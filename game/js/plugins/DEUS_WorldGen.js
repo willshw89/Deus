@@ -1012,9 +1012,33 @@
             const shapes = shapeTable();
             const waterBases = m.waterKeys.map(k => autotileBase(cat.water.surface[k]));
             const groundBases = m.groundIds.map((id, k) => (window.UF.Tiles && UF.Tiles.groundBase(id) !== null ? UF.Tiles.groundBase(id) : Tilemap.TILE_ID_A2 + k * 48));
+            const L = window.UF && UF.Levels;
+            const b = L && typeof L.baseline === "function" ? L.baseline(0, ctx.areaX, ctx.areaY) : null;
+            const rockBase = (L && typeof L.tileBase === "function") ? L.tileBase("rock") : 4352;
+            const isSolidUnder = (cx, cy) => {
+                if (cx < 0 || cy < 0 || cx >= size || cy >= size) return false;
+                const idx = cy * size + cx;
+                return b && b.shape && b.shape[idx] === 1;
+            };
             for (let y = 0; y < size; y++) {
                 for (let x = 0; x < size; x++) {
                     const i = y * size + x;
+                    if (b && b.shape && b.shape[i] === 1) {
+                        // Hard Volumetric Invariant: cell is solid cliff/hill supporting volume under S >= 1!
+                        let rockMask = 0;
+                        for (let k = 0; k < 8; k++) {
+                            if (isSolidUnder(x + NB[k][0], y + NB[k][1])) rockMask |= NB[k][2];
+                        }
+                        ctx.setTile(x, y, 0, rockBase + shapes[rockMask]);
+                        continue;
+                    }
+                    if (b && b.shape && b.shape[i] === 4) {
+                        // Natural ramp connecting Z0 to Z1
+                        const rampBase = (L && typeof L.tileBase === "function") ? L.tileBase("ramp_up") : 0;
+                        ctx.setTile(x, y, 0, groundBases[ground[i]] + shapes[0]);
+                        if (rampBase > 0) ctx.setTile(x, y, 1, rampBase);
+                        continue;
+                    }
                     let mask = 0;
                     if (water[i]) {
                         for (let k = 0; k < 8; k++) if (waterAt(x + NB[k][0], y + NB[k][1])) mask |= NB[k][2];

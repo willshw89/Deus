@@ -65,13 +65,16 @@ const townHallTestCode = `
                     const loc = window.location.pathname;
                     if (loc) {
                         let cleaned = decodeURIComponent(loc);
-                        if (/^\/[A-Za-z]:/.test(cleaned)) cleaned = cleaned.slice(1);
+                        if (/^\\/[A-Za-z]:/.test(cleaned)) cleaned = cleaned.slice(1);
                         dir = path.dirname(cleaned);
                     }
                 } catch (_) {}
                 const candidates = [
+                    path.join(dir, "js", "plugins", "DEUS_Households.js"),
                     path.join(dir, "js", "plugins", "UF_Households.js"),
+                    path.join(process.cwd(), "js", "plugins", "DEUS_Households.js"),
                     path.join(process.cwd(), "js", "plugins", "UF_Households.js"),
+                    path.join(process.cwd(), "game", "js", "plugins", "DEUS_Households.js"),
                     path.join(process.cwd(), "game", "js", "plugins", "UF_Households.js")
                 ];
                 for (const p of candidates) {
@@ -81,7 +84,8 @@ const townHallTestCode = `
                     }
                 }
             } catch (e) {}
-            H = window.UF && UF.Households;
+            H = (window.UF && window.UF.Households) || (typeof global !== "undefined" && global.UF && global.UF.Households);
+            if (window.UF && H) window.UF.Households = H;
         }
         const C = window.UF && UF.Colonists;
         const O = window.UF && UF.Objects;

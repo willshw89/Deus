@@ -1685,7 +1685,10 @@
             if (!isLevel(zOf(u))) continue;
             if (view && u.area.x === view.x && u.area.y === view.y && zOf(u) === view.z) {
                 const ev = $gameMap._events[EVENT_BASE + u.id];
-                if (!ev) continue;
+                if (!ev) {
+                    if (u.goal && (frame + u.id) % steps === 0) stepOffscreen(u);
+                    continue;
+                }
                 const fx = u.x, fy = u.y;
                 u.x = ev.x;
                 u.y = ev.y;

@@ -79,7 +79,8 @@
                 "DEUS_Select",
                 "DEUS_Dnd5e",
                 "DEUS_Callings",
-                "DEUS_HistoricalDemographics"
+                "DEUS_HistoricalDemographics",
+                "DEUS_DeathForensics"
             ];
             for (const name of companionPlugins) {
                 const paths = [

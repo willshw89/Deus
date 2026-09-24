@@ -3,11 +3,31 @@
 Project formal name: **DEUS** (formally renamed by user directive 2026-09-20; replaces working titles "UF", "Ultima Frontier", and "Wayfarer").
 Update this whenever reality changes. Write only what you've checked, and say how you checked it.
 
-**Last updated:** 2026-09-23
+**Last updated:** 2026-09-24
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (Autonomous Shelter Construction Loop COMPLETE — AWAITING USER REVIEW)
 
 ## In progress
 - **Astra (2026-09-24):** On hold / consumed per user directive ("ASTRA USE IS CONSUMED, FABLE ONLY FOR THE TIME BEING"). `DEUS-TSK-ASTRA-17` paused.
+- **Gemini (2026-09-24):** Clean source control integration and automated verification complete.
+
+## DEUS-TSK-GEMINI-09 — Survival Defect Prevention, Hearth Containment, Volumetric Z0 Terrain & Housing Progression (2026-09-24)
+- **Status**: `COMPLETED — PASS`
+- **Scope**:
+  - `tools/test_survival_regressions.js`: Verified all 5 survival gates with Rule 4 negative control mutants (Encumbered survival, Cross-midnight long rest exhaustion recovery, No double-credit exploit on latched intake, Shared pond simultaneous bank access, and Starting pond valley datum unburied with walkable banks).
+  - `game/js/plugins/DEUS_Fire.js`: Hard hearth containment invariant (`isHearth -> escapeChance = 0` for `kitchen_hearth`, `hearth`, and indoor campfires in roofed/project structures). Structured fire provenance tracking (`fireId`, `startedAt`, `sourceType`, `sourceObjectId`, `sourceCell`, `firstFuelIgnited`, `spreadParents`).
+  - `game/js/plugins/DEUS_DeathForensics.js`: Structured casualty forensic logging attaching fire provenance and mortality ledger records.
+  - `game/js/plugins/DEUS_Levels.js` & `DEUS_WorldGen.js`: Hard volumetric terrain invariant on Z0 under Z+1 hills (solid rock wall autotiles on Z0 under S >= 1, blocking passability, ramps painted for shape = 4). Enabled `Sprite_UFNaturalWalls` on Z0 with Dwarf Fortress Black Wall-Top Convention (`#0a0a10` / `#14141c`).
+  - `game/js/plugins/DEUS_Projects.js`: Added settlement progression phases (`camp` -> `village` -> `town`), `household_dwelling` blueprint, and `housing` deficit tracking for unhoused households.
+- **Checks observed**:
+  - `node tools/test_survival_regressions.js`: **20 passed, 0 failed (exit 0)**.
+  - Rule 4 negative control mutants verified failing (exit 1):
+    - `--mutant=encumbrance_paralyzes_jobs`: **FAIL (exit 1)**
+    - `--mutant=midnight_intake_wiped`: **FAIL (exit 1)**
+    - `--mutant=double_credit_allowed`: **FAIL (exit 1)**
+    - `--mutant=pond_entity_locked`: **FAIL (exit 1)**
+    - `--mutant=starting_valley_datum_broken`: **FAIL (exit 1)**
+  - `node tools/test_multi_deficit_settlement.js`: **10 passed, 0 failed (exit 0)**.
+  - `node tools/test_settlement_expansion_multi_dwelling.js`: **12 passed, 0 failed (exit 0)** across full 2.6 calendar day multi-dwelling expansion simulation.
 
 ## DEUS-TSK-GEMINI-08 — Liquid Depth V1 & Year 250 Population Materialization (2026-09-23)
 - **Status**: `COMPLETED — PASS`

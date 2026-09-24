@@ -48,7 +48,7 @@
     const NEEDS_EVERY = 60;         // ticks per needs tick (one game minute)
     const SEARCH_RADIUS = 60;       // cells: how far a colonist looks for materials and objects
     const FOOD_ITEM_RADIUS = 30;    // cells: food lying on the ground is eaten from this far
-    const WATER_RADIUS = 60;
+    const WATER_RADIUS = 120;
     const FIRE_RADIUS = 40;         // same as UF_Jobs' craft workplace search
     const HUNT_NEAR = 15;           // cells: a brave colonist hunts prey this close before gathering
     const NATURE_RADIUS = 20;
@@ -137,7 +137,7 @@
         const t = target || u, area = t.area || u.area;
         const z = t.z !== undefined ? t.z : t.area && t.area.z !== undefined ? t.area.z : zOf(u);
         const ref = { area: copyArea(area), x: t.x | 0, y: t.y | 0, z };
-        return sameLevel(u, ref) ? ref : null;
+        return sameArea(u.area, ref.area) && levelSupported(ref.z) ? ref : null;
     };
     const chebyshev = (ax, ay, bx, by) => (Space() ? Space().chebyshev({ x: ax, y: ay }, { x: bx, y: by }) : Math.max(Math.abs(ax - bx), Math.abs(ay - by)));
     const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -1161,17 +1161,35 @@
         }
         return { type: "craft", target: { x: f.x, y: f.y }, params: plan ? { recipeId, plan } : { recipeId } };
     }
+    const waterTargeted = (x, y) => activeJobs().some(j => j.type === "drink" && j.target && j.target.x === x && j.target.y === y);
     // Nearest water cell that has a standable land neighbor, spiralling out from the colonist.
     function waterNear(u, radius) {
         const J = Jobs();
         if (!J) return null;
-        for (let r = 1; r <= radius; r++) {
-            for (let dy = -r; dy <= r; dy++) {
-                for (let dx = -r; dx <= r; dx++) {
-                    if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
-                    const x = u.x + dx, y = u.y + dy;
-                    if (!J.isWaterAt(levelArea(u), x, y)) continue;
-                    if (NEIGHBORS.some(([nx, ny]) => J.standable(levelArea(u), x + nx, y + ny, u.id))) return { x, y };
+        const curArea = levelArea(u);
+        const searchLevels = [curArea];
+        if (zOf(u) !== 0) searchLevels.push({ x: u.area.x, y: u.area.y, z: 0 });
+        for (const area of searchLevels) {
+            for (let pass = 0; pass < 2; pass++) {
+                for (let r = 1; r <= radius; r++) {
+                    for (let dy = -r; dy <= r; dy++) {
+                        for (let dx = -r; dx <= r; dx++) {
+                            if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+                            const x = u.x + dx, y = u.y + dy;
+                            if (!J.isWaterAt(area, x, y)) continue;
+                            const hasFreeBank = NEIGHBORS.some(([nx, ny]) => {
+                                const bx = x + nx, by = y + ny;
+                                if (!J.standable(area, bx, by, u.id)) {
+                                    return pass === 1 && J.walkable(area, bx, by);
+                                }
+                                if (pass === 0) {
+                                    return !activeJobs().some(j => j.type === "drink" && j.stand && j.stand.x === bx && j.stand.y === by && j.assigned !== u.id);
+                                }
+                                return true;
+                            });
+                            if (hasFreeBank) return { area: copyArea(area), x, y, z: zOf(area) };
+                        }
+                    }
                 }
             }
         }
@@ -1391,11 +1409,16 @@
             }
             if (type === "hunt" && j.type === "hunt" && j.params.unitId === params.unitId) return true;
             if ((type === "haul" || type === "fetch") && (j.type === "haul" || j.type === "fetch")) {
+                if (params && params.fromContainer) continue; // shared container stacks can be fetched by multiple colonists concurrently
                 if (j.params.itemId === params.itemId) return true;
                 if (params && params.to && j.params && j.params.to && j.params.to.x === params.to.x && j.params.to.y === params.to.y) {
                     const destCell = onBuildCell(params.to.x, params.to.y, u);
                     if (destCell) return true;
                 }
+            }
+            if (type === "eat" && j.type === "eat") {
+                if (params && j.params && params.itemId && j.params.itemId && params.itemId === j.params.itemId) return true;
+                continue;
             }
             if (j.type === type && j.target && j.target.x === x && j.target.y === y) return true;
             if (j.type === "move" && j.params && j.params.via === type && j.params.viaTarget && j.params.viaTarget.x === x && j.params.viaTarget.y === y) return true;
@@ -1417,8 +1440,9 @@
         }
         const tx = spec.target ? spec.target.x : u.x, ty = spec.target ? spec.target.y : u.y;
         const key = avoidKey(u, spec.type, tx, ty);
-        if ((avoid.get(key) || 0) > ticks()) return null;
-        if (claimed(u, spec.type, tx, ty, params)) return null;
+        const isSurvival = spec.type === "drink" || spec.type === "eat" || (spec.type === "fetch" && spec.params && (spec.params.fromContainer || spec.params.need === "hunger" || spec.params.need === "thirst"));
+        if (!isSurvival && (avoid.get(key) || 0) > ticks()) return null;
+        if (spec.type !== "drink" && claimed(u, spec.type, tx, ty, params)) return null;
         // Walled sites: go through an opening first (a move job; the same decision comes back afterwards).
         if (spec.target && spec.type !== "sleep") {
             const gap = ringGap(u, tx, ty);
@@ -1429,7 +1453,7 @@
         }
         const job = J.create({ type: spec.type, target, params, owner: u.id });
         if (!job || job.state === "failed") {
-            avoid.set(key, ticks() + AVOID_TICKS);
+            avoid.set(key, ticks() + (isSurvival ? 30 : AVOID_TICKS));
             return null;
         }
         _activeJobsTick = -1;
@@ -1550,6 +1574,10 @@
         delete u.data.dying;
         const c = colonyState(u);
         if (c && Array.isArray(c.log)) c.log.push({ tick: ticks(), text: `${u.name || "A colonist"} died of ${cause}` });
+        const Forensics = (window.UF && window.UF.DeathForensics) || (typeof global !== "undefined" && global.UF && global.UF.DeathForensics);
+        if (Forensics && typeof Forensics.recordDeath === "function") {
+            try { Forensics.recordDeath(u, cause, null); } catch (_) {}
+        }
         emit("colonists:died", u, cause);
         const Cb = Combat();
         if (Cb && typeof Cb.onUnitDeath === "function") Cb.onUnitDeath(u, null);
@@ -1566,7 +1594,11 @@
             dieOf(u, cause); // level 6 is death (SRD p. 358)
         } else if (n.exhaustion >= 5) {
             const job = J ? J.of(u.id) : null;
-            if (job && job.type !== "sleep") J.cancel(job.id, "survival: exhaustion");
+            const isSurvivalFetch = job && job.type === "fetch" && job.params &&
+                (job.params.to === "eat" || job.params.need === "hunger" || job.params.need === "thirst" || job.params.fromContainer || (job.params.itemId && isFoodType(itemType(job.params.itemId))));
+            if (job && job.type !== "sleep" && job.type !== "drink" && job.type !== "eat" && !isSurvivalFetch) {
+                J.cancel(job.id, "survival: exhaustion");
+            }
         }
         return n.exhaustion;
     }
@@ -1592,6 +1624,8 @@
                 if (d20 + conMod < 15) addExhaustion(u, levels, "thirst");
             } else addExhaustion(u, levels, "thirst");
         }
+        n.foodYesterday = n.foodLb;
+        n.waterYesterday = n.waterGal;
         n.foodLb = 0;
         n.waterGal = 0;
         n.day = dayKey();
@@ -1619,13 +1653,30 @@
         const n = ensureNeeds(u);
         if (!n) return null;
         if (n.exhaustion >= 5) return "exhaustion";
-        if (sleepingHours(u) && n.lastRestDay !== dayKey()) return "rest";
+        if (sleepingHours(u) && n.lastRestDay !== dayKey()) {
+            // Supper and a drink before the long rest (DEUS-TSK-FABLE-14): a colonist that goes to bed short of the
+            // day's water rolls exhaustion at midnight, so the pond and the larder come first while they are within
+            // reach. The rest is held off for one decision (needJob then serves the drink or the meal through its own
+            // branches); a need nothing can meet (needBlocked) does not keep the colonist from its bed.
+            // (No search here: this runs every sweep for every colonist. needJob blocks a need it found nothing for.)
+            if (n.waterGal < waterNeed(u) && !needBlocked(u, "thirst")) { avoid.set(needKey(u, "rest"), ticks() + DECIDE_EVERY); return "thirst"; }
+            if (n.foodLb < FOOD_LB_PER_DAY && !needBlocked(u, "hunger")) { avoid.set(needKey(u, "rest"), ticks() + DECIDE_EVERY); return "hunger"; }
+            return "rest";
+        }
         if (hourNow() >= lastMealHour() && !sleepingHours(u)) {
             if (n.waterGal < waterNeed(u)) return "thirst";
             if (n.foodLb < FOOD_LB_PER_DAY) return "hunger";
         }
+        // Breakfast (DEUS-TSK-FABLE-14): for two hours after a long rest, water and food short of the day's need come
+        // before the day's work, so nobody sets out on a long shift or a gathering trip dry.
+        if (breakfastDue(u)) {
+            if (n.waterGal < waterNeed(u) && !needBlocked(u, "thirst")) return "thirst";
+            if (n.foodLb < FOOD_LB_PER_DAY && !needBlocked(u, "hunger")) return "hunger";
+        }
         return null;
     }
+    const BREAKFAST_TICKS = 2 * 600; // two game hours after waking
+    const breakfastDue = u => { const n = u && u.data && u.data.needs; return !!n && Number.isFinite(n.wokeTick) && ticks() - n.wokeTick >= 0 && ticks() - n.wokeTick < BREAKFAST_TICKS && !sleepingHours(u); };
     //-------------------------------------------------------------------------
     // Reflexive self-preservation (DEUS-TSK-FABLE-11). Above every project and routine: a colonist standing in fire,
     // lava or deep water, or burning, drops whatever it is doing and gets out (UF_Jobs fails the job on its own step
@@ -1799,6 +1850,7 @@
         const Env = window.UF && UF.Environment;
         if (Env && typeof Env.isHypothermic === "function" && Env.isHypothermic(u)) return "cold";
         const n = ensureNeeds(u);
+        if (n && n.waterGal < waterNeed(u) && (n.fromNeeds > 0 || n.exhaustion >= 1)) return "thirst";
         if (n && n.daysWithoutFood > Math.max(1, 3 + conModOf(u))) return "hunger";
         if (n && isMealHour() && (n.foodLb < FOOD_LB_PER_DAY || n.waterGal < waterNeed(u))) return "meal";
         return null;
@@ -1812,7 +1864,7 @@
     }
     // A meal hour with the day's food or water still short is a break from work: the sweep interrupts labour for it
     // (once per PREEMPT_EVERY), so the daily needs are met before the last meal hour makes them urgent.
-    const mealNeed = u => { const n = ensureNeeds(u); return n && isMealHour() && !sleepingHours(u) && (n.foodLb < FOOD_LB_PER_DAY || n.waterGal < waterNeed(u)) ? "meal" : null; };
+    const mealNeed = u => { const n = ensureNeeds(u); return n && (isMealHour() || breakfastDue(u)) && !sleepingHours(u) && (n.foodLb < FOOD_LB_PER_DAY || n.waterGal < waterNeed(u)) ? "meal" : null; };
     const isDrafted = u => !!(u && u.data && (u.data.drafted === true || (u.data.combat && u.data.combat.mode === "manual")));
     /** What a colonist would do next and why, without doing it: { priority: 1..9, name, detail } (UF_Sheet, harnesses). */
     function assess(u) {
@@ -1825,6 +1877,7 @@
         if (exhaustionOf(u) < 5) {
             const burning = !aflame(u) && burningPatientsFor(u).length > 0;
             if (burning || patientsFor(u).length) return { priority: 4, name: PRIORITY[4], detail: burning ? "douse" : "stabilize" };
+            if (feedPatientsFor(u).length) return { priority: 4, name: PRIORITY[4], detail: "feed" };
         }
         const crit = criticalNeed(u);
         if (crit) return { priority: 5, name: PRIORITY[5], detail: crit };
@@ -1844,7 +1897,13 @@
     }
 
     // A job that serves the need is never preempted for it; first aid is never preempted for a daily need either.
-    const isNeedJob = (job, need) => !!job && (NEED_JOBS.includes(job.type) || job.type === "stabilize" ||
+    // A fetch that brings food to the colonist's own mouth (from the larder chest, or marked for a need) is a need job
+    // whatever need the sweep is looking at, and so is the walk through the camp's gap that routes one (params.via):
+    // a colonist fetching supper is never sent for water first and back again every hour (DEUS-TSK-FABLE-14).
+    const survivalFetch = job => job.type === "fetch" && !!job.params && (!!job.params.need || !!job.params.fromContainer || job.params.to === "eat" ||
+        (!!job.params.itemId && !!Items() && isFoodType(itemType((Items().get(job.params.itemId) || {}).type))));
+    const isNeedJob = (job, need) => !!job && (NEED_JOBS.includes(job.type) || job.type === "stabilize" || job.type === "douse" || survivalFetch(job) || (job.type === "haul" && !!job.params && !!job.params.feed) ||
+        (job.type === "move" && !!job.params && !!job.params.via && (NEED_JOBS.includes(job.params.via) || job.params.via === "fetch")) ||
         ((need === "hunger" || need === "meal") && (job.type === "hunt" || job.type === "fetch" || job.type === "gather" || job.type === "craft")));
     // Anti-thrash: a need nothing could meet waits NEED_RETRY_TICKS before the search runs again (keyed on the hearth).
     const needKey = (u, need) => { const c = colonyState(u); return avoidKey(u, "need_" + need, c ? c.site.x : 0, c ? c.site.y : 0); };
@@ -1949,16 +2008,66 @@
         return colonists().filter(o => o !== u && o.data.faction === u.data.faction && sameLevel(o, u) && !o.data.dead && aflame(o) && cannotDouseSelf(o) && chebyshev(o.x, o.y, u.x, u.y) <= RESCUE_RADIUS);
     }
     // Douse a burning friend: the nearest one nobody is helping, by a colonist not itself aflame (fire kills faster
-    // than wounds, so this comes before first aid).
+    // than wounds, so this comes before first aid). With nobody burning, a friend too worn down to walk is fed.
     function douseJob(u) {
         if (!isColonist(u) || unconscious(u) || exhaustionOf(u) >= 5 || aflame(u)) return null;
         const J = Jobs();
-        if (!J || !J.handler("douse")) return null;
+        if (!J || !J.handler("douse")) return feedJob(u);
         const patients = burningPatientsFor(u).sort((a, b) => chebyshev(a.x, a.y, u.x, u.y) - chebyshev(b.x, b.y, u.x, u.y) || a.id - b.id);
         for (const p of patients) {
             if (J.reservation && J.reservation.isReservedByOther(u.id, { id: p.id })) continue;
             const j = give(u, { type: "douse", target: { x: p.x, y: p.y }, params: { unitId: p.id, emergency: true } });
             if (j) return j;
+        }
+        return feedJob(u);
+    }
+    // Feeding the immobile (DEUS-TSK-FABLE-14): a colonist at exhaustion 5 has no speed (SRD) and cannot walk to the
+    // larder; with nothing to eat in its pack or at its feet it would starve beside a full chest. A friend brings a
+    // stack of food and puts it down at its feet (a haul with params.feed); the eater's own next meal is then an eat
+    // job on its own square. Water cannot be carried yet (no fill job), so thirst at that level remains open.
+    const immobile = o => !!o && !!o.data && !o.data.dead && !unconscious(o) && exhaustionOf(o) >= 5;
+    function needsFeeding(o) {
+        const n = ensureNeeds(o), I = Items();
+        if (!n || !I || n.foodLb >= FOOD_LB_PER_DAY) return false;
+        if (I.inventoryOf(o.id).some(it => isFoodType(itemType(it.type)))) return false;
+        return !I.atIn(levelArea(o), o.x, o.y).some(it => isFoodType(itemType(it.type)));
+    }
+    function feedPatientsFor(u) {
+        return colonists().filter(o => o !== u && o.data.faction === u.data.faction && sameLevel(o, u) && immobile(o) && needsFeeding(o) && chebyshev(o.x, o.y, u.x, u.y) <= RESCUE_RADIUS);
+    }
+    // The nearest stack of food the rescuer can bring: its own pack first, else the larder chest, a larder cell or the ground.
+    function foodToBring(u) {
+        const I = Items(), C = window.UF && UF.Containers;
+        if (!I) return null;
+        const mine = I.inventoryOf(u.id).find(it => isFoodType(itemType(it.type)));
+        if (mine) return { item: mine, x: u.x, y: u.y, containerId: null };
+        let best = null, bestD = Infinity;
+        for (const it of foodStored(u)) {
+            const cont = it.container && C ? C.get(it.container) : null, pos = cont || it;
+            const d = chebyshev(pos.x, pos.y, u.x, u.y);
+            if (d < bestD) { best = { item: it, x: pos.x, y: pos.y, containerId: it.container || null }; bestD = d; }
+        }
+        for (const f of groundItemsNear(u, { radius: FOOD_ITEM_RADIUS })) {
+            if (!isFoodType(itemType(f.item.type)) || f.item.container) continue;
+            const d = chebyshev(f.x, f.y, u.x, u.y);
+            if (d < bestD) { best = { item: f.item, x: f.x, y: f.y, containerId: null }; bestD = d; }
+        }
+        return best;
+    }
+    function feedJob(u) {
+        if (!isColonist(u) || unconscious(u) || exhaustionOf(u) >= 5) return null;
+        if (urgent(u)) return null; // a rescuer in urgent need of its own drinks or eats first (the feed haul is short and, once taken, uninterrupted)
+        const J = Jobs();
+        if (!J || !J.handler("haul")) return null;
+        const patients = feedPatientsFor(u).sort((a, b) => chebyshev(a.x, a.y, u.x, u.y) - chebyshev(b.x, b.y, u.x, u.y) || a.id - b.id);
+        for (const p of patients) {
+            if (J.reservation && J.reservation.isReservedByOther(u.id, { id: p.id })) continue;
+            const f = foodToBring(u);
+            if (!f) return null;
+            const params = { itemId: f.item.id, count: Math.min(f.item.count | 0, 2), to: { x: p.x, y: p.y }, material: "food", feed: true, unitId: p.id, emergency: true };
+            if (f.containerId) params.fromContainer = f.containerId;
+            const j = give(u, { type: "haul", target: { x: f.x, y: f.y }, params });
+            if (j) { if (J.reservation && typeof J.reservation.reserve === "function") J.reservation.reserve(u.id, { id: p.id }); addThought(u, `Brought food to ${p.name || "a friend"}.`, 2); return j; }
         }
         return null;
     }
@@ -1989,12 +2098,19 @@
         const n = ensureNeeds(u);
         if (!n) return;
         n.lastRestDay = dayKey();
+        n.wokeTick = ticks(); // breakfast follows (DEUS-TSK-FABLE-14)
         const d = u.data;
         if (Number.isFinite(d.hp) && Number.isFinite(d.maxHp) && d.hp >= 1) d.hp = d.maxHp;
         if (n.exhaustion > 0) {
-            const full = n.foodLb >= FOOD_LB_PER_DAY && n.waterGal >= waterNeed(u);
-            const some = n.foodLb > 0 && n.waterGal > 0;
-            if (n.fromNeeds > 0 ? full : some) removeExhaustion(u, 1);
+            const food = (n.foodLb || 0) + (n.foodYesterday || 0);
+            const water = (n.waterGal || 0) + (n.waterYesterday || 0);
+            const full = food >= FOOD_LB_PER_DAY && water >= waterNeed(u);
+            const some = food > 0 && water > 0;
+            if (n.fromNeeds > 0 ? full : some) {
+                removeExhaustion(u, 1);
+                n.foodYesterday = 0;
+                n.waterYesterday = 0;
+            }
         }
         emit("colonists:longRest", u, n.exhaustion);
     }
@@ -2006,9 +2122,31 @@
         const n = ensureNeeds(u);
         if (!n || unconscious(u)) return null;
         const wants = [];
-        if (n.lastRestDay !== dayKey() && (sleepingHours(u) || n.exhaustion >= 1)) wants.push("rest");
-        if (n.waterGal < waterNeed(u)) wants.push("thirst");
-        if (n.foodLb < FOOD_LB_PER_DAY) wants.push("hunger");
+        const thirsty = n.waterGal < waterNeed(u);
+        const hungry = n.foodLb < FOOD_LB_PER_DAY;
+        const foodClose = hungry && (
+            (Items() && Items().inventoryOf(u.id).some(it => isFoodType(itemType(it.type)))) ||
+            foodStored(u).some(it => {
+                const C = window.UF && UF.Containers;
+                const cont = it.container && C ? C.get(it.container) : null;
+                const pos = cont || it;
+                return Math.hypot(pos.x - u.x, pos.y - u.y) <= 15;
+            })
+        );
+        if (foodClose) {
+            wants.push("hunger");
+        }
+        if (thirsty && (n.fromNeeds > 0 || n.exhaustion >= 1 || n.waterGal <= 0.25 || !sleepingHours(u))) {
+            wants.push("thirst");
+        }
+        if (hungry && !wants.includes("hunger") && (n.daysWithoutFood >= 1 || !sleepingHours(u))) {
+            wants.push("hunger");
+        }
+        if (n.lastRestDay !== dayKey() && (sleepingHours(u) || n.exhaustion >= 1)) {
+            wants.push("rest");
+        }
+        if (thirsty && !wants.includes("thirst")) wants.push("thirst");
+        if (hungry && !wants.includes("hunger")) wants.push("hunger");
         for (const need of wants) {
             if (needBlocked(u, need)) continue;
             let j = null, text = "", exists = false;
@@ -2016,7 +2154,10 @@
                 j = longRestJob(u);
                 text = "Found nowhere to rest.";
             } else if (need === "thirst") {
-                const w = waterNear(u, WATER_RADIUS);
+                let w = waterNear(u, WATER_RADIUS);
+                if (!w && (n.waterGal <= 0.25 || n.exhaustion >= 1)) {
+                    w = waterNear(u, 200);
+                }
                 exists = !!w;
                 j = w ? give(u, { type: "drink", target: w, params: { need } }) : null;
                 text = "Found no water to drink.";
@@ -2029,7 +2170,7 @@
             // Water or food that exists but is busy (somebody drinks or eats there now: one job per cell) is tried
             // again at the next sweep; a resource that doesn't exist waits NEED_RETRY_TICKS and leaves a thought.
             if (exists) { avoid.set(needKey(u, need), ticks() + DECIDE_EVERY); continue; }
-            avoid.set(needKey(u, need), ticks() + NEED_RETRY_TICKS);
+            avoid.set(needKey(u, need), ticks() + (need === "thirst" || need === "hunger" ? DECIDE_EVERY : NEED_RETRY_TICKS));
             addThought(u, text, -4);
         }
         return null;
@@ -2056,10 +2197,20 @@
         if (!I) return out;
         for (const s of stockpilesStoring("food", ref)) for (const it of I.atIn(siteArea(ref), s.x, s.y)) if (isFoodType(itemType(it.type))) out.push(it);
         if (window.UF && UF.Containers) {
-            const containers = UF.Containers.all(siteArea(ref), zOf(ref));
-            for (const cont of containers) {
-                for (const it of UF.Containers.itemsIn(cont.id)) {
-                    if (isFoodType(itemType(it.type))) out.push(it);
+            const levelsToCheck = new Set([zOf(ref), c ? zOf(c) : 0]);
+            for (const z of levelsToCheck) {
+                const containers = UF.Containers.all(siteArea(ref), z);
+                for (const cont of containers) {
+                    if (c && c.site) {
+                        const distToCamp = Math.hypot(cont.x - c.site.x, cont.y - c.site.y);
+                        if (distToCamp > (c.radius || 30) + 12) continue;
+                    }
+                    if (c && c.factionId && cont.owner && cont.owner.kind === "faction" && cont.owner.id !== c.factionId && cont.owner.id !== "settler") {
+                        continue;
+                    }
+                    for (const it of UF.Containers.itemsIn(cont.id)) {
+                        if (isFoodType(itemType(it.type))) out.push(it);
+                    }
                 }
             }
         }
@@ -2090,17 +2241,20 @@
             const C = window.UF && UF.Containers;
             const cont = it.container && C ? C.get(it.container) : null;
             const pos = cont || it;
-            return { item: it, x: pos.x, y: pos.y, dist: Math.hypot(pos.x - u.x, pos.y - u.y), containerId: it.container || null };
+            return { item: it, x: pos.x, y: pos.y, z: zOf(pos), dist: Math.hypot(pos.x - u.x, pos.y - u.y), containerId: it.container || null };
         });
         const seen = new Set(stored.map(f => f.item.id));
-        const ground = stored.concat(groundItemsNear(u, { radius: FOOD_ITEM_RADIUS }).filter(f => isFoodType(itemType(f.item.type)) && !seen.has(f.item.id) && (!f.item.firstOwner || f.item.firstOwner === u.id))).sort((a, b) => a.dist - b.dist);
+        const ground = stored.concat(groundItemsNear(u, { radius: FOOD_ITEM_RADIUS }).filter(f => isFoodType(itemType(f.item.type)) && !seen.has(f.item.id) && (!f.item.firstOwner || f.item.firstOwner === u.id)).map(f => Object.assign({}, f, { z: zOf(f.item || f) }))).sort((a, b) => a.dist - b.dist);
+        // Nearest first: what lies at the colonist's feet (a friend's delivery) before the larder across the camp,
+        // which a colonist too worn down to walk could never reach (DEUS-TSK-FABLE-14).
+        ground.sort((a, b) => a.dist - b.dist || a.item.id - b.item.id);
         const kill = ground.find(f => rawFood(itemType(f.item.type)) && f.dist <= FOOD_ITEM_RADIUS);
         if (kill) {
             const spec = fire && cookRecipeFor(kill.item.type)
-                ? { type: "fetch", target: { x: kill.x, y: kill.y }, params: { itemId: kill.item.id, fromContainer: kill.containerId } }
+                ? { type: "fetch", target: { x: kill.x, y: kill.y, z: kill.z }, params: { itemId: kill.item.id, fromContainer: kill.containerId, need: "hunger" } }
                 : (kill.containerId
-                    ? { type: "fetch", target: { x: kill.x, y: kill.y }, params: { itemId: kill.item.id, fromContainer: kill.containerId } }
-                    : { type: "eat", target: { x: kill.x, y: kill.y }, params: { itemId: kill.item.id } });
+                    ? { type: "fetch", target: { x: kill.x, y: kill.y, z: kill.z }, params: { itemId: kill.item.id, fromContainer: kill.containerId, need: "hunger" } }
+                    : { type: "eat", target: { x: kill.x, y: kill.y, z: kill.z }, params: { itemId: kill.item.id } });
             const j = give(u, spec);
             if (j) return j;
         }
@@ -2109,26 +2263,28 @@
         const brave = adult && (facet(u, "bravery") >= BRAVE || priorityOf("hunt", u) > 1);
         const near = brave ? preyNear(u, HUNT_NEAR) : null;
         if (near) {
-            const j = give(u, { type: "hunt", target: { x: near.x, y: near.y }, params: { unitId: near.id } });
+            const j = give(u, { type: "hunt", target: { x: near.x, y: near.y, z: zOf(near) }, params: { unitId: near.id } });
             if (j) return j;
         }
         for (const f of ground) {
             const t = itemType(f.item.type);
             const spec = rawFood(t) && fire && cookRecipeFor(f.item.type)
-                ? { type: "fetch", target: { x: f.x, y: f.y }, params: { itemId: f.item.id } }
-                : { type: "eat", target: { x: f.x, y: f.y }, params: { itemId: f.item.id } };
+                ? { type: "fetch", target: { x: f.x, y: f.y, z: f.z }, params: { itemId: f.item.id, fromContainer: f.containerId, need: "hunger" } }
+                : (f.containerId
+                    ? { type: "fetch", target: { x: f.x, y: f.y, z: f.z }, params: { itemId: f.item.id, fromContainer: f.containerId, need: "hunger" } }
+                    : { type: "eat", target: { x: f.x, y: f.y, z: f.z }, params: { itemId: f.item.id } });
             const j = give(u, spec);
             if (j) return j;
         }
         // Nothing lying about: gather, else hunt farther out.
         const plant = foodObjectNear(u, SEARCH_RADIUS);
         if (plant) {
-            const j = give(u, { type: plant.action, target: { x: plant.x, y: plant.y } });
+            const j = give(u, { type: plant.action, target: { x: plant.x, y: plant.y, z: zOf(plant) } });
             if (j) return j;
         }
         const prey = adult ? preyNear(u, huntRadius()) : null;
         if (prey) {
-            const j = give(u, { type: "hunt", target: { x: prey.x, y: prey.y }, params: { unitId: prey.id } });
+            const j = give(u, { type: "hunt", target: { x: prey.x, y: prey.y, z: zOf(prey) }, params: { unitId: prey.id } });
             if (j) return j;
         }
         if (unit01(seed(), SALT.thought, u.id, ticks(), 9) < 0.2) addThought(u, "Found nothing to eat.", -4);
@@ -4919,12 +5075,15 @@
         return give(u, { type: "move", target: { x: u.x, y: u.y }, params: { contemplate: true } });
     }
 
-    // Far from home (a hunt follows fleeing prey a long way): back to the site before anything but a need.
+    // Far from home or on a different level: back to the site before anything but an urgent need.
     function homeJob(u) {
         const c = colonyState(u);
-        if (!c || !sameLevel(u, c) || Math.hypot(u.x - c.site.x, u.y - c.site.y) <= HOME_LEASH) return null;
-        const h = UF.Households && UF.Households.of(u), p = h && h.home;
-        if (p && sameLevel(h, u) && (UF.Households.structures ? UF.Households.structures(h) : [p]).some(b => u.x >= b.x - 2 && u.y >= b.y - 2 && u.x <= b.x + b.w + 2 && u.y <= b.y + b.h + 2)) return null;
+        if (!c || !sameArea(u.area, c.area)) return null;
+        if (sameLevel(u, c) && Math.hypot(u.x - c.site.x, u.y - c.site.y) <= HOME_LEASH) {
+            const h = UF.Households && UF.Households.of(u), p = h && h.home;
+            if (p && sameLevel(h, u) && (UF.Households.structures ? UF.Households.structures(h) : [p]).some(b => u.x >= b.x - 2 && u.y >= b.y - 2 && u.x <= b.x + b.w + 2 && u.y <= b.y + b.h + 2)) return null;
+            return null;
+        }
         const cell = freeCellNear(levelArea(c), c.site.x, c.site.y, 4);
         return cell ? give(u, { type: "move", target: cell, params: { via: "move", home: true } }) : null;
     }
@@ -4949,10 +5108,15 @@
         const open = openJobs().filter(j => j.target && j.params && ids.has(j.params.project) && sameLevel(j.target, u));
         if (!open.length) return null;
         const RM = J.reservation || null, t = ticks();
+        // Food work (a cache's gathering and its hauls to the larder) weighs double for a colonist whose calling is
+        // foraging, hunting or farming (UF.Callings), so the sustenance loop is theirs first (DEUS-TSK-FABLE-14).
+        const Callings = getCallings();
+        const forager = !!(Callings && typeof Callings.isForager === "function" && Callings.isForager(u));
+        const foodWork = j => !!(j.params && (j.params.forage || j.params.material === "food"));
         const score = j => {
             const skill = SKILL_OF[j.type] ? ((u.data.skills && u.data.skills[SKILL_OF[j.type]]) || 0) : 0;
             const dist = Math.hypot(j.target.x - u.x, j.target.y - u.y);
-            return priorityOf(j.type, u) * (1 + skill / 20) * (1 + (j.priority | 0)) / (1 + dist / 20);
+            return priorityOf(j.type, u) * (forager && foodWork(j) ? 2 : 1) * (1 + skill / 20) * (1 + (j.priority | 0)) / (1 + dist / 20);
         };
         open.sort((a, b) => score(b) - score(a) || a.id - b.id);
         for (const j of open.slice(0, 6)) {
@@ -4989,40 +5153,48 @@
         decisionAt.set(u.id, ticks());
         if (Number.isFinite(u.data.age) && u.data.age < 15) return null; // dependants are not workers
         if (J.of(u.id)) return null;
+        const setJobMetadata = (job, rung) => {
+            u.data._currentDecisionRung = rung;
+            if (job) {
+                u.data._currentJob = job.type;
+                u.data._currentProject = (job.params && job.params.project) || null;
+            }
+            return job;
+        };
         // The fixed order (DEUS-TSK-FABLE-11; assess(u) names it):
         // 1. Physically unable to act: unconscious at 0 hit points, paralyzed, petrified, stunned (UF.Conditions).
-        if (unconscious(u) || !canActNow(u)) return null;
+        if (unconscious(u) || !canActNow(u)) { u.data._currentDecisionRung = 1; return null; }
         // 2. Immediate lethal hazard: off the burning square, out of the flames, before anything else.
         const hz = hazardOf(u);
-        if (hz) return hazardReflexJob(u, hz);
+        if (hz) return setJobMetadata(hazardReflexJob(u, hz), 2);
         // 3. Under attack: the armed hold their ground for UF_Combat (no work meanwhile), the rest run.
         const th = threatOf(u);
-        if (th) { const r = threatResponseJob(u, th); if (r === "hold") return null; if (r) return r; }
+        if (th) { const r = threatResponseJob(u, th); if (r === "hold") { u.data._currentDecisionRung = 3; return null; } if (r) return setJobMetadata(r, 3); }
         // 4. Emergency aid for a dying colonist, before the rescuer's own daily needs (not at exhaustion 5).
-        if (exhaustionOf(u) < 5) { const aid = douseJob(u) || rescueJob(u); if (aid) return aid; }
+        if (exhaustionOf(u) < 5) { const aid = douseJob(u) || rescueJob(u); if (aid) return setJobMetadata(aid, 4); }
         // 5. Critical personal survival: the acute daily needs (SRD: bedtime, the last meal hour), a meal hour with
         //    nothing eaten or drunk, starvation past the grace days, hypothermia. A need nothing can meet does not
         //    keep the colonist from working.
         const crit = criticalNeed(u);
-        if (crit) { const j = crit === "cold" ? warmthJob(u) : needJob(u); if (j) return j; }
+        if (crit) { const j = crit === "cold" ? warmthJob(u) : needJob(u); if (j) return setJobMetadata(j, 5); }
         // 6. A draft or a direct combat order holds the colonist for UF_Combat.
-        if (isDrafted(u)) return null;
+        if (isDrafted(u)) { u.data._currentDecisionRung = 6; return null; }
         // 7. Work: settlement project jobs first, then any open designation; UF_Jobs walks the worker there and runs it.
         //    A colonist that found nothing looks at the open jobs again only after IDLE_SCAN_INTERVAL, or as soon as a
         //    job is posted (DEUS-TSK-FABLE-12: the idle never scan the job list every tick).
         const t = ticks();
         if (workScanDue(u, t)) {
             const work = projectJob(u) || designationJob(u);
-            if (work) { lastIdleScan.delete(u.id); return work; }
+            if (work) { lastIdleScan.delete(u.id); return setJobMetadata(work, 7); }
             lastIdleScan.set(u.id, t);
         }
         const off = stepOffReserved(u);
-        if (off) return off;
+        if (off) return setJobMetadata(off, 7);
         // 8. Routine maintenance: the day's food, water and rest when nothing else calls.
         const routine = needJob(u);
-        if (routine) return routine;
+        if (routine) return setJobMetadata(routine, 8);
         // 9. Idle: stroll, look around, talk, sit by the fire.
-        return idleJob(u);
+        return setJobMetadata(idleJob(u), 9);
     }
 
     function isLowPriorityJob(job, u) {
@@ -5078,7 +5250,8 @@
             // A burning colonist that cannot put itself out comes first (fire kills faster than wounds), then the dying.
             const unhelped = o => !(J.reservation && J.reservation.reservedBy({ id: o.id }) !== null);
             const burningOnes = all.filter(o => !o.data.dead && aflame(o) && cannotDouseSelf(o) && unhelped(o));
-            const patients = burningOnes.concat(all.filter(o => dyingOf(o) && !dyingOf(o).stable && unhelped(o)));
+            const starvingOnes = all.filter(o => immobile(o) && needsFeeding(o) && unhelped(o));
+            const patients = burningOnes.concat(all.filter(o => dyingOf(o) && !dyingOf(o).stable && unhelped(o)), starvingOnes);
             for (const p of patients) {
                 const helpers = all.filter(o => o !== p && !unconscious(o) && exhaustionOf(o) < 5 && !aflame(o) && sameLevel(o, p) && chebyshev(o.x, o.y, p.x, p.y) <= RESCUE_RADIUS)
                     .sort((a, b) => chebyshev(a.x, a.y, p.x, p.y) - chebyshev(b.x, b.y, p.x, p.y) || a.id - b.id);
@@ -5115,7 +5288,8 @@
                         continue;
                     }
                     const need = urgent(u) || mealNeed(u);
-                    if (need && !isReflexJob(job) && !isNeedJob(job, need) && !needBlocked(u, need) && t - (preemptAt.get(u.id) || -Infinity) >= PREEMPT_EVERY) {
+                    const isIdle = isLowPriorityJob(job, u);
+                    if (need && !isReflexJob(job) && !isNeedJob(job, need) && !needBlocked(u, need) && (isIdle || t - (preemptAt.get(u.id) || -Infinity) >= PREEMPT_EVERY)) {
                         preemptAt.set(u.id, t);
                         J.cancel(job.id, `survival: ${need}`);
                     } else if (isLowPriorityJob(job, u) && workScanDue(u, t)) {
@@ -5191,8 +5365,12 @@
         switch (job.type) {
             case "drink":
                 addThought(u, "Felt refreshed after a drink of water.", 8);
+                u.data._lastDrinkTime = window.$ufTime ? `Day ${$ufTime.day || 1} ${$ufTime.hour || 0}:${String($ufTime.minute || 0).padStart(2, "0")}` : null;
                 if (u.data && u.data.needs && u.data.needs.model === NEEDS_MODEL) {
                     u.data.needs.waterGal = Math.round(((u.data.needs.waterGal || 0) + WATER_GAL_PER_DAY) * 1000) / 1000; // one drink is a gallon
+                }
+                if (window.UF && UF.DeathForensics && typeof UF.DeathForensics.recordEvent === "function") {
+                    UF.DeathForensics.recordEvent(u, "drank", { target: job.target, waterGal: u.data && u.data.needs ? u.data.needs.waterGal : 1.0 });
                 }
                 const S = Sanitation();
                 if (S && S.isWaterContaminated && S.isWaterContaminated(levelArea(u), job.target ? job.target.x : u.x, job.target ? job.target.y : u.y)) {
@@ -5201,6 +5379,7 @@
                 break;
             case "eat":
                 addThought(u, `Ate ${lower((itemType(job.params.itemType) || {}).name || "something")} and felt better.`, 8);
+                u.data._lastMealTime = window.$ufTime ? `Day ${$ufTime.day || 1} ${$ufTime.hour || 0}:${String($ufTime.minute || 0).padStart(2, "0")}` : null;
                 if (u.data && u.data.needs && u.data.needs.model === NEEDS_MODEL) {
                     // One unit eaten. Its nutritional contribution in pounds of the day's food is catalog food.nutrition
                     // (tools/add_srd_food_data.js), else the item's weight, else a fifth of a pound; its water contribution
@@ -5212,10 +5391,19 @@
                     u.data.needs.foodLb = Math.round(((u.data.needs.foodLb || 0) + (lb > 0 ? lb : 0.2)) * 1000) / 1000;
                     if (gal > 0) u.data.needs.waterGal = Math.round(((u.data.needs.waterGal || 0) + gal) * 1000) / 1000;
                 }
+                if (window.UF && UF.DeathForensics && typeof UF.DeathForensics.recordEvent === "function") {
+                    UF.DeathForensics.recordEvent(u, "ate", { itemType: job.params.itemType, foodLb: u.data && u.data.needs ? u.data.needs.foodLb : 1.0 });
+                }
                 break;
             case "sleep": {
                 addThought(u, "Woke rested.", 10);
-                if (job.params && job.params.longRest) completeLongRest(u);
+                if (job.params && job.params.longRest) {
+                    completeLongRest(u);
+                    u.data._lastLongRest = window.$ufTime ? `Day ${$ufTime.day || 1} ${$ufTime.hour || 0}:${String($ufTime.minute || 0).padStart(2, "0")}` : null;
+                }
+                if (window.UF && UF.DeathForensics && typeof UF.DeathForensics.recordEvent === "function") {
+                    UF.DeathForensics.recordEvent(u, "woke", { exhaustion: u.data && u.data.needs ? u.data.needs.exhaustion : 0 });
+                }
                 const O = Objects();
                 const owned = UF.Ownership && UF.Ownership.bedOf(u);
                 const fire = nearestFire(u);
@@ -5384,8 +5572,9 @@
         if (u) {
             decisionAt.set(u.id, -Infinity);
             if (job.target) {
+                const isSurvival = job.type === "drink" || job.type === "eat" || (job.type === "fetch" && job.params && (job.params.fromContainer || job.params.need === "hunger" || job.params.need === "thirst"));
                 const key = avoidKey(u, job.type, job.target.x, job.target.y);
-                avoid.set(key, ticks() + AVOID_TICKS);
+                avoid.set(key, ticks() + (isSurvival ? 30 : AVOID_TICKS));
             }
         }
     }
@@ -5451,7 +5640,7 @@
         isColonist,
         assess, hazardOf, threatOf, criticalNeed, onUnitMoved, PRIORITY,
         claimBed, claimedBed, allocateBeds, bedClaims, bedSearchRadius,
-        raiseAlarm, refugeFor, douseJob, burningPatientsFor, openJobs,
+        raiseAlarm, refugeFor, douseJob, burningPatientsFor, openJobs, feedJob, feedPatientsFor,
         state: colonyState,
         faction: () => (window.UF.Factions ? UF.Factions.get(factionId()) : null),
         site(ref) {
@@ -5476,6 +5665,22 @@
         setEnabled(on) { enabled = !!on; },
         isEnabled: () => enabled,
         doneLog: () => doneLog.slice(),
+        deathLedger: () => {
+            const F = (window.UF && window.UF.DeathForensics) || (typeof global !== "undefined" && global.UF && global.UF.DeathForensics);
+            return F && typeof F.deathLedger === "function" ? F.deathLedger() : [];
+        },
+        mortalitySummary: () => {
+            const F = (window.UF && window.UF.DeathForensics) || (typeof global !== "undefined" && global.UF && global.UF.DeathForensics);
+            return F && typeof F.mortalitySummary === "function" ? F.mortalitySummary() : { totalDeaths: 0, byCause: {}, ledger: [] };
+        },
+        recentEvents: (unitId) => {
+            const F = (window.UF && window.UF.DeathForensics) || (typeof global !== "undefined" && global.UF && global.UF.DeathForensics);
+            return F && typeof F.recentEvents === "function" ? F.recentEvents(unitId) : [];
+        },
+        recordEvent: (unit, ev) => {
+            const F = (window.UF && window.UF.DeathForensics) || (typeof global !== "undefined" && global.UF && global.UF.DeathForensics);
+            if (F && typeof F.recordEvent === "function") F.recordEvent(unit, ev);
+        },
         onMated: handleMated,
         giveBirth,
         progressPregnancies,

@@ -58,7 +58,7 @@
         forageJobs: 4,           // food: gather jobs alive at once for a food cache
         reserveMarginDays: 0.5,  // food: a cache forages this much past the target, so a meal does not reopen one at once
         kindCooldownTicks: 6000, // a kind whose project could not be sited or supplied is not tried again for this long
-        severity: { shelter: 3, food: 2, foodCritical: 4, bed: 1.5, storage: 1 },
+        severity: { shelter: 3, food: 2, foodCritical: 4, bed: 1.5, storage: 1, housing: 2.5 },
         survivalBonus: { foodCritical: 5, shelter: 2 }
     };
 
@@ -74,6 +74,18 @@
             wall: "wall_wood",
             door: "door_wood",
             hearth: "campfire",
+            bed: "floor_straw",
+            phases: ["site", "walls", "hearth", "beds"]
+        },
+        household_dwelling: {
+            id: "household_dwelling",
+            name: "Household dwelling",
+            deficit: "housing",
+            kind: "footprint",
+            size: 5,
+            wall: "wall_wood",
+            door: "door_wood",
+            hearth: "kitchen_hearth",
             bed: "floor_straw",
             phases: ["site", "walls", "hearth", "beds"]
         },
@@ -141,6 +153,12 @@
         const over = cat && cat.colony && cat.colony.projects ? cat.colony.projects : null;
         const cfg = Object.assign({}, DEFAULTS, over || {});
         cfg.blueprints = Object.assign({}, BLUEPRINTS, (over && over.blueprints) || {});
+        const c = colony();
+        const phase = (c && c._settlementPhase) || "camp";
+        const H = window.UF && UF.Households;
+        if (phase === "camp" || !H || typeof H.all !== "function") {
+            delete cfg.blueprints.household_dwelling;
+        }
         return cfg;
     }
     const blueprint = kind => config().blueprints[kind] || null;
@@ -467,12 +485,38 @@
         Object.assign(storage, { containerSlots, stockpileCells });
         const bed = row(population, beds, "beds");
         bed.unsheltered = bedsUnsheltered;
+        const neededShelters = population > 0 ? Math.ceil(population / cfg.perShelter) : 0;
+        const shelter = row(neededShelters, shelters, "shelters");
+        // Settlement development phase: camp -> village -> town
+        const phase = (shelters >= neededShelters && foodDays >= 3)
+            ? (population >= 16 ? "town" : "village")
+            : "camp";
+        if (s) s._settlementPhase = phase;
+        // Domestic housing: unhoused households in village/town phase
+        const H = window.UF && UF.Households;
+        let householdCount = 0, housedCount = 0;
+        if (H && typeof H.all === "function") {
+            const allH = H.all();
+            for (const h of allH) {
+                if (h.mergedInto) continue;
+                householdCount++;
+                if (h.homeBuildingId || (h.home && !h.home.isShared && (typeof H.isSheltered === "function" ? H.isSheltered(h) : true))) {
+                    housedCount++;
+                }
+            }
+        } else {
+            householdCount = 0;
+            housedCount = 0;
+        }
+        const housing = row(phase === "camp" ? 0 : householdCount, housedCount, "dwellings");
         return {
             area: { x: area.x, y: area.y, z: area.z },
             site: near,
             radius: cfg.scanRadius,
             population,
-            shelter: row(population > 0 ? Math.ceil(population / cfg.perShelter) : 0, shelters, "shelters"),
+            phase,
+            shelter,
+            housing,
             food, bed, storage,
             evaluatedAt: stamp()
         };
@@ -481,9 +525,10 @@
         const d = evaluateDeficits(areaRef);
         if (!d) return "No settlement.";
         const part = (label, r) => `${label} ${r.current}/${r.needed}${r.deficit ? ` (needs ${r.deficit} more)` : ""}`;
+        const housingPart = d.housing && d.phase !== "camp" ? ` · ${part("Housing", d.housing)}` : "";
         const b = brain(d);
         const top = b && b.chosen ? `; next: ${b.chosen.kind} (utility ${b.chosen.utility.toFixed(1)})` : (b ? "; nothing to open" : "");
-        return `${part("Shelter", d.shelter)} · Food ${d.food.current}/${d.food.needed} days${d.food.critical ? " (critical)" : d.food.deficit ? ` (needs ${d.food.deficit} more)` : ""} · ${part("Beds", d.bed)} · ${part("Storage", d.storage)} slots · ${d.population} colonists within ${d.radius} of (${d.site.x},${d.site.y})${top}`;
+        return `${part("Shelter", d.shelter)} · Food ${d.food.current}/${d.food.needed} days${d.food.critical ? " (critical)" : d.food.deficit ? ` (needs ${d.food.deficit} more)` : ""} · ${part("Beds", d.bed)} · ${part("Storage", d.storage)} slots${housingPart} · ${d.population} colonists within ${d.radius} of (${d.site.x},${d.site.y})${top}`;
     }
 
     //-------------------------------------------------------------------------
@@ -583,6 +628,7 @@
         if (bp.id === "communal_stockpile") return { storage: (bp.size | 0) * (bp.size | 0) * (cfg.slotsPerStockpileCell || 1) };
         if (bp.id === "bedding_expansion") return { bed: phases && phases[0] ? phases[0].cells.length : 0 };
         if (bp.id === "food_cache") return { food: d && d.food ? Math.max(d.food.deficit, 0.001) : cfg.targetReserveDays };
+        if (bp.id === "household_dwelling") return { housing: 1, bed: relativeCells(bp).beds.length };
         return {};
     }
 
@@ -910,6 +956,23 @@
     }
 
     // Objects whose harvest yields food (from the catalog), and the gather jobs a food cache posts on them.
+    // The settlement's chest with room for a food stack (DEUS-TSK-FABLE-14): the nearest to the hearth within
+    // scanRadius that UF.Containers will store it in, as { x, y, containerId }; null when none (or no containers plugin).
+    function foodChestFor(c, item) {
+        const C = window.UF && UF.Containers, cfg = config();
+        if (!C || typeof C.all !== "function" || typeof C.canStore !== "function" || !c || !c.site) return null;
+        const area = levelArea(c);
+        let best = null, bestD = Infinity;
+        for (const cont of C.all(area, area.z)) {
+            const d = chebyshev(cont.x, cont.y, c.site.x, c.site.y);
+            if (d > cfg.scanRadius || d >= bestD) continue;
+            const can = C.canStore(cont.id, item, item.count | 0);
+            if (!can || !can.ok) continue;
+            best = { x: cont.x, y: cont.y, containerId: cont.id };
+            bestD = d;
+        }
+        return best;
+    }
     function foodSources() {
         const cat = catalog(), I = Items();
         const out = [];
@@ -936,16 +999,25 @@
         const standing = sp => !!sp && !!O.atIn(area, sp.x, sp.y) && !refusedAt(p, cellKey(sp.x, sp.y));
         const larder = standing(p.larder) ? p.larder : (larderCells(c).find(sp => standing(sp) && hasTag(O.atIn(area, sp.x, sp.y), "stockpile")) || null);
         if (!larder && larderCell(c)) summary.refused = 1;
-        // Loose food (on the ground, not in a larder or container) is hauled into the larder.
+        // Loose food (on the ground, not in a larder or container) is hauled into the communal store: the settlement's
+        // chest when one has room for it (DEUS-TSK-FABLE-14: UF.Containers, so every colonist eats from it), else the
+        // larder cell.
         if (larder) {
             const larders = new Set(larderCells(c).map(sp => cellKey(sp.x, sp.y)));
+            // A stack somebody is walking to for a meal (an eat or a fetch on it) is theirs: hauling it to the larder
+            // under their feet fails their meal "the food moved" (DEUS-TSK-FABLE-14, seen in the survival soak).
+            const spokenFor = new Set(J.list(j => !finished(j) && (j.type === "eat" || j.type === "fetch") && j.params && j.params.itemId !== undefined).map(j => j.params.itemId));
             for (const f of I.find({ area: { x: area.x, y: area.y }, z: area.z, near: { x: larder.x, y: larder.y }, radius: cfg.materialRadius, tags: ["food"] })) {
                 if (openCount(p) >= cfg.maxOpenJobs) break;
-                if (larders.has(cellKey(f.x, f.y)) || f.item.container || p.hauls[f.item.id]) continue;
+                if (larders.has(cellKey(f.x, f.y)) || f.item.container || p.hauls[f.item.id] || spokenFor.has(f.item.id)) continue;
                 if (J.reservation && J.reservation.reservedBy(f.item.id)) continue;
-                const job = postJob(p, { type: "haul", target: targetOf(p, f.x, f.y), params: { itemId: f.item.id, count: f.item.count | 0, to: targetOf(p, larder.x, larder.y), material: "food" } });
+                const chest = foodChestFor(c, f.item);
+                const to = chest || larder;
+                const params = { itemId: f.item.id, count: f.item.count | 0, to: targetOf(p, to.x, to.y), material: "food" };
+                if (chest) params.toContainer = chest.containerId;
+                const job = postJob(p, { type: "haul", target: targetOf(p, f.x, f.y), params });
                 if (!job) continue;
-                p.hauls[f.item.id] = { job: job.id, cell: cellKey(larder.x, larder.y), type: f.item.type, count: f.item.count | 0 };
+                p.hauls[f.item.id] = { job: job.id, cell: cellKey(to.x, to.y), type: f.item.type, count: f.item.count | 0 };
                 posted++;
             }
         }
@@ -1121,6 +1193,26 @@
                                 cells: footprint(p),
                                 filters: { groups: bp.stores ? bp.stores.slice() : ["all"] }
                             });
+                        }
+                    }
+                }
+                if (p.kind === "household_dwelling") {
+                    const H = window.UF && UF.Households;
+                    const C = window.UF && UF.Colonists;
+                    if (H && typeof H.all === "function") {
+                        const unhoused = H.all().find(h => !h.home || h.home.isShared || !h.homeBuildingId);
+                        if (unhoused) {
+                            unhoused.homeBuildingId = p.id;
+                            unhoused.home = Object.assign(unhoused.home || {}, {
+                                buildingId: p.id,
+                                x: p.origin.x,
+                                y: p.origin.y,
+                                size: p.size,
+                                isShared: false
+                            });
+                            if (C && typeof C.allocateBeds === "function") {
+                                C.allocateBeds(colony());
+                            }
                         }
                     }
                 }

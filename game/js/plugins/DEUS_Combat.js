@@ -1025,6 +1025,10 @@
         d._isDying = true;
         d.dead = true;
         d.hp = 0;
+        const Forensics = (window.UF && window.UF.DeathForensics) || (typeof global !== "undefined" && global.UF && global.UF.DeathForensics);
+        if (Forensics && typeof Forensics.recordDeath === "function") {
+            try { Forensics.recordDeath(victim, d.deathCause || null, killer); } catch (_) {}
+        }
         const w = World();
         const area = victim.area ? levelArea(victim) : (w ? viewArea(w) : null);
         const x = victim.x, y = victim.y;

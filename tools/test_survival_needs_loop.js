@@ -309,6 +309,7 @@ try {
     O.setIn(area, SITE.x + 5, SITE.y, "stockpile");
     I.drop(area, SITE.x + 5, SITE.y, "berries", 40);
     const H = S.founders[0];
+    S.time.hour = 14; // between meals: the haul is picked up whatever the walk to the stack, and supper (19:00) cuts it
     { const j = jobOf(S, H); if (j) J.cancel(j.id, "test: scenario"); }
     for (const k of [...C._internal.avoid.keys()]) if (k.startsWith(`${H.id}:`)) C._internal.avoid.delete(k);
     if (C._internal.preemptAt) C._internal.preemptAt.delete(H.id);
@@ -421,6 +422,9 @@ try {
     for (const u of C.list()) { needs(u).foodLb = 1; needs(u).waterGal = 1; }
     needs(R).exhaustion = 2; needs(R).fromNeeds = 2; needs(R).foodLb = 0.5; needs(R).waterGal = 1; R.data.hp = 3; R.data.maxHp = 10;
     R.x = SITE.x; R.y = SITE.y; R.goal = null; // Position at camp center with direct route to straw beds
+    // A colonist short of the day's food eats before bed when it can (DEUS-TSK-FABLE-14); this scene is about the
+    // rest on half a pound, so its hunger is marked unmeetable (the "nothing to eat" memory the sweep respects).
+    C._internal.avoid.set(`${R.id}:0:need_hunger:${SITE.x},${SITE.y}`, S.now() + 20000);
     S.time.hour = 1;
     const n8 = drive(S, 300, () => { const j = jobOf(S, R); return !!j && j.type === "sleep" && j.params.longRest; });
     const rest1 = jobOf(S, R);

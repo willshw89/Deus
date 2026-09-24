@@ -201,10 +201,10 @@
             }
             return false;
         }
-        if (W && onScreen(area) && window.$gameMap && $dataMap) {
+        if (typeof W.getTile === "function") return Tilemap.isWaterTile(W.getTile(area.x, area.y, x, y, 0, zOf(area)) | 0);
+        if (W && onScreen(area) && window.$gameMap && $dataMap && x < ($dataMap.width || 0) && y < ($dataMap.height || 0)) {
             return Tilemap.isWaterTile($gameMap.tileId(x, y, 0));
         }
-        if (typeof W.getTile === "function") return Tilemap.isWaterTile(W.getTile(area.x, area.y, x, y, 0, zOf(area)) | 0);
         const G = window.UF && UF.WorldGen;
         if (G && G.cellInfoLocal) {
             const c = G.cellInfoLocal(area.x, area.y, x, y);
@@ -286,7 +286,7 @@
      * none (the target is walled in).
      */
     function standFor(target, unit, adjacentOnly) {
-        if (!target || !unit || !target.area || !validLevel(target) || !validLevel(unit) || !sameLevel(target, unit)) return null;
+        if (!target || !unit || !target.area || !validLevel(target) || !validLevel(unit) || !sameArea(target.area, unit.area)) return null;
         const area = lv(target), z = refZ(target);
         if (!adjacentOnly && target.x === unit.x && target.y === unit.y) return { area: copyArea(area), x: target.x, y: target.y, z };
         if (!adjacentOnly && standableIn(area, target.x, target.y, unit.id)) return { area: copyArea(area), x: target.x, y: target.y, z };
@@ -300,6 +300,22 @@
             if (dist < bestDist) {
                 bestDist = dist;
                 best = { area: copyArea(area), x, y, z };
+            }
+        }
+        if (!best) {
+            // Fallback: if all neighbor cells currently have a unit on them, select the nearest walkable cell anyway.
+            // Living units are temporary obstacles; a traveling colonist must not be blocked from starting their journey
+            // to a container, workplace, or resource just because someone is standing beside it.
+            for (const [dx, dy] of eight ? NEIGHBORS.concat(DIAGONALS) : NEIGHBORS) {
+                const x = target.x + dx, y = target.y + dy;
+                if (x < 0 || y < 0 || x >= W.state.size || y >= W.state.size) continue;
+                if (!W.walkable(area.x, area.y, x, y, { z })) continue;
+                if (dx && dy && !(W.walkable(area.x, area.y, x, target.y, { unit, z }) && W.walkable(area.x, area.y, target.x, y, { unit, z }))) continue;
+                const dist = eight ? octileDistance(unit, area, x, y) : unitDistance(unit, area, x, y);
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    best = { area: copyArea(area), x, y, z };
+                }
             }
         }
         return best;
@@ -477,14 +493,6 @@
     const moveHandler = verb => ({
         verb,
         plan(job, unit) {
-            const I = Items();
-            // A reflex (a flight from fire or a foe) runs however laden; anything else waits for a lighter load.
-            if (!(job.params && job.params.reflex) && I && typeof I.encumbrance === "function") {
-                const enc = I.encumbrance(unit.id);
-                if (enc && enc.status !== "unencumbered") {
-                    return { ok: false, reason: "encumbered" };
-                }
-            }
             // A route (DEUS-TSK-FABLE-12: an escape around the flames from UF.Jobs.safeCellNear) is walked square by
             // square: the stand is the first waypoint not yet reached, and apply() continues the job until the last.
             const route = job.params && Array.isArray(job.params.route) ? job.params.route : null;
@@ -629,6 +637,13 @@
             if (job.params.toContainer && C) {
                 const stored = C.putItem(job.params.toContainer, job.params.itemId);
                 job.result = stored ? { itemId: job.params.itemId, containerId: job.params.toContainer } : null;
+            } else if (job.params.feed && job.params.unitId !== undefined && job.params.unitId !== null) {
+                // A delivery to a friend who cannot walk (DEUS-TSK-FABLE-14): put down at its feet and straight into its
+                // pack, so it eats where it lies and no tidy haul or hungry passer-by takes the food first.
+                const eater = World().unit(job.params.unitId);
+                const placed = I.putDown(job.params.itemId, lv(to), to.x | 0, to.y | 0);
+                const handed = !!placed && !!eater && !!eater.data && !eater.data.dead && eater.x === (to.x | 0) && eater.y === (to.y | 0) && !!I.pickUp(placed.id, eater.id);
+                job.result = placed ? { itemId: placed.id, unitId: handed ? eater.id : null } : null;
             } else {
                 const placed = I.putDown(job.params.itemId, lv(to), to.x | 0, to.y | 0);
                 job.result = placed ? { itemId: placed.id } : null;
@@ -918,8 +933,11 @@
             const t = it ? I.type(it.type) : null;
             if (!it || !t || !t.food) return { ok: false, reason: "nothing to eat" };
             if (it.holder === unit.id) return { ok: true, stand: null };
-            if (!it.area) return { ok: false, reason: "someone else has it" };
-            if (!sameLevel(it, job.target) || it.x !== job.target.x || it.y !== job.target.y) return { ok: false, reason: "the food moved" };
+            if (!it.area && !it.container) return { ok: false, reason: "someone else has it" };
+            const C = window.UF && UF.Containers;
+            const cont = it.container && C ? C.get(it.container) : null;
+            const itemLoc = cont || it;
+            if (!sameLevel(itemLoc, job.target) || itemLoc.x !== job.target.x || itemLoc.y !== job.target.y) return { ok: false, reason: "the food moved" };
             const stand = standFor(job.target, unit, false);
             return stand ? { ok: true, stand } : { ok: false, reason: "can't reach it" };
         },
@@ -1318,8 +1336,8 @@
     }
 
     function plan(job, unit) {
-        if (!validLevel(unit) || !validLevel(job.target) || !sameLevel(job.target, unit)) {
-            fail(job, "the target is on another level");
+        if (!validLevel(unit) || !validLevel(job.target) || !sameArea(job.target.area, unit.area)) {
+            fail(job, "the target is in another area");
             return false;
         }
         const h = handlers[job.type];
@@ -1336,8 +1354,8 @@
         }
         job.stand = r.stand ? { area: copyArea(r.stand.area || job.target.area), x: r.stand.x | 0, y: r.stand.y | 0,
             z: r.stand.z !== undefined ? r.stand.z : r.stand.area && r.stand.area.z !== undefined ? r.stand.area.z : refZ(job.target) } : null;
-        if (!validLevel(job.target) || !sameLevel(job.target, unit) || (job.stand && (!validLevel(job.stand) || !sameLevel(job.stand, unit)))) {
-            fail(job, "the target is on another level");
+        if (!validLevel(job.target) || !sameArea(job.target.area, unit.area) || (job.stand && (!validLevel(job.stand) || !sameArea(job.stand.area, unit.area)))) {
+            fail(job, "the target is in another area");
             return false;
         }
         job.planned = true;
@@ -1350,7 +1368,7 @@
         const W = World();
         const unit = W ? W.unit(unitId) : null;
         if (!job || !unit || isFinished(job) || !handlers[job.type]) return null;
-        if (!validLevel(unit) || !validLevel(job.target) || !sameLevel(job.target, unit)) return fail(job, "the target is on another level");
+        if (!validLevel(unit) || !validLevel(job.target) || !sameArea(job.target.area, unit.area)) return fail(job, "the target is in another area");
         if (job.assigned === unitId && isActive(job)) return job;
         const current = of(unitId);
         if (current && current !== job) fail(current, "replaced");
@@ -1617,9 +1635,9 @@
     function step(job, unit) {
         const W = World();
         const h = handlers[job.type];
-        if (!validLevel(unit) || !validLevel(job.target) || !sameLevel(job.target, unit) ||
-            (job.stand && (!validLevel(job.stand) || !sameLevel(job.stand, unit)))) {
-            fail(job, "the target is on another level");
+        if (!validLevel(unit) || !validLevel(job.target) || !sameArea(job.target.area, unit.area) ||
+            (job.stand && (!validLevel(job.stand) || !sameArea(job.stand.area, unit.area)))) {
+            fail(job, "the target is in another area");
             return;
         }
         // Reflex (DEUS-TSK-FABLE-11): a worker in a lethal hazard (a burning square, lava, deep water, or aflame) is
@@ -1639,14 +1657,6 @@
         }
         const stand = job.stand;
         if (stand && !atCell(unit, stand)) {
-            const I = Items();
-            if (!(job.params && job.params.reflex) && I && typeof I.encumbrance === "function") {
-                const enc = I.encumbrance(unit.id);
-                if (enc && enc.status !== "unencumbered") {
-                    fail(job, "encumbered");
-                    return;
-                }
-            }
             if (!unit.goal || !sameLevel(unit.goal, stand) || unit.goal.x !== stand.x || unit.goal.y !== stand.y) {
                 W.sendUnit(unit.id, { area: stand.area, x: stand.x, y: stand.y, z: refZ(stand) });
             }
@@ -1659,8 +1669,11 @@
             }
             return;
         }
-        // A unit must have its own exclusive square to act:
-        const sharingSquare = W.unitsInArea(unit.area.x, unit.area.y, zOf(unit)).some(o => o.id !== unit.id && o.x === unit.x && o.y === unit.y);
+        // A unit must have its own exclusive square to begin work at a stand cell; a job with no stand (eating from
+        // the pack, an equip) acts where the unit is, and a job already at work goes on however crowded its square
+        // gets (DEUS-TSK-FABLE-14: two founders on one square at the larder chest left the one eating from her pack
+        // replanning forever; a sleeper whose square four others stepped onto was held at "work" for thirty hours).
+        const sharingSquare = !!job.stand && job.state !== "work" && W.unitsInArea(unit.area.x, unit.area.y, zOf(unit)).some(o => o.id !== unit.id && o.x === unit.x && o.y === unit.y);
         if (sharingSquare) {
             const ev = unitEvent(unit);
             const otherEvs = window.$gameMap ? $gameMap.eventsXyNt(unit.x, unit.y).filter(e => e !== ev) : [];

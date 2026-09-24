@@ -608,8 +608,8 @@
         const ly = ((gy % size) + size) % size;
         const distToCamp = Math.hypot(lx - mid, ly - mid);
 
-        // Within starting camp clearing (r <= 12), always datum S = 0
-        if (distToCamp <= 12) return 0;
+        // Within starting settlement valley, kit objects and pond radius (r <= 30), always datum S = 0
+        if (distToCamp <= 30) return 0;
 
         const G = window.UF && UF.WorldGen;
         let e = 0.45;
@@ -627,9 +627,9 @@
         const relief = valueNoise(seed, saltRelief, gx, gy, 18);
         let eff = (e * 0.55 + upland * 0.45) + (relief - 0.5) * 0.15;
 
-        // Smooth transition ring near camp (12 < r < 18)
-        if (distToCamp < 18) {
-            const blend = (distToCamp - 12) / 6;
+        // Smooth transition ring near camp (30 < r < 36)
+        if (distToCamp < 36) {
+            const blend = (distToCamp - 30) / 6;
             eff = eff * blend + 0.35 * (1 - blend);
         }
 
@@ -1819,12 +1819,22 @@
         if (!source || !source.isReady()) return null;
         const bitmap = new Bitmap(48, provoked("natural_wall_height") ? 48 : 96);
         const x0 = material === SOIL ? 96 : 0;
-        const cap = Tilemap.FLOOR_AUTOTILE_TABLE[maskTable()[mask]];
         const face = Tilemap.WALL_AUTOTILE_TABLE[10 + ((mask & 4) ? 0 : 1) + ((mask & 8) ? 0 : 4)];
-        for (let q = 0; q < 4; q++) {
-            const dx = (q % 2) * 24, dy = Math.floor(q / 2) * 24;
-            bitmap.blt(source, x0 + cap[q][0] * 24, cap[q][1] * 24, 24, 24, dx, dy);
-            if (bitmap.height === 96) bitmap.blt(source, x0 + face[q][0] * 24, 144 + face[q][1] * 24, 24, 24, dx, dy + 48);
+        if (bitmap.height === 96) {
+            // Dwarf Fortress Black Wall-Top Convention (User directive 2026-09-21; docs/PROJECT_DEUS_ART_DIRECTION_SPEC.md §3)
+            // Upper 48 px cap: flat near-black (#0a0a10) with subtle edge definition for readability
+            bitmap.fillRect(0, 0, 48, 48, "#0a0a10");
+            bitmap.fillRect(0, 0, 48, 2, "#14141c");
+            for (let q = 0; q < 4; q++) {
+                const dx = (q % 2) * 24, dy = Math.floor(q / 2) * 24;
+                bitmap.blt(source, x0 + face[q][0] * 24, 144 + face[q][1] * 24, 24, 24, dx, dy + 48);
+            }
+        } else {
+            const cap = Tilemap.FLOOR_AUTOTILE_TABLE[maskTable()[mask]];
+            for (let q = 0; q < 4; q++) {
+                const dx = (q % 2) * 24, dy = Math.floor(q / 2) * 24;
+                bitmap.blt(source, x0 + cap[q][0] * 24, cap[q][1] * 24, 24, 24, dx, dy);
+            }
         }
         naturalWallFrames.set(key, bitmap);
         return bitmap;
@@ -1836,7 +1846,7 @@
         update() {
             super.update();
             const map = window.$dataMap, W = World(), view = W && W.viewLevel();
-            if (!this.parent || !map || !view || (view.z === 0 && levelGen(W.state, 0) < 4) || map.tilesetId !== TILESET_ID) {
+            if (!this.parent || !map || !view || map.tilesetId !== TILESET_ID) {
                 for (const s of this._active.values()) { s.visible = false; this._pool.push(s); }
                 this._active.clear(); this._seen = ""; return;
             }

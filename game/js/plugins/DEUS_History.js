@@ -2753,12 +2753,12 @@
         const I = window.UF && UF.Items;
         if (!I || !cont) return;
         if (cont.items && cont.items.length > 0) return; // Idempotent: do not double-seed
-        // Food for 8 founders for 1 day (16 cooked meat / 2 meals each) + 1 shovel, 1 pickaxe, 1 axe
+        // Actual shipping starter inventory: 16 cooked meat (1 day of food for 8 founders) + 1 shovel, 1 pickaxe, 1 axe
         const starterKit = [
-            { type: "meat_cooked", count: 16 }, // Food for 8 people for 1 day
-            { type: "shovel", count: 1 },       // 1 shovel
-            { type: "pickaxe", count: 1 },      // 1 pickaxe
-            { type: "axe", count: 1 }           // 1 axe
+            { type: "meat_cooked", count: 16 },  // 1 day supply for 8 founders (shipping standard)
+            { type: "shovel", count: 1 },        // 1 shovel
+            { type: "pickaxe", count: 1 },       // 1 pickaxe
+            { type: "axe", count: 1 }            // 1 axe
         ];
         for (const spec of starterKit) {
             let itType = spec.type;
