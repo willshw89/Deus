@@ -7,8 +7,41 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (Autonomous Shelter Construction Loop COMPLETE — AWAITING USER REVIEW)
 
 ## In progress
-- **Astra (2026-09-24):** On hold / consumed per user directive ("ASTRA USE IS CONSUMED, FABLE ONLY FOR THE TIME BEING"). `DEUS-TSK-ASTRA-17` paused.
-- **Gemini (2026-09-24):** Clean source control integration and automated verification complete.
+- **Fable / Claude Code (2026-09-24):** In progress on `DEUS-TSK-FABLE-17` (authoritative writer for simulation & engine: hearth containment, domestic housing progression, volumetric terrain column & Z=0 cliff walls audit/refinement, and commit).
+- **Gemini (2026-09-24):** In progress on `CHARART-02 Candidate / Human Golden Pack Input` (ratified in `docs/CHARART_MASTER_CHARTER.md`; pilot visual geometry proof & non-living art production pipeline for AR-2010 and AR-2100..2102).
+- **Astra (2026-09-24):** On hold / consumed per user directive.
+
+## DEUS-TSK-GEMINI-11 — Visual Hierarchy, Environmental Standard, Racial Architecture & VFX/UI Presentation Standards (2026-09-24)
+- **Status**: `COMPLETED — PASS`
+- **Scope**:
+  - `docs/art/DEUS_ENVIRONMENT_MATERIAL_STANDARD.md`: Authoritative specification establishing the global 45° top-left lighting standard, ambient color-matrix time-of-day transitions (Noon, Golden Hour, Twilight, Deep Night), procedural weather overlays (rain, snow, frost, wet sheen, mud), seasonal 4-season states without tileset duplication, 4-stage damage/ruin/debris progression, scorched/charred fire states, indoor cutaway & south-wall dithering rules, geological biome grammar, traffic-driven road evolution, 5-stage crop lifecycle, and decal persistence/cleanup mechanics.
+  - `docs/art/DEUS_RACIAL_BUILDING_BIBLE_TEMPLATE.md`: Reusable standard template for authoring racial architectural grammars; establishes strict disambiguation between Race (biological anatomy & architectural style) and Faction (political entity owning system menu theme); defines the universal 6-tier structural building contract; formalizes explicit constructible roofs as real horizontal slabs at Z+1 with material weight, support spans, fire flammability, and crushing downward collapse physics; codifies historical architectural evolution (multi-era construction and repairs).
+  - `docs/art/DEUS_VFX_UI_INFORMATION_STANDARD.md`: Comprehensive visual standard establishing the VFX catalog (fire, blood, sparks, water ripples, divine/arcane/necrotic/primal magic) with permissive alpha rules; 16-bit inventory and condition iconography; faction-themed system menu skins across all 6 cultural profiles; high-contrast tactical information layer (selection rings, command designations, project ghosts, stockpile boundaries); 3-tier fog of war (Unexplored void, Remembered historical snapshot, Active line of sight); multi-channel accessibility encoding (never color alone); 4-stage corpse-to-grave decay lifecycle; subtle craftsmanship/runic prestige language (no MMO neon); and 5 golden-scene regression benchmarks.
+  - `docs/art/DEUS_SCALE_AND_ASSET_MASTER_BIBLE.md` & `docs/art/DEUS_VISUAL_QUALITY_CONTROL_STANDARD.md`: Completed in prior session; unifies $T=48\text{ px}$ grid math, extended presentation envelope, and 6 mechanical QC gates.
+- **Checks observed**:
+  - Cross-document consistency verified across all 7 master documents in `docs/art/`.
+  - Zero duplicate tilesets required: Lighting, weather, and seasons fully proceduralized via color LUTs and decals.
+  - Verification harness: `node tools/test_srd_character_presentation.js` (11 passed, 0 failed, 7 negative mutants pass).
+
+## DEUS-TSK-GEMINI-10 — CHARART-SRD-01 SRD 5.1 → CHARART Complete Presentation Crosswalk (2026-09-24)
+- **Status**: `COMPLETED — PASS`
+- **Scope**:
+  - `tools/build_srd_character_presentation.js`: Generator for systematic presentation crosswalk mapping 100% of canonical SRD 5.1 entries into DEUS character presentation.
+  - `game/data/art/srd_character_presentation.json`: Authoritative machine-readable crosswalk (740 KB) classifying 1,325/1,325 canonical SRD records across `PRESENTATION_REQUIRED` (935), `PRESENTATION_INDIRECT` (88), and `NO_CHARACTER_PRESENTATION` (302), with zero unclassified records.
+  - `docs/art/SRD_CHARACTER_PRESENTATION_CROSSWALK.md`: Canonical human-readable specification defining semantic sockets, weapon presentation families, armor coverage profiles, material ramps, spell body and delivery VFX profiles, creature rigs, natural attack profiles, and condition visual states.
+  - `tools/test_srd_character_presentation.js`: Comprehensive 11-test verification harness auditing schema version, coverage, ID validity, socket validity, material profile references, deterministic ordering, and canonical source immutability.
+- **Checks observed**:
+  - `node tools/test_srd_character_presentation.js`: **11 passed, 0 failed (exit 0)**.
+  - Negative control mutants verified failing (exit 1):
+    - `--mutant=missing_srd_id`: **FAIL (exit 1)**
+    - `--mutant=invalid_socket`: **FAIL (exit 1)**
+    - `--mutant=invalid_action_profile`: **FAIL (exit 1)**
+    - `--mutant=missing_classification`: **FAIL (exit 1)**
+    - `--mutant=illegal_grip_value`: **FAIL (exit 1)**
+    - `--mutant=dangling_material_ref`: **FAIL (exit 1)**
+    - `--mutant=canonical_source_mutated`: **FAIL (exit 1)**
+- **Source Integrity**: All 6 canonical SRD 5.1 JSON files in `game/data/srd51/` confirmed 100% unmutated (exact SHA-256 match). Zero presentation keys added to canonical files.
+
 
 ## DEUS-TSK-GEMINI-09 — Survival Defect Prevention, Hearth Containment, Volumetric Z0 Terrain & Housing Progression (2026-09-24)
 - **Status**: `COMPLETED — PASS`
