@@ -7,9 +7,31 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (Autonomous Shelter Construction Loop COMPLETE — AWAITING USER REVIEW)
 
 ## In progress
-- **Fable / Claude Code (2026-09-24):** In progress on `DEUS-TSK-FABLE-17` (authoritative writer for autonomous behavior: 7-day unattended survival soak, fire survival behavior, post-communal shelter expansion).
-- **Gemini (2026-09-24):** In progress on `Gemini Phase 1 Physical World Stabilization` (authoritative owner of core engine / physics: fire & hazard model hardening, hearth clearance invariant, rain extinguishing, construction safety refusal).
+- **Fable / Claude Code (2026-09-24):** In progress on `DEUS-TSK-FABLE-18` (autonomous behavior: 7-day then 30-day unattended soak, fire survival behavior, construction common sense, post-communal expansion). Writes only `game/js/plugins/DEUS_Projects.js`, `DEUS_Colonists.js`, `DEUS_Jobs.js`, `UF_Households.js`, one line in `DEUS_Items.js` (export `Items.detach`: `UF_Containers.putItem` needs it, without it every haul into a chest leaves a phantom stack in the hauler's pack), the settlement/survival harnesses in `tools/`, and their `docs/systems/` pages. Works in an isolated worktree and copies finished files in. First step: land the Fable-owned part of the finished FABLE-16 work (Projects, Colonists, Households, harnesses); its engine-side part (Fire, Environment, DeathForensics, Core, History, Levels, WorldGen) goes to Gemini as a patch, not into the live tree.
+- **Gemini (2026-09-24):** In progress on `Gemini Phase 1 Physical World Stabilization` and View Distance Calibration.
 - **Astra (2026-09-24):** On hold / consumed per user directive.
+
+## DEUS-TSK-GEMINI-16 — In-Game View Scale Calibrator & Continuous Zoom (2026-09-24)
+- **Status**: `COMPLETED — PASS`
+- **Scope**:
+  - `game/js/plugins/DEUS_Camera.js`: Implemented continuous floating-point zoom scaling (0.20x to 2.50x), localStorage persistence, and interactive in-game View Scale Calibrator HUD.
+  - Interactive HUD Features:
+    - Draggable slider bar with live visual feedback spanning 0.25x to 1.75x.
+    - Quick preset buttons: `[0.33x]` (1x Art, 16px), `[0.50x]` (24px), `[0.67x]` (2x Art / default, 32px), `[0.75x]` (36px), `[1.00x]` (3x Art, 48px), `[1.25x]` (60px), `[1.50x]` (72px).
+    - Stepper buttons: `[-]` and `[+]` for fine incremental zoom (+/- 0.05 normal, +/- 0.01 with Shift).
+    - Real-time readouts: Zoom scale multiplier, effective tile size in pixels, chibi character height in pixels, and visible viewport grid dimensions (`cols x rows`).
+    - Draggable header bar allowing players to position the window anywhere on screen.
+    - Minimize / expand toggle button collapsing into a compact pill `[ 🔍 X.XXx | Expand ]`.
+    - `★ LOCK AS OFFICIAL VIEW DISTANCE` button: stores user's chosen scale in `localStorage.setItem("deus_canonical_view_scale")`, logs to dev console (F8), and emits `camera:officialScaleLocked`.
+    - Hotkey `F7` to toggle calibrator HUD visibility at will.
+    - Full input isolation via `Scene_Map.prototype.isAnyWindowUnderMouse` to prevent map clicks/movement while interacting with the HUD.
+- **Checks observed**:
+  - `node tools/run_tests.js camera`: 15 passed, 0 failed (`RESULT: 15 passed, 0 failed (exit 0)`).
+  - Verified original discrete levels (0, 1, 2) backward compatibility.
+  - Verified continuous zoom calculation, tilemap scaling, and canvas-to-map mouse coordinate accuracy at 0.75x.
+  - Verified official scale persistence to `Camera.officialScale` and `localStorage`.
+  - Verified mouse click isolation over the HUD.
+  - Screenshot captured and visually inspected: `game/test_output/camera.calibrator_hud.png`.
 
 ## DEUS-TSK-GEMINI-15 — Division of Labor & Collaborative Roadmap Ratified (2026-09-24)
 - **Status**: `COMPLETED — PASS`
