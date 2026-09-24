@@ -2,7 +2,11 @@
 **Document ID:** `DEUS-SYS-PHYS-01`  
 **Status:** Authoritative Engineering Specification (Frozen Physical World Standard)  
 **Authority:** Gemini (Full-Stack Coordinator & Art Authority) & Fable / Claude Code (Engine Authority)  
-**Applicability:** `DEUS_Levels.js`, `DEUS_Walls.js`, `DEUS_Floors.js`, `DEUS_Fluid.js`, `DEUS_Fire.js`, `DEUS_Projects.js`, `DEUS_WorldGen.js`, and all AI systems.
+**Applicability:** `DEUS_Levels.js`, `DEUS_Walls.js`, `DEUS_Floors.js`, `DEUS_Fluid.js`, `DEUS_Fire.js`, `DEUS_Projects.js`, `DEUS_WorldGen.js`, and all AI systems.  
+**Companion Documents:**
+- [`docs/systems/DEUS_CONSTRUCTION_LIFECYCLE_SPEC.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/systems/DEUS_CONSTRUCTION_LIFECYCLE_SPEC.md)
+- [`docs/systems/DEUS_WORLD_STRUCTURAL_ARCHITECTURE.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/systems/DEUS_WORLD_STRUCTURAL_ARCHITECTURE.md)
+- [`docs/art/DEUS_ENVIRONMENT_MATERIAL_STANDARD.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/art/DEUS_ENVIRONMENT_MATERIAL_STANDARD.md)
 
 ---
 
@@ -262,9 +266,11 @@ $$\textbf{RULE: A building has NO roof until colonists physically build it.}$$
 
 ---
 
-### 2.8 Settlement Construction Logic & Physical Build Sequence
+### 2.8 Settlement Construction Logic & Universal Lifecycle
 
-To eliminate issues where colonists stall after the first communal room, construction adheres to an explicit physical dependency graph:
+$$\textbf{Universal Lifecycle: Intent (PLANNED) \longrightarrow Under Construction (BUILDING) \longrightarrow Completed (COMPLETE)}$$
+
+As codified in [`docs/systems/DEUS_CONSTRUCTION_LIFECYCLE_SPEC.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/systems/DEUS_CONSTRUCTION_LIFECYCLE_SPEC.md), every buildable physical element—from individual wall segments, floor tiles, and roof slabs to whole communal halls—progresses through discrete physical construction phases. Buildings are derived composite collections of components, not single monolithic entities.
 
 ```text
               THE PHYSICAL BUILDING DEPENDENCY GRAPH

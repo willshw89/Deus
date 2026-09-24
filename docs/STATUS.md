@@ -11,6 +11,19 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 - **Gemini (2026-09-24):** In progress on `CHARART-02 Candidate / Human Golden Pack Input` (ratified in `docs/CHARART_MASTER_CHARTER.md`; pilot visual geometry proof & non-living art production pipeline for AR-2010 and AR-2100..2102).
 - **Astra (2026-09-24):** On hold / consumed per user directive.
 
+## DEUS-TSK-GEMINI-13 — Universal Construction Lifecycle Specification (Intent → Building → Complete) (2026-09-24)
+- **Status**: `COMPLETED — PASS`
+- **Scope**:
+  - `docs/systems/DEUS_CONSTRUCTION_LIFECYCLE_SPEC.md`: Authoritative specification establishing the universal construction lifecycle across every buildable physical element in Project DEUS (walls, floors, roofs, stairs, ramps, bridges, pillars, doors, furniture, containers, workshops, fences, and roads).
+  - Codifies the 3 player-facing states (`Intent to Build / PLANNED` -> `Under Construction / BUILDING` -> `Completed Construction / COMPLETE`) and 4 internal engine states (`PLANNED` -> `MATERIAL_READY` -> `BUILDING` -> `COMPLETE`).
+  - Establishes component-based building architecture: buildings are composite assemblies of independent constructible pieces; shelter and capacity contracts are derived dynamically from component completion ratios.
+  - Preserves authentic physical logistics: no abstract bank counters; physical resources reserved in stockpiles, hauled to site, visibly staged (piles of logs, stone pallets, thatch bundles), and consumed progressively by worker labor.
+  - Enforces deterministic structural physics: `PLANNED` and `BUILDING` components provide zero structural support and zero functional benefits; only `COMPLETE` components enter the structural support graph.
+  - Implements explicit construction collision policies (`constructionCollision: "NONE" | "SOFT" | "BLOCKING"`), physical cancellation/dismantling rules with material salvage, and post-completion condition lifecycles (`COMPLETE` -> `DAMAGED` -> `RUINED` -> `DEMOLISHED / CLEARED`).
+  - Integrates Building Grammar as an emitter of construction plans, and establishes strict Player and AI parity across all live construction.
+- **Checks observed**:
+  - Cross-referenced with `DEUS_PHYSICAL_WORLD_SIMULATION_SPEC.md`, `DEUS_WORLD_STRUCTURAL_ARCHITECTURE.md`, `DEUS_Projects.md`, and `DEUS_BuildingGrammar.md`.
+
 ## DEUS-TSK-GEMINI-12 — Physical World Simulation Specification (Z-Support, Fluids, Fire, Roofs, Digging & AI Hooks) (2026-09-24)
 - **Status**: `COMPLETED — PASS`
 - **Scope**:
