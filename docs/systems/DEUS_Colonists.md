@@ -88,6 +88,14 @@ Rule 4 mutants (each exit 1 on 2026-09-24): `panics_into_fire_when_choked` (a st
 
 `tools/test_stabilization.js` reads the Medicine check's result at `jobs:done` (the finished job is pruned from `UF_Jobs`' list before the check runs since the idle fallback): 12/12.
 
+## 5b. A named bed (DEUS-TSK-FABLE-16, 2026-09-24)
+
+`UF.Colonists.claimBedAt(unit, { area, z, x, y })` claims one particular standing bed for the colonist: refused (`null`) when no bed stands there, the cell is on another level, or another living colonist holds it; else `data.bed` becomes that cell (the earlier claim lapses with it, so the communal bed a household member held is free for the next claimant), `UF.Ownership.assignBed` is told when present, the claim index is invalidated and `colonists:bedClaimed` is emitted. `DEUS_Projects` uses it when a household moves into its cottage.
+
+**Beds kept for a family** (DEUS-TSK-FABLE-17). `keptForOthers(unit, area, x, y)` asks `UF.Projects.bedReservedFor`: a bed cell of a cottage being built or standing for a household is kept for that household's members. The bed claim sweep (`claimBed`), `claimBedAt` and the sleep job's choice of a free bed all skip a bed kept for somebody else, so newcomers sleep in the communal shelter and never take a cottage's bed before its family moves in.
+
+**Civic steps left out.** While `DEUS_Projects` owns the settlement layout (`projectsManaged()`), the society plan adds no town-square or path steps for households: `DEUS_Floors` has no `road` floor kind, so those steps could never be built and only kept colonists failing a job every 900 ticks.
+
 ## 6. Known limits
 
 - No water container item exists in the catalog: the torture suite adds a harness-only `TEST_waterskin` (`liquid: "water"`); a real one is the catalog owner's to add, and a skin is not emptied by a douse.

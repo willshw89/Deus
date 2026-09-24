@@ -3407,6 +3407,25 @@
         emit("colonists:bedClaimed", u, u.data.bed);
         return u.data.bed;
     }
+    /**
+     * Claims one particular standing bed for the colonist (DEUS-TSK-FABLE-16: a household moving into its cottage takes
+     * the cottage's beds; the communal bed it held is free for the next claimant). ref: { area, z, x, y }. Null when no
+     * bed stands there, the cell is on another level, or another living colonist holds it; else the new record.
+     */
+    function claimBedAt(u, ref) {
+        const O = Objects();
+        if (!O || !u || !u.data || u.data.dead || !ref || !Number.isFinite(ref.x) || !Number.isFinite(ref.y)) return null;
+        const b = { area: copyArea(ref.area || u.area), x: ref.x | 0, y: ref.y | 0, z: ref.z === undefined ? zOf(u) : ref.z | 0 };
+        if (!sameLevel(b, u) || !bedStands(u, b)) return null;
+        const holder = bedClaims().get(bedKeyAt(b, b.x, b.y));
+        if (holder !== undefined && holder !== u.id) return null;
+        u.data.bed = b;
+        const Own = window.UF && UF.Ownership;
+        if (Own && typeof Own.assignBed === "function") { try { Own.assignBed(u, { area: copyArea(b.area), z: b.z, x: b.x, y: b.y }); } catch (e) { console.error(e); } }
+        _claimTick = -1;
+        emit("colonists:bedClaimed", u, u.data.bed);
+        return u.data.bed;
+    }
     // Who gets a new bed first: the most exhausted, then the eldest, then the earliest arrival (stable across runs).
     const bedPriority = (a, b) => (exhaustionOf(b) - exhaustionOf(a)) || ((b.data.age | 0) - (a.data.age | 0)) || (a.id - b.id);
     /** Gives every colonist without a usable bed record the nearest unclaimed bed, in priority order; returns how many were bedded. */
@@ -5639,7 +5658,7 @@
         get: colonist,
         isColonist,
         assess, hazardOf, threatOf, criticalNeed, onUnitMoved, PRIORITY,
-        claimBed, claimedBed, allocateBeds, bedClaims, bedSearchRadius,
+        claimBed, claimBedAt, claimedBed, allocateBeds, bedClaims, bedSearchRadius,
         raiseAlarm, refugeFor, douseJob, burningPatientsFor, openJobs, feedJob, feedPatientsFor,
         state: colonyState,
         faction: () => (window.UF.Factions ? UF.Factions.get(factionId()) : null),

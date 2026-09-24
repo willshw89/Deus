@@ -58,37 +58,51 @@
         forageJobs: 4,           // food: gather jobs alive at once for a food cache
         reserveMarginDays: 0.5,  // food: a cache forages this much past the target, so a meal does not reopen one at once
         kindCooldownTicks: 6000, // a kind whose project could not be sited or supplied is not tried again for this long
+        // Hearths and homes (DEUS-TSK-FABLE-16)
+        hearthClearance: 1,      // no bed or other furnishing within this many orthogonal steps of a blueprint's hearth (a walkway, no fuel against the fire)
+        cottageBeds: 3,          // household_cottage: beds for the household's members, at most this many
+        villageFoodDays: 3,      // phase: village once the communal shelter stands, storage holds and the reserve covers this many days
+        townPopulation: 16,      // phase: town at this population
         severity: { shelter: 3, food: 2, foodCritical: 4, bed: 1.5, storage: 1, housing: 2.5 },
-        survivalBonus: { foodCritical: 5, shelter: 2 }
+        survivalBonus: { foodCritical: 5, shelter: 2 },
+        phaseBonus: { housing: 1 } // village and town: added to housing's utility (camp never opens a cottage)
     };
 
     // Blueprints. `kind` "footprint": a square site chosen outside the camp (cells from the geometry below);
     // "task": cells chosen inside existing settlement space, or no cells at all (a forage quota).
+    // A blueprint's `hearth` names a contained fire source (DEUS-TSK-FABLE-16): "hearth" resolves through hearthId()
+    // to the first of hearth / kitchen_hearth the catalog defines (stone-built; UF_Fire treats both as contained), and
+    // only when neither exists to a campfire, which the finished building marks contained (UF.Fire.setContained).
+    const HEARTH_FALLBACKS = ["hearth", "kitchen_hearth", "campfire"];
     const BLUEPRINTS = {
         communal_shelter: {
             id: "communal_shelter",
             name: "Communal shelter",
             deficit: "shelter",
             kind: "footprint",
-            size: 5,
+            size: 6,                 // 6x6: 20 wall and door cells, a hearth, its four clearance cells, 11 beds (8 founders and room for arrivals)
             wall: "wall_wood",
             door: "door_wood",
-            hearth: "campfire",
+            hearth: "hearth",
             bed: "floor_straw",
             phases: ["site", "walls", "hearth", "beds"]
         },
-        household_dwelling: {
-            id: "household_dwelling",
-            name: "Household dwelling",
+        household_cottage: {
+            id: "household_cottage",
+            name: "Cottage",
             deficit: "housing",
             kind: "footprint",
-            size: 5,
+            size: 5,                 // 5x5: 16 wall and door cells, a hearth with its clearance, up to cottageBeds beds on the corners, a chest
             wall: "wall_wood",
             door: "door_wood",
-            hearth: "kitchen_hearth",
+            hearth: "hearth",
             bed: "floor_straw",
-            phases: ["site", "walls", "hearth", "beds"]
+            chest: "chest_wood",
+            phases: ["site", "walls", "hearth", "beds", "chest"]
         },
+        // One dwelling blueprint (Rule 14, one source of truth per concept): a second kind for the same deficit
+        // would let two dwellings open beside each other for the same household. Variants belong in the catalog's
+        // colony.projects.blueprints override, not here.
         communal_stockpile: {
             id: "communal_stockpile",
             name: "Communal stockpile",
@@ -117,7 +131,9 @@
             phases: ["larder", "forage"]
         }
     };
-    const DEFICITS = ["shelter", "food", "bed", "storage"];
+    const DEFICITS = ["shelter", "food", "bed", "storage", "housing"];
+    const PHASES = ["camp", "village", "town"];
+    const WORKING_AGE = 15; // a household needs a member of working age to ask for a dwelling (UF_Colonists' own line)
 
     // Build inputs a job accepts in place of the named material (mirrors UF_Jobs' build plan).
     const ACCEPTS = { wood: ["wood", "log"], straw: ["straw", "fiber"], stone: ["stone", "rocks_small"] };
@@ -153,12 +169,8 @@
         const over = cat && cat.colony && cat.colony.projects ? cat.colony.projects : null;
         const cfg = Object.assign({}, DEFAULTS, over || {});
         cfg.blueprints = Object.assign({}, BLUEPRINTS, (over && over.blueprints) || {});
-        const c = colony();
-        const phase = (c && c._settlementPhase) || "camp";
-        const H = window.UF && UF.Households;
-        if (phase === "camp" || !H || typeof H.all !== "function") {
-            delete cfg.blueprints.household_dwelling;
-        }
+        // The blueprint set never changes with the phase: the brain gates a cottage on the phase (phaseOk), and
+        // UF_Households reads blueprint("household_cottage") to know this planner owns housing in every phase.
         return cfg;
     }
     const blueprint = kind => config().blueprints[kind] || null;
@@ -193,20 +205,38 @@
     //-------------------------------------------------------------------------
     // Blueprint geometry (relative to the footprint origin, its top-left cell)
 
-    function relativeCells(bp) {
-        const n = bp.size | 0, mid = Math.floor(n / 2);
-        const site = [], walls = [], hearth = [], beds = [], fill = [];
+    /** The object id a blueprint's hearth builds: the first of HEARTH_FALLBACKS (after bp.hearth itself) the catalog defines. */
+    function hearthId(bp) {
+        const O = Objects();
+        const wanted = bp && bp.hearth ? [bp.hearth].concat(HEARTH_FALLBACKS.filter(id => id !== bp.hearth)) : HEARTH_FALLBACKS;
+        for (const id of wanted) if (O && O.type(id)) return id;
+        return bp && bp.hearth ? bp.hearth : "campfire";
+    }
+    /**
+     * A footprint blueprint's cells relative to its origin. The perimeter is wall with the door at the bottom middle;
+     * the hearth sits at (mid, mid); its orthogonal neighbours within hearthClearance stay free of every furnishing
+     * (a walkway from the door, no straw against the fire: DEUS-TSK-FABLE-16); the other interior cells take beds
+     * (bedCount of them at most, nearest the top-left first) and, when the blueprint has one, a chest on the last cell.
+     */
+    function relativeCells(bp, bedCount) {
+        const n = bp.size | 0, mid = Math.floor(n / 2), clearance = Math.max(0, config().hearthClearance | 0);
+        const site = [], walls = [], hearth = [], beds = [], chest = [], clear = [], fill = [], free = [];
+        const nearHearth = (x, y) => !!bp.hearth && !(x === mid && y === mid) && Math.abs(x - mid) + Math.abs(y - mid) <= clearance;
         for (let y = 0; y < n; y++) {
             for (let x = 0; x < n; x++) {
                 site.push({ x, y, object: null });
                 if (bp.fill) { fill.push({ x, y, object: bp.fill, stores: bp.stores || null }); continue; }
                 const edge = x === 0 || y === 0 || x === n - 1 || y === n - 1;
                 if (edge) walls.push({ x, y, object: x === mid && y === n - 1 ? bp.door : bp.wall });
-                else if (x === mid && y === mid) hearth.push({ x, y, object: bp.hearth });
-                else beds.push({ x, y, object: bp.bed });
+                else if (bp.hearth && x === mid && y === mid) hearth.push({ x, y, object: hearthId(bp), role: "hearth" });
+                else if (nearHearth(x, y)) clear.push({ x, y, object: null, role: "clearance" });
+                else free.push({ x, y });
             }
         }
-        const out = { site, walls, hearth, beds };
+        if (bp.chest && free.length) { const c = free.pop(); chest.push({ x: c.x, y: c.y, object: bp.chest, role: "chest" }); }
+        const want = Number.isFinite(bedCount) ? Math.max(0, bedCount | 0) : free.length;
+        for (const c of free) { if (beds.length >= want) break; if (bp.bed) beds.push({ x: c.x, y: c.y, object: bp.bed, role: "bed" }); }
+        const out = { site, walls, hearth, beds, chest, clearance: clear };
         if (bp.fill) out[bp.fill === "stockpile" ? "stockpile" : bp.fill] = fill;
         return out;
     }
@@ -215,8 +245,15 @@
     function phaseSpec(p, bp, phase) {
         if (Array.isArray(p.phases) && p.phases[phase]) return p.phases[phase];
         const name = bp.phases[phase];
-        const rel = relativeCells(bp)[name] || [];
-        return { name, task: null, cells: rel.map(c => ({ x: p.origin.x + c.x, y: p.origin.y + c.y, object: c.object, stores: c.stores || null })) };
+        const rel = relativeCells(bp, p.bedCount)[name] || [];
+        return { name, task: null, cells: rel.map(c => ({ x: p.origin.x + c.x, y: p.origin.y + c.y, object: c.object, stores: c.stores || null, role: c.role || null })) };
+    }
+    /** A finished footprint project's hearth cell (absolute), or null. */
+    function hearthCellOf(p) {
+        const bp = blueprint(p.kind);
+        if (!bp || !bp.hearth || !((p.size | 0) > 0)) return null;
+        const h = relativeCells(bp, p.bedCount).hearth[0];
+        return h ? { x: p.origin.x + h.x, y: p.origin.y + h.y } : null;
     }
     const phaseCells = (p, bp, phase) => phaseSpec(p, bp, phase).cells;
     const phaseName = (p, bp, phase) => (Array.isArray(p.phases) && p.phases[phase] ? p.phases[phase].name : bp.phases[phase]);
@@ -289,6 +326,9 @@
         const O = Objects(), area = levelArea(p.origin);
         const here = O.atIn(area, cell.x, cell.y);
         if (cell.object && here && here.id === cell.object) return { state: "done", here };
+        // A hearth cell already holding a fire source (a campfire an older blueprint built) is done: the finished
+        // building marks it contained rather than tearing it out (DEUS-TSK-FABLE-16).
+        if (cell.role === "hearth" && here && hasTag(here, "fire")) return { state: "done", here };
         if (here && isConstructed(here)) return { state: "blocked", here, reason: `${here.name || here.id} is in the way` };
         if (here && (here.passable !== true || !cell.object)) {
             const action = clearAction(here);
@@ -319,30 +359,43 @@
         }
         return set;
     }
-    // Sheltered space: the interior of every finished communal shelter, and the camp's own interior inside its ring.
-    // (UF.Rooms' enclosure detection is not consulted yet; the sheltered set is what this planner built or was given.)
+    // Sheltered space: the bed cells of every finished roofed blueprint (communal shelters and cottages), and the
+    // camp's own interior inside its ring. (UF.Rooms' enclosure detection is not consulted yet; the sheltered set is
+    // what this planner built or was given.)
     function shelteredCells(c) {
         const set = new Set();
         const r = Math.max(0, (c.radius | 0) - 1);
         for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (dx || dy) set.add(cellKey(c.site.x + dx, c.site.y + dy));
-        for (const p of list(q => q.state === "done" && q.kind === "communal_shelter")) {
+        for (const p of list(q => q.state === "done" && (q.size | 0) > 0)) {
             const bp = blueprint(p.kind);
-            if (!bp || !sameLevel(levelArea(p.origin), levelArea(c))) continue;
-            for (const cell of relativeCells(bp).beds) set.add(cellKey(p.origin.x + cell.x, p.origin.y + cell.y));
+            if (!bp || !bp.bed || !bp.hearth || !sameLevel(levelArea(p.origin), levelArea(c))) continue;
+            for (const cell of relativeCells(bp, p.bedCount).beds) set.add(cellKey(p.origin.x + cell.x, p.origin.y + cell.y));
         }
         return set;
     }
-    // Free sheltered cells a bed could go on: no object, dry standable ground, nobody's reserved cell.
+    // Whether a cell touches a fire source (an object with the "fire" tag) orthogonally within `steps`: no bed goes
+    // there (DEUS-TSK-FABLE-16: a straw bed against the camp's open fire is how the shelter burned).
+    function nextToFire(area, x, y, steps) {
+        const O = Objects();
+        for (let dy = -steps; dy <= steps; dy++) for (let dx = -steps; dx <= steps; dx++) {
+            if ((dx === 0 && dy === 0) || Math.abs(dx) + Math.abs(dy) > steps) continue;
+            if (hasTag(O.atIn(area, x + dx, y + dy), "fire")) return true;
+        }
+        return false;
+    }
+    // Free sheltered cells a bed could go on: no object, dry standable ground, nobody's reserved cell, not against a fire.
     function beddingCells(c, cfg, count) {
         const O = Objects(), area = levelArea(c), out = [];
         const taken = new Set();
         for (const p of active()) if (sameLevel(levelArea(p.origin), area)) for (const cell of footprint(p)) taken.add(cellKey(cell.x, cell.y));
         const cells = [...shelteredCells(c)].map(k => k.split(",").map(Number)).map(([x, y]) => ({ x, y }))
             .sort((a, b) => Math.hypot(a.x - c.site.x, a.y - c.site.y) - Math.hypot(b.x - c.site.x, b.y - c.site.y) || a.y - b.y || a.x - b.x);
+        const clearance = Math.max(0, cfg.hearthClearance | 0);
         for (const cell of cells) {
             if (out.length >= count) break;
             if (taken.has(cellKey(cell.x, cell.y)) || O.atIn(area, cell.x, cell.y)) continue;
             if (isWater(area, cell.x, cell.y) || !groundOk(area, cell.x, cell.y)) continue;
+            if (clearance > 0 && nextToFire(area, cell.x, cell.y, clearance)) continue;
             out.push({ x: cell.x, y: cell.y });
         }
         return out;
@@ -485,50 +538,122 @@
         Object.assign(storage, { containerSlots, stockpileCells });
         const bed = row(population, beds, "beds");
         bed.unsheltered = bedsUnsheltered;
-        const neededShelters = population > 0 ? Math.ceil(population / cfg.perShelter) : 0;
-        const shelter = row(neededShelters, shelters, "shelters");
-        // Settlement development phase: camp -> village -> town
-        const phase = (shelters >= neededShelters && foodDays >= 3)
-            ? (population >= 16 ? "town" : "village")
-            : "camp";
-        if (s) s._settlementPhase = phase;
-        // Domestic housing: unhoused households in village/town phase
-        const H = window.UF && UF.Households;
-        let householdCount = 0, housedCount = 0;
-        if (H && typeof H.all === "function") {
-            const allH = H.all();
-            for (const h of allH) {
-                if (h.mergedInto) continue;
-                householdCount++;
-                if (h.homeBuildingId || (h.home && !h.home.isShared && (typeof H.isSheltered === "function" ? H.isSheltered(h) : true))) {
-                    housedCount++;
-                }
-            }
-        } else {
-            householdCount = 0;
-            housedCount = 0;
-        }
-        const housing = row(phase === "camp" ? 0 : householdCount, housedCount, "dwellings");
-        return {
+        const shelter = row(population > 0 ? Math.ceil(population / cfg.perShelter) : 0, shelters, "shelters");
+        // Emergency shelter answers "can everybody survive tonight?": a sheltered bed for every colonist (the
+        // communal shelter's beds count). Domestic housing answers "does every household have an adequate permanent
+        // home of its own?": the communal shelter never satisfies it (DEUS-TSK-FABLE-16).
+        shelter.emergency = row(population, beds, "sheltered beds");
+        const households = householdsOf(s, people);
+        const eligible = households.filter(h => h.eligible);
+        const housing = row(eligible.length, eligible.filter(h => h.housed).length, "dwellings");
+        housing.households = households.map(h => ({ id: h.id, size: h.members.length, adults: h.adults, eligible: h.eligible, housed: h.housed, homeBuildingId: h.homeBuildingId, source: h.source }));
+        housing.domestic = { needed: housing.needed, current: housing.current, deficit: housing.deficit };
+        const out = {
             area: { x: area.x, y: area.y, z: area.z },
             site: near,
             radius: cfg.scanRadius,
             population,
-            phase,
             shelter,
-            housing,
-            food, bed, storage,
+            food, bed, storage, housing,
             evaluatedAt: stamp()
         };
+        out.phase = phaseOf(out);
+        return out;
+    }
+    /**
+     * The settlement's development phase (DEUS-TSK-FABLE-16), from the deficits:
+     * - camp: no finished communal shelter, a colonist without a sheltered bed, the food reserve under
+     *   villageFoodDays, or storage short. Emergency shelter, beds, starter food and the stockpile come first; no
+     *   cottage opens.
+     * - village: the shelter stands, food and storage hold. Households get permanent dwellings.
+     * - town: a village of townPopulation or more (civic buildings and districts are later work; the phase is exposed now).
+     */
+    function phaseOf(d) {
+        const cfg = config();
+        if (!d || !(d.population > 0)) return "camp";
+        // Emergency shelter complete: a shelter stands and everybody has a sheltered bed ("8/8 people sheltered").
+        const shelterUp = d.shelter.current > 0 && d.shelter.deficit === 0 && d.bed.deficit === 0;
+        const foodStable = d.food.current >= Math.min(d.food.needed, Number(cfg.villageFoodDays) || 0);
+        const storageUp = d.storage.deficit === 0;
+        if (!shelterUp || !foodStable || !storageUp) return "camp";
+        return d.population >= (cfg.townPopulation | 0) ? "town" : "village";
+    }
+    const isAdult = u => !!u && !!u.data && (!Number.isFinite(u.data.age) || u.data.age >= WORKING_AGE);
+    /**
+     * The settlement's households as this planner sees them: [{ id, members: [units], adults, eligible, housed,
+     * homeBuildingId, source, record }]. UF.Households' records when that plugin is loaded (members through it);
+     * colonists no record covers are grouped from their own data: `householdId`, else a partner pair (both alive,
+     * each other's partner), else a child with a living parent, else alone. Eligible: a member of working age.
+     * Housed: a finished dwelling of this planner holds the household (state.housing / Households.homeBuildingId)
+     * with a bed for each member up to cottageBeds. The communal shelter houses nobody.
+     */
+    function householdsOf(s, people) {
+        const H = window.UF && UF.Households, cfg = config(), st = projectState(false);
+        const area = levelArea(s), alive = new Map(people.map(u => [u.id, u]));
+        const out = [], covered = new Set();
+        const done = new Map(list(p => p.state === "done" && p.kind === "household_cottage").map(p => [p.id, p]));
+        const adequate = (buildingId, size) => {
+            const p = buildingId !== null && buildingId !== undefined ? done.get(buildingId) : null;
+            return !!p && (p.bedCount | 0) >= Math.min(size, Math.max(1, cfg.cottageBeds | 0));
+        };
+        if (H && typeof H.all === "function") {
+            let records = [];
+            try { records = H.all(); } catch (e) { records = []; }
+            for (const h of records) {
+                if (!h || !h.area || !sameLevel({ x: h.area.x, y: h.area.y, z: zOf(h) }, area)) continue;
+                if (s.factionId && h.faction && h.faction !== s.factionId) continue;
+                let members = [];
+                try { members = (typeof H.members === "function" ? H.members(h) : (h.members || []).map(id => alive.get(id))).filter(u => u && alive.has(u.id)); } catch (e) { members = []; }
+                if (!members.length) continue;
+                for (const u of members) covered.add(u.id);
+                const adults = members.filter(isAdult).length;
+                const homeBuildingId = h.homeBuildingId === undefined ? null : h.homeBuildingId;
+                out.push({ id: h.id, members, adults, eligible: adults > 0, housed: adequate(homeBuildingId, members.length), homeBuildingId, source: "households", record: h });
+            }
+        }
+        // Colonists without a household record: a deterministic key per household.
+        const keys = new Map();
+        const keyOfUnit = u => {
+            if (keys.has(u.id)) return keys.get(u.id);
+            let k = null;
+            if (u.data.householdId) k = `hh:${u.data.householdId}`;
+            else {
+                const pid = u.data.partnerId || u.data.partner;
+                const partner = pid ? alive.get(pid) : null;
+                if (partner && !covered.has(partner.id) && (partner.data.partnerId || partner.data.partner) === u.id) k = `pair:${Math.min(u.id, partner.id)}`;
+            }
+            if (!k && !isAdult(u)) {
+                const parent = alive.get(u.data.motherId) || alive.get(u.data.fatherId);
+                if (parent && !covered.has(parent.id)) k = keyOfUnit(parent);
+            }
+            if (!k) k = `unit:${u.id}`;
+            keys.set(u.id, k);
+            return k;
+        };
+        const groups = new Map();
+        for (const u of people) {
+            if (covered.has(u.id)) continue;
+            const k = keyOfUnit(u);
+            if (!groups.has(k)) groups.set(k, []);
+            groups.get(k).push(u);
+        }
+        const housing = st && st.housing ? st.housing : {};
+        for (const [k, members] of groups) {
+            const adults = members.filter(isAdult).length;
+            const rec = housing[k] || null;
+            const homeBuildingId = rec ? rec.buildingId : null;
+            out.push({ id: k, members, adults, eligible: adults > 0, housed: adequate(homeBuildingId, members.length), homeBuildingId, source: "units", record: null });
+        }
+        out.sort((a, b) => String(a.id).localeCompare(String(b.id)));
+        return out;
     }
     function explain(areaRef) {
         const d = evaluateDeficits(areaRef);
         if (!d) return "No settlement.";
         const part = (label, r) => `${label} ${r.current}/${r.needed}${r.deficit ? ` (needs ${r.deficit} more)` : ""}`;
-        const housingPart = d.housing && d.phase !== "camp" ? ` · ${part("Housing", d.housing)}` : "";
         const b = brain(d);
         const top = b && b.chosen ? `; next: ${b.chosen.kind} (utility ${b.chosen.utility.toFixed(1)})` : (b ? "; nothing to open" : "");
-        return `${part("Shelter", d.shelter)} · Food ${d.food.current}/${d.food.needed} days${d.food.critical ? " (critical)" : d.food.deficit ? ` (needs ${d.food.deficit} more)` : ""} · ${part("Beds", d.bed)} · ${part("Storage", d.storage)} slots${housingPart} · ${d.population} colonists within ${d.radius} of (${d.site.x},${d.site.y})${top}`;
+        return `${d.phase} · ${part("Shelter", d.shelter)} · Food ${d.food.current}/${d.food.needed} days${d.food.critical ? " (critical)" : d.food.deficit ? ` (needs ${d.food.deficit} more)` : ""} · ${part("Beds", d.bed)} · ${part("Storage", d.storage)} slots · ${part("Homes", d.housing)} · ${d.population} colonists within ${d.radius} of (${d.site.x},${d.site.y})${top}`;
     }
 
     //-------------------------------------------------------------------------
@@ -622,13 +747,13 @@
         return alive + posted;
     }
 
-    function capacityFor(bp, d, phases) {
+    function capacityFor(bp, d, phases, bedCount) {
         const cfg = config();
         if (bp.id === "communal_shelter") return { shelter: 1, bed: relativeCells(bp).beds.length };
+        if (bp.id === "household_cottage") return { housing: 1, bed: relativeCells(bp, bedCount).beds.length };
         if (bp.id === "communal_stockpile") return { storage: (bp.size | 0) * (bp.size | 0) * (cfg.slotsPerStockpileCell || 1) };
         if (bp.id === "bedding_expansion") return { bed: phases && phases[0] ? phases[0].cells.length : 0 };
         if (bp.id === "food_cache") return { food: d && d.food ? Math.max(d.food.deficit, 0.001) : cfg.targetReserveDays };
-        if (bp.id === "household_dwelling") return { housing: 1, bed: relativeCells(bp).beds.length };
         return {};
     }
 
@@ -640,7 +765,17 @@
         const c = colony(), bp = blueprint(kind), st = projectState(true);
         if (!c || !bp || !st) return null;
         const cfg = config(), d = (opts && opts.deficits) || evaluateDeficits(null);
-        let site = null, phases = null, larder = null;
+        let site = null, phases = null, larder = null, household = null, bedCount;
+        if (bp.id === "household_cottage") {
+            // A cottage is for one household: the first unhoused one (by id) no active cottage is already for.
+            const spoken = new Set(active().filter(p => p.kind === "household_cottage" && p.household).map(p => p.household.id));
+            const want = (d && d.housing && d.housing.households ? d.housing.households : []).find(h => h.eligible && !h.housed && !spoken.has(h.id));
+            if (!want) return null;
+            household = { id: want.id, source: want.source, members: null, size: want.size };
+            const full = householdsOf(c, World().unitsInArea(c.area.x, c.area.y, zOf(c)).filter(u => isColonist(u) && !u.data.dead)).find(h => h.id === want.id);
+            household.members = full ? full.members.map(u => u.id) : [];
+            bedCount = Math.max(1, Math.min(want.size | 0, Math.max(1, cfg.cottageBeds | 0)));
+        }
         if (bp.kind === "task" && bp.id === "bedding_expansion") {
             const count = Math.max(1, Math.min((opts && opts.count) || (d ? d.bed.deficit : 1), 16));
             const cells = beddingCells(c, cfg, count);
@@ -674,7 +809,9 @@
             margin: cfg.margin | 0,
             phases,
             larder,
-            capacity: capacityFor(bp, d, phases),
+            household,
+            bedCount: bedCount === undefined ? null : bedCount,
+            capacity: capacityFor(bp, d, phases, bedCount),
             utility: opts && Number.isFinite(opts.utility) ? opts.utility : null,
             created: stamp(),
             sited: stamp(),
@@ -692,7 +829,7 @@
             log: []
         };
         st.list.push(record);
-        log(record, `${bp.name} sited at (${site.x},${site.y}), ${site.distance} from the hearth; adds ${JSON.stringify(record.capacity)}`);
+        log(record, `${bp.name} sited at (${site.x},${site.y}), ${site.distance} from the hearth; adds ${JSON.stringify(record.capacity)}${household ? `; for household ${household.id} (${household.size} member(s), ${bedCount} bed(s))` : ""}`);
         emit("projects:opened", record);
         emit("projects:sited", record);
         return record;
@@ -1179,6 +1316,8 @@
                 p.finished = stamp();
                 p.jobs = {}; p.hauls = {}; p.harvests = {}; p.failed = {};
                 log(p, `${bp.name} finished`);
+                containHearth(p);
+                if (p.kind === "household_cottage") moveIn(p);
                 if (p.kind === "communal_stockpile") {
                     const S = window.UF && UF.Stockpiles;
                     if (S && typeof S.create === "function") {
@@ -1196,26 +1335,6 @@
                         }
                     }
                 }
-                if (p.kind === "household_dwelling") {
-                    const H = window.UF && UF.Households;
-                    const C = window.UF && UF.Colonists;
-                    if (H && typeof H.all === "function") {
-                        const unhoused = H.all().find(h => !h.home || h.home.isShared || !h.homeBuildingId);
-                        if (unhoused) {
-                            unhoused.homeBuildingId = p.id;
-                            unhoused.home = Object.assign(unhoused.home || {}, {
-                                buildingId: p.id,
-                                x: p.origin.x,
-                                y: p.origin.y,
-                                size: p.size,
-                                isShared: false
-                            });
-                            if (C && typeof C.allocateBeds === "function") {
-                                C.allocateBeds(colony());
-                            }
-                        }
-                    }
-                }
                 emit("projects:done", p);
             } else {
                 log(p, `phase ${phaseName(p, bp, p.phase)} started`);
@@ -1227,6 +1346,70 @@
             }
         }
         return summary;
+    }
+
+    //-------------------------------------------------------------------------
+    // Finishing a building (DEUS-TSK-FABLE-16): its hearth is a contained fire; a cottage's household moves in
+
+    // The finished building's hearth cell is marked contained in UF_Fire, whatever stands there (a stone hearth is
+    // contained by type; a campfire an older blueprint built becomes contained by the cell record).
+    function containHearth(p) {
+        const F = window.UF && UF.Fire, O = Objects();
+        const h = hearthCellOf(p);
+        if (!F || typeof F.setContained !== "function" || !O || !h) return false;
+        const area = levelArea(p.origin);
+        if (!hasTag(O.atIn(area, h.x, h.y), "fire")) return false;
+        const info = typeof F.sourceInfoAt === "function" ? F.sourceInfoAt(area, h.x, h.y) : null;
+        if (info && info.contained) return true;
+        return F.setContained(area, h.x, h.y, true, `project:${p.id}`);
+    }
+    // Every finished building's hearth is contained, once, after a load (saves from before DEUS-TSK-FABLE-16 hold
+    // shelters whose campfire hearth was an open fire). Bounded by the number of finished footprint projects.
+    let containmentSwept = false;
+    function sweepContainment() {
+        if (containmentSwept) return;
+        const F = window.UF && UF.Fire;
+        if (!F || typeof F.setContained !== "function" || !Objects()) return;
+        containmentSwept = true;
+        for (const p of list(q => q.state === "done" && (q.size | 0) > 0)) containHearth(p);
+    }
+    /**
+     * The cottage's household moves in: the household's home record (UF.Households.assignHome when its record came
+     * from there, else this planner's own state.housing entry), then each living member claims one of the cottage's
+     * beds (UF.Colonists.claimBedAt), which frees the communal bed it held for the next arrival. Emits projects:movedIn.
+     */
+    function moveIn(p) {
+        const W = World(), O = Objects(), st = projectState(true), bp = blueprint(p.kind), Col = window.UF && UF.Colonists, H = window.UF && UF.Households;
+        if (!W || !O || !st || !bp || !p.household) return null;
+        const area = levelArea(p.origin), rel = relativeCells(bp, p.bedCount);
+        const abs = c => ({ x: p.origin.x + c.x, y: p.origin.y + c.y });
+        const members = (p.household.members || []).map(id => W.unit(id)).filter(u => isColonist(u) && !u.data.dead && sameLevel(levelArea(u), area));
+        const spec = {
+            buildingId: p.id, x: p.origin.x, y: p.origin.y, w: p.size | 0, h: p.size | 0, area: { x: area.x, y: area.y }, z: area.z,
+            wall: bp.wall, door: bp.door,
+            walls: rel.walls.filter(c => c.object === bp.wall).map(abs), doors: rel.walls.filter(c => c.object === bp.door).map(abs),
+            beds: rel.beds.map(abs), hearth: rel.hearth[0] ? abs(rel.hearth[0]) : null, storage: rel.chest[0] ? abs(rel.chest[0]) : null,
+            entrance: rel.walls.filter(c => c.object === bp.door).map(c => ({ x: p.origin.x + c.x, y: p.origin.y + c.y + 1 }))[0] || null
+        };
+        let home = null;
+        if (p.household.source === "households" && H && typeof H.assignHome === "function") {
+            try { home = H.assignHome(p.household.id, spec); } catch (e) { home = null; }
+        }
+        st.housing = st.housing || {};
+        st.housing[p.household.id] = { buildingId: p.id, members: members.map(u => u.id), at: stamp() };
+        // Beds: one per member in order; a member that cannot claim (a bed missing) keeps what it had.
+        const claimed = [];
+        const bedCells = spec.beds.slice();
+        for (const u of members) {
+            const cell = bedCells.shift();
+            if (!cell) break;
+            const b = Col && typeof Col.claimBedAt === "function" ? Col.claimBedAt(u, { area: { x: area.x, y: area.y }, z: area.z, x: cell.x, y: cell.y }) : null;
+            if (b) claimed.push(u.id);
+        }
+        p.movedIn = { household: p.household.id, members: members.map(u => u.id), claimed, at: stamp() };
+        log(p, `household ${p.household.id} moved in: ${claimed.length}/${members.length} member(s) took a bed`);
+        emit("projects:movedIn", p, p.household.id, claimed);
+        return home || spec;
     }
 
     //-------------------------------------------------------------------------
@@ -1252,6 +1435,7 @@
         const d = evaluated || evaluateDeficits(null);
         if (!d) return null;
         const cfg = config(), st = projectState(true), t = now();
+        const phase = d.phase || phaseOf(d);
         const candidates = [];
         for (const kind of Object.keys(cfg.blueprints)) {
             const bp = cfg.blueprints[kind];
@@ -1264,17 +1448,22 @@
             const fraction = row.needed > 0 ? Math.min(1, unmet / row.needed) : 0;
             const critical = key === "food" && !!row.critical;
             const severity = critical ? cfg.severity.foodCritical : (cfg.severity[key] || 1);
-            const bonus = (critical ? cfg.survivalBonus.foodCritical : 0) + (key === "shelter" && unmet > 0 ? cfg.survivalBonus.shelter : 0);
+            // Domestic housing waits for the village (DEUS-TSK-FABLE-16): in camp a cottage is never eligible; from
+            // the village on it carries the phase bonus, so homes come before more beds and storage but never before
+            // an unmet emergency shelter or critical food.
+            const housing = key === "housing";
+            const phaseOk = !housing || phase !== "camp";
+            const bonus = (critical ? cfg.survivalBonus.foodCritical : 0) + (key === "shelter" && unmet > 0 ? cfg.survivalBonus.shelter : 0) + (housing && phaseOk ? (cfg.phaseBonus && cfg.phaseBonus.housing) || 0 : 0);
             const activeOfKind = active().filter(p => p.kind === kind).length;
-            const utility = unmet > 0 ? severity * fraction + bonus - activeOfKind * 10 : -Infinity;
+            const utility = unmet > 0 && phaseOk ? severity * fraction + bonus - activeOfKind * 10 : -Infinity;
             const cooledUntil = (st && st.cooldowns && st.cooldowns[kind]) || 0;
-            // Eligible: something unmet, the kind not cooling, and a positive utility: the active-project penalty
-            // keeps a second project of a kind from opening beside one in flight (a food cache forages until the
-            // reserve holds whatever the deficit grows to; the next shelter waits for the first).
-            candidates.push({ kind, deficit: key, total: row.deficit, needed: row.needed, unit: row.unit, inFlightCapacity, inFlightProjects: inFlight.length, unmet, fraction, severity, bonus, utility, cooled: cooledUntil > t, eligible: unmet > 0 && cooledUntil <= t && utility > 0 });
+            // Eligible: something unmet, the kind not cooling, the phase allowing it, and a positive utility: the
+            // active-project penalty keeps a second project of a kind from opening beside one in flight (a food cache
+            // forages until the reserve holds whatever the deficit grows to; the next shelter waits for the first).
+            candidates.push({ kind, deficit: key, total: row.deficit, needed: row.needed, unit: row.unit, inFlightCapacity, inFlightProjects: inFlight.length, unmet, fraction, severity, bonus, utility, cooled: cooledUntil > t, phaseOk, eligible: unmet > 0 && phaseOk && cooledUntil <= t && utility > 0 });
         }
         candidates.sort((a, b) => (b.utility - a.utility) || a.kind.localeCompare(b.kind));
-        return { deficits: d, candidates, chosen: candidates.find(x => x.eligible) || null };
+        return { deficits: d, phase, candidates, chosen: candidates.find(x => x.eligible) || null };
     }
 
     function runCycle() {
@@ -1308,6 +1497,7 @@
         if (!W || !W.state || !W.state.colony) return;
         const t = now();
         if (nextRunAt === null) nextRunAt = t + (config().startDelayTicks | 0);
+        if (!containmentSwept) sweepContainment();
         if (dirty.size) {
             for (const id of dirty) { const p = get(id); if (p && p.state === "active") advance(p); }
             dirty.clear();
@@ -1322,6 +1512,7 @@
         nextRunAt = null;
         dirty.clear();
         yieldIndex = null;
+        containmentSwept = false;
     }
 
     //-------------------------------------------------------------------------
@@ -1384,7 +1575,15 @@
         describe,
         setEnabled: on => { enabled = !!on; return enabled; },
         isEnabled: () => enabled,
-        _internal: { chooseSite, siteValid, stockpileCellFor, tidyParcel, reservedCellSet, cellStatus, canFullyClear, clearAction, relativeCells, harvestSources, foodSources, shelteredCells, beddingCells, larderCell, capacityFor, brain, coolKind, cellFault, staleReason, refusedAt, wakeIdle, isIdleJob, onMapUpdate, onLoaded, now }
+        // Phases and households (DEUS-TSK-FABLE-16)
+        phases: PHASES.slice(),
+        /** The settlement's development phase now: "camp" | "village" | "town". */
+        phase: () => phaseOf(evaluateDeficits(null)),
+        /** The households the planner sees: [{ id, members: [units], adults, eligible, housed, homeBuildingId, source }]. */
+        households: () => { const c = colony(), W = World(); return c && W ? householdsOf(c, W.unitsInArea(c.area.x, c.area.y, zOf(c)).filter(u => isColonist(u) && !u.data.dead)) : []; },
+        hearthId,
+        hearthCellOf,
+        _internal: { chooseSite, siteValid, stockpileCellFor, tidyParcel, reservedCellSet, cellStatus, canFullyClear, clearAction, relativeCells, harvestSources, foodSources, shelteredCells, beddingCells, nextToFire, larderCell, capacityFor, brain, coolKind, cellFault, staleReason, refusedAt, wakeIdle, isIdleJob, onMapUpdate, onLoaded, now, phaseOf, householdsOf, containHearth, sweepContainment, moveIn }
     };
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;

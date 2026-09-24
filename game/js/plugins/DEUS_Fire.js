@@ -161,7 +161,7 @@
         if (c.sourceTypes) return c.sourceTypes;
         const set = new Set();
         const O = Objects();
-        if (O) for (const t of O.types()) { const r = ruleForType(t); if (r && r.source) set.add(t.typeId); }
+        if (O) for (const t of O.types()) { const r = ruleForType(t); if (r && r.source) set.add(t.typeId || t.id); }
         c.sourceTypes = set;
         return set;
     }
@@ -666,7 +666,7 @@
             if (d.hp <= 0) { d.hp = 0; died = true; }
         }
         d.burnedAt = b;
-        if (W.isDisplayed(u)) {
+        if (typeof W.isDisplayed === "function" && W.isDisplayed(u)) {
             // Sprites only (VISION V58): the damage number, and the sheet's own hurt frames when its sidecar lists them.
             // No UF.Combat.playHitAnimation: that is a code-made recoil and red flash.
             try {
@@ -1356,9 +1356,10 @@
         },
         errors: () => errors.slice()
     };
-    window.DEUS = window.DEUS || {};
-    window.UF = window.DEUS;
-    window.UF.Fire = Fire;
+    const ns = window.DEUS || window.UF || {};
+    window.DEUS = ns;
+    window.UF = ns;
+    ns.Fire = Fire;
 
     //-------------------------------------------------------------------------
     // Events and boot
