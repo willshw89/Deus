@@ -347,8 +347,8 @@ try {
         }
         const nB = p ? drive(A, days(1.5), () => p.phase >= 2 || p.state !== "active") : -1;
         const walls = p ? wallCells(A, p).filter(c => objectAt(A, c.x, c.y) === c.object).length : 0;
-        check("haul_stack_vanishes_in_transit", !!p && n > 0 && vanished === 3 && reasons["the item is gone"] === 3 && Object.keys(p.failed).length === 0 && nB > 0 && p.phase >= 2 && walls === 16 && A.assignCalls === 0,
-            p ? `${vanished} hauls lost their stack on the way (${JSON.stringify(reasons)}); squares with a failure count: ${Object.keys(p.failed).length}; walls ${walls}/16 after ${nB > 0 ? (nB / HOUR_TICKS).toFixed(1) : ">36"} h; ${A.assignCalls} assign calls` : "no shelter project");
+        check("haul_stack_vanishes_in_transit", !!p && n > 0 && vanished === 3 && reasons["the item is gone"] === 3 && Object.keys(p.failed).length === 0 && nB > 0 && p.phase >= 2 && walls === 20 && A.assignCalls === 0,
+            p ? `${vanished} hauls lost their stack on the way (${JSON.stringify(reasons)}); squares with a failure count: ${Object.keys(p.failed).length}; walls ${walls}/20 after ${nB > 0 ? (nB / HOUR_TICKS).toFixed(1) : ">36"} h; ${A.assignCalls} assign calls` : "no shelter project");
     }
 
     // C. An open build job's materials vanish from its square: the job is withdrawn (stale: the materials are gone)

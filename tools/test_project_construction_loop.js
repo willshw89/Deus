@@ -304,18 +304,21 @@ try {
         for (const c of P.cells(p, 1)) if (c.object === "wall_wood" && objectAt(S, c.x, c.y) === "wall_wood") walls++;
         for (const c of P.cells(p, 3)) if (objectAt(S, c.x, c.y) === "floor_straw") beds++;
     }
-    const door = p && objectAt(S, o.x + 2, o.y + 4) === "door_wood";
-    const hearth = p && objectAt(S, o.x + 2, o.y + 2) === "campfire";
+    // The 6x6 blueprint (DEUS-TSK-FABLE-16): the door at the bottom middle, the contained stone hearth at the centre.
+    const hearthId = P.hearthId(P.blueprint("communal_shelter"));
+    const door = p && objectAt(S, o.x + 3, o.y + 5) === "door_wood";
+    const hearth = p && objectAt(S, o.x + 3, o.y + 3) === hearthId;
     // Used = what was there + what the founders' harvests yielded (from jobs:done results) - what is left anywhere.
     const logsUsed = logsStart + (yielded.log || 0) - totalOf(S, "log");
     const strawUsed = strawStart + (yielded.straw || 0) + (yielded.fiber || 0) - totalOf(S, "straw") - totalOf(S, "fiber"); // beds take fiber for straw
     const stoneUsed = stoneStart + (yielded.stone || 0) - totalOf(S, "stone");
-    const refusedBuilds = S.refusals.filter(r => p && r.x >= o.x && r.y >= o.y && r.x < o.x + 5 && r.y < o.y + 5).length;
+    const refusedBuilds = S.refusals.filter(r => p && r.x >= o.x && r.y >= o.y && r.x < o.x + 6 && r.y < o.y + 6).length;
     const d = P.evaluateDeficits(area);
-    check("shelter_completed_by_founders", n2 > 0 && !!p && p.state === "done" && walls === 15 && door && hearth && beds === 8 && !!d && d.shelter.current === 1 && d.shelter.deficit === 0,
-        p ? `${p.state} after ${n1 + n2} updates: ${walls}/15 walls, door ${door ? "up" : "missing"}, hearth ${hearth ? "lit" : "missing"}, ${beds}/8 beds; ${d ? P.explain(area) : ""}` : "no project");
-    check("materials_conserved", logsUsed === 19 && strawUsed === 16 && stoneUsed === 3,
-        `logs used ${logsUsed} (15 walls + door + 3 for the hearth = 19; harvests yielded ${yielded.log || 0}), straw or fiber used ${strawUsed} (8 beds x 2; yielded ${(yielded.straw || 0) + (yielded.fiber || 0)}), stone used ${stoneUsed} (hearth 3; yielded ${yielded.stone || 0}); ${refusedBuilds} placement(s) refused on the footprint, none lost a material`);
+    check("shelter_completed_by_founders", n2 > 0 && !!p && p.state === "done" && walls === 19 && door && hearth && beds === 11 && !!d && d.shelter.current === 1 && d.shelter.deficit === 0,
+        p ? `${p.state} after ${n1 + n2} updates: ${walls}/19 walls, door ${door ? "up" : "missing"}, hearth ${hearth ? `${hearthId} up` : `${hearthId} missing`}, ${beds}/11 beds; ${d ? P.explain(area) : ""}` : "no project");
+    const hearthCost = (O.type(hearthId) && O.type(hearthId).build && O.type(hearthId).build.items) || {}; const wantLogs = 20 + (hearthCost.log | 0), wantStone = hearthCost.stone | 0;
+    check("materials_conserved", logsUsed === wantLogs && strawUsed === 22 && stoneUsed === wantStone,
+        `logs used ${logsUsed} (19 walls + door + ${hearthCost.log | 0} for the hearth = ${wantLogs}; harvests yielded ${yielded.log || 0}), straw or fiber used ${strawUsed} (11 beds x 2; yielded ${(yielded.straw || 0) + (yielded.fiber || 0)}), stone used ${stoneUsed} (hearth ${wantStone}; yielded ${yielded.stone || 0}); ${refusedBuilds} placement(s) refused on the footprint, none lost a material`);
 
     // E. Recursion is bounded: a project in its walls phase whose walls, hearth and beds already stand steps through
     //    every remaining phase in one advance and stops at "done" (the site phase treats standing buildings as blockers,
