@@ -2752,6 +2752,7 @@
     function seedStarterChest(cont) {
         const I = window.UF && UF.Items;
         if (!I || !cont) return;
+        if (cont.items && cont.items.length > 0) return; // Idempotent: do not double-seed
         // Food for 8 founders for 1 day (16 cooked meat / 2 meals each) + 1 shovel, 1 pickaxe, 1 axe
         const starterKit = [
             { type: "meat_cooked", count: 16 }, // Food for 8 people for 1 day

@@ -7,7 +7,7 @@ const vm = require("vm");
 const assert = require("assert");
 
 const ROOT = path.resolve(__dirname, "..");
-const MODULES = ["World", "WorldGen", "Factions", "History", "Levels", "Objects", "Items", "Containers", "Stockpiles", "Colonists"];
+const MODULES = ["World", "WorldGen", "Factions", "HistoricalDemographics", "Callings", "Dnd5e", "History", "Levels", "Objects", "Items", "Containers", "Stockpiles", "Colonists"];
 
 function loadEngine() {
     const cat = JSON.parse(fs.readFileSync(path.join(ROOT, "game/data/UF_WorldCatalog.json"), "utf8"));
@@ -65,6 +65,7 @@ UF.Levels.ensureWorldLevels(world);
 UF.Factions.generate(world);
 UF.History.generate(world);
 UF.History.spawnFounders(world.state || world);
+UF.Colonists.setup(world);
 
 const site = world.history.sites[0];
 assert(site, "At least one site must exist");
@@ -111,7 +112,7 @@ for (let dy = -1; dy <= 1; dy++) {
 console.log("PASS 3: All 9 starting tiles (3x3 centered on chest) are designated as physical stockpile squares.");
 
 // 5. Colony state inherits the 9 stockpile squares
-const colony = UF.Colonists.state(site.id);
+const colony = UF.Colonists.state();
 assert(colony, "Colony state must initialize");
 assert(Array.isArray(colony.stockpiles) && colony.stockpiles.length === 9, `Colony state must have 9 stockpiles, found: ${colony.stockpiles ? colony.stockpiles.length : 0}`);
 
