@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DEUS Biome Registry Documentation Mirror",
+  "canonicalSource": "game/data/DEUS_BiomeRegistry.json",
+  "documentId": "DEUS-BIOME-REGISTRY-01",
+  "task": "DW.01.04",
+  "canonicalBiomes": [
+    "TEMP",
+    "WET",
+    "ARID",
+    "HIGH",
+    "VOLC"
+  ]
+}

@@ -1,0 +1,654 @@
+{
+  "version": "1.0.0",
+  "documentId": "DEUS-BIOME-REGISTRY-01",
+  "task": "DW.01.04",
+  "title": "DEUS Canonical Biome Identity & Material Differentiation Registry",
+  "visualReference": "art/reference/DEUS_BIOME_STUDIES_V1.jpg",
+  "perspectiveReference": "art/reference/DEUS_GAMEPLAY_PERSPECTIVE_MASTER_V1.jpg",
+  "scaleReference": "art/reference/DEUS_SCALE_LANGUAGE_V1.jpg",
+  "canonicalBiomes": [
+    "TEMP",
+    "WET",
+    "ARID",
+    "HIGH",
+    "VOLC"
+  ],
+  "forbiddenBiomes": [
+    "FROZEN",
+    "SNOW",
+    "GLACIER",
+    "ICE",
+    "TUNDRA_SNOW"
+  ],
+  "densityScale": [
+    "VERY_SPARSE",
+    "SPARSE",
+    "MODERATE",
+    "DENSE",
+    "VERY_DENSE"
+  ],
+  "biomes": {
+    "TEMP": {
+      "biomeId": "TEMP",
+      "displayName": "Temperate / Verdant",
+      "dominantGround": "Fertile meadow turf, compacted dirt paths, woodland floor",
+      "exposedSoil": "Rich dark brown loam, organic humus, compact garden earth",
+      "geology": "Rounded field stones, weathered limestone, grey granite boulders",
+      "moisture": "MODERATE",
+      "drainage": "WELL_DRAINED",
+      "vegetationDensity": {
+        "grass": "DENSE",
+        "shrubs": "MODERATE",
+        "trees": "MODERATE_TO_DENSE",
+        "lowFlora": "MODERATE",
+        "debris": "MODERATE"
+      },
+      "vegetationForm": "Broadleaf deciduous crowns, soft rounded shrub contours, upright leafy herbs",
+      "treeVocabulary": [
+        "oak",
+        "birch",
+        "pine (upland/mixed)",
+        "apple/orchard"
+      ],
+      "shrubVocabulary": [
+        "small berry bush",
+        "medium foliage bush",
+        "dense green thicket"
+      ],
+      "lowFloraVocabulary": [
+        "meadow turf",
+        "clover patches",
+        "tall meadow grass",
+        "wildflowers (poppy, daisy, buttercup)"
+      ],
+      "rockOutcropVocabulary": [
+        "rounded fieldstones",
+        "chest-height granite boulders",
+        "stepped limestone ridges"
+      ],
+      "debrisVocabulary": [
+        "leaf litter",
+        "fallen branches",
+        "timber logs",
+        "stumps",
+        "loose pebbles"
+      ],
+      "waterEdgeBehavior": "Clean gradual pebble/loam slope into clear freshwater streams and lakes; shallow sand/gravel bars",
+      "elevationCharacter": "Gentle rolling hills, earthen berms, layered limestone/granite bluffs (1-2 grid vertical)",
+      "atmosphericCharacter": "Temperate, mild, sun-dappled, clear air with soft early morning haze",
+      "signatureMaterials": [
+        "rich loam",
+        "broadleaf oak canopy",
+        "fieldstone masonry",
+        "clover meadow turf"
+      ],
+      "sharedMaterials": [
+        "grey granite",
+        "clear freshwater",
+        "pine",
+        "birch",
+        "compact dirt",
+        "timber logs"
+      ],
+      "forbiddenCues": [
+        "snow",
+        "ice",
+        "frost",
+        "desert hardpan",
+        "alkali dust",
+        "peat swamp saturation everywhere",
+        "volcanic ash/basalt",
+        "glowing lava"
+      ],
+      "verticalHooks": {
+        "Z+2": "Open high forest canopy crowns, wind-swept grassy knoll crests, ridge lookout perches",
+        "Z+1": "Upper terrace pastures, elevated limestone plateau ledges, cliff-top orchards",
+        "Z0": "Canonical surface: rolling verdant meadow, clear streams, forest floor, settlement paths",
+        "Z-1": "Rich loam subsoil, root networks, alluvial gravel, root cellars, dug earthworks",
+        "Z-2": "Solid limestone and granite bedrock, subterranean natural caverns, groundwater aquifers"
+      },
+      "notes": "Canonical cradle of civilization and agriculture; baseline ecological balance across Project DEUS."
+    },
+    "WET": {
+      "biomeId": "WET",
+      "displayName": "Wetland / Riverland",
+      "dominantGround": "Waterlogged grass, spongy peat mounds, dark mud flats, submerged marsh turf",
+      "exposedSoil": "Dark saturated organic muck, dense peat, soft dark river silt",
+      "geology": "Water-smoothed river stones, dark damp slate, moss-covered low rock slabs",
+      "moisture": "HIGH",
+      "drainage": "POOR_DRAINAGE",
+      "vegetationDensity": {
+        "grass": "DENSE",
+        "shrubs": "DENSE",
+        "trees": "SPARSE_TO_MODERATE",
+        "lowFlora": "VERY_DENSE",
+        "debris": "DENSE"
+      },
+      "vegetationForm": "Upright vertical reeds/rushes, drooping willow fronds, tangled root systems, floating aquatic mats",
+      "treeVocabulary": [
+        "water-tolerant willow",
+        "swamp alder",
+        "bog birch",
+        "stunted cypress-like forms"
+      ],
+      "shrubVocabulary": [
+        "waterlogged marsh bush",
+        "dense swamp tangle",
+        "bog myrtle",
+        "tangled briar"
+      ],
+      "lowFloraVocabulary": [
+        "cattails",
+        "marsh reeds",
+        "rushes",
+        "water lilies",
+        "duckweed",
+        "spongy bog moss"
+      ],
+      "rockOutcropVocabulary": [
+        "water-slicked river boulders",
+        "submerged flat stepping stones",
+        "mossy low damp rock outcrops"
+      ],
+      "debrisVocabulary": [
+        "waterlogged driftwood",
+        "exposed gnarly roots",
+        "rotting snag timbers",
+        "peat chunks"
+      ],
+      "waterEdgeBehavior": "Indistinct saturated shoreline: water grades into mud, peat, and floating reed beds; stagnant ponds and murky oxbow channels",
+      "elevationCharacter": "Depressed basin, shallow swales, riverbanks, low mud shelves, raised wooden boardwalk footings",
+      "atmosphericCharacter": "Humid, heavy, damp, low-hanging river mist, stagnant air",
+      "signatureMaterials": [
+        "saturated dark peat",
+        "upright cattail/reed beds",
+        "waterlogged driftwood snags",
+        "murky slow water",
+        "dark swamp silt"
+      ],
+      "sharedMaterials": [
+        "freshwater",
+        "bog birch",
+        "river stones",
+        "wooden planks/docks",
+        "marsh ferns"
+      ],
+      "forbiddenCues": [
+        "bright tropical jungle neon greens",
+        "dry sand dunes",
+        "arid hardpan",
+        "sharp dry granite scree",
+        "snow/ice",
+        "volcanic lava"
+      ],
+      "verticalHooks": {
+        "Z+2": "Weeping willow upper crowns, swamp bird canopy roosts, high marsh mist layer",
+        "Z+1": "Raised wooden boardwalk platforms, natural levee ridges, hummock crests",
+        "Z0": "Canonical surface: marsh pools, reed shallows, peat meadows, slow river channels",
+        "Z-1": "Deep anaerobic black mud, waterlogged peat strata, submerged taproots",
+        "Z-2": "Flooded subterranean caverns, silt-choked aquifers, underground drainage sumps"
+      },
+      "notes": "Major water presence, tangled organic density, rich foraging and fishing, treacherous footing."
+    },
+    "ARID": {
+      "biomeId": "ARID",
+      "displayName": "Arid / Steppe / Desert",
+      "dominantGround": "Dry steppe earth, sun-baked hardpan, loose coarse sand, cracked clay washes",
+      "exposedSoil": "Caliche-rich pale dry earth, cracked sun-baked clay, powdery mineral dust",
+      "geology": "Layered red/buff sandstone, horizontal sedimentary strata, eroded mesa caps, warm weathered rock",
+      "moisture": "LOW",
+      "drainage": "EXCESSIVE_RAPID",
+      "vegetationDensity": {
+        "grass": "SPARSE",
+        "shrubs": "SPARSE",
+        "trees": "VERY_SPARSE",
+        "lowFlora": "SPARSE",
+        "debris": "SPARSE_TO_MODERATE"
+      },
+      "vegetationForm": "Isolated spiky bunchgrass clumps, twisted drought-stunted wood, thorny succulents, flat-topped umbrella canopies",
+      "treeVocabulary": [
+        "acacia-like thorny trees",
+        "drought-adapted juniper",
+        "dead sun-bleached snags",
+        "twisted mesquite"
+      ],
+      "shrubVocabulary": [
+        "spiny thorn scrub",
+        "dry sagebrush",
+        "drought tumble-bushes",
+        "creosote scrub"
+      ],
+      "lowFloraVocabulary": [
+        "spiky bunchgrass",
+        "desert succulents/agave",
+        "dry ground lichen",
+        "opportunistic wash blooms"
+      ],
+      "rockOutcropVocabulary": [
+        "stepped sandstone ledges",
+        "horizontal canyon walls",
+        "wind-eroded hoodoos",
+        "loose sandstone rubble"
+      ],
+      "debrisVocabulary": [
+        "bleached animal skulls/bones",
+        "sun-cracked branches",
+        "loose shale/sandstone fragments",
+        "windblown tumble-debris"
+      ],
+      "waterEdgeBehavior": "Ephemeral dry washes (arroyos) with cracked mud beds; rare isolated oasis/springs with narrow high-contrast verdant fringe",
+      "elevationCharacter": "Flat-topped mesas, steep sandstone canyons, stepped rock benches, eroded escarpments",
+      "atmosphericCharacter": "Dry, sun-bleached, intense thermal shimmer, cloudless high sky, crisp starry nights",
+      "signatureMaterials": [
+        "layered sandstone",
+        "cracked caliche hardpan",
+        "spiky drought bunchgrass",
+        "bleached bones",
+        "dry wash silt"
+      ],
+      "sharedMaterials": [
+        "stone rubble",
+        "common dirt (dry)",
+        "coarse sand",
+        "scrub wood",
+        "rare oasis freshwater"
+      ],
+      "forbiddenCues": [
+        "temperate grass recolored yellow",
+        "continuous lush green carpet",
+        "mossy forest loam",
+        "standing marsh peat",
+        "snow/ice",
+        "volcanic basalt"
+      ],
+      "verticalHooks": {
+        "Z+2": "Wind-scoured mesa summits, open baking sky, raptor cliff perches",
+        "Z+1": "Upper sandstone terrace shelves, canyon rims, cliff dwellings",
+        "Z0": "Canonical surface: dry steppe flats, gravel plains, arroyo washes, sandstone benches",
+        "Z-1": "Hardpan caliche sub-layer, dry sedimentary shale, parched subterranean gravel",
+        "Z-2": "Deep sandstone aquifer caverns, dry mineral/salt chambers, underground hollows"
+      },
+      "notes": "Wide-open tactical lines of sight, scarce surface water, distinctive horizontal geological layering."
+    },
+    "HIGH": {
+      "biomeId": "HIGH",
+      "displayName": "Highland / Mountain",
+      "dominantGround": "Thin hardy turf, rock-strewn upland earth, angular gravel scree, bare bedrock",
+      "exposedSoil": "Shallow stony upland loam, weathered gravelly soil, coarse crushed rock",
+      "geology": "Sharp fractured grey granite, dark cleft slate, angular scree talus, massive bedrock cliffs",
+      "moisture": "VARIABLE_WELL_DRAINED",
+      "drainage": "RAPID_GRAVITATIONAL",
+      "vegetationDensity": {
+        "grass": "MODERATE",
+        "shrubs": "SPARSE_TO_MODERATE",
+        "trees": "SPARSE_TO_MODERATE",
+        "lowFlora": "MODERATE",
+        "debris": "DENSE"
+      },
+      "vegetationForm": "Wind-pruned krummholz conifers, low-growing cushion plants, hardy upright tussocks tucked in rock crevices",
+      "treeVocabulary": [
+        "mountain pine",
+        "slender high-elevation birch",
+        "wind-twisted larch/conifer",
+        "stunted fir"
+      ],
+      "shrubVocabulary": [
+        "tough upland heath",
+        "crevice-dwelling alpine juniper",
+        "wind-flattened dwarf scrub"
+      ],
+      "lowFloraVocabulary": [
+        "rock-cleft hardy flowers (WITHOUT snow association)",
+        "cushion moss",
+        "tough upland fescue",
+        "cliffside lichens"
+      ],
+      "rockOutcropVocabulary": [
+        "vertical fractured granite faces",
+        "jagged slate columns",
+        "tumbling talus/scree fields",
+        "carved stone mountain steps"
+      ],
+      "debrisVocabulary": [
+        "freshly fractured stone chips",
+        "rockfall boulders",
+        "weathered mountain timber",
+        "gravel scree"
+      ],
+      "waterEdgeBehavior": "Fast-flowing cascading mountain brooks, narrow rocky rapids over clean granite, crystalline pool basins with zero mud",
+      "elevationCharacter": "Steep vertical 2-grid and multi-level cliff walls, narrow shelf passes, high plateaus, jagged ridges",
+      "atmosphericCharacter": "Cool, crisp, windswept, thin clear air, dynamic fast-moving mountain clouds",
+      "signatureMaterials": [
+        "fractured angular granite",
+        "cleft slate scree",
+        "wind-shaped mountain conifer",
+        "rock-ledge cushion flora",
+        "crystalline cascade water"
+      ],
+      "sharedMaterials": [
+        "pine",
+        "birch",
+        "fieldstone",
+        "freshwater",
+        "coarse gravel"
+      ],
+      "forbiddenCues": [
+        "snow of any kind",
+        "ice",
+        "glaciers",
+        "frost crusting",
+        "standing swamp mud",
+        "desert sand dunes",
+        "volcanic lava"
+      ],
+      "verticalHooks": {
+        "Z+2": "Sheer jagged granite summits, mountain spire peaks, windswept ridge perches",
+        "Z+1": "Upper cliff shelves, alpine scree terraces, switchback mountain passes",
+        "Z0": "Canonical surface: upland valley floor, rocky plateaus, cascading torrent banks, high pass settlements",
+        "Z-1": "Fractured granite bedrock, mountain mine shafts, quarry benches",
+        "Z-2": "Massive solid granite deep chambers, subterranean dwarven halls, natural fissure chasms"
+      },
+      "notes": "HARD RULE: Zero snow/ice. Emphasizes sheer physical elevation, fractured stone mass, and wind-sculpted ecology."
+    },
+    "VOLC": {
+      "biomeId": "VOLC",
+      "displayName": "Volcanic / Ashland",
+      "dominantGround": "Powdery grey-black ash drifts, scorched earth, dark volcanic gravel, crusted basalt rock",
+      "exposedSoil": "Fine mineral ash, burnt clay, sulfur-stained dark soil, heat-hardened crust",
+      "geology": "Vesicular scoria, dark columnar basalt, obsidian glass shards, porous pumice blocks",
+      "moisture": "LOW_EXCEPT_GEOTHERMAL",
+      "drainage": "POROUS_INTERNAL",
+      "vegetationDensity": {
+        "grass": "VERY_SPARSE",
+        "shrubs": "VERY_SPARSE",
+        "trees": "VERY_SPARSE",
+        "lowFlora": "SPARSE",
+        "debris": "DENSE"
+      },
+      "vegetationForm": "Charred skeletal trunks, stunted fire-adapted brush, pioneering geothermal moss, cracked root remnants",
+      "treeVocabulary": [
+        "charred deadwood trunks",
+        "standing burned snags",
+        "rare heat-adapted resinous ironwood"
+      ],
+      "shrubVocabulary": [
+        "brittle scorched scrub",
+        "sulfur-tolerant dwarf brush",
+        "blackened briar"
+      ],
+      "lowFloraVocabulary": [
+        "fireweed recovery sprouts",
+        "geothermal sulfur lichen",
+        "tough volcanic tuft-grass in cool rock cracks"
+      ],
+      "rockOutcropVocabulary": [
+        "columnar basalt pillars",
+        "jagged cooling fissures",
+        "vesicular scoria boulders",
+        "caldera crater walls"
+      ],
+      "debrisVocabulary": [
+        "charcoal chunks",
+        "pumice gravel",
+        "black obsidian flakes",
+        "ash drifts",
+        "burned timber logs"
+      ],
+      "waterEdgeBehavior": "Steaming geothermal pools, sulfurous mineral springs with vibrant yellow-green encrusted rims; acid ponds; localized molten lava channels with cooled black rock crusts",
+      "elevationCharacter": "Fractured volcanic cones, terraced basalt steps, sudden tectonic fissures, crater rims",
+      "atmosphericCharacter": "Smoky, haze-choked, thermal updrafts, glowing embers on wind, sulfur scent",
+      "signatureMaterials": [
+        "columnar basalt",
+        "fine black/grey ash",
+        "porous scoria",
+        "charred snags",
+        "focal molten lava (accent only)",
+        "sulfur crust"
+      ],
+      "sharedMaterials": [
+        "dark stone",
+        "gravel",
+        "deadwood",
+        "mineral earth"
+      ],
+      "forbiddenCues": [
+        "entire screen glowing red/orange wallpaper",
+        "lush green grass",
+        "healthy broadleaf oaks",
+        "swamp peat",
+        "snow/ice"
+      ],
+      "verticalHooks": {
+        "Z+2": "Smoking caldera rims, jagged basalt spires rising through smoke plume, fumarole crests",
+        "Z+1": "Upper cooling lava terraces, raised basalt ledges, obsidian outcrops",
+        "Z0": "Canonical surface: ash fields, active basalt fissures, geothermal pools, scorched settlements",
+        "Z-1": "Porous basalt crust, subterranean magma vents, heated rock tubes",
+        "Z-2": "Deep magma-adjacent caverns, glowing subterranean molten conduits, obsidian halls"
+      },
+      "notes": "Lava is an accent feature / danger node, not a wallpaper flood. Dominant visual palette is dark charcoal, basalt, and ash with localized thermal heat."
+    }
+  },
+  "materialTaxonomy": {
+    "signatureMaterials": {
+      "TEMP": [
+        "rich loam",
+        "broadleaf oak foliage",
+        "rounded fieldstone masonry",
+        "clover meadow turf"
+      ],
+      "WET": [
+        "saturated dark peat",
+        "upright cattail/reed beds",
+        "waterlogged driftwood snags",
+        "murky oxbow water",
+        "dark swamp silt"
+      ],
+      "ARID": [
+        "layered sandstone",
+        "cracked caliche hardpan",
+        "spiky drought bunchgrass",
+        "bleached bones",
+        "dry wash silt"
+      ],
+      "HIGH": [
+        "fractured angular granite",
+        "cleft slate scree",
+        "wind-shaped mountain conifer",
+        "rock-ledge cushion flora",
+        "crystalline cascade water"
+      ],
+      "VOLC": [
+        "columnar basalt pillars",
+        "fine black/grey ash drifts",
+        "porous scoria",
+        "charred standing snags",
+        "focal molten lava",
+        "sulfur crust"
+      ]
+    },
+    "sharedMaterials": {
+      "stoneRubble": {
+        "description": "Loose stone elements present across biomes with distinct physical form and prevalence",
+        "prevalence": {
+          "TEMP": "MODERATE (rounded fieldstones, weathered limestone)",
+          "WET": "SPARSE (water-smoothed cobbles, submerged river stones)",
+          "ARID": "MODERATE (angular sandstone shards, sun-cracked shale)",
+          "HIGH": "VERY_DENSE (massive fractured scree and talus chips)",
+          "VOLC": "DENSE (porous scoria, obsidian flakes, basalt blocks)"
+        }
+      },
+      "earthSubstrate": {
+        "description": "Base ground soil layer across biomes",
+        "prevalence": {
+          "TEMP": "DENSE (fertile organic loam with active humus)",
+          "WET": "VERY_DENSE (anaerobic black muck and fibrous peat)",
+          "ARID": "VERY_DENSE (sun-baked caliche clay and mineral dust)",
+          "HIGH": "SPARSE (thin stony grit in rock depressions)",
+          "VOLC": "DENSE (powdery volcanic ash and scorched earth)"
+        }
+      },
+      "woodTimber": {
+        "description": "Wood elements and harvestable forestry debris",
+        "prevalence": {
+          "TEMP": "DENSE (healthy broadleaf logs, oak timber, leafy branches)",
+          "WET": "MODERATE (waterlogged driftwood, spongy alder logs, weeping willow roots)",
+          "ARID": "VERY_SPARSE (bleached gnarled branches, dry ironwood roots)",
+          "HIGH": "SPARSE_TO_MODERATE (dense-grained mountain pine, resinous conifer logs)",
+          "VOLC": "SPARSE (calcined charcoal, burned snags, charred timber)"
+        }
+      },
+      "water": {
+        "description": "Fluid water manifestation across biomes",
+        "prevalence": {
+          "TEMP": "MODERATE (clear meandering streams, ponds with pebble shores)",
+          "WET": "VERY_DENSE (dominant marsh pools, river shallows, slow channels)",
+          "ARID": "VERY_SPARSE (rare isolated springs, ephemeral flash-flood washes)",
+          "HIGH": "MODERATE (fast tumbling cold torrents, crystalline waterfalls)",
+          "VOLC": "SPARSE (bubbling geothermal springs, steaming pools, acid tarns)"
+        }
+      }
+    },
+    "universalMaterials": [
+      "freshwater",
+      "compact dirt path",
+      "dressed structural timber",
+      "worked stone masonry",
+      "colonist tools and equipment"
+    ]
+  },
+  "materialFormRules": {
+    "ROCK": {
+      "TEMP": "Rounded fieldstone boulders, weathered limestone with smoothed edges, mossy granite",
+      "WET": "Water-slicked river cobbles, submerged flat stepping stones, moss-blanketed low slabs",
+      "ARID": "Horizontally bedded sandstone, stepped canyon shelves, sharp wind-faceted planar cleavage, flaky shale",
+      "HIGH": "Sharply angular fractured granite and cleft slate, steep vertical jointing, jagged wedge-shaped scree chips",
+      "VOLC": "Highly porous vesicular scoria, hexagonal columnar basalt jointing, glass-sharp obsidian fragments, jagged cooling fractures"
+    },
+    "SOIL": {
+      "TEMP": "Clumpy, crumbly organic loam with visible humus and rootlets",
+      "WET": "Saturated, spongy, cohesive dark muck and fibrous peat",
+      "ARID": "Polygonal shrinkage cracks in hardpan, powdery fine dust, loose coarse sand grains",
+      "HIGH": "Gritty, gravel-heavy crushed rock fragments with minimal organic binding",
+      "VOLC": "Fine air-fall powdery ash drifts, brittle baked crusts, volcanic cinders"
+    },
+    "VEGETATION": {
+      "TEMP": "Soft billowing broadleaf crowns, rounded leafy shrubs, lush continuous turf",
+      "WET": "Vertical sword-like reeds, weeping droop forms, floating circular lily pads, sprawling root networks",
+      "ARID": "Isolated radial spiky bunchgrass, succulent fleshy pads, gnarly twisted drought wood, thorny scrub",
+      "HIGH": "Tight hemispherical cushion plants, wind-sheared one-sided krummholz pines, crevice-hugging lichens",
+      "VOLC": "Skeletal leafless charred limbs, pioneering rosette fireweeds, sulfur-tolerant encrustations"
+    },
+    "WATER": {
+      "TEMP": "Gentle translucent surface, rounded pebble beds, clean sand bars",
+      "WET": "Murky, peat-tinted water with floating duckweed and submerged reed stalks",
+      "ARID": "Cracked dry mud wash beds with rare isolated clear oasis pools",
+      "HIGH": "Frothing white water cascades over dark granite, crystalline transparent pools",
+      "VOLC": "Steaming geothermal pools with vibrant sulfur-encrusted mineral edges; localized molten lava channels with crusted cooling edges"
+    },
+    "DEBRIS": {
+      "TEMP": "Autumn leaf litter, fallen leafy branches, decaying woodland logs, small pebbles",
+      "WET": "Waterlogged driftwood snags, tangled root clumps, sodden peat chunks",
+      "ARID": "Sun-bleached animal skulls and ribs, sun-cracked dry twigs, windblown tumbleweed",
+      "HIGH": "Freshly broken rockfall rubble, angular slate chips, weathered alpine wood fragments",
+      "VOLC": "Black charcoal chunks, porous pumice stones, sharp obsidian flakes, drifted ash banks"
+    }
+  },
+  "differentiationTests": {
+    "GRAYSCALE_MATERIAL_TEST": "In grayscale, can the biome be identified instantly from structural forms, fracture geometry, and substrate texture alone without hue cues?",
+    "SILHOUETTE_FORM_TEST": "Do rock, tree, and shrub silhouettes have distinct structural geometries (e.g. rounded fieldstone vs stepped sandstone vs jagged granite vs columnar basalt)?",
+    "ECOLOGICAL_DENSITY_TEST": "Does vegetation distribution reflect authentic moisture and soil regimes (e.g. dense continuous turf in Temperate vs isolated spiky bunchgrass in Arid)?",
+    "BARE_SUBSTRATE_TEST": "If all props and decorative objects are removed, does the bare ground tile clearly identify its biome (loam vs peat vs caliche vs mountain gravel vs ash)?"
+  },
+  "horizontalTransitions": {
+    "TEMP_WET": {
+      "pair": "TEMP <-> WET",
+      "grassDensity": "Dense verdant turf -> increasingly saturated, spongy tussocks and reed clusters",
+      "soilTransition": "Rich brown loam -> damp dark organic earth -> soft saturated black peat/mud",
+      "geologyTransition": "Rounded dry fieldstones -> damp slick stone -> half-submerged river pebbles",
+      "moistureTransition": "Moderate -> High (water table rises to surface)",
+      "vegetationForm": "Broadleaf oak/meadow -> water-tolerant alders, weeping willows, upright cattails",
+      "topography": "Rolling meadows and gentle rises -> low drainage basin and marsh pockets"
+    },
+    "TEMP_ARID": {
+      "pair": "TEMP <-> ARID",
+      "grassDensity": "Continuous dense turf -> thinning patch grass -> isolated dry bunchgrass clumps",
+      "soilTransition": "Rich dark brown loam -> pale sandy loam -> sun-baked clay and caliche hardpan",
+      "geologyTransition": "Grey granite/limestone -> warm sandstone and sedimentary rock ledges",
+      "moistureTransition": "Moderate -> Low (evaporative drying)",
+      "vegetationForm": "Lush broadleaf woodland -> drought-stunted scrub, thorn bushes, open steppe",
+      "topography": "Rolling loam hills -> broad flat steppe plains, dry wash arroyos, and sandstone shelves"
+    },
+    "TEMP_HIGH": {
+      "pair": "TEMP <-> HIGH",
+      "grassDensity": "Soft meadow grass -> thinner, tougher alpine fescue and crevice moss",
+      "soilTransition": "Deep fertile topsoil -> shallow stony upland soil -> coarse gravel scree",
+      "geologyTransition": "Weathered fieldstones -> massive fractured granite cliffs and angular slate",
+      "moistureTransition": "Moderate -> Variable (rapid downhill runoff, well-drained slopes)",
+      "vegetationForm": "Broadleaf oak/birch forest -> wind-shaped mountain pines, hardy alpine scrub (NO SNOW)",
+      "topography": "Gentle valley floor -> steep rocky slopes, 2-grid vertical cliffs, and high passes"
+    },
+    "TEMP_VOLC": {
+      "pair": "TEMP <-> VOLC",
+      "grassDensity": "Verdant green turf -> yellowing scorched grass -> barren ash drifts with rare pioneer fireweed",
+      "soilTransition": "Living dark loam -> heat-desiccated earth -> powdery dark ash and scorched gravel",
+      "geologyTransition": "Sedimentary/granite boulders -> heat-fractured dark rock -> porous scoria and columnar basalt",
+      "moistureTransition": "Moderate -> Low (geothermal heat drying substrate)",
+      "vegetationForm": "Living broadleaf forest -> dead charred standing timber -> bare volcanic rock with rare scrub",
+      "topography": "Soft rolling hills -> rugged tectonic fissures, volcanic break-slopes, and basalt ridges"
+    },
+    "WET_ARID": {
+      "pair": "WET <-> ARID",
+      "grassDensity": "Dense marsh reeds and swamp grass -> rapid drop-off to sparse spiky bunchgrass around shrinking salt pans",
+      "soilTransition": "Dark saturated peat and black mud -> alkaline drying mud -> cracked sun-baked clay hardpan and salt crust",
+      "geologyTransition": "Damp dark river stones -> salt-encrusted shale -> warm layered sandstone",
+      "moistureTransition": "High -> Low (extreme moisture gradient: evaporation terminal basin)",
+      "vegetationForm": "Waterlogged willows and cattails -> desiccated reed stalks -> spiny drought scrub",
+      "topography": "Low marsh basin -> drying alluvial fan -> flat sun-baked playa and eroded arroyos"
+    },
+    "WET_HIGH": {
+      "pair": "WET <-> HIGH",
+      "grassDensity": "Spongy bog turf and reeds -> cold rushing mountain brook moss -> tough crevice alpine grass",
+      "soilTransition": "Deep organic peat and mud -> coarse alluvial gravel -> thin stony mountain soil and bare bedrock",
+      "geologyTransition": "Silt-covered river stones -> tumbled granite river boulders -> sheer angular granite/slate walls",
+      "moistureTransition": "High stagnant -> High dynamic (stagnant bog transitions to high-velocity mountain drainage)",
+      "vegetationForm": "Bog alders and weeping willows -> mountain conifers and water-hugging birch along gorge",
+      "topography": "Flat low marsh -> steep rocky gorge, waterfalls, and towering granite cliffs (NO SNOW)"
+    },
+    "WET_VOLC": {
+      "pair": "WET <-> VOLC",
+      "grassDensity": "Dense reed beds -> scalded swamp tussocks -> steaming mineral mud with sulfur algae",
+      "soilTransition": "Organic peat muck -> steaming sulfur mud -> hot black ash and mineral encrustations",
+      "geologyTransition": "Dark wet river gravel -> thermal fractured stone -> porous dark scoria and basalt vents",
+      "moistureTransition": "High ambient -> Extreme localized geothermal boiling/steaming",
+      "vegetationForm": "Lush swamp greenery -> scalded deadwood snags -> geothermal algae and sulfur lichen",
+      "topography": "Flat marsh basin -> steaming hot springs, bubbling mud pots, and basalt crater rim"
+    },
+    "ARID_HIGH": {
+      "pair": "ARID <-> HIGH",
+      "grassDensity": "Sparse bunchgrass on steppe -> tough alpine cushion grass and rock lichen on windward slopes",
+      "soilTransition": "Sun-baked caliche and sand -> coarse alluvial scree -> shallow rocky mountain soil",
+      "geologyTransition": "Warm horizontal sandstone strata -> transitional conglomerate -> massive vertical grey granite and slate",
+      "moistureTransition": "Low -> Variable (dry rain shadow transitions to cooler, windward slopes)",
+      "vegetationForm": "Thorny desert scrub -> sparse mountain juniper -> wind-pruned mountain pines (NO SNOW)",
+      "topography": "Desert flat and canyon washes -> steep rugged escarpment, rock scree talus, and mountain peaks"
+    },
+    "ARID_VOLC": {
+      "pair": "ARID <-> VOLC",
+      "grassDensity": "Sparse drought bunchgrass -> scorched brittle scrub -> bare ash drifts and lava crust",
+      "soilTransition": "Pale caliche clay and sand -> burnt red/brown earth -> dark powdery volcanic ash",
+      "geologyTransition": "Sedimentary sandstone ledges -> dark heat-altered shale -> black columnar basalt and obsidian",
+      "moistureTransition": "Low -> Low/Arid thermal",
+      "vegetationForm": "Drought-adapted spiny scrub -> dead bleached/charred branches -> bare volcanic rock",
+      "topography": "Desert mesas and dry washes -> jagged tectonic fault scarps, basalt plains, and volcanic cones"
+    },
+    "HIGH_VOLC": {
+      "pair": "HIGH <-> VOLC",
+      "grassDensity": "Tough alpine crevice grass -> blackened alpine moss -> barren volcanic ash and basalt bedrock",
+      "soilTransition": "Shallow stony mountain gravel -> sulfur-dusted gravel -> dense black ash and scoria",
+      "geologyTransition": "Sharp fractured grey granite and slate -> heat-fractured igneous rock -> columnar basalt and lava vents",
+      "moistureTransition": "Cool mountain drainage -> hot dry geothermal vents",
+      "vegetationForm": "Hardy mountain conifers (NO SNOW) -> scorched timber snags -> zero vegetation near volcanic crests",
+      "topography": "Sheer granite mountain peaks -> jagged volcanic caldera rims, smoking vents, and basalt slopes"
+    }
+  }
+}
