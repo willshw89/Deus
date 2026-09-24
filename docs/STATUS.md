@@ -7,9 +7,18 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (Autonomous Shelter Construction Loop COMPLETE — AWAITING USER REVIEW)
 
 ## In progress
-- **Fable / Claude Code (2026-09-24):** In progress on `DEUS-TSK-FABLE-17` (authoritative writer for simulation & engine: hearth containment, domestic housing progression, volumetric terrain column & Z=0 cliff walls audit/refinement, and commit).
-- **Gemini (2026-09-24):** In progress on `CHARART-02 Candidate / Human Golden Pack Input` (ratified in `docs/CHARART_MASTER_CHARTER.md`; pilot visual geometry proof & non-living art production pipeline for AR-2010 and AR-2100..2102).
+- **Fable / Claude Code (2026-09-24):** In progress on `DEUS-TSK-FABLE-17` (authoritative writer for autonomous behavior: 7-day unattended survival soak, fire survival behavior, post-communal shelter expansion).
+- **Gemini (2026-09-24):** In progress on `Gemini Phase 1 Physical World Stabilization` (authoritative owner of core engine / physics: fire & hazard model hardening, hearth clearance invariant, rain extinguishing, construction safety refusal).
 - **Astra (2026-09-24):** On hold / consumed per user directive.
+
+## DEUS-TSK-GEMINI-15 — Division of Labor & Collaborative Roadmap Ratified (2026-09-24)
+- **Status**: `COMPLETED — PASS`
+- **Scope**:
+  - `docs/DIVISION_OF_LABOR.md`: Codified the authoritative division of labor between Gemini (Core Engine, World Rules, Infrastructure, Physics) and Fable / Claude Code (Autonomous Behavior, Colony Competence, Survival, Expansion).
+  - Frozen Core Principle: *"Gemini should fix the world so it obeys solid physical rules; Fable should fix the people so they can survive in that world and actually grow a society."*
+  - Ratified 4-phase collaborative roadmap: Phase 1 (Survival Baseline & Hazard Hardening), Phase 2 (Physical Correctness & Multi-Z Geometry), Phase 3 (Expansion & Building Grammar), Phase 4 (Scalable Optimization for 4x @ 60 FPS).
+- **Checks observed**:
+  - Full alignment across `AGENTS.md`, `DEUS_PHYSICAL_WORLD_SIMULATION_SPEC.md`, `DEUS_CONSTRUCTION_LIFECYCLE_SPEC.md`, and `docs/DIVISION_OF_LABOR.md`.
 
 ## DEUS-TSK-GEMINI-14 — Skills, Proficiency & Deterministic Competence Standard (2026-09-24)
 - **Status**: `COMPLETED — PASS`
