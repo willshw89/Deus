@@ -11,6 +11,28 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 - **Gemini (2026-09-24):** In progress on `Gemini Phase 1 Physical World Stabilization`.
 - **Astra (2026-09-24):** On hold / consumed per user directive.
 
+## DEUS-TSK-GEMINI-18 — Knowledge-Based Multi-Z Strategic Minimap (TASK UI-MAP-01) (2026-09-24)
+- **Status**: `COMPLETED — PASS`
+- **Scope**:
+  - `game/js/plugins/DEUS_Minimap.js`:
+    - Implemented lightweight, scalable DEUS minimap reflecting character knowledge and discovery across all 5 Z-levels (`+2`, `+1`, `0`, `-1`, `-2`).
+    - Separation of World Truth, Discovered Map State, and Currently Visible State. Zero leak of undiscovered caverns, unspotted enemies, hidden structures, or unknown hazards.
+    - Three-mode operational support: Command Mode (`CMD`, shared settlement vision), Combat Mode (`CBT`, tactical objective and spotted enemy focus), Incarnate Mode (`INC`, personal character line of sight).
+    - Hard performance architecture: $16 \times 16$ chunk-cached static base bitmap (`256 × 256` px) with decoupled dynamic overlay. Zero full-world redraw per frame.
+    - Invalidation hooks for object placement, wall construction/digging, fluid propagation, and exploration discovery.
+    - Dynamic unit markers: friendly colonists (green), selected unit (mint halo), party members (sky blue), wildlife/neutral (amber), actively spotted hostiles (crimson red).
+    - Viewport camera wireframe box showing active 17×13 screen view, updating cleanly without redrawing base terrain.
+    - Interactive HUD window: Z-level tabs (`[ -2 | -1 | 0 | +1 | +2 ]`), minimize/expand toggle, and click-to-pan / drag-to-pan camera navigation.
+    - Full persistence of exploration bitsets via `DataManager.makeSaveContents` / `extractSaveContents`.
+  - `game/js/plugins/UF_Minimap.js`: Compatibility forwarder shim.
+  - `game/js/plugins/DEUS_Camera.js`: Dynamic script loader hook to ensure clean loading without modifying `plugins.js` while editor is open.
+  - `docs/systems/DEUS_Minimap.md`: Comprehensive system architecture and API documentation.
+  - `tools/test_minimap.js`: Headless test suite verifying discovery, Z-layer isolation, geometry invalidation, destruction, fluids, unit visibility, hostile leak suppression, save/load roundtrips, and negative/mutant coordinates.
+- **Checks observed**:
+  - `node tools/test_minimap.js`: 20 passed, 0 failed (`RESULT: 20 passed, 0 failed (exit 0)`).
+  - `node tools/run_tests.js minimap`: 8 passed, 0 failed (`RESULT: 8 passed, 0 failed (exit 0)`).
+  - Native NW.js screenshot captured and verified: `game/test_output/minimap.minimap_verified.png` displaying the docked minimap with active Z-level selector, circular exploration discovery boundary, 1.00x viewport wireframe, and 0 errors.
+
 ## DEUS-TSK-GEMINI-17 — Locked 1.0x View Scale & Removed Glow / Animation Effects (2026-09-24)
 - **Status**: `COMPLETED — PASS`
 - **Scope**:

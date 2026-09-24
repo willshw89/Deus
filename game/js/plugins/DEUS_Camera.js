@@ -169,4 +169,12 @@
             await t.waitFrames(5);
         });
     }
+
+    // Dynamically load DEUS_Minimap if not already loaded
+    if (typeof PluginManager !== "undefined" && typeof PluginManager.loadScript === "function") {
+        if (!PluginManager._scripts || (!PluginManager._scripts.includes("DEUS_Minimap") && !PluginManager._scripts.includes("DEUS_Minimap.js"))) {
+            PluginManager.loadScript("DEUS_Minimap");
+        }
+    }
 })();
+
