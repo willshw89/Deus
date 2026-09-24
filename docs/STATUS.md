@@ -8,8 +8,21 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress
 - **Fable / Claude Code (2026-09-24):** In progress on `DEUS-TSK-FABLE-18` (autonomous behavior: 7-day then 30-day unattended soak, fire survival behavior, construction common sense, post-communal expansion). Writes only `game/js/plugins/DEUS_Projects.js`, `DEUS_Colonists.js`, `DEUS_Jobs.js`, `UF_Households.js`, one line in `DEUS_Items.js` (export `Items.detach`: `UF_Containers.putItem` needs it, without it every haul into a chest leaves a phantom stack in the hauler's pack), the settlement/survival harnesses in `tools/`, and their `docs/systems/` pages. Works in an isolated worktree and copies finished files in. First step: land the Fable-owned part of the finished FABLE-16 work (Projects, Colonists, Households, harnesses); its engine-side part (Fire, Environment, DeathForensics, Core, History, Levels, WorldGen) goes to Gemini as a patch, not into the live tree.
-- **Gemini (2026-09-24):** In progress on `Gemini Phase 1 Physical World Stabilization`.
+- **Gemini (2026-09-24):** In progress on `WORLDART-BIOMES` Pipeline Reset — Temperate Core Golden Scene Review.
 - **Astra (2026-09-24):** On hold / consumed per user directive.
+
+## DEUS-TSK-GEMINI-19 — World Art Pipeline Reset & Temperate Core Golden Scene Proposals (2026-09-24)
+- **Status**: `AWAITING OWNER REVIEW`
+- **Scope**:
+  - Received owner NAY on Phase D mechanical cross-biome proof. Primary critique: visual pipeline optimized for passing mechanical RMMZ QC rather than visual excellence (visible 48px grid chunks, high-frequency ground noise, 32-color quantization starving material ramps, abrupt water border, flat topography).
+  - Reversed priority: Visual quality is the primary product; RMMZ packing is a technical adaptation underneath it.
+  - Strictly halted all multi-biome expansion and Z-layer progression until one Temperate Core screen achieves golden visual quality.
+  - Audited the `<= 32 opaque colors per sheet` constraint: identified it as the root cause of ground speckle and flat water. Formulated the Two-Tier Palette Architecture (Global 256-color `art/palette/uf.hex` master lattice + 4–6 tone material family ramps).
+  - Generated three alternate in-game mockups of the SAME Temperate Core scene at locked 1.00x camera (816×624 px, 17×13 tiles) using Google Nano Banana Pro (`gemini-3-pro-image`):
+    - `WORLD_STYLE_A` (`art/review/world_style_a_verdant_meadow.jpg`): The Classical Verdant Meadow (balanced painterly calmness, natural gravel shore, translucent riverbed stones, rolling grassy bluff).
+    - `WORLD_STYLE_B` (`art/review/world_style_b_wildwood_frontier.jpg`): The Deep Wildwood Frontier (rich organic depth, fallen mossy cedar log crossing, log-hauling colonist, stone steps carved into craggy granite cliff).
+    - `WORLD_STYLE_C` (`art/review/world_style_c_highland_glade.jpg`): The Sunlit Highland Glade (crisp planar ground shading, stepped limestone shelf, stepping stones ford crossing, vibrant poppy colonies).
+  - Published comprehensive presentation artifact `temperate_core_golden_scene_proposals.md` and stopped at owner decision gate.
 
 ## DEUS-TSK-GEMINI-18 — Knowledge-Based Multi-Z Strategic Minimap (TASK UI-MAP-01) (2026-09-24)
 - **Status**: `COMPLETED — PASS`
