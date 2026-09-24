@@ -388,17 +388,31 @@
     },
     "ARCH_DOORWAY": {
       "category": "ARCHITECTURE_REFERENCE",
-      "visualWidthMin": 28,
-      "visualWidthTarget": 32,
-      "visualWidthMax": 36,
-      "visualHeightMin": 64,
-      "visualHeightTarget": 72,
-      "visualHeightMax": 80,
+      "visualWidthMin": 40,
+      "visualWidthTarget": 44,
+      "visualWidthMax": 48,
+      "visualHeightMin": 56,
+      "visualHeightTarget": 58,
+      "visualHeightMax": 60,
       "footprintWidthTiles": 1,
       "footprintHeightTiles": 2,
       "anchorType": "BOTTOM_CENTER",
-      "overhangAllowed": false,
-      "notes": "Entryway portal accommodating ~42 px Human + helmet + headroom (~72 px)."
+      "overhangAllowed": true,
+      "notes": "Ordinary Human doorway (~58 px visible height) comfortably clearing ~42 px Human without monumental height. Upper frame may visually extend above wall footprint; wall-base contact at ground."
+    },
+    "ARCH_GATE_LARGE": {
+      "category": "ARCHITECTURE_REFERENCE",
+      "visualWidthMin": 48,
+      "visualWidthTarget": 64,
+      "visualWidthMax": 96,
+      "visualHeightMin": 72,
+      "visualHeightTarget": 84,
+      "visualHeightMax": 96,
+      "footprintWidthTiles": 2,
+      "footprintHeightTiles": 2,
+      "anchorType": "BOTTOM_CENTER",
+      "overhangAllowed": true,
+      "notes": "Monumental gate or fortress portal (~84-96 px tall) accommodating wagons, mounts, and large creatures."
     },
     "ARCH_WALL_2GRID": {
       "category": "ARCHITECTURE_REFERENCE",
@@ -412,7 +426,7 @@
       "footprintHeightTiles": 2,
       "anchorType": "BOTTOM_CENTER",
       "overhangAllowed": false,
-      "notes": "48 px lower authentic material face + 48 px flat near-black upper cap."
+      "notes": "Full 2-grid vertical wall structure (48x96 px): 48 px lower wall face + 48 px upper structural elevation."
     },
     "ARCH_BED": {
       "category": "ARCHITECTURE_REFERENCE",

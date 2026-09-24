@@ -123,8 +123,9 @@ All asset classes registered in `game/data/DEUS_ScaleRegistry.json`:
 ### 4.6 Architecture & Furniture Reference Anchors
 | Class ID | Target W×H | Min W×H | Max W×H | Footprint | Anchor | Notes |
 |---|:---:|:---:|:---:|:---:|:---:|---|
-| `ARCH_DOORWAY` | **32×72 px** | 28×64 px | 36×80 px | $1\times 2$ | BOTTOM_CENTER | Entryway portal clearing Human + helmet (~72 px). |
-| `ARCH_WALL_2GRID` | **48×96 px** | 48×92 px | 48×96 px | $1\times 2$ | BOTTOM_CENTER | 48 px material face + 48 px flat black cap. |
+| `ARCH_DOORWAY` | **44×58 px** | 40×56 px | 48×60 px | $1\times 2$ | BOTTOM_CENTER | Ordinary Human doorway (~58 px tall) comfortably clearing ~42 px Human. Upper frame overhang permitted. |
+| `ARCH_GATE_LARGE` | **64×84 px** | 48×72 px | 96×96 px | $2\times 2$ | BOTTOM_CENTER | Monumental gate/fortress portal (~84–96 px tall) accommodating wagons and large creatures. |
+| `ARCH_WALL_2GRID` | **48×96 px** | 48×92 px | 48×96 px | $1\times 2$ | BOTTOM_CENTER | Full 2-grid vertical wall structure: 48 px lower face + 48 px upper elevation. |
 | `ARCH_BED` | **28×58 px** | 24×52 px | 32×64 px | $1\times 2$ | BOTTOM_CENTER | Sleeping berth exceeding Human body height. |
 | `ARCH_CHAIR` | **20×26 px** | 16×24 px | 24×30 px | $1\times 1$ | BOTTOM_CENTER | Seat surface at knee height (10–14 px). |
 | `ARCH_TABLE` | **38×24 px** | 32×20 px | 44×26 px | $1\times 1$ | BOTTOM_CENTER | Dining/work surface at waist height (20–24 px). |
@@ -150,7 +151,7 @@ Generated deterministically by `tools/generate_scale_strip.js`:
   - $36\text{ px}$: Medium rock / Dwarf height
   - **$42\text{ px}$**: **CANONICAL ADULT HUMAN REFERENCE** (amber dashed guide)
   - $48\text{ px}$: **1 WORLD TILE HEIGHT** (cyan dashed guide)
-  - $72\text{ px}$: Standard doorway lintel ($1.5\times$ tile height)
+  - $58\text{ px}$: Standard doorway opening/frame (~$1.38\times$ Human height, comfortably clears helmet)
   - **$84\text{ px}$**: **STANDARD COMMON OAK** ($2.0\times$ Human height; amber dashed guide)
   - $96\text{ px}$: **2 TILES HEIGHT** / 2-grid wall cap (cyan dashed guide)
   - $105\text{ px}$: Large accent copse tree ($2.5\times$ Human height)

@@ -76,6 +76,24 @@ assert(hero && hero.visualHeightMin === 120 && hero.visualHeightTarget === 140 &
     'Hero / Landmark Tree is 120-160+ px (target 140 px, ~3.3x Human)');
 
 // -----------------------------------------------------------------------------
+// 2b. ARCHITECTURE SCALE & STYLE NEUTRALITY (OWNER CORRECTION)
+// -----------------------------------------------------------------------------
+console.log('\n--- 2b. Architecture Scale & Style Neutrality ---');
+const doorway = registry.classes.ARCH_DOORWAY;
+assert(doorway && doorway.visualHeightMin >= 56 && doorway.visualHeightTarget === 58 && doorway.visualHeightMax <= 60,
+    'Ordinary Doorway is 56-60 px (target 58 px, ~1.38x Human)');
+assert(doorway && doorway.visualWidthMin >= 40 && doorway.visualWidthMax <= 48,
+    'Ordinary Doorway width is 40-48 px');
+assert(doorway && doorway.overhangAllowed === true,
+    'Ordinary Doorway allows upper frame overhang');
+assert(doorway && !/DF|black-?cap/i.test(doorway.notes),
+    'Ordinary Doorway notes are style/renderer neutral');
+
+const wall = registry.classes.ARCH_WALL_2GRID;
+assert(wall && !/DF|black-?cap/i.test(wall.notes),
+    'Wall 2-grid notes are style/renderer neutral');
+
+// -----------------------------------------------------------------------------
 // 3. REQUIRED CLASS COVERAGE
 // -----------------------------------------------------------------------------
 console.log('\n--- 3. Required Class Coverage ---');
@@ -93,7 +111,7 @@ const requiredClasses = [
     // Trees
     'TREE_SAPLING', 'TREE_COMMON_OAK', 'TREE_COMMON_BIRCH', 'TREE_COMMON_PINE', 'TREE_LARGE_ACCENT', 'TREE_HERO_LANDMARK',
     // Architecture Reference
-    'ARCH_DOORWAY', 'ARCH_WALL_2GRID', 'ARCH_BED', 'ARCH_CHAIR', 'ARCH_TABLE',
+    'ARCH_DOORWAY', 'ARCH_GATE_LARGE', 'ARCH_WALL_2GRID', 'ARCH_BED', 'ARCH_CHAIR', 'ARCH_TABLE',
     'ARCH_CHEST', 'ARCH_BARREL', 'ARCH_WORKBENCH', 'ARCH_HEARTH', 'ARCH_FENCE', 'ARCH_STAIR_RAMP'
 ];
 

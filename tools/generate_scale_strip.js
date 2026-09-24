@@ -154,7 +154,7 @@ const heights = [
     { px: 36, label: '36 PX', col: 'right' },
     { px: 42, label: '42P HUMAN', highlight: true, col: 'right' },
     { px: 48, label: '48P [1T]', grid: true, col: 'left' },
-    { px: 72, label: '72P DOOR', col: 'right' },
+    { px: 58, label: '58P DOOR', col: 'right' },
     { px: 84, label: '84P OAK', highlight: true, col: 'right' },
     { px: 96, label: '96P [2T]', grid: true, col: 'left' },
     { px: 105, label: '105P ACC', col: 'right' },
@@ -321,21 +321,21 @@ const items = [
     },
     {
         name: 'DOORWAY',
-        hTarget: 72,
-        w: 32,
+        hTarget: 58,
+        w: 44,
         render: (cx, by) => {
-            const x0 = cx - 16, y0 = by - 72;
-            // Stone jambs
-            fillRect(x0, y0, 6, 72, 100, 105, 115);
-            fillRect(x0 + 26, y0, 6, 72, 100, 105, 115);
+            const x0 = cx - 22, y0 = by - 58;
+            // Stone jambs (44 wide, 58 tall)
+            fillRect(x0, y0, 6, 58, 100, 105, 115);
+            fillRect(x0 + 38, y0, 6, 58, 100, 105, 115);
             // Lintel
-            fillRect(x0, y0, 32, 8, 120, 125, 135);
-            // Wooden door
-            fillRect(x0 + 6, y0 + 8, 20, 64, 140, 95, 50);
+            fillRect(x0, y0, 44, 7, 120, 125, 135);
+            // Wooden door opening/leaf
+            fillRect(x0 + 6, y0 + 7, 32, 51, 140, 95, 50);
             // Iron studs
-            for (let r = 0; r < 4; r++) {
-                setPixel(x0 + 10, y0 + 20 + r * 14, 40, 40, 45);
-                setPixel(x0 + 22, y0 + 20 + r * 14, 40, 40, 45);
+            for (let r = 0; r < 3; r++) {
+                setPixel(x0 + 12, y0 + 18 + r * 14, 40, 40, 45);
+                setPixel(x0 + 32, y0 + 18 + r * 14, 40, 40, 45);
             }
         }
     },
