@@ -8,11 +8,11 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress
 - **Fable / Claude Code (2026-09-24):** In progress on `DEUS-TSK-FABLE-18` (autonomous behavior: 7-day then 30-day unattended soak, fire survival behavior, construction common sense, post-communal expansion). Writes only `game/js/plugins/DEUS_Projects.js`, `DEUS_Colonists.js`, `DEUS_Jobs.js`, `UF_Households.js`, one line in `DEUS_Items.js` (export `Items.detach`: `UF_Containers.putItem` needs it, without it every haul into a chest leaves a phantom stack in the hauler's pack), the settlement/survival harnesses in `tools/`, and their `docs/systems/` pages. Works in an isolated worktree and copies finished files in. First step: land the Fable-owned part of the finished FABLE-16 work (Projects, Colonists, Households, harnesses); its engine-side part (Fire, Environment, DeathForensics, Core, History, Levels, WorldGen) goes to Gemini as a patch, not into the live tree.
-- **Gemini (2026-09-24):** STOPPED AT GATE — completed `DW.01.02 — Freeze native-resolution / pixel-density standard`. Awaiting owner review.
+- **Gemini (2026-09-24):** STOPPED AT GATE — reconciled WBS numbering with canonical `DEUS-WORLD-WBS-v1.0` (`docs/art/DEUS_WORLD_WBS.md`). Awaiting owner authorization to begin `DW.01.03 — Freeze Human / World Scale Strip`.
 - **Astra (2026-09-24):** On hold / consumed per user directive.
 
 ## DW.01.02 — Freeze Native-Resolution / Pixel-Density Standard (2026-09-24)
-- **Status**: `COMPLETED — PASS (AWAITING OWNER REVIEW)`
+- **Status**: `COMPLETED — FROZEN (APPROVED BY OWNER) [commit faeee9e]`
 - **Scope**:
   - Enforced the single cardinal rule: `1 SOURCE ART PIXEL = 1 RENDERED SCREEN PIXEL` at locked 1.00x gameplay camera.
   - Formally decoupled three distinct concepts:
