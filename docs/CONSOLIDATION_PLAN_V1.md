@@ -103,15 +103,17 @@ Of the 41 legacy `UF_*.js` shims:
 - Assert: zero checksum drift on golden seeds, equal or faster latency, zero console errors, zero unexplained performance regressions.
 - Freeze `Repository Layout v1` and `Agent Operating Model v1`.
 
-### Phase 10: Performance Framework Setup & Closed-World Census
+### Phase 10: Performance Framework, Closed-World Census & Learning Telemetry
 - **Closed-World Runtime Census**: Implement boot census tracking every loaded module, plugin, JSON catalog, audio file, and RMMZ system to identify dead/orphaned code.
 - **Performance Instrumentation**: Establish `tools/performance/` (`bench_boot.js`, `bench_worldgen.js`, `bench_ticks.js`, `bench_allocations.js`).
+- **Learning Loop Telemetry**: Establish `docs/telemetry/` and logging tools (`log_task_outcome.js`, `audit_reviewer_findings.js`) per [`docs/AGENT_QUALITY_LEARNING_LOOP.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/AGENT_QUALITY_LEARNING_LOOP.md).
 - **Plugin Update-Hook Audit**: Audit all hooks on `Scene_Map.update`, `Game_Map.update`, `Spriteset_Map.update`, `Sprite_Character.update`.
 - **Grok Hash32 Optimization**: Deploy Grok's straight-line `hash32_4` kernel into `DEUS_Levels.js` with 100% bit-identical strata outputs across 1,000 seeds.
 
 ---
 
 ## 6. Authoritative Policy Cross-References
+- **Agent Quality & Continuous-Learning Standard:** [`docs/AGENT_QUALITY_LEARNING_LOOP.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/AGENT_QUALITY_LEARNING_LOOP.md) (Evidence-based learning, corrections & telemetry)
 - **Performance Architecture Standard:** [`docs/PERFORMANCE_ARCHITECTURE.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/PERFORMANCE_ARCHITECTURE.md)
 - **Quality Engineering Standard:** [`docs/QUALITY_ENGINEERING_POLICY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/QUALITY_ENGINEERING_POLICY.md)
 - **Agent Utilization Standard:** [`docs/AGENT_UTILIZATION_POLICY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/AGENT_UTILIZATION_POLICY.md)

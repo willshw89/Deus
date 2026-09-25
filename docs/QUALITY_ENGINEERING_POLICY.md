@@ -31,8 +31,10 @@ Before any implementation branch is merged into canonical `main`:
 ---
 
 ## 3. Cross-System Architecture References
+- **Agent Quality & Continuous-Learning Standard:** [`docs/AGENT_QUALITY_LEARNING_LOOP.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/AGENT_QUALITY_LEARNING_LOOP.md) (Evidence-based learning, corrections & telemetry)
 - **Performance Standard**: [`docs/PERFORMANCE_ARCHITECTURE.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/PERFORMANCE_ARCHITECTURE.md)
 - **Multi-Agent Orchestration**: [`docs/AGENT_UTILIZATION_POLICY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/AGENT_UTILIZATION_POLICY.md)
 - **Repository Consolidation**: [`docs/CONSOLIDATION_PLAN_V1.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/CONSOLIDATION_PLAN_V1.md)
 - **WorldGen Work Breakdown**: [`docs/worldgen/DEUS_WORLDGEN_WBS.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_WORLDGEN_WBS.md)
 - **Risk Register**: [`docs/RISK_REGISTER.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/RISK_REGISTER.md)
+
