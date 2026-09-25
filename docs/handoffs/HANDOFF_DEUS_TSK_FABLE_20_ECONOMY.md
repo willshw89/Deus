@@ -95,7 +95,7 @@ $$\text{WORLD\_TOTAL}(R) = \sum \text{Deposits} + \sum \text{Loose Stock} + \sum
 4. **Destruction / Wear:** Broken or dismantled entities MUST spawn scrap/rubble matching their original component mass.
 5. **Recycling / Salvage:** Remelting scrap recovers 100% of base metal back into ingots.
 6. **No Spontaneous Generation:** Factions, merchants, wandering NPCs, or raids CANNOT spawn with items created ex nihilo. All starter gear and merchant goods are deducted from the world's unmined or stockpile reserves.
-7. **World Year 0 Starting State:** At standard New Game, all finite material begins in natural geological deposits (except starter kits for the 72 founders). No pre-generated centuries of circulating coins, exhausted fictional mines, or pre-placed ruins exist; all history emerges through live simulation.
+7. **World Year 0 Starting State:** At World Year 0, the overwhelming majority of finite STONE, IRON, COPPER, SILVER, GOLD, and PLATINUM exists in natural geological deposits. Any conserved material already present in founder equipment, starting stockpiles, structures, tools, weapons, or other manufactured forms is deducted from the same finite world-generation material total. Standard New Game contains no pre-aged historical circulation, historical scrap economy, abandoned industrial stockpiles, or fictional centuries of prior resource extraction unless an explicit scenario requires them.
 
 ---
 
