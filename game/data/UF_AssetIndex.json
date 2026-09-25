@@ -1,4 +1,25 @@
 {
+ "": {
+  "status": "missing",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "people halfling",
+   "people dragonborn",
+   "people half-elf",
+   "people half-orc",
+   "people tiefling"
+  ],
+  "states": [
+   "4 facings × stand/walk (3 columns × 4 rows)",
+   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
+  ],
+  "category": "people",
+  "file": "img/characters/.png",
+  "exists": false,
+  "sidecar": false,
+  "statusWhy": "no file game/img/characters/.png"
+ },
  "$UF_Stock_BigMonster1_r1": {
   "status": "stock RMMZ",
   "request": "AR-401",
@@ -282,63 +303,6 @@
   "sidecar": false,
   "statusWhy": "character 6 of stock characters/SF_Monster.png, cut by tools/extract_stock_characters.js (pixels match)"
  },
- "$UF_Stock_SF_People3_4": {
-  "status": "stock RMMZ",
-  "request": "AR-1709",
-  "requests": [
-   "AR-1709"
-  ],
-  "usedBy": [
-   "people automaton"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_SF_People3_4.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 4 of stock characters/SF_People3.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_SF_People3_6": {
-  "status": "stock RMMZ",
-  "request": "AR-1709",
-  "requests": [
-   "AR-1709"
-  ],
-  "usedBy": [
-   "people automaton"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_SF_People3_6.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 6 of stock characters/SF_People3.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
- "$UF_Stock_SF_People3_7": {
-  "status": "stock RMMZ",
-  "request": "AR-1709",
-  "requests": [
-   "AR-1709"
-  ],
-  "usedBy": [
-   "people automaton"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Stock_SF_People3_7.png",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "character 7 of stock characters/SF_People3.png, cut by tools/extract_stock_characters.js (pixels match)"
- },
  "$UF_Stock_Vehicle_2": {
   "status": "stock RMMZ",
   "request": "AR-401",
@@ -513,43 +477,11 @@
   "sidecar": false,
   "statusWhy": "name starts with U7_"
  },
- "UF_Generator": {
+ "Outside_A2#2816": {
   "status": "generated",
-  "request": "none yet",
-  "requests": [],
-  "usedBy": [
-   "plugin UF_Generator.js"
-  ],
-  "states": [],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GenGround_A2": {
-  "status": "generated",
-  "request": "AR-120",
+  "request": "AR-2102",
   "requests": [
-   "AR-120",
-   "AR-100"
-  ],
-  "usedBy": [
-   "tileset 91 slot A2: all 26 ground kinds (UF_Tiles draws them from groundKinds[].colors/pattern)"
-  ],
-  "states": [
-   "26 kinds × 47 autotile shapes on one 768×576 sheet"
-  ],
-  "category": "generated",
-  "file": "(drawn in code)",
-  "exists": true,
-  "sidecar": false,
-  "statusWhy": "drawn in code (UF_Gen*)"
- },
- "UF_GenGround_A2#2816": {
-  "status": "generated",
-  "request": "AR-100",
-  "requests": [
+   "AR-2102",
    "AR-100"
   ],
   "usedBy": [
@@ -561,12 +493,12 @@
    "placeholder pattern \"grass\", colors #5D7139 #4D5D28 #71864D #8A9A61"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 0)",
+  "file": "(drawn in code: Outside_A2, kind 0)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#2864": {
+ "Outside_A2#2864": {
   "status": "generated",
   "request": "AR-100",
   "requests": [
@@ -581,12 +513,12 @@
    "placeholder pattern \"grass\", colors #189218 #006D00 #45B645 #86D200"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 1)",
+  "file": "(drawn in code: Outside_A2, kind 1)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#2912": {
+ "Outside_A2#2912": {
   "status": "generated",
   "request": "AR-100",
   "requests": [
@@ -601,12 +533,12 @@
    "placeholder pattern \"grass\", colors #C69618 #B28210 #DBAE20 #F3DF79"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 2)",
+  "file": "(drawn in code: Outside_A2, kind 2)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#2960": {
+ "Outside_A2#2960": {
   "status": "generated",
   "request": "AR-100",
   "requests": [
@@ -621,15 +553,16 @@
    "placeholder pattern \"dots\", colors #AA8659 #9A7141 #BA9A71 #5D7139"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 3)",
+  "file": "(drawn in code: Outside_A2, kind 3)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3008": {
+ "Outside_A2#3008": {
   "status": "generated",
-  "request": "AR-120",
+  "request": "AR-2102",
   "requests": [
+   "AR-2102",
    "AR-120"
   ],
   "usedBy": [
@@ -641,12 +574,12 @@
    "placeholder pattern \"litter\", colors #6D4D3D #553D31 #825D4D #9E5124"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 4)",
+  "file": "(drawn in code: Outside_A2, kind 4)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3056": {
+ "Outside_A2#3056": {
   "status": "generated",
   "request": "AR-100",
   "requests": [
@@ -661,12 +594,12 @@
    "placeholder pattern \"needles\", colors #39451C #283114 #4D5D28 #6D3D0C"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 5)",
+  "file": "(drawn in code: Outside_A2, kind 5)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3104": {
+ "Outside_A2#3104": {
   "status": "generated",
   "request": "AR-100",
   "requests": [
@@ -681,12 +614,12 @@
    "placeholder pattern \"litter\", colors #4D5D28 #39451C #71864D #8A5D2D"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 6)",
+  "file": "(drawn in code: Outside_A2, kind 6)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3152": {
+ "Outside_A2#3152": {
   "status": "generated",
   "request": "AR-100",
   "requests": [
@@ -701,15 +634,16 @@
    "placeholder pattern \"dots\", colors #9EAE7D #8A9A61 #B6C29A #CEC6BE"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 7)",
+  "file": "(drawn in code: Outside_A2, kind 7)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3200": {
+ "Outside_A2#3200": {
   "status": "generated",
-  "request": "AR-1206",
+  "request": "AR-2102",
   "requests": [
+   "AR-2102",
    "AR-1206",
    "AR-100",
    "AR-102",
@@ -723,15 +657,16 @@
    "placeholder pattern \"snow\", colors #EFEFEF #DBDBFF #FFFFFF #CECECE"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 8)",
+  "file": "(drawn in code: Outside_A2, kind 8)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3248": {
+ "Outside_A2#3248": {
   "status": "generated",
-  "request": "AR-100",
+  "request": "AR-2102",
   "requests": [
+   "AR-2102",
    "AR-100",
    "AR-401",
    "AR-402"
@@ -745,15 +680,16 @@
    "placeholder pattern \"ice\", colors #B2D7F3 #71AEE7 #F3F3FF #6DB2E7"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 9)",
+  "file": "(drawn in code: Outside_A2, kind 9)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3296": {
+ "Outside_A2#3296": {
   "status": "generated",
-  "request": "AR-100",
+  "request": "AR-2102",
   "requests": [
+   "AR-2102",
    "AR-100",
    "AR-401",
    "AR-402"
@@ -767,12 +703,12 @@
    "placeholder pattern \"dots\", colors #CAB292 #BA9A71 #DBCAB2 #F7E7A6"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 10)",
+  "file": "(drawn in code: Outside_A2, kind 10)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3344": {
+ "Outside_A2#3344": {
   "status": "generated",
   "request": "AR-100",
   "requests": [
@@ -787,12 +723,12 @@
    "placeholder pattern \"cracks\", colors #9E928A #7D7169 #AEA29A #615551"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 11)",
+  "file": "(drawn in code: Outside_A2, kind 11)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3392": {
+ "Outside_A2#3392": {
   "status": "generated",
   "request": "AR-100",
   "requests": [
@@ -809,12 +745,12 @@
    "placeholder pattern \"stria\", colors #AE653D #9E5124 #BE825D #7D2D00"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 12)",
+  "file": "(drawn in code: Outside_A2, kind 12)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3440": {
+ "Outside_A2#3440": {
   "status": "generated",
   "request": "AR-1203",
   "requests": [
@@ -826,6 +762,7 @@
    "AR-1202",
    "AR-1217",
    "AR-1218",
+   "AR-2100",
    "AR-100",
    "AR-1747",
    "AR-1727",
@@ -841,12 +778,12 @@
    "placeholder pattern \"cracks\", colors #7D7D7D #616161 #8E8E8E #514945"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 13)",
+  "file": "(drawn in code: Outside_A2, kind 13)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3488": {
+ "Outside_A2#3488": {
   "status": "generated",
   "request": "AR-100",
   "requests": [
@@ -861,12 +798,12 @@
    "placeholder pattern \"cracks\", colors #515151 #453D39 #6D6D6D #35312D"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 14)",
+  "file": "(drawn in code: Outside_A2, kind 14)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3536": {
+ "Outside_A2#3536": {
   "status": "generated",
   "request": "AR-100",
   "requests": [
@@ -881,12 +818,12 @@
    "placeholder pattern \"mud\", colors #6D4D3D #553D31 #7D6559 #415120"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 15)",
+  "file": "(drawn in code: Outside_A2, kind 15)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3584": {
+ "Outside_A2#3584": {
   "status": "generated",
   "request": "AR-100",
   "requests": [
@@ -901,15 +838,16 @@
    "placeholder pattern \"mud\", colors #45352D #352D24 #514139 #39451C"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 16)",
+  "file": "(drawn in code: Outside_A2, kind 16)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3632": {
+ "Outside_A2#3632": {
   "status": "generated",
-  "request": "AR-1201",
+  "request": "AR-2102",
   "requests": [
+   "AR-2102",
    "AR-1201",
    "AR-1203",
    "AR-1214",
@@ -917,6 +855,7 @@
    "AR-1216",
    "AR-1211",
    "AR-1212",
+   "AR-2101",
    "AR-100",
    "AR-001"
   ],
@@ -929,12 +868,12 @@
    "placeholder pattern \"dots\", colors #8A5D2D #6D3D0C #9A7141 #5D350C"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 17)",
+  "file": "(drawn in code: Outside_A2, kind 17)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3680": {
+ "Outside_A2#3680": {
   "status": "generated",
   "request": "AR-120",
   "requests": [
@@ -949,12 +888,12 @@
    "placeholder pattern \"grass\", colors #7D7169 #615551 #8E8279 #6D006D"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 18)",
+  "file": "(drawn in code: Outside_A2, kind 18)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3728": {
+ "Outside_A2#3728": {
   "status": "generated",
   "request": "AR-120",
   "requests": [
@@ -969,16 +908,17 @@
    "placeholder pattern \"grass\", colors #45B645 #189218 #7DDF7D #F7E7A6"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 19)",
+  "file": "(drawn in code: Outside_A2, kind 19)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3776": {
+ "Outside_A2#3776": {
   "status": "generated",
   "request": "AR-120",
   "requests": [
    "AR-120",
+   "AR-2010",
    "AR-100"
   ],
   "usedBy": [
@@ -990,12 +930,12 @@
    "placeholder pattern \"dots\", colors #515151 #454545 #616161 #6D2400"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 20)",
+  "file": "(drawn in code: Outside_A2, kind 20)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3824": {
+ "Outside_A2#3824": {
   "status": "generated",
   "request": "AR-100",
   "requests": [
@@ -1009,12 +949,12 @@
    "placeholder pattern \"cracks\", colors #6D615D #615551 #7D7169 #514945"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 21)",
+  "file": "(drawn in code: Outside_A2, kind 21)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3872": {
+ "Outside_A2#3872": {
   "status": "generated",
   "request": "AR-1201",
   "requests": [
@@ -1028,12 +968,12 @@
    "placeholder pattern \"dots\", colors #BA9A71 #8E7565 #CAB292 #6D4D3D"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 22)",
+  "file": "(drawn in code: Outside_A2, kind 22)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3920": {
+ "Outside_A2#3920": {
   "status": "generated",
   "request": "AR-1204",
   "requests": [
@@ -1048,12 +988,12 @@
    "placeholder pattern \"planks\", colors #9A7141 #653D10 #BE825D #3D240C"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 23)",
+  "file": "(drawn in code: Outside_A2, kind 23)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#3968": {
+ "Outside_A2#3968": {
   "status": "generated",
   "request": "AR-1205",
   "requests": [
@@ -1068,12 +1008,12 @@
    "placeholder pattern \"cracks\", colors #8E8E8E #6D6D6D #AEAEAE #454545"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 24)",
+  "file": "(drawn in code: Outside_A2, kind 24)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
  },
- "UF_GenGround_A2#4016": {
+ "Outside_A2#4016": {
   "status": "generated",
   "request": "AR-300",
   "requests": [
@@ -1087,7 +1027,21 @@
    "placeholder pattern \"needles\", colors #AA8659 #9A7141 #F7E7A6 #6D4D3D"
   ],
   "category": "tiles",
-  "file": "(drawn in code: UF_GenGround_A2, kind 25)",
+  "file": "(drawn in code: Outside_A2, kind 25)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "drawn in code (UF_Gen*)"
+ },
+ "UF_Generator": {
+  "status": "generated",
+  "request": "none yet",
+  "requests": [],
+  "usedBy": [
+   "plugin UF_Generator.js"
+  ],
+  "states": [],
+  "category": "generated",
+  "file": "(drawn in code)",
   "exists": true,
   "sidecar": false,
   "statusWhy": "drawn in code (UF_Gen*)"
@@ -1351,8 +1305,10 @@
  },
  "!$UF_Chest_Wood": {
   "status": "original",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-2011",
+  "requests": [
+   "AR-2011"
+  ],
   "usedBy": [
    "object chest_wood \"Storage chest\""
   ],
@@ -2100,12 +2056,14 @@
    "AR-201"
   ],
   "usedBy": [
-   "item fiber_wrap \"Woven wrap\""
+   "item fiber_wrap \"Woven wrap\"",
+   "item common_clothes \"Common clothes\""
   ],
   "states": [
    "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "worn: clothing tier 1 (the wearer's sheet changes)",
-   "made by: Weave a fiber wrap"
+   "fiber_wrap: worn: clothing tier 1 (the wearer's sheet changes)",
+   "fiber_wrap: made by: Weave a fiber wrap",
+   "common_clothes: worn: clothing tier 1 (the wearer's sheet changes)"
   ],
   "category": "items",
   "file": "img/characters/!$UF_Icon_136.png",
@@ -2244,7 +2202,8 @@
    "AR-1701"
   ],
   "usedBy": [
-   "item gold \"Gold nugget\""
+   "item gold \"Gold nugget\"",
+   "item gold_coin \"Gold piece\""
   ],
   "states": [
    "lies on a cell as a stack (one frame; carried items are not drawn yet)"
@@ -2303,11 +2262,12 @@
    "AR-200"
   ],
   "usedBy": [
-   "item root \"Root vegetable\""
+   "item root \"Root vegetable\"",
+   "item pouch \"Pouch\""
   ],
   "states": [
    "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "eaten: −25 hunger"
+   "root: eaten: −25 hunger"
   ],
   "category": "items",
   "file": "img/characters/!$UF_Icon_256.png",
@@ -2360,6 +2320,7 @@
   "request": "AR-200",
   "requests": [
    "AR-200",
+   "AR-2000",
    "AR-020",
    "AR-102"
   ],
@@ -2695,8 +2656,9 @@
  },
  "!$UF_Item_Berries": {
   "status": "original",
-  "request": "AR-200",
+  "request": "AR-2000",
   "requests": [
+   "AR-2000",
    "AR-200"
   ],
   "usedBy": [
@@ -2714,8 +2676,10 @@
  },
  "!$UF_Item_Bone": {
   "status": "original",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-2000",
+  "requests": [
+   "AR-2000"
+  ],
   "usedBy": [
    "item hardware_iron \"Iron construction hardware\" (tint #707888)"
   ],
@@ -2731,8 +2695,9 @@
  },
  "!$UF_Item_CopperOre": {
   "status": "original",
-  "request": "AR-200",
+  "request": "AR-2000",
   "requests": [
+   "AR-2000",
    "AR-200"
   ],
   "usedBy": [
@@ -2750,8 +2715,9 @@
  },
  "!$UF_Item_IronOre": {
   "status": "original",
-  "request": "AR-200",
+  "request": "AR-2000",
   "requests": [
+   "AR-2000",
    "AR-200"
   ],
   "usedBy": [
@@ -2769,8 +2735,11 @@
  },
  "!$UF_Item_Log": {
   "status": "original",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-2000",
+  "requests": [
+   "AR-2000",
+   "AR-2010"
+  ],
   "usedBy": [
    "item log \"Log\"",
    "item plank_dressed \"Dressed timber plank\" (tint #d0a060)"
@@ -2788,17 +2757,20 @@
  },
  "!$UF_Item_MeatCooked": {
   "status": "original",
-  "request": "AR-200",
+  "request": "AR-2000",
   "requests": [
+   "AR-2000",
    "AR-200"
   ],
   "usedBy": [
-   "item meat_cooked \"Cooked meat\""
+   "item meat_cooked \"Cooked meat\"",
+   "item rations \"Rations (1 day)\""
   ],
   "states": [
    "lies on a cell as a stack (one frame; carried items are not drawn yet)",
-   "eaten: −50 hunger",
-   "made by: Roast meat, Roast fish"
+   "meat_cooked: eaten: −50 hunger",
+   "meat_cooked: made by: Roast meat, Roast fish",
+   "rations: eaten: −100 hunger"
   ],
   "category": "items",
   "file": "img/characters/!$UF_Item_MeatCooked.png",
@@ -2808,8 +2780,9 @@
  },
  "!$UF_Item_MeatRaw": {
   "status": "original",
-  "request": "AR-200",
+  "request": "AR-2000",
   "requests": [
+   "AR-2000",
    "AR-200"
   ],
   "usedBy": [
@@ -2828,24 +2801,15 @@
  },
  "!$UF_Item_Stone": {
   "status": "original",
-  "request": "AR-200",
+  "request": "AR-2000",
   "requests": [
+   "AR-2000",
    "AR-200",
    "AR-201",
    "AR-906",
-   "AR-1200",
-   "AR-1203",
-   "AR-1205",
-   "AR-1207",
-   "AR-1210",
+   "AR-2010",
    "AR-044",
-   "AR-104",
-   "AR-022",
-   "AR-1720",
-   "AR-1722",
-   "AR-1742",
-   "AR-105",
-   "AR-1901"
+   "AR-104"
   ],
   "usedBy": [
    "item stone \"Stone\"",
@@ -2866,8 +2830,9 @@
  },
  "!$UF_Item_Straw": {
   "status": "original",
-  "request": "AR-200",
+  "request": "AR-2000",
   "requests": [
+   "AR-2000",
    "AR-200",
    "AR-104"
   ],
@@ -2905,8 +2870,10 @@
  },
  "!$UF_Kitchen_Hearth": {
   "status": "original",
-  "request": "none yet",
-  "requests": [],
+  "request": "AR-2010",
+  "requests": [
+   "AR-2010"
+  ],
   "usedBy": [
    "object kitchen_hearth \"Cooking hearth\""
   ],
@@ -3671,7 +3638,7 @@
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
-   "worn on the pair: clothing tier 1 = Woven wrap equipped",
+   "worn on the pair: clothing tier 1 = Common clothes equipped",
    "worn on the pair: clothing tier 3 = Iron mail equipped"
   ],
   "category": "people",
@@ -3692,7 +3659,7 @@
   ],
   "states": [
    "4 facings × stand/walk (3 columns × 4 rows)",
-   "worn on the pair: clothing tier 1 = Woven wrap equipped",
+   "worn on the pair: clothing tier 1 = Common clothes equipped",
    "worn on the pair: clothing tier 3 = Iron mail equipped"
   ],
   "category": "people",
@@ -3841,54 +3808,6 @@
   ],
   "category": "people",
   "file": "img/characters/$UF_Gnome_Male.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "not in 8e5fdc1"
- },
- "$UF_Goblin_Female": {
-  "status": "original",
-  "request": "AR-900",
-  "requests": [
-   "AR-900",
-   "AR-400",
-   "AR-600",
-   "AR-1704",
-   "AR-1724",
-   "AR-1744"
-  ],
-  "usedBy": [
-   "people goblin"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Goblin_Female.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "not in 8e5fdc1"
- },
- "$UF_Goblin_Male": {
-  "status": "original",
-  "request": "AR-900",
-  "requests": [
-   "AR-900",
-   "AR-400",
-   "AR-600",
-   "AR-1704",
-   "AR-1724",
-   "AR-1744"
-  ],
-  "usedBy": [
-   "people goblin"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Goblin_Male.png",
   "exists": true,
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
@@ -4247,54 +4166,6 @@
   "sidecar": true,
   "statusWhy": "not in 8e5fdc1"
  },
- "$UF_Orc_Female": {
-  "status": "original",
-  "request": "AR-900",
-  "requests": [
-   "AR-900",
-   "AR-400",
-   "AR-600",
-   "AR-1705",
-   "AR-1725",
-   "AR-1745"
-  ],
-  "usedBy": [
-   "people orc"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Orc_Female.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "not in 8e5fdc1"
- },
- "$UF_Orc_Male": {
-  "status": "original",
-  "request": "AR-900",
-  "requests": [
-   "AR-900",
-   "AR-400",
-   "AR-600",
-   "AR-1705",
-   "AR-1725",
-   "AR-1745"
-  ],
-  "usedBy": [
-   "people orc"
-  ],
-  "states": [
-   "4 facings × stand/walk (3 columns × 4 rows)",
-   "faction member at a site (wanders); the player's faction's people become colonists and work: chop / gather / build / carry / hunt (AR-600 work, carry, attack columns)"
-  ],
-  "category": "people",
-  "file": "img/characters/$UF_Orc_Male.png",
-  "exists": true,
-  "sidecar": true,
-  "statusWhy": "not in 8e5fdc1"
- },
  "img/system/IconSet.png": {
   "status": "original",
   "request": "AR-800",
@@ -4531,6 +4402,24 @@
   ],
   "category": "tiles",
   "file": "img/tilesets/Outside_A1.png (A1 autotile 2720)",
+  "exists": true,
+  "sidecar": false,
+  "statusWhy": "in 8e5fdc1 but changed since"
+ },
+ "Outside_A2": {
+  "status": "original",
+  "request": "AR-100",
+  "requests": [
+   "AR-100"
+  ],
+  "usedBy": [
+   "tileset 91 slot A2: all 26 ground kinds (UF_Tiles draws them from groundKinds[].colors/pattern)"
+  ],
+  "states": [
+   "26 kinds × 47 autotile shapes on one 768×576 sheet"
+  ],
+  "category": "tiles",
+  "file": "img/tilesets/Outside_A2.png",
   "exists": true,
   "sidecar": false,
   "statusWhy": "in 8e5fdc1 but changed since"
