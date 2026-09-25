@@ -21,6 +21,7 @@ The project owner explicitly directs **MAXIMUM PRODUCTIVE USE** of all available
 5. **No Pointless Waste:** Every consumed token must yield tangible project value. Fictitious busywork, repetitive restatements, and circular unevidenced reviews are strictly prohibited.
 
 ### Related Standards & Registries
+- **Performance Architecture Standard:** [`docs/PERFORMANCE_ARCHITECTURE.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/PERFORMANCE_ARCHITECTURE.md) (Demand-driven runtime performance standard)
 - **Quality Engineering Standard:** [`docs/QUALITY_ENGINEERING_POLICY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/QUALITY_ENGINEERING_POLICY.md) (`SPEC → IMPLEMENT → BREAK → BENCHMARK → INTEGRATE`)
 - **Master Risk Register:** [`docs/RISK_REGISTER.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/RISK_REGISTER.md) (Autonomous risk mitigation backlog)
 - **Model Availability:** [`docs/MODEL_AVAILABILITY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/MODEL_AVAILABILITY.md) (Real-time provider state and model discovery)
