@@ -96,9 +96,11 @@ If "Not done / known problems" is empty, reread your evidence. It's almost never
 Player-facing text never uses Ultima or DF proper nouns or signature terms (Avatar, Britannia, Guardian, Lord British, Iolo, Dupre, Shamino, Fellowship, moongate, Urist, Armok, "strange mood", "fey mood", …). It also never uses D&D product-identity creatures (beholder, mind flayer/illithid, displacer beast, githyanki, …). Generic fantasy is fine: elves, dwarves, goblins, trolls, dragons. If any text comes from the D&D SRD 5.1, it's CC-BY-4.0 and needs attribution in the game credits.
 
 ## Agents and collaboration
-Roles (updated by user directive 2026-09-20; establishes unified full-stack capability):
-- **Gemini / Antigravity**: Full-stack systems engineering, plugin architecture (`game/js/plugins/`), automated test harnesses (`tools/`), data schemas (`game/data/`), and original art production via Google Nano Banana Pro (`art/`, `game/img/`).
-- **Claude Code**: Systems engineering, engine plugins, automated test suites, data catalogs, and asset integration review.
+Cross-model agent roles, decision authorities, and responsibilities are canonically governed by [`docs/CANONICAL_ROLES.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/CANONICAL_ROLES.md) (Owner Directive 2026-09-25):
+- **Gemini / Antigravity**: Coordinator, WBS controller, integration authority, non-living art production pipeline via Google Nano Banana Pro. Does not self-certify.
+- **Claude / Fable**: Primary implementer for engine, simulation, and society leaves.
+- **Grok**: Independent adversarial review, mutation design, defect closure, performance attack plans.
+- **Codex**: Bounded tooling, test harnesses, scripts, governance & telemetry utilities.
 
 Who touches what:
 | Path | Owner |

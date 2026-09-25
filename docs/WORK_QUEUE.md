@@ -2,7 +2,8 @@
 
 **Owner Terminal:** Gemini  
 **Last Updated:** 2026-09-25  
-**Active Engine Gate:** Year-0 default + Z-2 generated-cut proof + Phase 1 baseline file (Slice 1 playtest remains AWAITING OWNER separately; WG.00.09 / 19C remains QUEUED)  
+**Active Engine Gate:** Parallel Lanes A–E (Lane A: 19B Closeout, Lane B: Year-0 Verification, Lane C: WG.00.12 Non-Moving Consolidation, Lane D: Adversarial Review, Lane E: WG.00.09 Attack Plan). Slice 1 remains AWAITING OWNER separately; WG.00.09 implementation remains QUEUED pending repository layout freeze.  
+**Hardware Rule:** Max 1 heavy local job cap LIFTED as of 2026-09-25 (Owner decision). Auto-tripwire: instantaneous power loss reinstates cap of 1 immediately.
 
 ---
 
@@ -122,4 +123,27 @@ Every work block MUST declare:
 - **Provenance & Licensing**: 100% original code and logic; zero ripped reference code.
 - **Rollback / Recovery Plan**: Git commit baseline `17039c1de8c2d09b2c606dcd7fc1838398b65657`.
 - **Expected Handoff Destination**: Verification, Debug & Performance (Gemini) -> Native MZ & Player Review (Owner).
+
+---
+
+### Block `WB-004`: WG.00.12 Consolidation Without Moving Files (Lane C)
+- **Objective**: Establish non-moving foundation for repository hygiene, governance, performance profiling, and battle stack audit prior to any physical directory migration.
+- **Priority**: `HIGH`
+- **Status**: `IN_PROGRESS`
+- **Dependencies**: WG.00.08 / FABLE-19B closeout evidence.
+- **Allowed Paths**:
+  - `docs/telemetry/*`
+  - `tools/performance/*`
+  - `tools/governance/*`
+  - `docs/adr/*`
+  - `docs/issues/*`
+- **Forbidden Paths**: Core engine plugins (`game/js/plugins/DEUS_Levels.js`, `DEUS_World.js`, `DEUS_Fluid.js`, etc.); zero file moving/renaming.
+- **Owner Decisions Required**: None (non-moving preparatory work).
+- **Assigned Worker**: Codex (or Claude subagent if Codex unavailable). Reviewer: Gemini.
+- **Automated Acceptance Criteria**:
+  - `tools/performance/` and `tools/governance/` scripts execute cleanly and output verifiable metrics.
+  - Battle stack audit document completed in `docs/adr/`.
+- **Performance Criteria**: Zero runtime engine impact (tooling only).
+- **Rollback / Recovery Plan**: Git branch/worktree isolation.
+- **Expected Handoff Destination**: Architecture Council -> Coordinator Integration.
 

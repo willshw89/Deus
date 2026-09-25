@@ -4,13 +4,42 @@ Project formal name: **DEUS** (formally renamed by user directive 2026-09-20; re
 Update this whenever reality changes. Write only what you've checked, and say how you checked it.
 
 **Last updated:** 2026-09-25
-**Current gate:** Post-19B consolidation + Year-0 default + Z-2 generated-cut proof (Slice 1 remains AWAITING USER REVIEW)
+**Current gate:** Post-19B consolidation + Parallel Lanes A–E (Owner directive 2026-09-25)
+**Hardware Rule:** Max 1 heavy local job cap LIFTED as of 2026-09-25 (Owner decision). Auto-tripwire: instantaneous power loss reinstates cap of 1 immediately.
+
+## Parallel Work Lanes & Ownership Matrix (Owner Directive 2026-09-25)
+
+| Lane | Objective | Primary Writer | Independent Reviewer | File Whitelist / Ownership | Current State |
+|---|---|---|---|---|---|
+| **Lane A** | 19B Closeout & Z-2 Cut Proof | Gemini / Fable | Grok | `tools/test_generated_z2_cut_proof.js`<br>`tasks/WG.00.08/defects.jsonl` | EVIDENCE DELIVERED (`8d1c7c3`); Awaiting Grok closure |
+| **Lane B** | ATK-YEAR0-001 (New Game Year 0) | Fable / Gemini | Grok | `game/js/plugins/DEUS_FactionMenus.js`<br>`tools/test_new_game_year0.js` | FIX COMMITTED (`8d1c7c3`); Awaiting Grok verification |
+| **Lane C** | Consolidation Without Moving Files (`WG.00.12`) | Codex / Claude subagent | Gemini | `docs/telemetry/*`<br>`tools/performance/*`<br>`tools/governance/*`<br>`docs/adr/*`<br>`docs/issues/*` | DIRECTORIES CREATED; Tooling & audit in progress |
+| **Lane D** | Grok Adversarial Review (Consolidation & Fluid/Air) | Grok | Owner / Gemini | `tasks/WG.00.12/grok_adversarial_review.md` | AUDIT ACTIVE; Evaluating git clone risks & fluid/air |
+| **Lane E** | WG.00.09 Depth Renderer Definition & Attack Plan | Fable / Claude subagent | Grok | `docs/systems/UF_Depth_Attack_Plan.md` | SPEC & ATTACK PLAN ONLY; Zero engine implementation |
+
+### File-Ownership Matrix (No Overlapping Write Sets)
+- **Gemini / Coordinator**: WBS documents (`docs/STATUS.md`, `docs/WORK_QUEUE.md`, `docs/CANONICAL_ROLES.md`), mailboxes (`docs/agents/mailboxes/*`), baseline capture.
+- **Lane A & B (Fable / Gemini)**: `game/js/plugins/DEUS_FactionMenus.js`, `tools/test_new_game_year0.js`, `tools/test_generated_z2_cut_proof.js`, `tasks/WG.00.08/defects.jsonl`.
+- **Lane C (Codex / Subagent)**: `docs/telemetry/*`, `tools/performance/*`, `tools/governance/*`, `docs/adr/*`, `docs/issues/*`.
+- **Lane D (Grok)**: `tasks/WG.00.12/` (review reports and adversarial findings).
+- **Lane E (Fable)**: `docs/systems/UF_Depth_Attack_Plan.md` (spec and attack plan only).
+- **FROZEN / READ-ONLY**: `C:\Dev\DEUS` migration frozen until synchronized freeze point; core engine plugins (`game/js/plugins/DEUS_Levels.js`, `DEUS_World.js`, `DEUS_Fluid.js`, etc.) read-only during consolidation.
 
 ## In progress
-- **Gemini / Antigravity (2026-09-25):** Integration Coordinator & Review Authority. Post-19B consolidation window: verified Year-0 default (`tools/test_new_game_year0.js`), generated Z-2 cut proof (`tools/test_generated_z2_cut_proof.js`), child suite isolated timings, durable mailboxes (`docs/agents/mailboxes/`).
-- **Claude / Fable (2026-09-25):** Completed WG.00.08 / FABLE-19B natural cuts and all-Z caves on strata. Standing by for WG.00.09 / FABLE-19C (Global Five-Z Depth Renderer) worktree initialization.
-- **Grok (2026-09-25):** ATK-19B-001 and ATK-19B-002 closed by Grok 2026-09-25 15:54 CDT on 2e4571a/689aff8. ATK-YEAR0-001 open. 19C queued, not armed.
-- **Codex / OpenAI (2026-09-25):** Secondary reviewer standing by for consolidation audit.
+- **Gemini / Antigravity (2026-09-25):** Coordinator & Integration Authority. Managing 3-minute pulse, dispatching Lanes A–E, maintaining mailboxes, enforcing zero self-certification.
+- **Claude / Fable (2026-09-25):** Lane B Year-0 handover verification and Lane E WG.00.09 definition & pre-attack plan.
+- **Grok (2026-09-25):** Lane A Z-2 cut proof closure review, Lane B ATK-YEAR0-001 verification, Lane D consolidation/fluid-air adversarial review.
+- **Codex / Subagent (2026-09-25):** Lane C consolidation tooling (`tools/performance/`, `tools/governance/`, `docs/telemetry/`) and RMMZ battle stack audit.
+
+## WG.00.12 — Non-Moving Consolidation & Subsystem Tooling (Lane C, 2026-09-25)
+- **Status**: `IN PROGRESS`
+- **Scope** (`docs/telemetry/`, `tools/performance/`, `tools/governance/`, `docs/adr/`, `docs/issues/`):
+  - Establish non-moving foundation for repository hygiene prior to any physical directory migration.
+  - Boot/load census: measure initial module load times, companion plugin registration, and memory baseline.
+  - Performance instrumentation: dedicated query-budget profiling scripts and hot-path alloc probes.
+  - Read-only audit of RMMZ battle stack (`BattleManager`, `Scene_Battle`, `Game_Action`) against retro CRPG / D&D 5.1 SRD combat contracts.
+  - Governance tooling: WBS leaf linting, agent mailbox communication verifier, and defect registry audit.
+- **Assigned Writer**: Codex (or Claude subagent if Codex unavailable). Reviewer: Gemini.
 
 ## WG.00.08 / DEUS-TSK-FABLE-19B — Natural Cuts and All-Z Caves on Strata (Fable & Gemini, 2026-09-25)
 - **Status**: `COMPLETED & VERIFIED / CANONICAL MAIN MERGED` [commit `2e4571a`]

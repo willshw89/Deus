@@ -76,6 +76,12 @@ For critical tasks, multi-agent decomposition must avoid echo-chamber consensus 
 - Subagents inspect, reason, test, profile, and propose patches read-only.
 - Parallel writing tasks must operate in isolated git worktrees.
 
+### Hardware Execution Policy & Local Workload Concurrency (Owner Decision, 2026-09-25)
+- **Local Heavy Job Cap Lifted:** The laptop power issue is resolved. The previous "max 1 heavy local job" constraint is formally **LIFTED** as of 2026-09-25 per Owner decision.
+- **Tripwire Rule:** If an instantaneous power-off or sudden shutdown occurs again, the constraint of `MAX_SIMULTANEOUS_HEAVY_LOCAL_JOBS = 1` is **automatically reinstated** until the Owner explicitly lifts it. Any such event must be logged immediately in `docs/STATUS.md`.
+- **Pre-Execution Checkpoint Required:** Before launching any heavy local execution (e.g. multi-seed benchmarks, long Node/NW.js test suites, native playtests), workers must verify that all dirty files are saved, task state is checkpointed, active branch/worktree is recorded, and progress is committed where appropriate.
+- **Post-Crash Recovery:** Following any machine crash or power loss, agents must verify repository integrity (`git status`, `git fsck`) before resuming active workers.
+
 ### Dual-Layer Multi-Agent Architecture
 The coordinator utilizes both:
 1. **Intra-Provider Multi-Agent:** Claude-native subagents, Grok-native subagents/parallel sessions, Gemini subagents.

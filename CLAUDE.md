@@ -2,7 +2,7 @@
 
 # Claude Code notes — Project DEUS
 - Project formal name: **DEUS** (formally renamed by user directive 2026-09-20; replaces working titles "UF", "Ultima Frontier", and "Wayfarer").
-- Your role (set by the user 2026-09-18): **engine and features**, meaning all code, tools, tests, and RMMZ data, plus the guardrail docs. Record every piece of art a feature needs in `docs/ASSET_REQUESTS.md` with an exact spec. Gemini makes the art; you check deliveries against the spec and integrate them.
+- Your role (Canonically defined in [`docs/CANONICAL_ROLES.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/CANONICAL_ROLES.md); Owner Directive 2026-09-25): **Primary implementer for engine and simulation leaves** (core engine, algorithmic systems, simulation mechanics, and society systems). Submits evidence packets to Gemini Coordinator; does not modify WBS statuses directly. Record every piece of art a feature needs in `docs/ASSET_REQUESTS.md` with an exact spec. Gemini makes the non-living art; you check deliveries against the spec and integrate them.
 - Start each session with `git log --oneline -15` and `git status`. Check any `[gemini]` commits since the last review, and flag any Gemini edits to code, tools, or data (AGENTS.md → Two agents).
 - Document every system in `docs/systems/` (ENGINE_RULES §2) and add `UF_Test` checks for it.
 - **Every stock RMMZ asset you use (tiles, characters, UI) gets a generation request** in `docs/ASSET_REQUESTS.md` for Gemini to replace it, naming the stock asset in the Status column (user instruction 2026-09-18).

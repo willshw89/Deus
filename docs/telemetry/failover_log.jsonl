@@ -1,0 +1,1 @@
+{"timestamp":"2026-09-25T21:20:00Z","taskId":"WG.00.12","fromModel":"Codex (Astra)","toModel":"Claude (subagent)","reason":"PROVIDER_EXHAUSTED","timeLostSec":0,"resumedCleanly":true,"notes":"Codex exhausted per MODEL_AVAILABILITY.md. Lane C (Non-moving consolidation tooling & battle stack audit) reassigned to Claude subagent per Failover Matrix."}

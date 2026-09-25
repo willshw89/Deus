@@ -2,7 +2,8 @@
 **Document ID:** `DEUS-GOV-DIVISION-01`  
 **Status:** Authoritative Governance Contract & Collaborative Roadmap  
 **Authority:** User Directive (2026-09-24)  
-**Applicability:** All AI Agents (Gemini & Fable / Claude Code)
+**Applicability:** All AI Agents (Gemini & Fable / Claude Code)  
+**Canonical Roles Precedence:** Overall cross-model AI roles, responsibilities, and decision authorities are canonically defined in [`docs/CANONICAL_ROLES.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/CANONICAL_ROLES.md). This document specifies the domain split between physical world simulation and society behavior.
 
 ---
 
