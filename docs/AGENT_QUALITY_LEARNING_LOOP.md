@@ -9,6 +9,12 @@
 
 > **"DEUS treats every substantive AI task as both project work and evidence about the engineering process. Task assignment, implementation, review, corrections, integration, and final outcomes are recorded in structured form. Valid defects, false positives, correction cycles, escaped bugs, performance results, provider usage, and owner interruptions feed an evidence-based learning loop that improves future routing, prompts, tests, and review strategy. The system does not optimize for token consumption or arbitrary model scores; it optimizes for verified accepted project progress and avoids repeatedly making the same class of mistake."**
 
+### Related Operational Standards
+- **Agent Communication Protocol:** [`docs/AGENT_COMMUNICATION_PROTOCOL.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/AGENT_COMMUNICATION_PROTOCOL.md) (Structured task mailbox & evidence bus)
+- **Agent Utilization Policy:** [`docs/AGENT_UTILIZATION_POLICY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/AGENT_UTILIZATION_POLICY.md) (MAX_MULTIAGENT orchestration)
+- **Quality Engineering Standard:** [`docs/QUALITY_ENGINEERING_POLICY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/QUALITY_ENGINEERING_POLICY.md) (5-phase quality lifecycle)
+- **Performance Architecture:** [`docs/PERFORMANCE_ARCHITECTURE.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/PERFORMANCE_ARCHITECTURE.md) (Demand-driven performance standard)
+
 ---
 
 ## 2. Canonical Task State Machine
