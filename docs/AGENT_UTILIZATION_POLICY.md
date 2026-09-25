@@ -83,7 +83,9 @@ A single-agent or faster model tier (e.g. flash, haiku) is permitted **ONLY** fo
 
 *If there is any reasonable doubt whether a task requires architectural judgment, the orchestrator MUST route to MAX_MULTIAGENT.*
 
-### Task Metadata Tracking
+### Task Metadata & Operational Evidence Rule
+A task is **NOT** considered fully MAX_MULTIAGENT-compliant merely because its selected model supports multi-agent/subagent operation. The orchestrator must record actual operational evidence of multi-agent execution.
+
 Every substantive dispatched task must record:
 ```text
 QUALITY_PROFILE:        MAX_MULTIAGENT | MECHANICAL_FAST
@@ -91,13 +93,20 @@ PARENT_MODEL_REQUESTED: <model_name>
 PARENT_MODEL_ACTUAL:    <model_name>
 REASONING_EFFORT:       <xhigh | high | medium | low>
 CONTEXT_MODE:           <1M | standard>
+MULTIAGENT_SUPPORTED:   YES | NO
 MULTIAGENT_REQUESTED:   YES
 MULTIAGENT_ACTUAL:      YES | NO
 SUBAGENT_COUNT:         <count>
 SUBAGENT_ROLES:         [<role1>, <role2>, ...]
+PARALLEL_AGENT_COUNT:   <count> (if applicable)
 PROVIDER_STATE:         <AVAILABLE | LIMITED | EXHAUSTED>
-FALLBACK_REASON:        <NONE | reason_for_downgrade>
+FALLBACK_REASON:        <NONE | reason if actual multi-agent execution did not occur>
 ```
+
+#### Historical vs. Future Task Classification
+- **Active Tasks (FABLE-19B, GROK-TASK-D):** Running prior to this directive; recorded as:
+  `MAX_QUALITY = YES`, `MULTIAGENT_ACTUAL = UNKNOWN / NO EVIDENCE` (unless runtime logs substantiate subagent calls).
+- **Subsequent Dispatches:** Must actively deploy and evidence multi-agent execution whenever supported by the provider CLI.
 
 ---
 
