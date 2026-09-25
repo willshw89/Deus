@@ -23,6 +23,7 @@ This document defines the authoritative, step-by-step path from the initial five
 4. **Actual RMMZ Runtime Verification:** Definition of Done requires running in actual RMMZ Playtest (NW.js / F5). Automated test harnesses must prove capability to fail (Rule 4).
 5. **No Blind Mass Art Generation:** Every asset must possess an explicit semantic ID, metadata specification, and pre-allocated permanent atlas slot before generation.
 6. **Production Blur Elimination:** Depth compositing utilizes physical geometry, scale recession, subtle parallax, and restrained brightness/saturation/contrast steps. **Blur is OFF for production.**
+7. **World Year 0 Starting Principle:** Every standard DEUS New Game begins at World Year 0. Worldgen creates the initial viable Year-0 physical world (geology, 5 macro-Z levels, 5 strata, hydrology, ecology, finite materials, 9 faction starting camps of 8 founders = 72 colonists). History is NOT pre-materialized (no pre-generating centuries of roads, abandoned towns, old kingdoms, historical mines, exhausted veins, battlefield debris, or ancient coins). All history emerges through live simulation. Simulating forward (100, 250, 500 years) is preserved as a developer / simulation / scenario tool, not a standard New Game starting option. The WG.90 completion gate requires a viable living Year-0 world ready for simulation, not pre-aged historical materialization.
 
 ---
 
@@ -190,7 +191,7 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | **WG.84.01** | Multi-Seed Procedural WorldGen QA | Gemini | Headless audit over 20 randomized seeds checking stability, viability, and errors. | `PLANNED` |
 | **WG.85.01** | Engine Performance, Heap & Load QA | Gemini / Fable | Verify 60 FPS viewport rendering, zero frame spikes, and <3.5MB area memory. | `PLANNED` |
 | **WG.86.01** | Golden Master WorldGen Regression Freeze | Gemini / Fable | Automated golden test suite locking worldgen seeds and baseline checksums. | `PLANNED` |
-| **WG.90.01** | DEUS WORLDGEN v1 — COMPLETE | User / Gemini | Formal Owner final acceptance and sign-off of complete WorldGen subsystem. | `PLANNED` |
+| **WG.90.01** | DEUS WORLDGEN v1 — COMPLETE | User / Gemini | Formal Owner final acceptance and sign-off of complete Year-0 WorldGen subsystem (viable, solvable, living Year-0 world ready for simulation). | `PLANNED` |
 
 ---
 

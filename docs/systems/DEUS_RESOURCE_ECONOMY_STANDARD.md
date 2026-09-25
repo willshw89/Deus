@@ -153,6 +153,13 @@ Conserved resources cannot be garbage-collected or deleted upon damage/destructi
    - $1\ \text{destroyed stone wall} \to 1\ \text{rubble pile}$ ($80\text{–}100\%$ recoverable stone blocks).
 4. **Starter Kit Conservation:** Founder equipment, starting tools, and embark coin bags are **debited directly from the world total** at generation. No free matter is spawned ex nihilo.
 
+#### Year 0 Initial Material Distribution
+At standard New Game (**World Year 0**):
+- Over $99.9\%$ of finite metals and stone exist in their native geological strata ($N_{\text{deposits}}$).
+- Only the initial starter tools, basic weapons, and starting kits of the 72 founders exist as manufactured items ($E_{\text{equipment}}$), debited from the world total.
+- **Zero pre-aged historical circulation:** There are no pre-generated centuries of circulating coins ($C_{\text{currency}} \approx 0$ except starter purses), no fictional exhausted mines, no ancient battlefield scrap piles ($R_{\text{salvage}} = 0$), and no pre-built ruins across the landscape.
+- **Emergent Material History:** All subsequent manufactured goods, town treasuries, coins, battlefield salvage, and structural ruins develop organically through live simulation ticks after Year 0.
+
 ---
 
 ### 6. Geological Deposit-Generation Specification
