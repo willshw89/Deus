@@ -8,7 +8,7 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress
 - **Fable / Claude Code (2026-09-24):** Completed `DEUS-TSK-FABLE-19A` (Five-Strata Geometry Authority & Foundation Migration; commit `edba004`). Native RMMZ smoke gate PASSED and 19A is FINAL ACCEPTED / OWNER APPROVED. `DEUS-TSK-FABLE-19B` (Cuts + Caves on Strata) authorized with Deep-Cut requirements.
-- **Gemini (2026-09-24):** Authoring DEUS Resource Economy & WorldGen Standard (Balance v0.1: Finite Materials + Renewable Ecology + Physical Currency; task DEUS-TSK-FABLE-20 / DEUS-ECON-01), machine-readable registry `game/data/DEUS_ResourceRegistry.json`, validation test harness `tools/test_resource_economy_standard.js`, and bounded implementation handoff. World-art foundation leaf `DW.01.05` is `FINAL FROZEN / OWNER APPROVED` at commit `f208000`. Next world-art leaf `DW.01.06` remains paused at gate during this engineering track.
+- **Gemini (2026-09-24):** Integration Coordinator & Authority for `DEUS-WORLDGEN-WBS-v1.0` (`docs/worldgen/DEUS_WORLDGEN_WBS.md`). Freezing WG.00.06 (FABLE-19A native smoke gate verified), preparing bounded prompt for `WG.00.08 / DEUS-TSK-FABLE-19B` (Cuts + Caves on Strata), and queuing `WG.00.07` (Fluid ↔ Strata Reconciliation). All art generation strictly held until asset catalogues (WG.20–WG.25) and atlas slot assignments (WG.30–WG.33) are frozen.
 - **Astra (2026-09-24):** On hold / consumed per user directive.
 
 ## DEUS-TSK-FABLE-19A — Five-strata geometry authority & foundation migration (Fable, 2026-09-24)
