@@ -7,8 +7,8 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (Autonomous Shelter Construction Loop COMPLETE — AWAITING USER REVIEW)
 
 ## In progress
-- **Fable / Claude Code (2026-09-24):** Assigned `DEUS-TSK-FABLE-19` (Global Five-Layer Vertical Exposure + WorldGen Cuts; see `docs/DEUS_TSK_FABLE_19_HANDOFF.md`). Temporary bounded ownership over vertical depth rendering (`DEUS_Depth.js`), natural vertical cut generation in worldgen (`DEUS_WorldGen.js`, `DEUS_World.js`), depth-mask caching/invalidation, and native proof/regression tests. (Previous autonomous soak `DEUS-TSK-FABLE-18` active in worktree).
-- **Gemini (2026-09-24):** DEUS Integration Coordinator standing by for Fable's return / coordinator review on `DEUS-TSK-FABLE-19`. World-art foundation leaf `DW.01.05` is `FINAL FROZEN / OWNER APPROVED` at commit `f208000`. Next world-art leaf is `DW.01.06 — Freeze Seamless Autotile & Terrain Assembly Standard` (authorized; pending prompt).
+- **Fable / Claude Code (2026-09-24):** Assigned `DEUS-TSK-FABLE-19A` (Five-Strata Geometry Authority & Foundation Migration; see `docs/DEUS_TSK_FABLE_19_HANDOFF.md`). Temporary bounded ownership over `DEUS_Levels.js`, compact strata storage, volumetric damage API, legacy shape adapters, and foundation tests. (Phases 19B and 19C are strictly gated behind 19A completion and coordinator review).
+- **Gemini (2026-09-24):** DEUS Integration Coordinator standing by for Fable's return / coordinator review on `DEUS-TSK-FABLE-19A`. World-art foundation leaf `DW.01.05` is `FINAL FROZEN / OWNER APPROVED` at commit `f208000`. Next world-art leaf `DW.01.06` remains paused at gate during this engineering track.
 - **Astra (2026-09-24):** On hold / consumed per user directive.
 
 ## DW.01.05 — Freeze Palette Architecture & Family Material Ramps (2026-09-24)
