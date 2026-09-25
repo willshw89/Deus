@@ -150,9 +150,15 @@ The initial registry accounts for all fifteen natural-world systems across Proje
 | `STATE_FIRE_TREE_CHARRED` | `ECOLOGY_WILDFIRE` | Standing dead tree skeleton | `VISUAL_REQUIRED` | `FAM_FIRE_TERRAIN` | `tree_charred_trunk` |
 | `STATE_FIRE_ACTIVE_FRONT` | `ECOLOGY_WILDFIRE` | Active combustion on cell | `VFX_REQUIRED` | `FAM_FIRE_VFX` | `vfx_flame_loop` |
 | `STATE_FIRE_SMOKE_PLUME` | `ECOLOGY_WILDFIRE` | Upward particulate convection column | `VFX_REQUIRED` | `FAM_FIRE_VFX` | `vfx_smoke_plume` |
-| `STATE_WILDLIFE_GRAZING_DENSITY`| `ECOLOGY_WILDLIFE` | Herbivore biomass per square mile | `SIMULATION_ONLY` | *None* | *None* |
-| `STATE_WILDLIFE_PREDATOR_DENSITY`| `ECOLOGY_WILDLIFE` | Carnivore biomass per square mile | `SIMULATION_ONLY` | *None* | *None* |
-| `STATE_WILDLIFE_GAME_TRAIL` | `ECOLOGY_WILDLIFE` | Trampled ground path from frequent travel | `VISUAL_REQUIRED` | `FAM_SUCCESSION_STAGE`| `game_trail_trampled`|
+| `STATE_WILDLIFE_GRAZING_DENSITY`| `CREATURE_ECOLOGY` | Herbivore biomass per square mile | `SIMULATION_ONLY` | *None* | *None* |
+| `STATE_WILDLIFE_PREDATOR_DENSITY`| `CREATURE_ECOLOGY` | Carnivore/Monster biomass per square mile | `SIMULATION_ONLY` | *None* | *None* |
+| `STATE_WILDLIFE_GAME_TRAIL` | `CREATURE_ECOLOGY` | Trampled ground path from frequent animal travel | `VISUAL_REQUIRED` | `FAM_SUCCESSION_STAGE`| `game_trail_trampled`|
+| `STATE_HABITAT_PREY_RICH` | `CREATURE_ECOLOGY` | High density of forage and herbivore prey | `SIMULATION_ONLY` | *None* | *None* |
+| `STATE_HABITAT_PREDATOR_HIGH` | `CREATURE_ECOLOGY` | Dangerous apex or monster hunting grounds | `SIMULATION_ONLY` | *None* | *None* |
+| `STATE_SPECIES_LOCAL_EXTIRPATED`| `CREATURE_ECOLOGY` | Species hunted out or driven from local area | `SIMULATION_ONLY` | *None* | *None* |
+| `STATE_SPECIES_MIGRATING` | `CREATURE_ECOLOGY` | Regional herd/pack seasonal transit | `SIMULATION_ONLY` | *None* | *None* |
+| `STATE_LAIR_ACTIVE` | `CREATURE_ECOLOGY` | Occupied beast den, monster cavern, or nest | `VISUAL_REQUIRED` | `FAM_HISTORICAL_RUIN` | `lair_beast_entrance` |
+| `STATE_REGION_OVERGRAZED` | `CREATURE_ECOLOGY` | Flora stripped by excess herbivore biomass | `VISUAL_REQUIRED` | `FAM_SUCCESSION_STAGE`| `scrub_dense` |
 | `STATE_SNOW_LIGHT_DUSTING` | `SEASONAL_SNOWPACK` | Snow accumulation `0.1..0.5 ft` | `VISUAL_REQUIRED` | `FAM_SNOW_ACCUMULATION`| `snow_dusting` |
 | `STATE_SNOW_DEEP_STRATUM` | `SEASONAL_SNOWPACK` | Snow accumulation `1.0..3.0 ft` (physical) | `VISUAL_REQUIRED` | `FAM_SNOW_ACCUMULATION`| `snow_deep_stratum` |
 | `STATE_SNOW_SLUSH_THAW` | `SEASONAL_SNOWPACK` | Melting snowpack with mud pools | `VISUAL_REQUIRED` | `FAM_SNOW_ACCUMULATION`| `snow_slush_thaw` |

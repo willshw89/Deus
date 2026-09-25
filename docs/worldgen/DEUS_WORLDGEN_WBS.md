@@ -62,7 +62,7 @@ WG.64 — Geology-Driven Features, Karst & Geothermal Systems
 WG.65 — World Lifecycle, Geomorphology & Natural Reclamation Architecture
 WG.66 — Natural Hydrology, Groundwater & Watershed Architecture
 WG.67 — Soil Formation, Fertility & Microclimate Systems
-WG.68 — Living Ecology, Succession & Wildlife Systems
+WG.68 — Living Ecology, Flora Succession, Wildlife & Monster Systems
 WG.70 — Multi-Scale Visual Placement (Macro/Meso/Micro Density)
 WG.71 — Environmental Sprite Animation Runtime Integration
 WG.72 — Five-Z Visual Compositing & Occlusion Integration
@@ -271,10 +271,10 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 
 ---
 
-### WG.68 — Living Ecology, Succession & Wildlife Systems
+### WG.68 — Living Ecology, Flora Succession, Wildlife & Monster Systems
 
-*Governed by Owner Directive (2026-09-25), [`docs/worldgen/DEUS_NATURAL_WORLD_SYSTEMS.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_NATURAL_WORLD_SYSTEMS.md), and [`docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md)*  
-*Core Principle: Living ecology recovers predictably through multi-stage succession; wildfire and wildlife operate under event-driven, bounded performance budgets.*
+*Governed by Owner Directive (2026-09-25), [`docs/worldgen/DEUS_CREATURE_ECOLOGY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_CREATURE_ECOLOGY.md), [`docs/worldgen/DEUS_NATURAL_WORLD_SYSTEMS.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_NATURAL_WORLD_SYSTEMS.md), and [`docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md)*  
+*Core Principle: Wildlife and monsters share one underlying living-world ecology framework (habitat suitability, persistent populations, carrying capacity, food webs, lairs, migration); supernatural exceptions override specific biological rules without creating separate spawn architectures.*
 
 | WBS Leaf | Title | Owner | Scope & Deliverables | Status |
 | :--- | :--- | :---: | :--- | :---: |
@@ -284,8 +284,16 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | **WG.68.04** | Spatially Bounded Wildfire Simulation | Fable | Ignition from lightning, lava, or campfires; fire propagation driven by fuel moisture, fuel load, wind vector, and slope. | `PLANNED` |
 | **WG.68.05** | Active-Front Fire Queue & Event-Driven Burning | Fable | Zero per-frame cost for dormant vegetation; simulation ticks only active combustion fronts in localized dirty bounding boxes. | `PLANNED` |
 | **WG.68.06** | Burn Scars, Ash Beds & Fireweed Regrowth | Gemini / Fable | Post-fire charred tree skeletons, scorched earth, soot beds, and rapid colonization by specialized fireweed flora. | `PLANNED` |
-| **WG.68.07** | Wildlife Territory, Grazing & Food Webs | Fable | Simplified ecological chain (Vegetation $\rightarrow$ Herbivores $\rightarrow$ Predators); animals establish home territories around water. | `PLANNED` |
-| **WG.68.08** | Wildlife Seasonal Migration & Hunting Response | Fable | Altitude migration between seasons; animal populations flee wildfire and hunting pressure, trampling natural game trails. | `PLANNED` |
+| **WG.68.07** | Unified Creature Ecology Model | Fable | Common biological & ecological schema for wildlife, domestic animals, and biological monsters. | `PLANNED` |
+| **WG.68.08** | Habitat Suitability & Carrying Capacity Solver | Fable | Physical terrain suitability determines creature presence; zero arbitrary timer-based spawn points. | `PLANNED` |
+| **WG.68.09** | Food-Web Dynamics, Predation & Scavenging | Fable | Multi-tiered food web (Producers $\rightarrow$ Herbivores $\rightarrow$ Predators $\rightarrow$ Apex Beasts $\rightarrow$ Scavengers); trophic cascades. | `PLANNED` |
+| **WG.68.10** | Territorial Home Ranges, Dens, Nests & Lairs | Fable | Physical creature habitations (burrows, dens, canopy nests, cave lairs, ruin lairs); territorial defense. | `PLANNED` |
+| **WG.68.11** | Persistent Populations & Local Extirpation | Fable | Persistent population tracking; overhunting causes local extirpation; zero infinite magical respawning. | `PLANNED` |
+| **WG.68.12** | Regional Seasonal Migration & Disturbance Fleeing| Fable | Coarse regional animal migration between altitudes and biomes; flight from wildfire, flood, or hunting. | `PLANNED` |
+| **WG.68.13** | Monster Supernatural Overrides & Exceptions | Fable | Override framework for undead, elementals, constructs, summoned entities, slimes, and ancient dragons. | `PLANNED` |
+| **WG.68.14** | Civilization Interactions & Ecological Feedback | Fable | 10 behavioral archetypes (human-avoidant, scavenger, livestock-predator, crop-pest, etc.); colonist pressure. | `PLANNED` |
+| **WG.68.15** | Master Semantic Creature Catalogue & Gate | Gemini | Register all approved wildlife & monster species with dimensions, ecology profiles, and atlas destinations before art generation. | `PLANNED` |
+| **WG.68.16** | Shared Creature Animation & Behavior Primitives | Gemini / Fable | Universal 12-sprite layout standard ($144\times 192$ or $288\times 384$ px); shared behavior tree primitives. | `PLANNED` |
 
 ---
 

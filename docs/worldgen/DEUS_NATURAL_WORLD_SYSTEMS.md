@@ -163,7 +163,7 @@ flowchart TD
     CLIM["4. CLIMATE & MICROCLIMATES<br/>(WG.00.04, WG.67)<br/>Temp, Rainfall, Aspect, Altitude"]
     SOIL["5. SOIL FORMATION & MOISTURE<br/>(WG.67)<br/>Weathered Rock, Alluvium, Moisture Bands"]
     VEG["6. VEGETATION & SUCCESSION<br/>(WG.68)<br/>Pioneer Weeds, Grass, Scrub, Forest"]
-    WILD["7. WILDLIFE & FOOD WEBS<br/>(WG.68)<br/>Herbivores, Predators, Territory"]
+    CREAT["7. CREATURE ECOLOGY & FOOD WEBS<br/>(WG.68, DEUS_CREATURE_ECOLOGY.md)<br/>Wildlife, Monsters, Domesticated, Lairs"]
     LAND["8. LANDMARK DETECTION<br/>(WG.63)<br/>Waterfalls, Arches, Great Caves"]
     DIST["9. DISTURBANCE FORCES<br/>(WG.65, WG.68)<br/>Mining, Logging, Wildfire, Flooding"]
     RECL["10. NATURAL RECLAMATION<br/>(WG.65)<br/>Weathering, Sedimentation, Re-vegetation"]
@@ -178,10 +178,10 @@ flowchart TD
     CLIM --> SOIL
     SOIL --> VEG
     CLIM --> VEG
-    VEG --> WILD
-    HYDRO --> WILD
+    VEG --> CREAT
+    HYDRO --> CREAT
     TOPO & HYDRO & GEO --> LAND
-    VEG & WILD & SOIL --> DIST
+    VEG & CREAT & SOIL --> DIST
     DIST --> RECL
     RECL --> SOIL
     DIST & LAND & HYDRO --> HIST
