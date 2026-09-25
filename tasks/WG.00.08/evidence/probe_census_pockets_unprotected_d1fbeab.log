@@ -1,0 +1,22 @@
+d1fbeab84a9ca07fce905f65d5bbffc6148c566c
+2026-09-25T17:06:49-05:00
+=== WG.00.08 2.2c probe: seeds 18,3,21,4; suite tools\test_strata_cuts_and_caves.js; mutants taken from its MUTANTS table; census only, generator 5 with MUTANT pockets_unprotected ===
+--- seed 18
+FLUID seed 18: generator 4 fluid strata 406 {"-2":128,"-1":278}; generator 5 406 {"-2":128,"-1":278}; generator-4 fluid strata not the same fluid in generator 5: 0
+UNDER-FLUID seed 18: fluid strata resting on air: generator 4 0, generator 5 0; strata carved (solid in 4, air in 5) below a fluid stratum of the same column: 0
+CARVED seed 18 (MUTANT pockets_unprotected, uninstrumented): cave networks 16, shafts 2, skylights carved 3 [{"network":5,"x":96,"y":175,"floor":15,"cells":5},{"network":8,"x":30,"y":206,"floor":10,"cells":5},{"network":12,"x":215,"y":208,"floor":5,"cells":5}]
+--- seed 3
+FLUID seed 3: generator 4 fluid strata 386 {"-2":120,"-1":266}; generator 5 386 {"-2":120,"-1":266}; generator-4 fluid strata not the same fluid in generator 5: 0
+UNDER-FLUID seed 3: fluid strata resting on air: generator 4 0, generator 5 0; strata carved (solid in 4, air in 5) below a fluid stratum of the same column: 0
+CARVED seed 3 (MUTANT pockets_unprotected, uninstrumented): cave networks 12, shafts 1, skylights carved 2 [{"network":2,"x":103,"y":216,"floor":11,"cells":5},{"network":3,"x":190,"y":232,"floor":15,"cells":5}]
+--- seed 21
+FLUID seed 21: generator 4 fluid strata 408 {"-2":128,"-1":280}; generator 5 408 {"-2":128,"-1":280}; generator-4 fluid strata not the same fluid in generator 5: 0
+UNDER-FLUID seed 21: fluid strata resting on air: generator 4 0, generator 5 0; strata carved (solid in 4, air in 5) below a fluid stratum of the same column: 0
+CARVED seed 21 (MUTANT pockets_unprotected, uninstrumented): cave networks 17, shafts 2, skylights carved 4 [{"network":4,"x":51,"y":53,"floor":11,"cells":5},{"network":5,"x":97,"y":48,"floor":11,"cells":5},{"network":13,"x":69,"y":231,"floor":6,"cells":5},{"network":14,"x":228,"y":232,"floor":5,"cells":3}]
+--- seed 4
+FLUID seed 4: generator 4 fluid strata 400 {"-2":128,"-1":272}; generator 5 400 {"-2":128,"-1":272}; generator-4 fluid strata not the same fluid in generator 5: 0
+UNDER-FLUID seed 4: fluid strata resting on air: generator 4 0, generator 5 0; strata carved (solid in 4, air in 5) below a fluid stratum of the same column: 0
+CARVED seed 4 (MUTANT pockets_unprotected, uninstrumented): cave networks 15, shafts 1, skylights carved 5 [{"network":5,"x":73,"y":193,"floor":15,"cells":5},{"network":6,"x":28,"y":94,"floor":11,"cells":5},{"network":7,"x":226,"y":174,"floor":11,"cells":5},{"network":9,"x":218,"y":154,"floor":6,"cells":5},{"network":10,"x":87,"y":46,"floor":2,"cells":5}]
+TIME 85 s
+RESULT: MUTANT pockets_unprotected: census clean (exit 0)
+EXIT 0

@@ -1,0 +1,53 @@
+d1fbeab84a9ca07fce905f65d5bbffc6148c566c
+2026-09-25T16:56:25-05:00
+=== DEUS-TSK-FABLE-19B natural cuts and all-Z caves: regression seed 18, second seed 3, seed set 18,3,21,4 ===
+INFO newWorld seed 18: generator 5 14466 ms, generator 4 (same code, levelsGen 4) 16057 ms, pre-19B code 16372 ms; natural features 551 ms
+INFO seed set built: 18, 3, 21, 4 (159 s)
+PASS deterministic_same_seed - seed 18 in two vms: strata+connectors+caps per level -2:same -1:same 0:same 1:same 2:same, feature list same; regenerated inside seed 3's world: -2: dcfbb91b, -1: 433f2728, 1: eaf389b9, 2: 9998ffb2
+PASS different_seeds_differ - carved columns: seed 18 4997, seed 3 2027, shared 195 (overlap 2.9 %, limit 25 %); cut anchors 19 / 8, at the same cell 0 (0 %, limit 30 %); seed 3 valid (no floating mass, caves present) true
+PASS old_generator_unchanged - generator 4 (levelsGen 4) vs the pre-19B code (19fcf0e), seed 18: strata per level -2:same -1:same 0:same 1:same 2:same; checksums -2:666ada13 -1:8eda2b93 0:0779462c 1:1496eea4 2:ae3e6025; no features or caps true; a pre-V80 migration's generators [4,4,4,4,4]
+PASS carve_only_removes - 4 seeds, generator 4 -> 5: solid strata carved to air 57026; +2 massif fill on capped summit columns 5345; air -> matter elsewhere 0, solid material changed 0, fluid removed 0; connectors: ramps added 754, other changes on unchanged columns 0
+PASS partial_heights - cut columns of seed 18 by the fill of the cell holding the new top: HEIGHT_1_OF_5 519 e.g. (72,24,-1), HEIGHT_2_OF_5 301 e.g. (77,31,-1), HEIGHT_3_OF_5 472 e.g. (76,29,-1), HEIGHT_4_OF_5 654 e.g. (71,24,-1), HEIGHT_5_OF_5 1064 e.g. (69,23,-1) (want >= 5 each); heightStateAt disagreeing 0
+PASS z0_to_z1_exposure - 751 generated columns of seed 18 open from the ground down to a floor in -1; deepest (190,83): first air 5 ft, ground cell open, -1 cell floor (HEIGHT_0_OF_5), overburden false
+PASS z1_to_z2_exposure - 31 generated sky-open columns of seed 18 whose -1 cell is all air over a floor in -2; deepest (194,89): first air 3 ft, -1 open, -2 floor HEIGHT_3_OF_5
+PASS feature_reaches_z2 - a connected generated cut of seed 18: 207 columns, host levels [1], deepest first air 3 ft at (194,89); traced through the cut up to a column whose natural surface is the ground or higher true
+PASS shallow_more_common - generated cut components over 4 seeds by realized depth: shallow (<= 4 ft) 66, deeper partial 28, exposing -1 to its S0 20, reaching -2 8 (want shallow >= 3 x reaching -2, and at least one reaching -2); 18: 23 shallow / 3 to -2; 3: 8 shallow / 1 to -2; 21: 18 shallow / 2 to -2; 4: 17 shallow / 2 to -2
+PASS caves_on_all_levels - roofed generated cave floors over 4 seeds by level: 2: 930 (seed 18 (87,208)), 1: 1403 (seed 18 (47,98)), 0: 1619 (seed 18 (174,47)), -1: 1378 (seed 18 (43,205)), -2: 2181 (seed 18 (41,206))
+PASS cave_free_terrain - 18: cave columns 2058 (3.14 %), massif 691 (1.05 %); 3: cave columns 1531 (2.34 %), massif 290 (0.44 %); 21: cave columns 1927 (2.94 %), massif 262 (0.40 %); 4: cave columns 1686 (2.57 %), massif 1006 (1.54 %) (limits 5 % and 3 %)
+PASS traversable_terrain - 18: standable 125240/124320 (100.7 %), ground 24408/23939 (102.0 %), largest ground region 14148/14537 (97.3 %), start valley untouched true; 3: standable 128150/127194 (100.8 %), ground 39962/39468 (101.3 %), largest ground region 39557/39320 (100.6 %), start valley untouched true; 21: standable 127618/126036 (101.3 %), ground 12686/11478 (110.5 %), largest ground region 3348/3348 (100.0 %), start valley untouched true; 4: standable 123812/123627 (100.1 %), ground 15315/14346 (106.8 %), largest ground region 4442/4457 (99.7 %), start valley untouched true
+PASS cave_overburden - seed 18: 2128 roofed generated cave floors (hasOpaqueOverburden true and continuousAirHeight = the air run of the strata), 2989 sky-open cut floors (no overburden, Infinity); wrong 0; network chambers roofed at their centres 47/48 (want >= 90 %: a mouth or a cut can open a few): #7 (22,201) floor 10: open to the sky
+PASS cave_void_minimum - roofed generated cave voids over 4 seeds by height (ft): {"3":852,"4":1995,"5":2130,"6":1071,"7":1047,"8":301,"9":77,"10":20,"11":5,"12":8,"13":3,"14":2}; under 3 ft 0
+PASS roof_breach - cave (167,31,0) under 1 ft of roof: before {"ob":true,"cl":"5","shape":"floor"}, dug 1 strata (want 1) -> {"ob":false,"cl":"Infinity","shape":"floor"}, restored {"ob":true,"cl":"5","records":0}; +2 cave (136,176,2) under a stone cap 10 ft: overburden true -> breached (true, levels:capBreached 1) false, clearance 4 -> Infinity; saved and loaded: overburden false, cap gone, saved record true; restored: overburden true, clearance 4, record kept false
+PASS clearance_4_5_more - fixture column (64,30): 1 solid + 4 air under solid 4 ft (derived shape floor: the compatibility view; the clearance is the data), 5 air on -2's S4 5, across -1 and the ground 6 (airRunAt 6), up to +1 9, open sky Infinity, a 2 ft slot 2 (shape solid), solid 0, no floor -1; restored records 0; generated floors: 4 ft (176,39,0), 5 ft (167,31,0), > 5 ft 7 ft (175,46,0); 1,000,000 queries 1440 ns each, heap growth 87152 B (checksum 6075000)
+PASS clearance_stops_at_fluid - fixture column (64,30): -1 stone + 4 water, ground solid: continuousAirHeight 0 (want 0), airRunAt(6) 0 (want 0); -1 stone + 2 air + 2 water: continuousAirHeight 2 (want 2), airRunAt(6) 2 (want 2); -1 stone + water + 3 air (from the floor): continuousAirHeight 0 (want 0), airRunAt(6) 0 (want 0); the same, air run from S2: continuousAirHeight 0 (want 0), airRunAt(7) 3 (want 3); -2 stone + 4 lava, -1 solid: continuousAirHeight 0 (want 0), airRunAt(1) 0 (want 0); -2 stone + 4 air, -1 solid (control): continuousAirHeight 4 (want 4), airRunAt(1) 4 (want 4); restored records 0
+PASS multi_z_connectivity - 3 networks flagged multi-Z in seed 18; #6 from (202,50) floor 10 ft: 658 air strata (roofed), floors on levels [-1,0]; natural ramp connectors added 294, e.g. (71,24,-1) derived ramp
+PASS shafts_keep_fluid - seed 18: 2 shafts, 0 skylights (0 with rock under water); seed 3: 3 shafts, 10 skylights (10 with rock under water); total rock strata under water: 30; after the carve: every planted water stratum still water, no rock under it carved
+PASS no_floating_mass - solid strata not connected to bedrock or the area edge: 18: generator 5 0, generator 4 0; 3: generator 5 0, generator 4 0; 21: generator 5 0, generator 4 0; 4: generator 5 0, generator 4 0; the generator removed 2 unconnected strata in seed 18
+PASS protections - 4 seeds: 208 underground founding squares and pools with their roofs, 106 cliff cave mouths with their corridors, the 12-cell area edge (0 changed), 29801 valley cells within 2 of a cut checked for surface water (0 wet)
+PASS ground_holes - seed 18: 1116 open ground cells (natural cuts): rock face on layers 0 and 2, region 250, not walkable, cellInfo not walkable, no object; objects on unstandable cut cells at +1/+2 0; volumeStats.open 1116
+PASS save_load - generator-5 world saved (575 chars of world state) and loaded: checksums verified (0 mismatches), the dug cave floor (223,46,-1) kept [air,air,air,air,air] (changed true); loaded into a fresh vm that had another world: its checksums regenerate and the dig is there true
+PASS no_parallel_authority - baseline members beyond strata, connectors, biome, surface, caps, legacy views and descriptors: none; feature descriptors 11897 chars (no per-cell grid)
+PASS cost - seed 18: newWorld generator 5 14466 ms vs generator 4 16057 ms (same code) vs pre-19B 16372 ms; natural features 551 ms (bound 3000); seed set newWorld 3: 16656/15426 ms, 21: 16568/15825 ms, 4: 16921/14393 ms; baselines' own memory per area (strata, connectors, biome, surface, caps) 2004376 B vs 1998848 B (caps 691 entries, ~5528 B; bound +256 KiB), with the cached shape grids and built legacy views 2856344 B vs 2326528 B; fresh save 575 vs 662 chars of world state
+PASS fluid_suite - node tools/test_strata_fluid_reconciliation.js: exit 0 in 247 s; PASSED: 36; FAILED: 0; MUTANT VERIFICATION: 5/5 mutants detected.
+PASS foundation_suite - node tools/test_strata_foundation.js: exit 0 in 247 s; RESULT: 26 passed, 0 failed (exit 0)
+PASS no_errors - none
+EVIDENCE (generated worlds; x,y in the start area; levels -2..+2; heights in ft = strata):
+  1. shallow partial-height cut floor: seed 18 (77,31) level -1: HEIGHT_2_OF_5 (natural top 11 ft, cut top 7 ft)
+  2. Z0 -> Z-1 cut: seed 18 (190,83): ground open, -1 floor HEIGHT_0_OF_5, first air at 5 ft (natural 16 ft), open to the sky
+  3. Z-1 -> Z-2 cut: seed 18 (194,89): -1 open (all air), -2 floor HEIGHT_3_OF_5, first air 3 ft (natural 16 ft)
+  4. multi-level feature reaching Z-2: seed 18, ravine (TEMP, class z2) of 207 columns spanning x 187..204, y 72..103, host levels 1, deepest (194,89) first air 3 ft
+  5. Z+2 cave: seed 18 network #0 (151,180): floor first air 21 ft (level 2), clearance 4 ft, roof the ceiling cap
+  6. Z+1 cave: seed 18 network #2 (53,92): floor first air 16 ft (level 1), clearance 3 ft, roof solid from 19 ft
+  7. Z+0 cave: seed 18 network #5 (175,41): floor first air 10 ft (level 0), clearance 5 ft, roof solid from 15 ft
+  8. Z-1 cave: seed 18 network #8 (213,174): floor first air 5 ft (level -1), clearance 5 ft, roof solid from 10 ft
+  9. Z-2 cave: seed 18 network #12 (230,54): floor first air 1 ft (level -2), clearance 4 ft, roof solid from 5 ft
+  11. intact physical cave roof: seed 18 (221,46) level -1: floor 5 ft, clearance 7 ft, solid roof from 12 ft to the rock top at 21 ft (9 ft thick), hasOpaqueOverburden true
+  12. roof breach: seed 18 (167,31) level 0: roof 15..15 ft dug (1 strata) -> hasOpaqueOverburden true -> false, continuousAirHeight 5 -> Infinity
+  12. cap breach: seed 18 (136,176) +2: +2 cave (136,176,2) under a stone cap 10 ft: overburden true -> breached (true, levels:capBreached 1) false, clearance 4 -> Infinity; saved and loaded: overburden false, cap gone, saved record true; restored: overburden true, clearance 4, record kept false
+  M4. clearance 4 ft: seed 18 (176,39) level 0
+  M5. clearance 5 ft: seed 18 (167,31) level 0
+  M>5. clearance 7 ft: seed 18 (175,46) level 0
+  10. multi-Z cave network: seed 18 network #6 (level 0, sloped passage), from (202,50) floor 10 ft one air volume of 658 strata holding floors on levels [-1,0]
+TIME 247.4 s
+RESULT: 28 passed, 0 failed (exit 0)
+EXIT 0

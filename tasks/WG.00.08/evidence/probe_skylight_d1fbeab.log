@@ -1,0 +1,180 @@
+d1fbeab84a9ca07fce905f65d5bbffc6148c566c
+2026-09-25T17:00:41-05:00
+=== WG.00.08 2.2c probe: seeds 18,3,21,4; suite tools\test_strata_cuts_and_caves.js; mutants taken from its MUTANTS table ===
+--- seed 18
+FLUID seed 18: generator 4 fluid strata 406 {"-2":128,"-1":278}; generator 5 406 {"-2":128,"-1":278}; generator-4 fluid strata not the same fluid in generator 5: 0
+UNDER-FLUID seed 18: fluid strata resting on air: generator 4 0, generator 5 0; strata carved (solid in 4, air in 5) below a fluid stratum of the same column: 0
+CARVED seed 18 (real, uninstrumented): cave networks 15, shafts 1, skylights carved 3 [{"network":4,"x":73,"y":155,"floor":15,"cells":5},{"network":7,"x":30,"y":206,"floor":10,"cells":5},{"network":11,"x":215,"y":208,"floor":5,"cells":5}]
+SKYLIGHTS seed 18: networks 15 (by level {"0":3,"1":3,"2":2,"-1":4,"-2":3}), rolled a skylight 4, eligible 3
+  network #4 level 1: node (73,155) floor F 15 ft, h 5 ft; overburden top-(F+h) per disc cell [1,1,1,1,1] (skylightMax 10); ELIGIBLE: the carve loop runs
+  network #7 level 0: node (30,206) floor F 10 ft, h 5 ft; overburden top-(F+h) per disc cell [1,1,1,1,1] (skylightMax 10); ELIGIBLE: the carve loop runs
+  network #10 level -1: node (85,208) floor F 6 ft, h 6 ft; overburden top-(F+h) per disc cell [13,13,13,13,13] (skylightMax 10); REFUSED before the carve loop: skylightMax 5/5
+  network #11 level -1: node (215,208) floor F 5 ft, h 7 ft; overburden top-(F+h) per disc cell [-1,-1,-1,-1,-1] (skylightMax 10); ELIGIBLE: the carve loop runs
+REAL seed 18: planted 2 shaft + 0 skylight water strata (0 skylight columns with rock under the water, 0 rock strata); after the carve: planted water no longer water 0, rock under it carved 0; console.error 0
+MUTANT skylight_through_fluid seed 18: planted 2 shaft + 0 skylight water strata (0 skylight columns with rock under the water, 0 rock strata); after the carve: planted water no longer water 0, rock under it carved 0; console.error 0
+MUTANT shaft_through_fluid seed 18: planted 2 shaft + 0 skylight water strata (0 skylight columns with rock under the water, 0 rock strata); after the carve: planted water no longer water 2, rock under it carved 0; console.error 0
+  shaft (41,206): water at 9 ft now 0
+  shaft (41,207): water at 9 ft now 0
+--- seed 3
+FLUID seed 3: generator 4 fluid strata 386 {"-2":120,"-1":266}; generator 5 386 {"-2":120,"-1":266}; generator-4 fluid strata not the same fluid in generator 5: 0
+UNDER-FLUID seed 3: fluid strata resting on air: generator 4 0, generator 5 0; strata carved (solid in 4, air in 5) below a fluid stratum of the same column: 0
+CARVED seed 3 (real, uninstrumented): cave networks 12, shafts 1, skylights carved 2 [{"network":2,"x":103,"y":216,"floor":11,"cells":5},{"network":3,"x":190,"y":232,"floor":15,"cells":5}]
+SKYLIGHTS seed 3: networks 12 (by level {"0":2,"1":3,"2":1,"-1":2,"-2":4}), rolled a skylight 3, eligible 2
+  network #2 level 1: node (103,216) floor F 11 ft, h 4 ft; overburden top-(F+h) per disc cell [6,6,6,6,6] (skylightMax 10); ELIGIBLE: the carve loop runs
+  network #3 level 1: node (190,232) floor F 15 ft, h 4 ft (stub); overburden top-(F+h) per disc cell [2,2,2,2,2] (skylightMax 10); ELIGIBLE: the carve loop runs
+  network #11 level -2: node (119,218) floor F 2 ft, h 6 ft; overburden top-(F+h) per disc cell [13,13,13,13,13] (skylightMax 10); REFUSED before the carve loop: skylightMax 5/5
+REAL seed 3: planted 3 shaft + 10 skylight water strata (10 skylight columns with rock under the water, 30 rock strata); after the carve: planted water no longer water 0, rock under it carved 0; console.error 0
+  (103,215) water at 20 ft over rock [15,16,17,18,19]
+  (102,216) water at 20 ft over rock [15,16,17,18,19]
+  (103,216) water at 20 ft over rock [15,16,17,18,19]
+  (104,216) water at 20 ft over rock [15,16,17,18,19]
+  (103,217) water at 20 ft over rock [15,16,17,18,19]
+  (190,231) water at 20 ft over rock [19]
+  (189,232) water at 20 ft over rock [19]
+  (190,232) water at 20 ft over rock [19]
+  (191,232) water at 20 ft over rock [19]
+  (190,233) water at 20 ft over rock [19]
+MUTANT skylight_through_fluid seed 3: planted 3 shaft + 10 skylight water strata (10 skylight columns with rock under the water, 30 rock strata); after the carve: planted water no longer water 0, rock under it carved 30; console.error 0
+  skylight (103,215): water at 20 ft now 4, 5 rock strata under it carved
+  skylight (102,216): water at 20 ft now 4, 5 rock strata under it carved
+  skylight (103,216): water at 20 ft now 4, 5 rock strata under it carved
+  skylight (104,216): water at 20 ft now 4, 5 rock strata under it carved
+  skylight (103,217): water at 20 ft now 4, 5 rock strata under it carved
+  skylight (190,231): water at 20 ft now 4, 1 rock strata under it carved
+  skylight (189,232): water at 20 ft now 4, 1 rock strata under it carved
+  skylight (190,232): water at 20 ft now 4, 1 rock strata under it carved
+  skylight (191,232): water at 20 ft now 4, 1 rock strata under it carved
+  skylight (190,233): water at 20 ft now 4, 1 rock strata under it carved
+MUTANT shaft_through_fluid seed 3: planted 3 shaft + 10 skylight water strata (10 skylight columns with rock under the water, 30 rock strata); after the carve: planted water no longer water 3, rock under it carved 0; console.error 0
+  shaft (33,55): water at 9 ft now 0
+  shaft (34,55): water at 9 ft now 0
+  shaft (33,56): water at 9 ft now 0
+--- seed 21
+FLUID seed 21: generator 4 fluid strata 408 {"-2":128,"-1":280}; generator 5 408 {"-2":128,"-1":280}; generator-4 fluid strata not the same fluid in generator 5: 0
+UNDER-FLUID seed 21: fluid strata resting on air: generator 4 0, generator 5 0; strata carved (solid in 4, air in 5) below a fluid stratum of the same column: 0
+CARVED seed 21 (real, uninstrumented): cave networks 17, shafts 2, skylights carved 4 [{"network":4,"x":33,"y":55,"floor":11,"cells":5},{"network":5,"x":97,"y":48,"floor":11,"cells":5},{"network":13,"x":69,"y":231,"floor":6,"cells":5},{"network":14,"x":228,"y":232,"floor":5,"cells":3}]
+SKYLIGHTS seed 21: networks 17 (by level {"0":5,"1":3,"2":1,"-1":6,"-2":2}), rolled a skylight 6, eligible 5
+  network #1 level 1: node (226,40) floor F 15 ft, h 4 ft; overburden top-(F+h) per disc cell [2,2,2,2,2] (skylightMax 10); ELIGIBLE: the carve loop runs
+  network #4 level 0: node (33,55) floor F 11 ft, h 6 ft; overburden top-(F+h) per disc cell [4,4,4,4,4] (skylightMax 10); ELIGIBLE: the carve loop runs
+  network #5 level 0: node (97,48) floor F 11 ft, h 8 ft; overburden top-(F+h) per disc cell [2,2,2,2,2] (skylightMax 10); ELIGIBLE: the carve loop runs
+  network #13 level -1: node (69,231) floor F 6 ft, h 7 ft; overburden top-(F+h) per disc cell [3,3,3,3,3] (skylightMax 10); ELIGIBLE: the carve loop runs
+  network #14 level -1: node (228,232) floor F 5 ft, h 6 ft; overburden top-(F+h) per disc cell [5,7,5,5,5] (skylightMax 10); ELIGIBLE: the carve loop runs
+  network #16 level -2: node (232,54) floor F 1 ft, h 7 ft; overburden top-(F+h) per disc cell [13,13,13,13,13] (skylightMax 10); REFUSED before the carve loop: skylightMax 5/5
+REAL seed 21: planted 8 shaft + 25 skylight water strata (25 skylight columns with rock under the water, 57 rock strata); after the carve: planted water no longer water 0, rock under it carved 0; console.error 0
+  (226,39) water at 20 ft over rock [19]
+  (225,40) water at 20 ft over rock [19]
+  (226,40) water at 20 ft over rock [19]
+  (227,40) water at 20 ft over rock [19]
+  (226,41) water at 20 ft over rock [19]
+  (33,54) water at 20 ft over rock [17,18,19]
+  (32,55) water at 20 ft over rock [17,18,19]
+  (33,55) water at 20 ft over rock [17,18,19]
+  (34,55) water at 20 ft over rock [17,18,19]
+  (33,56) water at 20 ft over rock [17,18,19]
+  (97,47) water at 20 ft over rock [19]
+  (96,48) water at 20 ft over rock [19]
+  (97,48) water at 20 ft over rock [19]
+  (98,48) water at 20 ft over rock [19]
+  (97,49) water at 20 ft over rock [19]
+  (69,230) water at 15 ft over rock [13,14]
+  (68,231) water at 15 ft over rock [13,14]
+  (69,231) water at 15 ft over rock [13,14]
+  (70,231) water at 15 ft over rock [13,14]
+  (69,232) water at 15 ft over rock [13,14]
+  (228,231) water at 15 ft over rock [11,12,13,14]
+  (227,232) water at 17 ft over rock [11,12,13,14,15,16]
+  (228,232) water at 15 ft over rock [11,12,13,14]
+  (229,232) water at 15 ft over rock [11,12,13,14]
+  (228,233) water at 15 ft over rock [11,12,13,14]
+MUTANT skylight_through_fluid seed 21: planted 8 shaft + 25 skylight water strata (25 skylight columns with rock under the water, 57 rock strata); after the carve: planted water no longer water 0, rock under it carved 44; console.error 0
+  skylight (33,54): water at 20 ft now 4, 3 rock strata under it carved
+  skylight (32,55): water at 20 ft now 4, 3 rock strata under it carved
+  skylight (33,55): water at 20 ft now 4, 3 rock strata under it carved
+  skylight (34,55): water at 20 ft now 4, 3 rock strata under it carved
+  skylight (33,56): water at 20 ft now 4, 3 rock strata under it carved
+  skylight (97,47): water at 20 ft now 4, 1 rock strata under it carved
+  skylight (96,48): water at 20 ft now 4, 1 rock strata under it carved
+  skylight (97,48): water at 20 ft now 4, 1 rock strata under it carved
+  skylight (98,48): water at 20 ft now 4, 1 rock strata under it carved
+  skylight (97,49): water at 20 ft now 4, 1 rock strata under it carved
+  skylight (69,230): water at 15 ft now 4, 2 rock strata under it carved
+  skylight (68,231): water at 15 ft now 4, 2 rock strata under it carved
+  skylight (69,231): water at 15 ft now 4, 2 rock strata under it carved
+  skylight (70,231): water at 15 ft now 4, 2 rock strata under it carved
+  skylight (69,232): water at 15 ft now 4, 2 rock strata under it carved
+  skylight (227,232): water at 17 ft now 4, 6 rock strata under it carved
+  skylight (228,232): water at 15 ft now 4, 4 rock strata under it carved
+  skylight (228,233): water at 15 ft now 4, 4 rock strata under it carved
+MUTANT shaft_through_fluid seed 21: planted 8 shaft + 25 skylight water strata (25 skylight columns with rock under the water, 57 rock strata); after the carve: planted water no longer water 8, rock under it carved 0; console.error 0
+  shaft (226,39): water at 14 ft now 0
+  shaft (225,40): water at 14 ft now 0
+  shaft (226,40): water at 14 ft now 0
+  shaft (227,40): water at 14 ft now 0
+  shaft (226,41): water at 14 ft now 0
+  shaft (232,54): water at 4 ft now 0
+  shaft (232,55): water at 4 ft now 0
+  shaft (233,55): water at 4 ft now 0
+--- seed 4
+FLUID seed 4: generator 4 fluid strata 400 {"-2":128,"-1":272}; generator 5 400 {"-2":128,"-1":272}; generator-4 fluid strata not the same fluid in generator 5: 0
+UNDER-FLUID seed 4: fluid strata resting on air: generator 4 0, generator 5 0; strata carved (solid in 4, air in 5) below a fluid stratum of the same column: 0
+CARVED seed 4 (real, uninstrumented): cave networks 14, shafts 1, skylights carved 4 [{"network":5,"x":66,"y":171,"floor":15,"cells":5},{"network":6,"x":28,"y":94,"floor":11,"cells":5},{"network":8,"x":218,"y":154,"floor":6,"cells":5},{"network":9,"x":87,"y":46,"floor":2,"cells":5}]
+SKYLIGHTS seed 4: networks 14 (by level {"0":2,"1":3,"2":3,"-1":1,"-2":5}), rolled a skylight 4, eligible 4
+  network #5 level 1: node (66,171) floor F 15 ft, h 4 ft (stub); overburden top-(F+h) per disc cell [2,2,2,2,2] (skylightMax 10); ELIGIBLE: the carve loop runs
+  network #6 level 0: node (28,94) floor F 11 ft, h 8 ft; overburden top-(F+h) per disc cell [2,2,2,2,2] (skylightMax 10); ELIGIBLE: the carve loop runs
+  network #8 level -1: node (218,154) floor F 6 ft, h 6 ft; overburden top-(F+h) per disc cell [4,4,4,4,4] (skylightMax 10); ELIGIBLE: the carve loop runs
+  network #9 level -2: node (87,46) floor F 2 ft, h 7 ft; overburden top-(F+h) per disc cell [7,7,7,7,7] (skylightMax 10); ELIGIBLE: the carve loop runs
+REAL seed 4: planted 9 shaft + 20 skylight water strata (20 skylight columns with rock under the water, 54 rock strata); after the carve: planted water no longer water 0, rock under it carved 0; console.error 0
+  (66,170) water at 20 ft over rock [19]
+  (65,171) water at 20 ft over rock [19]
+  (66,171) water at 20 ft over rock [19]
+  (67,171) water at 20 ft over rock [19]
+  (66,172) water at 20 ft over rock [19]
+  (28,93) water at 20 ft over rock [19]
+  (27,94) water at 20 ft over rock [19]
+  (28,94) water at 20 ft over rock [19]
+  (29,94) water at 20 ft over rock [19]
+  (28,95) water at 20 ft over rock [19]
+  (218,153) water at 15 ft over rock [12,13,14]
+  (217,154) water at 15 ft over rock [12,13,14]
+  (218,154) water at 15 ft over rock [12,13,14]
+  (219,154) water at 15 ft over rock [12,13,14]
+  (218,155) water at 15 ft over rock [12,13,14]
+  (87,45) water at 15 ft over rock [9,10,11,12,13,14]
+  (86,46) water at 15 ft over rock [9,10,11,12,13,14]
+  (87,46) water at 15 ft over rock [9,10,11,12,13,14]
+  (88,46) water at 15 ft over rock [10,11,12,13,14]
+  (87,47) water at 15 ft over rock [9,10,11,12,13,14]
+MUTANT skylight_through_fluid seed 4: planted 9 shaft + 20 skylight water strata (20 skylight columns with rock under the water, 54 rock strata); after the carve: planted water no longer water 0, rock under it carved 54; console.error 0
+  skylight (66,170): water at 20 ft now 4, 1 rock strata under it carved
+  skylight (65,171): water at 20 ft now 4, 1 rock strata under it carved
+  skylight (66,171): water at 20 ft now 4, 1 rock strata under it carved
+  skylight (67,171): water at 20 ft now 4, 1 rock strata under it carved
+  skylight (66,172): water at 20 ft now 4, 1 rock strata under it carved
+  skylight (28,93): water at 20 ft now 4, 1 rock strata under it carved
+  skylight (27,94): water at 20 ft now 4, 1 rock strata under it carved
+  skylight (28,94): water at 20 ft now 4, 1 rock strata under it carved
+  skylight (29,94): water at 20 ft now 4, 1 rock strata under it carved
+  skylight (28,95): water at 20 ft now 4, 1 rock strata under it carved
+  skylight (218,153): water at 15 ft now 4, 3 rock strata under it carved
+  skylight (217,154): water at 15 ft now 4, 3 rock strata under it carved
+  skylight (218,154): water at 15 ft now 4, 3 rock strata under it carved
+  skylight (219,154): water at 15 ft now 4, 3 rock strata under it carved
+  skylight (218,155): water at 15 ft now 4, 3 rock strata under it carved
+  skylight (87,45): water at 15 ft now 4, 6 rock strata under it carved
+  skylight (86,46): water at 15 ft now 4, 6 rock strata under it carved
+  skylight (87,46): water at 15 ft now 4, 6 rock strata under it carved
+  skylight (88,46): water at 15 ft now 4, 5 rock strata under it carved
+  skylight (87,47): water at 15 ft now 4, 6 rock strata under it carved
+MUTANT shaft_through_fluid seed 4: planted 9 shaft + 20 skylight water strata (20 skylight columns with rock under the water, 54 rock strata); after the carve: planted water no longer water 9, rock under it carved 0; console.error 0
+  shaft (38,129): water at 20 ft now 0
+  shaft (39,129): water at 20 ft now 0
+  shaft (40,129): water at 20 ft now 0
+  shaft (38,130): water at 20 ft now 0
+  shaft (39,130): water at 20 ft now 0
+  shaft (40,130): water at 20 ft now 0
+  shaft (38,131): water at 20 ft now 0
+  shaft (39,131): water at 20 ft now 0
+  shaft (40,131): water at 20 ft now 0
+TIME 309 s
+RESULT: real code: every planted water stratum kept, no rock under it carved, no fluid lost, nothing carved under a fluid (exit 0)
+EXIT 0
