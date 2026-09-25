@@ -7,12 +7,12 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (Autonomous Shelter Construction Loop COMPLETE — AWAITING USER REVIEW)
 
 ## In progress
-- **Fable / Claude Code (2026-09-24):** READY FOR DISPATCH `DEUS-TSK-FABLE-19B` / WG.00.08 (Global Five-Layer Vertical Exposure, Natural Cuts & Cave Networks). Bounded prompt authored and verified against five-strata authority and fluid contracts.
-- **Gemini (2026-09-24):** Integration Coordinator & Authority for `DEUS-WORLDGEN-WBS-v1.0` (`docs/worldgen/DEUS_WORLDGEN_WBS.md`). WG.00.07 (Fluid ↔ Five-Strata Reconciliation) COMPLETED & VERIFIED (36/36 tests, 5/5 Rule 4 mutants caught; zero regressions across foundation suites). Dispatching bounded handoff for `WG.00.08 / DEUS-TSK-FABLE-19B`. All art generation strictly held until asset catalogues (WG.20–WG.25) and atlas slot assignments (WG.30–WG.33) are frozen.
+- **Fable / Claude Code (2026-09-24):** ACTIVE `DEUS-TSK-FABLE-19B` / WG.00.08 (Global Five-Layer Vertical Exposure, Natural Cuts & Cave Networks). Canonical handoff dispatched (`docs/handoffs/HANDOFF_DEUS_TSK_FABLE_19B_CUTS_CAVES.md`).
+- **Gemini (2026-09-24):** Integration Coordinator & Review Authority for `DEUS-WORLDGEN-WBS-v1.0` (`docs/worldgen/DEUS_WORLDGEN_WBS.md`). WG.00.07 (Fluid ↔ Five-Strata Reconciliation) ACCEPTED [commit `2f47203`]. Dispatched WG.00.08 / FABLE-19B to Fable. Standing by for review; no overlapping edits on Fable-owned paths. All art generation strictly held until asset catalogues (WG.20–WG.25) and atlas slot assignments (WG.30–WG.33) are frozen.
 - **Astra (2026-09-24):** On hold / consumed per user directive.
 
 ## WG.00.07 — Fluid ↔ Five-Strata Reconciliation (Gemini, 2026-09-24)
-- **Status**: `COMPLETED & VERIFIED`
+- **Status**: `COMPLETED & VERIFIED / OWNER ACCEPTED` [commit `2f47203`]
 - **Scope** (`game/js/plugins/DEUS_Fluid.js`, `game/js/plugins/DEUS_Levels.js`, new `tools/test_strata_fluid_reconciliation.js`, documentation update):
   - Solids are strictly authoritative in physical strata: each 5 ft cell has 5 strata; open capacity = `5 - solidStrataCount`.
   - Bidirectional lookup tables: `FLUID_TO_STRATA = [0, 1, 1, 2, 3, 4, 4, 5]` and `STRATA_TO_FLUID = [0, 1, 3, 4, 6, 7]`.
@@ -22,6 +22,7 @@ Update this whenever reality changes. Write only what you've checked, and say ho
   - Performance & allocation: eliminated object allocations in hot query and simulation loops (`decodeCellId` with module-scoped integers). Quiescent tick cost is exactly 0 processed cells in 0.01ms.
   - Serialization: dual-key save support (`contents.deusFluid = saved; contents.ufFluid = saved;`) with `fluidSchemaVersion: 1` and backward-compatible array fallback.
   - Verification: `tools/test_strata_fluid_reconciliation.js` passed 36/36 checks, and 5/5 Rule 4 failure mutants were detected. Foundation regression suites `test_liquid_depth_simulation.js` (21/21 passed, 7/7 mutants detected) and `test_strata_foundation.js` (26/26 passed, 23/23 mutants detected) passed with 0 regressions.
+  - **Nonblocking Future Fluid Architecture Note**: When solidification/construction would reduce a cell's fluid capacity below contained conserved volume and no legal displacement destination exists, DEUS must never silently create a physically over-capacity compressed fluid state (`volume > capacity`). Before construction/collapse relies on this path, define and test one legal policy such as mutation rejection/deferment or guaranteed valid displacement. (Does not block WG.00.08, which is primarily subtractive carving).
 
 ## DEUS-TSK-FABLE-19A — Five-strata geometry authority & foundation migration (Fable, 2026-09-24)
 - **Status**: `FINAL ACCEPTED / OWNER APPROVED` [commit `edba004`]

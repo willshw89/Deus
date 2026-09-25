@@ -83,8 +83,8 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | **WG.00.04** | Biome Identity Standard | Gemini | 5 canonical biomes (`TEMP`, `WET`, `ARID`, `HIGH`, `VOLC`), physical-Z hooks, 10 transitions. | `DONE` (DW.01.04) |
 | **WG.00.05** | Palette Architecture & Material Ramps | Gemini | Master Palette V1 (226 active, 30 reserve), 58 material ramps, 0 near-duplicates. | `DONE` (DW.01.05) |
 | **WG.00.06** | Five-Strata Geometry Foundation | Fable / Gemini | Strata storage (5x1ft/cell), derived cached shapes, damage API, native smoke gate. | `DONE` (FABLE-19A / edba004) |
-| **WG.00.07** | Fluid ↔ Strata Reconciliation | Gemini | Resolve fluid depth adapter (0..7) with physical strata (0..5), buoyancy, saturation. | `QUEUED` |
-| **WG.00.08** | Cuts + Caves on All Five Z | Fable | Partial-height terrain, chasms, sinkholes, Z0→Z-1 & Z-1→Z-2 deep cuts, cave roofs. | `QUEUED` (FABLE-19B) |
+| **WG.00.07** | Fluid ↔ Strata Reconciliation | Gemini | Resolve fluid depth adapter (0..7) with physical strata (0..5), buoyancy, saturation. | `DONE` (2f47203) |
+| **WG.00.08** | Cuts + Caves on All Five Z | Fable | Partial-height terrain, chasms, sinkholes, Z0→Z-1 & Z-1→Z-2 deep cuts, cave roofs. | `ACTIVE` (FABLE-19B) |
 | **WG.00.09** | Global Five-Z Depth Renderer | Fable | Five-plane compositor, physical scale recession, no blur, chunk exposure cache. | `QUEUED` (FABLE-19C) |
 | **WG.00.10** | Startup & Load Performance Baseline | Gemini / Fable | 256x256x5 area memory budget (<3.5MB), tick budget (<0.2ms), load time benchmarks. | `QUEUED` |
 
