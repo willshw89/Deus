@@ -355,7 +355,8 @@
     //-------------------------------------------------------------------------
     // Generation
 
-    /** HIST-10: 0/1 means founders; N > 1 means N unchanged HIST-09 annual steps.
+    /** HIST-10: 0 means the founders at World Year 0 (INV-SIM-01, a standard New Game), 1 the founders at year 1;
+     * N > 1 means N unchanged HIST-09 annual steps from year 1.
      * opts.seed selects the demographic RNG, preserving the world's terrain/faction seed.
      * onCheckpoint observes each completed step and is never stored in the save.
      */
@@ -368,8 +369,10 @@
         if (!Number.isSafeInteger(targetYear) || targetYear < 0 || targetYear >= 1000000) throw new Error("History: invalid targetYear");
         if (!Number.isInteger(seed) || seed < 0 || seed > 0xffffffff) throw new Error("History: invalid seed");
         const steps = targetYear <= 1 ? 0 : targetYear;
+        const foundedYear = targetYear === 0 ? 0 : 1;
         if (state.history && state.history.demographics) {
-            if (state.history.demographics.seed !== seed || state.history.demographics.yearsSimulated !== steps) {
+            const d = state.history.demographics;
+            if (d.seed !== seed || d.yearsSimulated !== steps || d.startYear !== foundedYear) {
                 throw new Error("History: generate requires a new world when changing its era or seed");
             }
             this.materialize(state);
@@ -382,7 +385,7 @@
         const started = now();
         const live = UF.World && UF.World.state === state;
         return withWorldState(state, () => {
-            const h = found(state, cfg, false);
+            const h = found(state, cfg, false, foundedYear);
             const demographics = D.create({ ...state, seed });
             for (let year = 0; year < steps; year++) {
                 D.step(demographics);
@@ -692,7 +695,7 @@
         return out;
     }
 
-    function found(state, cfg, live) {
+    function found(state, cfg, live, foundedYear = 1) {
         const started = now();
         const F = state.factions;
         const fc = foundersConfig();
@@ -718,7 +721,7 @@
                 const site = {
                     id: sites.length + 1, faction: f.id, kind: founding.kind, bare: founding.stamp === false,
                     area: { x: f.home.area.x, y: f.home.area.y }, x: cell.x, y: cell.y, z,
-                    radius, founded: 1, pop: 0, ruined: null, name: placeName()
+                    radius, founded: foundedYear, pop: 0, ruined: null, name: placeName()
                 };
                 if (f.id === playerId && z === levels[0]) site.protected = true;
                 sites.push(site);
@@ -823,17 +826,17 @@
             }
             founders[f.id] = { site: site.id, sites: camps.map(s => s.id), families, plan, units: [] };
             const lead = plan[leader];
-            if (lead) rulers[f.id] = [{ name: lead.name, title: lead.title, from: 1, to: null, unitId: null }];
+            if (lead) rulers[f.id] = [{ name: lead.name, title: lead.title, from: foundedYear, to: null, unitId: null }];
             f.population = count;
             for (const camp of camps) events.push({
-                year: 1, type: "founding", factions: [f.id], site: camp.id, area: { ...camp.area }, x: camp.x, y: camp.y, z: camp.z,
+                year: foundedYear, type: "founding", factions: [f.id], site: camp.id, area: { ...camp.area }, x: camp.x, y: camp.y, z: camp.z,
                 text: `${WORDS[camp.pop] || String(camp.pop)} ${speciesWord(f.species)} of ${f.name} settled by ${camp.name}.`
             });
         }
         const home = sites.find(s => s.protected) || null;
         if (home) state.viewStart = { area: { ...home.area }, x: home.x, y: home.y, z: home.z };
         state.history = {
-            version: 5, simulated: false, years: 0, startYear: 1,
+            version: 5, simulated: false, years: 0, startYear: foundedYear,
             clockYear0: live && window.$ufTime && typeof $ufTime.year === "number" ? $ufTime.year : null,
             events, sites, rulers, wars: [], homeSiteId: home ? home.id : null, founders
         };
@@ -3513,9 +3516,10 @@
             y += 22;
             this.contents.fontSize = 12;
             const room = Math.max(0, Math.floor((this.innerHeight - y - 40) / 16));
-            // The year-1 lines first, then the newest events that still fit.
-            const first = h.events.filter(e => e.type === "founding" && e.year === 1);
-            const later = h.events.filter(e => !(e.type === "founding" && e.year === 1));
+            // The founding lines first (year 0 in a World Year 0 game, else year 1), then the newest events that still fit.
+            const foundingYear = Math.min(1, ...h.sites.map(s => s.founded));
+            const first = h.events.filter(e => e.type === "founding" && e.year === foundingYear);
+            const later = h.events.filter(e => !(e.type === "founding" && e.year === foundingYear));
             const shown = first.slice(0, room).concat(later.slice(-Math.max(0, room - first.length)));
             for (const e of shown) {
                 this.changeTextColor("#38bdf8");
@@ -4114,7 +4118,7 @@
             const ev = History.addEvent({ type: "test_event", text: "TEST_event: a check wrote this line.", factions: [pid] });
             const refused = History.addEvent({ type: "test_event" });
             const found = History.events({ type: "test_event" });
-            const addOk = !!ev && ev.year === History.currentYear() && ev.year >= 1 && h.events.length === n0 + 1 && h.events[h.events.length - 1] === ev && found.length === 1 && heard === ev && refused === null;
+            const addOk = !!ev && ev.year === History.currentYear() && ev.year >= 0 && h.events.length === n0 + 1 && h.events[h.events.length - 1] === ev && found.length === 1 && heard === ev && refused === null;
             if (UF.Events.off) UF.Events.off("history:event", listener);
             const at = h.events.indexOf(ev);
             if (at >= 0) h.events.splice(at, 1);

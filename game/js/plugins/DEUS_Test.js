@@ -190,9 +190,20 @@
         return true;
     };
 
-    // Skip the title screen: go straight into a new game.
+    // Skip the title screen: go straight into a new game. With no setup window UF_History builds its default 500-year
+    // history. --deus-year=<n> (or DEUS_TEST_YEAR=<n> in the environment, which tools/run_tests.js passes on) asks for
+    // a New Game at year n instead; 0 is the standard World Year 0 start (INV-SIM-01). A year already in
+    // UF.NewGameSetup is kept.
+    const yearArg = args.find(a => a.startsWith("--deus-year=") || a.startsWith("--uf-year="));
+    const yearRequest = yearArg ? yearArg.split("=")[1] : (typeof process !== "undefined" && process.env ? process.env.DEUS_TEST_YEAR : undefined);
+    const requestedYear = yearRequest === undefined || yearRequest === "" ? null : Number(yearRequest);
     Scene_Boot.prototype.startNormalGame = function() {
         this.checkPlayerLocation();
+        if (requestedYear !== null) {
+            if (!Number.isSafeInteger(requestedYear) || requestedYear < 0) return finish(2, `year request "${yearRequest}" is not a whole year >= 0`);
+            if (!window.UF.NewGameSetup || window.UF.NewGameSetup.year === undefined) window.UF.NewGameSetup = { ...window.UF.NewGameSetup, year: requestedYear };
+            write(`HARNESS New Game year ${window.UF.NewGameSetup.year} (requested ${requestedYear})`);
+        }
         DataManager.setupNewGame();
         SceneManager.goto(Scene_Map);
     };
