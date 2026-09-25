@@ -1,0 +1,615 @@
+{
+  "version": "1.0.0",
+  "documentId": "DEUS-RESOURCE-REGISTRY-01",
+  "standardTask": "DEUS-TSK-FABLE-20",
+  "wbsId": "DEUS-ECON-01",
+  "title": "DEUS Resource Economy & WorldGen Standard Registry (Balance v0.1)",
+  "worldBaseline": {
+    "gridWidth": 256,
+    "gridHeight": 256,
+    "macroZLevels": 5,
+    "levels": [-2, -1, 0, 1, 2],
+    "macroCells": 327680,
+    "strataPerCell": 5,
+    "totalStrata": 1638400,
+    "stratumDimensionsFt": {
+      "x": 5,
+      "y": 5,
+      "z": 1
+    },
+    "stratumVolumeCuFt": 25,
+    "initialFactions": 9,
+    "foundersPerFaction": 8,
+    "initialFounders": 72,
+    "targetPopulation": 1200
+  },
+  "initialRacialSpawnZ": {
+    "-2": {
+      "races": ["Tiefling", "Dragonborn"],
+      "habitatType": "DEEP_UNDERGROUND",
+      "anchorOnly": true,
+      "notes": "Initial world-generation spawn anchor only; migration, trade, conquest, and expansion may relocate populations."
+    },
+    "-1": {
+      "races": ["Dwarf", "Gnome"],
+      "habitatType": "SHALLOW_UNDERGROUND",
+      "anchorOnly": true,
+      "notes": "Initial world-generation spawn anchor only; migration, trade, conquest, and expansion may relocate populations."
+    },
+    "0": {
+      "races": ["Human", "Half-Orc"],
+      "habitatType": "SURFACE",
+      "anchorOnly": true,
+      "notes": "Initial world-generation spawn anchor only; migration, trade, conquest, and expansion may relocate populations."
+    },
+    "1": {
+      "races": ["Halfling", "Half-Elf"],
+      "habitatType": "ELEVATED_TERRACES",
+      "anchorOnly": true,
+      "notes": "Initial world-generation spawn anchor only; migration, trade, conquest, and expansion may relocate populations."
+    },
+    "2": {
+      "races": ["Elf"],
+      "habitatType": "HIGH_CANOPY_MOUNTAIN",
+      "anchorOnly": true,
+      "notes": "Initial world-generation spawn anchor only; migration, trade, conquest, and expansion may relocate populations."
+    }
+  },
+  "economicPhilosophy": {
+    "principle": "MANY_WORLD_MATERIALS_TO_FEW_ECONOMIC_CLASSES",
+    "description": "Physical materials in the world catalog preserve visual identities, support, HP, flammability, and geological provenance, but economy recipes and ledgers map them into a compressed set of broad economic classes."
+  },
+  "coreResourceClasses": {
+    "FOOD": {
+      "resourceClass": "FOOD",
+      "displayName": "Nutritional Subsistence",
+      "renewabilityClass": "FAST_RENEWABLE",
+      "conserved": false,
+      "naturalGeneration": true,
+      "worldTarget": {
+        "initialWildStockCreatureDays": 25000,
+        "annualSustainableCapacityCreatureDays": 650000,
+        "designPopulation": 1200,
+        "designAnnualConsumption": 438000,
+        "theoreticalMaxSupportPop": 1780
+      },
+      "depositCountTarget": null,
+      "zWeights": {
+        "-2": 0.05,
+        "-1": 0.15,
+        "0": 0.60,
+        "1": 0.15,
+        "2": 0.05
+      },
+      "biomeBias": {
+        "TEMP": 1.4,
+        "WET": 1.3,
+        "ARID": 0.3,
+        "HIGH": 0.6,
+        "VOLC": 0.2
+      },
+      "regrowthModel": {
+        "type": "ECOLOGICAL_SEASONAL",
+        "timescale": "DAYS_TO_SEASONS",
+        "subsystems": ["farming", "forage_berries", "fishing", "livestock_wildlife", "fungi_mushrooms"]
+      },
+      "processedForms": ["ration", "cooked_meat", "bread", "stew", "preserved_provisions"],
+      "economicUses": ["metabolic_survival", "work_energy", "population_growth", "trade_stock"],
+      "specialRules": "Consumption drains creature hunger. Without food, exhaustion tiers accumulate per SRD 5.1 rules."
+    },
+    "WATER": {
+      "resourceClass": "WATER",
+      "displayName": "Potable & Hydration Fluid",
+      "renewabilityClass": "FAST_RENEWABLE",
+      "conserved": false,
+      "naturalGeneration": true,
+      "worldTarget": {
+        "permanentSourcesRequirement": "UNIVERSAL_LOCAL_GUARANTEE",
+        "initialWildStockCreatureDays": 100000
+      },
+      "depositCountTarget": null,
+      "zWeights": {
+        "-2": 0.15,
+        "-1": 0.25,
+        "0": 0.45,
+        "1": 0.10,
+        "2": 0.05
+      },
+      "biomeBias": {
+        "TEMP": 1.2,
+        "WET": 2.0,
+        "ARID": 0.1,
+        "HIGH": 0.8,
+        "VOLC": 0.2
+      },
+      "regrowthModel": {
+        "type": "HYDROLOGICAL_CYCLE",
+        "timescale": "CONTINUOUS",
+        "subsystems": ["springs", "aquifers", "rainfall", "rivers", "wells"]
+      },
+      "processedForms": ["waterskin", "jug_water", "barrel_water", "boiled_water"],
+      "economicUses": ["hydration", "crop_irrigation", "firefighting", "brewing", "refining"],
+      "specialRules": "Every viable settlement start must possess access to permanent potable water."
+    },
+    "FIBER": {
+      "resourceClass": "FIBER",
+      "displayName": "Plant & Animal Textile Fiber",
+      "renewabilityClass": "FAST_RENEWABLE",
+      "conserved": false,
+      "naturalGeneration": true,
+      "worldTarget": {
+        "annualProductionCapacityUnits": 120000
+      },
+      "depositCountTarget": null,
+      "zWeights": {
+        "-2": 0.02,
+        "-1": 0.08,
+        "0": 0.70,
+        "1": 0.15,
+        "2": 0.05
+      },
+      "biomeBias": {
+        "TEMP": 1.3,
+        "WET": 1.8,
+        "ARID": 0.2,
+        "HIGH": 0.5,
+        "VOLC": 0.1
+      },
+      "regrowthModel": {
+        "type": "CROP_AND_FAUNA_RENEWAL",
+        "timescale": "SEASONS",
+        "subsystems": ["flax_hemp", "cotton_grass", "reed_fiber", "wool_shearing", "silk_spinning"]
+      },
+      "processedForms": ["thread", "twine", "rope", "cloth", "canvas", "burlap_sack"],
+      "economicUses": ["clothing", "bedding", "sails", "pouches", "insulation", "binding"],
+      "specialRules": "Essential low-tech input for founder bedding and carrier containers."
+    },
+    "WOOD": {
+      "resourceClass": "WOOD",
+      "displayName": "Timber & Structural Wood",
+      "renewabilityClass": "SLOW_RENEWABLE",
+      "conserved": false,
+      "naturalGeneration": true,
+      "worldTarget": {
+        "matureTrees": 25000,
+        "youngTreesAndSaplings": 10000,
+        "timberYieldPerMatureTreeUnits": 10,
+        "totalStandingTimberReserveUnits": 250000
+      },
+      "depositCountTarget": null,
+      "zWeights": {
+        "-2": 0.02,
+        "-1": 0.08,
+        "0": 0.65,
+        "1": 0.20,
+        "2": 0.05
+      },
+      "biomeBias": {
+        "TEMP": 1.6,
+        "WET": 1.2,
+        "ARID": 0.1,
+        "HIGH": 0.7,
+        "VOLC": 0.05
+      },
+      "regrowthModel": {
+        "type": "ECOLOGICAL_SILVICULTURE",
+        "timescale": "YEARS_TO_DECADES",
+        "maturityYears": {
+          "sapling": 1,
+          "young_tree": 4,
+          "mature_tree": 15,
+          "landmark_ancient": 50
+        },
+        "formula": "regeneration = remainingMatureTrees * seedDispersionFactor * terrainSuitability * climateFactor - harvestPressure",
+        "clearCutPenalty": "Complete clear-cutting eliminates seed canopies and extends local regeneration time up to 5x."
+      },
+      "processedForms": ["log", "firewood", "timber_beam", "plank", "charcoal", "wooden_tool"],
+      "economicUses": ["shelter_framing", "furnishings", "fuel_smelting", "tool_handles", "containers", "scaffolding"],
+      "specialRules": "Zero short-timer respawning. Deforestation is a persistent strategic ecological state."
+    },
+    "STONE": {
+      "resourceClass": "STONE",
+      "displayName": "Building Stone & Masonry Rock",
+      "renewabilityClass": "FINITE_CONSERVED",
+      "conserved": true,
+      "naturalGeneration": true,
+      "worldTarget": {
+        "strataCountTarget": 650000,
+        "volumeCuFt": 16250000,
+        "economicUnitsPerStratum": 1,
+        "totalWorldUnits": 650000
+      },
+      "depositCountTarget": null,
+      "zWeights": {
+        "-2": 0.40,
+        "-1": 0.30,
+        "0": 0.15,
+        "1": 0.10,
+        "2": 0.05
+      },
+      "biomeBias": {
+        "TEMP": 0.8,
+        "WET": 0.4,
+        "ARID": 1.2,
+        "HIGH": 1.8,
+        "VOLC": 1.8
+      },
+      "regrowthModel": null,
+      "processedForms": ["rough_stone", "dressed_block", "flagstone", "masonry_wall", "rubble", "crushed_gravel"],
+      "economicUses": ["permanent_fortifications", "furnaces", "foundations", "querns", "hearths", "roads"],
+      "specialRules": "Abundant but strictly conserved. Destruction converts stone structures into rubble/reclaimed stone. Zero regeneration."
+    },
+    "IRON": {
+      "resourceClass": "IRON",
+      "displayName": "Iron Ore & Refined Iron",
+      "renewabilityClass": "FINITE_CONSERVED",
+      "conserved": true,
+      "naturalGeneration": true,
+      "worldTarget": {
+        "refinedEquivalentEconomicUnits": 80000,
+        "depositCountRange": {
+          "min": 100,
+          "max": 150,
+          "expected": 125
+        },
+        "averageDepositReserveUnits": 640
+      },
+      "depositCountTarget": {
+        "min": 100,
+        "max": 150,
+        "expected": 125
+      },
+      "zWeights": {
+        "-2": 0.30,
+        "-1": 0.25,
+        "0": 0.20,
+        "1": 0.15,
+        "2": 0.10
+      },
+      "biomeBias": {
+        "TEMP": 0.9,
+        "WET": 0.8,
+        "ARID": 1.1,
+        "HIGH": 1.4,
+        "VOLC": 1.3
+      },
+      "regrowthModel": null,
+      "processedForms": ["iron_ore", "pig_iron", "iron_ingot", "iron_tool", "iron_weapon", "iron_armor", "scrap_iron"],
+      "economicUses": ["heavy_tools", "weapons", "armor", "hardware", "structural_reinforcement", "steel_alloying"],
+      "specialRules": "Strictly finite. Broken iron gear converts to scrap iron that yields 100% metal value upon remelting. Zero regeneration."
+    },
+    "COPPER": {
+      "resourceClass": "COPPER",
+      "displayName": "Copper Ore & Native Copper",
+      "renewabilityClass": "FINITE_CONSERVED",
+      "conserved": true,
+      "naturalGeneration": true,
+      "worldTarget": {
+        "refinedEquivalentEconomicUnits": 40000,
+        "depositCountRange": {
+          "min": 60,
+          "max": 100,
+          "expected": 80
+        },
+        "averageDepositReserveUnits": 500
+      },
+      "depositCountTarget": {
+        "min": 60,
+        "max": 100,
+        "expected": 80
+      },
+      "zWeights": {
+        "-2": 0.30,
+        "-1": 0.25,
+        "0": 0.20,
+        "1": 0.15,
+        "2": 0.10
+      },
+      "biomeBias": {
+        "TEMP": 0.9,
+        "WET": 0.7,
+        "ARID": 1.2,
+        "HIGH": 1.3,
+        "VOLC": 1.3
+      },
+      "regrowthModel": null,
+      "processedForms": ["copper_ore", "copper_ingot", "copper_coin_cp", "bronze_alloy", "pipe", "cookware", "scrap_copper"],
+      "economicUses": ["base_currency_cp", "early_metal_tools", "bronze_alloying", "conduits", "cooking_vessels"],
+      "specialRules": "Strictly finite. Primary base currency standard (cp). Remeltable without loss. Zero regeneration."
+    },
+    "SILVER": {
+      "resourceClass": "SILVER",
+      "displayName": "Silver Ore & Refined Silver",
+      "renewabilityClass": "FINITE_CONSERVED",
+      "conserved": true,
+      "naturalGeneration": true,
+      "worldTarget": {
+        "refinedEquivalentEconomicUnits": 4000,
+        "depositCountRange": {
+          "min": 25,
+          "max": 40,
+          "expected": 32
+        },
+        "averageDepositReserveUnits": 125
+      },
+      "depositCountTarget": {
+        "min": 25,
+        "max": 40,
+        "expected": 32
+      },
+      "zWeights": {
+        "-2": 0.40,
+        "-1": 0.30,
+        "0": 0.15,
+        "1": 0.10,
+        "2": 0.05
+      },
+      "biomeBias": {
+        "TEMP": 0.7,
+        "WET": 0.5,
+        "ARID": 1.2,
+        "HIGH": 1.5,
+        "VOLC": 1.4
+      },
+      "regrowthModel": null,
+      "processedForms": ["silver_ore", "silver_ingot", "silver_coin_sp", "electrum_alloy", "jewelry", "relic", "scrap_silver"],
+      "economicUses": ["standard_currency_sp", "electrum_alloying", "prestige_trade", "consecrated_weapons", "tableware"],
+      "specialRules": "Strictly finite. Precious metal. Remeltable without loss. Zero regeneration."
+    },
+    "GOLD": {
+      "resourceClass": "GOLD",
+      "displayName": "Gold Ore & Native Gold",
+      "renewabilityClass": "FINITE_CONSERVED",
+      "conserved": true,
+      "naturalGeneration": true,
+      "worldTarget": {
+        "refinedEquivalentEconomicUnits": 400,
+        "depositCountRange": {
+          "min": 10,
+          "max": 20,
+          "expected": 15
+        },
+        "averageDepositReserveUnits": 26.7
+      },
+      "depositCountTarget": {
+        "min": 10,
+        "max": 20,
+        "expected": 15
+      },
+      "zWeights": {
+        "-2": 0.45,
+        "-1": 0.30,
+        "0": 0.15,
+        "1": 0.08,
+        "2": 0.02
+      },
+      "biomeBias": {
+        "TEMP": 0.6,
+        "WET": 0.5,
+        "ARID": 1.3,
+        "HIGH": 1.5,
+        "VOLC": 1.5
+      },
+      "regrowthModel": null,
+      "processedForms": ["gold_nugget", "gold_ore", "gold_ingot", "gold_coin_gp", "electrum_alloy", "crown_jewels", "scrap_gold"],
+      "economicUses": ["high_denomination_currency_gp", "electrum_alloying", "sovereign_tribute", "masterwork_inlays"],
+      "specialRules": "Extremely scarce. Strictly finite. Remeltable without loss. Zero regeneration."
+    },
+    "PLATINUM": {
+      "resourceClass": "PLATINUM",
+      "displayName": "Platinum Ore & Native Platinum",
+      "renewabilityClass": "FINITE_CONSERVED",
+      "conserved": true,
+      "naturalGeneration": true,
+      "worldTarget": {
+        "refinedEquivalentEconomicUnits": 40,
+        "depositCountRange": {
+          "min": 3,
+          "max": 8,
+          "expected": 5
+        },
+        "averageDepositReserveUnits": 8.0
+      },
+      "depositCountTarget": {
+        "min": 3,
+        "max": 8,
+        "expected": 5
+      },
+      "zWeights": {
+        "-2": 0.60,
+        "-1": 0.25,
+        "0": 0.10,
+        "1": 0.05,
+        "2": 0.00
+      },
+      "biomeBias": {
+        "TEMP": 0.3,
+        "WET": 0.2,
+        "ARID": 1.2,
+        "HIGH": 1.8,
+        "VOLC": 2.0
+      },
+      "regrowthModel": null,
+      "processedForms": ["platinum_nugget", "platinum_ingot", "platinum_coin_pp", "royal_regalia", "scrap_platinum"],
+      "economicUses": ["apex_currency_pp", "legendary_artifacts", "monumental_tribute"],
+      "specialRules": "Ultra-rare apex metal, concentrated almost entirely in deepest rock (Z-2). Strictly finite. Zero regeneration."
+    },
+    "STEEL": {
+      "resourceClass": "STEEL",
+      "displayName": "Refined Carbon Steel",
+      "renewabilityClass": "MANUFACTURED_CONSERVED",
+      "conserved": true,
+      "naturalGeneration": false,
+      "worldTarget": {
+        "naturalDeposits": 0,
+        "manufacturedDerivativeOf": "IRON"
+      },
+      "depositCountTarget": null,
+      "zWeights": null,
+      "biomeBias": null,
+      "regrowthModel": null,
+      "processedForms": ["steel_bloom", "steel_ingot", "steel_weapon", "steel_armor", "steel_tool", "scrap_steel"],
+      "economicUses": ["superior_weapons", "heavy_armor", "masterwork_engineering", "fortress_gates"],
+      "specialRules": "Zero natural deposits. Manufactured by processing iron with flux/carbon at high heat. Counts toward global iron conservation balance."
+    },
+    "ELECTRUM": {
+      "resourceClass": "ELECTRUM",
+      "displayName": "Electrum Alloy",
+      "renewabilityClass": "MANUFACTURED_CONSERVED",
+      "conserved": true,
+      "naturalGeneration": false,
+      "worldTarget": {
+        "naturalDeposits": 0,
+        "manufacturedDerivativeOf": ["GOLD", "SILVER"]
+      },
+      "depositCountTarget": null,
+      "zWeights": null,
+      "biomeBias": null,
+      "regrowthModel": null,
+      "processedForms": ["electrum_ingot", "electrum_coin_ep", "electrum_chalice", "scrap_electrum"],
+      "economicUses": ["intermediate_currency_ep", "ceremonial_plate", "trade_bullion"],
+      "specialRules": "MANDATORY: Zero natural electrum deposits exist in world generation. Manufactured strictly as a 50/50 alloy of Gold and Silver. Its mass is conserved against the gold and silver ledgers."
+    }
+  },
+  "geologicalMapping": {
+    "STONE": [
+      "limestone", "sandstone", "granite", "basalt", "slate", "marble",
+      "diorite", "quartzite", "fieldstone", "pumice", "scoria", "obsidian"
+    ],
+    "WOOD": [
+      "oak", "birch", "pine", "willow", "ash", "elm", "yew",
+      "conifer", "charred_wood", "driftwood", "bleached_wood"
+    ],
+    "IRON": [
+      "hematite", "magnetite", "bog_iron", "siderite", "limonite"
+    ],
+    "COPPER": [
+      "native_copper", "malachite", "chalcopyrite", "tetrahedrite", "azurite"
+    ],
+    "SILVER": [
+      "native_silver", "galena", "acanthite", "pyrargyrite"
+    ],
+    "GOLD": [
+      "native_gold", "quartz_gold", "calaverite", "sylvanite"
+    ],
+    "PLATINUM": [
+      "native_platinum", "sperrylite", "platiniridium"
+    ]
+  },
+  "conservationLedger": {
+    "conservedClasses": [
+      "STONE",
+      "IRON",
+      "COPPER",
+      "SILVER",
+      "GOLD",
+      "PLATINUM"
+    ],
+    "invariantFormula": "WORLD_TOTAL(resource) = natural_deposits + loose_stock + inventories + buildings + furniture + equipment + coins + scrap + rubble + staging",
+    "rule": "For all conserved classes, WORLD_TOTAL remains constant after world generation. Mining converts natural_deposits to loose_stock. Crafting converts loose_stock to equipment/buildings. Destruction converts structures to rubble/scrap. Recycling remelts scrap to loose_stock. No free creation; no destruction deletion.",
+    "salvageRecoveryRates": {
+      "weapons_armor_tools": 1.0,
+      "masonry_structures": 0.8,
+      "rubble_reclaim": 1.0,
+      "coins_melting": 1.0
+    }
+  },
+  "geologicalDepositGeneration": {
+    "hierarchy": [
+      "GEOLOGICAL_PROVINCE",
+      "HOST_GEOLOGY",
+      "DEPOSIT_FIELD_VEIN",
+      "ORE_BEARING_STRATA"
+    ],
+    "prohibition": "Arbitrary cell-by-cell ore scattering is strictly forbidden. Ore must generate in cohesive structural bodies.",
+    "morphologies": [
+      "VEIN",
+      "LODE",
+      "POCKET",
+      "BRANCH",
+      "PIPE_CHIMNEY",
+      "DEEP_CONTINUATION"
+    ],
+    "hostRocks": {
+      "IRON": ["granite", "basalt", "limestone", "slate"],
+      "COPPER": ["sandstone", "limestone", "granite", "basalt"],
+      "SILVER": ["granite", "slate", "limestone"],
+      "GOLD": ["granite", "quartzite", "slate"],
+      "PLATINUM": ["basalt", "gabbro", "peridotite", "deep_granite"]
+    }
+  },
+  "currencyAndMinting": {
+    "denominations": {
+      "cp": {
+        "name": "Copper Piece",
+        "metal": "COPPER",
+        "valueInCp": 1,
+        "metalUnits": 1
+      },
+      "sp": {
+        "name": "Silver Piece",
+        "metal": "SILVER",
+        "valueInCp": 10,
+        "metalUnits": 1
+      },
+      "ep": {
+        "name": "Electrum Piece",
+        "metal": "ELECTRUM",
+        "valueInCp": 50,
+        "metalUnits": {
+          "GOLD": 0.5,
+          "SILVER": 0.5
+        }
+      },
+      "gp": {
+        "name": "Gold Piece",
+        "metal": "GOLD",
+        "valueInCp": 100,
+        "metalUnits": 1
+      },
+      "pp": {
+        "name": "Platinum Piece",
+        "metal": "PLATINUM",
+        "valueInCp": 1000,
+        "metalUnits": 1
+      }
+    },
+    "stackProvenanceSchema": {
+      "denomination": "cp | sp | ep | gp | pp",
+      "metal": "COPPER | SILVER | ELECTRUM | GOLD | PLATINUM",
+      "mintFaction": "string",
+      "mintEra": "number",
+      "quantity": "number"
+    }
+  },
+  "settlementViabilityGuarantees": {
+    "foundersCount": 8,
+    "immediateBandDays": 1,
+    "localBandDays": 3,
+    "regionalBandDays": 10,
+    "minimumImmediateFoodCreatureDays": 720,
+    "permanentWaterRequired": true,
+    "starterShelterMaterialRequired": true,
+    "guaranteedStarterIronMine": false
+  },
+  "headlessBalanceAuditTargets": {
+    "targetSeeds": 1000,
+    "sampleIntervalYears": [1, 5, 20, 100, 500],
+    "metrics": [
+      "foodStock",
+      "foodCarryingCapacity",
+      "waterAccess",
+      "woodReserve",
+      "stoneStock",
+      "ironReserve",
+      "copperReserve",
+      "silverReserve",
+      "goldReserve",
+      "platinumReserve",
+      "averageDistanceToMetals",
+      "salvageRecyclingEfficiency",
+      "populationTrajectory",
+      "settlementViabilityFailures"
+    ]
+  }
+}

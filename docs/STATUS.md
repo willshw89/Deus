@@ -8,7 +8,7 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 
 ## In progress
 - **Fable / Claude Code (2026-09-24):** Completed `DEUS-TSK-FABLE-19A` (Five-Strata Geometry Authority & Foundation Migration; commit `edba004`). Native RMMZ smoke gate PASSED and 19A is FINAL ACCEPTED / OWNER APPROVED. `DEUS-TSK-FABLE-19B` (Cuts + Caves on Strata) authorized with Deep-Cut requirements.
-- **Gemini (2026-09-24):** DEUS Integration Coordinator review completed for `DEUS-TSK-FABLE-19A` (native smoke gate passed, 19B prompt issued). World-art foundation leaf `DW.01.05` is `FINAL FROZEN / OWNER APPROVED` at commit `f208000`. Next world-art leaf `DW.01.06` remains paused at gate during this engineering track.
+- **Gemini (2026-09-24):** Authoring DEUS Resource Economy & WorldGen Standard (Balance v0.1: Finite Materials + Renewable Ecology + Physical Currency; task DEUS-TSK-FABLE-20 / DEUS-ECON-01), machine-readable registry `game/data/DEUS_ResourceRegistry.json`, validation test harness `tools/test_resource_economy_standard.js`, and bounded implementation handoff. World-art foundation leaf `DW.01.05` is `FINAL FROZEN / OWNER APPROVED` at commit `f208000`. Next world-art leaf `DW.01.06` remains paused at gate during this engineering track.
 - **Astra (2026-09-24):** On hold / consumed per user directive.
 
 ## DEUS-TSK-FABLE-19A — Five-strata geometry authority & foundation migration (Fable, 2026-09-24)
@@ -18,7 +18,24 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 - **Checks observed** (2026-09-24, snapshot copies of 2d5fc47 plus these files; verified in native NW.js and Node VM): `tools/test_strata_foundation.js` `RESULT: 26 passed, 0 failed` and all 23 mutants exit 1; `tools/test_volumetric_terrain_column.js` 34/34 (its moved mutant `hills_walkable` exits 1); the older terrain harnesses (column_landforms, geology_strata, upper_elevation_terrain, vertical_worldgen_proof, natural_connections, survival_regressions) print the same PASS/FAIL lines as on 2d5fc47; the gate suites palette 503/503, biome 334/334, scale 26/26, native resolution 23/23, `art_check.js --selftest` 80/80. In native NW.js: suite `strata` `RESULT: 6 passed, 0 failed` (`strata_live`, `adapter_cost`, `dig_tunnel`, `tunnel_restored`, `shape_grids_coherent`, `no_errors`), 0 F8 console exceptions; suite `vertical` `five_levels`, `complete_at_start`, `switch_view` (Z0 <-> Z-1 <-> Z+1), `follow_view`, `persistence` (save/load through `DataManager.extractSaveContents` with all Z-levels, units, and deterministic regeneration intact), `switch_time`, and `no_errors` pass.
 - **Cost** (same seed in both builds, 600 frames of normal play, about 1,230 units): the work the strata add is 0.0074–0.012 ms a frame; all shape-query time is 0.09–0.41 ms a frame (reads at 46–49 ns) against 5.40 ms before (reads at 652 ns); `world.path_budget` ran the same searches at 1.22 ms a plan against 6.06 ms.
 - **Screenshots opened** (`strata.tunnel_before.png`, `strata.tunnel_dug.png`, `vertical.view_ground.png`, `vertical.view_minus1.png`, `vertical.view_plus1.png`): before, a cave floor above solid rock; after, a one-cell floor corridor running four cells south from the cave floor carved open via `applyVolumeDamage`, flanked by black cap bands; Z0, Z-1, and Z+1 views confirm clean navigation and UI level display.
-- **Found**: 23 walking animals stand on ground cells inside hills, on the pre-strata build too (same seed): a Wildlife placement matter (backlogged). The depth suite's terrace-hole fixture now reads as a floor (setShape "open" over solid ground is a floor on its top under the strata).
+
+## DEUS-TSK-FABLE-20 / DEUS-ECON-01 — Resource Economy & WorldGen Standard: Finite Materials + Renewable Ecology + Physical Currency (Balance v0.1) (2026-09-24)
+- **Status**: `SPECIFICATION FROZEN / IMPLEMENTATION PENDING FABLE-19 COMPLETION`
+- **Scope & Authority** (Gemini as Integration Coordinator):
+  - Defined and froze the canonical DEUS Resource Economy and WorldGen standard across physical geology, macro-Z elevation, biomes, silviculture, and closed-loop material conservation.
+  - Authored canonical machine-readable registry `game/data/DEUS_ResourceRegistry.json` (and `docs/systems/DEUS_ResourceRegistry.json`).
+  - Authored canonical design and technical specification `docs/systems/DEUS_RESOURCE_ECONOMY_STANDARD.md`.
+  - Authored bounded implementation handoff `docs/handoffs/HANDOFF_DEUS_TSK_FABLE_20_ECONOMY.md`.
+  - Built automated verification test harness `tools/test_resource_economy_standard.js` (68/68 assertions passed; all 5 negative mutant controls verified).
+- **Core Parameters (Balance v0.1)**:
+  - World scale: 256x256x5 macro cells (327,680 macro cells, 1,638,400 physical strata).
+  - Population baseline: 9 factions x 8 founders = 72 initial colonists; target population capacity = 1,200 creatures.
+  - Canonical initial racial spawn Z anchors (VISION V132): Z-2 (Tiefling, Dragonborn), Z-1 (Dwarf, Gnome), Z0 (Human, Half-Orc), Z+1 (Halfling, Half-Elf), Z+2 (Elf).
+  - 12 resource classes: FAST_RENEWABLE (Food, Water, Fiber), SLOW_RENEWABLE (Wood), FINITE_CONSERVED (Stone, Iron, Copper, Silver, Gold, Platinum), MANUFACTURED_CONSERVED (Steel, Electrum).
+  - Conservation Law: WORLD_TOTAL(R) = const across deposits, loose stock, inventories, buildings, furniture, equipment, coins, scrap/rubble, and staging. Zero creation or deletion ex nihilo.
+  - Physical currency: SRD denominations (cp=1, sp=10, ep=50, gp=100, pp=1000). Electrum is strictly 50% Au + 50% Ag (0 natural deposits). Coin stacks carry provenance metadata (`denomination`, `metal`, `mintFaction`, `mintEra`, `quantity`).
+  - Starting viability guarantees: Immediate food >= 720 creature-days (90 days for 8 founders), permanent water source, local shelter materials. Starter tools deducted from world conservation ledger. No guaranteed iron mine.
+- **Dependencies & Gate**: Gated behind completion of `DEUS-TSK-FABLE-19B` (Cuts + Caves) and `DEUS-TSK-FABLE-19C` (Depth Compositor) so mineral veins are injected directly into authoritative physical strata.
 
 ## DW.01.05 — Freeze Palette Architecture & Family Material Ramps (2026-09-24)
 - **Status**: `FINAL FROZEN / OWNER APPROVED` [commit `f208000`]
