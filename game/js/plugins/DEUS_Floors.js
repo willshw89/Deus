@@ -187,14 +187,26 @@
         }
         return n / room.cells.length;
     }
+    // Solid strata anywhere over the cell up the column (UF.Levels.hasOpaqueOverburden, the strata of DEUS-TSK-FABLE-19A).
+    // Without the strata API: below the ground counts as covered, as before.
+    function hasOpaqueOverburden(area, x, y, z) {
+        const zLevel = z !== undefined ? z : zOf(area);
+        const L = window.UF && UF.Levels;
+        if (L && typeof L.hasOpaqueOverburden === "function") return L.hasOpaqueOverburden(area, x, y, zLevel);
+        return zLevel < 0;
+    }
     function isRoofed(area, x, y, z) {
         const zLevel = z !== undefined ? z : zOf(area);
-        if (zLevel < 0) return true;
         const L = window.UF && UF.Levels;
-        if (L) {
-            const upperRef = { area: copyArea(area), x, y, z: zLevel + 1 };
-            if (typeof L.standableShape === "function" && L.standableShape(upperRef)) return true;
-            if (typeof L.shapeAt === "function" && L.shapeAt(upperRef) === "floor") return true;
+        if (L && typeof L.hasOpaqueOverburden === "function") {
+            if (L.hasOpaqueOverburden(area, x, y, zLevel)) return true;
+        } else {
+            if (zLevel < 0) return true;
+            if (L) {
+                const upperRef = { area: copyArea(area), x, y, z: zLevel + 1 };
+                if (typeof L.standableShape === "function" && L.standableShape(upperRef)) return true;
+                if (typeof L.shapeAt === "function" && L.shapeAt(upperRef) === "floor") return true;
+            }
         }
         const r = roomAt(area, x, y);
         if (r && r.cells && r.cells.some(c => c.x === x && c.y === y)) {
@@ -266,7 +278,7 @@
         return true;
     }
 
-    const Rooms = { MAX_ROOM_CELLS, MAX_ROOM_GAPS, roomAt, value: roomValue, invalidate, isRoofed, applyRoofedUpperDeck };
+    const Rooms = { MAX_ROOM_CELLS, MAX_ROOM_GAPS, roomAt, value: roomValue, invalidate, isRoofed, hasOpaqueOverburden, applyRoofedUpperDeck };
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;
     window.UF.Rooms = Rooms;
@@ -561,7 +573,7 @@
     const Floors = {
         FLOOR_IDS: FLOOR_IDS.slice(), MAX_OPEN, FLOOR_WORK, kindAt, isFloorAt, isFloor: isFloorAt, canLay, setFloor, removeFloor, setGround,
         createDesignations, floorOtherSites, playerCultureFloor, defineJobType, augmentOptions, hookInteract,
-        isRoofed, applyRoofedUpperDeck
+        isRoofed, hasOpaqueOverburden, applyRoofedUpperDeck
     };
     window.UF.Floors = Floors;
     defineJobType();

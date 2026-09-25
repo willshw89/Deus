@@ -427,7 +427,8 @@
     // Baselines: the seeded shape and material of every cell of a level (runtime only; regenerated from the seed)
 
     const baselines = new Map(); // "seed:gen:z:ax,ay" -> { shape: Uint8Array, material: Uint8Array }
-    const stats = { generated: 0, genMs: 0, lastGenMs: 0, shapeReads: 0, switches: 0, lastSwitch: null, migrations: 0, checksumMismatches: 0, composeMs: 0 };
+    const stats = { generated: 0, genMs: 0, lastGenMs: 0, shapeReads: 0, switches: 0, lastSwitch: null, migrations: 0, checksumMismatches: 0, composeMs: 0,
+        strataWrites: 0, strataDamaged: 0, strataDestroyed: 0, strataMigrations: 0, strataSchemaErrors: 0, derives: 0, gridBuilds: 0 };
 
     function levelGen(st, z) {
         const L = st && st.levels && st.levels[String(z)];
@@ -776,12 +777,11 @@
                     }
                 }
             } else {
-                const S_grid = new Int8Array(n);
+                const S_grid = surfaceGridFor(seed, ax, ay, size, d, cl);
                 for (let y = 0; y < size; y++) {
                     for (let x = 0; x < size; x++) {
-                        const i = y * size + x, gx = ax * size + x, gy = ay * size + y;
-                        const S = surfaceElevation(seed, gx, gy, size, d, cl);
-                        S_grid[i] = S;
+                        const i = y * size + x;
+                        const S = S_grid[i];
 
                         if (z < S) {
                             shape[i] = SOLID;
@@ -857,11 +857,31 @@
         } else {
             shape.fill(FLOOR); // the ground (its real passability is its tiles)
         }
+        // Only the strata are kept: the working arrays are converted here and dropped (toStrata).
+        const b = Object.assign({ z }, extra || {});
+        const water = b.water || null;
+        delete b.water;
+        if (z === 0 && gen < 4) b.legacyGround = true;
+        toStrata(b, shape, material, water, z, size);
         const ms = performance.now() - t0;
         stats.generated++;
         stats.genMs += ms;
         stats.lastGenMs = ms;
-        return Object.assign({ shape, material }, extra || {});
+        return b;
+    }
+
+    // The surface height S of every cell of an area, computed once and shared by the ground, +1 and +2 baselines
+    // (surfaceElevation is the same function of the seed and the cell for all three).
+    const surfaceGrids = new Map();
+    function surfaceGridFor(seed, ax, ay, size, d, cl) {
+        const key = `${seed}:${ax},${ay}:${size}:${d.width}x${d.height}`;
+        const e = surfaceGrids.get(key);
+        if (e && e.cl === cl) return e.grid;
+        const grid = new Int8Array(size * size);
+        for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) grid[y * size + x] = surfaceElevation(seed, ax * size + x, ay * size + y, size, d, cl);
+        surfaceGrids.set(key, { cl, grid });
+        while (surfaceGrids.size > 4) surfaceGrids.delete(surfaceGrids.keys().next().value);
+        return grid;
     }
 
     function baseline(z, ax = 0, ay = 0, seed, gen) {
@@ -885,16 +905,9 @@
         const W = World(), st = W && W.state;
         if (!st || !isLevel(z) || !W.inWorld(ax, ay, z)) return null;
         if (z === 0 && levelGen(st, 0) < 4) return null;
-        const b = baseline(z, ax, ay);
-        if (!b) return null;
-        const grid = new Uint8Array(b.shape);
-        const ch = changesOf(st, z, ax, ay, false);
-        if (ch) {
-            for (const k in ch) {
-                const i = Number(k);
-                if (Number.isInteger(i) && i >= 0 && i < grid.length) grid[i] = (ch[k] | 0) & 7;
-            }
-        }
+        if (!baseline(z, ax, ay)) return null;
+        const grid = derivedGrid(z, ax, ay, new Uint8Array(st.size * st.size));
+        for (let i = 0; i < grid.length; i++) grid[i] &= 7;
         return grid;
     }
 
@@ -915,49 +928,399 @@
             return hex(h);
         }
         for (let ay = 0; ay < st.areasY; ay++) for (let ax = 0; ax < st.areasX; ax++) {
-            const b = seed === undefined ? baseline(z, ax, ay, undefined, gen) : generateBaseline(seed, gen || GEN, z, ax, ay, st.size);
-            h = fnvBytes(h, b.shape);
-            h = fnvBytes(h, b.material);
-            if (b.biome) h = fnvBytes(h, b.biome);
-            if (b.water) h = fnvBytes(h, b.water);
+            // The generator's codes, read back from the strata (legacyViews): the same bytes as before the strata, so a
+            // save's checksum from New Game still matches.
+            const v = legacyViews(seed === undefined ? baseline(z, ax, ay, undefined, gen) : generateBaseline(seed, gen || GEN, z, ax, ay, st.size));
+            h = fnvBytes(h, v.shape);
+            h = fnvBytes(h, v.material);
+            if (v.biome) h = fnvBytes(h, v.biome);
+            if (v.water) h = fnvBytes(h, v.water);
         }
         return hex(h);
     }
 
     //-------------------------------------------------------------------------
-    // Cells: shape and material (baseline plus the saved changes)
+    // Strata (DEUS-TSK-FABLE-19A): the one geometry authority. Every 5 ft cell of every level is five 1 ft strata,
+    // S0 (bottom) .. S4 (top). A stratum is two bytes: its material (id in the low 6 bits, 0 = air; 0x80 = constructed)
+    // and its HP (0..255 = 0..100 % of the material's max HP). A level's seeded baseline keeps the material bytes only
+    // (Uint8Array size*size*5; an unchanged solid stratum is at full HP by definition) and a 4-bit connector code per
+    // cell (ramp, stairs). A changed cell is an 11-byte record [connector, m0..m4, hp0..hp4], saved as 22 hex digits in
+    // UF.World.state.levels[z].strata["ax,ay"][i]. The shape codes the rest of the game reads (solid, floor, open,
+    // ramp, stairs) are derived from the strata here and nowhere else. docs/systems/UF_Levels.md, section Strata.
+
+    const STRATA = 5, CELL_FT = 5;
+    const M_AIR = 0, M_STONE = 1, M_SOIL = 2, M_WOOD = 3, M_WATER = 4, M_LAVA = 5;
+    const M_BUILT = 0x80, M_ID = 0x3f;
+    const STRATA_SCHEMA = 1;
+    const REC = 11, REC_M = 1, REC_HP = 6;       // a changed cell: [connector, m0..m4, hp0..hp4]
+    const LEVEL_KEY = ["-2", "-1", "0", "1", "2"];
+    const AREA_STRIDE = 4096;                    // area index in the change maps: ax + ay * 4096
+    // Material table. Diagnostic values, not balanced: maxHP in HP points; resist multiplies incoming damage by damage
+    // type (a type not listed: 1); support is what a full-HP stratum carries (0..1); debris is what a destroyed stratum
+    // leaves, reported in levels:strataDestroyed (no item drops in 19A).
+    const STRATA_MATERIALS = Object.freeze([
+        { id: M_AIR, key: "air", solid: false, fluid: false, maxHP: 0, support: 0, debris: null, resist: {} },
+        { id: M_STONE, key: "stone", solid: true, fluid: false, maxHP: 120, support: 1, debris: "rubble", resist: { impact: 0.5, dig: 1, blast: 1, fire: 0.1 } },
+        { id: M_SOIL, key: "soil", solid: true, fluid: false, maxHP: 40, support: 0.5, debris: "loose_earth", resist: { impact: 1, dig: 2, blast: 1.5, fire: 0.2 } },
+        { id: M_WOOD, key: "wood", solid: true, fluid: false, maxHP: 60, support: 0.7, debris: "broken_timber", resist: { impact: 1, dig: 1, blast: 1.2, fire: 2 } },
+        { id: M_WATER, key: "water", solid: false, fluid: true, maxHP: 0, support: 0, debris: null, resist: {} },
+        { id: M_LAVA, key: "lava", solid: false, fluid: true, maxHP: 0, support: 0, debris: null, resist: {} }
+    ].map(m => Object.freeze(Object.assign(m, { resist: Object.freeze(m.resist) }))));
+    const MATERIAL_ID = new Map(STRATA_MATERIALS.map(m => [m.key, m.id]));
+    const LEGACY_TO_M = [M_STONE, M_SOIL, M_WOOD];     // legacy material code (stone, soil, wood) -> stratum material
+    // Lookups by the whole material byte (id and constructed flag): solid, fluid, legacy material code.
+    const SOLID_B = new Uint8Array(256), FLUID_B = new Uint8Array(256), LEGACY_B = new Uint8Array(256);
+    for (let v = 0; v < 256; v++) {
+        const m = (v & 0x40) === 0 ? STRATA_MATERIALS[v & M_ID] : null;
+        SOLID_B[v] = m && m.solid ? 1 : 0;
+        FLUID_B[v] = m && m.fluid && !(v & M_BUILT) ? 1 : 0;
+        LEGACY_B[v] = (v & M_ID) === M_SOIL ? SOIL : (v & M_ID) === M_WOOD ? WOOD : STONE;
+    }
+    // A material byte a stratum may hold: air is exactly 0, fluids carry no constructed flag, the id is known.
+    const validMaterialByte = v => Number.isInteger(v) && v >= 0 && v <= 255 && (v === 0 || SOLID_B[v] === 1 || FLUID_B[v] === 1);
+    const HEIGHT_STATES = Object.freeze(["HEIGHT_0_OF_5", "HEIGHT_1_OF_5", "HEIGHT_2_OF_5", "HEIGHT_3_OF_5", "HEIGHT_4_OF_5", "HEIGHT_5_OF_5"]);
+    const FLUID_STATES = Object.freeze(["FLUID_0_OF_5", "FLUID_1_OF_5", "FLUID_2_OF_5", "FLUID_3_OF_5", "FLUID_4_OF_5", "FLUID_5_OF_5"]);
+    // DEUS_Fluid keeps its 0..7 depth scale (DEPTH_MAX 7); these are the conversions (round(d * 5 / 7), round(k * 7 / 5)).
+    const FLUID_TO_STRATA = Object.freeze([0, 1, 1, 2, 3, 4, 4, 5]);
+    const STRATA_TO_FLUID = Object.freeze([0, 1, 3, 4, 6, 7]);
+    // Bits of getStrataFluidPassage: capacity 0..7 in DEUS_Fluid depth units, then the open faces.
+    const FLUID_PASS = Object.freeze({ CAPACITY_MASK: 7, DOWN: 8, UP: 16, SIDE: 32 });
+
+    const connOf = (conn, i) => (conn[i >> 1] >> ((i & 1) << 2)) & 15;
+
+    // A baseline's strata from the generator's working arrays (shape, material and water codes per cell), made in the
+    // same call and then dropped: solid -> 5 strata, ramp -> S0..S2 and its connector, floor and stairs -> S0 (stairs
+    // with their connector), open -> 5 air. A natural pool (water) is fluid in S1..S2: water on -1, lava on -2.
+    function toStrata(b, shape, material, water, z, size) {
+        const n = size * size, m = new Uint8Array(n * STRATA), conn = new Uint8Array((n + 1) >> 1);
+        const fluid = z === -2 ? M_LAVA : M_WATER;
+        for (let i = 0; i < n; i++) {
+            const s = shape[i], mat = LEGACY_TO_M[material[i]] || M_STONE, o = i * STRATA;
+            const fill = s === SOLID ? STRATA : s === RAMP ? 3 : (s === FLOOR || s >= STAIR_UP) ? 1 : 0;
+            for (let k = 0; k < fill; k++) m[o + k] = mat;
+            if (s >= RAMP && s <= STAIR_BOTH) conn[i >> 1] |= s << ((i & 1) << 2);
+            if (water && water[i] && fill < 2) { m[o + 1] = fluid; m[o + 2] = fluid; }
+        }
+        b.strata = { m, hp: null };    // hp null: every baseline solid stratum is at full HP
+        b.conn = conn;
+        b.size = size;
+        b.hasWater = !!water;
+        // Read-only legacy views (b.shape, b.material, b.water: one code per cell, what the generator made), built on
+        // the first read and kept: code written before the strata still reads them. Writing into them changes nothing.
+        const lazy = (name, which) => Object.defineProperty(b, name, {
+            enumerable: true, configurable: true,
+            get() {
+                const v = new Uint8Array(n);
+                standaloneInto(b, which === 0 ? v : null, which === 1 ? v : null, which === 2 ? v : null);
+                Object.defineProperty(b, name, { value: v, enumerable: true, configurable: true, writable: true });
+                return v;
+            }
+        });
+        lazy("shape", 0);
+        lazy("material", 1);
+        if (water) lazy("water", 2);
+        return b;
+    }
+    // The generator's codes back from a baseline's strata alone (no cells above or below): exact for every baseline.
+    function standaloneInto(b, shapeOut, matOut, waterOut) {
+        const m = b.strata.m, conn = b.conn, n = b.size * b.size;
+        for (let i = 0; i < n; i++) {
+            const o = i * STRATA;
+            let fill = 0;
+            while (fill < STRATA && SOLID_B[m[o + fill]] === 1) fill++;
+            if (shapeOut) { const c = connOf(conn, i); shapeOut[i] = fill === STRATA ? SOLID : c ? c : fill > 0 ? FLOOR : OPEN; }
+            if (matOut) matOut[i] = fill > 0 ? LEGACY_B[m[o]] : STONE;
+            if (waterOut) waterOut[i] = FLUID_B[m[o]] | FLUID_B[m[o + 1]] | FLUID_B[m[o + 2]] | FLUID_B[m[o + 3]] | FLUID_B[m[o + 4]];
+        }
+    }
+    // Scratch copies of the legacy views for checksums and metrics (reused: never kept, never handed out).
+    let scratchViews = null;
+    function legacyViews(b) {
+        const n = b.size * b.size;
+        if (!scratchViews || scratchViews.shape.length !== n) scratchViews = { shape: new Uint8Array(n), material: new Uint8Array(n), water: new Uint8Array(n) };
+        standaloneInto(b, scratchViews.shape, scratchViews.material, b.hasWater ? scratchViews.water : null);
+        return { shape: scratchViews.shape, material: scratchViews.material, water: b.hasWater ? scratchViews.water : null, biome: b.biome || null };
+    }
+
+    //-------------------------------------------------------------------------
+    // Reading strata: baseline plus changed cells (no allocation on a read)
 
     const pack = (shape, constructed, material) => (shape & 7) | (constructed ? 8 : 0) | ((material & 15) << 4);
     const unpack = p => ({ shape: SHAPE_NAMES[p & 7] || "", code: p & 7, constructed: (p & 8) !== 0, material: MATERIALS[p >> 4] || String(p >> 4) });
     const areaKey = (ax, ay) => `${ax},${ay}`;
+    const genOf = (st, z) => { const L = st.levels && st.levels[LEVEL_KEY[z + 2]]; return L && L.gen ? L.gen : GEN; };
 
-    function changesOf(st, z, ax, ay, create) {
-        const L = st.levels && st.levels[String(z)];
-        if (!L) return null;
-        L.cells = L.cells || {};
-        const k = areaKey(ax, ay);
-        if (!L.cells[k] && create) L.cells[k] = {};
-        return L.cells[k] || null;
+    // The last baseline read per level (a numeric check instead of baseline()'s string key).
+    const baseSlots = [null, null, null, null, null];
+    function baseOf(st, z, ax, ay) {
+        const s = baseSlots[z + 2], g = genOf(st, z);
+        if (s !== null && s.st === st && s.ax === ax && s.ay === ay && s.gen === g && s.seed === st.seed) return s.b;
+        const b = baseline(z, ax, ay);
+        baseSlots[z + 2] = { st, ax, ay, gen: g, seed: st.seed, b };
+        return b;
     }
+
+    // The changed cells, decoded: per level (z + 2) a Map of area index -> Map of cell index -> record. Rebuilt from the
+    // save whenever UF.World.state is another object (a load, a New Game). Unreadable saved records are reported and
+    // skipped (they stay in the save untouched).
+    const HEX = "0123456789abcdef";
+    const deltas = { st: null, levels: null, errors: [] };
+    function encodeRecord(r) {
+        let s = "";
+        for (let k = 0; k < REC; k++) s += HEX[r[k] >> 4] + HEX[r[k] & 15];
+        return s;
+    }
+    function decodeRecord(s) {
+        if (typeof s !== "string" || s.length !== REC * 2 || !/^[0-9a-fA-F]+$/.test(s)) return null;
+        const r = new Uint8Array(REC);
+        for (let k = 0; k < REC; k++) r[k] = parseInt(s.substr(k * 2, 2), 16);
+        return validRecord(r) ? r : null;
+    }
+    function validRecord(r) {
+        if (r[0] !== 0 && !(r[0] >= RAMP && r[0] <= STAIR_BOTH)) return false;
+        for (let k = 0; k < STRATA; k++) {
+            if (!validMaterialByte(r[REC_M + k])) return false;
+            if (!SOLID_B[r[REC_M + k]] && r[REC_HP + k] !== 0) return false;
+        }
+        return true;
+    }
+    const parseAreaKey = k => {
+        const m = /^(-?\d+),(-?\d+)$/.exec(String(k));
+        return m ? { x: Number(m[1]), y: Number(m[2]) } : null;
+    };
+    const schemaKnown = st => st.strataSchemaVersion === undefined || st.strataSchemaVersion === STRATA_SCHEMA;
+    function deltaLevels(st) {
+        if (deltas.st === st) return deltas.levels;
+        deltas.st = st;
+        deltas.levels = [new Map(), new Map(), new Map(), new Map(), new Map()];
+        deltas.errors = [];
+        if (!st || !st.levels || !schemaKnown(st)) return deltas.levels;
+        const n = st.size * st.size;
+        for (let li = 0; li < 5; li++) {
+            const L = st.levels[LEVEL_KEY[li]], saved = L && L.strata;
+            if (!saved) continue;
+            if (typeof saved !== "object" || Array.isArray(saved)) { deltas.errors.push(`level ${LEVEL_KEY[li]}: strata is not an object`); continue; }
+            for (const ak in saved) {
+                const a = parseAreaKey(ak), cells = saved[ak];
+                if (!a || !cells || typeof cells !== "object") { deltas.errors.push(`level ${LEVEL_KEY[li]} area "${ak}"`); continue; }
+                let map = null;
+                for (const k in cells) {
+                    const i = Number(k), r = decodeRecord(cells[k]);
+                    if (!Number.isInteger(i) || i < 0 || i >= n || !r) { deltas.errors.push(`level ${LEVEL_KEY[li]} area ${ak} cell ${k}: ${JSON.stringify(cells[k])}`); continue; }
+                    if (!map) { map = new Map(); deltas.levels[li].set(a.x + a.y * AREA_STRIDE, map); }
+                    map.set(i, r);
+                }
+            }
+        }
+        if (deltas.errors.length) {
+            stats.strataReadErrors = (stats.strataReadErrors || 0) + deltas.errors.length;
+            console.error(`DEUS_Levels: ${deltas.errors.length} saved strata record(s) could not be read and were skipped (left in the save): ${deltas.errors.slice(0, 5).join("; ")}`);
+        }
+        return deltas.levels;
+    }
+
+    // The cell located last: material bytes rdM[rdO..rdO+4], HP bytes rdH[rdHO..] (rdH null: the baseline's full HP),
+    // connector rdC. Module-level so a read allocates nothing. slot: which scratch a legacy ground cell uses (0 below,
+    // 1 the cell, 2 above), so the three cells of one derivation never share one.
+    let rdM = null, rdO = 0, rdH = null, rdHO = 0, rdC = 0;
+    const legacyGroundRec = [new Uint8Array(REC), new Uint8Array(REC), new Uint8Array(REC)];
+    function locate(st, z, ax, ay, i, slot) {
+        const am = deltaLevels(st)[z + 2].get(ax + ay * AREA_STRIDE);
+        const r = am !== undefined ? am.get(i) : undefined;
+        if (r !== undefined) { rdM = r; rdO = REC_M; rdH = r; rdHO = REC_HP; rdC = r[0]; return; }
+        const b = baseOf(st, z, ax, ay);
+        if (b.legacyGround) {
+            // The ground of a world without its column (generator < 4): its peaks are solid, the rest a floor.
+            const G = window.UF.WorldGen, size = st.size;
+            const info = G && G.cellInfoLocal ? G.cellInfoLocal(ax, ay, i % size, (i - (i % size)) / size) : null;
+            const rec = legacyGroundRec[slot], fill = info && info.peak ? STRATA : 1;
+            rec.fill(0);
+            for (let k = 0; k < fill; k++) { rec[REC_M + k] = M_STONE; rec[REC_HP + k] = 255; }
+            rdM = rec; rdO = REC_M; rdH = rec; rdHO = REC_HP; rdC = 0;
+            return;
+        }
+        rdM = b.strata.m; rdO = i * STRATA; rdH = b.strata.hp; rdHO = rdO; rdC = connOf(b.conn, i);
+    }
+    const hpAt = k => rdH !== null ? rdH[rdHO + k] : (SOLID_B[rdM[rdO + k]] === 1 ? 255 : 0);
+    const fillOf = (m, o) => { let f = 0; while (f < STRATA && SOLID_B[m[o + f]] === 1) f++; return f; };
+    const solidMaskOf = (m, o) => SOLID_B[m[o]] | (SOLID_B[m[o + 1]] << 1) | (SOLID_B[m[o + 2]] << 2) | (SOLID_B[m[o + 3]] << 3) | (SOLID_B[m[o + 4]] << 4);
+    const fluidCountOf = (m, o) => FLUID_B[m[o]] + FLUID_B[m[o + 1]] + FLUID_B[m[o + 2]] + FLUID_B[m[o + 3]] + FLUID_B[m[o + 4]];
+
+    /**
+     * The legacy packed code of a cell, derived from its strata and the cells above and below (the table in
+     * docs/systems/UF_Levels.md). fill = solid strata stacked from S0. fill 5: solid. A connector (ramp, stairs): that
+     * connector. Otherwise the standing surface is the top of the fill, or with fill 0 the top stratum (S4) of the cell
+     * below when it is solid (below -2 there is only lava: no surface). No surface: open. A surface with under 4 strata
+     * of headroom (counted on into the cell above; the sky above +2) can't be stood on: solid. Material and the
+     * constructed flag come from the stratum stood on.
+     */
+    function derivePacked(st, ax, ay, i, z) {
+        stats.derives++;
+        locate(st, z, ax, ay, i, 1);
+        const m = rdM, o = rdO, c = rdC;
+        let fill = 0;
+        while (fill < STRATA && SOLID_B[m[o + fill]] === 1) fill++;
+        if (fill === STRATA) return pack(SOLID, (m[o] & M_BUILT) !== 0, LEGACY_B[m[o]]);
+        let sup = -1;
+        if (fill > 0) sup = m[o + fill - 1];
+        else if (z > -2) {
+            locate(st, z - 1, ax, ay, i, 0);
+            if (SOLID_B[rdM[rdO + 4]] === 1) sup = rdM[rdO + 4];
+        }
+        if (c !== 0) return sup >= 0 ? pack(c, (sup & M_BUILT) !== 0, LEGACY_B[sup]) : pack(c, false, STONE);
+        if (sup < 0) return pack(OPEN, false, STONE);
+        let head = 0, s = fill;
+        while (s < STRATA && SOLID_B[m[o + s]] === 0) { head++; s++; }
+        if (s === STRATA && head < 4) {
+            if (z === 2) head = STRATA * 2;
+            else {
+                locate(st, z + 1, ax, ay, i, 2);
+                for (let t = 0; t < STRATA && head < 4 && SOLID_B[rdM[rdO + t]] === 0; t++) head++;
+            }
+        }
+        return pack(head >= 4 ? FLOOR : SOLID, (sup & M_BUILT) !== 0, LEGACY_B[sup]);
+    }
+
+    // The derived packed codes of a whole level of an area, kept per world state: a read-only view of the strata, built
+    // from them (derivePacked) on first use after a load or a New Game and refreshed by putDelta for the changed cell and
+    // the cells above and below it, the only cells whose derivation reads it. 65,536 bytes per level of a 256 x 256 area;
+    // the last GRID_KEEP grids are kept. A shape read is one array read; whole-level passes (painting, flood walls, the
+    // ground's cliffs) read the grid instead of deriving every cell again.
+    const GRID_KEEP = 15;
+    const packedGrids = { st: null, map: new Map() };   // (ax + ay * AREA_STRIDE) * 5 + (z + 2) -> Uint8Array
+    const gridSlots = [0, 1, 2, 3, 4].map(() => ({ st: null, ai: -1, grid: null }));   // the last grid read per level
+    function packedGridOf(st, z, ax, ay) {
+        const li = z + 2, ai = ax + ay * AREA_STRIDE, slot = gridSlots[li];
+        if (slot.st === st && slot.ai === ai) return slot.grid;
+        if (packedGrids.st !== st) { packedGrids.st = st; packedGrids.map.clear(); }
+        const key = ai * 5 + li;
+        let grid = packedGrids.map.get(key);
+        if (grid === undefined) {
+            const n = st.size * st.size;
+            grid = new Uint8Array(n);
+            for (let i = 0; i < n; i++) grid[i] = derivePacked(st, ax, ay, i, z);
+            packedGrids.map.set(key, grid);
+            stats.gridBuilds++;
+            while (packedGrids.map.size > GRID_KEEP) {
+                const k0 = packedGrids.map.keys().next().value, g0 = packedGrids.map.get(k0);
+                packedGrids.map.delete(k0);
+                for (const sl of gridSlots) if (sl.grid === g0) { sl.st = null; sl.ai = -1; sl.grid = null; }
+            }
+        }
+        slot.st = st; slot.ai = ai; slot.grid = grid;
+        return grid;
+    }
+    // After a cell's strata changed: re-derive it and the cells above and below in the grids that exist.
+    function refreshPacked(st, z, ax, ay, i) {
+        if (packedGrids.st !== st) return;
+        const ai = ax + ay * AREA_STRIDE;
+        for (let zz = Math.max(-2, z - 1); zz <= Math.min(2, z + 1); zz++) {
+            const g = packedGrids.map.get(ai * 5 + zz + 2);
+            if (g !== undefined) g[i] = derivePacked(st, ax, ay, i, zz);
+        }
+    }
+    // Every built grid of an area against a fresh derivation of every cell (diagnostics and tests; slow).
+    function verifyPackedGrids(ax, ay) {
+        const st = World().state, out = { grids: 0, cells: 0, mismatches: 0, examples: [] };
+        if (packedGrids.st !== st) return out;
+        const ai = ax + ay * AREA_STRIDE, n = st.size * st.size;
+        for (let li = 0; li < 5; li++) {
+            const g = packedGrids.map.get(ai * 5 + li);
+            if (g === undefined) continue;
+            out.grids++;
+            for (let i = 0; i < n; i++) {
+                out.cells++;
+                const p = derivePacked(st, ax, ay, i, li - 2);
+                if (g[i] !== p) { out.mismatches++; if (out.examples.length < 5) out.examples.push({ z: li - 2, x: i % st.size, y: (i / st.size) | 0, cached: g[i], derived: p }); }
+            }
+        }
+        return out;
+    }
+
     // Packed shape of a cell (0 for outside the world).
     function packedAt(ax, ay, x, y, z) {
         const W = World(), st = W && W.state;
-        if (!st || !isLevel(z) || !W.inWorld(ax, ay, z) || x < 0 || y < 0 || x >= st.size || y >= st.size) return 0;
+        if (!st || !isLevel(z) || z < -2 || z > 2 || !W.inWorld(ax, ay, z) || x < 0 || y < 0 || x >= st.size || y >= st.size) return 0;
         stats.shapeReads++;
-        const i = y * st.size + x;
-        const ch = changesOf(st, z, ax, ay, false);
-        if (ch && ch[i] !== undefined) return ch[i] | 0;
-        if (z === 0) {
-            if (levelGen(st, 0) >= 4) {
-                const b = baseline(0, ax, ay);
-                return pack(b.shape[i], false, b.material[i]);
-            }
-            const G = window.UF.WorldGen;
-            const info = G && G.cellInfoLocal ? G.cellInfoLocal(ax, ay, x, y) : null;
-            return pack(info && info.peak ? SOLID : FLOOR, false, STONE);
+        return packedGridOf(st, z, ax, ay)[y * st.size + x];
+    }
+
+    // The packed codes of a whole level of an area (baseline plus changes) into out: a copy of the grid.
+    function derivedGrid(z, ax, ay, out) {
+        out.set(packedGridOf(World().state, z, ax, ay));
+        return out;
+    }
+
+    // The cell queries' arguments without allocating: (ref), (area, x, y[, z]) or (ax, ay, x, y, z). Sets q*; false when
+    // the cell isn't in the world.
+    let qSt = null, qAx = 0, qAy = 0, qX = 0, qY = 0, qZ = 0, qI = 0;
+    function cellQuery(a, b, c, d, e) {
+        if (typeof a === "number") { qAx = a; qAy = b; qX = c; qY = d; qZ = e; }
+        else if (a && typeof b === "number") { qAx = a.x | 0; qAy = a.y | 0; qX = b; qY = c; qZ = d !== undefined ? d : (a.z !== undefined ? a.z : 0); }
+        else if (a) { qAx = a.area ? a.area.x | 0 : 0; qAy = a.area ? a.area.y | 0 : 0; qX = a.x; qY = a.y; qZ = zOf(a); }
+        else return false;
+        qX |= 0; qY |= 0;
+        const W = World();
+        qSt = W && W.state;
+        if (!qSt || !Number.isInteger(qZ) || qZ < -2 || qZ > 2 || !W.inWorld(qAx, qAy, qZ) || qX < 0 || qY < 0 || qX >= qSt.size || qY >= qSt.size) return false;
+        qI = qY * qSt.size + qX;
+        return true;
+    }
+    // The packed shape of the cell cellQuery just set (no second world lookup; no allocation).
+    const queriedPacked = () => { stats.shapeReads++; return packedGridOf(qSt, qZ, qAx, qAy)[qI]; };
+
+    // A copy of a cell's record (writes and damage only).
+    function currentRecord(st, z, ax, ay, i) {
+        locate(st, z, ax, ay, i, 1);
+        const r = new Uint8Array(REC);
+        r[0] = rdC;
+        for (let k = 0; k < STRATA; k++) { r[REC_M + k] = rdM[rdO + k]; r[REC_HP + k] = hpAt(k); }
+        return r;
+    }
+    function sameAsBaseline(b, i, r) {
+        if (b.legacyGround) return false;
+        if (connOf(b.conn, i) !== r[0]) return false;
+        const m = b.strata.m, o = i * STRATA;
+        for (let k = 0; k < STRATA; k++) {
+            if (m[o + k] !== r[REC_M + k]) return false;
+            const hp = b.strata.hp ? b.strata.hp[o + k] : (SOLID_B[m[o + k]] === 1 ? 255 : 0);
+            if (hp !== r[REC_HP + k]) return false;
         }
-        const b = baseline(z, ax, ay);
-        return pack(b.shape[i], false, b.material[i]);
+        return true;
+    }
+    // Store a cell's record (null: back to the baseline) in the decoded maps and the save.
+    function putDelta(st, z, ax, ay, i, r) {
+        const lv = deltaLevels(st)[z + 2], ai = ax + ay * AREA_STRIDE, key = areaKey(ax, ay);
+        const L = st.levels[LEVEL_KEY[z + 2]];
+        if (r === null) {
+            const am = lv.get(ai);
+            if (am) { am.delete(i); if (!am.size) lv.delete(ai); }
+            if (L && L.strata && L.strata[key]) {
+                delete L.strata[key][i];
+                if (!Object.keys(L.strata[key]).length) delete L.strata[key];
+            }
+            refreshPacked(st, z, ax, ay, i);
+            return;
+        }
+        let am = lv.get(ai);
+        if (!am) { am = new Map(); lv.set(ai, am); }
+        am.set(i, r);
+        L.strata = L.strata || {};
+        (L.strata[key] = L.strata[key] || {})[i] = encodeRecord(r);
+        refreshPacked(st, z, ax, ay, i);
+    }
+
+    // The strata of a legacy packed cell (migration, setShape): solid -> 5 strata of its material; floor and stairs -> S0;
+    // ramp -> S0..S2 (the compatibility step); open -> none; a constructed cell marks its strata. Fluid strata of keep
+    // (the cell's record before) stay where the new shape leaves air.
+    function recordFromPacked(p, keep) {
+        const r = new Uint8Array(REC), s = p & 7;
+        const byte = (LEGACY_TO_M[p >> 4] || M_STONE) | ((p & 8) ? M_BUILT : 0);
+        const fill = s === SOLID ? STRATA : s === RAMP ? 3 : (s === FLOOR || s >= STAIR_UP) ? 1 : 0;
+        for (let k = 0; k < fill; k++) { r[REC_M + k] = byte; r[REC_HP + k] = 255; }
+        r[0] = s >= RAMP ? s : 0;
+        if (keep) for (let k = fill; k < STRATA; k++) if (FLUID_B[keep[REC_M + k]]) r[REC_M + k] = keep[REC_M + k];
+        return r;
     }
     const refOf = ref => ({ ax: ref.area ? ref.area.x : 0, ay: ref.area ? ref.area.y : 0, x: ref.x | 0, y: ref.y | 0, z: zOf(ref) });
 
@@ -975,14 +1338,20 @@
         const r = refOf(ref);
         return isNaturalWaterAtRaw(r.ax, r.ay, r.z, r.x, r.y);
     }
+    // A natural pool: a floor cell below the ground, not constructed, holding fluid strata (water on -1 and lava on -2 in
+    // generated levels; isLavaAtRaw tells which). As before the strata, a lava pool also counts here.
     function isNaturalWaterAtRaw(ax, ay, z, x, y) {
         if (z >= 0) return false;
         const p = packedAt(ax, ay, x, y, z);
         if (!p || (p & 7) !== FLOOR || (p & 8)) return false;
-        const b = baseline(z, ax, ay);
-        const W = World();
-        const size = (W && W.state && W.state.size) || 256;
-        return !!(b && b.water && b.water[y * size + x]);
+        const st = World().state;
+        return fluidMaterialAt(st, z, ax, ay, y * st.size + x) !== M_AIR;
+    }
+    // The material id of a cell's lowest fluid stratum (M_AIR: none). No allocation.
+    function fluidMaterialAt(st, z, ax, ay, i) {
+        locate(st, z, ax, ay, i, 1);
+        for (let k = 0; k < STRATA; k++) if (FLUID_B[rdM[rdO + k]] === 1) return rdM[rdO + k] & M_ID;
+        return M_AIR;
     }
     function waterAt(ref) {
         const r = refOf(ref);
@@ -1002,7 +1371,8 @@
         pockets.sort((a, b) => ((a.x - r.x) ** 2 + (a.y - r.y) ** 2) - ((b.x - r.x) ** 2 + (b.y - r.y) ** 2) || a.id - b.id);
         return pockets[0] || null;
     }
-    function baselineMetrics(b, size) {
+    function baselineMetrics(base, size) {
+        const b = legacyViews(base);   // the generator's codes, read back from the strata
         const counts = {}, visited = new Uint8Array(b.shape.length), components = [];
         let solid = 0, floor = 0, water = 0, soil = 0;
         for (let i = 0; i < b.shape.length; i++) {
@@ -1026,8 +1396,15 @@
         return { solid, floor, water, soil, biomes: counts, components,
             solidFraction: solid / b.shape.length };
     }
-    const biomeReader = (b, size) => (x, y) => x >= 0 && y >= 0 && x < size && y < size
-        ? { code: b.biome ? b.biome[y * size + x] : 0, water: !!(b.water && b.water[y * size + x]) } : null;
+    // A cell's biome code and pool (fluid strata now, baseline plus changes: water, and lava when the fluid is lava).
+    const biomeReader = (b, size, z, ax, ay) => {
+        const st = World().state;
+        return (x, y) => {
+            if (x < 0 || y < 0 || x >= size || y >= size) return null;
+            const fluid = z < 0 ? fluidMaterialAt(st, z, ax, ay, y * size + x) : M_AIR;
+            return { code: b.biome ? b.biome[y * size + x] : 0, water: fluid !== M_AIR, lava: fluid === M_LAVA };
+        };
+    };
 
     // The looks of a cell: [layer 0 base look, layer 1 overlay, layer 2 connector] keys (null = none).
     function looksOfPacked(p, z, biomeInfo) {
@@ -1043,7 +1420,7 @@
             if (!c && s === FLOOR && biomeInfo) {
                 const b = BIOMES[biomeInfo.code];
                 if (b) base = b.floorLook;
-                if (biomeInfo.water) base = (z === -2 ? "lava_pool" : "freshwater_pool");
+                if (biomeInfo.water) base = ((biomeInfo.lava !== undefined ? biomeInfo.lava : z === -2) ? "lava_pool" : "freshwater_pool");
             }
             if (s === RAMP) l2 = "ramp_up";
             else if (s === STAIR_UP) l2 = "stair_up";
@@ -1087,12 +1464,12 @@
             ctx.map.parallaxSy = 0;
         }
         const b = baseline(z, ctx.areaX, ctx.areaY);
-        const grid = new Uint8Array(size * size);
-        for (let i = 0; i < grid.length; i++) grid[i] = pack(b.shape[i], false, b.material[i]);
-        const ch = changesOf(st, z, ctx.areaX, ctx.areaY, false);
-        if (ch) for (const k in ch) grid[Number(k)] = ch[k] | 0;
+        const grid = derivedGrid(z, ctx.areaX, ctx.areaY, new Uint8Array(size * size));
+        const fluid = new Uint8Array(size * size);
+        if (z < 0) for (let i = 0; i < fluid.length; i++) fluid[i] = fluidMaterialAt(st, z, ctx.areaX, ctx.areaY, i);
         const read = (x, y) => (x < 0 || y < 0 || x >= size || y >= size ? 0 : grid[y * size + x]);
-        const readBiome = biomeReader(b, size);
+        const readBiome = (x, y) => x >= 0 && y >= 0 && x < size && y < size
+            ? { code: b.biome ? b.biome[y * size + x] : 0, water: fluid[y * size + x] !== M_AIR, lava: fluid[y * size + x] === M_LAVA } : null;
         for (let y = 0; y < size; y++) {
             for (let x = 0; x < size; x++) {
                 const t = tilesAt(read, x, y, z, readBiome);
@@ -1102,6 +1479,530 @@
             }
         }
         if (provoked("budgets")) { const until = performance.now() + 6000; while (performance.now() < until) { /* provoked slow build */ } }
+    }
+
+    //-------------------------------------------------------------------------
+    // Writing strata: the one writer (setStrata, setShape and the damage API all end in writeCell)
+
+    const standableCode = s => s === FLOOR || s >= RAMP;
+    const CONNECTOR_CODE = { ramp: RAMP, stairUp: STAIR_UP, stairDown: STAIR_DOWN, stairBoth: STAIR_BOTH };
+
+    // Store a cell's new record and tell the world. The derived shapes of the cell and of the cells above and below are
+    // compared before and after: each level whose derived cell changed is redrawn and gets levels:shapeChanged and
+    // levels:cellChanged (the cell itself also when a material or its connector changed; legacyEvents: always, as
+    // setShape always did). An HP-only change emits levels:strataChanged alone. refuseIfStanding: undo and refuse when a
+    // unit stands on the cell and it can't be stood on after the change.
+    function writeCell(st, ax, ay, x, y, z, rec, opts) {
+        const W = World(), i = y * st.size + x;
+        const before = currentRecord(st, z, ax, ay, i);
+        const from = [-1, -1, -1], to = [-1, -1, -1];
+        for (let d = -1; d <= 1; d++) if (z + d >= -2 && z + d <= 2 && W.inWorld(ax, ay, z + d)) from[d + 1] = derivePacked(st, ax, ay, i, z + d);
+        const b = baseOf(st, z, ax, ay);
+        putDelta(st, z, ax, ay, i, sameAsBaseline(b, i, rec) ? null : rec);
+        for (let d = -1; d <= 1; d++) if (from[d + 1] >= 0) to[d + 1] = derivePacked(st, ax, ay, i, z + d);
+        if (opts.refuseIfStanding && !standableCode(to[1] & 7) && W.standerAt(ax, ay, x, y, z)) {
+            putDelta(st, z, ax, ay, i, sameAsBaseline(b, i, before) ? null : before);
+            return { ok: false, reason: `a unit stands on (${x},${y}) at level ${z}` };
+        }
+        let matChanged = before[0] !== rec[0], hpChanged = false;
+        for (let k = 0; k < STRATA; k++) {
+            if (before[REC_M + k] !== rec[REC_M + k]) matChanged = true;
+            if (before[REC_HP + k] !== rec[REC_HP + k]) hpChanged = true;
+        }
+        if (!matChanged && !hpChanged && !opts.legacyEvents) return { ok: true, changed: false, from: from[1], to: to[1] };
+        stats.strataWrites++;
+        const cause = opts.cause || "setStrata";
+        const ref = { area: { x: ax, y: ay }, x, y, z };
+        emit("levels:strataChanged", ref, { before: Array.from(before), after: Array.from(rec), cause });
+        for (let d = -1; d <= 1; d++) {
+            const a = from[d + 1], c = to[d + 1];
+            if (a < 0) continue;
+            const here = d === 0, moved = a !== c;
+            if (moved || (here && matChanged)) redrawAround(ax, ay, x, y, z + d);
+            const r = here ? ref : { area: { x: ax, y: ay }, x, y, z: z + d };
+            if (moved || (here && opts.legacyEvents)) emit("levels:shapeChanged", r, unpack(a), unpack(c));
+            if (moved || (here && (matChanged || opts.legacyEvents))) notifyWorldCellChanged(r, unpack(a), unpack(c), cause);
+        }
+        return { ok: true, changed: true, from: from[1], to: to[1] };
+    }
+
+    /**
+     * Write a cell's five strata: setStrata(ref, { m, hp, connector }, opts). m: five materials, S0 first, as keys
+     * ("stone", "soil", "wood", "water", "lava", "air") or bytes (id | 0x80 constructed); opts.constructed marks the solid
+     * ones constructed. hp: five 1..255 for solid strata (default 255; air and fluids are 0). connector: 0 / null /
+     * "none", a shape name ("ramp", "stairUp", "stairDown", "stairBoth") or its code (default: the cell's own).
+     * opts.refuseIfStanding: refused when a unit stands on the cell and it can't be stood on after (VISION V68).
+     * Returns true, or false with lastRefusal() saying why.
+     */
+    function setStrata(ref, spec, opts = {}) {
+        const W = World(), st = W && W.state;
+        const r = refOf(ref || {});
+        const refuse = reason => {
+            lastRefusal = { ref: { area: { x: r.ax, y: r.ay }, x: r.x, y: r.y, z: r.z }, strata: spec, reason };
+            return false;
+        };
+        if (!st || !st.levels) return refuse("no levels in this world");
+        if (!schemaKnown(st)) return refuse(`this save's strata schema ${JSON.stringify(st.strataSchemaVersion)} is unknown: no changes are written`);
+        if (!isLevel(r.z) || r.z < -2 || r.z > 2 || !W.inWorld(r.ax, r.ay, r.z) || r.x < 0 || r.y < 0 || r.x >= st.size || r.y >= st.size) return refuse(`level ${ref && ref.z} or cell (${r.x},${r.y}) doesn't exist`);
+        if (r.z === 0 && levelGen(st, 0) < 4) return refuse("the ground has no column in this world (generator < 4)");
+        const m = spec && spec.m;
+        if (!m || typeof m.length !== "number" || m.length !== STRATA) return refuse("m must list five materials, S0 first");
+        if (spec.hp !== undefined && (!spec.hp || spec.hp.length !== STRATA)) return refuse("hp must list five values, S0 first");
+        const i = r.y * st.size + r.x;
+        const rec = new Uint8Array(REC);
+        for (let k = 0; k < STRATA; k++) {
+            let v = m[k];
+            if (typeof v === "string") {
+                const id = MATERIAL_ID.get(v);
+                if (id === undefined) return refuse(`unknown material ${JSON.stringify(v)} in S${k}`);
+                v = id;
+            }
+            if (opts.constructed && SOLID_B[v & 0xff] === 1) v |= M_BUILT;
+            if (!validMaterialByte(v)) return refuse(`material ${JSON.stringify(m[k])} in S${k} is not a known material byte`);
+            rec[REC_M + k] = v;
+            const hp = spec.hp !== undefined ? spec.hp[k] : (SOLID_B[v] === 1 ? 255 : 0);
+            if (SOLID_B[v] === 1) {
+                if (!Number.isInteger(hp) || hp < 1 || hp > 255) return refuse(`HP ${JSON.stringify(hp)} of S${k} must be 1..255 (0 HP is air)`);
+            } else if (hp !== 0) return refuse(`HP of S${k} (${STRATA_MATERIALS[v & M_ID].key}) must be 0`);
+            rec[REC_HP + k] = hp;
+        }
+        let conn;
+        const c = spec.connector;
+        if (c === undefined) conn = currentRecord(st, r.z, r.ax, r.ay, i)[0];
+        else if (c === 0 || c === null || c === "none") conn = 0;
+        else if (typeof c === "string" && CONNECTOR_CODE[c]) conn = CONNECTOR_CODE[c];
+        else if (Number.isInteger(c) && c >= RAMP && c <= STAIR_BOTH) conn = c;
+        else return refuse(`unknown connector ${JSON.stringify(c)}`);
+        rec[0] = conn;
+        const res = writeCell(st, r.ax, r.ay, r.x, r.y, r.z, rec, { cause: opts.cause || "setStrata", refuseIfStanding: !!opts.refuseIfStanding });
+        return res.ok ? true : refuse(res.reason);
+    }
+
+    // A cell's strata for reading (allocates; not for per-frame use).
+    function strataAt(ref) {
+        const r = refOf(ref || {});
+        const W = World(), st = W && W.state;
+        if (!st || !isLevel(r.z) || r.z < -2 || r.z > 2 || !W.inWorld(r.ax, r.ay, r.z) || r.x < 0 || r.y < 0 || r.x >= st.size || r.y >= st.size) return null;
+        const rec = currentRecord(st, r.z, r.ax, r.ay, r.y * st.size + r.x);
+        const out = { materials: [], constructed: [], hp: [], bytes: [], connector: rec[0] ? SHAPE_NAMES[rec[0]] : null, fill: 0, changed: false };
+        for (let k = 0; k < STRATA; k++) {
+            const v = rec[REC_M + k];
+            out.materials.push(STRATA_MATERIALS[v & M_ID].key);
+            out.constructed.push((v & M_BUILT) !== 0);
+            out.hp.push(rec[REC_HP + k]);
+            out.bytes.push(v);
+        }
+        out.fill = fillOf(rec, REC_M);
+        const am = deltaLevels(st)[r.z + 2].get(r.ax + r.ay * AREA_STRIDE);
+        out.changed = !!(am && am.has(r.y * st.size + r.x));
+        return out;
+    }
+
+    //-------------------------------------------------------------------------
+    // Damage: material HP per stratum, volumes across levels
+
+    const damageHooks = new Map();   // material key, "*" (every solid material) or "fluid" -> [fn]
+    /**
+     * A damage response: fn(ctx) runs when a stratum of that material ("stone", ...; "*" = every solid material; "fluid",
+     * "water", "lava" = fluid strata) takes damage. ctx: { ref, stratum, material, constructed, damageType, damage,
+     * effective, source }. A solid material's hook may return the effective damage to use (a number >= 0); a fluid's
+     * return is ignored (fluids take no HP damage in 19A). Returns a function that removes the hook.
+     */
+    function registerDamageResponse(key, fn) {
+        if (typeof key !== "string" || typeof fn !== "function") return () => false;
+        const list = damageHooks.get(key) || [];
+        list.push(fn);
+        damageHooks.set(key, list);
+        return () => {
+            const l = damageHooks.get(key), j = l ? l.indexOf(fn) : -1;
+            if (j >= 0) l.splice(j, 1);
+            return j >= 0;
+        };
+    }
+    function runHooks(key, ctx) {
+        const list = damageHooks.get(key);
+        if (!list || !list.length) return;
+        for (const fn of list.slice()) {
+            try {
+                const v = fn(ctx);
+                if (typeof v === "number" && Number.isFinite(v) && v >= 0) ctx.effective = v;
+            } catch (e) {
+                console.error(`DEUS_Levels: damage response "${key}" threw: ${e && e.message}`);
+            }
+        }
+    }
+    // One stratum of a record takes damage (the record changes in place). effective = damage x the material's resist
+    // for the damage type, then the hooks. HP bytes lost = ceil(effective x 255 / maxHP): any damage > 0 costs at least
+    // one step (maxHP / 255 HP). HP 0: the stratum becomes air.
+    function damageStratum(rec, s, damage, damageType, ref, source) {
+        const byte = rec[REC_M + s], mat = STRATA_MATERIALS[byte & M_ID];
+        const out = { stratum: s, material: mat.key, hit: false, fluid: false, destroyed: false, damage, effective: 0,
+            hpBefore: rec[REC_HP + s], hpAfter: rec[REC_HP + s], constructed: (byte & M_BUILT) !== 0, debris: null };
+        if (byte === M_AIR) return out;
+        const ctx = { ref, stratum: s, material: mat.key, constructed: out.constructed, damageType, damage, effective: 0, source };
+        if (FLUID_B[byte] === 1) {
+            out.fluid = true;
+            runHooks(mat.key, ctx);
+            runHooks("fluid", ctx);
+            return out;
+        }
+        ctx.effective = damage * (mat.resist[damageType] !== undefined ? mat.resist[damageType] : 1);
+        runHooks(mat.key, ctx);
+        runHooks("*", ctx);
+        out.hit = true;
+        out.effective = ctx.effective;
+        if (ctx.effective > 0) {
+            const hp = Math.max(0, out.hpBefore - Math.ceil(ctx.effective * 255 / mat.maxHP - 1e-9));
+            out.hpAfter = hp;
+            if (hp === 0) {
+                out.destroyed = true;
+                out.debris = mat.debris;
+                rec[REC_M + s] = M_AIR;
+                rec[REC_HP + s] = 0;
+            } else rec[REC_HP + s] = hp;
+        }
+        return out;
+    }
+    // Damage some strata of one cell: hits = [[stratum, damage], ...]. One write for the cell, then the events.
+    function damageCell(st, ax, ay, x, y, z, hits, damageType, source) {
+        const i = y * st.size + x, ref = { area: { x: ax, y: ay }, x, y, z };
+        const rec = currentRecord(st, z, ax, ay, i);
+        const results = hits.map(h => damageStratum(rec, h[0], h[1], damageType, ref, source));
+        if (results.some(r => r.hpAfter !== r.hpBefore)) writeCell(st, ax, ay, x, y, z, rec, { cause: `damage:${damageType}` });
+        for (const r of results) {
+            if (!r.hit) continue;
+            stats.strataDamaged++;
+            emit("levels:strataDamaged", { area: { x: ax, y: ay }, x, y, z, stratum: r.stratum, material: r.material, constructed: r.constructed,
+                damageType, damage: r.damage, effective: r.effective, hpBefore: r.hpBefore, hpAfter: r.hpAfter, destroyed: r.destroyed, source });
+            if (r.destroyed) {
+                stats.strataDestroyed++;
+                emit("levels:strataDestroyed", { area: { x: ax, y: ay }, x, y, z, stratum: r.stratum, material: r.material, constructed: r.constructed,
+                    debris: r.debris, damageType, source });
+            }
+        }
+        return results;
+    }
+    // Why a cell can't take damage ("" = it can).
+    function damageRefusal(st, ax, ay, x, y, z) {
+        const W = World();
+        if (!st || !st.levels) return "no levels in this world";
+        if (!schemaKnown(st)) return `this save's strata schema ${JSON.stringify(st.strataSchemaVersion)} is unknown`;
+        if (!Number.isInteger(z) || z < -2 || z > 2 || !W.inWorld(ax, ay, z) || x < 0 || y < 0 || x >= st.size || y >= st.size) return `level ${z} or cell (${x},${y}) doesn't exist`;
+        if (z === 0 && levelGen(st, 0) < 4) return "the ground has no column in this world (generator < 4)";
+        return "";
+    }
+    const badNumber = v => typeof v !== "number" || !Number.isFinite(v);
+
+    /** Damage one stratum: applyStrataDamage(area, x, y, z, stratumIndex 0..4, damage >= 0, damageType = "impact"[, { source }]). */
+    function applyStrataDamage(area, x, y, z, s, damage, damageType = "impact", opts = {}) {
+        const W = World(), st = W && W.state;
+        const ax = area ? area.x | 0 : 0, ay = area ? area.y | 0 : 0;
+        const why = damageRefusal(st, ax, ay, x, y, z)
+            || (!Number.isInteger(s) || s < 0 || s >= STRATA ? `stratum ${JSON.stringify(s)} isn't 0..4` : "")
+            || (badNumber(damage) || damage < 0 ? `damage ${JSON.stringify(damage)} isn't a number >= 0` : "")
+            || (typeof damageType !== "string" || !damageType ? "damageType must be a name" : "");
+        if (why) return { ok: false, reason: why };
+        const r = damageCell(st, ax, ay, x, y, z, [[s, damage]], damageType, (opts && opts.source) || null)[0];
+        return Object.assign({ ok: true, area: { x: ax, y: ay }, x, y, z }, r);
+    }
+
+    const FALLOFF = { constant: t => 1, linear: t => 1 - t, quadratic: t => (1 - t) * (1 - t) };
+    const levelOfElevation = e => Math.floor(e / STRATA) - 2;
+    function newSummary() { return { ok: true, cells: 0, strataHit: 0, strataDestroyed: 0, skipped: 0, destroyed: [], levels: [] }; }
+    function addResults(sum, results, x, y, z) {
+        let wrote = false;
+        for (const r of results) {
+            if (r.hpAfter !== r.hpBefore) wrote = true;
+            if (r.hit) sum.strataHit++;
+            if (r.destroyed) { sum.strataDestroyed++; sum.destroyed.push({ x, y, z, stratum: r.stratum, material: r.material }); }
+        }
+        if (wrote) { sum.cells++; if (!sum.levels.includes(z)) sum.levels.push(z); }
+    }
+    // Any non-air stratum of the cell among the listed ones (no allocation; skips air before a record is made).
+    function anyMatter(st, ax, ay, i, z, hits) {
+        locate(st, z, ax, ay, i, 1);
+        for (let h = 0; h < hits.length; h++) if (rdM[rdO + hits[h][0]] !== M_AIR) return true;
+        return false;
+    }
+
+    /**
+     * Damage a volume. Two forms:
+     *   applyVolumeDamage(area, minX, minY, minZ, minS, maxX, maxY, maxZ, maxS, damage, damageType = "impact"[, { source }]):
+     *     every stratum of the box, from level minZ stratum minS up to level maxZ stratum maxS (it crosses levels: the
+     *     25 strata of a column are one elevation scale, e = (z + 2) * 5 + s, 0..24), takes the damage.
+     *   applyVolumeDamage({ center: { area, x, y, z, s = 2 }, radius (feet), damage, damageType = "impact",
+     *     falloff: "constant" | "linear" (default) | "quadratic", source }):
+     *     a sphere around the middle of that stratum; a stratum takes damage x falloff(distance / radius) when its middle
+     *     is within the radius (a cell is 5 ft across, a stratum 1 ft high). It crosses levels the same way.
+     * One area per call (cells past the area's edge are left out). Returns { ok, cells, strataHit, strataDestroyed,
+     * skipped, destroyed: [{ x, y, z, stratum, material }], levels } or { ok: false, reason }.
+     */
+    function applyVolumeDamage(a, minX, minY, minZ, minS, maxX, maxY, maxZ, maxS, damage, damageType = "impact", opts = {}) {
+        if (a && typeof a === "object" && a.radius !== undefined) return sphereDamage(a);
+        const W = World(), st = W && W.state;
+        if (!st || !st.levels) return { ok: false, reason: "no levels in this world" };
+        const nums = [minX, minY, minZ, minS, maxX, maxY, maxZ, maxS];
+        if (nums.some(v => !Number.isInteger(v))) return { ok: false, reason: "the box needs integer bounds" };
+        if (badNumber(damage) || damage < 0) return { ok: false, reason: `damage ${JSON.stringify(damage)} isn't a number >= 0` };
+        if (typeof damageType !== "string" || !damageType) return { ok: false, reason: "damageType must be a name" };
+        if (minS < 0 || minS >= STRATA || maxS < 0 || maxS >= STRATA) return { ok: false, reason: "strata are 0..4" };
+        const ax = a ? a.x | 0 : 0, ay = a ? a.y | 0 : 0;
+        const e0 = Math.max(0, (minZ + 2) * STRATA + minS), e1 = Math.min(24, (maxZ + 2) * STRATA + maxS);
+        const x0 = Math.max(0, minX), y0 = Math.max(0, minY), x1 = Math.min(st.size - 1, maxX), y1 = Math.min(st.size - 1, maxY);
+        const sum = newSummary(), source = (opts && opts.source) || null;
+        if (e0 > e1 || x0 > x1 || y0 > y1) return sum;
+        for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+            for (let z = levelOfElevation(e0); z <= levelOfElevation(e1); z++) {
+                if (damageRefusal(st, ax, ay, x, y, z)) { sum.skipped++; continue; }
+                const hits = [];
+                for (let s = 0; s < STRATA; s++) { const e = (z + 2) * STRATA + s; if (e >= e0 && e <= e1) hits.push([s, damage]); }
+                if (!anyMatter(st, ax, ay, y * st.size + x, z, hits)) continue;
+                addResults(sum, damageCell(st, ax, ay, x, y, z, hits, damageType, source), x, y, z);
+            }
+        }
+        sum.levels.sort((p, q) => p - q);
+        return sum;
+    }
+    function sphereDamage(spec) {
+        const W = World(), st = W && W.state;
+        if (!st || !st.levels) return { ok: false, reason: "no levels in this world" };
+        const c = spec.center || {};
+        const area = c.area || spec.area || { x: 0, y: 0 }, ax = area.x | 0, ay = area.y | 0;
+        const cs = c.s !== undefined ? c.s : 2, falloff = FALLOFF[spec.falloff || "linear"];
+        const damage = spec.damage, radius = spec.radius, damageType = spec.damageType || "impact", source = spec.source || null;
+        if (![c.x, c.y, c.z, cs].every(Number.isInteger) || cs < 0 || cs >= STRATA || c.z < -2 || c.z > 2) return { ok: false, reason: "center needs integer x, y, z (-2..2) and s (0..4)" };
+        if (badNumber(radius) || radius <= 0) return { ok: false, reason: `radius ${JSON.stringify(radius)} isn't a number > 0 (feet)` };
+        if (badNumber(damage) || damage < 0) return { ok: false, reason: `damage ${JSON.stringify(damage)} isn't a number >= 0` };
+        if (!falloff) return { ok: false, reason: `unknown falloff ${JSON.stringify(spec.falloff)} (constant, linear, quadratic)` };
+        if (typeof damageType !== "string") return { ok: false, reason: "damageType must be a name" };
+        const px = (c.x + 0.5) * CELL_FT, py = (c.y + 0.5) * CELL_FT, pe = (c.z + 2) * STRATA + cs + 0.5;
+        const rc = Math.ceil(radius / CELL_FT), r2 = radius * radius;
+        const e0 = Math.max(0, Math.floor(pe - radius)), e1 = Math.min(24, Math.floor(pe + radius));
+        const sum = newSummary();
+        for (let y = Math.max(0, c.y - rc); y <= Math.min(st.size - 1, c.y + rc); y++) {
+            for (let x = Math.max(0, c.x - rc); x <= Math.min(st.size - 1, c.x + rc); x++) {
+                const dx = (x + 0.5) * CELL_FT - px, dy = (y + 0.5) * CELL_FT - py, h2 = dx * dx + dy * dy;
+                if (h2 > r2) continue;
+                for (let z = levelOfElevation(e0); z <= levelOfElevation(e1); z++) {
+                    if (damageRefusal(st, ax, ay, x, y, z)) { sum.skipped++; continue; }
+                    const hits = [];
+                    for (let s = 0; s < STRATA; s++) {
+                        const de = (z + 2) * STRATA + s + 0.5 - pe, d2 = h2 + de * de;
+                        if (d2 <= r2) hits.push([s, damage * falloff(Math.sqrt(d2) / radius)]);
+                    }
+                    if (!hits.length || !anyMatter(st, ax, ay, y * st.size + x, z, hits)) continue;
+                    addResults(sum, damageCell(st, ax, ay, x, y, z, hits, damageType, source), x, y, z);
+                }
+            }
+        }
+        sum.levels.sort((p, q) => p - q);
+        return sum;
+    }
+
+    //-------------------------------------------------------------------------
+    // Adapters: questions about a cell's strata (no allocation; arguments (ref), (area, x, y[, z]) or (ax, ay, x, y, z))
+
+    /** The index (0..4) of the top stratum of the cell's solid base (S0 up), or -1 when S0 isn't solid. */
+    function surfaceHeightAt(a, b, c, d, e) {
+        if (!cellQuery(a, b, c, d, e)) return -1;
+        locate(qSt, qZ, qAx, qAy, qI, 1);
+        const f = fillOf(rdM, rdO);
+        return f > 0 ? f - 1 : -1;
+    }
+    /** The column elevation (0..24 = (z + 2) * 5 + stratum) of the stratum stood on in the cell: the top of its solid base,
+     *  or with none the cell below's S4 when that is solid; -1 when there is nothing to stand on. */
+    function worldStrataElevationAt(a, b, c, d, e) {
+        if (!cellQuery(a, b, c, d, e)) return -1;
+        locate(qSt, qZ, qAx, qAy, qI, 1);
+        const f = fillOf(rdM, rdO);
+        if (f > 0) return (qZ + 2) * STRATA + f - 1;
+        if (qZ > -2) {
+            locate(qSt, qZ - 1, qAx, qAy, qI, 0);
+            if (SOLID_B[rdM[rdO + 4]] === 1) return (qZ + 2) * STRATA - 1;
+        }
+        return -1;
+    }
+    /** "HEIGHT_k_OF_5": k = the solid strata stacked from S0 ("" outside the world). */
+    function heightStateAt(a, b, c, d, e) {
+        if (!cellQuery(a, b, c, d, e)) return "";
+        locate(qSt, qZ, qAx, qAy, qI, 1);
+        return HEIGHT_STATES[fillOf(rdM, rdO)];
+    }
+    /** "FLUID_k_OF_5": k = the fluid strata of the cell ("" outside the world). */
+    function fluidStateAt(a, b, c, d, e) {
+        if (!cellQuery(a, b, c, d, e)) return "";
+        locate(qSt, qZ, qAx, qAy, qI, 1);
+        return FLUID_STATES[fluidCountOf(rdM, rdO)];
+    }
+    /** All five strata solid. */
+    function isSolid(a, b, c, d, e) {
+        if (!cellQuery(a, b, c, d, e)) return false;
+        locate(qSt, qZ, qAx, qAy, qI, 1);
+        return fillOf(rdM, rdO) === STRATA;
+    }
+    /** Solid strata / 5 (0, 0.2 .. 1). */
+    function solidFraction(a, b, c, d, e) {
+        if (!cellQuery(a, b, c, d, e)) return 0;
+        locate(qSt, qZ, qAx, qAy, qI, 1);
+        const m = rdM, o = rdO;
+        return (SOLID_B[m[o]] + SOLID_B[m[o + 1]] + SOLID_B[m[o + 2]] + SOLID_B[m[o + 3]] + SOLID_B[m[o + 4]]) / STRATA;
+    }
+    const materialCounts = new Uint8Array(64);
+    /** The material key held by the most strata ("air" when none; a tie goes to the lower stratum's). */
+    function dominantMaterial(a, b, c, d, e) {
+        if (!cellQuery(a, b, c, d, e)) return "";
+        locate(qSt, qZ, qAx, qAy, qI, 1);
+        let best = M_AIR, bestN = 0;
+        for (let k = 0; k < STRATA; k++) materialCounts[rdM[rdO + k] & M_ID] = 0;
+        for (let k = 0; k < STRATA; k++) {
+            const id = rdM[rdO + k] & M_ID;
+            if (id === M_AIR) continue;
+            const n = ++materialCounts[id];
+            if (n > bestN) { best = id; bestN = n; }
+        }
+        return STRATA_MATERIALS[best].key;
+    }
+    /** HP points left in the cell's solid strata (sum of maxHP x hp / 255). */
+    function remainingStructuralHP(a, b, c, d, e) {
+        if (!cellQuery(a, b, c, d, e)) return 0;
+        locate(qSt, qZ, qAx, qAy, qI, 1);
+        let hp = 0;
+        for (let k = 0; k < STRATA; k++) if (SOLID_B[rdM[rdO + k]] === 1) hp += STRATA_MATERIALS[rdM[rdO + k] & M_ID].maxHP * hpAt(k) / 255;
+        return hp;
+    }
+    /** HP points of the cell's solid strata at full HP. */
+    function maxStructuralHP(a, b, c, d, e) {
+        if (!cellQuery(a, b, c, d, e)) return 0;
+        locate(qSt, qZ, qAx, qAy, qI, 1);
+        let hp = 0;
+        for (let k = 0; k < STRATA; k++) if (SOLID_B[rdM[rdO + k]] === 1) hp += STRATA_MATERIALS[rdM[rdO + k] & M_ID].maxHP;
+        return hp;
+    }
+    /** The load the cell carries, 0..1: sum over its solid strata of support x hp / 255, divided by 5 (diagnostic; no
+     *  collapse rules in 19A). */
+    function effectiveSupport(a, b, c, d, e) {
+        if (!cellQuery(a, b, c, d, e)) return 0;
+        locate(qSt, qZ, qAx, qAy, qI, 1);
+        let s = 0;
+        for (let k = 0; k < STRATA; k++) if (SOLID_B[rdM[rdO + k]] === 1) s += STRATA_MATERIALS[rdM[rdO + k] & M_ID].support * hpAt(k) / 255;
+        return s / STRATA;
+    }
+    /** Any solid stratum above the cell's standing space: in the cell above its solid base (after an air gap), or in any
+     *  cell above it up to +2 (the 25-strata column). A 5-bit solid mask per cell. */
+    function hasOpaqueOverburden(a, b, c, d, e) {
+        if (!cellQuery(a, b, c, d, e)) return false;
+        locate(qSt, qZ, qAx, qAy, qI, 1);
+        const f = fillOf(rdM, rdO);
+        if (f < STRATA && (solidMaskOf(rdM, rdO) >> f) !== 0) return true;
+        for (let z = qZ + 1; z <= 2; z++) {
+            if (!World().inWorld(qAx, qAy, z)) break;
+            locate(qSt, z, qAx, qAy, qI, 2);
+            if (solidMaskOf(rdM, rdO) !== 0) return true;
+        }
+        return false;
+    }
+    /**
+     * For DEUS_Fluid (which keeps its 0..7 depth scale): the cell's open volume and faces as bits. capacity (bits 0..2) =
+     * the cell's non-solid strata in fluid depth units (STRATA_TO_FLUID); DOWN (8): S0 open and the cell below's S4 open
+     * (not at -2); UP (16): S4 open and the cell above's S0 open (the sky above +2); SIDE (32): any stratum open. 0 outside
+     * the world or for a solid cell.
+     */
+    function getStrataFluidPassage(a, b, c, d, e) {
+        if (!cellQuery(a, b, c, d, e)) return 0;
+        locate(qSt, qZ, qAx, qAy, qI, 1);
+        const mask = solidMaskOf(rdM, rdO);
+        const open = STRATA - (SOLID_B[rdM[rdO]] + SOLID_B[rdM[rdO + 1]] + SOLID_B[rdM[rdO + 2]] + SOLID_B[rdM[rdO + 3]] + SOLID_B[rdM[rdO + 4]]);
+        if (!open) return 0;
+        let bits = STRATA_TO_FLUID[open] | FLUID_PASS.SIDE;
+        if ((mask & 1) === 0 && qZ > -2) {
+            locate(qSt, qZ - 1, qAx, qAy, qI, 0);
+            if (SOLID_B[rdM[rdO + 4]] === 0) bits |= FLUID_PASS.DOWN;
+        }
+        if ((mask & 16) === 0) {
+            if (qZ === 2) bits |= FLUID_PASS.UP;
+            else {
+                locate(qSt, qZ + 1, qAx, qAy, qI, 2);
+                if (SOLID_B[rdM[rdO]] === 0) bits |= FLUID_PASS.UP;
+            }
+        }
+        return bits;
+    }
+    const fluidDepthToStrata = d => FLUID_TO_STRATA[Math.max(0, Math.min(7, d | 0))];
+    const strataToFluidDepth = k => STRATA_TO_FLUID[Math.max(0, Math.min(STRATA, k | 0))];
+    /** Everything above about a cell's standing surface in one object (allocates: diagnostics, cellAt). */
+    function surfaceAt(ref) {
+        if (!cellQuery(ref)) return null;
+        const top = surfaceHeightAt(ref), elevation = worldStrataElevationAt(ref);
+        return { topStratum: top, elevation, heightState: heightStateAt(ref), fluidState: fluidStateAt(ref),
+            solidFraction: solidFraction(ref), dominantMaterial: dominantMaterial(ref), overburden: hasOpaqueOverburden(ref) };
+    }
+
+    //-------------------------------------------------------------------------
+    // Old saves: legacy level changes (levels[z].cells, one packed shape per cell) to strata records (schema 1)
+
+    /**
+     * Bring a save's level changes to strata, in place, before the world is used: each legacy cells[area][i] packed shape
+     * becomes a strata record (recordFromPacked; the baseline's natural pool fluid stays where the shape leaves air),
+     * dropped when it equals the baseline; levels[z].cells is removed and st.strataSchemaVersion set to 1. Entries that
+     * can't be read are kept, unapplied, in levels[z].unmigratedCells with a console.error; nothing is guessed. A save
+     * with an unknown strata schema version is left untouched (console.error; its changes aren't read or written).
+     * Returns the record (pushed to st.migrations when anything was converted or refused).
+     */
+    function migrateSaveToFiveStrata(st) {
+        const rec = { rule: "strata", to: STRATA_SCHEMA, converted: 0, droppedAsBaseline: 0, invalid: 0, shapeChanged: 0, normalizedOpen: 0, errors: [] };
+        const fail = msg => {
+            rec.errors.push(msg);
+            stats.strataSchemaErrors++;
+            console.error(`DEUS_Levels: ${msg}`);
+            return rec;
+        };
+        if (!st || typeof st !== "object" || !st.levels || typeof st.levels !== "object") return fail("strata migration: this save has no levels");
+        if (st.strataSchemaVersion === STRATA_SCHEMA) { rec.already = true; return rec; }
+        if (st.strataSchemaVersion !== undefined) return fail(`strata migration: unknown strata schema version ${JSON.stringify(st.strataSchemaVersion)}; the level changes of this save were not read and nothing is written to them`);
+        const W = World();
+        if (!W || W.state !== st) return fail("strata migration: the save isn't the live world state");
+        const n = st.size * st.size, todo = [];
+        const keep = (L, ak, k, v) => {
+            L.unmigratedCells = L.unmigratedCells || {};
+            if (k === null) L.unmigratedCells[ak] = v;
+            else (L.unmigratedCells[ak] = L.unmigratedCells[ak] || {})[k] = v;
+            rec.invalid++;
+        };
+        for (const z of LEVELS) {
+            const L = st.levels[String(z)];
+            if (!L || L.cells === undefined) continue;
+            const cells = L.cells;
+            delete L.cells;
+            if (!cells || typeof cells !== "object" || Array.isArray(cells)) { keep(L, "*", null, cells); continue; }
+            for (const ak in cells) {
+                const a = parseAreaKey(ak), area = cells[ak];
+                if (!a || !area || typeof area !== "object" || Array.isArray(area) || !W.inWorld(a.x, a.y, z)) { keep(L, ak, null, area); continue; }
+                for (const k in area) {
+                    const i = Number(k), p = area[k];
+                    const ok = Number.isInteger(i) && i >= 0 && i < n && Number.isInteger(p) && p >= 0 && p <= 255 && (p & 7) >= SOLID && (p >> 4) < MATERIALS.length;
+                    if (!ok) { keep(L, ak, k, p); continue; }
+                    todo.push({ z, ax: a.x, ay: a.y, i, p });
+                }
+            }
+        }
+        st.strataSchemaVersion = STRATA_SCHEMA;
+        for (const t of todo) {
+            const r = recordFromPacked(t.p, currentRecord(st, t.z, t.ax, t.ay, t.i));
+            if ((t.p & 7) === OPEN && (t.p & 0xf8) !== 0) rec.normalizedOpen++;   // an open cell's material and flag aren't geometry
+            if (sameAsBaseline(baseOf(st, t.z, t.ax, t.ay), t.i, r)) { rec.droppedAsBaseline++; putDelta(st, t.z, t.ax, t.ay, t.i, null); }
+            else putDelta(st, t.z, t.ax, t.ay, t.i, r);
+            rec.converted++;
+        }
+        // The derived shapes agree with the legacy ones except an open cell over solid ground, which the strata read as a
+        // floor on the ground's top (counted, not repaired).
+        for (const t of todo) if ((derivePacked(st, t.ax, t.ay, t.i, t.z) & 7) !== (t.p & 7)) rec.shapeChanged++;
+        if (rec.invalid) console.error(`DEUS_Levels: strata migration: ${rec.invalid} legacy level change(s) could not be read; they are kept in levels[z].unmigratedCells and not applied`);
+        if (rec.converted || rec.invalid) {
+            st.migrations = st.migrations || [];
+            st.migrations.push(rec);
+        }
+        stats.strataMigrations++;
+        return rec;
     }
 
     /**
@@ -1120,7 +2021,8 @@
             return false;
         };
         if (!st || !st.levels) return refuse("no levels in this world");
-        if (!isLevel(r.z) || !W.inWorld(r.ax, r.ay, r.z) || r.x < 0 || r.y < 0 || r.x >= st.size || r.y >= st.size) return refuse(`level ${ref && ref.z} or cell (${r.x},${r.y}) doesn't exist`);
+        if (!schemaKnown(st)) return refuse(`this save's strata schema ${JSON.stringify(st.strataSchemaVersion)} is unknown: no changes are written`);
+        if (!isLevel(r.z) || r.z < -2 || r.z > 2 || !W.inWorld(r.ax, r.ay, r.z) || r.x < 0 || r.y < 0 || r.x >= st.size || r.y >= st.size) return refuse(`level ${ref && ref.z} or cell (${r.x},${r.y}) doesn't exist`);
         if (!Number.isInteger(code) || !(code >= 1 && code <= 7)) return refuse(`unknown shape ${JSON.stringify(shape)}`);
         if (r.z === 0 && levelGen(st, 0) < 4) return refuse("the ground's shapes change with stairs and holes (vertical slice 2)");
         const from = packedAt(r.ax, r.ay, r.x, r.y, r.z);
@@ -1129,14 +2031,10 @@
         if (!Number.isInteger(mat) || mat < 0 || mat >= MATERIALS.length) return refuse(`unknown material ${JSON.stringify(opts.material)}`);
         const to = pack(code, !!opts.constructed, mat);
         if ((code === SOLID || code === OPEN) && W.standerAt(r.ax, r.ay, r.x, r.y, r.z)) return refuse(`a unit stands on (${r.x},${r.y}) at level ${r.z}`);
+        // The shape becomes its legacy strata (recordFromPacked); a natural pool's fluid stays where the shape leaves air.
         const i = r.y * st.size + r.x;
-        const b = baseline(r.z, r.ax, r.ay);
-        const ch = changesOf(st, r.z, r.ax, r.ay, true);
-        if (to === pack(b.shape[i], false, b.material[i])) delete ch[i];
-        else ch[i] = to;
-        redrawAround(r.ax, r.ay, r.x, r.y, r.z);
-        emit("levels:shapeChanged", { area: { x: r.ax, y: r.ay }, x: r.x, y: r.y, z: r.z }, unpack(from), unpack(to));
-        notifyWorldCellChanged({ area: { x: r.ax, y: r.ay }, x: r.x, y: r.y, z: r.z }, unpack(from), unpack(to), opts.cause || "setShape");
+        const rec = recordFromPacked(to, currentRecord(st, r.z, r.ax, r.ay, i));
+        writeCell(st, r.ax, r.ay, r.x, r.y, r.z, rec, { cause: opts.cause || "setShape", legacyEvents: true });
         return true;
     }
     function redrawAround(ax, ay, x, y, z) {
@@ -1145,7 +2043,7 @@
         const W = World();
         if (z === 0) return redrawGroundAround(ax, ay, x, y);
         const read = (cx, cy) => packedAt(ax, ay, cx, cy, z);
-        const readBiome = biomeReader(baseline(z, ax, ay), W.state.size);
+        const readBiome = biomeReader(baseline(z, ax, ay), W.state.size, z, ax, ay);
         for (let dy = -1; dy <= 1; dy++) {
             for (let dx = -1; dx <= 1; dx++) {
                 const cx = x + dx, cy = y + dy;
@@ -1331,24 +2229,37 @@
         return _wallGrids[z];
     }
 
-    function buildWallGrid(ax, ay, z, size, st) {
-        const wall = getWallGridBuffer(z, size);
-        const b = baseline(z, ax, ay);
-        const ch = changesOf(st, z, ax, ay, false);
-        const bShape = b ? b.shape : null;
-
-        if (bShape) {
-            for (let i = 0; i < size * size; i++) {
-                if ((bShape[i] & 7) === SOLID) wall[i] = 1;
+    // The fluid material of every cell of a level below the ground (0 = none), in one of two reused buffers.
+    const poolBuffers = [null, null];
+    function poolGrid(st, z, ax, ay, slot) {
+        const W = World();
+        if (!st || !W || !W.inWorld(ax, ay, z) || !baseline(z, ax, ay)) return null;
+        const n = st.size * st.size;
+        if (!poolBuffers[slot] || poolBuffers[slot].length !== n) poolBuffers[slot] = new Uint8Array(n);
+        const out = poolBuffers[slot], b = baseline(z, ax, ay);
+        if (b.legacyGround) out.fill(0);
+        else {
+            const m = b.strata.m;
+            for (let i = 0, o = 0; i < n; i++, o += STRATA) {
+                out[i] = FLUID_B[m[o]] ? m[o] & M_ID : FLUID_B[m[o + 1]] ? m[o + 1] & M_ID : FLUID_B[m[o + 2]] ? m[o + 2] & M_ID
+                    : FLUID_B[m[o + 3]] ? m[o + 3] & M_ID : FLUID_B[m[o + 4]] ? m[o + 4] & M_ID : M_AIR;
             }
         }
-        if (ch) {
-            for (const key in ch) {
-                const idx = Number(key);
-                if (Number.isInteger(idx) && idx >= 0 && idx < size * size) {
-                    wall[idx] = ((ch[idx] | 0) & 7) === SOLID ? 1 : 0;
-                }
+        const am = deltaLevels(st)[z + 2].get(ax + ay * AREA_STRIDE);
+        if (am !== undefined) {
+            for (const [i, r] of am) {
+                let f = M_AIR;
+                for (let k = 0; k < STRATA; k++) if (FLUID_B[r[REC_M + k]] === 1) { f = r[REC_M + k] & M_ID; break; }
+                out[i] = f;
             }
+        }
+        return out;
+    }
+    function buildWallGrid(ax, ay, z, size, st) {
+        const wall = getWallGridBuffer(z, size);
+        if (baseline(z, ax, ay)) {
+            const g = packedGridOf(st, z, ax, ay);
+            for (let i = 0; i < size * size; i++) if ((g[i] & 7) === SOLID) wall[i] = 1;
         }
 
         const W = World();
@@ -1440,10 +2351,8 @@
         }
         const gridMinus2 = entry2.grid;
 
-        const base1 = baseline(-1, ax, ay);
-        const baseWater1 = base1 ? base1.water : null;
-        const base2 = baseline(-2, ax, ay);
-        const baseWater2 = base2 ? base2.water : null;
+        // Natural pools: the fluid strata of -1 and -2 now (baseline plus changes); lava seeds a lava flood, water a water one.
+        const pool1 = poolGrid(st, -1, ax, ay, 0), pool2 = poolGrid(st, -2, ax, ay, 1);
 
         const isWall1 = buildWallGrid(ax, ay, -1, size, st);
         const isWall2 = buildWallGrid(ax, ay, -2, size, st);
@@ -1483,9 +2392,9 @@
                 }
             }
             // Natural water pools on -1
-            if (baseWater1 && baseWater1[i]) {
+            if (pool1 && pool1[i]) {
                 if (!isWall1[i] && gridMinus1[i] === DRY) {
-                    gridMinus1[i] = FLOOD_WATER;
+                    gridMinus1[i] = pool1[i] === M_LAVA ? FLOOD_LAVA : FLOOD_WATER;
                     queueMinus1.push(i);
                 }
             }
@@ -1553,9 +2462,9 @@
         const queueMinus2 = [];
         for (let i = 0; i < size * size; i++) {
             let liq1 = null;
-            if (gridMinus1[i] === FLOOD_WATER || (baseWater1 && baseWater1[i])) {
+            if (gridMinus1[i] === FLOOD_WATER || (pool1 && pool1[i] === M_WATER)) {
                 liq1 = "water";
-            } else if (gridMinus1[i] === FLOOD_LAVA) {
+            } else if (gridMinus1[i] === FLOOD_LAVA || (pool1 && pool1[i] === M_LAVA)) {
                 liq1 = "lava";
             }
 
@@ -1567,9 +2476,9 @@
             }
 
             // Natural lava pools on z=-2
-            if (baseWater2 && baseWater2[i]) {
+            if (pool2 && pool2[i]) {
                 if (!isWall2[i] && gridMinus2[i] === DRY) {
-                    gridMinus2[i] = FLOOD_LAVA;
+                    gridMinus2[i] = pool2[i] === M_WATER ? FLOOD_WATER : FLOOD_LAVA;
                     queueMinus2.push(i);
                 }
             }
@@ -1699,7 +2608,11 @@
     }
 
     function isLavaAtRaw(ax, ay, z, x, y) {
-        if (z === -2 && isNaturalWaterAtRaw(ax, ay, z, x, y)) return true;
+        // A natural pool whose fluid strata are lava (the pools of -2).
+        if (isNaturalWaterAtRaw(ax, ay, z, x, y)) {
+            const st = World().state;
+            if (fluidMaterialAt(st, z, ax, ay, y * st.size + x) === M_LAVA) return true;
+        }
         if (window.UF && UF.Fluid && typeof UF.Fluid.depthAt === "function") {
             if (UF.Fluid.typeAt(ax, ay, x, y, z) === "lava" && UF.Fluid.depthAt(ax, ay, x, y, z) > 0) return true;
         }
@@ -1910,13 +2823,12 @@
     function groundWallReader(ax, ay) {
         const W = World(), st = W && W.state;
         if (!st || levelGen(st, 0) < 4 || !W.inWorld(ax, ay, 0) || provoked("ground_cliffs")) return () => -1;
-        const size = st.size, b = baseline(0, ax, ay), ch = changesOf(st, 0, ax, ay, false);
+        const size = st.size;
         const one = st.areasX === 1 && st.areasY === 1;
         return (x, y) => {
             if (one) { x = ((x % size) + size) % size; y = ((y % size) + size) % size; }
             else if (x < 0 || y < 0 || x >= size || y >= size) return STONE;
-            const i = y * size + x;
-            const p = ch && ch[i] !== undefined ? ch[i] | 0 : pack(b.shape[i], false, b.material[i]);
+            const p = packedGridOf(st, 0, ax, ay)[y * size + x];
             return (p & 7) === SOLID ? ((p >> 4) === SOIL ? SOIL : STONE) : -1;
         };
     }
@@ -1966,12 +2878,11 @@
     function groundConnectorCells(area, x0, y0, x1, y1) {
         const W = World(), st = W && W.state;
         if (!st || !area || levelGen(st, 0) < 4 || !W.inWorld(area.x, area.y, 0)) return [];
-        const size = st.size, b = baseline(0, area.x, area.y), ch = changesOf(st, 0, area.x, area.y, false), out = [];
+        const size = st.size, out = [];
         const c = v => Math.max(0, Math.min(size - 1, v | 0));
         for (let y = c(y0); y <= c(y1); y++) {
             for (let x = c(x0); x <= c(x1); x++) {
-                const i = y * size + x;
-                const s = (ch && ch[i] !== undefined ? ch[i] | 0 : b.shape[i]) & 7;
+                const s = packedGridOf(st, 0, area.x, area.y)[y * size + x] & 7;
                 if (s >= RAMP) out.push({ x, y, look: CONNECTOR_LOOK[s] });
             }
         }
@@ -2128,12 +3039,14 @@
         if (!st || st !== (World() && World().state)) return false;
         const t0 = performance.now();
         st.levels = st.levels || {};
-        for (const z of LEVELS) if (!st.levels[String(z)]) st.levels[String(z)] = { z, gen: GEN, checksum: null, cells: {} };
+        for (const z of LEVELS) if (!st.levels[String(z)]) st.levels[String(z)] = { z, gen: GEN, checksum: null, strata: {} };
         for (const z of LEVELS) {
             // Allocate Ground too: its checksum still uses its unchanged WorldGen lattice.
             for (let ay = 0; ay < st.areasY; ay++) for (let ax = 0; ax < st.areasX; ax++) baseline(z, ax, ay);
             if (!st.levels[String(z)].checksum) st.levels[String(z)].checksum = checksumOf(z);
         }
+        // A new world starts at strata schema 1; a save from before the strata has its level changes converted.
+        if (st.strataSchemaVersion === undefined) migrateSaveToFiveStrata(st);
         st.version = 4;
         stats.initMs = performance.now() - t0;
         return true;
@@ -2206,7 +3119,11 @@
         const W = World(), st = W && W.state;
         if (!st) return;
         if (!(st.version >= 4 && st.levels)) migrate(st, { x: $gamePlayer.x, y: $gamePlayer.y });
-        else verifyLevels(st);
+        else {
+            migrateSaveToFiveStrata(st);   // a no-op at schema 1; converts levels[z].cells of a save made before the strata
+            verifyLevels(st);
+        }
+        deltaLevels(st);                   // decode the saved strata records now: an unreadable one is reported at load
         pruneUnitEvents();
     };
 
@@ -2482,31 +3399,87 @@
         levelArea: ref => ({ x: ref.area.x, y: ref.area.y, z: zOf(ref) }),
         ref: (area, x, y, z) => ({ area: { x: area.x, y: area.y }, x: x | 0, y: y | 0, z: z === undefined ? zOf(area) : z }),
         sameLevel: (a, b) => !!a && !!b && !!a.area && !!b.area && a.area.x === b.area.x && a.area.y === b.area.y && zOf(a) === zOf(b),
-        /** The shape name of a cell ("solid", "floor", "open", "ramp", "stairUp", "stairDown", "stairBoth"), "" outside the world. */
-        shapeAt: (...args) => {
-            const r = args.length >= 5 ? { ax: args[0], ay: args[1], x: args[2], y: args[3], z: args[4] } : refOf(args[0]);
-            return SHAPE_NAMES[packedAt(r.ax, r.ay, r.x, r.y, r.z) & 7] || "";
-        },
-        /** The numeric shape code of a cell (0..7). */
-        shapeCodeAt: (...args) => {
-            const r = args.length >= 5 ? { ax: args[0], ay: args[1], x: args[2], y: args[3], z: args[4] } : refOf(args[0]);
-            return packedAt(r.ax, r.ay, r.x, r.y, r.z) & 7;
-        },
+        /** The shape name of a cell ("solid", "floor", "open", "ramp", "stairUp", "stairDown", "stairBoth"), "" outside the
+         *  world; derived from the strata. Arguments: (ref), (area, x, y[, z]) or (ax, ay, x, y, z). No allocation. */
+        shapeAt: (a, b, c, d, e) => cellQuery(a, b, c, d, e) ? SHAPE_NAMES[queriedPacked() & 7] || "" : "",
+        /** The numeric shape code of a cell (0..7; 0 outside the world). Same arguments as shapeAt. No allocation. */
+        shapeCodeAt: (a, b, c, d, e) => cellQuery(a, b, c, d, e) ? queriedPacked() & 7 : 0,
         /** { shape, code, constructed, material, stratum } of a cell, or null outside the world. */
         cellAt: ref => {
             const r = refOf(ref);
             const p = packedAt(r.ax, r.ay, r.x, r.y, r.z);
             const fl = isFlooded(ref);
             const hasWater = waterAt(ref) || (fl && fl.flooded && fl.type === "water");
-            const isLava = (fl && fl.flooded && fl.type === "lava") || (r.z === -2 && naturalWaterAt(ref));
-            return p ? Object.assign(unpack(p), {
+            const isLava = (fl && fl.flooded && fl.type === "lava") || isLavaAtRaw(r.ax, r.ay, r.z, r.x, r.y);
+            if (!p) return null;
+            const surface = surfaceAt(ref);
+            return Object.assign(unpack(p), {
                 biome: biomeAt(ref),
                 water: hasWater,
                 flooded: fl ? fl.flooded : false,
                 floodType: fl && fl.flooded ? fl.type : null,
                 liquid: isLava ? "lava" : hasWater ? "water" : null,
-                stratum: Levels.stratumAt(ref)
-            }) : null;
+                stratum: Levels.stratumAt(ref),
+                // The cell's strata (19A): the stratum stood on and its column elevation, fill and fluid states.
+                surfaceStratum: surface ? surface.topStratum : -1,
+                elevation: surface ? surface.elevation : -1,
+                heightState: surface ? surface.heightState : "",
+                fluidState: surface ? surface.fluidState : ""
+            });
+        },
+        /** A cell's five strata: { materials, constructed, hp, bytes, connector, fill, changed } (S0 first), or null. */
+        strataAt,
+        setStrata,
+        applyStrataDamage,
+        applyVolumeDamage,
+        registerDamageResponse,
+        surfaceHeightAt,
+        worldStrataElevationAt,
+        heightStateAt,
+        fluidStateAt,
+        isSolid,
+        solidFraction,
+        dominantMaterial,
+        remainingStructuralHP,
+        maxStructuralHP,
+        effectiveSupport,
+        hasOpaqueOverburden,
+        getStrataFluidPassage,
+        fluidDepthToStrata,
+        strataToFluidDepth,
+        surfaceAt,
+        migrateSaveToFiveStrata,
+        /** Every cached shape grid of an area against a fresh derivation: { grids, cells, mismatches, examples } (slow). */
+        verifyPackedGrids: (ax = 0, ay = 0) => verifyPackedGrids(ax, ay),
+        STRATA_MATERIALS,
+        STRATA_SCHEMA,
+        FLUID_PASS,
+        HEIGHT_STATES,
+        FLUID_STATES,
+        /** Bytes held by the strata of one area's five baselines (the budget check; builds them when missing). */
+        strataMemory: (ax = 0, ay = 0) => {
+            const W = World(), st = W && W.state;
+            if (!st) return null;
+            const out = { perLevel: {}, strata: 0, connectors: 0, shapeGrids: 0, biome: 0, surface: 0, legacyViews: 0 };
+            let surf = null;
+            for (const z of LEVELS) {
+                const b = baseline(z, ax, ay);
+                if (!b) continue;
+                const own = Object.getOwnPropertyDescriptor(b, "shape");
+                const views = ["shape", "material", "water"].reduce((n, k) => {
+                    const d = Object.getOwnPropertyDescriptor(b, k);
+                    return n + (d && d.value ? d.value.byteLength : 0);
+                }, 0);
+                out.perLevel[z] = { strata: b.strata.m.byteLength + (b.strata.hp ? b.strata.hp.byteLength : 0), connectors: b.conn.byteLength, legacyViewsBuilt: !!(own && own.value) };
+                out.strata += out.perLevel[z].strata;
+                out.connectors += b.conn.byteLength;
+                out.biome += b.biome ? b.biome.byteLength : 0;
+                if (b.surface && b.surface !== surf) { out.surface += b.surface.byteLength; surf = b.surface; }
+                out.legacyViews += views;
+            }
+            if (packedGrids.st === st) for (let li = 0; li < 5; li++) { const g = packedGrids.map.get((ax + ay * AREA_STRIDE) * 5 + li); if (g) out.shapeGrids += g.byteLength; }
+            out.total = out.strata + out.connectors + out.shapeGrids + out.biome + out.surface + out.legacyViews;
+            return out;
         },
         stratumAt: ref => {
             const r = refOf(ref);
@@ -2519,18 +3492,17 @@
         setShape,
         lastRefusal: () => lastRefusal,
         /** Whether a unit could stand on a cell by its shape alone (floors, ramps, stairs). */
-        standableShape: ref => {
-            const r = refOf(ref);
-            const s = packedAt(r.ax, r.ay, r.x, r.y, r.z) & 7;
+        standableShape: (a, b, c, d, e) => {
+            if (!cellQuery(a, b, c, d, e)) return false;
+            const s = queriedPacked() & 7;
             return s === FLOOR || s >= RAMP;
         },
-        isConnectorCell: ref => {
-            const r = refOf(ref);
-            return (packedAt(r.ax, r.ay, r.x, r.y, r.z) & 7) >= RAMP;
-        },
+        isConnectorCell: (a, b, c, d, e) => cellQuery(a, b, c, d, e) && (queriedPacked() & 7) >= RAMP,
         describeCell,
         cellArt,
-        /** The seeded baseline of a level (area 0,0 by default): { shape: Uint8Array, material: Uint8Array } (codes; runtime only). */
+        /** The seeded baseline of a level (area 0,0 by default; runtime only, never write): { strata: { m, hp: null }, conn,
+         *  biome, pockets, cliffCaves, surface, ... } plus read-only legacy views shape, material (and water below the
+         *  ground) built from the strata on first read. */
         baseline: (z, ax = 0, ay = 0) => baseline(z, ax, ay),
         /** True when the ground has its column (generator 4+): its shapes are volumetric and its tiles follow them. */
         groundVolumetric: () => {
@@ -2688,6 +3660,7 @@
         UF.Test.suite("vertical", verticalSuite, { isDefault: false });
         UF.Test.suite("natural_walls", naturalWallsSuite, { isDefault: false });
         UF.Test.suite("flooding", floodingSuite, { isDefault: false });
+        UF.Test.suite("strata", strataSuite, { isDefault: false });
     }
 
     async function naturalWallsSuite(t) {
@@ -2814,7 +3787,7 @@
         const saveShape = (x, y, z) => {
             const k = `${x},${y},${z}`;
             if (!savedShapes.has(k)) {
-                savedShapes.set(k, { x, y, z, cell: Levels.cellAt({ area, x, y, z }) });
+                savedShapes.set(k, { x, y, z, cell: Levels.cellAt({ area, x, y, z }), strata: strataAt({ area, x, y, z }) });
             }
         };
 
@@ -2900,10 +3873,8 @@
                 setShape({ area, x: cx + dx, y: cy + dy, z: -2 }, isEdge ? "solid" : "floor", { material: "stone" });
             }
         }
-        const bMinus2 = baseline(-2, area.x, area.y);
-        const lavaIdx = cy * size + (cx + 8);
-        const oldWaterVal = bMinus2 && bMinus2.water ? bMinus2.water[lavaIdx] : 0;
-        if (bMinus2 && bMinus2.water) bMinus2.water[lavaIdx] = 1; // Baseline water on z=-2 is lava
+        // A lava pool on z=-2: lava strata over the chamber's floor stratum (the strata are the pool, 19A).
+        setStrata({ area, x: cx + 8, y: cy, z: -2 }, { m: ["stone", "lava", "lava", "air", "air"] });
         invalidateFloods();
 
         const floodLava = Levels.isFlooded({ area, x: cx + 8, y: cy, z: -2 });
@@ -2948,9 +3919,9 @@
         for (const st of savedTiles0) {
             W.setTile(area.x, area.y, st.x, st.y, 0, st.tile);
         }
-        if (bMinus2 && bMinus2.water) bMinus2.water[lavaIdx] = oldWaterVal;
+        // Each cell back to its strata record from before (a record equal to the baseline is dropped from the save).
         for (const s of savedShapes.values()) {
-            if (s.cell) setShape({ area, x: s.x, y: s.y, z: s.z }, s.cell.code, { material: s.cell.material, constructed: s.cell.constructed });
+            if (s.strata) setStrata({ area, x: s.x, y: s.y, z: s.z }, { m: s.strata.bytes, hp: s.strata.hp, connector: s.strata.connector || 0 });
         }
         invalidateFloods();
         setView(0);
@@ -3427,7 +4398,7 @@
             const zipped = typeof pako !== "undefined" ? pako.deflate(json, { to: "string", level: 1 }).length : -1;
             const saveBytes = json.length;
             const copy = JsonEx.parse(json);
-            if (provoked("persistence") && copy.ufWorld.levels["-1"]) copy.ufWorld.levels["-1"].cells = {};
+            if (provoked("persistence") && copy.ufWorld.levels["-1"]) copy.ufWorld.levels["-1"].strata = {};
             if (provoked("save_size")) W.state._provokedPadding = "x".repeat(4 * 1024 * 1024);
             const sizeNow = provoked("save_size") ? JsonEx.stringify(DataManager.makeSaveContents()).length : saveBytes;
             if (provoked("save_size")) delete W.state._provokedPadding;
@@ -3462,7 +4433,7 @@
                 `baselines regenerated from seed ${st2.seed}: ${regen.map(r => `${r.z} ${r.saved === r.now ? "same" : `DIFFERENT (${r.saved}/${r.now})`}`).join(", ")}; seed + 1 gives -1 checksum ${other} (${other !== regen.find(r => r.z === -1).now ? "different" : "SAME"})${note}`);
             t.check("save_size", sizeNow <= 3 * 1024 * 1024 && saveBytes > 0,
                 `save contents ${sizeNow} characters of JSON (V50 limit 3 MB = ${3 * 1024 * 1024}), ${zipped} zipped (RMMZ level 1), measured with JsonEx.stringify(DataManager.makeSaveContents()); ` +
-                `${W2.units().length} units, level changes ${LEVELS.map(z => `${z}: ${Object.values(st2.levels[String(z)].cells || {}).reduce((n, c) => n + Object.keys(c).length, 0)}`).join(", ")}${note}`);
+                `${W2.units().length} units, changed strata cells ${LEVELS.map(z => `${z}: ${Object.values(st2.levels[String(z)].strata || {}).reduce((n, c) => n + Object.keys(c).length, 0)}`).join(", ")}${note}`);
             // Clean up the fixtures (in the reloaded world).
             for (const u of made.units) if (W2.unit(u.id)) W2.removeUnit(u.id);
             for (const o of made.objects) O.setIn(o.lv, o.x, o.y, null);
@@ -3470,10 +4441,7 @@
             for (const it of made.items) if (it) I.remove(it.id);
             for (const z of LEVELS) if (fx[z].item) I.remove(fx[z].item);
             if (fx[0] && fx[0].tileCell) W2.setTile(area.x, area.y, fx[0].tileCell.x, fx[0].tileCell.y, 0, fx[0].tileWas);
-            for (const s of made.shapes.reverse()) {
-                const ch = changesOf(st2, s.z, area.x, area.y, false);
-                if (ch) delete ch[s.y * size + s.x];
-            }
+            for (const s of made.shapes.reverse()) putDelta(st2, s.z, area.x, area.y, s.y * size + s.x, null);
         }
 
         //---------------------------------------------------------------- switch_time (measured, sane bound)
@@ -3542,5 +4510,177 @@
         }
         await t.waitFrames(30);
         t.check("no_errors", t.errorsSoFar().length === 0, t.errorsSoFar().length ? `${t.errorsSoFar().length} error(s), first: ${t.errorsSoFar()[0]}` : `none during the vertical checks${note}`);
+    }
+
+    //-------------------------------------------------------------------------
+    // Checks (UF_Test suite "strata", on request: run_tests.bat strata) for the strata of DEUS-TSK-FABLE-19A, in the
+    // running game. strata_live: the New Game world is on strata schema 1 with flat baselines; every saved record decodes
+    // and differs from its baseline; every colonist of the viewed area stands on a cell whose derived shape can be stood
+    // on (other walkers are counted, not judged: some wildlife stands inside hills on the pre-strata build too, measured
+    // 2026-09-24, a Wildlife placement matter). adapter_cost: over 600 frames of normal play, shape reads, shape
+    // derivations and overburden queries per frame, times their cost measured here (docs/DEUS_TSK_FABLE_19_HANDOFF.md
+    // section 9: under 0.2 ms a frame of added overhead). It judges the work the strata add (derivations: grid builds
+    // and refreshes; overburden queries, which replace isRoofed's two shape reads) and the cost of one shape read; how
+    // many reads there are is the path planner's and the other callers' business, unchanged by the strata, and is
+    // reported with its total (a pre-strata read cost 651 ns in the same harness on 2026-09-24: docs/systems/UF_Levels.md,
+    // section Strata). dig_tunnel: four rock cells of -1 south of a cave floor (a north-south tunnel: the black caps of the
+    // natural walls fall beside it, not on it) lose S1..S4 to applyVolumeDamage: they read as
+    // floor, are walkable, a path runs to the end and the level's map is repainted (screenshot); tunnel_restored: setStrata
+    // puts them back, no saved record left; shape_grids_coherent: every cached shape grid of the area equals a fresh
+    // derivation of every cell.
+    // Provocations: UF_TEST_PROVOKE=vertical.strata_live (a record equal to its baseline is saved),
+    // vertical.adapter_cost (budget 0), vertical.dig_tunnel (the dig does no damage), vertical.tunnel_restored (not put
+    // back), vertical.shape_grids_coherent (one cached code flipped).
+
+    async function strataSuite(t) {
+        const W = World();
+        if (!W || !W.state || !W.viewLevel()) { t.check("setup", false, "no world"); return; }
+        const settled = () => SceneManager._scene instanceof Scene_Map && SceneManager._scene.isStarted() && !$gamePlayer.isTransferring() && !pending;
+        await t.waitUntil(settled, 20000, "initial map");
+        const st = W.state, size = st.size, n = size * size, v = W.viewLevel(), area = { x: v.x, y: v.y };
+
+        //---------------------------------------------------------------- strata_live
+        if (provoked("strata_live")) {
+            const i = (size >> 1) * size + (size >> 1);
+            putDelta(st, -1, area.x, area.y, i, currentRecord(st, -1, area.x, area.y, i));   // a record equal to its baseline
+        }
+        const noCells = LEVELS.every(z => { const L = st.levels[LEVEL_KEY[z + 2]]; return !!L && L.cells === undefined && (L.strata === undefined || (typeof L.strata === "object" && !Array.isArray(L.strata))); });
+        const flat = LEVELS.every(z => { const b = baseline(z, area.x, area.y); return !!b && b.strata.m instanceof Uint8Array && b.strata.m.length === n * STRATA && b.strata.hp === null; });
+        let records = 0, differ = 0, saved = 0;
+        const lv = deltaLevels(st);
+        for (let li = 0; li < 5; li++) {
+            for (const [ai, am] of lv[li]) {
+                const b = baseOf(st, li - 2, ai % AREA_STRIDE, (ai - (ai % AREA_STRIDE)) / AREA_STRIDE);
+                for (const [i, r] of am) { records++; if (!sameAsBaseline(b, i, r)) differ++; }
+            }
+            const s = st.levels[LEVEL_KEY[li]].strata || {};
+            for (const k in s) saved += Object.keys(s[k]).length;
+        }
+        const units = W.units().filter(u => u.area && u.area.x === area.x && u.area.y === area.y);
+        const fliers = units.filter(u => u.data && u.data.through);
+        const standable = u => Levels.standableShape({ area, x: u.x, y: u.y, z: zOf(u) });
+        const colonists = units.filter(u => u.data && u.data.kind === "colonist");
+        const offStand = colonists.filter(u => !standable(u));
+        const offOthers = units.filter(u => !(u.data && u.data.through) && !(u.data && u.data.kind === "colonist") && !standable(u));
+        const byLevel = LEVELS.map(z => `${z}: ${units.filter(u => zOf(u) === z).length}`).join(", ");
+        t.check("strata_live", st.strataSchemaVersion === STRATA_SCHEMA && noCells && flat && records === saved && differ === records && deltas.errors.length === 0 && colonists.length > 0 && offStand.length === 0,
+            `strataSchemaVersion ${st.strataSchemaVersion}; no legacy levels[z].cells ${noCells}; five baselines of area ${area.x},${area.y} flat Uint8Array ${n}x5, HP implicit ${flat}; ` +
+            `saved strata records ${saved}, decoded ${records}, differing from their baseline ${differ}, unreadable ${deltas.errors.length}; ` +
+            `units of the area ${units.length} (by level ${byLevel}); colonists ${colonists.length}, on cells not standable by their derived shape ${offStand.length}${offStand.length ? `: ${offStand.slice(0, 4).map(u => `${u.name} (${u.x},${u.y},${zOf(u)}) ${Levels.shapeAt({ area, x: u.x, y: u.y, z: zOf(u) })}`).join("; ")}` : ""}; ` +
+            `other walkers on such cells (not judged) ${offOthers.length}${offOthers.length ? ` (${offOthers.slice(0, 4).map(u => `${u.name} (${u.x},${u.y},${zOf(u)}) ${Levels.shapeAt({ area, x: u.x, y: u.y, z: zOf(u) })}`).join("; ")})` : ""}; fliers ${fliers.length}`);
+
+        //---------------------------------------------------------------- adapter_cost (normal play first, before any fixture)
+        let overCalls = 0;
+        const over = Levels.hasOpaqueOverburden;
+        Levels.hasOpaqueOverburden = (a, b, c, d, e) => { overCalls++; return over(a, b, c, d, e); };
+        await t.waitFrames(60);
+        const samples = [];
+        let r0 = stats.shapeReads, d0 = stats.derives, o0 = overCalls, f0 = Graphics.frameCount;
+        const frames0 = Graphics.frameCount, builds0 = stats.gridBuilds;
+        for (let k = 0; k < 600; k++) {
+            await t.waitFrames(1);
+            const r = stats.shapeReads, d = stats.derives, o = overCalls, f = Graphics.frameCount;
+            samples.push({ reads: r - r0, derives: d - d0, over: o - o0, frames: Math.max(1, f - f0) });
+            r0 = r; d0 = d; o0 = o; f0 = f;
+        }
+        Levels.hasOpaqueOverburden = over;
+        const frames = Graphics.frameCount - frames0, builds = stats.gridBuilds - builds0;
+        const totReads = samples.reduce((s, x) => s + x.reads, 0), totDerives = samples.reduce((s, x) => s + x.derives, 0), totOver = samples.reduce((s, x) => s + x.over, 0);
+        // Cost per call here, on cells round the view on all five levels (warmed up first; the ref form is what most callers use).
+        const pts = [];
+        for (let k = 0; k < 4096; k++) pts.push({ x: Math.max(0, Math.min(size - 1, $gamePlayer.x + ((k * 37) % 65) - 32)), y: Math.max(0, Math.min(size - 1, $gamePlayer.y + ((k * 61) % 49) - 24)), z: (k % 5) - 2 });
+        const refs = pts.map(p => ({ area, x: p.x, y: p.y, z: p.z }));
+        const bench = fn => {
+            let acc = 0;
+            for (let k = 0; k < 40000; k++) acc += fn(k & 4095);
+            const N = 200000, t0 = performance.now();
+            for (let k = 0; k < N; k++) acc += fn(k & 4095);
+            return { ns: (performance.now() - t0) * 1e6 / N, acc };
+        };
+        const cRead = bench(k => Levels.shapeCodeAt(refs[k]));
+        const cDerive = bench(k => derivePacked(st, area.x, area.y, pts[k].y * size + pts[k].x, pts[k].z));
+        const cOver = bench(k => (over(refs[k]) ? 1 : 0));
+        const cost = s => (s.reads * cRead.ns + s.derives * cDerive.ns + s.over * cOver.ns) / 1e6 / s.frames;   // ms a frame
+        const costs = samples.map(cost).sort((p, q) => p - q);
+        const meanMs = (totReads * cRead.ns + totDerives * cDerive.ns + totOver * cOver.ns) / 1e6 / Math.max(1, frames);
+        const addedMs = (totDerives * cDerive.ns + totOver * cOver.ns) / 1e6 / Math.max(1, frames);
+        const p95 = costs[Math.floor(costs.length * 0.95)], worst = costs[costs.length - 1];
+        const budget = provoked("adapter_cost") ? 0 : 0.2, READ_NS = 200;
+        t.check("adapter_cost", addedMs < budget && cRead.ns < READ_NS && cRead.ns > 0 && cDerive.ns > 0 && cOver.ns > 0,
+            `work the strata add a frame (derivations + overburden queries): mean ${addedMs.toFixed(4)} ms (budget ${budget} ms); one shape read ${cRead.ns.toFixed(0)} ns (bound ${READ_NS} ns). ` +
+            `${frames} frames of normal play on level ${v.z} (${units.length} units in the area): a frame ${(totReads / Math.max(1, frames)).toFixed(1)} shape reads, ${(totDerives / Math.max(1, frames)).toFixed(1)} shape derivations (${builds} whole-level grid builds in the window), ${(totOver / Math.max(1, frames)).toFixed(2)} overburden queries ` +
+            `(most in one sample: ${Math.max(...samples.map(s => s.reads))} / ${Math.max(...samples.map(s => s.derives))} / ${Math.max(...samples.map(s => s.over))}); cost here ${cRead.ns.toFixed(0)} ns per shapeCodeAt(ref), ${cDerive.ns.toFixed(0)} ns per derivation, ${cOver.ns.toFixed(0)} ns per hasOpaqueOverburden(ref) ` +
+            `(200,000 calls each on ${pts.length} cells round the view, all five levels); all adapter time a frame, reads included: mean ${meanMs.toFixed(4)} ms, 95th percentile ${p95.toFixed(4)} ms, worst sample ${worst.toFixed(4)} ms`);
+
+        //---------------------------------------------------------------- dig_tunnel, tunnel_restored
+        if (window.$colonyManager) $colonyManager.cameraFollowUnit = null;
+        if (viewZ() !== -1) { setView(-1); await t.waitUntil(() => settled() && viewZ() === -1, 20000, "level -1"); }
+        const lv1 = W.viewLevel(), a1 = { x: lv1.x, y: lv1.y };
+        const code = (x, y) => packedAt(a1.x, a1.y, x, y, -1);
+        const rock = (x, y) => { const p = code(x, y); return (p & 7) === SOLID && (p & 8) === 0 && !W.getObject(a1.x, a1.y, x, y, -1); };
+        const cave = (x, y) => { const p = code(x, y); return (p & 7) === FLOOR && (p & 8) === 0 && fluidMaterialAt(st, -1, a1.x, a1.y, y * size + x) === M_AIR && W.walkable(a1.x, a1.y, x, y, { z: -1 }); };
+        const tiles = (x, y) => [0, 1, 2, 3].map(l => $gameMap.tileId(x, y, l)).join(":");
+        const busy = (x, y) => W.units().some(u => zOf(u) === -1 && u.area.x === a1.x && u.area.y === a1.y && Math.abs(u.x - x) <= 4 && Math.abs(u.y - y) <= 5);
+        const mx = Math.round($gameMap.displayX() + $gameMap.screenTileX() / 2), my = Math.round($gameMap.displayY() + $gameMap.screenTileY() / 2);
+        let fx = null, best = Infinity;
+        for (let y = 12; y < size - 12; y++) {
+            for (let x = 12; x < size - 12; x++) {
+                const dd = (x - mx) * (x - mx) + (y - my) * (y - my);
+                if (dd >= best || !cave(x, y)) continue;
+                let ok = true;
+                for (let d = 1; d <= 4 && ok; d++) ok = rock(x, y + d) && rock(x - 1, y + d) && rock(x + 1, y + d);
+                if (ok && rock(x, y + 5) && !busy(x, y + 2)) { fx = { x, y }; best = dd; }
+            }
+        }
+        if (!fx) { t.check("dig_tunnel", false, `no cave floor at -1 with 4 rock cells south of it (rock on both sides) in area ${a1.x},${a1.y}`); }
+        else {
+            $gamePlayer.locate(fx.x, fx.y + 2);
+            $gamePlayer.center(fx.x, fx.y + 2);
+            await t.waitFrames(15);
+            t.screenshot("tunnel_before");
+            const cells = [1, 2, 3, 4].map(d => ({ area: a1, x: fx.x, y: fx.y + d, z: -1 }));
+            const before = cells.map(r => ({ strata: strataAt(r), tile: tiles(r.x, r.y), pass: $gameMap.isPassable(r.x, r.y, 2), walk: W.walkable(a1.x, a1.y, r.x, r.y, { z: -1 }) }));
+            const pathBefore = W.findPath(a1, fx.x, fx.y, fx.x, fx.y + 4, { z: -1 });
+            const seen = { destroyed: 0, cell: 0 };
+            const onDestroyed = e => { if (e && e.z === -1 && e.x === fx.x && e.y > fx.y && e.y <= fx.y + 4) seen.destroyed++; };
+            const onCell = r => { if (r && zOf(r) === -1 && r.x === fx.x && r.y > fx.y && r.y <= fx.y + 4) seen.cell++; };
+            UF.Events.on("levels:strataDestroyed", onDestroyed);
+            UF.Events.on("levels:cellChanged", onCell);
+            const sum = applyVolumeDamage(a1, fx.x, fx.y + 1, -1, 1, fx.x, fx.y + 4, -1, 4, provoked("dig_tunnel") ? 0 : 100000, "dig", { source: "TEST_strata_tunnel" });
+            UF.Events.off("levels:strataDestroyed", onDestroyed);
+            UF.Events.off("levels:cellChanged", onCell);
+            await t.waitFrames(15);
+            const after = cells.map(r => ({ shape: Levels.shapeAt(r), top: surfaceHeightAt(r), elev: worldStrataElevationAt(r), walk: W.walkable(a1.x, a1.y, r.x, r.y, { z: -1 }), pass: $gameMap.isPassable(r.x, r.y, 2), tile: tiles(r.x, r.y), mats: strataAt(r).materials.join("/") }));
+            const path = W.findPath(a1, fx.x, fx.y, fx.x, fx.y + 4, { z: -1 });
+            const pathEnds = !!path && path.length === 4 && path[3].x === fx.x && path[3].y === fx.y + 4;
+            const beforeEnd = pathBefore && pathBefore.length ? `${pathBefore[pathBefore.length - 1].x},${pathBefore[pathBefore.length - 1].y}` : "none";
+            t.screenshot("tunnel_dug");
+            t.check("dig_tunnel", sum.ok && sum.strataDestroyed === 16 && sum.cells === 4 && seen.destroyed === 16 && seen.cell >= 4 &&
+                before.every(b => !b.walk && !b.pass) && after.every((a, k) => a.shape === "floor" && a.top === 0 && a.elev === 5 && a.walk && a.pass && a.tile !== before[k].tile) && pathEnds,
+                `cave floor (${fx.x},${fx.y}) at -1, rock (${fx.x},${fx.y + 1}..${fx.y + 4}) dug with applyVolumeDamage from S1 to S4 (100000 dig): destroyed ${sum.strataDestroyed} strata in ${sum.cells} cells ` +
+                `(events: strataDestroyed ${seen.destroyed}, cellChanged ${seen.cell}); before: walkable ${before.map(b => b.walk).join("/")}, map passable ${before.map(b => b.pass).join("/")}, path ended at ${beforeEnd}; ` +
+                `after: ${after.map(a => `${a.shape} S${a.top} e${a.elev} [${a.mats}]`).join(", ")}, walkable ${after.map(a => a.walk).join("/")}, map passable ${after.map(a => a.pass).join("/")}, ` +
+                `tiles ${before.map(b => b.tile).join("/")} -> ${after.map(a => a.tile).join("/")}; path to (${fx.x},${fx.y + 4}) ${path ? `${path.length} steps ending ${path.length ? `${path[path.length - 1].x},${path[path.length - 1].y}` : "here"}` : "none"}`);
+            for (let k = 0; k < cells.length && !provoked("tunnel_restored"); k++) {
+                const s = before[k].strata;
+                setStrata(cells[k], { m: s.bytes, hp: s.hp, connector: s.connector || 0 }, { cause: "test" });
+            }
+            await t.waitFrames(15);
+            const back = cells.map(r => ({ shape: Levels.shapeAt(r), changed: strataAt(r).changed, pass: $gameMap.isPassable(r.x, r.y, 2), walk: W.walkable(a1.x, a1.y, r.x, r.y, { z: -1 }) }));
+            const tilesBack = cells.every((r, k) => tiles(r.x, r.y) === before[k].tile);
+            t.check("tunnel_restored", back.every(b => b.shape === "solid" && !b.changed && !b.pass && !b.walk) && tilesBack,
+                `after setStrata with the saved strata: ${back.map(b => `${b.shape}${b.changed ? " (record)" : ""}`).join(", ")}; walkable ${back.map(b => b.walk).join("/")}; map passable ${back.map(b => b.pass).join("/")}; tiles as before ${tilesBack}`);
+        }
+        for (const z of LEVELS) packedAt(area.x, area.y, 0, 0, z);   // every level's grid built
+        const flip = provoked("shape_grids_coherent") ? packedGridOf(st, -1, area.x, area.y) : null;
+        if (flip) flip[0] ^= 7;
+        const vg = verifyPackedGrids(area.x, area.y);
+        if (flip) flip[0] ^= 7;
+        t.check("shape_grids_coherent", vg.grids === 5 && vg.cells === 5 * n && vg.mismatches === 0,
+            `${vg.grids} cached shape grids of area ${area.x},${area.y}, ${vg.cells} cells re-derived from the strata after normal play and the tunnel: ${vg.mismatches} differ${vg.examples.length ? ` (${JSON.stringify(vg.examples)})` : ""}`);
+        setView(0);
+        await t.waitUntil(() => settled() && viewZ() === 0, 20000, "back to the ground").catch(() => {});
+        await t.waitFrames(10);
+        t.check("no_errors", t.errorsSoFar().length === 0, t.errorsSoFar().length ? `${t.errorsSoFar().length} error(s), first: ${t.errorsSoFar()[0]}` : "none during the strata checks");
     }
 })();

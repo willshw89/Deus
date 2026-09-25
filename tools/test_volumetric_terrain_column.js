@@ -78,8 +78,9 @@ const MUTANTS = {
     // Both guards off: the ground's tiles painted without the column AND its solid cells reported as floor.
     hills_walkable: [HOLLOW, {
         file: "DEUS_Levels.js",
-        find: "            if (levelGen(st, 0) >= 4) {\n                const b = baseline(0, ax, ay);\n                return pack(b.shape[i], false, b.material[i]);",
-        replace: "            if (levelGen(st, 0) >= 4) {\n                const b = baseline(0, ax, ay);\n                return pack(b.shape[i] === SOLID ? FLOOR : b.shape[i], false, b.material[i]); /* MUTANT hills_walkable */"
+        // DEUS-TSK-FABLE-19A: the shape codes are derived from the strata (derivePacked); a full column reads as floor here.
+        find: "        if (fill === STRATA) return pack(SOLID, (m[o] & M_BUILT) !== 0, LEGACY_B[m[o]]);",
+        replace: "        if (fill === STRATA) return pack(z === 0 ? FLOOR : SOLID, (m[o] & M_BUILT) !== 0, LEGACY_B[m[o]]); /* MUTANT hills_walkable */"
     }],
     // Coverage mutants: each makes one more check print FAIL (run with one seed: --seeds=20260923).
     floating_upper_levels: [{ // +1 under a +2 surface left open: the +2 floor floats
