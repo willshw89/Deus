@@ -22,14 +22,22 @@
 ## 2. Canonical Performance Risks (PERF-001 to PERF-006)
 *Governed by [`docs/PERFORMANCE_ARCHITECTURE.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/PERFORMANCE_ARCHITECTURE.md)*
 
+### Status Vocabulary:
+`OPEN` | `ARCHITECTURALLY_MITIGATED` | `BENCHMARK_PENDING` | `BENCHMARK_VERIFIED` | `REGRESSION` | `CLOSED`
+
+### Performance Claim Rule:
+- **DESIGN CLAIM**: Architectural property (e.g., *"Architecture avoids full-world recurring scans via active queues"*).
+- **MEASURED CLAIM**: Empirically verified against repeatable scenarios (e.g., *"PERF_HEAVY_FLUID measured 7.4 ms avg / 11.2 ms p95 on reference hardware"*).  
+*Strict Rule: Only measured claims may be designated benchmark-verified.*
+
 | Risk ID | Title | Category | Threat Description | Severity | Impact | Architectural Mitigation | Status |
 |---|---|---|---|---|---|---|---|
-| `PERF-001` | Full-World Recurring Scans | Simulation | Scanning 65,536 world cells every frame for fluids, growth, or needs. | `CRITICAL` | Massive frame drop (<10 FPS) at scale. | Strict Active-Work queue and dirty-region architecture. Settled state = 0 ms. | `MITIGATED` |
-| `PERF-002` | Offscreen Sprite Animation | Rendering | Thousands of offscreen flora, water, and fire sprites ticking animation loops. | `MAJOR` | Wasteful GPU/CPU matrix updates. | Global shared animation tick (`frame3`) + aggressive viewport culling. | `ACTIVE_DESIGN` |
-| `PERF-003` | Five-Z Overdraw | Rendering | Rendering five full world maps stacked vertically, overwhelming fill-rate. | `CRITICAL` | Severe GPU bottleneck on integrated graphics. | Exposed-region culling; render only visible hole/ravine geometry. No production blur. | `QUEUED` (19C) |
-| `PERF-004` | 1,000-Creature Update Saturation | Simulation / AI | 1,000 AI agents evaluating A* paths and decision trees concurrently. | `CRITICAL` | Frame freeze on high-population maps. | Staggered 4-tier simulation (A/B/C/D); spatial partitioning; coarse offscreen AI. | `ACTIVE_DESIGN` |
-| `PERF-005` | Garbage Collection Stutter | Memory / Engine | Object literal and array allocations in hot paths triggering periodic GC freezes. | `MAJOR` | Periodic micro-stutters and p99 frame spikes. | Zero-allocation hot path rule; typed arrays; preallocated scratch memory structs. | `MITIGATED` |
-| `PERF-006` | Startup & Plugin Growth | Boot / Loading | Cumulative plugin registration and asset preloading inflating launch latency. | `MAJOR` | Slow boot times (>5s), high baseline memory. | Closed-world runtime catalog; demand-driven lazy asset loading. | `QUEUED` (Consolidation) |
+| `PERF-001` | Full-World Recurring Scans | Simulation | Scanning 65,536 world cells every frame for fluids, growth, or needs. | `CRITICAL` | Massive frame drop (<10 FPS) at scale. | Strict Active-Work queue and dirty-region architecture. Settled state = 0 ms. | `ARCHITECTURALLY_MITIGATED` (Benchmark pending) |
+| `PERF-002` | Offscreen Sprite Animation | Rendering | Thousands of offscreen flora, water, and fire sprites ticking animation loops. | `MAJOR` | Wasteful GPU/CPU matrix updates. | Global shared animation tick (`frame3`) + aggressive viewport culling. | `ARCHITECTURALLY_MITIGATED` (Benchmark pending 19C) |
+| `PERF-003` | Five-Z Overdraw | Rendering | Rendering five full world maps stacked vertically, overwhelming fill-rate. | `CRITICAL` | Severe GPU bottleneck on integrated graphics. | Exposed-region culling; render only visible hole/ravine geometry. No production blur. | `BENCHMARK_PENDING` (Queued 19C) |
+| `PERF-004` | 1,000-Creature Update Saturation | Simulation / AI | 1,000 AI agents evaluating A* paths and decision trees concurrently. | `CRITICAL` | Frame freeze on high-population maps. | Staggered 4-tier simulation (A/B/C/D); spatial partitioning; coarse offscreen AI. | `ARCHITECTURALLY_MITIGATED` (Benchmark pending) |
+| `PERF-005` | Garbage Collection Stutter | Memory / Engine | Object literal and array allocations in hot paths triggering periodic GC freezes. | `MAJOR` | Periodic micro-stutters and p99 frame spikes. | Zero-allocation hot path rule; typed arrays; preallocated scratch memory structs. | `ARCHITECTURALLY_MITIGATED` (Benchmark pending) |
+| `PERF-006` | Startup & Plugin Growth | Boot / Loading | Cumulative plugin registration and asset preloading inflating launch latency. | `MAJOR` | Slow boot times (>5s), high baseline memory. | Closed-world runtime catalog; demand-driven lazy asset loading. | `BENCHMARK_PENDING` (Queued Consolidation) |
 
 ---
 
