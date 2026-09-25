@@ -66,3 +66,17 @@ Every decision item recorded in this log must provide:
 - **Recommended Default:** Option 1 (Zero bypass without written Owner entry).
 - **What Happens If Unanswered:** Option 1 applies strictly.
 - **Status:** `OPEN`
+
+---
+
+### Decision `DEC-005`: External Off-Disk Backup Target Selection (WG.00.12)
+- **Date Logged:** 2026-09-25
+- **Question:** What is the authoritative off-disk backup target for the pre-migration backup of Project DEUS before any copy to `C:\Dev\DEUS`?
+- **Options:**
+  1. Private git remote (e.g. GitHub/GitLab), pushing all branches, then verifying by cloning into a temporary folder and executing full test suite.
+  2. External physical drive / USB drive mount (e.g. `D:\`, `E:\`), running `tools/backup_project.ps1` via robocopy to mirror the repo off-disk.
+  3. Both private git remote and external physical drive mirror.
+- **Recommended Default:** Option 1 (Private git remote) + test clone and run.
+- **What Happens If Unanswered:** Migration to `C:\Dev\DEUS` remains strictly frozen; `WG.00.12` external backup milestone remains NOT DONE.
+- **Status:** `OPEN`
+
