@@ -5076,6 +5076,9 @@ The U7 files below stay on disk (never committed) and nothing in the catalog dra
 - Q1–Q8 and Q13 in `docs/VISION.md`.
 
 ## Backlog (not scheduled)
+- V132 (user, 2026-09-24): racial spawn levels at world generation (Z-2 tiefling, dragonborn; Z-1 dwarf, gnome; Z0 human, half-orc; Z+1 halfling, half-elf; Z+2 elf), initial anchors only. `DEUS_Factions.js` `getZForSpecies` and the catalog layer lists still follow the 2026-09-22 rule (everyone else on Z0). Queued after the FABLE-19A gate; needs an assignment (DEUS_Factions / catalog / History placement).
+- "DEUS — DEPTH VISUAL TUNING BRIEF" (user, 2026-09-24; VISION decision log): 5 ft per level, H = 120 ft with 160 / 90 ft presets, 4 % colour steps per level, blur off, screenshots of 3–5 visible levels. Queued behind 19A; depths 3–4 need 19B geometry and the 19C compositor.
+- Wildlife standing inside hills (23 animals on the ground's solid hill cells at seed 20260923, the same on 2d5fc47): placement or roaming ignores the ground's column shapes.
 - V76/V77 progression: data-driven, faction-specific development/weapon trees and an original building-count prerequisite graph that unlocks later construction and recipes. Do not copy Warcraft content or invent unapproved faction lore.
 - V78 private intimacy: rooms/doors need an occupancy query so most characters prefer an enclosed empty room for intimacy without freezing when none is available.
 - V59/V62/V63 UI cleanup: overhead text is spoken dialogue only. Remove/reroute work barks and level-up status; show a character's current job, target and skill progress in the clicked profile. This waits for the active `UF_Jobs.js`/`UF_Sheet.js`/`UF_Skills.js` runs.
