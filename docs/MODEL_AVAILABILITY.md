@@ -8,12 +8,13 @@
 
 ## 1. Active Model Pool & Availability State
 
-| Model / Work Destination | Designated Role | Access | Current State | CLI Ready | Strongest Discovered Model | Configuration / Effort | Routing Policy |
-|---|---|:---:|:---:|:---:|---|---|---|
-| **Claude / Fable** | Bounded Implementation & Core Engineering | `YES` | **`AVAILABLE`** | `YES` | `claude-opus-5-5[1m]` | `effort: xhigh`, 1M context | Active owner of bounded implementation leaves (e.g. `WG.00.08 / FABLE-19B`). MAX_QUALITY routing. |
-| **Grok** | Parallel Analysis, Adversarial Review, Profiling | `YES` | **`AVAILABLE`** | `YES` | `grok-4.7` | Highest reasoning | Saturate available capacity on independent audits, seed sweeps, benchmarks, and reviews. MAX_QUALITY routing. |
-| **Codex** | Mutation Testing & Invariant Breaking | `YES` | **`EXHAUSTED`** | `NO` | *(Deferred to reset)* | Highest appropriate reasoning | Owner holds access; current period usage exhausted. Retain queued tasks; re-probe when quota resets. |
-| **Gemini / Antigravity** | Coordinator, Control Tower, Architecture, Nano Banana Pro Art | `YES` | **`AVAILABLE`** | `YES` | `gemini-3-pro` / `gemini-3-pro-image` | High reasoning / Thinking | Integration authority, gatekeeper, regression verifier, and author of authentic pixel art assets. MAX_QUALITY routing. |
+| Provider | Role | Access | State | CLI Ready | Strongest Discovered Model | Configuration / Effort | Multi-Agent Support | Image Gen | Routing Policy |
+|---|---|:---:|:---:|:---:|---|---|:---:|:---:|---|
+| **Claude / Fable** | Bounded Implementation & Core Engineering | `YES` | **`AVAILABLE`** | `YES` | `claude-opus-5-5[1m]` | `effort: xhigh`, 1M context | **YES** (native subagents, agent teams) | `NO` | Active owner of bounded implementation leaves. MAX_MULTIAGENT routing. |
+| **Grok** | Parallel Analysis, Adversarial Review, Profiling, Source Art | `YES` | **`AVAILABLE`** | `YES` | `grok-4.7` | Highest reasoning | **YES** (native `--agents`, parallel sessions) | **YES** (Source art only, catalogue-driven) | Adversarial analysis, test design, profiling, catalogue source art. MAX_MULTIAGENT routing. |
+| **Astra** | Secondary Engineering & Source Art | `UNKNOWN` | **`NOT_CONFIGURED`** | `NO` | *(Unprobed)* | *(Pending configuration)* | *(Pending discovery)* | *(Pending discovery)* | CLI/API not currently discovered on PATH. Re-probe when configured. |
+| **Codex** | Mutation Testing & Invariant Breaking | `YES` | **`EXHAUSTED`** | `NO` | *(Deferred to reset)* | Highest appropriate reasoning | **YES** (when available) | `NO` | Owner holds access; current period usage exhausted. Re-verify upon reset. |
+| **Gemini / Antigravity** | Coordinator, Control Tower, Architecture, Nano Banana Pro Art | `YES` | **`AVAILABLE`** | `YES` | `gemini-3-pro` / `gemini-3-pro-image` | High reasoning / Thinking | **YES** (`invoke_subagent`, `define_subagent`) | **YES** (Nano Banana Pro source art, catalogue-driven) | Coordinator, gatekeeper, regression verifier, and author of authentic pixel art. MAX_MULTIAGENT routing. |
 
 ---
 
@@ -22,18 +23,19 @@
 Send these explicit signals to toggle model availability at any time:
 - `CLAUDE AVAILABLE` / `FABLE AVAILABLE`
 - `GROK AVAILABLE`
+- `ASTRA AVAILABLE`
 - `CODEX AVAILABLE`
 - `CLAUDE EXHAUSTED` / `GROK EXHAUSTED` / `CODEX EXHAUSTED`
 - `MAX_UTILIZATION` (Enforce maximum productive subscription usage per `AGENT_UTILIZATION_POLICY.md`)
-- `MAX_QUALITY` (Enforce maximum model strength, reasoning effort, and large context)
+- `MAX_MULTIAGENT` (Enforce maximum model strength, highest reasoning, and multi-agent execution)
 
 ---
 
 ## 3. Operating Principles
 
-1. **MAX_QUALITY Default:** Substantive delegated work defaults to the strongest currently available provider model, highest practical reasoning/effort, and expanded context when beneficial.
-2. **Maximum Productive Compute:** Convert expiring AI subscription usage into project progress, test coverage, and performance validation rather than saving quota.
-3. **Strict Non-Overlapping Path Ownership:** No two workers modify the same files concurrently.
-4. **Multi-Model Attack on High-Risk Work:** Deploy parallel workers for implementation, adversarial review, and independent test generation using strong models on both sides.
-5. **Worktree Isolation:** Concurrent implementation tasks operate in isolated git worktrees.
-6. **Transparent Reporting:** Report requested model, actual model, reasoning effort, and any forced downgrade reasons.
+1. **MAX_MULTIAGENT Default:** Substantive delegated work defaults to the strongest currently available provider model, highest practical reasoning/effort, expanded context when beneficial, and provider-native multi-agent/subagent execution whenever supported.
+2. **Absolute WBS-Catalogue Image Rule:** All DEUS image generation is subordinate to the canonical WBS and semantic asset catalogue. Pre-assigned atlas slots precede generation. Multi-provider generation operates strictly across different READY catalogue families for source art only.
+3. **WorldGen Physical Gates:** No mass image generation occurs before physical world completion and gates WG.10–WG.33 are satisfied.
+4. **Maximum Productive Compute:** Convert expiring AI subscription usage into project progress, test coverage, and performance validation rather than saving quota.
+5. **Strict Non-Overlapping Path Ownership:** Exactly one primary writer per file path. Subagents inspect, reason, test, profile, and propose patches read-only.
+6. **Transparent Reporting:** Report requested model, actual model, reasoning effort, multiagent execution state, and any forced downgrade reasons.

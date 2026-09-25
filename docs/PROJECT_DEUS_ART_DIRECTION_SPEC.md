@@ -1,24 +1,63 @@
 # PROJECT DEUS — ART DIRECTION & PRODUCTION SPECIFICATION (MASTER SPEC)
-**Document Version:** 1.0.0 (Established 2026-09-21 by User Directive)  
+**Document Version:** 2.0.0 (Updated 2026-09-25 by Owner Directive)  
 **Applies To:** All visual generation tasks, tools, sprite cleaners, and engine integration pipelines across Project DEUS.  
-**Mandatory Model:** Google Nano Banana Pro (`gemini-3-pro-image` / `generate_image`). No other model is permitted.
+**Approved Source Art Providers:** Google Nano Banana Pro (`gemini-3-pro-image` / `generate_image`), Grok (`grok-4.7`), and Astra (when configured).
 
 ---
 
-## 1. Scope & Standing Production Directive
+## 1. Absolute WBS-Catalogue Image Generation Rule
 
-### 1.1 Continuous Autonomous Production for Non-Living Assets
-Nano Banana Pro is an active component of the production pipeline, not merely a concept-art tool.
-- Whenever implementation requires **non-living artwork** (walls, doors, terrain, flora, crops, water features, items, resources, furniture, workshops, machinery, environmental effects), agents must **continuously identify those needs, batch them aggressively, generate packed game-ready sheets via Nano Banana Pro, process approved results, integrate them into the project, and verify them in context**.
-- **Agents must not wait for manual individual asset requests for non-living assets.**
+### 1.1 Canonical Governing Principle
+> **"All DEUS image generation is subordinate to the canonical WBS and semantic asset catalogue. Every generated image must originate from an authorized WBS requirement and catalogue entry, with its production role, dimensions, variants, animation requirements, and—when runtime-bound—permanent atlas destination defined before generation. Available image-generation providers are used in parallel to complete different READY catalogue entries; they do not independently invent production assets or bypass catalogue, QC, deterministic packing, in-engine proof, or owner approval."**
 
-### 1.2 Absolute Exclusion: Living Things
-- **This automated pipeline DOES NOT apply to living things.**
-- Agents must **NEVER** autonomously generate:
-  - Humans, colonists, humanoids
-  - Animals, wildlife, monsters, creatures
-  - Living character portraits, living character sprites, or living animation sheets
-- When implementation requires a missing living asset: **REGISTER THE REQUIREMENT in `docs/ASSET_REQUESTS.md` / `docs/STATUS.md`**, but do not autonomously generate it under this pipeline.
+This rule supersedes any wording that could imply image providers may independently invent, explore, or generate production assets outside the canonical WorldGen workflow.
+
+### 1.2 The Required Lineage Chain
+Every production image generation must strictly trace through the unbroken chain:
+```text
+WBS LEAF
+  ↓
+ASSET REQUIREMENT
+  ↓
+CANONICAL CATALOGUE ENTRY
+  ↓
+SEMANTIC ASSET ID
+  ↓
+PERMANENT ATLAS SLOT / DESTINATION
+  ↓
+READY STATUS
+  ↓
+PROVIDER ASSIGNMENT
+  ↓
+GENERATION JOB
+```
+*If an asset does not yet have an approved catalogue entry and predetermined atlas destination, IT MUST NOT BE GENERATED.*
+
+### 1.3 Strict Prohibition Against Ad-Hoc Art
+- No image provider (Nano Banana Pro, Grok, Astra) may generate ad-hoc assets merely to burn available quota.
+- Available image-generation capacity is consumed strictly by advancing **READY catalogue entries**.
+- If no catalogue entries are marked READY, image workers must wait or assist with non-generation catalogue/QC work.
+
+### 1.4 Distributed Multi-Provider Source Art Generation
+- **Source Art Only:** Image providers generate raw source art candidates only. They never directly edit canonical runtime tilesheets.
+- **Coherent Family Ownership:** One provider produces the entire assigned family/batch (including all animation frames).
+- **Multi-Provider Candidates:** Different providers work different READY catalogue entries (e.g. Grok on trees, Nano Banana Pro on flora/crops, Astra on stone). For critical hero assets, multiple providers may generate candidate variations for visual critique, but the owner retains final visual YEA / NAY.
+- **Deterministic Pipeline:** `GENERATOR OUTPUT → STAGING → MECHANICAL QC → VISUAL CRITIQUE → DETERMINISTIC PACKER → PREASSIGNED ATLAS SLOT → IN-ENGINE PROOF → OWNER YEA/NAY`.
+
+### 1.5 WorldGen WBS Gates Remain Authoritative
+Mass catalogue-driven image production is strictly gated by the physical WorldGen WBS sequence:
+1. Physical World Completion (`WG.00`–`WG.09`)
+2. `WG.10`: World Visual Topology Specification
+3. `WG.11`: Animation Requirements & Phase Budgets
+4. `WG.20`–`WG.25`: Complete Semantic Asset Catalogue
+5. `WG.30`–`WG.33`: Permanent Atlas Planning & Blank Companion Sheets
+6. `WG.40+`: Mass Distributed Image Generation
+*The availability of Grok, Astra, or Nano Banana compute capacity does NOT permit bypassing these preceding gates.*
+
+### 1.6 Absolute Exclusion: Living Things
+- Autonomous non-living pipelines DO NOT apply to living beings.
+- Agents must **NEVER** autonomously generate humans, colonists, humanoids, animals, wildlife, monsters, creatures, or living character portraits/sprites.
+- When implementation requires a missing living asset, register the requirement in `docs/ASSET_REQUESTS.md` / `docs/STATUS.md` and await explicit owner authorization.
 
 ---
 
