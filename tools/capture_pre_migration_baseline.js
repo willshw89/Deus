@@ -65,16 +65,59 @@ function setupVM(tag) {
         env[name] = vm.runInNewContext(`(function ${name}(){})`);
         env[name].prototype.initialize = function() {};
     }
-    env.Sprite = vm.runInNewContext(`(function Sprite(){ this.children = []; })`);
-    env.Bitmap = vm.runInNewContext(`(function Bitmap(){})`);
+    env.Scene_Boot.prototype.start = function() {};
+    env.Scene_Boot.prototype.isReady = function() { return true; };
+    env.Spriteset_Map.prototype.createCharacters = function() {};
+    Object.assign(env.Game_Map.prototype, {
+        mapId() { return this._mapId || 0; }, width: () => 256, height: () => 256, update() {}, tileId: () => 0, tilesetFlags: () => [],
+        isPassable: () => true, checkPassage: () => true,
+        displayX() { return 0; }, displayY() { return 0; }, screenTileX: () => 17, screenTileY: () => 13,
+        adjustX(x) { return x; }, adjustY(y) { return y; },
+        roundXWithDirection: (x, d) => x + (d === 6 ? 1 : d === 4 ? -1 : 0), roundYWithDirection: (y, d) => y + (d === 2 ? 1 : d === 8 ? -1 : 0),
+        eventsXy: () => [], eventsXyNt: () => []
+    });
+    Object.assign(env.Game_Player.prototype, { isTransferring: () => false, direction: () => 2, locate(x, y) { this.x = x; this.y = y; } });
+    env.$gameMap = new env.Game_Map();
+    env.$gameMap._events = [];
+    env.$gamePlayer = new env.Game_Player();
+    env.$gamePlayer.x = 128;
+    env.$gamePlayer.y = 128;
+    env.Sprite = vm.runInNewContext(`(function Sprite(bitmap) {
+        this.anchor = { x: 0, y: 0, set(a, b) { this.x = a; this.y = b; } };
+        this.children = []; this.parent = null; this.visible = true; this.bitmap = bitmap || null; this.x = 0; this.y = 0; this.z = 0;
+    })`);
+    Object.assign(env.Sprite.prototype, { update() {}, addChild(c) { c.parent = this; this.children.push(c); return c; } });
+    env.Bitmap = vm.runInNewContext(`(function Bitmap(w, h) {
+        this.width = w || 0; this.height = h || 0;
+        this.context = { imageSmoothingEnabled: false, drawImage() {}, putImageData() {}, fillRect() {} };
+        this._baseTexture = { update() {} };
+    })`);
+    Object.assign(env.Bitmap.prototype, { isReady() { return true; }, isError() { return false; }, clear() {}, clearRect() {}, fillRect() {}, blt() {} });
+    env.Bitmap.load = () => ({ isReady: () => false, isError: () => false });
+
+    const section = (src, a, b) => {
+        const i = src.indexOf(a), j = src.indexOf(b, i + a.length);
+        if (i < 0 || j <= i) throw new Error(`engine source section missing: ${a}`);
+        return src.slice(i, j);
+    };
+    const core = fs.readFileSync(path.join(ROOT, "game/js/rmmz_core.js"), "utf8");
+    const mgr = fs.readFileSync(path.join(ROOT, "game/js/rmmz_managers.js"), "utf8");
+    const deus = fs.readFileSync(path.join(PLUGINS, "DEUS_Core.js"), "utf8");
+    const ctx = vm.createContext(env);
+    vm.runInContext(section(mgr, "DataManager.makeSaveContents =", "DataManager.correctDataErrors ="), ctx, { filename: "rmmz_managers.js" });
+    vm.runInContext(section(core, "function JsonEx()", "//-----------------------------------------------------------------------------"), ctx, { filename: "rmmz_core.js JsonEx" });
+    vm.runInContext(section(core, "Tilemap.TILE_ID_B =", "Tilemap.Layer ="), ctx, { filename: "rmmz_core.js Tilemap constants" });
+    vm.runInContext(section(deus, "window.DEUS = window.DEUS || {};", "//-----------------------------------------------------------------------------"), ctx, { filename: "DEUS_Core.js events" });
 
     const files = ["DEUS_World.js", "DEUS_WorldGen.js", "DEUS_Tiles.js", "DEUS_Objects.js", "DEUS_Levels.js", "DEUS_Floors.js"];
     for (const f of files) {
         const full = path.join(PLUGINS, f);
         if (fs.existsSync(full)) {
-            vm.runInNewContext(fs.readFileSync(full, "utf8"), env, { filename: f });
+            vm.runInContext(fs.readFileSync(full, "utf8"), ctx, { filename: f });
         }
     }
+    env.DataManager.onLoad(env.$dataTilesets);
+    new env.Scene_Boot().start();
     return { env, errors, warnings };
 }
 
@@ -84,10 +127,8 @@ function captureSeed(seed) {
     const W = env.UF.World || env.DEUS.World;
 
     const t0 = performance.now();
-    env.UF.NewGameSetup.startAreaX = 0;
-    env.UF.NewGameSetup.startAreaY = 0;
-    env.UF.NewGameSetup.worldSeed = seed;
-    W.initNewWorld(seed);
+    env.UF.NewGameSetup = { seed, year: 1, levelsGen: 5 };
+    W.newWorld(seed);
     const totalMs = performance.now() - t0;
 
     const stats = L && typeof L.stats === "function" ? L.stats() : {};
@@ -96,7 +137,7 @@ function captureSeed(seed) {
         checksums[String(z)] = L ? L.checksum(z) : null;
     }
 
-    const saveObj = W.makeSaveContents ? W.makeSaveContents() : {};
+    const saveObj = env.DataManager && env.DataManager.makeSaveContents ? env.DataManager.makeSaveContents() : {};
     const saveLen = JSON.stringify(saveObj).length;
     const mem = L && typeof L.strataMemory === "function" ? L.strataMemory(0, 0) : null;
 

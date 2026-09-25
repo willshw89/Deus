@@ -4,13 +4,13 @@ Project formal name: **DEUS** (formally renamed by user directive 2026-09-20; re
 Update this whenever reality changes. Write only what you've checked, and say how you checked it.
 
 **Last updated:** 2026-09-25
-**Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (Autonomous Shelter Construction Loop COMPLETE — AWAITING USER REVIEW)
+**Current gate:** Post-19B consolidation + Year-0 default + Z-2 generated-cut proof (Slice 1 remains AWAITING USER REVIEW)
 
 ## In progress
-- **Gemini / Antigravity (2026-09-25):** Integration Coordinator & Review Authority. WG.00.08 / FABLE-19B ACCEPTED & MERGED [commit `2e4571a`]. Re-enabled MAX_MULTIAGENT operations under workstation one-heavy-job limit. Leading post-19B consolidation window (durable multiagent mailboxes, closed-world census, OneDrive migration preparation) and dispatching WG.00.09 / FABLE-19C preparatory audits.
-- **Claude / Fable (2026-09-25):** Completed WG.00.08 / FABLE-19B natural cuts and all-Z caves on strata. Preparing implementation architecture for WG.00.09 / FABLE-19C (Global Five-Z Depth Renderer).
-- **Grok (2026-09-25):** Adversarial verification of ATK-19B-001 and ATK-19B-002 signed off (0 regressions, 27/27 mutants caught). Preparing 19C pre-attack and exposure-cache depth review.
-- **Codex / OpenAI (2026-09-25):** Secondary reviewer standing by for post-19B repo cleanup and consolidation audit.
+- **Gemini / Antigravity (2026-09-25):** Integration Coordinator & Review Authority. Post-19B consolidation window: verified Year-0 default (`tools/test_new_game_year0.js`), generated Z-2 cut proof (`tools/test_generated_z2_cut_proof.js`), child suite isolated timings, durable mailboxes (`docs/agents/mailboxes/`).
+- **Claude / Fable (2026-09-25):** Completed WG.00.08 / FABLE-19B natural cuts and all-Z caves on strata. Standing by for WG.00.09 / FABLE-19C (Global Five-Z Depth Renderer) worktree initialization.
+- **Grok (2026-09-25):** ATK-19B-001 and ATK-19B-002 closed by Grok 2026-09-25 15:54 CDT on 2e4571a/689aff8. ATK-YEAR0-001 open. 19C queued, not armed.
+- **Codex / OpenAI (2026-09-25):** Secondary reviewer standing by for consolidation audit.
 
 ## WG.00.08 / DEUS-TSK-FABLE-19B — Natural Cuts and All-Z Caves on Strata (Fable & Gemini, 2026-09-25)
 - **Status**: `COMPLETED & VERIFIED / CANONICAL MAIN MERGED` [commit `2e4571a`]

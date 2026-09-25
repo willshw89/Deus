@@ -1,8 +1,8 @@
 # WORK QUEUE & CONTROL TOWER — Project DEUS
 
 **Owner Terminal:** Gemini  
-**Last Updated:** 2026-09-22  
-**Active Baseline:** `git status` clean, 53/53 tests passing, RMMZ 1.10.0  
+**Last Updated:** 2026-09-25  
+**Active Engine Gate:** Year-0 default + Z-2 generated-cut proof + Phase 1 baseline file (Slice 1 playtest remains AWAITING OWNER separately; WG.00.09 / 19C remains QUEUED)  
 
 ---
 
@@ -48,7 +48,7 @@ Every work block MUST declare:
 ### Block `WB-001`: Slice 1 Owner Acceptance & Native Playtest Gate
 - **Objective**: Complete formal owner playtest review of Slice 1 (Autonomous Colonist AI & Settlement Construction) in native RPG Maker MZ editor.
 - **Priority**: `HIGH`
-- **Status**: `VERIFY` (Awaiting Owner Review)
+- **Status**: `AWAITING_OWNER` (Slice 1 playtest gate, tracked separately from active engine gate)
 - **Dependencies**: Slice 0 Approved (`2026-09-20`)
 - **Allowed Paths**: `docs/STATUS.md`, `docs/SLICES.md`, `docs/WORK_QUEUE.md`
 - **Forbidden Paths**: `game/js/rmmz_*.js`, `game/js/libs/`, `game/js/plugins/` (Code freeze pending review)

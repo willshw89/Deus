@@ -6,6 +6,8 @@
 ---
 
 ## 1. Executive Principles & Boundaries
+The Owner-safe execution order is copy-not-move to `C:\Dev\DEUS`, leave OneDrive untouched, one heavy job, no Phase 2 in this packet.
+
 1. **Timing Window**: Begins ONLY after `WG.00.08 / FABLE-19B` is accepted, committed, and verified.
 2. **Behavioral Equivalence Only**: Zero feature additions, zero balance tweaks, zero speculative refactors during migration.
 3. **Ironclad Acceptance Gate**: Every phase is verified by automated test suites, golden seeds (`18`, `20260923`), and native NW.js playtest smoke verification.

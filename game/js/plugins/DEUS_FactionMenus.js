@@ -277,7 +277,7 @@
             }
         }
         const faction = this._newGameSetupWindow ? this._newGameSetupWindow.currentFaction() : "Human";
-        const year = this._newGameSetupWindow ? this._newGameSetupWindow.currentYear() : 1;
+        const year = this._newGameSetupWindow ? this._newGameSetupWindow.currentYear() : 0;
         const seed = this._newGameSetupWindow ? this._newGameSetupWindow.resolvedSeed() : undefined;
         const worldSize = 256;
         const fogOfWar = false;
@@ -344,7 +344,7 @@
                 "Dragonborn", "Half-Elf", "Half-Orc", "Tiefling"
             ];
             this._factionIndex = 0;
-            this._year = 1;
+            this._year = 0;
             this._seedInput = "";
             this._seedButtonCol = 0;
             this._copiedTimer = 0;
@@ -555,13 +555,13 @@
                 if (clean !== "") {
                     let val = parseInt(clean, 10);
                     if (val > 999) { val = 999; input.value = "999"; }
-                    this._year = Math.max(1, val);
+                    this._year = Math.max(0, val);
                 }
             });
             input.addEventListener("blur", () => {
                 let val = parseInt(input.value, 10);
-                if (isNaN(val) || val < 1) {
-                    this._year = 1;
+                if (isNaN(val) || val < 0) {
+                    this._year = 0;
                 } else if (val > 999) {
                     this._year = 999;
                 } else {
@@ -1088,7 +1088,7 @@
 
         changeYear(delta) {
             const oldYear = this._year;
-            this._year = Math.max(1, Math.min(999, this._year + delta));
+            this._year = Math.max(0, Math.min(999, this._year + delta));
             if (this._yearInput) {
                 this._yearInput.value = String(this._year);
             }
@@ -1576,7 +1576,7 @@
             t.check("setup_window_x_centered", scene._newGameSetupWindow.x >= 248 && scene._newGameSetupWindow.x <= 256, "Setup window centered squarely between D and S (x=" + scene._newGameSetupWindow.x + ")");
             t.check("fits_between_d_and_s", scene._newGameSetupWindow.x > 243 && (scene._newGameSetupWindow.x + scene._newGameSetupWindow.width) < 618, "Fits squarely between letter D and letter S");
             t.check("default_faction_human", scene._newGameSetupWindow.currentFaction() === "Human", "Default faction is Human");
-            t.check("default_year_1", scene._newGameSetupWindow.currentYear() === 1, "Default starting year is 1 AD");
+            t.check("default_year_0", scene._newGameSetupWindow.currentYear() === 0, "Default starting year is 0 AD (World Year 0)");
             t.check("default_size_locked_256", scene._newGameSetupWindow.currentSize() === 256, "Default world size is 256x256");
             t.check("default_size_label_locked", scene._newGameSetupWindow.currentSizeLabel() === "256x256 (Locked)", "Default world size label is locked");
             t.check("no_flashing_cursor", !scene._newGameSetupWindow._cursorSprite || !scene._newGameSetupWindow._cursorSprite.visible, "Flashing cursor box suppressed");
