@@ -2,47 +2,40 @@
 
 - **Task ID:** `DEUS-TSK-FABLE-19C`
 - **WBS ID:** `WG.00.09`
-- **Role:** Writer: Grok (Directive 001-B, Lane E) | Reviewer: Claude CLI session (verdict CHANGES REQUESTED, 2026-09-25)
+- **Role:** Writer: Grok (Directive 001-F revision, Lane E) | Reviewer: Claude CLI session (prior verdict CHANGES REQUESTED, 2026-09-25)
 - **Branch / Worktree:** `task/lane-e` (`C:\Users\snewt\.deus_worktrees\lane-e`)
-- **Last Commit:** `[claude] WG.00.09 Independent review of UF_Depth_Attack_Plan.md` (on top of Grok's `c846fc7c`)
-- **Current Gate:** Specification review returned **CHANGES REQUESTED** (Claude, 2026-09-25). The plan goes back to Grok for revision. Engine implementation is not started and stays blocked.
+- **Last Commit:** `[grok] WG.00.09 Revise depth attack plan resolving review findings (Directive 001-F)`
+- **Current Gate:** Specification revised against `claude_review.md`. Awaiting Claude's re-review. Engine implementation is not started and stays blocked.
 
 ## Owned File Set
 - `docs/systems/UF_Depth_Attack_Plan.md` (Grok)
 - `tasks/DEUS-TSK-FABLE-19C/state.md`
-- `tasks/DEUS-TSK-FABLE-19C/claude_review.md` (Claude, reviewer)
+- `tasks/DEUS-TSK-FABLE-19C/claude_review.md` (Claude, reviewer; not edited by this revision)
 
 Plugins, harnesses, and `game/data` stay read-only for this lane.
 
 ## What is Done (with Evidence)
-1. **Attack plan authored** at `docs/systems/UF_Depth_Attack_Plan.md` (2026-09-25). It specifies:
-   - Five macro-planes `Z-2` through `Z+2`, with up to four lower planes under the camera and none when the camera is on `Z-2`.
-   - Exposure as a downward solid-stratum ray (`dHit`), and the shape-grid / `hasOpaqueOverburden` / `continuousAirHeight` reads that must fail as oracles.
-   - Integer pixel steps off a 48 px camera tile (at `H = 120`: 46, 44, 43, 41), pad 96 px, no production blur, no `ColorMatrixFilter`.
-   - Shade as a load-time lookup onto `art/palette/deus_master_world_palette_v1.hex` (226 colors). Void texel `#0C0D12` (`NEUT_VOID_CAP`). `#08080C` is not in that file.
-   - A 16×16 pooled solid-word cache, HP-only `levels:strataChanged` ignored, zero heap allocation inside the depth update.
-   - Oracle ids, twenty mutants, and tick bars for a future `tools/test_global_depth_renderer.js`.
-2. **Code freeze held.** No edit under `game/js/`, `tools/`, or `game/data/` in this checkpoint. The review confirmed this: `git diff --stat c846fc7c^ c846fc7c -- game tools run_tests.bat` is empty.
-3. **Independent review done** (Claude, 2026-09-25): `tasks/DEUS-TSK-FABLE-19C/claude_review.md`. Verdict **CHANGES REQUESTED**: 1 BLOCKER, 8 MAJOR, 9 MINOR. Evidence: a vm probe of the real `DEUS_Levels` on seed 18 (generator 5), a simulation of the §5.2 shade table on `DEUS_PaletteRegistry.json`, and code citations. No harness, mutant, screenshot, or frame time was produced or claimed.
+1. **Attack plan authored** at `docs/systems/UF_Depth_Attack_Plan.md` (2026-09-25), then revised in this commit against Claude's review. The revision resolves CR-19C-B1 and M1–M8:
+   - **B1.** A hit on `S4` of the band below belongs to the band above (`zHit = floor((e + 1) / 5) - 2`, `dHit = max(0, V - zHit)`), so lip floors stay on the live map and on that level's entity list. The live WebGL tilemap is not see-through where the ray passes. `DEUS_Depth` wraps the live tilemap's `_addSpot` (that instance only): `dHit ≥ 1` adds no rect on either layer, and a `dHit = 0` cell whose stock tile is transparent (`V > 0`, shape `open`) draws an opaque floor tile of the hit material at scale 1. No PIXI mask, no new shader, no edit to `DEUS_Levels.js` or `DEUS_WorldGen.js`. Screen check `P-CUTOUT` samples roof, hole, void, and live columns at cameras `+2`, `+1`, `0`, and `−1`.
+   - **M1.** Nearest-luminance at 4% changes 0 of 226 colours at depths 1–2 on `DEUS_PaletteRegistry.json` (review §3.2). The pixel formula is retired. Depths 1–2 take one ramp step darker, depths 3–4 take a second, clamped at the dark end. Void ids stay identity. Checks: `S-SHADE-ORACLE`, `S-MONO`, `S-STEP` (an identity table fails).
+   - **M2.** Master texels use the step table. Non-master texels (stock `Dungeon_A2` / `Outside_A2`, tileset 91) pass through unchanged, counted as art debt (ADR-002 §2.2). Alpha `< 128` becomes 0, alpha `≥ 128` becomes 255. The stock `rgba(0,0,0,0.5)` shadow quad is not drawn on a depth plane.
+   - **M3.** Shaded sheet copies are built once per `(sheet, depth)`. A plane repaint is `clearRect` + `drawImage` + `baseTexture.update` on buffers that already exist. No `getImageData` on the repaint path. The 256-bitmap entity pool is gone; sprites `setFrame` on the shared sheet. A pan benchmark reports GC and repaint ms after the sheets are warm.
+   - **M4.** No sprite mask and no `SpriteMaskFilter`. Tile ownership is baked into the canvas paint (`draw` only where `dHit = d`). Entities crop with `setFrame`. Mutant `sprite_mask_production` fails `no_sprite_mask`.
+   - **M5.** `cache_ignores_destroy` ignores both `cellChanged` and `strataDestroyed` (`strataDestroyed` alone cannot kill `C-DIG`, because `writeCell` emits `cellChanged` first). `max_depth_clamped_2` fails `O-SHAFT-DRAW` (plane 4 bound and drawn). `absolute_z_scale` fails `S-RELATIVE`. `palette_lerp` fails `S-PAL-CANVAS`. `float_scale` fails `S-SCALE-INT` on the applied `plane.scale`. Every check name in the scenario table has a build and an expected result. Node, PIXI-stub, and nw.js harnesses are split. A mutant's exit code comes only from its checks; the driver fails an exit of 0 or a named check missing from the `FAIL` lines. World replacement is on the invalidation list (`world:created`, save load, `strataSchemaVersion`), and the LRU is keyed by world-state identity.
+   - **M6.** `C-LIVE-ALLOC` runs with a five-level opening (`exposed > 0`), camera still, and one unit walking on a lower plane. It measures heap growth and GC with `--expose-gc`. `C-ALLOC` at `exposed = 0` remains and is not sufficient. `alloc_unwired` fails the heap side, not the self-reported counter.
+   - **M7.** The picture gate is handoff §10.3 again: cameras `−2`, `−1`, `0`, `+1`, `+2`, plus one frame with all five levels visible. Each shot names the column class it samples. No remaining reduction is logged in §9.
+   - **M8.** No new `DEUS_Levels` export. Block fill reads `UF.Levels.baseline().strata.m` and the public 22-hex delta at `state.levels[z].strata`, and writes a pooled `Uint32Array`. The 256-column loop allocates nothing. `strataAt` stays off that path.
+2. **Code freeze held.** This commit edits only `docs/systems/UF_Depth_Attack_Plan.md` and this state file. No edit under `game/js/`, `tools/`, or `game/data/`.
+3. **Independent review** (Claude, 2026-09-25) remains at `tasks/DEUS-TSK-FABLE-19C/claude_review.md`. Verdict on the previous text was **CHANGES REQUESTED**. This revision has not been re-reviewed. No harness, mutant, screenshot, or frame time was produced or claimed.
 
 ## Exact Next Step
-- Grok revises `docs/systems/UF_Depth_Attack_Plan.md` against `claude_review.md`, starting with CR-19C-B1, then resubmits for review.
-- The owner / coordinator answers the decisions in `claude_review.md` §4: live-layer transparency ownership and lip banding (B1), how value recession works on short ramps (M1), quantising stand-in art (M2), a new `DEUS_Levels` column-word export (M8), and Rule 13 vs the master void ramp (m7).
-- Implementation of `DEUS_Depth.js` and `tools/test_global_depth_renderer.js` stays blocked until a revised spec is accepted and the engine freeze for Lane E is lifted.
+- Claude re-reviews `docs/systems/UF_Depth_Attack_Plan.md` against `claude_review.md`.
+- One art question stays open and is logged in plan §9, not decided here: Rule 13's cap range (`#08080C`–`#121218`) against the master void ramp (`#060709`, `#0C0D12`, `#14161C`). The compositor does not invent `#08080C`.
+- Implementation of `DEUS_Depth.js` and `tools/test_global_depth_renderer.js` stays blocked until the revised spec is accepted and the engine freeze for Lane E is lifted.
 
 ## Open Defects / Questions
-- **CR-19C-B1 (BLOCKER):** the plan assumes the live tilemap is see-through exactly where `dHit ≥ 1`, but the live tilemap is painted from the derived shape. Seed 18, generator 5: every exposed column on `V = 0` (1,368) and `V = −1` (344) sits under an opaque live tile. On `+1`, 127 cave-roof columns with `dHit = 0` are transparent and would show the void. The lip cases (`O-LIP`, "Roof one level down") are drawn as opaque live floors. The fix lives in files that are read-only for 19C, or is a new `DEUS_Depth` duty.
-- **MAJOR:**
-  - M1: the shade table changes 0 of 226 colours at depths 1–2 and passes `S-PAL` when it never shades.
-  - M2: quantising at paint conflicts with ADR-002 §2.2.
-  - M3: the per-repaint shading pass is unbudgeted.
-  - M4: the GPU mask is a `SpriteMaskFilter` pass.
-  - M5: mutant/check mismatches, including one mutant that can never be killed (`cache_ignores_destroy`) and ten undefined checks.
-  - M6: zero-allocation is tested only at `exposed = 0`.
-  - M7: the picture gate is narrower than handoff §10.3.
-  - M8: block fill needs a `DEUS_Levels` export that doesn't exist.
-- MINOR m1–m9: see the review.
-- Not updated by this review: `tasks/DEUS-TSK-FABLE-19C/messages.jsonl`, `docs/STATUS.md`, `docs/AUDIT_LOG.md` (outside the file set in `REVIEW_BRIEF.md`).
+- **Resolved in the plan, not yet re-reviewed:** CR-19C-B1 and M1–M8, as listed above. Minors m1 (lip entities), m2 (pad coverage and `H ≥ 90`), m3 (canvas 1104×912), m4 (presence mask), m5 (world identity and wrap), m6 (cap events ignored), m8 (handoff departures and the wall-cap crop), and m9 (wording) are corrected in the same pass because the rewritten sections would otherwise still say the false thing. **m7** is recorded in §9 as an open art conflict.
+- Not updated by this revision: `tasks/DEUS-TSK-FABLE-19C/messages.jsonl`, `docs/STATUS.md`, `docs/AUDIT_LOG.md`.
 - 60 FPS, mutant kills, and screenshot contents are still not claimed. The harness was not created and was not run.
 
 ## Relevant Commands
