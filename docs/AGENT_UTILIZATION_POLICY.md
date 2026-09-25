@@ -212,7 +212,39 @@ At every orchestration cycle, the coordinator ensures **every available worker i
 
 ---
 
-## 6. Path Ownership & Worktree Isolation Laws
+## 6. Usage-Aware Saturation & Burn-Priority Scheduling
+
+The orchestrator integrates real-time quota telemetry from `tools/deus-usage.ps1` and `docs/agents/PROVIDER_USAGE_STATUS.json` as a primary scheduling signal.
+
+### Multi-Factor Task Routing Formula
+```text
+ASSIGNMENT_SCORE = WORK_VALUE × MODEL_SUITABILITY × BURN_PRIORITY × DEPENDENCY_READINESS × OWNERSHIP_SAFETY
+```
+- **WORK_VALUE:** Milestone priority and blocking severity (WBS leaf urgency).
+- **MODEL_SUITABILITY:** Match between task domain and model strengths (e.g. Claude Opus for deep algorithms/refactors; Grok for adversarial audits/sweeps; Gemini for integration/architecture).
+- **BURN_PRIORITY:** `REMAINING_CAPACITY / TIME_TO_RESET`. High remaining quota expiring soon receives maximum work allocation to arrive near reset with as little unused capacity as practical.
+- **DEPENDENCY_READINESS:** Prerequisite code and tests committed and clean.
+- **OWNERSHIP_SAFETY:** Absence of file-write conflicts; clean worktree isolation.
+
+*Usage management determines WHICH AVAILABLE PROVIDER receives the next useful task. It NEVER authorizes downgrading model capability or reasoning effort on substantive engineering.*
+
+### Quota Threshold Guidelines
+- **>25% Capacity:** `AVAILABLE` — Dispatch full-scale implementation, deep refactors, and multi-file architecture tasks.
+- **10%–25% Capacity:** `LIMITED` — Prioritize focused implementation leaves, targeted reviews, and modular test generation.
+- **>0%–10% Capacity:** `LOW` — Route strictly bounded tasks (short reviews, seed sweeps, static audits, small catalogue batches) to avoid mid-task quota exhaustion.
+- **0% / Explicit Provider Limit:** `EXHAUSTED` — Cease dispatches; route queued work to remaining available providers.
+
+### Automatic Provider Reset Handling
+When an `EXHAUSTED` provider resets:
+1. Automatically refresh usage telemetry (`tools/deus_usage_telemetry.js`).
+2. Mark provider `AVAILABLE`.
+3. Discover strongest available model.
+4. Restore `MAX_MULTIAGENT` routing.
+5. Immediately assign queued DEUS backlog work.
+
+---
+
+## 7. Path Ownership & Worktree Isolation Laws
 
 Maximum utilization must never compromise repository integrity:
 1. **Strict Path Ownership:** Never allow two agents to concurrently edit overlapping files.
