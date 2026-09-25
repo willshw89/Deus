@@ -17,9 +17,14 @@ The project owner explicitly directs **MAXIMUM PRODUCTIVE USE** of all available
 ### Binding Rules of Consumption
 1. **Default to MAX_MULTIAGENT:** Substantive delegated engineering defaults to the strongest available models, highest reasoning, expanded context, and provider-native multi-agent/subagent teams.
 2. **Deep Reasoning & High Effort:** Do not downgrade reasoning effort or token budgets merely to preserve quota.
-3. **Long Context Utilization:** Leverage large-context capabilities for repository-wide reasoning, cross-plugin dependencies, and structural audits.
 4. **No Artificial Restraint:** Do not stop using a provider because "substantial usage has already been consumed." If safe, useful work remains, keep assigning it until the provider explicitly reports exhaustion.
 5. **No Pointless Waste:** Every consumed token must yield tangible project value. Fictitious busywork, repetitive restatements, and circular unevidenced reviews are strictly prohibited.
+
+### Related Standards & Registries
+- **Quality Engineering Standard:** [`docs/QUALITY_ENGINEERING_POLICY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/QUALITY_ENGINEERING_POLICY.md) (`SPEC → IMPLEMENT → BREAK → BENCHMARK → INTEGRATE`)
+- **Master Risk Register:** [`docs/RISK_REGISTER.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/RISK_REGISTER.md) (Autonomous risk mitigation backlog)
+- **Model Availability:** [`docs/MODEL_AVAILABILITY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/MODEL_AVAILABILITY.md) (Real-time provider state and model discovery)
+- **Quota Telemetry Dashboard:** `tools/deus-usage.ps1` & [`docs/agents/PROVIDER_USAGE_STATUS.json`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/agents/PROVIDER_USAGE_STATUS.json)
 
 ---
 
@@ -198,8 +203,7 @@ The orchestrator and integration authority track each subordinate model provider
 |---|:---:|:---:|:---:|---|---|---|---|:---:|---|
 | **Claude / Fable** | `YES` | **`AVAILABLE`** | `YES` | `claude-opus-5-5[1m]` | `effort: xhigh` | Up to 1M | **YES** (native subagents, agent teams, worktrees) | `NO` | Primary implementation leaves, deep debugging, complex algorithms. |
 | **Grok** | `YES` | **`AVAILABLE`** | `YES` | `grok-4.7` | Highest reasoning | Standard long | **YES** (native `--agents`, parallel sessions, worktrees) | **YES** (Source art only, catalogue-driven) | Adversarial analysis, test design, performance profiling, source art generation. |
-| **Astra** | `UNKNOWN` | **`NOT_CONFIGURED`** | `NO` | *(Unprobed)* | *(Unprobed)* | *(Unprobed)* | *(Pending discovery)* | *(Pending discovery)* | Secondary engineering/art (activate when CLI configured). |
-| **Codex** | `YES` | **`EXHAUSTED`** | `NO` | *(Deferred to reset)* | Highest appropriate | Standard | **YES** (when available) | `NO` | Mutation testing, invariant breaking, fuzz testing (standby for reset). |
+| **OpenAI Codex** | `YES` | **`EXHAUSTED`** | `NO` | **`astra`** (Codex Model) | Highest appropriate | Standard | **YES** (when available) | **YES** (Source art only, catalogue-driven) | Mutation testing, invariant breaking, fuzz testing, source art (standby for reset). |
 | **Gemini** | `YES` | **`AVAILABLE`** | `YES` | `gemini-3-pro` / `gemini-3-pro-image` | High reasoning / Thinking | Full repo context | **YES** (`invoke_subagent`, `define_subagent`) | **YES** (Nano Banana Pro source art, catalogue-driven) | Coordinator, control tower, integration authority, authentic pixel art. |
 
 ---

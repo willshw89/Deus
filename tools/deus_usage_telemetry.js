@@ -161,9 +161,9 @@ function probeGrok() {
 
 function probeCodex() {
   return {
-    provider: 'OpenAI Codex / Astra',
-    runtime: 'Codex CLI / Astra',
-    plan: 'ChatGPT / Codex Subscription',
+    provider: 'OpenAI Codex (Model: Astra)',
+    runtime: 'Codex CLI / Astra Model',
+    plan: 'ChatGPT / Codex Subscription (Astra)',
     state: 'EXHAUSTED',
     remainingFiveHourPct: 0,
     remainingWeeklyPct: 0,
@@ -176,7 +176,7 @@ function probeCodex() {
     source: 'Owner Verification & CLI Discovery',
     precision: 'PROVIDER_STATE_ONLY',
     lastChecked: new Date().toISOString(),
-    note: 'Account holds access; current period exhausted. Standby for quota reset.'
+    note: 'Account holds access; preferred model Astra; current period quota exhausted. Standby for quota reset.'
   };
 }
 
@@ -275,14 +275,14 @@ function main() {
   const cx5h = cx.remainingFiveHourPct !== null ? `${cx.remainingFiveHourPct}%` : '0%';
   const cxWk = cx.remainingWeeklyPct !== null ? `${cx.remainingWeeklyPct}%` : '0%';
   const cxRst = formatDuration(cx.fiveHourReset);
-  console.log('Codex/Astra'.padEnd(14) + cx5h.padEnd(10) + cxWk.padEnd(14) + cxRst.padEnd(16) + cx.state);
+  console.log('Codex (Astra)'.padEnd(14) + cx5h.padEnd(10) + cxWk.padEnd(14) + cxRst.padEnd(16) + cx.state);
 
   console.log('============================================================');
   console.log('CURRENT DEUS SESSION CONSUMPTION');
   console.log(`- Claude: ~${c.sessionTokensUsed.toLocaleString()} tokens observed in project directory`);
   console.log(`- Grok:   ${gr.sessionTokensUsed.toLocaleString()} tokens ($${gr.sessionCostUsd.toFixed(4)} USD) across completed task sessions`);
   console.log(`- Gemini: Native coordinator session (0 cost for local usage probe)`);
-  console.log(`- Codex:  0 tokens (EXHAUSTED)`);
+  console.log(`- Codex:  0 tokens (Model: Astra; state EXHAUSTED)`);
   console.log('============================================================');
   console.log(`Saved machine-readable status to: ${path.relative(REPO_ROOT, STATUS_JSON_PATH)}`);
 }

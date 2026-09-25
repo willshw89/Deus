@@ -12,8 +12,7 @@
 |---|---|:---:|:---:|:---:|---|---|:---:|:---:|---|
 | **Claude / Fable** | Bounded Implementation & Core Engineering | `YES` | **`AVAILABLE`** | `YES` | `claude-opus-5-5[1m]` | `effort: xhigh`, 1M context | **YES** (native subagents, agent teams) | `NO` | Active owner of bounded implementation leaves. MAX_MULTIAGENT routing. |
 | **Grok** | Parallel Analysis, Adversarial Review, Profiling, Source Art | `YES` | **`AVAILABLE`** | `YES` | `grok-4.7` | Highest reasoning | **YES** (native `--agents`, parallel sessions) | **YES** (Source art only, catalogue-driven) | Adversarial analysis, test design, profiling, catalogue source art. MAX_MULTIAGENT routing. |
-| **Astra** | Secondary Engineering & Source Art | `UNKNOWN` | **`NOT_CONFIGURED`** | `NO` | *(Unprobed)* | *(Pending configuration)* | *(Pending discovery)* | *(Pending discovery)* | CLI/API not currently discovered on PATH. Re-probe when configured. |
-| **Codex** | Mutation Testing & Invariant Breaking | `YES` | **`EXHAUSTED`** | `NO` | *(Deferred to reset)* | Highest appropriate reasoning | **YES** (when available) | `NO` | Owner holds access; current period usage exhausted. Re-verify upon reset. |
+| **OpenAI Codex** | Mutation Testing, Invariant Breaking & Source Art | `YES` | **`EXHAUSTED`** | `NO` | **`astra`** (Codex Model) | Highest appropriate reasoning | **YES** (when available) | **YES** (Source art only, catalogue-driven) | Preferred model: **Astra**. Owner holds access; current period usage exhausted. Re-verify upon reset. |
 | **Gemini / Antigravity** | Coordinator, Control Tower, Architecture, Nano Banana Pro Art | `YES` | **`AVAILABLE`** | `YES` | `gemini-3-pro` / `gemini-3-pro-image` | High reasoning / Thinking | **YES** (`invoke_subagent`, `define_subagent`) | **YES** (Nano Banana Pro source art, catalogue-driven) | Coordinator, gatekeeper, regression verifier, and author of authentic pixel art. MAX_MULTIAGENT routing. |
 
 ---
@@ -23,9 +22,8 @@
 Send these explicit signals to toggle model availability at any time:
 - `CLAUDE AVAILABLE` / `FABLE AVAILABLE`
 - `GROK AVAILABLE`
-- `ASTRA AVAILABLE`
-- `CODEX AVAILABLE`
-- `CLAUDE EXHAUSTED` / `GROK EXHAUSTED` / `CODEX EXHAUSTED`
+- `CODEX AVAILABLE` / `ASTRA AVAILABLE`
+- `CLAUDE EXHAUSTED` / `GROK EXHAUSTED` / `CODEX EXHAUSTED` / `ASTRA EXHAUSTED`
 - `MAX_UTILIZATION` (Enforce maximum productive subscription usage per `AGENT_UTILIZATION_POLICY.md`)
 - `MAX_MULTIAGENT` (Enforce maximum model strength, highest reasoning, and multi-agent execution)
 
