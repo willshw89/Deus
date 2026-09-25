@@ -261,7 +261,7 @@ function runSeed(seed) {
     const env = setup();
     const W = env.UF.World, L = env.UF.Levels, T = env.UF.Tiles, G = env.UF.WorldGen, O = env.UF.Objects;
     if (!W || !L || !T || !G || !O) harnessProblem("plugins did not load (World/Levels/Tiles/WorldGen/Objects)");
-    env.UF.NewGameSetup = { seed, year: 1 };
+    env.UF.NewGameSetup = { seed, year: 1, levelsGen: 4 };   // FABLE-16's column profiles are generator 4's (19B cuts: test_strata_cuts_and_caves.js)
     let t0 = performance.now();
     W.newWorld(seed);
     const tNew = performance.now() - t0;

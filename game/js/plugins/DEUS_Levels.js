@@ -53,7 +53,11 @@
     "use strict";
 
     const TILESET_ID = 92;
-    const GEN = 4;                        // a save keeps its baseline generator version; version 1, 2 and 3 are preserved below
+    // A save keeps its baseline generator version; versions 1 to 4 are preserved below. Generator 5 (DEUS-TSK-FABLE-19B)
+    // is generator 4 plus the natural cuts and caves carved into the strata of an area's five levels at once.
+    const GEN = 5;
+    const PRE_CUT_GEN = 4;                // a pre-V80 save migrates to the generator it had before 19B (no cuts under its settlement)
+    const KNOWN_GENS = Object.freeze([1, 2, 3, 4, 5]);
     const LEVELS = Object.freeze([-2, -1, 0, 1, 2]);
     const LABELS = Object.freeze({ 2: "+2", 1: "+1", 0: "Ground", "-1": "-1", "-2": "-2" });
     const SHAPES = Object.freeze({ solid: 1, floor: 2, open: 3, ramp: 4, stairUp: 5, stairDown: 6, stairBoth: 7 });
@@ -428,7 +432,7 @@
 
     const baselines = new Map(); // "seed:gen:z:ax,ay" -> { shape: Uint8Array, material: Uint8Array }
     const stats = { generated: 0, genMs: 0, lastGenMs: 0, shapeReads: 0, switches: 0, lastSwitch: null, migrations: 0, checksumMismatches: 0, composeMs: 0,
-        strataWrites: 0, strataDamaged: 0, strataDestroyed: 0, strataMigrations: 0, strataSchemaErrors: 0, derives: 0, gridBuilds: 0 };
+        strataWrites: 0, strataDamaged: 0, strataDestroyed: 0, strataMigrations: 0, strataSchemaErrors: 0, derives: 0, gridBuilds: 0, featureMs: 0 };
 
     function levelGen(st, z) {
         const L = st && st.levels && st.levels[String(z)];
@@ -706,8 +710,21 @@
         return selected;
     }
 
+    // One level's baseline. Generator 5 and later generate the five levels of the area together (generateVolume: the
+    // natural cuts and caves span levels) and hand out this level's.
     function generateBaseline(seed, gen, z, ax, ay, size) {
+        if (gen >= FEATURE_GEN) return volumeOf(seed, gen, ax, ay, size)[z + 2];
         const t0 = performance.now();
+        const b = finishBaseline(levelArrays(seed, gen, z, ax, ay, size), z, gen, size);
+        const ms = performance.now() - t0;
+        stats.generated++;
+        stats.genMs += ms;
+        stats.lastGenMs = ms;
+        return b;
+    }
+
+    // The generator's working arrays of one level (one shape, material and water code per cell, and its extras).
+    function levelArrays(seed, gen, z, ax, ay, size) {
         const n = size * size;
         const shape = new Uint8Array(n), material = new Uint8Array(n);
         let extra = null;
@@ -761,12 +778,14 @@
 
                         if (targetX >= 0 && nearestDist < 30) {
                             let curX = term.x, curY = term.y;
+                            const corridor = m.corridor = [];   // the cells walked (natural cuts and caves keep clear of them)
                             while (curX !== targetX || curY !== targetY) {
                                 if (curX < targetX) curX++;
                                 else if (curX > targetX) curX--;
                                 else if (curY < targetY) curY++;
                                 else if (curY > targetY) curY--;
                                 const ci = curY * size + curX;
+                                corridor.push(ci);
                                 if (shape[ci] === SOLID) {
                                     shape[ci] = FLOOR;
                                     material[ci] = STONE;
@@ -857,16 +876,16 @@
         } else {
             shape.fill(FLOOR); // the ground (its real passability is its tiles)
         }
-        // Only the strata are kept: the working arrays are converted here and dropped (toStrata).
-        const b = Object.assign({ z }, extra || {});
+        return { shape, material, extra };
+    }
+
+    // A level's baseline from its working arrays: only the strata are kept (toStrata converts the arrays; they are dropped).
+    function finishBaseline(a, z, gen, size) {
+        const b = Object.assign({ z }, a.extra || {});
         const water = b.water || null;
         delete b.water;
         if (z === 0 && gen < 4) b.legacyGround = true;
-        toStrata(b, shape, material, water, z, size);
-        const ms = performance.now() - t0;
-        stats.generated++;
-        stats.genMs += ms;
-        stats.lastGenMs = ms;
+        toStrata(b, a.shape, a.material, water, z, size);
         return b;
     }
 
@@ -913,6 +932,8 @@
 
     function checksumOf(z, seed, gen) {
         const W = World(), st = W.state;
+        const g = gen || (seed === undefined ? levelGen(st, z) : GEN);
+        const baseOfArea = (ax, ay) => seed === undefined ? baseline(z, ax, ay, undefined, gen) : generateBaseline(seed, gen || GEN, z, ax, ay, st.size);
         let h = 2166136261 >>> 0;
         if (z === 0) {
             const G = window.UF.WorldGen;
@@ -925,18 +946,39 @@
                     h = fnvBytes(h, enc(info ? `${info.ground}|${info.water || ""}|${info.peak ? 1 : 0};` : "-;"));
                 }
             }
+            // Generator 5: the ground's strata too (its natural cuts and caves are strata, not climate cells).
+            if (g >= FEATURE_GEN) for (let ay = 0; ay < st.areasY; ay++) for (let ax = 0; ax < st.areasX; ax++) h = strataHash(h, baseOfArea(ax, ay));
             return hex(h);
         }
         for (let ay = 0; ay < st.areasY; ay++) for (let ax = 0; ax < st.areasX; ax++) {
+            // Generator 5: the strata bytes themselves (partial fills, caves and caps don't show in the legacy codes).
+            if (g >= FEATURE_GEN) { h = strataHash(h, baseOfArea(ax, ay)); continue; }
             // The generator's codes, read back from the strata (legacyViews): the same bytes as before the strata, so a
             // save's checksum from New Game still matches.
-            const v = legacyViews(seed === undefined ? baseline(z, ax, ay, undefined, gen) : generateBaseline(seed, gen || GEN, z, ax, ay, st.size));
+            const v = legacyViews(baseOfArea(ax, ay));
             h = fnvBytes(h, v.shape);
             h = fnvBytes(h, v.material);
             if (v.biome) h = fnvBytes(h, v.biome);
             if (v.water) h = fnvBytes(h, v.water);
         }
         return hex(h);
+    }
+
+    // FNV-1a over a baseline's strata bytes, connectors, biome codes and caps (the checksum of generator 5 and later).
+    function strataHash(h, b) {
+        h = fnvBytes(h, b.strata.m);
+        h = fnvBytes(h, b.conn);
+        if (b.biome) h = fnvBytes(h, b.biome);
+        if (b.caps && b.caps.size) {
+            const keys = [...b.caps.keys()].sort((p, q) => p - q), buf = new Uint8Array(keys.length * 6);
+            keys.forEach((i, k) => {
+                const c = b.caps.get(i);
+                buf[k * 6] = i & 255; buf[k * 6 + 1] = (i >> 8) & 255; buf[k * 6 + 2] = (i >> 16) & 255;
+                buf[k * 6 + 3] = c & 255; buf[k * 6 + 4] = (c >> 8) & 255; buf[k * 6 + 5] = (c >> 16) & 255;
+            });
+            h = fnvBytes(h, buf);
+        }
+        return h;
     }
 
     //-------------------------------------------------------------------------
@@ -1172,7 +1214,7 @@
         let head = 0, s = fill;
         while (s < STRATA && SOLID_B[m[o + s]] === 0) { head++; s++; }
         if (s === STRATA && head < 4) {
-            if (z === 2) head = STRATA * 2;
+            if (z === 2) head = capCode(st, ax, ay, i) !== 0 ? head : STRATA * 2;   // the sky above +2, unless the column is capped
             else {
                 locate(st, z + 1, ax, ay, i, 2);
                 for (let t = 0; t < STRATA && head < 4 && SOLID_B[rdM[rdO + t]] === 0; t++) head++;
@@ -1905,7 +1947,8 @@
         return s / STRATA;
     }
     /** Any solid stratum above the cell's standing space: in the cell above its solid base (after an air gap), or in any
-     *  cell above it up to +2 (the 25-strata column). A 5-bit solid mask per cell. */
+     *  cell above it up to +2 (the 25-strata column), or the column's ceiling cap above +2 (19B). A 5-bit solid mask per
+     *  cell. */
     function hasOpaqueOverburden(a, b, c, d, e) {
         if (!cellQuery(a, b, c, d, e)) return false;
         locate(qSt, qZ, qAx, qAy, qI, 1);
@@ -1916,7 +1959,7 @@
             locate(qSt, z, qAx, qAy, qI, 2);
             if (solidMaskOf(rdM, rdO) !== 0) return true;
         }
-        return false;
+        return capCode(qSt, qAx, qAy, qI) !== 0;
     }
     /**
      * For DEUS_Fluid (which keeps its 0..7 depth scale): the cell's open volume and faces as bits. capacity (bits 0..2) =
@@ -1936,7 +1979,7 @@
             if (SOLID_B[rdM[rdO + 4]] === 0) bits |= FLUID_PASS.DOWN;
         }
         if ((mask & 16) === 0) {
-            if (qZ === 2) bits |= FLUID_PASS.UP;
+            if (qZ === 2) { if (capCode(qSt, qAx, qAy, qI) === 0) bits |= FLUID_PASS.UP; }   // a capped column is closed above
             else {
                 locate(qSt, qZ + 1, qAx, qAy, qI, 2);
                 if (SOLID_B[rdM[rdO]] === 0) bits |= FLUID_PASS.UP;
@@ -1952,6 +1995,939 @@
         const top = surfaceHeightAt(ref), elevation = worldStrataElevationAt(ref);
         return { topStratum: top, elevation, heightState: heightStateAt(ref), fluidState: fluidStateAt(ref),
             solidFraction: solidFraction(ref), dominantMaterial: dominantMaterial(ref), overburden: hasOpaqueOverburden(ref) };
+    }
+
+    //-------------------------------------------------------------------------
+    // Natural cuts and caves (DEUS-TSK-FABLE-19B, generator 5). docs/systems/UF_Levels.md, section "Natural cuts and
+    // caves". A generator-5 area has its five levels generated together (generator 4's baselines, generateVolume), then
+    // natural features are carved into their strata in one deterministic pass: solid strata become air through the
+    // column, so a ravine or a cave is strata and nothing else. The plans below are the generator's working data,
+    // dropped after the carve; the ground baseline keeps a list of feature descriptors (naturalFeatures) for diagnostics
+    // and tests, never read as terrain. Everything is a pure function of the seed, the generator version, the area and
+    // the world's size and catalog climate (never of the live world state), so any area regenerates the same way.
+
+    const FEATURE_GEN = 5;
+    const E_TOP = 25;                  // elevations 0..24 (e = (z + 2) * 5 + s); 25 is the top of +2, where the model ends
+    const DEFAULT_CLIMATE = Object.freeze({ continentRim: 0.15, seaLevel: 0.2, scale: Object.freeze({ elevation: 64, rainfall: 48, temperature: 96, detail: 16 }) });
+    const deepFreeze = o => {
+        if (o && typeof o === "object" && !Object.isFrozen(o)) { Object.freeze(o); for (const k of Object.keys(o)) deepFreeze(o[k]); }
+        return o;
+    };
+    // Frozen per generator: a change is a new generator version (saves regenerate their baselines from these numbers).
+    const FEATURE_PARAMS = deepFreeze({
+        5: {
+            edgeMargin: 12, edgeTaper: 8,      // nothing carved within 12 cells of an area edge; full depth from 20 in
+            startRadius: 40, startTaper: 8,    // each area's flat centre (the founders' valley: flat to r 30, blended by r 36)
+            waterMargin: 2,                    // cells kept between a cut and surface water (ocean, lake, river, pond)
+            pocketMargin: 3, mouthMargin: 3,   // round underground founding squares and pools, and the cliff cave mouths
+            minBed: 1,                         // -2 S0 is never carved: below -2 there is only lava
+            cuts: {
+                spacing: 36, chance: 0.5,      // one candidate anchor per 36 x 36 lattice cell
+                // Depth below the anchor's rock top (ft) and the lowest first-air elevation the class may carve to: the
+                // valley floor stands on the ground's S0 (first air 11), only 1 ft above -1, so shallow and medium cuts
+                // keep -1's lower strata (first air >= 7), deep ones stop on -1 S0 (6: the whole -1 band exposed) and
+                // only the rare z2 class reaches -2 (bed 1..3; -2 S0 stays).
+                classes: [
+                    { key: "shallow", p: 0.60, depth: [1, 4], floor: 7 },    // partial-height relief
+                    { key: "medium", p: 0.25, depth: [5, 8], floor: 7 },     // about one macro-Z transition (from higher ground)
+                    { key: "deep", p: 0.12, depth: [9, 13], floor: 6 },      // exposes -1
+                    { key: "z2", p: 0.03, bed: [1, 3], floor: 1 }            // reaches -2
+                ],
+                // Geological tendencies by biome family (weights; not exclusive).
+                families: {
+                    TEMP: { ravine: 4, karst_sinkhole: 3, stream_cut: 3, limestone_cleft: 2, arroyo: 0.5, fissure: 0.3 },
+                    WET: { drainage_cut: 4, peat_hollow: 3, wet_sinkhole: 2, water_channel: 3, ravine: 0.5 },
+                    ARID: { arroyo: 4, canyon: 3, slot_chasm: 2, terrace_steps: 3, ravine: 0.5 },
+                    HIGH: { fault_chasm: 3, granite_cleft: 3, rock_cut: 3, scree_terrace: 3, ravine: 0.5 },
+                    VOLC: { fissure: 4, tube_collapse: 3, caldera_fracture: 2, basalt_steps: 3, slot_chasm: 0.5 }
+                },
+                // Shapes: form line / round / chain / arc; half-widths and radii in cells; profile = the cross-section
+                // (vertical walls with a 1 ft lip, U, flat bed with banks, steep, stepped ledges, funnel, bowl, throat);
+                // deep: the type may take the deep and z2 classes.
+                types: {
+                    ravine: { form: "line", len: [24, 56], half: [1.6, 3.2], profile: "u", bend: 0.9, deep: true },
+                    stream_cut: { form: "line", len: [30, 70], half: [1.2, 2.2], profile: "flat", bend: 1.2, deep: false },
+                    limestone_cleft: { form: "line", len: [12, 28], half: [0.7, 1.2], profile: "vertical", bend: 0.5, deep: true },
+                    karst_sinkhole: { form: "round", r: [2.5, 5.5], profile: "funnel", deep: true },
+                    drainage_cut: { form: "line", len: [30, 70], half: [1.8, 3.4], profile: "flat", bend: 1.0, deep: false },
+                    water_channel: { form: "line", len: [24, 60], half: [1.0, 2.0], profile: "u", bend: 1.3, deep: false },
+                    peat_hollow: { form: "round", r: [3, 7], profile: "bowl", deep: false },
+                    wet_sinkhole: { form: "round", r: [2, 4], profile: "throat", deep: true },
+                    arroyo: { form: "line", len: [30, 80], half: [2.0, 4.0], profile: "flat", bend: 1.1, deep: false },
+                    canyon: { form: "line", len: [30, 70], half: [3.0, 6.0], profile: "stepped", bend: 0.8, deep: true },
+                    slot_chasm: { form: "line", len: [16, 40], half: [0.7, 1.1], profile: "vertical", bend: 0.9, deep: true },
+                    terrace_steps: { form: "line", len: [20, 44], half: [3.5, 6.5], profile: "stepped", bend: 0.4, deep: true },
+                    fault_chasm: { form: "line", len: [30, 70], half: [0.8, 1.6], profile: "vertical", bend: 0.25, deep: true },
+                    granite_cleft: { form: "line", len: [12, 30], half: [0.7, 1.2], profile: "vertical", bend: 0.4, deep: true },
+                    rock_cut: { form: "line", len: [16, 40], half: [1.5, 3.0], profile: "steep", bend: 0.5, deep: true },
+                    scree_terrace: { form: "line", len: [18, 40], half: [3.0, 5.5], profile: "stepped", bend: 0.5, deep: true },
+                    fissure: { form: "line", len: [24, 64], half: [0.7, 1.1], profile: "vertical", bend: 0.35, deep: true },
+                    tube_collapse: { form: "chain", pits: [3, 6], r: [1.3, 2.6], gap: [3, 6], profile: "throat", deep: true },
+                    caldera_fracture: { form: "arc", radius: [14, 26], span: [0.8, 1.8], half: [0.7, 1.4], profile: "vertical", deep: true },
+                    basalt_steps: { form: "line", len: [16, 36], half: [2.5, 5.0], profile: "stepped", bend: 0.6, deep: true }
+                }
+            },
+            caves: {
+                spacing: 64,                   // one candidate anchor per 64 x 64 lattice cell and level
+                // Per level: chance per candidate, floor = first air elevation of its chambers, node count, clearance of
+                // chambers and passages (ft), the host rock it needs. +2 caves sit in a massif: the summit's rock rising
+                // above the model, its +2 strata solid and its column capped (the ceiling cap).
+                levels: {
+                    "2": { chance: 0.3, floor: [21, 21], chamberFloor: [20, 21], nodes: [2, 4], chamberH: [4, 6], passageH: [4, 4], interior: 7, massifMargin: 3, capThickness: [3, 12] },
+                    "1": { chance: 0.35, floor: [15, 16], nodes: [2, 4], chamberH: [4, 5], passageH: [4, 4] },
+                    "0": { chance: 0.3, floor: [10, 11], nodes: [3, 5], chamberH: [5, 8], passageH: [4, 5] },
+                    "-1": { chance: 0.22, floor: [5, 6], nodes: [3, 6], chamberH: [5, 7], passageH: [4, 5] },
+                    "-2": { chance: 0.2, floor: [1, 2], nodes: [3, 6], chamberH: [5, 7], passageH: [4, 5] }
+                },
+                nodeGap: [7, 13], chamberR: [2.5, 5.5], passageHalf: [0.7, 1.3],
+                branchChance: 0.35, deadEnds: [0, 2], loopChance: 0.2,
+                multiZChance: 0.25,            // one chamber a level up or down, joined by a sloped passage
+                shaftChance: 0.4, shaftReach: 20,  // two networks on adjacent levels joined by a shaft
+                skylightChance: 0.25, skylightMax: 10,  // a shaft from a chamber up to the open surface through thin rock
+                mouthChance: 0.6, mouthReach: 28,       // a passage out to open ground at the network's floor height
+                roofMin: 1                     // strata of rock kept above a cave (the cap is the roof of a massif column)
+            }
+        }
+    });
+    const FAMILIES = Object.freeze(["TEMP", "WET", "ARID", "HIGH", "VOLC"]);
+
+    // The five baselines of a generator-5 area, generated together (the last VOLUME_KEEP areas are kept: a pure
+    // function of the key, so a dropped one regenerates identically).
+    const VOLUME_KEEP = 3;
+    const volumes = new Map();
+    function volumeOf(seed, gen, ax, ay, size) {
+        const W = World(), st = W && W.state;
+        const key = `${seed}:${gen}:${ax},${ay}:${size}:${st && st.areasX ? `${st.areasX}x${st.areasY}` : "1x1"}`;
+        let v = volumes.get(key);
+        if (v) return v;
+        const t0 = performance.now();
+        v = LEVELS.map(z => finishBaseline(levelArrays(seed, gen, z, ax, ay, size), z, gen, size));
+        const tBase = performance.now() - t0;
+        carveNaturalFeatures(seed, gen, ax, ay, size, v);
+        const ms = performance.now() - t0;
+        stats.generated += 5;
+        stats.genMs += ms;
+        stats.lastGenMs = ms;
+        stats.featureMs = ms - tBase;
+        volumes.set(key, v);
+        while (volumes.size > VOLUME_KEEP) volumes.delete(volumes.keys().next().value);
+        return v;
+    }
+
+    /**
+     * Carve the natural cuts and caves of an area into its five baselines' strata (bs[z + 2]), in place. Order: host
+     * rock and protections, cave networks (+2 massifs and their caps first), shafts and skylights, cuts, ramps where a
+     * carved slope meets the next level, removal of any natural solid no longer connected to bedrock. Keeps the feature
+     * descriptors on the ground baseline (bs[2].features) and the caps on +2's (bs[4].caps).
+     */
+    function carveNaturalFeatures(seed, gen, ax, ay, size, bs) {
+        const t0 = performance.now();
+        const P = FEATURE_PARAMS[gen] || FEATURE_PARAMS[FEATURE_GEN];
+        const n = size * size, mid = Math.floor(size / 2);
+        const M = bs.map(b => b.strata.m), CONN = bs.map(b => b.conn);
+        const S = bs[2].surface;                                   // the natural surface heights (0, 1, 2)
+        const W = World(), st = W && W.state;
+        const areasX = st && st.areasX ? st.areasX : 1, areasY = st && st.areasY ? st.areasY : 1;
+        const G = window.UF && UF.WorldGen, cat = catalog(), cl = (cat && cat.climate) || DEFAULT_CLIMATE;
+        const salt = hashString(`deus.levels.features.v${gen}`);
+        const rnd = (...p) => hash32(seed, salt, ax, ay, ...p) / 4294967296;
+        const rint = (range, ...p) => range[0] + Math.floor(rnd(...p) * (range[1] - range[0] + 1));
+        const rfl = (range, ...p) => range[0] + rnd(...p) * (range[1] - range[0]);
+        const out = { gen, area: { x: ax, y: ay }, cuts: [], caves: [], shafts: [], skylights: [], massifCells: 0, capCells: 0,
+            carvedStrata: 0, cutCells: 0, caveCells: 0, rampsAdded: 0, floatingRemoved: 0, ms: 0 };
+        bs[4].caps = new Map();
+
+        // The column as one elevation scale: stratum e of cell i.
+        const getE = (i, e) => M[(e / STRATA) | 0][i * STRATA + (e % STRATA)];
+        const setE = (i, e, v) => { M[(e / STRATA) | 0][i * STRATA + (e % STRATA)] = v; };
+        const solidE = (i, e) => SOLID_B[getE(i, e)] === 1;
+        const clearConn = (i, e0, e1) => {   // connectors of the levels whose strata e0..e1 changed
+            for (let li = (e0 / STRATA) | 0; li <= ((e1 / STRATA) | 0) && li < 5; li++) CONN[li][i >> 1] &= ~(15 << ((i & 1) << 2));
+        };
+        const top = new Uint8Array(n);      // first air above the highest solid stratum (the rock surface; 0 = none)
+        const topOf = i => { let e = E_TOP - 1; while (e >= 0 && !solidE(i, e)) e--; return e + 1; };
+        for (let i = 0; i < n; i++) top[i] = topOf(i);
+
+        // Protections. wt: 0..1 depth allowed (area edges and each area's flat centre fade in); lock bits; minTop: a cut
+        // stops above the roof of an underground founding square or pool.
+        const NO_CUT = 1, NO_CAVE = 2;
+        const wt = new Float32Array(n), lock = new Uint8Array(n), minTop = new Uint8Array(n);
+        for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+            const edge = Math.min(x, y, size - 1 - x, size - 1 - y);
+            const we = Math.min(1, Math.max(0, (edge - P.edgeMargin) / P.edgeTaper));
+            const ws = Math.min(1, Math.max(0, (Math.hypot(x - mid, y - mid) - P.startRadius) / P.startTaper));
+            wt[y * size + x] = Math.min(we, ws);
+        }
+        const inArea = (x, y) => x >= 0 && y >= 0 && x < size && y < size;
+        const lockDisc = (cx, cy, r, bits, mt) => {
+            for (let dy = -Math.ceil(r); dy <= Math.ceil(r); dy++) for (let dx = -Math.ceil(r); dx <= Math.ceil(r); dx++) {
+                if (dx * dx + dy * dy > r * r || !inArea(cx + dx, cy + dy)) continue;
+                const i = (cy + dy) * size + cx + dx;
+                lock[i] |= bits;
+                if (mt > minTop[i]) minTop[i] = mt;
+            }
+        };
+        for (const li of [0, 1]) {
+            const roofTop = (li - 2 + 3) * STRATA + 1;   // first air above the pocket's roof (the next level's S0)
+            for (const p of bs[li].pockets || []) {
+                lockDisc(p.x, p.y, (p.clearRadius || 3) + P.pocketMargin + 0.5, NO_CAVE, roofTop);
+                if (p.water) lockDisc(p.water.x, p.water.y, 2.5 + P.pocketMargin, NO_CAVE, roofTop);   // the 2 x 2 pool from (x, y)
+            }
+        }
+        for (const m of bs[2].cliffCaves || []) for (const c of m.tunnel) lockDisc(c.x, c.y, P.mouthMargin + 0.5, NO_CUT | NO_CAVE, 0);
+        for (const m of bs[1].cliffCaves || []) {
+            lockDisc(m.terminus.x, m.terminus.y, P.mouthMargin + 1.5, NO_CUT | NO_CAVE, 0);
+            for (const ci of m.corridor || []) lockDisc(ci % size, (ci / size) | 0, P.mouthMargin + 0.5, NO_CUT | NO_CAVE, 0);
+        }
+        // Surface water (pure: the water model of this seed and world size), asked only for cells a feature reaches. Water
+        // is painted on the valley floor only (S = 0), so nearWater looks for wet valley cells round any cell.
+        const pseudo = { seed, size, areasX, areasY, startArea: { x: Math.floor(areasX / 2), y: Math.floor(areasY / 2) } };
+        const wm = G && cat && cat.climate && typeof G.waterModel === "function" ? G.waterModel(pseudo) : null;
+        const wetMemo = new Int8Array(n).fill(-1);
+        const isWet = i => {
+            if (!wm) return false;
+            if (wetMemo[i] < 0) wetMemo[i] = wm.isWater(ax * size + i % size, ay * size + ((i / size) | 0)) ? 1 : 0;
+            return wetMemo[i] === 1;
+        };
+        const nearWater = i => {
+            const x = i % size, y = (i / size) | 0, r = P.waterMargin;
+            for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+                if (!inArea(x + dx, y + dy)) continue;
+                const j = (y + dy) * size + x + dx;
+                if (S[j] === 0 && isWet(j)) return true;      // water is painted on the valley floor only (S = 0)
+            }
+            return false;
+        };
+        // Biome family of a cell from the climate fields (blended toward the start's climate, as the biome map is).
+        const dd = { seed, width: areasX * size, height: areasY * size,
+            startX: pseudo.startArea.x * size + Math.floor(size / 2), startY: pseudo.startArea.y * size + Math.floor(size / 2) };
+        const familyAt = (x, y) => {
+            if (!G || typeof G.fieldsFor !== "function" || !cat || !cat.climate) return "TEMP";
+            const f = G.fieldsFor(seed, dd, cl, ax * size + x, ay * size + y), s = S[y * size + x];
+            if (f.v > 0.62) return "VOLC";
+            if (s === 2 || f.e > (cl.mountainLevel || 0.74) - 0.08) return "HIGH";
+            if (f.r > 0.58 && f.d < 0.45) return "WET";
+            if (f.r < 0.28 || (f.t > 0.62 && f.r < 0.36)) return "ARID";
+            return "TEMP";
+        };
+        const touched = new Uint8Array(n);          // 1: cut, 2: cave, 4: shaft or skylight, 8: massif
+        const ownerCut = new Int32Array(n).fill(-1);
+
+        // A thick polyline: pts = [{ x, y, w, ...}] every half cell. fn(i, d, p) for every cell whose centre lies within
+        // p.w + extra of some point p: the point whose edge (d - w) is nearest.
+        function stroke(pts, extra, fn) {
+            let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity, wmax = 0;
+            for (const p of pts) { x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y); x1 = Math.max(x1, p.x); y1 = Math.max(y1, p.y); wmax = Math.max(wmax, p.w); }
+            const r = wmax + extra;
+            const bx0 = Math.max(0, Math.floor(x0 - r)), by0 = Math.max(0, Math.floor(y0 - r));
+            const bx1 = Math.min(size - 1, Math.ceil(x1 + r)), by1 = Math.min(size - 1, Math.ceil(y1 + r));
+            if (bx0 > bx1 || by0 > by1) return;
+            const bw = bx1 - bx0 + 1, bh = by1 - by0 + 1;
+            const best = new Float32Array(bw * bh).fill(1e9), dist = new Float32Array(bw * bh), which = new Int32Array(bw * bh).fill(-1);
+            for (let k = 0; k < pts.length; k++) {
+                const p = pts[k], rr = p.w + extra;
+                for (let y = Math.max(by0, Math.floor(p.y - rr)); y <= Math.min(by1, Math.ceil(p.y + rr)); y++) {
+                    for (let x = Math.max(bx0, Math.floor(p.x - rr)); x <= Math.min(bx1, Math.ceil(p.x + rr)); x++) {
+                        const dx = x + 0.5 - p.x, dy = y + 0.5 - p.y, d = Math.sqrt(dx * dx + dy * dy);
+                        if (d > rr) continue;
+                        const j = (y - by0) * bw + (x - bx0);
+                        if (d - p.w < best[j]) { best[j] = d - p.w; dist[j] = d; which[j] = k; }
+                    }
+                }
+            }
+            for (let j = 0; j < bw * bh; j++) if (which[j] >= 0) fn((by0 + ((j / bw) | 0)) * size + bx0 + (j % bw), dist[j], pts[which[j]]);
+        }
+
+        //---------------------------------------------------------------- cave networks
+        const CV = P.caves;
+        // Distance (cells) from each summit cell (S = 2) to the nearest cell that isn't one: +2 caves need a broad summit.
+        const interior = new Uint8Array(n);
+        {
+            const q = new Int32Array(n);
+            let qh = 0, qt = 0;
+            for (let i = 0; i < n; i++) { if (S[i] !== 2) { interior[i] = 0; q[qt++] = i; } else interior[i] = 255; }
+            while (qh < qt) {
+                const i = q[qh++], x = i % size, y = (i / size) | 0, d = interior[i] + 1;
+                if (x > 0 && interior[i - 1] > d) { interior[i - 1] = d; q[qt++] = i - 1; }
+                if (x < size - 1 && interior[i + 1] > d) { interior[i + 1] = d; q[qt++] = i + 1; }
+                if (y > 0 && interior[i - size] > d) { interior[i - size] = d; q[qt++] = i - size; }
+                if (y < size - 1 && interior[i + size] > d) { interior[i + size] = d; q[qt++] = i + size; }
+            }
+        }
+        // Host rock for a chamber of level z at cell (x, y) with first-air floor F and h ft of clearance.
+        const hostOk = (z, x, y, F, h) => {
+            if (!inArea(x, y)) return false;
+            const i = y * size + x;
+            if (wt[i] < 1 || (lock[i] & NO_CAVE)) return false;
+            if (z === 2) return S[i] === 2 && interior[i] >= 5;   // (the network's first chamber: levels["2"].interior)
+            if (z === 1 && S[i] !== 2) return false;
+            if (z === 0 && S[i] < 1) return false;
+            return solidE(i, F - 1) && solidE(i, F) && top[i] >= F + h + CV.roofMin;
+        };
+        const networks = [];
+        const lat = Math.max(1, Math.floor(size / CV.spacing));
+        out.placement = {};
+        for (const z of [2, 1, 0, -1, -2]) {
+            const LV = CV.levels[String(z)], pl = out.placement[z] = { rolled: 0, hosted: 0, planned: 0 };
+            for (let ly = 0; ly < lat; ly++) for (let lx = 0; lx < lat; lx++) {
+                const k = (z + 2) * 4096 + ly * lat + lx;
+                if (rnd(101, k) >= LV.chance) continue;
+                pl.rolled++;
+                // A few seeded tries inside the lattice cell for host rock (the first that fits).
+                const F0 = rint(LV.floor, 104, k), hP = rint(LV.passageH, 105, k);
+                let x = -1, y = -1;
+                for (let t = 0; t < 8 && x < 0; t++) {
+                    const tx = Math.floor((lx + 0.1 + 0.8 * rnd(102, k, t)) * CV.spacing), ty = Math.floor((ly + 0.1 + 0.8 * rnd(103, k, t)) * CV.spacing);
+                    if (hostOk(z, tx, ty, F0, z === 2 ? 0 : hP) && (z !== 2 || interior[ty * size + tx] >= LV.interior)) { x = tx; y = ty; }
+                }
+                if (x < 0) continue;
+                pl.hosted++;
+                const net = planNetwork(z, k, x, y, F0, hP, LV);
+                if (net) { networks.push(net); pl.planned++; }
+            }
+        }
+        function planNetwork(z, k, x0, y0, F0, hP, LV) {
+            const net = { id: networks.length, z, F0, hP, nodes: [], edges: [], mouth: null, skylight: null, multiZ: false, joins: [] };
+            const chamberFloor = i => z === 2 ? rint(LV.chamberFloor, 110, k, i) : F0;
+            const addNode = (x, y, F, stub) => {
+                const node = { x, y, F, stub: !!stub, rx: stub ? 1.1 : rfl(CV.chamberR, 111, k, net.nodes.length), ry: stub ? 1.1 : rfl(CV.chamberR, 112, k, net.nodes.length),
+                    rot: rnd(113, k, net.nodes.length) * Math.PI, h: stub ? hP : rint(LV.chamberH, 114, k, net.nodes.length) };
+                net.nodes.push(node);
+                return node;
+            };
+            const ok = (x, y, F, h) => hostOk(z, x, y, F, z === 2 ? 0 : h) && !net.nodes.some(nd => Math.hypot(nd.x - x, nd.y - y) < 6);
+            addNode(x0, y0, chamberFloor(0));
+            let dir = rnd(115, k) * Math.PI * 2;
+            const count = rint(LV.nodes, 116, k);
+            for (let a = 1; a < count; a++) {
+                const parent = net.nodes.length > 1 && rnd(117, k, a) < CV.branchChance ? net.nodes[Math.floor(rnd(118, k, a) * net.nodes.length)] : net.nodes[net.nodes.length - 1];
+                for (let t = 0; t < 8; t++) {
+                    const th = dir + (rnd(119, k, a, t) - 0.5) * 1.8, d = rfl(CV.nodeGap, 120, k, a, t);
+                    const x = Math.round(parent.x + Math.cos(th) * d), y = Math.round(parent.y + Math.sin(th) * d), F = chamberFloor(a);
+                    if (!ok(x, y, F, rint(LV.chamberH, 114, k, net.nodes.length))) continue;
+                    dir = th;
+                    net.edges.push({ a: parent, b: addNode(x, y, F), kind: "passage" });
+                    break;
+                }
+            }
+            if (net.nodes.length < 2) return null;
+            // Dead ends: short passages that end in a small alcove.
+            const dead = rint(CV.deadEnds, 121, k);
+            for (let a = 0; a < dead; a++) {
+                const from = net.nodes[Math.floor(rnd(122, k, a) * net.nodes.length)];
+                const th = rnd(123, k, a) * Math.PI * 2, d = 4 + rnd(124, k, a) * 5;
+                const x = Math.round(from.x + Math.cos(th) * d), y = Math.round(from.y + Math.sin(th) * d);
+                if (!hostOk(z, x, y, from.F, z === 2 ? 0 : hP)) continue;
+                net.edges.push({ a: from, b: addNode(x, y, from.F, true), kind: "deadEnd" });
+            }
+            // A loop between two chambers close to each other that aren't joined yet.
+            if (rnd(125, k) < CV.loopChance) {
+                const ch = net.nodes.filter(nd => !nd.stub);
+                loop: for (let i = 0; i < ch.length; i++) for (let j = i + 2; j < ch.length; j++) {
+                    if (Math.hypot(ch[i].x - ch[j].x, ch[i].y - ch[j].y) > 18) continue;
+                    if (net.edges.some(e => (e.a === ch[i] && e.b === ch[j]) || (e.a === ch[j] && e.b === ch[i]))) continue;
+                    net.edges.push({ a: ch[i], b: ch[j], kind: "loop" });
+                    break loop;
+                }
+            }
+            // Multi-Z: the last chamber drops (or rises) one level, the passage to it sloping (1 ft per cell or less).
+            if (z < 2 && z > -2 && rnd(126, k) < CV.multiZChance) {
+                const leaf = net.nodes.filter(nd => !nd.stub).pop(), dz = z > -1 ? -1 : (rnd(127, k) < 0.5 ? -1 : 1);
+                const F = leaf.F + dz * STRATA, e = net.edges.find(ed => ed.b === leaf);
+                if (e && Math.hypot(e.a.x - leaf.x, e.a.y - leaf.y) >= STRATA + 2 && F >= 1 && hostOk(z + dz, leaf.x, leaf.y, F, leaf.h)) {
+                    leaf.F = F;
+                    net.multiZ = true;
+                }
+            }
+            // A mouth: a passage out to open ground at the network's floor height (found when carving: +2's needs the massif).
+            net.wantsMouth = z >= 0 && rnd(128, k) < CV.mouthChance;
+            if (z < 2 && rnd(129, k) < CV.skylightChance) net.skylight = { node: net.nodes[Math.floor(rnd(130, k) * net.nodes.length)] };
+            return net;
+        }
+        // Shafts: a chamber of one network over a chamber of a network one level down, joined through the rock between.
+        for (const A of networks) for (const B of networks) {
+            if (B.z !== A.z - 1 || A.joins.length || B.joins.length || rnd(131, A.id, B.id) >= CV.shaftChance) continue;
+            let pick = null;
+            for (const a of A.nodes) if (!a.stub) for (const b of B.nodes) if (!b.stub) {
+                const d = Math.hypot(a.x - b.x, a.y - b.y);
+                if (d <= CV.shaftReach && (!pick || d < pick.d)) pick = { a, b, d };
+            }
+            if (!pick) continue;
+            const LB = CV.levels[String(B.z)];
+            if (!hostOk(B.z, pick.a.x, pick.a.y, pick.b.F, pick.b.h)) continue;
+            // B reaches under A's chamber with a passage to a small chamber there; the shaft rises from it.
+            const under = { x: pick.a.x, y: pick.a.y, F: pick.b.F, stub: false, rx: 2, ry: 2, rot: 0, h: rint(LB.chamberH, 132, A.id, B.id) };
+            B.nodes.push(under);
+            if (pick.d >= 1) B.edges.push({ a: pick.b, b: under, kind: "passage" });
+            const shaft = { x: pick.a.x, y: pick.a.y, r: 1.2 + rnd(133, A.id, B.id) * 0.6, from: under.F, to: pick.a.F, upper: A.id, lower: B.id };
+            A.joins.push(B.id); B.joins.push(A.id);
+            A.multiZ = B.multiZ = true;
+            out.shafts.push(shaft);
+        }
+
+        // +2 massifs: the summit rock round a +2 network rises above the model. Its +2 strata are solid and its column
+        // is capped (the cap: rock above +2, the network's roof).
+        const LV2 = CV.levels["2"];
+        const inNetwork = (net, fn, extra) => {
+            for (const nd of net.nodes) ellipse(nd, extra, fn);
+            for (const e of net.edges) stroke(passagePoints(net, e), extra, (i, d, p) => fn(i, p.F));
+        };
+        function ellipse(nd, extra, fn) {
+            const R = Math.max(nd.rx, nd.ry) * 1.2 + extra + 1, c = Math.cos(nd.rot), s = Math.sin(nd.rot);
+            for (let y = Math.floor(nd.y - R); y <= Math.ceil(nd.y + R); y++) for (let x = Math.floor(nd.x - R); x <= Math.ceil(nd.x + R); x++) {
+                if (!inArea(x, y)) continue;
+                const dx = x - nd.x, dy = y - nd.y, u = (dx * c + dy * s) / (nd.rx + extra), v = (-dx * s + dy * c) / (nd.ry + extra);
+                const th = Math.atan2(dy, dx), rim = 0.85 + 0.3 * valueNoise(seed, salt + 7, Math.cos(th) * 2 + nd.x, Math.sin(th) * 2 + nd.y, 1);
+                if (u * u + v * v <= rim * rim) fn(y * size + x, nd.F);
+            }
+        }
+        function passagePoints(net, e) {
+            const L = Math.hypot(e.b.x - e.a.x, e.b.y - e.a.y), steps = Math.max(2, Math.ceil(L * 2));
+            const bend = (rnd(140, net.id, e.a.x, e.b.x, e.a.y) - 0.5) * Math.min(6, L * 0.3), nx = -(e.b.y - e.a.y) / (L || 1), ny = (e.b.x - e.a.x) / (L || 1);
+            const pts = [];
+            for (let s = 0; s <= steps; s++) {
+                const t = s / steps, off = Math.sin(t * Math.PI) * bend;
+                pts.push({ x: e.a.x + 0.5 + (e.b.x - e.a.x) * t + nx * off, y: e.a.y + 0.5 + (e.b.y - e.a.y) * t + ny * off,
+                    w: rfl(CV.passageHalf, 141, net.id, e.a.x, e.b.y), F: Math.round(e.a.F + (e.b.F - e.a.F) * t), h: e.kind === "deadEnd" ? e.b.h : net.hP });
+            }
+            return pts;
+        }
+        for (const net of networks) {
+            if (net.z !== 2) continue;
+            net.massif = [];
+            const mark = new Set();
+            inNetwork(net, i => mark.add(i), LV2.massifMargin);
+            for (const i of [...mark].sort((p, q) => p - q)) {
+                if (S[i] !== 2 || (lock[i] & NO_CAVE) || wt[i] < 1 || touched[i] & 8) continue;
+                for (let e = 21; e < E_TOP; e++) setE(i, e, M_STONE);
+                clearConn(i, 20, 24);
+                top[i] = E_TOP;
+                touched[i] |= 8;
+                bs[4].caps.set(i, M_STONE | (rint(LV2.capThickness, 150, i) << 8));
+                net.massif.push(i);
+            }
+            out.massifCells += net.massif.length;
+        }
+        out.capCells = bs[4].caps.size;
+
+        // Carving a void: strata F .. C - 1 of cell i become air, where C = min(F + h, the rock's top - roofMin) (a
+        // capped column may be carved to the top of +2: the cap is its roof). The floor stratum F - 1 must be solid; the
+        // carve stops a stratum short of an existing void above (a 1 ft slab between them), and skips a cell whose void
+        // would hold less than 3 ft, a fluid, or a locked cell.
+        const caveOwner = new Int32Array(n).fill(-1);
+        const carveVoid = (i, F, h, id) => {
+            if ((lock[i] & NO_CAVE) || wt[i] < 1 || F < 1 || F >= E_TOP || !solidE(i, F - 1)) return 0;
+            const capped = bs[4].caps.has(i);
+            let C = Math.min(F + h, capped ? E_TOP : top[i] - CV.roofMin, E_TOP);
+            for (let e = F; e < C; e++) {
+                const v = getE(i, e);
+                if (FLUID_B[v] === 1) return 0;
+                if (SOLID_B[v] !== 1) { C = e - 1; break; }
+            }
+            if (C - F < 3) return 0;
+            for (let e = F; e < C; e++) setE(i, e, M_AIR);
+            clearConn(i, F, C - 1);
+            touched[i] |= 2;
+            caveOwner[i] = id;
+            return C - F;
+        };
+        // The open cell nearest a chamber whose ground is at the network's floor: a valley cell for the ground's caves, a
+        // +1 terrace for +1's, the open summit outside the massif for +2's.
+        function findMouth(net) {
+            let best = null;
+            const R = CV.mouthReach;
+            for (const nd of net.nodes) {
+                if (nd.stub) continue;
+                for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) {
+                    const x = nd.x + dx, y = nd.y + dy, dist = Math.hypot(dx, dy);
+                    if (dist > R || !inArea(x, y) || (best && dist >= best.dist)) continue;
+                    const i = y * size + x;
+                    if (wt[i] < 1 || (lock[i] & (NO_CAVE | NO_CUT))) continue;
+                    const want = net.z === 2 ? S[i] === 2 && !(touched[i] & 8) && top[i] === 21
+                        : S[i] === net.z && top[i] >= nd.F && top[i] <= nd.F + 1;
+                    if (!want || nearWater(i)) continue;
+                    best = { node: nd, x, y, dist };
+                }
+            }
+            return best;
+        }
+        for (const net of networks) {
+            const d = { id: net.id, kind: "cave", level: net.z, floor: net.F0, chambers: 0, passages: 0, deadEnds: 0, loops: 0, multiZ: false,
+                nodes: net.nodes.map(nd => ({ x: nd.x, y: nd.y, floor: nd.F, stub: nd.stub })), cells: 0, maxClearance: 0, massifCells: (net.massif || []).length,
+                mouth: null, skylight: null, joins: net.joins.slice(), levels: [] };
+            const carve = (i, F, h) => { const c = carveVoid(i, F, h, net.id); if (c) { d.cells++; if (c > d.maxClearance) d.maxClearance = c; } };
+            for (const nd of net.nodes) {
+                if (!nd.stub) d.chambers++;
+                ellipse(nd, 0, i => {
+                    // Uneven chamber floors: raised patches a stratum up (partial heights inside the cave).
+                    const F = nd.F + (valueNoise(seed, salt + 9, i % size, (i / size) | 0, 3) > 0.72 && !nd.stub ? 1 : 0);
+                    carve(i, F, nd.h - (F - nd.F));
+                });
+            }
+            for (const e of net.edges) {
+                if (e.kind === "deadEnd") d.deadEnds++; else if (e.kind === "loop") d.loops++; else d.passages++;
+                stroke(passagePoints(net, e), 0, (i, dist, p) => carve(i, p.F, p.h));
+            }
+            if (net.wantsMouth) net.mouth = findMouth(net);
+            if (net.mouth) {
+                const nd = net.mouth.node, exitTop = net.z === 2 ? 21 : top[net.mouth.y * size + net.mouth.x];
+                const e = { a: nd, b: { x: net.mouth.x, y: net.mouth.y, F: exitTop, h: net.hP }, kind: "mouth" };
+                const before = d.cells;
+                stroke(passagePoints(net, e), 0, (i, dist, p) => {
+                    if (touched[i] & 8 || (i !== net.mouth.y * size + net.mouth.x && top[i] > p.F)) carve(i, p.F, p.h);
+                });
+                if (d.cells > before) d.mouth = { x: net.mouth.x, y: net.mouth.y, floor: exitTop };
+            }
+            net.desc = d;
+            out.caves.push(d);
+        }
+        // Shafts between networks, then skylights up to the open surface through thin rock.
+        const disc = (cx, cy, r, fn) => {
+            for (let y = Math.floor(cy - r - 1); y <= Math.ceil(cy + r + 1); y++) for (let x = Math.floor(cx - r - 1); x <= Math.ceil(cx + r + 1); x++) {
+                if (inArea(x, y) && (x + 0.5 - cx - 0.5) ** 2 + (y + 0.5 - cy - 0.5) ** 2 <= r * r) fn(y * size + x);
+            }
+        };
+        for (const sh of out.shafts) {
+            let cells = 0;
+            disc(sh.x, sh.y, sh.r, i => {
+                if ((lock[i] & NO_CAVE) || wt[i] < 1) return;
+                const hi = Math.min(sh.to, top[i] - CV.roofMin);   // up to and through the upper chamber's floor stratum
+                let changed = false;
+                for (let e = sh.from; e < hi; e++) if (SOLID_B[getE(i, e)] === 1 || FLUID_B[getE(i, e)] === 1) { setE(i, e, M_AIR); changed = true; }
+                if (changed) { clearConn(i, sh.from, hi - 1); touched[i] |= 4; cells++; }
+            });
+            sh.cells = cells;
+        }
+        for (const net of networks) {
+            if (!net.skylight) continue;
+            const nd = net.skylight.node, r = 1.2;
+            let ok = true, cells = 0;
+            disc(nd.x, nd.y, r, i => {
+                if ((lock[i] & (NO_CUT | NO_CAVE)) || wt[i] < 1 || minTop[i] > nd.F || top[i] - (nd.F + nd.h) > CV.skylightMax || nearWater(i)) ok = false;
+            });
+            if (!ok) continue;
+            disc(nd.x, nd.y, r, i => {
+                if (!solidE(i, nd.F - 1)) return;
+                let changed = false;
+                for (let e = nd.F; e < top[i]; e++) if (getE(i, e) !== M_AIR) { if (FLUID_B[getE(i, e)] === 1) return; setE(i, e, M_AIR); changed = true; }
+                if (changed) { clearConn(i, nd.F, top[i] - 1); top[i] = topOf(i); touched[i] |= 4; cells++; }
+            });
+            if (cells) { net.desc.skylight = { x: nd.x, y: nd.y, floor: nd.F, cells }; out.skylights.push({ network: net.id, x: nd.x, y: nd.y, floor: nd.F, cells }); }
+        }
+
+        //---------------------------------------------------------------- cuts
+        const CU = P.cuts;
+        const cutTop = new Uint8Array(n).fill(255);
+        // The first-air elevation a cut's cross-section gives a cell of natural top T: g = distance / half-width (0 on
+        // the centre line, 1 at the edge), b = the bed there. T: not cut.
+        const profileF = (profile, g, T, b, w, step) => {
+            if (b >= T) return T;
+            const span = T - b, lip = 1 + 1 / Math.max(1, w);
+            switch (profile) {
+                case "vertical": return g <= 1 ? b : g <= lip ? T - 1 : T;
+                case "u": return g <= 1 ? b + Math.round(span * g * g) : T;
+                case "flat": return g <= 0.6 ? b : g <= 1 ? b + Math.round(span * (g - 0.6) / 0.4) : T;
+                case "steep": return g <= 0.8 ? b : g <= 1 ? b + Math.round(span * (g - 0.8) / 0.2) : g <= lip ? T - 1 : T;
+                case "stepped": return g <= 1 ? Math.min(T, b + step * Math.floor(g * Math.max(1, Math.ceil(span / step)))) : T;
+                case "funnel": return g <= 1 ? b + Math.round(span * Math.pow(g, 1.6)) : g <= lip ? T - 1 : T;
+                case "bowl": return g <= 1 ? T - Math.round(span * (1 - g * g)) : T;
+                case "throat": return g <= 0.45 ? b : g <= 1 ? b + Math.round(span * Math.pow((g - 0.45) / 0.55, 1.3)) : g <= lip ? T - 1 : T;
+                default: return T;
+            }
+        };
+        const latC = Math.max(1, Math.floor(size / CU.spacing));
+        for (let ly = 0; ly < latC; ly++) for (let lx = 0; lx < latC; lx++) {
+            const k = ly * latC + lx;
+            if (rnd(201, k) >= CU.chance) continue;
+            const x = Math.floor((lx + 0.15 + 0.7 * rnd(202, k)) * CU.spacing), y = Math.floor((ly + 0.15 + 0.7 * rnd(203, k)) * CU.spacing);
+            if (!inArea(x, y)) continue;
+            const i0 = y * size + x;
+            if (wt[i0] < 1 || (lock[i0] & NO_CUT) || nearWater(i0) || (touched[i0] & 8)) continue;
+            let cls = CU.classes[CU.classes.length - 1], acc = 0;
+            const cr = rnd(204, k);
+            for (const c of CU.classes) { acc += c.p; if (cr < acc) { cls = c; break; } }
+            const family = familyAt(x, y);
+            const choices = Object.keys(CU.families[family]).filter(t => CU.types[t].deep || cls.key === "shallow" || cls.key === "medium");
+            let wsum = 0;
+            for (const t of choices) wsum += CU.families[family][t];
+            let pick = rnd(205, k) * wsum, type = choices[choices.length - 1];
+            for (const t of choices) { pick -= CU.families[family][t]; if (pick < 0) { type = t; break; } }
+            const spec = CU.types[type], Hs = top[i0];
+            const floorMin = Math.max(P.minBed, cls.floor);
+            const bed0 = cls.bed ? rint(cls.bed, 206, k) : Math.max(floorMin, Hs - rint(cls.depth, 206, k));
+            if (bed0 >= Hs) continue;
+            const f = { id: out.cuts.length, kind: "cut", type, family, depthClass: cls.key, anchor: { x, y }, hostTop: Hs, bed: bed0, form: spec.form, profile: spec.profile,
+                cells: 0, minFloor: 99, maxDepth: 0, floorLevel: null };
+            const step = spec.profile === "stepped" ? 2 + Math.floor(rnd(207, k) * 2) : 1;
+            const put = (i, F, dist, fw) => {
+                if ((lock[i] & NO_CUT) || (touched[i] & 8) || wt[i] <= 0) return;
+                const T = top[i];
+                if (F >= T) return;
+                if (nearWater(i)) return;                           // whatever the cell's height: water beside a trench would pour in
+                let Fw = T - Math.round((T - F) * wt[i]);            // fades out toward area edges and flat centres
+                Fw = Math.max(Fw, minTop[i], floorMin);
+                if (Fw >= T || Fw >= cutTop[i]) return;
+                cutTop[i] = Fw;
+                ownerCut[i] = f.id;
+            };
+            const bedAt = (t, u) => {
+                const bn = Math.round((valueNoise(seed, salt + 13 + k, t + 4096, 0, 9) - 0.5) * 2.4);
+                return Math.max(floorMin, Math.round(Hs - (Hs - bed0) * (1 - 0.7 * u * u * u)) + bn);
+            };
+            if (spec.form === "line" || spec.form === "arc") {
+                const pts = [];
+                if (spec.form === "line") {
+                    const len = rfl(spec.len, 208, k), half = rfl(spec.half, 209, k), heading = rnd(210, k) * Math.PI * 2, stepL = 0.5, nHalf = Math.ceil(len / 2 / stepL);
+                    for (const dir of [-1, 1]) {
+                        let px = x + 0.5, py = y + 0.5;
+                        for (let s = 0; s <= nHalf; s++) {
+                            const t = dir * s * stepL;
+                            if (dir === 1 || s > 0) pts.push({ t, x: px, y: py });
+                            const th = heading + spec.bend * (valueNoise(seed, salt + 11 + k, t + 4096, 0, 14) - 0.5) * 2;
+                            px += dir * Math.cos(th) * stepL;
+                            py += dir * Math.sin(th) * stepL;
+                        }
+                    }
+                    pts.sort((p, q) => p.t - q.t);
+                    for (const p of pts) {
+                        const u = Math.min(1, Math.abs(p.t) / (len / 2));
+                        p.w = half * (0.75 + 0.5 * valueNoise(seed, salt + 12 + k, p.t + 4096, 0, 10)) * (0.35 + 0.65 * smooth(Math.min(1, (1 - u) / 0.2)));
+                        p.b = bedAt(p.t, u);
+                    }
+                    f.length = Math.round(len);
+                } else {
+                    const R = rfl(spec.radius, 208, k), span = rfl(spec.span, 209, k), half = rfl(spec.half, 210, k), c0 = rnd(211, k) * Math.PI * 2;
+                    const cx = x + 0.5 - Math.cos(c0 + span / 2) * R, cy = y + 0.5 - Math.sin(c0 + span / 2) * R, steps = Math.ceil(R * span * 2);
+                    for (let s = 0; s <= steps; s++) {
+                        const a = c0 + span * s / steps, t = (s / steps - 0.5) * R * span, u = Math.abs(s / steps - 0.5) * 2;
+                        pts.push({ t, x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R, w: half * (0.35 + 0.65 * smooth(Math.min(1, (1 - u) / 0.2))), b: bedAt(t, u) });
+                    }
+                    f.length = Math.round(R * span);
+                }
+                stroke(pts, 1.5, (i, d, p) => put(i, profileF(spec.profile, d / Math.max(0.5, p.w), top[i], p.b, p.w, step), d, p.w));
+            } else {
+                const pits = [];
+                if (spec.form === "round") pits.push({ x: x + 0.5, y: y + 0.5, r: rfl(spec.r, 208, k), b: bed0 });
+                else {
+                    const count = rint(spec.pits, 208, k), heading = rnd(209, k) * Math.PI * 2;
+                    let px = x + 0.5, py = y + 0.5;
+                    for (let a = 0; a < count; a++) {
+                        pits.push({ x: px, y: py, r: rfl(spec.r, 210, k, a), b: Math.max(floorMin, bed0 + (a === Math.floor(count / 2) ? 0 : rint([0, 2], 211, k, a))) });
+                        const g = rfl(spec.gap, 212, k, a) + 2, th = heading + (rnd(213, k, a) - 0.5) * 0.8;
+                        px += Math.cos(th) * g;
+                        py += Math.sin(th) * g;
+                    }
+                    // The collapsed tube's shallow trough between the pits.
+                    const tpts = [];
+                    for (let a = 0; a + 1 < pits.length; a++) for (let s = 0; s <= 8; s++) {
+                        const t = s / 8;
+                        tpts.push({ x: pits[a].x + (pits[a + 1].x - pits[a].x) * t, y: pits[a].y + (pits[a + 1].y - pits[a].y) * t, w: 0.9, b: Math.max(floorMin, Hs - 2) });
+                    }
+                    if (tpts.length) stroke(tpts, 0.5, (i, d, p) => put(i, profileF("u", d / p.w, top[i], Math.max(floorMin, top[i] - 2), p.w, 1), d, p.w));
+                }
+                for (const pit of pits) {
+                    const R = pit.r * 1.25 + 2;
+                    for (let yy = Math.floor(pit.y - R); yy <= Math.ceil(pit.y + R); yy++) for (let xx = Math.floor(pit.x - R); xx <= Math.ceil(pit.x + R); xx++) {
+                        if (!inArea(xx, yy)) continue;
+                        const dx = xx + 0.5 - pit.x, dy = yy + 0.5 - pit.y, d = Math.hypot(dx, dy), th = Math.atan2(dy, dx);
+                        const rr = pit.r * (0.78 + 0.44 * valueNoise(seed, salt + 14 + k, Math.cos(th) * 2.2 + 8, Math.sin(th) * 2.2 + 8, 1));
+                        const i = yy * size + xx;
+                        put(i, profileF(spec.profile, d / rr, top[i], pit.b, rr, 1), d, rr);
+                    }
+                }
+                f.pits = pits.length;
+            }
+            out.cuts.push(f);
+        }
+        // Carve: every stratum from the cut's floor to the rock's top becomes air (fluids included: none are left
+        // floating), and the connectors of the levels it reaches are dropped.
+        for (let i = 0; i < n; i++) {
+            const F = cutTop[i];
+            if (F === 255 || F >= top[i]) continue;
+            let fluid = false;
+            for (let e = F; e < top[i]; e++) if (FLUID_B[getE(i, e)] === 1) fluid = true;
+            if (fluid) continue;
+            for (let e = F; e < top[i]; e++) setE(i, e, M_AIR);
+            clearConn(i, F, top[i] - 1);
+            const f = out.cuts[ownerCut[i]];
+            const depth = top[i] - F;
+            out.carvedStrata += depth;
+            out.cutCells++;
+            if (f) {
+                f.cells++;
+                if (depth > f.maxDepth) f.maxDepth = depth;
+                if (F < f.minFloor) { f.minFloor = F; f.deepest = { x: i % size, y: (i / size) | 0 }; }
+            }
+            top[i] = topOf(i);
+            touched[i] |= 1;
+        }
+
+        //---------------------------------------------------------------- ramps where a carved slope steps 1 ft up onto the next level
+        const floorsOf = (i, list) => {
+            list.length = 0;
+            for (let e = 1; e < E_TOP; e++) if (!solidE(i, e) && solidE(i, e - 1)) list.push(e);
+            return list;
+        };
+        const fa = [], fb = [];
+        for (let i = 0; i < n; i++) {
+            if (!(touched[i] & 7)) continue;
+            const x = i % size, y = (i / size) | 0;
+            floorsOf(i, fa);
+            for (const f of fa) {
+                const zf = ((f / STRATA) | 0) - 2;
+                if (zf >= 2) continue;
+                let clear = 0;
+                for (let e = f; e < E_TOP && !solidE(i, e); e++) clear++;
+                if (clear < 3 || connOf(CONN[zf + 2], i) !== 0) continue;
+                let ramp = false;
+                for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) {
+                    if (!inArea(x + dx, y + dy)) continue;
+                    for (const g of floorsOf((y + dy) * size + x + dx, fb)) if (((g / STRATA) | 0) - 2 === zf + 1 && g - f === 1) ramp = true;
+                }
+                if (ramp) { CONN[zf + 2][i >> 1] |= RAMP << ((i & 1) << 2); out.rampsAdded++; }
+            }
+        }
+
+        //---------------------------------------------------------------- no floating natural mass
+        // Every solid stratum must reach bedrock (elevation 0) or the area's edge (the next area) through solid strata
+        // (up, down or sideways). Whatever the carve left unconnected is removed.
+        {
+            const N = n * E_TOP, sol = new Uint8Array(N), q = new Int32Array(N);
+            for (let e = 0; e < E_TOP; e++) for (let i = 0; i < n; i++) sol[e * n + i] = solidE(i, e) ? 1 : 0;
+            let qh = 0, qt = 0;
+            const push = v => { if (sol[v] === 1) { sol[v] = 2; q[qt++] = v; } };
+            for (let i = 0; i < n; i++) push(i);
+            for (let e = 0; e < E_TOP; e++) for (let k = 0; k < size; k++) {
+                push(e * n + k); push(e * n + (size - 1) * size + k); push(e * n + k * size); push(e * n + k * size + size - 1);
+            }
+            while (qh < qt) {
+                const v = q[qh++], e = (v / n) | 0, i = v - e * n, x = i % size;
+                if (e > 0) push(v - n);
+                if (e < E_TOP - 1) push(v + n);
+                if (x > 0) push(v - 1);
+                if (x < size - 1) push(v + 1);
+                if (i >= size) push(v - size);
+                if (i < n - size) push(v + size);
+            }
+            for (let v = 0; v < N; v++) {
+                if (sol[v] !== 1) continue;
+                const e = (v / n) | 0, i = v - e * n;
+                setE(i, e, M_AIR);
+                clearConn(i, e, e);
+                if (out.floatingRemoved++ < 8) (out.floatingAt = out.floatingAt || []).push({ x: i % size, y: (i / size) | 0, e, owner: touched[i] });
+            }
+        }
+
+        // Descriptors: the floor levels each cave reaches (from the strata).
+        for (const net of networks) {
+            const lv = new Set();
+            const f = [];
+            for (const nd of net.nodes) {
+                const i = nd.y * size + nd.x;
+                for (const e of floorsOf(i, f)) if (e >= nd.F - 1 && e <= nd.F + 1) lv.add(((e / STRATA) | 0) - 2);
+            }
+            net.desc.levels = [...lv].sort((p, q) => p - q);
+            net.desc.multiZ = net.desc.levels.length > 1 || net.joins.length > 0;
+        }
+        for (const f of out.cuts) {
+            if (f.minFloor === 99) { f.minFloor = null; f.floorLevel = null; continue; }
+            f.floorLevel = ((f.minFloor / STRATA) | 0) - 2;
+            f.hostLevel = ((f.hostTop - 1) / STRATA | 0) - 2;
+        }
+        out.caveCells = 0;
+        for (let i = 0; i < n; i++) if (touched[i] & 2) out.caveCells++;
+        out.ms = performance.now() - t0;
+        bs[2].features = out;
+        return out;
+    }
+
+    //-------------------------------------------------------------------------
+    // The ceiling cap (19B): rock above +2 over a column where the mountain rises beyond the model (a +2 massif). The
+    // model has no level above +2; a cap is the minimal record of the rock there: material, thickness (ft), HP. It is
+    // opaque (hasOpaqueOverburden, continuousAirHeight), carries a +2 floor's headroom, blocks fluids rising out of the
+    // top, and can be damaged and breached like a stratum (applyCapDamage). A generator-5 baseline keeps its caps in
+    // +2's baseline (caps: Map cell -> material | thickness << 8, at full HP); a changed cap is saved sparse in
+    // UF.World.state.levels["2"].caps["ax,ay"][cell] = 6 hex digits (material, thickness, HP; "000000" = breached).
+
+    const capState = { st: null, map: null };
+    function capDeltas(st) {
+        if (capState.st === st) return capState.map;
+        capState.st = st;
+        capState.map = new Map();
+        const L = st && st.levels && st.levels["2"], saved = L && L.caps;
+        if (!saved || typeof saved !== "object") return capState.map;
+        const n = st.size * st.size;
+        for (const ak in saved) {
+            const a = parseAreaKey(ak), cells = saved[ak];
+            if (!a || !cells || typeof cells !== "object") { console.error(`DEUS_Levels: saved caps of area "${ak}" could not be read`); continue; }
+            let map = null;
+            for (const k in cells) {
+                const i = Number(k), s = cells[k];
+                const code = typeof s === "string" && /^[0-9a-fA-F]{6}$/.test(s) ? parseInt(s.slice(0, 2), 16) | (parseInt(s.slice(2, 4), 16) << 8) | (parseInt(s.slice(4, 6), 16) << 16) : -1;
+                const ok = code === 0 || (code > 0 && SOLID_B[code & 0xff] === 1 && ((code >> 8) & 0xff) > 0 && ((code >> 16) & 0xff) > 0);
+                if (!Number.isInteger(i) || i < 0 || i >= n || !ok) { console.error(`DEUS_Levels: saved cap ${ak} cell ${k} ${JSON.stringify(s)} could not be read and was skipped`); continue; }
+                if (!map) { map = new Map(); capState.map.set(a.x + a.y * AREA_STRIDE, map); }
+                map.set(i, code);
+            }
+        }
+        return capState.map;
+    }
+    // A column's cap as one number (no allocation): 0 = none (open sky above +2), else material byte | thickness << 8 |
+    // HP (0..255) << 16.
+    function capCode(st, ax, ay, i) {
+        const cd = capDeltas(st).get(ax + ay * AREA_STRIDE);
+        if (cd !== undefined) { const v = cd.get(i); if (v !== undefined) return v; }
+        const b = baseOf(st, 2, ax, ay);
+        if (!b || !b.caps) return 0;
+        const c = b.caps.get(i);
+        return c === undefined ? 0 : c | (255 << 16);
+    }
+    function capInfo(code) {
+        if (!code) return null;
+        const mat = STRATA_MATERIALS[code & M_ID], thickness = (code >> 8) & 0xff, hp = (code >> 16) & 0xff;
+        return { material: mat.key, thickness, hp, maxHP: mat.maxHP * thickness, remainingHP: mat.maxHP * thickness * hp / 255,
+            opaque: mat.solid, support: mat.support, anchored: true };
+    }
+    // Store a column's cap (0: breached) and tell the world: +2's derived cell reads the cap (and +1's reads +2).
+    function writeCap(st, ax, ay, x, y, code, cause) {
+        const i = y * st.size + x, before = capCode(st, ax, ay, i);
+        if (before === code) return false;
+        const from = derivePacked(st, ax, ay, i, 2);
+        const b = baseOf(st, 2, ax, ay), base = b && b.caps && b.caps.has(i) ? b.caps.get(i) | (255 << 16) : 0;
+        const ai = ax + ay * AREA_STRIDE, key = areaKey(ax, ay), L = st.levels["2"];
+        let am = capDeltas(st).get(ai);
+        if (code === base) {
+            if (am) { am.delete(i); if (!am.size) capDeltas(st).delete(ai); }
+            if (L.caps && L.caps[key]) { delete L.caps[key][i]; if (!Object.keys(L.caps[key]).length) delete L.caps[key]; if (!Object.keys(L.caps).length) delete L.caps; }
+        } else {
+            if (!am) { am = new Map(); capDeltas(st).set(ai, am); }
+            am.set(i, code);
+            L.caps = L.caps || {};
+            const hx = v => (v & 0xff).toString(16).padStart(2, "0");
+            (L.caps[key] = L.caps[key] || {})[i] = hx(code) + hx(code >> 8) + hx(code >> 16);
+        }
+        refreshPacked(st, 2, ax, ay, i);
+        const to = derivePacked(st, ax, ay, i, 2);
+        const ref = { area: { x: ax, y: ay }, x, y, z: 2 };
+        emit("levels:capChanged", ref, { before: capInfo(before), after: capInfo(code), cause });
+        if (from !== to) {
+            redrawAround(ax, ay, x, y, 2);
+            emit("levels:shapeChanged", ref, unpack(from), unpack(to));
+            notifyWorldCellChanged(ref, unpack(from), unpack(to), cause);
+        }
+        return true;
+    }
+    /** A column's cap: { material, thickness, hp, maxHP, remainingHP, opaque, support, anchored, changed } or null. */
+    function capAt(a, b, c, d, e) {
+        if (!cellQuery(a, b, c, d, e === undefined && typeof a === "number" ? 2 : e)) return null;
+        const code = capCode(qSt, qAx, qAy, qI), info = capInfo(code);
+        if (info) { const am = capDeltas(qSt).get(qAx + qAy * AREA_STRIDE); info.changed = !!(am && am.has(qI)); }
+        return info;
+    }
+    /** Set (spec { material, thickness 1..255, hp 1..255 }) or remove (null) a column's cap. Returns true or false (lastRefusal). */
+    function setCap(ref, spec, opts = {}) {
+        const W = World(), st = W && W.state, r = refOf(ref || {});
+        const refuse = reason => { lastRefusal = { ref: { area: { x: r.ax, y: r.ay }, x: r.x, y: r.y, z: 2 }, cap: spec, reason }; return false; };
+        if (!st || !st.levels || !st.levels["2"]) return refuse("no levels in this world");
+        if (!schemaKnown(st)) return refuse(`this save's strata schema ${JSON.stringify(st.strataSchemaVersion)} is unknown: no changes are written`);
+        if (!W.inWorld(r.ax, r.ay, 2) || r.x < 0 || r.y < 0 || r.x >= st.size || r.y >= st.size) return refuse(`cell (${r.x},${r.y}) doesn't exist`);
+        let code = 0;
+        if (spec) {
+            const id = typeof spec.material === "string" ? MATERIAL_ID.get(spec.material) : spec.material;
+            const t = spec.thickness, hp = spec.hp === undefined ? 255 : spec.hp;
+            if (id === undefined || SOLID_B[id & 0xff] !== 1 || (id & M_BUILT)) return refuse(`a cap is a natural solid material, not ${JSON.stringify(spec.material)}`);
+            if (!Number.isInteger(t) || t < 1 || t > 255) return refuse("thickness must be 1..255 ft");
+            if (!Number.isInteger(hp) || hp < 1 || hp > 255) return refuse("hp must be 1..255");
+            code = id | (t << 8) | (hp << 16);
+        }
+        writeCap(st, r.ax, r.ay, r.x, r.y, code, opts.cause || "setCap");
+        return true;
+    }
+    /**
+     * Damage a column's cap: applyCapDamage(ref | area, x, y, damage, damageType = "impact", { source }). The cap is one
+     * body of material x thickness HP points (resist by damage type, hooks as a stratum's); at 0 HP it is breached
+     * (removed): levels:capBreached, and the column below is open to the sky.
+     */
+    function applyCapDamage(a, b, c, d, e, f) {
+        let ref, damage, damageType, opts;
+        if (a && typeof b === "number" && typeof c === "number") { ref = { area: a, x: b, y: c, z: 2 }; damage = d; damageType = e; opts = f; }
+        else { ref = a; damage = b; damageType = c; opts = d; }
+        damageType = typeof damageType === "string" && damageType ? damageType : "impact";
+        const W = World(), st = W && W.state, r = refOf(ref || {});
+        if (!st || !st.levels || !schemaKnown(st)) return { ok: false, reason: "no writable levels in this world" };
+        if (!W.inWorld(r.ax, r.ay, 2) || r.x < 0 || r.y < 0 || r.x >= st.size || r.y >= st.size) return { ok: false, reason: `cell (${r.x},${r.y}) doesn't exist` };
+        if (badNumber(damage) || damage < 0) return { ok: false, reason: `damage ${JSON.stringify(damage)} isn't a number >= 0` };
+        const i = r.y * st.size + r.x, code = capCode(st, r.ax, r.ay, i);
+        if (!code) return { ok: false, reason: "no cap over this column" };
+        const mat = STRATA_MATERIALS[code & M_ID], thickness = (code >> 8) & 0xff, hpBefore = (code >> 16) & 0xff;
+        const cref = { area: { x: r.ax, y: r.ay }, x: r.x, y: r.y, z: 2 };
+        const ctx = { ref: cref, stratum: "cap", material: mat.key, constructed: false, damageType, damage,
+            effective: damage * (mat.resist[damageType] !== undefined ? mat.resist[damageType] : 1), source: (opts && opts.source) || null };
+        runHooks(mat.key, ctx);
+        runHooks("*", ctx);
+        const hpAfter = ctx.effective > 0 ? Math.max(0, hpBefore - Math.ceil(ctx.effective * 255 / (mat.maxHP * thickness) - 1e-9)) : hpBefore;
+        const res = { ok: true, area: cref.area, x: r.x, y: r.y, material: mat.key, thickness, damage, effective: ctx.effective, hpBefore, hpAfter, breached: hpAfter === 0 };
+        if (hpAfter !== hpBefore) writeCap(st, r.ax, r.ay, r.x, r.y, hpAfter === 0 ? 0 : (code & 0xffff) | (hpAfter << 16), `damage:${damageType}`);
+        if (res.breached) emit("levels:capBreached", { area: cref.area, x: r.x, y: r.y, material: mat.key, thickness, debris: mat.debris, damageType, source: ctx.source });
+        return res;
+    }
+
+    //-------------------------------------------------------------------------
+    // Clearance (19B): continuous open volume in the column, in feet (strata), across levels. Physical data only: no
+    // creature's needs are decided here.
+
+    /**
+     * The continuous open (non-solid) strata above a cell's standing surface, in feet: from the stratum stood on (the
+     * top of the cell's solid base, or the S4 of the cell below when the cell's S0 is open; worldStrataElevationAt) up
+     * through the cells above to the first solid stratum. Infinity when nothing solid is above up to +2's S4 and the
+     * column has no cap (open sky); 0 for a solid cell; -1 when there is nothing to stand on (outside the world, or an
+     * open cell over open space). A fluid stratum counts as open volume (fluidStateAt says how much of it is fluid).
+     * Arguments (ref), (area, x, y[, z]) or (ax, ay, x, y, z); no allocation.
+     */
+    function continuousAirHeight(a, b, c, d, e) {
+        if (!cellQuery(a, b, c, d, e)) return -1;
+        locate(qSt, qZ, qAx, qAy, qI, 1);
+        let s = fillOf(rdM, rdO), z = qZ;
+        if (s === STRATA) return 0;
+        if (s === 0) {
+            if (qZ === -2) return -1;
+            locate(qSt, qZ - 1, qAx, qAy, qI, 0);
+            if (SOLID_B[rdM[rdO + 4]] !== 1) return -1;
+            locate(qSt, qZ, qAx, qAy, qI, 1);
+        }
+        let h = 0;
+        for (;;) {
+            while (s < STRATA) {
+                if (SOLID_B[rdM[rdO + s]] === 1) return h;
+                h++;
+                s++;
+            }
+            if (z === 2) return capCode(qSt, qAx, qAy, qI) !== 0 ? h : Infinity;
+            z++;
+            s = 0;
+            locate(qSt, z, qAx, qAy, qI, 2);
+        }
+    }
+    /** Continuous open strata (ft) from column elevation e (0..24) upward in a cell: 0 when e is solid; Infinity to the
+     *  open sky (no cap). airRunAt(area, x, y, e) or airRunAt(ax, ay, x, y, e). No allocation. */
+    function airRunAt(a, b, c, d, e) {
+        let ax, ay, x, y, el;
+        if (typeof a === "number") { ax = a; ay = b; x = c; y = d; el = e; }
+        else { ax = a ? a.x | 0 : 0; ay = a ? a.y | 0 : 0; x = b; y = c; el = d; }
+        if (!Number.isInteger(el) || el < 0 || el >= E_TOP || !cellQuery(ax, ay, x, y, ((el / STRATA) | 0) - 2)) return -1;
+        let z = qZ, s = el % STRATA, h = 0;
+        locate(qSt, z, qAx, qAy, qI, 1);
+        for (;;) {
+            while (s < STRATA) {
+                if (SOLID_B[rdM[rdO + s]] === 1) return h;
+                h++;
+                s++;
+            }
+            if (z === 2) return capCode(qSt, qAx, qAy, qI) !== 0 ? h : Infinity;
+            z++;
+            s = 0;
+            locate(qSt, z, qAx, qAy, qI, 2);
+        }
     }
 
     //-------------------------------------------------------------------------
@@ -3052,11 +4028,22 @@
     //-------------------------------------------------------------------------
     // The level state in the save: UF.World.state.levels, .view, .version 4, .migrations
 
-    function ensureWorldLevels(st) {
+    // The generator version of a level entry added to a world: gen when given (a pre-V80 migration passes PRE_CUT_GEN);
+    // else the version of the levels the world already has (a column is one generator: generator 5's cuts span it);
+    // else a New Game's UF.NewGameSetup.levelsGen when it names a version 4 or later (tests pinning an older generator);
+    // else GEN.
+    function newLevelGen(st, gen) {
+        if (KNOWN_GENS.includes(gen)) return gen;
+        for (const z of [0, -1, -2, 1, 2]) { const L = st.levels[String(z)]; if (L && KNOWN_GENS.includes(L.gen)) return L.gen; }
+        const req = window.UF && UF.NewGameSetup ? UF.NewGameSetup.levelsGen : undefined;
+        return KNOWN_GENS.includes(req) && req >= 4 ? req : GEN;
+    }
+    function ensureWorldLevels(st, gen) {
         if (!st || st !== (World() && World().state)) return false;
         const t0 = performance.now();
         st.levels = st.levels || {};
-        for (const z of LEVELS) if (!st.levels[String(z)]) st.levels[String(z)] = { z, gen: GEN, checksum: null, strata: {} };
+        const g = newLevelGen(st, gen);
+        for (const z of LEVELS) if (!st.levels[String(z)]) st.levels[String(z)] = { z, gen: g, checksum: null, strata: {} };
         for (const z of LEVELS) {
             // Allocate Ground too: its checksum still uses its unchanged WorldGen lattice.
             for (let ay = 0; ay < st.areasY; ay++) for (let ax = 0; ax < st.areasX; ax++) baseline(z, ax, ay);
@@ -3101,7 +4088,7 @@
             if (e.z === undefined) e.z = 0;
             counts.regrow++;
         }
-        ensureWorldLevels(st);
+        ensureWorldLevels(st, PRE_CUT_GEN);   // no natural cuts under a settlement that was made before the levels
         st.view = { x: view ? view.x | 0 : 0, y: view ? view.y | 0 : 0, z: 0 };
         st.migrations = st.migrations || [];
         const record = { from, to: 4, rule: "V80", counts, conflicts: [] };
@@ -3408,7 +4395,7 @@
     // The public object
 
     const Levels = {
-        LEVELS, SHAPES, MATERIALS, TILESET_ID, GEN, BIOMES,
+        LEVELS, SHAPES, MATERIALS, TILESET_ID, GEN, BIOMES, PRE_CUT_GEN, FEATURE_GEN, FEATURE_PARAMS, FAMILIES,
         isLevel,
         label: z => (isLevel(z) && z !== 3 ? LABELS[z] : ""),
         levelKey: (ax, ay, z = 0) => isLevel(z) ? (z ? `${ax},${ay},${z}` : `${ax},${ay}`) : null,
@@ -3463,6 +4450,20 @@
         effectiveSupport,
         hasOpaqueOverburden,
         getStrataFluidPassage,
+        continuousAirHeight,
+        airRunAt,
+        capAt,
+        setCap,
+        applyCapDamage,
+        /** The natural cuts and caves of an area (generator 5): { gen, cuts: [...], caves: [...], shafts, skylights, massifCells,
+         *  capCells, carvedStrata, cutCells, caveCells, rampsAdded, floatingRemoved, ms } (a copy; descriptors for
+         *  diagnostics and tests, not terrain: the strata are), or null for an older generator. */
+        naturalFeatures: (ax = 0, ay = 0) => {
+            const W = World(), st = W && W.state;
+            if (!st || !W.inWorld(ax, ay, 0) || levelGen(st, 0) < FEATURE_GEN) return null;
+            const b = baseline(0, ax, ay);
+            return b && b.features ? JSON.parse(JSON.stringify(b.features)) : null;
+        },
         fluidDepthToStrata,
         strataToFluidDepth,
         fluidVolumeAt: (...args) => (typeof window !== "undefined" && window.UF && window.UF.Fluid && typeof window.UF.Fluid.fluidVolumeAt === "function") ? window.UF.Fluid.fluidVolumeAt(...args) : 0,
@@ -3485,7 +4486,7 @@
         strataMemory: (ax = 0, ay = 0) => {
             const W = World(), st = W && W.state;
             if (!st) return null;
-            const out = { perLevel: {}, strata: 0, connectors: 0, shapeGrids: 0, biome: 0, surface: 0, legacyViews: 0 };
+            const out = { perLevel: {}, strata: 0, connectors: 0, shapeGrids: 0, biome: 0, surface: 0, legacyViews: 0, caps: 0, capEntries: 0 };
             let surf = null;
             for (const z of LEVELS) {
                 const b = baseline(z, ax, ay);
@@ -3499,11 +4500,12 @@
                 out.strata += out.perLevel[z].strata;
                 out.connectors += b.conn.byteLength;
                 out.biome += b.biome ? b.biome.byteLength : 0;
+                if (b.caps) { out.capEntries += b.caps.size; out.caps += b.caps.size * 8; }   // a Map entry: 2 numbers (about 8 B of data)
                 if (b.surface && b.surface !== surf) { out.surface += b.surface.byteLength; surf = b.surface; }
                 out.legacyViews += views;
             }
             if (packedGrids.st === st) for (let li = 0; li < 5; li++) { const g = packedGrids.map.get((ax + ay * AREA_STRIDE) * 5 + li); if (g) out.shapeGrids += g.byteLength; }
-            out.total = out.strata + out.connectors + out.shapeGrids + out.biome + out.surface + out.legacyViews;
+            out.total = out.strata + out.connectors + out.shapeGrids + out.biome + out.surface + out.legacyViews + out.caps;
             return out;
         },
         stratumAt: ref => {

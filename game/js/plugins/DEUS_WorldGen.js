@@ -729,9 +729,14 @@
                 region: { savagery: "wild", alignment: "ordinary" }, fields: null, lake: !!c.water, peak: false, z, geology };
         }
         const c = resolve(st.seed, dims(st), m, waterModels(st), gx, gy, {});
+        // 19B: a ground cell with nothing to stand on (a natural cut or a dig down to a lower level) is not walkable land.
+        // Only a ground with its column has shapes of its own (without it, UF_Levels reads the ground from this function).
+        const L0 = window.UF.Levels, ax0 = Math.floor(gx / st.size), ay0 = Math.floor(gy / st.size);
+        const hole = !!L0 && typeof L0.groundVolumetric === "function" && L0.groundVolumetric()
+            && L0.shapeCodeAt(ax0, ay0, gx - ax0 * st.size, gy - ay0 * st.size, 0) === 3;
         return {
             biomeId: c.biomeId, biome: m.biomes[c.b], ground: c.groundId, water: c.waterKey,
-            walkable: !c.waterKey && !(c.flags & FLAG_PEAK),
+            walkable: !c.waterKey && !(c.flags & FLAG_PEAK) && !hole,
             region: { savagery: m.savTiers[c.sav].id, alignment: m.alignTiers[c.align].id },
             fields: c.f, lake: c.lake, peak: !!(c.flags & FLAG_PEAK), geology
         };
@@ -973,7 +978,7 @@
         const grid = L.shapeGrid(0, ax, ay);
         return grid ? { code: i => grid[i], surface } : null;
     }
-    WorldGen.volumeStats = {}; // "ax,ay" -> { columns, solid, carved, ramps, groundReplaced, waterSuppressed, sitePiecesSkipped } of the last ground build
+    WorldGen.volumeStats = {}; // "ax,ay" -> { columns, solid, open, carved, ramps, groundReplaced, waterSuppressed, sitePiecesSkipped } of the last ground build
 
     function groundPalette(cat, m) {
         const T = window.UF && UF.Tiles;
@@ -987,9 +992,12 @@
     }
 
     // Readers for the painter, in area-local coordinates (neighbours outside the area included): solid (the ground cell
-    // is solid), under (its surface is above the ground: S >= 1), kind (ground index painted there), wet (water index + 1
-    // painted there, 0 = none), peak (a mountain peak cell). natural: { kind, wet, peak } of the climate model. col null:
-    // nothing is solid and every cell is its natural ground (the painting before the column invariant).
+    // is solid, or open: nothing to stand on at the ground, a natural cut or a dig down to a lower level, DEUS-TSK-FABLE-19B;
+    // both are painted as the impassable rock face, never grass or water, until the depth renderer shows what is below),
+    // open (the ground cell is open), under (its surface is above the ground: S >= 1), kind (ground index painted there),
+    // wet (water index + 1 painted there, 0 = none), peak (a mountain peak cell). natural: { kind, wet, peak } of the
+    // climate model. col null: nothing is solid and every cell is its natural ground (the painting before the column
+    // invariant).
     function columnReader(col, size, d, gx0, gy0, natural, P) {
         const one = d.areasX === 1 && d.areasY === 1;
         const L = window.UF && UF.Levels;
@@ -1006,11 +1014,12 @@
         };
         const local = (x, y) => one ? (((y % size) + size) % size) * size + (((x % size) + size) % size)
             : (x >= 0 && y >= 0 && x < size && y < size ? y * size + x : -1);
-        const solid = col ? (x, y) => { const i = local(x, y); return i >= 0 ? col.code(i) === 1 : surfaceOut(x, y) >= 1; } : () => false;
+        const solid = col ? (x, y) => { const i = local(x, y); if (i < 0) return surfaceOut(x, y) >= 1; const c = col.code(i); return c === 1 || c === 3; } : () => false;
+        const open = col ? (x, y) => { const i = local(x, y); return i >= 0 && col.code(i) === 3; } : () => false;
         const under = col ? (x, y) => { const i = local(x, y); return i >= 0 ? col.surface[i] >= 1 : surfaceOut(x, y) >= 1; } : () => false;
         const ramp = col ? (x, y) => { const i = local(x, y); return i >= 0 && col.code(i) === 4; } : () => false;
         return {
-            solid, under, ramp,
+            solid, open, under, ramp,
             kind: (x, y) => solid(x, y) ? P.peakK : under(x, y) ? P.rockK : natural.kind(x, y),
             wet: (x, y) => solid(x, y) || under(x, y) || ramp(x, y) ? 0 : natural.wet(x, y),
             peak: natural.peak
@@ -1025,7 +1034,7 @@
             const tile = P.groundBases[P.peakK] + P.shapes[mask];
             // Layer 2 repeats the rock face: UF_Tiles' shade overlay on layer 1 (E tiles, passable) must not open the rock
             // to passage (RMMZ decides passage by the top tile that isn't a [*] tile).
-            return { layer0: tile, layer2: tile, region: PEAK_REGION, solid: true, carved: false, ramp: false };
+            return { layer0: tile, layer2: tile, region: PEAK_REGION, solid: true, open: R.open(x, y), carved: false, ramp: false };
         }
         const carved = R.under(x, y);
         const w = R.wet(x, y);
@@ -1041,7 +1050,7 @@
             }
             layer0 = P.groundBases[g] + P.shapes[mask];
         }
-        return { layer0, layer2: 0, region: !w && !carved && R.peak(x, y) ? PEAK_REGION : 0, solid: false, carved, ramp: R.ramp(x, y) };
+        return { layer0, layer2: 0, region: !w && !carved && R.peak(x, y) ? PEAK_REGION : 0, solid: false, open: false, carved, ramp: R.ramp(x, y) };
     }
 
     /**
@@ -1142,7 +1151,7 @@
         // (the surface is at +1 or +2 above it), the cell is the rock face, impassable, never grass or water; a cell dug
         // or carved inside a hill (cave mouths) is bare rock floor. Everything else is painted as before.
         const col = z === 0 ? groundColumns(ctx.areaX, ctx.areaY, false) : null; // null: a save from before the column levels (gen < 4)
-        const volume = { solid: 0, carved: 0, ramps: 0, groundReplaced: 0, waterSuppressed: 0, sitePiecesSkipped: 0 };
+        const volume = { solid: 0, open: 0, carved: 0, ramps: 0, groundReplaced: 0, waterSuppressed: 0, sitePiecesSkipped: 0 };
         if (z === 0) {
             const P = groundPalette(cat, m);
             const R = columnReader(col, size, d, gx0, gy0, {
@@ -1160,7 +1169,11 @@
                     ctx.setTile(x, y, 0, t.layer0);
                     if (t.layer2) ctx.setTile(x, y, 2, t.layer2);
                     if (t.region) ctx.setTile(x, y, 5, t.region);
-                    if (t.solid) {
+                    if (t.open) {
+                        volume.open++;
+                        if (water[i]) volume.waterSuppressed++;
+                        else volume.groundReplaced++;
+                    } else if (t.solid) {
                         volume.solid++;
                         if (water[i]) volume.waterSuppressed++;
                         else volume.groundReplaced++;
@@ -1241,6 +1254,8 @@
                 } else if (z !== 0) continue;
                 const isRamp = L && (typeof L.shapeCodeAt === "function" ? L.shapeCodeAt(ctx.areaX, ctx.areaY, x, y, z) === 4 : (typeof L.shapeAt === "function" && (L.shapeAt(ctx.areaX, ctx.areaY, x, y, z) === "ramp" || L.shapeAt(ctx.areaX, ctx.areaY, x, y, z) === 4)));
                 if (isRamp) continue; // Don't place on ramps
+                // Nor where a natural cut took the floor away (19B): the cell must still be a floor at its level.
+                if (L && typeof L.shapeCodeAt === "function" && L.shapeCodeAt(ctx.areaX, ctx.areaY, x, y, z) !== 2) continue;
                 const table = plantTable(m, biome[i], m.alignTiers[align[i]].id);
                 const list = water[i] ? table.water : table.land;
                 for (let k = 0; k < list.length; k++) {
@@ -1260,8 +1275,10 @@
                 for (const piece of s.pieces || []) {
                     const o = m.objectById.get(piece.object);
                     if (!o || !inside(s.x + piece.dx, s.y + piece.dy)) continue;
-                    // Never inside a hill: a piece whose ground cell is solid rock is left out (counted).
-                    if (col && col.code((s.y + piece.dy) * size + s.x + piece.dx) === 1) { volume.sitePiecesSkipped++; continue; }
+                    // Never inside a hill, nor over a natural cut (19B): a piece whose ground cell is solid rock or open is
+                    // left out (counted).
+                    const pc = col ? col.code((s.y + piece.dy) * size + s.x + piece.dx) : 0;
+                    if (pc === 1 || pc === 3) { volume.sitePiecesSkipped++; continue; }
                     ctx.setObject(s.x + piece.dx, s.y + piece.dy, o.typeId);
                     counts[piece.object] = (counts[piece.object] || 0) + 1;
                 }
@@ -1298,6 +1315,7 @@
                         } else if (z !== 0) continue;
                         const isRamp = L && (typeof L.shapeCodeAt === "function" ? L.shapeCodeAt(ctx.areaX, ctx.areaY, x, y, z) === 4 : (typeof L.shapeAt === "function" && (L.shapeAt(ctx.areaX, ctx.areaY, x, y, z) === "ramp" || L.shapeAt(ctx.areaX, ctx.areaY, x, y, z) === 4)));
                         if (isRamp) continue;
+                        if (L && typeof L.shapeCodeAt === "function" && L.shapeCodeAt(ctx.areaX, ctx.areaY, x, y, z) !== 2) continue;   // 19B: cut cells
                         if (typeIds.has(objects[i])) have++;
                         else if (dist >= r0 && objects[i] === 0 && !water[i] && !(flags[i] & FLAG_PEAK) && waterDist[i] > (o.entry.avoidWater | 0)
                             && !inClearing(x, y) && !(siteMask && siteMask[i]) && !ctx.isTemplateCell(x, y)) {
