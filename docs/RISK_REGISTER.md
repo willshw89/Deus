@@ -41,11 +41,23 @@
 
 ---
 
-## 3. Risk Escalation Protocol
+## 3. Organizational & Operational Risks (ORG-001 to ORG-003)
+*Governed by [`docs/DEUS_ORGANIZATIONAL_OPERATING_SYSTEM.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/DEUS_ORGANIZATIONAL_OPERATING_SYSTEM.md)*
+
+| Risk ID | Title | Category | Threat Description | Severity | Impact | Mitigation Strategy | Status |
+|---|---|---|---|---|---|---|---|
+| `ORG-001` | Process Bloat & Bureaucracy | Governance | Accumulating procedural overhead, redundant templates, and synthetic gates that impede development velocity. | `MAJOR` | Slower iteration, token inflation, agent confusion. | Anti-Goodhart rule; explicit 6-question anti-bloat gate; bounded process experiments with mandatory evaluate/revert cycles. | `CONTROLLED` |
+| `ORG-002` | Environment & Dependency Drift | Infrastructure | Differing local Node.js, NW.js, or OS configurations producing non-reproducible test or runtime failures. | `MAJOR` | "Works on my machine" failures, broken builds. | Canonical version-locking in [`docs/DEPENDENCY_POLICY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/DEPENDENCY_POLICY.md); automated pre-flight environment checks. | `CONTROLLED` |
+| `ORG-003` | Credential Leakage in Telemetry | Security | Accidental logging or committing of provider API tokens, session headers, or private paths in task mailboxes or git. | `CRITICAL` | Security breach, unauthorized account drain. | Zero-secrets invariant in [`docs/SECURITY_AND_SECRETS.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/SECURITY_AND_SECRETS.md); automated pre-commit scanning. | `CONTROLLED` |
+
+---
+
+## 4. Risk Escalation Protocol
 
 If any risk reaches an active failure state:
 1. **Freeze Execution**: Immediately halt dependent work blocks.
 2. **Issue Incident Notice**: Log incident with exact stack trace, failing files, and reproduction steps.
 3. **Escalate to Owner**: Present bounded recovery options directly in Owner Terminal.
 4. **Deploy Recovery Plan**: Execute git rollback or restore verified backup archive before resuming work.
+
 

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generatedAt": "2026-09-25T15:27:42.578Z",
+  "generatedAt": "2026-09-25T16:48:56.007Z",
   "governingStandard": "docs/AGENT_UTILIZATION_POLICY.md",
   "providers": {
     "gemini": {
@@ -8,8 +8,8 @@
       "runtime": "Antigravity CLI (agy)",
       "plan": "Google Developer / Antigravity",
       "state": "AVAILABLE",
-      "remainingFiveHourPct": 94.9,
-      "remainingWeeklyPct": 97.2,
+      "remainingFiveHourPct": 89.1,
+      "remainingWeeklyPct": 97.3,
       "fiveHourReset": "2026-09-25T18:34:24Z",
       "weeklyReset": "2026-10-01T17:08:22Z",
       "creditBalance": null,
@@ -18,7 +18,7 @@
       "sessionCost": null,
       "source": "agy -p /usage --output-format json",
       "precision": "EXACT_PROVIDER",
-      "lastChecked": "2026-09-25T15:27:35.883Z"
+      "lastChecked": "2026-09-25T16:48:52.169Z"
     },
     "claude": {
       "provider": "Claude / Fable",
@@ -31,11 +31,11 @@
       "weeklyReset": null,
       "creditBalance": null,
       "bankedResets": null,
-      "sessionTokensUsed": 47770744,
+      "sessionTokensUsed": 49472967,
       "sessionCost": null,
       "source": "~/.claude.json + project session logs",
       "precision": "PROVIDER_STATE_ONLY",
-      "lastChecked": "2026-09-25T15:27:42.575Z"
+      "lastChecked": "2026-09-25T16:48:56.003Z"
     },
     "grok": {
       "provider": "Grok",
@@ -48,16 +48,16 @@
       "weeklyReset": null,
       "creditBalance": null,
       "bankedResets": null,
-      "sessionTokensUsed": 4849852,
-      "sessionCostUsd": 1.7492,
+      "sessionTokensUsed": 5775752,
+      "sessionCostUsd": 2.245,
       "source": "grok usage <session-id>",
       "precision": "SESSION_ONLY",
-      "lastChecked": "2026-09-25T15:27:42.577Z"
+      "lastChecked": "2026-09-25T16:48:56.005Z"
     },
     "codex": {
-      "provider": "OpenAI Codex / Astra",
-      "runtime": "Codex CLI / Astra",
-      "plan": "ChatGPT / Codex Subscription",
+      "provider": "OpenAI Codex (Model: Astra)",
+      "runtime": "Codex CLI / Astra Model",
+      "plan": "ChatGPT / Codex Subscription (Astra)",
       "state": "EXHAUSTED",
       "remainingFiveHourPct": 0,
       "remainingWeeklyPct": 0,
@@ -69,13 +69,13 @@
       "sessionCost": null,
       "source": "Owner Verification & CLI Discovery",
       "precision": "PROVIDER_STATE_ONLY",
-      "lastChecked": "2026-09-25T15:27:42.578Z",
-      "note": "Account holds access; current period exhausted. Standby for quota reset."
+      "lastChecked": "2026-09-25T16:48:56.007Z",
+      "note": "Account holds access; preferred model Astra; current period quota exhausted. Standby for quota reset."
     }
   },
   "burnPriorities": {
     "gemini": {
-      "score": 30.5,
+      "score": 50.7,
       "recommendation": "AGGRESSIVE_ROUTING (Substantial quota expiring soon)"
     },
     "claude": {

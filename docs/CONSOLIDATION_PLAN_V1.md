@@ -111,13 +111,33 @@ Of the 41 legacy `UF_*.js` shims:
 - **Plugin Update-Hook Audit**: Audit all hooks on `Scene_Map.update`, `Game_Map.update`, `Spriteset_Map.update`, `Sprite_Character.update`.
 - **Grok Hash32 Optimization**: Deploy Grok's straight-line `hash32_4` kernel into `DEUS_Levels.js` with 100% bit-identical strata outputs across 1,000 seeds.
 
+### Phase 11: Organizational Operating System Foundations
+Implement foundational tooling and state registries per [`docs/DEUS_ORGANIZATIONAL_OPERATING_SYSTEM.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/DEUS_ORGANIZATIONAL_OPERATING_SYSTEM.md):
+- **A. Durable Task State & Mailboxes**: Structure `docs/agents/mailboxes/` for crash-recoverable agent task tracking.
+- **B. Invariant Validation Gate**: Deploy `tools/governance/check_invariants.js` enforcing [`docs/INVARIANT_REGISTRY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/INVARIANT_REGISTRY.md).
+- **C. Architecture Decision Records**: Deploy ADR template and index under `docs/adr/`.
+- **D. Durable Issue / Bug Registry**: Deploy `docs/issues/` for tracking defects discovered outside active tasks.
+- **E. Dependency & Configuration Checker**: Deploy `tools/governance/verify_dependencies.js` enforcing [`docs/DEPENDENCY_POLICY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/DEPENDENCY_POLICY.md).
+- **F. Security & Secret Scanner**: Deploy `tools/security/scan_secrets.js` enforcing [`docs/SECURITY_AND_SECRETS.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/SECURITY_AND_SECRETS.md).
+- **G. Reproducible Build & Release Manifest**: Deploy `tools/release/build_player_package.js` implementing [`docs/RELEASE_ENGINEERING.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/RELEASE_ENGINEERING.md).
+- **H. Organizational Health Dashboard**: Deploy `tools/governance/dashboard.js` generating a consolidated high-level status summary.
+
 ---
 
 ## 6. Authoritative Policy Cross-References
-- **Agent Communication Protocol:** [`docs/AGENT_COMMUNICATION_PROTOCOL.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/AGENT_COMMUNICATION_PROTOCOL.md) (Structured task mailbox & evidence bus)
-- **Agent Quality & Continuous-Learning Standard:** [`docs/AGENT_QUALITY_LEARNING_LOOP.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/AGENT_QUALITY_LEARNING_LOOP.md) (Evidence-based learning, corrections & telemetry)
+- **DEUS Organizational Operating System:** [`docs/DEUS_ORGANIZATIONAL_OPERATING_SYSTEM.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/DEUS_ORGANIZATIONAL_OPERATING_SYSTEM.md) (Self-improving engineering organization standard)
+- **Canonical Invariant Registry:** [`docs/INVARIANT_REGISTRY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/INVARIANT_REGISTRY.md)
+- **Dependency & Environment Policy:** [`docs/DEPENDENCY_POLICY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/DEPENDENCY_POLICY.md)
+- **Security & Secrets Policy:** [`docs/SECURITY_AND_SECRETS.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/SECURITY_AND_SECRETS.md)
+- **Release Engineering Standard:** [`docs/RELEASE_ENGINEERING.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/RELEASE_ENGINEERING.md)
+- **Schema & Compatibility Governance:** [`docs/SCHEMA_AND_COMPATIBILITY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/SCHEMA_AND_COMPATIBILITY.md)
+- **Backup & Recovery Runbooks:** [`docs/BACKUP_AND_RECOVERY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/BACKUP_AND_RECOVERY.md)
+- **Runtime Observability & Diagnostics:** [`docs/OBSERVABILITY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/OBSERVABILITY.md)
+- **Agent Communication Protocol:** [`docs/AGENT_COMMUNICATION_PROTOCOL.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/AGENT_COMMUNICATION_PROTOCOL.md)
+- **Agent Quality & Continuous-Learning Standard:** [`docs/AGENT_QUALITY_LEARNING_LOOP.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/AGENT_QUALITY_LEARNING_LOOP.md)
 - **Performance Architecture Standard:** [`docs/PERFORMANCE_ARCHITECTURE.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/PERFORMANCE_ARCHITECTURE.md)
 - **Quality Engineering Standard:** [`docs/QUALITY_ENGINEERING_POLICY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/QUALITY_ENGINEERING_POLICY.md)
 - **Agent Utilization Standard:** [`docs/AGENT_UTILIZATION_POLICY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/AGENT_UTILIZATION_POLICY.md)
 - **Master Risk Register:** [`docs/RISK_REGISTER.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/RISK_REGISTER.md)
+
 
