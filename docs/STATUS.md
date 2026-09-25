@@ -28,7 +28,7 @@
 - **Lane D (Grok PM):** Adversarial review delivered (verdicts recorded).
 - **Lane E (Grok Writer / Claude Reviewer):** WG.00.09 Follow-up: Grok revising `UF_Depth_Attack_Plan.md` against review `38875ae0` (Blocker CR-19C-B1, M1-M8).
 - **Lane F (Claude CLI):** WG.00.12 OneDrive absolute link rewrite tool & dry-run diff committed (`23559316`).
-- **Lane G (Claude CLI):** WG.00.11 Follow-up: Test maintenance across `test_new_game_year0.js`, `test_history_materialization_and_world_age.js`, `test_historical_carrying_capacity.js` (Directive 001-F sec 2).
+- **Lane G (Claude CLI):** WG.00.11 Follow-up: Test maintenance complete & committed (`a8e42502`, 30/30 gating checks pass, 15 mutants caught, world_age 29/29 pass, carrying capacity 23/23 pass). Awaiting Grok review.
 
 ---
 
@@ -44,7 +44,7 @@
 | **Lane D** | **Adversarial Review** | Grok (PM instance) / `grok-4.7` | Via Owner | Main checkout | 2026-09-25 16:48:00 | **STATUS: DELIVERED.**<br>• ATK-19B-001 CLOSED; ATK-19B-002 KEEP OPEN (F2); ATK-YEAR0-001 KEEP OPEN (F1); WG.00.08 stays REVIEW. |
 | **Lane E** | **WG.00.09 DEFINE / PRE-ATTACK** (`WG.00.09`) | Grok CLI (Writer) / Claude (Reviewer) | `task/lane-e` | `C:\Users\snewt\.deus_worktrees\lane-e` | 2026-09-25 16:58:00 | **STATUS: REVISION ACTIVE.**<br>• Grok revising `UF_Depth_Attack_Plan.md` against review `38875ae0` (Blocker CR-19C-B1: live tilemap opacity, M1-M8). Claude re-reviews. |
 | **Lane F** | **OneDrive-Link Migration Prep** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Committed `23559316`<br>`task/lane-f` | `C:\Users\snewt\.deus_worktrees\lane-f` | 2026-09-25 16:52:09 | **STATUS: WRITER COMMITTED.**<br>• Link rewrite scanner & dry-run diff ready. Applied at freeze point. |
-| **Lane G** | **ATK-YEAR0-002 Runtime Fix & Test Maint** (`WG.00.11`) | Claude CLI / `claude-opus-5-5` | `task/lane-g` (base `0859ed3c`) | `C:\Users\snewt\.deus_worktrees\lane-g` | 2026-09-25 17:13:46 | **STATUS: TEST MAINTENANCE ACTIVE.**<br>• Engine fix committed `0859ed3c` (Core line `>= 0 ? setupYear : 0`). Updating Section C KNOWN_OPEN/Section D anchor, updating world_age assertions, re-freezing carrying capacity SHA. |
+| **Lane G** | **ATK-YEAR0-002 Runtime Fix & Test Maint** (`WG.00.11`) | Claude CLI / `claude-opus-5-5` | Committed `a8e42502`<br>`task/lane-g` | `C:\Users\snewt\.deus_worktrees\lane-g` | 2026-09-25 17:50:51 | **STATUS: COMMITTED & VERIFIED.**<br>• Gating checks pass (30/30), 15 mutants caught; `INV-SIM-01` end-to-end met; world_age 29/0; carrying capacity 23/0. Awaiting Grok review. |
 
 ---
 
