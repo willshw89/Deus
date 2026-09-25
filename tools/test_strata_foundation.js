@@ -242,7 +242,7 @@ function setup(sources, tag) {
     return env;
 }
 function newWorld(env, seed) {
-    env.UF.NewGameSetup = { seed, year: 1 };
+    env.UF.NewGameSetup = { seed, year: 1, levelsGen: 4 };   // 19A's comparisons are generator 4's (19B's generator 5: test_strata_cuts_and_caves.js)
     const t0 = performance.now();
     env.UF.World.newWorld(seed);
     return performance.now() - t0;
@@ -342,7 +342,7 @@ guard("generation_deterministic", () => {
     const rows = [];
     let ok = true;
     for (const z of LEVELS) {
-        const gen = L.GEN;
+        const gen = st.levels[String(z)].gen;   // the world's own generator (4, pinned above)
         const own = L.checksum(z), old = LL.checksum(z), rep = L.checksum(z, SEED, gen), other = L.checksum(z, SEED + 1, gen);
         const own2 = L.checksum(z, SEED2, gen), old2 = LL.checksum(z, SEED2, gen);
         // The ground's checksum is a lattice of UF_WorldGen's cell info for the live world (it never took a seed argument): no seed+1 test there.

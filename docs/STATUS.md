@@ -3,13 +3,31 @@
 Project formal name: **DEUS** (formally renamed by user directive 2026-09-20; replaces working titles "UF", "Ultima Frontier", and "Wayfarer").
 Update this whenever reality changes. Write only what you've checked, and say how you checked it.
 
-**Last updated:** 2026-09-24
+**Last updated:** 2026-09-25
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (Autonomous Shelter Construction Loop COMPLETE — AWAITING USER REVIEW)
 
 ## In progress
-- **Fable / Claude Code (2026-09-24):** ACTIVE `DEUS-TSK-FABLE-19B` / WG.00.08 (Global Five-Layer Vertical Exposure, Natural Cuts & Cave Networks). Canonical handoff dispatched (`docs/handoffs/HANDOFF_DEUS_TSK_FABLE_19B_CUTS_CAVES.md`).
-- **Gemini (2026-09-24):** Integration Coordinator & Review Authority for `DEUS-WORLDGEN-WBS-v1.0` (`docs/worldgen/DEUS_WORLDGEN_WBS.md`). WG.00.07 (Fluid ↔ Five-Strata Reconciliation) ACCEPTED [commit `2f47203`]. Dispatched WG.00.08 / FABLE-19B to Fable. Standing by for review; no overlapping edits on Fable-owned paths. All art generation strictly held until asset catalogues (WG.20–WG.25) and atlas slot assignments (WG.30–WG.33) are frozen.
-- **Astra (2026-09-24):** On hold / consumed per user directive.
+- **Gemini / Antigravity (2026-09-25):** Integration Coordinator & Review Authority. WG.00.08 / FABLE-19B ACCEPTED & MERGED [commit `2e4571a`]. Re-enabled MAX_MULTIAGENT operations under workstation one-heavy-job limit. Leading post-19B consolidation window (durable multiagent mailboxes, closed-world census, OneDrive migration preparation) and dispatching WG.00.09 / FABLE-19C preparatory audits.
+- **Claude / Fable (2026-09-25):** Completed WG.00.08 / FABLE-19B natural cuts and all-Z caves on strata. Preparing implementation architecture for WG.00.09 / FABLE-19C (Global Five-Z Depth Renderer).
+- **Grok (2026-09-25):** Adversarial verification of ATK-19B-001 and ATK-19B-002 signed off (0 regressions, 27/27 mutants caught). Preparing 19C pre-attack and exposure-cache depth review.
+- **Codex / OpenAI (2026-09-25):** Secondary reviewer standing by for post-19B repo cleanup and consolidation audit.
+
+## WG.00.08 / DEUS-TSK-FABLE-19B — Natural Cuts and All-Z Caves on Strata (Fable & Gemini, 2026-09-25)
+- **Status**: `COMPLETED & VERIFIED / CANONICAL MAIN MERGED` [commit `2e4571a`]
+- **Scope** (`game/js/plugins/DEUS_Levels.js`, `game/js/plugins/DEUS_WorldGen.js`, `docs/systems/UF_Levels.md`, `docs/systems/UF_WorldGen.md`, `tools/test_strata_cuts_and_caves.js`):
+  - Generator 5 mesoscale natural features carved directly into five-strata geometry (ravines, canyons, chasms, fissures, sinkholes, stream cuts, stepped terraces, and cave networks across all 5 macro-Z levels).
+  - Physical clearance & continuous air run: `continuousAirHeight` and `airRunAt` strictly stop at solid and fluid strata (`rdM[rdO + s] !== M_AIR`), preventing fluid from counting as open headroom (resolving `ATK-19B-001`).
+  - Fluid-safe carving: shafts, skylights, and voids strictly refuse to carve columns holding fluid strata (`fluidIn`), preserving 100% of water and lava without illegally carving underlying rock (resolving `ATK-19B-002`).
+  - Ceiling cap & massif architecture: +2 mountain massifs enclosed with anchored rock caps (3–12 ft) under the DF near-black wall top convention (`#08080C..#121218`), providing physical overburden and breach mechanics without requiring a 6th macro-Z level.
+  - Multi-Z connectivity: natural 1 ft step-down ramps and vertical shafts connect cave networks across Z-levels (-1 to 0, 0 to +1) with zero floating mass (connected down to bedrock elevation 0).
+  - Performance: Natural feature carving executes in **452 ms** across all 5 levels (well under the 3000 ms budget); memory overhead per 256x256 area is 2,004,376 B (well within 3.5 MB budget).
+- **Automated Verification**:
+  - `tools/test_strata_cuts_and_caves.js`: **28 passed, 0 failed** in 231.5s across 4 test seeds (18, 3, 21, 4).
+  - Mutants: **27 / 27 semantic mutants caught** by named checks (including `skylight_through_fluid` which caught 30 illegally carved strata under water).
+  - Regressions: Child suites `test_strata_fluid_reconciliation.js` (36/36 passed, 5/5 mutants detected) and `test_strata_foundation.js` (26/26 passed) clean.
+  - Native NW.js smoke test (`tools/native_smoke_19a.js` on updated snapshot): **26/26 passed**, 0 exceptions, 0 `console.error`s across Playtest New Game, save, in-page reload, and cold fresh-process load.
+- **Visual Proof**:
+  - Inspected 7 native playtest screenshots across all macro-Z levels: `deus19b.plus2_massif_cave.png` (+2 massif cave with black caps), `deus19b.z2_ravine_ground.png` (Z0 surface chasm cut), `deus19b.z2_ravine_minus1.png` (Z-1 multi-Z chasm penetration), `deus19b.z2_ravine_minus2.png` (Z-2 deep underworld chasm floor, crystals, glowing mushrooms), `deus19b.z0_cave_ground.png` (ground cave chamber), `deus19b.minus1_cave.png` (subterranean cavern), `deus19b.shallow_cut_minus1.png` (shallow cut opening). All confirmed strictly compliant with art and geometry standards.
 
 ## WG.00.07 — Fluid ↔ Five-Strata Reconciliation (Gemini, 2026-09-24)
 - **Status**: `COMPLETED & VERIFIED / OWNER ACCEPTED` [commit `2f47203`]
