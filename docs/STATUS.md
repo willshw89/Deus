@@ -28,7 +28,7 @@
 - **Lane D (Grok PM):** Adversarial review delivered (verdicts recorded).
 - **Lane E (Grok Writer / Claude Reviewer):** WG.00.09 Depth renderer specification (`c846fc7c`) & independent review committed (`38875ae0`, CHANGES REQUESTED).
 - **Lane F (Claude CLI):** WG.00.12 OneDrive absolute link rewrite tool & dry-run diff (committed `23559316`).
-- **Lane G (Claude CLI):** WG.00.11 ATK-YEAR0-002 Runtime Year 0 fix (`task-34196`, active regression testing).
+- **Lane G (Claude CLI):** WG.00.11 ATK-YEAR0-002 Runtime Year 0 fix delivered & committed (`0859ed3c`). Awaiting Grok review.
 
 ---
 
@@ -44,7 +44,7 @@
 | **Lane D** | **Adversarial Review** | Grok (PM instance) / `grok-4.7` | Via Owner | Main checkout | 2026-09-25 16:48:00 | **STATUS: DELIVERED.**<br>• ATK-19B-001 CLOSED; ATK-19B-002 KEEP OPEN (F2); ATK-YEAR0-001 KEEP OPEN (F1); WG.00.08 stays REVIEW. |
 | **Lane E** | **WG.00.09 DEFINE / PRE-ATTACK** (`WG.00.09`) | Grok CLI (Writer) / Claude (Reviewer) | Writer `c846fc7c`<br>Reviewer `38875ae0`<br>`task/lane-e` | `C:\Users\snewt\.deus_worktrees\lane-e` | 2026-09-25 16:58:00 | **STATUS: REVIEW DELIVERED (CHANGES REQUESTED).**<br>• Independent review delivered (1 Blocker: live tilemap opacity occludes depth planes, 8 Major, 9 Minor). Awaiting Grok revision. |
 | **Lane F** | **OneDrive-Link Migration Prep** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Committed `23559316`<br>`task/lane-f` | `C:\Users\snewt\.deus_worktrees\lane-f` | 2026-09-25 16:52:09 | **STATUS: WRITER COMMITTED.**<br>• Authored `tools/migration/rewrite_onedrive_links.js` (28 KB); generated dry-run diff (`onedrive_links_rewrite.diff`). Applied only at freeze point. |
-| **Lane G** | **ATK-YEAR0-002 Runtime Fix** (`WG.00.11`) | Claude CLI / `claude-opus-5-5` | `task-34196`<br>`task/lane-g` | `C:\Users\snewt\.deus_worktrees\lane-g` | Streaming JSON | **STATUS: ACTIVE / POLISHING.**<br>• Runtime fix for Core `?? 0`, History startYear 0, Demographics startYear 0, and FactionMenus assertion. Active regression testing. |
+| **Lane G** | **ATK-YEAR0-002 Runtime Fix** (`WG.00.11`) | Claude CLI / `claude-opus-5-5` | Committed `0859ed3c`<br>`task/lane-g` | `C:\Users\snewt\.deus_worktrees\lane-g` | 2026-09-25 17:13:46 | **STATUS: WRITER COMMITTED.**<br>• Runtime fix committed: Core `?? 0`, History startYear 0, Demographics startYear 0, Test harness year request. Years 1 and 42 byte-identical. Awaiting Grok review. |
 
 ---
 
