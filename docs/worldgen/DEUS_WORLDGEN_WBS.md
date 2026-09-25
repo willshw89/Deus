@@ -359,6 +359,7 @@ SELECT NEXT UNBLOCKED LEAF
 
 | Rev | Date | Change |
 |:---:|:---:|:---|
+| 16 | 2026-09-25 | Add WG.00.13 (Consolidation, Machine Governance & Backup Infrastructure / Directive 001). |
 | 15 | 2026-09-25 | WG.00.08 returned to REVIEW per DEUS Directive 001; WG.00.07 strata range corrected to 0..4 (S0-S4); WG.00.12 added. |
 | 14 | 2026-09-25 | Add WG.00.11 (Incarnation & Command Layer). Adopt integer rev header and immutable ID governance. Next free in WG.00 is WG.00.12. |
 | 13 | 2026-09-25 | Add WG.63–WG.68 (Historical Landmarks, Karst/Geology, Reclamation, Hydrology, Soils, Living Ecology). |
