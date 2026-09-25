@@ -20,15 +20,15 @@
 ---
 
 ## In progress
-- **Lane A (Claude / Fable):** WG.00.08 Exit Criteria mutant runs (`tools/test_strata_cuts_and_caves.js`, `tasks/WG.00.08/*`).
+- **Lane A (Claude / Fable):** WG.00.08 Exit Criteria 2.2b/2.2c delivered & committed (`9f320da2`). Awaiting Grok closure review.
 - **Lane B (Claude / Fable):** WG.00.11 ATK-YEAR0-001 hardening suite committed (`37ac57da`).
 - **Lane C1 (Claude CLI):** WG.00.12 External backup infrastructure (`tools/backup_project.ps1`, committed `4a3a56f8`).
-- **Lane C2 (Claude CLI):** WG.00.12 Machine governance enforcement (`tools/governance/check_claims.js`, 75/75 PASS).
+- **Lane C2 (Claude CLI):** WG.00.12 Machine governance enforcement (`tools/governance/check_claims.js`, committed `58b0fcad`, 88/88 PASS).
 - **Lane C3 (Claude CLI):** WG.00.12 Palette ADR-002 revision & commit d1fbeab review (committed `70dad27`).
 - **Lane D (Grok PM):** Adversarial review delivered (verdicts recorded).
-- **Lane E (Grok Writer / Claude Reviewer):** WG.00.09 Depth renderer specification (`c846fc7c`) & independent review.
+- **Lane E (Grok Writer / Claude Reviewer):** WG.00.09 Depth renderer specification (`c846fc7c`) & independent review committed (`38875ae0`, CHANGES REQUESTED).
 - **Lane F (Claude CLI):** WG.00.12 OneDrive absolute link rewrite tool & dry-run diff (committed `23559316`).
-- **Lane G (Claude CLI):** WG.00.11 ATK-YEAR0-002 Runtime Year 0 fix (`task-34196`, streaming JSON).
+- **Lane G (Claude CLI):** WG.00.11 ATK-YEAR0-002 Runtime Year 0 fix (`task-34196`, active regression testing).
 
 ---
 
@@ -36,15 +36,15 @@
 
 | Lane | Objective & WBS ID | Provider / Model | Worker Task ID & Branch | Worktree Path | Last Output / mtime | Current Gate & Status |
 |---|---|---|---|---|---|---|
-| **Lane A** | **WG.00.08 Exit Criteria** (`WG.00.08`) | Claude CLI (Fable) / `claude-opus-5-5` | `task-33803`<br>`task/lane-a` | `C:\Users\snewt\.deus_worktrees\lane-a` | 2026-09-25 16:52:25 | **STATUS: ACTIVE / RUNNING.**<br>• Generating mutant kill roster (raw runner count) & 6-point `skylight_through_fluid` proof. Mutant `shaft_prescan_removed` queued (F2). |
+| **Lane A** | **WG.00.08 Exit Criteria** (`WG.00.08`) | Claude CLI (Fable) / `claude-opus-5-5` | Committed `9f320da2`<br>`task/lane-a` | `C:\Users\snewt\.deus_worktrees\lane-a` | 2026-09-25 17:09:20 | **STATUS: WRITER COMMITTED.**<br>• Criteria 2.2b (mutant kill roster, 27/27 caught) and 2.2c (6-point skylight proof, 0 fluid lost/carved across 4 seeds) delivered with full logs. Awaiting Grok review (2.2e) and DEC-001 (2.2d). |
 | **Lane B** | **ATK-YEAR0-001 Hardening** (`WG.00.11`) | Claude CLI (Fable) / `claude-opus-5-5` | Committed `37ac57da`<br>`task/lane-b` | `C:\Users\snewt\.deus_worktrees\lane-b` | 2026-09-25 16:52:25 | **STATUS: WRITER COMMITTED.**<br>• 27 gating checks + 12 mutants pass. Section C checks kept failing as open evidence for `ATK-YEAR0-002`. Awaiting Grok closure signoff. |
 | **Lane C1** | **Consolidation Infrastructure** (`WG.00.12`) | Claude CLI (Codex failover) / `claude-opus-5-5` | Committed `4a3a56f8`<br>`task/lane-c1` | `C:\Users\snewt\.deus_worktrees\lane-c1` | 2026-09-25 16:52:25 | **STATUS: WRITER COMMITTED.**<br>• Authored `tools/backup_project.ps1` (robocopy, SHA-256 hash verify, off-disk detection). Tested against 9,795 files (896 MB). |
-| **Lane C2** | **Governance check_claims.js** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | `task-33817`<br>`task/lane-c2` | `C:\Users\snewt\.deus_worktrees\lane-c2` | 2026-09-25 16:54:41 | **STATUS: TESTS PASS (75/75).**<br>• Authored `tools/governance/check_claims.js` (Rules 4.1–4.4, bold-ID parsing, backfill detection, pre-commit hook). All 75 tests pass. |
+| **Lane C2** | **Governance check_claims.js** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Committed `58b0fcad`<br>`task/lane-c2` | `C:\Users\snewt\.deus_worktrees\lane-c2` | 2026-09-25 17:02:39 | **STATUS: WRITER COMMITTED (88/88 PASS).**<br>• Authored `tools/governance/check_claims.js` (Rules 4.1–4.4, bold-ID parsing, backfill detection, pre-commit hook). 88/88 checks pass, 22 mutants killed. Awaiting Grok attack. |
 | **Lane C3** | **Palette ADR Revision & Review** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Committed `70dad27`<br>`task/lane-c3` | `C:\Users\snewt\.deus_worktrees\lane-c3` | 2026-09-25 16:54:51 | **STATUS: WRITER COMMITTED.**<br>• Revised ADR-002 (uf.hex canonical for runtime now); d1fbeab review completed (flagged Stand-ins blocker). Reviewer: Grok. |
 | **Lane D** | **Adversarial Review** | Grok (PM instance) / `grok-4.7` | Via Owner | Main checkout | 2026-09-25 16:48:00 | **STATUS: DELIVERED.**<br>• ATK-19B-001 CLOSED; ATK-19B-002 KEEP OPEN (F2); ATK-YEAR0-001 KEEP OPEN (F1); WG.00.08 stays REVIEW. |
-| **Lane E** | **WG.00.09 DEFINE / PRE-ATTACK** (`WG.00.09`) | Grok CLI (Writer) / Claude (Reviewer) | `task-33819` (Done)<br>`task-33939` (Review)<br>`task/lane-e` | `C:\Users\snewt\.deus_worktrees\lane-e` | Streaming JSON | **STATUS: REVIEW IN PROGRESS.**<br>• Writer (Grok) committed `c846fc7c`: `UF_Depth_Attack_Plan.md` (518 lines). Claude review actively running. |
+| **Lane E** | **WG.00.09 DEFINE / PRE-ATTACK** (`WG.00.09`) | Grok CLI (Writer) / Claude (Reviewer) | Writer `c846fc7c`<br>Reviewer `38875ae0`<br>`task/lane-e` | `C:\Users\snewt\.deus_worktrees\lane-e` | 2026-09-25 16:58:00 | **STATUS: REVIEW DELIVERED (CHANGES REQUESTED).**<br>• Independent review delivered (1 Blocker: live tilemap opacity occludes depth planes, 8 Major, 9 Minor). Awaiting Grok revision. |
 | **Lane F** | **OneDrive-Link Migration Prep** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Committed `23559316`<br>`task/lane-f` | `C:\Users\snewt\.deus_worktrees\lane-f` | 2026-09-25 16:52:09 | **STATUS: WRITER COMMITTED.**<br>• Authored `tools/migration/rewrite_onedrive_links.js` (28 KB); generated dry-run diff (`onedrive_links_rewrite.diff`). Applied only at freeze point. |
-| **Lane G** | **ATK-YEAR0-002 Runtime Fix** (`WG.00.11`) | Claude CLI / `claude-opus-5-5` | `task-34196`<br>`task/lane-g` | `C:\Users\snewt\.deus_worktrees\lane-g` | Streaming JSON | **STATUS: ACTIVE / RUNNING.**<br>• Runtime fix for Core `|| 1` -> `?? 0`, History startYear 0, Demographics startYear 0, and FactionMenus assertion. |
+| **Lane G** | **ATK-YEAR0-002 Runtime Fix** (`WG.00.11`) | Claude CLI / `claude-opus-5-5` | `task-34196`<br>`task/lane-g` | `C:\Users\snewt\.deus_worktrees\lane-g` | Streaming JSON | **STATUS: ACTIVE / POLISHING.**<br>• Runtime fix for Core `?? 0`, History startYear 0, Demographics startYear 0, and FactionMenus assertion. Active regression testing. |
 
 ---
 
