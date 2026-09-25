@@ -335,7 +335,7 @@
     };
 
     // Class: Window_NewGameSetup
-    // Expedition setup menu allowing player to choose faction, starting year (1-200 AD), and world seed
+    // Expedition setup menu allowing player to choose faction, starting year (0-999 AD, default World Year 0), and world seed
     class Window_NewGameSetup extends Window_Selectable {
         initialize(rect) {
             super.initialize(rect);
@@ -387,7 +387,7 @@
         currentYear() {
             if (this._yearInput && this._yearInput.value) {
                 const parsed = parseInt(this._yearInput.value, 10);
-                if (!isNaN(parsed) && parsed >= 1 && parsed <= 999) {
+                if (!isNaN(parsed) && parsed >= 0 && parsed <= 999) {
                     this._year = parsed;
                 }
             }
@@ -487,7 +487,8 @@
         }
 
         setYear(y) {
-            this._year = Math.max(1, Math.min(999, parseInt(y, 10) || 1));
+            const parsed = parseInt(y, 10);
+            this._year = isNaN(parsed) ? 0 : Math.max(0, Math.min(999, parsed));
             if (this._yearInput) {
                 this._yearInput.value = String(this._year);
             }
@@ -512,7 +513,7 @@
             input.type = "text";
             input.maxLength = 3;
             input.value = String(this._year);
-            input.title = "Starting Year (1 - 999 AD)";
+            input.title = "Starting Year (0 - 999 AD)";
             input.setAttribute("autocomplete", "off");
             input.setAttribute("spellcheck", "false");
             input.style.position = "absolute";
@@ -1604,14 +1605,14 @@
 
             // Test Year Adjustment and Clamping on Row 1
             scene._newGameSetupWindow.select(1);
-            scene._newGameSetupWindow.changeYear(49);
-            t.check("year_adjusted_to_50", scene._newGameSetupWindow.currentYear() === 50, "Year stepped to 50 AD");
+            scene._newGameSetupWindow.changeYear(50);
+            t.check("year_adjusted_to_50", scene._newGameSetupWindow.currentYear() === 50, "Year stepped from 0 to 50 AD");
 
             scene._newGameSetupWindow.setYear(1200);
             t.check("year_clamped_max_999", scene._newGameSetupWindow.currentYear() === 999, "Year clamped at maximum 999 AD");
 
             scene._newGameSetupWindow.setYear(-10);
-            t.check("year_clamped_min_1", scene._newGameSetupWindow.currentYear() === 1, "Year clamped at minimum 1 AD");
+            t.check("year_clamped_min_0", scene._newGameSetupWindow.currentYear() === 0, "Year clamped at minimum 0 AD (World Year 0)");
 
             // Test direct numeric typing into HTML year input
             if (scene._newGameSetupWindow._yearInput) {
