@@ -26,6 +26,7 @@
 | **Lane C2** | **Governance check_claims.js** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | `task-33817`<br>`task/lane-c2` | `C:\Users\snewt\.deus_worktrees\lane-c2` | **STATUS: ACTIVE / RUNNING.**<br>• Authoring `tools/governance/check_claims.js` (Rules 4.1–4.4 + backfill flag) & test suite. |
 | **Lane D** | **Adversarial Review** | Grok (PM instance) / `grok-4.7` | Via Owner | Main checkout | **STATUS: ACTIVE.**<br>• Adversarial review in progress; delivering via Owner. |
 | **Lane E** | **WG.00.09 DEFINE / PRE-ATTACK** (`WG.00.09`) | Grok CLI / `grok-4.7` | `task-33819`<br>`task/lane-e` | `C:\Users\snewt\.deus_worktrees\lane-e` | **STATUS: ACTIVE / RUNNING.**<br>• Authoring `docs/systems/UF_Depth_Attack_Plan.md` (5-plane depth spec, strata authority, physical scale recession, no blur). Zero engine code permitted. |
+| **Lane F** | **OneDrive-Link Migration Prep** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | `task-33868`<br>`task/lane-f` | `C:\Users\snewt\.deus_worktrees\lane-f` | **STATUS: ACTIVE / RUNNING.**<br>• Preparing script & dry-run patch (`onedrive_links_rewrite.diff`) for 103 OneDrive paths; applied only at freeze point. |
 
 ---
 
@@ -33,13 +34,14 @@
 
 | Lane / Owner | Exclusive File Whitelist (Full Paths) | Access Policy |
 |---|---|---|
-| **Gemini (Coordinator)** | `docs/STATUS.md`<br>`docs/archive/STATUS_LEDGER_*.md`<br>`docs/WORK_QUEUE.md`<br>`docs/CANONICAL_ROLES.md`<br>`docs/AGENT_UTILIZATION_POLICY.md`<br>`docs/OWNER_DECISIONS.md`<br>`docs/telemetry/*`<br>`baseline/*` | **Exclusive Writer.** WBS coordination, integration authority, pulse reports, baseline records. |
-| **Lane A (Claude / Fable)** | `tools/test_strata_cuts_and_caves.js`<br>`tasks/WG.00.08/*` | **Exclusive Writer (Worktree lane-a).** 2.2b mutant kill roster, 2.2c proof. |
+| **Gemini (Coordinator)** | `docs/STATUS.md`<br>`docs/archive/STATUS_LEDGER_*.md`<br>`docs/WORK_QUEUE.md`<br>`docs/CANONICAL_ROLES.md`<br>`docs/AGENT_UTILIZATION_POLICY.md`<br>`docs/OWNER_DECISIONS.md`<br>`docs/telemetry/*`<br>`baseline/*` | **Exclusive Writer.** WBS coordination, integration authority, pulse reports, baseline records. Zero engine code. |
+| **Lane A (Claude / Fable)** | `tools/test_strata_cuts_and_caves.js`<br>`tasks/WG.00.08/*` | **Exclusive Writer (Worktree lane-a).** 2.2b mutant kill roster (raw count, no reconciliation), 2.2c proof. |
 | **Lane B (Claude / Fable)** | `game/js/plugins/DEUS_FactionMenus.js`<br>`tools/test_new_game_year0.js`<br>`tasks/WG.00.11/*` | **Exclusive Writer (Worktree lane-b).** Year 0 engine implementation and verification suite. |
-| **Lane C1 (Claude CLI)** | `tools/backup_project.ps1`<br>`tasks/WG.00.12/state.md` | **Exclusive Writer (Worktree lane-c1).** External backup script, consolidation infrastructure. |
-| **Lane C2 (Claude CLI)** | `tools/governance/check_claims.js`<br>`tools/governance/test_check_claims.js`<br>`tasks/WG.00.12/c2_governance_state.md` | **Exclusive Writer (Worktree lane-c2).** Machine governance enforcement script and test suite. |
+| **Lane C1 (Claude CLI)** | `tools/backup_project.ps1`<br>`tasks/WG.00.12/state.md` | **Exclusive Writer (Worktree lane-c1).** External backup script (off-disk target required per DEC-005). |
+| **Lane C2 (Claude CLI)** | `tools/governance/check_claims.js`<br>`tools/governance/test_check_claims.js`<br>`docs/adr/ADR-002-Palette-Canonicalization.md` (revision)<br>`tasks/WG.00.12/c2_governance_state.md` | **Exclusive Writer (Worktree lane-c2).** Machine governance enforcement script, commit d1fbeab review, and ADR-002 runtime canonicalization. |
 | **Lane D (Grok)** | `tasks/WG.00.12/grok_adversarial_review.md`<br>`tasks/WG.00.08/defects.jsonl` (closure lines only) | **Exclusive Writer.** Adversarial review findings, defect verification, and closure signatures. |
 | **Lane E (Grok CLI)** | `docs/systems/UF_Depth_Attack_Plan.md`<br>`tasks/DEUS-TSK-FABLE-19C/state.md` | **Exclusive Writer (Worktree lane-e).** WG.00.09 specification review and pre-attack plan. |
+| **Lane F (Claude CLI)** | `tools/migration/rewrite_onedrive_links.js`<br>`docs/migration/*`<br>`tasks/lane-f/state.md` | **Exclusive Writer (Worktree lane-f).** Link scanner, dry-run diff preparation. |
 | **FROZEN / READ-ONLY** | `C:\Dev\DEUS`<br>`game/js/plugins/DEUS_Levels.js`<br>`game/js/plugins/DEUS_World.js`<br>`game/js/plugins/DEUS_WorldGen.js`<br>`game/js/plugins/DEUS_Fluid.js`<br>`game/js/rmmz_*.js` | **Strictly Read-Only.** Core engine files locked during parallel consolidation. |
 
 ---
@@ -48,8 +50,9 @@
 
 | Defect / Finding ID | Task / WBS | Severity | Title & Requirement | Status | Owner |
 |---|---|:---:|---|:---:|:---:|
-| **ATK-YEAR0-001** | `WG.00.11` | `MAJOR` | Standard New Game defaults to Year 1; INV-SIM-01 requires World Year 0. Fix committed in `8d1c7c3`. | `OPEN` (Fix Ready) | Fable / Grok |
-| **A10-1** | `WG.00.08` | `MAJOR` | Native playtest proof of Z-2 ravine cut. Awaiting Owner decision in `docs/OWNER_DECISIONS.md`. | `OPEN` | Owner / Grok |
+| **BLOCKER-BACKUP** | `WG.00.12` | `BLOCKER` | Migration to `C:\Dev\DEUS` blocked: repo has no git remote, C: is only drive. Off-disk backup target required (DEC-005 in `OWNER_DECISIONS.md`). | `OPEN` (Blocker) | Owner / Lane C1 |
+| **ATK-YEAR0-001** | `WG.00.11` | `MAJOR` | Standard New Game defaults to Year 1; INV-SIM-01 requires World Year 0. Fix committed in `8d1c7c3`. | `OPEN` (Hardening) | Fable / Grok |
+| **A10-1** | `WG.00.08` | `MAJOR` | Native playtest proof of Z-2 ravine cut. Awaiting Owner decision DEC-001 in `docs/OWNER_DECISIONS.md`. | `OPEN` | Owner / Grok |
 
 ---
 
