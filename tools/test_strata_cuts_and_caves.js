@@ -29,11 +29,18 @@
  *   traversable_terrain         [J] per seed: standable cells >= 90 % of generator 4's (ground and all levels), the ground's
  *                                    largest walkable region >= 85 %, the start valley (r <= 36) untouched on every level
  *   cave_overburden             [K] every roofed generated cave floor: hasOpaqueOverburden true and continuousAirHeight =
- *                                    the strata's void height; every sky-open cut floor: no overburden, Infinity
+ *                                    the strata's air run; every sky-open cut floor: no overburden, Infinity; the networks'
+ *                                    chambers roofed at their centres (>= 90 %)
+ *   cave_void_minimum               over the seed set: no generated cave void is under 3 ft (the carve rule: C - F >= 3)
  *   roof_breach                 [L] a generated cave roof dug away: overburden and clearance change; a +2 cap breached:
  *                                    the same, levels:capBreached, the breach saved and loaded; restored = no record
  *   clearance_4_5_more          [M] continuousAirHeight: 4 ft (1 solid + 4 air), 5 ft, 6 and 9 ft across levels, sky,
  *                                    solid, no floor, a capped +2 floor; generated floors of 4, 5 and > 5 ft; no allocation
+ *   clearance_stops_at_fluid    [M] clearance is AIR: stone + 4 water under solid 0 ft, stone + 2 air + 2 water 2 ft, -2
+ *                                    stone + 4 lava 0 ft, the air above a water stratum not counted; airRunAt agrees
+ *   shafts_keep_fluid               an instrumented copy of the generator plants water in every shaft's and skylight's path
+ *                                    before they are carved (generated worlds keep pools away from them): the water stays and
+ *                                    no rock of those columns is carved (a shaft or skylight never cuts through a fluid)
  *   multi_z_connectivity        [N] a generated multi-Z network: one continuous air volume holding floors on two levels
  *                                    (shaft or slope), and natural ramp connectors on slopes that step onto the next level
  *   no_floating_mass            [O] every solid stratum of every seed's five levels reaches bedrock or the area edge
@@ -99,8 +106,17 @@ const MUTANTS = {
     cuts_in_start: [[L_, "            startRadius: 40, startTaper: 8,", "            startRadius: 0, startTaper: 1, /* MUTANT */"]],
     no_roof: [[L_, "            let C = Math.min(F + h, capped ? E_TOP : top[i] - CV.roofMin, E_TOP);", "            let C = top[i]; /* MUTANT */"]],
     cap_ignored: [[L_, "        return capCode(qSt, qAx, qAy, qI) !== 0;\n    }", "        return false; /* MUTANT */\n    }"]],
-    clearance_off_by_one: [[L_, "        let h = 0;\n        for (;;) {\n            while (s < STRATA) {\n                if (SOLID_B[rdM[rdO + s]] === 1) return h;",
-        "        let h = 1; /* MUTANT */\n        for (;;) {\n            while (s < STRATA) {\n                if (SOLID_B[rdM[rdO + s]] === 1) return h;"]],
+    clearance_off_by_one: [[L_, "        let h = 0;\n        for (;;) {\n            while (s < STRATA) {\n                if (rdM[rdO + s] !== M_AIR) return h;",
+        "        let h = 1; /* MUTANT */\n        for (;;) {\n            while (s < STRATA) {\n                if (rdM[rdO + s] !== M_AIR) return h;"]],
+    air_through_fluid: [[L_, "        let h = 0;\n        for (;;) {\n            while (s < STRATA) {\n                if (rdM[rdO + s] !== M_AIR) return h;",
+        "        let h = 0;\n        for (;;) {\n            while (s < STRATA) {\n                if (SOLID_B[rdM[rdO + s]] === 1) return h; /* MUTANT: fluid counted as air */"]],
+    airrun_through_fluid: [[L_, "        let z = qZ, s = el % STRATA, h = 0;\n        locate(qSt, z, qAx, qAy, qI, 1);\n        for (;;) {\n            while (s < STRATA) {\n                if (rdM[rdO + s] !== M_AIR) return h;",
+        "        let z = qZ, s = el % STRATA, h = 0;\n        locate(qSt, z, qAx, qAy, qI, 1);\n        for (;;) {\n            while (s < STRATA) {\n                if (SOLID_B[rdM[rdO + s]] === 1) return h; /* MUTANT: fluid counted as air */"]],
+    void_min_1: [[L_, "            if (C - F < 3) return 0;", "            if (C - F < 1) return 0; /* MUTANT */"]],
+    shaft_through_fluid: [[L_, "                if (fluidIn(i, sh.from, hi)) return;\n                let changed = false;\n                for (let e = sh.from; e < hi; e++) if (SOLID_B[getE(i, e)] === 1) { setE(i, e, M_AIR); changed = true; }",
+        "                let changed = false;\n                for (let e = sh.from; e < hi; e++) if (SOLID_B[getE(i, e)] === 1 || FLUID_B[getE(i, e)] === 1) { setE(i, e, M_AIR); changed = true; } /* MUTANT: the old shaft */"]],
+    skylight_through_fluid: [[L_, "                if (!solidE(i, nd.F - 1) || fluidIn(i, nd.F, top[i])) return;\n                let changed = false;\n                for (let e = nd.F; e < top[i]; e++) if (SOLID_B[getE(i, e)] === 1) { setE(i, e, M_AIR); changed = true; }",
+        "                if (!solidE(i, nd.F - 1)) return;\n                let changed = false;\n                for (let e = nd.F; e < top[i]; e++) if (getE(i, e) !== M_AIR) { if (FLUID_B[getE(i, e)] === 1) return; setE(i, e, M_AIR); changed = true; } /* MUTANT: the old skylight */"]],
     no_multi_z: [[L_, "multiZChance: 0.25,", "multiZChance: 0, /* MUTANT */"], [L_, "shaftChance: 0.4,", "shaftChance: 0,"],
         [L_, "if (ramp) { CONN[zf + 2][i >> 1] |= RAMP << ((i & 1) << 2);", "if (ramp && false) { CONN[zf + 2][i >> 1] |= RAMP << ((i & 1) << 2);"]],
     keep_floating: [[L_, "                if (sol[v] !== 1) continue;", "                if (sol[v] !== 1 || true) continue; /* MUTANT */"]],
@@ -332,7 +348,9 @@ function floorsOf(V, i) {
         if (V.solid(i, e) || !V.solid(i, e - 1)) continue;
         let r = e;
         while (r < E_TOP && !V.solid(i, r)) r++;
-        out.push({ F: e, roof: r, clear: r - e, sky: r === E_TOP && !V.caps.has(i), capped: r === E_TOP && V.caps.has(i) });
+        let air = 0;
+        while (e + air < r && V.get(i, e + air) === 0) air++;
+        out.push({ F: e, roof: r, clear: r - e, air, sky: r === E_TOP && !V.caps.has(i), capped: r === E_TOP && V.caps.has(i) });
     }
     return out;
 }
@@ -347,7 +365,7 @@ function compare(V5, V4) {
             if (f.sky) continue;
             let carved = f.capped && massif[i] === 1;
             for (let e = f.F; e < f.roof && !carved; e++) if (V4.solid(i, e)) carved = true;
-            if (carved) caveFloors.push({ i, x: i % V5.size, y: (i / V5.size) | 0, F: f.F, level: levelOfFloor(f.F), clear: f.clear, roof: f.roof, capped: f.capped });
+            if (carved) caveFloors.push({ i, x: i % V5.size, y: (i / V5.size) | 0, F: f.F, level: levelOfFloor(f.F), clear: f.clear, air: f.air, roof: f.roof, capped: f.capped });
         }
     }
     return { cut, caveFloors, massif };
@@ -443,6 +461,7 @@ for (const s of [SEED2, ...EXTRA]) {
 info(`seed set built: ${set.map(r => r.seed).join(", ")} (${((performance.now() - T0) / 1000).toFixed(0)} s)`);
 
 const evidence = [];
+const envErrors = [];
 const ev = (k, text) => evidence.push(`${k}. ${text}`);
 
 //---------------------------------------------------------------- [A] deterministic_same_seed
@@ -710,7 +729,7 @@ guard("cave_overburden", () => {
         const r = ref(f.x, f.y, z);
         if (L.worldStrataElevationAt(r) !== f.F - 1) continue;    // another floor of the column is this cell's
         const ob = L.hasOpaqueOverburden(r), cl = L.continuousAirHeight(r);
-        if (!ob || cl !== f.clear) { if (bad.length < 5) bad.push(`cave (${f.x},${f.y},${z}) fill ${fill}: overburden ${ob}, clearance ${cl} (strata: ${f.clear})`); }
+        if (!ob || cl !== f.air) { if (bad.length < 5) bad.push(`cave (${f.x},${f.y},${z}) fill ${fill}: overburden ${ob}, clearance ${cl} (strata: ${f.air} ft of air)`); }
     }
     for (let i = 0; i < n; i++) {
         if (!C5.cut[i] || !skyOpen(V5, i)) continue;
@@ -735,10 +754,21 @@ guard("cave_overburden", () => {
         else if (open.length < 4) open.push(`#${c.id} (${nd.x},${nd.y}) floor ${nd.floor}: ${fl ? "open to the sky" : "no floor there"}`);
     }
     check("cave_overburden", caves > 20 && cutFloors > 50 && bad.length === 0 && chambers > 10 && roofedChambers >= 0.9 * chambers,
-        `seed ${SEED}: ${caves} roofed generated cave floors (hasOpaqueOverburden true and continuousAirHeight = the void's strata), ${cutFloors} sky-open cut floors (no overburden, Infinity); wrong ${bad.length}${bad.length ? `: ${bad.join("; ")}` : ""}; ` +
+        `seed ${SEED}: ${caves} roofed generated cave floors (hasOpaqueOverburden true and continuousAirHeight = the air run of the strata), ${cutFloors} sky-open cut floors (no overburden, Infinity); wrong ${bad.length}${bad.length ? `: ${bad.join("; ")}` : ""}; ` +
         `network chambers roofed at their centres ${roofedChambers}/${chambers} (want >= 90 %: a mouth or a cut can open a few)${open.length ? `: ${open.join("; ")}` : ""}`);
     const roofed = C5.caveFloors.find(f => !f.capped && f.roof < V5.top[f.i] + 1 && f.level === -1) || C5.caveFloors.find(f => !f.capped);
     if (roofed) ev(11, `intact physical cave roof: seed ${SEED} (${roofed.x},${roofed.y}) level ${roofed.level}: floor ${roofed.F} ft, clearance ${roofed.clear} ft, solid roof from ${roofed.roof} ft to the rock top at ${V5.top[roofed.i]} ft (${V5.top[roofed.i] - roofed.roof} ft thick), hasOpaqueOverburden ${L.hasOpaqueOverburden(ref(roofed.x, roofed.y, roofed.level))}`);
+});
+
+guard("cave_void_minimum", () => {
+    const hist = {}, small = [];
+    for (const r of set) for (const f of r.C.caveFloors) {
+        hist[f.clear] = (hist[f.clear] || 0) + 1;
+        if (f.clear < 3 && small.length < 5) small.push(`seed ${r.seed} (${f.x},${f.y}) floor ${f.F} ft: ${f.clear} ft`);
+    }
+    const n3 = Object.keys(hist).map(Number);
+    check("cave_void_minimum", small.length === 0 && n3.length > 0,
+        `roofed generated cave voids over ${set.length} seeds by height (ft): ${JSON.stringify(hist)}; under 3 ft ${small.length}${small.length ? `: ${small.join("; ")}` : ""}`);
 });
 
 //---------------------------------------------------------------- [L] roof_breach
@@ -782,17 +812,19 @@ guard("roof_breach", () => {
 });
 
 //---------------------------------------------------------------- [M] clearance_4_5_more
-guard("clearance_4_5_more", () => {
-    // A valley column of the regression world away from every feature: -2 rock, -1 rock, ground floor, sky above.
-    let col = -1;
-    for (let i = 0; i < n && col < 0; i++) {
+// A valley column of the regression world away from every feature: -2 rock, -1 rock, ground floor, sky above.
+function plainValleyColumn() {
+    for (let i = 0; i < n; i++) {
         const x = i % size, y = (i / size) | 0;
         if (x < 30 || y < 30 || x > size - 30 || y > size - 30 || V5.S[i] !== 0 || C5.cut[i] || V5.top[i] !== 11) continue;
         if (!LEVELS.every(z => z > 0 || [0, 1, 2, 3, 4].every(s => V5.solid(i, (z + 2) * 5 + s) || z === 0))) continue;
         if (L.shapeAt(ref(x, y, -1)) !== "solid" || L.shapeAt(ref(x, y, -2)) !== "solid") continue;
-        col = i;
+        return i;
     }
-    if (col < 0) throw new Error("no plain valley column");
+    throw new Error("no plain valley column");
+}
+guard("clearance_4_5_more", () => {
+    const col = plainValleyColumn();
     const x = col % size, y = (col / size) | 0, snap = LEVELS.map(z => L.strataAt(ref(x, y, z)));
     const set5 = (z, m) => L.setStrata(ref(x, y, z), { m, connector: 0 });
     const S_ = "stone", A_ = "air";
@@ -818,10 +850,10 @@ guard("clearance_4_5_more", () => {
     // Generated floors of 4, 5 and more than 5 ft.
     const byClear = { 4: null, 5: null, more: null };
     for (const f of C5.caveFloors) {
-        const k = f.clear === 4 ? 4 : f.clear === 5 ? 5 : f.clear > 5 ? "more" : null;
+        const k = f.air === 4 ? 4 : f.air === 5 ? 5 : f.air > 5 ? "more" : null;
         if (k === null || byClear[k]) continue;
         const r = ref(f.x, f.y, levelOfFloor(f.F));
-        if (L.worldStrataElevationAt(r) === f.F - 1 && L.continuousAirHeight(r) === f.clear) byClear[k] = f;
+        if (L.worldStrataElevationAt(r) === f.F - 1 && L.continuousAirHeight(r) === f.air) byClear[k] = f;
     }
     // Allocation: 1,000,000 queries after a warm-up grow the heap by < 1 B each.
     const pts = C5.caveFloors.slice(0, 64).map(f => [f.x, f.y, levelOfFloor(f.F)]);
@@ -839,6 +871,38 @@ guard("clearance_4_5_more", () => {
         `fixture column (${x},${y}): 1 solid + 4 air under solid ${got.four} ft (derived shape ${got.fourShape}: the compatibility view; the clearance is the data), 5 air on -2's S4 ${got.five}, across -1 and the ground ${got.six} (airRunAt ${got.sixRun}), up to +1 ${got.nine}, open sky ${got.sky}, a 2 ft slot ${got.slot} (shape ${got.slotShape}), solid ${got.solid}, no floor ${got.noFloor}; restored records ${got.back}; ` +
         `generated floors: 4 ft ${byClear[4] ? `(${byClear[4].x},${byClear[4].y},${byClear[4].level})` : "NONE"}, 5 ft ${byClear[5] ? `(${byClear[5].x},${byClear[5].y},${byClear[5].level})` : "NONE"}, > 5 ft ${byClear.more ? `${byClear.more.clear} ft (${byClear.more.x},${byClear.more.y},${byClear.more.level})` : "NONE"}; ` +
         `1,000,000 queries ${ns.toFixed(0)} ns each, heap growth ${grew} B (checksum ${acc})`);
+});
+
+// Clearance is continuous AIR (handoff section 8): a fluid stratum ends the run like a solid one.
+guard("clearance_stops_at_fluid", () => {
+    const col = plainValleyColumn();
+    const x = col % size, y = (col / size) | 0, snap = LEVELS.map(z => L.strataAt(ref(x, y, z)));
+    const set5 = (z, m) => { if (!L.setStrata(ref(x, y, z), { m, connector: 0 })) throw new Error(`setStrata refused: ${L.lastRefusal().reason}`); };
+    const S_ = "stone", A_ = "air", W_ = "water", V_ = "lava";
+    const rows = [];
+    let ok = true;
+    const expect = (label, z, run, want) => {
+        const got = { cah: L.continuousAirHeight(ref(x, y, z)), run: L.airRunAt(a, x, y, run) };
+        const good = got.cah === want.cah && got.run === want.run;
+        if (!good) ok = false;
+        rows.push(`${label}: continuousAirHeight ${got.cah} (want ${want.cah}), airRunAt(${run}) ${got.run} (want ${want.run})${good ? "" : " WRONG"}`);
+    };
+    set5(0, [S_, S_, S_, S_, S_]);
+    set5(-1, [S_, W_, W_, W_, W_]);                    // S0 stone, S1..S4 water, the cell above solid: no air
+    expect("-1 stone + 4 water, ground solid", -1, 6, { cah: 0, run: 0 });
+    set5(-1, [S_, A_, A_, W_, W_]);                    // S0 stone, S1..S2 air, S3..S4 water: 2 ft
+    expect("-1 stone + 2 air + 2 water", -1, 6, { cah: 2, run: 2 });
+    set5(-1, [S_, W_, A_, A_, A_]);                    // water right on the floor: 0 ft; the air above it is its own run
+    expect("-1 stone + water + 3 air (from the floor)", -1, 6, { cah: 0, run: 0 });
+    expect("the same, air run from S2", -1, 7, { cah: 0, run: 3 });
+    set5(-1, [S_, S_, S_, S_, S_]);
+    set5(-2, [S_, V_, V_, V_, V_]);                    // -2 S0 stone, S1..S4 lava, -1 solid: no air
+    expect("-2 stone + 4 lava, -1 solid", -2, 1, { cah: 0, run: 0 });
+    set5(-2, [S_, A_, A_, A_, A_]);                    // the same cell dry: 4 ft of air (the control)
+    expect("-2 stone + 4 air, -1 solid (control)", -2, 1, { cah: 4, run: 4 });
+    LEVELS.forEach((z, k) => L.setStrata(ref(x, y, z), { m: snap[k].bytes, hp: snap[k].hp, connector: snap[k].connector || 0 }));
+    const back = LEVELS.filter(z => L.strataAt(ref(x, y, z)).changed).length;
+    check("clearance_stops_at_fluid", ok && back === 0, `fixture column (${x},${y}): ${rows.join("; ")}; restored records ${back}`);
 });
 
 //---------------------------------------------------------------- [N] multi_z_connectivity
@@ -882,6 +946,65 @@ guard("multi_z_connectivity", () => {
     check("multi_z_connectivity", !!found && !!rampAt,
         `${cand.length} networks flagged multi-Z in seed ${SEED}; ${found ? `#${found.c.id} from (${found.x},${found.y}) floor ${found.F} ft: ${found.cells} air strata (roofed), floors on levels [${found.levels}]` : "NONE whose air volume holds floors on two levels"}; ` +
         `natural ramp connectors added ${ramps}${rampAt ? `, e.g. (${rampAt.x},${rampAt.y},${rampAt.z}) derived ${L.shapeAt(ref(rampAt.x, rampAt.y, rampAt.z))}` : ", NONE derived as a ramp"}`);
+});
+
+guard("shafts_keep_fluid", () => {
+    const anchor = "        for (const sh of out.shafts) {\n";
+    const plant = `        // TEST INSTRUMENTATION (tools/test_strata_cuts_and_caves.js, shafts_keep_fluid): water planted in the paths.
+        out.planted = [];
+        for (const sh of out.shafts) disc(sh.x, sh.y, sh.r, i => {
+            const hi = Math.min(sh.to, top[i] - CV.roofMin), e = hi - 1;
+            if (e >= sh.from && SOLID_B[getE(i, e)] === 1) { setE(i, e, M_WATER); out.planted.push({ kind: "shaft", x: i % size, y: (i / size) | 0, e, solid: [] }); }
+        });
+        for (const net of networks) {
+            if (!net.skylight) continue;
+            const nd = net.skylight.node;
+            let ok = true;
+            disc(nd.x, nd.y, 1.2, i => {
+                if ((lock[i] & (NO_CUT | NO_CAVE)) || wt[i] < 1 || minTop[i] > nd.F || top[i] - (nd.F + nd.h) > CV.skylightMax || nearWater(i)) ok = false;
+            });
+            if (!ok) continue;
+            disc(nd.x, nd.y, 1.2, i => {
+                const e = top[i] - 1, from = nd.F + nd.h;
+                if (e <= from || SOLID_B[getE(i, e)] !== 1) return;
+                const solid = [];
+                for (let k = from; k < e; k++) if (SOLID_B[getE(i, k)] === 1) solid.push(k);
+                setE(i, e, M_WATER);
+                out.planted.push({ kind: "skylight", x: i % size, y: (i / size) | 0, e, solid });
+            });
+        }
+`;
+    const inst = Object.assign({}, src);
+    if (!inst["DEUS_Levels.js"].includes(anchor)) harnessProblem("shafts_keep_fluid: the shaft loop to instrument is missing");
+    inst["DEUS_Levels.js"] = inst["DEUS_Levels.js"].replace(anchor, plant + anchor);
+    // Test on SEED and SEED2 (seed 3 naturally has eligible skylights with 5-6 strata of rock overburden as well as vertical shafts).
+    const seedsToTest = [SEED, SEED2];
+    const bad = [];
+    let totalShafts = 0, totalSkylights = 0, totalRock = 0, totalWithRock = 0;
+    const summaries = [];
+    for (const s of seedsToTest) {
+        const envI = setup(inst, `inst-${s}`);
+        newWorld(envI, s);
+        const VI = volume(envI), stI = envI.UF.World.state, FI = envI.UF.Levels.naturalFeatures(stI.startArea.x, stI.startArea.y);
+        const planted = FI.planted || [];
+        let sShafts = 0, sSkylights = 0, sWithRock = 0;
+        for (const p of planted) {
+            const i = p.y * size + p.x;
+            if (p.kind === "shaft") sShafts++; else sSkylights++;
+            if (VI.get(i, p.e) !== 4 && bad.length < 5) bad.push(`${p.kind} (${p.x},${p.y}) planted water at ${p.e} ft is now ${VI.get(i, p.e)}`);
+            for (const k of p.solid) {
+                totalRock++;
+                if (!VI.solid(i, k) && bad.length < 8) bad.push(`skylight (${p.x},${p.y}) rock at ${k} ft carved below the water`);
+            }
+        }
+        sWithRock = planted.filter(p => p.kind === "skylight" && p.solid.length).length;
+        totalShafts += sShafts; totalSkylights += sSkylights; totalWithRock += sWithRock;
+        summaries.push(`seed ${s}: ${sShafts} shafts, ${sSkylights} skylights (${sWithRock} with rock under water)`);
+        envErrors.push(...envI.__errors);
+    }
+    check("shafts_keep_fluid", totalShafts > 0 && totalWithRock > 0 && bad.length === 0,
+        `${summaries.join("; ")}; total rock strata under water: ${totalRock}; ` +
+        `after the carve: ${bad.length ? bad.join("; ") : "every planted water stratum still water, no rock under it carved"}`);
 });
 
 //---------------------------------------------------------------- [O] no_floating_mass
@@ -1020,7 +1143,7 @@ async function finish() {
         const tail = (r.text.match(/(RESULT:.*|MUTANT VERIFICATION:.*|PASSED: \d+|FAILED: \d+)/g) || []).join("; ");
         check(key, r.code === 0, `node ${r.file}: exit ${r.code} in ${r.s.toFixed(0)} s; ${tail}`);
     }
-    const unexpected = [envA, envB, env4, ...set.slice(1).map(r => r.env)].flatMap(e => e ? e.__errors : []);
+    const unexpected = [envA, envB, env4, ...set.slice(1).map(r => r.env)].flatMap(e => e ? e.__errors : []).concat(envErrors);
     check("no_errors", unexpected.length === 0, unexpected.length ? unexpected.slice(0, 3).join(" | ") : "none");
     if (!quiet) {
         console.log("EVIDENCE (generated worlds; x,y in the start area; levels -2..+2; heights in ft = strata):");

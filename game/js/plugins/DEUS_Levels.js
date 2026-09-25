@@ -2481,7 +2481,10 @@
             net.desc = d;
             out.caves.push(d);
         }
-        // Shafts between networks, then skylights up to the open surface through thin rock.
+        // Shafts between networks, then skylights up to the open surface through thin rock. As a cave void, a shaft or a
+        // skylight never carves through a fluid: a column holding a fluid stratum anywhere in its interval is left as it is
+        // (checked before anything is written), and only solid strata become air.
+        const fluidIn = (i, e0, e1) => { for (let e = e0; e < e1; e++) if (FLUID_B[getE(i, e)] === 1) return true; return false; };
         const disc = (cx, cy, r, fn) => {
             for (let y = Math.floor(cy - r - 1); y <= Math.ceil(cy + r + 1); y++) for (let x = Math.floor(cx - r - 1); x <= Math.ceil(cx + r + 1); x++) {
                 if (inArea(x, y) && (x + 0.5 - cx - 0.5) ** 2 + (y + 0.5 - cy - 0.5) ** 2 <= r * r) fn(y * size + x);
@@ -2492,8 +2495,9 @@
             disc(sh.x, sh.y, sh.r, i => {
                 if ((lock[i] & NO_CAVE) || wt[i] < 1) return;
                 const hi = Math.min(sh.to, top[i] - CV.roofMin);   // up to and through the upper chamber's floor stratum
+                if (fluidIn(i, sh.from, hi)) return;
                 let changed = false;
-                for (let e = sh.from; e < hi; e++) if (SOLID_B[getE(i, e)] === 1 || FLUID_B[getE(i, e)] === 1) { setE(i, e, M_AIR); changed = true; }
+                for (let e = sh.from; e < hi; e++) if (SOLID_B[getE(i, e)] === 1) { setE(i, e, M_AIR); changed = true; }
                 if (changed) { clearConn(i, sh.from, hi - 1); touched[i] |= 4; cells++; }
             });
             sh.cells = cells;
@@ -2507,9 +2511,9 @@
             });
             if (!ok) continue;
             disc(nd.x, nd.y, r, i => {
-                if (!solidE(i, nd.F - 1)) return;
+                if (!solidE(i, nd.F - 1) || fluidIn(i, nd.F, top[i])) return;
                 let changed = false;
-                for (let e = nd.F; e < top[i]; e++) if (getE(i, e) !== M_AIR) { if (FLUID_B[getE(i, e)] === 1) return; setE(i, e, M_AIR); changed = true; }
+                for (let e = nd.F; e < top[i]; e++) if (SOLID_B[getE(i, e)] === 1) { setE(i, e, M_AIR); changed = true; }
                 if (changed) { clearConn(i, nd.F, top[i] - 1); top[i] = topOf(i); touched[i] |= 4; cells++; }
             });
             if (cells) { net.desc.skylight = { x: nd.x, y: nd.y, floor: nd.F, cells }; out.skylights.push({ network: net.id, x: nd.x, y: nd.y, floor: nd.F, cells }); }
@@ -2873,15 +2877,16 @@
     }
 
     //-------------------------------------------------------------------------
-    // Clearance (19B): continuous open volume in the column, in feet (strata), across levels. Physical data only: no
-    // creature's needs are decided here.
+    // Clearance (19B): continuous air in the column, in feet (strata), across levels. Physical data only: no creature's
+    // needs are decided here.
 
     /**
-     * The continuous open (non-solid) strata above a cell's standing surface, in feet: from the stratum stood on (the
-     * top of the cell's solid base, or the S4 of the cell below when the cell's S0 is open; worldStrataElevationAt) up
-     * through the cells above to the first solid stratum. Infinity when nothing solid is above up to +2's S4 and the
-     * column has no cap (open sky); 0 for a solid cell; -1 when there is nothing to stand on (outside the world, or an
-     * open cell over open space). A fluid stratum counts as open volume (fluidStateAt says how much of it is fluid).
+     * The continuous AIR strata above a cell's standing surface, in feet: from the stratum stood on (the top of the
+     * cell's solid base, or the S4 of the cell below when the cell's S0 is open; worldStrataElevationAt) up through the
+     * cells above to the first stratum that isn't air: a solid one, or a fluid one (water and lava are not clearance: a
+     * floor under a pool has 0 ft; the air above a fluid isn't counted). Infinity when every stratum above up to +2's S4
+     * is air and the column has no cap (open sky); 0 for a solid cell; -1 when there is nothing to stand on (outside the
+     * world, or an open cell over open space).
      * Arguments (ref), (area, x, y[, z]) or (ax, ay, x, y, z); no allocation.
      */
     function continuousAirHeight(a, b, c, d, e) {
@@ -2898,7 +2903,7 @@
         let h = 0;
         for (;;) {
             while (s < STRATA) {
-                if (SOLID_B[rdM[rdO + s]] === 1) return h;
+                if (rdM[rdO + s] !== M_AIR) return h;   // solid or fluid: the air run ends
                 h++;
                 s++;
             }
@@ -2908,8 +2913,9 @@
             locate(qSt, z, qAx, qAy, qI, 2);
         }
     }
-    /** Continuous open strata (ft) from column elevation e (0..24) upward in a cell: 0 when e is solid; Infinity to the
-     *  open sky (no cap). airRunAt(area, x, y, e) or airRunAt(ax, ay, x, y, e). No allocation. */
+    /** Continuous air strata (ft) from column elevation e (0..24) upward in a cell, ending at the first solid or fluid
+     *  stratum: 0 when e itself is solid or fluid; Infinity to the open sky (no cap). airRunAt(area, x, y, e) or
+     *  airRunAt(ax, ay, x, y, e). No allocation. */
     function airRunAt(a, b, c, d, e) {
         let ax, ay, x, y, el;
         if (typeof a === "number") { ax = a; ay = b; x = c; y = d; el = e; }
@@ -2919,7 +2925,7 @@
         locate(qSt, z, qAx, qAy, qI, 1);
         for (;;) {
             while (s < STRATA) {
-                if (SOLID_B[rdM[rdO + s]] === 1) return h;
+                if (rdM[rdO + s] !== M_AIR) return h;   // solid or fluid: the air run ends
                 h++;
                 s++;
             }
