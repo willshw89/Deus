@@ -86,7 +86,8 @@ function inspect(loaded, world, targetYear) {
     const { env, errors } = loaded, h = world.history, d = h && h.demographics;
     assert(d, "HIST10_API: missing production demographics"); env.UF.HistoricalDemographics.validate(d);
     const steps = targetYear <= 1 ? 0 : targetYear;
-    assert(d.yearsSimulated === steps && d.currentYear === steps + 1, "WORLD_AGE: target does not map to frozen annual clock");
+    const start = targetYear === 0 ? 0 : 1;
+    assert(d.yearsSimulated === steps && d.startYear === start && d.currentYear === start + steps, "WORLD_AGE: target does not map to frozen annual clock");
     assert(errors.length === 0, `GENERATION_ERRORS: ${errors.join("; ")}`);
     const alive = d.people.filter(p => p.died === null), dead = d.people.filter(p => p.died !== null);
     equal(d.living, alive.map(p => p.id), "LIVING_INDEX: living IDs do not exactly partition people");
@@ -248,7 +249,7 @@ function main(args = process.argv.slice(2)) {
         if (!mutant) {
             const dawn = rows.find(r => r.seed === 0 && r.targetYear === 0);
             const alias = child({ mode: "generate", seed: 0, targetYear: 1, sourceDigest: bundle.digest });
-            assert(alias.coreSha256 === dawn.coreSha256 && alias.unitsSha256 === dawn.unitsSha256, "DAWN_ALIAS: Year1 changed founder demographics or physical units");
+            assert(dawn.currentYear === 0 && alias.currentYear === 1 && alias.living === dawn.living && alias.records === dawn.records, "DAWN_ALIAS: Year0/Year1 founders differ in clock year, census or records");
             checks.push({ id: "DAWN_YEAR1_ALIAS", status: "PASS" });
             const override = child({ mode: "generate", seed: 424242, seedOverride: 0, targetYear: 0, sourceDigest: bundle.digest });
             const repeat = child({ mode: "generate", seed: 424242, seedOverride: 0, targetYear: 0, sourceDigest: bundle.digest });
@@ -267,7 +268,7 @@ function main(args = process.argv.slice(2)) {
         }
         assert(sources().digest === bundle.digest, "SOURCE_CHANGED: working production changed during suite");
         const report = { task: "DEUS-TSK-ASTRA-15", status: "PASS", sourceSha256: bundle.hashes, sourceDigest: bundle.digest, checks, matrix: rows, restarts,
-            totalWallMs: performance.now() - start, methodology: "Fresh VM and OS process per canonical seed/age; production History world:created, World.addUnit, Callings and Dnd5e; original engine DataManager/JsonEx plus production save aliases. Rendering classes and scene baseline methods are headless doubles. No native gameplay claim. Year0/1 are founders; N>1 means N unchanged HIST-09 annual steps, core currentYear=N+1. Full core and event hashes prove Year100 prefix. Dedicated saver exits before fresh loader reads/fsynced disk save; full world/history/units/factions/sites/people/rulers hashes compared." };
+            totalWallMs: performance.now() - start, methodology: "Fresh VM and OS process per canonical seed/age; production History world:created, World.addUnit, Callings and Dnd5e; original engine DataManager/JsonEx plus production save aliases. Rendering classes and scene baseline methods are headless doubles. No native gameplay claim. Year0 and Year1 are the same founders, founded at year 0 and year 1 (core currentYear=0/1); N>1 means N unchanged HIST-09 annual steps from year 1, core currentYear=N+1. Full core and event hashes prove Year100 prefix. Dedicated saver exits before fresh loader reads/fsynced disk save; full world/history/units/factions/sites/people/rulers hashes compared." };
         console.log(`RESULT: ${checks.length} passed, 0 failed`); console.log(json(report));
     } finally {
         // Delete only known files under the exact directory this invocation created.
