@@ -104,6 +104,20 @@ To support large-scale settlements and 1,000+ simulated entities, simulation fre
 
 > **Conservation Invariant:** Lower simulation frequencies must **never** alter authoritative simulation outcomes. Systems operating on reduced tiers accumulate elapsed physical time ($\Delta t$) and resolve state changes mathematically rather than dropping calculations.
 
+### 5.1 Natural World Systems & Multi-Timescale Performance Standard
+*Governed by [`docs/worldgen/DEUS_NATURAL_WORLD_SYSTEMS.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_NATURAL_WORLD_SYSTEMS.md) and [`docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md)*
+
+Natural world systems (hydrology, soil, succession, wildfire, wildlife, geomorphology) operate across vast geographic areas but must **never** incur full-world per-frame scans:
+
+1. **Stable World = Zero Recurring CPU Work:** Undisturbed natural terrain, dormant forests, settled aquifers, and calm lakes consume **0 ms** of recurring simulation time.
+2. **Multi-Timescale Execution Cadences:**
+   - **Action Domain (Seconds / Minutes):** Active wildfire fronts, flash flood expansion, and active landslides utilize localized dirty bounding boxes and active-front FIFO queues. Dormant trees and stable slopes are never checked.
+   - **Simulation Domain (Daily Ticks):** Soil moisture evaporation, rain soaking, and wildlife grazing utilize staggered chunk schedulers (e.g. 64 chunks per frame across 60 seconds).
+   - **Historical Domain (Seasonal / Decadal):** Vegetation growth, herd migration, snowpack melt pulses, and river low/high water shifts execute on quarterly macro-ticks.
+   - **Century Catch-Up:** Centuries of historical succession, mine stabilization, and geomorphic weathering resolve via closed-form deterministic catch-up equations upon area load; never through frame-by-frame ticking.
+3. **No Unique Graphic Explosion:** Continuous environmental values (soil moisture 0..100, fertility 0..100) map visually into discrete semantic bands (`DRY`, `NORMAL`, `MOIST`, `SATURATED`), preventing asset catalogue bloat.
+4. **Compositional Natural Landmarks:** Exceptional formations (monumental waterfalls, great arches, abyssal chasms) are algorithmically detected world compositions assembled from standard terrain autotiles, strata ledges, and VFX. Zero monolithic single-use landmark sprites.
+
 ---
 
 ## 6. Rendering Architecture & Five-Z Depth

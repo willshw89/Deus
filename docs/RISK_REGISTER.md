@@ -64,7 +64,19 @@
 
 ---
 
-## 5. Risk Escalation Protocol
+## 5. Natural World Systems & Catalogue Risks (NAT-001 to NAT-004)
+*Governed by [`docs/worldgen/DEUS_NATURAL_WORLD_SYSTEMS.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_NATURAL_WORLD_SYSTEMS.md) and [`docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md)*
+
+| Risk ID | Title | Category | Threat Description | Severity | Impact | Mitigation Strategy | Status |
+|---|---|---|---|---|---|---|---|
+| `NAT-001` | Visual State & Catalogue Explosion | Art Pipeline / Assets | Generating unique tiles for continuous simulation parameters (e.g. moisture 1..100, fertility 1..100) inflating atlas memory beyond budget. | `CRITICAL` | Heap saturation, V8 crashes, unmaintainable asset catalogues. | Strict semantic banding (`DRY`, `NORMAL`, `MOIST`, `SATURATED`); compositional layering; mandatory visual-state inventory (`DEUS_NATURAL_WORLD_SYSTEMS.md`). | `ARCHITECTURALLY_MITIGATED` |
+| `NAT-002` | WorldGen vs. Simulation Authority Drift | Architecture / Simulation | Divergence between initial worldgen representations and live simulation logic creating duplicate world models. | `CRITICAL` | Desynchronization, corrupted save games, split state authority. | Single Authoritative World Invariant (`INV-ENG-02`); Worldgen and Simulation both read/write the same five-strata model (`DEUS_Levels.js`, `DEUS_Fluid.js`). | `ARCHITECTURALLY_MITIGATED` |
+| `NAT-003` | Full-World Recurring Ecological Scanning | Performance / Simulation | Background natural systems (aquifers, soil moisture, wildfire, wildlife) iterating 65,536 cells per frame. | `CRITICAL` | Severe frame rate collapse (<10 FPS) at scale. | Multi-timescale execution (action, daily, seasonal, century); active-front queues; dirty bounding boxes; stable wilderness = 0 ms CPU. | `ARCHITECTURALLY_MITIGATED` |
+| `NAT-004` | Premature Ad-Hoc Art Generation | Governance / Pipeline | Generating artwork before semantic catalogue entry, atlas coordinate allocation, and visual classification are completed. | `MAJOR` | Orphan assets, wasted model credits, atlas fragmentation. | Catalogue-First Rule (`WBS -> SYSTEM -> VISIBLE STATE -> CATALOGUE -> ATLAS -> READY`); automated bi-directional validation tool (`WG.33`). | `CONTROLLED` |
+
+---
+
+## 6. Risk Escalation Protocol
 
 If any risk reaches an active failure state:
 1. **Freeze Execution**: Immediately halt dependent work blocks.

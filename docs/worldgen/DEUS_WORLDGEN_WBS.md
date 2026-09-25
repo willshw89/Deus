@@ -57,7 +57,12 @@ WG.57 — Volumetric Fluid Depth & Hazard Art Pack
 WG.60 — Geological Mineral & Finite Material Visual Pack
 WG.61 — Deterministic 3D Vein & Resource WorldGen Implementation
 WG.62 — Canonical Initial Racial Spawn WorldGen Implementation
+WG.63 — Natural Landmark Detection, Cultural Naming & Historical Events
+WG.64 — Geology-Driven Features, Karst & Geothermal Systems
 WG.65 — World Lifecycle, Geomorphology & Natural Reclamation Architecture
+WG.66 — Natural Hydrology, Groundwater & Watershed Architecture
+WG.67 — Soil Formation, Fertility & Microclimate Systems
+WG.68 — Living Ecology, Succession & Wildlife Systems
 WG.70 — Multi-Scale Visual Placement (Macro/Meso/Micro Density)
 WG.71 — Environmental Sprite Animation Runtime Integration
 WG.72 — Five-Z Visual Compositing & Occlusion Integration
@@ -100,7 +105,7 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | **WG.10.01** | Ground Layer Assembly Architecture | Gemini | Split ground into base substrate, material autotile, transition blend, and micro-scatter. | `PLANNED` |
 | **WG.10.02** | Wall & Cliff Structural Architecture | Gemini | DF-style black wall-top convention (48px material + 48px black cap), vertical continuity. | `PLANNED` |
 | **WG.10.03** | Canopy & Overhead Cover Architecture | Gemini | Multi-tile tree overhangs, roof transparency masks, interior shelter occlusion. | `PLANNED` |
-| **WG.11.01** | Environmental Animation Cadence | Gemini | Standardize 3 visual variants $\times$ 3 frames for wind sway, water ripple, flame loops. | `PLANNED` |
+| **WG.11.01** | Environmental Animation Cadence | Gemini | Standardize 3 visual variants $\times$ 3 frames for wind sway, water ripple, flame loops, steam wisps, natural hydrology; offscreen culling = 0 CPU cost. | `PLANNED` |
 | **WG.11.02** | Rigid Geometry Static Rule | Gemini | Enforce static rendering for stone, cliff faces, trunks, walls, floors, structural props. | `PLANNED` |
 
 ---
@@ -109,14 +114,14 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 
 | WBS Leaf | Title | Owner | Scope & Deliverables | Status |
 | :--- | :--- | :---: | :--- | :---: |
-| **WG.20.01** | Semantic Asset Schema & Naming Spec | Gemini | Schema: `BIOME_Z_CATEGORY_TYPE_VARIANT_STATE` with strict metadata requirements. | `PLANNED` |
-| **WG.21.01** | Ground Autotile & Macro-Variety Rules | Gemini | Min 1 core autotile + 3–6 subtle variants + 2–4 low-frequency breakups per biome. | `PLANNED` |
-| **WG.21.02** | Flora & Silviculture Variety Rules | Gemini | Min 3 micro-flora + 3 small/medium/large shrubs + 3 tree variants + stump + fallen log. | `PLANNED` |
-| **WG.21.03** | Geological Variety Rules | Gemini | Min 3 pebble clusters + 3 small + 3 medium rocks + 2–3 boulders + 2 outcrops + scree. | `PLANNED` |
-| **WG.22.01–25**| 25 Biome/Z Environment Catalogues | Gemini | Explicit catalogue for each of the 25 combinations (5 biomes $\times$ 5 macro-Z). | `PLANNED` |
-| **WG.23.01** | Shared World & Neutral Asset Catalogue | Gemini | Common stone, excavation rubble, neutral soils, generic timber, shared props. | `PLANNED` |
-| **WG.24.01–10**| 10 Horizontal Transition Catalogues | Gemini | Explicit blend assets for all 10 pairwise biome transitions. | `PLANNED` |
-| **WG.25.01** | Vertical Cliff & Ramp Transition Catalogue | Gemini | Step-down ramps, natural stair formations, vertical cliff faces across all 5 strata. | `PLANNED` |
+| **WG.20.01** | Semantic Asset Schema & Naming Spec | Gemini | Schema: `BIOME_Z_CATEGORY_TYPE_VARIANT_STATE`; consumes all `VISUAL_REQUIRED` states from natural systems (groundwater, drainage, soil moisture, succession, wildfire, snowpack, geomorphology, karst, geothermal). | `PLANNED` |
+| **WG.21.01** | Ground Autotile & Macro-Variety Rules | Gemini | Min 1 core autotile + 3–6 subtle variants + 2–4 low-frequency breakups per biome; consumes 4 soil moisture bands (`DRY`, `NORMAL`, `MOIST`, `SATURATED`). | `PLANNED` |
+| **WG.21.02** | Flora & Silviculture Variety Rules | Gemini | Min 3 micro-flora + 3 small/medium/large shrubs + 3 tree variants + stump + fallen log; accounts for pioneer succession weeds and charred tree skeletons. | `PLANNED` |
+| **WG.21.03** | Geological Variety Rules | Gemini | Min 3 pebble clusters + 3 small + 3 medium rocks + 2–3 boulders + 2 outcrops + scree; consumes mineral patinas (Cu, Fe) and karst dissolution textures. | `PLANNED` |
+| **WG.22.01–25**| 25 Biome/Z Environment Catalogues | Gemini | Explicit catalogue for each of the 25 combinations (5 biomes $\times$ 5 macro-Z); incorporates biome-specific natural states (VOLC geothermal, HIGH snowpack, WET saturated soil, ZM karst). | `PLANNED` |
+| **WG.23.01** | Shared World & Neutral Asset Catalogue | Gemini | Common stone, excavation rubble, neutral soils, generic timber, loose sediment, ash beds, and talus scree. | `PLANNED` |
+| **WG.24.01–10**| 10 Horizontal Transition Catalogues | Gemini | Explicit blend assets for all 10 pairwise biome transitions; accounts for natural boundaries (wet $\rightarrow$ dry soil, burned $\rightarrow$ regrowing forest, river $\rightarrow$ floodplain, snow $\rightarrow$ bare). | `PLANNED` |
+| **WG.25.01** | Vertical Cliff & Ramp Transition Catalogue | Gemini | Step-down ramps, natural stair formations, vertical cliff faces, cliff seepages, wet rock, karst sinkholes, and cave mouths across all 5 strata. | `PLANNED` |
 
 ---
 
@@ -124,11 +129,11 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 
 | WBS Leaf | Title | Owner | Scope & Deliverables | Status |
 | :--- | :--- | :---: | :--- | :---: |
-| **WG.30.01** | Master Sheet Allocation & Dimensions | Gemini | A1 (water/anim), A2 (ground), A3 (buildings), A4 (walls/cliffs), A5 (floors), B–E (props). | `PLANNED` |
+| **WG.30.01** | Master Sheet Allocation & Dimensions | Gemini | A1 (water/anim/depth 1..5), A2 (ground/moisture), A3 (buildings), A4 (walls/cliffs), A5 (floors), B–E (props/scatter); pre-allocates slots for all natural systems. | `PLANNED` |
 | **WG.30.02** | Autotile Block Geometric Mapping | Gemini | Formal 2x3 mini-tile mapping for 48px RMMZ autotile reconstruction. | `PLANNED` |
-| **WG.31.01** | Companion Animated Sheet Topology | Gemini | Strict matching coordinate geometry across frames F1, F2, F3 on separate sheets. | `PLANNED` |
+| **WG.31.01** | Companion Animated Sheet Topology | Gemini | Strict matching coordinate geometry across frames F1, F2, F3 on separate sheets (water, lava, steam, fire). | `PLANNED` |
 | **WG.32.01** | Diagnostic Slotmap Generation (`*_SLOTMAP.png`)| Gemini | Build CLI tool to render transparent grid maps with labeled asset IDs and status overlays. | `PLANNED` |
-| **WG.33.01** | Manifest ↔ Atlas Bi-Directional Integrity Checker | Gemini | Automated tool asserting 100% agreement between JSON manifest and atlas slots. | `PLANNED` |
+| **WG.33.01** | Manifest ↔ Atlas Bi-Directional Integrity Checker | Gemini | Automated tool asserting 100% agreement between JSON manifest, World-State Registry (`DEUS_WORLD_STATE_REGISTRY.md`), and atlas slots. | `PLANNED` |
 
 ---
 
@@ -171,6 +176,38 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 
 ---
 
+### WG.63 — Natural Landmark Detection, Cultural Naming & Historical Events
+
+*Governed by Owner Directive (2026-09-25), [`docs/worldgen/DEUS_NATURAL_WORLD_SYSTEMS.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_NATURAL_WORLD_SYSTEMS.md), and [`docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md)*  
+*Core Principle: Landmarks are algorithmically detected world compositions, not monolithic pre-drawn sprites. Physical entities exist independently of cultural naming.*
+
+| WBS Leaf | Title | Owner | Scope & Deliverables | Status |
+| :--- | :--- | :---: | :--- | :---: |
+| **WG.63.01** | Natural Landmark Detection Algorithm | Fable | Procedural detector identifying monumental waterfalls, natural arches, abyssal chasms, great cavern domes, ancient groves, and calderas from worldgen strata. | `PLANNED` |
+| **WG.63.02** | Compositional Landmark Assembly Standard | Gemini | Assemble detected landmarks from standard catalogue tiles, strata ledges, autotiles, and VFX with zero monolithic single-use sprites. | `PLANNED` |
+| **WG.63.03** | Persistent Natural Disaster Simulation | Fable | Rare catastrophic events: 100-year river floods, severe droughts, volcanic ash eruptions, earthquakes, and forest fires. | `PLANNED` |
+| **WG.63.04** | Disaster Scar Geomorphic Modification | Fable | Disasters carve permanent physical consequences into strata: channel relocations, rock collapses, talus aprons, and burn scar ash beds. | `PLANNED` |
+| **WG.63.05** | Decoupled Cultural Place Naming Framework | Gemini / Fable | Immutable physical geographic IDs (`River #83`) paired with subjective faction linguistic cultural names (Human, Dwarf, Elf, Goblin, Orc). | `PLANNED` |
+| **WG.63.06** | Historical Lore & Toponymic Evolution | Fable | Factions name landmarks and geography based on historical events (battles, founder deaths, resource discoveries); lore integration with `UF_Look`. | `PLANNED` |
+
+---
+
+### WG.64 — Geology-Driven Features, Karst & Geothermal Systems
+
+*Governed by Owner Directive (2026-09-25), [`docs/worldgen/DEUS_NATURAL_WORLD_SYSTEMS.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_NATURAL_WORLD_SYSTEMS.md), and [`docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md)*  
+*Core Principle: Surface terrain provides visible geological clues (karst, staining, flora) hinting at subterranean strata and resources.*
+
+| WBS Leaf | Title | Owner | Scope & Deliverables | Status |
+| :--- | :--- | :---: | :--- | :---: |
+| **WG.64.01** | Karst Dissolution & Cave Architecture | Fable | Limestone/dolomite dissolution modeling: sinkhole funnels, disappearing streams, underground solution cavities, and stalactite formations. | `PLANNED` |
+| **WG.64.02** | Structural Fault Fractures & Chasms | Fable | Tectonic stress fracturing generating all-Z vertical fissures, shear cliffs, and natural subterranean access ways. | `PLANNED` |
+| **WG.64.03** | Surface Mineral Patinas & Indicator Flora | Gemini / Fable | Malachite (Cu) and hematite (Fe) mineral seepage staining on cliff faces; metallophyte indicator flora revealing underground veins. | `PLANNED` |
+| **WG.64.04** | Geothermal Hot Springs & Mineral Evaporites | Fable | Volcanic/hydrothermal heated water pools, yellow sulfur mineral crusts, boiling mud pots, and mineral terracing. | `PLANNED` |
+| **WG.64.05** | Volcanic Fumaroles & Steam Vents | Gemini / Fable | Pressurized steam fissures, porous basalt lava tubes, active volcanic ground variants, and animated steam loop VFX. | `PLANNED` |
+| **WG.64.06** | Subterranean Geothermal Heat Transport | Fable | Magma chamber proximity heats surrounding rock strata and cave air; convective air currents and heated subterranean caverns. | `PLANNED` |
+
+---
+
 ### WG.65 — World Lifecycle, Geomorphology & Conserved Natural Reclamation
 
 *Governed by Owner Directive (2026-09-25), [`docs/PERFORMANCE_ARCHITECTURE.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/PERFORMANCE_ARCHITECTURE.md), and [`docs/INVARIANT_REGISTRY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/INVARIANT_REGISTRY.md)*  
@@ -197,6 +234,58 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | **WG.65.16** | Historical Terrain Provenance & Stratigraphy| Gemini / Fable | Sparse metadata recording whether strata are natural, excavated, constructed, collapsed, or naturalized. | `PLANNED` |
 | **WG.65.17** | Emergent Archaeology & Subsurface Recovery| Fable | Subsurface excavation exposes genuine historical ruins, buried foundations, and forgotten artifacts. | `PLANNED` |
 | **WG.65.18** | Naturalization Quality Assurance & Proof | Gemini / User | Multi-century stress test proving zero mass leaks, steady 60 FPS, and naturalistic landscape stabilization. | `PLANNED` |
+
+---
+
+### WG.66 — Natural Hydrology, Groundwater & Watershed Architecture
+
+*Governed by Owner Directive (2026-09-25), [`docs/worldgen/DEUS_NATURAL_WORLD_SYSTEMS.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_NATURAL_WORLD_SYSTEMS.md), and [`docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md)*  
+*Core Principle: Water stores, flows, and drains through physical five-strata geometry; surface drainage derives from real topography.*
+
+| WBS Leaf | Title | Owner | Scope & Deliverables | Status |
+| :--- | :--- | :---: | :--- | :---: |
+| **WG.66.01** | Subterranean Water Table & Aquifer Model | Fable | Physical strata-level pore water storage; hydrostatic pressure head, equilibrium water table depth across biomes. | `PLANNED` |
+| **WG.66.02** | Hillside Springs & Weeping Rock Seeps | Fable | Natural water table emergence on hill slopes and cliff faces; spring head pools and trickling rock seeps. | `PLANNED` |
+| **WG.66.03** | Subterranean Lakes, Rivers & Mine Flooding | Fable | Negative-Z cave lakes and underground streams; excavation breaches into aquifers trigger realistic mine flooding. | `PLANNED` |
+| **WG.66.04** | Topographical Watershed & Ridgeline Solver | Fable | Elevation-derived drainage divides, gravity flow vectors, natural catchment basins, and runoff accumulation. | `PLANNED` |
+| **WG.66.05** | River Channel, Tributary & Confluence Formation | Fable | Headwater streams converging into hierarchical tributaries and mainstem river channels carved into strata. | `PLANNED` |
+| **WG.66.06** | Floodplains, Meanders & Delta Silt Deposition | Fable | Seasonal riverbank overflow, fertile silt deposits on valley floodplains, and braided sediment deltas. | `PLANNED` |
+| **WG.66.07** | Seasonal Snowpack Accumulation & Melt Pulses | Fable | High-altitude winter snow accumulation (1..3 strata); spring thaw temperature pulses driving heavy runoff into rivers. | `PLANNED` |
+| **WG.66.08** | Surface Freezing & Seasonal Wetland Cycles | Fable | Sub-freezing surface ice formation over water bodies; summer evaporation drying seasonal wetlands into cracked mud. | `PLANNED` |
+
+---
+
+### WG.67 — Soil Formation, Fertility & Microclimate Systems
+
+*Governed by Owner Directive (2026-09-25), [`docs/worldgen/DEUS_NATURAL_WORLD_SYSTEMS.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_NATURAL_WORLD_SYSTEMS.md), and [`docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md)*  
+*Core Principle: Soil derives from parent rock, sediment, and moisture; microclimates create rich localized variety without multiplying biomes.*
+
+| WBS Leaf | Title | Owner | Scope & Deliverables | Status |
+| :--- | :--- | :---: | :--- | :---: |
+| **WG.67.01** | Geological Pedogenesis & Soil Texture | Fable | Soil formation derived from underlying parent geology: limestone fertile loam, basalt rich clay, granite sandy soil. | `PLANNED` |
+| **WG.67.02** | Four-Band Soil Moisture & Fertility Model | Gemini / Fable | Map continuous fertility/moisture into 4 discrete visual bands: `DRY`, `NORMAL`, `MOIST`, `SATURATED`; modulates farming yields. | `PLANNED` |
+| **WG.67.03** | Agricultural Depletion & Silt Replenishment | Fable | Intensive farming depletes topsoil fertility; seasonal river flooding deposits nutrient-rich alluvium restoring yields. | `PLANNED` |
+| **WG.67.04** | Topographical Elevation & Aspect Microclimates | Fable | Temperature lapse rate cooling with altitude; south-facing slopes receive higher solar warmth, north slopes remain moist/cool. | `PLANNED` |
+| **WG.67.05** | Rain Shadows & Valley Cold Pooling | Fable | Mountain ridges block precipitation creating dry leeward microclimates; nocturnal dense cold air drains into frost pockets. | `PLANNED` |
+| **WG.67.06** | Geothermal & Vegetative Thermal Havens | Fable | Hot spring warmth enables sub-tropical flora in cold biomes; dense forest canopies buffer ground from extreme heat and frost. | `PLANNED` |
+
+---
+
+### WG.68 — Living Ecology, Succession & Wildlife Systems
+
+*Governed by Owner Directive (2026-09-25), [`docs/worldgen/DEUS_NATURAL_WORLD_SYSTEMS.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_NATURAL_WORLD_SYSTEMS.md), and [`docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md)*  
+*Core Principle: Living ecology recovers predictably through multi-stage succession; wildfire and wildlife operate under event-driven, bounded performance budgets.*
+
+| WBS Leaf | Title | Owner | Scope & Deliverables | Status |
+| :--- | :--- | :---: | :--- | :---: |
+| **WG.68.01** | Multi-Stage Plant Ecological Succession | Fable | Deterministic recovery sequence over disturbed terrain: Bare $\rightarrow$ Pioneer Weeds $\rightarrow$ Grass $\rightarrow$ Scrub $\rightarrow$ Woodland $\rightarrow$ Climax. | `PLANNED` |
+| **WG.68.02** | Biome-Specific Succession Pathways | Fable | Distinct ecological succession sequences tailored for Temperate, Wetland, Arid, Highland, and Volcanic biomes. | `PLANNED` |
+| **WG.68.03** | Disturbance Reset & Pioneer Colonization | Fable | Logging, wildfire, overgrazing, or excavation resets local succession stage; pioneer species colonize bare mineral soil. | `PLANNED` |
+| **WG.68.04** | Spatially Bounded Wildfire Simulation | Fable | Ignition from lightning, lava, or campfires; fire propagation driven by fuel moisture, fuel load, wind vector, and slope. | `PLANNED` |
+| **WG.68.05** | Active-Front Fire Queue & Event-Driven Burning | Fable | Zero per-frame cost for dormant vegetation; simulation ticks only active combustion fronts in localized dirty bounding boxes. | `PLANNED` |
+| **WG.68.06** | Burn Scars, Ash Beds & Fireweed Regrowth | Gemini / Fable | Post-fire charred tree skeletons, scorched earth, soot beds, and rapid colonization by specialized fireweed flora. | `PLANNED` |
+| **WG.68.07** | Wildlife Territory, Grazing & Food Webs | Fable | Simplified ecological chain (Vegetation $\rightarrow$ Herbivores $\rightarrow$ Predators); animals establish home territories around water. | `PLANNED` |
+| **WG.68.08** | Wildlife Seasonal Migration & Hunting Response | Fable | Altitude migration between seasons; animal populations flee wildfire and hunting pressure, trampling natural game trails. | `PLANNED` |
 
 ---
 
