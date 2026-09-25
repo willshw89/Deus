@@ -3,6 +3,7 @@
 - **Leaf:** WG.00.08 / DEUS-TSK-FABLE-19B. **Defect:** ATK-19B-002 (shafts and skylights carve rock below a fluid or destroy it).
 - **Writer:** Claude / Fable (Lane A, branch `task/lane-a`). **Date:** 2026-09-25.
 - **Code under proof:** `game/js/plugins/DEUS_Levels.js` at HEAD `d1fbeab`. It is byte-identical to fix commit `2e4571a`: `git diff 2e4571a HEAD` on DEUS_Levels.js, DEUS_WorldGen.js and the test is empty. Line numbers below are from that file.
+- **Revision 2 (2026-09-25, Directive 001-F §3).** This revision adds the `shaft_prescan_removed` mutant and strengthens `shafts_keep_fluid` so that it catches it (point 5, items 5–6). Game code is unchanged. Points 1–4 and 6 were proven at `d1fbeab` with test blob `373aed6b`, and their quotes and test line numbers refer to that blob. Runs R8–R14 used test blob `47052c30` (this commit). The skylight numbers of R5 and R12 are identical: the census, carved-skylight and eligibility lines match byte for byte, and so do the skylight counts (30 / 44 of 57 / 54 of 54).
 - **The six points.** The text of Directive 001 that defines criterion 2.2c is not in this repository (searched `docs/`, `tasks/`, `prompts/` and the canonical checkout). The six points therefore follow the scope in `BRIEF.md`, in this order: (1) what the mutant is, (2) seed 18, (3) seed 3, (4) the kill, (5) the shaft and skylight guards, (6) fluid conservation across the whole generator and the clearance queries.
 
 ## Evidence runs (all on HEAD `d1fbeab`, 2026-09-25; no tracked file modified; the only extra files were this task's new, untracked files under `tasks/WG.00.08/`)
@@ -15,6 +16,20 @@
 | **R5** | `node tasks/WG.00.08/probe_skylight_through_fluid.js --seeds=18,3,21,4` | exit 0 | `evidence/probe_skylight_d1fbeab.log` |
 | **R6** | `node tasks/WG.00.08/probe_skylight_through_fluid.js --seeds=18 --census-mutant=probe_self_test` | exit 1 (the census failing, as intended) | `evidence/probe_census_self_test_d1fbeab.log` |
 | **R7** | `node tasks/WG.00.08/probe_skylight_through_fluid.js --seeds=18,3,21,4 --census-mutant=pockets_unprotected` | exit 0 | `evidence/probe_census_pockets_unprotected_d1fbeab.log` |
+
+Revision 2 runs (HEAD `9f320da`, plugins unchanged; test blob as stated; times in `evidence/run_times_47052c3.txt`):
+| Tag | Command | Result | Log (committed copy) |
+|---|---|---|---|
+| **R8** | `node tools/test_strata_cuts_and_caves.js --mutant=shaft_prescan_removed`, old check (test blob `bb32c44f`) | 26 passed, 0 failed (exit 0): **the mutant survived** | `evidence/mutant_shaft_prescan_removed_old_check_bb32c44.log` |
+| **R9** | the same command, strengthened check (`47052c30`) | 25 passed, 1 failed (exit 1): `shafts_keep_fluid` | `evidence/mutant_shaft_prescan_removed_47052c3.log` |
+| **R10** | `node tools/test_strata_cuts_and_caves.js` | 28 passed, 0 failed (exit 0) | `evidence/baseline_run_47052c3.log` |
+| **R11** | `node tools/test_strata_cuts_and_caves.js --mutants` | 28/28 caught; `shaft_prescan_removed: exit 1; failed: shafts_keep_fluid` | `evidence/mutants_run_47052c3.log` |
+| **R12** | `node tasks/WG.00.08/probe_skylight_through_fluid.js --seeds=18,3,21,4` (probe blob `eba1b580`) | exit 0 | `evidence/probe_skylight_47052c3.log` |
+| **R13** | `node tools/test_strata_cuts_and_caves.js --seed2=18 --no-suites` | 24 passed, 2 failed (exit 1): `different_seeds_differ`, `shafts_keep_fluid` | `evidence/seed2_18_vacuity_47052c3.log` |
+| **R14** | `node tools/test_strata_cuts_and_caves.js --mutant=swiss_cheese`, plus a diagnosis between generator passes | 24 passed, 2 failed (exit 1); the stratum removed by the unconnected-solid removal | `evidence/mutant_swiss_cheese_47052c3.log`, `evidence/diag_swiss_cheese_floating_47052c3.log` |
+| **R15** | `node tasks/WG.00.08/probe_skylight_through_fluid.js --seeds=18 --census-mutant=probe_self_test` (probe blob `eba1b580`) | exit 1 (the census failing, as intended; same numbers as R6) | `evidence/probe_census_self_test_47052c3.log` |
+
+The probe changed in revision 2. It reads the suite's planting text, and shaft plantings now carry rock strata, so its counts now separate skylight rock from shaft rock. It also runs `shaft_prescan_removed`. Its skylight counts and labels are unchanged.
 
 The probe (`tasks/WG.00.08/probe_skylight_through_fluid.js`, new in this commit) changes nothing on disk. At run time it slices the suite file and reuses the suite's own vm `setup`/`newWorld`, its `MUTANTS` table and the exact water-planting text of `shafts_keep_fluid`, so its numbers are the check's own numbers, split by seed. It adds one diagnostics block that records, per skylight, which eligibility condition refused it. It also adds a fluid census of the uninstrumented worlds.
 
@@ -54,9 +69,9 @@ MUTANT skylight_through_fluid seed 18: planted 2 shaft + 0 skylight water strata
 - Four networks rolled a skylight (`skylightChance` 0.25, line 2344). Network #10 is refused by the gate before any carve: 13 ft of rock over its chamber exceeds `skylightMax` 10 in all 5 disc cells (line 2510).
 - Networks #4, #7 and #11 pass the gate, and their 15 columns are carved. Their overburden `top − (F + h)` is 1, 1 and −1. The top rock stratum `e = top − 1` is therefore at or below `from = F + h`, the planting rule `e > from` is false in every column, and no skylight water is planted. None of the 15 columns holds a natural fluid either, since the real generator carved all 5 cells of each skylight and `fluidIn` would have skipped a column with fluid.
 - As a result the mutated line never meets a fluid on seed 18, and the mutant writes exactly what the fix writes: "rock under it carved 0" in both the REAL and MUTANT rows. **Seed 18 alone cannot kill `skylight_through_fluid`.**
-- The check does not pass vacuously on such a seed set. Its condition is `totalShafts > 0 && totalWithRock > 0 && bad.length === 0` (test 1005). R4 runs the suite with seed 18 as both seeds and the check fails:
+- The check does not pass vacuously on such a seed set. Its condition is `totalShafts > 0 && totalWithRock > 0 && bad.length === 0` (test 1005; in revision 2 it also requires `totalShaftWithRock > 0`, test 1015). R4 runs the suite with seed 18 as both seeds and the check fails:
   `FAIL shafts_keep_fluid - seed 18: 2 shafts, 0 skylights (0 with rock under water); seed 18: 2 shafts, 0 skylights (0 with rock under water); total rock strata under water: 0; after the carve: every planted water stratum still water, no rock under it carved`
-  This is why the check runs on `[SEED, SEED2]` = seeds 18 and 3 (test 981).
+  This is why the check runs on `[SEED, SEED2]` = seeds 18 and 3 (test 981). Revision 2 (R13) gives the same result with the strengthened check: `FAIL shafts_keep_fluid - seed 18: 2 shafts (2 with rock under water), 0 skylights (0 with rock under water); seed 18: …; total rock strata under water: 16 (shafts 16, skylights 0), carved 0; after the carve: every planted water stratum still water, no rock under it carved`.
 
 ## Point 3: seed 3 reaches the carve with 30 rock strata under planted water
 
@@ -106,9 +121,22 @@ for (let e = sh.from; e < hi; e++) if (SOLID_B[getE(i, e)] === 1) { setE(i, e, M
 // skylight (2513–2518): fluidIn(i, nd.F, top[i]) at 2514, SOLID_B-only write at 2516
 ```
 1. **The scan comes before any write.** `fluidIn` covers the whole interval the loop may write (`[sh.from, hi)` and `[nd.F, top[i])`). If a fluid stratum lies anywhere in it, the callback returns before the first `setE`, so no stratum of that column changes, and in particular no rock under the fluid.
-2. **Only solid strata are written.** Even without the scan, the write loop's predicate is `SOLID_B[...] === 1`, and `FLUID_B` and `SOLID_B` never both hold for a byte (DEUS_Levels.js 1014–1020). A fluid byte can therefore never be set to air. The pre-fix shaft wrote `SOLID_B || FLUID_B` (the `shaft_through_fluid` mutant).
+2. **Only solid strata are written.** Even without the scan, the write loop's predicate is `SOLID_B[...] === 1`, and `FLUID_B` and `SOLID_B` never both hold for a byte (DEUS_Levels.js 1014–1020). A fluid byte can therefore never be set to air. The pre-fix shaft wrote `SOLID_B || FLUID_B` (the `shaft_through_fluid` mutant). The SOLID-only predicate protects the fluid, but **not the rock under it**. Only the scan in item 1 protects that rock, as `shaft_prescan_removed` shows (items 5–6).
 3. **Observed on all four seeds of the suite's set** (R5, REAL rows, planted water kept / rock under it carved): seed 18 2 shaft / 0 skylight strata planted, 0 lost, 0 carved; seed 3 3 / 10, **0 of 30** carved; seed 21 8 / 25, **0 of 57**; seed 4 9 / 20, **0 of 54**. No console.error in any world. In the suite, R2 prints `PASS shafts_keep_fluid - … total rock strata under water: 30; after the carve: every planted water stratum still water, no rock under it carved`.
-4. **The shaft half can fail too.** Under `shaft_through_fluid` the planted shaft water becomes air: seed 18 2 of 2, seed 3 3 of 3, seed 21 8 of 8, seed 4 9 of 9 (R5). R1 records `MUTANT shaft_through_fluid: exit 1; failed: shafts_keep_fluid`.
+4. **The shaft half can fail too.** Under `shaft_through_fluid` the planted shaft water becomes air: seed 18 2 of 2, seed 3 3 of 3, seed 21 8 of 8, seed 4 9 of 9 (R5). R1 records `MUTANT shaft_through_fluid: exit 1; failed: shafts_keep_fluid`. R12 adds that it also carves the rock under that water: seed 18 8 of 8 strata, seed 4 9 of 9.
+5. **Revision 2: the shaft scan itself is now tested (`shaft_prescan_removed`, Directive 001-F).** The mutant deletes line 2498 (`if (fluidIn(i, sh.from, hi)) return;`) and keeps the SOLID-only write at 2500. So a fluid in the shaft's path survives, and every rock stratum under it in `[sh.from, hi)` is carved.
+   - **Revision 1's check could not see this (R8).** The mutant survived: `RESULT: 26 passed, 0 failed (exit 0)`, `PASS shafts_keep_fluid - …; total rock strata under water: 30; …`. The shaft planting recorded `solid: []`, so for shafts the check tested only whether the water was still water, and here it is.
+   - **The check now records the rock under shaft water** (test 958–965). In columns that pass the shaft's own gate (`NO_CAVE`, `wt < 1`, DEUS_Levels.js 2496), it records the solid strata in `[sh.from, e)` under the planted water. It also requires a shaft fixture (`totalShaftWithRock > 0`, test 1015). Where water is planted is unchanged.
+   - **Kill (R9).** `FAIL shafts_keep_fluid - seed 18: 2 shafts (2 with rock under water), …; seed 3: 3 shafts (0 with rock under water), 10 skylights (10 with rock under water); total rock strata under water: 38 (shafts 8, skylights 30), carved 8; after the carve: shaft (41,206) rock at 5 ft carved below the water; …` and `RESULT: 25 passed, 1 failed (exit 1) - shafts_keep_fluid`. R11: `MUTANT shaft_prescan_removed: exit 1; failed: shafts_keep_fluid`, and the sweep finished with `MUTANTS: 28/28 caught by a named check (exit 1)`.
+   - **Per seed (R12, copied):**
+     ```
+     MUTANT shaft_prescan_removed seed 18: … 2 shaft columns with rock under the water, 8 rock strata); after the carve: planted water no longer water 0, rock under it carved 0 under skylight water + 8 under shaft water; console.error 0
+       shaft (41,206): water at 9 ft now 4, 4 rock strata under it carved
+       shaft (41,207): water at 9 ft now 4, 4 rock strata under it carved
+     MUTANT shaft_prescan_removed seed 4: … 9 shaft columns with rock under the water, 9 rock strata); after the carve: planted water no longer water 0, rock under it carved 0 under skylight water + 9 under shaft water; console.error 0
+     ```
+     Seeds 3 and 21 carry no rock under their planted shaft water (0 of 0). In the suite's pair (18, 3), seed 18's two columns are therefore the whole shaft fixture. The water stays water (byte 4) in every row, and that is why revision 1's check missed the fault.
+6. **Real code with the strengthened check.** R10: `PASS shafts_keep_fluid - …; total rock strata under water: 38 (shafts 8, skylights 30), carved 0`, `RESULT: 28 passed, 0 failed (exit 0)`. R12, REAL rows: 0 of 8 / 0 / 0 / 0 of 9 rock strata under shaft water carved on seeds 18 / 3 / 21 / 4. The skylight rows are unchanged from R5.
 
 ## Point 6: zero fluid loss across the whole generator, and clearance ends at a fluid
 
@@ -120,7 +148,7 @@ for (let e = sh.from; e < hi; e++) if (SOLID_B[getE(i, e)] === 1) { setE(i, e, M
 | 2500 | shafts | `fluidIn(i, sh.from, hi)` at 2498, SOLID-only write (point 5) |
 | 2516 | skylights | `fluidIn(i, nd.F, top[i])` at 2514, SOLID-only write (point 5) |
 | 2654 | cuts | Pre-scan 2651–2653: a column holding a fluid in `[F, top)` is skipped (`continue`) before any write |
-| 2719 | unconnected-solid removal | Only strata with `sol[v] === 1`, which is set from `solidE` (2700), so fluids are never candidates |
+| 2719 | unconnected-solid removal | Only strata with `sol[v] === 1`, which is set from `solidE` (2700), so fluids are never candidates. It has **no fluid test** for the rock it removes. Revision 2 (R14) saw it remove rock in a column holding a (planted) fluid under the `swiss_cheese` mutant: see Limits 6. |
 
 **Census of the uninstrumented worlds** (R5, generator 4 vs generator 5 of the same seed, whole area, all 25 strata):
 ```
@@ -144,10 +172,13 @@ This gives zero fluid lost or moved, and zero strata carved beneath a fluid, on 
 3. **Stale comment at 2646–2647.** "every stratum from the cut's floor to the rock's top becomes air (fluids included: none are left floating)" contradicts the code below it, which skips a column holding a fluid. `docs/systems/UF_Levels.md` (line 212) describes the code correctly. Proposed as MINOR finding **A-2.2c-2** (comment only).
 4. The census is four seeds (18, 3, 21, 4), not all seeds. It covers generation only. Runtime digging (`applyStrataDamage`/`applyVolumeDamage`) is a different code path and is not covered here.
 5. No in-game run (RMMZ F5) was made for this criterion. Every result above comes from the Node vm harness running the real plugins.
+6. **The unconnected-solid removal (2695–2724) can remove rock in a column holding a fluid** (revision 2, R14). Under the `swiss_cheese` mutant (cave lattice spacing 20), the strengthened `shafts_keep_fluid` reports 5 rock strata carved under shaft water on seed 18, around (144,204). The diagnosis (`evidence/diag_swiss_cheese_floating_47052c3.log`, which holds its code) shows the following. The shaft there (from 15 ft to 20 ft) carved 0 cells, because its scan saw the planted water at 19 ft. The stratum at 15 ft was still rock (byte 1) after the shafts, the skylights and the cuts, and became air only in the unconnected-solid removal: 40 strata removed against 35 without the planted water. With the shaft refused, that stratum was a 1 ft slab between air at 12–14 and 16–18 ft, with no solid path to bedrock. The water was kept, and it already rested on the 16–18 ft void. The removed rock was 4 ft below it, not directly under it. This happens only in a mutant world with planted water. In the real configuration: the census finds no fluid resting on air and nothing carved below a fluid on seeds 18/3/21/4 (R12), and the baseline carves 0 of 38 rock strata under planted water (R10). Whether the removal could ever strand a real fluid is not proven here. It would need either a fluid test in the removal pass or a census over more seeds. This is an observation for Grok, not a finding filed in `defects.jsonl`.
 
 ## Reproduce
 ```bash
 node tools/test_strata_cuts_and_caves.js --mutant=skylight_through_fluid          # exit 1, FAIL shafts_keep_fluid
+node tools/test_strata_cuts_and_caves.js --mutant=shaft_prescan_removed           # exit 1, FAIL shafts_keep_fluid (8 rock strata under shaft water carved)
+node tools/test_strata_cuts_and_caves.js --mutant=swiss_cheese                    # exit 1: cave_free_terrain, and shafts_keep_fluid via the floating removal (Limits 6)
 node tools/test_strata_cuts_and_caves.js --seed2=18 --no-suites                   # shafts_keep_fluid FAILs: seed 18 has no skylight fixture
 node tasks/WG.00.08/probe_skylight_through_fluid.js                               # seeds 18,3 (default); add --seeds=18,3,21,4
 node tasks/WG.00.08/probe_skylight_through_fluid.js --seeds=18 --census-mutant=probe_self_test   # exit 1: the census can fail

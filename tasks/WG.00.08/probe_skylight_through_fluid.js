@@ -11,9 +11,11 @@
  *   - every cave network that rolled a skylight: its node, and for each cell of the 1.2-radius disc which eligibility
  *     condition of the skylight pass (DEUS_Levels.js carveNaturalFeatures) refuses it (lock, wt, minTop, skylightMax,
  *     nearWater). One refused cell refuses the whole skylight, so the carve loop is never reached for it;
- *   - the planted water strata and the rock strata between the chamber roof and that water;
- *   - after generation, with the real code and with the skylight_through_fluid / shaft_through_fluid mutants: planted
- *     water strata that are no longer water, and rock strata under planted water that are no longer solid;
+ *   - the planted water strata and the rock strata under that water (a skylight: from the chamber roof; a shaft: from
+ *     the shaft's bottom, in columns its carve visits);
+ *   - after generation, with the real code and with the skylight_through_fluid / shaft_through_fluid /
+ *     shaft_prescan_removed mutants: planted water strata that are no longer water, and rock strata under planted water
+ *     that are no longer solid, by kind;
  *   - fluid conservation of the uninstrumented world: fluid strata per level, generator 4 vs generator 5 of the same seed,
  *     and every generator-4 fluid stratum's byte at the same place in generator 5;
  *   - rock under fluid in the uninstrumented world: fluid strata resting on air (generator 4 vs 5), and strata carved
@@ -145,7 +147,7 @@ for (const seed of SEEDS) {
     if (under || onAir5 > onAir4) bad++;
     console.log(`CARVED seed ${seed} (${censusMutant ? `MUTANT ${censusMutant}` : "real"}, uninstrumented): cave networks ${g5.F.caves.length}, shafts ${g5.F.shafts.length}, skylights carved ${g5.F.skylights.length}${g5.F.skylights.length ? ` ${JSON.stringify(g5.F.skylights)}` : ""}`);
 
-    for (const mutant of censusMutant ? [] : ["", "skylight_through_fluid", "shaft_through_fluid"]) {
+    for (const mutant of censusMutant ? [] : ["", "skylight_through_fluid", "shaft_through_fluid", "shaft_prescan_removed"]) {
         const w = world(seed, mutant, true, 0);
         const planted = w.F.planted || [], diag = w.F.skyDiag || [];
         if (!mutant) {
@@ -156,20 +158,22 @@ for (const seed of SEEDS) {
             }
         }
         let waterGone = 0, rockGone = 0, rockUnder = 0, withRock = 0;
+        const shaft = { withRock: 0, rock: 0, gone: 0 };
         const rows = [];
         for (const p of planted) {
             const i = p.y * w.size + p.x, now = w.get(i, p.e);
             if (now !== 4) waterGone++;
-            if (p.solid.length) withRock++;
             let gone = 0;
-            for (const k of p.solid) { rockUnder++; if (!isSolidB(w.get(i, k))) { rockGone++; gone++; } }
-            if (p.kind === "skylight" && !mutant) rows.push(`(${p.x},${p.y}) water at ${p.e} ft over rock [${p.solid.join(",")}]`);
+            for (const k of p.solid) if (!isSolidB(w.get(i, k))) gone++;
+            if (p.kind === "skylight") { if (p.solid.length) withRock++; rockUnder += p.solid.length; rockGone += gone; }
+            else { if (p.solid.length) shaft.withRock++; shaft.rock += p.solid.length; shaft.gone += gone; }
+            if (!mutant && (p.kind === "skylight" || p.solid.length)) rows.push(`${p.kind === "skylight" ? "" : "shaft "}(${p.x},${p.y}) water at ${p.e} ft over rock [${p.solid.join(",")}]`);
             if (mutant && (gone || now !== 4)) rows.push(`${p.kind} (${p.x},${p.y}): water at ${p.e} ft now ${now}${gone ? `, ${gone} rock strata under it carved` : ""}`);
         }
         const sky = planted.filter(p => p.kind === "skylight").length, sh = planted.length - sky;
-        console.log(`${mutant ? `MUTANT ${mutant}` : "REAL"} seed ${seed}: planted ${sh} shaft + ${sky} skylight water strata (${withRock} skylight columns with rock under the water, ${rockUnder} rock strata); after the carve: planted water no longer water ${waterGone}, rock under it carved ${rockGone}; console.error ${w.errors.length}`);
+        console.log(`${mutant ? `MUTANT ${mutant}` : "REAL"} seed ${seed}: planted ${sh} shaft + ${sky} skylight water strata (${withRock} skylight columns with rock under the water, ${rockUnder} rock strata; ${shaft.withRock} shaft columns with rock under the water, ${shaft.rock} rock strata); after the carve: planted water no longer water ${waterGone}, rock under it carved ${rockGone} under skylight water + ${shaft.gone} under shaft water; console.error ${w.errors.length}`);
         for (const r of rows) console.log(`  ${r}`);
-        if (!mutant && (waterGone || rockGone || w.errors.length)) bad++;
+        if (!mutant && (waterGone || rockGone || shaft.gone || w.errors.length)) bad++;
     }
 }
 console.log(`TIME ${((Date.now() - t0) / 1000).toFixed(0)} s`);

@@ -1,0 +1,54 @@
+# WG.00.08 diagnosis: why shafts_keep_fluid fails under the swiss_cheese mutant (2026-09-25, 2026-09-25T18:25:18-05:00)
+# Method: the head of tasks/WG.00.08/probe_skylight_through_fluid.js (blob eba1b580e7b205be4b7ba07b03a6ff4b595e29ea, everything before 'let bad = 0;')
+# with the tail below appended; it snapshots stratum 15 ft and 19 ft of seed 18 (144,204) between the generator's passes.
+# Test blob 47052c301a9c98093343fc132110299907aa5285; plugins at HEAD 9f320da2 (unmodified). Not committed as a tool.
+# ---- tail
+# const _src = sources;
+# sources = (m, inst) => {
+#   const s = _src(m, inst);
+#   const snap = lab => `        (out.snap = out.snap || []).push(["${lab}", getE(204 * size + 144, 15), getE(204 * size + 144, 19)]);\n`;
+#   const A = [["            sh.cells = cells;\n        }\n", true, "after shafts"],
+#              ["        // The first-air elevation a cut", false, "before cuts"],
+#              ["        //---------------------------------------------------------------- no floating natural mass", false, "before floating removal"],
+#              ["        out.ms = performance.now() - t0;", false, "end"]];
+#   for (const [a, after, lab] of A) {
+#     if (!s["DEUS_Levels.js"].includes(a)) harnessProblem("diag anchor missing: " + lab);
+#     s["DEUS_Levels.js"] = s["DEUS_Levels.js"].replace(a, after ? a + snap(lab) : snap(lab) + a);
+#   }
+#   return s;
+# };
+# for (const inst of [true, false]) {
+#   const w = world(18, "swiss_cheese", inst, 0);
+#   console.log(`${inst ? "INSTRUMENTED" : "UNINSTRUMENTED"} SNAPSHOTS (144,204) [label, byte at 15 ft, byte at 19 ft]: ${JSON.stringify(w.F.snap)}`);
+#   console.log(`  floatingRemoved ${w.F.floatingRemoved} e.g. ${JSON.stringify(w.F.floatingAt)}`);
+# }
+# process.exit(0);
+# ---- output
+INSTRUMENTED SNAPSHOTS (144,204) [label, byte at 15 ft, byte at 19 ft]: [["after shafts",1,4],["before cuts",1,4],["before floating removal",1,4],["end",0,4]]
+  floatingRemoved 40 e.g. [{"x":59,"y":208,"e":8,"owner":2},{"x":209,"y":192,"e":10,"owner":0},{"x":209,"y":193,"e":10,"owner":0},{"x":83,"y":210,"e":10,"owner":2},{"x":53,"y":206,"e":11,"owner":10},{"x":54,"y":206,"e":11,"owner":14},{"x":53,"y":207,"e":11,"owner":14},{"x":54,"y":207,"e":11,"owner":14}]
+UNINSTRUMENTED SNAPSHOTS (144,204) [label, byte at 15 ft, byte at 19 ft]: [["after shafts",0,0],["before cuts",0,0],["before floating removal",0,0],["end",0,0]]
+  floatingRemoved 35 e.g. [{"x":59,"y":208,"e":8,"owner":2},{"x":209,"y":192,"e":10,"owner":0},{"x":209,"y":193,"e":10,"owner":0},{"x":83,"y":210,"e":10,"owner":2},{"x":53,"y":206,"e":11,"owner":10},{"x":54,"y":206,"e":11,"owner":14},{"x":53,"y":207,"e":11,"owner":14},{"x":54,"y":207,"e":11,"owner":14}]
+exit=0
+# ==== part 2: the planted columns after generation (same method, tail below)
+# const w = world(18, "swiss_cheese", true, 0);
+# for (const [x, y] of [[144,203],[143,204],[144,204],[145,204],[144,205]]) {
+#   const i = y * w.size + x, strata = [];
+#   for (let e = 0; e < 25; e++) strata.push(w.get(i, e));
+#   console.log(`COL (${x},${y}) strata e0..24 after generation: ${strata.join(",")}`);
+#   for (const p of (w.F.planted || []).filter(p => p.x === x && p.y === y)) console.log(`   planted ${p.kind} water e ${p.e} (now ${w.get(i, p.e)}) rock recorded under it [${p.solid.join(",")}]`);
+# }
+# console.log(`SHAFTS within 4 of (144,204): ${JSON.stringify(w.F.shafts.filter(s => Math.abs(s.x - 144) <= 4 && Math.abs(s.y - 204) <= 4))}`);
+# process.exit(0);
+# ---- output
+COL (144,203) strata e0..24 after generation: 1,1,1,1,1,2,2,2,2,2,1,1,0,0,0,0,0,0,0,4,2,0,0,0,0
+   planted shaft water e 19 (now 4) rock recorded under it [15]
+COL (143,204) strata e0..24 after generation: 1,1,1,1,1,2,2,2,2,2,1,1,0,0,0,0,0,0,0,4,2,0,0,0,0
+   planted shaft water e 19 (now 4) rock recorded under it [15]
+COL (144,204) strata e0..24 after generation: 1,1,1,1,1,2,2,2,2,2,1,1,0,0,0,0,0,0,0,4,2,0,0,0,0
+   planted shaft water e 19 (now 4) rock recorded under it [15]
+COL (145,204) strata e0..24 after generation: 1,1,1,1,1,2,2,2,2,2,1,1,0,0,0,0,0,0,0,4,2,0,0,0,0
+   planted shaft water e 19 (now 4) rock recorded under it [15]
+COL (144,205) strata e0..24 after generation: 1,1,1,1,1,2,2,2,2,2,1,1,0,0,0,0,0,0,0,4,2,0,0,0,0
+   planted shaft water e 19 (now 4) rock recorded under it [15]
+SHAFTS within 4 of (144,204): [{"x":144,"y":204,"r":1.2017463601659983,"from":15,"to":20,"upper":11,"lower":16,"cells":0}]
+exit=0
