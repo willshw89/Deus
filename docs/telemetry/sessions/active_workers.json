@@ -1,17 +1,5 @@
 [
     {
-        "Lane": "Lane G",
-        "WbsId": "WG.00.11",
-        "Provider": "Claude CLI (Fable)",
-        "Model": "claude-opus-5-5",
-        "Pid": 11368,
-        "Worktree": "C:\\Users\\snewt\\.deus_worktrees\\lane-g",
-        "Branch": "task/lane-g",
-        "StartTime": "2026-09-25T17:42:20-05:00",
-        "LogFile": "C:\\Users\\snewt\\.gemini\\antigravity\\brain\\793a3102-02aa-4045-adad-e3420f033e81\\.system_generated\\tasks\\task-34872.log",
-        "Status": "ACTIVE"
-    },
-    {
         "Lane": "Lane A",
         "WbsId": "WG.00.08",
         "Provider": "Claude CLI (Fable)",
@@ -24,15 +12,15 @@
         "Status": "ACTIVE"
     },
     {
-        "Lane": "Lane E",
+        "Lane": "Lane E (Reviewer)",
         "WbsId": "WG.00.09",
-        "Provider": "Grok CLI",
-        "Model": "grok-4.7",
-        "Pid": 9624,
+        "Provider": "Claude CLI",
+        "Model": "claude-opus-5-5",
+        "Pid": 9240,
         "Worktree": "C:\\Users\\snewt\\.deus_worktrees\\lane-e",
         "Branch": "task/lane-e",
-        "StartTime": "2026-09-25T17:42:31-05:00",
-        "LogFile": "C:\\Users\\snewt\\.gemini\\antigravity\\brain\\793a3102-02aa-4045-adad-e3420f033e81\\.system_generated\\tasks\\task-34876.log",
+        "StartTime": "2026-09-25T18:04:28-05:00",
+        "LogFile": "C:\\Users\\snewt\\.gemini\\antigravity\\brain\\793a3102-02aa-4045-adad-e3420f033e81\\.system_generated\\tasks\\task-34960.log",
         "Status": "ACTIVE"
     }
 ]
