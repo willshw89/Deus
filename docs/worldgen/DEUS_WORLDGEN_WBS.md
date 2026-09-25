@@ -1,11 +1,11 @@
-# DEUS-WORLDGEN-WBS-v1.0 — Canonical WorldGen Work Breakdown Structure
+# DEUS WorldGen Work Breakdown Structure
 
-**Document ID:** `DEUS-WORLDGEN-WBS-v1.0`  
-**Status:** ACTIVE / CANONICAL BASELINE  
-**Integration Authority:** Gemini  
-**Bounded Implementation Agent:** Fable  
-**Date:** 2026-09-24  
-**Permanent Project-Control Anchor:** WBS IDs are immutable. Never silently renumber, merge, or reuse them.
+**Namespace:** WG  
+**Rev:** 14  
+**IDs:** Stable. Next free in WG.00 is WG.00.12  
+**Canonical Authority:** Gemini / Antigravity  
+**Status:** CANONICAL ON MAIN  
+**Permanent Project-Control Anchor:** WBS IDs are immutable. Never silently renumber, merge, or reuse them. Once committed, a leaf changes only by status (`PLANNED` → `DONE`) or retirement via `SUPERSEDED`.
 
 ---
 
@@ -95,6 +95,7 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | **WG.00.08** | Cuts + Caves on All Five Z | Fable / Gemini | Partial-height terrain, chasms, sinkholes, Z0→Z-1 & Z-1→Z-2 deep cuts, cave roofs. | `DONE` (FABLE-19B / 2e4571a) |
 | **WG.00.09** | Global Five-Z Depth Renderer | Fable | Five-plane compositor, physical scale recession, no blur, chunk exposure cache. | `QUEUED` (FABLE-19C) |
 | **WG.00.10** | Startup & Load Performance Baseline | Gemini / Fable | 256x256x5 area memory budget (<3.5MB), tick budget (<0.2ms), load time benchmarks. | `QUEUED` |
+| **WG.00.11** | Incarnation & Command Layer | Fable / Gemini | Player avatar direct possession vs top-down RTS colonist command switching, input arbitration, camera follow. | `QUEUED` |
 
 ---
 
@@ -348,3 +349,16 @@ MARK LEAF DONE IN WBS & STATUS.md
 SELECT NEXT UNBLOCKED LEAF
 ```
 *Constraint: Only one implementation leaf active at a time. No exceptions.*
+
+---
+
+## Revision Log
+
+| Rev | Date | Change |
+|:---:|:---:|:---|
+| 14 | 2026-09-25 | Add WG.00.11 (Incarnation & Command Layer). Adopt integer rev header and immutable ID governance. Next free in WG.00 is WG.00.12. |
+| 13 | 2026-09-25 | Add WG.63–WG.68 (Historical Landmarks, Karst/Geology, Reclamation, Hydrology, Soils, Living Ecology). |
+| 12 | 2026-09-25 | WG.00.08 marked DONE (Cuts and caves on all five Z / commit `2e4571a`). |
+| 11 | 2026-09-24 | WG.00.07 marked DONE (Fluid reconciliation / commit `2f47203`). |
+| 10 | 2026-09-24 | WG.00.06 marked DONE (Five-strata foundation / FABLE-19A / commit `edba004`). |
+

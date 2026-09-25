@@ -1,10 +1,11 @@
-# DEUS-SOCIETY-WBS-v1.0 — Canonical Society & Institutions Work Breakdown Structure
+# DEUS Society & Institutions Work Breakdown Structure
 
-**Document ID:** `DEUS-SOCIETY-WBS-v1.0`  
-**Status:** ACTIVE / CANONICAL BASELINE  
-**Integration Authority:** Gemini / Antigravity  
-**Date:** 2026-09-25  
-**Permanent Project-Control Anchor:** WBS IDs are immutable. Never silently renumber, merge, or reuse them.  
+**Namespace:** SOC  
+**Rev:** 2  
+**IDs:** Stable. Next free in SOC.70 is SOC.70.02. Next free band is SOC.80  
+**Canonical Authority:** Gemini / Antigravity  
+**Status:** CANONICAL ON MAIN  
+**Permanent Project-Control Anchor:** WBS IDs are immutable. Never silently renumber, merge, or reuse them. Once committed, a leaf changes only by status (`PLANNED` → `DONE`) or retirement via `SUPERSEDED`.  
 
 ---
 
@@ -115,3 +116,13 @@ SOC.70 — Society & Economy Verification Test Suites
 | **SOC.60.01** | Multi-Timescale Performance & Catch-Up | Fable | Event-driven civic logic; zero 60 Hz polling; coarse background catch-up for remote settlement economies. | `PLANNED` |
 | **SOC.60.02** | Societal State Persistence & Save Migrations | Gemini / Fable | Stable JSON save schema versioning for person identities, office appointments, and treasury balances. | `PLANNED` |
 | **SOC.70.01** | Societal & Economic Verification Test Suite | Gemini | Automated test suite proving three-axis independence, office survival across death, coin conservation, and mobilization costs. | `PLANNED` |
+
+---
+
+## Revision Log
+
+| Rev | Date | Change |
+|:---:|:---:|:---|
+| 2 | 2026-09-25 | Adopt integer rev header and immutable ID governance. SOC.70.01 confirmed as society verification suite. Next free in SOC.70 is SOC.70.02; next free band is SOC.80. |
+| 1 | 2026-09-25 | Initial release of SOC.10 through SOC.70 (Person identity, offices, currency, duties). |
+
