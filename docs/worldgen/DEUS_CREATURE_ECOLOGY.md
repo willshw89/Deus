@@ -12,10 +12,11 @@
 
 ### Core Architectural Mandates
 1. **Shared Living Foundation:** A timber wolf and a fantastical subterranean predator behave differently, but both participate in the exact same underlying world systems: habitat suitability, food, water, territory, predators, prey, reproduction, migration, mortality, environmental disturbance, and carrying capacity.
-2. **Habitat Suitability Over Random Spawn Timers:** Creatures do not materialize out of thin air because an invisible timer elapsed at a "spawn point." Creature populations exist because the physical world satisfies their environmental requirements (biomes, strata levels, moisture, cave shelter, food sources, civilization distance).
-3. **Persistent Populations Over Magical Respawns:** Overhunting a species reduces its regional population and can lead to **local extirpation**. Eradicated populations do not automatically respawn; they recover only through biological reproduction of survivors or migration from adjacent un-depleted regions.
-4. **Catalogue-First Creature Art Integration:** No visual asset for any wildlife, monster, or domesticated creature may be generated before the species is registered in the **Master Semantic Creature Catalogue** (`WG.68.15`), its ecology profile is defined, its animation requirements are specified, and permanent runtime sheet coordinates are allocated.
-5. **Multi-Timescale Performance Compliance:** Complex creature AI and kinematics execute strictly on Tier A (visible/engaged) and Tier B (nearby). Remote populations simulate coarsely at hours, days, and seasons, consuming near-zero CPU. Complies with [`docs/PERFORMANCE_ARCHITECTURE.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/PERFORMANCE_ARCHITECTURE.md).
+2. **One Authoritative Physical World:** Worldgen and live simulation operate on one authoritative physical world and the canonical authorities of its subsystems. No separate generated-world and simulation-world representations may compete. Five-strata geometry (`DEUS_Levels.js`) remains authoritative for solid physical terrain. Fluid volume remains governed by the canonical fluid representation (`DEUS_Fluid.js`) reconciled against strata capacity and passage rules.
+3. **Habitat Suitability Over Random Spawn Timers:** Creatures do not materialize out of thin air because an invisible timer elapsed at a "spawn point." Creature populations exist because the physical world satisfies their environmental requirements (biomes, strata levels, moisture, cave shelter, food sources, civilization distance).
+4. **Persistent Populations Over Magical Respawns:** Overhunting a species reduces its regional population and can lead to **local extirpation**. Eradicated populations do not automatically respawn; they recover only through biological reproduction of survivors or migration from adjacent un-depleted regions.
+5. **Catalogue-First Creature Art Integration:** No visual asset for any wildlife, monster, or domesticated creature may be generated before the species is registered in the **Master Semantic Creature Catalogue** (`WG.68.15`), its ecology profile is defined, its animation requirements are specified, and permanent runtime sheet coordinates are allocated.
+6. **Multi-Timescale Performance Compliance:** Complex creature AI and kinematics execute strictly on Tier A (visible/engaged) and Tier B (nearby). Remote populations simulate coarsely at hours, days, and seasons, consuming near-zero CPU. Complies with [`docs/PERFORMANCE_ARCHITECTURE.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/PERFORMANCE_ARCHITECTURE.md). Exact update frequencies are established by empirical profiling rather than premature freezing.
 
 ---
 
@@ -273,22 +274,30 @@ Creature habitation is an authentic spatial feature rooted in the physical terra
 
 ## 9. Multi-Timescale Performance & Individual Materialization
 
-To maintain 60 FPS while supporting thousands of simulated creatures across the world, DEUS enforces **Dual-Representation Scalability**:
+To maintain 60 FPS while supporting thousands of simulated creatures across the world, DEUS enforces **Dual-Representation Scalability** across four simulation fidelity tiers.
+
+> **Canonical Performance Rule:**
+> - **VISIBLE / ENGAGED** $\rightarrow$ Highest required fidelity (kinematics, pathing, animations).
+> - **NEARBY** $\rightarrow$ Reduced scheduled fidelity (staggered local sensory & needs ticks).
+> - **REMOTE** $\rightarrow$ Coarse scheduled simulation (group vector stepping).
+> - **DORMANT / UNLOADED** $\rightarrow$ Event-driven / deterministic catch-up (0 Hz recurring cost).
+>
+> *Note on Update Frequencies:* Numerical frequencies cited below are provisional operational examples only. Exact update frequencies must be established by empirical profiling and gameplay correctness tests under [`docs/PERFORMANCE_ARCHITECTURE.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/PERFORMANCE_ARCHITECTURE.md). **Benchmark before freezing actual Hz values.**
 
 ```text
-PROXIMITY TO PLAYER               SIMULATION STATE             COMPUTATIONAL COST
+PROXIMITY TO PLAYER               SIMULATION STATE             PROVISIONAL FIDELITY GOAL
 ─────────────────────────────────────────────────────────────────────────────────────────────
-TIER A (Visible Viewport + 2 tiles) Individual Entity Sprite   Full 60 Hz kinematics, A*
-                                    (Sprite_Character)          pathing, animation frames.
+TIER A (Visible Viewport + 2 tiles) Individual Entity Sprite   Highest required fidelity
+                                    (Sprite_Character)          (full kinematics, pathing, frames).
 ─────────────────────────────────────────────────────────────────────────────────────────────
-TIER B (Active Settlement / <48t)   Individual Entity Data     Staggered 15–20 Hz updates;
-                                    (No render overhead)        local sensory & needs ticks.
+TIER B (Nearby Settlement / <48t)   Individual Entity Data     Reduced scheduled fidelity
+                                    (No render overhead)        (staggered sensory & needs ticks).
 ─────────────────────────────────────────────────────────────────────────────────────────────
-TIER C (Offscreen Loaded Area)      Coarse Regional Entity     1–2 Hz macro-stepping; coarse
-                                    (Grouped herd/pack)         vector movement, statistical.
+TIER C (Remote Loaded Area)         Coarse Regional Entity     Coarse scheduled simulation
+                                    (Grouped herd/pack)         (coarse vector movement, stats).
 ─────────────────────────────────────────────────────────────────────────────────────────────
-TIER D (Dormant / Unloaded World)   Population Summary Vector  0 Hz recurring cost. Solved
-                                    { species, count, health }  via seasonal catch-up ticks.
+TIER D (Dormant / Unloaded World)   Population Summary Vector  Event-driven / deterministic catch-up
+                                    { species, count, health }  (0 Hz recurring cost).
 ```
 
 ### Materialization & Dematerialization Protocol
@@ -328,17 +337,21 @@ CREATURE CATALOGUE ENTRY SPECIFICATION:
     └── QC & Verification Status (PLANNED | READY | DELIVERED | VERIFIED)
 ```
 
-### Universal 12-Sprite Layout Compliance (Rule 11 & GEMINI.md)
-Every creature sprite sheet adheres strictly to the canonical 12-sprite layout:
-```text
-DOWN   DOWN   DOWN   (Row 0: South facing)
-LEFT   LEFT   LEFT   (Row 1: West facing)
-RIGHT  RIGHT  RIGHT  (Row 2: East facing - mirrored where symmetrical)
-UP     UP     UP     (Row 3: North facing)
-```
-- Standard 1-tile creatures: $144 \times 192\text{ px}$ sheet ($48 \times 48\text{ px}$ cells).
-- Large 2-tile creatures (e.g., Bears, Wyverns, Great Beasts): $288 \times 384\text{ px}$ sheet ($96 \times 96\text{ px}$ cells).
-- **Zero Flying Projectiles on Sheets:** Attacks depict bite/claw/strike tension and recoil only; projectile spells or breath cones animate via separate VFX sprites.
+### Creature Sprite & Animation Standard (Locomotion vs. Semantic Action Families)
+
+The creature animation system does **not** assume every creature requires a multi-sheet suite. Instead, the architecture strictly distinguishes:
+
+1. **BASE LOCOMOTION SHEET:**
+   - Standard 3 frames $\times$ 4 directions (South, West, East, North) matching native RMMZ charset conventions where appropriate.
+   - Standard 1-tile creatures: $144 \times 192\text{ px}$ sheet ($48 \times 48\text{ px}$ cells).
+   - Large 2-tile creatures (e.g. Bears, Wyverns, Great Beasts): $288 \times 384\text{ px}$ sheet ($96 \times 96\text{ px}$ cells).
+   - Serves as the primary movement visual asset across the world.
+
+2. **SEMANTIC ACTION FAMILIES:**
+   - Distinct, demand-driven action states: `ATTACK`, `HIT_REACTION`, `DEATH_CORPSE`, `SLEEP`, `EAT`, `DRINK`, `FLY`, `SWIM`, `BURROW`, `CAST`, `SPECIAL_ABILITY`, `TRANSFORMATION`.
+   - **Anti-Explosion Rule:** Only species that genuinely require an animation family for active gameplay receive it (e.g., a deer may only need Walk, Idle, Eat, and Corpse; a dragon may need Walk, Flight, Breath Attack, and Death).
+   - **Zero Flying Projectiles on Sheets:** Attacks depict physical bite/claw/strike tension and recoil only; projectile spells or breath cones animate via separate VFX sprites.
+   - `WG.11` (Animation Standard) and `WG.68.15` (Creature Catalogue) determine exact sheet topology before production creature generation begins.
 
 ---
 
