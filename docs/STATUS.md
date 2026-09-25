@@ -26,7 +26,7 @@
 - **Lane C2 (Claude CLI):** WG.00.12 Machine governance enforcement committed (`58b0fcad`, 88/88 PASS). ACCEPTED for Grok attack. Hook installation held.
 - **Lane C3 (Claude CLI):** WG.00.12 Palette ADR-002 revision & commit d1fbeab review committed (`70dad27`). Ready for integration (step 2).
 - **Lane D (Grok PM):** Adversarial review delivered (verdicts recorded).
-- **Lane E (Grok Writer / Claude Reviewer):** WG.00.09 Follow-up: Grok revising `UF_Depth_Attack_Plan.md` against review `38875ae0` (Blocker CR-19C-B1, M1-M8).
+- **Lane E (Grok Writer / Claude Reviewer):** WG.00.09 Follow-up: Grok revision committed (`37fc1473`). Claude reviewer actively re-reviewing against CR-19C-B1 and M1–M8.
 - **Lane F (Claude CLI):** WG.00.12 OneDrive absolute link rewrite tool & dry-run diff committed (`23559316`).
 - **Lane G (Claude CLI):** WG.00.11 Follow-up: Test maintenance complete & committed (`a8e42502`, 30/30 gating checks pass, 15 mutants caught, world_age 29/29 pass, carrying capacity 23/23 pass). Awaiting Grok review.
 
@@ -42,7 +42,7 @@
 | **Lane C2** | **Governance check_claims.js** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Committed `58b0fcad`<br>`task/lane-c2` | `C:\Users\snewt\.deus_worktrees\lane-c2` | 2026-09-25 17:02:39 | **STATUS: ACCEPTED FOR GROK ATTACK.**<br>• 88/88 checks pass, 22 mutants killed. Hook installation held until lane branches integrated. Integration order step 3. |
 | **Lane C3** | **Palette ADR Revision & Review** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Committed `70dad27`<br>`task/lane-c3` | `C:\Users\snewt\.deus_worktrees\lane-c3` | 2026-09-25 16:54:51 | **STATUS: WRITER COMMITTED.**<br>• Revised ADR-002 (uf.hex canonical for runtime now); d1fbeab review completed. Integration order step 2. |
 | **Lane D** | **Adversarial Review** | Grok (PM instance) / `grok-4.7` | Via Owner | Main checkout | 2026-09-25 16:48:00 | **STATUS: DELIVERED.**<br>• ATK-19B-001 CLOSED; ATK-19B-002 KEEP OPEN (F2); ATK-YEAR0-001 KEEP OPEN (F1); WG.00.08 stays REVIEW. |
-| **Lane E** | **WG.00.09 DEFINE / PRE-ATTACK** (`WG.00.09`) | Grok CLI (Writer) / Claude (Reviewer) | `task/lane-e` | `C:\Users\snewt\.deus_worktrees\lane-e` | 2026-09-25 16:58:00 | **STATUS: REVISION ACTIVE.**<br>• Grok revising `UF_Depth_Attack_Plan.md` against review `38875ae0` (Blocker CR-19C-B1: live tilemap opacity, M1-M8). Claude re-reviews. |
+| **Lane E** | **WG.00.09 DEFINE / PRE-ATTACK** (`WG.00.09`) | Grok CLI (Writer) / Claude (Reviewer) | `task/lane-e` | `C:\Users\snewt\.deus_worktrees\lane-e` | 2026-09-25 18:03:55 | **STATUS: REVISION COMMITTED; RE-REVIEW ACTIVE.**<br>• Grok committed `37fc1473` resolving CR-19C-B1 and M1-M8. Claude reviewer launched and actively re-reviewing. |
 | **Lane F** | **OneDrive-Link Migration Prep** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Committed `23559316`<br>`task/lane-f` | `C:\Users\snewt\.deus_worktrees\lane-f` | 2026-09-25 16:52:09 | **STATUS: WRITER COMMITTED.**<br>• Link rewrite scanner & dry-run diff ready. Applied at freeze point. |
 | **Lane G** | **ATK-YEAR0-002 Runtime Fix & Test Maint** (`WG.00.11`) | Claude CLI / `claude-opus-5-5` | Committed `a8e42502`<br>`task/lane-g` | `C:\Users\snewt\.deus_worktrees\lane-g` | 2026-09-25 17:50:51 | **STATUS: COMMITTED & VERIFIED.**<br>• Gating checks pass (30/30), 15 mutants caught; `INV-SIM-01` end-to-end met; world_age 29/0; carrying capacity 23/0. Awaiting Grok review. |
 
