@@ -7,7 +7,7 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (Autonomous Shelter Construction Loop COMPLETE — AWAITING USER REVIEW)
 
 ## In progress
-- **Fable / Claude Code (2026-09-24):** Completed `DEUS-TSK-FABLE-19A` (Five-Strata Geometry Authority & Foundation Migration; commit `edba004`). Native RMMZ smoke gate PASSED and 19A is FINAL ACCEPTED / OWNER APPROVED. `DEUS-TSK-FABLE-19B` (Cuts + Caves on Strata) authorized with Deep-Cut requirements.
+- **Fable / Claude Code (2026-09-24):** IN PROGRESS `DEUS-TSK-FABLE-19B` / WG.00.08 (cuts + caves on strata, user prompt 2026-09-24, with the owner deep-cut requirement). Files: `game/js/plugins/DEUS_WorldGen.js` (cut and cave plan, ground painter, cellInfo), `game/js/plugins/DEUS_Levels.js` (the hook that applies the plan to the baselines, generator 6, helper queries), `tools/test_strata_cuts_and_caves.js` (new), existing terrain harnesses whose gates move with generator 6, `docs/systems/UF_Levels.md`, `docs/systems/UF_WorldGen.md`. No rendering (19C), no plugins.js or game/data change. 19A: edba004 (native smoke tools 7f48cfd, AUDIT_LOG A10).
 - **Gemini (2026-09-24):** Integration Coordinator & Authority for `DEUS-WORLDGEN-WBS-v1.0` (`docs/worldgen/DEUS_WORLDGEN_WBS.md`). Freezing WG.00.06 (FABLE-19A native smoke gate verified), preparing bounded prompt for `WG.00.08 / DEUS-TSK-FABLE-19B` (Cuts + Caves on Strata), and queuing `WG.00.07` (Fluid ↔ Strata Reconciliation). All art generation strictly held until asset catalogues (WG.20–WG.25) and atlas slot assignments (WG.30–WG.33) are frozen.
 - **Astra (2026-09-24):** On hold / consumed per user directive.
 
