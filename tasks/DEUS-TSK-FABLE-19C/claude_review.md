@@ -5,6 +5,7 @@
 - **Document under review:** `docs/systems/UF_Depth_Attack_Plan.md` at commit `c846fc7c` (Grok)
 - **Branch / worktree:** `task/lane-e` (`C:\Users\snewt\.deus_worktrees\lane-e`)
 - **Verdict:** **CHANGES REQUESTED** (1 BLOCKER, 8 MAJOR, 9 MINOR)
+- **Re-review of `37fc1473` (2026-09-25, Section 4 at the end of this file):** **CHANGES REQUESTED** (0 BLOCKER, 1 MAJOR, 10 MINOR). B1 is resolved.
 
 The plan's depth math, its tables, and its rejection of the shape grid, the blur, and the colour matrix hold up against the code. It is not accepted because of one gap. The plan assumes the live tilemap is see-through exactly where the ray passes, and the live tilemap does not work that way. The live tilemap picks each cell's tile from the derived shape. On generated terrain the two disagree in both directions, and on the Ground and `-1` views they disagree on every exposed column. None of the plan's checks can see this. Most of the other findings are checks that can't fail on the mutant they are mapped to, or palette and performance rules that don't work on the real registry.
 
@@ -222,3 +223,200 @@ distinct shades across d0..d4 per color: {"1":134,"2":92}
 - Every BLOCKER and MAJOR above either changed in the plan or recorded in §9 with an owner decision.
 - For each of the twenty or more mutants, the check it must fail can observe the code path the mutant patches, and every check name has a build and an expected result.
 - This review does not claim any check, mutant or frame time. The harness does not exist, and nothing in the plan was run except the arithmetic and probes in section 3.
+
+---
+
+# Section 4: Re-Review of `37fc1473`
+
+- **Reviewer:** Claude CLI session (Lane E)
+- **Date:** 2026-09-25
+- **Document under review:** `docs/systems/UF_Depth_Attack_Plan.md` at `37fc1473` (Grok, "Directive 001-F")
+- **Checked against:** sections 1–5 above, `docs/handoffs/HANDOFF_DEUS_TSK_FABLE_19C_DEPTH.md`, the `docs/VISION.md` decision log, and the code the plan cites
+- **Verdict:** **CHANGES REQUESTED** (0 BLOCKER, 1 MAJOR, 10 MINOR)
+
+The blocker is fixed. The lip rule, the `_addSpot` cutout and the roof fallback close every leak the seed-18 probe found; I re-ran the probe on the plan's new ray to confirm it (4.4.1). M2–M8 are resolved in the design. One item is still open. M1 asked for an owner decision on value recession. The revision took that decision itself and labelled it "Owner decision". The rule it picked darkens depth 1 by about a third, where the user's recorded brief asks for 4 %, and on today's art it shades nothing at all. That goes to the owner before the shade path is built. The ten minors are edits to the text; none needs new investigation.
+
+## 4.1 Item-by-item
+
+| Item | Verdict | Basis |
+|---|---|---|
+| **B1** (a) lip assignment | Resolved | `zHit = floor((e + 1) / 5) − 2` matches `derivePacked` (`DEUS_Levels.js:1208-1210`) and `worldStrataElevationAt` (`:1874-1876`). Probe: the columns that move from `dHit ≥ 1` to `0` are exactly the review's lip counts (419 / 517 / 575 / 306 on `+2` / `+1` / `0` / `−1`), and every one of them is a live `floor`. |
+| B1 (b) live-layer contract | Resolved | `DEUS_Depth` owns it and the painters stay read-only. `_addAllSpots` clears both layers (`rmmz_core.js:2422-2424`), and `_addSpot` adds every rect of a cell on both layers (`:2436-2461`), so skipping the spot is a clean cut. No DEUS plugin overrides `Tilemap.prototype._addSpot`, `_addAllSpots` or `_readMapData` for the live map (grep: only `DepthTilemap`). Zoom is locked at 1.0 (`DEUS_Camera.js:104-117`), so the live 19×15 spot grid lies inside the 23×19 summary. After the lip rule the cutout must skip 793 ground columns and 38 on `−1` (seed 18), as §3.5 says. Residuals: R4, R5. |
+| B1 (c) `dHit = 0` fallback | Resolved (look open) | An opaque tile at scale 1 where the live tile is transparent. 127 cells on `+1`, none on any other camera (seed 18); 188 / 621 / 122 on seeds 3 / 21 / 4. `shapeCodeAt` with numeric arguments is allocation-free on a warm grid (`cellQuery` and `packedGridOf`, `DEUS_Levels.js:1299-1311`). The tile it draws: R6. |
+| B1 (d) screen checks | Resolved | `P-CUTOUT` samples roof, hole, void and live per camera, and fails when a present class is not sampled. `live_cutout_off` maps to it. Seed 18 has every class except void; none of the four seeds has a void column (4.4.1). |
+| **M1** shade table | **Partly resolved** | The checks now work. `S-STEP` fails an identity table (192 of 226 slots change at `d = 1`), `S-MONO` holds (0 non-monotone steps), and `S-SHADE-ORACLE` pins the ramp choice. But the owner did not take the decision the finding asked for: **R1**. |
+| M2 transition | Resolved | Master texels are stepped, other texels copied unchanged, alpha split at 128, the shadow quad skipped. What that means on current art is part of R1. |
+| M3 repaint cost | Resolved | Shaded copies are built once. A repaint is `clearRect` + `drawImage` + `baseTexture.update`. `getImageData` runs only in the sheet build. The pan benchmark reports GC counts. Memory: R9. |
+| M4 masks | Resolved | No sprite mask anywhere. Tile ownership is painted into the canvas and entities are cropped with `setFrame`. `no_sprite_mask` reads `.mask` on planes and their children plus the stub's own construct count, and `sprite_mask_production` maps to it. Sprites wider than 48 px: R11. |
+| **M5** mutants and checks | Resolved except R2 and R8 | `cache_ignores_destroy` is redefined so `C-DIG` can kill it: `writeCell` emits `cellChanged` before `damageCell` emits `strataDestroyed` (`DEUS_Levels.js:1558-1566`, `:1713-1722`). `max_depth_clamped_2` → `O-SHAFT-DRAW` (stub). `float_scale` → `S-SCALE-INT`: at `H = 120`, `48·H/(H+5d)` is 46.08, 44.31, 42.67, 41.14, never an integer. `palette_lerp` → `S-PAL-CANVAS`. All 32 check names used in §8.3 and §8.4 are defined in §8.2 (27 mutants). The exit-code rule is fixed (line 492) and the harnesses are split. `absolute_z_scale` still can't be seen: R2. |
+| M6 live allocation | Resolved | `C-LIVE-ALLOC` runs with `exposed > 0`, plane 4 bound and a walking lower unit, under `--expose-gc`. It measures heap and GC and doesn't trust the counter, so `alloc_unwired` fails it. The live `_addSpot` wrapper is outside it: R4. |
+| M7 picture gate | Resolved | A five-level frame plus one shot per camera, as handoff §10.3 asks. From `+2`, the number of 17×13 views showing `dHit` 0 through 4 together is 72 on seed 18, 41 on seed 4, and 0 on seeds 3 and 21, so the five-level frame has to come from seed 18 or 4. Camera `−2` sees only `dHit = 0` on all four seeds. |
+| M8 block fill | Resolved | No new export. The public reader (`baseline().strata.m`, the 22-hex record in `state.levels[z].strata`, `STRATA_MATERIALS[..].solid`, bit `0x40`) gives the same 25-bit word as `strataAt` on all 65,536 columns of area (0,0) for seeds 18, 3, 21 and 4, and after five `setStrata` writes (air, roof, water, constructed soil). `putDelta` writes the hex string in the same call as the decoded map (`DEUS_Levels.js:1347-1352`), so the string is never stale. Edge cases: R11. |
+| m1 lip entities | Resolved | §7 uses the same lip rule, so a unit on a lip is in its own level's list. |
+| m2 pad | Resolved | `H ≥ 90`. `PAD·tilePx/48 ≥ shift + 1` holds in all 12 cells (tightest 78.0 ≥ 77.5), and `PAD = 48` fails at all three eyes. |
+| m3 canvas | Resolved | 1104×912 (23×19), recomputed. |
+| m4 presence | Resolved | 5-bit presence mask. |
+| m5 world / wrap | Resolved | `world:created`, load, schema version and state identity are all covered. A load assigns a new object (`DEUS_World.js:2910`), so the identity test works. The block index wraps. |
+| m6 cap events | Resolved | Ignored. |
+| m7 Rule 13 | Recorded | Logged in §9 as an open art decision, which is acceptable. |
+| m8 departures | Resolved | `frame3` and the cap departure are in §9, and the wall-cap crop rule is in §7. One new departure is not in §9: R10. |
+| m9 wording | Resolved | All four fixed. |
+
+## 4.2 New and residual findings
+
+### MAJOR
+
+**CR-19C-R1: M1's decision is labelled an owner decision, the owner didn't make it, and it overrides a recorded user brief by a wide margin.**
+
+- §5.2 (line 290) is headed "Decision for CR-19C-M1", and the §9 row (line 746) says "**Owner decision, M1.**" There is no record of it anywhere I looked: the `docs/VISION.md` decision log, `docs/STATUS.md`, and the Lane E message bus (`tasks/DEUS-TSK-FABLE-19C/messages.jsonl` in the canonical checkout). "Directive 001-F" appears only as the coordinator's lane assignment in STATUS.
+- The user's brief is on record (`docs/VISION.md:383`, 2026-09-24): "colour recession about 4 % brightness and saturation per level (96 / 92 / 88 / 84 %) … nothing frozen before the screenshots are reviewed". Line 288 retires those figures.
+- I ran the §5.2 rule on the registry (4.4.2). It changes 192 of the 226 colours at every depth. The median luminance ratio is **0.67 at depths 1–2** (range 0.43–0.81) and **0.47 at depths 3–4** (range 0.23–0.70). So planes come out about 33 % darker where the brief asks for 4 %, and about 53 % darker where it asks for 12–16 %. Depths 1 and 2 are identical for every colour, and so are depths 3 and 4, so value never separates plane 1 from plane 2.
+- Under M2's pass-through rule, the step applies only to texels that are exact master hexes. Of 11,741,932 opaque texels in `game/img/tilesets/*.png`, **0.01 %** are master hexes (only `Inside_A5`, at 0.5 %; see 4.4.3). On today's tiles `deus` therefore renders the same as `deus_scale`. Once master-palette art lands, the same planes drop by a third.
+- The plan states neither number. The brief's acceptance line ("a human, a tree, a bridge, a cave entrance … stay recognisable at depth 4") is exactly what a 0.23–0.70 ratio puts at risk.
+
+**Required:**
+- Relabel §5.2 and the §9 row as a proposal awaiting the owner.
+- Put both measurements in front of the owner, through the coordinator, with the options: this rule; one step at depths 3–4 only; a static ordered dither between ramp neighbours (review M1); or scale-only recession until the art is on the palette.
+- Keep `S-STEP`, `S-MONO` and `S-SHADE-ORACLE` whichever rule is chosen.
+- Only the shade path waits for this decision; the rest of the plan does not.
+
+### MINOR
+
+- **R2: `absolute_z_scale` still can't fail `S-RELATIVE`.** §8.2 lists `S-RELATIVE` under "Scale (node, except `S-SCALE-INT`)" (line 549). The node harness has no planes, and its only scale export is `tilePx(H, d)`, which takes no `z`. The check therefore reduces to `tilePx(120, 1) = 46` and `tilePx(120, 2) = 44`, which `S-120` already asserts, and a binder that keys scale on `z` passes it. Checking from camera `+2` alone doesn't help either: a table keyed as `d' = 2 − z` equals `d` there, so `S-SCALE-INT` misses it too. The driver would still catch this (the mutant exits 0 and fails the gate), so it is not a false pass. But the gate can't go green as specified.
+  - **Fix:** move `S-RELATIVE` to the stub. Bind with `V = +1` and then `V = +2`, and read `plane.scale.x × 48` on the plane showing `z = 0`: expect 46, then 44. Do the same for `z = +1` from `+2` and `z = −1` from `0`: both 46.
+- **R3: "Owner decision" labels on B1, M2 and M8** (lines 169, 742, 743, 747, 754). These three choices stay inside the handoff's owned paths and are the alternatives the review offered, so they don't need the owner. As written, the log records owner decisions that were never made.
+  - **Fix:** relabel them "Plan decision (within handoff §9 authority)".
+- **R4: The live tilemap repaints with the camera still, and nothing measures the wrapper.**
+  - Line 179 says "A still camera does not repaint." But stock `Tilemap.update` advances `animationFrame` every 30 frames (`rmmz_core.js:2327-2329`), and `updateTransform` rebuilds every spot when it changes (`:2378`). The `_addSpot` wrapper therefore runs 285 times (19×15) every 30 frames with the camera still, and again on every live start-tile change.
+  - §8.6 item 3 forbids allocation in the wrapper, but no check runs it. The stub harness doesn't include the stock `Tilemap`. The pan benchmark (line 717) exempts "a GC inside the live WebGL tilemap's own rebuild", which is exactly where the wrapper runs.
+  - **Fix:** correct the sentence. Either run the real `Tilemap.prototype._addAllSpots` with the wrapper inside `C-LIVE-ALLOC` (240 frames include 8 repaints) or add a separate heap/GC check. Drop the exemption for GC inside the wrapper.
+- **R5: The spot-to-summary mapping isn't pinned, and the loop seam leaks.**
+  - (a) The wrapper reads `dHit` for the live spot's cell. The live start tile is `floor((ceil(ox) − 20) / 48)` (`rmmz_core.js:2369-2370`), and the depth canvas starts two tiles before it. "Rebuild the summary when the camera crosses a cell" (line 384) reads naturally as `floor(displayX)`. Write `ox = 48k + r`. The live start tile is `k − 1` for `r < 20` and `k` otherwise, so no fixed offset from `floor(displayX)` is right for the whole pan. A player-centred camera at rest has `r = 0`. Keyed that way, every cut lands one cell off for 20 px of every 48.
+    - **Fix:** key the summary on the depth canvas start tile, which is the live start tile − 2. Rebuild it in `updateTilemap`, where the root already updates after the stock origin is set (`DEUS_Depth.js:824-826`, `rmmz_sprites.js:3485`), so it runs before the live `updateTransform`. The wrapper indexes `(x + 2, y + 2)` of its spot loop. Add a `P-CUTOUT` sample at `r < 20`.
+  - (b) `_addSpot` passes unwrapped `mx`, `my`; only `_readMapData` wraps (`rmmz_core.js:2618`). Level maps loop (`scrollType: 3`, `DEUS_World.js:622`), and `shapeCodeAt` returns 0 for `x < 0` or `x ≥ size` (`DEUS_Levels.js:1299-1308`). So a `+1` roof at the seam falls through to case 3 and paints `open_air`, and the void shows.
+    - **Fix:** wrap `mx`, `my` before calling `shapeCodeAt`, and add a surgical seam roof to `P-CUTOUT`.
+- **R6: The roof fallback paints a dug floor.**
+  - Case 2 (line 176) draws `mined_stone` ("Dug stone floor"), `mined_soil`, or `deck_wood` ("Wooden floor", a constructed look) on an undug natural roof (`DEUS_Levels.js:130-131`).
+  - The painter's own look for the top of solid material is `rock` or `soil` (`looksOfPacked`, `:1457`). A roof next to solid rock would read as a walkable dug floor, while `UF_Look` still reports "Open air".
+  - The same happens on plane-owned `open` cells at `z ≤ 0`: `cave_floor` + `hole_edge` marks a hole over rock.
+  - This is not a leak. **Fix:** name the look and say why; the solid look is the consistent choice.
+- **R7: The shading checks need a fixture, and the step can produce the void colour.**
+  - Only 0.01 % of texels in the real sheets are master hexes (R1), so `S-SHADE-VIS` ("one master texel that `S-STEP` says changes") has nothing to test on real art. A `palette_lerp` build, or an unwired table, that touches only master texels changes no real pixel.
+    - **Fix:** name a master-palette fixture sheet for `S-SHADE-VIS`, `S-PAL-CANVAS` and `S-PASS`. A missing fixture exits 2.
+  - `HIGH_SOIL_01` (at `d = 1..4`) and `VOLC_CHAR_03` (at `d = 3..4`) step onto `NEUT_VOID_CAP` `#0C0D12`, which is the void texel. In all, 9 non-void colours step onto one of the three void ids (4.4.2). A shaded plane pixel can then equal the void, while `P-CUTOUT` and `void_palette` tell hole from void by colour alone.
+    - **Fix:** exclude the void ids as step targets for non-void colours, or have `P-CUTOUT` identify the source layer another way.
+- **R8: Harness labels, a missing export, and one underspecified build.**
+  - `C-STILL`, `C-HP`, `C-ALLOC` and `C-ONE` read upload and rebuild counters and "no plane bound", and `S-PAD` reads "the constructed layer size". All of these need the depth update or the layer, which only the stub harness provides, but they are labelled node.
+  - `C-DIG`, `C-WORLD` and `C-WRAP` compare "the word", but the export table (lines 512-518) has no block-word reader, and `columnHit` is not required to read through the cache.
+    - **Fix:** add `UF.Depth.blockWord(area, x, y)`, or require `columnHit` to go through the cache.
+  - `O-ROOF-V` says "It may be `open`" (line 529) and doesn't pin `V−1`'s `S4`. With a solid `S4` below, the cell derives `floor` (a lip), and `shape_open_is_hole` never fires.
+    - **Fix:** build `V−1 S4` as air, and assert shape `open` as a precondition (exit 2 otherwise).
+  - For `cache_no_wrap`, pick a row where `(size−1, y)` and `(size−1, y−1)` differ, so the unwrapped read is visibly wrong.
+- **R9: The memory for the shaded copies isn't stated.**
+  - Line 331 builds "one shaded copy per depth in `1..4`". The chosen table makes `d1 ≡ d2` and `d3 ≡ d4` for every colour, so two copies are enough.
+  - On today's art every copy is byte-identical to its source.
+  - Tileset 92's four runtime sheets alone are 2,027,520 px, which is 8,110,080 bytes per copy. The eight plane canvases add 32,219,136 bytes, created with the scene. §6.5 gives no total.
+  - A first bind in play runs `getImageData` and a per-texel search on about 2 M px, which will hitch.
+  - **Fix:** share one copy between depths that have the same table column, skip the copy for a sheet with no master texel, build at scene start, and state the total.
+- **R10: `off`, and one unrecorded departure.**
+  - The F7 cycle keeps `off` (line 312), but the plan doesn't say whether the cutout and the roof fallback stay on under it. If they stay, a hole with the planes off shows the parallax, which §5.1 forbids. If they go, the `+1` roof leak returns.
+    - **Fix:** say which.
+  - Handoff §10.1 asks for "Pure Node.js VM execution", and the plan adds an nw.js render harness. I asked for that split and it is right, but the departure belongs in §9.
+- **R11: Edge cases.**
+  - The fill should behave like `locate`. With an unknown `strataSchemaVersion`, `deltaLevels` ignores the saved records (`DEUS_Levels.js:1133-1137`), but the hex reader would read them. An unreadable record is skipped by `deltaLevels` (`:1146-1150`), but the hex reader would read it raw.
+  - §7's crop rule only handles the north cell of a 48×96 frame. A sprite wider than 48 px whose east or west column has a different `dHit` needs its own rule. A rectangle crop can't express L-shaped ownership, so the plan should say what gets dropped.
+
+## 4.3 Containment
+
+- `git show --name-status 37fc1473` → `docs/systems/UF_Depth_Attack_Plan.md` and `tasks/DEUS-TSK-FABLE-19C/state.md`.
+- `git diff --stat 37fc1473^ 37fc1473 -- game tools run_tests.bat` → empty.
+- `git diff --stat main...HEAD` → the plan, this review, and `state.md` only.
+
+Neither the revision nor this re-review added or changed engine code, a harness, or data.
+
+## 4.4 Evidence (commands run in this session)
+
+### 4.4.1 Live layer vs the plan's ray
+
+This is the section 3.1 method, run again: the real plugins in the `setup()` vm of `tools/test_strata_foundation.js`, a New Game with `levelsGen 5`, area (0,0), and the census taken before any edit. The probe script lived in the system temp folder, not in the repo.
+- "Ray" is §3.2 with the lip rule; "old ray" is `floor(e / 5) − 2`.
+- "Transparent" means `V > 0` and shape `open` (`DEUS_Levels.js:1455-1456`).
+
+Seed 18, trimmed:
+
+```text
+seed 18 size 256 newWorld 12057 ms gens 5,5,5,5,5 legacyGround false groundVolumetric true
+public-bytes word vs strataAt: 0 mismatches of 65536 columns (baseline only)
+V=+2: dHit hist 0..5 [15849, 24870, 24035, 751, 31, 0]; old-ray dHit>=1: 50106; moved to dHit=0 by lip rule: 419 (live shape floor: 419); new dHit>=1 under an opaque live tile (cutout must skip): 0 ; dHit=0 under transparent live tile (roof substitute): 0
+V=+1: dHit hist 0..5 [40719, 24035, 751, 31, 0, 0]; old-ray dHit>=1: 25334; moved to dHit=0 by lip rule: 517 (live shape floor: 517); new dHit>=1 under an opaque live tile (cutout must skip): 0 ; dHit=0 under transparent live tile (roof substitute): 127 (175,46)
+V=0: dHit hist 0..5 [64743, 760, 33, 0, 0, 0]; old-ray dHit>=1: 1368; moved to dHit=0 by lip rule: 575 (live shape floor: 575); new dHit>=1 under an opaque live tile (cutout must skip): 793 (71,24) shape 3 d1; dHit=0 under transparent live tile (roof substitute): 0
+V=-1: dHit hist 0..5 [65498, 38, 0, 0, 0, 0]; old-ray dHit>=1: 344; moved to dHit=0 by lip rule: 306 (live shape floor: 306); new dHit>=1 under an opaque live tile (cutout must skip): 38 (191,85) shape 3 d1; dHit=0 under transparent live tile (roof substitute): 0
+V=-2: dHit hist 0..5 [65536, 0, 0, 0, 0, 0]; ...
+V=+2: 17x13 viewports showing dHit 0,1,2,3,4 together: 72 (first top-left (175,75))
+after 5 setStrata edits (5 hex records in state): 0 word mismatches
+vm errors 0
+```
+
+Seeds 3 / 21 / 4, same run:
+
+| Measure | Seed 3 | Seed 21 | Seed 4 |
+|---|---:|---:|---:|
+| Word mismatches vs `strataAt` | 0 | 0 | 0 |
+| Roof fallback cells on `+1` | 188 | 621 | 122 |
+| Cutout columns on `0` | 94 | 68 | 441 |
+| Cutout columns on `−1` | 78 | 14 | 70 |
+| Five-`dHit` views from `+2` | 0 | 0 | 41 |
+| `dHit = 5` columns, any camera | 0 | 0 | 0 |
+| vm errors | 0 | 0 | 0 |
+
+The probe reads strata and derived shapes; it does not render anything. **Not checked:** no screenshot was taken, because no compositor implementing the plan exists yet.
+
+### 4.4.2 The §5.2 step table on the registry
+
+Input: `docs/art/DEUS_PaletteRegistry.json` (226 colours; all 226 hexes are in `deus_master_world_palette_v1.hex`), with ramp choice and tie-breaks as in §5.2 and the void ids held as identity.
+
+```text
+d 1 changed 192 / 226 lum ratio min/median/max 0.43/0.67/0.81
+d 2 changed 192 / 226 lum ratio min/median/max 0.43/0.67/0.81
+d 3 changed 192 / 226 lum ratio min/median/max 0.23/0.47/0.70
+d 4 changed 192 / 226 lum ratio min/median/max 0.23/0.47/0.70
+non-monotone steps 0 | distinct shades per colour d0..d4 {"1":34,"2":42,"3":150} | at dark end of chosen ramp (no step at d1) 31 | multi-ramp colours 32 of which ramps span >1 materialFamily 24 | non-void colours stepped onto a void id 9
+d1==d2 for every colour true | d3==d4 for every colour true
+HIGH_SOIL_01 #1D1B18 ramp VOLC_WOOD_CHARRED d1 NEUT_VOID_CAP d3 NEUT_VOID_CAP
+VOLC_CHAR_03 #362D2A ramp VOLC_WOOD_CHARRED d1 HIGH_SOIL_01 d3 NEUT_VOID_CAP
+```
+
+### 4.4.3 Master texels in today's tile art
+
+`tools/png_read.js` over every `game/img/tilesets/*.png`, counting texels with alpha ≥ 128 whose RGB exactly matches one of the 226 master hexes. Trimmed:
+
+```text
+Dungeon_A2.png                      442368 opaque    0.0% master
+Inside_A2.png                       392916 opaque    0.0% master
+Inside_A5.png                       292608 opaque    0.5% master
+Temperate_Z0_CORE_A2.png            425016 opaque    0.0% master
+ALL 11741932 opaque 0.01% master
+```
+
+### 4.4.4 Other
+
+- Owner-decision search:
+  - `grep -rn "001-F"` in this worktree finds only the plan's and `state.md`'s headers.
+  - In the canonical checkout it appears in `docs/STATUS.md` as the lane assignment, never alongside a depth decision.
+  - `grep "2026-09-2[45]" docs/VISION.md` finds V134, V135 and the 2026-09-24 depth brief, and no later depth entry.
+- Arithmetic (`node`):
+  - `tilePx` for `H` = 160 / 120 / 90 matches §4.2.
+  - `PAD·s ≥ shift + 1` is true in all 12 cells with `PAD = 96`, and false at all three eyes with `PAD = 48`.
+  - Canvas 23×19 = 1104×912, which is 4,027,392 bytes per canvas and 32,219,136 for eight. The live spot grid is 19×15.
+- Plan cross-check: 49 check ids in §8.2; 32 names used in §8.3/§8.4, none undefined; 27 mutants.
+- `grep "Tilemap.prototype" game/js/plugins/*.js` finds only `DepthTilemap` in `DEUS_Depth.js`. The active plugin list in `plugins.js` includes `DEUS_Camera` (zoom fixed at 1.0) and `DEUS_Culling`.
+
+## 4.5 Decisions needed (owner / coordinator)
+
+1. **R1:** the value recession rule, decided with the numbers in 4.4.2 and 4.4.3 in hand.
+2. **R6:** which tile a natural roof shows on the live map: a dug floor, or the solid rock look.
+3. **m7** (still open from the first review): Rule 13's cap range against the master void ramp.
+
+## 4.6 Overall verdict
+
+**CHANGES REQUESTED.** B1 and M2–M8 are resolved in the design, and the fixes hold up against both the code and the probe. M1 is resolved as a testing matter but not as a decision, and that decision belongs to the owner (R1). R2–R11 are text edits. Once the owner's answer on R1 is recorded and R2–R11 are edited, I expect to pass the plan on a diff review without new probes. This re-review claims no check result, mutant kill, screenshot or frame time; none of them exists yet.
