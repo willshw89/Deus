@@ -16,16 +16,16 @@
 
 ---
 
-## 2. Active Parallel Work Lanes (DEUS Directive 001)
+## 2. Active Parallel Work Lanes (DEUS Directive 001-B)
 
-| Lane | Objective & WBS ID | Primary Writer | Independent Reviewer | Current Gate & Status |
-|---|---|---|---|---|
-| **Lane A** | **WG.00.08 Reopen Evidence** (`WG.00.08`) | Gemini | Grok | **STATUS: REVIEW (Directive 001 sec 2.1).**<br>• Criterion 2.2a met (Z-2 cut proof committed in `8d1c7c3`).<br>• Still owed: 27-mutant roster with kill results (2.2b), 6-point `skylight_through_fluid` proof (2.2c), Owner ruling on A10-1 in `docs/OWNER_DECISIONS.md` (2.2d), then Grok closure verdict (2.2e). |
-| **Lane B** | **ATK-YEAR0-001 (New Game Year 0)** (`WG.00.11`) | Fable | Grok | **STATUS: FIX READY (Commit `8d1c7c3`).**<br>• Engine defaults to Year 0 in `DEUS_FactionMenus.js`.<br>• `tools/test_new_game_year0.js` passes 3/3 checks + Rule 4 mutant.<br>• Authored by Gemini in `8d1c7c3`; assigned to Fable to review/harden; awaiting Grok independent closure. |
-| **Lane C1** | **Consolidation Infrastructure** (`WG.00.12`) | Claude Subagent (failover from Codex) | Gemini | **STATUS: IN PROGRESS.**<br>• Directories created: `docs/telemetry/`, `tools/performance/`, `docs/adr/`, `docs/issues/`.<br>• Battle stack audit delivered in `docs/adr/ADR-001-RMMZ-Battle-Stack-Audit.md`.<br>• Boot/load census delivered (census compile time marked INVALID per Directive 001-A sec 5).<br>• External backup creation & test pending before migration. |
-| **Lane C2** | **Governance & Housekeeping** (`WG.00.12`) | Claude Subagent | Grok | **STATUS: IN PROGRESS.**<br>• Building `tools/governance/check_claims.js` (Rules 4.1–4.4 + backfill flag).<br>• Split `STATUS.md` and created `docs/archive/STATUS_LEDGER_20260925.md`.<br>• Seeded `docs/OWNER_DECISIONS.md`.<br>• Stale docs & non-evidence banners applied.<br>• Whitelisted `tasks/`, `prompts/`, `baseline/` in `.gitignore`. |
-| **Lane D** | **Adversarial Review** | Grok | Owner / Gemini | **STATUS: ACTIVE.**<br>• (a) Fluid/air exceptions audit (`derivePacked` headroom, unknown material IDs, A10-4 flood grid, fluid 0..7 vs 5 depth states).<br>• (b) Attack governance checks (`check_claims.js`) attempting to sneak forbidden changes past. |
-| **Lane E** | **WG.00.09 Depth Renderer Definition** | Fable | Grok | **STATUS: ACTIVE (Spec & Attack Plan Only).**<br>• Zero engine implementation until repository layout is frozen. Drafting in `docs/systems/UF_Depth_Attack_Plan.md`. |
+| Lane | Objective & WBS ID | Provider / Model | Worker Task ID & Branch | Worktree Path | Current Gate & Status |
+|---|---|---|---|---|---|
+| **Lane A** | **WG.00.08 Exit Criteria** (`WG.00.08`) | Claude CLI (Fable) / `claude-opus-5-5` | `task-33803`<br>`task/lane-a` | `C:\Users\snewt\.deus_worktrees\lane-a` | **STATUS: ACTIVE / RUNNING.**<br>• Generating 27-mutant kill roster (2.2b) & 6-point `skylight_through_fluid` proof (2.2c). Gemini ceased writing. |
+| **Lane B** | **ATK-YEAR0-001 Hardening** (`WG.00.11`) | Claude CLI (Fable) / `claude-opus-5-5` | `task-33813`<br>`task/lane-b` | `C:\Users\snewt\.deus_worktrees\lane-b` | **STATUS: ACTIVE / RUNNING.**<br>• Edge-case hardening for Year 0 defaults, arrow inputs, and test expansion. |
+| **Lane C1** | **Consolidation Infrastructure** (`WG.00.12`) | Claude CLI (Codex failover) / `claude-opus-5-5` | `task-33815`<br>`task/lane-c1` | `C:\Users\snewt\.deus_worktrees\lane-c1` | **STATUS: ACTIVE / RUNNING.**<br>• Authoring and validating `tools/backup_project.ps1` (robocopy, no git clone) to `C:\Users\snewt\.deus_backups\`. |
+| **Lane C2** | **Governance check_claims.js** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | `task-33817`<br>`task/lane-c2` | `C:\Users\snewt\.deus_worktrees\lane-c2` | **STATUS: ACTIVE / RUNNING.**<br>• Authoring `tools/governance/check_claims.js` (Rules 4.1–4.4 + backfill flag) & test suite. |
+| **Lane D** | **Adversarial Review** | Grok (PM instance) / `grok-4.7` | Via Owner | Main checkout | **STATUS: ACTIVE.**<br>• Adversarial review in progress; delivering via Owner. |
+| **Lane E** | **WG.00.09 DEFINE / PRE-ATTACK** (`WG.00.09`) | Grok CLI / `grok-4.7` | `task-33819`<br>`task/lane-e` | `C:\Users\snewt\.deus_worktrees\lane-e` | **STATUS: ACTIVE / RUNNING.**<br>• Authoring `docs/systems/UF_Depth_Attack_Plan.md` (5-plane depth spec, strata authority, physical scale recession, no blur). Zero engine code permitted. |
 
 ---
 
@@ -33,13 +33,13 @@
 
 | Lane / Owner | Exclusive File Whitelist (Full Paths) | Access Policy |
 |---|---|---|
-| **Gemini (Coordinator)** | `docs/STATUS.md`<br>`docs/archive/STATUS_LEDGER_*.md`<br>`docs/WORK_QUEUE.md`<br>`docs/CANONICAL_ROLES.md`<br>`docs/AGENT_UTILIZATION_POLICY.md`<br>`docs/OWNER_DECISIONS.md`<br>`baseline/*` | **Exclusive Writer.** WBS coordination, integration authority, pulse reports, baseline records. |
-| **Lane A (Gemini)** | `tools/test_generated_z2_cut_proof.js`<br>`tasks/WG.00.08/*` | **Exclusive Writer.** 19B proof packet and evidence documentation. |
-| **Lane B (Fable)** | `game/js/plugins/DEUS_FactionMenus.js`<br>`tools/test_new_game_year0.js`<br>`tasks/WG.00.11/*` | **Exclusive Writer.** Year 0 engine implementation and verification suite. |
-| **Lane C1 (Claude Subagent)** | `docs/telemetry/*`<br>`tools/performance/*`<br>`docs/adr/*`<br>`docs/issues/*`<br>`tasks/WG.00.12/*`<br>`tools/backup_project.ps1` | **Exclusive Writer.** Consolidation tooling, performance profiling, battle stack ADR, external backup script. |
-| **Lane C2 (Claude Subagent)** | `tools/governance/check_claims.js`<br>`.git/hooks/pre-commit`<br>`docs/art/DEUS_WORLD_WBS.md`<br>`docs/worldgen/DEUS_WORLDGEN_WBS.md`<br>`docs/audits/GROK_HASH32_PERFORMANCE_OPTIMIZATION.md`<br>`docs/audits/GROK_19B_SEED_SWEEP_PROTOCOL.md`<br>`docs/DEUS_TSK_FABLE_19_HANDOFF.md`<br>`tasks/active/ARCHITECTURE-CLEANUP-001.md`<br>`.gitignore` | **Exclusive Writer.** Governance enforcement, WBS crosswalk, stale document reconciliation. |
+| **Gemini (Coordinator)** | `docs/STATUS.md`<br>`docs/archive/STATUS_LEDGER_*.md`<br>`docs/WORK_QUEUE.md`<br>`docs/CANONICAL_ROLES.md`<br>`docs/AGENT_UTILIZATION_POLICY.md`<br>`docs/OWNER_DECISIONS.md`<br>`docs/telemetry/*`<br>`baseline/*` | **Exclusive Writer.** WBS coordination, integration authority, pulse reports, baseline records. |
+| **Lane A (Claude / Fable)** | `tools/test_strata_cuts_and_caves.js`<br>`tasks/WG.00.08/*` | **Exclusive Writer (Worktree lane-a).** 2.2b mutant kill roster, 2.2c proof. |
+| **Lane B (Claude / Fable)** | `game/js/plugins/DEUS_FactionMenus.js`<br>`tools/test_new_game_year0.js`<br>`tasks/WG.00.11/*` | **Exclusive Writer (Worktree lane-b).** Year 0 engine implementation and verification suite. |
+| **Lane C1 (Claude CLI)** | `tools/backup_project.ps1`<br>`tasks/WG.00.12/state.md` | **Exclusive Writer (Worktree lane-c1).** External backup script, consolidation infrastructure. |
+| **Lane C2 (Claude CLI)** | `tools/governance/check_claims.js`<br>`tools/governance/test_check_claims.js`<br>`tasks/WG.00.12/c2_governance_state.md` | **Exclusive Writer (Worktree lane-c2).** Machine governance enforcement script and test suite. |
 | **Lane D (Grok)** | `tasks/WG.00.12/grok_adversarial_review.md`<br>`tasks/WG.00.08/defects.jsonl` (closure lines only) | **Exclusive Writer.** Adversarial review findings, defect verification, and closure signatures. |
-| **Lane E (Fable)** | `docs/systems/UF_Depth_Attack_Plan.md`<br>`tasks/DEUS-TSK-FABLE-19C/*` | **Exclusive Writer.** WG.00.09 specification review and pre-attack plan. |
+| **Lane E (Grok CLI)** | `docs/systems/UF_Depth_Attack_Plan.md`<br>`tasks/DEUS-TSK-FABLE-19C/state.md` | **Exclusive Writer (Worktree lane-e).** WG.00.09 specification review and pre-attack plan. |
 | **FROZEN / READ-ONLY** | `C:\Dev\DEUS`<br>`game/js/plugins/DEUS_Levels.js`<br>`game/js/plugins/DEUS_World.js`<br>`game/js/plugins/DEUS_WorldGen.js`<br>`game/js/plugins/DEUS_Fluid.js`<br>`game/js/rmmz_*.js` | **Strictly Read-Only.** Core engine files locked during parallel consolidation. |
 
 ---
