@@ -70,7 +70,7 @@
 
 | Defect / Finding ID | Task / WBS | Severity | Title & Requirement | Status | Owner |
 |---|---|:---:|---|:---:|:---:|
-| **BLOCKER-BACKUP** | `WG.00.12` | `BLOCKER` | Migration to `C:\Dev\DEUS` blocked: repo has private GitHub remote (DEC-005), but backup is PARTIAL until `game/img` and `game/data/df_*.json` are tracked or archived (review F9). | `PARTIAL` | Owner / Lane C1 |
+| **BLOCKER-BACKUP** | `WG.00.12` | `BLOCKER` | Migration to `C:\Dev\DEUS` backup requirement: private GitHub remote live (DEC-005), `game/img` fully whitelisted (388 assets) and `game/data/df_*.json` tracked (commit 258a2c60; 10,259 tracked files pushed to origin). | `RESOLVED` | Owner / Lane C1 |
 | **ATK-19B-001** | `WG.00.08` | `MAJOR` | continuousAirHeight counts fluid strata as open air clearance. | `CLOSED` | Grok (verified on `2e4571a`) |
 | **ATK-19B-002** | `WG.00.08` | `MAJOR` | Shafts and skylights carve rock below fluid. Skylight fix verified, but shaft guard (`DEUS_Levels.js:2498`) untested (F2); rock under shaft plants must be recorded & `shaft_prescan_removed` caught. | `OPEN` (Review F2) | Lane A / Grok |
 | **ATK-YEAR0-001** | `WG.00.11` | `MAJOR` | Standard New Game defaults to Year 1; INV-SIM-01 requires World Year 0. Edge-case hardening committed in Lane B (`37ac57da`). | `OPEN` (Awaiting Grok Signoff) | Lane B / Grok |
