@@ -172,7 +172,7 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | **WG.60.01** | Mineral Vein & Ore Deposit Visual Pack | Gemini | Embedded ore textures (Iron, Copper, Silver, Gold, Platinum) across rock types. | `PLANNED` |
 | **WG.61.01** | Deterministic 3D Vein WorldGen Generator | Fable | Inject 3D continuous vein clusters into strata matching Balance v0.1 targets. | `QUEUED` (FABLE-20) |
 | **WG.61.02** | Closed-Loop Finite Conservation Ledger | Fable | Runtime tracking of mass conservation across mining, crafting, wear, and salvage. | `QUEUED` (FABLE-20) |
-| **WG.62.01** | Canonical Initial Racial Spawn WorldGen | Fable | Spawn placement: Z-2 Tiefling/Dragonborn, Z-1 Dwarf/Gnome, Z0 Human/Half-Orc, Z+1 Halfling/Half-Elf, Z+2 Elf. | `QUEUED` |
+| **WG.62.01** | Canonical Initial Racial Spawn WorldGen | Fable | Spawn placement: Z-2 Tiefling/Dragonborn, Z-1 Dwarf/Gnome, Z0 Human/Half-Orc, Z+1 Halfling/Half-Elf, Z+2 Elf; seeds 8 multi-hat founders per faction with minimal institutional coverage (cross-ref `SOC.21.01`). | `QUEUED` |
 
 ---
 

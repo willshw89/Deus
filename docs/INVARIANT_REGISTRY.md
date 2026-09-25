@@ -75,3 +75,20 @@ This registry centralizes the fundamental, non-negotiable invariants of Project 
 | **INV-GOV-03** | **Independent Review Precedence** | Reviewers form conclusions independently from the diff and specification before reviewing author explanations or rebuttals. | Adversarial review workflow |
 | **INV-GOV-04** | **Durable Task State** | Task state, defects, and evidence must be committed or written to disk mailboxes (`docs/agents/mailboxes/`); they must survive agent context loss or crashes. | `docs/AGENT_COMMUNICATION_PROTOCOL.md` |
 | **INV-GOV-05** | **Evidence Precedes Claims** | No claims of "verified", "0 errors", or "60 FPS" without citing concrete evidence generated and inspected in the active session. | `AGENTS.md` Rule 3, report format enforcement |
+
+---
+
+## 8. Person, Society & Institutional Invariants
+
+| ID | Invariant | Formal Statement | Enforcement / Verification |
+|---|---|---|---|
+| **INV-SOC-01** | **Three Independent Identity Axes** | A person's economic Craft, Civic Office, and 2014 SRD Class are independent characteristics. Progression or changes in one axis do not modify another. | `docs/society/DEUS_PERSON_AND_INSTITUTIONS.md`, `SOC.10.01` |
+| **INV-SOC-02** | **Current Duty is Operational State** | Current Duty describes temporary operational assignments (what a person is doing right now), never an immutable identity axis. | `SOC.13.01`, Duty Scheduler tests |
+| **INV-SOC-03** | **Office Exists Independently of Holder** | An office survives holder death as a vacancy. Authority and jurisdiction reside in the Office entity, never solely in individual person records. | `SOC.20.01`, `SOC.23.01` |
+| **INV-SOC-04** | **Workload-Driven Institutional Growth** | Small factions combine civic functions across multi-hat founders; institutions specialize and split into subordinate offices based on workload index, not arbitrary population triggers. | `SOC.21.01`, `SOC.22.02` |
+| **INV-SOC-05** | **Conserved Physical Minting** | Minting transforms physical assayed monetary metal into official coinage (cp, sp, ep, gp, pp) and never creates wealth or matter from nothing. | `SOC.30.01`, Mass conservation tests |
+| **INV-SOC-06** | **Treasury vs Stores Separation** | Faction monetary balance (Treasurer) and physical goods inventory (Quartermaster) are strictly separate concepts. Financial wealth cannot substitute for physical food in famine. | `SOC.31.01`, `SOC.32.01` |
+| **INV-SOC-07** | **No Fixed Military Ratios** | DEUS rejects universal fixed military/civilian population ratios. Military participation derives from administrative service status (`NONE`, `RESERVE`, `MILITIA`, `GUARD`, `PROFESSIONAL`). | `SOC.40.01` |
+| **INV-SOC-08** | **Mobilization Economic Cost** | Threat mobilization temporarily redirects civilian economic labor to defense, imposing an authentic, physical economic productivity and harvest cost. | `SOC.40.02`, `SOC.42.01` |
+| **INV-SOC-09** | **Canonical 2014 SRD Class Source** | All Class mechanics, spell progressions, proficiencies, and combat capabilities derive exclusively from the canonical 2014 SRD located in the UF project repository. | `SOC.11.01`, `docs/SRD5_1_INTEGRATION.md` |
+
