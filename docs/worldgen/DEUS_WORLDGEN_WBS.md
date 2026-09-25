@@ -57,6 +57,7 @@ WG.57 — Volumetric Fluid Depth & Hazard Art Pack
 WG.60 — Geological Mineral & Finite Material Visual Pack
 WG.61 — Deterministic 3D Vein & Resource WorldGen Implementation
 WG.62 — Canonical Initial Racial Spawn WorldGen Implementation
+WG.65 — World Lifecycle, Geomorphology & Natural Reclamation Architecture
 WG.70 — Multi-Scale Visual Placement (Macro/Meso/Micro Density)
 WG.71 — Environmental Sprite Animation Runtime Integration
 WG.72 — Five-Z Visual Compositing & Occlusion Integration
@@ -167,6 +168,35 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | **WG.61.01** | Deterministic 3D Vein WorldGen Generator | Fable | Inject 3D continuous vein clusters into strata matching Balance v0.1 targets. | `QUEUED` (FABLE-20) |
 | **WG.61.02** | Closed-Loop Finite Conservation Ledger | Fable | Runtime tracking of mass conservation across mining, crafting, wear, and salvage. | `QUEUED` (FABLE-20) |
 | **WG.62.01** | Canonical Initial Racial Spawn WorldGen | Fable | Spawn placement: Z-2 Tiefling/Dragonborn, Z-1 Dwarf/Gnome, Z0 Human/Half-Orc, Z+1 Halfling/Half-Elf, Z+2 Elf. | `QUEUED` |
+
+---
+
+### WG.65 — World Lifecycle, Geomorphology & Conserved Natural Reclamation
+
+*Governed by Owner Directive (2026-09-25), [`docs/PERFORMANCE_ARCHITECTURE.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/PERFORMANCE_ARCHITECTURE.md), and [`docs/INVARIANT_REGISTRY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/INVARIANT_REGISTRY.md)*  
+*Core Invariant: "Terrain matter may change form and location, but physical material is not silently deleted or magically respawned."*  
+*Canonical Distinction: WorldGen owns initial Year-0 conditions; live world simulation owns post-Year-0 evolution.*
+
+| WBS Leaf | Title | Owner | Scope & Deliverables | Status |
+| :--- | :--- | :---: | :--- | :---: |
+| **WG.65.01** | Material-State Lifecycle Architecture | Gemini / Fable | Define state machine: Natural $\rightarrow$ Excavated $\rightarrow$ Construction/Tailings $\rightarrow$ Rubble $\rightarrow$ Sediment $\rightarrow$ Soil $\rightarrow$ Naturalized. | `PLANNED` |
+| **WG.65.02** | Rubble & Debris Strata Representation | Fable | Model loose broken rock occupying physical 1 ft strata cells; support degradation and angle of repose. | `PLANNED` |
+| **WG.65.03** | Loose Fill & Sediment Representation | Fable | Strata-level storage for gravel, silt, and alluvial sand deposited by gravity and runoff. | `PLANNED` |
+| **WG.65.04** | Structural-Collapse Material Transfer | Fable | Structural ceiling/wall failure converts intact rock/timber strata into falling debris and rubble below. | `PLANNED` |
+| **WG.65.05** | Geological Erosion Susceptibility | Gemini | Calculate per-cell weathering rates from slope gradient, rainfall, fluid exposure, and rock hardness. | `PLANNED` |
+| **WG.65.06** | Sediment Transport Simulation | Fable | Water runoff and wind transport particulate sediment along hydraulic gradients without teleports. | `PLANNED` |
+| **WG.65.07** | Sediment Deposition & Basins | Fable | Abandoned quarries, cuts, and depressions act as catchment basins, filling progressively over decades. | `PLANNED` |
+| **WG.65.08** | Soil Formation & Pedogenesis | Fable | Weathering of compacted rubble and sediment into fertile topsoil layers supporting micro-vegetation. | `PLANNED` |
+| **WG.65.09** | Vegetation Ecological Succession | Fable | Pioneer weeds $\rightarrow$ grasses $\rightarrow$ scrub $\rightarrow$ woodland $\rightarrow$ climax forest re-vegetation sequence over scars. | `PLANNED` |
+| **WG.65.10** | Construction Degradation & Ruins | Fable | Maintained $\rightarrow$ Damaged $\rightarrow$ Ruined $\rightarrow$ Collapsed $\rightarrow$ Overgrown progression based on material longevity. | `PLANNED` |
+| **WG.65.11** | Mine & Quarry Geomorphic Reclamation | Fable | Excavated pits stabilize into lakes, cliffs, or marshy depressions; abandoned shafts collapse into sinkholes. | `PLANNED` |
+| **WG.65.12** | Water-Driven Landscape Reclamation | Fable | Groundwater pooling, aquifer breach flooding, and natural channel cutting through abandoned cuts. | `PLANNED` |
+| **WG.65.13** | Long-Time Deterministic Catch-Up | Fable | Century-scale fast-forward simulation calculating accumulated landscape evolution without per-frame ticks. | `PLANNED` |
+| **WG.65.14** | Disturbed-Region Active-Work Scheduler | Fable | Bounded tracking: only altered regions undergo reclamation work; stable natural regions consume 0 ms CPU. | `PLANNED` |
+| **WG.65.15** | Closed-Loop Geomass & Resource Verifier| Gemini | Automated audit proving total geomass is conserved and finite metals (Fe, Cu, Ag, Au, Pt) never regenerate. | `PLANNED` |
+| **WG.65.16** | Historical Terrain Provenance & Stratigraphy| Gemini / Fable | Sparse metadata recording whether strata are natural, excavated, constructed, collapsed, or naturalized. | `PLANNED` |
+| **WG.65.17** | Emergent Archaeology & Subsurface Recovery| Fable | Subsurface excavation exposes genuine historical ruins, buried foundations, and forgotten artifacts. | `PLANNED` |
+| **WG.65.18** | Naturalization Quality Assurance & Proof | Gemini / User | Multi-century stress test proving zero mass leaks, steady 60 FPS, and naturalistic landscape stabilization. | `PLANNED` |
 
 ---
 

@@ -52,12 +52,25 @@
 
 ---
 
-## 4. Risk Escalation Protocol
+## 4. World Lifecycle & Geomorphology Risks (LIFE-001 to LIFE-004)
+*Governed by `WG.65` in [`docs/worldgen/DEUS_WORLDGEN_WBS.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_WORLDGEN_WBS.md) and [`docs/INVARIANT_REGISTRY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/INVARIANT_REGISTRY.md)*
+
+| Risk ID | Title | Category | Threat Description | Severity | Impact | Mitigation Strategy | Status |
+|---|---|---|---|---|---|---|---|
+| `LIFE-001` | Physical Matter Leakage in Lifecycle | Simulation | Matter silently deleted or leaked when constructions collapse, erode, or naturalize. | `CRITICAL` | Breaks mass-conservation; world hollows out over centuries. | Closed-loop geomass accounting (`WG.65.15`); material transfer state machine preserving volume in strata. | `ARCHITECTURALLY_MITIGATED` |
+| `LIFE-002` | Accidental Finite Resource Respawning | Simulation / Economy | Naturalization or pedogenesis accidentally fabricating fresh metal ore veins (Fe, Cu, Ag, Au, Pt). | `CRITICAL` | Destroys economic scarcity; invalidates finite resource gameplay. | Strict invariant `INV-SIM-03`; depleted veins marked permanently exhausted in world state; zero regeneration. | `ARCHITECTURALLY_MITIGATED` |
+| `LIFE-003` | Historical Over-Erasure | Narrative / World | Naturalization erasing meaningful player/faction historical geography too rapidly or completely. | `MAJOR` | World history feels impermanent; ruins feel generic. | Material-differentiated decay rates (`WG.65.10`); monumental stone leaves permanent foundation remnants. | `ARCHITECTURALLY_MITIGATED` |
+| `LIFE-004` | Catch-Up Nondeterminism | WorldGen / Simulation | Century-scale long-time catch-up simulation producing divergent terrain states across repeated runs. | `CRITICAL` | Divergent multiplayer/simulation history; breaks replayability. | Pure-function deterministic equation driven strictly by seed, elapsed delta, and local geology (`WG.65.13`). | `ARCHITECTURALLY_MITIGATED` |
+
+---
+
+## 5. Risk Escalation Protocol
 
 If any risk reaches an active failure state:
 1. **Freeze Execution**: Immediately halt dependent work blocks.
 2. **Issue Incident Notice**: Log incident with exact stack trace, failing files, and reproduction steps.
 3. **Escalate to Owner**: Present bounded recovery options directly in Owner Terminal.
 4. **Deploy Recovery Plan**: Execute git rollback or restore verified backup archive before resuming work.
+
 
 
