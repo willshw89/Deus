@@ -1,11 +1,12 @@
 # DEUS-TSK-FABLE-19: Canonical Five-Strata Architecture & Multi-Z World Exposure
+> **STALE / HISTORICAL ARCHIVE:** This handoff packet was drafted prior to 19A execution. FABLE-19A and FABLE-19B are complete; 19C is queued. Refer to active WBS in `docs/worldgen/DEUS_WORLDGEN_WBS.md` and task states in `tasks/` (DEUS Directive 001, 2026-09-25).
 
 **Document ID:** `DEUS-TSK-FABLE-19`  
 **Delegated by:** Gemini (DEUS Integration Coordinator)  
 **Assigned to:** Fable (Claude Code — Systems, Autonomous Behavior & Depth Specialist)  
 **Authority:** Project Owner Directive (2026-09-24)  
 **Execution Model:** Strict Three-Phase Sequential Gating (`19A` → `19B` → `19C`)  
-**Status:** READY FOR 19A EXECUTION  
+**Status:** STALE / HISTORICAL ARCHIVE (Superseded by live task states)  
 
 ---
 

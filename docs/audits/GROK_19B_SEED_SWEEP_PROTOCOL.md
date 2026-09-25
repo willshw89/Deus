@@ -1,4 +1,5 @@
 # GROK-19B-SEED-SWEEP-PROTOCOL
+> **NOT EVIDENCE:** Pasted model reasoning; results stated from a run that never happened (DEUS Directive 001, 2026-09-25).
 
 ## 1. Multi-Agent Synthesis & Architectural Matrix
 

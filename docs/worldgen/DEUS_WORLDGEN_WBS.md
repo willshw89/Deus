@@ -1,8 +1,8 @@
 # DEUS WorldGen Work Breakdown Structure
 
 **Namespace:** WG  
-**Rev:** 14  
-**IDs:** Stable. Next free in WG.00 is WG.00.12  
+**Rev:** 15  
+**IDs:** Stable. Next free in WG.00 is WG.00.13  
 **Canonical Authority:** Gemini / Antigravity  
 **Status:** CANONICAL ON MAIN  
 **Permanent Project-Control Anchor:** WBS IDs are immutable. Never silently renumber, merge, or reuse them. Once committed, a leaf changes only by status (`PLANNED` → `DONE`) or retirement via `SUPERSEDED`.
@@ -91,11 +91,12 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | **WG.00.04** | Biome Identity Standard | Gemini | 5 canonical biomes (`TEMP`, `WET`, `ARID`, `HIGH`, `VOLC`), physical-Z hooks, 10 transitions. | `DONE` (DW.01.04) |
 | **WG.00.05** | Palette Architecture & Material Ramps | Gemini | Master Palette V1 (226 active, 30 reserve), 58 material ramps, 0 near-duplicates. | `DONE` (DW.01.05) |
 | **WG.00.06** | Five-Strata Geometry Foundation | Fable / Gemini | Strata storage (5x1ft/cell), derived cached shapes, damage API, native smoke gate. | `DONE` (FABLE-19A / edba004) |
-| **WG.00.07** | Fluid ↔ Strata Reconciliation | Gemini | Resolve fluid depth adapter (0..7) with physical strata (0..5), buoyancy, saturation. | `DONE` (2f47203) |
-| **WG.00.08** | Cuts + Caves on All Five Z | Fable / Gemini | Partial-height terrain, chasms, sinkholes, Z0→Z-1 & Z-1→Z-2 deep cuts, cave roofs. | `DONE` (FABLE-19B / 2e4571a) |
+| **WG.00.07** | Fluid ↔ Strata Reconciliation | Gemini | Resolve fluid depth adapter (0..7) with physical strata (0..4, S0-S4), buoyancy, saturation. | `DONE` (2f47203) |
+| **WG.00.08** | Cuts + Caves on All Five Z | Fable / Gemini | Partial-height terrain, chasms, sinkholes, Z0→Z-1 & Z-1→Z-2 deep cuts, cave roofs. | `REVIEW` (DEUS Directive 001) |
 | **WG.00.09** | Global Five-Z Depth Renderer | Fable | Five-plane compositor, physical scale recession, no blur, chunk exposure cache. | `QUEUED` (FABLE-19C) |
 | **WG.00.10** | Startup & Load Performance Baseline | Gemini / Fable | 256x256x5 area memory budget (<3.5MB), tick budget (<0.2ms), load time benchmarks. | `QUEUED` |
 | **WG.00.11** | Incarnation & Command Layer | Fable / Gemini | Player avatar direct possession vs top-down RTS colonist command switching, input arbitration, camera follow. | `QUEUED` |
+| **WG.00.12** | Consolidation Without Moving Files | Codex / Claude Subagent | Non-moving consolidation tooling, boot/load census, RMMZ battle stack audit, tested external backup. | `IN_PROGRESS` (Lane C1) |
 
 ---
 
@@ -356,6 +357,7 @@ SELECT NEXT UNBLOCKED LEAF
 
 | Rev | Date | Change |
 |:---:|:---:|:---|
+| 15 | 2026-09-25 | WG.00.08 returned to REVIEW per DEUS Directive 001; WG.00.07 strata range corrected to 0..4 (S0-S4); WG.00.12 added. |
 | 14 | 2026-09-25 | Add WG.00.11 (Incarnation & Command Layer). Adopt integer rev header and immutable ID governance. Next free in WG.00 is WG.00.12. |
 | 13 | 2026-09-25 | Add WG.63–WG.68 (Historical Landmarks, Karst/Geology, Reclamation, Hydrology, Soils, Living Ecology). |
 | 12 | 2026-09-25 | WG.00.08 marked DONE (Cuts and caves on all five Z / commit `2e4571a`). |

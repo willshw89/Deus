@@ -1,10 +1,11 @@
 # ARCHITECTURE-CLEANUP-001: Project DEUS Architectural Streamlining & System Pruning
+> **STATUS: CLOSED / SUPERSEDED (DEUS Directive 001, 2026-09-25).** Superseded by `docs/CONSOLIDATION_PLAN_V1.md` and active consolidation leaf `WG.00.12`. Historical record from September 22 preserved.
 
 **Task ID:** ARCHITECTURE-CLEANUP-001  
 **Target Repository:** `C:\Users\snewt\OneDrive\Desktop\UF`  
 **Date:** 2026-09-22  
-**Status:** IN PROGRESS  
-**Integration Authority:** Gemini / Antigravity (collaborative architecture maintenance)
+**Status:** CLOSED / SUPERSEDED  
+**Integration Authority:** Gemini / Antigravity
 
 ---
 

@@ -66,3 +66,22 @@ Mass production begins with one core biome to achieve golden visual quality befo
 | **DW.04.02** | **Arid / Badlands Biome Suite** | Red clay, sandstone strata, scrub brush, dry wash gravel. | QUEUED |
 | **DW.04.03** | **Highland / Mountain Foothills Suite** | Craggy slate/granite, scree slopes, alpine scrub (zero snow). | QUEUED |
 | **DW.04.04** | **Volcanic / Deep Subterranean Suite** | Basalt slabs, ash loam, obsidian outcroppings, glowing magma seams. | QUEUED |
+
+---
+
+## 6. DW-to-WG Canonical Crosswalk & Namespace Deprecation
+
+> **GOVERNANCE NOTICE (DEUS Directive 001, 2026-09-25):**  
+> The `DW` prefix is **DEPRECATED** for new leaves. Canonical world leaves are unified under `docs/worldgen/DEUS_WORLDGEN_WBS.md` (`WG` namespace). Historical `DW.01` leaves map 1:1 to canonical `WG.00` leaves as follows:
+
+| Legacy DW ID | Canonical WG ID | Canonical Leaf Title | Status |
+|:---:|:---:|---|:---:|
+| `DW.01.01` | `WG.00.01` | World-Art Visual Charter | `DONE` |
+| `DW.01.02` | `WG.00.02` | Native Resolution & Pixel Density Standard | `DONE` |
+| `DW.01.03` | `WG.00.03` | Human / World Scale Strip | `DONE` |
+| `DW.01.04` | `WG.00.04` | Biome Identity Standard | `DONE` |
+| `DW.01.05` | `WG.00.05` | Palette Architecture & Material Ramps | `DONE` |
+| `DW.01.06` | `WG.00.06` | Seamless Autotile & Terrain Assembly Standard | `DONE` (Geometry Foundation) |
+
+*Rule:* Never issue new `DW.*` IDs. All new world and environment tasks must be minted under the canonical `WG` namespace in `docs/worldgen/DEUS_WORLDGEN_WBS.md`.
+

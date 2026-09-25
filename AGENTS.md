@@ -6,7 +6,7 @@ If a rule here conflicts with your habits, this file wins. If it conflicts with 
 
 ## Read order
 1. `AGENTS.md` (this file)
-2. `docs/STATUS.md`: what actually works, what's broken, who is working on what
+2. `docs/STATUS.md`: what actually works, what's broken, who is working on what (current state; historical ledger archived in `docs/archive/STATUS_LEDGER_20260925.md`)
 3. `docs/AUDIT_LOG.md`: the latest audit entry and its open findings
 4. `docs/SLICES.md`: the current slice and its acceptance criteria
 5. `docs/VISION.md`: what the game is, locked decisions, rejected directions
