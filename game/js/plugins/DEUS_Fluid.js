@@ -57,6 +57,29 @@ var UF = UF || {};
     const Z_MAX = 2;
     const Z_LEVELS = 5; // -2, -1, 0, 1, 2
 
+    // Strata reconciliation constants (matching DEUS_Levels.js)
+    const FLUID_TO_STRATA = Object.freeze([0, 1, 1, 2, 3, 4, 4, 5]);
+    const STRATA_TO_FLUID = Object.freeze([0, 1, 3, 4, 6, 7]);
+
+    // Hot query coordinate parser (zero heap allocation)
+    let qAx = 0, qAy = 0, qX = 0, qY = 0, qZ = 0;
+    function parseCoords(a, b, c, d, e) {
+        if (typeof a === "object" && a !== null) {
+            const ar = a.area || a;
+            qAx = (ar.x !== undefined ? ar.x : (ar.ax !== undefined ? ar.ax : 0)) | 0;
+            qAy = (ar.y !== undefined ? ar.y : (ar.ay !== undefined ? ar.ay : 0)) | 0;
+            qX = (a.x !== undefined ? a.x : 0) | 0;
+            qY = (a.y !== undefined ? a.y : 0) | 0;
+            qZ = (a.z !== undefined ? a.z : 0) | 0;
+        } else {
+            qAx = a | 0;
+            qAy = b | 0;
+            qX = c | 0;
+            qY = d | 0;
+            qZ = (e !== undefined ? e : 0) | 0;
+        }
+    }
+
     // Direction offsets for orthogonal horizontal neighbors: North, East, South, West
     const HORZ_DIRS = [
         { dx: 0, dy: -1 },
@@ -175,14 +198,19 @@ var UF = UF || {};
         return zIdx * (size * size) + ((y | 0) * size + (x | 0));
     }
 
-    function coordsOf(size, cellId) {
+    let coordX = 0, coordY = 0, coordZ = 0;
+    function decodeCellId(size, cellId) {
         const n = size * size;
         const zIdx = Math.floor(cellId / n);
-        const z = zIdx + Z_MIN;
+        coordZ = zIdx + Z_MIN;
         const rem = cellId - zIdx * n;
-        const x = rem % size;
-        const y = Math.floor(rem / size);
-        return { x, y, z };
+        coordX = rem % size;
+        coordY = Math.floor(rem / size);
+    }
+
+    function coordsOf(size, cellId) {
+        decodeCellId(size, cellId);
+        return { x: coordX, y: coordY, z: coordZ };
     }
 
     // --- Enqueueing & Wakeup ---
@@ -208,12 +236,45 @@ var UF = UF || {};
     }
 
     // --- Barrier & Geometry Checks ---
+    function checkObjBarrier(objId, ax, ay, x, y, z) {
+        if (!objId) return false;
+        const O = window.UF && UF.Objects;
+        const obj = O && typeof O.type === "function" ? O.type(objId) : null;
+        if (!obj) return false;
+        if (obj.autotile === "wall" || (Array.isArray(obj.tags) && obj.tags.includes("wall"))) return true;
+        const D = window.UF && UF.Doors;
+        if ((Array.isArray(obj.tags) && obj.tags.includes("door")) || (D && typeof D.isDoorType === "function" && D.isDoorType(obj))) {
+            const isOpen = D && typeof D.isOpen === "function" && D.isOpen({ x: ax, y: ay, z }, x, y);
+            if (!isOpen) return true;
+        }
+        return false;
+    }
+
+    function isObjectBarrier(ax, ay, x, y, z) {
+        if (config._mutantIgnoreWalls) return false;
+        const W = window.UF && UF.World;
+        if (!W) return false;
+
+        let objId = 0;
+        if (typeof W.getObject === "function") {
+            try {
+                objId = W.getObject(ax, ay, x, y, z);
+            } catch (e) {
+                objId = 0;
+            }
+        }
+        return checkObjBarrier(objId, ax, ay, x, y, z);
+    }
+
     function isBarrier(ax, ay, x, y, z) {
         if (config._mutantIgnoreWalls) return false;
 
         const L = window.UF && UF.Levels;
         if (L) {
-            if (typeof L.shapeAt === "function") {
+            if (typeof L.getStrataFluidPassage === "function") {
+                const pass = L.getStrataFluidPassage(ax, ay, x, y, z);
+                if ((pass & 7) === 0) return true; // zero fluid capacity = solid barrier
+            } else if (typeof L.shapeAt === "function") {
                 const s = L.shapeAt(ax, ay, x, y, z);
                 if (s === "solid") return true;
             } else if (typeof L.shapeCodeAt === "function") {
@@ -222,46 +283,72 @@ var UF = UF || {};
             }
         }
 
-        const W = window.UF && UF.World;
-        if (W) {
-            const objId = typeof W.getObject === "function" ? W.getObject(ax, ay, x, y, z) : 0;
-            if (objId) {
-                const O = window.UF && UF.Objects;
-                const obj = O && typeof O.type === "function" ? O.type(objId) : null;
-                if (obj) {
-                    if (obj.autotile === "wall" || (Array.isArray(obj.tags) && obj.tags.includes("wall"))) {
-                        return true;
-                    }
-                    const D = window.UF && UF.Doors;
-                    if ((Array.isArray(obj.tags) && obj.tags.includes("door")) || (D && typeof D.isDoorType === "function" && D.isDoorType(obj))) {
-                        const isOpen = D && typeof D.isOpen === "function" && D.isOpen({ x: ax, y: ay, z }, x, y);
-                        if (!isOpen) return true;
-                    }
-                }
-            }
-        }
-        return false;
+        return isObjectBarrier(ax, ay, x, y, z);
     }
 
     function canDrainDown(ax, ay, x, y, z) {
         if (config._mutantNoGravity) return false;
         if (z <= Z_MIN) return false; // Bottom of the world (-2)
 
-        // Cell directly below must NOT be a barrier (solid rock or wall)
-        if (isBarrier(ax, ay, x, y, z - 1)) return false;
+        // Object barrier at destination
+        if (isObjectBarrier(ax, ay, x, y, z - 1)) return false;
 
         const L = window.UF && UF.Levels;
-        if (L && typeof L.shapeAt === "function") {
+        if (L && typeof L.getStrataFluidPassage === "function") {
+            const pass = L.getStrataFluidPassage(ax, ay, x, y, z);
+            // DOWN bit (8) indicates S0 of this cell is open AND S4 of (z-1) is open
+            if ((pass & 8) === 0) return false;
+        } else if (L && typeof L.shapeAt === "function") {
+            if (isBarrier(ax, ay, x, y, z - 1)) return false;
             const s = L.shapeAt(ax, ay, x, y, z);
-            if (s === "open" || s === "channel") return true;
             if (s === "solid") return false;
         }
 
-        // On ground (z=0) or underground (z=-1):
-        // If the space below is excavated / open / floor, downward breach occurs.
-        if (z <= 0) return true;
+        // Destination capacity: cell below must not be already at or over capacity
+        const destCap = Fluid.fluidCapacityAt(ax, ay, x, y, z - 1);
+        if (destCap <= 0) return false;
+        const destDepth = Fluid.depthAt(ax, ay, x, y, z - 1);
+        if (destDepth >= destCap) return false;
 
-        // On upper levels (z > 0), air is open by default unless shape is solid/floor
+        return true;
+    }
+
+    function fluidCanPassLaterally(ax, ay, x, y, z, dx, dy, nz) {
+        if (config._mutantIgnoreWalls) return true;
+        const data = getAreaData(ax, ay);
+        const size = data.size;
+        let nx, ny;
+        if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && (dx !== 0 || dy !== 0) && nz === undefined) {
+            nx = x + dx;
+            ny = y + dy;
+        } else {
+            nx = dx;
+            ny = dy;
+        }
+        if (nx < 0 || ny < 0 || nx >= size || ny >= size) return false;
+
+        if (isObjectBarrier(ax, ay, x, y, z) || isObjectBarrier(ax, ay, nx, ny, z)) return false;
+
+        const nCap = Fluid.fluidCapacityAt(ax, ay, nx, ny, z);
+        if (nCap <= 0) return false;
+        const nDepth = Fluid.depthAt(ax, ay, nx, ny, z);
+        if (nDepth >= nCap) return false;
+
+        const L = window.UF && UF.Levels;
+        if (L && typeof L.solidFraction === "function") {
+            const srcSolid = Math.round(L.solidFraction(ax, ay, x, y, z) * 5);
+            const nSolid = Math.round(L.solidFraction(ax, ay, nx, ny, z) * 5);
+
+            if (nSolid > srcSolid) {
+                const curDepth = Fluid.depthAt(ax, ay, x, y, z);
+                const fluidStrata = FLUID_TO_STRATA[curDepth];
+                const topElevation = srcSolid + fluidStrata;
+                if (topElevation <= nSolid) return false; // Blocked by rock lip
+            }
+        } else if (isBarrier(ax, ay, nx, ny, z)) {
+            return false;
+        }
+
         return true;
     }
 
@@ -291,7 +378,8 @@ var UF = UF || {};
             data.inQueue[cellId] = 0;
             processed++;
 
-            const { x, y, z } = coordsOf(size, cellId);
+            decodeCellId(size, cellId);
+            const x = coordX, y = coordY, z = coordZ;
             const gridZ = data.grids.get(z);
             if (!gridZ) continue;
 
@@ -315,9 +403,10 @@ var UF = UF || {};
                     let belowDepth = getDepth(belowVal);
                     const belowType = getType(belowVal);
 
-                    // Transfer if destination is dry OR matches liquid type
-                    if (belowDepth < DEPTH_MAX && (belowDepth === 0 || belowType === type)) {
-                        let transferAmt = Math.min(depth, DEPTH_MAX - belowDepth);
+                    const belowCap = Fluid.fluidCapacityAt(ax, ay, x, y, belowZ);
+                    // Transfer if destination is dry OR matches liquid type, and has capacity
+                    if (belowDepth < belowCap && (belowDepth === 0 || belowType === type)) {
+                        let transferAmt = Math.min(depth, belowCap - belowDepth);
                         if (config._mutantDuplicate) transferAmt += 1;
                         if (config._mutantDelete) transferAmt = Math.max(0, transferAmt - 1);
 
@@ -350,11 +439,15 @@ var UF = UF || {};
                 for (let d = 0; d < HORZ_DIRS.length; d++) {
                     if (depth <= 1) break; // Cannot equalize if depth <= 1
 
-                    const nx = x + HORZ_DIRS[d].dx;
-                    const ny = y + HORZ_DIRS[d].dy;
+                    const dx = HORZ_DIRS[d].dx;
+                    const dy = HORZ_DIRS[d].dy;
+                    const nx = x + dx;
+                    const ny = y + dy;
 
-                    if (nx < 0 || ny < 0 || nx >= size || ny >= size) continue;
-                    if (isBarrier(ax, ay, nx, ny, z)) continue;
+                    if (!fluidCanPassLaterally(ax, ay, x, y, z, dx, dy)) continue;
+
+                    const nCap = Fluid.fluidCapacityAt(ax, ay, nx, ny, z);
+                    if (nCap <= 0) continue;
 
                     const nIdx = ny * size + nx;
                     const nVal = gridZ[nIdx];
@@ -364,9 +457,10 @@ var UF = UF || {};
                     // Liquid types must match or neighbor must be dry (no mixing in V1)
                     if (nDepth > 0 && nType !== type) continue;
 
-                    if (depth > nDepth + 1) {
+                    if (depth > nDepth + 1 && nDepth < nCap) {
                         let diff = depth - nDepth;
-                        let transferAmt = Math.floor(diff / 2);
+                        let maxTransfer = Math.floor(diff / 2);
+                        let transferAmt = Math.min(maxTransfer, nCap - nDepth);
                         if (config._mutantDuplicate) transferAmt += 1;
                         if (config._mutantDelete) transferAmt = Math.max(0, transferAmt - 1);
 
@@ -412,6 +506,76 @@ var UF = UF || {};
         TYPE_NONE,
         TYPE_WATER,
         TYPE_LAVA,
+        FLUID_TO_STRATA,
+        STRATA_TO_FLUID,
+
+        // Strata Reconciliation Formal Queries
+        fluidVolumeAt(a, b, c, d, e) {
+            return Fluid.depthAt(a, b, c, d, e);
+        },
+
+        fluidCapacityAt(a, b, c, d, e) {
+            parseCoords(a, b, c, d, e);
+            if (qZ < Z_MIN || qZ > Z_MAX) return 0;
+
+            const L = window.UF && UF.Levels;
+            if (L && typeof L.getStrataFluidPassage === "function") {
+                const pass = L.getStrataFluidPassage(qAx, qAy, qX, qY, qZ);
+                return pass & 7;
+            }
+            if (L && typeof L.shapeAt === "function") {
+                const s = L.shapeAt(qAx, qAy, qX, qY, qZ);
+                if (s === "solid") return 0;
+                return DEPTH_MAX;
+            }
+            return DEPTH_MAX;
+        },
+
+        fluidFillFractionAt(a, b, c, d, e) {
+            parseCoords(a, b, c, d, e);
+            const cap = Fluid.fluidCapacityAt(qAx, qAy, qX, qY, qZ);
+            if (cap <= 0) return 0.0;
+            const dVal = Fluid.depthAt(qAx, qAy, qX, qY, qZ);
+            return Math.min(1.0, Math.max(0.0, dVal / cap));
+        },
+
+        fluidPhysicalHeightStateAt(a, b, c, d, e) {
+            parseCoords(a, b, c, d, e);
+            const dVal = Fluid.depthAt(qAx, qAy, qX, qY, qZ);
+            if (dVal <= 0) return 0;
+            const cap = Fluid.fluidCapacityAt(qAx, qAy, qX, qY, qZ);
+            const openStrata = FLUID_TO_STRATA[cap];
+            const fluidStrata = FLUID_TO_STRATA[dVal];
+            return Math.min(openStrata, fluidStrata);
+        },
+
+        fluidPhysicalHeightStringAt(a, b, c, d, e) {
+            const k = Fluid.fluidPhysicalHeightStateAt(a, b, c, d, e);
+            return `FLUID_${k}_OF_5`;
+        },
+
+        fluidCanPassDown(a, b, c, d, e) {
+            parseCoords(a, b, c, d, e);
+            return canDrainDown(qAx, qAy, qX, qY, qZ);
+        },
+
+        fluidCanPassLaterally(a, b, c, d, e, dx, dy) {
+            let stepX, stepY;
+            if (typeof a === "object" && a !== null) {
+                parseCoords(a);
+                stepX = b | 0;
+                stepY = c | 0;
+            } else {
+                parseCoords(a, b, c, d, e);
+                stepX = dx | 0;
+                stepY = dy | 0;
+            }
+            return fluidCanPassLaterally(qAx, qAy, qX, qY, qZ, stepX, stepY);
+        },
+
+        fluidTypeAt(a, b, c, d, e) {
+            return Fluid.typeAt(a, b, c, d, e);
+        },
 
         // Direct Coordinate Queries
         depthAt(ax, ay, x, y, z) {
@@ -673,12 +837,16 @@ var UF = UF || {};
                     }
                 }
             }
-            return records;
+            return {
+                fluidSchemaVersion: 1,
+                records
+            };
         },
 
-        extractSaveContents(records) {
+        extractSaveContents(saved) {
             this.reset();
-            if (!Array.isArray(records)) return;
+            if (!saved) return;
+            const records = Array.isArray(saved) ? saved : (saved.records && Array.isArray(saved.records) ? saved.records : []);
 
             for (let i = 0; i < records.length; i++) {
                 const [ax, ay, z, x, y, t, d] = records[i];
@@ -702,26 +870,78 @@ var UF = UF || {};
         }
     };
 
+    function reconcileCellWithStrata(ax, ay, x, y, z) {
+        if (z < Z_MIN || z > Z_MAX) return;
+        const data = getAreaData(ax, ay);
+        const size = data.size;
+        if (x < 0 || y < 0 || x >= size || y >= size) return;
+
+        const idx = y * size + x;
+        const gridZ = data.grids.get(z);
+        if (!gridZ) return;
+
+        const val = gridZ[idx];
+        let curDepth = getDepth(val);
+        if (curDepth === 0) return;
+
+        const type = getType(val);
+        const cap = Fluid.fluidCapacityAt(ax, ay, x, y, z);
+
+        if (curDepth > cap) {
+            let excess = curDepth - cap;
+            gridZ[idx] = cap > 0 ? packVal(type, cap) : 0;
+            data.floodGrids.get(z)[idx] = cap > 0 ? type : 0;
+            data.revision++;
+
+            // Displace excess fluid into open neighbor or cell above to preserve mass conservation
+            if (excess > 0) {
+                if (z < Z_MAX) {
+                    const aboveCap = Fluid.fluidCapacityAt(ax, ay, x, y, z + 1);
+                    const aboveDepth = Fluid.depthAt(ax, ay, x, y, z + 1);
+                    const spaceAbove = aboveCap - aboveDepth;
+                    if (spaceAbove > 0) {
+                        const move = Math.min(excess, spaceAbove);
+                        Fluid.setCell({ x: ax, y: ay }, x, y, z + 1, typeName(type), aboveDepth + move);
+                        excess -= move;
+                    }
+                }
+                if (excess > 0) {
+                    for (let d = 0; d < HORZ_DIRS.length && excess > 0; d++) {
+                        const nx = x + HORZ_DIRS[d].dx, ny = y + HORZ_DIRS[d].dy;
+                        if (nx >= 0 && ny >= 0 && nx < size && ny < size) {
+                            const nCap = Fluid.fluidCapacityAt(ax, ay, nx, ny, z);
+                            const nDepth = Fluid.depthAt(ax, ay, nx, ny, z);
+                            const nType = Fluid.typeAt(ax, ay, nx, ny, z);
+                            if (nCap > nDepth && (nDepth === 0 || typeCode(nType) === type)) {
+                                const move = Math.min(excess, nCap - nDepth);
+                                Fluid.setCell({ x: ax, y: ay }, nx, ny, z, typeName(type), nDepth + move);
+                                excess -= move;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // --- Event Listeners: Change Creates Work ---
     function setupEventHooks() {
         if (!window.UF || !UF.Events || typeof UF.Events.on !== "function") return;
 
-        // Terrain & Shape Mutations
-        UF.Events.on("levels:cellChanged", function(payload) {
+        function handleGeometryChange(payload) {
             if (!payload) return;
             const a = payload.area || {};
             const ax = a.x !== undefined ? a.x : 0;
             const ay = a.y !== undefined ? a.y : 0;
-            wakeCellAndNeighbors(ax, ay, payload.x | 0, payload.y | 0, payload.z | 0);
-        });
+            const x = payload.x | 0, y = payload.y | 0, z = payload.z | 0;
+            reconcileCellWithStrata(ax, ay, x, y, z);
+            wakeCellAndNeighbors(ax, ay, x, y, z);
+        }
 
-        UF.Events.on("levels:shapeChanged", function(payload) {
-            if (!payload) return;
-            const a = payload.area || {};
-            const ax = a.x !== undefined ? a.x : 0;
-            const ay = a.y !== undefined ? a.y : 0;
-            wakeCellAndNeighbors(ax, ay, payload.x | 0, payload.y | 0, payload.z | 0);
-        });
+        UF.Events.on("levels:cellChanged", handleGeometryChange);
+        UF.Events.on("levels:shapeChanged", handleGeometryChange);
+        UF.Events.on("levels:strataChanged", handleGeometryChange);
+        UF.Events.on("levels:strataDestroyed", handleGeometryChange);
 
         // Door State Changes
         UF.Events.on("doors:opened", function(door) {
@@ -775,15 +995,17 @@ var UF = UF || {};
         const _DataManager_makeSaveContents = DataManager.makeSaveContents;
         DataManager.makeSaveContents = function() {
             const contents = _DataManager_makeSaveContents.call(this);
-            contents.deusFluid = Fluid.makeSaveContents();
+            const saved = Fluid.makeSaveContents();
+            contents.deusFluid = saved;
+            contents.ufFluid = saved;
             return contents;
         };
 
         const _DataManager_extractSaveContents = DataManager.extractSaveContents;
         DataManager.extractSaveContents = function(contents) {
             _DataManager_extractSaveContents.call(this, contents);
-            if (contents && contents.deusFluid) {
-                Fluid.extractSaveContents(contents.deusFluid);
+            if (contents && (contents.deusFluid || contents.ufFluid)) {
+                Fluid.extractSaveContents(contents.deusFluid || contents.ufFluid);
             }
         };
     }

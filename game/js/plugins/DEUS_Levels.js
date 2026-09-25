@@ -1693,17 +1693,30 @@
     }
     const badNumber = v => typeof v !== "number" || !Number.isFinite(v);
 
-    /** Damage one stratum: applyStrataDamage(area, x, y, z, stratumIndex 0..4, damage >= 0, damageType = "impact"[, { source }]). */
+    /** Damage one stratum: applyStrataDamage(area, x, y, z, stratumIndex 0..4, damage >= 0, damageType = "impact"[, { source }]) or applyStrataDamage(ref, damage, damageType, opts). */
     function applyStrataDamage(area, x, y, z, s, damage, damageType = "impact", opts = {}) {
+        let ax, ay, px, py, pz, ps, dmg, dtype, popts;
+        if (typeof area === "object" && area !== null && "x" in area && "y" in area && "z" in area) {
+            const a = area.area || { x: 0, y: 0 };
+            ax = a.x | 0; ay = a.y | 0;
+            px = area.x | 0; py = area.y | 0; pz = area.z | 0;
+            ps = area.stratum !== undefined ? (area.stratum | 0) : (area.s | 0);
+            dmg = x;
+            dtype = typeof y === "string" ? y : "impact";
+            popts = typeof z === "object" ? z : {};
+        } else {
+            ax = area ? area.x | 0 : 0; ay = area ? area.y | 0 : 0;
+            px = x; py = y; pz = z; ps = s;
+            dmg = damage; dtype = damageType; popts = opts;
+        }
         const W = World(), st = W && W.state;
-        const ax = area ? area.x | 0 : 0, ay = area ? area.y | 0 : 0;
-        const why = damageRefusal(st, ax, ay, x, y, z)
-            || (!Number.isInteger(s) || s < 0 || s >= STRATA ? `stratum ${JSON.stringify(s)} isn't 0..4` : "")
-            || (badNumber(damage) || damage < 0 ? `damage ${JSON.stringify(damage)} isn't a number >= 0` : "")
-            || (typeof damageType !== "string" || !damageType ? "damageType must be a name" : "");
+        const why = damageRefusal(st, ax, ay, px, py, pz)
+            || (!Number.isInteger(ps) || ps < 0 || ps >= STRATA ? `stratum ${JSON.stringify(ps)} isn't 0..4` : "")
+            || (badNumber(dmg) || dmg < 0 ? `damage ${JSON.stringify(dmg)} isn't a number >= 0` : "")
+            || (typeof dtype !== "string" || !dtype ? "damageType must be a name" : "");
         if (why) return { ok: false, reason: why };
-        const r = damageCell(st, ax, ay, x, y, z, [[s, damage]], damageType, (opts && opts.source) || null)[0];
-        return Object.assign({ ok: true, area: { x: ax, y: ay }, x, y, z }, r);
+        const r = damageCell(st, ax, ay, px, py, pz, [[ps, dmg]], dtype, (popts && popts.source) || null)[0];
+        return Object.assign({ ok: true, area: { x: ax, y: ay }, x: px, y: py, z: pz }, r);
     }
 
     const FALLOFF = { constant: t => 1, linear: t => 1 - t, quadratic: t => (1 - t) * (1 - t) };
@@ -1832,6 +1845,10 @@
     function fluidStateAt(a, b, c, d, e) {
         if (!cellQuery(a, b, c, d, e)) return "";
         locate(qSt, qZ, qAx, qAy, qI, 1);
+        if (typeof window !== "undefined" && window.UF && window.UF.Fluid && typeof window.UF.Fluid.fluidPhysicalHeightStateAt === "function") {
+            const live = window.UF.Fluid.fluidPhysicalHeightStateAt(qAx, qAy, qI % qSt.size, Math.floor(qI / qSt.size), qZ);
+            if (live > 0) return FLUID_STATES[live];
+        }
         return FLUID_STATES[fluidCountOf(rdM, rdO)];
     }
     /** All five strata solid. */
@@ -3431,6 +3448,7 @@
         strataAt,
         setStrata,
         applyStrataDamage,
+        damageStrata: applyStrataDamage,
         applyVolumeDamage,
         registerDamageResponse,
         surfaceHeightAt,
@@ -3447,6 +3465,13 @@
         getStrataFluidPassage,
         fluidDepthToStrata,
         strataToFluidDepth,
+        fluidVolumeAt: (...args) => (typeof window !== "undefined" && window.UF && window.UF.Fluid && typeof window.UF.Fluid.fluidVolumeAt === "function") ? window.UF.Fluid.fluidVolumeAt(...args) : 0,
+        fluidCapacityAt: (...args) => (typeof window !== "undefined" && window.UF && window.UF.Fluid && typeof window.UF.Fluid.fluidCapacityAt === "function") ? window.UF.Fluid.fluidCapacityAt(...args) : 0,
+        fluidFillFractionAt: (...args) => (typeof window !== "undefined" && window.UF && window.UF.Fluid && typeof window.UF.Fluid.fluidFillFractionAt === "function") ? window.UF.Fluid.fluidFillFractionAt(...args) : 0.0,
+        fluidPhysicalHeightStateAt: (...args) => (typeof window !== "undefined" && window.UF && window.UF.Fluid && typeof window.UF.Fluid.fluidPhysicalHeightStateAt === "function") ? window.UF.Fluid.fluidPhysicalHeightStateAt(...args) : 0,
+        fluidCanPassDown: (...args) => (typeof window !== "undefined" && window.UF && window.UF.Fluid && typeof window.UF.Fluid.fluidCanPassDown === "function") ? window.UF.Fluid.fluidCanPassDown(...args) : false,
+        fluidCanPassLaterally: (...args) => (typeof window !== "undefined" && window.UF && window.UF.Fluid && typeof window.UF.Fluid.fluidCanPassLaterally === "function") ? window.UF.Fluid.fluidCanPassLaterally(...args) : false,
+        fluidTypeAt: (...args) => (typeof window !== "undefined" && window.UF && window.UF.Fluid && typeof window.UF.Fluid.fluidTypeAt === "function") ? window.UF.Fluid.fluidTypeAt(...args) : null,
         surfaceAt,
         migrateSaveToFiveStrata,
         /** Every cached shape grid of an area against a fresh derivation: { grids, cells, mismatches, examples } (slow). */
