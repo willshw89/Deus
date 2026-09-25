@@ -1,0 +1,179 @@
+﻿[
+    {
+        "id":  "REALM_KARADRIM",
+        "titles":  {
+                       "ruler":  "High Forge-Lord",
+                       "spiritual":  "Runecrafter Elder",
+                       "noble":  "Stone-Thane",
+                       "commander":  "Vanguard Captain",
+                       "craftsman":  "Grand Furnace-Master"
+                   },
+        "name":  "High Bastion of the Karadrim",
+        "traits":  [
+                       "METALLURGY",
+                       "STONE_CARVING",
+                       "RUNIC_INSPIRATIONS",
+                       "DEEP_BREW_LOVER"
+                   ],
+        "weapons":  [
+                        "WAR_PICK",
+                        "FORGE_HAMMER",
+                        "HEAVY_CROSSBOW",
+                        "BROAD_AXE"
+                    ],
+        "civType":  "Subterranean Mountainhall",
+        "race":  "KARADRIM",
+        "armors":  [
+                       "PLATE_CUIRASS",
+                       "SCALE_MAIL",
+                       "GREAT_HELM",
+                       "TOWER_SHIELD"
+                   ]
+    },
+    {
+        "id":  "REALM_VALEN",
+        "titles":  {
+                       "ruler":  "High Sovereign",
+                       "spiritual":  "Arch-Magister",
+                       "noble":  "Castellan / Baron",
+                       "commander":  "Knight-Commander",
+                       "craftsman":  "Guildmaster"
+                   },
+        "name":  "Sovereign Realms of Valenford",
+        "traits":  [
+                       "COMMERCE",
+                       "CHIVALRY",
+                       "WRITTEN_LAW",
+                       "EXPANSIVE_TRADE"
+                   ],
+        "weapons":  [
+                        "BROADSWORD",
+                        "HALBERD",
+                        "COMPOSITE_BOW",
+                        "LANCE"
+                    ],
+        "civType":  "Feudal Citadel \u0026 Plains Towns",
+        "race":  "VALEN",
+        "armors":  [
+                       "KNIGHT_PLATE",
+                       "STUDDED_LEATHER",
+                       "HEATER_SHIELD"
+                   ]
+    },
+    {
+        "id":  "REALM_SYLVATHI",
+        "titles":  {
+                       "ruler":  "First Arbor-Hierophant",
+                       "spiritual":  "Song-Shaper Elder",
+                       "noble":  "Canopy Warden",
+                       "commander":  "Grove-Ranger General",
+                       "craftsman":  "Living-Wood Sculptor"
+                   },
+        "name":  "Elder Groves of the Verdant Deep",
+        "traits":  [
+                       "NATURE_COMMUNION",
+                       "TREE_REVERENCE",
+                       "PRIMAL_SONG",
+                       "AGILE_STRIDE"
+                   ],
+        "weapons":  [
+                        "LIVING_WOOD_BOW",
+                        "SONG_BLADE",
+                        "REED_SPEAR"
+                    ],
+        "civType":  "Arbor Canopy Sanctuary",
+        "race":  "SYLVATHI",
+        "armors":  [
+                       "WOVEN_BARK",
+                       "LEAF_SILK_CLOAK",
+                       "FIBER_CUIRASS"
+                   ]
+    },
+    {
+        "id":  "REALM_MORVATH",
+        "titles":  {
+                       "ruler":  "Pit-Overlord",
+                       "spiritual":  "Ash-Shaman",
+                       "noble":  "Trench-Master",
+                       "commander":  "Lasher-Captain",
+                       "craftsman":  "Spike-Smith"
+                   },
+        "name":  "Abyssal Trenches of Mor-Kaza",
+        "traits":  [
+                       "RULE_OF_STRENGTH",
+                       "SHADOW_VISION",
+                       "CHAIN_CRAFT",
+                       "CARNIVORE"
+                   ],
+        "weapons":  [
+                        "BARBED_SCOURGE",
+                        "SPIKED_SPEAR",
+                        "SERRATED_CLEAVER"
+                    ],
+        "civType":  "Subterranean Jagged Bastion",
+        "race":  "MORVATH",
+        "armors":  [
+                       "DARK_IRON_SPLINT",
+                       "BARBED_HELM",
+                       "REINFORCED_HIDE"
+                   ]
+    },
+    {
+        "id":  "REALM_KITTERKIN",
+        "titles":  {
+                       "ruler":  "Chief Warren-Seeker",
+                       "spiritual":  "Crystal-Whisperer",
+                       "noble":  "Key-Turner",
+                       "commander":  "Sneak-Leader",
+                       "craftsman":  "Scrap-Tinker"
+                   },
+        "name":  "Hidden Warrens of the Slinkers",
+        "traits":  [
+                       "LOCKPICKING",
+                       "TRAP_DISARM",
+                       "SCRAP_TINKERING",
+                       "CHIT_SPEECH"
+                   ],
+        "weapons":  [
+                        "BLOWPIPE_DARTS",
+                        "SPRING_DAGGER",
+                        "SLING_SHOT"
+                    ],
+        "civType":  "Fissure Burrow \u0026 Clockwork Warren",
+        "race":  "KITTERKIN",
+        "armors":  [
+                       "PATCHWORK_TUNIC",
+                       "TOOL_BELT",
+                       "PADDED_HIDE"
+                   ]
+    },
+    {
+        "id":  "REALM_VORGARI",
+        "titles":  {
+                       "ruler":  "Zenith-Exarch",
+                       "spiritual":  "Arbiter of Endurance",
+                       "noble":  "Keeper of Will",
+                       "commander":  "Master of Form",
+                       "craftsman":  "Volcanic Artificer"
+                   },
+        "name":  "Basalt Citadel of the Dual Axioms",
+        "traits":  [
+                       "DUAL_AXIOMS",
+                       "WINGED_AND_WINGLESS",
+                       "FIRE_IMMUNITY",
+                       "STONE_ENDURANCE"
+                   ],
+        "weapons":  [
+                        "BASALT_HALBERD",
+                        "MYSTIC_DISC",
+                        "VOLCANIC_GREATSWORD"
+                    ],
+        "civType":  "Volcanic Monolith Sanctuary",
+        "race":  "VORGARI",
+        "armors":  [
+                       "OBSIDIAN_PLATE",
+                       "TEMPERED_BRONZE",
+                       "CEREMONIAL_ROBE"
+                   ]
+    }
+]

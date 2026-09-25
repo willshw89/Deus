@@ -1,0 +1,149 @@
+﻿[
+    {
+        "building":  "BREWERY",
+        "products":  [
+                         {
+                             "type":  "DRINK",
+                             "prob":  100,
+                             "material":  "BLACK_IRON_STOUT",
+                             "count":  5
+                         }
+                     ],
+        "name":  "Brew Black Iron-Stout",
+        "id":  "BREW_BLACK_IRON_STOUT",
+        "reagents":  [
+                         {
+                             "type":  "FUNGUS",
+                             "name":  "Glow-Spore Truffles",
+                             "material":  "GLOW_SPORE",
+                             "count":  1
+                         },
+                         {
+                             "type":  "CONTAINER",
+                             "name":  "Oak/Stone Keg",
+                             "material":  "WOOD_OR_STONE",
+                             "count":  1
+                         }
+                     ]
+    },
+    {
+        "building":  "VOLCANIC_FORGE",
+        "products":  [
+                         {
+                             "type":  "WEAPON",
+                             "prob":  100,
+                             "material":  "STAR_IRON_CLEAVER",
+                             "count":  1
+                         }
+                     ],
+        "name":  "Forge Star-Iron Cleaver",
+        "id":  "FORGE_STAR_IRON_CLEAVER",
+        "reagents":  [
+                         {
+                             "type":  "BAR",
+                             "name":  "Star-Iron Ingot",
+                             "material":  "STAR_IRON",
+                             "count":  2
+                         },
+                         {
+                             "type":  "FLUX",
+                             "name":  "Basalt Flux / Fuel",
+                             "material":  "BASALT",
+                             "count":  1
+                         }
+                     ]
+    },
+    {
+        "building":  "FURNACE",
+        "products":  [
+                         {
+                             "type":  "BAR",
+                             "prob":  100,
+                             "material":  "REFINED_IRON",
+                             "count":  2
+                         }
+                     ],
+        "name":  "Smelt Ironstone into Refined Iron",
+        "id":  "SMELT_IRONSTONE",
+        "reagents":  [
+                         {
+                             "type":  "ORE",
+                             "name":  "Raw Ironstone",
+                             "material":  "IRONSTONE",
+                             "count":  2
+                         },
+                         {
+                             "type":  "FUEL",
+                             "name":  "Black Coal / Coke",
+                             "material":  "COAL",
+                             "count":  1
+                         }
+                     ]
+    },
+    {
+        "building":  "PRECURSOR_FABRICATOR",
+        "products":  [
+                         {
+                             "type":  "PROSTHETIC",
+                             "prob":  100,
+                             "material":  "BIONIC_ARM",
+                             "count":  1
+                         }
+                     ],
+        "name":  "Fabricate Bionic Pneumatic Limb",
+        "id":  "FABRICATE_BIONIC_LIMB",
+        "reagents":  [
+                         {
+                             "type":  "BAR",
+                             "name":  "Star-Iron Ingot",
+                             "material":  "STAR_IRON",
+                             "count":  2
+                         },
+                         {
+                             "type":  "ENERGY",
+                             "name":  "Aetheric Power Cell",
+                             "material":  "AETHER_CELL",
+                             "count":  1
+                         },
+                         {
+                             "type":  "CONDUIT",
+                             "name":  "Runed Wire",
+                             "material":  "VOID_SILVER",
+                             "count":  2
+                         }
+                     ]
+    },
+    {
+        "building":  "TECHNO_FORGE",
+        "products":  [
+                         {
+                             "type":  "WEAPON",
+                             "prob":  100,
+                             "material":  "GALVANIC_ARC_BLADE",
+                             "count":  1
+                         }
+                     ],
+        "name":  "Assemble Galvanic Arc-Blade",
+        "id":  "ASSEMBLE_ARC_BLADE",
+        "reagents":  [
+                         {
+                             "type":  "WEAPON",
+                             "name":  "Refined Steel Blade",
+                             "material":  "STEEL",
+                             "count":  1
+                         },
+                         {
+                             "type":  "ENERGY",
+                             "name":  "Aetheric Power Cell",
+                             "material":  "AETHER_CELL",
+                             "count":  1
+                         },
+                         {
+                             "type":  "GEM",
+                             "name":  "Photon Crystal",
+                             "material":  "PHOTON_CRYSTAL",
+                             "count":  1
+                         }
+                     ]
+    }
+]

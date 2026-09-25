@@ -1,0 +1,803 @@
+﻿[
+    {
+        "id":  "KARADRIM",
+        "professions":  [
+                            "Deep-Delver",
+                            "Furnace-Master",
+                            "Stone-Mason",
+                            "Runecrafter",
+                            "Shield-Thane",
+                            "Vanguard-Guard",
+                            "Brewer"
+                        ],
+        "averageHeight":  135,
+        "name":  "Karadrim",
+        "traits":  [
+                       "RUNIC_INSPIRATION",
+                       "ALCOHOL_HARDY",
+                       "DENSE_BONES"
+                   ],
+        "description":  "A dense-boned, broad-shouldered mountain-dweller renowned for master craftsmanship, unyielding resolve, and deep-brew.",
+        "baseHealth":  125,
+        "bodyParts":  [
+                          {
+                              "vital":  true,
+                              "name":  "head",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "thick skin",
+                                              "dense skull",
+                                              "brain"
+                                          ]
+                          },
+                          {
+                              "vital":  true,
+                              "name":  "throat",
+                              "canSever":  false,
+                              "tissues":  [
+                                              "thick throat",
+                                              "arteries"
+                                          ]
+                          },
+                          {
+                              "vital":  true,
+                              "name":  "upper body",
+                              "canSever":  false,
+                              "tissues":  [
+                                              "heavy ribcage",
+                                              "heart",
+                                              "lungs"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "lower body",
+                              "canSever":  false,
+                              "tissues":  [
+                                              "stout belly",
+                                              "guts"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "left arm",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "brawny arm",
+                                              "dense bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "right arm",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "brawny arm",
+                                              "dense bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "left hand",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "calloused hand",
+                                              "bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "right hand",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "calloused hand",
+                                              "bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "left leg",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "stout leg",
+                                              "heavy bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "right leg",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "stout leg",
+                                              "heavy bone"
+                                          ]
+                          }
+                      ]
+    },
+    {
+        "id":  "VALEN",
+        "professions":  [
+                            "Knight",
+                            "Caravan-Master",
+                            "Scholar-Mage",
+                            "Castellan",
+                            "Bard",
+                            "Guild-Merchant"
+                        ],
+        "averageHeight":  175,
+        "name":  "Valen",
+        "traits":  [
+                       "ADAPTABLE",
+                       "CHIVALRIC_CODE",
+                       "TRADE_NETWORK"
+                   ],
+        "description":  "An adaptable, ambitious human realm-builder possessing keen intellect, chivalric pride, and expansive trade ambition.",
+        "baseHealth":  100,
+        "bodyParts":  [
+                          {
+                              "vital":  true,
+                              "name":  "head",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "skin",
+                                              "skull",
+                                              "brain"
+                                          ]
+                          },
+                          {
+                              "vital":  true,
+                              "name":  "throat",
+                              "canSever":  false,
+                              "tissues":  [
+                                              "throat",
+                                              "carotid artery"
+                                          ]
+                          },
+                          {
+                              "vital":  true,
+                              "name":  "upper body",
+                              "canSever":  false,
+                              "tissues":  [
+                                              "ribcage",
+                                              "heart",
+                                              "lungs"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "lower body",
+                              "canSever":  false,
+                              "tissues":  [
+                                              "abdomen",
+                                              "guts"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "left arm",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "arm",
+                                              "bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "right arm",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "arm",
+                                              "bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "left hand",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "hand",
+                                              "bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "right hand",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "hand",
+                                              "bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "left leg",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "thigh",
+                                              "bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "right leg",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "thigh",
+                                              "bone"
+                                          ]
+                          }
+                      ]
+    },
+    {
+        "id":  "SYLVATHI",
+        "professions":  [
+                            "Arbor-Warden",
+                            "Song-Shaper",
+                            "Grove-Ranger",
+                            "Wind-Scout",
+                            "Arbor-Hierophant"
+                        ],
+        "averageHeight":  188,
+        "name":  "Sylvathi",
+        "traits":  [
+                       "LIVING_WOOD_SHAPER",
+                       "CANOPY_AGILITY",
+                       "TREE_REVERENCE"
+                   ],
+        "description":  "A tall, lithe arbor-dweller deeply attuned to ancient canopy song and the sacred sanctity of living wood.",
+        "baseHealth":  90,
+        "bodyParts":  [
+                          {
+                              "vital":  true,
+                              "name":  "head",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "fair skin",
+                                              "delicate skull",
+                                              "brain"
+                                          ]
+                          },
+                          {
+                              "vital":  true,
+                              "name":  "throat",
+                              "canSever":  false,
+                              "tissues":  [
+                                              "slender throat"
+                                          ]
+                          },
+                          {
+                              "vital":  true,
+                              "name":  "upper body",
+                              "canSever":  false,
+                              "tissues":  [
+                                              "ribs",
+                                              "heart",
+                                              "lungs"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "lower body",
+                              "canSever":  false,
+                              "tissues":  [
+                                              "slender waist"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "left arm",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "slender arm",
+                                              "bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "right arm",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "slender arm",
+                                              "bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "left hand",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "nimble fingers",
+                                              "bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "right hand",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "nimble fingers",
+                                              "bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "left leg",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "agile leg",
+                                              "bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "right leg",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "agile leg",
+                                              "bone"
+                                          ]
+                          }
+                      ]
+    },
+    {
+        "id":  "MORVATH",
+        "professions":  [
+                            "Pit-Raider",
+                            "Lasher-Captain",
+                            "Trench-Stalker",
+                            "Ash-Shaman",
+                            "Warlord"
+                        ],
+        "averageHeight":  152,
+        "name":  "Morvath",
+        "traits":  [
+                       "RULE_OF_STRENGTH",
+                       "SHADOW_VISION",
+                       "CARNIVORE"
+                   ],
+        "description":  "A sinewy, sallow-skinned subterranean stalker who thrives in lightless abyssal trenches, wielding barbed chains and dark iron.",
+        "baseHealth":  95,
+        "bodyParts":  [
+                          {
+                              "vital":  true,
+                              "name":  "head",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "scarred hide",
+                                              "cruel skull",
+                                              "brain"
+                                          ]
+                          },
+                          {
+                              "vital":  true,
+                              "name":  "throat",
+                              "canSever":  false,
+                              "tissues":  [
+                                              "throat",
+                                              "artery"
+                                          ]
+                          },
+                          {
+                              "vital":  true,
+                              "name":  "upper body",
+                              "canSever":  false,
+                              "tissues":  [
+                                              "sinewy chest",
+                                              "heart"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "lower body",
+                              "canSever":  false,
+                              "tissues":  [
+                                              "wiry belly",
+                                              "guts"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "left arm",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "sinewy arm",
+                                              "bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "right arm",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "sinewy arm",
+                                              "bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "left leg",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "agile leg",
+                                              "bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "right leg",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "agile leg",
+                                              "bone"
+                                          ]
+                          }
+                      ]
+    },
+    {
+        "id":  "KITTERKIN",
+        "professions":  [
+                            "Warren-Slinker",
+                            "Lock-Turner",
+                            "Scrap-Tinker",
+                            "Dart-Spitter",
+                            "Trap-Finder"
+                        ],
+        "averageHeight":  98,
+        "name":  "Kitterkin",
+        "traits":  [
+                       "LOCKPICKING",
+                       "TRAP_AVOID",
+                       "FLEE_RAPID",
+                       "CHIT_TONGUE"
+                   ],
+        "description":  "A diminutive, scaled/furred subterranean survivor with large expressive ears, a long twitching tail, and an obsession with shiny mechanism scrap.",
+        "baseHealth":  70,
+        "bodyParts":  [
+                          {
+                              "vital":  true,
+                              "name":  "head",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "fur/skin",
+                                              "small skull",
+                                              "brain"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "ears",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "large pointed ear",
+                                              "cartilage"
+                                          ]
+                          },
+                          {
+                              "vital":  true,
+                              "name":  "throat",
+                              "canSever":  false,
+                              "tissues":  [
+                                              "throat"
+                                          ]
+                          },
+                          {
+                              "vital":  true,
+                              "name":  "upper body",
+                              "canSever":  false,
+                              "tissues":  [
+                                              "small ribcage",
+                                              "heart"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "lower body",
+                              "canSever":  false,
+                              "tissues":  [
+                                              "belly"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "tail",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "long twitching tail",
+                                              "tail vertebrae"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "left arm",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "quick arm",
+                                              "bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "right arm",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "quick arm",
+                                              "bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "left leg",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "nimble leg",
+                                              "bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "right leg",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "nimble leg",
+                                              "bone"
+                                          ]
+                          }
+                      ]
+    },
+    {
+        "id":  "VORGARI",
+        "name":  "Vorgari",
+        "baseHealth":  145,
+        "description":  "A proud, horned race of crimson-grey basalt hide and volcanic blood who revere the Dual Axioms of Will and Form.",
+        "castes":  [
+                       {
+                           "bodyParts":  [
+                                             {
+                                                 "vital":  true,
+                                                 "name":  "head",
+                                                 "canSever":  true,
+                                                 "tissues":  "basalt hide dense skull brain"
+                                             },
+                                             {
+                                                 "vital":  false,
+                                                 "name":  "horns",
+                                                 "canSever":  true,
+                                                 "tissues":  "curved obsidian horn core"
+                                             },
+                                             {
+                                                 "vital":  false,
+                                                 "name":  "wings",
+                                                 "canSever":  true,
+                                                 "tissues":  "leathery wing membrane wing bone"
+                                             },
+                                             {
+                                                 "vital":  true,
+                                                 "name":  "throat",
+                                                 "canSever":  false,
+                                                 "tissues":  "thick throat"
+                                             },
+                                             {
+                                                 "vital":  true,
+                                                 "name":  "upper body",
+                                                 "canSever":  false,
+                                                 "tissues":  "reinforced ribcage volcanic heart"
+                                             },
+                                             {
+                                                 "vital":  false,
+                                                 "name":  "tail",
+                                                 "canSever":  true,
+                                                 "tissues":  "spiked basalt tail"
+                                             },
+                                             {
+                                                 "vital":  false,
+                                                 "name":  "left arm",
+                                                 "canSever":  true,
+                                                 "tissues":  "dense muscle stonehide"
+                                             },
+                                             {
+                                                 "vital":  false,
+                                                 "name":  "right arm",
+                                                 "canSever":  true,
+                                                 "tissues":  "dense muscle stonehide"
+                                             },
+                                             {
+                                                 "vital":  false,
+                                                 "name":  "legs",
+                                                 "canSever":  true,
+                                                 "tissues":  "pillar leg bone"
+                                             }
+                                         ],
+                           "name":  "Winged Zenith",
+                           "professions":  [
+                                               "Zenith-Scholar",
+                                               "Master of Form",
+                                               "Keeper of Will",
+                                               "Exarch",
+                                               "Axiom-Arbiter"
+                                           ]
+                       },
+                       {
+                           "bodyParts":  [
+                                             {
+                                                 "vital":  true,
+                                                 "name":  "head",
+                                                 "canSever":  true,
+                                                 "tissues":  "thick basalt hide dense skull brain"
+                                             },
+                                             {
+                                                 "vital":  false,
+                                                 "name":  "horns",
+                                                 "canSever":  true,
+                                                 "tissues":  "heavy obsidian horn"
+                                             },
+                                             {
+                                                 "vital":  true,
+                                                 "name":  "upper body",
+                                                 "canSever":  false,
+                                                 "tissues":  "immense ribcage volcanic heart"
+                                             },
+                                             {
+                                                 "vital":  false,
+                                                 "name":  "tail",
+                                                 "canSever":  true,
+                                                 "tissues":  "heavy basalt tail"
+                                             },
+                                             {
+                                                 "vital":  false,
+                                                 "name":  "left arm",
+                                                 "canSever":  true,
+                                                 "tissues":  "colossal hammer-arm bone"
+                                             },
+                                             {
+                                                 "vital":  false,
+                                                 "name":  "right arm",
+                                                 "canSever":  true,
+                                                 "tissues":  "colossal hammer-arm bone"
+                                             },
+                                             {
+                                                 "vital":  false,
+                                                 "name":  "legs",
+                                                 "canSever":  true,
+                                                 "tissues":  "pillar leg bone"
+                                             }
+                                         ],
+                           "name":  "Wingless Forge-Kin",
+                           "professions":  [
+                                               "Furnace-Artificer",
+                                               "Basalt-Mason",
+                                               "Anvil-Warden",
+                                               "Volcanic-Miner"
+                                           ]
+                       }
+                   ],
+        "averageHeight":  192,
+        "traits":  [
+                       "DUAL_AXIOMS",
+                       "VOLCANIC_HEAT_IMMUNITY",
+                       "BASALT_NATURAL_ARMOR"
+                   ]
+    },
+    {
+        "id":  "CRAG_GARGANT",
+        "professions":  [
+                            "Cavern-Territory-Alpha"
+                        ],
+        "averageHeight":  310,
+        "name":  "Crag-Gargant",
+        "traits":  [
+                       "BUILDING_CRUSHER",
+                       "SUBTERRANEAN_BEHEMOTH"
+                   ],
+        "description":  "A colossal, subterranean quadruped behemoth covered in matted moss and stone plates.",
+        "baseHealth":  320,
+        "bodyParts":  [
+                          {
+                              "vital":  true,
+                              "name":  "head",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "crag skull",
+                                              "thick hide",
+                                              "brain"
+                                          ]
+                          },
+                          {
+                              "vital":  true,
+                              "name":  "upper body",
+                              "canSever":  false,
+                              "tissues":  [
+                                              "massive stone plates",
+                                              "dense muscle",
+                                              "enormous heart"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "forelimbs",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "pillar limbs",
+                                              "dense bone"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "hindlimbs",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "pillar limbs",
+                                              "dense bone"
+                                          ]
+                          }
+                      ]
+    },
+    {
+        "id":  "AUTOMATON",
+        "professions":  [
+                            "Derelict-Sentinel",
+                            "Vault-Warden",
+                            "Recon-Drone"
+                        ],
+        "averageHeight":  210,
+        "name":  "Precursor Automaton",
+        "traits":  [
+                       "PRECURSOR_TECH",
+                       "PLASMA_BURST",
+                       "POISON_IMMUNE",
+                       "PAINLESS"
+                   ],
+        "description":  "A derelict pre-collapse security construct with heavy star-iron plating, an optic sensor eye, pneumatic limbs, and a volatile aetheric core.",
+        "baseHealth":  180,
+        "bodyParts":  [
+                          {
+                              "vital":  true,
+                              "name":  "optic sensor",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "armored visor",
+                                              "quantum optic array"
+                                          ]
+                          },
+                          {
+                              "vital":  true,
+                              "name":  "chassis",
+                              "canSever":  false,
+                              "tissues":  [
+                                              "star-iron plating",
+                                              "hydraulic pump",
+                                              "aetheric core"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "left servo-arm",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "pneumatic piston",
+                                              "titanium strut",
+                                              "plasma torch"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "right servo-arm",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "pneumatic piston",
+                                              "titanium strut",
+                                              "crushing claw"
+                                          ]
+                          },
+                          {
+                              "vital":  false,
+                              "name":  "tread assembly",
+                              "canSever":  true,
+                              "tissues":  [
+                                              "segmented treads",
+                                              "drive motor",
+                                              "suspension"
+                                          ]
+                          }
+                      ]
+    }
+]
