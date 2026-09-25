@@ -1,6 +1,6 @@
 # STATUS: Project DEUS Current Operational State
 **Project Formal Name:** DEUS  
-**Last Updated:** 2026-09-25 (Directive 001-E)  
+**Last Updated:** 2026-09-25 (Directive 001-F)  
 **Coordinator & Integration Authority:** Gemini / Antigravity  
 **Reporting Policy:** Immediate notification on commits, failures, defects, crashes, or power events; routine pulse every 15 minutes.  
 **Historical Ledger:** All completed historical records prior to 2026-09-25 are archived in [`docs/archive/STATUS_LEDGER_20260925.md`](docs/archive/STATUS_LEDGER_20260925.md).
@@ -8,43 +8,43 @@
 ---
 
 ## 1. Hardware, Remote & Execution State
-- **Hardware Status:** `GREEN` (Laptop power issue resolved).
+- **Hardware Status:** `GREEN` (Clean restarts 17:16/17:18; no Kernel-Power 41).
 - **Heavy Job Cap:** Formally **LIFTED** as of 2026-09-25 per Owner decision.
 - **Automatic Tripwire:** Any instant power loss automatically reinstates `MAX_SIMULTANEOUS_HEAVY_LOCAL_JOBS = 1` until explicitly lifted by the Owner. Any power event must be reported immediately.
-- **Remote Git Origin:** Formally configured and live per DEC-005: `origin = https://github.com/willshw89/Deus.git` (private remote). Verified clean clone with 9,796/9,796 tracked files, fsck clean, checks pass.
-- **Origin in Sync:** **YES** (`main` pushed to `origin/main` at `3dc5be23`).
-- **Backup State:** **PARTIAL** (DEC-005 remote live; off-disk backup partial until `game/img/` and `game/data/df_*.json` are tracked or archived per review F9).
+- **Remote Git Origin:** Formally configured and live per DEC-005: `origin = https://github.com/willshw89/Deus.git` (private remote). Verified clean clone with 10,259 tracked files, fsck clean, checks pass.
+- **Origin in Sync:** **YES** (`main` pushed to `origin/main` at `2d967d0d`).
+- **Backup State:** **COMPLETE** (Whitelisted `game/img` fully and tracked `game/data/df_*.json` per Directive 001-F sec 7; commit `258a2c60`).
 - **Pre-Execution Checkpoint Discipline:** Before launching any heavy execution, workers must checkpoint in `tasks/<task-id>/state.md`, save all open files, verify git branch/worktree, and commit uncommitted work.
 - **Migration Freeze:** The physical copy to `C:\Dev\DEUS` is frozen until all active writers commit and pause at a synchronized freeze point.
 
 ---
 
 ## In progress
-- **Lane A (Claude / Fable):** WG.00.08 Exit Criteria 2.2b/2.2c delivered & committed (`9f320da2`). Awaiting Grok closure review.
-- **Lane B (Claude / Fable):** WG.00.11 ATK-YEAR0-001 hardening suite committed (`37ac57da`).
-- **Lane C1 (Claude CLI):** WG.00.12 External backup infrastructure (`tools/backup_project.ps1`, committed `4a3a56f8`).
-- **Lane C2 (Claude CLI):** WG.00.12 Machine governance enforcement (`tools/governance/check_claims.js`, committed `58b0fcad`, 88/88 PASS).
-- **Lane C3 (Claude CLI):** WG.00.12 Palette ADR-002 revision & commit d1fbeab review (committed `70dad27`).
+- **Lane A (Claude / Fable):** WG.00.08 Follow-up: adding `shaft_prescan_removed` mutant in `tools/test_strata_cuts_and_caves.js` (Directive 001-F sec 3).
+- **Lane B (Claude / Fable):** WG.00.11 ATK-YEAR0-001 hardening suite committed (`37ac57da`). Awaiting Grok signoff.
+- **Lane C1 (Claude CLI):** WG.00.12 External backup infrastructure committed (`4a3a56f8`). Ready for integration (step 1).
+- **Lane C2 (Claude CLI):** WG.00.12 Machine governance enforcement committed (`58b0fcad`, 88/88 PASS). ACCEPTED for Grok attack. Hook installation held.
+- **Lane C3 (Claude CLI):** WG.00.12 Palette ADR-002 revision & commit d1fbeab review committed (`70dad27`). Ready for integration (step 2).
 - **Lane D (Grok PM):** Adversarial review delivered (verdicts recorded).
-- **Lane E (Grok Writer / Claude Reviewer):** WG.00.09 Depth renderer specification (`c846fc7c`) & independent review committed (`38875ae0`, CHANGES REQUESTED).
-- **Lane F (Claude CLI):** WG.00.12 OneDrive absolute link rewrite tool & dry-run diff (committed `23559316`).
-- **Lane G (Claude CLI):** WG.00.11 ATK-YEAR0-002 Runtime Year 0 fix delivered & committed (`0859ed3c`). Awaiting Grok review.
+- **Lane E (Grok Writer / Claude Reviewer):** WG.00.09 Follow-up: Grok revising `UF_Depth_Attack_Plan.md` against review `38875ae0` (Blocker CR-19C-B1, M1-M8).
+- **Lane F (Claude CLI):** WG.00.12 OneDrive absolute link rewrite tool & dry-run diff committed (`23559316`).
+- **Lane G (Claude CLI):** WG.00.11 Follow-up: Test maintenance across `test_new_game_year0.js`, `test_history_materialization_and_world_age.js`, `test_historical_carrying_capacity.js` (Directive 001-F sec 2).
 
 ---
 
-## 2. Active Parallel Work Lanes (DEUS Directive 001-E)
+## 2. Active Parallel Work Lanes (DEUS Directive 001-F)
 
 | Lane | Objective & WBS ID | Provider / Model | Worker Task ID & Branch | Worktree Path | Last Output / mtime | Current Gate & Status |
 |---|---|---|---|---|---|---|
-| **Lane A** | **WG.00.08 Exit Criteria** (`WG.00.08`) | Claude CLI (Fable) / `claude-opus-5-5` | Committed `9f320da2`<br>`task/lane-a` | `C:\Users\snewt\.deus_worktrees\lane-a` | 2026-09-25 17:09:20 | **STATUS: WRITER COMMITTED.**<br>• Criteria 2.2b (mutant kill roster, 27/27 caught) and 2.2c (6-point skylight proof, 0 fluid lost/carved across 4 seeds) delivered with full logs. Awaiting Grok review (2.2e) and DEC-001 (2.2d). |
+| **Lane A** | **WG.00.08 Exit Criteria** (`WG.00.08`) | Claude CLI (Fable) / `claude-opus-5-5` | `task/lane-a` (base `9f320da2`) | `C:\Users\snewt\.deus_worktrees\lane-a` | 2026-09-25 17:09:20 | **STATUS: FOLLOW-UP ACTIVE.**<br>• 27/27 roster accepted. Adding `shaft_prescan_removed` mutant in `tools/test_strata_cuts_and_caves.js` and proving it caught. ATK-19B-002 & WG.00.08 stay open until caught & DEC-001. |
 | **Lane B** | **ATK-YEAR0-001 Hardening** (`WG.00.11`) | Claude CLI (Fable) / `claude-opus-5-5` | Committed `37ac57da`<br>`task/lane-b` | `C:\Users\snewt\.deus_worktrees\lane-b` | 2026-09-25 16:52:25 | **STATUS: WRITER COMMITTED.**<br>• 27 gating checks + 12 mutants pass. Section C checks kept failing as open evidence for `ATK-YEAR0-002`. Awaiting Grok closure signoff. |
-| **Lane C1** | **Consolidation Infrastructure** (`WG.00.12`) | Claude CLI (Codex failover) / `claude-opus-5-5` | Committed `4a3a56f8`<br>`task/lane-c1` | `C:\Users\snewt\.deus_worktrees\lane-c1` | 2026-09-25 16:52:25 | **STATUS: WRITER COMMITTED.**<br>• Authored `tools/backup_project.ps1` (robocopy, SHA-256 hash verify, off-disk detection). Tested against 9,795 files (896 MB). |
-| **Lane C2** | **Governance check_claims.js** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Committed `58b0fcad`<br>`task/lane-c2` | `C:\Users\snewt\.deus_worktrees\lane-c2` | 2026-09-25 17:02:39 | **STATUS: WRITER COMMITTED (88/88 PASS).**<br>• Authored `tools/governance/check_claims.js` (Rules 4.1–4.4, bold-ID parsing, backfill detection, pre-commit hook). 88/88 checks pass, 22 mutants killed. Awaiting Grok attack. |
-| **Lane C3** | **Palette ADR Revision & Review** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Committed `70dad27`<br>`task/lane-c3` | `C:\Users\snewt\.deus_worktrees\lane-c3` | 2026-09-25 16:54:51 | **STATUS: WRITER COMMITTED.**<br>• Revised ADR-002 (uf.hex canonical for runtime now); d1fbeab review completed (flagged Stand-ins blocker). Reviewer: Grok. |
+| **Lane C1** | **Consolidation Infrastructure** (`WG.00.12`) | Claude CLI (Codex failover) / `claude-opus-5-5` | Committed `4a3a56f8`<br>`task/lane-c1` | `C:\Users\snewt\.deus_worktrees\lane-c1` | 2026-09-25 16:52:25 | **STATUS: WRITER COMMITTED.**<br>• Authored `tools/backup_project.ps1`. Integration order step 1. |
+| **Lane C2** | **Governance check_claims.js** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Committed `58b0fcad`<br>`task/lane-c2` | `C:\Users\snewt\.deus_worktrees\lane-c2` | 2026-09-25 17:02:39 | **STATUS: ACCEPTED FOR GROK ATTACK.**<br>• 88/88 checks pass, 22 mutants killed. Hook installation held until lane branches integrated. Integration order step 3. |
+| **Lane C3** | **Palette ADR Revision & Review** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Committed `70dad27`<br>`task/lane-c3` | `C:\Users\snewt\.deus_worktrees\lane-c3` | 2026-09-25 16:54:51 | **STATUS: WRITER COMMITTED.**<br>• Revised ADR-002 (uf.hex canonical for runtime now); d1fbeab review completed. Integration order step 2. |
 | **Lane D** | **Adversarial Review** | Grok (PM instance) / `grok-4.7` | Via Owner | Main checkout | 2026-09-25 16:48:00 | **STATUS: DELIVERED.**<br>• ATK-19B-001 CLOSED; ATK-19B-002 KEEP OPEN (F2); ATK-YEAR0-001 KEEP OPEN (F1); WG.00.08 stays REVIEW. |
-| **Lane E** | **WG.00.09 DEFINE / PRE-ATTACK** (`WG.00.09`) | Grok CLI (Writer) / Claude (Reviewer) | Writer `c846fc7c`<br>Reviewer `38875ae0`<br>`task/lane-e` | `C:\Users\snewt\.deus_worktrees\lane-e` | 2026-09-25 16:58:00 | **STATUS: REVIEW DELIVERED (CHANGES REQUESTED).**<br>• Independent review delivered (1 Blocker: live tilemap opacity occludes depth planes, 8 Major, 9 Minor). Awaiting Grok revision. |
-| **Lane F** | **OneDrive-Link Migration Prep** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Committed `23559316`<br>`task/lane-f` | `C:\Users\snewt\.deus_worktrees\lane-f` | 2026-09-25 16:52:09 | **STATUS: WRITER COMMITTED.**<br>• Authored `tools/migration/rewrite_onedrive_links.js` (28 KB); generated dry-run diff (`onedrive_links_rewrite.diff`). Applied only at freeze point. |
-| **Lane G** | **ATK-YEAR0-002 Runtime Fix** (`WG.00.11`) | Claude CLI / `claude-opus-5-5` | Committed `0859ed3c`<br>`task/lane-g` | `C:\Users\snewt\.deus_worktrees\lane-g` | 2026-09-25 17:13:46 | **STATUS: WRITER COMMITTED.**<br>• Runtime fix committed: Core `?? 0`, History startYear 0, Demographics startYear 0, Test harness year request. Years 1 and 42 byte-identical. Awaiting Grok review. |
+| **Lane E** | **WG.00.09 DEFINE / PRE-ATTACK** (`WG.00.09`) | Grok CLI (Writer) / Claude (Reviewer) | `task/lane-e` | `C:\Users\snewt\.deus_worktrees\lane-e` | 2026-09-25 16:58:00 | **STATUS: REVISION ACTIVE.**<br>• Grok revising `UF_Depth_Attack_Plan.md` against review `38875ae0` (Blocker CR-19C-B1: live tilemap opacity, M1-M8). Claude re-reviews. |
+| **Lane F** | **OneDrive-Link Migration Prep** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Committed `23559316`<br>`task/lane-f` | `C:\Users\snewt\.deus_worktrees\lane-f` | 2026-09-25 16:52:09 | **STATUS: WRITER COMMITTED.**<br>• Link rewrite scanner & dry-run diff ready. Applied at freeze point. |
+| **Lane G** | **ATK-YEAR0-002 Runtime Fix & Test Maint** (`WG.00.11`) | Claude CLI / `claude-opus-5-5` | `task/lane-g` (base `0859ed3c`) | `C:\Users\snewt\.deus_worktrees\lane-g` | 2026-09-25 17:13:46 | **STATUS: TEST MAINTENANCE ACTIVE.**<br>• Engine fix committed `0859ed3c` (Core line `>= 0 ? setupYear : 0`). Updating Section C KNOWN_OPEN/Section D anchor, updating world_age assertions, re-freezing carrying capacity SHA. |
 
 ---
 
@@ -53,15 +53,15 @@
 | Lane / Owner | Exclusive File Whitelist (Full Paths) | Access Policy |
 |---|---|---|
 | **Gemini (Coordinator)** | `docs/STATUS.md`<br>`docs/archive/STATUS_LEDGER_*.md`<br>`docs/WORK_QUEUE.md`<br>`docs/CANONICAL_ROLES.md`<br>`docs/AGENT_UTILIZATION_POLICY.md`<br>`docs/OWNER_DECISIONS.md`<br>`docs/worldgen/DEUS_WORLDGEN_WBS.md`<br>`docs/telemetry/*`<br>`baseline/*` | **Exclusive Writer.** WBS coordination, integration authority, pulse reports, baseline records. Zero engine code. |
-| **Lane A (Claude / Fable)** | `tools/test_strata_cuts_and_caves.js`<br>`tasks/WG.00.08/*` | **Exclusive Writer (Worktree lane-a).** 2.2b mutant kill roster (raw count, no reconciliation), 2.2c proof. |
-| **Lane B (Claude / Fable)** | `game/js/plugins/DEUS_FactionMenus.js`<br>`tools/test_new_game_year0.js`<br>`tasks/WG.00.11/*` | **Exclusive Writer (Worktree lane-b).** Year 0 menu & verification suite hardening. |
-| **Lane C1 (Claude CLI)** | `tools/backup_project.ps1`<br>`tasks/WG.00.12/state.md` | **Exclusive Writer (Worktree lane-c1).** External backup script (off-disk target required per DEC-005). |
-| **Lane C2 (Claude CLI)** | `tools/governance/check_claims.js`<br>`tools/governance/test_check_claims.js`<br>`tasks/WG.00.12/c2_governance_state.md` | **Exclusive Writer (Worktree lane-c2).** Machine governance enforcement script and test suite. |
-| **Lane C3 (Claude CLI)** | `docs/adr/ADR-002-Palette-Canonicalization.md`<br>`tasks/WG.00.12/c3_commit_review_d1fbeab.md`<br>`tasks/WG.00.12/c3_state.md` | **Exclusive Writer (Worktree lane-c3).** ADR-002 runtime canonicalization to uf.hex and commit d1fbeab review. |
+| **Lane A (Claude / Fable)** | `tools/test_strata_cuts_and_caves.js`<br>`tasks/WG.00.08/*` | **Exclusive Writer (Worktree lane-a).** Adding & proving `shaft_prescan_removed` mutant. |
+| **Lane B (Claude / Fable)** | `game/js/plugins/DEUS_FactionMenus.js`<br>`tools/test_new_game_year0.js`<br>`tasks/WG.00.11/*` | **Exclusive Writer (Worktree lane-b).** Hardening committed (`37ac57da`). |
+| **Lane C1 (Claude CLI)** | `tools/backup_project.ps1`<br>`tasks/WG.00.12/state.md` | **Exclusive Writer (Worktree lane-c1).** External backup script committed (`4a3a56f8`). |
+| **Lane C2 (Claude CLI)** | `tools/governance/check_claims.js`<br>`tools/governance/test_check_claims.js`<br>`tasks/WG.00.12/c2_governance_state.md` | **Exclusive Writer (Worktree lane-c2).** Machine governance checker committed (`58b0fcad`). |
+| **Lane C3 (Claude CLI)** | `docs/adr/ADR-002-Palette-Canonicalization.md`<br>`tasks/WG.00.12/c3_commit_review_d1fbeab.md`<br>`tasks/WG.00.12/c3_state.md` | **Exclusive Writer (Worktree lane-c3).** ADR-002 runtime canonicalization committed (`70dad27`). |
 | **Lane D (Grok)** | `tasks/WG.00.12/grok_adversarial_review.md`<br>`tasks/WG.00.08/defects.jsonl` (closure lines only) | **Exclusive Writer.** Adversarial review findings, defect verification, and closure signatures. |
-| **Lane E (Grok CLI / Claude)** | `docs/systems/UF_Depth_Attack_Plan.md`<br>`tasks/DEUS-TSK-FABLE-19C/*` | **Exclusive Writer (Worktree lane-e).** WG.00.09 specification review and pre-attack plan. |
+| **Lane E (Grok CLI / Claude)** | `docs/systems/UF_Depth_Attack_Plan.md`<br>`tasks/DEUS-TSK-FABLE-19C/*` | **Exclusive Writer (Worktree lane-e).** Depth renderer specification revision (Grok) and re-review (Claude). |
 | **Lane F (Claude CLI)** | `tools/migration/rewrite_onedrive_links.js`<br>`docs/migration/*`<br>`tasks/lane-f/state.md` | **Exclusive Writer (Worktree lane-f).** Link scanner, dry-run diff preparation. |
-| **Lane G (Claude CLI)** | `game/js/plugins/DEUS_Core.js`<br>`game/js/plugins/DEUS_History.js`<br>`game/js/plugins/DEUS_HistoricalDemographics.js`<br>`game/js/plugins/DEUS_FactionMenus.js`<br>`game/js/plugins/DEUS_Test.js`<br>`tasks/lane-g/state.md` | **Exclusive Writer (Worktree lane-g).** Runtime Year 0 engine implementation. |
+| **Lane G (Claude CLI)** | `game/js/plugins/DEUS_Core.js`<br>`game/js/plugins/DEUS_History.js`<br>`game/js/plugins/DEUS_HistoricalDemographics.js`<br>`game/js/plugins/DEUS_FactionMenus.js`<br>`game/js/plugins/DEUS_Test.js`<br>`tools/test_new_game_year0.js`<br>`tools/test_history_materialization_and_world_age.js`<br>`tools/test_historical_carrying_capacity.js`<br>`tasks/lane-g/state.md` | **Exclusive Writer (Worktree lane-g).** Runtime Year 0 engine implementation and test suite maintenance per 001-F. |
 | **FROZEN / READ-ONLY** | `C:\Dev\DEUS`<br>`game/js/plugins/DEUS_Levels.js`<br>`game/js/plugins/DEUS_World.js`<br>`game/js/plugins/DEUS_WorldGen.js`<br>`game/js/plugins/DEUS_Fluid.js`<br>`game/js/rmmz_*.js` | **Strictly Read-Only.** Core engine files locked during parallel consolidation. |
 
 ---
