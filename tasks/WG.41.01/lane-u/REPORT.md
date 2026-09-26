@@ -319,4 +319,9 @@ EXIT=1
 
 ## Final HEAD
 
-The commit that adds this report is followed by one commit that fills in this section only. That commit's hash is printed in the session's final message.
+```text
+$ git rev-parse HEAD      (after the commit that adds this report)
+889aa3256b54aeffa8543ea69f2461ba8054d4b7
+```
+
+The only later commit fills in this section. Its hash is printed in the session's final message.
