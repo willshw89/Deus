@@ -9,7 +9,10 @@
     "launchTimeCT": "2026-09-26 00:24:08 CT",
     "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\lane-c2b\\tasks\\WG.00.12\\c2_governance_state.md",
     "launchPromptPath": "C:\\Users\\snewt\\.deus_worktrees\\run_lane_c2b.ps1",
-    "state": "running"
+    "state": "exited",
+    "exitCode": 0,
+    "tip": "7619c9cb",
+    "endedAtCT": "2026-09-26 00:52:04 CT"
   },
   {
     "lane": "Lane I",
@@ -21,7 +24,10 @@
     "launchTimeCT": "2026-09-26 00:24:14 CT",
     "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\lane-i\\tasks\\WG.00.12\\lane-i\\BRIEF.md",
     "launchPromptPath": "C:\\Users\\snewt\\.deus_worktrees\\run_lane_i.ps1",
-    "state": "running"
+    "state": "exited",
+    "exitCode": 0,
+    "tip": "a0183d68",
+    "endedAtCT": "2026-09-26 00:38:56 CT"
   },
   {
     "lane": "Lane J",
@@ -33,7 +39,10 @@
     "launchTimeCT": "2026-09-26 00:24:19 CT",
     "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\lane-j\\tasks\\WG.00.12\\lane-j\\BRIEF.md",
     "launchPromptPath": "C:\\Users\\snewt\\.deus_worktrees\\run_lane_j.ps1",
-    "state": "running"
+    "state": "exited",
+    "exitCode": 0,
+    "tip": "5a1ec388",
+    "endedAtCT": "2026-09-26 00:53:09 CT"
   },
   {
     "lane": "Lane K",

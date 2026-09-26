@@ -1,7 +1,7 @@
 # DEUS WorldGen Work Breakdown Structure
 
 **Namespace:** WG  
-**Rev:** 19  
+**Rev:** 20  
 **IDs:** Stable. Next free in WG.00 is WG.00.18  
 **Canonical Authority:** the Owner approves; the Coordinator records; the PM signs off.  
 **Status:** CANONICAL ON MAIN  
@@ -531,6 +531,7 @@ Rows are numbered in the SIM namespace. **SIM.10 is already history and populati
 | SIM.40.07 | **Item weathering & burial** (rot, rust, sediment burial, durable relics, LIFE-001 mass conservation, LIFE-002 no ore creation) | PLANNED | Directive 0021-V §7; V138; LIFE-001; LIFE-002 | dep: SIM.40.05 | Claude → Grok | Item weathering: loose organic items decompose into soil; metals rust; durable relics become buried finds. Mass strictly conserved (LIFE-001); mineral ore is never generated (LIFE-002). Grok review artifact approves | M | — |
 | SIM.40.08 | **Deep-history decay integration** (summary-level decay for fast-forward, LIFE-003 trace retention) | PLANNED | Directive 0021-V §7; V138; DEC-012; LIFE-003 | SIM.40.05, dep: SIM.30.02 | Claude → Grok | Deep-history fast-forward executes summary decay so ancient sites appear in appropriate decay stages upon discovery. Recognizable traces preserved (foundations, mounds, vaults; LIFE-003). Grok review artifact approves | M | — |
 | SIM.40.09 | **Decay QA & fixtures** (deterministic aging fixture, mass conservation, no ore creation, perf bound) | PLANNED | Directive 0021-V §7; V138 | SIM.40.06, SIM.40.07, dep: SIM.40.08 | Claude → Grok (mutation) | Automated test suite: deterministic fixture aging an abandoned site through all stages, exact mass conservation assertions, zero ore generation verification, and perf benchmark proving zero per-frame scan. Mutants caught. Exits 0 | M | — |
+| SIM.40.10 | **Shared reproduction and lifecycle system** (people, livestock, wildlife, monsters). Per-species mating, gestation, growth, lifespan, litter size, heritable traits; young built from food eaten, bodies decay to soil (LIFE-001); wild counts at summary LOD | PLANNED | Directive 0021-V Addendum §9; V140; LIFE-001 | dep: SIM.40.02 | Claude → Grok | Simulation implementation: unified biological lifecycle across people, animals, and monsters. Food mass converted to offspring growth; natural death and decay to soil (LIFE-001). Summary LOD reproduction for non-focus regions. Grok review artifact approves | L | — |
 
 ---
 
@@ -582,11 +583,11 @@ The Owner clarified this on 2026-09-25 at 23:41 CT. **Art is a stream of its own
 | M0 Operations & Governance | 43 | 11 | 8 WG.00.12 sub-packages + 35 OPS |
 | M1 World Generation Foundation | 16 | 1 | includes new WG.00.14, WG.00.15, WG.00.17, WG.62.02, SIM.90.01 |
 | M2 Rendering & Depth | 16 | 4 | includes new WG.00.16 |
-| M3 Simulation | 38 | 2 | band rows (e.g. WG.66.01–08) count as one package each; includes 11 SIM.00/SIM.30 rows plus 9 new SIM.40.01–.09 collapse & decay rows (*Owner-ordered 2026-09-26, Directive 0021-V*) |
+| M3 Simulation | 39 | 2 | band rows (e.g. WG.66.01–08) count as one package each; includes 11 SIM.00/SIM.30 rows plus 10 new SIM.40.01–.10 collapse, decay & reproduction rows (*Owner-ordered 2026-09-26, Directive 0021-V*) |
 | M4 Civilization & Gameplay | 16 | 16 | every package waits on an Owner decision, playtest or approval |
 | M5 Content & Art (4 stages) | 32 | 15 | Stage 1: 12 (1 gated, a decision only) · Stage 2: 3 (0) · **Stage 3: 12 (all 12 "OWNER-GATED: requires Owner involvement")** · Stage 4: 5 (2 gated, Owner visual verification) |
 | M6 Release | 9 | 3 | all new REL IDs |
-| **Total** | **170** | **52** | Band rows stand for about 297 underlying WBS leaves |
+| **Total** | **171** | **52** | Band rows stand for about 298 underlying WBS leaves |
 
 A **package** here is one table row. Band rows (such as WG.22.01–25) keep their underlying leaf IDs and are split into leaf lanes when they start. The counts were produced by a script over this file's tables.
 
@@ -695,6 +696,7 @@ Notes:
 
 | Rev | Date | Change |
 |:---:|:---:|:---|
+| 20 | 2026-09-26 | Directive 0021-V Addendum (§9–§10) / Directive 0023-X: Added SIM.40.10 (Shared reproduction and lifecycle system), DEC-014 (Population budget & crowd LOD), DEC-015 (Faction Development Plans), Vision V139–V141. |
 | 19 | 2026-09-26 | Directive 0021-V: Record DEC-013 (9 Z layers, 9 races, one home layer per race, 5 biome bands). Added WG.00.17 (Z-range configurable setting / 9 layers), WG.62.02 (Race home-layer assignment in WorldGen), SIM.40.01–SIM.40.04 (Structural integrity & collapse), and SIM.40.05–SIM.40.09 (Urban decay & nature reclamation). Next free WG.00 is WG.00.18. |
 | 18 | 2026-09-26 | Owner approved master WBS ('Follow the WBS', 00:00 CT). Added §5 master packages (OPS, SIM, GP, REL); minted WG.00.14 (Year-0, alias tasks/WG.00.11), WG.00.15, WG.00.16, WG.20.02, WG.32.02; SIM.00/SIM.30 Owner-ordered 2026-09-26 (DEC-012); DW crosswalk fix; Rule 1/3/4 notes; closedBy column. OD-1..OD-18 OPEN (directive 0018-R). |
 | 17 | 2026-09-25 | Rev 16 row misdescribed WG.00.13; WG.00.13 = Master Palette Engine Migration, consolidation is WG.00.12. Align roles with CANONICAL_ROLES, DEC-001 and DEC-007 (Directive 001-L). |
