@@ -1,0 +1,50 @@
+diff --git a/game/js/plugins/DEUS_Depth.js b/game/js/plugins/DEUS_Depth.js
+index 547f2863..058f67e7 100644
+--- a/game/js/plugins/DEUS_Depth.js
++++ b/game/js/plugins/DEUS_Depth.js
+@@ -1368,10 +1368,28 @@
+             const treeType = O && O.types ? (O.types().find(tt => tt.image && Array.isArray(tt.tags) && tt.tags.includes("tree")) || O.types().find(tt => tt.image)) : null;
+             const treeOk = fx[0] && treeType ? O.setIn(lv1, fx[0].x, fx[0].y, treeType.id) : false;
+             const itemTypeId = ["stone", "oak_log", "log", "wood", "berries", "rations", "stone_axe", "gold_coin", "common_clothes", "pouch", "shovel", "waterskin"].find(id => I && I.type && I.type(id) && I.type(id).image) || null;
++
++            const b1Img = itemTypeId && I && I.type ? I.type(itemTypeId).image : null;
++            const b1Trace = async (label, n, item) => {
++                for (let k = 0; k <= n; k++) {
++                    const r = D.root(), pl = r ? r.planes[0] : null, win = r ? r._win : null;
++                    const bmp = b1Img ? ImageManager.loadCharacter(b1Img) : null;
++                    let found = "-";
++                    if (pl && pl.level && win && item) {
++                        const near = { x: win.dx + win.cols / 2, y: win.dy + win.rows / 2 }, radius = Math.hypot(win.cols / 2 + 3, win.rows / 2 + 3 + 6);
++                        const hits = I.find({ area: { x: pl.level.x, y: pl.level.y, z: pl.level.z }, near, radius });
++                        found = String(hits.some(h => h.item.id === item.id)) + " (near " + near.x + "," + near.y + " radius " + radius.toFixed(1) + ", " + hits.length + " hit(s))";
++                    }
++                    const s = pl && item ? pl._items.get(item.id) : null;
++                    UF.Test.write("TRACE b1 " + label + " +" + k + " frame " + Graphics.frameCount + " world " + W._frame + ": item sheet " + b1Img + " ready " + (bmp ? bmp.isReady() : "-") + "; rebuildItems query finds it " + found + "; tracked " + !!s + "; visible " + (s ? s.visible : "-") + "; display (" + $gameMap.displayX() + "," + $gameMap.displayY() + ") window x " + (win && win.x0) + ".." + (win && win.x1) + " y " + (win && win.y0) + ".." + (win && win.y1) + "; item at (" + (item && item.x) + "," + (item && item.y) + "," + (item && item.z) + ")");
++                    if (k < n) await t.waitFrames(1);
++                }
++            };
++            UF.Test.write("TRACE b1 world seed " + W.state.seed + "; proof window (" + best.wx + "," + best.wy + ") centre (" + center.x + "," + center.y + "); item sheet " + b1Img + " ready before I.create: " + (b1Img ? ImageManager.loadCharacter(b1Img).isReady() : "-"));
+             const itemMade = fx[1] && itemTypeId ? I.create(itemTypeId, 3, { area: lv1, x: fx[1].x, y: fx[1].y }) : null;
+             const unitMade = fx[2] ? W.addUnit({ name: "TEST_depth_unit", image: { characterName: "People1", characterIndex: 0 }, area: { x: area.x, y: area.y }, x: fx[2].x, y: fx[2].y, z: 1, dir: 2, snapToFree: true, data: { kind: "test" } }) : null;
+             if (unitMade) fx[2] = { x: unitMade.x, y: unitMade.y }; // it may have snapped to the nearest free cell
+-            await t.waitFrames(6);
++            await b1Trace("after I.create", 6, itemMade);
+ 
+             // 4. The projection is the identity (DEC-011): the viewport centre stays at the centre, the left edge at x 0.
+             const viewO = () => ({ x: $gameMap.displayX() * TW, y: $gameMap.displayY() * TH });
+@@ -1488,6 +1506,7 @@
+             await setEntities(true);
+ 
+             // 6b. The level below shows its entities: counts on the +1 plane, and the unit's body pixels change when units are switched off.
++            await b1Trace("at the check", 0, itemMade);
+             const ec = p1.entityCounts();
+             let unitDrawn = false, detailE = "";
+             if (unitMade && fx[2]) {
+@@ -1504,6 +1523,7 @@
+             t.check("entities_drawn", treeOk && !!itemMade && !!unitMade && ec.objects >= 1 && ec.units >= 1 && ec.items >= 1 && ec.walls >= 1 && unitDrawn,
+                 `fixtures: oak ${treeOk ? "placed" : "NOT placed"} at ${fx[0] ? `(${fx[0].x},${fx[0].y})` : "-"}, item ${itemMade ? `${itemTypeId} x3` : "NOT made"} at ${fx[1] ? `(${fx[1].x},${fx[1].y})` : "-"}, unit ${unitMade ? "added" : "NOT added"}; +1 plane draws ${ec.objects} object(s), ${ec.units} unit(s), ${ec.items} item stack(s), ${ec.walls} wall/ramp frame(s); ${detailE}`);
+ 
++            if (ec.items < 1) await b1Trace("after a failed check", 60, itemMade);
+             // 7. Crisp: every opaque pixel of the planes' render (tiles only: the entity sheets have their own palettes) is a
+             //    colour of the source canvases (nearest sampling, whole-pixel positions, no new colours).
+             const colorsOf = bmp => { const d = imageData(bmp), set = new Set(); for (let i = 0; i < d.length; i += 4) if (d[i + 3] === 255) set.add((d[i] << 16) | (d[i + 1] << 8) | d[i + 2]); return set; };

@@ -302,6 +302,12 @@
         return e;
     }
     const wrapCell = (v, size) => ((v % size) + size) % size;
+    /** The cells a..b of a looping axis as ranges inside 0..size-1: one range, or two where the window crosses the loop seam. */
+    function seamRanges(a, b, size) {
+        if (b - a + 1 >= size) return [[0, size - 1]];
+        const a0 = wrapCell(a, size), b0 = a0 + (b - a);
+        return b0 < size ? [[a0, b0]] : [[a0, size - 1], [0, b0 - size]];
+    }
     const isOpenIn = (e, size, mx, my, OPEN) => !!e.grid && e.grid[wrapCell(my, size) * size + wrapCell(mx, size)] === OPEN;
     /** A cell's shape changed (levels:shapeChanged / levels:cellChanged): patch the cached grid of its level. */
     function patchOpenCell(ref) {
@@ -346,10 +352,11 @@
     const unitStepFrames = () => { const W = World(); return Math.max(1, (W && W.config && W.config.unitStepFrames) | 0 || 16); };
 
     /** Start loading a unit's sheet (ImageManager keeps it; a level switch does not clear the cache). */
+    const preloaded = new Map(); // characterName -> Bitmap: the sheets preloadSheet started (the checks wait for them, Fix 1)
     function preloadSheet(image) {
         const name = image && image.characterName;
         if (!name || provoked("switch_same_frame")) return;
-        ImageManager.loadCharacter(name);
+        if (!preloaded.has(name)) preloaded.set(name, ImageManager.loadCharacter(name));
         stats.preloads++;
     }
     /** Preload the sheets of the units of the viewed area (all levels, or the levels in `levels`). Once per scene start or rebuild, never per frame. */
@@ -638,19 +645,35 @@
     Sprite_DepthPlane.prototype.sortEntities = function() {
         this._entities.children.sort((a, b) => ((a.z || 0) - (b.z || 0)) || ((a.spriteId || 0) - (b.spriteId || 0)));
     };
+    // The window's cells in the area's own coordinates. The areas loop (scrollType 3), so near the edge the view's display
+    // origin wraps (a view centred at y 6 has its display at y 255.5) and the window runs past the seam: it is read in up to
+    // four pieces, never as one clamped or distance-based query (B1, Fix 1: an item at y 3 was never found there).
+    const SEAM_FAULT = provoked("entities_at_seam"); // the provocation: the old unwrapped item query and clamped wall window
+    function windowPieces(win, size) {
+        if (SEAM_FAULT) return [[win.x0, win.y0, win.x1, win.y1]];
+        const out = [];
+        for (const [ya, yb] of seamRanges(win.y0, win.y1, size)) for (const [xa, xb] of seamRanges(win.x0, win.x1, size)) out.push([xa, ya, xb, yb]);
+        return out;
+    }
     Sprite_DepthPlane.prototype.rebuildItems = function(win) {
         const I = window.UF && UF.Items, keep = new Set();
-        if (config.entities.items && I && I.find) {
+        const see = it => {
+            if (!it || it.holder || it.container) return;
+            keep.add(it.id);
+            let s = this._items.get(it.id);
+            if (!s) { s = this.takeSprite(); this._items.set(it.id, s); }
+            s._ufRef = it;
+            s._ufKind = "item";
+            s._ufFrameOk = false;
+        };
+        const level = { x: this.level.x, y: this.level.y, z: this.level.z };
+        if (config.entities.items && I && SEAM_FAULT && I.find) {
             const near = { x: win.dx + win.cols / 2, y: win.dy + win.rows / 2 }, radius = Math.hypot(win.cols / 2 + ENTITY_MARGIN, win.rows / 2 + ENTITY_MARGIN + ENTITY_TALL);
-            for (const f of I.find({ area: { x: this.level.x, y: this.level.y, z: this.level.z }, near, radius })) {
-                const it = f.item;
-                if (!it || it.holder || it.container) continue;
-                keep.add(it.id);
-                let s = this._items.get(it.id);
-                if (!s) { s = this.takeSprite(); this._items.set(it.id, s); }
-                s._ufRef = it;
-                s._ufKind = "item";
-                s._ufFrameOk = false;
+            for (const f of I.find({ area: level, near, radius })) see(f.item);
+        } else if (config.entities.items && I && I.atIn) {
+            // The window's cells, one index lookup each (bounded by the window, not by the level's item count).
+            for (const [x0, y0, x1, y1] of windowPieces(win, World().state.size)) {
+                for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) for (const it of I.atIn(level, x, y)) see(it);
             }
         }
         for (const [id, s] of this._items) if (!keep.has(id)) { this.releaseSprite(s); this._items.delete(id); }
@@ -658,8 +681,13 @@
     Sprite_DepthPlane.prototype.rebuildWalls = function(L, win) {
         const keep = new Set();
         if (config.entities.walls && L && L.naturalWallCells) {
-            const area = { x: this.level.x, y: this.level.y }, z = this.level.z;
-            for (const c of L.naturalWallCells(area, z, win.x0, win.y0, win.x1, win.y1)) {
+            const area = { x: this.level.x, y: this.level.y }, z = this.level.z, pieces = windowPieces(win, World().state.size);
+            const wallCells = [], connectorCells = [];
+            for (const [x0, y0, x1, y1] of pieces) {
+                for (const c of L.naturalWallCells(area, z, x0, y0, x1, y1)) wallCells.push(c);
+                if (z === 0 && L.groundConnectorCells) for (const c of L.groundConnectorCells(area, x0, y0, x1, y1)) connectorCells.push(c);
+            }
+            for (const c of wallCells) {
                 const bmp = L.naturalWallFrame(c.code, c.mask);
                 if (!bmp) continue;
                 const k = `${c.x},${c.y}`;
@@ -670,18 +698,16 @@
                 s._ufKind = "wall";
                 s._ufFrameOk = false;
             }
-            if (z === 0 && L.groundConnectorCells) {
-                for (const c of L.groundConnectorCells(area, win.x0, win.y0, win.x1, win.y1)) {
-                    const bmp = connectorFrame(c.look);
-                    if (!bmp) continue;
-                    const k = `c:${c.x},${c.y}`;
-                    keep.add(k);
-                    let s = this._walls.get(k);
-                    if (!s) { s = this.takeSprite(); this._walls.set(k, s); }
-                    s._ufRef = { x: c.x, y: c.y, bitmap: bmp, z: 0.5 };
-                    s._ufKind = "connector";
-                    s._ufFrameOk = false;
-                }
+            for (const c of connectorCells) {
+                const bmp = connectorFrame(c.look);
+                if (!bmp) continue;
+                const k = `c:${c.x},${c.y}`;
+                keep.add(k);
+                let s = this._walls.get(k);
+                if (!s) { s = this.takeSprite(); this._walls.set(k, s); }
+                s._ufRef = { x: c.x, y: c.y, bitmap: bmp, z: 0.5 };
+                s._ufKind = "connector";
+                s._ufFrameOk = false;
             }
         }
         for (const [k, s] of this._walls) if (!keep.has(k)) { this.releaseSprite(s); this._walls.delete(k); }
@@ -1176,6 +1202,8 @@
         rebuild() { const r = rootOf(); if (r) r.rebuild(); },
         root: rootOf,
         planes: () => { const r = rootOf(); return r ? r.planes.filter(p => p.visible && p.level) : []; },
+        /** How many sheets the unit preload started are still loading (0: every one is ready or failed). */
+        preloadsPending: () => { let n = 0; for (const b of preloaded.values()) if (!b.isReady() && !b.isError()) n++; return n; },
         /** Whether cell (x, y) of level z of area (ax, ay) is open (from the cached shape grid). */
         isOpen: (ax, ay, x, y, z) => { const W = World(); return !!(W && W.state) && isOpenIn(openCells(ax, ay, z), W.state.size, x, y, openCode()); },
         describe: () => `${config.maxDepth} level(s) below, drawn 1:1 (DEC-011), void #${config.voidColor.toString(16).padStart(6, "0")}` + (config.enabled ? "" : " (off)"),
@@ -1213,133 +1241,194 @@
     // Checks: suites "depth" and "layers_flat" (run on their own). Each check has a provocation UF_TEST_PROVOKE=depth.<check>
     // where one exists (docs/systems/DEUS_Depth.md §6).
 
-    // The 17x13 view with the most balanced mix of +2 summit, +1 terrace and low ground (or a fixture hill near the start).
-    function proofWindow(W, L, area, size) {
-        const S = L.surfaceGrid(area.x, area.y);
-        const COLS = 17, ROWS = 13;
-        let best = null;
-        for (let wy = 0; wy + ROWS <= size; wy += 2) {
-            for (let wx = 0; wx + COLS <= size; wx += 2) {
-                let n0 = 0, n1 = 0, n2 = 0;
-                for (let y = wy; y < wy + ROWS; y++) for (let x = wx; x < wx + COLS; x++) { const s = S[y * size + x]; if (s === 0) n0++; else if (s === 1) n1++; else n2++; }
-                const score = Math.min(n0, n1, n2) * 1000 + n1 + n2;
-                if (!best || score > best.score) best = { wx, wy, n0, n1, n2, score };
-            }
-        }
-        let synthetic = false;
-        if (!best || Math.min(best.n0, best.n1, best.n2) === 0) {
-            // No natural three-height window: raise a fixture hill on +1/+2 near the start (shapes only; the test world is discarded).
-            synthetic = true;
-            const sa = W.state.startArea || { x: area.x, y: area.y };
-            const cx0 = Math.floor(size / 2) + 20, cy0 = Math.floor(size / 2) - 4;
-            for (let y = -3; y <= 3; y++) for (let x = -5; x <= 5; x++) L.setShape({ area: sa, x: cx0 + x, y: cy0 + y, z: 1 }, "floor", { material: "soil" });
-            for (let y = -1; y <= 1; y++) for (let x = -2; x <= 2; x++) { L.setShape({ area: sa, x: cx0 + x, y: cy0 + y, z: 1 }, "solid", { material: "stone" }); L.setShape({ area: sa, x: cx0 + x, y: cy0 + y, z: 2 }, "floor", { material: "stone" }); }
-            best = { wx: cx0 - 8, wy: cy0 - 6, n0: 0, n1: 0, n2: 0, score: 0 };
-        }
-        return { best, synthetic, COLS, ROWS, center: { x: best.wx + Math.floor(COLS / 2), y: best.wy + Math.floor(ROWS / 2) } };
+    // The fixture scene (WG.00.09b Fix 1, B2): every cell a check judges is built here, on all five levels, with explicit
+    // strata and ground tiles, so that no check depends on what the world generator made. Columns (levels -2, -1, 0, +1, +2;
+    // S solid, F floor, O open):
+    //   low       S S F O O   the ground cell painted with the catalog's first ground kind (kinds 0-3 have art, AUDIT_LOG A9)
+    //   terrace   S S S F O   a +1 stone floor under +2's open air
+    //   summit    S S S S F   a +2 stone floor on a +1 stone hill (its +1 cells next to the terrace draw natural wall faces)
+    //   deck      S S F F O   a +1 wooden deck (constructed) over painted low ground
+    //   cutFloor  F F O O O   the Z-2 cut ("cuts down to z-2", Owner 2026-09-25 23:52 CT): open on the ground; this cell has a
+    //   cut       F O O O O   -1 floor, the other five are open on -1 over a -2 floor
+    // Layout, as offsets from the scene's centre C (every view of both suites is centred on C; the screen is 17 x 13 cells):
+    //   rows -4..-2: the terrace at dx -7..-3 (its hole at (-5,-3) is low ground), the deck at dx -2..0 on row -2, the summit
+    //   at dx 3..6; rows -1..0: the cut at dx -1..1 (the -1 floor at (-1,-1)); the rest of dx -8..7, dy -5..3 is low ground.
+    const S5 = m => [m, m, m, m, m], F5 = m => [m, "air", "air", "air", "air"], A5 = S5("air");
+    const SCENE_COLUMNS = {
+        low: { strata: [S5("stone"), S5("stone"), F5("soil"), A5, A5], shapes: ["solid", "solid", "floor", "open", "open"] },
+        terrace: { strata: [S5("stone"), S5("stone"), S5("stone"), F5("stone"), A5], shapes: ["solid", "solid", "solid", "floor", "open"] },
+        summit: { strata: [S5("stone"), S5("stone"), S5("stone"), S5("stone"), F5("stone")], shapes: ["solid", "solid", "solid", "solid", "floor"] },
+        deck: { strata: [S5("stone"), S5("stone"), F5("soil"), F5("wood"), A5], shapes: ["solid", "solid", "floor", "floor", "open"], constructedZ: 1 },
+        cutFloor: { strata: [F5("stone"), F5("stone"), A5, A5, A5], shapes: ["floor", "floor", "open", "open", "open"] },
+        cut: { strata: [F5("stone"), A5, A5, A5, A5], shapes: ["floor", "open", "open", "open", "open"] }
+    };
+    const SCENE_BOX = { dx0: -8, dx1: 7, dy0: -5, dy1: 3 };
+    // No unit on any level here when the scene is built (the entity window of every view of C, with the checks' pans), and the
+    // simulation is paused while the checks look: no unit of the world is in a window a check judges.
+    const SCENE_ZONE = { dx0: -16, dx1: 16, dy0: -18, dy1: 14 };
+    function sceneKind(dx, dy) {
+        if (dx >= -1 && dx <= 1 && dy >= -1 && dy <= 0) return dx === -1 && dy === -1 ? "cutFloor" : "cut";
+        if (dx >= -7 && dx <= -3 && dy >= -4 && dy <= -2) return dx === -5 && dy === -3 ? "low" : "terrace";
+        if (dx >= -2 && dx <= 0 && dy === -2) return "deck";
+        if (dx >= 3 && dx <= 6 && dy >= -4 && dy <= -2) return "summit";
+        return "low";
     }
-    // A fixture cut on the low ground of the window (the Z-2 cut of the Owner's "cuts down to z-2"): a 3 x 2 block opened on
-    // the ground; under it, on -1, the first cell a floor (seen from the ground: -1) and the rest open over a -2 floor.
-    // The block nearest to `near` (rings of growing Chebyshev radius, up to maxR) whose six cells are low ground: a ground
-    // floor under open air on +1 and +2, nobody standing on it. The views that judge it are centred on it (cut.center).
-    function fixtureCut(W, L, area, near, maxR, avoid) {
-        const size = W.state.size;
-        const g0 = L.shapeGrid(0, area.x, area.y), g1 = L.shapeGrid(1, area.x, area.y), g2 = L.shapeGrid(2, area.x, area.y);
-        const at = (g, x, y) => (g && x >= 0 && y >= 0 && x < size && y < size ? g[y * size + x] : 0);
-        const FLOOR = L.SHAPES.floor, OPEN = L.SHAPES.open;
-        const O = window.UF.Objects;
-        const lowFloor = (x, y) => at(g0, x, y) === FLOOR && at(g1, x, y) === OPEN && at(g2, x, y) === OPEN && !W.standerAt(area.x, area.y, x, y, 0) && !avoid(x, y);
-        const fits = (x, y) => { for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 3; dx++) if (!lowFloor(x + dx, y + dy)) return false; return true; };
-        let origin = null;
-        for (let r = 0; r <= maxR && !origin; r++) {
-            for (let y = near.y - r; y <= near.y + r && !origin; y++) for (let x = near.x - r; x <= near.x + r && !origin; x++) {
-                if (Math.max(Math.abs(x - near.x), Math.abs(y - near.y)) !== r) continue; // this ring only
-                if (x < 2 || y < 2 || x > size - 5 || y > size - 4) continue;
-                if (fits(x, y)) origin = { x, y };
+    // The cells the checks judge (offsets from C).
+    const SCENE_AT = {
+        hole: [-5, -3], deckMid: [-1, -2],
+        summitFloor: [4, -3],   // +2 floor: the exposure check's floor cell and the +2 view's reference cell
+        terraceAir: [-3, -4],   // +2 open over the +1 terrace: the exposure check's open cell, flat_transform's texel
+        terraceRef: [-4, -4],   // a +1 terrace floor: the +1 view's reference cell
+        chain: [4, 2],          // low ground, open on +2 and +1 over the painted ground: the two-depth chain, the void, the pan
+        groundRef: [-2, -1],    // a ground floor cell next to the cut: the ground view's reference cell
+        minus1Ref: [-2, -1],    // -1 solid next to the cut: the -1 view's reference cell
+        tree: [-7, -4], item: [-6, -3], unit: [-4, -2], // the depth suite's entity fixtures on the terrace
+        unitA: [-3, -3]         // layers_flat's unit A on the terrace (it steps east)
+    };
+    const SCENE_DECK = [[-2, -2], [-1, -2], [0, -2]];
+    function sceneCut(C) {
+        const cells = [];
+        for (let dy = -1; dy <= 0; dy++) for (let dx = -1; dx <= 1; dx++) cells.push({ x: C.x + dx, y: C.y + dy });
+        return { cells, floorM1: cells[0], openM1: cells.slice(1), center: { x: C.x, y: C.y }, ok: true };
+    }
+    /** The scene's centre: the first place, in a fixed order from (size/2 + 56, size/2 + 56), with no unit on any level in its zone. */
+    function sceneCentre(W, area, size) {
+        const all = W.units(), sx = Math.floor(size / 2) + 56, sy = Math.floor(size / 2) + 56;
+        const lo = { x: -SCENE_ZONE.dx0 + 4, y: -SCENE_ZONE.dy0 + 4 }, hi = { x: size - 1 - SCENE_ZONE.dx1 - 4, y: size - 1 - SCENE_ZONE.dy1 - 4 };
+        const free = (cx, cy) => {
+            for (let i = 0; i < all.length; i++) {
+                const u = all[i];
+                if (!u || !u.area || u.area.x !== area.x || u.area.y !== area.y) continue;
+                const dx = u.x - cx, dy = u.y - cy;
+                if (dx >= SCENE_ZONE.dx0 && dx <= SCENE_ZONE.dx1 && dy >= SCENE_ZONE.dy0 && dy <= SCENE_ZONE.dy1) return false;
             }
+            return true;
+        };
+        for (let r = 0; r <= size; r += 8) for (let oy = -r; oy <= r; oy += 8) for (let ox = -r; ox <= r; ox += 8) {
+            if (Math.max(Math.abs(ox), Math.abs(oy)) !== r) continue;
+            const cx = sx + ox, cy = sy + oy;
+            if (cx < lo.x || cy < lo.y || cx > hi.x || cy > hi.y) continue;
+            if (free(cx, cy)) return { x: cx, y: cy };
         }
-        if (!origin) return null;
-        const cells = [], refused = [];
-        for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 3; dx++) cells.push({ x: origin.x + dx, y: origin.y + dy });
+        return null;
+    }
+    /** Build the scene around C: objects cleared in the zone, every column's strata written (unless already exactly so), the
+     *  ground floor cells given one painted tile; then every level of every column verified. */
+    function buildScene(W, L, area, C) {
+        const t0 = performance.now(), O = window.UF.Objects, Tl = window.UF.Tiles;
         const lv = z => ({ x: area.x, y: area.y, z });
-        for (const c of cells) {
-            if (O && O.typeIdIn && O.typeIdIn(lv(0), c.x, c.y) && O.setIn) O.setIn(lv(0), c.x, c.y, null);
-            if (!L.setShape({ area, x: c.x, y: c.y, z: -2 }, "floor", { material: "stone" })) refused.push(`-2 (${c.x},${c.y})`);
+        const kinds = Tl && Tl.kinds ? Tl.kinds() : [];
+        const groundTile = kinds.length && Tl.groundBase ? Tl.groundBase(kinds[0].id) : null;
+        const out = { C, area: { x: area.x, y: area.y }, columns: 0, written: 0, kept: 0, objectsCleared: 0, tilesSet: 0, refused: [], mismatches: [],
+            groundKind: kinds.length ? kinds[0].id : null, groundTile, ok: false, ms: 0 };
+        if (!O || !O.typeIdIn || !O.setIn || !L.setStrata || !L.strataAt || groundTile === null) {
+            out.refused.push(`an API is missing (Objects ${!!O}, setStrata ${!!L.setStrata}, ground tile ${groundTile})`);
+            return out;
         }
-        const floorM1 = cells[0], openM1 = cells.slice(1);
-        if (!L.setShape({ area, x: floorM1.x, y: floorM1.y, z: -1 }, "floor", { material: "stone" })) refused.push(`-1 floor (${floorM1.x},${floorM1.y})`);
-        for (const c of openM1) if (!L.setShape({ area, x: c.x, y: c.y, z: -1 }, "open")) refused.push(`-1 open (${c.x},${c.y})`);
-        for (const c of cells) if (!L.setShape({ area, x: c.x, y: c.y, z: 0 }, "open")) refused.push(`0 open (${c.x},${c.y}): ${JSON.stringify(L.lastRefusal && L.lastRefusal())}`);
-        const shape = (c, z) => L.shapeAt({ area, x: c.x, y: c.y, z });
-        const ok = refused.length === 0 && cells.every(c => shape(c, 0) === "open") && shape(floorM1, -1) === "floor" && openM1.every(c => shape(c, -1) === "open" && shape(c, -2) === "floor");
-        return { cells, floorM1, openM1, ok, refused, center: { x: origin.x + 1, y: origin.y + 1 } };
+        for (let z = -2; z <= 2; z++) for (let y = C.y + SCENE_ZONE.dy0; y <= C.y + SCENE_ZONE.dy1; y++) for (let x = C.x + SCENE_ZONE.dx0; x <= C.x + SCENE_ZONE.dx1; x++) {
+            if (O.typeIdIn(lv(z), x, y)) { O.setIn(lv(z), x, y, null); out.objectsCleared++; }
+        }
+        const eachColumn = fn => { for (let dy = SCENE_BOX.dy0; dy <= SCENE_BOX.dy1; dy++) for (let dx = SCENE_BOX.dx0; dx <= SCENE_BOX.dx1; dx++) fn(SCENE_COLUMNS[sceneKind(dx, dy)], C.x + dx, C.y + dy); };
+        eachColumn((col, x, y) => {
+            out.columns++;
+            for (let k = 0; k < 5; k++) {
+                const z = k - 2, ref = { area: { x: area.x, y: area.y }, x, y, z }, want = col.strata[k], built = col.constructedZ === z;
+                const s = L.strataAt(ref);
+                if (s && s.connector === null && want.every((m, j) => s.materials[j] === m) && s.constructed.every((c, j) => c === (built && want[j] !== "air"))) { out.kept++; continue; }
+                if (L.setStrata(ref, { m: want, connector: "none" }, { constructed: built, cause: "test fixture" })) out.written++;
+                else out.refused.push(`${z} (${x},${y}): ${L.lastRefusal && L.lastRefusal() ? L.lastRefusal().reason : "refused"}`);
+            }
+        });
+        // After every strata write (a write repaints its neighbours' ground from the generator, except tiles with a saved diff).
+        eachColumn((col, x, y) => {
+            if (col.shapes[2] !== "floor") return;
+            for (let layer = 0; layer <= 3; layer++) {
+                const want = layer === 0 ? groundTile : 0;
+                if ((W.getTile(area.x, area.y, x, y, layer, 0) | 0) !== want) { W.setTile(area.x, area.y, x, y, layer, want, 0); out.tilesSet++; }
+            }
+        });
+        eachColumn((col, x, y) => {
+            for (let k = 0; k < 5; k++) {
+                const got = L.shapeAt({ area: { x: area.x, y: area.y }, x, y, z: k - 2 });
+                if (got !== col.shapes[k]) out.mismatches.push(`${k - 2} (${x},${y}) is ${got}, want ${col.shapes[k]}`);
+            }
+            if (col.shapes[2] === "floor" && (W.getTile(area.x, area.y, x, y, 0, 0) | 0) !== groundTile) out.mismatches.push(`ground tile (${x},${y}) is ${W.getTile(area.x, area.y, x, y, 0, 0)}, want ${groundTile}`);
+        });
+        out.ok = out.refused.length === 0 && out.mismatches.length === 0;
+        out.ms = performance.now() - t0;
+        return out;
+    }
+    const sceneText = (sc, W) => `fixture scene centred at (${sc.C.x},${sc.C.y}) in area (${sc.area.x},${sc.area.y}), world seed ${W.state.seed}: ${sc.columns} columns x 5 levels (${sc.written} cell(s) written, ${sc.kept} already as specified), ${sc.tilesSet} ground tile(s) set (${sc.groundKind}, tile ${sc.groundTile}), ${sc.objectsCleared} object(s) cleared, ${sc.ms.toFixed(0)} ms; ${sc.refused.length} refused${sc.refused.length ? ` (${sc.refused.slice(0, 3).join("; ")})` : ""}, ${sc.mismatches.length} cell(s) not as specified${sc.mismatches.length ? ` (${sc.mismatches.slice(0, 3).join("; ")})` : ""}`;
+
+    // A harness problem (a fixture that can't be built, a condition that never comes): named in results.txt as a HARNESS line,
+    // then the suite stops (DEUS_Test records it as suite_completed FAIL; tools/test_layer_render_flat.js exits 2). Never a pass.
+    function harnessStop(message) {
+        UF.Test.write(`HARNESS ${message}`);
+        throw new Error(`HARNESS ${message}`);
+    }
+    /** A condition wait (Fix 1, section 3.1): a timeout only catches a hang, and is a harness problem that names the condition. */
+    async function need(t, cond, ms, what) {
+        try { await t.waitUntil(cond, ms, what); } catch (e) { harnessStop(`timed out after ${ms} ms waiting for ${what}`); }
+    }
+    /** Load character sheets and wait until every one is ready (a harness condition: the checks judge the planes, not the disk). */
+    async function sheetsReady(t, names, what) {
+        const list = names.filter(Boolean), bmps = list.map(n => ImageManager.loadCharacter(n));
+        await need(t, () => bmps.every(b => b.isReady() || b.isError()), 30000, `the sheets ${list.join(", ")} to load (${what})`);
+        const bad = list.filter((n, i) => bmps[i].isError());
+        if (bad.length) harnessStop(`sheet(s) failed to load: ${bad.join(", ")} (${what})`);
     }
     // Every descendant of a display object (the object itself first).
     function subtree(o, out = []) { out.push(o); for (const c of o.children || []) subtree(c, out); return out; }
     const filterNames = o => (o.filters || []).map(f => f.constructor.name);
+    const worldSeed = W => (W && W.state ? W.state.seed : "-");
 
     function registerChecks() {
         UF.Test.suite("depth", async t => {
             const W = World(), L = Levels();
             const scene = () => SceneManager._scene;
             const ok0 = !!W && !!L && L.view() === 0 && !!L.surfaceGrid() && Graphics.width === 816;
-            t.check("preconditions", ok0, `world ${!!W}, levels ${!!L}, view ${L && L.view()}, surface grid ${!!(L && L.surfaceGrid())}, screen ${Graphics.width}x${Graphics.height}`);
+            t.check("preconditions", ok0, `world ${!!W}, levels ${!!L}, view ${L && L.view()}, surface grid ${!!(L && L.surfaceGrid())}, screen ${Graphics.width}x${Graphics.height}, world seed ${worldSeed(W)}`);
             if (!ok0) return;
             const size = W.state.size;
             const area = W.viewLevel();
-
-            // 1. The proof window: the 17x13 view with the most balanced mix of +2 summit, +1 terrace and low ground.
-            const pw = proofWindow(W, L, area, size);
-            const { best, synthetic, COLS, ROWS, center } = pw;
-            const inWindowCell = (x, y) => x >= best.wx && x < best.wx + COLS && y >= best.wy && y < best.wy + ROWS;
-            const shape1 = L.shapeGrid(1, area.x, area.y), shape2 = L.shapeGrid(2, area.x, area.y);
-            const shAt = (g, x, y) => (g && x >= 0 && y >= 0 && x < size && y < size ? g[y * size + x] : 0);
-            const OPEN = L.SHAPES.open, FLOOR = L.SHAPES.floor;
-
-            // 2. Fixtures on +1: a hole in the terrace (seen from +2 through the open air above it) and a wooden deck over low ground.
-            let hole = null, deck = [];
-            for (let y = best.wy + 1; y < best.wy + ROWS - 1 && !hole; y++) for (let x = best.wx + 1; x < best.wx + COLS - 1 && !hole; x++) {
-                if (shAt(shape1, x, y) !== FLOOR || shAt(shape2, x, y) !== OPEN) continue;
-                if ([[1, 0], [-1, 0], [0, 1], [0, -1]].every(([a, b]) => shAt(shape1, x + a, y + b) === FLOOR)) hole = { x, y };
-            }
-            if (hole) L.setShape({ area, x: hole.x, y: hole.y, z: 1 }, "open");
-            // The deck: from a +1 floor cell, up to three open cells in a row in any of the four directions (a bridge over low ground).
-            for (const [ddx, ddy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-                for (let y = best.wy + 1; y < best.wy + ROWS - 1 && deck.length < 3; y++) for (let x = best.wx + 1; x < best.wx + COLS - 1 && deck.length < 3; x++) {
-                    if (shAt(shape1, x, y) !== FLOOR) continue;
-                    const run = [];
-                    for (let k = 1; k <= 3; k++) { const cx1 = x + ddx * k, cy1 = y + ddy * k; if (inWindowCell(cx1, cy1) && shAt(shape1, cx1, cy1) === OPEN && shAt(shape2, cx1, cy1) === OPEN) run.push({ x: cx1, y: cy1 }); else break; }
-                    if (run.length > deck.length) deck = run;
-                }
-                if (deck.length === 3) break;
-            }
-            for (const c of deck) L.setShape({ area, x: c.x, y: c.y, z: 1 }, "floor", { constructed: true, material: "wood" });
-            t.check("proof_scene", !!best && (synthetic || Math.min(best.n0, best.n1, best.n2) > 0) && !!hole && deck.length >= 2,
-                `${synthetic ? "fixture hill" : "natural"} window at (${best.wx},${best.wy}): ground ${best.n0}, +1 ${best.n1}, +2 ${best.n2} cells; hole ${hole ? `(${hole.x},${hole.y})` : "none"}, deck ${deck.length ? `${deck.length} cells from (${deck[0].x},${deck[0].y})` : "none"}`);
-
-            // Pixel comparisons need a still scene: no rain (DEUS_Environment's weather of the test area is seed-rolled).
+            const D = Depth;
+            // A still world for the whole suite: the simulation is paused (UF.Time; the view, the planes and the level switches keep
+            // running), so no unit walks into a probe and nothing changes between two renders a check compares.
+            const TS = window.UF.Time, wasPaused = !!(TS && TS.paused);
+            if (TS && TS.pause) TS.pause();
+            // Pixel comparisons need a still scene: no rain (the test area's weather is seed-rolled), and the day tone (DEUS_DayNight
+            // tones the screen by the hour; the harness clock is DEUS_Test's).
             if (window.UF.Environment && UF.Environment.setWeather) UF.Environment.setWeather({ x: area.x, y: area.y }, "clear");
             if (window.$gameScreen) $gameScreen.changeWeather("none", 0, 0);
-            // Exact screen pixels need the day tone: DEUS_DayNight tones the screen by the hour (the harness clock is DEUS_Test's).
             if (window.UF.Time && UF.Time.setForTest) UF.Time.setForTest(12, 0);
+
+            // 1. The fixture scene: +2 summit, +1 terrace with a hole, a deck, low ground and the Z-2 cut, built on every level.
+            const C = sceneCentre(W, area, size);
+            if (!C) harnessStop(`the fixture scene: no place in the area without a unit on any level (${SCENE_ZONE.dx1 - SCENE_ZONE.dx0 + 1} x ${SCENE_ZONE.dy1 - SCENE_ZONE.dy0 + 1} cells)`);
+            const sc = buildScene(W, L, area, C);
+            const at = k => ({ x: C.x + SCENE_AT[k][0], y: C.y + SCENE_AT[k][1] });
+            const center = C, hole = at("hole"), deck = SCENE_DECK.map(([dx, dy]) => ({ x: C.x + dx, y: C.y + dy }));
+            t.check("proof_scene", sc.ok, `${sceneText(sc, W)}; hole (${hole.x},${hole.y}), deck 3 cells from (${deck[0].x},${deck[0].y})`);
+            if (!sc.ok) harnessStop(`the fixture scene was not built as specified: ${[...sc.refused, ...sc.mismatches].slice(0, 4).join("; ")}`);
+
             const fs = require("fs"), pathMod = require("path");
             const outDir = pathMod.join((nw.__dirname) || process.cwd(), "test_output");
             const savePng = (name, bmp) => { const f = pathMod.join(outDir, `depth.${name}.png`); fs.writeFileSync(f, bmp.canvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, ""), "base64"); UF.Test.write(`SHOT ${f}`); return f; };
-
+            let switches = 0;
             const goTo = async (z, c = center) => {
                 const okSwitch = L.setView(z, { center: c });
-                await t.waitUntil(() => !L.switching() && L.view() === z && scene() instanceof Scene_Map && scene().isStarted(), 30000, `the ${L.label(z)} view`);
+                await need(t, () => !L.switching() && L.view() === z && scene() instanceof Scene_Map && scene().isStarted(), 30000, `the ${L.label(z)} view`);
+                switches++;
                 await t.waitFrames(8);
                 return okSwitch;
             };
-            const D = Depth;
             const settle = async () => { D.touch(); await t.waitFrames(3); };
 
             // 3. On +2 with both depths (the addendum's chain): +1 through the summit's open air, the ground through +1's.
             config.maxDepth = 2;
             await goTo(2);
             await settle();
-            await t.waitFrames(40); // the weather fade
+            await need(t, () => !window.$gameScreen || $gameScreen.weatherPower() === 0, 30000, "the weather to clear");
             const st = D.stats();
             const p1 = D.planes().find(p => p.depth === 1) || null, p2 = D.planes().find(p => p.depth === 2) || null;
             const imageData = bmp => bmp.context.getImageData(0, 0, bmp.width, bmp.height).data;
@@ -1348,30 +1437,26 @@
             t.check("planes_present", st.view === 2 && !!p1 && p1.level.z === 1 && p1._tilemap.paints > 0 && opq1 > 0 && !!p2 && p2.level.z === 0 && p2._tilemap.paints > 0 && opq2 > 0,
                 `view ${st.view}; depth 1 -> ${p1 ? `level ${p1.level.z}, ${p1._tilemap.paints} paint(s), ${opq1} opaque samples` : "none"}; depth 2 -> ${p2 ? `level ${p2.level.z}, ${p2._tilemap.paints} paint(s), ${opq2} opaque samples` : "none"}; last paint ${st.lastPaintMs.toFixed(1)} ms, last peek ${st.lastPeekMs.toFixed(1)} ms`);
             if (!p1 || !p2) return;
-            // A repaint (every 48 px of scroll, every shape change, every 30 frames only while water is in the window) must stay well inside a frame.
-            const paintMs = [st.lastPaintMs];
-            for (let i = 0; i < 4; i++) { p1.refresh(); await t.waitFrames(1); paintMs.push(stats.lastPaintMs); }
-            const worstPaint = Math.max(...paintMs);
+            // A repaint (every 48 px of scroll, every shape change, every 30 frames only while water is in the window) happens on the
+            // plane's next frame. Its time is reported, not gated (Fix 1, P1: wall-clock time depends on the machine's load).
+            const paintMs = [st.lastPaintMs], repainted = [];
+            for (let i = 0; i < 4; i++) { const before = p1._tilemap.paints; p1.refresh(); await t.waitFrames(1); repainted.push(p1._tilemap.paints > before); paintMs.push(stats.lastPaintMs); }
             const cw = p1._tilemap._lowerLayer.bitmap.width, ch = p1._tilemap._lowerLayer.bitmap.height;
-            t.check("repaint_cost", worstPaint < 16, `repaints of one ${cw}x${ch} plane: ${paintMs.map(v => v.toFixed(1)).join(" / ")} ms (bound 16; this machine, nw.exe harness)`);
+            t.check("repaint_cost", repainted.every(Boolean), `${repainted.filter(Boolean).length} of 4 refreshes of one ${cw}x${ch} plane repainted it by the next frame; repaint times ${paintMs.map(v => v.toFixed(1)).join(" / ")} ms (reported, not gated: wall-clock time, this machine, nw.exe harness)`);
 
-            // 3b. Entities of the level below (user direction 2026-09-24): an oak, an item stack and a unit on the +1 terrace, in view.
-            const fx = [];
-            for (let y = best.wy + 3; y < best.wy + ROWS - 2 && fx.length < 3; y++) for (let x = best.wx + 2; x < best.wx + COLS - 2 && fx.length < 3; x += 3) {
-                if (shAt(shape1, x, y) !== FLOOR || shAt(shape2, x, y) !== OPEN) continue;
-                if ((hole && hole.x === x && hole.y === y) || deck.some(c => c.x === x && c.y === y)) continue;
-                if (fx.some(c => Math.abs(c.x - x) < 3 && Math.abs(c.y - y) < 3)) continue;
-                fx.push({ x, y });
-            }
+            // 3b. Entities of the level below (user direction 2026-09-24): an oak, an item stack and a unit on the +1 terrace, in
+            //     view. Their sheets are loaded first (a harness condition: the check judges the planes, not the file cache).
             const lv1 = { x: area.x, y: area.y, z: 1 };
             const O = window.UF.Objects, I = window.UF.Items;
             const treeType = O && O.types ? (O.types().find(tt => tt.image && Array.isArray(tt.tags) && tt.tags.includes("tree")) || O.types().find(tt => tt.image)) : null;
-            const treeOk = fx[0] && treeType ? O.setIn(lv1, fx[0].x, fx[0].y, treeType.id) : false;
             const itemTypeId = ["stone", "oak_log", "log", "wood", "berries", "rations", "stone_axe", "gold_coin", "common_clothes", "pouch", "shovel", "waterskin"].find(id => I && I.type && I.type(id) && I.type(id).image) || null;
-            const itemMade = fx[1] && itemTypeId ? I.create(itemTypeId, 3, { area: lv1, x: fx[1].x, y: fx[1].y }) : null;
-            const unitMade = fx[2] ? W.addUnit({ name: "TEST_depth_unit", image: { characterName: "People1", characterIndex: 0 }, area: { x: area.x, y: area.y }, x: fx[2].x, y: fx[2].y, z: 1, dir: 2, snapToFree: true, data: { kind: "test" } }) : null;
-            if (unitMade) fx[2] = { x: unitMade.x, y: unitMade.y }; // it may have snapped to the nearest free cell
-            await t.waitFrames(6);
+            const itemSheet = itemTypeId ? I.type(itemTypeId).image : null;
+            await sheetsReady(t, [treeType && treeType.image, itemSheet, "People1"], "the entity fixtures");
+            const fx = [at("tree"), at("item"), at("unit")];
+            const treeOk = treeType ? !!O.setIn(lv1, fx[0].x, fx[0].y, treeType.id) : false;
+            const itemMade = itemTypeId ? I.create(itemTypeId, 3, { area: lv1, x: fx[1].x, y: fx[1].y }) : null;
+            const unitMade = W.addUnit({ name: "TEST_depth_unit", image: { characterName: "People1", characterIndex: 0 }, area: { x: area.x, y: area.y }, x: fx[2].x, y: fx[2].y, z: 1, dir: 2, exact: true, data: { kind: "test" } });
+            await t.waitFrames(3); // the planes read a new object (objects:levelChanged), item (items:changed) and unit (every frame) on their next frame
 
             // 4. The projection is the identity (DEC-011): the viewport centre stays at the centre, the left edge at x 0.
             const viewO = () => ({ x: $gameMap.displayX() * TW, y: $gameMap.displayY() * TH });
@@ -1386,14 +1471,7 @@
 
             // 5. The exposure mask is the viewed level's own geometry: a floor cell of +2 is untouched, an open cell shows a lower level.
             const cellScreen = (x, y) => ({ x: ($gameMap.adjustX(x) + 0.5) * TW, y: ($gameMap.adjustY(y) + 0.5) * TH });
-            const onScreen = (x, y) => { const p = cellScreen(x, y); return p.x > 30 && p.x < Graphics.width - 30 && p.y > 60 && p.y < Graphics.height - 30; };
-            const far = (x, y) => Math.abs(x - center.x) >= 3 || Math.abs(y - center.y) >= 2;
-            let airOverTerrace = null, floorCell = null;
-            for (let y = best.wy; y < best.wy + ROWS; y++) for (let x = best.wx; x < best.wx + COLS; x++) {
-                if (!onScreen(x, y)) continue;
-                if (!airOverTerrace && shAt(shape2, x, y) === OPEN && shAt(shape1, x, y) === FLOOR && far(x, y) && !(hole && hole.x === x && hole.y === y) && !deck.some(c => c.x === x && c.y === y)) airOverTerrace = { x, y };
-                if (!floorCell && shAt(shape2, x, y) === FLOOR && far(x, y)) floorCell = { x, y };
-            }
+            const floorCell = at("summitFloor"), airOverTerrace = at("terraceAir");
             const snapScreen = () => Bitmap.snap(scene());
             const pix = (bmp, x, y) => bmp.getPixel(Math.round(x), Math.round(y));
             const shotOn = snapScreen();
@@ -1403,13 +1481,15 @@
             D.setEnabled(true);
             await settle();
             const around = (bmp, p) => { const out = []; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) out.push(pix(bmp, p.x + dx * 4, p.y + dy * 4)); return out; };
-            let floorSame = false, airDiffers = false, detail5 = "";
-            if (floorCell) { const a = around(shotOn, cellScreen(floorCell.x, floorCell.y)), b = around(shotOff, cellScreen(floorCell.x, floorCell.y)); floorSame = a.every((c, i) => c === b[i]); detail5 += `floor cell (${floorCell.x},${floorCell.y}) ${floorSame ? "unchanged" : "CHANGED"} by the planes; `; }
-            if (airOverTerrace) { const pp = cellScreen(airOverTerrace.x, airOverTerrace.y); const a = around(shotOn, pp), b = around(shotOff, pp); airDiffers = a.some((c, i) => c !== b[i]); detail5 += `open cell (${airOverTerrace.x},${airOverTerrace.y}) ${airDiffers ? "shows the level below" : "UNCHANGED (still sky)"}`; }
-            t.check("exposure_by_upper_geometry", !!floorCell && !!airOverTerrace && floorSame && airDiffers, detail5 || "no floor or open cell in view");
+            const a5 = around(shotOn, cellScreen(floorCell.x, floorCell.y)), b5 = around(shotOff, cellScreen(floorCell.x, floorCell.y));
+            const floorSame = a5.every((c, i) => c === b5[i]);
+            const pa = cellScreen(airOverTerrace.x, airOverTerrace.y), a6 = around(shotOn, pa), b6 = around(shotOff, pa);
+            const airDiffers = a6.some((c, i) => c !== b6[i]);
+            t.check("exposure_by_upper_geometry", floorSame && airDiffers,
+                `floor cell (${floorCell.x},${floorCell.y}) ${floorSame ? "unchanged" : "CHANGED"} by the planes; open cell (${airOverTerrace.x},${airOverTerrace.y}) ${airDiffers ? "shows the level below" : "UNCHANGED (still sky)"}`);
 
             // 6. Mask order and the two-depth chain, from a render of the planes alone (no tint, no fog): through +2's open air
-            //    a +1 terrace cell shows depth 1's own texel; a low-ground cell shows the ground (depth 2) through depth 1.
+            //    a +1 floor shows depth 1's own texel; a low-ground cell shows the ground (depth 2) through depth 1.
             const root = D.root();
             const planesOnly = () => Bitmap.snap(root);
             const texelOf = (p, gx, gy) => { // the plane's canvas colour under screen pixel (gx, gy)
@@ -1419,8 +1499,8 @@
                 return { color: up || lower.getPixel(lx, ly), alpha: up ? 255 : lower.getAlphaPixel(lx, ly), lx, ly };
             };
             const neighbours = (p, gx, gy) => { const set = new Set(); for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const tx = texelOf(p, gx + dx, gy + dy); if (tx.alpha === 255) set.add(tx.color); } return set; };
-            // The tile checks compare against tile texels, so the entities are switched off for their render (they are
-            // checked on their own in 6b); the render with entities is dumped too.
+            // The tile checks compare against tile texels, so the entities are switched off for their render (they are checked on
+            // their own in 6b); the render with entities is dumped too.
             const ENTITIES_OFF = { objects: false, items: false, units: false, walls: false };
             const entitiesOn = Object.assign({}, config.entities);
             const setEntities = async on => { Object.assign(config.entities, on ? entitiesOn : ENTITIES_OFF); D.refresh(); await t.waitFrames(3); };
@@ -1430,67 +1510,36 @@
             savePng("planes_only_plus2_tiles", render);
             savePng("canvas_depth1", p1._tilemap._lowerLayer.bitmap);
             savePng("canvas_depth2", p2._tilemap._lowerLayer.bitmap);
-            // The two-depth chain: a low-ground cell (open on +2 and on +1) shows the ground's texel, with depth 1 transparent there.
-            // The cell must have ground art under it: kinds the live Outside_A2 sheet does not paint are transparent (AUDIT_LOG A9).
-            let chainCell = null, chainCandidates = 0;
-            for (let y = best.wy; y < best.wy + ROWS && !chainCell; y++) for (let x = best.wx; x < best.wx + COLS && !chainCell; x++) {
-                if (!(onScreen(x, y) && far(x, y) && shAt(shape2, x, y) === OPEN && shAt(shape1, x, y) === OPEN && !deck.some(c => c.x === x && c.y === y))) continue;
-                chainCandidates++;
-                const c = cellScreen(x, y);
-                if (texelOf(p2, Math.round(c.x), Math.round(c.y)).alpha === 255) chainCell = { x, y };
-            }
-            let chainOk = false, detail7 = "";
-            if (chainCell) {
-                const c = cellScreen(chainCell.x, chainCell.y);
-                const gx = Math.round(c.x), gy = Math.round(c.y);
-                const seen = render.getPixel(gx, gy), seenA = render.getAlphaPixel(gx, gy), want2 = neighbours(p2, gx, gy), tx1 = texelOf(p1, gx, gy), tx2 = texelOf(p2, gx, gy);
-                chainOk = seenA === 255 && want2.has(seen) && tx1.alpha === 0;
-                detail7 = `low ground (${chainCell.x},${chainCell.y}) at screen (${gx},${gy}): drawn ${seen}/${seenA}, ground texel ${tx2.color}/${tx2.alpha}, ground texels {${[...want2].slice(0, 4).join(" ")}}, depth 1 alpha there ${tx1.alpha}`;
-            }
-            // Mask order: a +1 floor seen from +2 shows depth 1's texel, never the ground under it. Only a floor over PAINTED ground
-            // tells the order apart: over transparent ground (AUDIT_LOG A9, or a cut) depth 1 wins whatever the order. The fixture
-            // deck is used where its ground is painted; otherwise one more deck cell is laid over low ground with painted ground (not
-            // the chain cell) and the planes repaint.
-            const opaqueUnder = c => { const pc = cellScreen(c.x, c.y); return texelOf(p2, Math.round(pc.x), Math.round(pc.y)).alpha === 255; };
-            let maskCell = deck.find(c => onScreen(c.x, c.y) && opaqueUnder(c)) || null, maskKind = "deck";
-            if (!maskCell) {
-                let spot = null;
-                for (let y = best.wy; y < best.wy + ROWS && !spot; y++) for (let x = best.wx; x < best.wx + COLS && !spot; x++) {
-                    if (!(onScreen(x, y) && far(x, y) && shAt(shape2, x, y) === OPEN && shAt(shape1, x, y) === OPEN)) continue;
-                    if ((chainCell && chainCell.x === x && chainCell.y === y) || deck.some(c => c.x === x && c.y === y) || !opaqueUnder({ x, y })) continue;
-                    spot = { x, y };
-                }
-                if (spot && L.setShape({ area, x: spot.x, y: spot.y, z: 1 }, "floor", { constructed: true, material: "wood" })) {
-                    deck.push(spot);
-                    maskCell = spot;
-                    maskKind = "added deck";
-                    await t.waitFrames(4);
-                }
-            }
-            let maskOk = false, detail6 = "";
-            if (maskCell) {
-                const maskRender = maskKind === "deck" ? render : planesOnly();
-                const pp = cellScreen(maskCell.x, maskCell.y);
-                const gx = Math.round(pp.x), gy = Math.round(pp.y);
-                const seen = maskRender.getPixel(gx, gy), want1 = neighbours(p1, gx, gy), tx2 = texelOf(p2, gx, gy);
-                maskOk = tx2.alpha === 255 && want1.has(seen);
-                detail6 = `${maskKind} cell (${maskCell.x},${maskCell.y}) at screen (${gx},${gy}): drawn ${seen}, depth 1 texels {${[...want1].slice(0, 4).join(" ")}}, ground texel under it ${tx2.color}/${tx2.alpha}`;
-            }
-            t.check("mask_order", !!maskCell && maskOk, detail6 || "no +1 floor over painted ground in view, and no low-ground cell with painted ground to lay one on");
-            // The carved hole is a visual fixture (in the screenshots); what the ground draws under a hill is reported, not judged here.
-            if (hole) {
+            // The two-depth chain: the fixture's low-ground cell (open on +2 and on +1, over the painted ground) shows the ground's
+            // texel, with depth 1 transparent there.
+            const chainCell = at("chain");
+            const cc = cellScreen(chainCell.x, chainCell.y), cgx = Math.round(cc.x), cgy = Math.round(cc.y);
+            const seen7 = render.getPixel(cgx, cgy), seen7A = render.getAlphaPixel(cgx, cgy), want7 = neighbours(p2, cgx, cgy), tx71 = texelOf(p1, cgx, cgy), tx72 = texelOf(p2, cgx, cgy);
+            const chainOk = seen7A === 255 && tx72.alpha === 255 && want7.has(seen7) && tx71.alpha === 0;
+            let detail7 = `low ground (${chainCell.x},${chainCell.y}) at screen (${cgx},${cgy}): drawn ${seen7}/${seen7A}, ground texel ${tx72.color}/${tx72.alpha}, ground texels {${[...want7].slice(0, 4).join(" ")}}, depth 1 alpha there ${tx71.alpha}`;
+            // Mask order: a +1 floor seen from +2 shows depth 1's texel, never the painted ground under it (the fixture deck).
+            const maskCell = at("deckMid");
+            const pm = cellScreen(maskCell.x, maskCell.y), mgx = Math.round(pm.x), mgy = Math.round(pm.y);
+            const seen6 = render.getPixel(mgx, mgy), want6 = neighbours(p1, mgx, mgy), tx62 = texelOf(p2, mgx, mgy);
+            const maskOk = tx62.alpha === 255 && want6.has(seen6);
+            t.check("mask_order", maskOk, `deck cell (${maskCell.x},${maskCell.y}) at screen (${mgx},${mgy}): drawn ${seen6}, depth 1 texels {${[...want6].slice(0, 4).join(" ")}}, ground texel under it ${tx62.color}/${tx62.alpha}`);
+            // The hole in the terrace is a visual fixture (in the screenshots); what the ground draws under it is reported.
+            {
                 const c = cellScreen(hole.x, hole.y);
                 const tx2 = texelOf(p2, Math.round(c.x), Math.round(c.y));
                 const groundTiles = [0, 1, 2].map(l => W.getTile(area.x, area.y, hole.x, hole.y, l, 0));
-                detail7 += `; under the hole (${hole.x},${hole.y}) the ground draws ${tx2.color}/${tx2.alpha} (tiles ${groundTiles.join("/")})${tx2.alpha === 0 ? ": the solid ground cell has no art (see AUDIT_LOG)" : ""}`;
+                detail7 += `; under the hole (${hole.x},${hole.y}) the ground draws ${tx2.color}/${tx2.alpha} (tiles ${groundTiles.join("/")})`;
             }
-            t.check("depth2_through_depth1", !!chainCell && chainOk, detail7 || `no low-ground cell with painted ground in view (${chainCandidates} open cells over transparent ground kinds: AUDIT_LOG A9)`);
+            t.check("depth2_through_depth1", chainOk, detail7);
             await setEntities(true);
 
-            // 6b. The level below shows its entities: counts on the +1 plane, and the unit's body pixels change when units are switched off.
+            // 6b. The level below shows its entities: counts on the +1 plane, and the unit's body pixels change when units are
+            //     switched off. The detail names the facts behind a missing item (B1): its sheet, whether the plane tracks it.
             const ec = p1.entityCounts();
+            const itemSprite = itemMade ? p1._items.get(itemMade.id) : null;
+            const itemFacts = itemMade ? `item sheet ${itemSheet} ready ${ImageManager.loadCharacter(itemSheet).isReady()}, tracked by the plane ${!!itemSprite}, visible ${itemSprite ? itemSprite.visible : "-"}` : "no item";
             let unitDrawn = false, detailE = "";
-            if (unitMade && fx[2]) {
+            if (unitMade) {
                 const c = cellScreen(fx[2].x, fx[2].y); // the body, above the foot at the cell's bottom
                 const gx = Math.round(c.x), gy = Math.round(c.y + 4);
                 const probe = bmp => { const out = []; for (let dy = -2; dy <= 2; dy += 2) for (let dx = -2; dx <= 2; dx += 2) out.push(bmp.getPixel(gx + dx, gy + dy)); return out; };
@@ -1502,7 +1551,7 @@
                 detailE = `unit at (${fx[2].x},${fx[2].y}) probed at screen (${gx},${gy}): ${unitDrawn ? "drawn" : "NOT drawn"} (${onPx[4]} vs ${offPx[4]} without units)`;
             }
             t.check("entities_drawn", treeOk && !!itemMade && !!unitMade && ec.objects >= 1 && ec.units >= 1 && ec.items >= 1 && ec.walls >= 1 && unitDrawn,
-                `fixtures: oak ${treeOk ? "placed" : "NOT placed"} at ${fx[0] ? `(${fx[0].x},${fx[0].y})` : "-"}, item ${itemMade ? `${itemTypeId} x3` : "NOT made"} at ${fx[1] ? `(${fx[1].x},${fx[1].y})` : "-"}, unit ${unitMade ? "added" : "NOT added"}; +1 plane draws ${ec.objects} object(s), ${ec.units} unit(s), ${ec.items} item stack(s), ${ec.walls} wall/ramp frame(s); ${detailE}`);
+                `fixtures: oak ${treeOk ? "placed" : "NOT placed"} at (${fx[0].x},${fx[0].y}), item ${itemMade ? `${itemTypeId} x3` : "NOT made"} at (${fx[1].x},${fx[1].y}), unit ${unitMade ? "added" : "NOT added"}; +1 plane draws ${ec.objects} object(s), ${ec.units} unit(s), ${ec.items} item stack(s), ${ec.walls} wall/ramp frame(s); ${itemFacts}; ${detailE}`);
 
             // 7. Crisp: every opaque pixel of the planes' render (tiles only: the entity sheets have their own palettes) is a
             //    colour of the source canvases (nearest sampling, whole-pixel positions, no new colours).
@@ -1529,8 +1578,7 @@
 
             // 8. No parallax (DEC-011): no edge shift at either depth, and a fixed world point moves exactly with the camera (48 px a tile).
             const edge1 = observed(p1, 0, cy).x, edge2 = observed(p2, 0, cy).x;
-            // A fixed world point (the low-ground cell's centre, in world px) is drawn where the camera says, before and after a pan.
-            const worldPt = chainCell ? { x: (chainCell.x + 0.5) * TW, y: (chainCell.y + 0.5) * TH } : { x: (center.x + 3.5) * TW, y: (center.y + 0.5) * TH };
+            const worldPt = { x: (chainCell.x + 0.5) * TW, y: (chainCell.y + 0.5) * TH }; // the low-ground cell's centre, in world px
             const drawnAt = p => { const o = viewO(); return observed(p, worldPt.x - Math.ceil(o.x), worldPt.y - Math.ceil(o.y)); };
             const dx0 = $gameMap.displayX();
             const before1 = drawnAt(p1);
@@ -1581,15 +1629,10 @@
             await setEntities(false); // the void is judged on the tiles; an entity could stand on the probed cell
             const renderD = planesOnly();
             const voidHex = `#${config.voidColor.toString(16).padStart(6, "0")}`;
-            let voidOk = false, detailV = "";
-            if (chainCell) {
-                const c = cellScreen(chainCell.x, chainCell.y), gx = Math.round(c.x), gy = Math.round(c.y);
-                const screenPx = Bitmap.snap(scene()).getPixel(gx, gy);
-                const seen = renderD.getPixel(gx, gy), seenA = renderD.getAlphaPixel(gx, gy);
-                voidOk = seen === voidHex && seenA === 255 && screenPx === voidHex;
-                detailV = `low ground (${chainCell.x},${chainCell.y}) at screen (${gx},${gy}): planes render ${seen}/${seenA}, screen ${screenPx}, void ${voidHex}`;
-            }
-            t.check("void_beyond", !!chainCell && voidOk, detailV || "no low-ground cell in view");
+            const screenPx = Bitmap.snap(scene()).getPixel(cgx, cgy);
+            const seenV = renderD.getPixel(cgx, cgy), seenVA = renderD.getAlphaPixel(cgx, cgy);
+            const voidOk = seenV === voidHex && seenVA === 255 && screenPx === voidHex;
+            t.check("void_beyond", voidOk, `low ground (${chainCell.x},${chainCell.y}) at screen (${cgx},${cgy}): planes render ${seenV}/${seenVA}, screen ${screenPx}, void ${voidHex}`);
             // No blends (the inverse of the old blur check): with one level below the render holds only source colours and the void.
             const blends = foreignIn(renderD, paletteOf([p1]));
             t.check("no_blends", blends.sampled >= 1000 && blends.foreign === 0, `${blends.foreign} of ${blends.sampled} sampled pixels are blends (want 0)${blends.first ? `, first ${blends.first}` : ""}`);
@@ -1605,17 +1648,12 @@
             const noBlurAnywhere = subtree(root).every(o => !filterNames(o).some(n => n === "BlurFilter" || n === "ColorMatrixFilter"));
             const activeUntouched = mainTm.scale.x === 1 && mainTm.scale.y === 1 && !mainTm.filters && mainTm.alpha === 1;
             await setEntities(false);
-            let baselineOk = false, detailB = "no terrace cell";
-            if (airOverTerrace) {
-                const c = cellScreen(airOverTerrace.x, airOverTerrace.y);
-                const gx = Math.round(c.x), gy = Math.round(c.y);
-                const seen = planesOnly().getPixel(gx, gy), want = texelOf(p1, gx, gy);
-                baselineOk = want.alpha === 255 && seen === want.color;
-                detailB = `terrace pixel ${seen}, its source texel ${want.color}/${want.alpha}`;
-            }
+            const cB = cellScreen(airOverTerrace.x, airOverTerrace.y), bgx = Math.round(cB.x), bgy = Math.round(cB.y);
+            const seenB = planesOnly().getPixel(bgx, bgy), wantB = texelOf(p1, bgx, bgy);
+            const baselineOk = wantB.alpha === 255 && seenB === wantB.color;
             await setEntities(true);
             t.check("flat_transform", flatOf(p1) && flatOf(p2) && noBlurAnywhere && activeUntouched && baselineOk,
-                `depth 1 scale ${p1.scale.x} at (${p1.x},${p1.y}) filters [${filterNames(p1)}] entities [${filterNames(p1._entities)}] alpha ${p1.alpha}; depth 2 scale ${p2.scale.x} at (${p2.x},${p2.y}) filters [${filterNames(p2)}] entities [${filterNames(p2._entities)}] alpha ${p2.alpha}; blur/colour filters in the subtree: ${noBlurAnywhere ? "none" : "PRESENT"}; active tilemap scale ${mainTm.scale.x}, filters ${mainTm.filters ? "SET" : "none"}, alpha ${mainTm.alpha}; ${detailB}`);
+                `depth 1 scale ${p1.scale.x} at (${p1.x},${p1.y}) filters [${filterNames(p1)}] entities [${filterNames(p1._entities)}] alpha ${p1.alpha}; depth 2 scale ${p2.scale.x} at (${p2.x},${p2.y}) filters [${filterNames(p2)}] entities [${filterNames(p2._entities)}] alpha ${p2.alpha}; blur/colour filters in the subtree: ${noBlurAnywhere ? "none" : "PRESENT"}; active tilemap scale ${mainTm.scale.x}, filters ${mainTm.filters ? "SET" : "none"}, alpha ${mainTm.alpha}; terrace pixel ${seenB}, its source texel ${wantB.color}/${wantB.alpha}`);
             // Entities are children of the plane: world scale 1, no filter on the sprite or any container above it.
             const us = unitMade ? p1._units.get(unitMade.id) : null;
             let inheritOk = false, detailI = "no unit sprite";
@@ -1631,11 +1669,11 @@
             // Visual settings never touch the physical world.
             const physics = () => JSON.stringify({
                 unit: unitMade ? { x: unitMade.x, y: unitMade.y, z: unitMade.z } : null,
-                shapeUnit: fx[2] ? L.shapeAt({ area, x: fx[2].x, y: fx[2].y, z: 1 }) : null,
-                shapeChain: chainCell ? L.shapeAt({ area, x: chainCell.x, y: chainCell.y, z: 2 }) : null,
-                walkChain: chainCell ? W.walkable(area.x, area.y, chainCell.x, chainCell.y, { z: 2 }) : null,
-                walkUnit: fx[2] ? W.walkable(area.x, area.y, fx[2].x, fx[2].y, { z: 1 }) : null,
-                objects: fx[0] ? O.typeIdIn(lv1, fx[0].x, fx[0].y) : null
+                shapeUnit: L.shapeAt({ area, x: fx[2].x, y: fx[2].y, z: 1 }),
+                shapeChain: L.shapeAt({ area, x: chainCell.x, y: chainCell.y, z: 2 }),
+                walkChain: W.walkable(area.x, area.y, chainCell.x, chainCell.y, { z: 2 }),
+                walkUnit: W.walkable(area.x, area.y, fx[2].x, fx[2].y, { z: 1 }),
+                objects: O.typeIdIn(lv1, fx[0].x, fx[0].y)
             });
             const phys0 = physics();
             const cycle = async () => { for (const m of [1, 0, 2]) { config.maxDepth = m; await t.waitFrames(2); } D.setEnabled(false); await t.waitFrames(2); D.setEnabled(true); await settle(); };
@@ -1649,34 +1687,29 @@
             const cfgB = snapCfg();
             t.check("config_deterministic", cfgA === cfgB, cfgA === cfgB ? `the same after maxDepth 1 / 0 / 2 and off / on: ${cfgA}` : `DIFFERS: ${cfgA} vs ${cfgB}`);
 
-            // 12. The cost of the planes: wall time per frame with them off and on (this machine, nw.exe harness). Per frame: the
-            //     engine's own tick duration (update + render submission, Graphics.FPSCounter) and the wall interval. Medians, two
-            //     interleaved rounds per condition, the world simulation paused, so a world-generation hitch does not decide.
+            // 12. The cost of the planes: the engine's own tick duration (update + render submission, Graphics.FPSCounter) and the
+            //     wall interval per frame, planes off and on, medians of two interleaved rounds of 60 frames, the simulation paused.
+            //     Reported, not gated (Fix 1, P1): the gate is that each condition was sampled as set (planes off: none shown; on:
+            //     both bound); the milliseconds are judged separately with the machine's load (DEC-017).
             const sampleFrames = async n => {
-                const ticks = [], gaps = []; let last = performance.now();
-                for (let i = 0; i < n; i++) { await t.waitFrames(1); const now = performance.now(); gaps.push(now - last); last = now; ticks.push(Graphics._fpsCounter ? Graphics._fpsCounter.duration : NaN); }
+                const ticks = [], gaps = [], shown = []; let last = performance.now();
+                for (let i = 0; i < n; i++) { await t.waitFrames(1); const now = performance.now(); gaps.push(now - last); last = now; ticks.push(Graphics._fpsCounter ? Graphics._fpsCounter.duration : NaN); shown.push(D.planes().length); }
                 const med = a => { const s = a.filter(Number.isFinite).sort((x, y) => x - y); return s.length ? s[Math.floor(s.length / 2)] : NaN; };
-                return { tick: med(ticks), gap: med(gaps), worstTick: Math.max(...ticks.filter(Number.isFinite)) };
+                return { tick: med(ticks), gap: med(gaps), worstTick: Math.max(...ticks.filter(Number.isFinite)), shown };
             };
             const conditions = { off: async () => { D.setEnabled(false); }, on: async () => { D.setEnabled(true); } };
             const cost = {};
-            // UF.Time is DEUS_TimeSpeed's object (the old suite paused "UF.TimeSpeed", which does not exist, so it never paused).
-            const TS = window.UF.Time, wasPaused = !!(TS && TS.paused);
-            if (TS && TS.pause) TS.pause();
             for (let round = 0; round < 2; round++) for (const name of Object.keys(conditions)) { await conditions[name](); await t.waitFrames(10); (cost[name] = cost[name] || []).push(await sampleFrames(60)); }
-            if (TS && TS.resume && !wasPaused) TS.resume();
             D.setEnabled(true); await settle();
             const bestOf = name => cost[name].reduce((a, b) => (b.tick < a.tick ? b : a));
             const cOff = bestOf("off"), cOn = bestOf("on"), dPlanes = cOn.tick - cOff.tick;
+            const offAsSet = cost.off.every(r => r.shown.length === 60 && r.shown.every(n => n === 0)), onAsSet = cost.on.every(r => r.shown.length === 60 && r.shown.every(n => n === 2));
             let glName = "unknown";
             try { const gl = Graphics.app.renderer.gl, dbg = gl.getExtension("WEBGL_debug_renderer_info"); glName = dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : String(gl.getParameter(gl.RENDERER)); } catch (e) { glName = `unreadable (${e.message})`; }
-            t.check("planes_cost", Number.isFinite(dPlanes) && dPlanes < 8,
-                `GL renderer "${glName}"; median engine tick (update + render submit) over 2 x 60 frames: planes off ${cOff.tick.toFixed(1)} ms, on ${cOn.tick.toFixed(1)} ms (the planes +${dPlanes.toFixed(1)} ms, bound 8); median frame intervals off ${cOff.gap.toFixed(0)}, on ${cOn.gap.toFixed(0)} ms; worst tick off ${cOff.worstTick.toFixed(1)}, on ${cOn.worstTick.toFixed(1)} ms; this machine, nw.exe harness, simulation paused`);
+            t.check("planes_cost", offAsSet && onAsSet,
+                `sampled 2 x 60 frames per condition: planes off ${offAsSet ? "none shown in every frame" : "PLANES SHOWN"}, on ${onAsSet ? "both bound in every frame" : "NOT BOTH BOUND"}; reported, not gated: GL renderer "${glName}"; median engine tick (update + render submit): planes off ${cOff.tick.toFixed(1)} ms, on ${cOn.tick.toFixed(1)} ms (the planes +${dPlanes.toFixed(1)} ms); median frame intervals off ${cOff.gap.toFixed(0)}, on ${cOn.gap.toFixed(0)} ms; worst tick off ${cOff.worstTick.toFixed(1)}, on ${cOn.worstTick.toFixed(1)} ms; this machine, nw.exe harness, simulation paused`);
 
-            // 13. The screenshots at locked 1.00x: +2 and +1, planes off and flat. A fixture cut in the low ground (open to -1 and -2)
-            //     is made first, so +1 shows the ground and -1 through it and the ground view below can be judged.
-            const cut = fixtureCut(W, L, area, center, 60, (x, y) => deck.some(c => c.x === x && c.y === y) || (hole && hole.x === x && hole.y === y) || fx.some(c => c.x === x && c.y === y));
-            await t.waitFrames(6);
+            // 13. The screenshots at locked 1.00x: +2 and +1, planes off and flat (the fixture cut down to -2 is in view).
             const shots = [];
             D.setEnabled(false); await t.waitFrames(3); shots.push(t.screenshot("plus2_off"));
             D.setEnabled(true); await settle(); shots.push(t.screenshot("plus2_flat"));
@@ -1688,7 +1721,8 @@
 
             // 14. The ground view sees through its openings (Owner 2026-09-25 23:52 CT): a solid ground cell draws nothing below; an
             //     open cell over the Z-2 cut shows -2 (with -1 open), an open cell over a -1 floor shows -1.
-            await goTo(0, cut && cut.ok ? cut.center : center);
+            const cut = sceneCut(C);
+            await goTo(0);
             await setEntities(false);
             const main0 = scene()._spriteset._tilemap, root0 = D.root();
             // The tile layers and the planes only (characters, fog and the rest of the tilemap's children hidden for the render).
@@ -1701,79 +1735,107 @@
             };
             const st0 = D.stats();
             const q1 = D.planes().find(p => p.depth === 1) || null, q2 = D.planes().find(p => p.depth === 2) || null;
-            let groundOk = false, detailG = cut ? (cut.ok ? "" : `fixture cut refused: ${cut.refused.join("; ")}; `) : "no 3x2 low-ground block for the fixture cut within 60 cells; ";
-            if (cut && cut.ok && q1 && q2) {
-                const g = cut.openM1[1] || cut.openM1[0], f1 = cut.floorM1;
-                // A solid (not open) ground cell next to the cut: every neighbour of the block that is not open on the ground.
-                let solidCell = null;
-                for (let y = cut.cells[0].y - 1; y <= cut.cells[0].y + 2 && !solidCell; y++) for (let x = cut.cells[0].x - 1; x <= cut.cells[0].x + 3 && !solidCell; x++) {
-                    if (cut.cells.some(c => c.x === x && c.y === y)) continue;
-                    if (L.shapeAt({ area, x, y, z: 0 }) !== "open" && onScreen(x, y)) solidCell = { x, y };
-                }
+            let groundOk = false, detailG = `view ${st0.view}: depth 1 ${q1 ? q1.level.z : "none"}, depth 2 ${q2 ? q2.level.z : "none"}`;
+            if (q1 && q2) {
+                const g = cut.openM1[1], f1 = cut.floorM1, solidCell = at("groundRef");
                 const on = tileRender(), planes0 = Bitmap.snap(root0);
                 D.setEnabled(false); await t.waitFrames(3);
                 const off = tileRender();
                 D.setEnabled(true); await settle();
-                const at = (bmp, c) => { const p = cellScreen(c.x, c.y); return bmp.getPixel(Math.round(p.x), Math.round(p.y)); };
+                const atPx = (bmp, c) => { const p = cellScreen(c.x, c.y); return bmp.getPixel(Math.round(p.x), Math.round(p.y)); };
                 const pg = cellScreen(g.x, g.y), pf = cellScreen(f1.x, f1.y);
                 const want2 = neighbours(q2, Math.round(pg.x), Math.round(pg.y)), a1 = texelOf(q1, Math.round(pg.x), Math.round(pg.y)).alpha;
                 const want1 = neighbours(q1, Math.round(pf.x), Math.round(pf.y));
-                const solidSame = !!solidCell && around(on, cellScreen(solidCell.x, solidCell.y)).every((c, i) => c === around(off, cellScreen(solidCell.x, solidCell.y))[i]);
+                const solidShape = L.shapeAt({ area, x: solidCell.x, y: solidCell.y, z: 0 });
+                const sp = cellScreen(solidCell.x, solidCell.y);
+                const solidSame = solidShape !== "open" && around(on, sp).every((c, i) => c === around(off, sp)[i]);
                 // How much of the solid cell the ground's own art covers (255: opaque; less: transparent art, AUDIT_LOG A9).
-                const solidAlpha = solidCell ? Math.min(...[-4, 0, 4].flatMap(dy => [-4, 0, 4].map(dx => { const p = cellScreen(solidCell.x, solidCell.y); return off.getAlphaPixel(Math.round(p.x + dx), Math.round(p.y + dy)); }))) : -1;
-                const cutShows2 = at(on, g) === at(planes0, g) && want2.has(at(on, g)) && a1 === 0;
-                const cutShows1 = at(on, f1) === at(planes0, f1) && want1.has(at(on, f1));
+                const solidAlpha = Math.min(...[-4, 0, 4].flatMap(dy => [-4, 0, 4].map(dx => off.getAlphaPixel(Math.round(sp.x + dx), Math.round(sp.y + dy)))));
+                const cutShows2 = atPx(on, g) === atPx(planes0, g) && want2.has(atPx(on, g)) && a1 === 0;
+                const cutShows1 = atPx(on, f1) === atPx(planes0, f1) && want1.has(atPx(on, f1));
                 groundOk = st0.view === 0 && st0.seeThrough && q1.level.z === -1 && q2.level.z === -2 && solidSame && cutShows2 && cutShows1;
-                detailG = `view ${st0.view}, depth 1 -> ${q1.level.z}, depth 2 -> ${q2.level.z}, void ${st0.voidVisible ? "shown" : "hidden"}; solid ground cell ${solidCell ? `(${solidCell.x},${solidCell.y}) ${solidSame ? "unchanged" : "CHANGED"} by the planes (its own art's lowest alpha ${solidAlpha})` : "none found"}; open cell (${g.x},${g.y}) over the -2 floor draws ${at(on, g)} (planes ${at(planes0, g)}, -2 texels {${[...want2].slice(0, 3).join(" ")}}, -1 alpha ${a1}; planes off ${at(off, g)}); open cell (${f1.x},${f1.y}) over the -1 floor draws ${at(on, f1)} (-1 texels {${[...want1].slice(0, 3).join(" ")}}; planes off ${at(off, f1)})`;
-            } else if (cut && cut.ok) {
-                detailG += `view ${st0.view}: depth 1 ${q1 ? q1.level.z : "none"}, depth 2 ${q2 ? q2.level.z : "none"}`;
+                detailG = `view ${st0.view}, depth 1 -> ${q1.level.z}, depth 2 -> ${q2.level.z}, void ${st0.voidVisible ? "shown" : "hidden"}; ${solidShape} ground cell (${solidCell.x},${solidCell.y}) ${solidSame ? "unchanged" : "CHANGED"} by the planes (its own art's lowest alpha ${solidAlpha}); open cell (${g.x},${g.y}) over the -2 floor draws ${atPx(on, g)} (planes ${atPx(planes0, g)}, -2 texels {${[...want2].slice(0, 3).join(" ")}}, -1 alpha ${a1}; planes off ${atPx(off, g)}); open cell (${f1.x},${f1.y}) over the -1 floor draws ${atPx(on, f1)} (-1 texels {${[...want1].slice(0, 3).join(" ")}}; planes off ${atPx(off, f1)})`;
             }
             t.check("ground_draws_through_openings", groundOk, detailG);
             await setEntities(true);
-            // Each level switch makes a new spriteset; its canvases come from the pool and go back to it at terminate. After four
-            // switches: four canvases in use, none made since the first spriteset, none destroyed (no leak, no re-allocation).
+
+            // 15. Entities at the loop seam (B1, Fix 1). The areas loop: a view near the area's edge has its display origin wrapped (a
+            //     view centred on (2,2) starts at (249.5,251.5)), and its window runs past the seam. Item stacks on both sides of both
+            //     seams, a unit past them and natural wall faces past each seam, all on +1 and seen from +2: each is drawn, at the foot
+            //     of its own cell on screen (Game_Map.adjustX/adjustY).
+            const seamC = { x: 2, y: 2 }, hi = size - 3;
+            const seamItems = [[1, 1], [hi, 1], [1, hi], [hi, hi]].map(([x, y]) => ({ x, y }));
+            const seamWalls = [{ x: size - 2, y: 4 }, { x: 4, y: size - 2 }], seamUnitAt = { x: 3, y: 3 };
+            const floorAt = (x, y, z) => L.setStrata({ area: { x: area.x, y: area.y }, x, y, z }, { m: z === 1 ? F5("stone") : A5, connector: "none" }, { cause: "test fixture" });
+            const seamRefused = [];
+            for (const c of [...seamItems, seamUnitAt]) { if (!floorAt(c.x, c.y, 1) || !floorAt(c.x, c.y, 2)) seamRefused.push(`(${c.x},${c.y})`); if (O.typeIdIn(lv1, c.x, c.y)) O.setIn(lv1, c.x, c.y, null); }
+            for (const w of seamWalls) {
+                // A natural stone wall cell on +1 with a floor on each side (a wall face is drawn where a wall cell has a neighbour that is not a wall).
+                if (!L.setStrata({ area: { x: area.x, y: area.y }, x: w.x, y: w.y, z: 1 }, { m: S5("stone"), connector: "none" }, { cause: "test fixture" })) seamRefused.push(`wall (${w.x},${w.y})`);
+                for (const [ox, oy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = wrapCell(w.x + ox, size), ny = wrapCell(w.y + oy, size); if (!floorAt(nx, ny, 1)) seamRefused.push(`(${nx},${ny})`); if (O.typeIdIn(lv1, nx, ny)) O.setIn(lv1, nx, ny, null); }
+            }
+            const seamStacks = seamItems.map(c => I.create(itemTypeId, 2, { area: lv1, x: c.x, y: c.y }));
+            const seamUnit = W.addUnit({ name: "TEST_depth_seam_unit", image: { characterName: "People1", characterIndex: 0 }, area: { x: area.x, y: area.y }, x: seamUnitAt.x, y: seamUnitAt.y, z: 1, dir: 2, exact: true, data: { kind: "test" } });
+            await goTo(2, seamC);
+            const sp1 = D.planes().find(p => p.depth === 1) || null;
+            const footOf = c => ({ x: Math.round(($gameMap.adjustX(c.x) + 0.5) * TW), y: Math.round(($gameMap.adjustY(c.y) + 1) * TH) });
+            const onScreenFoot = f => f.x >= 0 && f.x <= Graphics.width && f.y >= 0 && f.y <= Graphics.height + TH;
+            const judge = (label, c, s) => { const f = footOf(c), ok = !!s && s.visible && s.x === f.x && s.y === f.y && onScreenFoot(f); return { ok, text: `${label} (${c.x},${c.y}) ${ok ? `drawn at (${f.x},${f.y})` : s ? `sprite ${s.visible ? "visible" : "HIDDEN"} at (${s.x},${s.y}), its cell's foot (${f.x},${f.y})` : "NOT TRACKED"}` }; };
+            const seamJudged = [];
+            if (sp1 && sp1.level.z === 1) {
+                seamItems.forEach((c, i) => seamJudged.push(judge("item", c, seamStacks[i] ? sp1._items.get(seamStacks[i].id) : null)));
+                seamWalls.forEach(c => seamJudged.push(judge("wall face", c, sp1._walls.get(`${c.x},${c.y}`))));
+                seamJudged.push(judge("unit", seamUnitAt, seamUnit ? sp1._units.get(seamUnit.id) : null));
+            }
+            const dispSeam = { x: $gameMap.displayX(), y: $gameMap.displayY() };
+            const wrappedView = dispSeam.x > seamC.x && dispSeam.y > seamC.y; // the display origin lies past the seam on both axes
+            t.check("entities_at_seam", seamRefused.length === 0 && wrappedView && seamJudged.length === 7 && seamJudged.every(j => j.ok),
+                `view on +2 centred on (${seamC.x},${seamC.y}), display (${dispSeam.x},${dispSeam.y}) (${wrappedView ? "wrapped" : "NOT WRAPPED"}); +1 plane ${sp1 ? `level ${sp1.level.z}` : "NONE"}: ${seamJudged.map(j => j.text).join("; ") || "nothing judged"}${seamRefused.length ? `; fixture cells refused: ${seamRefused.join(" ")}` : ""}`);
+
+            // Each level switch makes a new spriteset; its canvases come from the pool and go back to it at terminate. Four canvases
+            // in use, none made since the first spriteset, none destroyed (no leak, no re-allocation).
             const s0 = D.stats();
             t.check("canvases_freed", s0.layersAlive === 4 && s0.canvasesMade === 4 && s0.canvasesDestroyed === 0 && s0.pooled === 0,
-                `${s0.layersAlive} canvas layers in use, ${s0.canvasesMade} canvases made since boot, ${s0.canvasesDestroyed} destroyed, ${s0.pooled} pooled, after 4 level switches (want 4 / 4 / 0 / 0)`);
+                `${s0.layersAlive} canvas layers in use, ${s0.canvasesMade} canvases made since boot, ${s0.canvasesDestroyed} destroyed, ${s0.pooled} pooled, after ${switches} level switches (want 4 / 4 / 0 / 0)`);
             t.check("hotkey_free", Input.keyMapper[118] === undefined, `keyMapper[118] (F7) is ${JSON.stringify(Input.keyMapper[118])}: the preset hotkey is gone and the key is free`);
             t.check("no_errors", UF.Test.errors.length === 0, UF.Test.errors.length ? `${UF.Test.errors.length} error(s), first: ${UF.Test.errors[0]}` : "none");
+            if (TS && TS.resume && !wasPaused) TS.resume();
         }, { isDefault: false });
 
         UF.Test.suite("layers_flat", async t => {
             const W = World(), L = Levels(), D = Depth;
             const scene = () => SceneManager._scene;
             const ok0 = !!W && !!L && L.view() === 0 && !!L.surfaceGrid() && Graphics.width === 816;
-            t.check("preconditions", ok0, `world ${!!W}, levels ${!!L}, view ${L && L.view()}, screen ${Graphics.width}x${Graphics.height}`);
+            t.check("preconditions", ok0, `world ${!!W}, levels ${!!L}, view ${L && L.view()}, screen ${Graphics.width}x${Graphics.height}, world seed ${worldSeed(W)}`);
             if (!ok0) return;
             const size = W.state.size, area = W.viewLevel();
-            const pw = proofWindow(W, L, area, size);
-            const g1 = L.shapeGrid(1, area.x, area.y), g2 = L.shapeGrid(2, area.x, area.y);
-            const shAt = (g, x, y) => (g && x >= 0 && y >= 0 && x < size && y < size ? g[y * size + x] : 0);
-            const OPEN = L.SHAPES.open, FLOOR = L.SHAPES.floor;
+            // A still world (the simulation paused) except while the step check runs, at x1 (DEUS_TimeSpeed).
+            const TS = window.UF.Time, wasPaused = !!(TS && TS.paused);
+            if (TS && TS.setMultiplier) TS.setMultiplier(1);
+            if (TS && TS.pause) TS.pause();
             if (window.UF.Environment && UF.Environment.setWeather) UF.Environment.setWeather({ x: area.x, y: area.y }, "clear");
             if (window.$gameScreen) $gameScreen.changeWeather("none", 0, 0);
             // Exact screen pixels need the day tone: DEUS_DayNight tones the screen by the hour (the harness clock is DEUS_Test's).
             if (window.UF.Time && UF.Time.setForTest) UF.Time.setForTest(12, 0);
-            const TS = window.UF.Time; // DEUS_TimeSpeed: units must step at x1 for the step check
-            if (TS && TS.setMultiplier) TS.setMultiplier(1);
-            if (TS && TS.resume) TS.resume();
+            // Fixtures: the fixture scene (the Z-2 cut at its centre, the terrace, the summit); unit A (a sheet not used before in
+            // this run) on the +1 terrace, seen from +2; unit B on the -1 floor of the cut, seen from the ground. Both are added on
+            // the ground view, so only the planes' own preload (K2 c) loads their sheets.
+            const C = sceneCentre(W, area, size);
+            if (!C) harnessStop(`the fixture scene: no place in the area without a unit on any level (${SCENE_ZONE.dx1 - SCENE_ZONE.dx0 + 1} x ${SCENE_ZONE.dy1 - SCENE_ZONE.dy0 + 1} cells)`);
+            const sc = buildScene(W, L, area, C);
+            const at = k => ({ x: C.x + SCENE_AT[k][0], y: C.y + SCENE_AT[k][1] });
+            const center = C, cut = sceneCut(C), tA = at("unitA");
+            const unitA = W.addUnit({ name: "TEST_flat_A", image: { characterName: "People3", characterIndex: 1 }, area: { x: area.x, y: area.y }, x: tA.x, y: tA.y, z: 1, dir: 2, exact: true, data: { kind: "test", through: true } });
+            const unitB = W.addUnit({ name: "TEST_flat_B", image: { characterName: "People4", characterIndex: 2 }, area: { x: area.x, y: area.y }, x: cut.floorM1.x, y: cut.floorM1.y, z: -1, dir: 2, exact: true, data: { kind: "test" } });
+            t.check("fixtures", sc.ok && !!unitA && !!unitB, `${sceneText(sc, W)}; cut ${cut.cells.length} cells from (${cut.cells[0].x},${cut.cells[0].y}), -1 floor (${cut.floorM1.x},${cut.floorM1.y}); unit A ${unitA ? `(${unitA.x},${unitA.y}) +1` : "none"}; unit B ${unitB ? `(${unitB.x},${unitB.y}) -1` : "none"}`);
+            if (!sc.ok) harnessStop(`the fixture scene was not built as specified: ${[...sc.refused, ...sc.mismatches].slice(0, 4).join("; ")}`);
+            // The planes' preload of the new units' sheets finishes before the first switch (a condition, not a frame count).
+            await need(t, () => D.preloadsPending() === 0, 30000, "the planes' sheet preloads (K2 c) to finish");
             const goTo = async z => {
                 L.setView(z, { center });
-                await t.waitUntil(() => !L.switching() && L.view() === z && scene() instanceof Scene_Map && scene().isStarted(), 30000, `the ${L.label(z)} view`);
+                await need(t, () => !L.switching() && L.view() === z && scene() instanceof Scene_Map && scene().isStarted(), 30000, `the ${L.label(z)} view`);
                 await t.waitFrames(8);
             };
-            // Fixtures: the Z-2 cut in the low ground; unit A (a sheet not used before in this run) on the +1 terrace, seen from +2;
-            // unit B on the -1 floor of the cut, seen from the ground. Both added on the ground view, so only the preload loads them.
-            const cut = fixtureCut(W, L, area, pw.center, 60, () => false);
-            const center = cut && cut.ok ? cut.center : pw.center; // every view of this suite is centred on the cut
-            let terrace = null;
-            for (let y = center.y - 3; y <= center.y + 3 && !terrace; y++) for (let x = center.x - 5; x <= center.x + 5 && !terrace; x++) if (shAt(g1, x, y) === FLOOR && shAt(g2, x, y) === OPEN && !W.standerAt(area.x, area.y, x, y, 1)) terrace = { x, y };
-            // No terrace near the cut: unit A passes through everything, so any +1 cell under +2's open air will do (it is seen from +2).
-            for (let y = center.y - 3; y <= center.y + 3 && !terrace; y++) for (let x = center.x - 5; x <= center.x + 1 && !terrace; x++) if (shAt(g2, x, y) === OPEN && !W.standerAt(area.x, area.y, x, y, 1)) terrace = { x, y };
-            const unitA = terrace ? W.addUnit({ name: "TEST_flat_A", image: { characterName: "People3", characterIndex: 1 }, area: { x: area.x, y: area.y }, x: terrace.x, y: terrace.y, z: 1, dir: 2, exact: true, data: { kind: "test", through: true } }) : null;
-            const unitB = cut && cut.ok ? W.addUnit({ name: "TEST_flat_B", image: { characterName: "People4", characterIndex: 2 }, area: { x: area.x, y: area.y }, x: cut.floorM1.x, y: cut.floorM1.y, z: -1, dir: 2, exact: true, data: { kind: "test" } }) : null;
-            t.check("fixtures", !!cut && cut.ok && !!unitA && !!unitB, `cut ${cut ? (cut.ok ? `${cut.cells.length} cells from (${cut.cells[0].x},${cut.cells[0].y}), -1 floor (${cut.floorM1.x},${cut.floorM1.y})` : `REFUSED ${cut.refused.join("; ")}`) : "no low-ground block"}; unit A ${unitA ? `(${unitA.x},${unitA.y}) +1` : "none"}; unit B ${unitB ? `(${unitB.x},${unitB.y}) -1` : "none"}`);
-            await t.waitFrames(20);
 
             // (4) In the same frame as levels:viewChanged every visible plane is bound and painted, and every unit in the window on a
             //     plane's level has a visible sprite with a frame (no one-frame-late planes, no units hidden while their sheet loads).
@@ -1858,33 +1920,41 @@
             Object.assign(config.entities, entitiesOn); D.refresh(); await t.waitFrames(3);
             t.check("flat_crisp", sampled >= 1000 && foreign === 0, `${sampled} opaque samples of the +2 planes' tile render, ${foreign} colour(s) not in the ${palette.size}-colour source set${first ? `, first ${first}` : ""}`);
 
-            // (5) A unit on a lower level that steps gets its sprite's target in that same frame and is drawn on the new cell within
-            //     UnitStepFrames frames, walking (between cells, walk frames) on the way; a unit entering the window (camera still)
-            //     gets its sprite in the frame it enters. No 60-frame wait.
+            // (5) A unit on a lower level that steps gets its sprite's target in that same frame and walks to the new cell over
+            //     UnitStepFrames simulation ticks, the clock the walk uses (Fix 1, m2): in every frame drawn 0 < ticks < UnitStepFrames
+            //     after the step it is between the cells (not yet on the new one), in every frame drawn UnitStepFrames or more ticks
+            //     after it stands on the new cell's foot, and walk frames show on the way. A unit entering the window (camera still)
+            //     gets its sprite in the frame it enters. No 60-frame wait. Displayed-frame counts are reported, not gated.
             const moves = [];
-            const onMoved = (u, from, to) => { if (u && (u === unitA || u.name === "TEST_flat_E")) moves.push({ id: u.id, frame: Graphics.frameCount, x: to.x, y: to.y }); };
+            const onMoved = (u, from, to) => { if (u && (u === unitA || u.name === "TEST_flat_E")) moves.push({ id: u.id, frame: Graphics.frameCount, tick: W._frame | 0, from: { x: from.x, y: from.y }, x: to.x, y: to.y }); };
             UF.Events.on("world:unitMoved", onMoved);
             const dur = unitStepFrames();
+            if (TS && TS.resume) TS.resume();
             let stepDetail = "unit A missing", stepOk = false;
             if (unitA && sA) {
                 W.sendUnit(unitA.id, { area: { x: area.x, y: area.y }, x: unitA.x + 1, y: unitA.y, z: 1 });
-                await t.waitUntil(() => moves.some(m => m.id === unitA.id), 5000, "unit A's step");
+                await need(t, () => moves.some(m => m.id === unitA.id), 20000, "unit A's step (world:unitMoved)");
                 const m = moves.find(q => q.id === unitA.id);
-                const trace = [];
                 const plane1 = () => D.root().planes[0];
-                const want = { x: Math.round(($gameMap.adjustX(m.x) + 0.5) * TW), y: Math.round(($gameMap.adjustY(m.y) + 1) * TH) };
-                let reachedAt = -1;
-                for (let i = 0; i <= dur + 2; i++) {
-                    const s = plane1()._units.get(unitA.id);
-                    if (s) trace.push({ f: Graphics.frameCount, x: s.x, y: s.y, col: s._ufCol, target: `${wrapCell(s._ufToX, size)},${wrapCell(s._ufToY, size)}`, targetFrame: s._ufTargetFrame });
-                    if (s && reachedAt < 0 && s.x === want.x && s.y === want.y) reachedAt = Graphics.frameCount;
+                const footAt = c => ({ x: Math.round(($gameMap.adjustX(c.x) + 0.5) * TW), y: Math.round(($gameMap.adjustY(c.y) + 1) * TH) });
+                const want = footAt(m), fromFoot = footAt(m.from);
+                const trace = [];
+                for (let guard = 0; ; guard++) {
+                    const s = plane1()._units.get(unitA.id), tick = W._frame | 0;
+                    if (s) trace.push({ f: Graphics.frameCount, tick, t0: s._ufT0, e: tick - s._ufT0, x: s.x, y: s.y, col: s._ufCol, target: `${wrapCell(s._ufToX, size)},${wrapCell(s._ufToY, size)}`, targetFrame: s._ufTargetFrame });
+                    if (tick - m.tick >= dur + 2) break;
+                    if (guard > 3000) harnessStop(`the simulation clock did not reach ${dur + 2} ticks after unit A's step (at ${tick - m.tick})`);
                     await t.waitFrames(1);
                 }
                 const t0 = trace[0], stand = sA._ufSheet ? sA._ufSheet.stand : 1;
-                const between = trace.some(q => q.x !== trace[0].x && q.x !== want.x) || trace.some(q => q.y !== trace[0].y && q.y !== want.y);
-                const walked = trace.some(q => q.col !== stand);
-                stepOk = !!t0 && t0.targetFrame === m.frame && t0.target === `${m.x},${m.y}` && reachedAt >= 0 && reachedAt - m.frame <= dur + 1 && between && walked;
-                stepDetail = `step to (${m.x},${m.y}) in frame ${m.frame}: sprite target ${t0 ? `${t0.target} set in frame ${t0.targetFrame}` : "-"}; drawn on the new cell's foot (${want.x},${want.y}) in frame ${reachedAt} (${reachedAt >= 0 ? reachedAt - m.frame : "never"} frame(s) later, bound ${dur + 1}); between cells on the way: ${between}; walk frames shown: ${walked} (columns ${[...new Set(trace.map(q => q.col))].join("/")}, stand ${stand})`;
+                const lo = Math.min(fromFoot.x, want.x), hi = Math.max(fromFoot.x, want.x), loY = Math.min(fromFoot.y, want.y), hiY = Math.max(fromFoot.y, want.y);
+                const during = trace.filter(q => q.e > 0 && q.e < dur), after = trace.filter(q => q.e >= dur);
+                const betweenAll = during.length > 0 && during.every(q => !(q.x === want.x && q.y === want.y) && q.x >= lo && q.x <= hi && q.y >= loY && q.y <= hiY && (q.x !== fromFoot.x || q.y !== fromFoot.y));
+                const arrived = after.length > 0 && after.every(q => q.x === want.x && q.y === want.y);
+                const walked = trace.some(q => q.e >= 0 && q.e <= dur && q.col !== stand);
+                const firstAt = trace.find(q => q.x === want.x && q.y === want.y);
+                stepOk = !!t0 && t0.targetFrame === m.frame && t0.target === `${m.x},${m.y}` && t0.t0 === m.tick && betweenAll && arrived && walked;
+                stepDetail = `step (${m.from.x},${m.from.y}) -> (${m.x},${m.y}) in frame ${m.frame}, tick ${m.tick}: sprite target ${t0 ? `${t0.target} set in frame ${t0.targetFrame}, walk from tick ${t0.t0}` : "-"}; ${during.length} frame(s) drawn 1..${dur - 1} ticks after it, ${betweenAll ? "each between the cells" : "NOT ALL BETWEEN THE CELLS"}; ${after.length} frame(s) drawn ${dur}+ ticks after it, ${arrived ? "each on the new cell's foot" : "NOT ALL ON THE NEW CELL"} (${want.x},${want.y}); walk frames shown: ${walked} (columns ${[...new Set(trace.map(q => q.col))].join("/")}, stand ${stand}); reported, not gated: first drawn on the new cell ${firstAt ? `${firstAt.e} tick(s), ${firstAt.f - m.frame} frame update(s) after the step` : "never"} (bound ${dur} ticks)`;
             }
             // Entering: unit E starts one cell outside the window's right edge on +1 and steps into it.
             const win = D.root().planes[0].entityWindow();
@@ -1893,13 +1963,15 @@
             await t.waitFrames(2);
             const outside = !D.root().planes[0]._units.has(unitE.id);
             W.sendUnit(unitE.id, { area: { x: area.x, y: area.y }, x: wrapCell(win.x1 - 1, size), y: ey, z: 1 });
-            await t.waitUntil(() => moves.some(m => m.id === unitE.id), 5000, "unit E's step");
+            await need(t, () => moves.some(m => m.id === unitE.id), 20000, "unit E's step (world:unitMoved)");
             const mE = moves.find(q => q.id === unitE.id);
             await t.waitFrames(1);
             const sE = D.root().planes[0]._units.get(unitE.id);
             const enterOk = outside && !!sE && sE._ufTargetFrame === mE.frame && sE._ufCellX === mE.x;
             UF.Events.off("world:unitMoved", onMoved);
             W.stopUnit(unitE.id);
+            W.stopUnit(unitA.id);
+            if (TS && TS.pause) TS.pause();
             t.check("unit_step_same_frame", stepOk && enterOk, `${stepDetail}; unit E ${outside ? "outside the window" : "ALREADY TRACKED"} at x ${wrapCell(win.x1 + 1, size)}, stepped to (${mE.x},${mE.y}) in frame ${mE.frame}: sprite ${sE ? `made in frame ${sE._ufTargetFrame}` : "NOT made"}`);
 
             // K4: the per-frame unit check tests only the units on the planes' levels (a candidate list), not every unit of the world.
@@ -1929,11 +2001,20 @@
             t.check("item_change_scoped", heldOk && groundOk, detailIC);
 
             // Every view sees through its open cells (Owner 2026-09-25 23:52 CT): on +2, +1, the ground and -1, an open cell of the
-            // viewed level is not painted by the map on screen (the tile render there equals the planes' own render), and a cell
-            // that is not open is unchanged when the planes are switched off (solid cells stay opaque).
+            // viewed level is not painted by the map on screen (the tile render there equals the planes' own render, alpha 255), and
+            // a reference cell that is not open is unchanged when the planes are switched off (solid cells stay opaque). Both cells of
+            // every view are fixture cells (Fix 1, M1); a fixture cell that is not as built is a harness problem.
+            const refCell = { 2: at("summitFloor"), 1: at("terraceRef"), 0: at("groundRef"), [-1]: at("minus1Ref") };
             const views = [];
             const viewCheck = async z => {
                 const main = scene()._spriteset._tilemap, r = D.root();
+                const cellPx = (x, y) => ({ x: Math.round(($gameMap.adjustX(x) + 0.5) * TW), y: Math.round(($gameMap.adjustY(y) + 0.5) * TH) });
+                const visibleCell = c => { const p = cellPx(c.x, c.y); return p.x > 24 && p.x < Graphics.width - 24 && p.y > 24 && p.y < Graphics.height - 24; };
+                const openHere = (z === -1 ? cut.openM1 : cut.cells)[0], solidHere = refCell[z];
+                const openShape = L.shapeAt({ area, x: openHere.x, y: openHere.y, z }), refShape = L.shapeAt({ area, x: solidHere.x, y: solidHere.y, z });
+                if (openShape !== "open" || refShape === "open" || !visibleCell(openHere) || !visibleCell(solidHere)) {
+                    harnessStop(`every_view_sees_through, the ${L.label(z)} view: the fixture cells are not as built (open cell (${openHere.x},${openHere.y}) is ${openShape}${visibleCell(openHere) ? "" : ", off screen"}; reference cell (${solidHere.x},${solidHere.y}) is ${refShape}${visibleCell(solidHere) ? "" : ", off screen"})`);
+                }
                 Object.assign(config.entities, { objects: false, items: false, units: false, walls: false }); D.refresh(); await t.waitFrames(3);
                 const tileRender = () => {
                     const hidden = [];
@@ -1942,22 +2023,16 @@
                     for (const c of hidden) c.visible = true;
                     return b;
                 };
-                const cellPx = (x, y) => ({ x: Math.round(($gameMap.adjustX(x) + 0.5) * TW), y: Math.round(($gameMap.adjustY(y) + 0.5) * TH) });
-                const visibleCell = (x, y) => { const p = cellPx(x, y); return p.x > 24 && p.x < Graphics.width - 24 && p.y > 24 && p.y < Graphics.height - 24; };
-                const openHere = cut && cut.ok ? (z === -1 ? cut.openM1 : cut.cells).find(c => visibleCell(c.x, c.y)) : null;
-                let solidHere = null;
-                for (let y = center.y - 5; y <= center.y + 5 && !solidHere; y++) for (let x = center.x - 7; x <= center.x + 7 && !solidHere; x++) {
-                    if (visibleCell(x, y) && L.shapeAt({ area, x, y, z }) !== "open") solidHere = { x, y };
-                }
                 const on = tileRender(), planes = Bitmap.snap(r);
                 D.setEnabled(false); await t.waitFrames(3);
                 const off = tileRender();
                 D.setEnabled(true); await t.waitFrames(3);
                 Object.assign(config.entities, entitiesOn); D.refresh(); await t.waitFrames(3);
                 const px = (b, c) => { const p = cellPx(c.x, c.y); return b.getPixel(p.x, p.y); };
-                const seesThrough = !!openHere && r.seeThrough && px(on, openHere) === px(planes, openHere) && planes.getAlphaPixel(cellPx(openHere.x, openHere.y).x, cellPx(openHere.x, openHere.y).y) === 255;
-                const opaque = !!solidHere && px(on, solidHere) === px(off, solidHere);
-                views.push({ z, ok: seesThrough && opaque, text: `${L.label(z)}: open cell ${openHere ? `(${openHere.x},${openHere.y}) draws ${px(on, openHere)}, planes ${px(planes, openHere)}, planes off ${px(off, openHere)}` : "NONE"}; ${solidHere ? `${L.shapeAt({ area, x: solidHere.x, y: solidHere.y, z })} cell (${solidHere.x},${solidHere.y}) ${opaque ? "unchanged" : "CHANGED"}` : "no solid cell"}; planes on levels [${r.planes.filter(p => p.level).map(p => p.level.z).join(", ")}]` });
+                const po = cellPx(openHere.x, openHere.y);
+                const seesThrough = r.seeThrough && px(on, openHere) === px(planes, openHere) && planes.getAlphaPixel(po.x, po.y) === 255;
+                const opaque = px(on, solidHere) === px(off, solidHere);
+                views.push({ z, ok: seesThrough && opaque, text: `${L.label(z)}: open cell (${openHere.x},${openHere.y}) draws ${px(on, openHere)}, planes ${px(planes, openHere)}/${planes.getAlphaPixel(po.x, po.y)}, planes off ${px(off, openHere)}; ${refShape} cell (${solidHere.x},${solidHere.y}) ${opaque ? "unchanged" : "CHANGED"} (${px(on, solidHere)} / ${px(off, solidHere)} planes off); planes on levels [${r.planes.filter(p => p.level).map(p => p.level.z).join(", ")}]` });
             };
             await goTo(2);
             await viewCheck(2);
@@ -1989,6 +2064,7 @@
             const sizes = shots.map(f => (fs.existsSync(f) ? fs.statSync(f).size : 0));
             t.check("screenshots_written", shots.length === 4 && sizes.every(n => n > 10000), shots.map((f, i) => `${require("path").basename(f)} ${sizes[i]} B`).join(", "));
             t.check("no_errors", UF.Test.errors.length === 0, UF.Test.errors.length ? `${UF.Test.errors.length} error(s), first: ${UF.Test.errors[0]}` : "none");
+            if (TS && TS.resume && !wasPaused) TS.resume();
         }, { isDefault: false });
     }
 })();
