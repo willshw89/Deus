@@ -1,8 +1,8 @@
 # DEUS WorldGen Work Breakdown Structure
 
 **Namespace:** WG  
-**Rev:** 21  
-**IDs:** Stable. Next free in WG.00 is WG.00.18  
+**Rev:** 22  
+**IDs:** Stable. Next free in WG.00 is WG.00.19  
 **Canonical Authority:** the Owner approves; the Coordinator records; the PM signs off.  
 **Status:** CANONICAL ON MAIN  
 **Permanent Project-Control Anchor:** WBS IDs are immutable. Never silently renumber, merge, or reuse them. Once committed, a leaf changes only by status (`PLANNED` → `DONE`) or retirement via `SUPERSEDED`.
@@ -103,6 +103,7 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | **WG.00.15** | M-GEN-01: Vertical Biome Coupling | Claude | M-GEN-01: vertical biome coupling, plus raising `survey.tested` cap from 12 to 64. | `PLANNED` | |
 | **WG.00.16** | Depth-Shading Revisit After Palette Migration | Claude / Owner | Options memo with harness renders; Owner ruling recorded as update to DEC-006. | `PLANNED` | |
 | **WG.00.17** | Z-Range Configurable Setting & Expansion to 32 Layers | Claude | Make Z-range a single configurable setting in engine core, then expand to 32 layers (-16..+15: surface 0, 16 underground -1..-16, 15 upper +1..+15, 320 ft total height, 10 ft layers, 2 ft strata). Refactor hardcoded spots (DEUS_Levels.js L1137 fixed maps, L1805 +2 offset/slice cap 24, all +2/5/24 assumptions). Mandatory sparse storage: memory and save size scale with occupied cells, not 32 × area (empty sky and solid rock cost near zero). Must maintain support for running at 9 layers in automated tests. Depends on Lanes K and N merging; inputs: ADR-003. Do NOT open code lane yet. | `PLANNED` | |
+| **WG.00.18** | Layer-View Presentation (Owner-Led) | Owner / Claude | Depth presentation (lighting, fog, atmosphere, colour grading of lower layers, parallax or none) designed directly with Owner after Lanes K, N, and WG.00.17 land. Governed by visual goal "looking down layers must be beautiful and breathtaking". DEC-011 governs until opened with Owner. | `PLANNED` | |
 
 
 ---
@@ -532,6 +533,16 @@ Rows are numbered in the SIM namespace. **SIM.10 is already history and populati
 | SIM.40.08 | **Deep-history decay integration** (summary-level decay for fast-forward, LIFE-003 trace retention) | PLANNED | Directive 0021-V §7; V138; DEC-012; LIFE-003 | SIM.40.05, dep: SIM.30.02 | Claude → Grok | Deep-history fast-forward executes summary decay so ancient sites appear in appropriate decay stages upon discovery. Recognizable traces preserved (foundations, mounds, vaults; LIFE-003). Grok review artifact approves | M | — |
 | SIM.40.09 | **Decay QA & fixtures** (deterministic aging fixture, mass conservation, no ore creation, perf bound) | PLANNED | Directive 0021-V §7; V138 | SIM.40.06, SIM.40.07, dep: SIM.40.08 | Claude → Grok (mutation) | Automated test suite: deterministic fixture aging an abandoned site through all stages, exact mass conservation assertions, zero ore generation verification, and perf benchmark proving zero per-frame scan. Mutants caught. Exits 0 | M | — |
 | SIM.40.10 | **Shared reproduction and lifecycle system** (people, livestock, wildlife, monsters). Per-species mating, gestation, growth, lifespan, litter size, heritable traits; young built from food eaten, bodies decay to soil (LIFE-001); wild counts at summary LOD | PLANNED | Directive 0021-V Addendum §9; V140; LIFE-001 | dep: SIM.40.02 | Claude → Grok | Simulation implementation: unified biological lifecycle across people, animals, and monsters. Food mass converted to offspring growth; natural death and decay to soil (LIFE-001). Summary LOD reproduction for non-focus regions. Grok review artifact approves | L | — |
+| SIM.50.01 | **Living world gap audit** (`docs/audits/LIVING_WORLD_GAP_AUDIT.md`). Read-only gap audit mapping all 9 living-world systems, structural support, decay, reproduction, and faction plans to existing code, VISION rows, and WBS rows | PLANNED | Directive 0021-V Addendum §14 | dep: SIM.00.01 | Claude → Grok | Exhaustive audit report in docs/audits/LIVING_WORLD_GAP_AUDIT.md mapping existing code, partial implementations, and missing systems across all 9 areas; zero code modifications; Grok review artifact approves | M | — |
+| SIM.50.02 | **Cross-layer water dynamics** (seepage, vertical drops, flooding, springs, lake cycling across 32 layers) | PLANNED | Directive 0021-V Addendum §14; V142 | SIM.50.01, dep: WG.00.17 | Claude → Grok | Fluid simulation handles seepage through porous strata, vertical water drops/waterfalls, seasonal flooding, subterranean aquifers/springs, and lake filling/drying. Mass conserved (LIFE-001); change-driven (V133) | L | — |
+| SIM.50.03 | **Erosion and sediment deposition** (slope wash, alluvial deposits, channel shifting, feeding strata elevation) | PLANNED | Directive 0021-V Addendum §14; V142; LIFE-001 | dep: SIM.50.02 | Claude → Grok | Flowing water erodes soil and softer rock strata, transporting sediment to lower basins and deltas. Changes strata elevation over slow ticks; mass conserved into soil/sediment (LIFE-001) | M | — |
+| SIM.50.04 | **Vegetation spread and succession** (seed dispersal, canopy competition, biome spread across layers) | PLANNED | Directive 0021-V Addendum §14; V142 | SIM.50.01, dep: SIM.40.06 | Claude → Grok | Plants spread by seed dispersal, pioneer species pave way for climax forest, canopy density limits understory. Fire/clearing resets succession; slow-clock scheduled (NAT-003) | M | — |
+| SIM.50.05 | **Combustible fire spread simulation** (combustible fuel, wind propagation, soil dryness, ash beds) | PLANNED | Directive 0021-V Addendum §14; V142 | SIM.50.01, dep: SIM.50.04 | Claude → Grok | Fire ignites from lightning/sparks/lava, spreads along combustible materials, driven by wind direction and weather dryness. Produces smoke and permanent ash beds (WG.63.04). Conserves carbon mass | M | — |
+| SIM.50.06 | **Seasons and dynamic weather** (seasonal temperatures, precipitation, winter freezing, agricultural calendar) | PLANNED | Directive 0021-V Addendum §14; V142 | SIM.50.01, dep: WG.00.17 | Claude → Grok | Annual seasonal cycle shifts temperature and rainfall across all 32 layers. Winter freezes shallow water into ice and produces snow; spring thaw triggers runoff; seasons drive crop growth cycles | M | — |
+| SIM.50.07 | **Animal migration and herd movement** (seasonal herd travel across layers and biome bands) | PLANNED | Directive 0021-V Addendum §14; V142 | SIM.50.01, dep: SIM.40.10 | Claude → Grok | Wildlife herds migrate seasonally between upland summer grazing and lowland/sheltered winter valleys across Z layers. Summary LOD herd movement off-camera; individuals materialize near focus | M | — |
+| SIM.50.08 | **Anthropic land reshaping** (roads, clearing, mining, dams, terraces, irrigation canals) | PLANNED | Directive 0021-V Addendum §14; V142 | SIM.50.01, dep: SOC.10.03 | Claude → Grok | Civilizations physically alter terrain: worn footpaths become paved roads, forests are cleared for fields, stone is quarried, rivers are dammed or channeled. Strata mutations conserve mass | L | — |
+| SIM.50.09 | **Settlement lifecycle and ruins resettlement** (growth, abandonment, re-founding on ruins) | PLANNED | Directive 0021-V Addendum §14; V142; LIFE-003 | SIM.50.08, dep: SIM.40.08 | Claude → Grok | Factions expand camps into towns, contract or abandon under war/famine/disease. Later settlers found new homes on existing stone ruins, reusing foundations and materials | M | — |
+| SIM.50.10 | **Catastrophic geological events** (earthquakes, karst sinkholes, volcanic eruptions, caldera breaches) | PLANNED | Directive 0021-V Addendum §14; V142; WG.63.03 | SIM.50.01, dep: SIM.40.02 | Claude → Grok | Rare catastrophic events alter geology: earthquakes trigger mass cave-ins, underground karst cavities collapse into surface sinkholes, volcanic fissures erupt lava. Leaves geomorphic scars (WG.63.04) | M | — |
 
 ---
 
@@ -582,12 +593,12 @@ The Owner clarified this on 2026-09-25 at 23:41 CT. **Art is a stream of its own
 |---|---|---|---|
 | M0 Operations & Governance | 43 | 11 | 8 WG.00.12 sub-packages + 35 OPS |
 | M1 World Generation Foundation | 16 | 1 | includes new WG.00.14, WG.00.15, WG.00.17, WG.62.02, SIM.90.01 |
-| M2 Rendering & Depth | 16 | 4 | includes new WG.00.16 |
-| M3 Simulation | 39 | 2 | band rows (e.g. WG.66.01–08) count as one package each; includes 11 SIM.00/SIM.30 rows plus 10 new SIM.40.01–.10 collapse, decay & reproduction rows (*Owner-ordered 2026-09-26, Directive 0021-V*) |
+| M2 Rendering & Depth | 17 | 4 | includes new WG.00.16, WG.00.18 |
+| M3 Simulation | 49 | 2 | band rows (e.g. WG.66.01–08) count as one package each; includes 11 SIM.00/SIM.30 rows, 10 SIM.40.01–.10 collapse/decay/reproduction rows, plus 10 new SIM.50.01–.10 living-world rows (*Owner-ordered 2026-09-26, Directive 0021-V §14*) |
 | M4 Civilization & Gameplay | 16 | 16 | every package waits on an Owner decision, playtest or approval |
 | M5 Content & Art (4 stages) | 32 | 15 | Stage 1: 12 (1 gated, a decision only) · Stage 2: 3 (0) · **Stage 3: 12 (all 12 "OWNER-GATED: requires Owner involvement")** · Stage 4: 5 (2 gated, Owner visual verification) |
 | M6 Release | 9 | 3 | all new REL IDs |
-| **Total** | **171** | **52** | Band rows stand for about 298 underlying WBS leaves |
+| **Total** | **182** | **52** | Band rows stand for about 298 underlying WBS leaves |
 
 A **package** here is one table row. Band rows (such as WG.22.01–25) keep their underlying leaf IDs and are split into leaf lanes when they start. The counts were produced by a script over this file's tables.
 
@@ -696,6 +707,7 @@ Notes:
 
 | Rev | Date | Change |
 |:---:|:---:|:---|
+| 22 | 2026-09-26 | Directive 0021-V Addendum (§14): Added WG.00.18 (Layer-View presentation Owner-led placeholder), SIM.50.01 (Living World Gap Audit), and SIM.50.02–SIM.50.10 (Nine living-world physical simulation systems across 32 layers). Next free WG.00 is WG.00.19. |
 | 21 | 2026-09-26 | Directive 0021-V Addendum (§12–§13): DEC-013 amended (32 Z layers supersede 9, range -16..+15, 320 ft height, 10 ft layers, 2 ft strata); updated WG.00.17 (32-layer Z-range refactor with sparse storage and 9-layer test support), WG.62.02 (race home-layer ranges across 5 bands/32 layers), and SIM.40.01 (cross-layer blast propagation and material attenuation). |
 | 20 | 2026-09-26 | Directive 0021-V Addendum (§9–§10) / Directive 0023-X: Added SIM.40.10 (Shared reproduction and lifecycle system), DEC-014 (Population budget & crowd LOD), DEC-015 (Faction Development Plans), Vision V139–V141. |
 | 19 | 2026-09-26 | Directive 0021-V: Record DEC-013 (9 Z layers, 9 races, one home layer per race, 5 biome bands). Added WG.00.17 (Z-range configurable setting / 9 layers), WG.62.02 (Race home-layer assignment in WorldGen), SIM.40.01–SIM.40.04 (Structural integrity & collapse), and SIM.40.05–SIM.40.09 (Urban decay & nature reclamation). Next free WG.00 is WG.00.18. |
