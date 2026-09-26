@@ -21,7 +21,7 @@
 - **Code today** (secondary column), as in SIM.50.01: **PRESENT** runs in the live game; **PARTIAL** some of it runs live; **DORMANT** code exists but live play never reaches it; **ABSENT** no code.
 - **Severity** follows AGENTS.md: **BLOCKER** means no planned leaf can meet a binding VISION/DEC requirement for this area, or the area cannot work at all without it; **MAJOR** means a VISION or DEC requirement has no leaf, or a leaf is much larger than its row says; **MINOR** is a local defect or documentation gap.
 - **Citations.** Code claims cite `file:line` at the base commit. A bare plugin name (`DEUS_Colonists.js:5111`) means `game/js/plugins/`. Planning claims cite a WBS ID, a DEC ID or a V row, usually with the line in the WBS or VISION file. In an evidence table whose first two columns are a citation and a code excerpt, the excerpt is copied verbatim from that line (`\|` in a table is a literal `|`). `node tasks/SIM.50.01/gap-audit/verify_citations.js --commit 790387090083848959ce0b95bc560a395336fa3d --doc tasks/SIM.50.11/gap-audit-people/PEOPLE_GAP_AUDIT.md` checks every citation and excerpt against the base; its output is in `REPORT.md`.
-- **Proposed IDs** are written `PROPOSED-<AREA>-NN` (MIND, GOV, WAR, CUL, KNOW, HEALTH, LOG, REC, MODE, DEEP). None is a minted WBS ID. The coordinator mints IDs, not this audit.
+- **Proposed IDs** are written `PROPOSED-<AREA>-NN` (MIND, GOV, WAR, CUL, KNOW, HEALTH, LOG, REC, MODE, DEEP). None is a minted WBS ID. The coordinator mints IDs, not this audit. Inside gap tables, dependency lists and running text the prefix is dropped (`MIND-01` means `PROPOSED-MIND-01`; `MIND-01..05` means 01 to 05). The short forms are not IDs of their own. At the base, the full forms occur nowhere else, and two unrelated real IDs contain the same characters: the invariants `INV-GOV-01` to `INV-GOV-05` (`docs/INVARIANT_REGISTRY.md:73`) and the defect `DEF-OPS-LOG-01` (`docs/STATUS.md:148`).
 - **Tick cost** uses one cost model (section 2.5): per-tick CPU at the 10 Hz fixed tick (DEC-012), memory per named person, per settlement and per layer, at 32 layers with sparse storage (DEC-013 §3). Every per-operation cost is an assumption, not a measurement, and is written as such. No frame rate is claimed.
 - **Owner questions** (section 6) are listed with options and are never answered here. Overlord mode is flagged, not designed.
 
@@ -38,9 +38,9 @@
 | 5 | Knowledge and technology | PARTLY PLANNED | SOC.10.02, SOC.11.01, SOC.12.01, WG.65.17 | PARTIAL | No row for discovery, diffusion or loss; the tech tree is not built (`DEUS_Select.js:924`, `docs/design/TECH_TREE.md:3`) and two designs say unlocks never lock again | 8 |
 | 6 | Health | PARTLY PLANNED | SOC.13.01, WB-002, SIM.20.01, SIM.40.10, GP.07.01 (wounds, nominal) | PARTIAL | No row for disease, contagion or epidemics (DEC-014 §4), poison, healers or conditions; the conditions engine's `tick` has no caller (`DEUS_Conditions.js:1117`) | 2 |
 | 7 | Travel and logistics | PARTLY PLANNED | SIM.50.08, WG.00.19, WG.00.20, SIM.00.04, SOC.30.02, SOC.32.01, SOC.33.01, WG.62.02, SIM.30.02 | PARTIAL | No row for caravans, trade routes, off-screen travel between settlements, pack animals or supply; live hauling and autonomous jobs never cross a layer (`DEUS_Jobs.js:1412`) | 5 |
-| 8 | Records and legends | PARTLY PLANNED | SOC.51.01, SIM.10.01, WG.63.06, WG.65.16, WG.65.17, SIM.40.08, SIM.50.09 | PARTIAL | No world event log, renown, artifact provenance or legends; the chronicle keeps 400 events (`DEUS_History.js:869`); the history-born character mode is defined nowhere | 7 |
+| 8 | Records and legends | PARTLY PLANNED | SOC.51.01, SIM.10.01, SIM.10.02, WG.63.06, WG.65.16, WG.65.17, SIM.40.08, SIM.50.09 | PARTIAL | No world event log, renown, artifact provenance or legends; the chronicle keeps 400 events (`DEUS_History.js:869`); the history-born character mode is defined nowhere | 7 |
 | 9 | The player's role per mode | PARTLY PLANNED | WG.00.11, SOC.50.01, SIM.00.03, GP.07.01 (nominal) | PARTIAL | WG.00.11 is a one-line row and OD-16 / VISION Q4 are open; **Overlord mode is not mentioned in any repository document** (flagged, not designed) | 9 |
-| 10 | Underground life | PARTLY PLANNED | WG.64.01, WG.64.06, WG.66.01, WG.66.03, WG.68.07-.10, WG.62.02, SIM.50.02 | PARTIAL | No row for a simulation light field, darkvision, light fuel, cave flora succession or underground farming; darkness changes nothing in the simulation, and pools on the deepest level are always lava (`DEUS_Levels.js:1038`) | 3 |
+| 10 | Underground life | PARTLY PLANNED | WG.64.01, WG.64.02, WG.64.06, WG.66.01, WG.66.03, WG.68.07-.10, WG.62.02, SIM.50.02 | PARTIAL | No row for a simulation light field, darkvision, light fuel, cave flora succession or underground farming; darkness changes nothing in the simulation, and pools on the deepest level are always lava (`DEUS_Levels.js:1038`) | 3 |
 
 No area is FULLY PLANNED and none is MISSING under the rule in section 0. The ratings hide a large difference in depth. For individual minds, one of eleven sub-elements is covered by a row's own scope text; for government, six of thirteen.
 
@@ -49,13 +49,13 @@ No area is FULLY PLANNED and none is MISSING under the rule in section 0. The ra
 | Item | Count |
 |---|---|
 | Areas rated | 10 |
-| Gaps | 58 (BLOCKER 7, MAJOR 37, MINOR 14) |
-| Proposed packages | 57 |
+| Gaps | 73 (BLOCKER 6, MAJOR 48, MINOR 19) |
+| Proposed packages | 59 |
 | Owner questions | 26 |
-| Documentation mismatches (section 7) | 12 |
+| Documentation mismatches (section 7) | 14 |
 | Defects found in passing (section 8) | 8 |
 
-The per-area numbers are in the section of each area and in `people_gap_table.json`.
+Per area (gaps / packages / Owner questions that name the area): minds 9 / 10 / 4, government 6 / 6 / 5, war 7 / 6 / 3, culture 7 / 5 / 4, knowledge 6 / 5 / 2, health 10 / 7 / 5, logistics 8 / 5 / 2, records 8 / 5 / 3, modes 5 / 4 / 5, underground 7 / 6 / 4. OQ-03 (the calendar) names every area. The counts are computed from `people_gap_table.json`, which is generated from this file (section 9).
 
 ### 1.3 Findings that decide the order of work
 
@@ -1142,10 +1142,12 @@ Each people area couples to the nine living-world systems (SIM.50.02-.10), to th
 | SIM.50.06 Seasons and weather (`docs/worldgen/DEUS_WORLDGEN_WBS.md:549`) | Festivals and the farming calendar (CUL-03, OQ-03). Exposure, where cold and heat damage are already live (`DEUS_Environment.js:651`), and seasonal disease (HEALTH-03). Seasonal route weights (LOG-01). Campaign seasons (WAR-03). Weather as a mood source (MIND-03). | The row shifts temperature "across all 32 layers". Deep layers should follow WG.64.06's underground heat rather than the surface season, and DEEP-01 needs sky exposure, not season. How seasons weaken with depth is not stated. |
 | SIM.50.07 Migration and herds (`docs/worldgen/DEUS_WORLDGEN_WBS.md:550`) | Hunting follows herds. Pack and draft animals come from livestock (LOG-04). Cave fauna moves between regions below ground (DEEP-05). | Written for upland and lowland herds; no underground movement. |
 | SIM.50.08 Land reshaping (`docs/worldgen/DEUS_WORLDGEN_WBS.md:551`) | Roads lower route cost (LOG-01); the row makes roads terrain only. Dams, terraces and irrigation are techniques someone must know (KNOW-02). Land claims fall under law (GOV-01). Fortifications and siege tunnels (WAR-05). Mining opens caves, and the ecology design says that mining and torchlight collapse a cave predator's habitat (`docs/worldgen/DEUS_CREATURE_ECOLOGY.md:219`, DEEP-05). | Who decides to reshape, and why. The row depends on SOC.10.03 plan data but names no decision maker (DEC-015 build orders, office duties). |
-| SIM.50.09 Settlement lifecycle (`docs/worldgen/DEUS_WORLDGEN_WBS.md:552`) | The row names its own causes of contraction and abandonment: "war/famine/disease". War is WAR-04 and WAR-06, famine comes through supply (LOG-05), and disease is HEALTH-03; none of the three has a row. Fission and V42 departures found new settlements (GOV-05, MIND-06). Ruins keep their history (REC-04). Abandonment can lose knowledge (KNOW-05). | Every cause it names is unplanned on the people side, so the row cannot meet its own test text without the people packages. |
+| SIM.50.09 Settlement lifecycle (`docs/worldgen/DEUS_WORLDGEN_WBS.md:552`) | The row names its own causes of contraction and abandonment: "war/famine/disease". War beyond defence is WAR-04 and WAR-06, famine comes through supply (LOG-05), and disease is HEALTH-03. SOC.40 plans defence only, and none of the three causes has a row that produces it. Fission and V42 departures found new settlements (GOV-05, MIND-06). Ruins keep their history (REC-04). Abandonment can lose knowledge (KNOW-05). | Every cause it names is unplanned on the people side, so the row cannot meet its own test text without the people packages. |
 | SIM.50.10 Catastrophes (`docs/worldgen/DEUS_WORLDGEN_WBS.md:553`) | Mass injuries (HEALTH-02). Grief and fear in witnesses (MIND-02). Disasters become legends (REC-01, REC-02). A legitimacy shock for the ruler (GOV-04). Cave-ins kill underground populations (DEEP-05, DEEP-06). Sinkholes open new cross-layer connectors (LOG-01). | No people response (evacuation, rescue, rebuilding duties). |
 
 Every one of the nine rows is physical. None names a consumer on the people side, and none emits events that witnesses, memories or records can use. PROPOSED-REC-01 gives them one event store to write to, and PROPOSED-MIND-02 turns those events into memories.
+
+Area 9 couples to all nine systems in one way. V125 requires the world to run on with no player input, which PROPOSED-MODE-01 test 3 checks with every living-world system running. In Incarnate mode the player meets floods, fires and weather only through one person's senses and knowledge (PROPOSED-MODE-04, with DEEP-02 and MIND-02).
 
 ### 4.2 Hyper-realistic SRD spells (DEC-018, SIM.60.01-.04)
 
@@ -1194,13 +1196,15 @@ The counts add up to 208. The four couplings the brief names, and the other SRD 
 | `game/data/srd51/spells.json:10582` | `sheds bright light in a 20-foot radius and dim light for an additional 20 feet` | **Underground light versus Light.** DEEP-01 test 1 uses the same radii as a torch. The spell's material component is "a firefly or phosphorescent moss", which ties it to DEEP-04's glowing flora as a real item. |
 | `game/data/srd51/spells.json:5382` | `A 60-foot-radius sphere of light spreads out from a point you choose within range.` | **Daylight.** Lane P notes that the SRD does not call it sunlight, so it lights a cave but grows nothing; DEEP-04 must not treat it as a growth source. |
 | `game/data/srd51/spells.json:4606` | `ruby dust worth 50 gp, which the spell consumes` | **Continual Flame**: permanent light with no fuel (DEEP-03), paid for with a consumed item. |
-| `game/data/srd51/spells.json:5291` | `Magical darkness spreads from a point you choose within range` | Darkness blocks darkvision, so DEEP-02 needs a magical-darkness case. |
+| `game/data/srd51/spells.json:5291` | `Magical darkness spreads from a point you choose within range` | Darkness blocks darkvision, so DEEP-02 needs a magical-darkness case, and so does PROPOSED-MODE-04's incarnate view. |
+| `game/data/srd51/character_options.json:6720` | `you can add it to your spellbook if it is of a spell level you can prepare and if you can spare the time to decipher and copy it` | **Spells are knowledge.** A wizard's spellbook is a record (KNOW-01) that can be copied (KNOW-03), captured (KNOW-04) and lost (KNOW-05). Which spells a faction can cast is knowledge like any technique. |
 
 **War versus Fireball breaching floors.** Lane P classifies Fireball as `breaches-floor`, the Owner-named reference case, and does the same for Passwall, Stone Shape, Move Earth, Disintegrate and Earthquake. These are siege tools as well as weapons: WAR-05 test 3 uses SIM.40's attenuation, a breach dirties route-graph regions (LOG-01 test 4), defenders and bystanders form memories (MIND-02), the battle is logged (REC-01), and a ruler who cannot stop it loses standing (GOV-04).
 
 Additions to packages above that come from this section:
 - PROPOSED-REC-01 logs every cast as an event (caster, spell, targets, place, layer, tick), so witnesses, crimes and records use one source. SIM.60.03 lists no event output.
 - PROPOSED-LOG-01 treats a permanent Teleportation Circle pair, and any other SRD fixed magical link, as a graph edge with the SRD's conditions.
+- PROPOSED-MODE-03's click targeting covers spells aimed at another layer (GP.07.02). Lane P counts 206 spells that target through openings and 13 that breach floors.
 - PROPOSED-DEEP-06's viability test states whether conjured food and water (Create Food and Water, Goodberry; Lane P's Q1 governs their ledger entry) count toward a start being viable.
 
 Tick cost: all of these run per cast event, and expiries go through PROPOSED-HEALTH-01's timer wheel; negligible at the planning point.
@@ -1346,5 +1350,5 @@ These are not people-side features, but each would corrupt a people system built
 - No performance was measured. Every tick cost is arithmetic from assumptions A-1 to A-7.
 - Lane P's audit and ADR-003 were read on their branches. Both have since passed review and been merged to main after this lane's base (header). Between the base and `origin/main` at `51d78a38` the WBS files, `docs/OWNER_DECISIONS.md` and `docs/VISION.md` did not change (`git diff --stat` in `REPORT.md`).
 - `docs/STATUS.md` on main now registers Lanes Q, R and W for SIM.40.01, SIM.40.05 and SIM.40.10 design. Their designs may change the couplings in section 4.3.
-- The split of each area into sub-elements is the writer's. A different split would change the "n of m covered" counts, but not whether an area is MISSING, PARTLY or FULLY planned.
+- The split of each area into sub-elements is the writer's. A different split would change the "n of m covered" counts. A rating would change only if a split left an area with no uncovered sub-element (FULLY PLANNED) or no covered one (MISSING). Every area has at least one VISION or DEC requirement quoted in its section with no row, and at least one row whose own text names part of it, so the PARTLY PLANNED ratings do not rest on the split alone.
 - The zero-hit word searches in sections 3.2 and 3.4 cover `game/js/plugins` at the base; their commands and exit codes are in `REPORT.md`, with a control word that does match.
