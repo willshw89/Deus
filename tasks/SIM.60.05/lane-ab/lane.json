@@ -3,7 +3,7 @@
     "taskId":  "SIM.60.05",
     "branch":  "task/lane-ab",
     "writer":  "grok",
-    "reviewer":  "claude",
+    "reviewer":  "gemini",
     "push":  true,
     "allowedPaths":  [
                          "game/js/sim/rules/**",
