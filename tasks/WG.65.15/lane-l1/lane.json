@@ -1,0 +1,36 @@
+{
+  "lane": "lane-l1",
+  "taskId": "WG.65.15",
+  "branch": "task/lane-l1",
+  "writer": "claude",
+  "reviewer": "grok",
+  "allowedPaths": [
+    "game/js/sim/ledger*",
+    "tools/sim/test_ledger*.js",
+    "tools/sim/fixtures/ledger/**",
+    "tasks/WG.65.15/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "node",
+      "args": [
+        "tools/sim/test_ledger.js"
+      ],
+      "timeoutSec": 300
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/sim/test_ledger_longrun.js"
+      ],
+      "timeoutSec": 900
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/check_deus_syntax.js"
+      ],
+      "timeoutSec": 300
+    }
+  ]
+}
