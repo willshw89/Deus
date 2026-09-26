@@ -80,3 +80,15 @@ K2 changes, all inside allowedPaths:
 **lane.json gateTests:** `node tools/test_layer_render_flat.js`, `node tools/test_snapshot.js --name depth --plugins DEUS_Depth --suite depth`, `node tools/test_minimap.js` (timeouts 900/900/300 s).
 
 **Commits:** messages start `[claude] WG.00.09b`. Commit early on task/lane-k. Do not push or merge.
+
+---
+
+## Directive 0019-T §2: Worst-Case Combat Stress Scenario (K3 Addition)
+Add a second scenario to `tools/bench_render_layers.js` (same harness, same per-frame metrics as 0017-Q §4), selected by `--scenario=stress`:
+- **1x zoom** (the locked view). Fill the whole visible screen with animated units, one per walkable visible cell up to the screen's capacity, spread over 3 visible Z layers (the viewed layer plus two layers seen through openings).
+- **Every unit is in combat:** walk cycles, melee swings (swords), ranged attacks with arrows in flight, and spell casts with projectile, impact and hit-flash effects, using the existing animation/effect path (RMMZ animations or the current DEUS effect code). Record which path was used.
+- **Run 30 s by day and 30 s at night** (DayNight glows active), fixed seed.
+- **Also record peak counts:** units drawn, projectiles alive, effect sprites/particles alive, draw calls if obtainable (else say "not obtainable").
+- **Placeholder or existing assets only. NO ART MAY BE GENERATED (DEC-007).** If an effect has no asset, use a solid-color placeholder and list it.
+- **Output:** `tasks/WG.00.09b/lane-k/perf/stress_baseline_<sha8>.json` with median, p95 and worst frame time, and the fps those imply. Run it 2 times in the foreground of the harness (not the worker) and report both.
+- **K4 ranking:** uses both the normal baseline and the stress baseline.
