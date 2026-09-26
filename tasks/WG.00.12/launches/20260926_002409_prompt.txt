@@ -1,0 +1,11 @@
+﻿You are the primary implementer for Lane C2b (Task WG.00.12: Governance Tooling Hardening).
+Follow all instructions in tasks/WG.00.12/c2_governance_state.md.
+Harden tools/governance/check_claims.js and expand tools/governance/test_check_claims.js per Directive 001-I Â§C.
+Address all 9 vulnerability vectors. Ensure 100% of tests pass and all mutants are killed.
+Commit your work to task/lane-c2b with message starting with '[claude] WG.00.12'.
+Standing rules:
+1. One primary writer per file set.
+2. Workers never push. Only the integrator pushes.
+3. Capture the exit code of every command, one per command ('EXIT=$LASTEXITCODE'). Put raw values in your reports.
+4. FOREGROUND rule: Run tests in the FOREGROUND. Never end your turn while background jobs or child processes are running.
+5. NO ART (DEC-007).
