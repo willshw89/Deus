@@ -1,5 +1,5 @@
-$ node tools/art/test_place_art.js --provoke-sweep   (worktree at 4132e8586e37e852aa268ae58b2a089bcbc8a927)
-SWEEP baseline: exit 0, 135 checks
+$ node tools/art/test_place_art.js --provoke-sweep   (worktree at adb993565cf0e40ef008d7062e2161707a1bf887)
+SWEEP baseline: exit 0, 154 checks
 SWEEP PROVOKED place.fixture.json_only_no_png: exit=1 failed=yes
 SWEEP PROVOKED place.fixture.geom_slots_follow_stratumPx: exit=1 failed=yes
 SWEEP PROVOKED place.fixture.catalogue_slots_valid: exit=1 failed=yes
@@ -7,15 +7,19 @@ SWEEP PROVOKED place.static.no_geometry_literals_in_tools: exit=1 failed=yes
 SWEEP PROVOKED place.unit.tileset_targets: exit=1 failed=yes
 SWEEP PROVOKED place.unit.tileset_target_errors: exit=1 failed=yes
 SWEEP PROVOKED place.unit.geometry_rows: exit=1 failed=yes
+SWEEP PROVOKED place.unit.face_targets: exit=1 failed=yes
+SWEEP PROVOKED place.unit.character_targets: exit=1 failed=yes
 SWEEP PROVOKED place.unit.duplicate_inputs: exit=1 failed=yes
 SWEEP PROVOKED place.unit.runtime_file_paths: exit=1 failed=yes
 SWEEP PROVOKED place.validate.good_cells_accepted: exit=1 failed=yes
-SWEEP PROVOKED place.validate.slot_id_approval: exit=1 failed=yes
+SWEEP PROVOKED place.validate.slot_id_approval_warned: exit=1 failed=yes
+SWEEP PROVOKED place.validate.overlay_exempt_from_opacity: exit=1 failed=yes
+SWEEP PROVOKED place.validate.colour_chunk_warned: exit=1 failed=yes
 SWEEP PROVOKED place.validate.ledger_crlf_and_bom: exit=1 failed=yes
 SWEEP PROVOKED place.validate.not_checked_reported: exit=1 failed=yes
 SWEEP PROVOKED place.validate.proposed_frame_class_warned: exit=1 failed=yes
 SWEEP PROVOKED place.validate.tall_medium_enabled_accepts: exit=1 failed=yes
-SWEEP PROVOKED place.validate.stratumPx_changed_slots_follow: exit=1 failed=yes
+SWEEP PROVOKED place.validate.stratumPx_changed_heights_follow: exit=1 failed=yes
 SWEEP PROVOKED place.neg.approval_missing: exit=1 failed=yes
 SWEEP PROVOKED place.neg.approval_nay: exit=1 failed=yes
 SWEEP PROVOKED place.neg.approval_hash_of_other_file: exit=1 failed=yes
@@ -69,6 +73,8 @@ SWEEP PROVOKED place.neg.large_long_slot_48x96: exit=1 failed=yes
 SWEEP PROVOKED place.neg.tall_medium_48x64_while_disabled: exit=1 failed=yes
 SWEEP PROVOKED place.neg.huge_frame_owner_open_with_slot: exit=1 failed=yes
 SWEEP PROVOKED place.neg.ramp_height_ignores_stratumPx: exit=1 failed=yes
+SWEEP PROVOKED place.neg.ramp_envelope_ignores_stratumPx: exit=1 failed=yes
+SWEEP PROVOKED place.neg.ramp_drawn_height_not_a_run: exit=1 failed=yes
 SWEEP PROVOKED place.neg.wall_face_height_ignores_layerPx: exit=1 failed=yes
 SWEEP PROVOKED place.neg.stratumPx_changed_old_ramp_refused: exit=1 failed=yes
 SWEEP PROVOKED place.neg.stratumPx_zero_stratum: exit=1 failed=yes
@@ -77,6 +83,11 @@ SWEEP PROVOKED place.neg.stratumPx_wrong_count: exit=1 failed=yes
 SWEEP PROVOKED place.neg.geometry_hash_mismatch: exit=1 failed=yes
 SWEEP PROVOKED place.neg.geometry_flag_still_hash_checked: exit=1 failed=yes
 SWEEP PROVOKED place.neg.palette_hash_mismatch: exit=1 failed=yes
+SWEEP PROVOKED place.neg.autotile_with_hole: exit=1 failed=yes
+SWEEP PROVOKED place.neg.frame_class_missing: exit=1 failed=yes
+SWEEP PROVOKED place.neg.ledger_row_without_leading_pipe: exit=1 failed=yes
+SWEEP PROVOKED place.neg.ledger_pipeless_second_table: exit=1 failed=yes
+SWEEP PROVOKED place.neg.png_inflate_bomb: exit=1 failed=yes
 SWEEP PROVOKED place.neg.unknown_entry: exit=1 failed=yes
 SWEEP PROVOKED place.neg.derived_variant_row: exit=1 failed=yes
 SWEEP PROVOKED place.neg.huge_no_slot: exit=1 failed=yes
@@ -95,6 +106,8 @@ SWEEP PROVOKED place.place.coverage_report_exact: exit=1 failed=yes
 SWEEP PROVOKED place.place.coverage_markdown: exit=1 failed=yes
 SWEEP PROVOKED place.place.report_hashes: exit=1 failed=yes
 SWEEP PROVOKED place.place.derived_pending_reported: exit=1 failed=yes
+SWEEP PROVOKED place.place.runtime_pending_reported: exit=1 failed=yes
+SWEEP PROVOKED place.place.runtime_partial_flagged: exit=1 failed=yes
 SWEEP PROVOKED place.place.rerun_sha256_equal: exit=1 failed=yes
 SWEEP PROVOKED place.place.rerun_same_folder_unchanged: exit=1 failed=yes
 SWEEP PROVOKED place.place.replace_overwrites_slot: exit=1 failed=yes
@@ -110,10 +123,12 @@ SWEEP PROVOKED place.place.runtime_path_escape_refused: exit=1 failed=yes
 SWEEP PROVOKED place.place.runtime_size_mismatch_refused: exit=1 failed=yes
 SWEEP PROVOKED place.place.runtime_kind_unknown_refused: exit=1 failed=yes
 SWEEP PROVOKED place.place.runtime_target_clash_refused: exit=1 failed=yes
+SWEEP PROVOKED place.place.runtime_tile_zero_refused: exit=1 failed=yes
 SWEEP PROVOKED place.place.out_state_tampered: exit=1 failed=yes
 SWEEP PROVOKED place.place.out_state_unlisted_sheet_refused: exit=1 failed=yes
 SWEEP PROVOKED place.place.out_state_pixels_in_empty_slot_refused: exit=1 failed=yes
 SWEEP PROVOKED place.place.replace_with_refused_input_reports_only_the_refusal: exit=1 failed=yes
+SWEEP PROVOKED place.place.template_change_makes_out_stale: exit=1 failed=yes
 SWEEP PROVOKED place.place.out_state_stale: exit=1 failed=yes
 SWEEP PROVOKED place.place.out_dir_not_empty_refused: exit=1 failed=yes
 SWEEP PROVOKED place.place.out_dir_unsafe_refused: exit=1 failed=yes
@@ -131,9 +146,17 @@ SWEEP PROVOKED place.mutant.ground_anchor_disabled_killed: exit=1 failed=yes
 SWEEP PROVOKED place.mutant.ceiling_anchor_disabled_killed: exit=1 failed=yes
 SWEEP PROVOKED place.mutant.tile_opacity_disabled_killed: exit=1 failed=yes
 SWEEP PROVOKED place.mutant.frame_class_check_disabled_killed: exit=1 failed=yes
-SWEEP PROVOKED place.mutant.geom_height_check_disabled_killed: exit=1 failed=yes
+SWEEP PROVOKED place.mutant.geom_envelope_check_disabled_killed: exit=1 failed=yes
+SWEEP PROVOKED place.mutant.geom_drawn_height_check_disabled_killed: exit=1 failed=yes
+SWEEP PROVOKED place.mutant.tile_class_rows_reduced_to_geom_tile_killed: exit=1 failed=yes
+SWEEP PROVOKED place.mutant.pipeless_row_check_disabled_killed: exit=1 failed=yes
+SWEEP PROVOKED place.mutant.inflate_cap_removed_killed: exit=1 failed=yes
 SWEEP PROVOKED place.mutant.stratum_sum_check_disabled_killed: exit=1 failed=yes
 SWEEP PROVOKED place.mutant.copy_offset_x_plus_1_killed: exit=1 failed=yes
 SWEEP PROVOKED place.mutant.copy_offset_x_plus_1_self_check_off_killed: exit=1 failed=yes
-SWEEP RESULT: 135 of 135 checks fail when provoked, 0 do not
+SWEEP RESULT: 154 of 154 checks fail when provoked, 0 do not
+
+real	4m18.136s
+user	0m0.000s
+sys	0m0.015s
 EXIT=0

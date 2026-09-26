@@ -1,4 +1,10 @@
-fresh clone of task/lane-u at 4132e8586e37e852aa268ae58b2a089bcbc8a927
+$ git clone --branch task/lane-u --single-branch C:/Users/snewt/.deus_worktrees/lane-u %TEMP%/laneu_fresh2
+clone EXIT=0
+$ git -C %TEMP%/laneu_fresh2 rev-parse HEAD
+adb993565cf0e40ef008d7062e2161707a1bf887
+$ git -C %TEMP%/laneu_fresh2 status --short | wc -l   (after the run)
+0
+fresh clone of task/lane-u at adb993565cf0e40ef008d7062e2161707a1bf887
 $ node tools/art/test_place_art.js
 PASS fixture.json_only_no_png
 PASS fixture.geom_slots_follow_stratumPx
@@ -7,15 +13,19 @@ PASS static.no_geometry_literals_in_tools
 PASS unit.tileset_targets
 PASS unit.tileset_target_errors
 PASS unit.geometry_rows
+PASS unit.face_targets
+PASS unit.character_targets
 PASS unit.duplicate_inputs
 PASS unit.runtime_file_paths
 PASS validate.good_cells_accepted
-PASS validate.slot_id_approval
+PASS validate.slot_id_approval_warned
+PASS validate.overlay_exempt_from_opacity
+PASS validate.colour_chunk_warned
 PASS validate.ledger_crlf_and_bom
 PASS validate.not_checked_reported
 PASS validate.proposed_frame_class_warned
 PASS validate.tall_medium_enabled_accepts
-PASS validate.stratumPx_changed_slots_follow
+PASS validate.stratumPx_changed_heights_follow
 PASS neg.approval_missing
 PASS neg.approval_nay
 PASS neg.approval_hash_of_other_file
@@ -69,6 +79,8 @@ PASS neg.large_long_slot_48x96
 PASS neg.tall_medium_48x64_while_disabled
 PASS neg.huge_frame_owner_open_with_slot
 PASS neg.ramp_height_ignores_stratumPx
+PASS neg.ramp_envelope_ignores_stratumPx
+PASS neg.ramp_drawn_height_not_a_run
 PASS neg.wall_face_height_ignores_layerPx
 PASS neg.stratumPx_changed_old_ramp_refused
 PASS neg.stratumPx_zero_stratum
@@ -77,6 +89,11 @@ PASS neg.stratumPx_wrong_count
 PASS neg.geometry_hash_mismatch
 PASS neg.geometry_flag_still_hash_checked
 PASS neg.palette_hash_mismatch
+PASS neg.autotile_with_hole
+PASS neg.frame_class_missing
+PASS neg.ledger_row_without_leading_pipe
+PASS neg.ledger_pipeless_second_table
+PASS neg.png_inflate_bomb
 PASS neg.unknown_entry
 PASS neg.derived_variant_row
 PASS neg.huge_no_slot
@@ -95,6 +112,8 @@ PASS place.coverage_report_exact
 PASS place.coverage_markdown
 PASS place.report_hashes
 PASS place.derived_pending_reported
+PASS place.runtime_pending_reported
+PASS place.runtime_partial_flagged
 PASS place.rerun_sha256_equal
 PASS place.rerun_same_folder_unchanged
 PASS place.replace_overwrites_slot
@@ -110,10 +129,12 @@ PASS place.runtime_path_escape_refused
 PASS place.runtime_size_mismatch_refused
 PASS place.runtime_kind_unknown_refused
 PASS place.runtime_target_clash_refused
+PASS place.runtime_tile_zero_refused
 PASS place.out_state_tampered
 PASS place.out_state_unlisted_sheet_refused
 PASS place.out_state_pixels_in_empty_slot_refused
 PASS place.replace_with_refused_input_reports_only_the_refusal
+PASS place.template_change_makes_out_stale
 PASS place.out_state_stale
 PASS place.out_dir_not_empty_refused
 PASS place.out_dir_unsafe_refused
@@ -142,13 +163,21 @@ PASS mutant.tile_opacity_disabled_killed
   neg.tile_with_hole on the mutant: accepted; expected TILE_NOT_OPAQUE
 PASS mutant.frame_class_check_disabled_killed
   neg.large_tall_slot_96x96 on the mutant: accepted; expected FRAME_CLASS_MISMATCH
-PASS mutant.geom_height_check_disabled_killed
-  neg.ramp_height_ignores_stratumPx on the mutant: accepted; expected GEOM_HEIGHT_MISMATCH
+PASS mutant.geom_envelope_check_disabled_killed
+  neg.ramp_envelope_ignores_stratumPx on the mutant: accepted; expected GEOM_HEIGHT_MISMATCH
+PASS mutant.geom_drawn_height_check_disabled_killed
+  neg.ramp_drawn_height_not_a_run on the mutant: accepted; expected GEOM_HEIGHT_MISMATCH
+PASS mutant.tile_class_rows_reduced_to_geom_tile_killed
+  neg.autotile_with_hole on the mutant: accepted; expected TILE_NOT_OPAQUE
+PASS mutant.pipeless_row_check_disabled_killed
+  neg.ledger_row_without_leading_pipe on the mutant: accepted; expected LEDGER_MALFORMED
+PASS mutant.inflate_cap_removed_killed
+  neg.png_inflate_bomb on the mutant: codes [ANCHOR_GROUND,SCALE_OUT_OF_ENVELOPE], expected [PNG_INVALID]: SCALE_OUT_OF_ENVELOPE: 1 of 1 frame(s) outside envelope w 20..32 h 16..24 (scaleRow TEST_CHART_CHEST): frame 0: nothing drawn | ANCHOR_GROUND: 1 frame(s) not standing on the baseline: frame 0: nothing drawn, baseline is 47
 PASS mutant.stratum_sum_check_disabled_killed
   neg.stratumPx_sum_not_layerPx on the mutant: accepted; expected GEOMETRY_INVALID
 PASS mutant.copy_offset_x_plus_1_killed
   place.all_good_exit0 on the mutant: exit 1, refusals ["INTERNAL_COPY_MISMATCH","INTERNAL_COPY_MISMATCH","INTERNAL_COPY_MISMATCH","INTERNAL_COPY_MISMATCH","INTERNAL_COPY_MISMATCH","INTERNAL_COPY_MISMATCH","INTERNAL_COPY_MISMATCH","INTERNAL_COPY_MISMATCH","INTERNAL_COPY_MISMATCH","INTERNAL_COPY_MISMATCH","INTERNAL_COPY_MISMATCH","INTERN...
 PASS mutant.copy_offset_x_plus_1_self_check_off_killed
-  place.pixel_diff_zero_sheets on the mutant: pixels differ: ATLAS_TEST_SURFACE_B1: 5663, TS_TEST_SURFACE_B1_A2: 432, TS_TEST_SURFACE_B1_B: 152, CHR_TEST_SURFACE_B1_RAT: 241
-RESULT: 135 passed, 0 failed
+  place.pixel_diff_zero_sheets on the mutant: pixels differ: ATLAS_TEST_SURFACE_B1: 8030, TS_TEST_SURFACE_B1_A2: 288, TS_TEST_SURFACE_B1_B: 152, CHR_TEST_SURFACE_B1_RAT: 241
+RESULT: 154 passed, 0 failed
 EXIT=0

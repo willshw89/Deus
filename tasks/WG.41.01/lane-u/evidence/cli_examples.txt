@@ -1,5 +1,5 @@
-CLI examples at 4132e8586e37e852aa268ae58b2a089bcbc8a927. <world> is a temp fixture world kept by "node tools/art/test_place_art.js --keep" (synthetic cells only); <tmp> is its temp folder.
-Test run for the world: RESULT: 135 passed, 0 failed
+CLI examples at adb993565cf0e40ef008d7062e2161707a1bf887. <world> is a temp fixture world kept by "node tools/art/test_place_art.js --keep" (synthetic cells only); <tmp> is its temp folder.
+Test run for the world: RESULT: 154 passed, 0 failed
 
 $ node tools/art/validate_art.js <world>/neg/off_palette.png --entry SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED --catalogue <world>/art/catalogue/catalogue.json --approvals <world>/neg/off_palette.APPROVALS.md --root <world>
 REFUSE OFF_PALETTE: 1 non-transparent pixel(s) not in deus_master_world_palette_v1.hex; first at (25,41) #1C2127
@@ -35,6 +35,7 @@ RESULT: REFUSED entry=SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED file=<world>\neg\grou
 EXIT=1
 
 $ node tools/art/validate_art.js <world>/neg/ceiling_low.png --entry SURFACE_B1_PROP_TEST_LANTERN_V1_HANGING --catalogue <world>/art/catalogue/catalogue.json --approvals <world>/neg/ceiling_low.APPROVALS.md --root <world>
+WARN approved by slot id ATLAS_TEST_SURFACE_B1:0006 only; a slot id follows the slot's position if the catalogue is rebuilt
 REFUSE ANCHOR_CEILING: 1 frame(s) not hanging from row 0: frame 0: highest drawn row 1, must be 0
   pixels (1): (18,1)
 RESULT: REFUSED entry=SURFACE_B1_PROP_TEST_LANTERN_V1_HANGING file=<world>\neg\ceiling_low.png sha256=9d50d34099fad6735e6aae412d4dc629827d753956dc0759eb663cc7905a404e reasons=ANCHOR_CEILING
@@ -55,13 +56,41 @@ $ node tools/art/validate_art.js <world>/cells/SURFACE_B1_PROP_TEST_CHEST_V1_CLO
 RESULT: ACCEPTED entry=SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED file=<world>\cells\SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED.png sha256=3fb9f1d07648f8bdb765a1c423c7aa76e5c6c6aff9c0a3806d1c888a9cd2b131
 EXIT=0
 
+$ node tools/art/validate_art.js <ramp_literal>\cells\SURFACE_B1_RAMP_TEST_SOIL_V1_C2.png --entry SURFACE_B1_RAMP_TEST_SOIL_V1_C2 --catalogue <ramp_literal>\art\catalogue\catalogue.json --approvals <ramp_literal>\art\APPROVALS.md --root <ramp_literal>   (catalogue envelope for ramp cell 2 set to a literal 96 px; <ramp_literal> = <tmp>/w/ramp_literal)
+REFUSE GEOM_HEIGHT_MISMATCH: envelope height 96..96 of SURFACE_B1_RAMP_TEST_SOIL_V1_C2 is not from geometry: GEOM_RAMP_2 (tilePx + a run of 2 of stratumPx [19,19,19,19,20] in geometry.json) allows {86, 87}
+REFUSE GEOM_HEIGHT_MISMATCH: 1 frame(s) drawn at a height GEOM_RAMP_2 does not allow; geometry.json allows {86, 87}: frame 0: drawn 96 px tall
+  pixels (1): (0,0)
+RESULT: REFUSED entry=SURFACE_B1_RAMP_TEST_SOIL_V1_C2 file=<tmp>\w\ramp_literal\cells\SURFACE_B1_RAMP_TEST_SOIL_V1_C2.png sha256=db4d1fcc855aa1d515133ef1be953415b6ef615d9c8304067c530d1687821b55 reasons=GEOM_HEIGHT_MISMATCH
+EXIT=1
+
+$ node tools/art/validate_art.js <split_c_rebuilt>\neg\ramp_66.png --entry SURFACE_B1_RAMP_TEST_SOIL_V1_C1 --catalogue <split_c_rebuilt>\art\catalogue\catalogue.json --approvals <split_c_rebuilt>\neg\ramp_66.APPROVALS.md --root <split_c_rebuilt>   (stratumPx [16,20,20,20,20]; ramp cell 1 drawn 66 px, not tilePx + one stratum; <split_c_rebuilt> = <tmp>/w/split_c_rebuilt)
+REFUSE GEOM_HEIGHT_MISMATCH: 1 frame(s) drawn at a height GEOM_RAMP_1 does not allow; geometry.json allows {64, 68}: frame 0: drawn 66 px tall
+  pixels (1): (0,30)
+RESULT: REFUSED entry=SURFACE_B1_RAMP_TEST_SOIL_V1_C1 file=<tmp>\w\split_c_rebuilt\neg\ramp_66.png sha256=301d939f08d057047a9ef4e99c07efd533dbf5a11493ba5efea8f58955a8e0a1 reasons=GEOM_HEIGHT_MISMATCH
+EXIT=1
+
+$ node tools/art/validate_art.js <base>\neg\a2_hole.png --entry SURFACE_B1_TERRAIN_TEST_GRASS_V1_AUTOTILE --catalogue <base>\art\catalogue\catalogue.json --approvals <base>\neg\a2_hole.APPROVALS.md --root <base>   (A2 autotile block with one transparent pixel; <base> = <tmp>/w/base)
+REFUSE TILE_NOT_OPAQUE: tile-class slot (RMMZ_AUTOTILE_A2) must be 100% opaque; 1 pixel(s) are not; first at (50,70) alpha 0
+  pixels (1): (50,70)
+NOT CHECKED anchor (CENTER anchors have no pixel rule)
+RESULT: REFUSED entry=SURFACE_B1_TERRAIN_TEST_GRASS_V1_AUTOTILE file=<tmp>\w\base\neg\a2_hole.png sha256=7a6131e80119e428d3660ccf604d55335f530aad89c070614d334e6383e63ccf reasons=TILE_NOT_OPAQUE
+EXIT=1
+
+$ node tools/art/validate_art.js <base>\neg\png_bomb.png --entry SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED --catalogue <base>\art\catalogue\catalogue.json --approvals <base>\neg\png_bomb.APPROVALS.md --root <base>   (48x48 header, 8 MiB of zeros in IDAT; <base> = <tmp>/w/base)
+REFUSE PNG_INVALID: <tmp>\w\base\neg\png_bomb.png: image data inflates past the 9264 bytes its 48x48 header allows (not decoded)
+RESULT: REFUSED entry=SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED file=<tmp>\w\base\neg\png_bomb.png sha256=6537ac9d2e7e3118b2fea57a1cb0e8eb80ba9a7de8b268d252aba9c0997c862e reasons=PNG_INVALID
+EXIT=1
+
 $ node tools/art/place_art.js --catalogue ... --root <world> --out <tmp>/demo_out --approvals <world>/art/APPROVALS.md --in <tmp>/demo_in   (4 approved cells)
 PLACED ATLAS_TEST_SURFACE_B1:0002 <- SURFACE_B1_CREATURE_TEST_OGRE_V1_WALK.png (SURFACE_B1_CREATURE_TEST_OGRE_V1_WALK)
 PLACED ATLAS_TEST_SURFACE_B1:0005 <- SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED.png (SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED)
 PLACED ATLAS_TEST_SURFACE_B1:0006 <- SURFACE_B1_PROP_TEST_LANTERN_V1_HANGING.png (SURFACE_B1_PROP_TEST_LANTERN_V1_HANGING)
 PLACED TS_TEST_SURFACE_B1_A2:0001 <- SURFACE_B1_TERRAIN_TEST_GRASS_V1_AUTOTILE.png (SURFACE_B1_TERRAIN_TEST_GRASS_V1_AUTOTILE)
 DERIVED_PENDING SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED_FLIPH (from SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED)
-RESULT: PLACED filled=4/17 empty=13 unexpected=1 derivedPending=1 sheets=2 runtime=2
+RUNTIME_PENDING ATLAS_TEST_SURFACE_B1:0006 (SURFACE_B1_PROP_TEST_LANTERN_V1_HANGING): RMMZ_CHARACTER, no runtime file named
+WARN SURFACE_B1_PROP_TEST_LANTERN_V1_HANGING.png: approved by slot id ATLAS_TEST_SURFACE_B1:0006 only; a slot id follows the slot's position if the catalogue is rebuilt
+WARN runtime/img/tilesets/TEST_Surface_A2.png is partial (1 placed part(s), the rest transparent); do not copy it over a complete sheet
+RESULT: PLACED filled=4/21 empty=17 unexpected=1 derivedPending=1 sheets=2 runtime=2
 EXIT=0
 
 $ node tools/art/place_art.js --catalogue ... --out <tmp>/demo_out --approvals <world>/neg/propB.APPROVALS.md --in <tmp>/demo_in2   (a different approved chest, no --replace)
@@ -72,7 +101,9 @@ EXIT=1
 $ node tools/art/place_art.js --catalogue ... --out <tmp>/demo_out --approvals <world>/neg/propB.APPROVALS.md --in <tmp>/demo_in2 --replace ATLAS_TEST_SURFACE_B1:0005
 REPLACED ATLAS_TEST_SURFACE_B1:0005 <- SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED.png (SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED)
 DERIVED_PENDING SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED_FLIPH (from SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED)
-RESULT: PLACED filled=4/17 empty=13 unexpected=1 derivedPending=1 sheets=2 runtime=2
+RUNTIME_PENDING ATLAS_TEST_SURFACE_B1:0006 (SURFACE_B1_PROP_TEST_LANTERN_V1_HANGING): RMMZ_CHARACTER, no runtime file named
+WARN runtime/img/tilesets/TEST_Surface_A2.png is partial (1 placed part(s), the rest transparent); do not copy it over a complete sheet
+RESULT: PLACED filled=4/21 empty=17 unexpected=1 derivedPending=1 sheets=2 runtime=2
 EXIT=0
 
 Files in <tmp>/demo_out:
@@ -87,13 +118,13 @@ Files in <tmp>/demo_out:
 coverage_report.md:
 # Art placement coverage
 
-Written by tools/art/place_art.js for catalogue sha256 `9fd02671f0181583c5873de5ff92f986afe8a01462d95ca364546601eb9a2a63`.
+Written by tools/art/place_art.js for catalogue sha256 `e79a4a6cf0cda73f0d055aa5518bd840b74777df50fc3b7d4471aef393b5f4f9`.
 
 ## Per sheet
 
 | Sheet | Kind | Slots | Filled | Empty | Unexpected | Not in template | Stray pixels | Template |
 | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | :--- |
-| ATLAS_TEST_SURFACE_B1 | ATLAS | 14 | 3 | 11 | 1 | 0 | 0 | OK |
+| ATLAS_TEST_SURFACE_B1 | ATLAS | 18 | 3 | 15 | 1 | 0 | 0 | OK |
 | CHR_TEST_SURFACE_B1_RAT | RMMZ_CHARACTER | 1 | 0 | 1 | 0 | 0 | 0 | OK |
 | TS_TEST_SURFACE_B1_A2 | RMMZ_TILESET | 1 | 1 | 0 | 0 | 0 | 0 | OK |
 | TS_TEST_SURFACE_B1_B | RMMZ_TILESET | 1 | 0 | 1 | 0 | 0 | 0 | OK |
@@ -103,7 +134,7 @@ Written by tools/art/place_art.js for catalogue sha256 `9fd02671f0181583c5873de5
 | Band | In geometry | Slots | Filled | Empty | Derived pending | No slot | Unexpected |
 | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: |
 | LOWER1 | yes | 1 | 0 | 1 | 0 | 0 | 0 |
-| SURFACE | yes | 15 | 4 | 11 | 1 | 1 | 0 |
+| SURFACE | yes | 19 | 4 | 15 | 1 | 1 | 0 |
 | TEST_NOBAND | no | 1 | 0 | 1 | 0 | 0 | 1 |
 
 ## Unexpected
