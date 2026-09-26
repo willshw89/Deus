@@ -24,6 +24,7 @@
 **Method.** Every code claim was read at the base commit with `sed -n` or `grep -n`; each audit citation this document reuses was re-read (the plugins it cites for population are byte-identical between the audit commit `75cf2ff3` and the base; only `DEUS_Levels.js` and `DEUS_World.js` changed, and `DEUS_World.js` citations here use the base lines). SRD text was extracted from `character_options.json` with a `node -e` one-liner (REPORT.md has the commands).
 
 **Conventions.**
+- "Section N" counts the level-2 headings in order: 1 Lifecycle, 2 Lineage, 3 Reproduction and mass, 4 Carrying capacity, 5 Nine races and culture plans, 6 Population LOD, 7 Migration dependencies, 8 Dormant code today, 9 Health and death hooks, 10 Sparse storage and cost, 11 Acceptance tests, 12 WBS impact, 13 Owner questions. The headings themselves carry no number so the lane gate can match them exactly.
 - A bare plugin name (`DEUS_Colonists.js:2482`) means `game/js/plugins/<name>`. Other paths are from the repo root.
 - **Geometry (DEC-013, Owner ruling D-2):** 32 layers, z = -16..+15, surface 0; one cell is 5 ft × 5 ft; one layer is 10 ft; one layer is 5 slices (strata) of 2 ft. The code today has 5 levels of five 1 ft strata (audit F-01) and `Z_STEP_FEET: 5` (`DEUS_World.js:255`). Where a number here would differ under that stale model, the text says so.
 - **Regions [ADR-003 PROPOSED]:** a region is 32 × 32 cells across one *slab* of 2 adjacent layers, so 64 regions per slab and 1,024 regions per 256 × 256 area at 32 layers (ADR-003 §5.1). In feet a region is 160 ft × 160 ft × 20 ft. LOD levels: L0 full (every tick), L1 near (every 10 ticks), L2 summary (every 100 ticks = 1 game hour) (ADR-003 §5.2).
@@ -81,7 +82,7 @@ V140 asks for one lifecycle across people, livestock, wildlife and biological mo
 | `spawned` | Arrives from an explicitly modelled source (a lair, a rift). Never breeds in place. | a named **source** `spawn:<sourceId>`, logged like rain or conjured matter (DEC-018 PM default, `docs/OWNER_DECISIONS.md:262`); the source and its budget are Owner-approved data | fiend, celestial, elemental |
 | `unique` | One individual, never reproduces, never respawns; death is final. | as `breeds` for its own body | legendary named creatures |
 
-The five catalog monsters map as follows (a proposal, not an assignment): `troll` is SRD "Large giant" (`game/data/srd51/creatures.json:33428`), so `breeds`. `restless_dead` is undead by name; the nearest SRD entries are undead (`srd:creature:zombie`, `creatures.json:35073`), so `created`. `bog_horror`, `sand_stalker` and `ice_wraith` have no SRD entry by name; their origin is an Owner question (OQ-W-06).
+The five catalog monsters map as follows (a proposal, not an assignment): `troll` is SRD "Large giant" (`game/data/srd51/creatures.json:33428`), so `breeds`. `restless_dead` is undead by name; the nearest SRD entries are undead (`srd:creature:zombie`, `game/data/srd51/creatures.json:35073`), so `created`. `bog_horror`, `sand_stalker` and `ice_wraith` have no SRD entry by name; their origin is an Owner question (OQ-W-06).
 
 V75 ("monsters keep spawning", cited in `docs/design/ECOLOGY.md:6`) and V83 conflict with LIFE-001 if "spawn" means "appear from nothing". Today `attemptSpawn` does exactly that for prey and monsters (`DEUS_Ecology.js:509`, unit created at `:548`, called by `processArea` at `:563-564`). Under this design "keep spawning" is met by `breeds` plus arrivals from neighbouring regions (migration moves counts, it creates none) or by an approved `spawned` source. OQ-W-06 asks the Owner which.
 
@@ -313,7 +314,7 @@ About 48 bytes per record. At 32 layers an area has 1,024 regions (ADR-003 §5.1
 | Ratio | Formula | Effect when below 1 | SRD anchor |
 |---|---|---|---|
 | food ρF | (forage available to the region's diets + stored food) / (`demandG` × days to next step) | rations = ρF; body mass falls (section 3.3); fertility falls through `conditionFactor`; starvation hazard | "one pound of food per day"; "go without food for a number of days equal to 3 + … Constitution modifier (minimum 1)", then exhaustion (`game/data/srd51/rules.json:4403`; exhaustion `:10533`) |
-| water ρW | water available / demand (SRD gallons by size and heat) | the SRD dehydration rule: half water → DC 15 Constitution save or one exhaustion level a day; less → one level automatically | same entry, `rules.json:4403` |
+| water ρW | water available / demand (SRD gallons by size and heat) | the SRD dehydration rule: half water → DC 15 Constitution save or one exhaustion level a day; less → one level automatically | same entry, `game/data/srd51/rules.json:4403` |
 | shelter ρS | `shelterSlots` / (creatures that need shelter) | exposure hazard in cold or heat (reads SIM.50.06 temperature; today `DEUS_Environment.js` temperature per area) | none (SRD has extreme cold/heat rules in the same environment chapter; the hook passes them through, section 9) |
 | space ρA | `walkable` × 25 ft² / Σ (creature count × space) | crowding: disease contact rate rises (section 4.5); movement slows | SRD size categories: Tiny 2½ × 2½ ft, Small and Medium 5 × 5 ft, Large 10 × 10 ft, Huge 15 × 15 ft (`game/data/srd51/rules.json:9005`) |
 
@@ -361,7 +362,7 @@ D-6 is a PM decision (the Owner may object): each of the nine SRD races gets its
 
 | Slot | SRD entry | Catalog `people` | Catalog `cultures` | Size / weight (SRD) | Speed | Darkvision | SRD ability increase vs catalog `stats` |
 |---|---|---|---|---|---|---|---|
-| `human` | `character_options.json:525` | `DEUS_WorldCatalog.json:7307` | `:9308` "Settlers" | Medium, 5 to over 6 ft | 30 ft | none | SRD "each increase by 1"; catalog `stats: {}` (`:7322`) **differs** |
+| `human` | `game/data/srd51/character_options.json:525` | `game/data/DEUS_WorldCatalog.json:7307` | `:9308` "Settlers" | Medium, 5 to over 6 ft | 30 ft | none | SRD "each increase by 1"; catalog `stats: {}` (`:7322`) **differs** |
 | `dwarf` | `:45` | `:7334` | `:9394` "Stone-holders" | Medium, 4-5 ft, about 150 lb | 25 ft | 60 ft | SRD Con +2; catalog adds `cha: -1` **not SRD** |
 | `elf` | `:123` | `:7324` | `:9347` "Grove-keepers" | Medium, under 5 to over 6 ft | 30 ft | 60 ft | SRD Dex +2; catalog adds `con: -1` **not SRD** |
 | `halfling` | `:197` | `:7354` | **none** | Small, about 3 ft, about 40 lb | 25 ft | none | Dex +2 (+ Lightfoot Cha +1); catalog matches |
