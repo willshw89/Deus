@@ -188,6 +188,41 @@ Every work block MUST declare:
 - **Forbidden Paths**: All engine code (`game/js/plugins/*`) and game data.
 - **Assigned Worker**: Grok CLI (Writer). Reviewer: Claude CLI (Independent Diff Reviewer).
 - **Automated Acceptance Criteria**: Clean independent diff review PASS without open blockers or major findings.
-- **Expected Handoff Destination**: Claude Neutral Re-review -> PM Sign-off -> Coordinator Integration.
+### Block `WB-008`: WG.00.12 Automated Merge Gate (Lane I)
+- **Objective**: Implement CLI tool `tools/governance/merge_gate.js`, self-test suite `tools/governance/test_merge_gate.js`, and documentation `tools/governance/MERGE_GATE.md` enforcing scope boundaries, independent review tag/hash verification, test suite execution in fresh clones, and remote push alignment.
+- **Priority**: `CRITICAL`
+- **Status**: `IN_PROGRESS` (Active writer Claude PID 10576 on branch `task/lane-i`).
+- **Dependencies**: None.
+- **Allowed Paths**: `tools/governance/merge_gate.js`, `tools/governance/test_merge_gate.js`, `tools/governance/MERGE_GATE.md`, `tasks/WG.00.12/lane-i/**`.
+- **Forbidden Paths**: All other paths.
+- **Assigned Worker**: Claude CLI (Writer). Reviewer: Grok CLI (Adversarial Attacker).
+- **Automated Acceptance Criteria**: All 11 refusal conditions + passing case + mutants pass in foreground clone.
+- **Expected Handoff Destination**: Grok Adversarial Attack -> PM Sign-off -> First Gate-Enforced Merge to Main.
+
+---
+
+### Block `WB-009`: WG.00.12 Standard Worker Launcher & Pre-Push Guard (Lane J)
+- **Objective**: Implement `tools/ops/launch_worker.ps1`, `gate_tests.json`, `pre-push` hook, `install_lane_hooks.ps1`, `resume_queue.ps1`, and self-tests.
+- **Priority**: `CRITICAL`
+- **Status**: `IN_PROGRESS` (Active writer Claude PID 2684 on branch `task/lane-j`).
+- **Dependencies**: None.
+- **Allowed Paths**: `tools/ops/launch_worker.ps1`, `tools/ops/gate_tests.json`, `tools/ops/hooks/pre-push`, `tools/ops/install_lane_hooks.ps1`, `tools/ops/test_launch_worker.ps1`, `tools/ops/README.md`, `tools/ops/resume_queue.ps1`, `tools/ops/test_resume_queue.ps1`, `tasks/WG.00.12/lane-j/**`.
+- **Forbidden Paths**: Lane I files and all engine plugins.
+- **Assigned Worker**: Claude CLI (Writer). Reviewer: Grok CLI (Independent Reviewer).
+- **Automated Acceptance Criteria**: `tools/ops/test_launch_worker.ps1` and `tools/ops/test_resume_queue.ps1` pass in foreground.
+- **Expected Handoff Destination**: Grok Independent Review -> PM Sign-off -> Gate Merge.
+
+---
+
+### Block `WB-010`: WG.00.12 GitHub Actions Continuous Integration Gate
+- **Objective**: Author `.github/workflows/gate.yml` running the node-only gate test suite on push to `main` and `task/*`.
+- **Priority**: `HIGH`
+- **Status**: `QUEUED` (Do not launch; starts after Lane I is gate-merged; requires PM sign-off before merge).
+- **Dependencies**: `WB-008` (Lane I Merge Gate).
+- **Allowed Paths**: `.github/workflows/gate.yml`, `docs/governance/CI_GATE.md`.
+- **Forbidden Paths**: All other files.
+- **Assigned Worker**: Unassigned (Queued).
+- **Expected Handoff Destination**: PM Review & Sign-off -> Integration to Main.
+
 
 

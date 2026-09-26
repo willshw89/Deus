@@ -10,5 +10,53 @@
     "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\lane-c2b\\BRIEF.md",
     "launchPromptPath": "C:\\Users\\snewt\\.deus_worktrees\\run_lane_c2b.ps1",
     "state": "running"
+  },
+  {
+    "lane": "Lane H",
+    "provider": "Grok / grok-2-mini",
+    "taskId": "task-35958",
+    "pid": 24140,
+    "worktree": "C:\\Users\\snewt\\.deus_worktrees\\lane-h",
+    "branch": "task/lane-h",
+    "launchTimeCT": "2026-09-25 23:46:57 CT",
+    "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\lane-h\\BRIEF.md",
+    "launchPromptPath": "C:\\Users\\snewt\\.deus_worktrees\\run_lane_h_grok.ps1",
+    "state": "running"
+  },
+  {
+    "lane": "Lane E",
+    "provider": "Grok / grok-2-mini",
+    "taskId": "task-35960",
+    "pid": 25240,
+    "worktree": "C:\\Users\\snewt\\.deus_worktrees\\lane-e",
+    "branch": "task/lane-e",
+    "launchTimeCT": "2026-09-25 23:47:01 CT",
+    "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\lane-e\\BRIEF.md",
+    "launchPromptPath": "C:\\Users\\snewt\\.deus_worktrees\\run_lane_e_grok_n5_n6.ps1",
+    "state": "running"
+  },
+  {
+    "lane": "Lane I",
+    "provider": "Claude / claude-opus-5-5",
+    "taskId": "task-36035",
+    "pid": 10576,
+    "worktree": "C:\\Users\\snewt\\.deus_worktrees\\lane-i",
+    "branch": "task/lane-i",
+    "launchTimeCT": "2026-09-25 23:50:24 CT",
+    "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\lane-i\\tasks\\WG.00.12\\lane-i\\BRIEF.md",
+    "launchPromptPath": "C:\\Users\\snewt\\.deus_worktrees\\run_lane_i.ps1",
+    "state": "running"
+  },
+  {
+    "lane": "Lane J",
+    "provider": "Claude / claude-opus-5-5",
+    "taskId": "task-36037",
+    "pid": 2684,
+    "worktree": "C:\\Users\\snewt\\.deus_worktrees\\lane-j",
+    "branch": "task/lane-j",
+    "launchTimeCT": "2026-09-25 23:50:29 CT",
+    "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\lane-j\\tasks\\WG.00.12\\lane-j\\BRIEF.md",
+    "launchPromptPath": "C:\\Users\\snewt\\.deus_worktrees\\run_lane_j.ps1",
+    "state": "running"
   }
 ]

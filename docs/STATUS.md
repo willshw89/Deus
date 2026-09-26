@@ -64,10 +64,12 @@
 | **Lane C2b** | **Governance Hardening** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | `task-35427` (PID 7264)<br>`task/lane-c2b` | `C:\Users\snewt\.deus_worktrees\lane-c2b` | Active | **STATUS: ACTIVE WRITER.**<br>• Hardening check_claims.js against PM attack per Directive 001-I sec C. |
 | **Lane C3** | **Palette ADR Revision & Review** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Merged `8db39b0b`<br>`task/lane-c3` | `C:\Users\snewt\.deus_worktrees\lane-c3` | 2026-09-25 16:54:51 | **STATUS: INTEGRATED TO MAIN.**<br>• ADR-002 Rev 2 (uf.hex canonical for runtime) PROPOSED, awaiting Grok review; not yet accepted. Merged to main and pushed to origin. |
 | **Lane D** | **Adversarial Review** | Grok (PM instance) / `grok-4.7` | Via Owner | Main checkout | 2026-09-25 16:48:00 | **STATUS: DELIVERED.**<br>• ATK-19B-001 CLOSED; ATK-19B-002 KEEP OPEN (F2); ATK-YEAR0-001 KEEP OPEN (F1); WG.00.08 stays REVIEW. |
-| **Lane E** | **WG.00.09 DEFINE / PRE-ATTACK** (`WG.00.09`) | Grok CLI (Writer) / Claude (Reviewer) | Review `6a71a4c4`<br>`task/lane-e` (pushed) | `C:\Users\snewt\.deus_worktrees\lane-e` | 2026-09-25 23:31:45 | **STATUS: CHANGES REQUESTED (0B/0M/2m).**<br>• Claude diff review of `710fa095..5964f772` committed (`6a71a4c4`) and pushed to origin. Verdict: CHANGES REQUESTED (2 minor: N5, N6). N2, N4 resolved; N3 resolved as asked. Grok writer to fold in N5 and N6. |
+| **Lane E** | **WG.00.09 DEFINE / PRE-ATTACK** (`WG.00.09`) | Grok CLI (Writer) / Claude (Reviewer) | `task-35960` (PID 25240)<br>`task/lane-e` (pushed `6a71a4c4`) | `C:\Users\snewt\.deus_worktrees\lane-e` | Active | **STATUS: ACTIVE WRITER.**<br>• Grok writer launched to fold in N5 and N6 review findings into attack plan per Directive 001-M §2. |
 | **Lane F** | **OneDrive-Link Migration Prep** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Merged `d09a1295`<br>`task/lane-f` | `C:\Users\snewt\.deus_worktrees\lane-f` | 2026-09-25 16:52:09 | **STATUS: INTEGRATED TO MAIN.**<br>• Post-F test suite 8/8 EXIT=0; pushed to origin. |
 | **Lane G** | **ATK-YEAR0-002 Runtime Fix & Test Maint** (`WG.00.11`) | Claude CLI / `claude-opus-5-5` | Merged `da2c16b2`<br>`task/lane-g` | `C:\Users\snewt\.deus_worktrees\lane-g` | 2026-09-25 17:50:51 | **STATUS: INTEGRATED TO MAIN.**<br>• Runtime Year 0 integrated. |
-| **Lane H** | **Z-2 Cut Proof & Fluid Hardening** (`WG.00.08`) | Claude CLI (Fable) / `claude-opus-5-5` | Committed `c8694f01`<br>`task/lane-h` (pushed) | `C:\Users\snewt\.deus_worktrees\lane-h` | 2026-09-25 23:30:59 | **STATUS: COMMITTED & PUSHED (REVIEW PENDING).**<br>• Committed `c8694f01`, pushed to origin. Baseline 12/12 pass (exit 0), 8/8 mutants exit 1. Claude claims Z-2 proof hardened and fluid ruling aligned; Grok verification pending. |
+| **Lane H** | **Z-2 Cut Proof & Fluid Hardening** (`WG.00.08`) | Claude CLI (Writer) / Grok (Verifier) | `task-35958` (PID 24140)<br>`task/lane-h` (pushed `c8694f01`) | `C:\Users\snewt\.deus_worktrees\lane-h` | Active | **STATUS: ACTIVE VERIFIER.**<br>• Claude proof hardening committed (`c8694f01`). Grok verifier launched per Directive 001-M §1. |
+| **Lane I** | **Merge Gate CLI & Self-Tests** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | `task-36035` (PID 10576)<br>`task/lane-i` (pushed `4d731c6e`) | `C:\Users\snewt\.deus_worktrees\lane-i` | Active | **STATUS: ACTIVE WRITER.**<br>• Implementing `tools/governance/merge_gate.js`, `test_merge_gate.js`, `MERGE_GATE.md` per Directive 001-N §1. |
+| **Lane J** | **Standard Worker Launcher & Pre-Push Guard** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | `task-36037` (PID 2684)<br>`task/lane-j` (pushed `dac855a2`) | `C:\Users\snewt\.deus_worktrees\lane-j` | Active | **STATUS: ACTIVE WRITER.**<br>• Implementing `tools/ops/launch_worker.ps1`, `gate_tests.json`, `resume_queue.ps1` per Directive 001-N §2. |
 
 ---
 
@@ -80,6 +82,8 @@
 | **Lane H (Claude / Fable)** | `tools/test_generated_z2_cut_proof.js`<br>`tasks/WG.00.08/*` (docs & evidence only) | **Exclusive Writer (Worktree lane-h).** Z-2 cut proof hardening per Directive 001-I sec B. NO engine edits. |
 | **Lane C2b (Claude)** | `tools/governance/check_claims.js`<br>`tools/governance/test_check_claims.js`<br>`tasks/WG.00.12/c2_governance_state.md` | **Exclusive Writer (Worktree lane-c2b).** Governance checker hardening per Directive 001-I sec C. |
 | **Lane E (Grok Writer / Claude Reviewer)** | `docs/systems/UF_Depth_Attack_Plan.md` (attack plan (Grok) — spec authority pending PM ruling)<br>`tasks/DEUS-TSK-FABLE-19C/*` | **Exclusive Writer (Worktree lane-e).** Depth renderer attack plan revision (Grok) and re-review (Claude). |
+| **Lane I (Claude Writer / Grok Reviewer)** | `tools/governance/merge_gate.js`<br>`tools/governance/test_merge_gate.js`<br>`tools/governance/MERGE_GATE.md`<br>`tasks/WG.00.12/lane-i/**` | **Exclusive Writer (Worktree lane-i).** Automated merge gate implementation per 001-N §1. |
+| **Lane J (Claude Writer / Grok Reviewer)** | `tools/ops/launch_worker.ps1`<br>`tools/ops/gate_tests.json`<br>`tools/ops/hooks/pre-push`<br>`tools/ops/install_lane_hooks.ps1`<br>`tools/ops/test_launch_worker.ps1`<br>`tools/ops/README.md`<br>`tools/ops/resume_queue.ps1`<br>`tools/ops/test_resume_queue.ps1`<br>`tasks/WG.00.12/lane-j/**` | **Exclusive Writer (Worktree lane-j).** Standard launcher & operational hooks per 001-N §2. |
 
 ### Retired Lanes: Write Access Revoked
 - **Lane A (Claude / Fable):** Merged to `main` (`0f7f26cd`). Write access revoked.
@@ -114,6 +118,16 @@
 | **A10-1** | `WG.00.08` | `MAJOR` | Native playtest proof of Z-2 ravine cut. DEC-001 accepted in principle, SUSPENDED pending Lane H proof. | `OPEN` | Owner / Grok |
 | **DEF-COORD-INJECT-01** | `WG.00.11` | `MAJOR` | Coordinator output file overwrite at 17:13:55 logged as DEF-COORD-INJECT-01. | `OPEN` | Coordinator |
 | **DEF-COORD-BOARD-HASH-01** | `GOVERNANCE` | `MINOR` | Coordinator board reported non-existent hash for lane-b as 100% match; boards must paste raw command output. | `OPEN` | Coordinator |
+| **DEF-COORD-EMPTY-BOARD-01** | `GOVERNANCE` | `MINOR` | Outbox boards 2307, 2317, 2325 created as 0-byte files; temp-write-then-move pattern enforced. | `OPEN` | Coordinator |
+| **DEF-COORD-MERGE-01** | `WG.00.08` | `MAJOR` | Lane A merged 0f7f26cd (22:45:24) before Grok verification 16fec107 (22:49:10); earlier a1d02927 merged then undone by git reset --hard da2c16b2. | `OPEN` | PM / Coordinator |
+| **DEF-COORD-CLOSE-01** | `WG.00.08` | `MAJOR` | 31676cf1 marked WG.00.08 DONE 11 min after fix 2e4571a6 with no committed review. | `OPEN` | PM / Coordinator |
+| **DEF-COORD-EXIT-01** | `WG.00.12` | `MINOR` | Four 22:46 test runs captured $LASTEXITCODE inside powershell.exe -Command. | `OPEN` | PM / Coordinator |
+| **DEF-OPS-LOG-01** | `WG.00.12` | `MINOR` | Claude -p launches without redirect left task logs at 0 bytes (task-35425, task-35427); run_lane_a_grok.ps1, run_lane_c3.ps1, run_review_8d1c7c37.ps1 and lane-c3\BRIEF.md are 0 bytes. | `OPEN` | PM / Coordinator |
+| **DEF-COORD-BOARD-HASH-02** | `GOVERNANCE` | `MINOR` | Board 2026-09-25_2340 lists task/lane-c1 = 4f346b9a and task/lane-c2 = e99da6f2 in sync with origin (EXIT=128 on git cat-file); lists lane-c3 70dad277 as in sync while origin/task/lane-c3 = 048752c8. | `OPEN` | PM / Coordinator |
+| **MACHINE-STABILITY** | `HARDWARE` | `MAJOR` | 7 unexpected shutdowns 2026-09-25; Event 6008 at 00:14, 09:17, 12:15, 13:48, 14:13, 14:32, 17:19; Owner investigating; post-crash tripwire active. | `OPEN` | Owner |
+| **SCRATCH-SALVAGE** | `OPERATIONS` | `INFO` | Uncommitted scratch worktrees salvaged to salvage/* branches on origin per Directive 001-N §4 (unreviewed). Temp worktrees removed. | `OPEN` | PM / Owner |
+| **DUAL-MAILBOX** | `GOVERNANCE` | `INFO` | docs/agents/mailboxes and tools/agents/bus.js are frozen; C:\Users\snewt\.deus_pm is authoritative. | `OPEN` | PM / Coordinator |
+| **LANES I/J** | `WG.00.12` | `INFO` | Automated merge gate (Lane I) and standard worker launcher / pre-push guard (Lane J) active per Directive 001-N. | `OPEN` | Claude / Grok |
 
 ---
 
