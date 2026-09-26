@@ -1824,11 +1824,32 @@
             t.check("entities_at_seam", seamRefused.length === 0 && wrappedView && seamJudged.length === 7 && seamJudged.every(j => j.ok),
                 `view on +2 centred on (${seamC.x},${seamC.y}), display (${dispSeam.x},${dispSeam.y}) (${wrappedView ? "wrapped" : "NOT WRAPPED"}); +1 plane ${sp1 ? `level ${sp1.level.z}` : "NONE"}: ${seamJudged.map(j => j.text).join("; ") || "nothing judged"}${seamRefused.length ? `; fixture cells refused: ${seamRefused.join(" ")}` : ""}`);
 
-            // Each level switch makes a new spriteset; its canvases come from the pool and go back to it at terminate. Four canvases
-            // in use, none made since the first spriteset, none destroyed (no leak, no re-allocation).
+            // The canvases across spritesets (K2 d). A level switch happens in place (SIM.00.00) and keeps the spriteset, its root and
+            // their canvases; a map transfer (an area edge, a load) makes a new spriteset, whose planes take the old one's canvases from
+            // the pool (they go back to it at terminate). Two map transfers to the level on screen (UF.World.transferView, the load
+            // path): four canvases in use, none made since the first spriteset, none destroyed, none pooled (no leak, no
+            // re-allocation); and each new scene starts with its planes bound to the levels below the view and shown (K2, the
+            // transfer path). Fix 2: the switches alone no longer make spritesets, so this check needs the transfers to test the pool.
+            const rootBefore = D.root(), starts = [];
+            const realStart = Scene_Map.prototype.start;
+            Scene_Map.prototype.start = function() {
+                realStart.apply(this, arguments);
+                const r = this._spriteset && this._spriteset._ufDepth;
+                starts.push({ root: r || null, view: L.view(), planes: r ? r.planes.filter(p => p.level).map(p => ({ z: p.level.z, visible: p.visible, paints: p._tilemap.paints })) : [] });
+            };
+            try {
+                for (let i = 0; i < 2; i++) {
+                    const before = scene(), v = W.viewLevel();
+                    if (!W.transferView(v.x, v.y, $gamePlayer.x, $gamePlayer.y, $gamePlayer.direction(), v.z)) harnessStop(`canvases_freed: UF.World.transferView refused map transfer ${i + 1}`);
+                    await need(t, () => scene() !== before && scene() instanceof Scene_Map && scene().isStarted() && !$gamePlayer.isTransferring(), 60000, `map transfer ${i + 1} (a new map scene started)`);
+                    await t.waitFrames(3);
+                }
+            } finally { Scene_Map.prototype.start = realStart; }
             const s0 = D.stats();
-            t.check("canvases_freed", s0.layersAlive === 4 && s0.canvasesMade === 4 && s0.canvasesDestroyed === 0 && s0.pooled === 0,
-                `${s0.layersAlive} canvas layers in use, ${s0.canvasesMade} canvases made since boot, ${s0.canvasesDestroyed} destroyed, ${s0.pooled} pooled, after ${switches} level switches (want 4 / 4 / 0 / 0)`);
+            const newRoots = new Set([rootBefore, ...starts.map(s => s.root)]).size === 3;
+            const startsOk = starts.length === 2 && newRoots && starts.every(s => s.planes.length === 2 && s.planes.every((p, i) => p.visible && p.z === s.view - 1 - i));
+            t.check("canvases_freed", s0.layersAlive === 4 && s0.canvasesMade === 4 && s0.canvasesDestroyed === 0 && s0.pooled === 0 && startsOk,
+                `after ${switches} in-place level switches and ${starts.length} map transfer(s) (${newRoots ? "a new spriteset each" : "NOT A NEW SPRITESET EACH"}): ${s0.layersAlive} canvas layers in use, ${s0.canvasesMade} canvases made since boot, ${s0.canvasesDestroyed} destroyed, ${s0.pooled} pooled (want 4 / 4 / 0 / 0); at each new scene's start, view ${starts.map(s => `${s.view}: planes on levels [${s.planes.map(p => `${p.z}${p.visible ? "" : " HIDDEN"} ${p.paints} paint(s)`).join(", ")}]`).join("; view ") || "none"}`);
             t.check("hotkey_free", Input.keyMapper[118] === undefined, `keyMapper[118] (F7) is ${JSON.stringify(Input.keyMapper[118])}: the preset hotkey is gone and the key is free`);
             t.check("no_errors", UF.Test.errors.length === 0, UF.Test.errors.length ? `${UF.Test.errors.length} error(s), first: ${UF.Test.errors[0]}` : "none");
             if (TS && TS.resume && !wasPaused) TS.resume();
