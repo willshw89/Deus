@@ -37,6 +37,7 @@ function show(v) {
     return String(v);
 }
 function isObj(v) { return typeof v === "object" && v !== null && !Array.isArray(v); }
+function has(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
 function isAmount(n) { return typeof n === "number" && Number.isSafeInteger(n) && n >= 0; }
 function checkAmount(n, what) {
     if (!isAmount(n)) fail("E_AMOUNT", what + ": amount " + show(n) + " is not a non-negative safe integer");
@@ -113,13 +114,13 @@ function normalize(cfg) {
             if (!isObj(d.composition)) fail("E_CONFIG", "class " + c + ": composition must be an object");
             for (const f of sortedKeys(d.composition)) {
                 const p = d.composition[f];
-                if (!families[f]) fail("E_CONFIG", "class " + c + ": unknown family " + show(f) + " in composition");
+                if (!has(families, f)) fail("E_CONFIG", "class " + c + ": unknown family " + show(f) + " in composition");
                 if (!Number.isSafeInteger(p) || p < 1 || p > 1000000) fail("E_CONFIG", "class " + c + ": composition part for " + f + " must be an integer 1..1000000, got " + show(p));
                 comp.push([f, p]);
             }
             if (!comp.length) fail("E_CONFIG", "class " + c + ": empty composition");
         } else {
-            if (typeof d.family !== "string" || !families[d.family]) fail("E_CONFIG", "class " + c + ": unknown family " + show(d.family));
+            if (typeof d.family !== "string" || !has(families, d.family)) fail("E_CONFIG", "class " + c + ": unknown family " + show(d.family));
             comp.push([d.family, 1]);
         }
         let den = 0;
@@ -143,7 +144,7 @@ function normalize(cfg) {
     for (const c of clsNames) for (const f of classes[c].forms) keys.push(c + SEP + f);
 
     function checkClassForms(where, cls, list) {
-        if (typeof cls !== "string" || !classes[cls]) fail("E_CONFIG", where + ": unknown class " + show(cls));
+        if (typeof cls !== "string" || !has(classes, cls)) fail("E_CONFIG", where + ": unknown class " + show(cls));
         if (!Array.isArray(list) || !list.length) fail("E_CONFIG", where + ": form list for " + cls + " must be a non-empty array");
         for (const f of list) if (classes[cls].forms.indexOf(f) < 0) fail("E_CONFIG", where + ": class " + cls + " has no form " + show(f));
     }
@@ -177,7 +178,7 @@ function normalize(cfg) {
         const r = recipeList[i], where = "recipe row " + i;
         if (!isObj(r)) fail("E_CONFIG", where + " must be an object");
         checkName(r.id, where + " id");
-        if (recipes[r.id]) fail("E_CONFIG", where + ": recipe id " + r.id + " is declared twice");
+        if (has(recipes, r.id)) fail("E_CONFIG", where + ": recipe id " + r.id + " is declared twice");
         const bal = {};
         for (const f of famNames) bal[f] = 0;
         const sides = {};
@@ -227,7 +228,7 @@ function normalize(cfg) {
             const allowed = {};
             let count = 0;
             for (const c of clsList) {
-                if (typeof c !== "string" || !classes[c]) fail("E_CONFIG", kind + " " + name + ": unknown class " + show(c));
+                if (typeof c !== "string" || !has(classes, c)) fail("E_CONFIG", kind + " " + name + ": unknown class " + show(c));
                 const cd = classes[c];
                 if (kind === "source" && cd.ore) {
                     if (wildCls) continue;
@@ -338,7 +339,7 @@ function createLedger(config) {
     }
 
     function classOf(cls, where) {
-        if (typeof cls !== "string" || !Object.prototype.hasOwnProperty.call(C.classes, cls)) fail("E_UNKNOWN_CLASS", where + ": unknown class " + show(cls));
+        if (typeof cls !== "string" || !has(C.classes, cls)) fail("E_UNKNOWN_CLASS", where + ": unknown class " + show(cls));
         return C.classes[cls];
     }
     function keyOf(cls, form, where) {
@@ -436,7 +437,7 @@ function createLedger(config) {
         const where = "recipe " + show(id);
         needSealed(where);
         checkCause(cause, where);
-        if (typeof id !== "string" || !Object.prototype.hasOwnProperty.call(C.recipes, id)) fail("E_NO_ENTRY", where + ": no such recipe (cause " + show(cause) + ")");
+        if (typeof id !== "string" || !has(C.recipes, id)) fail("E_NO_ENTRY", where + ": no such recipe (cause " + show(cause) + ")");
         checkAmount(times, where + " times");
         const r = C.recipes[id], changes = [], counters = [];
         for (const side of [r.inputs, r.outputs]) for (const e of side) {
@@ -453,7 +454,7 @@ function createLedger(config) {
         const where = "source " + show(name) + " " + show(cls) + "/" + show(form);
         needSealed(where);
         checkCause(cause, where);
-        if (typeof name !== "string" || !Object.prototype.hasOwnProperty.call(C.sources, name)) fail("E_UNKNOWN_SOURCE", where + ": " + show(name) + " is not a declared source (cause " + show(cause) + ")");
+        if (typeof name !== "string" || !has(C.sources, name)) fail("E_UNKNOWN_SOURCE", where + ": " + show(name) + " is not a declared source (cause " + show(cause) + ")");
         const k = keyOf(cls, form, where);
         checkAmount(amount, where + " (cause " + show(cause) + ")");
         checkMultiple(cls, amount, where);
@@ -467,7 +468,7 @@ function createLedger(config) {
         const where = "sink " + show(name) + " " + show(cls) + "/" + show(form);
         needSealed(where);
         checkCause(cause, where);
-        if (typeof name !== "string" || !Object.prototype.hasOwnProperty.call(C.sinks, name)) fail("E_UNKNOWN_SINK", where + ": " + show(name) + " is not a declared sink (cause " + show(cause) + ")");
+        if (typeof name !== "string" || !has(C.sinks, name)) fail("E_UNKNOWN_SINK", where + ": " + show(name) + " is not a declared sink (cause " + show(cause) + ")");
         const k = keyOf(cls, form, where);
         checkAmount(amount, where + " (cause " + show(cause) + ")");
         checkMultiple(cls, amount, where);
@@ -479,7 +480,7 @@ function createLedger(config) {
     function total(cls) { classOf(cls, "total"); return clsTotalIn(S.amt, cls); }
     function amount(cls, form) { return S.amt[keyOf(cls, form, "amount")]; }
     function familyTotal(f) {
-        if (typeof f !== "string" || !Object.prototype.hasOwnProperty.call(C.families, f)) fail("E_UNKNOWN_FAMILY", "familyTotal: unknown family " + show(f));
+        if (typeof f !== "string" || !has(C.families, f)) fail("E_UNKNOWN_FAMILY", "familyTotal: unknown family " + show(f));
         return famTotalIn(S.amt, f);
     }
     function totals() {
@@ -543,7 +544,7 @@ function createLedger(config) {
         if (!isObj(recount)) fail("E_RECOUNT", "audit: the recount must be an object { class: { form: amount } | amount }");
         const unknown = [], diffs = [], famDiffs = [], counted = {};
         for (const c of sortedKeys(recount)) {
-            if (!Object.prototype.hasOwnProperty.call(C.classes, c)) { unknown.push(c); continue; }
+            if (!has(C.classes, c)) { unknown.push(c); continue; }
             const v = recount[c];
             if (typeof v === "number") { checkAmount(v, "audit recount " + c); continue; }
             if (!isObj(v)) fail("E_RECOUNT", "audit: the recount of " + c + " must be an amount or an object of forms");
@@ -571,6 +572,10 @@ function createLedger(config) {
                 if (act !== exp) diffs.push({ cls: c, form: f, expected: exp, actual: act, delta: act - exp });
             }
             counted[c] = sum;
+        }
+        for (const c of C.clsNames) {
+            const den = C.classes[c].den;
+            if (counted[c] % den !== 0) diffs.push({ cls: c, form: null, expected: clsTotalIn(S.amt, c), actual: counted[c], delta: counted[c] - clsTotalIn(S.amt, c), note: "E_MULTIPLE" });
         }
         for (const f of C.famNames) {
             let act = 0;
@@ -653,7 +658,7 @@ function createLedger(config) {
             if (!isObj(t)) bad("life." + side + " must be an object");
             for (const k of Object.keys(t)) {
                 const p = k.split(SEP);
-                if (p.length !== 2 || !Object.prototype.hasOwnProperty.call(table, p[0]) || !Object.prototype.hasOwnProperty.call(C.classes, p[1])) bad("life." + side + " has an invalid key " + show(k));
+                if (p.length !== 2 || !has(table, p[0]) || !has(C.classes, p[1])) bad("life." + side + " has an invalid key " + show(k));
                 if (!isAmount(t[k]) || t[k] % C.classes[p[1]].den !== 0) bad("life." + side + "." + k + " is not a valid amount");
                 st.life[side][k] = t[k];
             }
