@@ -1,0 +1,33 @@
+{
+    "lane":  "lane-am",
+    "taskId":  "DEUS-TSK-AUDIO-STD",
+    "branch":  "task/lane-am",
+    "writer":  "grok",
+    "reviewer":  "gemini",
+    "push":  true,
+    "allowedPaths":  [
+                         "docs/audio/DEUS_AUDIO_STANDARD.md",
+                         "game/data/UF_AudioStandard.json",
+                         "game/data/UF_AudioStandard.schema.json",
+                         "tools/audio/validate_audio_standard.js",
+                         "tools/audio/test_validate_audio_standard.js",
+                         "tools/audio/fixtures/audio_standard/**",
+                         "tasks/DEUS-TSK-AUDIO-STD/**"
+                     ],
+    "gateTests":  [
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/audio/test_validate_audio_standard.js"
+                                   ],
+                          "timeoutSec":  900
+                      },
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/check_deus_syntax.js"
+                                   ],
+                          "timeoutSec":  300
+                      }
+                  ]
+}
