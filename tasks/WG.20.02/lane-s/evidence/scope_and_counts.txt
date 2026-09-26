@@ -1,0 +1,21 @@
+clone HEAD: 51d3915af6beee1476c5b78df76b7c23dceb6a01
+$ git diff --name-only b612bc7217349bce695e15395bd041f63673b89b..HEAD | files outside allowedPaths
+EXIT=1 (grep: 1 = no file outside allowedPaths)
+$ git diff --name-only b612bc7217349bce695e15395bd041f63673b89b..HEAD | wc -l
+69
+EXIT=0
+$ git diff --name-only b612bc7217349bce695e15395bd041f63673b89b..HEAD | image files (png/jpg/gif/bmp/webp)
+EXIT=1 (grep: 1 = none)
+$ grep for data:image / base64 image payloads in the catalogue outputs
+EXIT=1 (grep: 1 = none)
+$ node -e "<catalogue counts>"
+entries 10089; painted slots 2494; derived/no slot 7595
+sheets 207 {"ATLAS":26,"RMMZ_CHARACTER":172,"RMMZ_TILESET":9}; largest atlas (area) ATLAS_SURFACE_SHARED_TILE_01 4080x2592; largest side of any sheet 4080
+outOfScope 243; sources 55
+EXIT=0
+$ wc -l art/catalogue/conflicts.md
+133 art/catalogue/conflicts.md
+EXIT=0
+$ sha256sum art/catalogue/catalogue.json
+eb5a0fc1ebbf28b8c07ada4ef85b984950f8c7cea840af37f3f61570ec3e727c *art/catalogue/catalogue.json
+EXIT=0

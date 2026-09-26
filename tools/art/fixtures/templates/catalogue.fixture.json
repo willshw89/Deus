@@ -1,0 +1,2343 @@
+{
+  "schemaVersion": "deus-art-catalogue/1.1.0",
+  "fixture": "TEST_ catalogue fixture for tools/art/test_blank_templates.js (WG.32.02 Lane T), built by build_fixture.js. Not the art catalogue; no art exists for any row.",
+  "tileSizePx": 48,
+  "geometry": {
+    "path": "tools/art/fixtures/templates/geometry.fixture.json",
+    "sha256": "a1b95e7eb35208a0d1406a49e04fd7f977999e7751b5f96d20d45bc0a1b60235"
+  },
+  "palette": {
+    "path": "art/palette/deus_master_world_palette_v1.hex",
+    "sha256": null
+  },
+  "scaleChart": {
+    "path": "art/reference/DEUS_HUMAN_SCALE_STRIP_V1.png",
+    "sha256": null
+  },
+  "sources": [
+    {
+      "path": "tasks/WG.32.02/lane-t/BRIEF.md",
+      "sha256": null,
+      "role": "fixture specification"
+    }
+  ],
+  "sheets": [
+    {
+      "sheetId": "TEST_ATLAS_SURFACE",
+      "kind": "ATLAS",
+      "group": {
+        "band": "SURFACE",
+        "biome": "SURFACE_B1",
+        "type": "TEST_MIXED"
+      },
+      "w": 4096,
+      "h": 4096,
+      "gridPx": 48,
+      "runtimeFile": null
+    },
+    {
+      "sheetId": "TEST_A2_SURFACE",
+      "kind": "RMMZ_TILESET",
+      "group": {
+        "band": "SURFACE",
+        "biome": "SURFACE_B1",
+        "type": "TEST_GROUND"
+      },
+      "w": 768,
+      "h": 576,
+      "gridPx": 48,
+      "runtimeFile": "TEST_A2_Surface.png"
+    },
+    {
+      "sheetId": "$TEST_Human",
+      "kind": "RMMZ_CHARACTER",
+      "group": {
+        "band": "SURFACE",
+        "biome": "SURFACE_B1",
+        "type": "TEST_CHARACTER"
+      },
+      "w": 144,
+      "h": 192,
+      "gridPx": 48,
+      "runtimeFile": "$TEST_Human.png"
+    },
+    {
+      "sheetId": "$TEST_Ogre",
+      "kind": "RMMZ_CHARACTER",
+      "group": {
+        "band": "SURFACE",
+        "biome": "SURFACE_B1",
+        "type": "TEST_CREATURE"
+      },
+      "w": 144,
+      "h": 384,
+      "gridPx": 48,
+      "runtimeFile": "$TEST_Ogre.png"
+    },
+    {
+      "sheetId": "$TEST_Horse",
+      "kind": "RMMZ_CHARACTER",
+      "group": {
+        "band": "SURFACE",
+        "biome": "SURFACE_B1",
+        "type": "TEST_CREATURE"
+      },
+      "w": 288,
+      "h": 192,
+      "gridPx": 48,
+      "runtimeFile": "$TEST_Horse.png"
+    }
+  ],
+  "entries": [
+    {
+      "id": "TEST_SURFACE_B1_FURNITURE_BED_V1_BASE",
+      "category": "FURNITURE",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "ARCH_BED",
+      "envelope": {
+        "wMin": 80,
+        "wTarget": 88,
+        "wMax": 90,
+        "hMin": 56,
+        "hTarget": 64,
+        "hMax": 70
+      },
+      "footprint": {
+        "w": 2,
+        "h": 2
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 48,
+        "y": 95
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0000",
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 96
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_FURNITURE_TABLE_V1_BASE",
+      "category": "FURNITURE",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "ARCH_TABLE",
+      "envelope": {
+        "wMin": 30,
+        "wTarget": 36,
+        "wMax": 40,
+        "hMin": 20,
+        "hTarget": 24,
+        "hMax": 28
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 47
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0001",
+        "x": 96,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_LOWER1_B1_PROP_HANGING_V1_BASE",
+      "category": "PROP",
+      "band": "LOWER1",
+      "biome": "LOWER1_B1",
+      "zMin": -8,
+      "zMax": -1,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "TEST_PROP_HANGING",
+      "envelope": {
+        "wMin": 10,
+        "wTarget": 14,
+        "wMax": 20,
+        "hMin": 40,
+        "hTarget": 50,
+        "hMax": 60
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "CEILING",
+        "x": 24,
+        "y": 0
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0002",
+        "x": 144,
+        "y": 0,
+        "w": 48,
+        "h": 96
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_CREATURE_TINY_V1_IDLE",
+      "category": "CREATURE",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": "TINY",
+      "frameClass": "TINY",
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "TEST_CREATURE_TINY",
+      "envelope": {
+        "wMin": 12,
+        "wTarget": 18,
+        "wMax": 24,
+        "hMin": 12,
+        "hTarget": 18,
+        "hMax": 24
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 47
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0003",
+        "x": 192,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_CREATURE_OGRE_V1_IDLE",
+      "category": "CREATURE",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": "LARGE",
+      "frameClass": "LARGE_TALL",
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_FRAME_LARGE_TALL",
+      "envelope": {
+        "wMin": 24,
+        "wTarget": 32,
+        "wMax": 48,
+        "hMin": 70,
+        "hTarget": 84,
+        "hMax": 96
+      },
+      "footprint": {
+        "w": 2,
+        "h": 2
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 95
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0004",
+        "x": 240,
+        "y": 0,
+        "w": 48,
+        "h": 96
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_CREATURE_HORSE_V1_IDLE",
+      "category": "CREATURE",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": "LARGE",
+      "frameClass": "LARGE_LONG",
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_FRAME_LARGE_LONG",
+      "envelope": {
+        "wMin": 70,
+        "wTarget": 84,
+        "wMax": 96,
+        "hMin": 30,
+        "hTarget": 38,
+        "hMax": 48
+      },
+      "footprint": {
+        "w": 2,
+        "h": 2
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 48,
+        "y": 47
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0005",
+        "x": 288,
+        "y": 0,
+        "w": 96,
+        "h": 48
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_CHARACTER_GNOME_V1_IDLE",
+      "category": "CHARACTER",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": "SMALL",
+      "frameClass": "SMALL",
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "RACE_GNOME",
+      "envelope": {
+        "wMin": 10,
+        "wTarget": 12,
+        "wMax": 14,
+        "hMin": 21,
+        "hTarget": 25,
+        "hMax": 28
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 47
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0006",
+        "x": 384,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_CHARACTER_HALFLING_V1_IDLE",
+      "category": "CHARACTER",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": "SMALL",
+      "frameClass": "SMALL",
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "RACE_HALFLING",
+      "envelope": {
+        "wMin": 10,
+        "wTarget": 12,
+        "wMax": 14,
+        "hMin": 21,
+        "hTarget": 21,
+        "hMax": 21
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 47
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0007",
+        "x": 432,
+        "y": 0,
+        "w": 48,
+        "h": 48
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_RAMP_RISE1_V1_BASE",
+      "category": "RAMP",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_STRATUM_1",
+      "envelope": {
+        "wMin": 48,
+        "wTarget": 48,
+        "wMax": 48,
+        "hMin": 19,
+        "hTarget": 19,
+        "hMax": 19
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 18
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0008",
+        "x": 0,
+        "y": 173,
+        "w": 48,
+        "h": 19
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_RAMP_RISE2_V1_BASE",
+      "category": "RAMP",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_STRATUM_2",
+      "envelope": {
+        "wMin": 48,
+        "wTarget": 48,
+        "wMax": 48,
+        "hMin": 38,
+        "hTarget": 38,
+        "hMax": 38
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 37
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0009",
+        "x": 48,
+        "y": 154,
+        "w": 48,
+        "h": 38
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_RAMP_RISE3_V1_BASE",
+      "category": "RAMP",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_STRATUM_3",
+      "envelope": {
+        "wMin": 48,
+        "wTarget": 48,
+        "wMax": 48,
+        "hMin": 57,
+        "hTarget": 57,
+        "hMax": 57
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 56
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0010",
+        "x": 96,
+        "y": 135,
+        "w": 48,
+        "h": 57
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_RAMP_RISE4_V1_BASE",
+      "category": "RAMP",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_STRATUM_4",
+      "envelope": {
+        "wMin": 48,
+        "wTarget": 48,
+        "wMax": 48,
+        "hMin": 76,
+        "hTarget": 76,
+        "hMax": 76
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 75
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0011",
+        "x": 144,
+        "y": 116,
+        "w": 48,
+        "h": 76
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_RAMP_RISE5_V1_BASE",
+      "category": "RAMP",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_STRATUM_5",
+      "envelope": {
+        "wMin": 48,
+        "wTarget": 48,
+        "wMax": 48,
+        "hMin": 96,
+        "hTarget": 96,
+        "hMax": 96
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 95
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0012",
+        "x": 192,
+        "y": 96,
+        "w": 48,
+        "h": 96
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_EDGE_STRATA1_V1_BASE",
+      "category": "EDGE",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_STRATUM_1",
+      "envelope": {
+        "wMin": 96,
+        "wTarget": 96,
+        "wMax": 96,
+        "hMin": 19,
+        "hTarget": 19,
+        "hMax": 19
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 48,
+        "y": 18
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0013",
+        "x": 0,
+        "y": 269,
+        "w": 96,
+        "h": 19
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_EDGE_STRATA2_V1_BASE",
+      "category": "EDGE",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_STRATUM_2",
+      "envelope": {
+        "wMin": 96,
+        "wTarget": 96,
+        "wMax": 96,
+        "hMin": 38,
+        "hTarget": 38,
+        "hMax": 38
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 48,
+        "y": 37
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0014",
+        "x": 144,
+        "y": 250,
+        "w": 96,
+        "h": 38
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_EDGE_STRATA3_V1_BASE",
+      "category": "EDGE",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_STRATUM_3",
+      "envelope": {
+        "wMin": 96,
+        "wTarget": 96,
+        "wMax": 96,
+        "hMin": 57,
+        "hTarget": 57,
+        "hMax": 57
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 48,
+        "y": 56
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0015",
+        "x": 288,
+        "y": 231,
+        "w": 96,
+        "h": 57
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_EDGE_STRATA4_V1_BASE",
+      "category": "EDGE",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_STRATUM_4",
+      "envelope": {
+        "wMin": 96,
+        "wTarget": 96,
+        "wMax": 96,
+        "hMin": 76,
+        "hTarget": 76,
+        "hMax": 76
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 48,
+        "y": 75
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0016",
+        "x": 432,
+        "y": 212,
+        "w": 96,
+        "h": 76
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_EDGE_STRATA5_V1_BASE",
+      "category": "EDGE",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_STRATUM_5",
+      "envelope": {
+        "wMin": 96,
+        "wTarget": 96,
+        "wMax": 96,
+        "hMin": 96,
+        "hTarget": 96,
+        "hMax": 96
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 48,
+        "y": 95
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0017",
+        "x": 576,
+        "y": 192,
+        "w": 96,
+        "h": 96
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_WALL_FACE_V1_BASE",
+      "category": "WALL",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_LAYER_FACE",
+      "envelope": {
+        "wMin": 48,
+        "wTarget": 48,
+        "wMax": 48,
+        "hMin": 96,
+        "hTarget": 96,
+        "hMax": 96
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 95
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0018",
+        "x": 0,
+        "y": 384,
+        "w": 48,
+        "h": 96
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_WALL_FACE_V2_SET",
+      "category": "WALL",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_LAYER_FACE",
+      "envelope": {
+        "wMin": 48,
+        "wTarget": 48,
+        "wMax": 48,
+        "hMin": 96,
+        "hTarget": 96,
+        "hMax": 96
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 95
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 2,
+        "rows": 2,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0019",
+        "x": 96,
+        "y": 288,
+        "w": 96,
+        "h": 192
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_DOLL_HUMAN_BASE_WALK",
+      "category": "PAPERDOLL",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": "MEDIUM",
+      "frameClass": "MEDIUM",
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "RACE_HUMAN",
+      "envelope": {
+        "wMin": 14,
+        "wTarget": 18,
+        "wMax": 22,
+        "hMin": 35,
+        "hTarget": 42,
+        "hMax": 46
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 47
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 3,
+        "rows": 4,
+        "facings": 4,
+        "rate": 1
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0020",
+        "x": 0,
+        "y": 480,
+        "w": 144,
+        "h": 192
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": {
+        "group": "TEST_DOLL_HUMAN",
+        "layer": "base",
+        "z": 0,
+        "registration": {
+          "x": 24,
+          "y": 47
+        }
+      },
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_DOLL_HUMAN_TORSO_WALK",
+      "category": "PAPERDOLL",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": "MEDIUM",
+      "frameClass": "MEDIUM",
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "RACE_HUMAN",
+      "envelope": {
+        "wMin": 14,
+        "wTarget": 18,
+        "wMax": 22,
+        "hMin": 35,
+        "hTarget": 42,
+        "hMax": 46
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 47
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 3,
+        "rows": 4,
+        "facings": 4,
+        "rate": 1
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0021",
+        "x": 192,
+        "y": 480,
+        "w": 144,
+        "h": 192
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": {
+        "group": "TEST_DOLL_HUMAN",
+        "layer": "torso",
+        "z": 1,
+        "registration": {
+          "x": 24,
+          "y": 47
+        }
+      },
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_DOLL_HUMAN_HEAD_WALK",
+      "category": "PAPERDOLL",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": "MEDIUM",
+      "frameClass": "MEDIUM",
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "RACE_HUMAN",
+      "envelope": {
+        "wMin": 14,
+        "wTarget": 18,
+        "wMax": 22,
+        "hMin": 35,
+        "hTarget": 42,
+        "hMax": 46
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 47
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 3,
+        "rows": 4,
+        "facings": 4,
+        "rate": 1
+      },
+      "slot": {
+        "sheetId": "TEST_ATLAS_SURFACE",
+        "slotId": "TEST_ATLAS_SURFACE:0022",
+        "x": 384,
+        "y": 480,
+        "w": 144,
+        "h": 192
+      },
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": {
+        "group": "TEST_DOLL_HUMAN",
+        "layer": "head",
+        "z": 2,
+        "registration": {
+          "x": 24,
+          "y": 47
+        }
+      },
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_FURNITURE_BED_V1_FLIPPED",
+      "category": "FURNITURE",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "ARCH_BED",
+      "envelope": {
+        "wMin": 80,
+        "wTarget": 88,
+        "wMax": 90,
+        "hMin": 56,
+        "hTarget": 64,
+        "hMax": 70
+      },
+      "footprint": {
+        "w": 2,
+        "h": 2
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 48,
+        "y": 95
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": null,
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": "TEST_SURFACE_B1_FURNITURE_BED_V1_BASE",
+        "flipH": true,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ variant row; drawn from its parent, owns no paint slot"
+    },
+    {
+      "id": "TEST_SURFACE_B1_CREATURE_HUGE_V1_IDLE",
+      "category": "CREATURE",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": "HUGE",
+      "frameClass": "HUGE",
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "TEST_CREATURE_HUGE",
+      "envelope": null,
+      "footprint": {
+        "w": 3,
+        "h": 3
+      },
+      "anchor": null,
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": null,
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ row; HUGE frame is OWNER_OPEN (future), so no paint slot"
+    },
+    {
+      "id": "TEST_SURFACE_B1_CREATURE_GARGANTUAN_V1_IDLE",
+      "category": "CREATURE",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": "GARGANTUAN",
+      "frameClass": "GARGANTUAN",
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "TEST_CREATURE_GARGANTUAN",
+      "envelope": null,
+      "footprint": {
+        "w": 4,
+        "h": 4
+      },
+      "anchor": null,
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 1,
+        "rows": 1,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": null,
+      "runtime": {
+        "kind": "ATLAS",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ row; GARGANTUAN frame is OWNER_OPEN (future), so no paint slot"
+    },
+    {
+      "id": "TEST_SURFACE_B1_TERRAIN_GROUND_V1_BASE",
+      "category": "TERRAIN",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_TILE",
+      "envelope": {
+        "wMin": 48,
+        "wTarget": 48,
+        "wMax": 48,
+        "hMin": 48,
+        "hTarget": 48,
+        "hMax": 48
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "CENTER",
+        "x": 24,
+        "y": 24
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 2,
+        "rows": 3,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_A2_SURFACE",
+        "slotId": "TEST_A2_SURFACE:0000",
+        "x": 0,
+        "y": 0,
+        "w": 96,
+        "h": 144
+      },
+      "runtime": {
+        "kind": "RMMZ_TILESET",
+        "file": "TEST_A2_Surface.png",
+        "tileId": 2816
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_TERRAIN_GROUND_V2_BASE",
+      "category": "TERRAIN",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_TILE",
+      "envelope": {
+        "wMin": 48,
+        "wTarget": 48,
+        "wMax": 48,
+        "hMin": 48,
+        "hTarget": 48,
+        "hMax": 48
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "CENTER",
+        "x": 24,
+        "y": 24
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 2,
+        "rows": 3,
+        "facings": 1,
+        "rate": 0
+      },
+      "slot": {
+        "sheetId": "TEST_A2_SURFACE",
+        "slotId": "TEST_A2_SURFACE:0001",
+        "x": 96,
+        "y": 0,
+        "w": 96,
+        "h": 144
+      },
+      "runtime": {
+        "kind": "RMMZ_TILESET",
+        "file": "TEST_A2_Surface.png",
+        "tileId": 2864
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_CHARACTER_HUMAN_V1_WALK",
+      "category": "CREATURE",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": "MEDIUM",
+      "frameClass": "MEDIUM",
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "RACE_HUMAN",
+      "envelope": {
+        "wMin": 14,
+        "wTarget": 18,
+        "wMax": 22,
+        "hMin": 35,
+        "hTarget": 42,
+        "hMax": 46
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 47
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 3,
+        "rows": 4,
+        "facings": 4,
+        "rate": 1
+      },
+      "slot": {
+        "sheetId": "$TEST_Human",
+        "slotId": "$TEST_Human:0000",
+        "x": 0,
+        "y": 0,
+        "w": 144,
+        "h": 192
+      },
+      "runtime": {
+        "kind": "RMMZ_CHARACTER",
+        "file": "$TEST_Human.png",
+        "index": 0
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_CREATURE_OGRE_V1_WALK",
+      "category": "CREATURE",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": "LARGE",
+      "frameClass": "LARGE_TALL",
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_FRAME_LARGE_TALL",
+      "envelope": {
+        "wMin": 24,
+        "wTarget": 32,
+        "wMax": 48,
+        "hMin": 70,
+        "hTarget": 84,
+        "hMax": 96
+      },
+      "footprint": {
+        "w": 2,
+        "h": 2
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 95
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 3,
+        "rows": 4,
+        "facings": 4,
+        "rate": 1
+      },
+      "slot": {
+        "sheetId": "$TEST_Ogre",
+        "slotId": "$TEST_Ogre:0000",
+        "x": 0,
+        "y": 0,
+        "w": 144,
+        "h": 384
+      },
+      "runtime": {
+        "kind": "RMMZ_CHARACTER",
+        "file": "$TEST_Ogre.png",
+        "index": 0
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    },
+    {
+      "id": "TEST_SURFACE_B1_CREATURE_HORSE_V1_WALK",
+      "category": "CREATURE",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": "LARGE",
+      "frameClass": "LARGE_LONG",
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "tasks/WG.32.02/lane-t/BRIEF.md"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_FRAME_LARGE_LONG",
+      "envelope": {
+        "wMin": 70,
+        "wTarget": 84,
+        "wMax": 96,
+        "hMin": 30,
+        "hTarget": 38,
+        "hMax": 48
+      },
+      "footprint": {
+        "w": 2,
+        "h": 2
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 48,
+        "y": 47
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 3,
+        "rows": 4,
+        "facings": 4,
+        "rate": 1
+      },
+      "slot": {
+        "sheetId": "$TEST_Horse",
+        "slotId": "$TEST_Horse:0000",
+        "x": 0,
+        "y": 0,
+        "w": 288,
+        "h": 192
+      },
+      "runtime": {
+        "kind": "RMMZ_CHARACTER",
+        "file": "$TEST_Horse.png",
+        "index": 0
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture row; no art exists"
+    }
+  ],
+  "outOfScope": [
+    {
+      "sourceId": "TEST_SOURCE_OUT_OF_SCOPE_1",
+      "reason": "TEST_ example of an out-of-scope source row"
+    }
+  ]
+}

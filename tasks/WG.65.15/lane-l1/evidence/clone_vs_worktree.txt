@@ -1,0 +1,4 @@
+$ cmp <(grep -v '^\$\|run time\|mutants:' gate1_test_ledger.txt) <(grep -v '^\$\|run time\|mutants:' clone_gate1_test_ledger.txt)
+EXIT=0 (0 = identical apart from the command header and timing lines)
+$ diff <(grep -v '^\$\|run time' gate2_test_ledger_longrun.txt | sed 's/; run time [0-9]* ms//') <(grep -v '^\$\|run time' clone_gate2_test_ledger_longrun.txt | sed 's/; run time [0-9]* ms//')
+EXIT=0 (0 = identical apart from the command header and timing)

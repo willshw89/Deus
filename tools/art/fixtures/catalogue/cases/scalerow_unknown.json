@@ -1,0 +1,20 @@
+{
+  "case": "scalerow_unknown",
+  "base": "tools/art/fixtures/catalogue/mini/catalogue.json",
+  "context": "tools/art/fixtures/catalogue/mini/context.json",
+  "code": "SCALEROW_UNKNOWN",
+  "rule": "a scaleRow not in scale_chart.json",
+  "patch": [
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "id": "SURFACE_SHARED_TREE_OAK_V1_DEFAULT"
+        },
+        "scaleRow"
+      ],
+      "value": "TREE_NOT_IN_THE_CHART"
+    }
+  ]
+}

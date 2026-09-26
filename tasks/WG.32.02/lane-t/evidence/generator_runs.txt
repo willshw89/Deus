@@ -1,0 +1,40 @@
+$ node tools/art/make_blank_templates.js --catalogue C:/Users/snewt/AppData/Local/Temp/lane-t-evidence/base.catalogue.json --out C:/Users/snewt/AppData/Local/Temp/lane-t-evidence/out-base
+WROTE $TEST_Horse.png 288x192 slots=1 sha256=8cdcbee81a4675d6428792926ef68ddd516fa67ffe28c72044dccc3a3daef05d
+WROTE $TEST_Human.png 144x192 slots=1 sha256=a542c5fde1718221c316606cfed3648d7b9359cea7f9cc1d306d3da5e2b3e9b4
+WROTE $TEST_Ogre.png 144x384 slots=1 sha256=bbf6ff2432161400f5325bb3cec99775db4ab78f0841c368f4f9a78db0064f1d
+WROTE TEST_A2_SURFACE.png 768x576 slots=2 sha256=b4ee04a59b6a47265b362b101e7f54415afca885560273b4ec6aa948e8536244
+WROTE TEST_ATLAS_SURFACE.png 4096x4096 slots=23 sha256=1437d21c8d95d5c18feffef644ea98c54c11821d733e4dc50a0797e35aa871cf
+TEMPLATES: 5 sheet(s), 28 slot(s) in C:\Users\snewt\AppData\Local\Temp\lane-t-evidence\out-base
+EXIT=0
+out folder exists: yes
+$ node tools/art/make_blank_templates.js --catalogue C:/Users/snewt/AppData/Local/Temp/lane-t-evidence/invalid_split.catalogue.json --out C:/Users/snewt/AppData/Local/Temp/lane-t-evidence/out-invalid_split
+REFUSED GEOMETRY_INVALID: stratumPx[4] must be a positive integer (got 0)
+REFUSED: 1 problem(s); nothing written
+EXIT=2
+out folder exists: no
+$ node tools/art/make_blank_templates.js --catalogue C:/Users/snewt/AppData/Local/Temp/lane-t-evidence/changed_split.catalogue.json --out C:/Users/snewt/AppData/Local/Temp/lane-t-evidence/out-changed_split
+WROTE $TEST_Horse.png 288x192 slots=1 sha256=8cdcbee81a4675d6428792926ef68ddd516fa67ffe28c72044dccc3a3daef05d
+WROTE $TEST_Human.png 144x192 slots=1 sha256=a542c5fde1718221c316606cfed3648d7b9359cea7f9cc1d306d3da5e2b3e9b4
+WROTE $TEST_Ogre.png 144x384 slots=1 sha256=bbf6ff2432161400f5325bb3cec99775db4ab78f0841c368f4f9a78db0064f1d
+WROTE TEST_A2_SURFACE.png 768x576 slots=2 sha256=b4ee04a59b6a47265b362b101e7f54415afca885560273b4ec6aa948e8536244
+WROTE TEST_ATLAS_SURFACE.png 4096x4096 slots=23 sha256=50afca57a224aa0e808257f7668c36b84afa58433dcf556ac0274fb6e9cd01ad
+TEMPLATES: 5 sheet(s), 28 slot(s) in C:\Users\snewt\AppData\Local\Temp\lane-t-evidence\out-changed_split
+EXIT=0
+out folder exists: yes
+$ node tools/art/make_blank_templates.js --catalogue C:/Users/snewt/AppData/Local/Temp/lane-t-evidence/stale.catalogue.json --out C:/Users/snewt/AppData/Local/Temp/lane-t-evidence/out-stale
+REFUSED GEOMETRY_SHA_MISMATCH: catalogue was built from geometry fc91f1ee023003651d6978932d1824948626d9f94c5d03fab26e6ef490643e22 but changed_split.geometry.json is 9156cd2939414f184d923dbccd6246e468c322d0700e0118717cb399aec367c9; rebuild the catalogue
+REFUSED STRATUM_HEIGHT_MISMATCH: TEST_SURFACE_B1_RAMP_RISE1_V1_BASE: GEOM_STRATUM_1 needs frame height 20 from stratumPx [20,19,19,19,19] (slot height 1 x 20 = 20) but the slot is 19 high
+REFUSED STRATUM_HEIGHT_MISMATCH: TEST_SURFACE_B1_RAMP_RISE2_V1_BASE: GEOM_STRATUM_2 needs frame height 39 from stratumPx [20,19,19,19,19] (slot height 1 x 39 = 39) but the slot is 38 high
+REFUSED STRATUM_HEIGHT_MISMATCH: TEST_SURFACE_B1_RAMP_RISE3_V1_BASE: GEOM_STRATUM_3 needs frame height 58 from stratumPx [20,19,19,19,19] (slot height 1 x 58 = 58) but the slot is 57 high
+REFUSED STRATUM_HEIGHT_MISMATCH: TEST_SURFACE_B1_RAMP_RISE4_V1_BASE: GEOM_STRATUM_4 needs frame height 77 from stratumPx [20,19,19,19,19] (slot height 1 x 77 = 77) but the slot is 76 high
+REFUSED STRATUM_HEIGHT_MISMATCH: TEST_SURFACE_B1_EDGE_STRATA1_V1_BASE: GEOM_STRATUM_1 needs frame height 20 from stratumPx [20,19,19,19,19] (slot height 1 x 20 = 20) but the slot is 19 high
+REFUSED STRATUM_HEIGHT_MISMATCH: TEST_SURFACE_B1_EDGE_STRATA2_V1_BASE: GEOM_STRATUM_2 needs frame height 39 from stratumPx [20,19,19,19,19] (slot height 1 x 39 = 39) but the slot is 38 high
+REFUSED STRATUM_HEIGHT_MISMATCH: TEST_SURFACE_B1_EDGE_STRATA3_V1_BASE: GEOM_STRATUM_3 needs frame height 58 from stratumPx [20,19,19,19,19] (slot height 1 x 58 = 58) but the slot is 57 high
+REFUSED STRATUM_HEIGHT_MISMATCH: TEST_SURFACE_B1_EDGE_STRATA4_V1_BASE: GEOM_STRATUM_4 needs frame height 77 from stratumPx [20,19,19,19,19] (slot height 1 x 77 = 77) but the slot is 76 high
+REFUSED: 9 problem(s); nothing written
+EXIT=2
+out folder exists: no
+$ node tools/art/make_blank_templates.js --catalogue tools/art/fixtures/templates/catalogue.fixture.json --out C:/Users/snewt/AppData/Local/Temp/lane-t-evidence/out-x --bg plaid
+ERROR: --bg must be one of transparent, magenta
+usage: node tools/art/make_blank_templates.js --catalogue <catalogue.json> [--geometry <geometry.json>] --out <dir> [--bg transparent|magenta]
+EXIT=1

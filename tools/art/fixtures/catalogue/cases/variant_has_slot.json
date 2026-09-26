@@ -1,0 +1,27 @@
+{
+  "case": "variant_has_slot",
+  "base": "tools/art/fixtures/catalogue/mini/catalogue.json",
+  "context": "tools/art/fixtures/catalogue/mini/context.json",
+  "code": "VARIANT_HAS_SLOT",
+  "rule": "a variant (derivedFrom set) with a paint slot",
+  "patch": [
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "id": "LOWER1_SHARED_EDGE_MEADOW_S-H2_DEFAULT"
+        },
+        "slot"
+      ],
+      "value": {
+        "sheetId": "ATLAS_SURFACE_SHARED_TILE_01",
+        "slotId": "ATLAS_SURFACE_SHARED_TILE_01:9999",
+        "x": 4032,
+        "y": 2544,
+        "w": 48,
+        "h": 48
+      }
+    }
+  ]
+}

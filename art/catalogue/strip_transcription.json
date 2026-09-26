@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "deus-art-catalogue/1.1.0",
+  "strip": {
+    "path": "art/reference/DEUS_HUMAN_SCALE_STRIP_V1.png",
+    "sha256": "5ce5cefef0a39d7b20234e66e106d9df4cf6ddb652da5ed30da2cf9096be6dea",
+    "widthPx": 1340,
+    "heightPx": 224
+  },
+  "method": "Transcribed by Claude (lane-s, 2026-09-26) by opening the strip PNG with the Read tool at native resolution and reading the printed label under each object (name line, then height line). No pixels were measured, edited or copied. The strip header reads: DEUS TECHNICAL HUMAN / WORLD SCALE STRIP (DW.01.03); OFFICIAL 1.00X CAMERA, NATIVE 1:1 RESOLUTION, 48X48 TILE GRID, CANONICAL HUMAN 42 PX.",
+  "labels": [
+    { "order": 1, "chartLabel": "48X48 TILE", "chartHeightPx": 48, "row": "RMMZ_TILE_48" },
+    { "order": 2, "chartLabel": "HUMAN", "chartHeightPx": 42, "row": "CHARACTER_HUMAN_ADULT" },
+    { "order": 3, "chartLabel": "SHORT GRASS", "chartHeightPx": 12, "row": "MICRO_SHORT_GRASS" },
+    { "order": 4, "chartLabel": "TALL GRASS", "chartHeightPx": 28, "row": "MICRO_TALL_GRASS" },
+    { "order": 5, "chartLabel": "SMALL BUSH", "chartHeightPx": 18, "row": "SHRUB_SMALL_BUSH" },
+    { "order": 6, "chartLabel": "MED BUSH", "chartHeightPx": 26, "row": "SHRUB_MEDIUM_BUSH" },
+    { "order": 7, "chartLabel": "MED ROCK", "chartHeightPx": 22, "row": "STONE_MEDIUM_ROCK" },
+    { "order": 8, "chartLabel": "BOULDER", "chartHeightPx": 38, "row": "STONE_LARGE_BOULDER" },
+    { "order": 9, "chartLabel": "DOORWAY", "chartHeightPx": 58, "row": "ARCH_DOORWAY" },
+    { "order": 10, "chartLabel": "BED", "chartHeightPx": 58, "row": "ARCH_BED" },
+    { "order": 11, "chartLabel": "CHAIR", "chartHeightPx": 26, "row": "ARCH_CHAIR" },
+    { "order": 12, "chartLabel": "TABLE", "chartHeightPx": 24, "row": "ARCH_TABLE" },
+    { "order": 13, "chartLabel": "CHEST", "chartHeightPx": 20, "row": "ARCH_CHEST" },
+    { "order": 14, "chartLabel": "OAK (~84)", "chartHeightPx": 84, "row": "TREE_COMMON_OAK" },
+    { "order": 15, "chartLabel": "BIRCH (~88)", "chartHeightPx": 88, "row": "TREE_COMMON_BIRCH" },
+    { "order": 16, "chartLabel": "PINE (~92)", "chartHeightPx": 92, "row": "TREE_COMMON_PINE" },
+    { "order": 17, "chartLabel": "ACCENT (105)", "chartHeightPx": 105, "row": "TREE_LARGE_ACCENT" },
+    { "order": 18, "chartLabel": "HERO (~140)", "chartHeightPx": 140, "row": "TREE_HERO_LANDMARK" }
+  ],
+  "axisLabels": ["144P [3T]", "140P HERO", "105P ACC", "96P [2T]", "84P OAK", "58P DOOR", "48P [1T]", "42P HUMAN", "36 PX", "24 PX", "12 PX", "0 PX"]
+}

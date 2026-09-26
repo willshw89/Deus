@@ -1,0 +1,17 @@
+running suite layer_switch_inplace on C:\Users\snewt\AppData\Local\Temp\deus_layer_switch\mutant_transfer_switch_2696 (mutant transfer_switch), seed 18
+MUTANT transfer_switch: CAUGHT by same_scene_and_spriteset (exit 1; RESULT: 2 passed, 5 failed (exit 1); failing: same_scene_and_spriteset, ticks_never_skipped, switch_within_one_frame, new_level_shown_at_once, save_load_keeps_view_and_world; 33 s)
+running suite layer_switch_inplace on C:\Users\snewt\AppData\Local\Temp\deus_layer_switch\mutant_pause_during_switch_2696 (mutant pause_during_switch), seed 18
+MUTANT pause_during_switch: CAUGHT by ticks_never_skipped (exit 1; RESULT: 6 passed, 1 failed (exit 1); failing: ticks_never_skipped; 35 s)
+running suite layer_switch_inplace on C:\Users\snewt\AppData\Local\Temp\deus_layer_switch\mutant_no_prewarm_2696 (mutant no_prewarm), seed 18
+MUTANT no_prewarm: CAUGHT by no_sync_build_after_prewarm (exit 1; RESULT: 6 passed, 1 failed (exit 1); failing: no_sync_build_after_prewarm; 53 s)
+running suite layer_switch_inplace on C:\Users\snewt\AppData\Local\Temp\deus_layer_switch\mutant_slow_rebind_2696 (mutant slow_rebind), seed 18
+MUTANT slow_rebind: CAUGHT by switch_within_one_frame (exit 1; RESULT: 6 passed, 1 failed (exit 1); failing: switch_within_one_frame; 35 s)
+running suite layer_switch_inplace on C:\Users\snewt\AppData\Local\Temp\deus_layer_switch\mutant_stale_sprites_2696 (mutant stale_sprites), seed 18
+MUTANT stale_sprites: CAUGHT by new_level_shown_at_once (exit 1; RESULT: 6 passed, 1 failed (exit 1); failing: new_level_shown_at_once; 35 s)
+running suite layer_switch_inplace on C:\Users\snewt\AppData\Local\Temp\deus_layer_switch\mutant_no_fog_refresh_2696 (mutant no_fog_refresh), seed 18
+MUTANT no_fog_refresh: CAUGHT by new_level_shown_at_once (exit 1; RESULT: 6 passed, 1 failed (exit 1); failing: new_level_shown_at_once; 32 s)
+running suite layer_switch_inplace on C:\Users\snewt\AppData\Local\Temp\deus_layer_switch\mutant_save_view_stale_2696 (mutant save_view_stale), seed 18
+MUTANT save_view_stale: CAUGHT by save_load_keeps_view_and_world (exit 1; RESULT: 6 passed, 1 failed (exit 1); failing: save_load_keeps_view_and_world; 36 s)
+running suite layer_switch_inplace on C:\Users\snewt\AppData\Local\Temp\deus_layer_switch\mutant_error_injected_2696 (mutant error_injected), seed 18
+MUTANT error_injected: CAUGHT by no_errors (exit 1; RESULT: 6 passed, 1 failed (exit 1); failing: no_errors; 36 s)
+MUTANTS: 8/8 caught

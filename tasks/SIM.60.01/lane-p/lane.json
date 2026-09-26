@@ -1,0 +1,22 @@
+{
+  "lane": "lane-p",
+  "taskId": "SIM.60.01",
+  "branch": "task/lane-p",
+  "writer": "claude",
+  "reviewer": "grok",
+  "allowedPaths": [
+    "docs/audits/SRD_SPELL_EFFECT_AUDIT.md",
+    "docs/audits/srd_spell_effect_audit.json",
+    "tasks/SIM.60.01/lane-p/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "node",
+      "args": [
+        "-e",
+        "const fs=require('fs');const src=JSON.parse(fs.readFileSync('game/data/srd51/spells.json','utf8')).entries.filter(e=>e.kind==='spell');const a=JSON.parse(fs.readFileSync('docs/audits/srd_spell_effect_audit.json','utf8'));const recs=Array.isArray(a)?a:(a.records||a.spells||a.entries);const ids=new Set(recs.map(r=>r.id));const miss=src.filter(e=>!ids.has(e.id));const extra=recs.filter(r=>!src.some(e=>e.id===r.id));const nosys=recs.filter(r=>!Array.isArray(r.systems)||r.systems.length===0);console.log('source',src.length,'records',recs.length,'missing',miss.length,'extra',extra.length,'noSystems',nosys.length);if(miss.length||extra.length||nosys.length||recs.length!==src.length)process.exit(1)"
+      ],
+      "timeoutSec": 60
+    }
+  ]
+}

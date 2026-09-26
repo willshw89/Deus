@@ -1,0 +1,3 @@
+$ node tasks/WG.65.15/lane-l1/gen_ledger_tables.js --check   (worktree, HEAD 6b15462c3732755377f8491fec763586746c29bc)
+PASS LEDGER_API.md generated tables match createLedger().describe()
+EXIT=0

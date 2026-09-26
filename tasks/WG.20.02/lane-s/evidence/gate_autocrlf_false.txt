@@ -1,0 +1,10 @@
+clone HEAD: 51d3915af6beee1476c5b78df76b7c23dceb6a01
+git config core.autocrlf (effective in the clone): false
+$ node tools/art/build_catalogue.js --check
+WARN UNVERIFIED_ABSENT reference/u7_shapes_0_31.png (untracked third-party reference not present in this checkout)
+CHECK: OK (12 generated files match)
+EXIT=0
+$ node tools/art/test_catalogue.js  (shown: number of PASS lines, every FAIL line, the summary line)
+PASS lines: 47
+47/47 checks passed
+EXIT=0

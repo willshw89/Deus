@@ -1,0 +1,30 @@
+{
+  "task": "WG.65.15",
+  "note": "Final checksums of tools/sim/test_ledger_longrun.js runs. Regenerate with --write-fixture only when the ledger, its defaults or the harness change on purpose.",
+  "runs": {
+    "seed1_z-16..15_ops100000_k1000": {
+      "ledger": "12a7e820",
+      "world": "ad4559df",
+      "counts": "{\"decay_ruin\":5176,\"ruin_to_rubble\":3253,\"collapse\":1989,\"weather\":4647,\"erode\":3703,\"pedogenesis\":1973,\"lithify\":1984,\"rust\":3218,\"mine_stone\":4822,\"mine_ore\":3878,\"mine_gem\":525,\"smelt\":2601,\"build\":4788,\"salvage\":1795,\"fire\":2744,\"ash_weather\":1190,\"water_flow\":9926,\"freeze\":2992,\"thaw\":2076,\"rain\":3046,\"evaporate\":3034,\"magic_source\":998,\"magic_sink\":951,\"migrant_arrives\":936,\"trader_leaves\":570,\"grow\":3014,\"litter\":1484,\"harvest\":1569,\"eat\":1273,\"die\":1093,\"butcher\":581,\"fell\":999,\"chop\":13,\"rot\":1641,\"kiln\":310,\"forge\":405,\"dig_fill\":1928,\"drink\":1983,\"excrete\":1475,\"solidify\":59,\"haul\":5630,\"creature_move\":2614,\"alloy\":44,\"part\":73,\"debug\":997}",
+      "tally": "{\"src\":{\"mineral\":137587,\"organic\":102764,\"water\":58716,\"fe\":0,\"cu\":0,\"ag\":0,\"au\":0,\"pt\":0,\"gem\":0},\"snk\":{\"mineral\":72205,\"organic\":30568,\"water\":22826,\"fe\":25321,\"cu\":13163,\"ag\":7934,\"au\":0,\"pt\":0,\"gem\":0}}{\"fe_ore\":329054,\"cu_ore\":152596,\"ag_ore\":86802,\"au_ore\":64314,\"pt_ore\":49688}"
+    },
+    "seed2_z-16..15_ops100000_k1000": {
+      "ledger": "139ac6f0",
+      "world": "d494aeb7",
+      "counts": "{\"decay_ruin\":5130,\"ruin_to_rubble\":3246,\"collapse\":2015,\"weather\":4824,\"erode\":3738,\"pedogenesis\":1917,\"lithify\":1889,\"rust\":3084,\"mine_stone\":4937,\"mine_ore\":3941,\"mine_gem\":548,\"smelt\":2543,\"build\":4883,\"salvage\":1794,\"fire\":2638,\"ash_weather\":1146,\"water_flow\":9928,\"freeze\":2987,\"thaw\":2111,\"rain\":3024,\"evaporate\":2948,\"magic_source\":997,\"magic_sink\":990,\"migrant_arrives\":1042,\"trader_leaves\":599,\"grow\":3018,\"litter\":1520,\"harvest\":1460,\"eat\":1215,\"die\":1066,\"butcher\":555,\"fell\":978,\"chop\":21,\"rot\":1594,\"kiln\":326,\"forge\":457,\"dig_fill\":1985,\"drink\":1957,\"excrete\":1391,\"solidify\":67,\"haul\":5804,\"creature_move\":2609,\"alloy\":51,\"part\":55,\"debug\":972}",
+      "tally": "{\"src\":{\"mineral\":145686,\"organic\":116234,\"water\":60213,\"fe\":0,\"cu\":0,\"ag\":0,\"au\":0,\"pt\":0,\"gem\":0},\"snk\":{\"mineral\":72106,\"organic\":33994,\"water\":23117,\"fe\":26122,\"cu\":11137,\"ag\":6679,\"au\":0,\"pt\":0,\"gem\":0}}{\"fe_ore\":341687,\"cu_ore\":141356,\"ag_ore\":80587,\"au_ore\":58013,\"pt_ore\":56213}"
+    },
+    "seed3_z-16..15_ops100000_k1000": {
+      "ledger": "1edbfc9e",
+      "world": "846ab612",
+      "counts": "{\"decay_ruin\":5118,\"ruin_to_rubble\":3278,\"collapse\":2091,\"weather\":4688,\"erode\":3711,\"pedogenesis\":1968,\"lithify\":1946,\"rust\":3033,\"mine_stone\":5001,\"mine_ore\":3989,\"mine_gem\":494,\"smelt\":2580,\"build\":4749,\"salvage\":1801,\"fire\":2601,\"ash_weather\":1165,\"water_flow\":9859,\"freeze\":2942,\"thaw\":2080,\"rain\":2956,\"evaporate\":3011,\"magic_source\":1000,\"magic_sink\":978,\"migrant_arrives\":991,\"trader_leaves\":600,\"grow\":3080,\"litter\":1491,\"harvest\":1534,\"eat\":1170,\"die\":1114,\"butcher\":493,\"fell\":1062,\"chop\":10,\"rot\":1650,\"kiln\":323,\"forge\":507,\"dig_fill\":2025,\"drink\":1893,\"excrete\":1415,\"solidify\":65,\"haul\":5785,\"creature_move\":2676,\"alloy\":42,\"part\":49,\"debug\":986}",
+      "tally": "{\"src\":{\"mineral\":138253,\"organic\":111932,\"water\":59193,\"fe\":0,\"cu\":0,\"ag\":0,\"au\":0,\"pt\":0,\"gem\":0},\"snk\":{\"mineral\":89952,\"organic\":28720,\"water\":21978,\"fe\":27934,\"cu\":13745,\"ag\":7403,\"au\":0,\"pt\":0,\"gem\":0}}{\"fe_ore\":327933,\"cu_ore\":166339,\"ag_ore\":76675,\"au_ore\":62349,\"pt_ore\":61014}"
+    },
+    "seed4_z-4..4_ops100000_k1000": {
+      "ledger": "a7cef426",
+      "world": "9ed48901",
+      "counts": "{\"decay_ruin\":5115,\"ruin_to_rubble\":3585,\"collapse\":1769,\"weather\":4367,\"erode\":3654,\"pedogenesis\":1815,\"lithify\":1845,\"rust\":3572,\"mine_stone\":4421,\"mine_ore\":3153,\"mine_gem\":203,\"smelt\":2367,\"build\":4466,\"salvage\":1801,\"fire\":3163,\"ash_weather\":1479,\"water_flow\":9006,\"freeze\":2682,\"thaw\":2044,\"rain\":2747,\"evaporate\":2781,\"magic_source\":985,\"magic_sink\":847,\"migrant_arrives\":923,\"trader_leaves\":712,\"grow\":3361,\"litter\":1957,\"harvest\":1924,\"eat\":1828,\"die\":1425,\"butcher\":769,\"fell\":1269,\"chop\":26,\"rot\":2079,\"kiln\":473,\"forge\":595,\"dig_fill\":1816,\"drink\":1801,\"excrete\":1567,\"solidify\":6,\"haul\":5028,\"creature_move\":3479,\"alloy\":77,\"part\":100,\"debug\":918}",
+      "tally": "{\"src\":{\"mineral\":135547,\"organic\":98287,\"water\":54931,\"fe\":0,\"cu\":0,\"ag\":0,\"au\":0,\"pt\":0,\"gem\":0},\"snk\":{\"mineral\":117053,\"organic\":25994,\"water\":21458,\"fe\":44237,\"cu\":9001,\"ag\":3072,\"au\":0,\"pt\":0,\"gem\":0}}{\"fe_ore\":367935,\"cu_ore\":106267,\"ag_ore\":38088,\"au_ore\":32572,\"pt_ore\":23561}"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+Running --deus-test=natural_walls on C:\Users\snewt\AppData\Local\Temp\deus_lane_n\main_game
+UF_Test run 2026-09-26T05:43:56.158Z args=[]
+DEBUG_SHEET: Scene_Boot.start called
+AVAILABLE SUITES: selftest, smoke, perf, native_starting_gear, native_survival_dying, native_perf_4x_benchmark, select, minimap, natural_connections, ownership, ecology, projects, settlement, colonists, overseer, world, spawn, worldgen, biomes, tiles, ground, factions, skins, history, objects, walls, doors, items, jobs, floors, wildlife, wildlife_seeds, stance, combat, anim, fog, daynight, timespeed, camera, culling, speech, overhead, look, sheet, talk, fire, vertical, natural_walls, flooding, strata, environment, faction_menus, title, load, setup, depth, select
+SUITE natural_walls
+PASS natural_walls.two_cell_render - soil 48x96, stone 48x96; opaque cap/face samples soil 144/144, stone 144/144; cap y-1 on z=-1, lower face ends at wall-cell foot
+PASS natural_walls.one_collision_cell - wall base blocked; north cap overhang and south floor remain passable; no duplicate object
+PASS natural_walls.material_and_depth - separate material frames; depth north 288 < wall 336 < south 384
+SHOT C:\Users\snewt\AppData\Local\Temp\deus_lane_n\main_game\test_output\natural_walls.two_cell_natural_walls.png
+PASS natural_walls.ground_cliff_render - edge (162,131) on the ground: frame 48x96, cap pixel #0a0a10 (want #08080C..#121218); 34 wall frames on screen for 34 natural wall cells in x 153..172, y 126..142; 10 ramp/stair frames for 10
+PASS natural_walls.ground_cliff_blocks - hill cell (162,131): ground peak_rock, map passable down/up false/false, World.walkable false
+SHOT C:\Users\snewt\AppData\Local\Temp\deus_lane_n\main_game\test_output\natural_walls.ground_cliff_z0.png
+PASS natural_walls.no_errors - none
+RESULT: 6 passed, 0 failed (exit 0)

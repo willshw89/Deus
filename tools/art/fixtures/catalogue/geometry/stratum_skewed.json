@@ -1,0 +1,13 @@
+{
+  "base": "art/catalogue/geometry.json",
+  "about": "stratumPx [40,14,14,14,14] (sums to layerPx 96): the 48-grid slot heights of 2-strata strips and ramp cells change.",
+  "set": {
+    "stratumPx": [
+      40,
+      14,
+      14,
+      14,
+      14
+    ]
+  }
+}

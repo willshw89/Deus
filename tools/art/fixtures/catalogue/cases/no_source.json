@@ -1,0 +1,28 @@
+{
+  "case": "no_source",
+  "base": "tools/art/fixtures/catalogue/mini/catalogue.json",
+  "context": "tools/art/fixtures/catalogue/mini/context.json",
+  "code": "NO_SOURCE",
+  "rule": "an entry that traces to no source",
+  "patch": [
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "id": "ALL_SHARED_ITEM_LOG_V1_DEFAULT"
+        },
+        "sourceIds"
+      ],
+      "value": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      }
+    }
+  ]
+}

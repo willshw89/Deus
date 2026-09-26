@@ -1,0 +1,12 @@
+﻿You are the primary implementer for Lane I (Task WG.00.12: Automated Merge Gate).
+Read tasks/WG.00.12/lane-i/BRIEF.md carefully.
+Your implementation commit 7e9124f3 passes all 89 tests in tools/governance/test_merge_gate.js!
+Next step: Author tools/governance/MERGE_GATE.md documenting the architecture, checks, failure reason codes, and usage.
+Ensure all tests continue to pass (node tools/governance/test_merge_gate.js).
+Commit your work to task/lane-i with message starting with '[claude] WG.00.12'.
+Standing rules:
+1. One primary writer per file set.
+2. Workers never push. Only the integrator pushes.
+3. Capture the exit code of every command, one per command ('EXIT=$LASTEXITCODE'). Put raw values in your reports.
+4. FOREGROUND rule: Run tests in the FOREGROUND. Never end your turn while background jobs or child processes are running.
+5. NO ART (DEC-007).

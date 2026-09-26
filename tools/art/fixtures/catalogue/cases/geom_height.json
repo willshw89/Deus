@@ -1,0 +1,33 @@
+{
+  "case": "geom_height",
+  "base": "tools/art/fixtures/catalogue/mini/catalogue.json",
+  "context": "tools/art/fixtures/catalogue/mini/context.json",
+  "code": "GEOM_HEIGHT",
+  "rule": "a geometry-derived slot height that is not computed from stratumPx/layerPx",
+  "patch": [
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "id": "SURFACE_SHARED_EDGE_MEADOW_S-H2_DEFAULT"
+        },
+        "envelope",
+        "hMax"
+      ],
+      "value": 48
+    },
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "id": "SURFACE_SHARED_EDGE_MEADOW_S-H2_DEFAULT"
+        },
+        "envelope",
+        "hTarget"
+      ],
+      "value": 48
+    }
+  ]
+}

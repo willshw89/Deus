@@ -1,0 +1,286 @@
+{
+  "task": "SIM.40.05",
+  "baseCommit": "84ee3b55f3f8c1b8a16710ccf3878795d98d1683",
+  "branchHeadAtStart": "0026c89c997778e5d12380d68e5c72c57a98f9d3",
+  "fix1": {
+    "reviewedCommit": "6613418ff5539c4156c5f42d589913d479dc0853",
+    "review": "tasks/SIM.40.05/lane-r/review_grok_6613418f.md",
+    "verdict": "FAIL (0 BLOCKER, 1 MAJOR, 4 MINOR)",
+    "brief": "tasks/SIM.40.05/lane-r/BRIEF_FIX1.md",
+    "branchHeadAtStart": "8d23c64c278f057c81e6a9a13968819d2cb3c6f7",
+    "findings": {
+      "MAJOR-1": "R-01.2 decay clock (t0 in year-ticks, rem0 in millionths, lifeYt) replaces the per-day rateMilli; failYt and every event instant in closed form with an exact inverse; HP byte derived, never the schedule; recomputed R-01.6, R-02.4, R-09.3 (FX-R-01 instants in yt); AT-R-01, AT-R-20, MR-15, MR-16",
+      "MINOR-1": "R-07.3 visitor years now cite FX-R-01 H1 at wR 50 (R-09.3), counted from abandonment at y11",
+      "MINOR-2": "R-08.5 keys every record by instant dueYt; short heap drained every tick for remains and FOOD; long heap day-drained on purpose with the whole-year checkpoint identity; AT-R-08 sub-day placement",
+      "MINOR-3": "header Limits row and R-05 intro: sibling tips re-sampled; Lane Q section 9.7 cited as the reconciliation record (Lane Q owns it); R-05 stays PARTIAL",
+      "MINOR-4": "R-01.2 rebase rule (rem0 <- rem(t1), t0 <- t1, lifeYt <- new life, heap entry replaced; t1 = causing instant) and R-05.4 step 3"
+    }
+  },
+  "document": "tasks/SIM.40.05/lane-r/SIM.40.05_DECAY_CYCLE.md",
+  "requirements": [
+    {
+      "id": "R-01",
+      "section": "## Decay drivers",
+      "status": "COVERED",
+      "notes": "Lives authored in simulated years (D-1 neutral) and turned into one decay clock per record (Fix 1, R-01.2): t0 in year-ticks (1/2,400 sy, exactly DPY ticks), rem0 in millionths of life, lifeYt. Closed forms rem(t), cross(p) and failYt are integer with an exact inverse; the HP byte is derived and written only at thresholds, so lives far longer than 1,000 x maxHP game days fit (u32 lifeYt, about 1.79 million sy). ADR-003 L1653 per-day rateMilli is not used (it cannot hold ASHLAR SHELTERED 20,000 sy and disagrees between DPY 1 and 20); proposed as an ADR-003 amendment. Rebase rule on an exposure or modifier change at the causing instant. 17 decay classes scaled by weatherResistance, rotResistance, corrosionResistance; 7 exposure classes; freeze-thaw, snow, roots and fire modifiers in eighths; default lives with sources; maintenance, abandonment grace, site abandonment. WET depends on D-4. Decay ignoring the SRD damage threshold is OQ-R-09."
+    },
+    {
+      "id": "R-02",
+      "section": "## Structure stages",
+      "status": "COVERED",
+      "notes": "Stages S0 intact to S7 rock with entry rules on the life fraction h = rem / R (exact transition instants), strata/object representation, ledger entries and catalogue slot names (names only, DEC-011); decay members share one clock and are split and rebased when exposure or HP diverges; walls in 2-slice bands so they lose height from the top; roofs before walls with a data validator; shedding, rot of organic rubble, pedogenesis; per-material chains (ASHLAR row recomputed in Fix 1). Needs LAND-5 (buildings as built strata) and new strata materials (Lane Q). S7 lithification is specified but Owner-gated (OQ-R-03)."
+    },
+    {
+      "id": "R-03",
+      "section": "## Metals and items",
+      "status": "COVERED",
+      "notes": "Unattended-item weathering with composite components and a decay clock per item; organic rot to SOIL-ORG plus an AIR sink (the missing soil-nutrient field, DEC-3); remains for every death with stages on one clock, sub-day stages (0.25 sy corpse, FOOD 0.05-0.1 sy) as exact instants drained every tick (Fix 1); bone to soil; anchors kept 200 sy for SRD resurrection windows; metals corrode to OXIDE in steps at clock crossings, four-rule ore guard; SRD rust monster, oozes, mending, creation, gentle repose (a clock pause) mapped; relics and buried finds (ITEM-BURIED). Lane W's design, merged (bed949e8, main 8997e238), assumes its own hand-off (IA-R1); names and mass unit are reconciled under PROPOSED-R-04 and Lane Q's escalation. Conflicts with DURABILITY.md:320, REMAINS.md and PEOPLES.md are OQ-R-04 and OQ-R-06; special materials OQ-R-05."
+    },
+    {
+      "id": "R-04",
+      "section": "## Fire residue",
+      "status": "COVERED",
+      "notes": "One residue.burn function called by SIM.50.05: ash and charcoal by class and burn completeness, gas to a named AIR sink by remainder (exact); bone calcines; metals survive; residue to per-cell records and ASH strata at one slice of mass; weathering of ash to soil and charcoal to soil carbon; buried horizons permanent (TR-7); charcoal never becomes coal. Whether exposed ash beds are permanent (WG.63.04 wording) is OQ-R-07."
+    },
+    {
+      "id": "R-05",
+      "section": "## Decay-driven collapse",
+      "status": "PARTIAL",
+      "notes": "Ownership split and a contract with Lane Q: HP writes only at Lane Q's capacity thresholds (at exact cross instants); decay never removes matter, it calls Lane Q's single break path; collapse events carry the causing instant atYt and drive local exposure recomputation and rebases at that instant; an instant barrier keeps decay chains DPY- and LOD-independent (Fix 1); bounded work of 64 cells per event. PARTIAL: written against the Lane Q brief (9103799e); Fix 1 re-sampled the tips (Lane Q design at 9d5b40d3, Grok FAIL, in its own Fix 1; the tip moves) and cites Lane Q section 9.7 as the reconciliation record, which is Lane Q's. Names stay ASSUMED; atYt, the clock and the barrier are new items for that reconciliation. Props under natural rock depend on DEC-010 (OPEN)."
+    },
+    {
+      "id": "R-06",
+      "section": "## Nature reclaiming",
+      "status": "COVERED",
+      "notes": "New reclamation rule overturning DEUS_Objects.js:266 (never on maintained built cells, by stage on abandoned ones); spread from neighbours only; root feedback; burial by own rubble, mudbrick melt and shedding, litter to soil per footprint in closed form, and SIM.50.03 sediment; underground variants per band (-1, Lower-1, Lower-2) with cave fungus, flooding (D-4 dependency) and lava; upper layers shed their ruins downward via Lane Q's cascade."
+    },
+    {
+      "id": "R-07",
+      "section": "## Ruins and re-founding",
+      "status": "COVERED",
+      "notes": "Site state machine ACTIVE, DECLINING, ABANDONED, RUIN (sets isRuined, the X-7 fix), MOUND, REFOUNDED; eight named trace-retention rules TR-1..TR-8 with minimum retention times and the only processes that remove them; visitor table from FX-R-01 H1 at wR 50 counted from abandonment (Fix 1 corrected the citation); salvage by mass with a worked example (closes LAND-1 for this path); re-founding on foundations using only missing slices (SET-4). Retention times are OQ-R-02; who may re-found whose ruins is OQ-R-08 and depends on D-6."
+    },
+    {
+      "id": "R-08",
+      "section": "## Deep history and LOD",
+      "status": "COVERED",
+      "notes": "Decay is per record and closed form, so the same heaps serve L0, L1, L2 and day jumps (ADR-003 L1693, L1696); decay-caused exposure changes rebase at the causing instant, so decay chains are LOD-invariant (Fix 1); every record keyed by instant dueYt; long heap drained at day boundaries on purpose, short heap (remains, FOOD) drained every tick for sub-day lives; whole-year checkpoints are DPY-independent (ceilDiv identity). Cohort records only for records-less matter with largest-remainder promotion; day-jump cost worked example; calendar mapping for D-1 options (a) and (b) without choosing, plus SRD day-versus-year limits. Aged-world starts are ADR-003 Q6 against INV-SIM-01 and are not answered here."
+    },
+    {
+      "id": "R-09",
+      "section": "## Matter ledger long-run test",
+      "status": "COVERED",
+      "notes": "Fixture FX-R-01 (abandoned hamlet: stone, mudbrick, burned timber and brick-tower structures, roads, a cellar at -1, a cave shrine at -3, items, remains; elm timber; deterministic vegetation stand-in; whole-year scripted events) aged to y12,000 at 9 and 32 layers and at DPY 1 and 20; assertions A1-A9 (exact classes, closure, zero ore delta, trace retention, oracle stages and instants, determinism including DPY, LOD invariance, work bound, save/load); exact S1-S4 and band-failure instants in year-ticks from R-01.2 (Fix 1), S5 approximate; stated assumptions (roofs fail at HP 0, band rubble spills to the foot); mutants MR-01..MR-16 including the per-day rateMilli schedule (MR-15) and a rebase at the processing day (MR-16); optional 1,000,000-sy lithification run."
+    },
+    {
+      "id": "R-10",
+      "section": "## Sparse storage and cost",
+      "status": "COVERED",
+      "notes": "Typed layouts with byte counts for members (clock fields t0 f64, rem0 u32, lifeYt u32 replace hp0, d0, rateMilli, nextDay: still 40 B), structures (32 B), sites (16 B), 12-B heap entries in two heaps, item clocks (20 B), remains (36 B), residue entries (density-adaptive per chunk) with 16-B clock blocks while weathering, cohorts; per-site, per-region and per-layer memory (no layer-count term); scenario Y0 (about 113 KB) and an assumed scenario L (about 23-25 MB) with arithmetic; CPU per tick under both D-1 options; save representation (maintained members rebuilt; lifeYt saved; caches never saved), scenario L about 10.9 MB."
+    },
+    {
+      "id": "R-11",
+      "section": "## Acceptance tests",
+      "status": "COVERED",
+      "notes": "AT-R-01..AT-R-22 mapped to SIM.40.05-.09 and the SIM.40.02, SIM.40.10, SIM.50.05, SIM.50.09 and SIM.60.03 interfaces; each names its fixture, assertion and a mutant that must fail; all run at 9 and 32 layers. Fix 1: AT-R-01 checks the closed form, a 20,000-sy life and the rebase; AT-R-08 checks sub-day placement; AT-R-20 compares instants and checkpoint states at DPY 1 and 20 with the per-day-rate and processing-day mutants."
+    },
+    {
+      "id": "R-12",
+      "section": "## WBS impact",
+      "status": "COVERED",
+      "notes": "Placement in the audit's section 6 order; PROPOSED-R-01..R-12 with real dependency IDs and acceptance tests; recommended dependency additions for SIM.40.05, .07, .08 and SIM.50.05; three proposed ADR-003 section 17 amendments (clock for L1653, causing instant for L1694, short heap for L1689-1690); overlaps with WG.65.x and WG.61.02; stale geometry in WG.65.02, SIM.30.01, INV-GEO-01/02; a table of flagged disagreements including ADR-003 vs Fix 1, Lane Q's C2 and Lane W's IA-R1; D-4, D-6, DEC-010 and D-1 dependencies. Owner questions are in the section '## Owner questions'."
+    }
+  ],
+  "proposedPackages": [
+    {
+      "id": "PROPOSED-R-01",
+      "title": "Decay parameter data (decay classes, exposure classes, lives, thresholds, residue fractions) and its validator",
+      "deps": ["SIM.40.01", "WG.65.15"],
+      "acceptanceTests": [
+        "AT-R-02: validator exits 1 on any life <= 0, any disallowed infinity, any finite life whose lifeYears x 2,400 is not an integer or whose lifeYt exceeds 2^32 - 2, any ore/coal/gem/fossil output, or any structure template whose ROOF life at SKY is not shorter than its WALL life at SHELTERED; mutant with ROOF and WALL lives swapped must fail",
+        "AT-R-20: FX-R-01 at DPY 1 and DPY 20 gives identical transition instants (year-ticks) and identical stages and ledger totals at every whole-year checkpoint; mutants that must fail: one duration authored in days instead of simulated years, the per-day rateMilli schedule (MR-15), a rebase at the processing day (MR-16)"
+      ]
+    },
+    {
+      "id": "PROPOSED-R-02",
+      "title": "Decay members, the decay clock (R-01.2) and the instant-keyed scheduler with long and short heaps (R-08.5)",
+      "deps": ["SIM.40.01", "SIM.40.02", "SIM.00.05", "WG.00.17", "WG.65.15"],
+      "acceptanceTests": [
+        "AT-R-01: rem and the derived HP byte equal the R-01.2 closed form at sampled instants; events land on their cross instants; a 20,000-sy member fails at exactly 48,000,000 yt at DPY 1 and 20; a rebase sets rem0 = rem(t1), t0 = t1 and the new lifeYt; HP bytes written only at published thresholds and at failure; mutants that must fail: HP written every day, the per-day rateMilli schedule (fails at 6,000 sy at DPY 20), a rebase that keeps the old t0",
+        "AT-R-05: at the roof failDay Lane Q's break path is called once per roof member, wall tops become SKY, at most 64 cells enqueued per event; mutant that turns strata to air inside decay must fail (ledger leak, no collapse event)",
+        "AT-R-18: decay heap and record bytes identical at 9 and 32 layers on the sparse fixture; mutant with a per-layer dense residue plane must fail",
+        "AT-R-19: save at y1,000, reload, continue gives identical checksums; mutant that does not rebuild the heap on load must fail"
+      ]
+    },
+    {
+      "id": "PROPOSED-R-03",
+      "title": "Maintenance, upkeep coverage, abandonment and the site state machine (X-7 isRuined fix)",
+      "deps": ["SIM.00.05", "SIM.40.10", "SOC.10.02"],
+      "acceptanceTests": [
+        "AT-R-03: a maintained site has zero decay heap entries and zero decay work over 10 game days; mutant that ignores maintenance must fail",
+        "AT-R-04: population to 0 gives ABANDONED after siteAbandonYears and RUIN with isRuined true at S3 on half the mass, and History's reader sees site.ruined; mutant that never sets isRuined must fail"
+      ]
+    },
+    {
+      "id": "PROPOSED-R-04",
+      "title": "Item weathering, remains to soil, and buried finds; reconcile the remains hand-off names and mass unit with Lane W (IA-R1)",
+      "deps": ["SIM.40.05", "SIM.40.10", "WG.65.15"],
+      "acceptanceTests": [
+        "AT-R-07: an unattended iron longsword corrodes in 4 steps and its grip rots, masses exact; the same sword carried never changes; mutant in which attended items decay must fail",
+        "AT-R-08: an off-screen death makes a remains record whose mass goes to SOIL-ORG, SOIL-MIN and AIR exactly, anchor kept 200 sy, gentle repose pauses the clock 10 game days; at DPY 1 a SKY death at tick k becomes SKELETAL on tick k + 600 and a loaf rots on tick k + 240; mutants that must fail: remains removed after 12 game hours, remains and food drained only at day boundaries",
+        "AT-R-11: covering an item or member reclassifies it as buried in the same tick and excavation re-exposes it; mutant with no burial reclassification must fail"
+      ]
+    },
+    {
+      "id": "PROPOSED-R-05",
+      "title": "Corrosion to OXIDE trace minerals and the ore guard",
+      "deps": ["WG.65.15", "SIM.40.05"],
+      "acceptanceTests": [
+        "AT-R-06: static transform-table check plus runtime guard rejects and logs any ore write with a non-generation cause; no recipe accepts OXIDE; mutant in which corrosion outputs ore must fail",
+        "AT-R-21: five rust-monster hits destroy a weapon and move its iron to OXIDE exactly; the antennae destroy 7,840 mu of an unattended iron object; mutant keeping conjured residue as permanent charcoal must fail"
+      ]
+    },
+    {
+      "id": "PROPOSED-R-06",
+      "title": "Fire residue function: ash, charcoal and the carbon AIR sink (closes FIR-3)",
+      "deps": ["SIM.50.05", "WG.63.04", "WG.65.15"],
+      "acceptanceTests": [
+        "AT-R-09: burning timber, cloth, iron nails, a lead cup and bone gives exact ash, charcoal, gas and SCRAP masses and keeps the metals; mutant deleting items on a burned cell must fail; mutant computing gas with floor instead of the remainder must fail"
+      ]
+    },
+    {
+      "id": "PROPOSED-R-07",
+      "title": "Reclamation rule and burial exposure, surface and underground",
+      "deps": ["SIM.40.05", "SIM.50.04", "SIM.50.03", "SIM.50.02"],
+      "acceptanceTests": [
+        "AT-R-10: plants establish on an abandoned S3 floor and never on a maintained built cell; mutant keeping the DEUS_Objects.js:266 guard must fail; mutant removing the guard entirely must fail",
+        "AT-R-12: members at layers -3 and -12 never get SKY or FT above 0, cave fungus halves timber lives, a flood makes members WET; mutant with the bottom layer hard-coded at -2 or -4 must fail at 32 layers"
+      ]
+    },
+    {
+      "id": "PROPOSED-R-08",
+      "title": "Trace retention, salvage by mass and re-founding on foundations",
+      "deps": ["SIM.40.08", "SIM.50.08", "SIM.50.09", "SOC.10.03"],
+      "acceptanceTests": [
+        "AT-R-13: salvaging a limestone rubble slice yields 93 stones of 800 mu and leaves 272 mu of rubble; mutant with fixed 2-stone yields must fail; mutant dropping the remainder must fail",
+        "AT-R-14: re-founding on H1 consumes items only for missing slices and reused slices keep their mass; mutant in which ruin cells block building must fail"
+      ]
+    },
+    {
+      "id": "PROPOSED-R-09",
+      "title": "Deep-history day jumps and cohort decay for records-less matter",
+      "deps": ["SIM.30.02", "SIM.30.03", "SIM.40.05"],
+      "acceptanceTests": [
+        "AT-R-15: L0 day stepping, L2 coarse ticks and one day jump give identical stages and ledger totals; mutant doing cohort rounding in floating point must fail",
+        "AT-R-16: aging FX-R-01 by 10,000 sy processes no more heap events than the oracle count and none in maintained periods; mutant evaluating every member every year must fail the event bound"
+      ]
+    },
+    {
+      "id": "PROPOSED-R-10",
+      "title": "Long-run matter ledger fixture FX-R-01 (SIM.40.09)",
+      "deps": ["SIM.40.06", "SIM.40.07", "SIM.40.08", "WG.65.15"],
+      "acceptanceTests": [
+        "AT-R-17: FX-R-01 aged to y12,000 at 9 and 32 layers and at DPY 1 and 20 satisfies A1-A9 at every checkpoint, with member-failure and stage instants equal to the oracle (R-09.3 table); each of mutants MR-01..MR-16 (leaks, ore creation, foundation and relic erasure, vanishing remains, fire deleting items, double yield, nondeterminism, full scan, stale geometry, lost heap, walls before roofs, coal from charcoal, per-day rateMilli schedule, rebase at the processing day) must fail"
+      ]
+    },
+    {
+      "id": "PROPOSED-R-11",
+      "title": "Lithification of buried sediment to rock (only if the Owner puts it in scope, OQ-R-03)",
+      "deps": ["SIM.50.03", "WG.65.08", "WG.65.16"],
+      "acceptanceTests": [
+        "AT-R-22: FX-R-01L to 1,000,000 sy forms ROCK-SED with exact ledger totals and no ore, coal, gem or fossil-bed output; mutant turning buried charcoal into coal must fail"
+      ]
+    },
+    {
+      "id": "PROPOSED-R-12",
+      "title": "Reconcile design documents (REMAINS, PEOPLES, DURABILITY, WORLD_ARCHITECTURE) and stale invariants with this design (docs only, Coordinator)",
+      "deps": ["SIM.40.05"],
+      "acceptanceTests": [
+        "A check lists the conflicting sentences in section R-12.4 and exits 1 while any is still present; mutant that re-inserts one of them must make the check fail"
+      ]
+    }
+  ],
+  "ownerQuestions": [
+    {
+      "id": "OQ-R-01",
+      "question": "How fast should decay run? (interacts with D-1; see the mapping table in 'Deep history and LOD')",
+      "options": [
+        "(a) the real-world-order default lives in the design (a timber roof in 60 simulated years, stone walls in millennia)",
+        "(b) all lives divided by one factor (for example 10) so ruins form within a play session",
+        "(c) separate factors for structures and for items and remains"
+      ]
+    },
+    {
+      "id": "OQ-R-02",
+      "question": "How long must ruins stay recognisable (LIFE-003)?",
+      "options": [
+        "(a) foundations, vaults and mounds indefinitely unless a physical process removes them (the TR-1..TR-8 default)",
+        "(b) at least 10,000 simulated years, after which natural erosion may erase them",
+        "(c) at least 1,000 simulated years"
+      ]
+    },
+    {
+      "id": "OQ-R-03",
+      "question": "Is lithification (buried sediment becoming rock) in scope?",
+      "options": [
+        "(a) no: the cycle ends at consolidated sediment and soil strata (ADR-003 L1680)",
+        "(b) only in deep-history day jumps, never in live play",
+        "(c) yes, live, under the ore guard"
+      ]
+    },
+    {
+      "id": "OQ-R-04",
+      "question": "Do unattended items weather, given 'Items have no HP ... Tools don't wear out' (docs/design/DURABILITY.md:320) and SIM.40.07 / V138?",
+      "options": [
+        "(a) unattended items weather through a condition field (not HP); tools in use never wear",
+        "(b) only organic items rot; metal never corrodes",
+        "(c) no item weathering (SIM.40.07 would need rewording)"
+      ]
+    },
+    {
+      "id": "OQ-R-05",
+      "question": "Do mithral, adamantine and magic items decay?",
+      "options": [
+        "(a) never",
+        "(b) very slowly",
+        "(c) per-item data"
+      ]
+    },
+    {
+      "id": "OQ-R-06",
+      "question": "Which remains timings apply (REMAINS.md:175 and PEOPLES.md:215 disagree), and how long is a dead person's identity anchor kept?",
+      "options": [
+        "(a) physical durations in simulated years (skeleton in 0.25 sy in the open) with the anchor kept at least 200 sy for true resurrection",
+        "(b) REMAINS.md's game-hour durations as the look, with the physical clock underneath",
+        "(c) PEOPLES.md's 30 and 120 days"
+      ]
+    },
+    {
+      "id": "OQ-R-07",
+      "question": "Are ash beds permanent when exposed (WG.63.04, SIM.50.05 'permanent ash beds')?",
+      "options": [
+        "(a) buried ash beds are permanent; exposed ash weathers to soil in about 5 simulated years",
+        "(b) exposed ash beds never weather",
+        "(c) the ash look stays while its mass goes to soil"
+      ]
+    },
+    {
+      "id": "OQ-R-08",
+      "question": "Who may re-found whose ruins?",
+      "options": [
+        "(a) any culture on any ruin",
+        "(b) only the same race or culture",
+        "(c) per race in the DEC-015 plan data (depends on D-6)"
+      ]
+    },
+    {
+      "id": "OQ-R-09",
+      "question": "Does decay lower HP past an object's SRD damage threshold (game/data/srd51/rules.json:7167)?",
+      "options": [
+        "(a) yes, decay ignores the damage threshold",
+        "(b) objects with a threshold decay at a reduced rate",
+        "(c) they never decay"
+      ]
+    }
+  ]
+}

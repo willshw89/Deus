@@ -1,0 +1,19 @@
+{
+  "base": "art/catalogue/geometry.json",
+  "about": "Owner parameter smallRaceReadabilityFloorPx switched on (default OFF): Gnome and Halfling drawn heights rise to 26-28 px.",
+  "set": {
+    "optionalParams": {
+      "smallRaceReadabilityFloorPx": {
+        "value": [
+          26,
+          28
+        ],
+        "races": [
+          "GNOME",
+          "HALFLING"
+        ],
+        "enabled": true
+      }
+    }
+  }
+}

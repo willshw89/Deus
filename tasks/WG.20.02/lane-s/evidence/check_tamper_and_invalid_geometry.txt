@@ -1,0 +1,23 @@
+clone HEAD: 51d3915af6beee1476c5b78df76b7c23dceb6a01
+$ echo tamper >> art/catalogue/conflicts.md; node tools/art/build_catalogue.js --check
+WARN UNVERIFIED_ABSENT reference/u7_shapes_0_31.png (untracked third-party reference not present in this checkout)
+DIFF art/catalogue/conflicts.md
+CHECK: FAILED (1 file(s) differ from a fresh build)
+EXIT=1
+$ git checkout -- art/catalogue/conflicts.md; node tools/art/build_catalogue.js --check
+WARN UNVERIFIED_ABSENT reference/u7_shapes_0_31.png (untracked third-party reference not present in this checkout)
+CHECK: OK (12 generated files match)
+EXIT=0
+$ rm docs/art/catalogue/BAND_UPPER2.md; node tools/art/build_catalogue.js --check
+WARN UNVERIFIED_ABSENT reference/u7_shapes_0_31.png (untracked third-party reference not present in this checkout)
+DIFF docs/art/catalogue/BAND_UPPER2.md
+CHECK: FAILED (1 file(s) differ from a fresh build)
+EXIT=1
+$ node -e "<build with geometry.stratumPx = [24,24,24,24,0]>"
+build ok=false; GEOM_INVALID: every stratumPx value must be an integer >= 1
+EXIT=1
+$ node -e "<build with geometry.stratumPx = [20,20,20,20,20] (sums to 100, layerPx 96)>"
+build ok=false; GEOM_INVALID: stratumPx sums to 100, not layerPx 96
+EXIT=1
+$ git status --porcelain (clone must be clean after the demo)
+EXIT=0
