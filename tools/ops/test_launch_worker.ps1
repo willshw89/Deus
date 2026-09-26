@@ -259,6 +259,47 @@ function Get-TextFile([string]$Path) {
 
 function Test-ProcessAlive([int]$ProcessId) { return [bool](Get-Process -Id $ProcessId -ErrorAction SilentlyContinue) }
 
+# --- prompt selection fixtures (WG.00.12b) ---------------------------------------------------------
+
+function Get-PmPromptText([string]$Tag = 'writer') {
+    # A hand-written prompt of the kind the PM passes with -PromptFile.
+    return "You are the TEST_ $Tag (Claude) for lane-t (Task T.01: TEST_ task).`nRead tasks/T.01/lane-t/BRIEF.md carefully.`nWhen finished, commit and push: git push origin task/lane-t.`nYour final output line must be exactly: FINAL SHA: <sha>`n"
+}
+
+function New-PromptFile([string]$Name, [string]$Text) {
+    $p = Join-Path $script:TestRoot $Name
+    [IO.File]::WriteAllText($p, $Text, (New-Object Text.UTF8Encoding $false))
+    return $p
+}
+
+function Save-LaneFixture($Fx, $Brief, [System.Collections.IDictionary]$LaneExtra) {
+    # Rewrites the lane's BRIEF.md and/or adds lane.json fields in the worktree, and commits them.
+    $dir = Join-Path $Fx.Wt "tasks\T.01\$($Fx.Lane)"
+    if ($null -ne $Brief) { [IO.File]::WriteAllText((Join-Path $dir 'BRIEF.md'), $Brief) }
+    if ($LaneExtra) {
+        $j = Read-DeusJsonFile (Join-Path $dir 'lane.json') ([ordered]@{})
+        foreach ($k in $LaneExtra.Keys) { $j[$k] = $LaneExtra[$k] }
+        [IO.File]::WriteAllText((Join-Path $dir 'lane.json'), (ConvertTo-DeusJson $j))
+    }
+    & git -C $Fx.Wt add -A -- "tasks/T.01/$($Fx.Lane)" 2>$null | Out-Null
+    & git -C $Fx.Wt commit -q -m 'fixture: lane files' 2>$null | Out-Null
+}
+
+function Save-LaunchFile($Fx, [string]$Stamp, [string]$Text, [string]$Subject) {
+    # Commits a prompt file in the lane's launches folder under the given subject, as a launcher or the coordinator would.
+    $rel = "tasks/T.01/$($Fx.Lane)/launches/${Stamp}_prompt.txt"
+    $full = Join-Path $Fx.Wt ($rel.Replace('/', '\'))
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $full) | Out-Null
+    [IO.File]::WriteAllText($full, $Text, (New-Object Text.UTF8Encoding $false))
+    & git -C $Fx.Wt add -- $rel 2>$null | Out-Null
+    & git -C $Fx.Wt commit -q -m $Subject -- $rel 2>$null | Out-Null
+    return $full
+}
+
+function Get-RunStdin($Fx, $Entry) { return (Get-TextFile (Join-Path $Fx.Out "stdin_$($Entry['runId']).txt")) }
+
+function Get-ResumeLineCount([string]$Text) { return ([regex]::Matches("$Text", '(?m)^resume from HEAD ')).Count }
+
 # ---------------------------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------------------------
@@ -295,12 +336,16 @@ $Tests = @(
         Check 'prompt_saved' (Test-Path $promptPath) $promptPath
         Check 'prompt_tracked' ((G $Fx.Wt ls-files -- $promptRel) -eq $promptRel)
         Check 'prompt_committed_before_worker' ((G $Fx.Wt log --format=%s -1 $e['baseCommit']) -match 'launch prompt') (G $Fx.Wt log --oneline -3)
+        Check 'prompt_commit_names_role_and_provider' ((G $Fx.Wt log --format=%s -1 $e['baseCommit']) -ceq "[ops] T.01 lane-t launch prompt $stamp (writer claude)") (G $Fx.Wt log --format=%s -1 $e['baseCommit'])
+        Check 'registry_prompt_generated' ($e['promptSource'] -eq 'generated' -and $null -eq $e['promptFile']) "promptSource '$($e['promptSource'])' promptFile '$($e['promptFile'])'"
+        Check 'registry_push_rule_default' ($e['pushRule'] -eq 'no-push' -and $e['pushRuleSource'] -eq 'default') "$($e['pushRule']) $($e['pushRuleSource'])"
         $prompt = Get-TextFile $promptPath
         $stdin = Get-TextFile (Join-Path $Fx.Out "stdin_$runId.txt")
         Check 'worker_got_exact_prompt' ($null -ne $stdin -and $stdin -ceq $prompt) "stdin length $("$stdin".Length) prompt length $("$prompt".Length)"
         Check 'prompt_names_brief' ($prompt -match [regex]::Escape('tasks/T.01/lane-t/BRIEF.md'))
         Check 'prompt_lists_allowed' ($prompt -match [regex]::Escape('- src/allowed/**'))
         Check 'prompt_no_art_rule' ($prompt -match 'NO ART \(DEC-007\)')
+        Check 'prompt_do_not_push_without_push_brief' ($prompt -match 'Do not push\. Do not merge\.' -and $prompt -notmatch 'FINAL SHA') $prompt
         $log = Get-TextFile $e['logPath']
         Check 'log_path' ($e['logPath'] -eq (Join-Path $Fx.Logs "lane-t\$runId.log")) $e['logPath']
         Check 'log_has_stdout' ($log -match 'worker: committed') $log
@@ -332,6 +377,196 @@ $Tests = @(
         Check 'still_names_brief' ($prompt -match [regex]::Escape('tasks/T.01/lane-t/BRIEF.md'))
         Check 'registry_resume_sha' ($e['resumeFromSha'] -eq $sha)
         Check 'no_head_mismatch' ($e['resumeHeadMismatch'] -eq $false)
+    } }
+    # --- prompt selection and the push rule (WG.00.12b) ------------------------------------------------
+    @{ Name = 'push_rule_from_brief'; Body = {
+        Reset-Lane $Fx
+        Save-LaneFixture $Fx "# TEST_ brief`nWhen finished, run ``git push origin task/lane-t`` and print FINAL SHA.`n" $null
+        $r = Invoke-Launch $Fx -Mode 'commit'
+        $e = $r.Entry
+        Check 'exit_0' ($r.Code -eq 0) "exit $($r.Code) $($r.Err)"
+        $prompt = Get-TextFile $e['launchPromptPath']
+        Check 'no_do_not_push' ($prompt -notmatch '(?i)do not push') $prompt
+        Check 'rule2_pushes_own_branch' ($prompt -match '(?m)^2\. .*When finished, commit and push your own branch only: git push origin task/lane-t\. Never push main or any other branch, never force-push, never set DEUS_INTEGRATOR;') $prompt
+        Check 'ends_with_final_sha' ((("$prompt".TrimEnd()) -split "`n")[-1] -ceq 'Your final output line must be exactly: FINAL SHA: <sha> (pasted from git rev-parse HEAD after the push).') $prompt
+        Check 'worker_got_it' ((Get-RunStdin $Fx $e) -ceq $prompt)
+        Check 'registry_push_rule' ($e['pushRule'] -eq 'push' -and $e['pushRuleSource'] -eq 'brief' -and $e['promptSource'] -eq 'generated') "$($e['pushRule']) $($e['pushRuleSource']) $($e['promptSource'])"
+    } }
+    @{ Name = 'push_rule_other_branch_is_not_a_push'; Body = {
+        Reset-Lane $Fx
+        Save-LaneFixture $Fx "# TEST_ brief`nNever git push origin main. The PM runs git push origin task/lane-t2 for another lane.`n" $null
+        $r = Invoke-Launch $Fx -Mode 'commit'
+        $prompt = Get-TextFile $r.Entry['launchPromptPath']
+        Check 'exit_0' ($r.Code -eq 0) "exit $($r.Code) $($r.Err)"
+        Check 'do_not_push_kept' ($prompt -match 'Do not push\. Do not merge\.' -and $prompt -notmatch 'FINAL SHA') $prompt
+        Check 'registry_no_push' ($r.Entry['pushRule'] -eq 'no-push') "$($r.Entry['pushRule'])"
+    } }
+    @{ Name = 'push_rule_lane_json_true'; Body = {
+        Reset-Lane $Fx
+        Save-LaneFixture $Fx $null ([ordered]@{ push = $true })
+        $r = Invoke-Launch $Fx -Mode 'commit'
+        $prompt = Get-TextFile $r.Entry['launchPromptPath']
+        Check 'exit_0' ($r.Code -eq 0) "exit $($r.Code) $($r.Err)"
+        Check 'push_rule' ($prompt -match 'git push origin task/lane-t\.' -and $prompt -notmatch 'Do not push' -and $prompt -match 'FINAL SHA: <sha>') $prompt
+        Check 'registry_source_lane_json' ($r.Entry['pushRule'] -eq 'push' -and $r.Entry['pushRuleSource'] -eq 'lane.json') "$($r.Entry['pushRule']) $($r.Entry['pushRuleSource'])"
+    } }
+    @{ Name = 'push_rule_lane_json_false_wins'; Body = {
+        Reset-Lane $Fx
+        Save-LaneFixture $Fx "# TEST_ brief`ngit push origin task/lane-t`n" ([ordered]@{ push = $false })
+        $r = Invoke-Launch $Fx -Mode 'commit'
+        $prompt = Get-TextFile $r.Entry['launchPromptPath']
+        Check 'exit_0' ($r.Code -eq 0) "exit $($r.Code) $($r.Err)"
+        Check 'do_not_push' ($prompt -match 'Do not push\.' -and $prompt -notmatch 'FINAL SHA') $prompt
+        Check 'registry_source_lane_json' ($r.Entry['pushRule'] -eq 'no-push' -and $r.Entry['pushRuleSource'] -eq 'lane.json') "$($r.Entry['pushRule']) $($r.Entry['pushRuleSource'])"
+    } }
+    @{ Name = 'push_rule_lane_json_invalid_refused'; Body = {
+        Reset-Lane $Fx
+        Save-LaneFixture $Fx $null ([ordered]@{ push = 'yes' })
+        $r = Invoke-Launch $Fx -Mode 'commit'
+        Check 'exit_1' ($r.Code -eq 1) "exit $($r.Code)"
+        Check 'says_push_boolean' ($r.Err -match 'lane\.json "push" must be true or false') $r.Err
+        Check 'no_registry_entry' (-not (Test-Path $Fx.Reg))
+    } }
+    @{ Name = 'prompt_file_recorded_then_reused'; Body = {
+        Reset-Lane $Fx
+        $pm = New-PromptFile 'pm_writer.txt' (Get-PmPromptText)
+        $r1 = Invoke-Launch $Fx -Mode 'commit' -Params @{ PromptFile = $pm }
+        $e1 = $r1.Entry
+        Check 'first_exit_0' ($r1.Code -eq 0) "exit $($r1.Code) $($r1.Err)"
+        Check 'first_verbatim' ((Get-RunStdin $Fx $e1) -ceq (Get-PmPromptText)) (Get-RunStdin $Fx $e1)
+        Check 'registry_prompt_file' ($e1['promptFile'] -eq $pm -and $e1['promptSource'] -eq 'file') "promptFile '$($e1['promptFile'])' source '$($e1['promptSource'])'"
+        $r2 = Invoke-Launch $Fx -Mode 'commit'
+        $e2 = $r2.Entry
+        Check 'second_exit_0' ($r2.Code -eq 0) "exit $($r2.Code) $($r2.Err)"
+        Check 'second_run_is_new' ($e2['runId'] -ne $e1['runId']) "$($e1['runId']) $($e2['runId'])"
+        Check 'saved_prompt_reused' ((Get-RunStdin $Fx $e2) -ceq (Get-PmPromptText)) (Get-RunStdin $Fx $e2)
+        Check 'no_do_not_push_injected' ((Get-RunStdin $Fx $e2) -notmatch '(?i)do not push')
+        Check 'registry_saved' ($e2['promptSource'] -eq 'saved' -and $e2['promptFile'] -eq $pm -and $e2['promptFrom'] -eq "registry run $($e1['runId']) promptFile") "source '$($e2['promptSource'])' file '$($e2['promptFile'])' from '$($e2['promptFrom'])'"
+    } }
+    @{ Name = 'reuse_with_resume_does_not_stack'; Body = {
+        Reset-Lane $Fx
+        $pm = New-PromptFile 'pm_writer_gone.txt' (Get-PmPromptText)
+        $sha1 = G $Fx.Wt rev-parse HEAD
+        $r1 = Invoke-Launch $Fx -Mode 'commit' -Params @{ PromptFile = $pm; ResumeFromSha = $sha1 }
+        $copy = Get-TextFile $r1.Entry['launchPromptPath']
+        Check 'first_has_one_resume_line' ((Get-ResumeLineCount $copy) -eq 1 -and $copy.StartsWith("resume from HEAD $sha1;")) $copy
+        Remove-Item -LiteralPath $pm -Force
+        $sha2 = G $Fx.Wt rev-parse HEAD
+        $r2 = Invoke-Launch $Fx -Mode 'commit' -Params @{ ResumeFromSha = $sha2 }
+        $e2 = $r2.Entry
+        $stdin = Get-RunStdin $Fx $e2
+        Check 'exit_0' ($r2.Code -eq 0) "exit $($r2.Code) $($r2.Err)"
+        Check 'reused_the_copy' ($e2['promptSource'] -eq 'saved' -and $e2['promptFrom'] -eq "registry run $($r1.Entry['runId']) launchPromptPath") "$($e2['promptSource']) $($e2['promptFrom'])"
+        Check 'source_gone_was_skipped' (@($e2['promptCandidatesSkipped'] | Where-Object { $_ -match 'promptFile: .* does not exist' }).Count -eq 1) (@($e2['promptCandidatesSkipped']) -join ' | ')
+        Check 'exactly_one_resume_line' ((Get-ResumeLineCount $stdin) -eq 1) $stdin
+        Check 'new_sha_on_top' ($stdin -ceq ((Get-DeusResumeLine $sha2) + "`n`n" + (Get-PmPromptText))) $stdin
+    } }
+    @{ Name = 'explicit_prompt_file_resume_not_stacked'; Body = {
+        Reset-Lane $Fx
+        $text = (Get-DeusResumeLine 'oldsha1') + "`n`n" + (Get-PmPromptText)
+        $pf = New-PromptFile 'pm_with_old_resume.txt' $text
+        $r1 = Invoke-Launch $Fx -Mode 'commit' -Params @{ PromptFile = $pf }
+        Check 'without_resume_verbatim' ((Get-RunStdin $Fx $r1.Entry) -ceq $text) (Get-RunStdin $Fx $r1.Entry)
+        $sha = G $Fx.Wt rev-parse HEAD
+        $r2 = Invoke-Launch $Fx -Mode 'commit' -Params @{ PromptFile = $pf; ResumeFromSha = $sha }
+        $stdin = Get-RunStdin $Fx $r2.Entry
+        Check 'exit_0' ($r2.Code -eq 0) "exit $($r2.Code) $($r2.Err)"
+        Check 'one_resume_line_new_sha' ($stdin -ceq ((Get-DeusResumeLine $sha) + "`n`n" + (Get-PmPromptText))) $stdin
+    } }
+    @{ Name = 'relaunch_note_dropped_when_reused'; Body = {
+        Reset-Lane $Fx
+        $note = "RESUME (PM relaunch #1, TEST_): your previous session stopped at a usage limit; tip 1234abcd.`nRe-run the evidence.`n--- original prompt follows ---`n"
+        $pf = New-PromptFile 'pm_relaunch.txt' ($note + (Get-PmPromptText))
+        $r1 = Invoke-Launch $Fx -Mode 'commit' -Params @{ PromptFile = $pf }
+        Check 'explicit_note_kept' ((Get-RunStdin $Fx $r1.Entry) -ceq ($note + (Get-PmPromptText))) (Get-RunStdin $Fx $r1.Entry)
+        $sha = G $Fx.Wt rev-parse HEAD
+        $r2 = Invoke-Launch $Fx -Mode 'commit' -Params @{ ResumeFromSha = $sha }
+        $stdin = Get-RunStdin $Fx $r2.Entry
+        Check 'exit_0' ($r2.Code -eq 0) "exit $($r2.Code) $($r2.Err)"
+        Check 'reused' ($r2.Entry['promptSource'] -eq 'saved' -and $r2.Entry['promptFile'] -eq $pf) "$($r2.Entry['promptSource']) $($r2.Entry['promptFile'])"
+        Check 'note_dropped_resume_on_top' ($stdin -ceq ((Get-DeusResumeLine $sha) + "`n`n" + (Get-PmPromptText))) $stdin
+    } }
+    @{ Name = 'reviewer_prompt_never_reused_for_writer'; Body = {
+        Reset-Lane $Fx
+        $rev = New-PromptFile 'reviewer_prompt.txt' (Get-PmPromptText 'reviewer')
+        # A real reviewer launch (-NoCommitPrompt leaves its copy uncommitted in launches/) ...
+        $r0 = Invoke-Launch $Fx -Mode 'commit' -Params @{ Provider = 'grok'; PromptFile = $rev } -Switches @('NoCommitPrompt')
+        Check 'reviewer_run_recorded' ($r0.Entry -and $r0.Entry['role'] -eq 'reviewer') "role $($r0.Entry['role']) $($r0.Err)"
+        # ... a reviewer registry entry and a reviewer prompt committed under the launcher's subject, both for claude, so
+        # only the role tells them apart; and a committed prompt whose subject names no role (the coordinator's format).
+        $list = Read-DeusJsonFile $Fx.Reg (New-Object System.Collections.ArrayList)
+        [void]$list.Add([ordered]@{ runId = 'seed-rev'; lane = 'lane-t'; taskId = 'T.01'; role = 'reviewer'; provider = 'claude'; state = 'COMPLETED'; startedAt = '2099-01-01T00:00:00Z'; promptFile = $rev })
+        Write-DeusJsonFile $Fx.Reg $list
+        Save-LaunchFile $Fx '20990101_000001' (Get-PmPromptText 'reviewer') '[ops] T.01 lane-t launch prompt 20990101_000001 (reviewer claude)' | Out-Null
+        Save-LaunchFile $Fx '20990101_000002' (Get-PmPromptText 'unknown') '[gemini] Record Lane T review launch prompt 20990101_000002' | Out-Null
+        $r = Invoke-Launch $Fx -Mode 'commit'
+        $e = $r.Entry
+        $stdin = Get-RunStdin $Fx $e
+        $skip = @($e['promptCandidatesSkipped']) -join ' | '
+        Check 'exit_0' ($r.Code -eq 0) "exit $($r.Code) $($r.Err)"
+        Check 'writer_role' ($e['role'] -eq 'writer')
+        Check 'no_reviewer_text' ($stdin -notmatch 'TEST_ reviewer' -and $stdin -notmatch 'TEST_ unknown') $stdin
+        Check 'generated_writer_prompt' ($e['promptSource'] -eq 'generated' -and $stdin -match '^You are the primary implementer for lane-t') "$($e['promptSource']) $stdin"
+        Check 'skipped_registry_reviewer_by_role' ($skip -match "registry run seed-rev: role 'reviewer', not writer") $skip
+        Check 'skipped_committed_reviewer' ($skip -match 'launches/20990101_000001_prompt\.txt: saved for reviewer claude') $skip
+        Check 'skipped_unknown_role' ($skip -match 'launches/20990101_000002_prompt\.txt: its commit .* does not name a role and provider') $skip
+    } }
+    @{ Name = 'writer_prompt_never_reused_for_reviewer'; Body = {
+        Reset-Lane $Fx
+        $pm = New-PromptFile 'pm_writer_for_rev.txt' (Get-PmPromptText)
+        $r1 = Invoke-Launch $Fx -Mode 'commit' -Params @{ PromptFile = $pm }
+        Check 'writer_exit_0' ($r1.Code -eq 0) "exit $($r1.Code) $($r1.Err)"
+        $r2 = Invoke-Launch $Fx -Mode 'commit' -Params @{ Provider = 'grok' } -Switches @('NoCommitPrompt')
+        $stdin = Get-RunStdin $Fx $r2.Entry
+        Check 'reviewer_role' ($r2.Entry['role'] -eq 'reviewer') "$($r2.Entry['role'])"
+        Check 'no_writer_text' ($stdin -notmatch 'TEST_ writer') $stdin
+        Check 'generated_reviewer_prompt' ($r2.Entry['promptSource'] -eq 'generated' -and $stdin -match '^You are the independent reviewer for lane-t') $stdin
+    } }
+    @{ Name = 'committed_prompt_reused_without_registry'; Body = {
+        Reset-Lane $Fx
+        $pm = New-PromptFile 'pm_writer_committed.txt' (Get-PmPromptText)
+        $r1 = Invoke-Launch $Fx -Mode 'commit' -Params @{ PromptFile = $pm }
+        $rel = 'tasks/T.01/lane-t/launches/' + (Split-Path -Leaf $r1.Entry['launchPromptPath'])
+        Remove-Item -LiteralPath $Fx.Reg, $pm -Force
+        $r2 = Invoke-Launch $Fx -Mode 'commit'
+        Check 'exit_0' ($r2.Code -eq 0) "exit $($r2.Code) $($r2.Err)"
+        Check 'reused_committed_copy' ($r2.Entry['promptSource'] -eq 'saved' -and $r2.Entry['promptFrom'] -eq "committed $rel") "$($r2.Entry['promptSource']) '$($r2.Entry['promptFrom'])' want 'committed $rel'"
+        Check 'worker_got_pm_prompt' ((Get-RunStdin $Fx $r2.Entry) -ceq (Get-PmPromptText)) (Get-RunStdin $Fx $r2.Entry)
+    } }
+    @{ Name = 'generated_prompt_not_reused'; Body = {
+        Reset-Lane $Fx
+        $r1 = Invoke-Launch $Fx -Mode 'commit'
+        Check 'first_generated_no_push' ((Get-TextFile $r1.Entry['launchPromptPath']) -match 'Do not push\.') (Get-TextFile $r1.Entry['launchPromptPath'])
+        Save-LaneFixture $Fx "# TEST_ brief`nPush with git push origin task/lane-t when done.`n" $null
+        $r2 = Invoke-Launch $Fx -Mode 'commit'
+        $stdin = Get-RunStdin $Fx $r2.Entry
+        $skip = @($r2.Entry['promptCandidatesSkipped']) -join ' | '
+        Check 'exit_0' ($r2.Code -eq 0) "exit $($r2.Code) $($r2.Err)"
+        Check 'regenerated_with_push' ($r2.Entry['promptSource'] -eq 'generated' -and $stdin -match 'git push origin task/lane-t\.' -and $stdin -notmatch 'Do not push') $stdin
+        Check 'old_generated_skipped' (@($r2.Entry['promptCandidatesSkipped'] | Where-Object { $_ -match 'was generated by the launcher' }).Count -ge 2) $skip
+    } }
+    @{ Name = 'other_task_or_provider_not_reused'; Body = {
+        Reset-Lane $Fx
+        $other = New-PromptFile 'other_task.txt' (Get-PmPromptText 'other-task')
+        $codex = New-PromptFile 'codex_writer.txt' (Get-PmPromptText 'codex-writer')
+        $seed = New-Object System.Collections.ArrayList
+        [void]$seed.Add([ordered]@{ runId = 'seed-task'; lane = 'lane-t'; taskId = 'T.99'; role = 'writer'; provider = 'claude'; state = 'COMPLETED'; startedAt = '2099-01-01T00:00:02Z'; promptFile = $other })
+        [void]$seed.Add([ordered]@{ runId = 'seed-codex'; lane = 'lane-t'; taskId = 'T.01'; role = 'writer'; provider = 'codex'; state = 'COMPLETED'; startedAt = '2099-01-01T00:00:01Z'; promptFile = $codex })
+        Write-DeusJsonFile $Fx.Reg $seed
+        $r = Invoke-Launch $Fx -Mode 'commit'
+        $stdin = Get-RunStdin $Fx $r.Entry
+        $skip = @($r.Entry['promptCandidatesSkipped']) -join ' | '
+        Check 'exit_0' ($r.Code -eq 0) "exit $($r.Code) $($r.Err)"
+        Check 'generated' ($r.Entry['promptSource'] -eq 'generated' -and $stdin -notmatch 'TEST_ (other-task|codex-writer)') $stdin
+        Check 'skipped_task' ($skip -match "registry run seed-task: task 'T\.99', not T\.01") $skip
+        Check 'skipped_provider' ($skip -match "registry run seed-codex: provider 'codex', not claude") $skip
+    } }
+    @{ Name = 'saved_prompt_flag_needs_prompt_file'; Body = {
+        Reset-Lane $Fx
+        $r = Invoke-Launch $Fx -Mode 'commit' -Switches @('SavedPrompt')
+        Check 'exit_1' ($r.Code -eq 1) "exit $($r.Code)"
+        Check 'says_needs_prompt_file' ($r.Err -match '-SavedPrompt needs -PromptFile') $r.Err
+        Check 'no_registry_entry' (-not (Test-Path $Fx.Reg))
     } }
     @{ Name = 'timeout_kill'; Body = {
         Reset-Lane $Fx
@@ -674,6 +909,39 @@ $MutantDefs = @(
        Find = 'if ($active.Count -gt 0) {'; Replace = 'if ($false) {' }
     @{ Name = 'resume_line_changed'; File = 'launch_worker.ps1'; Tests = 'resume_prompt'
        Find = 'return "resume from HEAD $Sha; re-read BRIEF and the uncommitted diff first"'; Replace = 'return "resume from $Sha"' }
+    # prompt selection and the push rule (WG.00.12b)
+    @{ Name = 'saved_prompt_ignored'; File = 'launch_worker.ps1'; Tests = 'prompt_file_recorded_then_reused'
+       Find = '$saved = Find-DeusSavedPrompt -Worktree $wt'; Replace = '$saved = @{ Path = $null; Skipped = @() }; $null = Find-DeusSavedPrompt -Worktree $wt' }
+    @{ Name = 'prompt_file_not_recorded'; File = 'launch_worker.ps1'; Tests = 'prompt_file_recorded_then_reused'
+       Find = 'promptFile = $promptFileUsed;'; Replace = 'promptFile = $null;' }
+    @{ Name = 'registry_role_not_checked'; File = 'launch_worker.ps1'; Tests = 'reviewer_prompt_never_reused_for_writer'
+       Find = 'if ("$($e[''role''])".ToLowerInvariant() -ne $role) {'; Replace = 'if ($false) {' }
+    @{ Name = 'committed_role_not_checked'; File = 'launch_worker.ps1'; Tests = 'reviewer_prompt_never_reused_for_writer'
+       Find = 'if ($made.Role -ne $role -or $made.Provider -ne $prov) {'; Replace = 'if ($made.Provider -ne $prov) {' }
+    @{ Name = 'registry_task_not_checked'; File = 'launch_worker.ps1'; Tests = 'other_task_or_provider_not_reused'
+       Find = 'if ("$($e[''taskId''])" -ne $TaskId) {'; Replace = 'if ($false) {' }
+    @{ Name = 'registry_provider_not_checked'; File = 'launch_worker.ps1'; Tests = 'other_task_or_provider_not_reused'
+       Find = 'if ("$($e[''provider''])".ToLowerInvariant() -ne $prov) {'; Replace = 'if ($false) {' }
+    @{ Name = 'commit_subject_without_role'; File = 'launch_worker.ps1'; Tests = 'committed_prompt_reused_without_registry'
+       Find = 'launch prompt $stamp$suffix ($roleName $prov)"'; Replace = 'launch prompt $stamp$suffix"' }
+    @{ Name = 'generated_prompt_reused'; File = 'launch_worker.ps1'; Tests = 'generated_prompt_not_reused'
+       Find = 'if (Test-DeusGeneratedPrompt $text) {'; Replace = 'if ($false) {' }
+    @{ Name = 'resume_lines_stack'; File = 'launch_worker.ps1'; Tests = 'reuse_with_resume_does_not_stack,explicit_prompt_file_resume_not_stacked'
+       Find = 'if ($m.Success) { $t = $t.Substring($m.Length); continue }'; Replace = 'if ($false) { continue }' }
+    @{ Name = 'relaunch_note_kept'; File = 'launch_worker.ps1'; Tests = 'relaunch_note_dropped_when_reused'
+       Find = 'if ($k.Success) { $t = $t.Substring($k.Index + $k.Length); continue }'; Replace = 'if ($false) { continue }' }
+    @{ Name = 'push_rule_ignored'; File = 'launch_worker.ps1'; Tests = 'push_rule_from_brief'
+       Find = '-Push:$pushRule.Push -Branch $pushBranch'; Replace = '-Branch $pushBranch' }
+    @{ Name = 'push_brief_ignored'; File = 'launch_worker.ps1'; Tests = 'push_rule_from_brief'
+       Find = 'return @{ Push = $true; Source = ''brief'' }'; Replace = 'return @{ Push = $false; Source = ''brief'' }' }
+    @{ Name = 'push_any_branch_prefix'; File = 'launch_worker.ps1'; Tests = 'push_rule_other_branch_is_not_a_push'
+       Find = '[regex]::Escape($Branch) + ''(?=$|'; Replace = '[regex]::Escape($Branch) + ''(?=|' }
+    @{ Name = 'push_lane_json_ignored'; File = 'launch_worker.ps1'; Tests = 'push_rule_lane_json_true,push_rule_lane_json_false_wins'
+       Find = 'if ($p -is [bool]) { return @{ Push = $p; Source = ''lane.json'' } }'; Replace = 'if ($p -is [bool]) { $null = $p }' }
+    @{ Name = 'push_lane_json_invalid_accepted'; File = 'launch_worker.ps1'; Tests = 'push_rule_lane_json_invalid_refused'
+       Find = 'return @{ Error = "lane.json ""push"" must be true or false, not ''$p''" }'; Replace = '$null = $p' }
+    @{ Name = 'no_final_sha_line'; File = 'launch_worker.ps1'; Tests = 'push_rule_from_brief'
+       Find = 'if ($Push) { $lines.Add(''Your final output line'; Replace = 'if ($false) { $lines.Add(''Your final output line' }
     @{ Name = 'hook_allows_push'; File = 'hooks\pre-push'; Tests = 'hooks_install_and_block'
        Find = 'exit 1'; Replace = 'exit 0' }
     @{ Name = 'hook_repo_wide'; File = 'install_lane_hooks.ps1'; Tests = 'hooks_install_and_block'

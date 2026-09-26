@@ -61,6 +61,7 @@ switch ($plan[$Provider]) {
     $launcher = @'
 param([string]$Lane, [string]$Provider, [string]$BriefPath, [string]$TimeoutMinutes, [string]$ResumeFromSha, [string]$Role,
       [string]$RegistryPath, [string]$ProviderStatusPath, [string]$LogRoot, [string]$Worktree, [switch]$Quiet,
+      [string]$PromptFile, [switch]$SavedPrompt,
       [Parameter(ValueFromRemainingArguments = $true)]$Rest)
 # Fake launcher: records its arguments; registers a run under its PID unless launcher_plan.txt says exit1.
 $plan = 'register'
@@ -68,7 +69,7 @@ $pf = Join-Path $PSScriptRoot 'launcher_plan.txt'
 if (Test-Path -LiteralPath $pf) { $plan = (Get-Content -LiteralPath $pf -Raw).Trim() }
 $calls = Join-Path $PSScriptRoot 'launcher_calls'
 New-Item -ItemType Directory -Force -Path $calls | Out-Null
-[IO.File]::WriteAllText((Join-Path $calls "$PID.txt"), "lane=$Lane`nprovider=$Provider`nrole=$Role`nresume=$ResumeFromSha`nbrief=$BriefPath`ntimeout=$TimeoutMinutes`nworktree=$Worktree`nregistry=$RegistryPath`n")
+[IO.File]::WriteAllText((Join-Path $calls "$PID.txt"), "lane=$Lane`nprovider=$Provider`nrole=$Role`nresume=$ResumeFromSha`nbrief=$BriefPath`ntimeout=$TimeoutMinutes`nworktree=$Worktree`nregistry=$RegistryPath`npromptfile=$PromptFile`nsaved=$SavedPrompt`n")
 if ($plan -eq 'exit1') { exit 1 }
 $list = @()
 if (Test-Path -LiteralPath $RegistryPath) {
@@ -333,6 +334,123 @@ $Tests = @(
         Check 'no_launch' ($r.Calls.Count -eq 0)
         Check 'says_would_probe' ($r.Out -match 'would probe claude') $r.Out
     } }
+    # --- saved prompts on relaunch (WG.00.12b) ---------------------------------------------------------
+    @{ Name = 'relaunch_passes_saved_prompt'; Body = {
+        Reset-Queue $Fx
+        Set-Plan $null 'register'
+        $pm = New-PromptFile 'rq_pm_writer.txt' (Get-PmPromptText)
+        $seed = New-Object System.Collections.ArrayList
+        [void]$seed.Add([ordered]@{ runId = 'r1'; lane = 'lane-t'; taskId = 'T.01'; role = 'writer'; provider = 'claude'; state = 'USAGE-EXHAUSTED'; startedAt = '2026-09-26T10:00:00Z'; promptFile = $pm })
+        Write-DeusJsonFile $Fx.Reg $seed
+        Set-QueueStatus $Fx @{ claude = @('AVAILABLE', $null) } @(New-QueueEntry $Fx)
+        $r = Invoke-ResumeQueue $Fx
+        Check 'exit_0' ($r.Code -eq 0) "$($r.Code) $($r.Out) $($r.Err)"
+        Check 'launched_once' ($r.Calls.Count -eq 1) "$($r.Calls.Count)"
+        $c = "$($r.Calls[0])"
+        Check 'passes_prompt_file' ($c -match ('(?m)^promptfile=' + [regex]::Escape($pm) + '$')) $c
+        Check 'marks_it_saved' ($c -match '(?m)^saved=True$') $c
+        Check 'logs_choice' ($r.Out -match ('lane-t prompt: saved writer prompt ' + [regex]::Escape($pm) + ' \(registry run r1 promptFile\)')) $r.Out
+        $q = Get-Q $r.Status
+        Check 'queue_records_prompt' ($q['resumePromptFile'] -eq $pm -and $q['resumePromptFrom'] -eq 'registry run r1 promptFile') "$($q['resumePromptFile']) $($q['resumePromptFrom'])"
+    } }
+    @{ Name = 'relaunch_prefers_the_queued_run'; Body = {
+        # A newer writer run of the lane exists, but the queued run's own promptFile comes first.
+        Reset-Queue $Fx
+        Set-Plan $null 'register'
+        $mine = New-PromptFile 'rq_queued_run.txt' (Get-PmPromptText 'queued-run')
+        $newer = New-PromptFile 'rq_newer_run.txt' (Get-PmPromptText 'newer-run')
+        $seed = New-Object System.Collections.ArrayList
+        [void]$seed.Add([ordered]@{ runId = 'r1'; lane = 'lane-t'; taskId = 'T.01'; role = 'writer'; provider = 'claude'; state = 'USAGE-EXHAUSTED'; startedAt = '2026-09-26T10:00:00Z'; promptFile = $mine })
+        [void]$seed.Add([ordered]@{ runId = 'r9'; lane = 'lane-t'; taskId = 'T.01'; role = 'writer'; provider = 'claude'; state = 'COMPLETED'; startedAt = '2026-09-26T11:30:00Z'; promptFile = $newer })
+        Write-DeusJsonFile $Fx.Reg $seed
+        Set-QueueStatus $Fx @{ claude = @('AVAILABLE', $null) } @(New-QueueEntry $Fx)
+        $r = Invoke-ResumeQueue $Fx
+        $c = "$($r.Calls[0])"
+        Check 'launched_once' ($r.Calls.Count -eq 1) "$($r.Calls.Count) $($r.Out)"
+        Check 'queued_run_prompt' ($c -match ('(?m)^promptfile=' + [regex]::Escape($mine) + '$')) $c
+    } }
+    @{ Name = 'relaunch_prompt_falls_back_to_committed'; Body = {
+        # The registry's promptFile is gone and so is its copy: the committed writer prompt (rule 3a) is used.
+        Reset-Queue $Fx
+        Set-Plan $null 'register'
+        $seed = New-Object System.Collections.ArrayList
+        [void]$seed.Add([ordered]@{ runId = 'r1'; lane = 'lane-t'; taskId = 'T.01'; role = 'writer'; provider = 'claude'; state = 'USAGE-EXHAUSTED'; startedAt = '2026-09-26T10:00:00Z'
+            promptFile = (Join-Path $TestRoot 'rq_gone.txt'); launchPromptPath = (Join-Path $TestRoot 'rq_gone_copy.txt') })
+        Write-DeusJsonFile $Fx.Reg $seed
+        $committed = Save-LaunchFile $Fx '20260926_090000' (Get-PmPromptText) '[ops] T.01 lane-t launch prompt 20260926_090000 (writer claude)'
+        Set-QueueStatus $Fx @{ claude = @('AVAILABLE', $null) } @(New-QueueEntry $Fx @{ lastCommit = (G $Fx.Wt rev-parse HEAD) })
+        $r = Invoke-ResumeQueue $Fx
+        $c = "$($r.Calls[0])"
+        Check 'launched_once' ($r.Calls.Count -eq 1) "$($r.Calls.Count) $($r.Out)"
+        Check 'passes_committed_prompt' ($c -match ('(?m)^promptfile=' + [regex]::Escape($committed) + '$') -and $c -match '(?m)^saved=True$') $c
+        Check 'logs_committed' ($r.Out -match 'prompt: saved writer prompt .*\(committed tasks/T\.01/lane-t/launches/20260926_090000_prompt\.txt\)') $r.Out
+    } }
+    @{ Name = 'reviewer_relaunch_uses_reviewer_prompt'; Body = {
+        Reset-Queue $Fx
+        Set-Plan $null 'register'
+        $w = New-PromptFile 'rq_writer.txt' (Get-PmPromptText 'writer')
+        $v = New-PromptFile 'rq_reviewer.txt' (Get-PmPromptText 'reviewer')
+        $seed = New-Object System.Collections.ArrayList
+        [void]$seed.Add([ordered]@{ runId = 'w1'; lane = 'lane-t'; taskId = 'T.01'; role = 'writer'; provider = 'claude'; state = 'COMPLETED'; startedAt = '2026-09-26T11:00:00Z'; promptFile = $w })
+        [void]$seed.Add([ordered]@{ runId = 'v1'; lane = 'lane-t'; taskId = 'T.01'; role = 'reviewer'; provider = 'grok'; state = 'USAGE-EXHAUSTED'; startedAt = '2026-09-26T10:00:00Z'; promptFile = $v })
+        Write-DeusJsonFile $Fx.Reg $seed
+        Set-QueueStatus $Fx @{ grok = @('AVAILABLE', $null) } @(New-QueueEntry $Fx @{ provider = 'grok'; role = 'reviewer'; runId = 'v1' })
+        $r = Invoke-ResumeQueue $Fx
+        $c = "$($r.Calls[0])"
+        Check 'launched_once' ($r.Calls.Count -eq 1) "$($r.Calls.Count) $($r.Out)"
+        Check 'reviewer_prompt' ($c -match ('(?m)^promptfile=' + [regex]::Escape($v) + '$') -and $c -match '(?m)^role=reviewer$') $c
+        Check 'not_writer_prompt' ($c -notmatch [regex]::Escape($w)) $c
+    } }
+    @{ Name = 'no_saved_prompt_uses_launcher_default'; Body = {
+        Reset-Queue $Fx
+        Set-Plan $null 'register'
+        Set-QueueStatus $Fx @{ claude = @('AVAILABLE', $null) } @(New-QueueEntry $Fx)
+        $r = Invoke-ResumeQueue $Fx
+        $c = "$($r.Calls[0])"
+        Check 'launched_once' ($r.Calls.Count -eq 1) "$($r.Calls.Count) $($r.Out)"
+        Check 'no_prompt_file' ($c -match '(?m)^promptfile=$' -and $c -match '(?m)^saved=False$') $c
+        Check 'logs_default' ($r.Out -match 'lane-t prompt: launcher default \(no saved writer prompt for claude') $r.Out
+        Check 'queue_records_default' ((Get-Q $r.Status)['resumePromptFrom'] -eq 'launcher default') "$((Get-Q $r.Status)['resumePromptFrom'])"
+    } }
+    @{ Name = 'dry_run_shows_prompt_choice'; Body = {
+        Reset-Queue $Fx
+        $pm = New-PromptFile 'rq_pm_dry.txt' (Get-PmPromptText)
+        $seed = New-Object System.Collections.ArrayList
+        [void]$seed.Add([ordered]@{ runId = 'r1'; lane = 'lane-t'; taskId = 'T.01'; role = 'writer'; provider = 'claude'; state = 'USAGE-EXHAUSTED'; promptFile = $pm })
+        Write-DeusJsonFile $Fx.Reg $seed
+        Set-QueueStatus $Fx @{ claude = @('AVAILABLE', $null) } @(New-QueueEntry $Fx)
+        $before = [IO.File]::ReadAllText($Fx.Status)
+        $r = Invoke-ResumeQueue $Fx @{ DryRun = $true }
+        Check 'exit_0' ($r.Code -eq 0) "$($r.Code) $($r.Err)"
+        Check 'no_launch' ($r.Calls.Count -eq 0)
+        Check 'status_unchanged' ([IO.File]::ReadAllText($Fx.Status) -eq $before)
+        Check 'would_pass_prompt' ($r.Out -match ('would relaunch lane-t on claude: .*-PromptFile ' + [regex]::Escape($pm) + ' -SavedPrompt')) $r.Out
+    } }
+    @{ Name = 'end_to_end_saved_prompt_resume'; Body = {
+        # resume_queue -> real launch_worker.ps1 -> fake worker: the queued run's saved prompt comes back with one resume
+        # line for the new HEAD and without the old relaunch note.
+        Reset-Queue $Fx
+        $note = "RESUME (PM relaunch #1, TEST_): stale note.`n--- original prompt follows ---`n"
+        $pm = New-PromptFile 'rq_pm_e2e.txt' ((Get-DeusResumeLine 'oldsha') + "`n`n" + $note + (Get-PmPromptText))
+        $seed = New-Object System.Collections.ArrayList
+        [void]$seed.Add([ordered]@{ runId = 'r1'; lane = 'lane-t'; taskId = 'T.01'; role = 'writer'; provider = 'claude'; state = 'USAGE-EXHAUSTED'; startedAt = '2026-09-26T10:00:00Z'; promptFile = $pm })
+        Write-DeusJsonFile $Fx.Reg $seed
+        $head = G $Fx.Wt rev-parse HEAD
+        Set-QueueStatus $Fx @{ claude = @('AVAILABLE', $null) } @(New-QueueEntry $Fx @{ lastCommit = $head })
+        $extra = @('-ProviderExe', $PsExe, '-ProviderArgs', "-NoProfile -ExecutionPolicy Bypass -File $($Fx.FakeWorker) -Mode commit -Out $($Fx.Out)",
+                   '-ProviderStdinPrompt', '-PollSeconds', '0.5', '-OrphanGraceSeconds', '1')
+        $r = Invoke-ResumeQueue $Fx @{ LauncherPath = (Join-Path $OpsDir 'launch_worker.ps1'); LauncherExtraArgs = $extra; NowUtc = $null; LaunchVerifySeconds = '60' }
+        Check 'exit_0' ($r.Code -eq 0) "$($r.Code) $($r.Out) $($r.Err)"
+        $q = Get-Q $r.Status
+        Check 'resumed_verified' ($q['state'] -eq 'RESUMED' -and $q['resumeVerified'] -eq $true) "$($q['state']) $($q['resumeVerified'])"
+        $lp = [int]$q['resumeLauncherPid']
+        if ($lp) { $lpProc = Get-Process -Id $lp -ErrorAction SilentlyContinue; if ($lpProc) { [void]$lpProc.WaitForExit(90000) } }
+        $e = @((Read-DeusJsonFile $Fx.Reg $null) | Where-Object { $_['runId'] -eq $q['resumeRunId'] })[0]
+        Check 'run_completed' ($e -and $e['state'] -eq 'COMPLETED') "state $($e['state']) flags $($e['flags'] -join ',')"
+        $stdin = Get-RunStdin $Fx $e
+        Check 'one_resume_line_no_note' ($stdin -ceq ((Get-DeusResumeLine $head) + "`n`n" + (Get-PmPromptText))) $stdin
+        Check 'registry_saved_source' ($e['promptSource'] -eq 'saved' -and $e['promptFile'] -eq $pm -and $e['promptFrom'] -eq '-PromptFile -SavedPrompt') "$($e['promptSource']) $($e['promptFile']) $($e['promptFrom'])"
+    } }
     @{ Name = 'end_to_end_real_launcher'; Body = {
         # resume_queue -> real launch_worker.ps1 -> fake worker; the new run carries the resume prompt.
         Reset-Queue $Fx
@@ -386,6 +504,17 @@ $MutantDefs = @(
        Find = '$null = $proc.Handle'; Replace = '$null = $proc' }
     @{ Name = 'dry_run_writes'; File = 'resume_queue.ps1'; Tests = 'dry_run_writes_nothing'
        Find = 'if (-not $DryRun) { Write-DeusJsonFile $statusPath $s }'; Replace = 'Write-DeusJsonFile $statusPath $s' }
+    # saved prompts on relaunch (WG.00.12b)
+    @{ Name = 'saved_prompt_not_passed'; File = 'resume_queue.ps1'; Tests = 'relaunch_passes_saved_prompt'
+       Find = "`$launchArgs += @('-PromptFile', `$sel.Path, '-SavedPrompt')"; Replace = '$null = $sel' }
+    @{ Name = 'relaunch_role_forced_writer'; File = 'resume_queue.ps1'; Tests = 'reviewer_relaunch_uses_reviewer_prompt'
+       Find = '-Role $qRole -Provider $l.Provider'; Replace = "-Role 'writer' -Provider `$l.Provider" }
+    @{ Name = 'queued_run_not_preferred'; File = 'resume_queue.ps1'; Tests = 'relaunch_prefers_the_queued_run'
+       Find = '-PreferRunId "$($q[''runId''])"'; Replace = '-PreferRunId ''''' }
+    @{ Name = 'saved_flag_dropped'; File = 'resume_queue.ps1'; Tests = 'end_to_end_saved_prompt_resume'
+       Find = "'-PromptFile', `$sel.Path, '-SavedPrompt')"; Replace = "'-PromptFile', `$sel.Path)" }
+    @{ Name = 'launcher_saved_flag_ignored'; File = 'launch_worker.ps1'; Tests = 'end_to_end_saved_prompt_resume'
+       Find = "if (`$SavedPrompt) { `$promptSource = 'saved'"; Replace = "if (`$false) { `$promptSource = 'saved'" }
 )
 
 # ---------------------------------------------------------------------------------------------
