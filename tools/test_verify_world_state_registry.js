@@ -135,6 +135,8 @@ function summary(res) {
     return `exit ${res.code}; findings: ${findings(res).map(f => `${f.rule}/${f.code}/${f.id}`).join(', ') || 'none'}`;
 }
 function assert(cond, msg) { if (!cond) throw new Error(msg); }
+// The parsed report of a run; fails with a clear message when the run produced none (exit 2).
+function reportOf(res) { assert(res.report, `want a report; got exit ${res.code}: ${res.lines.slice(-1)}`); return JSON.parse(res.report.json); }
 function sha(file) { return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'); }
 
 // A negative fixture: gate exit 1 (the fixture baseline is empty) and the named finding present.
@@ -200,7 +202,7 @@ const CHECKS = [
     }],
     ['clean_counts', T => {
         const res = runCase(T);
-        const c = JSON.parse(res.report.json).counts;
+        const c = reportOf(res).counts;
         assert(c.registry.rows === 8 && c.registry.artRequired === 5 && c.registry.withTemplateSlot === 5 && c.registry.composedExempt === 1, `registry counts ${JSON.stringify(c.registry)}`);
         assert(c.catalogue.slots === 9 && c.catalogue.slotsByScope.NATURAL_WORLD.slots === 4 && c.catalogue.slotsByScope.NATURAL_WORLD.tracing === 4, `catalogue counts ${JSON.stringify(c.catalogue.slotsByScope)}`);
         assert(c.manifestTemplate.slotsCompared === 9 && c.manifestTemplate.slotsAgree === 9 && c.manifestTemplate.sheetsCompared === 4, `manifest counts ${JSON.stringify(c.manifestTemplate)}`);
@@ -313,7 +315,7 @@ const CHECKS = [
     }],
     ['placed_none_reported', T => {
         const res = runCase(T, ws => { ws.approvals = null; ws.placements = []; });
-        const p = JSON.parse(res.report.json).counts.placed;
+        const p = reportOf(res).counts.placed;
         assert(res.code === 0 && p.ledgerSection === 'ABSENT' && p.placementReports === 0 && p.placedRegions === 0, `want exit 0 and no placed art; got ${JSON.stringify(p)} ${summary(res)}`);
         return 'ledger ABSENT, 0 regions';
     }],
@@ -398,6 +400,7 @@ const CHECKS = [
     }],
     ['report_has_no_paths_or_times', T => {
         const res = runCase(T, ws => setCell(ws, 'STATE_TEST_SPRING', 'Performance Class', ''));
+        reportOf(res);
         for (const text of [res.report.json, res.report.md]) {
             assert(!text.includes(tmpRoot) && !text.includes(os.tmpdir()), 'report contains a temp path');
             assert(!/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(text), 'report contains a timestamp');
@@ -407,7 +410,7 @@ const CHECKS = [
     }],
     ['report_lists_every_finding', T => {
         const res = runCase(T, ws => { setCell(ws, 'STATE_TEST_SPRING', 'Performance Class', ''); removeColumn(ws, 'Description'); ws.placements[0].filled[1].x = 96; });
-        const rep = JSON.parse(res.report.json);
+        const rep = reportOf(res);
         assert(rep.findings.length === findings(res).length && findings(res).length >= 3, `JSON findings ${rep.findings.length} vs ${findings(res).length}`);
         for (const f of findings(res)) assert(res.report.md.includes(`| ${f.code} | ${f.severity} |`) && res.report.md.includes(`${f.idKind} ${f.id}`), `md lacks ${f.rule}/${f.code}/${f.id}`);
         for (const r of ['WSR-01', 'WSR-02', 'WSR-03', 'WSR-04', 'WSR-05', 'WSR-SCHEMA', 'MANIFEST-TEMPLATE', 'PLACED-IN-SLOT']) assert(rep.counts.rules[r], `counts.rules lacks ${r}`);
@@ -466,7 +469,8 @@ const CHECKS = [
         const res = runCase(T, ws => {
             ws.registry += '\n## 3b. More TEST_ states\n\n| State ID | System | Authoritative Source | Visual Class | Semantic Asset Family | Visual State ID | Performance Class |\n|---|---|---|---|---|---|---|\n| `STATE_TEST_EXTRA` | `CREATURE_ECOLOGY` | TEST | `SIMULATION_ONLY` | *None* | *None* | `STATIC_TERRAIN` |\n';
         });
-        const c = JSON.parse(res.report.json).counts.registry;
+        assert(res.report, `want a report (the second table must parse); got exit ${res.code}: ${res.lines.slice(-1)}`);
+        const c = reportOf(res).counts.registry;
         assert(c.rows === 9 && c.seedTables.length === 2, `want 9 rows in 2 tables; got ${c.rows} rows, ${JSON.stringify(c.seedTables)}`);
         assert(has(res, 'WSR-01', 'SYSTEM_NOT_IN_ENUM', 'STATE_TEST_EXTRA') && has(res, 'WSR-SCHEMA', 'COLUMN_MISSING', 'description'), `the second table's row or its missing columns were not checked; ${summary(res)}`);
         return '2 tables, 9 rows; second-table row and its missing columns reported';
@@ -504,7 +508,7 @@ const CHECKS = [
     ['gen_lane_t_fixture_agrees', T => {
         const res = genCase(T, null);
         const t = res.ctx.tpl;
-        const c = JSON.parse(res.report.json).counts.manifestTemplate;
+        const c = reportOf(res).counts.manifestTemplate;
         const mt = findings(res).filter(f => f.rule === 'MANIFEST-TEMPLATE');
         assert(t.mode === 'GENERATED' && t.runs.length === 1 && t.runs[0].exit === 0, `runs ${JSON.stringify(t.runs)}`);
         assert(mt.length === 0, `want no MANIFEST-TEMPLATE finding; got ${mt.map(f => f.code + ' ' + f.id).join(', ')}`);
@@ -518,7 +522,7 @@ const CHECKS = [
         const want = ['SHEET_NOT_IN_TEMPLATE $TEST_Horse', 'SHEET_NOT_IN_TEMPLATE TEST_ATLAS_SURFACE', 'TEMPLATE_REFUSED_SHEET_INVALID $TEST_Horse', 'TEMPLATE_REFUSED_STRATUM_HEIGHT_MISMATCH TEST_ATLAS_SURFACE:0008'];
         assert(JSON.stringify(mt) === JSON.stringify(want), `MANIFEST-TEMPLATE findings ${JSON.stringify(mt)}`);
         assert(t.runs.length === 2 && t.runs[0].exit === 2 && t.runs[1].exit === 0 && t.runs[1].sheets === 3, `runs ${JSON.stringify(t.runs)}`);
-        const c = JSON.parse(res.report.json).counts.manifestTemplate;
+        const c = reportOf(res).counts.manifestTemplate;
         assert(c.sheetsCompared === 3 && c.slotsCompared === 4 && c.slotsAgree === 4, `counts ${JSON.stringify(c)}`);
         return '2 refusals, 3 sheets / 4 slots still compared';
     }],
@@ -572,7 +576,7 @@ const DISK_CHECKS = [
     }],
     ['placements_discovered_when_not_given', T => {
         const res = runCase(T, ws => { ws.placements = []; ws.discover = true; });
-        const p = JSON.parse(res.report.json).counts.placed;
+        const p = reportOf(res).counts.placed;
         const tracked = childProcess.spawnSync('git', ['ls-files', '--', 'art/*placement_report.json'], { cwd: REPO, encoding: 'utf8' }).stdout.split('\n').filter(Boolean).length;
         assert(res.code === 0 && p.placementReportsHow.startsWith('DISCOVERED') && p.placementReports === tracked, `want DISCOVERED with ${tracked} report(s); got ${JSON.stringify(p)} ${summary(res)}`);
         return `DISCOVERED, ${tracked} tracked report(s) under art/`;
