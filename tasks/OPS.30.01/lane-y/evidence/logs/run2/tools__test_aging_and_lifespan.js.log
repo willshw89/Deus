@@ -1,0 +1,24 @@
+# tools/test_aging_and_lifespan.js  category=PASS  exit=0  ms=60  decided by exit_0 (-)
+== stdout ==
+=== Testing Aging Progression and 60-Year Lifespan System ===
+PASS stage_baby
+PASS stage_child
+PASS stage_teen
+PASS stage_adult
+PASS stage_elder
+PASS mortality_zero_under_55
+PASS mortality_early_elder_55_57
+PASS mortality_target_elder_58_60
+PASS mortality_senior_elder_61_65
+PASS mortality_advanced_elder_66_70
+PASS mortality_late_elder_71_75
+PASS mortality_centenarian_76_plus
+Simulated 2000 lives -> Average Lifespan: 59.97 years (Min: 55, Max: 69)
+PASS average_lifespan_centered_around_60 - Average lifespan is 59.97 (expected ~60 years)
+PASS minimum_lifespan_at_least_55 - Youngest old-age mortality was 55 (expected >= 55)
+PASS maximum_lifespan_realistic_cap - Eldest survivor was 69 (expected realistic cap)
+PASS chronicle_peaceful_passing - Elder Sarah passed away peacefully of old age at the age of 64.
+
+RESULT: 16 passed, 0 failed
+== stderr ==
+

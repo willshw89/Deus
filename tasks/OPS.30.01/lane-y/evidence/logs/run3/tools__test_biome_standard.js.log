@@ -1,0 +1,363 @@
+# tools/test_biome_standard.js  category=PASS  exit=0  ms=231  decided by exit_0 (-)
+== stdout ==
+=== DEUS BIOME IDENTITY & MATERIAL DIFFERENTIATION TEST SUITE (DW.01.04) ===
+
+--- 1. Registry Integrity & Canonical Baselines ---
+PASS: Registry version is 1.0.0
+PASS: Document ID is DEUS-BIOME-REGISTRY-01
+PASS: Task is DW.01.04
+PASS: Exactly 5 canonical major biomes are registered
+PASS: Canonical biomes match expected IDs (TEMP, WET, ARID, HIGH, VOLC)
+
+--- 2. Exclusion of Snow/Ice & Highland Restrictions ---
+PASS: FROZEN is not a canonical biome
+PASS: SNOW is not a canonical biome
+PASS: GLACIER is not a canonical biome
+PASS: ICE is not a canonical biome
+PASS: HIGH biome exists
+PASS: Highland explicitly forbids snow
+PASS: Highland explicitly forbids ice
+PASS: Highland explicitly forbids glaciers
+PASS: Highland explicitly forbids frost
+
+--- 3. Volcanic Accent & Lava Containment ---
+PASS: VOLC biome exists
+PASS: Volcanic defines lava as a focal/accent material
+PASS: Volcanic explicitly forbids full-screen glowing red wallpaper
+
+--- 4. Physical System Completeness Across All Biomes ---
+PASS: Biome TEMP exists in biomes map
+PASS: TEMP: valid displayName
+PASS: TEMP: valid dominantGround
+PASS: TEMP: valid exposedSoil
+PASS: TEMP: valid geology
+PASS: TEMP: valid moisture
+PASS: TEMP: valid drainage
+PASS: TEMP: valid vegetationForm
+PASS: TEMP: valid treeVocabulary
+PASS: TEMP: valid shrubVocabulary
+PASS: TEMP: valid lowFloraVocabulary
+PASS: TEMP: valid rockOutcropVocabulary
+PASS: TEMP: valid debrisVocabulary
+PASS: TEMP: at least 3 signature materials
+PASS: TEMP: shared materials declared
+PASS: TEMP: forbidden cues declared
+PASS: TEMP: valid grass density (DENSE)
+PASS: TEMP: valid shrub density (MODERATE)
+PASS: TEMP: valid tree density (MODERATE_TO_DENSE)
+PASS: TEMP: valid lowFlora density (MODERATE)
+PASS: TEMP: valid debris density (MODERATE)
+PASS: Biome WET exists in biomes map
+PASS: WET: valid displayName
+PASS: WET: valid dominantGround
+PASS: WET: valid exposedSoil
+PASS: WET: valid geology
+PASS: WET: valid moisture
+PASS: WET: valid drainage
+PASS: WET: valid vegetationForm
+PASS: WET: valid treeVocabulary
+PASS: WET: valid shrubVocabulary
+PASS: WET: valid lowFloraVocabulary
+PASS: WET: valid rockOutcropVocabulary
+PASS: WET: valid debrisVocabulary
+PASS: WET: at least 3 signature materials
+PASS: WET: shared materials declared
+PASS: WET: forbidden cues declared
+PASS: WET: valid grass density (DENSE)
+PASS: WET: valid shrub density (DENSE)
+PASS: WET: valid tree density (SPARSE_TO_MODERATE)
+PASS: WET: valid lowFlora density (VERY_DENSE)
+PASS: WET: valid debris density (DENSE)
+PASS: Biome ARID exists in biomes map
+PASS: ARID: valid displayName
+PASS: ARID: valid dominantGround
+PASS: ARID: valid exposedSoil
+PASS: ARID: valid geology
+PASS: ARID: valid moisture
+PASS: ARID: valid drainage
+PASS: ARID: valid vegetationForm
+PASS: ARID: valid treeVocabulary
+PASS: ARID: valid shrubVocabulary
+PASS: ARID: valid lowFloraVocabulary
+PASS: ARID: valid rockOutcropVocabulary
+PASS: ARID: valid debrisVocabulary
+PASS: ARID: at least 3 signature materials
+PASS: ARID: shared materials declared
+PASS: ARID: forbidden cues declared
+PASS: ARID: valid grass density (SPARSE)
+PASS: ARID: valid shrub density (SPARSE)
+PASS: ARID: valid tree density (VERY_SPARSE)
+PASS: ARID: valid lowFlora density (SPARSE)
+PASS: ARID: valid debris density (SPARSE_TO_MODERATE)
+PASS: Biome HIGH exists in biomes map
+PASS: HIGH: valid displayName
+PASS: HIGH: valid dominantGround
+PASS: HIGH: valid exposedSoil
+PASS: HIGH: valid geology
+PASS: HIGH: valid moisture
+PASS: HIGH: valid drainage
+PASS: HIGH: valid vegetationForm
+PASS: HIGH: valid treeVocabulary
+PASS: HIGH: valid shrubVocabulary
+PASS: HIGH: valid lowFloraVocabulary
+PASS: HIGH: valid rockOutcropVocabulary
+PASS: HIGH: valid debrisVocabulary
+PASS: HIGH: at least 3 signature materials
+PASS: HIGH: shared materials declared
+PASS: HIGH: forbidden cues declared
+PASS: HIGH: valid grass density (MODERATE)
+PASS: HIGH: valid shrub density (SPARSE_TO_MODERATE)
+PASS: HIGH: valid tree density (SPARSE_TO_MODERATE)
+PASS: HIGH: valid lowFlora density (MODERATE)
+PASS: HIGH: valid debris density (DENSE)
+PASS: Biome VOLC exists in biomes map
+PASS: VOLC: valid displayName
+PASS: VOLC: valid dominantGround
+PASS: VOLC: valid exposedSoil
+PASS: VOLC: valid geology
+PASS: VOLC: valid moisture
+PASS: VOLC: valid drainage
+PASS: VOLC: valid vegetationForm
+PASS: VOLC: valid treeVocabulary
+PASS: VOLC: valid shrubVocabulary
+PASS: VOLC: valid lowFloraVocabulary
+PASS: VOLC: valid rockOutcropVocabulary
+PASS: VOLC: valid debrisVocabulary
+PASS: VOLC: at least 3 signature materials
+PASS: VOLC: shared materials declared
+PASS: VOLC: forbidden cues declared
+PASS: VOLC: valid grass density (VERY_SPARSE)
+PASS: VOLC: valid shrub density (VERY_SPARSE)
+PASS: VOLC: valid tree density (VERY_SPARSE)
+PASS: VOLC: valid lowFlora density (SPARSE)
+PASS: VOLC: valid debris density (DENSE)
+
+--- 5. Vertical Z Continuity Hooks ---
+PASS: TEMP: verticalHooks object exists
+PASS: TEMP: Z+2 vertical hook defined (Exposed high ridge crest, shal...)
+PASS: TEMP: Z+2 hook contains no constructed infrastructure (exposed high ridge crest,...)
+PASS: TEMP: Z+2 hook contains no wildlife references (exposed high ridge crest,...)
+PASS: TEMP: Z+2 hook contains no tree canopy airspace leakage (exposed high ridge crest,...)
+PASS: TEMP: Z+2 hook contains no atmospheric/weather leakage (exposed high ridge crest,...)
+PASS: TEMP: Z+1 vertical hook defined (Upper terrace meadows, elevate...)
+PASS: TEMP: Z+1 hook contains no constructed infrastructure (upper terrace meadows, el...)
+PASS: TEMP: Z+1 hook contains no wildlife references (upper terrace meadows, el...)
+PASS: TEMP: Z+1 hook contains no tree canopy airspace leakage (upper terrace meadows, el...)
+PASS: TEMP: Z+1 hook contains no atmospheric/weather leakage (upper terrace meadows, el...)
+PASS: TEMP: Z0 vertical hook defined (Canonical surface: rolling ver...)
+PASS: TEMP: Z0 hook contains no constructed infrastructure (canonical surface: rollin...)
+PASS: TEMP: Z0 hook contains no wildlife references (canonical surface: rollin...)
+PASS: TEMP: Z0 hook contains no tree canopy airspace leakage (canonical surface: rollin...)
+PASS: TEMP: Z0 hook contains no atmospheric/weather leakage (canonical surface: rollin...)
+PASS: TEMP: Z-1 vertical hook defined (Rich loam subsoil, taproot hor...)
+PASS: TEMP: Z-1 hook contains no constructed infrastructure (rich loam subsoil, taproo...)
+PASS: TEMP: Z-1 hook contains no wildlife references (rich loam subsoil, taproo...)
+PASS: TEMP: Z-1 hook contains no tree canopy airspace leakage (rich loam subsoil, taproo...)
+PASS: TEMP: Z-1 hook contains no atmospheric/weather leakage (rich loam subsoil, taproo...)
+PASS: TEMP: Z-2 vertical hook defined (Solid limestone and granite be...)
+PASS: TEMP: Z-2 hook contains no constructed infrastructure (solid limestone and grani...)
+PASS: TEMP: Z-2 hook contains no wildlife references (solid limestone and grani...)
+PASS: TEMP: Z-2 hook contains no tree canopy airspace leakage (solid limestone and grani...)
+PASS: TEMP: Z-2 hook contains no atmospheric/weather leakage (solid limestone and grani...)
+PASS: WET: verticalHooks object exists
+PASS: WET: Z+2 vertical hook defined (Elevated wetland knoll crests,...)
+PASS: WET: Z+2 hook contains no constructed infrastructure (elevated wetland knoll cr...)
+PASS: WET: Z+2 hook contains no wildlife references (elevated wetland knoll cr...)
+PASS: WET: Z+2 hook contains no tree canopy airspace leakage (elevated wetland knoll cr...)
+PASS: WET: Z+2 hook contains no atmospheric/weather leakage (elevated wetland knoll cr...)
+PASS: WET: Z+1 vertical hook defined (Natural levee crest, raised pe...)
+PASS: WET: Z+1 hook contains no constructed infrastructure (natural levee crest, rais...)
+PASS: WET: Z+1 hook contains no wildlife references (natural levee crest, rais...)
+PASS: WET: Z+1 hook contains no tree canopy airspace leakage (natural levee crest, rais...)
+PASS: WET: Z+1 hook contains no atmospheric/weather leakage (natural levee crest, rais...)
+PASS: WET: Z0 vertical hook defined (Canonical surface: marsh pools...)
+PASS: WET: Z0 hook contains no constructed infrastructure (canonical surface: marsh ...)
+PASS: WET: Z0 hook contains no wildlife references (canonical surface: marsh ...)
+PASS: WET: Z0 hook contains no tree canopy airspace leakage (canonical surface: marsh ...)
+PASS: WET: Z0 hook contains no atmospheric/weather leakage (canonical surface: marsh ...)
+PASS: WET: Z-1 vertical hook defined (Deep anaerobic black mud, wate...)
+PASS: WET: Z-1 hook contains no constructed infrastructure (deep anaerobic black mud,...)
+PASS: WET: Z-1 hook contains no wildlife references (deep anaerobic black mud,...)
+PASS: WET: Z-1 hook contains no tree canopy airspace leakage (deep anaerobic black mud,...)
+PASS: WET: Z-1 hook contains no atmospheric/weather leakage (deep anaerobic black mud,...)
+PASS: WET: Z-2 vertical hook defined (Flooded subterranean caverns, ...)
+PASS: WET: Z-2 hook contains no constructed infrastructure (flooded subterranean cave...)
+PASS: WET: Z-2 hook contains no wildlife references (flooded subterranean cave...)
+PASS: WET: Z-2 hook contains no tree canopy airspace leakage (flooded subterranean cave...)
+PASS: WET: Z-2 hook contains no atmospheric/weather leakage (flooded subterranean cave...)
+PASS: ARID: verticalHooks object exists
+PASS: ARID: Z+2 vertical hook defined (Mesa summit, exposed sandstone...)
+PASS: ARID: Z+2 hook contains no constructed infrastructure (mesa summit, exposed sand...)
+PASS: ARID: Z+2 hook contains no wildlife references (mesa summit, exposed sand...)
+PASS: ARID: Z+2 hook contains no tree canopy airspace leakage (mesa summit, exposed sand...)
+PASS: ARID: Z+2 hook contains no atmospheric/weather leakage (mesa summit, exposed sand...)
+PASS: ARID: Z+1 vertical hook defined (Upper sandstone terrace shelve...)
+PASS: ARID: Z+1 hook contains no constructed infrastructure (upper sandstone terrace s...)
+PASS: ARID: Z+1 hook contains no wildlife references (upper sandstone terrace s...)
+PASS: ARID: Z+1 hook contains no tree canopy airspace leakage (upper sandstone terrace s...)
+PASS: ARID: Z+1 hook contains no atmospheric/weather leakage (upper sandstone terrace s...)
+PASS: ARID: Z0 vertical hook defined (Canonical surface: dry steppe ...)
+PASS: ARID: Z0 hook contains no constructed infrastructure (canonical surface: dry st...)
+PASS: ARID: Z0 hook contains no wildlife references (canonical surface: dry st...)
+PASS: ARID: Z0 hook contains no tree canopy airspace leakage (canonical surface: dry st...)
+PASS: ARID: Z0 hook contains no atmospheric/weather leakage (canonical surface: dry st...)
+PASS: ARID: Z-1 vertical hook defined (Hardpan caliche sub-layer, dry...)
+PASS: ARID: Z-1 hook contains no constructed infrastructure (hardpan caliche sub-layer...)
+PASS: ARID: Z-1 hook contains no wildlife references (hardpan caliche sub-layer...)
+PASS: ARID: Z-1 hook contains no tree canopy airspace leakage (hardpan caliche sub-layer...)
+PASS: ARID: Z-1 hook contains no atmospheric/weather leakage (hardpan caliche sub-layer...)
+PASS: ARID: Z-2 vertical hook defined (Deep sandstone aquifer caverns...)
+PASS: ARID: Z-2 hook contains no constructed infrastructure (deep sandstone aquifer ca...)
+PASS: ARID: Z-2 hook contains no wildlife references (deep sandstone aquifer ca...)
+PASS: ARID: Z-2 hook contains no tree canopy airspace leakage (deep sandstone aquifer ca...)
+PASS: ARID: Z-2 hook contains no atmospheric/weather leakage (deep sandstone aquifer ca...)
+PASS: HIGH: verticalHooks object exists
+PASS: HIGH: Z+2 vertical hook defined (Sheer jagged granite summits, ...)
+PASS: HIGH: Z+2 hook contains no constructed infrastructure (sheer jagged granite summ...)
+PASS: HIGH: Z+2 hook contains no wildlife references (sheer jagged granite summ...)
+PASS: HIGH: Z+2 hook contains no tree canopy airspace leakage (sheer jagged granite summ...)
+PASS: HIGH: Z+2 hook contains no atmospheric/weather leakage (sheer jagged granite summ...)
+PASS: HIGH: Z+1 vertical hook defined (Upper cliff shelves, alpine sc...)
+PASS: HIGH: Z+1 hook contains no constructed infrastructure (upper cliff shelves, alpi...)
+PASS: HIGH: Z+1 hook contains no wildlife references (upper cliff shelves, alpi...)
+PASS: HIGH: Z+1 hook contains no tree canopy airspace leakage (upper cliff shelves, alpi...)
+PASS: HIGH: Z+1 hook contains no atmospheric/weather leakage (upper cliff shelves, alpi...)
+PASS: HIGH: Z0 vertical hook defined (Canonical surface: upland vall...)
+PASS: HIGH: Z0 hook contains no constructed infrastructure (canonical surface: upland...)
+PASS: HIGH: Z0 hook contains no wildlife references (canonical surface: upland...)
+PASS: HIGH: Z0 hook contains no tree canopy airspace leakage (canonical surface: upland...)
+PASS: HIGH: Z0 hook contains no atmospheric/weather leakage (canonical surface: upland...)
+PASS: HIGH: Z-1 vertical hook defined (Fractured granite bedrock, nat...)
+PASS: HIGH: Z-1 hook contains no constructed infrastructure (fractured granite bedrock...)
+PASS: HIGH: Z-1 hook contains no wildlife references (fractured granite bedrock...)
+PASS: HIGH: Z-1 hook contains no tree canopy airspace leakage (fractured granite bedrock...)
+PASS: HIGH: Z-1 hook contains no atmospheric/weather leakage (fractured granite bedrock...)
+PASS: HIGH: Z-2 vertical hook defined (Massive solid granite deep cha...)
+PASS: HIGH: Z-2 hook contains no constructed infrastructure (massive solid granite dee...)
+PASS: HIGH: Z-2 hook contains no wildlife references (massive solid granite dee...)
+PASS: HIGH: Z-2 hook contains no tree canopy airspace leakage (massive solid granite dee...)
+PASS: HIGH: Z-2 hook contains no atmospheric/weather leakage (massive solid granite dee...)
+PASS: VOLC: verticalHooks object exists
+PASS: VOLC: Z+2 vertical hook defined (Smoking caldera rims, jagged b...)
+PASS: VOLC: Z+2 hook contains no constructed infrastructure (smoking caldera rims, jag...)
+PASS: VOLC: Z+2 hook contains no wildlife references (smoking caldera rims, jag...)
+PASS: VOLC: Z+2 hook contains no tree canopy airspace leakage (smoking caldera rims, jag...)
+PASS: VOLC: Z+2 hook contains no atmospheric/weather leakage (smoking caldera rims, jag...)
+PASS: VOLC: Z+1 vertical hook defined (Upper cooling lava terraces, r...)
+PASS: VOLC: Z+1 hook contains no constructed infrastructure (upper cooling lava terrac...)
+PASS: VOLC: Z+1 hook contains no wildlife references (upper cooling lava terrac...)
+PASS: VOLC: Z+1 hook contains no tree canopy airspace leakage (upper cooling lava terrac...)
+PASS: VOLC: Z+1 hook contains no atmospheric/weather leakage (upper cooling lava terrac...)
+PASS: VOLC: Z0 vertical hook defined (Canonical surface: ash fields,...)
+PASS: VOLC: Z0 hook contains no constructed infrastructure (canonical surface: ash fi...)
+PASS: VOLC: Z0 hook contains no wildlife references (canonical surface: ash fi...)
+PASS: VOLC: Z0 hook contains no tree canopy airspace leakage (canonical surface: ash fi...)
+PASS: VOLC: Z0 hook contains no atmospheric/weather leakage (canonical surface: ash fi...)
+PASS: VOLC: Z-1 vertical hook defined (Porous basalt crust, subterran...)
+PASS: VOLC: Z-1 hook contains no constructed infrastructure (porous basalt crust, subt...)
+PASS: VOLC: Z-1 hook contains no wildlife references (porous basalt crust, subt...)
+PASS: VOLC: Z-1 hook contains no tree canopy airspace leakage (porous basalt crust, subt...)
+PASS: VOLC: Z-1 hook contains no atmospheric/weather leakage (porous basalt crust, subt...)
+PASS: VOLC: Z-2 vertical hook defined (Deep magma-adjacent caverns, s...)
+PASS: VOLC: Z-2 hook contains no constructed infrastructure (deep magma-adjacent caver...)
+PASS: VOLC: Z-2 hook contains no wildlife references (deep magma-adjacent caver...)
+PASS: VOLC: Z-2 hook contains no tree canopy airspace leakage (deep magma-adjacent caver...)
+PASS: VOLC: Z-2 hook contains no atmospheric/weather leakage (deep magma-adjacent caver...)
+
+--- 6. Horizontal Transitions Across All 10 Biome Pairs ---
+PASS: Exactly 10 horizontal transition pairs registered (found 10)
+PASS: Transition pair TEMP_WET exists
+PASS: TEMP_WET: valid grassDensity axis
+PASS: TEMP_WET: valid soilTransition axis
+PASS: TEMP_WET: valid geologyTransition axis
+PASS: TEMP_WET: valid moistureTransition axis
+PASS: TEMP_WET: valid vegetationForm axis
+PASS: TEMP_WET: valid topography axis
+PASS: Transition pair TEMP_ARID exists
+PASS: TEMP_ARID: valid grassDensity axis
+PASS: TEMP_ARID: valid soilTransition axis
+PASS: TEMP_ARID: valid geologyTransition axis
+PASS: TEMP_ARID: valid moistureTransition axis
+PASS: TEMP_ARID: valid vegetationForm axis
+PASS: TEMP_ARID: valid topography axis
+PASS: Transition pair TEMP_HIGH exists
+PASS: TEMP_HIGH: valid grassDensity axis
+PASS: TEMP_HIGH: valid soilTransition axis
+PASS: TEMP_HIGH: valid geologyTransition axis
+PASS: TEMP_HIGH: valid moistureTransition axis
+PASS: TEMP_HIGH: valid vegetationForm axis
+PASS: TEMP_HIGH: valid topography axis
+PASS: Transition pair TEMP_VOLC exists
+PASS: TEMP_VOLC: valid grassDensity axis
+PASS: TEMP_VOLC: valid soilTransition axis
+PASS: TEMP_VOLC: valid geologyTransition axis
+PASS: TEMP_VOLC: valid moistureTransition axis
+PASS: TEMP_VOLC: valid vegetationForm axis
+PASS: TEMP_VOLC: valid topography axis
+PASS: Transition pair WET_ARID exists
+PASS: WET_ARID: valid grassDensity axis
+PASS: WET_ARID: valid soilTransition axis
+PASS: WET_ARID: valid geologyTransition axis
+PASS: WET_ARID: valid moistureTransition axis
+PASS: WET_ARID: valid vegetationForm axis
+PASS: WET_ARID: valid topography axis
+PASS: Transition pair WET_HIGH exists
+PASS: WET_HIGH: valid grassDensity axis
+PASS: WET_HIGH: valid soilTransition axis
+PASS: WET_HIGH: valid geologyTransition axis
+PASS: WET_HIGH: valid moistureTransition axis
+PASS: WET_HIGH: valid vegetationForm axis
+PASS: WET_HIGH: valid topography axis
+PASS: Transition pair WET_VOLC exists
+PASS: WET_VOLC: valid grassDensity axis
+PASS: WET_VOLC: valid soilTransition axis
+PASS: WET_VOLC: valid geologyTransition axis
+PASS: WET_VOLC: valid moistureTransition axis
+PASS: WET_VOLC: valid vegetationForm axis
+PASS: WET_VOLC: valid topography axis
+PASS: Transition pair ARID_HIGH exists
+PASS: ARID_HIGH: valid grassDensity axis
+PASS: ARID_HIGH: valid soilTransition axis
+PASS: ARID_HIGH: valid geologyTransition axis
+PASS: ARID_HIGH: valid moistureTransition axis
+PASS: ARID_HIGH: valid vegetationForm axis
+PASS: ARID_HIGH: valid topography axis
+PASS: Transition pair ARID_VOLC exists
+PASS: ARID_VOLC: valid grassDensity axis
+PASS: ARID_VOLC: valid soilTransition axis
+PASS: ARID_VOLC: valid geologyTransition axis
+PASS: ARID_VOLC: valid moistureTransition axis
+PASS: ARID_VOLC: valid vegetationForm axis
+PASS: ARID_VOLC: valid topography axis
+PASS: Transition pair HIGH_VOLC exists
+PASS: HIGH_VOLC: valid grassDensity axis
+PASS: HIGH_VOLC: valid soilTransition axis
+PASS: HIGH_VOLC: valid geologyTransition axis
+PASS: HIGH_VOLC: valid moistureTransition axis
+PASS: HIGH_VOLC: valid vegetationForm axis
+PASS: HIGH_VOLC: valid topography axis
+
+--- 7. Biome Resolver Tooling (tools/biome_resolver.js) ---
+PASS: Resolver API: resolves TEMP
+PASS: Resolver API: TEMP includes rich loam signature
+PASS: Resolver API: alias "steppe" resolves to ARID
+PASS: Resolver API: resolves transition TEMP <-> ARID
+PASS: Resolver API: TEMP-ARID soil axis includes caliche
+PASS: Resolver CLI: output includes canonical biome header
+PASS: Resolver CLI: output includes dominant ground specification
+PASS: Resolver CLI: output includes transition pair header
+PASS: Resolver CLI: output includes soil transition axis
+PASS: Resolver CLI exits with error code on unknown biome
+
+--- 8. Separation of Concerns: No Premature Raw Palette Architecture ---
+PASS: No premature hex color ramps in biome registry (reserved for DW.01.05)
+
+==================================================
+TOTAL CHECKS: 334
+PASSED: 334
+FAILED: 0
+==================================================
+
+ALL BIOME STANDARD CHECKS PASSED (DW.01.04).
+== stderr ==
+

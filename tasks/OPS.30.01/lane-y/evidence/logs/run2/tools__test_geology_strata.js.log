@@ -1,0 +1,16 @@
+# tools/test_geology_strata.js  category=PASS  exit=0  ms=24534  decided by exit_0 (-)
+== stdout ==
+=== Running Geological Strata Test Suite ===
+PASS geology.api_present - WorldGen.geologyAt and Levels.stratumAt are defined
+PASS geology.surface_strata_valid - sampled 196 cells: 5 stone types found (granite, slate, limestone, sandstone, basalt), all match catalog
+PASS geology.determinism - cell (128,128) produced identical stone 'slate' across repeated calls
+PASS geology.physical_properties_attached - stone Slate: density 2.65, compressiveStrength 65, workability 75
+PASS geology.upper_earth_strata - Z=-1 stratum: stone 'limestone', depthBand 'upper_earth'
+PASS geology.deep_earth_strata - Z=-2 stratum: stone 'slate', depthBand 'deep'
+PASS geology.levels_stratum_at - Levels.stratumAt matches WorldGen.geologyAt: slate
+PASS geology.cell_info_contains_geology - WorldGen.cellInfo(128,128,0) includes geology: stone 'slate'
+PASS geology.levels_cell_at_contains_stratum - Levels.cellAt(64,64,-1) includes stratum: stone 'limestone'
+
+RESULT: 9 passed, 0 failed (exit 0)
+== stderr ==
+

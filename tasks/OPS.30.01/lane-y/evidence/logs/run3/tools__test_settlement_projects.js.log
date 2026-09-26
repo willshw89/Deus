@@ -1,0 +1,21 @@
+# tools/test_settlement_projects.js  category=PASS  exit=0  ms=1889  decided by exit_0 (-)
+== stdout ==
+=== Settlement projects (DEUS_Projects.js) headless checks ===
+PASS projects.plugin_loads - UF.Projects v1, cadence 3000 ticks (action)
+PASS projects.no_unseeded_random - DEUS_Projects.js has no Math.random
+PASS projects.deficit_year1 - camp · Shelter 0/1 (needs 1 more) · Food 0/3 days (critical) · Beds 3/8 (needs 5 more) · Storage 0/8 (needs 8 more) slots · Homes 0/8 (needs 8 more) · 8 colonists within 24 of (32,32); next: communal_shelter (utility 5.0)
+PASS projects.deficit_reads_world - with a door in the wall: 1/1; without: 0/1
+PASS projects.cadence_coarse - 1 evaluation(s) in 3000 map updates (start delay 120, cadence 3000)
+PASS projects.project_opened_and_sited - Communal shelter #1 at (26,20)-(31,25): phase 1/4 site, 34/36 cells, 2 jobs open, 0 taken; chooser predicted (26,20)
+PASS projects.site_deterministic - seed 20260922 twice: (26,20) and (26,20); seed 7: (20,21)
+PASS projects.site_avoids_water - moat at 6..14: footprint centre 19 from the hearth
+PASS projects.phase_site_clears - posted chop@1,1 gather@3,3; phase 1 after 356 updates; footprint clear
+PASS projects.hauls_and_reservations - 12 hauls (12 items, 12 cells) of 12 jobs; Hauling a log taken by #2 after 1 updates, cell and item reserved
+PASS projects.save_load_roundtrip - JSON-safe; identical after load; Communal shelter #1 at (26,20)-(31,25): phase 2/4 walls, 0/20 cells, 5 jobs open, 7 taken
+PASS projects.walls_then_door - phase 2 after 493 updates: 19/19 walls, door at (29,25); logs 44 -> 24 on the ground + 0 carried = 20 used, 10 refused placement(s) cost nothing; still 1 active project
+PASS projects.hearth_and_beds_complete - done after 325 more updates: hearth kitchen_hearth built, 11/11 beds; camp · Shelter 1/1 · Food 0/3 days (critical) · Beds 14/8 · Storage 0/8 (needs 8 more) slots · Homes 0/8 (needs 8 more) · 8 colonists within 24 of (32,32); nothing to open; 1 project(s), 0 active
+PASS projects.no_errors - no console errors during the run
+
+RESULT: 14 passed, 0 failed (exit 0)
+== stderr ==
+

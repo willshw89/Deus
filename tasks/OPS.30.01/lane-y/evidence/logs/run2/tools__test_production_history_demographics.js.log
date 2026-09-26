@@ -1,0 +1,15 @@
+# tools/test_production_history_demographics.js  category=FAIL_OTHER  exit=1  ms=57  decided by other (stderr)
+== stdout ==
+
+== stderr ==
+FAIL: Error: Production candidate mismatch before regression tests
+    at assert (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\tools\test_production_history_demographics.js:16:50)
+    at sourceBundle (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\tools\test_production_history_demographics.js:71:5)
+    at main (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\tools\test_production_history_demographics.js:544:18)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\tools\test_production_history_demographics.js:582:38)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)

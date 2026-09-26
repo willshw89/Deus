@@ -1,0 +1,20 @@
+# tools/test_srd_character_presentation.js  category=PASS  exit=0  ms=151  decided by exit_0 (-)
+== stdout ==
+=== DEUS SRD 5.1 Presentation Crosswalk Test Suite ===
+PASS srd_crosswalk.canonical_library_loaded - Found exactly 1325 canonical SRD 5.1 records across 6 files
+PASS srd_crosswalk.full_catalogue_coverage - Mapped 1325/1325 records, unclassified=0
+PASS srd_crosswalk.valid_srd_ids - Unknown SRD IDs in crosswalk: 0
+PASS srd_crosswalk.valid_profile_references - Profile errors: grip=0, stow=0, cast=0, delivery=0, rig=0
+PASS srd_crosswalk.valid_socket_references - Dangling socket references: 0
+PASS srd_crosswalk.valid_material_references - Dangling material references: 0
+PASS srd_crosswalk.valid_action_references - Invalid action references: 0
+PASS srd_crosswalk.no_duplicate_mappings - Unique IDs: 1325/1325, duplicates=0
+PASS srd_crosswalk.canonical_source_immutability - Canonical SRD 5.1 source integrity preserved (6 files checked, mutated=0)
+PASS srd_crosswalk.deterministic_ordering - Crosswalk entries match deterministic catalogue manifest order
+PASS srd_crosswalk.serialization_roundtrip - Crosswalk serialized successfully (551.1 KB)
+
+======================================================
+RESULT: 11 passed, 0 failed (exit 0)
+======================================================
+== stderr ==
+

@@ -1,0 +1,9 @@
+$ node tools/ops/run_gate.js --census --root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-slow --suite tools/governance/test_merge_gate.js --suite tools/test_autonomous_project_dispatch.js --suite tools/test_autonomous_work_recovery.js --suite tools/test_project_construction_loop.js --suite tools/test_settlement_domestic_housing.js --suite tools/test_settlement_expansion_multi_dwelling.js --suite tools/test_strata_fluid_reconciliation.js --suite tools/test_survival_needs_loop.js --timeout 580 --out tasks/OPS.30.01/lane-y/evidence/census_slow_580s.json --budget-sec 10
+run_gate: census of 8 suites, root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-slow, HEAD 425b594c146d5f353c10faa11f4b5d47f499b45f, timeout 580 s, up to 3 at once, budget 10 s, resuming (3 already measured)
+CENSUS 4/8 tools/test_project_construction_loop.js KILLED_TIMEOUT EXIT=- 580245ms | killed after 580 s (timeout) with its whole process tree
+CENSUS 5/8 tools/test_settlement_domestic_housing.js KILLED_TIMEOUT EXIT=- 580366ms | killed after 580 s (timeout) with its whole process tree
+CENSUS 6/8 tools/test_settlement_expansion_multi_dwelling.js KILLED_TIMEOUT EXIT=- 580365ms | killed after 580 s (timeout) with its whole process tree
+LEFTOVERS: none
+CENSUS COUNTS PASS=2 FAIL_MISSING_DEPENDENCY=0 FAIL_API_DRIFT=0 FAIL_MISSING_REFERENCE=0 FAIL_OTHER=1 KILLED_TIMEOUT=3 NEEDS_NWJS=0
+CENSUS PARTIAL: 6/8 measured -> C:\Users\snewt\.deus_worktrees\lane-y\tasks\OPS.30.01\lane-y\evidence\census_slow_580s.json; run the same command again to continue
+EXIT=3

@@ -1,0 +1,16 @@
+$ node tools/ops/run_gate.js --merge-census tasks/OPS.30.01/lane-y/evidence/census_run1.json tasks/OPS.30.01/lane-y/evidence/census_run2.json tasks/OPS.30.01/lane-y/evidence/census_run3.json tasks/OPS.30.01/lane-y/evidence/census_tip_run1.json tasks/OPS.30.01/lane-y/evidence/census_tip_run2.json tasks/OPS.30.01/lane-y/evidence/census_tip_run3.json --write-quarantine tools/ops/quarantine.json --base 425b594c146d5f353c10faa11f4b5d47f499b45f
+MERGE 6 census files: tasks/OPS.30.01/lane-y/evidence/census_run1.json (HEAD 425b594c146d5f353c10faa11f4b5d47f499b45f), tasks/OPS.30.01/lane-y/evidence/census_run2.json (HEAD 425b594c146d5f353c10faa11f4b5d47f499b45f), tasks/OPS.30.01/lane-y/evidence/census_run3.json (HEAD 425b594c146d5f353c10faa11f4b5d47f499b45f), tasks/OPS.30.01/lane-y/evidence/census_tip_run1.json (HEAD 2d9f513c40c683338d50c6ea3dc945b5fb4687c5), tasks/OPS.30.01/lane-y/evidence/census_tip_run2.json (HEAD 2d9f513c40c683338d50c6ea3dc945b5fb4687c5), tasks/OPS.30.01/lane-y/evidence/census_tip_run3.json (HEAD 2d9f513c40c683338d50c6ea3dc945b5fb4687c5)
+MERGE suites=189 agree=187 disagree=2 gate=9 quarantine=117 passingNotGated=63
+MERGE COUNTS (non-gate) PASS=63 FAIL_MISSING_DEPENDENCY=0 FAIL_API_DRIFT=19 FAIL_MISSING_REFERENCE=35 FAIL_OTHER=14 KILLED_TIMEOUT=7 NEEDS_NWJS=42
+FLAKY tools/test_strata_fluid_reconciliation.js KILLED_TIMEOUT / KILLED_TIMEOUT / PASS
+GATE tools/check_deus_syntax.js PASS / PASS / PASS
+GATE tools/governance/test_check_claims.js PASS / PASS / PASS
+GATE tools/test_geology_strata.js PASS / PASS / PASS
+GATE tools/test_historical_carrying_capacity.js PASS / PASS / PASS
+GATE tools/test_history_materialization_and_world_age.js PASS / PASS / PASS
+GATE tools/test_new_game_year0.js PASS / PASS / PASS
+GATE tools/test_palette.js PASS / PASS / PASS
+GATE tools/test_strata_cuts_and_caves.js KILLED_TIMEOUT / KILLED_TIMEOUT / PASS
+GATE tools/test_strata_foundation.js PASS / PASS / PASS
+WROTE C:\Users\snewt\.deus_worktrees\lane-y\tools\ops\quarantine.json
+EXIT=0

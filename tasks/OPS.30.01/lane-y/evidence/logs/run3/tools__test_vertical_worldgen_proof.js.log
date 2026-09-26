@@ -1,0 +1,47 @@
+# tools/test_vertical_worldgen_proof.js  category=FAIL_OTHER  exit=1  ms=138  decided by other (stderr)
+== stdout ==
+
+--- Running Vertical Worldgen, Cliff Caves & Rock Enclosure Proof Suite  ---
+
+Test 1: Natural Vertical Continuity Across 5 Z-Levels (Z = -2..+2)
+  PASS: Baselines generated for all 5 vertical levels (-2..+2)
+  PASS: Sampled columns include plateau (S=1: 1748) and ridge (S=2: 617) terrain, not only datum (S=0: 3411)
+  PASS: All 5776 sampled vertical columns obey volumetric physical laws (5776/5776)
+
+Test 2: Guaranteed Flat Camp Clearing (r <= 12 around Camp Center)
+  PASS: Camp clearing (r <= 12, 441 cells) is 100% flat at datum S = 0
+
+Test 3: Horizontal Cliff Cave Carving & Level Connection (Task 11)
+  PASS: Generated 5 natural horizontal cliff cave mouths breaching cliffs
+  PASS: Cliff cave mouth record contains entrance tunnel and inner terminus
+  PASS: Cave mouth at (72, 24, z=0) breaches cliff face as traversable FLOOR (got floor)
+  PASS: Cave mouth floor material is natural STONE
+  PASS: Inner terminus at (72, 22, z=0) has STAIR_DOWN descent (got stairDown)
+  PASS: Subterranean terminus at (72, 22, z=-1) has matching STAIR_UP (got stairUp)
+  PASS: Subterranean stair landing has natural water cleared in the z=-1 baseline (wet vestibule cells: 0)
+  Info: landing cell at z=-1 after fluid simulation: water=true, flooded=true, floodType=water
+  PASS: Subterranean stair landing has walkable vestibule (found 4 walkable neighbors)
+  PASS: NaturalConnections generated passage links
+  PASS: NaturalConnections registered cliff cave passage: id=cliff_cave_0_0_1
+  PASS: Cliff cave link connects z=0 to z=-1
+
+Test 4: Structural Natural Rock Enclosure & Hybrid Rooms (Task 12)
+  SKIP: Created household for colonist - Households subsystem retired 2026-09-22 (DEUS_Households.js archived, not registered)
+  SKIP: All natural rock perimeter cells count as structural enclosure - Households subsystem retired 2026-09-22 (DEUS_Households.js archived, not registered)
+  SKIP: homeSteps requires 0 wall construction steps for rock boundary - Households subsystem retired 2026-09-22 (DEUS_Households.js archived, not registered)
+  SKIP: Cave room strictly enclosed with 100% natural rock boundary + door - Households subsystem retired 2026-09-22 (DEUS_Households.js archived, not registered)
+  SKIP: Cave room automatically roofed upon enclosure - Households subsystem retired 2026-09-22 (DEUS_Households.js archived, not registered)
+  SKIP: Cave dwelling satisfies bedroom demands - Households subsystem retired 2026-09-22 (DEUS_Households.js archived, not registered)
+  SKIP: Bed demands satisfied - Households subsystem retired 2026-09-22 (DEUS_Households.js archived, not registered)
+  SKIP: Hearth demand satisfied - Households subsystem retired 2026-09-22 (DEUS_Households.js archived, not registered)
+  SKIP: Hybrid room requires building only 10 wooden walls, omitting 5 natural cliff tiles - Households subsystem retired 2026-09-22 (DEUS_Households.js archived, not registered)
+  SKIP: Hybrid room enclosed successfully with combination of natural cliff and wooden walls - Households subsystem retired 2026-09-22 (DEUS_Households.js archived, not registered)
+  SKIP: Hybrid room roofed upon enclosure - Households subsystem retired 2026-09-22 (DEUS_Households.js archived, not registered)
+  SKIP: households:enclosureBreached event emitted when rock wall mined away - Households subsystem retired 2026-09-22 (DEUS_Households.js archived, not registered)
+  SKIP: strictEnclosure returns FALSE after rock wall breached - Households subsystem retired 2026-09-22 (DEUS_Households.js archived, not registered)
+  SKIP: isRoofed reset to FALSE after enclosure breached - Households subsystem retired 2026-09-22 (DEUS_Households.js archived, not registered)
+  SKIP: Household demands reflect missing bedroom after breach - Households subsystem retired 2026-09-22 (DEUS_Households.js archived, not registered)
+
+Test Suite Summary: 15 passed, 1 failed, 15 skipped.
+== stderr ==
+  FAIL: Subterranean stair landing is dry after the fluid simulation (cellAt.water=true, flooded=true, floodType=water)

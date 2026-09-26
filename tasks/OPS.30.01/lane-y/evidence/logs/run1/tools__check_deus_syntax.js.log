@@ -1,0 +1,5 @@
+# tools/check_deus_syntax.js  category=PASS  exit=0  ms=3962  decided by exit_0 (-)
+== stdout ==
+Checked 52 DEUS plugin files. Errors: 0
+== stderr ==
+

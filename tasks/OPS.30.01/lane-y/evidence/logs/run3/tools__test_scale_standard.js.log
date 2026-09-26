@@ -1,0 +1,53 @@
+# tools/test_scale_standard.js  category=PASS  exit=0  ms=190  decided by exit_0 (-)
+== stdout ==
+=== DEUS HUMAN / WORLD SCALE STANDARD TEST SUITE (DW.01.03) ===
+
+--- 1. Registry Integrity & Canonical Baselines ---
+PASS: Registry version is 1.0.0
+PASS: Official camera is locked to 1.00x
+PASS: World tile size is 48 px
+PASS: Canonical Adult Human yardstick is 42 px
+PASS: Pixel density is NATIVE_1_TO_1
+
+--- 2. Tree Standard Preservation ---
+PASS: Standard Common Oak is 72-96 px (target 84 px, ~2.0x Human)
+PASS: Standard Common Birch is 76-100 px (target 88 px, ~2.1x Human)
+PASS: Standard Common Pine is 80-104 px (target 92 px, ~2.2x Human)
+PASS: Large Accent Tree is 96-124 px (target 105 px, ~2.5x Human)
+PASS: Hero / Landmark Tree is 120-160+ px (target 140 px, ~3.3x Human)
+
+--- 2b. Architecture Scale & Style Neutrality ---
+PASS: Ordinary Doorway is 56-60 px (target 58 px, ~1.38x Human)
+PASS: Ordinary Doorway width is 40-48 px
+PASS: Ordinary Doorway allows upper frame overhang
+PASS: Ordinary Doorway notes are style/renderer neutral
+PASS: Wall 2-grid notes are style/renderer neutral
+
+--- 3. Required Class Coverage ---
+PASS: All 39 required canonical scale classes exist in registry
+
+--- 4. Logical Invariants Across All Entries ---
+PASS: All 39 entries satisfy strict mathematical and footprint bounds
+
+--- 5. Scale Resolver Tooling (tools/scale_resolver.js) ---
+PASS: Resolver API: TREE_COMMON_OAK ratio is 2.0x Human
+PASS: Resolver API: target height is 84 px
+PASS: Resolver API: overhang is allowed for tree
+PASS: Resolver CLI: output includes Human yardstick reference
+PASS: Resolver CLI: output includes target visual envelope
+PASS: Resolver CLI exits with error code on unknown class
+
+--- 6. Canonical Scale Strip Graphic ---
+PASS: DEUS_HUMAN_SCALE_STRIP_V1.png exists in art/reference/
+PASS: Scale strip dimensions are exact 1340x224 px (got 1340x224)
+PASS: Scale strip raw RGBA buffer is fully intact
+
+==================================================
+TOTAL CHECKS: 26
+PASSED: 26
+FAILED: 0
+==================================================
+
+ALL SCALE STANDARD CHECKS PASSED (DW.01.03).
+== stderr ==
+

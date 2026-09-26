@@ -1,0 +1,62 @@
+# tools/test_faction_construction_and_homes.js  category=FAIL_API_DRIFT  exit=1  ms=74  decided by api_drift (stderr)
+== stdout ==
+
+========================================
+Results: 0 passed, 5 failed
+========================================
+== stderr ==
+FAIL faction_construction.all_faction_founders_are_settlers: TypeError: Cannot read properties of undefined (reading 'setup')
+    at createHarness (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:239:22)
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:246:15
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:30:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:245:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+FAIL faction_construction.multi_faction_household_home_planning: TypeError: Cannot read properties of undefined (reading 'setup')
+    at createHarness (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:239:22)
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:277:15
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:30:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:276:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+FAIL faction_construction.road_floor_obstacle_clearance: TypeError: Cannot read properties of undefined (reading 'setup')
+    at createHarness (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:239:22)
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:305:15
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:30:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:304:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+FAIL faction_construction.domestic_completion_priority_drive: TypeError: Cannot read properties of undefined (reading 'setup')
+    at createHarness (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:239:22)
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:333:15
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:30:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:332:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+FAIL faction_construction.home_progression_stage2_and_stage4: TypeError: Cannot read properties of undefined (reading 'setup')
+    at createHarness (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:239:22)
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:361:15
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:30:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_construction_and_homes.js:360:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)

@@ -1,0 +1,10 @@
+# supplementary (not used for quarantine.json): the KILLED_TIMEOUT and flaky suites with timeout 580 s, fresh clone C:\Users\snewt\AppData\Local\Temp\deus-lane-y-slow at 425b594c146d5f353c10faa11f4b5d47f499b45f, runner 2d9f513c40c683338d50c6ea3dc945b5fb4687c5
+$ node tools/ops/run_gate.js --census --root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-slow --suite tools/governance/test_merge_gate.js --suite tools/test_autonomous_project_dispatch.js --suite tools/test_autonomous_work_recovery.js --suite tools/test_project_construction_loop.js --suite tools/test_settlement_domestic_housing.js --suite tools/test_settlement_expansion_multi_dwelling.js --suite tools/test_strata_fluid_reconciliation.js --suite tools/test_survival_needs_loop.js --timeout 580 --out tasks/OPS.30.01/lane-y/evidence/census_slow_580s.json --budget-sec 10
+run_gate: census of 8 suites, root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-slow, HEAD 425b594c146d5f353c10faa11f4b5d47f499b45f, timeout 580 s, up to 3 at once, budget 10 s
+CENSUS 1/8 tools/governance/test_merge_gate.js PASS EXIT=0 195212ms
+CENSUS 2/8 tools/test_autonomous_project_dispatch.js PASS EXIT=0 500640ms
+CENSUS 3/8 tools/test_autonomous_work_recovery.js FAIL_OTHER EXIT=1 504790ms | FAIL recovery.forage_target_gone_or_unreachable - gather at 34,20 found its plant picked -> done (null) after 9 updates, no failure count on that square; walled-in tree at 35,43: 1 withdrawal(s) (one per retryTicks), failure record {"count":3,"reason":"stale: can't reach it","retryAt":724}; cache...
+LEFTOVERS: none
+CENSUS COUNTS PASS=2 FAIL_MISSING_DEPENDENCY=0 FAIL_API_DRIFT=0 FAIL_MISSING_REFERENCE=0 FAIL_OTHER=1 KILLED_TIMEOUT=0 NEEDS_NWJS=0
+CENSUS PARTIAL: 3/8 measured -> C:\Users\snewt\.deus_worktrees\lane-y\tasks\OPS.30.01\lane-y\evidence\census_slow_580s.json; run the same command again to continue
+EXIT=3

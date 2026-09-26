@@ -1,0 +1,5 @@
+# tools/test_side_combos.js  category=PASS  exit=0  ms=171  decided by exit_0 (-)
+== stdout ==
+Saved combo 1, 2, and 3
+== stderr ==
+

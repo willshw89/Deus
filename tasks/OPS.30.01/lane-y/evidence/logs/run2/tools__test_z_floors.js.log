@@ -1,0 +1,23 @@
+# tools/test_z_floors.js  category=FAIL_API_DRIFT  exit=1  ms=56  decided by api_drift (stdout)
+== stdout ==
+FAIL z_floors.legacy_ground_read_write: Cannot read properties of undefined (reading 'canLay')
+FAIL z_floors.legacy_refuses_other_levels_without_writes: Cannot read properties of undefined (reading 'canLay')
+FAIL z_floors.ground_key_unchanged: Cannot read properties of undefined (reading 'roomAt')
+FAIL z_floors.same_xy_rooms_are_distinct: Cannot read properties of undefined (reading 'roomAt')
+FAIL z_floors.non_ground_kind_does_not_decode_surface_tiles: Cannot read properties of undefined (reading 'kindAt')
+FAIL z_floors.structural_floor_reads_shape: Cannot read properties of undefined (reading 'value')
+FAIL z_floors.level_object_change_invalidates_only_that_room: Cannot read properties of undefined (reading 'roomAt')
+FAIL z_floors.level_shape_change_invalidates_room: Cannot read properties of undefined (reading 'roomAt')
+FAIL z_floors.surface_tile_change_invalidates_room: Cannot read properties of undefined (reading 'roomAt')
+FAIL z_floors.upper_floor_refused_before_consumption_or_pickup: Cannot read properties of undefined (reading 'plan')
+FAIL z_floors.cross_level_worker_refused: Cannot read properties of undefined (reading 'plan')
+FAIL z_floors.invalid_kind_replans_then_refuses: Cannot read properties of undefined (reading 'apply')
+FAIL z_floors.non_ground_site_does_not_autofloor_ground: Cannot read properties of undefined (reading 'floorOtherSites')
+FAIL z_floors.non_ground_site_does_not_designate_ground_rooms: Cannot read properties of undefined (reading 'createDesignations')
+FAIL z_floors.ground_job_continues_when_view_is_elsewhere: Cannot read properties of undefined (reading 'plan')
+FAIL z_floors.other_level_menu_no_ground_actions: Cannot read properties of undefined (reading 'augmentOptions')
+FAIL z_floors.save_restore_invalidates_cache_preserves_floor_state: Cannot read properties of undefined (reading 'roomAt')
+FAIL z_floors.new_world_invalidates_cached_rooms: Cannot read properties of undefined (reading 'roomAt')
+RESULT: 0 passed, 18 failed
+== stderr ==
+

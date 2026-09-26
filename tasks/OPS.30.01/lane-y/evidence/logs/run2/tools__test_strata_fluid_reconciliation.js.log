@@ -1,0 +1,72 @@
+# tools/test_strata_fluid_reconciliation.js  category=KILLED_TIMEOUT  exit=TIMEOUT  ms=180180  decided by timeout (runner)
+== stdout ==
+=== DEUS Fluid <-> Five-Strata Reconciliation Suite (WG.00.07) ===
+
+--- 1. Physical Capacity Derivation from Strata (Tests A-F) ---
+PASS: cap_5_of_5 - 5 air strata -> capacity 7 (got 7)
+PASS: phys_height_5_of_5 - 7 water in 5-air cell -> physical height 5/5 (got 5)
+PASS: phys_string_5_of_5 - string matches FLUID_5_OF_5
+PASS: levels_alias_phys_height - Levels alias matches live Fluid physical height
+PASS: cap_4_of_5 - 4 air strata -> capacity 6 (got 6)
+PASS: phys_height_4_of_5 - 6 water in 4-air cell -> physical height 4/5 (got 4)
+PASS: cap_3_of_5 - 3 air strata -> capacity 4 (got 4)
+PASS: phys_height_3_of_5 - 4 water in 3-air cell -> physical height 3/5 (got 3)
+PASS: cap_2_of_5 - 2 air strata -> capacity 3 (got 3)
+PASS: phys_height_2_of_5 - 3 water in 2-air cell -> physical height 2/5 (got 2)
+PASS: cap_1_of_5 - 1 air stratum -> capacity 1 (got 1)
+PASS: phys_height_1_of_5 - 1 water in 1-air cell -> physical height 1/5 (got 1)
+PASS: cap_0_of_5 - 5 solid strata -> capacity 0 (got 0)
+PASS: phys_height_0_of_5 - solid cell -> physical height 0 (got 0)
+
+--- 2. Vertical Flow Contracts (Tests G & H) ---
+PASS: can_pass_down_open - open hole allows downward drainage (got true)
+PASS: gravity_drain_executed - 6 water drained completely from Z0 to Z-1 (Z0: 0, Z-1: 6)
+PASS: can_pass_down_solid_floor_blocked - solid floor blocks downward drainage (got false)
+PASS: no_leak_through_solid_floor - water retained on stone floor without leaking (Z0: 6, Z-1: 0)
+
+--- 3. Lateral Passage & Elevation Lips (Test I) ---
+PASS: lateral_curb_shallow_blocked - shallow water below curb lip cannot climb (got false)
+PASS: lateral_curb_deep_spills - deep water exceeding curb height spills over (got true)
+PASS: neighbor_capacity_honored - curb fluid strictly bounded by its capacity of 1 (got 1)
+
+--- 4. Dynamic Mutation & Displacement (Tests J & K) ---
+PASS: cap_before_dig - initial capacity 3 (got 3)
+PASS: dig_increases_capacity - mining S2 increases capacity from 3 to 4 (got 4)
+PASS: water_in_cell_before_build - 6 water placed in cell
+PASS: no_fluid_in_solid_rock - solid rock contains 0 fluid after construction (got 0)
+PASS: fluid_displaced_upward - fluid displaced into open headroom on Z+1 (got 6)
+
+--- 5. Mass Conservation (Test L) ---
+PASS: initial_sum_set - initial fluid volume is 12 (got 12)
+PASS: closed_loop_mass_conserved - volume conserved across 50 simulation steps (initial: 12, final: 12)
+
+--- 6. Zero Fluid HP (Test M) ---
+PASS: water_mat_zero_hp - water strata material defines maxHP = 0, solid = false
+PASS: lava_mat_zero_hp - lava strata material defines maxHP = 0, solid = false
+PASS: fluid_stratum_immune_to_damage - damaging fluid stratum refused structural damage (hit: false, fluid: true)
+
+--- 7. Serialization & Reload Fidelity (Test N) ---
+PASS: save_contents_has_fluid - save contents includes versioned fluid schema 1
+PASS: cleared_before_reload - cleared to 0
+PASS: reloaded_exact_fluid - reloaded save faithfully restored 5 water (got 5)
+
+--- 8. Zero Quiescent Tick Cost (Test P) ---
+PASS: quiescent_zero_cost - 100 quiescent steps cost 0 processed cells (got 0) in 0.02ms
+
+--- 9. Determinism (Test O) ---
+PASS: determinism_identical - two identical runs produce identical fluid grids (2,1,0|1,1,0|1,0,0)
+
+==================================================
+TOTAL CHECKS: 36
+PASSED: 36
+FAILED: 0
+==================================================
+
+ALL BASELINE CHECKS PASSED.
+
+--- Running Rule 4 Failure Mutation Checks ---
+PASS: mutant_ignore_capacity successfully caught and exited 1.
+PASS: mutant_leak_through_floor successfully caught and exited 1.
+PASS: mutant_destroy_creates_no_capacity successfully caught and exited 1.
+== stderr ==
+

@@ -1,0 +1,11 @@
+# tools/test_z_walls.js  category=FAIL_API_DRIFT  exit=1  ms=44  decided by api_drift (stderr)
+== stdout ==
+RESULT: 0 passed, 7 failed
+== stderr ==
+FAIL walls_z.legacy_lookup: Cannot read properties of undefined (reading 'baseAt')
+FAIL walls_z.legacy_nonzero_refused: Cannot read properties of undefined (reading 'baseAt')
+FAIL walls_z.invalid_level_refused: Cannot read properties of undefined (reading 'baseAt')
+FAIL walls_z.same_xy_level_isolated: Cannot read properties of undefined (reading 'baseAt')
+FAIL walls_z.roof_stays_same_level: Cannot read properties of undefined (reading 'baseAt')
+FAIL walls_z.level_grid_masks: Cannot read properties of undefined (reading 'maskAt')
+FAIL walls_z.level_identity_serializes: Cannot read properties of undefined (reading 'baseAt')

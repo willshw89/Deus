@@ -1,0 +1,122 @@
+# tools/test_sheep_action_boxes.js  category=PASS  exit=0  ms=224  decided by exit_0 (-)
+== stdout ==
+
+=== pro_sheep_walk.png (1408x768) ===
+Row 0: 6 clusters:
+  C0: [41..192] (152px wide), Y [36..191] (156px tall)
+  C1: [276..427] (152px wide), Y [24..191] (168px tall)
+  C2: [511..661] (151px wide), Y [36..191] (156px tall)
+  C3: [722..919] (198px wide), Y [36..191] (156px tall)
+  C4: [957..1154] (198px wide), Y [36..191] (156px tall)
+  C5: [1192..1389] (198px wide), Y [36..191] (156px tall)
+Row 1: 6 clusters:
+  C0: [6..221] (216px wide), Y [192..383] (192px tall)
+  C1: [253..462] (210px wide), Y [192..383] (192px tall)
+  C2: [482..697] (216px wide), Y [192..383] (192px tall)
+  C3: [711..925] (215px wide), Y [192..383] (192px tall)
+  C4: [945..1154] (210px wide), Y [192..383] (192px tall)
+  C5: [1186..1401] (216px wide), Y [192..383] (192px tall)
+Row 2: 6 clusters:
+  C0: [42..227] (186px wide), Y [384..575] (192px tall)
+  C1: [247..433] (187px wide), Y [384..575] (192px tall)
+  C2: [476..667] (192px wide), Y [384..575] (192px tall)
+  C3: [746..931] (186px wide), Y [384..575] (192px tall)
+  C4: [974..1160] (187px wide), Y [384..575] (192px tall)
+  C5: [1180..1371] (192px wide), Y [384..575] (192px tall)
+Row 3: 6 clusters:
+  C0: [24..186] (163px wide), Y [576..761] (186px tall)
+  C1: [270..433] (164px wide), Y [576..761] (186px tall)
+  C2: [476..685] (210px wide), Y [576..761] (186px tall)
+  C3: [734..896] (163px wide), Y [576..761] (186px tall)
+  C4: [974..1137] (164px wide), Y [576..761] (186px tall)
+  C5: [1180..1389] (210px wide), Y [576..761] (186px tall)
+
+=== pro_sheep_eat.png (1408x768) ===
+Row 0: 6 clusters:
+  C0: [42..192] (151px wide), Y [42..191] (150px tall)
+  C1: [276..427] (152px wide), Y [42..191] (150px tall)
+  C2: [511..661] (151px wide), Y [42..191] (150px tall)
+  C3: [723..925] (203px wide), Y [77..191] (115px tall)
+  C4: [957..1154] (198px wide), Y [36..191] (156px tall)
+  C5: [1192..1394] (203px wide), Y [77..191] (115px tall)
+Row 1: 6 clusters:
+  C0: [7..221] (215px wide), Y [192..383] (192px tall)
+  C1: [253..455] (203px wide), Y [192..383] (192px tall)
+  C2: [482..696] (215px wide), Y [192..383] (192px tall)
+  C3: [711..931] (221px wide), Y [192..383] (192px tall)
+  C4: [945..1154] (210px wide), Y [192..383] (192px tall)
+  C5: [1186..1401] (216px wide), Y [192..383] (192px tall)
+Row 2: 8 clusters:
+  C0: [42..227] (186px wide), Y [384..575] (192px tall)
+  C1: [247..465] (219px wide), Y [384..575] (192px tall)
+  C2: [476..667] (192px wide), Y [384..575] (192px tall)
+  C3: [676..691] (16px wide), Y [384..402] (19px tall)
+  C4: [714..731] (18px wide), Y [384..402] (19px tall)
+  C5: [746..931] (186px wide), Y [384..575] (192px tall)
+  C6: [975..1160] (186px wide), Y [384..575] (192px tall)
+  C7: [1180..1401] (222px wide), Y [384..575] (192px tall)
+Row 3: 6 clusters:
+  C0: [24..186] (163px wide), Y [576..761] (186px tall)
+  C1: [271..432] (162px wide), Y [576..761] (186px tall)
+  C2: [476..685] (210px wide), Y [576..761] (186px tall)
+  C3: [734..896] (163px wide), Y [576..761] (186px tall)
+  C4: [974..1136] (163px wide), Y [576..761] (186px tall)
+  C5: [1180..1389] (210px wide), Y [576..761] (186px tall)
+
+=== pro_sheep_attack.png (1408x768) ===
+Row 0: 6 clusters:
+  C0: [42..192] (151px wide), Y [48..191] (144px tall)
+  C1: [277..426] (150px wide), Y [48..191] (144px tall)
+  C2: [488..702] (215px wide), Y [42..191] (150px tall)
+  C3: [723..919] (197px wide), Y [36..191] (156px tall)
+  C4: [957..1154] (198px wide), Y [36..191] (156px tall)
+  C5: [1192..1389] (198px wide), Y [36..191] (156px tall)
+Row 1: 5 clusters:
+  C0: [7..221] (215px wide), Y [192..383] (192px tall)
+  C1: [253..462] (210px wide), Y [192..383] (192px tall)
+  C2: [482..925] (444px wide), Y [192..383] (192px tall)
+  C3: [946..1154] (209px wide), Y [192..383] (192px tall)
+  C4: [1186..1401] (216px wide), Y [192..383] (192px tall)
+Row 2: 6 clusters:
+  C0: [42..227] (186px wide), Y [384..575] (192px tall)
+  C1: [247..433] (187px wide), Y [384..575] (192px tall)
+  C2: [476..697] (222px wide), Y [384..575] (192px tall)
+  C3: [711..931] (221px wide), Y [384..575] (192px tall)
+  C4: [975..1160] (186px wide), Y [384..575] (192px tall)
+  C5: [1180..1371] (192px wide), Y [384..575] (192px tall)
+Row 3: 6 clusters:
+  C0: [24..186] (163px wide), Y [576..761] (186px tall)
+  C1: [271..432] (162px wide), Y [576..761] (186px tall)
+  C2: [476..685] (210px wide), Y [576..761] (186px tall)
+  C3: [734..896] (163px wide), Y [576..761] (186px tall)
+  C4: [975..1136] (162px wide), Y [576..761] (186px tall)
+  C5: [1180..1389] (210px wide), Y [576..761] (186px tall)
+
+=== pro_sheep_sleep.png (1408x768) ===
+Row 0: 3 clusters:
+  C0: [83..385] (303px wide), Y [24..157] (134px tall)
+  C1: [552..855] (304px wide), Y [24..157] (134px tall)
+  C2: [1022..1318] (297px wide), Y [24..157] (134px tall)
+Row 1: 6 clusters:
+  C0: [7..227] (221px wide), Y [218..362] (145px tall)
+  C1: [242..462] (221px wide), Y [218..362] (145px tall)
+  C2: [488..697] (210px wide), Y [224..362] (139px tall)
+  C3: [711..919] (209px wide), Y [224..362] (139px tall)
+  C4: [945..1166] (222px wide), Y [218..362] (145px tall)
+  C5: [1180..1400] (221px wide), Y [218..362] (145px tall)
+Row 2: 6 clusters:
+  C0: [7..227] (221px wide), Y [405..550] (146px tall)
+  C1: [242..462] (221px wide), Y [405..549] (145px tall)
+  C2: [488..696] (209px wide), Y [411..550] (140px tall)
+  C3: [711..919] (209px wide), Y [411..550] (140px tall)
+  C4: [946..1166] (221px wide), Y [405..549] (145px tall)
+  C5: [1180..1400] (221px wide), Y [405..550] (146px tall)
+Row 3: 6 clusters:
+  C0: [19..221] (203px wide), Y [587..755] (169px tall)
+  C1: [270..432] (163px wide), Y [581..761] (181px tall)
+  C2: [488..685] (198px wide), Y [587..755] (169px tall)
+  C3: [734..902] (169px wide), Y [587..761] (175px tall)
+  C4: [974..1137] (164px wide), Y [581..761] (181px tall)
+  C5: [1186..1389] (204px wide), Y [587..755] (169px tall)
+== stderr ==
+

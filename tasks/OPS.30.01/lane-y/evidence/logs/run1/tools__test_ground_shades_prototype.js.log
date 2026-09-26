@@ -1,0 +1,16 @@
+# tools/test_ground_shades_prototype.js  category=PASS  exit=0  ms=44  decided by exit_0 (-)
+== stdout ==
+Loaded catalog and UF_WorldGen. Testing climate fields and ground families...
+Ground shade families: [
+  'grass',    'litter',
+  'needles',  'soil',
+  'clay',     'stone',
+  'mud',      'tundra',
+  'ash',      'snow',
+  'ice',      'blessed',
+  'cursed',   'cave_floor',
+  'mycelium'
+]
+Mapped kinds to families: 22
+== stderr ==
+

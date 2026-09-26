@@ -1,0 +1,7 @@
+# tools/test_fixed_walk_playback.js  category=PASS  exit=0  ms=131  decided by exit_0 (-)
+== stdout ==
+West facings: RIGHT RIGHT RIGHT
+East facings: RIGHT RIGHT RIGHT
+Saved test_fixed_male_playback.png
+== stderr ==
+

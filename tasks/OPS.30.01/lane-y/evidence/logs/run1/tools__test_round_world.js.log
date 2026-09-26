@@ -1,0 +1,21 @@
+# tools/test_round_world.js  category=FAIL_OTHER  exit=1  ms=52  decided by other (stderr)
+== stdout ==
+
+== stderr ==
+DEUS_World.js:3071
+    const _Scene_Map_isReady = Scene_Map.prototype.isReady;
+                               ^
+
+ReferenceError: Scene_Map is not defined
+    at DEUS_World.js:3071:32
+    at DEUS_World.js:4297:3
+    at Script.runInContext (node:vm:149:12)
+    at Object.runInContext (node:vm:301:6)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_round_world.js:178:4)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+
+Node.js v24.19.0

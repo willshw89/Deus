@@ -1,0 +1,5 @@
+# tools/test_clean_work_sheet.js  category=PASS  exit=0  ms=181  decided by exit_0 (-)
+== stdout ==
+Saved art/review/pro_work_12_sheet.png
+== stderr ==
+

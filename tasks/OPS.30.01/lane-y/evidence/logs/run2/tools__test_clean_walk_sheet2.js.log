@@ -1,0 +1,5 @@
+# tools/test_clean_walk_sheet2.js  category=PASS  exit=0  ms=188  decided by exit_0 (-)
+== stdout ==
+Saved art/review/pro_walk_12_sheet_clean.png
+== stderr ==
+

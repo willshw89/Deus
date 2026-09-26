@@ -1,0 +1,5 @@
+# tools/test_clean_attack_sheet.js  category=PASS  exit=0  ms=140  decided by exit_0 (-)
+== stdout ==
+Saved art/review/pro_attack_12_sheet.png
+== stderr ==
+

@@ -1,0 +1,134 @@
+# tools/test_native_survival_soak.js  category=FAIL_OTHER  exit=1  ms=107624  decided by other (stderr)
+== stdout ==
+=== DEUS Native Survival Soak & Death Forensics (Duration: 7 days, Seed: 20260923) ===
+Generating normal world at Year 1 (Founding Era)...
+  [VM] DEUS_History: world age 0, 72 living citizens, 0 ancestors
+PASS soak.colony_initialized - Player colony established at site 1
+PASS soak.founders_count - 8 founders present at start
+  Founder 1 (Saar) at (127, 127) z=0: walkable=true, obj=none
+  Founder 2 (Zorina) at (128, 127) z=0: walkable=true, obj=none
+  Founder 3 (Alan) at (129, 127) z=0: walkable=true, obj=none
+  Founder 4 (Wilah) at (127, 128) z=0: walkable=true, obj=none
+  Founder 5 (Zoric) at (129, 128) z=0: walkable=true, obj=none
+  Founder 6 (Yveelle) at (127, 129) z=0: walkable=true, obj=none
+  Founder 7 (Helar) at (128, 129) z=0: walkable=true, obj=none
+  Founder 8 (Kaette) at (129, 129) z=0: walkable=true, obj=none
+PASS soak.starter_chest_present - Central starter chest found near camp (128,128)
+
+Starting peaceful unattended settlement simulation...
+
+| Day | Living Pop | Food (lb) | Beds (Built/Assigned) | Active Projects | Active Jobs | Deaths | Dehydr/Starve Crit | Exhaustion (Lvl 1-5) |
+|-----|------------|-----------|-----------------------|-----------------|-------------|--------|---------------------|----------------------|
+| 1   | 8          | 90.0      | 0/8                   | none            | 0           | 0      | 0/0                 | [0:8 1:0 2:0 3:0 4:0 5:0] |
+  GROUND Saar: ....... / ....... / ....... / ...@.WW / .....Wf / .....W. / .f...W. | path of 8 to the stand
+  SHORT day 2 Saar (#1) at (128,135) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (120,135) z0 stand (120,135) water 1.02 food 0.1 exh 0 bed 23:15 wake 7:15 job haul#974 travel drank Day 2 0:40 ate Day 2 1:08 rest Day 1 10:33 rung 7 | 22:12 job cancelled: Job move failed: work: project posted | 22:17 job cancelled: Job move failed: survival: hunger | 22:24 job done: Finished job: move | 22:26 job cancelled: Job move failed: work: project posted | 23:17 job cancelled: Job haul failed: survival: hunger
+  GROUND Alan: ....... / ....... / ....... / ...@... / ....... / ....... / .f..... | path of 25 to the stand
+  SHORT day 2 Alan (#3) at (122,136) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (130,154) z0 stand (130,153) water 1 food 0 exh 0 bed 20:00 wake 5:00 job chop#992 travel drank Day 2 5:09 ate Day 1 14:29 rest Day 2 4:07 rung 9 | 22:26 job done: Finished job: chop | 23:22 job done: Finished job: haul | 23:31 job done: Finished job: build | 23:34 job done: Finished job: move | 23:50 job cancelled: Job haul failed: replaced
+  GROUND Zoric: ....... / ....... / ....... / WW.@... / fW..... / .W..... / CW..... | path of 17 to the stand
+  SHORT day 2 Zoric (#5) at (136,135) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (121,135) z0 stand (121,135) water 1 food 0 exh 0 bed 21:15 wake 4:15 job haul#979 travel drank Day 2 0:35 ate Day 1 2:38 rest Day 1 10:42 rung 7 | 22:05 job cancelled: Job move failed: survival: hunger | 22:14 job cancelled: Job move failed: survival: hunger | 22:23 job cancelled: Job move failed: survival: hunger | 22:26 job cancelled: Job move failed: work: project posted | 23:23 job cancelled: Job haul failed: survival: hunger
+  GROUND Yveelle: ..g.... / .w..... / ....... / ...@... / ....... / g...... / g...... | path of 34 to the stand
+  SHORT day 2 Yveelle (#6) at (151,131) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (122,136) z0 stand (122,136) water 1 food 0 exh 0 bed 23:30 wake 6:45 job haul#991 travel drank Day 2 0:29 ate Day 1 6:16 rest Day 1 14:21 rung 7 | 21:05 job done: Finished job: talk | 21:11 job cancelled: Job move failed: survival: hunger | 22:11 job cancelled: Job chop failed: survival: hunger | 23:11 job cancelled: Job chop failed: survival: hunger | 23:48 job done: Finished job: chop
+  GROUND Kaette: ....... / ...g..g / ....... / ...@... / .gB.... / g.....r / ....... | path of 25 to the stand
+  SHORT day 2 Kaette (#8) at (107,122) z0 here ok nbrs[NESW,NE,SE,SW,NW]=......#. obj - target (119,135) z0 stand (119,135) water 1 food 0 exh 0 bed 20:30 wake 3:45 job haul#987 travel drank Day 2 0:33 ate Day 1 14:24 rest never rung 7 | 22:02 job cancelled: Job move failed: survival: hunger | 22:11 job cancelled: Job move failed: survival: hunger | 22:26 job cancelled: Job talk failed: work: project posted | 23:11 job cancelled: Job chop failed: survival: hunger | 23:43 job done: Finished job: chop
+| 2   | 8          | 87.0      | 0/8                   |                 | 0           | 0      | 0/0                 | [0:8 1:0 2:0 3:0 4:0 5:0] |
+  GROUND Saar: ..f.... / ....... / ....... / ...@... / ....... / ....... / W...... | path of 0 to the stand
+  SHORT day 3 Saar (#1) at (124,123) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (124,122) z0 stand (124,123) water 1 food 0 exh 0 bed 23:15 wake 7:15 job talk#1915 work drank Day 3 1:12 ate Day 2 1:08 rest Day 1 10:33 rung 9 | 22:50 job cancelled: Job move failed: survival: hunger | 22:59 job cancelled: Job move failed: survival: hunger | 23:33 job done: Finished job: talk | 23:37 job done: Finished job: move | 23:41 job cancelled: Job move failed: survival: hunger
+  GROUND Alan: ....... / .C..... / ....... / ...@... / ....... / ....... / ....... | path of 0 to the stand
+  SHORT day 3 Alan (#3) at (130,130) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (130,129) z0 stand (130,130) water 1 food 0 exh 0 bed 20:00 wake 5:00 job talk#1907 work drank Day 3 0:59 ate Day 1 14:29 rest Day 2 4:07 rung 9 | 23:13 job done: Finished job: move | 23:17 job cancelled: Job move failed: survival: hunger | 23:19 job done: Finished job: move | 23:26 job cancelled: Job move failed: survival: hunger | 23:35 job cancelled: Job move failed: survival: hunger
+  GROUND Zoric: ....... / ....... / W...... / W..@... / W...... / W...... / W...... | no stand
+  SHORT day 3 Zoric (#5) at (124,127) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj -  water 1 food 0 exh 0 bed 21:15 wake 4:15 job none drank Day 3 1:22 ate Day 1 2:38 rest Day 1 10:42 rung 9 | 23:32 job cancelled: Job move failed: survival: hunger | 23:33 job done: Finished job: move | 23:41 job cancelled: Job move failed: survival: hunger | 23:50 job cancelled: Job move failed: survival: hunger | 23:59 job cancelled: Job move failed: survival: hunger
+  GROUND Yveelle: ....... / ....... / .....C. / ...@... / ....... / ....... / ....... | path of 9 to the stand
+  SHORT day 3 Yveelle (#6) at (126,129) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (130,124) z0 stand (130,124) water 1 food 0 exh 0 bed 23:30 wake 6:45 job move#1927 travel drank Day 3 1:23 ate Day 1 6:16 rest Day 1 14:21 rung 9 | 23:38 job done: Finished job: move | 23:40 job done: Finished job: move | 23:43 job done: Finished job: move | 23:47 job cancelled: Job move failed: survival: hunger | 23:56 job cancelled: Job move failed: survival: hunger
+  GROUND Kaette: ...f... / ....... / ....... / ...@... / ....... / ..C.... / ....... | path of 16 to the stand
+  SHORT day 3 Kaette (#8) at (129,126) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (138,133) z0 stand (138,133) water 1 food 0 exh 0 bed 20:30 wake 3:45 job move#1928 travel drank Day 3 1:20 ate Day 1 14:24 rest never rung 9 | 23:32 job cancelled: Job move failed: survival: hunger | 23:41 job cancelled: Job move failed: survival: hunger | 23:50 job done: Finished job: move | 23:55 job done: Finished job: move | 23:56 job cancelled: Job move failed: survival: hunger
+| 3   | 8          | 85.0      | 0/8                   |                 | 0           | 0      | 0/0                 | [0:8 1:0 2:0 3:0 4:0 5:0] |
+  GROUND Saar: .....C. / ....... / ....... / ...@... / ....... / ....... / ....... | path of 2 to the stand
+  SHORT day 4 Saar (#1) at (126,131) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (125,130) z0 stand (125,130) water 1 food 0 exh 0 bed 23:15 wake 7:15 job move#2745 travel drank Day 4 0:48 ate Day 2 1:08 rest Day 1 10:33 rung 9 | 23:32 job cancelled: Job move failed: survival: hunger | 23:41 job cancelled: Job move failed: survival: hunger | 23:50 job cancelled: Job move failed: survival: hunger | 23:56 job done: Finished job: move | 23:59 job done: Finished job: move
+  GROUND Alan: ....... / ....... / ......C / ...@... / ....... / ....... / ....... | no stand
+  SHORT day 4 Alan (#3) at (125,129) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj -  water 1 food 0 exh 0 bed 20:00 wake 5:00 job none drank Day 4 0:48 ate Day 1 14:29 rest Day 2 4:07 rung 9 | 23:35 job done: Finished job: move | 23:37 job done: Finished job: move | 23:41 job cancelled: Job move failed: survival: hunger | 23:50 job cancelled: Job move failed: survival: hunger | 23:59 job cancelled: Job move failed: survival: hunger
+  GROUND Wilah: ......B / ....... / ....... / ...@... / .f..... / ....... / ....... | path of 0 to the stand
+  SHORT day 4 Wilah (#4) at (131,122) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (130,122) z0 stand (131,122) water 1 food 0 exh 0 bed 22:15 wake 6:30 job talk#2704 work drank Day 4 0:51 ate Day 3 0:09 rest Day 2 10:12 rung 9 | 22:44 job done: Finished job: talk | 22:50 job done: Finished job: move | 22:56 job cancelled: Job move failed: survival: hunger | 23:05 job cancelled: Job move failed: survival: hunger | 23:14 job cancelled: Job move failed: survival: hunger
+  GROUND Zoric: ....... / ....... / ..f.... / ...@... / ....... / ....... / ....... | path of 9 to the stand
+  SHORT day 4 Zoric (#5) at (130,124) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (131,132) z0 stand (131,132) water 1 food 0 exh 0 bed 21:15 wake 4:15 job move#2742 travel drank Day 4 0:40 ate Day 1 2:38 rest Day 1 10:42 rung 9 | 23:41 job cancelled: Job move failed: survival: hunger | 23:46 job done: Finished job: move | 23:48 job done: Finished job: move | 23:51 job done: Finished job: move | 23:54 job done: Finished job: move
+  GROUND Yveelle: ....... / ....... / WWW.... / ffW@... / .fW.... / K.W.... / .fW.... | path of 2 to the stand
+  SHORT day 4 Yveelle (#6) at (122,127) z0 here ok nbrs[NESW,NE,SE,SW,NW]=...#..## obj - target (122,125) z0 stand (122,125) water 1 food 0 exh 0 bed 23:30 wake 6:45 job move#2744 travel drank Day 4 0:42 ate Day 1 6:16 rest Day 1 14:21 rung 9 | 23:35 job done: Finished job: move | 23:38 job done: Finished job: move | 23:40 job done: Finished job: move | 23:47 job cancelled: Job move failed: survival: hunger | 23:56 job cancelled: Job move failed: survival: hunger
+  GROUND Helar: f...... / ....... / ....... / ...@..f / ....... / ....... / ....... | path of 13 to the stand
+  SHORT day 4 Helar (#7) at (126,123) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (128,134) z0 stand (128,134) water 1 food 0 exh 0 bed 22:30 wake 6:30 job move#2741 travel drank Day 4 0:38 ate Day 3 0:09 rest Day 2 9:52 rung 9 | 23:32 job done: Finished job: move | 23:35 job cancelled: Job move failed: survival: hunger | 23:44 job cancelled: Job move failed: survival: hunger | 23:48 job done: Finished job: move | 23:53 job cancelled: Job move failed: survival: hunger
+  GROUND Kaette: ....... / ....... / WWWWW.. / fff@W.. / ff.fW.. / f.K.W.. / ff.fW.. | path of 0 to the stand
+  SHORT day 4 Kaette (#8) at (120,127) z0 here ok nbrs[NESW,NE,SE,SW,NW]=##..##.# obj floor_straw target (120,127) z0 stand (120,127) water 1 food 0 exh 0 bed 20:30 wake 3:45 job sleep#2620 work drank Day 4 0:41 ate Day 1 14:24 rest never rung 5 | 19:20 job cancelled: Job move failed: survival: hunger | 19:29 job cancelled: Job move failed: survival: hunger | 20:06 job done: Finished job: talk | 20:14 job cancelled: Job move failed: survival: hunger | 20:32 job cancelled: Job move failed: survival: rest
+| 4   | 8          | 84.0      | 0/8                   |                 | 0           | 0      | 0/5                 | [0:8 1:0 2:0 3:0 4:0 5:0] |
+  GROUND Saar: ....... / .C..... / ....... / ...@... / ....... / ....... / ....... | path of 14 to the stand
+  SHORT day 5 Saar (#1) at (130,130) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (132,118) z0 stand (132,118) water 1 food 0 exh 0 bed 23:15 wake 7:15 job move#3636 travel drank Day 5 0:45 ate Day 2 1:08 rest Day 1 10:33 rung 9 | 22:29 job cancelled: Job move failed: survival: hunger | 22:36 job done: Finished job: move | 22:44 job cancelled: Job move failed: survival: hunger | 23:55 job done: Finished job: talk | 23:56 job done: Finished job: move
+  GROUND Alan: ....... / ....... / ....... / ...@... / .....C. / ....... / ....... | path of 1 to the stand
+  SHORT day 5 Alan (#3) at (126,127) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (124,127) z0 stand (125,127) water 1 food 0 exh 0 bed 20:00 wake 5:00 job talk#3620 travel drank Day 5 0:40 ate Day 1 14:29 rest Day 2 4:07 rung 9 | 22:11 job cancelled: Job move failed: survival: hunger | 22:59 job done: Finished job: talk | 23:05 job cancelled: Job move failed: survival: hunger | 23:14 job cancelled: Job move failed: survival: hunger | 23:23 job cancelled: Job move failed: survival: hunger
+  GROUND Wilah: ....... / ....... / ....... / ...@... / ....... / ....... / ......W | path of 0 to the stand
+  SHORT day 5 Wilah (#4) at (127,132) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (127,131) z0 stand (127,132) water 1 food 0 exh 0 bed 22:15 wake 6:30 job talk#3623 work drank Day 5 0:42 ate Day 3 0:09 rest Day 2 10:12 rung 9 | 22:53 job cancelled: Job move failed: survival: hunger | 23:02 job cancelled: Job move failed: survival: hunger | 23:11 job cancelled: Job move failed: survival: hunger | 23:20 job cancelled: Job move failed: survival: hunger | 23:29 job cancelled: Job move failed: survival: hunger
+  GROUND Zoric: ....... / ....f.. / .....g. / ...@... / ....... / ....... / ....... | path of 1 to the stand
+  SHORT day 5 Zoric (#5) at (145,148) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj flowers_blue target (146,149) z0 stand (146,148) water 1 food 0 exh 0 bed 21:15 wake 4:15 job talk#3586 travel drank Day 5 0:34 ate Day 1 2:38 rest Day 1 10:42 rung 9 | 20:22 job done: Finished job: talk | 20:29 job cancelled: Job move failed: survival: hunger | 20:38 job cancelled: Job move failed: survival: hunger | 21:16 job done: Finished job: talk | 22:19 job done: Finished job: talk
+  GROUND Yveelle: ....... / ....... / ....... / ...@... / W...... / W...... / W...... | path of 8 to the stand
+  SHORT day 5 Yveelle (#6) at (124,125) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (132,125) z0 stand (132,125) water 1 food 0 exh 0 bed 23:30 wake 6:45 job move#3637 travel drank Day 5 0:38 ate Day 1 6:16 rest Day 1 14:21 rung 9 | 23:23 job cancelled: Job move failed: survival: hunger | 23:32 job cancelled: Job move failed: survival: hunger | 23:41 job cancelled: Job move failed: survival: hunger | 23:48 job done: Finished job: move | 23:56 job cancelled: Job move failed: survival: hunger
+  GROUND Helar: ....... / ....... / ....C.. / ...@... / ....... / ....... / ....... | path of 24 to the stand
+  SHORT day 5 Helar (#7) at (127,129) z0 here ok nbrs[NESW,NE,SE,SW,NW]=....#... obj - target (147,125) z0 stand (147,125) water 1 food 0 exh 0 bed 22:30 wake 6:30 job move#3633 travel drank Day 5 0:33 ate Day 3 0:09 rest Day 2 9:52 rung 9 | 23:17 job cancelled: Job move failed: survival: hunger | 23:38 job cancelled: Job move failed: survival: hunger | 23:41 job done: Finished job: move | 23:47 job cancelled: Job move failed: survival: hunger | 23:54 job done: Finished job: move
+  GROUND Kaette: ..f.... / ...g... / .f..... / ...@.f. / ....... / ......# / .....## | path of 33 to the stand
+  SHORT day 5 Kaette (#8) at (147,149) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (131,132) z0 stand (131,132) water 1 food 0 exh 0 bed 20:30 wake 3:45 job move#3638 travel drank Day 5 5:55 ate Day 1 14:24 rest Day 5 4:53 rung 9 | 22:08 job done: Finished job: move | 22:19 job done: Finished job: move | 22:21 job done: Finished job: move | 23:04 job done: Finished job: move | 23:59 job done: Finished job: move
+| 5   | 8          | 83.0      | 0/8                   |                 | 0           | 0      | 0/5                 | [0:8 1:0 2:0 3:0 4:0 5:0] |
+  GROUND Saar: ....... / ....... / ....... / ...@... / ....... / ....... / ....f.. | path of 22 to the stand
+  SHORT day 6 Saar (#1) at (128,120) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (113,113) z0 stand (113,113) water 1 food 0 exh 0 bed 23:15 wake 7:15 job move#4445 travel drank Day 6 0:40 ate Day 2 1:08 rest Day 1 10:33 rung 9 | 22:44 job cancelled: Job move failed: survival: hunger | 22:53 job cancelled: Job move failed: survival: hunger | 23:50 job done: Finished job: talk | 23:53 job done: Finished job: move | 23:56 job cancelled: Job move failed: survival: hunger
+  GROUND Alan: ....... / ....... / ....... / ...@... / ......C / ....... / ....... | path of 0 to the stand
+  SHORT day 6 Alan (#3) at (125,127) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (124,127) z0 stand (125,127) water 1 food 0 exh 0 bed 20:00 wake 5:00 job talk#4438 work drank Day 6 1:17 ate Day 1 14:29 rest Day 2 4:07 rung 9 | 23:11 job cancelled: Job move failed: survival: hunger | 23:20 job cancelled: Job move failed: survival: hunger | 23:29 job cancelled: Job move failed: survival: hunger | 23:38 job cancelled: Job move failed: survival: hunger | 23:47 job cancelled: Job move failed: survival: hunger
+  GROUND Wilah: ....... / ....... / ....... / ...@... / ....... / WWWWW.. / Wf.fW.. | path of 29 to the stand
+  SHORT day 6 Wilah (#4) at (133,133) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (108,137) z0 stand (108,137) water 1 food 0 exh 1 bed 22:15 wake 6:30 job move#4437 travel drank Day 6 1:31 ate Day 3 0:09 rest Day 6 15:13 rung 9 | 22:09 job done: Finished job: move | 22:14 job cancelled: Job move failed: survival: hunger | 23:05 job done: Finished job: move | 23:35 job done: Finished job: move | 23:46 job done: Finished job: move
+  GROUND Zoric: ...f... / ....... / ....... / ...@... / ....... / ..C.... / ....... | no stand
+  SHORT day 6 Zoric (#5) at (129,126) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj -  water 1 food 0 exh 0 bed 21:15 wake 4:15 job none drank Day 6 1:39 ate Day 1 2:38 rest Day 1 10:42 rung 9 | 23:23 job cancelled: Job move failed: survival: hunger | 23:32 job cancelled: Job move failed: survival: hunger | 23:41 job cancelled: Job move failed: survival: hunger | 23:50 job cancelled: Job move failed: survival: hunger | 23:59 job cancelled: Job move failed: survival: hunger
+  GROUND Yveelle: ....... / ....... / C...... / ...@... / ....... / ....... / ....... | path of 1 to the stand
+  SHORT day 6 Yveelle (#6) at (131,129) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (130,130) z0 stand (131,130) water 1 food 0 exh 0 bed 23:30 wake 6:45 job talk#4427 travel drank Day 6 0:32 ate Day 1 6:16 rest Day 1 14:21 rung 9 | 23:19 job done: Finished job: move | 23:22 job done: Finished job: move | 23:25 job done: Finished job: move | 23:28 job done: Finished job: move | 23:32 job cancelled: Job move failed: survival: hunger
+  GROUND Helar: ....... / ....... / W...... / W..@... / W...... / W...... / W...... | path of 0 to the stand
+  SHORT day 6 Helar (#7) at (124,127) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (124,127) z0 stand (124,127) water 1 food 0 exh 0 bed 22:30 wake 6:30 job move#4444 work drank Day 6 0:35 ate Day 3 0:09 rest Day 2 9:52 rung 9 | 23:26 job cancelled: Job move failed: survival: hunger | 23:35 job cancelled: Job move failed: survival: hunger | 23:44 job cancelled: Job move failed: survival: hunger | 23:48 job done: Finished job: move | 23:53 job cancelled: Job move failed: survival: hunger
+  GROUND Kaette: ....... / C...... / ....... / ...@... / ....... / ....... / ....... | path of 1 to the stand
+  SHORT day 6 Kaette (#8) at (131,130) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (132,130) z0 stand (132,130) water 1 food 0 exh 0 bed 20:30 wake 3:45 job move#4446 travel drank Day 6 1:37 ate Day 1 14:24 rest Day 5 4:53 rung 9 | 23:38 job done: Finished job: move | 23:41 job cancelled: Job move failed: survival: hunger | 23:44 job done: Finished job: move | 23:48 job done: Finished job: move | 23:56 job cancelled: Job move failed: survival: hunger
+| 6   | 8          | 82.0      | 0/8                   | none            | 0           | 0      | 0/7                 | [0:7 1:1 2:0 3:0 4:0 5:0] |
+  GROUND Saar: ....... / ......f / ....... / ...@... / ....... / ....... / .....C. | path of 1 to the stand
+  SHORT day 7 Saar (#1) at (126,125) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (127,126) z0 stand (127,125) water 1 food 0 exh 0 bed 23:15 wake 7:15 job talk#5278 travel drank Day 7 0:21 ate Day 2 1:08 rest Day 1 10:33 rung 9 | 23:32 job cancelled: Job move failed: survival: hunger | 23:41 job cancelled: Job move failed: survival: hunger | 23:48 job done: Finished job: move | 23:53 job done: Finished job: move | 23:56 job cancelled: Job move failed: survival: hunger
+  GROUND Alan: ....... / ....... / ....... / ...@... / ....... / ......C / ....... | path of 1 to the stand
+  SHORT day 7 Alan (#3) at (125,126) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (124,126) z0 stand (124,126) water 1 food 0 exh 0 bed 20:00 wake 5:00 job move#5279 travel drank Day 7 1:46 ate Day 1 14:29 rest Day 2 4:07 rung 9 | 23:22 job done: Finished job: move | 23:29 job cancelled: Job move failed: survival: hunger | 23:38 job cancelled: Job move failed: survival: hunger | 23:47 job cancelled: Job move failed: survival: hunger | 23:56 job cancelled: Job move failed: survival: hunger
+  GROUND Wilah: .fW.... / DWW.... / ....... / ...@... / ....... / WWWW... / ...W... | path of 17 to the stand
+  SHORT day 7 Wilah (#4) at (122,133) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (126,120) z0 stand (126,120) water 1 food 0 exh 2 bed 22:15 wake 6:30 job move#5281 travel drank Day 7 0:50 ate Day 3 0:09 rest Day 7 15:13 rung 9 | 23:04 job done: Finished job: talk | 23:15 job done: Finished job: move | 23:17 job done: Finished job: move | 23:25 job done: Finished job: move | 23:57 job done: Finished job: move
+  GROUND Zoric: ....... / W...... / W...... / W..@... / W...... / W...... / W...... | path of 0 to the stand
+  SHORT day 7 Zoric (#5) at (124,128) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (124,127) z0 stand (124,128) water 1 food 0 exh 0 bed 21:15 wake 4:15 job talk#5233 work drank Day 7 0:30 ate Day 1 2:38 rest Day 1 10:42 rung 9 | 21:51 job done: Finished job: talk | 21:59 job cancelled: Job move failed: survival: hunger | 22:50 job done: Finished job: talk | 22:56 job cancelled: Job move failed: survival: hunger | 23:05 job cancelled: Job move failed: survival: hunger
+  GROUND Yveelle: ....... / ....... / ....... / ...@... / W...... / W...... / W...... | path of 8 to the stand
+  SHORT day 7 Yveelle (#6) at (124,125) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (131,124) z0 stand (131,124) water 1 food 0 exh 0 bed 23:30 wake 6:45 job move#5274 travel drank Day 7 0:54 ate Day 1 6:16 rest Day 1 14:21 rung 9 | 23:22 job done: Finished job: move | 23:29 job cancelled: Job move failed: survival: hunger | 23:36 job done: Finished job: move | 23:44 job cancelled: Job move failed: survival: hunger | 23:53 job cancelled: Job move failed: survival: hunger
+  GROUND Helar: ....... / ....... / ....... / ...@... / ....... / ......C / ....... | path of 1 to the stand
+  SHORT day 7 Helar (#7) at (125,126) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (126,126) z0 stand (126,126) water 1 food 0 exh 0 bed 22:30 wake 6:30 job move#5280 travel drank Day 7 0:37 ate Day 3 0:09 rest Day 2 9:52 rung 9 | 22:26 job cancelled: Job move failed: survival: hunger | 23:31 job done: Finished job: talk | 23:38 job cancelled: Job move failed: survival: hunger | 23:47 job cancelled: Job move failed: survival: hunger | 23:56 job cancelled: Job move failed: survival: hunger
+  GROUND Kaette: ....... / ....... / ....... / ...@... / ......C / ....... / ....... | path of 3 to the stand
+  SHORT day 7 Kaette (#8) at (125,127) z0 here ok nbrs[NESW,NE,SE,SW,NW]=........ obj - target (127,126) z0 stand (127,126) water 1 food 0 exh 0 bed 20:30 wake 3:45 job move#5282 travel drank Day 7 0:48 ate Day 1 14:24 rest Day 5 4:53 rung 9 | 23:35 job cancelled: Job move failed: survival: hunger | 23:44 job cancelled: Job move failed: survival: hunger | 23:53 job cancelled: Job move failed: survival: hunger | 23:55 job done: Finished job: move | 23:59 job done: Finished job: move
+| 7   | 8          | 81.0      | 0/8                   |                 | 0           | 0      | 0/7                 | [0:7 1:0 2:1 3:0 4:0 5:0] |
+
+--- Simulation Complete. Evaluating Peaceful Baseline Gate ---
+
+0 deaths recorded during soak period!
+PASS soak.zero_unknown_deaths - Unknown deaths: 0 (want 0)
+PASS soak.zero_preventable_pathing_deaths - Trapped/pathing deaths: 0 (want 0)
+PASS soak.founders_survived_7_days - Living founders after 7 days: 8/8
+FAIL soak.nobody_dehydrated_at_midnight - founders short of water at midnight: none; starving: day 4: 5, day 5: 5, day 6: 7, day 7: 7 (days 2..7)
+FAIL soak.nobody_worn_down - founders at exhaustion 2 or worse on day 7: 1 besides the feed scene's (distribution [7 0 1 0 0 0])
+PASS soak.larder_replenished_by_foraging - 0 food gather job(s) done, 0 haul(s) of food into the chest or a larder cell; lowest reserve 6.13 of 3 colonist-days (the reserve never ran short: nothing to restock)
+
+Mortality Breakdown by Cause: {
+  "combat": 0,
+  "fire": 0,
+  "lava": 0,
+  "starvation": 0,
+  "dehydration": 0,
+  "exhaustion": 0,
+  "drowning": 0,
+  "hypothermia": 0,
+  "overheating": 0,
+  "poison": 0,
+  "falling": 0,
+  "dying/death-saves": 0,
+  "trapped/pathing": 0,
+  "unknown": 0
+}
+== stderr ==
+
+RESULT: SOAK CHECKS FAILED (7 passed, 2 failed, exit 1)

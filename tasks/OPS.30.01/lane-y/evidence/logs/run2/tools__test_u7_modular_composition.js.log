@@ -1,0 +1,5 @@
+# tools/test_u7_modular_composition.js  category=PASS  exit=0  ms=166  decided by exit_0 (-)
+== stdout ==
+Composites generated: combo_A.png, combo_B.png, combo_C.png
+== stderr ==
+

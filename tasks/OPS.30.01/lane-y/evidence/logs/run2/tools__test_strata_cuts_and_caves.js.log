@@ -1,0 +1,18 @@
+# tools/test_strata_cuts_and_caves.js  category=KILLED_TIMEOUT  exit=TIMEOUT  ms=180187  decided by timeout (runner)
+== stdout ==
+=== DEUS-TSK-FABLE-19B natural cuts and all-Z caves: regression seed 18, second seed 3, seed set 18,3,21,4 ===
+INFO newWorld seed 18: generator 5 17141 ms, generator 4 (same code, levelsGen 4) 15698 ms, pre-19B code 13460 ms; natural features 636 ms
+INFO seed set built: 18, 3, 21, 4 (160 s)
+PASS deterministic_same_seed - seed 18 in two vms: strata+connectors+caps per level -2:same -1:same 0:same 1:same 2:same, feature list same; regenerated inside seed 3's world: -2: dcfbb91b, -1: 433f2728, 1: eaf389b9, 2: 9998ffb2
+PASS different_seeds_differ - carved columns: seed 18 4997, seed 3 2027, shared 195 (overlap 2.9 %, limit 25 %); cut anchors 19 / 8, at the same cell 0 (0 %, limit 30 %); seed 3 valid (no floating mass, caves present) true
+PASS old_generator_unchanged - generator 4 (levelsGen 4) vs the pre-19B code (19fcf0e), seed 18: strata per level -2:same -1:same 0:same 1:same 2:same; checksums -2:666ada13 -1:8eda2b93 0:0779462c 1:1496eea4 2:ae3e6025; no features or caps true; a pre-V80 migration's generators [4,4,4,4,4]
+PASS carve_only_removes - 4 seeds, generator 4 -> 5: solid strata carved to air 57026; +2 massif fill on capped summit columns 5345; air -> matter elsewhere 0, solid material changed 0, fluid removed 0; connectors: ramps added 754, other changes on unchanged columns 0
+PASS partial_heights - cut columns of seed 18 by the fill of the cell holding the new top: HEIGHT_1_OF_5 519 e.g. (72,24,-1), HEIGHT_2_OF_5 301 e.g. (77,31,-1), HEIGHT_3_OF_5 472 e.g. (76,29,-1), HEIGHT_4_OF_5 654 e.g. (71,24,-1), HEIGHT_5_OF_5 1064 e.g. (69,23,-1) (want >= 5 each); heightStateAt disagreeing 0
+PASS z0_to_z1_exposure - 751 generated columns of seed 18 open from the ground down to a floor in -1; deepest (190,83): first air 5 ft, ground cell open, -1 cell floor (HEIGHT_0_OF_5), overburden false
+PASS z1_to_z2_exposure - 31 generated sky-open columns of seed 18 whose -1 cell is all air over a floor in -2; deepest (194,89): first air 3 ft, -1 open, -2 floor HEIGHT_3_OF_5
+PASS feature_reaches_z2 - a connected generated cut of seed 18: 207 columns, host levels [1], deepest first air 3 ft at (194,89); traced through the cut up to a column whose natural surface is the ground or higher true
+PASS shallow_more_common - generated cut components over 4 seeds by realized depth: shallow (<= 4 ft) 66, deeper partial 28, exposing -1 to its S0 20, reaching -2 8 (want shallow >= 3 x reaching -2, and at least one reaching -2); 18: 23 shallow / 3 to -2; 3: 8 shallow / 1 to -2; 21: 18 shallow / 2 to -2; 4: 17 shallow / 2 to -2
+PASS caves_on_all_levels - roofed generated cave floors over 4 seeds by level: 2: 930 (seed 18 (87,208)), 1: 1403 (seed 18 (47,98)), 0: 1619 (seed 18 (174,47)), -1: 1378 (seed 18 (43,205)), -2: 2181 (seed 18 (41,206))
+PASS cave_free_terrain - 18: cave columns 2058 (3.14 %), massif 691 (1.05 %); 3: cave columns 1531 (2.34 %), massif 290 (0.44 %); 21: cave columns 1927 (2.94 %), massif 262 (0.40 %); 4: cave columns 1686 (2.57 %), massif 1006 (1.54 %) (limits 5 % and 3 %)
+== stderr ==
+

@@ -1,0 +1,7 @@
+# tools/test_human_inheritance.js  category=PASS  exit=0  ms=46  decided by exit_0 (-)
+== stdout ==
+Independent variation distribution over 1200 units: { '1': 199, '2': 199, '3': 200, '4': 202, '5': 199, '6': 201 }
+Inheritance (Mom=5, Dad=2) over 1000 children: Mom=463, Dad=465, Other=72
+ALL HUMAN VARIATION TESTS PASSED!
+== stderr ==
+

@@ -1,0 +1,22 @@
+# tools/test_family_compounds_and_shops.js  category=PASS  exit=0  ms=83  decided by exit_0 (-)
+== stdout ==
+=== Test Suite: Family Compounds, Progressive Home Construction & Personality Shops ===
+
+PASS initial_bootstrap_steps_count - Expected 5 base steps, got 5
+PASS initial_bootstrap_steps_types - Steps match wall, door, bed, hearth, stockpile
+PASS progressive_floors_added - Wood flooring step added
+PASS progressive_kitchen_appointments_added - Kitchen counter, pantry, and cooking hearth added
+PASS progressive_dining_appointments_added - Dining table and bench added
+PASS progressive_bed_upgrade_added - Wooden bed upgrade step added
+PASS progressive_chest_added - Storage chest step added
+PASS calling_blacksmith_identified - Calling is Blacksmith
+PASS calling_blacksmith_station_and_shop_planned - Smithy workstation and shop counter planned
+PASS calling_bowyer_identified - Calling is Bowyer & Fletcher
+PASS calling_bowyer_station_and_shop_planned - Bowyer bench and shop counter planned
+PASS calling_apothecary_identified - Calling is Apothecary
+PASS calling_apothecary_station_and_shop_planned - Apothecary bench and shop counter planned
+PASS all_9_prop_charsets_deployed - All 9 character sets and JSON sidecars deployed
+
+=== Summary: 14 passed, 0 failed ===
+== stderr ==
+

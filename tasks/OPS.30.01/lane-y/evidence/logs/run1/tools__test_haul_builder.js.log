@@ -1,0 +1,6 @@
+# tools/test_haul_builder.js  category=PASS  exit=0  ms=62  decided by exit_0 (-)
+== stdout ==
+Testing updated haul sack builder...
+Saved updated art/review/test_haul_preview.png
+== stderr ==
+

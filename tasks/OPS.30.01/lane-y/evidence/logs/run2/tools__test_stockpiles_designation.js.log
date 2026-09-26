@@ -1,0 +1,25 @@
+# tools/test_stockpiles_designation.js  category=PASS  exit=0  ms=95  decided by exit_0 (-)
+== stdout ==
+=== DEUS Physical Command Stockpiles Suite (DEUS-TSK-GEMINI-07) ===
+PASS designation_creation - Created stockpile #1 with 9 cells, faction player
+PASS spatial_index - Cell (11,11) maps to stockpile #1, cell (15,15) correctly maps to null
+PASS filter_accuracy - Wood stockpile accepts log: true, rejects stone: true, rejects food: true
+PASS disabled_stockpile_rejected - Disabled stockpile accepts items: false (expected false)
+PASS empty_cell_occupancy - Empty cell (10,10) occupancy kind: empty, availableSlots: 1
+PASS loose_item_occupancy - Cell (10,10) with loose log: kind loose, count 5, availableSlots: 0
+PASS container_occupancy_no_double_count - Cell (10,11) container kind: container, container slots: 32, loose floor capacity not double-counted (looseCap === 32: true)
+PASS container_items_tracked - Container holds 1 item, available slots updated from 32 to 31
+PASS settlement_capacity_physical - Total physical slots: 40 (expected 40), used: 2, cells: 9, containers: 1
+PASS reservation_collision_prevented - Worker 1 holds reservation (isReserved for w1: false), Worker 2 blocked from reserving same cell (isReserved for w2: true)
+PASS cancellation_releases_reservation - After worker 1 releases, cell is available for worker 2: true
+PASS destination_finding - Found destination at (10,11) container: 1
+PASS hauler_picks_up_item - Hauler physically picked up item 5 (holder: 103)
+PASS no_teleportation_in_transit - Item remains in carrier's hands during transit, zero teleportation: true
+PASS physical_haul_completed - Haul job finished (done), item deposited at target destination
+PASS stale_destination_fails_gracefully - Stale job detected invalid destination and failed cleanly: "destination container is gone"
+PASS save_load_roundtrip - Reloaded stockpile #1 has 9 cells, container preserved: true
+PASS legacy_migration_clean - Migrated 1 legacy stockpile designations; zero fake slots preserved (fake: 0)
+
+RESULT: 18 passed, 0 failed
+== stderr ==
+

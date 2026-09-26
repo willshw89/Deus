@@ -1,0 +1,540 @@
+# tools/test_palette_standard.js  category=PASS  exit=0  ms=319  decided by exit_0 (-)
+== stdout ==
+=== DEUS PALETTE ARCHITECTURE & MATERIAL RAMPS TEST SUITE (DW.01.05) ===
+
+--- 1. Registry Integrity & Schema ---
+PASS: DEUS_PaletteRegistry.json exists in game/data/
+PASS: DEUS_PaletteRegistry.json exists in docs/art/
+PASS: deus_master_world_palette_v1.hex exists in art/palette/
+PASS: Registry version is 1.1.0
+PASS: Document ID is DEUS-PALETTE-REGISTRY-01
+PASS: Canonical master ceiling is locked to 256
+PASS: Master active colors (226) meets V1 ceiling <= 240 (target: 220–240)
+PASS: Master active colors (226) meets target range >= 220
+PASS: Master palette retains explicit reserve capacity >= 16 slots (got 30)
+PASS: Reserved capacity equals canonicalCeiling minus masterColorCount
+PASS: reservePolicy block exists in registry
+PASS: reservePolicy requires >= 16 reserved slots
+PASS: versioningPolicy block exists in registry
+PASS: versioningPolicy specifies 8-step controlled change process
+PASS: Policy block exists
+PASS: Policy explicitly removes arbitrary 32-color sheet cap
+
+--- 2. Master Color Invariants & Deduplication ---
+PASS: masterColors object exists
+PASS: masterColorCount matches Object.keys length
+PASS: All master color hex strings are well-formed 6-digit hex
+PASS: All master color RGB channels match hex codes
+PASS: All master color luminance values accurately follow ITU-R BT.709
+PASS: Zero exact duplicate RGB values exist in Master Palette
+PASS: nearDuplicatesReport is an array
+PASS: Near duplicates report count (0) is audited and <= 15
+
+--- 3. Material Ramps Integrity & Monotonicity ---
+PASS: Ramp count matches registry totalRampsCount
+PASS: Substantial material ramp coverage (got 58 ramps, >= 50)
+PASS: NEUT_VOID_BLACK: rampId matches key
+PASS: NEUT_VOID_BLACK: tone count 3 is 3-6 tones
+PASS: NEUT_VOID_BLACK: colorIds length matches colorCount
+PASS: NEUT_VOID_BLACK: hexColors length matches colorCount
+PASS: NEUT_VOID_BLACK: toneRoles length matches colorCount
+PASS: NEUT_COOL_GRAY: rampId matches key
+PASS: NEUT_COOL_GRAY: tone count 5 is 3-6 tones
+PASS: NEUT_COOL_GRAY: colorIds length matches colorCount
+PASS: NEUT_COOL_GRAY: hexColors length matches colorCount
+PASS: NEUT_COOL_GRAY: toneRoles length matches colorCount
+PASS: NEUT_WARM_GRAY: rampId matches key
+PASS: NEUT_WARM_GRAY: tone count 5 is 3-6 tones
+PASS: NEUT_WARM_GRAY: colorIds length matches colorCount
+PASS: NEUT_WARM_GRAY: hexColors length matches colorCount
+PASS: NEUT_WARM_GRAY: toneRoles length matches colorCount
+PASS: NEUT_PALE_CREST: rampId matches key
+PASS: NEUT_PALE_CREST: tone count 4 is 3-6 tones
+PASS: NEUT_PALE_CREST: colorIds length matches colorCount
+PASS: NEUT_PALE_CREST: hexColors length matches colorCount
+PASS: NEUT_PALE_CREST: toneRoles length matches colorCount
+PASS: TEMP_GRASS_FERTILE: rampId matches key
+PASS: TEMP_GRASS_FERTILE: tone count 5 is 3-6 tones
+PASS: TEMP_GRASS_FERTILE: colorIds length matches colorCount
+PASS: TEMP_GRASS_FERTILE: hexColors length matches colorCount
+PASS: TEMP_GRASS_FERTILE: toneRoles length matches colorCount
+PASS: TEMP_GRASS_DRY: rampId matches key
+PASS: TEMP_GRASS_DRY: tone count 5 is 3-6 tones
+PASS: TEMP_GRASS_DRY: colorIds length matches colorCount
+PASS: TEMP_GRASS_DRY: hexColors length matches colorCount
+PASS: TEMP_GRASS_DRY: toneRoles length matches colorCount
+PASS: TEMP_SOIL_LOAM: rampId matches key
+PASS: TEMP_SOIL_LOAM: tone count 5 is 3-6 tones
+PASS: TEMP_SOIL_LOAM: colorIds length matches colorCount
+PASS: TEMP_SOIL_LOAM: hexColors length matches colorCount
+PASS: TEMP_SOIL_LOAM: toneRoles length matches colorCount
+PASS: TEMP_WOODLAND_FLOOR: rampId matches key
+PASS: TEMP_WOODLAND_FLOOR: tone count 5 is 3-6 tones
+PASS: TEMP_WOODLAND_FLOOR: colorIds length matches colorCount
+PASS: TEMP_WOODLAND_FLOOR: hexColors length matches colorCount
+PASS: TEMP_WOODLAND_FLOOR: toneRoles length matches colorCount
+PASS: TEMP_BARK_OAK: rampId matches key
+PASS: TEMP_BARK_OAK: tone count 5 is 3-6 tones
+PASS: TEMP_BARK_OAK: colorIds length matches colorCount
+PASS: TEMP_BARK_OAK: hexColors length matches colorCount
+PASS: TEMP_BARK_OAK: toneRoles length matches colorCount
+PASS: TEMP_BARK_BIRCH: rampId matches key
+PASS: TEMP_BARK_BIRCH: tone count 5 is 3-6 tones
+PASS: TEMP_BARK_BIRCH: colorIds length matches colorCount
+PASS: TEMP_BARK_BIRCH: hexColors length matches colorCount
+PASS: TEMP_BARK_BIRCH: toneRoles length matches colorCount
+PASS: TEMP_FOLIAGE_OAK: rampId matches key
+PASS: TEMP_FOLIAGE_OAK: tone count 5 is 3-6 tones
+PASS: TEMP_FOLIAGE_OAK: colorIds length matches colorCount
+PASS: TEMP_FOLIAGE_OAK: hexColors length matches colorCount
+PASS: TEMP_FOLIAGE_OAK: toneRoles length matches colorCount
+PASS: TEMP_STONE_FIELDSTONE: rampId matches key
+PASS: TEMP_STONE_FIELDSTONE: tone count 5 is 3-6 tones
+PASS: TEMP_STONE_FIELDSTONE: colorIds length matches colorCount
+PASS: TEMP_STONE_FIELDSTONE: hexColors length matches colorCount
+PASS: TEMP_STONE_FIELDSTONE: toneRoles length matches colorCount
+PASS: TEMP_STONE_LIMESTONE: rampId matches key
+PASS: TEMP_STONE_LIMESTONE: tone count 5 is 3-6 tones
+PASS: TEMP_STONE_LIMESTONE: colorIds length matches colorCount
+PASS: TEMP_STONE_LIMESTONE: hexColors length matches colorCount
+PASS: TEMP_STONE_LIMESTONE: toneRoles length matches colorCount
+PASS: WET_GRASS_SATURATED: rampId matches key
+PASS: WET_GRASS_SATURATED: tone count 5 is 3-6 tones
+PASS: WET_GRASS_SATURATED: colorIds length matches colorCount
+PASS: WET_GRASS_SATURATED: hexColors length matches colorCount
+PASS: WET_GRASS_SATURATED: toneRoles length matches colorCount
+PASS: WET_REED_RUSH: rampId matches key
+PASS: WET_REED_RUSH: tone count 5 is 3-6 tones
+PASS: WET_REED_RUSH: colorIds length matches colorCount
+PASS: WET_REED_RUSH: hexColors length matches colorCount
+PASS: WET_REED_RUSH: toneRoles length matches colorCount
+PASS: WET_SOIL_PEAT: rampId matches key
+PASS: WET_SOIL_PEAT: tone count 5 is 3-6 tones
+PASS: WET_SOIL_PEAT: colorIds length matches colorCount
+PASS: WET_SOIL_PEAT: hexColors length matches colorCount
+PASS: WET_SOIL_PEAT: toneRoles length matches colorCount
+PASS: WET_MUD_ANAEROBIC: rampId matches key
+PASS: WET_MUD_ANAEROBIC: tone count 4 is 3-6 tones
+PASS: WET_MUD_ANAEROBIC: colorIds length matches colorCount
+PASS: WET_MUD_ANAEROBIC: hexColors length matches colorCount
+PASS: WET_MUD_ANAEROBIC: toneRoles length matches colorCount
+PASS: WET_SILT_RIVER: rampId matches key
+PASS: WET_SILT_RIVER: tone count 5 is 3-6 tones
+PASS: WET_SILT_RIVER: colorIds length matches colorCount
+PASS: WET_SILT_RIVER: hexColors length matches colorCount
+PASS: WET_SILT_RIVER: toneRoles length matches colorCount
+PASS: WET_STONE_DAMP_SLATE: rampId matches key
+PASS: WET_STONE_DAMP_SLATE: tone count 5 is 3-6 tones
+PASS: WET_STONE_DAMP_SLATE: colorIds length matches colorCount
+PASS: WET_STONE_DAMP_SLATE: hexColors length matches colorCount
+PASS: WET_STONE_DAMP_SLATE: toneRoles length matches colorCount
+PASS: WET_WOOD_DRIFTWOOD: rampId matches key
+PASS: WET_WOOD_DRIFTWOOD: tone count 5 is 3-6 tones
+PASS: WET_WOOD_DRIFTWOOD: colorIds length matches colorCount
+PASS: WET_WOOD_DRIFTWOOD: hexColors length matches colorCount
+PASS: WET_WOOD_DRIFTWOOD: toneRoles length matches colorCount
+PASS: WET_FOLIAGE_WILLOW: rampId matches key
+PASS: WET_FOLIAGE_WILLOW: tone count 5 is 3-6 tones
+PASS: WET_FOLIAGE_WILLOW: colorIds length matches colorCount
+PASS: WET_FOLIAGE_WILLOW: hexColors length matches colorCount
+PASS: WET_FOLIAGE_WILLOW: toneRoles length matches colorCount
+PASS: ARID_GRASS_BUNCHGRASS: rampId matches key
+PASS: ARID_GRASS_BUNCHGRASS: tone count 5 is 3-6 tones
+PASS: ARID_GRASS_BUNCHGRASS: colorIds length matches colorCount
+PASS: ARID_GRASS_BUNCHGRASS: hexColors length matches colorCount
+PASS: ARID_GRASS_BUNCHGRASS: toneRoles length matches colorCount
+PASS: ARID_SOIL_HARDPAN: rampId matches key
+PASS: ARID_SOIL_HARDPAN: tone count 5 is 3-6 tones
+PASS: ARID_SOIL_HARDPAN: colorIds length matches colorCount
+PASS: ARID_SOIL_HARDPAN: hexColors length matches colorCount
+PASS: ARID_SOIL_HARDPAN: toneRoles length matches colorCount
+PASS: ARID_SOIL_CLAY: rampId matches key
+PASS: ARID_SOIL_CLAY: tone count 5 is 3-6 tones
+PASS: ARID_SOIL_CLAY: colorIds length matches colorCount
+PASS: ARID_SOIL_CLAY: hexColors length matches colorCount
+PASS: ARID_SOIL_CLAY: toneRoles length matches colorCount
+PASS: ARID_SAND_COARSE: rampId matches key
+PASS: ARID_SAND_COARSE: tone count 5 is 3-6 tones
+PASS: ARID_SAND_COARSE: colorIds length matches colorCount
+PASS: ARID_SAND_COARSE: hexColors length matches colorCount
+PASS: ARID_SAND_COARSE: toneRoles length matches colorCount
+PASS: ARID_STONE_SANDSTONE: rampId matches key
+PASS: ARID_STONE_SANDSTONE: tone count 5 is 3-6 tones
+PASS: ARID_STONE_SANDSTONE: colorIds length matches colorCount
+PASS: ARID_STONE_SANDSTONE: hexColors length matches colorCount
+PASS: ARID_STONE_SANDSTONE: toneRoles length matches colorCount
+PASS: ARID_SCRUB_THORN: rampId matches key
+PASS: ARID_SCRUB_THORN: tone count 5 is 3-6 tones
+PASS: ARID_SCRUB_THORN: colorIds length matches colorCount
+PASS: ARID_SCRUB_THORN: hexColors length matches colorCount
+PASS: ARID_SCRUB_THORN: toneRoles length matches colorCount
+PASS: ARID_WOOD_BLEACHED: rampId matches key
+PASS: ARID_WOOD_BLEACHED: tone count 5 is 3-6 tones
+PASS: ARID_WOOD_BLEACHED: colorIds length matches colorCount
+PASS: ARID_WOOD_BLEACHED: hexColors length matches colorCount
+PASS: ARID_WOOD_BLEACHED: toneRoles length matches colorCount
+PASS: ARID_BONE_CALICHE: rampId matches key
+PASS: ARID_BONE_CALICHE: tone count 4 is 3-6 tones
+PASS: ARID_BONE_CALICHE: colorIds length matches colorCount
+PASS: ARID_BONE_CALICHE: hexColors length matches colorCount
+PASS: ARID_BONE_CALICHE: toneRoles length matches colorCount
+PASS: HIGH_GRASS_ALPINE: rampId matches key
+PASS: HIGH_GRASS_ALPINE: tone count 5 is 3-6 tones
+PASS: HIGH_GRASS_ALPINE: colorIds length matches colorCount
+PASS: HIGH_GRASS_ALPINE: hexColors length matches colorCount
+PASS: HIGH_GRASS_ALPINE: toneRoles length matches colorCount
+PASS: HIGH_SOIL_STONY_LOAM: rampId matches key
+PASS: HIGH_SOIL_STONY_LOAM: tone count 5 is 3-6 tones
+PASS: HIGH_SOIL_STONY_LOAM: colorIds length matches colorCount
+PASS: HIGH_SOIL_STONY_LOAM: hexColors length matches colorCount
+PASS: HIGH_SOIL_STONY_LOAM: toneRoles length matches colorCount
+PASS: HIGH_GRAVEL_SCREE: rampId matches key
+PASS: HIGH_GRAVEL_SCREE: tone count 5 is 3-6 tones
+PASS: HIGH_GRAVEL_SCREE: colorIds length matches colorCount
+PASS: HIGH_GRAVEL_SCREE: hexColors length matches colorCount
+PASS: HIGH_GRAVEL_SCREE: toneRoles length matches colorCount
+PASS: HIGH_STONE_GRANITE: rampId matches key
+PASS: HIGH_STONE_GRANITE: tone count 5 is 3-6 tones
+PASS: HIGH_STONE_GRANITE: colorIds length matches colorCount
+PASS: HIGH_STONE_GRANITE: hexColors length matches colorCount
+PASS: HIGH_STONE_GRANITE: toneRoles length matches colorCount
+PASS: HIGH_STONE_SLATE: rampId matches key
+PASS: HIGH_STONE_SLATE: tone count 5 is 3-6 tones
+PASS: HIGH_STONE_SLATE: colorIds length matches colorCount
+PASS: HIGH_STONE_SLATE: hexColors length matches colorCount
+PASS: HIGH_STONE_SLATE: toneRoles length matches colorCount
+PASS: HIGH_FOLIAGE_CONIFER: rampId matches key
+PASS: HIGH_FOLIAGE_CONIFER: tone count 5 is 3-6 tones
+PASS: HIGH_FOLIAGE_CONIFER: colorIds length matches colorCount
+PASS: HIGH_FOLIAGE_CONIFER: hexColors length matches colorCount
+PASS: HIGH_FOLIAGE_CONIFER: toneRoles length matches colorCount
+PASS: HIGH_BARK_CONIFER: rampId matches key
+PASS: HIGH_BARK_CONIFER: tone count 5 is 3-6 tones
+PASS: HIGH_BARK_CONIFER: colorIds length matches colorCount
+PASS: HIGH_BARK_CONIFER: hexColors length matches colorCount
+PASS: HIGH_BARK_CONIFER: toneRoles length matches colorCount
+PASS: VOLC_ASH_DRIFT: rampId matches key
+PASS: VOLC_ASH_DRIFT: tone count 5 is 3-6 tones
+PASS: VOLC_ASH_DRIFT: colorIds length matches colorCount
+PASS: VOLC_ASH_DRIFT: hexColors length matches colorCount
+PASS: VOLC_ASH_DRIFT: toneRoles length matches colorCount
+PASS: VOLC_SOIL_SCORCHED: rampId matches key
+PASS: VOLC_SOIL_SCORCHED: tone count 5 is 3-6 tones
+PASS: VOLC_SOIL_SCORCHED: colorIds length matches colorCount
+PASS: VOLC_SOIL_SCORCHED: hexColors length matches colorCount
+PASS: VOLC_SOIL_SCORCHED: toneRoles length matches colorCount
+PASS: VOLC_STONE_BASALT: rampId matches key
+PASS: VOLC_STONE_BASALT: tone count 5 is 3-6 tones
+PASS: VOLC_STONE_BASALT: colorIds length matches colorCount
+PASS: VOLC_STONE_BASALT: hexColors length matches colorCount
+PASS: VOLC_STONE_BASALT: toneRoles length matches colorCount
+PASS: VOLC_STONE_SCORIA: rampId matches key
+PASS: VOLC_STONE_SCORIA: tone count 5 is 3-6 tones
+PASS: VOLC_STONE_SCORIA: colorIds length matches colorCount
+PASS: VOLC_STONE_SCORIA: hexColors length matches colorCount
+PASS: VOLC_STONE_SCORIA: toneRoles length matches colorCount
+PASS: VOLC_STONE_PUMICE: rampId matches key
+PASS: VOLC_STONE_PUMICE: tone count 5 is 3-6 tones
+PASS: VOLC_STONE_PUMICE: colorIds length matches colorCount
+PASS: VOLC_STONE_PUMICE: hexColors length matches colorCount
+PASS: VOLC_STONE_PUMICE: toneRoles length matches colorCount
+PASS: VOLC_STONE_OBSIDIAN: rampId matches key
+PASS: VOLC_STONE_OBSIDIAN: tone count 5 is 3-6 tones
+PASS: VOLC_STONE_OBSIDIAN: colorIds length matches colorCount
+PASS: VOLC_STONE_OBSIDIAN: hexColors length matches colorCount
+PASS: VOLC_STONE_OBSIDIAN: toneRoles length matches colorCount
+PASS: VOLC_MINERAL_SULFUR: rampId matches key
+PASS: VOLC_MINERAL_SULFUR: tone count 4 is 3-6 tones
+PASS: VOLC_MINERAL_SULFUR: colorIds length matches colorCount
+PASS: VOLC_MINERAL_SULFUR: hexColors length matches colorCount
+PASS: VOLC_MINERAL_SULFUR: toneRoles length matches colorCount
+PASS: VOLC_WOOD_CHARRED: rampId matches key
+PASS: VOLC_WOOD_CHARRED: tone count 4 is 3-6 tones
+PASS: VOLC_WOOD_CHARRED: colorIds length matches colorCount
+PASS: VOLC_WOOD_CHARRED: hexColors length matches colorCount
+PASS: VOLC_WOOD_CHARRED: toneRoles length matches colorCount
+PASS: VOLC_LAVA_HAZARD: rampId matches key
+PASS: VOLC_LAVA_HAZARD: tone count 5 is 3-6 tones
+PASS: VOLC_LAVA_HAZARD: colorIds length matches colorCount
+PASS: VOLC_LAVA_HAZARD: hexColors length matches colorCount
+PASS: VOLC_LAVA_HAZARD: toneRoles length matches colorCount
+PASS: WATER_SHALLOW_CLEAR: rampId matches key
+PASS: WATER_SHALLOW_CLEAR: tone count 5 is 3-6 tones
+PASS: WATER_SHALLOW_CLEAR: colorIds length matches colorCount
+PASS: WATER_SHALLOW_CLEAR: hexColors length matches colorCount
+PASS: WATER_SHALLOW_CLEAR: toneRoles length matches colorCount
+PASS: WATER_DEEP_FRESH: rampId matches key
+PASS: WATER_DEEP_FRESH: tone count 5 is 3-6 tones
+PASS: WATER_DEEP_FRESH: colorIds length matches colorCount
+PASS: WATER_DEEP_FRESH: hexColors length matches colorCount
+PASS: WATER_DEEP_FRESH: toneRoles length matches colorCount
+PASS: WATER_MURKY_WETLAND: rampId matches key
+PASS: WATER_MURKY_WETLAND: tone count 5 is 3-6 tones
+PASS: WATER_MURKY_WETLAND: colorIds length matches colorCount
+PASS: WATER_MURKY_WETLAND: hexColors length matches colorCount
+PASS: WATER_MURKY_WETLAND: toneRoles length matches colorCount
+PASS: WATER_FOAM_RAPIDS: rampId matches key
+PASS: WATER_FOAM_RAPIDS: tone count 4 is 3-6 tones
+PASS: WATER_FOAM_RAPIDS: colorIds length matches colorCount
+PASS: WATER_FOAM_RAPIDS: hexColors length matches colorCount
+PASS: WATER_FOAM_RAPIDS: toneRoles length matches colorCount
+PASS: CONSTRUCT_TIMBER_FRESH: rampId matches key
+PASS: CONSTRUCT_TIMBER_FRESH: tone count 5 is 3-6 tones
+PASS: CONSTRUCT_TIMBER_FRESH: colorIds length matches colorCount
+PASS: CONSTRUCT_TIMBER_FRESH: hexColors length matches colorCount
+PASS: CONSTRUCT_TIMBER_FRESH: toneRoles length matches colorCount
+PASS: CONSTRUCT_TIMBER_AGED: rampId matches key
+PASS: CONSTRUCT_TIMBER_AGED: tone count 5 is 3-6 tones
+PASS: CONSTRUCT_TIMBER_AGED: colorIds length matches colorCount
+PASS: CONSTRUCT_TIMBER_AGED: hexColors length matches colorCount
+PASS: CONSTRUCT_TIMBER_AGED: toneRoles length matches colorCount
+PASS: CONSTRUCT_STONE_DRESSED: rampId matches key
+PASS: CONSTRUCT_STONE_DRESSED: tone count 5 is 3-6 tones
+PASS: CONSTRUCT_STONE_DRESSED: colorIds length matches colorCount
+PASS: CONSTRUCT_STONE_DRESSED: hexColors length matches colorCount
+PASS: CONSTRUCT_STONE_DRESSED: toneRoles length matches colorCount
+PASS: CONSTRUCT_METAL_IRON: rampId matches key
+PASS: CONSTRUCT_METAL_IRON: tone count 5 is 3-6 tones
+PASS: CONSTRUCT_METAL_IRON: colorIds length matches colorCount
+PASS: CONSTRUCT_METAL_IRON: hexColors length matches colorCount
+PASS: CONSTRUCT_METAL_IRON: toneRoles length matches colorCount
+PASS: CONSTRUCT_FABRIC_LEATHER: rampId matches key
+PASS: CONSTRUCT_FABRIC_LEATHER: tone count 5 is 3-6 tones
+PASS: CONSTRUCT_FABRIC_LEATHER: colorIds length matches colorCount
+PASS: CONSTRUCT_FABRIC_LEATHER: hexColors length matches colorCount
+PASS: CONSTRUCT_FABRIC_LEATHER: toneRoles length matches colorCount
+PASS: MAGIC_DIVINE_GOLD: rampId matches key
+PASS: MAGIC_DIVINE_GOLD: tone count 5 is 3-6 tones
+PASS: MAGIC_DIVINE_GOLD: colorIds length matches colorCount
+PASS: MAGIC_DIVINE_GOLD: hexColors length matches colorCount
+PASS: MAGIC_DIVINE_GOLD: toneRoles length matches colorCount
+PASS: MAGIC_ARCANE_CYAN: rampId matches key
+PASS: MAGIC_ARCANE_CYAN: tone count 5 is 3-6 tones
+PASS: MAGIC_ARCANE_CYAN: colorIds length matches colorCount
+PASS: MAGIC_ARCANE_CYAN: hexColors length matches colorCount
+PASS: MAGIC_ARCANE_CYAN: toneRoles length matches colorCount
+PASS: MAGIC_ASTRAL_VIOLET: rampId matches key
+PASS: MAGIC_ASTRAL_VIOLET: tone count 5 is 3-6 tones
+PASS: MAGIC_ASTRAL_VIOLET: colorIds length matches colorCount
+PASS: MAGIC_ASTRAL_VIOLET: hexColors length matches colorCount
+PASS: MAGIC_ASTRAL_VIOLET: toneRoles length matches colorCount
+PASS: MAGIC_HEALING_EMERALD: rampId matches key
+PASS: MAGIC_HEALING_EMERALD: tone count 4 is 3-6 tones
+PASS: MAGIC_HEALING_EMERALD: colorIds length matches colorCount
+PASS: MAGIC_HEALING_EMERALD: hexColors length matches colorCount
+PASS: MAGIC_HEALING_EMERALD: toneRoles length matches colorCount
+PASS: All ramps reference valid, existing master color IDs
+PASS: All ramp tone roles are valid (deepShadow, shadow, body, light, highlight)
+PASS: All ramps exhibit coherent monotonic value progression (failed: )
+
+--- 4. Required Material Families & Biome Coverage ---
+PASS: Required ramp NEUT_VOID_BLACK exists in registry
+PASS: Required ramp NEUT_COOL_GRAY exists in registry
+PASS: Required ramp NEUT_WARM_GRAY exists in registry
+PASS: Required ramp NEUT_PALE_CREST exists in registry
+PASS: Required ramp TEMP_GRASS_FERTILE exists in registry
+PASS: Required ramp TEMP_GRASS_DRY exists in registry
+PASS: Required ramp TEMP_SOIL_LOAM exists in registry
+PASS: Required ramp TEMP_WOODLAND_FLOOR exists in registry
+PASS: Required ramp TEMP_BARK_OAK exists in registry
+PASS: Required ramp TEMP_BARK_BIRCH exists in registry
+PASS: Required ramp TEMP_FOLIAGE_OAK exists in registry
+PASS: Required ramp TEMP_STONE_FIELDSTONE exists in registry
+PASS: Required ramp TEMP_STONE_LIMESTONE exists in registry
+PASS: Required ramp WET_GRASS_SATURATED exists in registry
+PASS: Required ramp WET_REED_RUSH exists in registry
+PASS: Required ramp WET_SOIL_PEAT exists in registry
+PASS: Required ramp WET_MUD_ANAEROBIC exists in registry
+PASS: Required ramp WET_SILT_RIVER exists in registry
+PASS: Required ramp WET_STONE_DAMP_SLATE exists in registry
+PASS: Required ramp WET_WOOD_DRIFTWOOD exists in registry
+PASS: Required ramp WET_FOLIAGE_WILLOW exists in registry
+PASS: Required ramp ARID_GRASS_BUNCHGRASS exists in registry
+PASS: Required ramp ARID_SOIL_HARDPAN exists in registry
+PASS: Required ramp ARID_SOIL_CLAY exists in registry
+PASS: Required ramp ARID_SAND_COARSE exists in registry
+PASS: Required ramp ARID_STONE_SANDSTONE exists in registry
+PASS: Required ramp ARID_SCRUB_THORN exists in registry
+PASS: Required ramp ARID_WOOD_BLEACHED exists in registry
+PASS: Required ramp ARID_BONE_CALICHE exists in registry
+PASS: Required ramp HIGH_GRASS_ALPINE exists in registry
+PASS: Required ramp HIGH_SOIL_STONY_LOAM exists in registry
+PASS: Required ramp HIGH_GRAVEL_SCREE exists in registry
+PASS: Required ramp HIGH_STONE_GRANITE exists in registry
+PASS: Required ramp HIGH_STONE_SLATE exists in registry
+PASS: Required ramp HIGH_FOLIAGE_CONIFER exists in registry
+PASS: Required ramp HIGH_BARK_CONIFER exists in registry
+PASS: Required ramp VOLC_ASH_DRIFT exists in registry
+PASS: Required ramp VOLC_SOIL_SCORCHED exists in registry
+PASS: Required ramp VOLC_STONE_BASALT exists in registry
+PASS: Required ramp VOLC_STONE_SCORIA exists in registry
+PASS: Required ramp VOLC_STONE_PUMICE exists in registry
+PASS: Required ramp VOLC_STONE_OBSIDIAN exists in registry
+PASS: Required ramp VOLC_MINERAL_SULFUR exists in registry
+PASS: Required ramp VOLC_WOOD_CHARRED exists in registry
+PASS: Required ramp VOLC_LAVA_HAZARD exists in registry
+PASS: Required ramp WATER_SHALLOW_CLEAR exists in registry
+PASS: Required ramp WATER_DEEP_FRESH exists in registry
+PASS: Required ramp WATER_MURKY_WETLAND exists in registry
+PASS: Required ramp WATER_FOAM_RAPIDS exists in registry
+PASS: Required ramp CONSTRUCT_TIMBER_FRESH exists in registry
+PASS: Required ramp CONSTRUCT_TIMBER_AGED exists in registry
+PASS: Required ramp CONSTRUCT_STONE_DRESSED exists in registry
+PASS: Required ramp CONSTRUCT_METAL_IRON exists in registry
+PASS: Required ramp CONSTRUCT_FABRIC_LEATHER exists in registry
+PASS: Required ramp MAGIC_DIVINE_GOLD exists in registry
+PASS: Required ramp MAGIC_ARCANE_CYAN exists in registry
+PASS: Required ramp MAGIC_ASTRAL_VIOLET exists in registry
+PASS: Required ramp MAGIC_HEALING_EMERALD exists in registry
+
+--- 5. Horizontal Transition Bridges (All 10 Pairs) ---
+PASS: Exactly 10 transition bridge pairs defined
+PASS: Transition bridge for TEMP_WET exists
+PASS: TEMP_WET: at least 3 bridge ramps specified (5)
+PASS: TEMP_WET: bridge tones defined (5)
+PASS: TEMP_WET: transition notes defined
+PASS: Transition bridge for TEMP_ARID exists
+PASS: TEMP_ARID: at least 3 bridge ramps specified (4)
+PASS: TEMP_ARID: bridge tones defined (5)
+PASS: TEMP_ARID: transition notes defined
+PASS: Transition bridge for TEMP_HIGH exists
+PASS: TEMP_HIGH: at least 3 bridge ramps specified (4)
+PASS: TEMP_HIGH: bridge tones defined (5)
+PASS: TEMP_HIGH: transition notes defined
+PASS: Transition bridge for TEMP_VOLC exists
+PASS: TEMP_VOLC: at least 3 bridge ramps specified (5)
+PASS: TEMP_VOLC: bridge tones defined (5)
+PASS: TEMP_VOLC: transition notes defined
+PASS: Transition bridge for WET_ARID exists
+PASS: WET_ARID: at least 3 bridge ramps specified (5)
+PASS: WET_ARID: bridge tones defined (5)
+PASS: WET_ARID: transition notes defined
+PASS: Transition bridge for WET_HIGH exists
+PASS: WET_HIGH: at least 3 bridge ramps specified (5)
+PASS: WET_HIGH: bridge tones defined (5)
+PASS: WET_HIGH: transition notes defined
+PASS: Transition bridge for WET_VOLC exists
+PASS: WET_VOLC: at least 3 bridge ramps specified (4)
+PASS: WET_VOLC: bridge tones defined (5)
+PASS: WET_VOLC: transition notes defined
+PASS: Transition bridge for ARID_HIGH exists
+PASS: ARID_HIGH: at least 3 bridge ramps specified (4)
+PASS: ARID_HIGH: bridge tones defined (5)
+PASS: ARID_HIGH: transition notes defined
+PASS: Transition bridge for ARID_VOLC exists
+PASS: ARID_VOLC: at least 3 bridge ramps specified (4)
+PASS: ARID_VOLC: bridge tones defined (5)
+PASS: ARID_VOLC: transition notes defined
+PASS: Transition bridge for HIGH_VOLC exists
+PASS: HIGH_VOLC: at least 3 bridge ramps specified (4)
+PASS: HIGH_VOLC: bridge tones defined (5)
+PASS: HIGH_VOLC: transition notes defined
+
+--- 6. Cardinal Ecological Invariants ---
+PASS: NEUT_VOID_BLACK: zero snow/ice in ramp identifier
+PASS: NEUT_COOL_GRAY: zero snow/ice in ramp identifier
+PASS: NEUT_WARM_GRAY: zero snow/ice in ramp identifier
+PASS: NEUT_PALE_CREST: zero snow/ice in ramp identifier
+PASS: TEMP_GRASS_FERTILE: zero snow/ice in ramp identifier
+PASS: TEMP_GRASS_DRY: zero snow/ice in ramp identifier
+PASS: TEMP_SOIL_LOAM: zero snow/ice in ramp identifier
+PASS: TEMP_WOODLAND_FLOOR: zero snow/ice in ramp identifier
+PASS: TEMP_BARK_OAK: zero snow/ice in ramp identifier
+PASS: TEMP_BARK_BIRCH: zero snow/ice in ramp identifier
+PASS: TEMP_FOLIAGE_OAK: zero snow/ice in ramp identifier
+PASS: TEMP_STONE_FIELDSTONE: zero snow/ice in ramp identifier
+PASS: TEMP_STONE_LIMESTONE: zero snow/ice in ramp identifier
+PASS: WET_GRASS_SATURATED: zero snow/ice in ramp identifier
+PASS: WET_REED_RUSH: zero snow/ice in ramp identifier
+PASS: WET_SOIL_PEAT: zero snow/ice in ramp identifier
+PASS: WET_MUD_ANAEROBIC: zero snow/ice in ramp identifier
+PASS: WET_SILT_RIVER: zero snow/ice in ramp identifier
+PASS: WET_STONE_DAMP_SLATE: zero snow/ice in ramp identifier
+PASS: WET_WOOD_DRIFTWOOD: zero snow/ice in ramp identifier
+PASS: WET_FOLIAGE_WILLOW: zero snow/ice in ramp identifier
+PASS: ARID_GRASS_BUNCHGRASS: zero snow/ice in ramp identifier
+PASS: ARID_SOIL_HARDPAN: zero snow/ice in ramp identifier
+PASS: ARID_SOIL_CLAY: zero snow/ice in ramp identifier
+PASS: ARID_SAND_COARSE: zero snow/ice in ramp identifier
+PASS: ARID_STONE_SANDSTONE: zero snow/ice in ramp identifier
+PASS: ARID_SCRUB_THORN: zero snow/ice in ramp identifier
+PASS: ARID_WOOD_BLEACHED: zero snow/ice in ramp identifier
+PASS: ARID_BONE_CALICHE: zero snow/ice in ramp identifier
+PASS: HIGH_GRASS_ALPINE: zero snow/ice in ramp identifier
+PASS: HIGH_SOIL_STONY_LOAM: zero snow/ice in ramp identifier
+PASS: HIGH_GRAVEL_SCREE: zero snow/ice in ramp identifier
+PASS: HIGH_STONE_GRANITE: zero snow/ice in ramp identifier
+PASS: HIGH_STONE_SLATE: zero snow/ice in ramp identifier
+PASS: HIGH_FOLIAGE_CONIFER: zero snow/ice in ramp identifier
+PASS: HIGH_BARK_CONIFER: zero snow/ice in ramp identifier
+PASS: VOLC_ASH_DRIFT: zero snow/ice in ramp identifier
+PASS: VOLC_SOIL_SCORCHED: zero snow/ice in ramp identifier
+PASS: VOLC_STONE_BASALT: zero snow/ice in ramp identifier
+PASS: VOLC_STONE_SCORIA: zero snow/ice in ramp identifier
+PASS: VOLC_STONE_PUMICE: zero snow/ice in ramp identifier
+PASS: VOLC_STONE_OBSIDIAN: zero snow/ice in ramp identifier
+PASS: VOLC_MINERAL_SULFUR: zero snow/ice in ramp identifier
+PASS: VOLC_WOOD_CHARRED: zero snow/ice in ramp identifier
+PASS: VOLC_LAVA_HAZARD: zero snow/ice in ramp identifier
+PASS: WATER_SHALLOW_CLEAR: zero snow/ice in ramp identifier
+PASS: WATER_DEEP_FRESH: zero snow/ice in ramp identifier
+PASS: WATER_MURKY_WETLAND: zero snow/ice in ramp identifier
+PASS: WATER_FOAM_RAPIDS: zero snow/ice in ramp identifier
+PASS: CONSTRUCT_TIMBER_FRESH: zero snow/ice in ramp identifier
+PASS: CONSTRUCT_TIMBER_AGED: zero snow/ice in ramp identifier
+PASS: CONSTRUCT_STONE_DRESSED: zero snow/ice in ramp identifier
+PASS: CONSTRUCT_METAL_IRON: zero snow/ice in ramp identifier
+PASS: CONSTRUCT_FABRIC_LEATHER: zero snow/ice in ramp identifier
+PASS: MAGIC_DIVINE_GOLD: zero snow/ice in ramp identifier
+PASS: MAGIC_ARCANE_CYAN: zero snow/ice in ramp identifier
+PASS: MAGIC_ASTRAL_VIOLET: zero snow/ice in ramp identifier
+PASS: MAGIC_HEALING_EMERALD: zero snow/ice in ramp identifier
+PASS: VOLC_LAVA_HAZARD ramp exists
+PASS: Lava ramp forbids full-screen wallpaper flooding
+PASS: Basalt is classified as STONE
+PASS: Basalt body (#2F303A) is charcoal grey-black, not glowing red
+
+--- 7. Policy Change & QC Integration (art_check.js) ---
+PASS: Tileset sheet with 45 colors PASSES palette check (policy change: no blind 32-color sheet cap; got PASS)
+PASS: Tileset detail confirms master palette compliance: "45 opaque colours: container sheet 100% compliant with DEUS Master Palette"
+
+--- 8. Strict QC: Unregistered RGB Color Rejection ---
+PASS: Tileset with unregistered RGB color #FF00FF FAILS strict palette check (got FAIL)
+PASS: Rejection message cites unregistered color: "1 colors outside DEUS Master Palette on tileset sheet (first: #FF00FF)"
+
+--- 9. Registered VFX Exception ---
+PASS: VFX asset with arbitrary colors PASSES via explicit VFX exception (got PASS)
+PASS: Detail confirms VFX exception: "vfx exception: unrestricted palette allowed for supernatural/vfx asset (17 colors)"
+
+--- 10. Deterministic Palette Reference Board ---
+PASS: DEUS_PALETTE_BOARD_V1.png exists in art/reference/
+PASS: Board width is exact 1480 px (got 1480)
+PASS: Board height is exact 1440 px (got 1440)
+PASS: Board raw RGBA buffer is fully intact
+
+--- 11. Palette Resolver Tooling (tools/palette_resolver.js) ---
+PASS: Resolver API: resolves TEMP_GRASS_FERTILE
+PASS: Resolver API: TEMP_GRASS_FERTILE has 5 tones
+PASS: Resolver API: resolves TEMP biome (21 ramps)
+PASS: Resolver API: resolves STONE material family (11 ramps)
+PASS: Resolver API: resolves TEMP_ARID transition pair
+PASS: Resolver API: transition pair provides bridge tones
+PASS: Resolver CLI: output includes ramp header
+PASS: Resolver CLI: output includes master color IDs
+PASS: Resolver CLI exits with error code on unknown ramp
+
+--- 12. Canonical Art Language Audit & Ramp Length Distribution ---
+PASS: Palette contains 3-tone compact ramps (found 1)
+PASS: Palette contains 4-tone variable length ramps (found 7, expected >= 5)
+PASS: Palette contains 5-tone standard ramps (found 50, expected >= 40)
+PASS: Canonical art documents and resolvers have 0 occurrences of 'chibi' (violations: 0)
+
+==================================================
+TOTAL CHECKS: 503
+PASSED: 503
+FAILED: 0
+==================================================
+
+ALL PALETTE STANDARD CHECKS PASSED (DW.01.05).
+== stderr ==
+

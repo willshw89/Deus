@@ -1,0 +1,99 @@
+# tools/test_process_human_12.js  category=FAIL_MISSING_REFERENCE  exit=1  ms=463  decided by enoent (stderr)
+== stdout ==
+
+== stderr ==
+Exception calling "FromFile" with "1" argument(s): 
+"C:/Users/snewt/.gemini/antigravity/brain/f9b9af6f-1902-44c2-8bc1-fe9d0fdadb45/faces_human_males_1789863537057.jpg"
+At line:1 char:40
++ ... em.Drawing; $img = [System.Drawing.Image]::FromFile('C:/Users/snewt/. ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodInvocationException
+    + FullyQualifiedErrorId : FileNotFoundException
+ 
+You cannot call a method on a null-valued expression.
+At line:1 char:198
++ ... 7057.jpg'); $img.Save('C:\Users\snewt\AppData\Local\Temp\deus-run-gat ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+You cannot call a method on a null-valued expression.
+At line:1 char:356
++ ... ezw.png', [System.Drawing.Imaging.ImageFormat]::Png); $img.Dispose();
++                                                           ~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+node:child_process:1017
+    throw err;
+    ^
+
+Error: Command failed: powershell -NoProfile -Command "Add-Type -AssemblyName System.Drawing; $img = [System.Drawing.Image]::FromFile('C:/Users/snewt/.gemini/antigravity/brain/f9b9af6f-1902-44c2-8bc1-fe9d0fdadb45/faces_human_males_1789863537057.jpg'); $img.Save('C:\Users\snewt\AppData\Local\Temp\deus-run-gate-h2WbDV\s9\tmp\tmp_proc_1790431924865_cpge9rfnezw.png', [System.Drawing.Imaging.ImageFormat]::Png); $img.Dispose();"
+Exception calling "FromFile" with "1" argument(s): 
+"C:/Users/snewt/.gemini/antigravity/brain/f9b9af6f-1902-44c2-8bc1-fe9d0fdadb45/faces_human_males_1789863537057.jpg"
+At line:1 char:40
++ ... em.Drawing; $img = [System.Drawing.Image]::FromFile('C:/Users/snewt/. ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodInvocationException
+    + FullyQualifiedErrorId : FileNotFoundException
+ 
+You cannot call a method on a null-valued expression.
+At line:1 char:198
++ ... 7057.jpg'); $img.Save('C:\Users\snewt\AppData\Local\Temp\deus-run-gat ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+You cannot call a method on a null-valued expression.
+At line:1 char:356
++ ... ezw.png', [System.Drawing.Imaging.ImageFormat]::Png); $img.Dispose();
++                                                           ~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+
+    at genericNodeError (node:internal/errors:985:15)
+    at wrappedFn (node:internal/errors:539:14)
+    at checkExecSyncError (node:child_process:942:11)
+    at Object.execSync (node:child_process:1014:15)
+    at Object.wrapped [as execSync] (C:\Users\snewt\AppData\Local\Temp\deus-run-gate-h2WbDV\run_gate_guard.js:29:84)
+    at loadJpg (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_process_human_12.js:75:18)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_process_human_12.js:104:14)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32) {
+  status: 1,
+  signal: null,
+  output: [
+    null,
+    Buffer(0) [Uint8Array] [],
+    Buffer(1197) [Uint8Array] [
+       69, 120,  99, 101, 112, 116, 105, 111, 110,  32,  99,  97,
+      108, 108, 105, 110, 103,  32,  34,  70, 114, 111, 109,  70,
+      105, 108, 101,  34,  32, 119, 105, 116, 104,  32,  34,  49,
+       34,  32,  97, 114, 103, 117, 109, 101, 110, 116,  40, 115,
+       41,  58,  32,  13,  10,  34,  67,  58,  47,  85, 115, 101,
+      114, 115,  47, 115, 110, 101, 119, 116,  47,  46, 103, 101,
+      109, 105, 110, 105,  47,  97, 110, 116, 105, 103, 114,  97,
+      118, 105, 116, 121,  47,  98, 114,  97, 105, 110,  47, 102,
+       57,  98,  57,  97,
+      ... 1097 more items
+    ]
+  ],
+  pid: 24060,
+  stdout: Buffer(0) [Uint8Array] [],
+  stderr: Buffer(1197) [Uint8Array] [
+     69, 120,  99, 101, 112, 116, 105, 111, 110,  32,  99,  97,
+    108, 108, 105, 110, 103,  32,  34,  70, 114, 111, 109,  70,
+    105, 108, 101,  34,  32, 119, 105, 116, 104,  32,  34,  49,
+     34,  32,  97, 114, 103, 117, 109, 101, 110, 116,  40, 115,
+     41,  58,  32,  13,  10,  34,  67,  58,  47,  85, 115, 101,
+    114, 115,  47, 115, 110, 101, 119, 116,  47,  46, 103, 101,
+    109, 105, 110, 105,  47,  97, 110, 116, 105, 103, 114,  97,
+    118, 105, 116, 121,  47,  98, 114,  97, 105, 110,  47, 102,
+     57,  98,  57,  97,
+    ... 1097 more items
+  ]
+}
+
+Node.js v24.19.0

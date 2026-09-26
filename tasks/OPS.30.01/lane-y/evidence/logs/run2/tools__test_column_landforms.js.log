@@ -1,0 +1,58 @@
+# tools/test_column_landforms.js  category=PASS  exit=0  ms=578  decided by exit_0 (-)
+== stdout ==
+
+--- Running Volumetric Column Landforms & Universal Mining Suite  ---
+
+Test 1: Surface Elevation S(gx, gy) Distribution & Determinism
+  PASS: Contains valley/plains datum S=0 (found 779 samples)
+  PASS: Contains plateau/hill S=1 (found 1718 samples)
+  PASS: Contains mountain ridge S=2 (found 1599 samples)
+  PASS: Deterministic elevation at (45,67): 1 === 1
+  Info: Elevation distribution sampled: S0=779, S1=1718, S2=1599
+
+Test 2: Guaranteed Flat Camp Clearing (r <= 12 at Datum S=0)
+  PASS: All 441 cells within camp radius r<=12 are strictly datum S=0
+
+Test 3: Volumetric Topography Across Z-Levels
+  PASS: Located representative coordinates for S=0, S=1, S=2
+  PASS: Datum coordinate (S=0) at z=0 is FLOOR (got floor)
+  PASS: Datum coordinate (S=0) at z=1 is OPEN sky (got open)
+  PASS: Datum coordinate (S=0) at z=2 is OPEN sky (got open)
+  PASS: Plateau coordinate (S=1) at z=0 is SOLID rock mass (got solid)
+  PASS: Plateau coordinate (S=1) at z=1 is FLOOR or RAMP (got floor)
+  PASS: Plateau coordinate (S=1) at z=2 is OPEN sky (got open)
+  PASS: High ridge coordinate (S=2) at z=0 is SOLID rock mass (got solid)
+  PASS: High ridge coordinate (S=2) at z=1 is SOLID rock mass (got solid)
+  PASS: High ridge coordinate (S=2) at z=2 is FLOOR or RAMP (got floor)
+
+Test 4: Natural Ramps at Single-Step Transitions
+  PASS: Natural ramp generated connecting elevation transition (found at z=0)
+
+Test 5: Universal Mining on Surface Rock (z = 0)
+  PASS: Found surface cliff cell at (10, 10, z=0)
+  PASS: Mine job handler registered
+  PASS: Surface cliff mining planned successfully: stand=(9, 10)
+  PASS: Mining work ticks calculated based on stone fracture resistance: 340 ticks
+  PASS: Target cell is SOLID before mining
+  PASS: Surface cliff mutated to FLOOR after mining (got floor)
+  PASS: Mining dropped stone items on mined cell (count: 1)
+  PASS: Dropped item is stone (got stone)
+  PASS: Dropped stone has typed geological material: granite
+  PASS: Hard stone granite mined bare-handed leaves quality unstamped (got undefined)
+  PASS: Miner given a metal pick via Items.give (item 2, mat iron)
+  PASS: Found second surface cliff cell at (11, 10, z=0)
+  PASS: Second mining job planned with metal pick: stand=(10, 10)
+  PASS: Second mining dropped stone (count: 1)
+  PASS: Stone mined with a metal pick is stamped with miner quality 4 (got 4, mat granite)
+
+Test 6: World-Mutation Invalidation & Exposed Faces
+  PASS: levels:cellChanged emitted exactly once (count: 1)
+  PASS: cellChanged contains correct coordinates
+  PASS: cellChanged contains correct cause: excavation_test
+  PASS: levels:faceExposed emitted for all 6 orthogonal neighbors (count: 6)
+  SKIP: Room enclosure invalidation triggered upon world cell mutation - Households subsystem retired 2026-09-22 (DEUS_Households.js archived, not registered)
+  SKIP: Invalidated room at correct mutation coordinate - Households subsystem retired 2026-09-22 (DEUS_Households.js archived, not registered)
+
+Test Suite Summary: 35 passed, 0 failed, 2 skipped.
+== stderr ==
+

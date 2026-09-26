@@ -1,0 +1,6 @@
+# tools/test_gen3_metrics.js  category=PASS  exit=0  ms=197  decided by exit_0 (-)
+== stdout ==
+Z=-1: solidFraction 55.69%, pockets 36, water 136, soil 48876, biomes: { '1': 17561, '2': 15026, '3': 16660, '4': 16289 }
+Z=-2: solidFraction 54.73%, pockets 16, water 64, soil 0, biomes: { '5': 16632, '6': 17801, '7': 16029, '8': 15074 }
+== stderr ==
+

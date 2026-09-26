@@ -1,0 +1,15 @@
+# tools/test_autonomous_project_dispatch.js  category=KILLED_TIMEOUT  exit=TIMEOUT  ms=180201  decided by timeout (runner)
+== stdout ==
+=== Autonomous project dispatch (DEUS_Colonists.js + DEUS_Projects.js) headless checks ===
+PASS dispatch.plugins_load - UF.Colonists, UF.Projects v1, UF.Jobs loaded; decide/projectJob/scan present
+PASS dispatch.founders_recognised - 8 colonists recognised out of 8 units
+PASS dispatch.legacy_plan_bypassed - effective plan: hearth larder knives clothes axe food woodpile cloaks pick workstone tannery leather bowyer bows fletcher arrows firewood furnace charcoal bars smithy blades armor rack arm; saved plan keeps shelter/door/beds/chest
+PASS dispatch.bypass_conditional - with UF.Projects disabled: shelter door chest beds back in the plan; enabled again: none
+PASS dispatch.idle_scan_bounded - 2 UF.Jobs.open() calls in 120 updates with 8 idle founders and no open job (expected 16)
+PASS dispatch.project_opened - Communal shelter #1 at (26,20)-(31,25): phase 1/4 site, 27/36 cells, 9 jobs open, 0 taken; 9 open clearing jobs: chop chop gather gather gather gather gather pick pick
+PASS dispatch.claimed_autonomously - 8/8 founders hold a project job after 1 updates and 1 open() calls (driver called only Game_Map.update): chop#29 gather#28 gather#26 chop#22 gather#23 pick#25 pick#27 gather#24; 2 still open
+PASS dispatch.project_jobs_preferred - the decoy gather beside the camp is open while the eight founders hold project jobs farther away
+PASS dispatch.no_double_claim - 8 distinct jobs on 8 distinct cells; every target reserved for its worker and against the other seven
+PASS dispatch.failed_job_returns_to_pool - job #29 cancelled; #1 took gather#21 after 1 updates
+== stderr ==
+

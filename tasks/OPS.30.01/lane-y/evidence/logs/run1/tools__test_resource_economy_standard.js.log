@@ -1,0 +1,98 @@
+# tools/test_resource_economy_standard.js  category=PASS  exit=0  ms=44  decided by exit_0 (-)
+== stdout ==
+=== DEUS Resource Economy & WorldGen Standard Verification (Balance v0.1) ===
+
+--- 1. World Scale & Population Baseline ---
+PASS: baseline_grid - Grid dimensions 256x256 (256x256)
+PASS: baseline_macro_z - Macro Z levels: 5 (levels: -2, -1, 0, 1, 2)
+PASS: baseline_macro_cells - Total macro cells: 327,680 (got 327680)
+PASS: baseline_strata_per_cell - Strata per cell: 5 (got 5)
+PASS: baseline_total_strata - Total possible strata: 1,638,400 (got 1638400)
+PASS: baseline_stratum_volume - Physical stratum volume: 25 cu ft (got 25)
+PASS: baseline_founders - Founders: 9 factions x 8 founders = 72 (got 72)
+PASS: baseline_target_population - Target design population: 1,200 creatures (got 1200)
+
+--- 2. Canonical Initial Racial Spawn Z Anchors ---
+PASS: spawn_z_minus2 - Z-2 anchor: Tiefling, Dragonborn
+PASS: spawn_z_minus1 - Z-1 anchor: Dwarf, Gnome
+PASS: spawn_z_0 - Z0 anchor: Human, Half-Orc
+PASS: spawn_z_plus1 - Z+1 anchor: Halfling, Half-Elf
+PASS: spawn_z_plus2 - Z+2 anchor: Elf
+PASS: spawn_z_anchor_only - All racial spawn Z levels designated as initial anchor only (migration permitted)
+
+--- 3. Core Resource Classes & Renewability ---
+PASS: all_classes_present - All 12 core resource classes present: FOOD, WATER, FIBER, WOOD, STONE, IRON, COPPER, SILVER, GOLD, PLATINUM, STEEL, ELECTRUM
+PASS: fast_renewables - FOOD, WATER, FIBER classified as FAST_RENEWABLE and not conserved
+PASS: slow_renewable_wood - WOOD classified as SLOW_RENEWABLE and not conserved
+PASS: finite_conserved - STONE, IRON, COPPER, SILVER, GOLD, PLATINUM classified as FINITE_CONSERVED (conserved: true)
+PASS: manufactured_conserved - STEEL, ELECTRUM classified as MANUFACTURED_CONSERVED with zero natural generation
+
+--- 4. Whole-World Balance v0.1 Calibration Targets ---
+PASS: target_stone_strata - STONE target: 650,000 strata (16.25 M cu ft)
+PASS: target_trees_mature - WOOD mature trees target: 25,000 (got 25000)
+PASS: target_trees_young - WOOD young trees target: 10,000 (got 10000)
+PASS: target_iron_reserve - IRON reserve target: 80,000 economic units
+PASS: target_iron_deposits - IRON deposit count target: 100-150 deposits
+PASS: target_copper_reserve - COPPER reserve target: 40,000 economic units
+PASS: target_copper_deposits - COPPER deposit count target: 60-100 deposits
+PASS: target_silver_reserve - SILVER reserve target: 4,000 economic units
+PASS: target_silver_deposits - SILVER deposit count target: 25-40 deposits
+PASS: target_gold_reserve - GOLD reserve target: 400 economic units
+PASS: target_gold_deposits - GOLD deposit count target: 10-20 deposits
+PASS: target_platinum_reserve - PLATINUM reserve target: 40 economic units
+PASS: target_platinum_deposits - PLATINUM deposit count target: 3-8 deposits
+PASS: target_electrum_zero_natural - ELECTRUM strictly 0 natural deposits (manufactured alloy only)
+PASS: target_wild_food_stock - FOOD initial wild stock: 25,000 creature-days
+PASS: target_sustainable_food_capacity - FOOD sustainable annual capacity: 650,000 creature-days/year (~1,780 creatures max support)
+
+--- 5. Macro-Z Depth Distribution Weights ---
+PASS: z_weights_IRON - IRON macro-Z depth weights sum to 1.00 (got 1.0000)
+PASS: z_weights_COPPER - COPPER macro-Z depth weights sum to 1.00 (got 1.0000)
+PASS: z_weights_SILVER - SILVER macro-Z depth weights sum to 1.00 (got 1.0000)
+PASS: z_weights_GOLD - GOLD macro-Z depth weights sum to 1.00 (got 1.0000)
+PASS: z_weights_PLATINUM - PLATINUM macro-Z depth weights sum to 1.00 (got 1.0000)
+PASS: iron_copper_z_distribution - IRON/COPPER Z weights match specification (30% Z-2 down to 10% Z+2)
+PASS: platinum_deep_bias - PLATINUM depth weighting concentrated in Z-2 (60%) and zero in Z+2 (0%)
+
+--- 6. Canonical Biome Biases ---
+PASS: biome_bias_FOOD - FOOD defines positive bias factors for all 5 canonical biomes
+PASS: biome_bias_WATER - WATER defines positive bias factors for all 5 canonical biomes
+PASS: biome_bias_FIBER - FIBER defines positive bias factors for all 5 canonical biomes
+PASS: biome_bias_WOOD - WOOD defines positive bias factors for all 5 canonical biomes
+PASS: biome_bias_STONE - STONE defines positive bias factors for all 5 canonical biomes
+PASS: biome_bias_IRON - IRON defines positive bias factors for all 5 canonical biomes
+PASS: biome_bias_COPPER - COPPER defines positive bias factors for all 5 canonical biomes
+PASS: biome_bias_SILVER - SILVER defines positive bias factors for all 5 canonical biomes
+PASS: biome_bias_GOLD - GOLD defines positive bias factors for all 5 canonical biomes
+PASS: biome_bias_PLATINUM - PLATINUM defines positive bias factors for all 5 canonical biomes
+PASS: biome_temp_high_wood - TEMP wood bias (1.6) exceeds ARID wood bias (0.1)
+PASS: biome_high_high_stone - HIGH stone bias (1.8) exceeds WET stone bias (0.4)
+PASS: biome_volc_platinum_bias - VOLC platinum bias (2.0) exceeds TEMP platinum bias (0.3)
+
+--- 7. Physical Currency & Minting Standard ---
+PASS: denominations_present - All 5 SRD denominations present: cp, sp, ep, gp, pp
+PASS: currency_values - Denomination values conform to SRD standards (1, 10, 50, 100, 1000 cp)
+PASS: electrum_alloy_recipe - Electrum coin metal formula strictly 50% Gold + 50% Silver
+PASS: provenance_schema - Currency stack provenance schema includes mintFaction and mintEra
+
+--- 8. Starting Settlement Viability Guarantees ---
+PASS: viability_food - Minimum immediate food reserve >= 720 creature-days (got 720)
+PASS: viability_water - Permanent potable water access strictly required for viable starts
+PASS: viability_shelter - Immediate shelter building materials required
+PASS: viability_no_iron_guarantee - No artificial guarantee of starting iron mine (scarcity preserved)
+
+--- 9. Conservation Ledger Invariant Simulation ---
+PASS: conserved_classes_list - Conservation ledger tracks exactly 6 finite classes
+PASS: conservation_after_mining - Mining 1,200 iron preserves ledger balance (80000 === 80000)
+PASS: conservation_after_crafting - Crafting 80 iron weapons preserves ledger balance (80000 === 80000)
+PASS: conservation_after_destruction - Broken gear converts to scrap without mass loss (80000 === 80000)
+PASS: conservation_after_salvage - Remelting scrap returns 100% metal to loose stock (80000 === 80000)
+
+==================================================
+TOTAL CHECKS: 68
+PASSED: 68
+FAILED: 0
+==================================================
+ALL RESOURCE ECONOMY STANDARD CHECKS PASSED (Balance v0.1).
+== stderr ==
+

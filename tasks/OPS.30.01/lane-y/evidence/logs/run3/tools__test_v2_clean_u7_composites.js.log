@@ -1,0 +1,5 @@
+# tools/test_v2_clean_u7_composites.js  category=PASS  exit=0  ms=83  decided by exit_0 (-)
+== stdout ==
+v2 composites generated!
+== stderr ==
+

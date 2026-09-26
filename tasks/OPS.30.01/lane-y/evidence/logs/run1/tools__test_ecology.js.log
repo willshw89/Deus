@@ -1,0 +1,12 @@
+# tools/test_ecology.js  category=FAIL_API_DRIFT  exit=1  ms=52  decided by api_drift (stderr)
+== stdout ==
+
+TEST SUMMARY: 0 passed, 7 failed
+== stderr ==
+FAIL ecology.renewable_vs_finite: Cannot read properties of undefined (reading 'isRenewableObject')
+FAIL ecology.tree_and_sapling_lifecycle: Cannot read properties of undefined (reading 'resources')
+FAIL ecology.harvested_flora_regrow: Cannot read properties of undefined (reading 'resources')
+FAIL ecology.plant_spreading_organic: Cannot read properties of undefined (reading 'spreadPlants')
+FAIL ecology.wildlife_herd_breeding: Cannot read properties of undefined (reading 'stepBreeding')
+FAIL ecology.depleted_wildlife_recovery: Cannot read properties of undefined (reading 'initializeBaselines')
+FAIL ecology.cavern_ecology_support: Cannot read properties of undefined (reading 'isRenewableObject')
