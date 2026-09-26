@@ -1,0 +1,197 @@
+{
+  "task": "SIM.40.10",
+  "baseCommit": "84ee3b55f3f8c1b8a16710ccf3878795d98d1683",
+  "requirements": [
+    {
+      "id": "W-01",
+      "section": "## Lifecycle",
+      "status": "COVERED",
+      "notes": "Sections 1.1-1.5: four species classes, origin kinds breeds/spawned/created/unique (DEC-014 §5) with a default-by-SRD-type table, stage tables, SRD Age text for all nine races next to the code profiles (DEUS_HistoricalDemographics.js:128-136), closed-form aging with a due-date queue, and keep/replace for REP-1 and REP-5. Human values follow V123; the V123-vs-SRD mismatch is OQ-W-01. Animal lifespans are zoology defaults (SRD silent)."
+    },
+    {
+      "id": "W-02",
+      "section": "## Lineage",
+      "status": "COVERED",
+      "notes": "Sections 2.1-2.4: parent-link records (life block 56 B, ancestor stub 32 B, lineage summary 48 B), bounded kin queries, compaction rule (3 generations, NOTABLE/HISTORY kept) with growth arithmetic, people genome and herd trait means, households, and the feed to history. The history-born mode is undefined in the repo (O2 G8-6), so only its data feed is given."
+    },
+    {
+      "id": "W-03",
+      "section": "## Reproduction and mass",
+      "status": "COVERED",
+      "notes": "Sections 3.1-3.6: pairing without population-driven chances, gestation/litter/spacing parameters, the growth/waste/metabolism mass split anchored on the SRD 1 lb food and 1 gallon water rules (rules.json:4403), a ledger table for every step, the soil-nutrient pools, livestock, and explicit interface assumptions IA-R1..R3 (Lane R decay) and IA-Q1..Q2 (Lane Q support). Gestation values where the SRD is silent are OQ-W-07."
+    },
+    {
+      "id": "W-04",
+      "section": "## Carrying capacity",
+      "status": "PARTIAL",
+      "notes": "Sections 4.1-4.6: caps removed, per-region capacity record (48 B, change-driven), four ratios with SRD anchors (food, water, size categories), SRD-derived famine arithmetic, shelter headroom in 2 ft slices, per-band table keyed by biome, famine/disease/predation/exposure/logistics mechanisms. PARTIAL because forage productivity, predation attack and handling constants and the allometric intake exponent have no SRD or repository source; they are tuning parameters pinned by tests T-CAP-1/T-CAP-2, and vegetation supply depends on SIM.50.04, which does not exist yet."
+    },
+    {
+      "id": "W-05",
+      "section": "## Nine races and culture plans",
+      "status": "COVERED",
+      "notes": "Sections 5.1-5.5: nine slots with SRD and catalog line numbers, size, speed, darkvision and ability increases (four catalog stats differ from the SRD: D-08-17), population-relevant traits, the PLAN-4 reconciliation (4 matching cultures, 5 missing, 3 non-SRD from PEOPLES.md's eleven), plan-schema inputs for SOC.10.02-03. Everything tagged [D-6]; home ranges kept OPEN and the catalog factions.layers map treated as a stale stand-in. The slot list itself is OQ-W-04."
+    },
+    {
+      "id": "W-06",
+      "section": "## Population LOD",
+      "status": "PARTIAL",
+      "notes": "Sections 6.1-6.6: fine/abstract/bucket records, sparse bucket keys with masses and lineage tables, promotion and demotion rules with an exact conservation table (counts, mass, lineage, tracked set, Q-FACTPOP), owned-herd proposal, budget arithmetic. PARTIAL because the individual budget numbers await post-split benchmarks (ADR-003 §9.2 PENDING-K3) and people crowd LOD awaits the Owner (ADR-003 Q14, DEC-014 OPEN; OQ-W-03, OQ-W-05). Depends on ADR-003, which is PROPOSED."
+    },
+    {
+      "id": "W-07",
+      "section": "## Migration dependencies",
+      "status": "COVERED",
+      "notes": "Ten dependencies M-1..M-10 with the row that provides each: movement model (MIG-1, SIM.00.04), herd entity (MIG-2), seasons (SIM.50.06, blocked on D-1), regions (SIM.30.01-02), capacity pressure (this design), cross-layer travel under soft home ranges (DEC-013 §6, WG.00.17, WG.62.02), refugees and founding (SIM.50.09, SOC.10.02), immigration without creation, and the ledger (WG.65.15)."
+    },
+    {
+      "id": "W-08",
+      "section": "## Dormant code today",
+      "status": "COVERED",
+      "notes": "26 items D-08-01..D-08-26 with file:line at the base commit, LIVE/DORMANT state, gap ID and keep/reactivate/replace/remove recommendation, covering REP-1..5, MIG-1, the 200-per-faction cap (DEUS_Colonists.js:2315 live, :2886 dormant), the 180 immigration cap, capFor, creation-from-nothing in attemptSpawn and spawnImmigrants, and catalog data defects."
+    },
+    {
+      "id": "W-09",
+      "section": "## Health and death hooks",
+      "status": "COVERED",
+      "notes": "Sections 9.1-9.2: published events and read-only queries, consumed health contracts with defaults when no health package loads, SRD exhaustion levels (rules.json:10533), a closed cause vocabulary. No health system is designed."
+    },
+    {
+      "id": "W-10",
+      "section": "## Sparse storage and cost",
+      "status": "COVERED",
+      "notes": "Sections 10.1-10.3: bytes per record with allocation rule and arithmetic, per-area 32-layer wildlife memory against a rejected dense grid, stale-model note, CPU class per mechanism with trigger, and the saved-versus-rebuilt split for D-3. All figures are arithmetic under stated assumptions; nothing was measured."
+    },
+    {
+      "id": "W-11",
+      "section": "## Acceptance tests",
+      "status": "COVERED",
+      "notes": "16 automatable tests (T-LIFE-1..2, T-MASS-1..3, T-CAP-1..2, T-LIN-1..2, T-LOD-1..3, T-RACE-1..2, T-NOSCAN-1, T-D1-1), each with a fixture, an assertion and a mutant that must fail."
+    },
+    {
+      "id": "W-12",
+      "section": "## WBS impact",
+      "status": "COVERED",
+      "notes": "PROPOSED-W-01..W-10 with real dependency IDs and tests; suggested dependency changes to SIM.40.10, SIM.50.07, SIM.50.09, SIM.30.01, SIM.30.03 and WG.62.02; sequencing against audit §6. Owner questions OQ-W-01..OQ-W-11 are under '## Owner questions' with options and are not answered."
+    }
+  ],
+  "proposedPackages": [
+    {
+      "id": "PROPOSED-W-01",
+      "title": "Species life schema in the catalog (stages, lifespan distributions, fertility, gestation, litter, spacing, origin kind, diet, mass)",
+      "deps": ["SIM.00.02", "WG.65.15", "SOC.10.01"],
+      "acceptanceTests": ["T-LIFE-2 (mutant: human table for all races)", "T-RACE-2 (mutant: elf con -1)", "T-MASS-3 (mutant: birth as a source, or bone to ore)"]
+    },
+    {
+      "id": "PROPOSED-W-02",
+      "title": "Lifecycle core: due-date queue, closed-form aging, death draws, conception, gestation, birth with the mass ledger",
+      "deps": ["SIM.00.02", "SIM.00.05", "WG.65.15"],
+      "acceptanceTests": ["T-LIFE-1 (mutant: per-hour loop over all individuals)", "T-MASS-1 (mutant: newborn with nominal mass)", "T-MASS-3", "T-D1-1 (mutant: hard-coded 240 s year)"]
+    },
+    {
+      "id": "PROPOSED-W-03",
+      "title": "Herd records and bucket lifecycle at L2 for wildlife, monsters and livestock",
+      "deps": ["SIM.30.01", "SIM.30.02", "WG.65.15"],
+      "acceptanceTests": ["T-LOD-1 (mutant: mass residual dropped on promotion)", "T-LOD-2 (mutant: Math.random in age draw)", "T-CAP-1 (mutant: famine hazard removed)"]
+    },
+    {
+      "id": "PROPOSED-W-04",
+      "title": "Region capacity record and pressures; famine, thirst, predation; disease and exposure hooks",
+      "deps": ["SIM.30.01", "SIM.50.02", "SIM.50.04", "SIM.40.01"],
+      "acceptanceTests": ["T-CAP-1", "T-CAP-2 (mutant: if (pop >= 200) reinserted)", "T-NOSCAN-1 (mutant: per-tick loop over all regions)"]
+    },
+    {
+      "id": "PROPOSED-W-05",
+      "title": "Owned-herd buckets: amend ADR-003 §7.5 so unnamed livestock is counted, not tracked",
+      "deps": ["SIM.00.01"],
+      "acceptanceTests": ["T-LOD-1 with an owner key (mutant: ownership dropped on demotion)"]
+    },
+    {
+      "id": "PROPOSED-W-06",
+      "title": "Lineage store, compaction and history feed",
+      "deps": ["SIM.00.06", "SOC.10.01"],
+      "acceptanceTests": ["T-LIN-1 (mutant: compaction ignores the 3-generation rule)", "T-LIN-2 (mutant: compaction disabled)"]
+    },
+    {
+      "id": "PROPOSED-W-07",
+      "title": "People crowd buckets with identity axes and lineage tables (only if the Owner adopts people crowd LOD)",
+      "deps": ["SIM.30.03", "SOC.10.01"],
+      "acceptanceTests": ["T-LOD-1 people variant (mutant: demotion drops the lineage)", "T-LOD-3 (mutant: bucket births ignore body condition)"]
+    },
+    {
+      "id": "PROPOSED-W-08",
+      "title": "Nine race slots and catalog reconciliation: SRD stats, five culture stubs, nonRacePeoples, homeRange OPEN [D-6]",
+      "deps": ["SOC.10.02", "SOC.10.03", "WG.62.02"],
+      "acceptanceTests": ["T-RACE-1 (mutant: tiefling dropped, or numeric home range without Owner source)", "T-RACE-2"]
+    },
+    {
+      "id": "PROPOSED-W-09",
+      "title": "Remove population caps, creation-from-nothing and the legacy history loop once the replacements run",
+      "deps": ["SIM.40.10", "SIM.00.05"],
+      "acceptanceTests": ["T-CAP-2", "T-MASS-3"]
+    },
+    {
+      "id": "PROPOSED-W-10",
+      "title": "Health and death hook contracts with a stub health package",
+      "deps": ["SIM.00.05", "SIM.40.05"],
+      "acceptanceTests": ["T-MASS-2 (mutant: unit removed without a transform)", "hook contract test: one health.kill gives exactly one life:died and one remains hand-off (mutant: double fire)"]
+    }
+  ],
+  "ownerQuestions": [
+    {
+      "id": "OQ-W-01",
+      "question": "Per-race lifespans and stage ages: V123 (human adulthood 15, mean life 60), the SRD (humans adult in their late teens) and DEUS_HistoricalDemographics.js:128 (human lifespan [60, 90]) disagree. Which governs, and what number is a tiefling's 'a few years longer'?",
+      "options": ["V123 for humans, SRD text for the other eight", "V123's ages and curve for all nine", "SRD for all nine, humans included (adulthood about 18)", "An Owner table"]
+    },
+    {
+      "id": "OQ-W-02",
+      "question": "Which cross-race pairs have offspring, and of what race?",
+      "options": ["No cross-race offspring", "Only the SRD pairs (human + elf gives half-elf; half-orcs from human and orc ancestry)", "Any pair is fertile; the child takes one parent's race by a seeded draw", "An Owner table"]
+    },
+    {
+      "id": "OQ-W-03",
+      "question": "How many named individuals should the world hold, beyond what benchmarks allow?",
+      "options": ["Benchmark only (DEC-014 §2 as written)", "An Owner floor: every office holder and household head is named", "A named quota per faction"]
+    },
+    {
+      "id": "OQ-W-04",
+      "question": "D-6 slot list: nine SRD races, while the catalog cultures include goblin, orc and automaton and docs/design/PEOPLES.md:5 records eleven peoples.",
+      "options": ["Nine SRD races; the three non-SRD cultures kept as nonRacePeoples outside the nine", "Nine SRD races; the three cultures deleted", "A different nine chosen by the Owner"]
+    },
+    {
+      "id": "OQ-W-05",
+      "question": "Adopt crowd LOD for people (ADR-003 Q14; DEC-014 §2 is OPEN)?",
+      "options": ["Adopt, with lineage tables capped at 8 lineages plus a residual", "Adopt, with full lineage per bucket", "Do not adopt: every person stays tracked, abstract when out of focus"]
+    },
+    {
+      "id": "OQ-W-06",
+      "question": "Origins of troll, bog_horror, sand_stalker, restless_dead and ice_wraith; and does V75's 'monsters keep spawning' mean breeding plus arrivals, or a spawned source?",
+      "options": ["The default-by-SRD-type table in section 1.1", "All breed", "The Owner assigns each species"]
+    },
+    {
+      "id": "OQ-W-07",
+      "question": "Gestation and incubation where the SRD is silent (all races; dragonborn hatch from eggs).",
+      "options": ["0.75 sim-years for the eight live-bearing races and an Owner number for dragonborn incubation", "Gestation scaled with lifespan", "An Owner table"]
+    },
+    {
+      "id": "OQ-W-08",
+      "question": "Can people or animals immigrate from outside the world?",
+      "options": ["No: arrivals come only from other regions", "An off-map pool as a logged source and sink with a budget, like rain", "The world edge is closed"]
+    },
+    {
+      "id": "OQ-W-09",
+      "question": "Once D-1 is ruled, should biological durations follow sim-years exactly? (Does not choose D-1.)",
+      "options": ["Biology follows sim-years whatever D-1 is", "Biology gets its own speed factor", "Decide after D-1"]
+    },
+    {
+      "id": "OQ-W-10",
+      "question": "ADR-003 §7.5 tracks every owned or tamed animal. How should unnamed livestock be held?",
+      "options": ["Owned-herd buckets for unnamed stock (PROPOSED-W-05)", "Every owned animal tracked", "A per-owner tracked budget with the rest in owned-herd buckets"]
+    },
+    {
+      "id": "OQ-W-11",
+      "question": "Race home layer ranges (DEC-013 open sub-question); the catalog factions.layers map predates DEC-013.",
+      "options": ["The Owner assigns ranges now", "Keep the stale map as a TEST_ stand-in until assigned", "All races start on the surface band until assigned"]
+    }
+  ]
+}
