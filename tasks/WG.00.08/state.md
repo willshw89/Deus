@@ -2,19 +2,19 @@
 
 - **Task ID:** `WG.00.08`
 - **WBS ID:** `WG.00.08`
-- **Role:** Writer: Claude / Fable (Lane A; Gemini ceased writing in this lane per `BRIEF.md`) | Reviewer: Grok
+- **Role:** Writer: Claude / Fable (Lane A; Gemini ceased writing in this lane per `BRIEF.md`) | Reviewer: Grok (revision 2 accepted 2026-09-25; `grok_verification.md`)
 - **Branch / Worktree:** `task/lane-a` (`C:\Users\snewt\.deus_worktrees\lane-a`)
-- **Base Commit:** `9f320da` (the 2.2b/2.2c checkpoint, `[fable] WG.00.08 Criteria 2.2b/2.2c …`, whose 27/27 roster the Owner accepted per `BRIEF.md`). This checkpoint is the `[fable] WG.00.08 Add and prove shaft_prescan_removed mutant (Directive 001-F)` commit on `task/lane-a`. The game code under test is still byte-identical to fix commit `2e4571a` (`git diff 2e4571a HEAD` on DEUS_Levels.js and DEUS_WorldGen.js is empty). The test file changed in this checkpoint (blob `47052c30`).
-- **Current Gate:** Directive 001 §2.2. 2.2a met (`8d1c7c3`). 2.2b and 2.2c delivered at `9f320da`. **Directive 001-F §3 follow-up (`shaft_prescan_removed`) delivered 2026-09-25 (this checkpoint), awaiting Grok review.** 2.2d (Owner ruling DEC-001) and 2.2e (Grok closure verdict) are still owed.
+- **Base Commit:** `9f320da` (the 2.2b/2.2c checkpoint, `[fable] WG.00.08 Criteria 2.2b/2.2c …`, whose 27/27 roster the Owner accepted per `BRIEF.md`). The Directive 001-F follow-up is `a14ee832` (`[fable] WG.00.08 Add and prove shaft_prescan_removed mutant (Directive 001-F)`). The game code under test is still byte-identical to fix commit `2e4571a` (`git diff 2e4571a a14ee832` on DEUS_Levels.js and DEUS_WorldGen.js is empty). The test file at `a14ee832` is blob `47052c30`. Grok's review commit adds `grok_verification.md` and this state update. It does not change the test or the plugins.
+- **Current Gate:** Directive 001 §2.2. 2.2a met (`8d1c7c3`). 2.2b and 2.2c delivered at `9f320da`. **Directive 001-F §3 follow-up (`shaft_prescan_removed`) delivered at `a14ee832` and accepted by Grok on 2026-09-25 (verdict PASS; `grok_verification.md`).** That acceptance is the 2.2e verdict on the delivered revision-2 roster and proof. 2.2d (Owner ruling DEC-001) is still owed.
 
 ## Owned File Set
 - `game/js/plugins/DEUS_Levels.js`
 - `game/js/plugins/DEUS_WorldGen.js`
 - `tools/test_strata_cuts_and_caves.js`
 - `tools/test_generated_z2_cut_proof.js`
-- `tasks/WG.00.08/*` (`mutant_kill_roster.md`, `skylight_through_fluid_proof.md`, `probe_skylight_through_fluid.js`, `evidence/*`)
+- `tasks/WG.00.08/*` (`mutant_kill_roster.md`, `skylight_through_fluid_proof.md`, `grok_verification.md`, `probe_skylight_through_fluid.js`, `evidence/*`)
 
-This checkpoint changes `tools/test_strata_cuts_and_caves.js` (one mutant added; the `shafts_keep_fluid` check strengthened) and `tasks/WG.00.08/probe_skylight_through_fluid.js` (it reads the check's planting text, so its counts now separate shaft rock from skylight rock). No game code or data file changed.
+Commit `a14ee832` changes `tools/test_strata_cuts_and_caves.js` (one mutant added; the `shafts_keep_fluid` check strengthened) and `tasks/WG.00.08/probe_skylight_through_fluid.js` (it reads the check's planting text, so its counts now separate shaft rock from skylight rock). No game code or data file changed. The review commit does not change those files.
 
 ## What is Done (with Evidence)
 1. **Physical clearance & continuous air run**: `continuousAirHeight` and `airRunAt` stop at solid and fluid strata (`!== M_AIR`, DEUS_Levels.js 2906 / 2928). Caught by `clearance_stops_at_fluid`, which kills `air_through_fluid`, `airrun_through_fluid` and `clearance_off_by_one` (commit `2e4571a`, merged `31676cf`).
@@ -32,15 +32,20 @@ This checkpoint changes `tools/test_strata_cuts_and_caves.js` (one mutant added;
    - **Check strengthened** (test 954–1018). Shaft plantings record the solid strata in `[sh.from, e)` under the water, in columns that pass the shaft's own gate. The check requires at least one shaft column with rock under water. Where water is planted is unchanged.
    - **Caught.** `--mutant=shaft_prescan_removed`, exit 1: `FAIL shafts_keep_fluid - … total rock strata under water: 38 (shafts 8, skylights 30), carved 8; after the carve: shaft (41,206) rock at 5 ft carved below the water; …`, `RESULT: 25 passed, 1 failed (exit 1) - shafts_keep_fluid`. Log `evidence/mutant_shaft_prescan_removed_47052c3.log`. The sweep: `MUTANT shaft_prescan_removed: exit 1; failed: shafts_keep_fluid`.
    - The check still fails on a seed pair with no skylight fixture (`--seed2=18 --no-suites`, exit 1, `evidence/seed2_18_vacuity_47052c3.log`).
+7. **Grok adversarial verification (2.2e on revision 2), 2026-09-25** → `tasks/WG.00.08/grok_verification.md`. Verdict **PASS**.
+   - Live: `node tools/test_strata_cuts_and_caves.js --mutant=shaft_prescan_removed` → `RESULT: 25 passed, 1 failed (exit 1) - shafts_keep_fluid`, node exit 1, `TIME 179.5 s`. The FAIL line matches `evidence/mutant_shaft_prescan_removed_47052c3.log` (8 rock strata at (41,206) and (41,207), water kept).
+   - Live: `node tools/test_strata_cuts_and_caves.js` → `RESULT: 28 passed, 0 failed (exit 0)`, process exit 0, `TIME 212.5 s`. `shafts_keep_fluid` carved 0 of 38. `fluid_suite` 36/36 with 5/5 mutants. `foundation_suite` 26/26.
+   - The 28 roster rows match `evidence/mutants_run_47052c3.log` (28/28, driver exit 0). That sweep was not re-run in the review session.
+   - ATK-19B-002 stays CLOSED on test blob `47052c30`. Limits 6 stays an observation.
 
 ## Exact Next Step
-- Grok: adversarial review of revision 2 of the roster (#28 and the strengthened `shafts_keep_fluid`, including the new `swiss_cheese` failure) and of the proof's point 5 items 5–6 / Limits 6. Then the closure verdict (2.2e).
 - Owner: ruling on DEC-001 / A10-1 in `docs/OWNER_DECISIONS.md` (2.2d).
 - Gemini: integrate `task/lane-a` and route the proposed findings below. The coordinator sets WBS status; this lane does not.
+- Grok's review of revision 2 is recorded. No further reviewer action is queued on this follow-up.
 
 ## Open Defects / Questions
 - ATK-19B-001: CLOSED by Grok on `2e4571a` / `689aff8`.
-- ATK-19B-002: CLOSED by Grok on `2e4571a` / `689aff8`. Its closure criterion names `shafts_keep_fluid`. That check was strengthened in this checkpoint, so Grok may want to re-confirm the closure against test blob `47052c30`.
+- ATK-19B-002: CLOSED by Grok on `2e4571a` / `689aff8`. Re-confirmed 2026-09-25 against test blob `47052c30`: the live baseline passes the strengthened `shafts_keep_fluid` (carved 0 of 38), and `shaft_prescan_removed` is caught. `skylight_through_fluid` and `shaft_through_fluid` remain exit 1 / `shafts_keep_fluid` in the cited sweep. See `grok_verification.md`.
 - **Proposed A-2.2c-1 (MINOR, not filed in `defects.jsonl`):** `carveVoid`'s fluid pre-scan covers `[F, C)` only. A fluid lying exactly at the void's planned top `C` under rock would not be seen, and the strata under it would be carved. Not observed on seeds 18/3/21/4, including with the pocket locks removed (`pockets_unprotected` census clean). Fix idea: scan `[F, C]` inclusive. This is a code change needing a task.
 - **Proposed A-2.2c-2 (MINOR, comment only):** DEUS_Levels.js 2646–2647 says a cut carves "fluids included", but the code skips a column holding a fluid. `UF_Levels.md` is correct.
 - **Observation (revision 2, not filed):** the unconnected-solid removal (DEUS_Levels.js 2695–2724) has no fluid test. Under `swiss_cheese` it removed a 1 ft rock slab 4 ft below planted shaft water, in the column of a shaft whose scan had refused. The water was kept, and it already rested on a void. It has not been seen on the real configuration (census clean on seeds 18/3/21/4). Evidence: `evidence/diag_swiss_cheese_floating_47052c3.log`; proof Limits 6.
