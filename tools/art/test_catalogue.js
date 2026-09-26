@@ -310,6 +310,7 @@ check('size_footprint_frame_separate', p => {
         const fc = g.frameClasses[e.frameClass] || (e.frameClass === 'TALL_MEDIUM' ? { frame: g.optionalParams.TALL_MEDIUM.frame } : null);
         if (!fc) { bad.push(`${e.id}: unknown frameClass ${e.frameClass}`); continue; }
         if (!e.footprint || !(e.footprint.w > 0)) bad.push(`${e.id}: missing footprint`);
+        if (e.category !== 'EQUIPMENT' && e.scaleRow !== null && !/^(RACE_|GEOM_FRAME_)/.test(e.scaleRow)) bad.push(`${e.id}: cites ${e.scaleRow}, not a RACE_* or frame-class row`);
         if (fc.frame && e.slot) {
             const cw = e.slot.w / e.frames.cols, ch = e.slot.h / e.frames.rows;
             if (cw !== fc.frame[0] || ch !== fc.frame[1]) bad.push(`${e.id}: cell ${cw}x${ch} is not the ${e.frameClass} frame ${fc.frame.join('x')}`);

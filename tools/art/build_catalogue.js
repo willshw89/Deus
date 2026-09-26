@@ -740,9 +740,11 @@ function buildEntries(ctx, S) {
     }
     // Generic person (AR-050).
     add(personEntry({ type: 'person', variant: 'GENERIC', raceRow: 'RACE_HUMAN', sourceIds: { ar: ['AR-050'] }, runtime: { kind: 'RMMZ_CHARACTER', file: null, index: null }, status: 'MISSING', statusWhy: `AR-050 ${requests.find(r => r.id === 'AR-050') ? 'REQUESTED' : ''}: generic person for arrivals and test units` }));
-    // Children (AR-601; only the child stage has a chart row, CHARACTER_CHILD).
+    // Children (AR-601). Character entries cite a race or frame-class row (brief 3a), so children cite
+    // the SMALL frame; the chart's child height (CHARACTER_CHILD) is carried in notes. Baby and teen: OWNER_OPEN.
+    const child = S.chart.find(r => r.rowId === 'CHARACTER_CHILD');
     for (const sp of peopleKeys) {
-        add(personEntry({ type: sp, variant: 'ANY', state: 'CHILD', scaleRow: 'CHARACTER_CHILD', frameClass: 'SMALL', sizeClass: null, rule: 'chart row CHARACTER_CHILD (baby and teen sizes OWNER_OPEN)', sourceIds: { catalog: ['people:' + sp], ar: ['AR-601'] }, runtime: { kind: 'RMMZ_CHARACTER', file: null, index: null }, status: 'MISSING', statusWhy: 'AR-601 REQUESTED: age stages (adults only today)' }));
+        add(personEntry({ type: sp, variant: 'ANY', state: 'CHILD', scaleRow: 'GEOM_FRAME_SMALL', frameClass: 'SMALL', sizeClass: null, rule: 'frame-class row GEOM_FRAME_SMALL; drawn height from chart row CHARACTER_CHILD (baby and teen sizes OWNER_OPEN)', sourceIds: { catalog: ['people:' + sp], ar: ['AR-601'] }, runtime: { kind: 'RMMZ_CHARACTER', file: null, index: null }, status: 'MISSING', statusWhy: 'AR-601 REQUESTED: age stages (adults only today)', notes: child ? `child drawn size per chart row CHARACTER_CHILD (${child.ref}): ${child.wMin}-${child.wMax} x ${child.hMin}-${child.hMax} px, target ${child.wTarget}x${child.hTarget}` : 'CHARACTER_CHILD row missing' }));
     }
 
     // E. Paper-doll equipment layers on the human body bases.
@@ -1300,8 +1302,12 @@ function buildReferences(ctx, S, cat) {
     const packs = [
         { packId: 'WORLD', about: 'perspective, scale and palette references for every world entry', paths: [].concat(byKind('PERSPECTIVE'), byKind('SCALE'), byKind('PALETTE')) },
         { packId: 'BIOME', about: 'biome material studies for terrain and water', paths: byKind('BIOME') },
-        { packId: 'STYLE', about: 'style-lock anchors of art/APPROVALS.md (ownerApproved UNKNOWN under DEC-007)', paths: refs.filter(r => r.kind === 'STYLE_ANCHOR' && !r.thirdParty).map(r => r.path) },
+        { packId: 'STYLE_PERSON', about: 'style-lock anchor 1 of art/APPROVALS.md (human male); ownerApproved UNKNOWN under DEC-007', paths: ['art/masters/human_male_stand.png'] },
+        { packId: 'STYLE_TREE', about: 'style-lock anchor 2 (oak); ownerApproved UNKNOWN', paths: ['art/masters/oak.png'] },
+        { packId: 'STYLE_WALL', about: 'style-lock anchor 3 (wooden wall); ownerApproved UNKNOWN', paths: ['art/masters/wall_wood.png'] },
+        { packId: 'STYLE_GROUND', about: 'style-lock anchor 4 (meadow); ownerApproved UNKNOWN', paths: ['art/masters/meadow.png'] },
     ];
+    for (const pk of packs) for (const pth of pk.paths) if (!refs.some(r => r.path === pth)) S.stats.errors.push({ code: 'REF_UNKNOWN', id: pk.packId, msg: `pack path ${pth} has no pin` });
     const known = new Set(refs.map(r => r.path));
     const packIds = new Set(packs.map(p => 'pack:' + p.packId));
     const byEntry = [];
@@ -1481,7 +1487,7 @@ function ownerQuestions(S, cat) {
         { id: 'Q-FRAMES-HUGE', text: 'Frame sizes for HUGE and GARGANTUAN creatures (no paint slots until set); and whether LARGE_LONG 96x48 (PROPOSED) is accepted.' },
         { id: 'Q-TALL-MEDIUM', text: 'Turn on TALL_MEDIUM (48x64) and the Gnome/Halfling readability floor (26-28 px)? Both are OFF.' },
         { id: 'Q-SRD-OPEN', text: 'Accept the PM pixel readings of open-ended SRD heights (Dragonborn 46-48, Human/Half-Orc/Tiefling 35-46, Elf 33-44) and the PROPOSED widths of races with no registry row?' },
-        { id: 'Q-CHILD', text: 'Baby and teen sizes (only CHARACTER_CHILD exists in the chart); child frames are catalogued with CHARACTER_CHILD.' },
+        { id: 'Q-CHILD', text: 'Baby and teen sizes (only CHARACTER_CHILD exists in the chart). Child entries cite the SMALL frame row and carry the CHARACTER_CHILD height in notes; per-race child heights are not charted.' },
         { id: 'Q-PEOPLE', text: 'Are goblin, orc and automaton (people briefs, cultures) people, monsters or neither under the DEC-013 rule of exactly nine races? They are catalogued as MISSING character entries until ruled.' },
         { id: 'Q-SNOW', text: 'The registry forbids snow/ice biomes but the WorldCatalog has snow, ice, icy water, snow fir, snow bush, arctic fox, ice wraith, glacier and tundra. Keep or drop them? (Catalogued as the sources name them.)' },
         { id: 'Q-SCALE-MAP', text: `${proposed.length} painted entries use a PROPOSED scale row or palette ramp (${proposedSrc.length} source entries, ${proposed.length - proposedSrc.length} addendum placeholders; no chart row or ramp names the thing; see mapping.scaleBasis / mapping.rampBasis per entry and art/catalogue/mapping.json). Confirm or reassign.` },
@@ -1662,6 +1668,12 @@ function build(opts) {
         for (const cid of sel) for (const e of base.byCatalog.get(cid) || []) e.sourceIds.ar = uniq(e.sourceIds.ar.concat([ar])).sort(sortStr);
     }
     for (const e of entries) for (const k of SOURCE_KINDS) e.sourceIds[k] = uniq(e.sourceIds[k]).sort(sortStr);
+    // Style-lock anchors (art/APPROVALS.md style_anchor_1..4; ownerApproved UNKNOWN) linked to what they anchor.
+    const styleOf = e => e.category === 'CHARACTER' || e.category === 'EQUIPMENT' ? 'pack:STYLE_PERSON'
+        : e.category === 'TREE' ? 'pack:STYLE_TREE'
+        : e.scaleRow === 'ARCH_WALL_2GRID' ? 'pack:STYLE_WALL'
+        : ['TERRAIN', 'TOP', 'EDGE', 'RAMP', 'RAMPSIDE'].includes(e.category) ? 'pack:STYLE_GROUND' : null;
+    for (const e of entries) { const s = styleOf(e); if (s && !e.references.includes(s)) e.references.push(s); }
     // Optional fields are written only when they carry something.
     for (const e of entries) {
         if (e.notes === null) delete e.notes;

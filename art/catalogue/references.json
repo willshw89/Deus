@@ -52,13 +52,30 @@
       ]
     },
     {
-      "packId": "STYLE",
-      "about": "style-lock anchors of art/APPROVALS.md (ownerApproved UNKNOWN under DEC-007)",
+      "packId": "STYLE_PERSON",
+      "about": "style-lock anchor 1 of art/APPROVALS.md (human male); ownerApproved UNKNOWN under DEC-007",
       "paths": [
-        "art/reference/DEUS_WORLD_ART_STYLE_EXPLORATION_01.jpg",
-        "art/masters/human_male_stand.png",
-        "art/masters/oak.png",
-        "art/masters/wall_wood.png",
+        "art/masters/human_male_stand.png"
+      ]
+    },
+    {
+      "packId": "STYLE_TREE",
+      "about": "style-lock anchor 2 (oak); ownerApproved UNKNOWN",
+      "paths": [
+        "art/masters/oak.png"
+      ]
+    },
+    {
+      "packId": "STYLE_WALL",
+      "about": "style-lock anchor 3 (wooden wall); ownerApproved UNKNOWN",
+      "paths": [
+        "art/masters/wall_wood.png"
+      ]
+    },
+    {
+      "packId": "STYLE_GROUND",
+      "about": "style-lock anchor 4 (meadow); ownerApproved UNKNOWN",
+      "paths": [
         "art/masters/meadow.png"
       ]
     }
