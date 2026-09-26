@@ -1,0 +1,134 @@
+{
+ "range": {
+  "zMin": -4,
+  "zMax": 4
+ },
+ "opened": null,
+ "rows": [
+  {
+   "from": 0,
+   "to": 2,
+   "frame": 99,
+   "area": {
+    "x": 0,
+    "y": 0
+   },
+   "level1": true,
+   "level2": true,
+   "exposes1": true,
+   "grid1": true,
+   "open1": 28121,
+   "planes": [
+    {
+     "depth": 1,
+     "z": 1,
+     "visible": true
+    },
+    {
+     "depth": 2,
+     "z": 0,
+     "visible": true
+    }
+   ]
+  },
+  {
+   "from": 2,
+   "to": 1,
+   "frame": 189,
+   "area": {
+    "x": 0,
+    "y": 0
+   },
+   "level1": true,
+   "level2": true,
+   "exposes1": true,
+   "grid1": true,
+   "open1": 594,
+   "planes": [
+    {
+     "depth": 1,
+     "z": 0,
+     "visible": true
+    },
+    {
+     "depth": 2,
+     "z": -1,
+     "visible": true
+    }
+   ]
+  },
+  {
+   "from": 1,
+   "to": 0,
+   "frame": 210,
+   "area": {
+    "x": 0,
+    "y": 0
+   },
+   "level1": true,
+   "level2": true,
+   "exposes1": true,
+   "grid1": true,
+   "open1": 251,
+   "planes": [
+    {
+     "depth": 1,
+     "z": -1,
+     "visible": true
+    },
+    {
+     "depth": 2,
+     "z": -2,
+     "visible": true
+    }
+   ]
+  },
+  {
+   "from": 0,
+   "to": -1,
+   "frame": 237,
+   "area": {
+    "x": 0,
+    "y": 0
+   },
+   "level1": true,
+   "level2": true,
+   "exposes1": true,
+   "grid1": true,
+   "open1": 0,
+   "planes": [
+    {
+     "depth": 1,
+     "z": -2,
+     "visible": true
+    }
+   ]
+  },
+  {
+   "from": -1,
+   "to": 0,
+   "frame": 264,
+   "area": {
+    "x": 0,
+    "y": 0
+   },
+   "level1": true,
+   "level2": true,
+   "exposes1": true,
+   "grid1": true,
+   "open1": 251,
+   "planes": [
+    {
+     "depth": 1,
+     "z": -1,
+     "visible": true
+    },
+    {
+     "depth": 2,
+     "z": -2,
+     "visible": true
+    }
+   ]
+  }
+ ]
+}

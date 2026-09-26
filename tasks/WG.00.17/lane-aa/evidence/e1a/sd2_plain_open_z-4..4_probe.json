@@ -1,0 +1,154 @@
+{
+ "range": {
+  "zMin": -4,
+  "zMax": 4
+ },
+ "opened": {
+  "tried": true,
+  "area": {
+   "x": 0,
+   "y": 0
+  },
+  "cell": {
+   "x": 2,
+   "y": 2,
+   "z": -2,
+   "ok": true,
+   "after": "open",
+   "below": "floor",
+   "refusal": null
+  }
+ },
+ "rows": [
+  {
+   "from": 0,
+   "to": 2,
+   "frame": 100,
+   "area": {
+    "x": 0,
+    "y": 0
+   },
+   "level1": true,
+   "level2": true,
+   "exposes1": true,
+   "grid1": true,
+   "open1": 36328,
+   "planes": [
+    {
+     "depth": 1,
+     "z": 1,
+     "visible": true
+    },
+    {
+     "depth": 2,
+     "z": 0,
+     "visible": true
+    }
+   ]
+  },
+  {
+   "from": 2,
+   "to": 1,
+   "frame": 184,
+   "area": {
+    "x": 0,
+    "y": 0
+   },
+   "level1": true,
+   "level2": true,
+   "exposes1": true,
+   "grid1": true,
+   "open1": 246,
+   "planes": [
+    {
+     "depth": 1,
+     "z": 0,
+     "visible": true
+    },
+    {
+     "depth": 2,
+     "z": -1,
+     "visible": true
+    }
+   ]
+  },
+  {
+   "from": 1,
+   "to": 0,
+   "frame": 205,
+   "area": {
+    "x": 0,
+    "y": 0
+   },
+   "level1": true,
+   "level2": true,
+   "exposes1": true,
+   "grid1": true,
+   "open1": 146,
+   "planes": [
+    {
+     "depth": 1,
+     "z": -1,
+     "visible": true
+    },
+    {
+     "depth": 2,
+     "z": -2,
+     "visible": true
+    }
+   ]
+  },
+  {
+   "from": 0,
+   "to": -1,
+   "frame": 232,
+   "area": {
+    "x": 0,
+    "y": 0
+   },
+   "level1": true,
+   "level2": true,
+   "exposes1": true,
+   "grid1": true,
+   "open1": 1,
+   "planes": [
+    {
+     "depth": 1,
+     "z": -2,
+     "visible": true
+    },
+    {
+     "depth": 2,
+     "z": -3,
+     "visible": true
+    }
+   ]
+  },
+  {
+   "from": -1,
+   "to": 0,
+   "frame": 259,
+   "area": {
+    "x": 0,
+    "y": 0
+   },
+   "level1": true,
+   "level2": true,
+   "exposes1": true,
+   "grid1": true,
+   "open1": 146,
+   "planes": [
+    {
+     "depth": 1,
+     "z": -1,
+     "visible": true
+    },
+    {
+     "depth": 2,
+     "z": -2,
+     "visible": true
+    }
+   ]
+  }
+ ]
+}

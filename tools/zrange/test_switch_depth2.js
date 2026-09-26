@@ -44,8 +44,9 @@
  *                   switch_same_frame FAILs, every case (b) switch prints want [to - 1, to - 2] against [to - 1], and no
  *                   other switch prints a want.
  *
- * Usage: node tools/zrange/test_switch_depth2.js [--commit=<rev>] [--z-range=-4..4[,-16..15]] [--variants=plain,a_unbound]
+ * Usage: node tools/zrange/test_switch_depth2.js [--commit=<rev>] [--z-range=-4..4[,-16..15][,default]] [--variants=plain,a_unbound]
  *                                               [--jobs=n] [--evidence=<dir>] [--keep]
+ *   --z-range  the DEUS_Z_RANGE of the runs; "default" leaves it unset (the game's default range, recorded by the probe)
  * Prints PASS/FAIL (plain variants) and CAUGHT/NOT CAUGHT (provocations) per range, then RESULT. Exit: 0 every plain
  * variant passed and every provocation was caught; 1 otherwise; 2 harness problem (no switch_same_frame line, no probe,
  * no cell of -2 opened, an edit target not found exactly once).
@@ -175,6 +176,7 @@ function prepareClone(sha, name) {
 function runGate(clone, range, probeFile, open) {
     return new Promise(resolve => {
         const env = Object.assign({}, process.env, { DEUS_Z_RANGE: range, ZR_SD2_PROBE: probeFile, ZR_SD2_OPEN: open ? "1" : "0" });
+        if (range === "default") delete env.DEUS_Z_RANGE;   // the game's own default range (the probe records it)
         delete env.UF_TEST_PROVOKE;
         const t0 = Date.now();
         const child = spawn(process.execPath, [path.join(clone, "tools", "test_layer_render_flat.js"), "--only", "switch_same_frame"], { cwd: clone, env, stdio: ["ignore", "pipe", "pipe"] });
@@ -249,7 +251,7 @@ function judge(name, run, probe) {
         for (const c of others) if (c.s.event.want || c.s.drawn.want) problems.push(`${c.s.from}->${c.s.to} (case ${c.kind}) also printed a want ${list(c.s.event.want || c.s.drawn.want)}`);
     }
     const openText = opened ? `; -2 opened at (${opened.x},${opened.y})` : "";
-    return { ok: problems.length === 0, harness: false, pass, text: `${line[1]} switch_same_frame; case (a) ${seen.a} switch(es) (${seen.a_new} with depth 2 outside -2..+2), case (b) ${seen.b}${openText}; ${cases.map(describe).join(" | ")}${problems.length ? `; PROBLEMS: ${problems.join("; ")}` : ""} [${result}; gate exit ${run.status}; ${run.secs} s]` };
+    return { ok: problems.length === 0, harness: false, pass, text: `range ${probe.range ? `${probe.range.zMin}..${probe.range.zMax}` : "?"}: ${line[1]} switch_same_frame; case (a) ${seen.a} switch(es) (${seen.a_new} with depth 2 outside -2..+2), case (b) ${seen.b}${openText}; ${cases.map(describe).join(" | ")}${problems.length ? `; PROBLEMS: ${problems.join("; ")}` : ""} [${result}; gate exit ${run.status}; ${run.secs} s]` };
 }
 
 //-----------------------------------------------------------------------------
