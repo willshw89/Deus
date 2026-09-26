@@ -490,4 +490,5 @@ From the repository root, with Node.js 22.8 or later (the bare context uses `vm.
 ## 10. Commit record
 
 - Code and evidence commit (all gates above): `6b15462c3732755377f8491fec763586746c29bc`.
-- This report and the `evidence/` files are added in the commit after it. The commit that records this report's own hash comes after that.
+- Report and evidence commit: `ec70730d19d33d43f05c25932385d6ca3a6e8260`. It adds only `REPORT.md` and `evidence/*`; `git diff --name-only 6b15462c3732755377f8491fec763586746c29bc..ec70730d19d33d43f05c25932385d6ca3a6e8260` lists only those 11 files.
+- The commit after it changes only this section, to record that hash. The final pushed hash is the lane's `FINAL SHA`.
