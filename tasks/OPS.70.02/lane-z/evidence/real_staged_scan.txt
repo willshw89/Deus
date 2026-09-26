@@ -1,0 +1,3 @@
+$ node tools/security/scan_secrets.js --staged   (nothing staged)
+RESULT: 0 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0

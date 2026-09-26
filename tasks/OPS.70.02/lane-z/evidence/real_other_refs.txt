@@ -1,0 +1,111 @@
+$ node tools/security/scan_secrets.js --range HEAD..refs/heads/astra/DEUS-TSK-ASTRA-01   (1 commits)
+RESULT: 3 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/heads/main   (28 commits)
+RESULT: 173 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/heads/salvage/wt13-2026-09-25   (1 commits)
+RESULT: 6 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/heads/salvage/wt14-2026-09-25   (1 commits)
+RESULT: 9 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/heads/salvage/wt16-2026-09-25   (1 commits)
+RESULT: 33 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/heads/salvage/wt18-2026-09-25   (1 commits)
+RESULT: 29 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/heads/salvage/wt19b-2026-09-25   (1 commits)
+RESULT: 3 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/heads/salvage/wthead-7f9fc1d3-2026-09-25   (1 commits)
+RESULT: 2 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/heads/task/lane-a   (1 commits)
+RESULT: 3 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/heads/task/lane-aa   (17 commits)
+RESULT: 72 files scanned (0 with NUL bytes, 0 text with a binary extension), 1 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/heads/task/lane-ab   (27 commits)
+RESULT: 168 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/heads/task/lane-ac   (27 commits)
+RESULT: 168 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/heads/task/lane-b   (1 commits)
+RESULT: 2 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/heads/task/lane-e   (11 commits)
+RESULT: 30 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/heads/task/lane-h   (1 commits)
+RESULT: 2 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/heads/task/lane-v   (10 commits)
+RESULT: 80 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/heads/task/lane-x   (12 commits)
+RESULT: 77 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/heads/task/lane-y   (7 commits)
+RESULT: 77 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/remotes/origin/HEAD   (28 commits)
+RESULT: 173 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/remotes/origin/astra/DEUS-TSK-ASTRA-01   (1 commits)
+RESULT: 3 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/remotes/origin/main   (28 commits)
+RESULT: 173 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/remotes/origin/salvage/wt13-2026-09-25   (1 commits)
+RESULT: 6 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/remotes/origin/salvage/wt14-2026-09-25   (1 commits)
+RESULT: 9 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/remotes/origin/salvage/wt16-2026-09-25   (1 commits)
+RESULT: 33 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/remotes/origin/salvage/wt18-2026-09-25   (1 commits)
+RESULT: 29 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/remotes/origin/salvage/wt19b-2026-09-25   (1 commits)
+RESULT: 3 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/remotes/origin/salvage/wthead-7f9fc1d3-2026-09-25   (1 commits)
+RESULT: 2 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/remotes/origin/task/lane-a   (1 commits)
+RESULT: 3 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/remotes/origin/task/lane-aa   (1 commits)
+RESULT: 3 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/remotes/origin/task/lane-ab   (27 commits)
+RESULT: 168 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/remotes/origin/task/lane-ac   (27 commits)
+RESULT: 168 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/remotes/origin/task/lane-b   (1 commits)
+RESULT: 2 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/remotes/origin/task/lane-e   (11 commits)
+RESULT: 30 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/remotes/origin/task/lane-h   (1 commits)
+RESULT: 2 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/remotes/origin/task/lane-v   (10 commits)
+RESULT: 80 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/remotes/origin/task/lane-x   (12 commits)
+RESULT: 77 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0
+$ node tools/security/scan_secrets.js --range HEAD..refs/remotes/origin/task/lane-y   (1 commits)
+RESULT: 3 files scanned (0 with NUL bytes, 0 text with a binary extension), 0 binary skipped, 0 findings, 0 allowed, 0 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0

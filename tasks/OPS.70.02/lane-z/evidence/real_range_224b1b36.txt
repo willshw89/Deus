@@ -1,0 +1,5 @@
+$ node tools/security/scan_secrets.js --range 224b1b36^..224b1b36   (4 redaction characters masked as ####)
+BASELINED 224b1b36dad8 docs/STATUS.md:12 HIGH_ENTROPY ####... (50 chars) fingerprint=6717051db5d3 incident: SEC-2026-09-26-01
+BASELINED 224b1b36dad8 tools/generate_nano_banana_pro.js:14 HIGH_ENTROPY ####... (50 chars) fingerprint=6717051db5d3 incident: SEC-2026-09-26-01
+RESULT: 22 files scanned (0 with NUL bytes, 0 text with a binary extension), 42 binary skipped, 0 findings, 0 allowed, 2 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0

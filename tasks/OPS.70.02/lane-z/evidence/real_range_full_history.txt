@@ -1,0 +1,6 @@
+$ node tools/security/scan_secrets.js --range 940ac9172c21cddb2d5f3f15aa4512d4d274408b..HEAD   (root commit 940ac9172c21cddb2d5f3f15aa4512d4d274408b; NUL_FILE lines none; 4 redaction characters masked as ####)
+BASELINED 224b1b36dad8 docs/STATUS.md:12 HIGH_ENTROPY ####... (50 chars) fingerprint=6717051db5d3 incident: SEC-2026-09-26-01
+BASELINED 224b1b36dad8 tools/generate_nano_banana_pro.js:14 HIGH_ENTROPY ####... (50 chars) fingerprint=6717051db5d3 incident: SEC-2026-09-26-01
+BASELINED d1fbeab84a9c docs/archive/STATUS_LEDGER_20260925.md:3682 HIGH_ENTROPY ####... (50 chars) fingerprint=6717051db5d3 incident: SEC-2026-09-26-01
+RESULT: 8066 files scanned (0 with NUL bytes, 0 text with a binary extension), 7735 binary skipped, 0 findings, 0 allowed, 3 baselined, 0 stale allowlist entries, 0 stale baseline entries
+EXIT=0

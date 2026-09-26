@@ -1,0 +1,12 @@
+$ node tools/security/check_dependencies.js --make-libs-baseline 425b594c146d5f353c10faa11f4b5d47f499b45f | diff - tools/security/libs_baseline.json
+EXIT(make)=0
+EXIT(diff)=0
+$ git diff --name-only 425b594c 96483c51 -- game/js/libs
+EXIT=0
+$ for f in <6 libs>; do git cat-file blob 425b594c:game/js/libs/$f | sha256sum; done
+49d8f79328495bfd9f47fce8378aa7d898adfb4238c36abc5801c78586d11dc9 game/js/libs/effekseer.min.js
+7f144a3cc4cae65c4e2b9806483e565cc3b7123448c4b2311ece33b15f3f653d game/js/libs/effekseer.wasm
+1ff66c1e32922549d0c824076703e69fb5535857934c8faa8023f51a4881f732 game/js/libs/localforage.min.js
+29cfa0542b9864b6640cfdcc8f15b184db6431b532db2702a3ce97e5f2a7fc1c game/js/libs/pako.min.js
+9cf328099f50e4ceca874d875abd3065e8189133e01e5f054bf7627eb6a960e6 game/js/libs/pixi.js
+5024fbb4606a89caeeedcd57c94e7f633fba40277d4c1d1b2277ee7d60905498 game/js/libs/vorbisdecoder.js

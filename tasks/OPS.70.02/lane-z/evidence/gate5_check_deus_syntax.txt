@@ -1,0 +1,3 @@
+$ node tools/check_deus_syntax.js
+Checked 52 DEUS plugin files. Errors: 0
+EXIT=0

@@ -1,0 +1,3 @@
+$ node %TEMP%/lanez/scan_root.js <repo> 940ac9172c21cddb2d5f3f15aa4512d4d274408b   (helper outside the repo: the scanner's scanLine over the root commit's tree, which a range cannot include)
+ROOT TREE 940ac9172c21 scanned 106 binary skipped 1258 findings 0
+EXIT=0
