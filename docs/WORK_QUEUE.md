@@ -1,9 +1,10 @@
 # WORK QUEUE & CONTROL TOWER — Project DEUS
 
-**Owner Terminal:** Gemini  
-**Last Updated:** 2026-09-25  
-**Active Engine Gate:** Parallel Lanes A–E (Lane A: 19B Closeout, Lane B: Year-0 Verification, Lane C: WG.00.12 Non-Moving Consolidation, Lane D: Adversarial Review, Lane E: WG.00.09 Attack Plan). Slice 1 remains AWAITING OWNER separately; WG.00.09 implementation remains QUEUED pending repository layout freeze.  
-**Hardware Rule:** Max 1 heavy local job cap LIFTED as of 2026-09-25 (Owner decision). Auto-tripwire: instantaneous power loss reinstates cap of 1 immediately.
+**Coordinator:** Gemini  
+**Last Updated:** 2026-09-25 23:45 CT (Directive 001-L)  
+**Active Engine Gate:** Current parallel lanes: Lane H (WG.00.08 Z-2 Cut Proof Hardening), Lane C2b (WG.00.12 Governance Hardening), and Lane E (WG.00.09 Five-Z Depth Renderer Attack Plan). Merged lanes: A, B, C1, C2, C3, F, G. Delivered: Lane D.  
+**Hardware Rule:** Max 1 heavy local job cap LIFTED as of 2026-09-25 (Owner decision). Auto-tripwire: instantaneous power loss reinstates cap of 1 immediately.  
+**Canonical Governance Standard:** [`docs/CANONICAL_ROLES.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/CANONICAL_ROLES.md) and [`docs/AGENT_UTILIZATION_POLICY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/AGENT_UTILIZATION_POLICY.md).
 
 ---
 
@@ -11,15 +12,15 @@
 
 Every work block moves strictly through the standard DEUS routing loop:
 
-$$\text{Owner Terminal} \longrightarrow \text{Architecture Council} \longrightarrow \begin{matrix} \text{Economy Review} \\ \text{(when relevant)} \end{matrix} \longrightarrow \text{Build Bench} \longrightarrow \begin{matrix} \text{Verification, Debug} \\ \text{\& Performance} \end{matrix} \longrightarrow \begin{matrix} \text{Native MZ \&} \\ \text{Player Review} \end{matrix} \longrightarrow \begin{matrix} \text{Provenance, Build} \\ \text{\& Recovery} \end{matrix} \longrightarrow \begin{matrix} \text{Owner Terminal} \\ \text{Release Gate} \end{matrix}$$
+$$\text{Coordinator (Gemini)} \longrightarrow \text{Architecture / Plan (Grok / Claude)} \longrightarrow \text{Build Bench (Claude / Fable)} \longrightarrow \text{Verification & Adversarial Review (Grok)} \longrightarrow \text{Integration to Main (Gemini)} \longrightarrow \text{Owner Release Gate}$$
 
 ### Permanent Work Destinations:
-1. **Architecture Council — Codex Astra Ultra**: System boundaries, schemas, contracts, sequencing, technical risks, architectural review.
-2. **Economy & Simulation Review — Gemini**: Resources, production chains, crafting, refining, construction, 3×3 workstation-grid transactions, logistics, population, AI behavior, simulation performance.
-3. **Build Bench / Implementation — Claude Code Fable Ultra**: Focused implementation blocks. Preserves path boundaries, runs focused unit tests, outputs formal handoff packet.
-4. **Verification, Debug & Performance — Gemini**: Automated tests, determinism checks, regression tests, profiling, 60 FPS frame-budget validation (<16.6 ms), memory cleanup, console zero-error review.
-5. **Native MZ & Player Review — Gemini + Owner Session**: RMMZ editor Playtest (F5), dev console (F8), scene transitions, camera, input, native feel.
-6. **Provenance, Assets, Build & Recovery — Gemini**: Asset metadata, SHA-256 hashes, originality checks, backup snapshots, packaging checks, release eligibility.
+1. **Routing, Coordination & Integration — Gemini:** Multi-agent routing, WBS state maintenance, git merge & push authority. Zero engine code edits; no self-certification.
+2. **Implementation & Core Engineering — Claude / Fable:** Bounded implementation leaves, test creation, plugin code adhering to lean architecture standards.
+3. **Adversarial Verification, Mutation Testing & Review — Grok (Independent):** Invariant testing, failure-mode analysis, mutant roster execution, independent verification verdicts.
+4. **Bounded Tooling & Automation — OpenAI Codex (Exhausted):** Bounded scripts, migration tools, telemetry utilities (when quota available).
+5. **Directives & PM Mailbox Authority — Grok Bot (PM):** Directives, independent sign-offs, mailbox communication via `C:\Users\snewt\.deus_pm`.
+6. **Owner Release Gate — Owner Session:** Final playtest acceptance, high-level rulings, release decisions.
 
 ---
 
@@ -34,7 +35,7 @@ Every work block MUST declare:
 - **Allowed Paths**: Explicit file / directory whitelist
 - **Forbidden Paths**: Explicit read-only or off-limits files (`game/js/rmmz_*.js`, etc.)
 - **Owner Decisions Required**: Open gates or choices requiring user input
-- **Assigned Worker**: Model or conversation (`Astra`, `Fable`, `Gemini`, or `Owner`)
+- **Assigned Worker**: Model or conversation (`Claude / Fable`, `Grok`, `Codex`, `Gemini`, or `Owner`)
 - **Automated Acceptance Criteria**: Measurable test commands that must output `PASS`
 - **Native MZ Acceptance Criteria**: Playtest observations, scene transitions, F8 console output
 - **Performance Criteria**: FPS target, frame budget (<16.6ms), no full-world per-frame scans
@@ -95,7 +96,7 @@ Every work block MUST declare:
 ### Block `WB-003`: Natural World Autonomous Behavior & Living Ecology
 - **Objective**: Activate the autonomous life and behavior of the natural world (fauna grazing, herd cohesion, predator/prey balance, flee responses, plant/bush ecological regrowth, and diurnal lighting) within strict 60 FPS budgets.
 - **Priority**: `HIGH`
-- **Status**: `READY` (Awaiting Owner Authorization to Execute)
+- **Status**: `PARKED` (Awaiting PM/Owner assignment)
 - **Dependencies**: None (self-contained living environment substrate).
 - **Allowed Paths**:
   - `game/js/plugins/DEUS_Wildlife.js`
@@ -109,9 +110,9 @@ Every work block MUST declare:
   - `game/data/*.json` (Editor safety; catalog remains unchanged)
   - `game/js/plugins/DEUS_Colonists.js`, `game/js/plugins/DEUS_Jobs.js` (Human systems untouched)
 - **Owner Decisions Required**:
-  1. Confirm authorization to execute `WB-003` with Gemini while Astra & Fable are resting.
+  1. Authorize execution of `WB-003` when ready.
   2. Confirm preferred predator-kill behavior: drop harvestable meat/bone items or feed in place.
-- **Assigned Worker**: Gemini (Implementation & Verification)
+- **Assigned Worker**: Claude / Fable (Writer). Reviewer: Grok (Independent Reviewer).
 - **Automated Acceptance Criteria**:
   - `node tools/run_tests.js smoke` -> 13/13 PASS
   - `node tools/run_tests.js wildlife` -> 13/13 PASS (grazing, fleeing, predator detection, performance < 1.0 ms)
@@ -122,14 +123,14 @@ Every work block MUST declare:
 - **Performance Criteria**: Total wildlife + ecology tick execution consumes < 1.0 ms per frame on 256×256 maps.
 - **Provenance & Licensing**: 100% original code and logic; zero ripped reference code.
 - **Rollback / Recovery Plan**: Git commit baseline `17039c1de8c2d09b2c606dcd7fc1838398b65657`.
-- **Expected Handoff Destination**: Verification, Debug & Performance (Gemini) -> Native MZ & Player Review (Owner).
+- **Expected Handoff Destination**: Verification & Adversarial Review (Grok) -> Coordinator Integration.
 
 ---
 
 ### Block `WB-004`: WG.00.12 Consolidation Without Moving Files (Lane C)
 - **Objective**: Establish non-moving foundation for repository hygiene, governance, performance profiling, and battle stack audit prior to any physical directory migration.
 - **Priority**: `HIGH`
-- **Status**: `IN_PROGRESS`
+- **Status**: `IN_PROGRESS` (Sub-lanes C1, C2, C3, and F merged; C2b active).
 - **Dependencies**: WG.00.08 / FABLE-19B closeout evidence.
 - **Allowed Paths**:
   - `docs/telemetry/*`
@@ -139,11 +140,54 @@ Every work block MUST declare:
   - `docs/issues/*`
 - **Forbidden Paths**: Core engine plugins (`game/js/plugins/DEUS_Levels.js`, `DEUS_World.js`, `DEUS_Fluid.js`, etc.); zero file moving/renaming.
 - **Owner Decisions Required**: None (non-moving preparatory work).
-- **Assigned Worker**: Codex (or Claude subagent if Codex unavailable). Reviewer: Gemini.
+- **Assigned Worker**: Claude (Lane C2b writer). Reviewer: Grok (Adversarial re-attack).
 - **Automated Acceptance Criteria**:
   - `tools/performance/` and `tools/governance/` scripts execute cleanly and output verifiable metrics.
   - Battle stack audit document completed in `docs/adr/`.
 - **Performance Criteria**: Zero runtime engine impact (tooling only).
 - **Rollback / Recovery Plan**: Git branch/worktree isolation.
-- **Expected Handoff Destination**: Architecture Council -> Coordinator Integration.
+- **Expected Handoff Destination**: Adversarial Review (Grok) -> Coordinator Integration.
+
+---
+
+### Block `WB-005`: WG.00.08 Native Z-2 Cut Proof Hardening (Lane H)
+- **Objective**: Harden automated Z-2 cut proof (`tools/test_generated_z2_cut_proof.js`) per DEC-001 fluid ruling with whole-footprint checks, ravine identity assertions, and 5 built-in mutants.
+- **Priority**: `CRITICAL`
+- **Status**: `VERIFY` (Committed `c8694f01` on `task/lane-h`, pushed to origin; Grok verification queued).
+- **Dependencies**: DEC-001 Owner Fluid Ruling.
+- **Allowed Paths**: `tools/test_generated_z2_cut_proof.js`, `tasks/WG.00.08/*` (docs & evidence only).
+- **Forbidden Paths**: All engine plugins (`game/js/plugins/*`) and game data.
+- **Owner Decisions Required**: Lift suspension on DEC-001 Option 1 upon passing independent verification.
+- **Assigned Worker**: Claude / Fable (Writer). Reviewer: Grok (Independent Verification).
+- **Automated Acceptance Criteria**:
+  - Baseline `node tools/test_generated_z2_cut_proof.js` exits 0 (12/12 checks pass).
+  - Mutants sweep `node tools/test_generated_z2_cut_proof.js --mutants` exits 1 (8/8 caught).
+- **Expected Handoff Destination**: Grok Independent Verification -> PM Sign-off -> Coordinator Integration.
+
+---
+
+### Block `WB-006`: WG.00.12 Governance Checker Hardening (Lane C2b)
+- **Objective**: Harden `tools/governance/check_claims.js` against 9 PM attack vectors identified in Directive 001-I §C.
+- **Priority**: `HIGH`
+- **Status**: `IN_PROGRESS` (Active writer in `C:\Users\snewt\.deus_worktrees\lane-c2b`).
+- **Dependencies**: Merged Lane C2 (`83bcc1a7`).
+- **Allowed Paths**: `tools/governance/check_claims.js`, `tools/governance/test_check_claims.js`, `tasks/WG.00.12/c2_governance_state.md`.
+- **Forbidden Paths**: All engine files.
+- **Assigned Worker**: Claude CLI (Writer). Reviewer: Grok (Adversarial Re-attack).
+- **Automated Acceptance Criteria**: All 9 attack vectors detected and reported with exit 1; clean claims exit 0.
+- **Expected Handoff Destination**: Grok Adversarial Re-attack -> PM Sign-off -> Coordinator Integration.
+
+---
+
+### Block `WB-007`: WG.00.09 Five-Z Depth Renderer Attack Plan (Lane E)
+- **Objective**: Author and harden the global Five-Z depth renderer attack plan (`docs/systems/UF_Depth_Attack_Plan.md`) adhering to lean 2D chibi top-down RPG specifications, zero blur, zero runtime color matrix shaders, and scale-only recession (DEC-006 / R1 = Option D).
+- **Priority**: `HIGH`
+- **Status**: `IN_PROGRESS` (Diff review `6a71a4c4` requested changes on 2 minor findings: N5, N6).
+- **Dependencies**: DEC-006 (Option D ruling).
+- **Allowed Paths**: `docs/systems/UF_Depth_Attack_Plan.md`, `tasks/DEUS-TSK-FABLE-19C/*`.
+- **Forbidden Paths**: All engine code (`game/js/plugins/*`) and game data.
+- **Assigned Worker**: Grok CLI (Writer). Reviewer: Claude CLI (Independent Diff Reviewer).
+- **Automated Acceptance Criteria**: Clean independent diff review PASS without open blockers or major findings.
+- **Expected Handoff Destination**: Claude Neutral Re-review -> PM Sign-off -> Coordinator Integration.
+
 
