@@ -1,3 +1,5 @@
+> **ART FREEZE — DEC-007 (Owner, 2026-09-25).** No art of any kind may be generated, requested from any image generator, or integrated as newly generated art by any agent without the Owner's direct involvement. Every art-generation rule below (including AGENTS.md Rules 11 and 13) is SUSPENDED until the Owner rewrites it. Test-harness PNG renders used as evidence are not art.
+
 @AGENTS.md
 
 # Gemini notes — Project DEUS
