@@ -317,7 +317,7 @@ About 48 bytes per record. At 32 layers an area has 1,024 regions (ADR-003 §5.1
 | shelter ρS | `shelterSlots` / (creatures that need shelter) | exposure hazard in cold or heat (reads SIM.50.06 temperature; today `DEUS_Environment.js` temperature per area) | none (SRD has extreme cold/heat rules in the same environment chapter; the hook passes them through, section 9) |
 | space ρA | `walkable` × 25 ft² / Σ (creature count × space) | crowding: disease contact rate rises (section 4.5); movement slows | SRD size categories: Tiny 2½ × 2½ ft, Small and Medium 5 × 5 ft, Large 10 × 10 ft, Huge 15 × 15 ft (`game/data/srd51/rules.json:9005`) |
 
-**Famine arithmetic from SRD numbers.** For a Medium humanoid with Constitution modifier 0: with no food, 3 days pass without effect, then one exhaustion level a day; exhaustion level 6 is death (SRD exhaustion table). Death therefore comes on day 9. On half rations each day counts as half a day without food (same SRD entry), so death comes on day 18. The bucket rule uses these numbers: the fraction of a bucket that dies of famine in a step is the fraction whose accumulated deficit days crossed `3 + Con + 6`, with Con from the species' SRD Constitution (people: 10 + racial increase; beasts: the creature's CON in `creatures.json`). Animals whose SRD entry has no age text still have a CON score, so the rule has an SRD anchor for every creature.
+**Famine arithmetic from SRD numbers.** For a Medium humanoid with Constitution modifier 0: with no food, 3 days pass without effect, then one exhaustion level a day; exhaustion level 6 is death (SRD exhaustion table). Death therefore comes on day 9. On half rations each day counts as half a day without food (same SRD entry). If exhaustion then accrues per full day-equivalent past the limit, death comes on day 18; if it accrues per calendar day once the limit (reached on day 6) is passed, death comes on day 12. The SRD text does not settle which; this design reads it the first way and marks that as an interpretation for review, held as a data switch. The bucket rule uses these numbers: the fraction of a bucket that dies of famine in a step is the fraction whose accumulated deficit days crossed `3 + Con + 6`, with Con from the species' SRD Constitution (people: 10 + racial increase; beasts: the creature's CON in `creatures.json`). Animals whose SRD entry has no age text still have a CON score, so the rule has an SRD anchor for every creature.
 
 **Geometry of shelter (DEC-013).** A shelter slot for a creature needs headroom of its height in whole 2 ft slices: Small (3-4 ft, halfling, gnome) 2 slices; Medium up to 6 ft 3 slices; a 6-7 ft Medium (dragonborn "well over 6 feet") 4 slices; Large a full 10 ft layer on a 2 × 2 cell footprint. **Stale model:** under the code's 1 ft strata these would be 4, 6, 7 and 10 strata of a 5 ft level (so a Large creature needs two levels); the counts above assume WG.00.17 has landed.
 
@@ -491,3 +491,188 @@ SIM.50.07 (animal migration and herds) and people migration (refugees, settlers)
 | M-10 | **Mass ledger** | Every move is a transfer of `body.*` mass between regions, which the ledger must accept as a location change, not a transform | WG.65.15 | blocked |
 
 **Migration rule sketch (for SIM.50.07, not a design of it).** At a region's coarse step, a herd or people bucket whose pressure is below its species threshold moves a fraction of its count to the adjacent region (same slab, or across a connection to another slab) with the best forecast ratios. The counts and masses move exactly (section 6.3 fields), and the move is logged as a location change. At L0/L1 the same decision becomes a movement goal for each individual (M-1).
+
+## Dormant code today
+
+Status words follow the audit (§0): LIVE runs in play; DORMANT exists but play never reaches it. "Keep" means the later code lane keeps the code or data (perhaps moved into the headless core, SIM.00.05); "reactivate" means wire it into play as it is; "replace" means new code per this design, reusing named parts; "remove" means delete once the replacement lands. No item is recommended for plain reactivation: each dormant loop either walks all people per second or hard-codes V123's 240 s year.
+
+| # | Item | Where (base commit) | State | Gap | Recommendation |
+|---|---|---|---|---|---|
+| D-08-01 | Pregnancy countdown `progressPregnancies` | `DEUS_Colonists.js:2540`; decrement `:2547`; only caller `DEUS_History.js:2386` | DORMANT | REP-1 | **Replace** with a gestation due-date (section 3.2). Keep the record shape of `:2482-2491` (`fatherId`, `dayConceived`, `isTwins`) minus the second counters. |
+| D-08-02 | Aging `progressAging` | `DEUS_Colonists.js:2799` (walks `allFactionPeople()` at `:2800`, `age++` at `:2806`); only caller `DEUS_History.js:2383` | DORMANT | REP-1 | **Replace** with closed-form age and stage events (section 1.4). Keep stage names and `updateAgeAppearance`. |
+| D-08-03 | Old-age mortality, one human curve for every species | `DEUS_Colonists.js:2828`; death at `passAwayOfOldAge` `:2849` → `Combat.onUnitDeath` (`:2868`; defined `DEUS_Combat.js:1021`) | DORMANT | REP-1 | **Replace** by one seeded death-age draw per individual; keep V123's table as the human distribution (data). Keep the mourning thoughts. |
+| D-08-04 | Birth `giveBirth` makes a two-year-old with no mass | `DEUS_Colonists.js:2561`; `age: 2` at `:2640` | LIVE only if a pregnancy completes, which needs D-08-01 | REP-2, LIFE-001 | **Replace** creation (newborn, mass from `gestMass`); **keep** the lineage fields at `:2644-2650`. |
+| D-08-05 | Conception chance falls to 0 at 200 people | `conceptionChance`, `DEUS_Colonists.js:2314-2322` (`:2315`); called from `handleMated` (`:2424`) | LIVE | REP-4, DEC-014 §1 | **Replace** with species fertility × age × body condition (section 3.1). |
+| D-08-06 | Twins, post-partum and gestation driven by population | `twinChance` `:2324`, `postPartumCooldownSeconds` `:2330`, `gestationSeconds` `:2336` | LIVE (gestation length set at conception) | REP-3 | **Replace** with species data (section 3.2). |
+| D-08-07 | 200-per-faction cap in the reproduction step | `stepFactionReproduction` `DEUS_Colonists.js:2875`, cap `:2886`; caller `DEUS_History.js:2393` | DORMANT | REP-4 | **Remove.** The function also clusters all faction people each call; the replacement is event-driven pairing. |
+| D-08-08 | `factionPopulation` walks every unit per call | `DEUS_Colonists.js:2299` (`W.units().filter` at `:2302`); called at conception (`:2477`) | LIVE | NAT-003 | **Replace** with the Q-FACTPOP counter. **Keep** the event-driven counters in `DEUS_Factions.js:594-625`. |
+| D-08-09 | Household gate defaults to "yes" | `DEUS_Colonists.js:2473`; gate `UF_Households.js:957`; Households loads by `require()` and its binding was not probed (audit §4.3) | LIVE | — | **Keep** the gate; change the default to "no" plus a diagnostic; confirm the binding in F5. |
+| D-08-10 | Food counted in pounds per day for the player's faction only; eating does not feed growth | `FOOD_LB_PER_DAY` `DEUS_Colonists.js:1521`; loop `:1637` | LIVE | REP-2 | **Replace** with per-individual intake and the mass split (section 3.3). ADR-003 §7.8 Q-FOOD already asks for integer milli-units. |
+| D-08-11 | Asexual herd breeding each game hour | `stepBreeding` `DEUS_Ecology.js:661`: any herd of 2 (`:684`), monsters never (`:689`), herd max (`:691-692`), 12-hour spacing (`:695`), chance (`:697`), one young as a full unit (`:714`) | LIVE | REP-3, REP-2 | **Replace** by the bucket and individual lifecycle; **keep** the herd record's `lastBirth` (ADR-003 §6). |
+| D-08-12 | Replenishment creates prey and monsters from nothing | `attemptSpawn` `DEUS_Ecology.js:509`, unit added `:548`, via `processArea` `:563-564` | LIVE | LIFE-001 | **Replace** by breeding plus arrivals (section 1.1); a `spawned` species uses a logged source only. |
+| D-08-13 | Wildlife capped at the starting count | `capFor` `DEUS_Ecology.js:223-227`; floors `:46-47` | LIVE | REP-4 | **Remove** (DEC-014 §1); capacity is physical (section 4). |
+| D-08-14 | Population counts only z = 0 | `population()` `DEUS_Ecology.js:170`, `unitsInArea` at `:174` | LIVE | MIG-4 | **Replace** by region buckets per layer. |
+| D-08-15 | Wildlife AI removed | `DEUS_Wildlife.js:1197`; `tick` `:1158` never called; `ai: null` `:543` | DORMANT | MIG-1 | **Do not reactivate** the frame-based tick; **replace** with SIM.00.04's movement model. |
+| D-08-16 | Immigration creates people, capped at 180 | `immigrationWaveSize`/`immigrationChance` `DEUS_Colonists.js:3015-3027`; `spawnImmigrants` `:3029`; `stepImmigration` `:3125` (calls at `:3141`), only caller `DEUS_History.js:2426` | DORMANT | LIFE-001, REP-4 | **Replace** by migration from other regions (M-9). |
+| D-08-17 | Catalog `people` stats differ from the SRD | `game/data/DEUS_WorldCatalog.json:7322` (human `{}`), `:7329` (elf), `:7339` (dwarf), `:7349` (gnome) | LIVE data | SRD baseline | **Replace** the four values with SRD increases (section 5.1). |
+| D-08-18 | Every living historical person becomes a full unit | `DEUS_History.js:481` loop, unit added `:518` | LIVE at New Game | REP-4 | **Replace** with budgeted promotion (section 6.5). |
+| D-08-19 | Legacy second-by-second history loop | `DEUS_History.js:2370` | DORMANT | NAT-003 | **Remove** after aged-world history runs on the life blocks (ADR-003 §14.3 Q6). |
+| D-08-20 | Species biology profiles | `DEUS_HistoricalDemographics.js:128-136`; run by `DEUS_History.js:391` | LIVE at New Game | — | **Keep** as the seed data for the catalog `life` blocks; fix `half-elf` and `tiefling` against the SRD (section 1.3). |
+| D-08-21 | Elder at 50 and at 55 | `DEUS_Colonists.js:2807`, `:3243` | both | REP-5 | **Replace** both with one stage table. |
+| D-08-22 | Race-to-layer map | `game/data/DEUS_WorldCatalog.json:7413-7429` | LIVE data | DEC-013 open | **Keep only as a stale stand-in** until WG.62.02 writes the Owner's assignment; no new code may read it as authority. |
+| D-08-23 | Seven cultures for nine races | `game/data/DEUS_WorldCatalog.json:9306` | LIVE data | PLAN-4 | **Replace** per section 5.3 **[D-6]**. |
+| D-08-24 | Appearance inheritance | `DEUS_Colonists.js:801` | LIVE | — | **Keep**; generalise into the genome (section 2.3). |
+| D-08-25 | Remains vanish after 12 game hours | `DEUS_Anim.js:1162`; `game/data/DEUS_WorldCatalog.json:9922` | LIVE | decay gap DEC-3 | **Replace** via Lane R's decay chain (IA-R1). |
+| D-08-26 | Herds planned for 0, -1, -2 only; cave species hardcoded; per-area herd counts | `DEUS_Wildlife.js:526`, `:454`, `:465` | LIVE at New Game | MIG-5, DEC-013 | **Replace** with biome-keyed data over all 32 layers once biome bands are assigned. |
+
+## Health and death hooks
+
+No health system is designed here. These are the smallest interfaces the lifecycle needs so that the people-side audit (SIM.50.11, Lane O2: gaps G6-1..G6-10, unreviewed) and later health packages can attach without changing the lifecycle.
+
+### 9.1 What the lifecycle publishes
+
+| Hook | Payload (ids and integers only) | Fired when | Used by |
+|---|---|---|---|
+| `life:born` | `{id, species, motherId, fatherId, regionId, cell, massG}` | birth | history, households, Q-FACTPOP |
+| `life:stage` | `{id, from, to}` | stage event | appearance, jobs, plans |
+| `life:pregnancy` | `{id, state: start \| end \| failed, dueAt}` | conception, birth, failure | health (prenatal care), households |
+| `life:died` | `{id or bucketKey+count, species, cause, killerRef, regionId, cell, massG, officeIds}` | any death | remains (IA-R1), history, Q-FACTPOP, households, succession (SOC.20.01), death forensics |
+| `capacity.pressure(regionId)` | `{rhoF, rhoW, rhoS, rhoA}` (fixed-point) | read on demand | plans, migration, health |
+| `capacity.density(regionId)` | `{count, walkable, crowding}` | read on demand | epidemic model (DEC-014 §4; O2 G6-1) |
+| `life.condition(id)` | `{bodyMassG, targetMassG, deficitDays}` | read on demand | health (starvation display, healing) |
+
+### 9.2 What the lifecycle consumes
+
+| Hook | Contract | Default when no health package is loaded |
+|---|---|---|
+| `health.kill(subject, cause, killerRef)` | the one way anything kills a tracked individual; the lifecycle performs the death transforms (section 3.3) and fires `life:died`. Combat keeps `Combat.onUnitDeath` (`DEUS_Combat.js:1021`, which emits `combat:kill` at `:1072`) as its caller | lifecycle calls it itself for old age and famine |
+| `health.bucketDeaths(regionId, key, count, cause)` | L2 deaths from disease, poison or exposure; the lifecycle removes `count` members and their mass to remains | none |
+| `health.addExhaustion(subject, levels, cause)` | the lifecycle's famine and thirst rules call this; health owns SRD conditions (O2 G6-2, HEALTH-01). SRD exhaustion: 1 disadvantage on ability checks, 2 speed halved, 3 disadvantage on attacks and saves, 4 hit point maximum halved, 5 speed 0, 6 death (`game/data/srd51/rules.json:10533`) | the lifecycle keeps an exhaustion count on the life block and calls `health.kill` at 6 |
+| `health.fertilityFactor(id)`, `health.growthFactor(id)` | 0..1 multipliers from wounds, disease or exhaustion | 1 |
+| `health.shelterNeed(species, temperature)` | exposure threshold for the capacity model (reads SIM.50.06 temperature) | species data constant |
+
+**Cause vocabulary** (a closed list in data, so tests can check it): `old_age`, `famine`, `thirst`, `exposure_cold`, `exposure_heat`, `disease:<id>`, `poison:<id>`, `wound`, `violence:<weapon|spell>`, `predation:<species>`, `collapse` (IA-Q2), `drowning`, `fire`, `childbirth`, `pregnancy_failed`, `created_undone` (a `created` body unmade).
+
+**Dying state.** SRD dying and death saves belong to health and combat (O2 G6-8 notes cold and heat deaths skip them). The lifecycle only reacts to `health.kill`.
+
+## Sparse storage and cost
+
+All sizes are at 32 layers; nothing is sized by 32 × area. ADR-003's region count (1,024 per area) is the only place the layer count enters, and only regions holding state have records.
+
+### 10.1 Memory per record
+
+| Record | Bytes | Allocated | Arithmetic example |
+|---|---|---|---|
+| Life block (tracked individual) | 56 | per tracked individual | 20,000 → 1.1 MB |
+| Due-date queue entry | 12 | one per tracked individual | 20,000 → 240 KB |
+| Pregnancy record | 16 (`fatherId`, `conceivedAt`, `dueAt`, `litter`, flags) | only while pregnant (hash map by id) | 5% of 10,000 women → 8 KB |
+| `childrenOf` index | about 8 per parent-child link | living people and live stubs | 20,000 × 2 links → 320 KB |
+| Ancestor stub | 32 | dead people still anchoring kin, or notable | about 3.8 MB steady state (section 2.2) |
+| Lineage summary | 48 + 4 per notable | per lineage ever founded | 10,000 → 480 KB per millennium |
+| Household | about 32 + 4 per member | living households | 5,000 × 52 → 260 KB |
+| Herd record | 48 (`herdId`, species, `ownerId`, home, summer and winter regions, trait means 16 B, `lastBirth`) | per herd | 2,000 herds → 96 KB |
+| Bucket entry | 24 | per non-zero key per region | wildlife region with 60 keys → 1.4 KB |
+| People lineage table | 68 | per people bucket (only if people crowd LOD is adopted) | 80,000 buckets → 5.4 MB |
+| Region capacity record | 48 | per region with population or food | 1,024 regions worst case → 48 KB per area |
+| Soil nutrient pools | 8 per region-layer; 8 per cell with remains | on first deposit | ≤ 16 KB per area for region pools |
+
+**Per area, 32 layers, wildlife only.** Worst case every region populated: 1,024 × (1.4 KB + 48 B) ≈ 1.5 MB. Assumed realistic 20% populated: about 300 KB. A dense per-cell population grid would be 256 × 256 × 32 cells × 2 bytes = 4 MB per area with no species or mass information; it is rejected.
+
+**Stale model note.** At the code's 5 levels the same area would have 5 layers, i.e. 3 slabs (ADR-003 §5.1 gives 320 regions at 9 layers; at 5 layers 192 regions), so the worst case above would be about 5 times smaller. Only the region count changes; no per-record size depends on layer thickness.
+
+### 10.2 CPU class per mechanism (per tick, 10 Hz [ADR-003 PROPOSED])
+
+| Mechanism | Trigger | Class | Arithmetic (assumptions) |
+|---|---|---|---|
+| Aging, stage change, natural death | due-date queue | O(events due) | 20,000 people: 12.5 events/s under D-1 (b), 0.037/s under (a) with D = 336 (section 1.4) |
+| Conception | mating job (L0/L1) or bucket closed form | O(1) per event | — |
+| Birth | due date | O(1) + one ledger transform | — |
+| Eating and mass split | each meal (L0/L1); per bucket per coarse step (L2) | O(1) per meal; O(keys) per bucket step | 800 key updates per tick for 80,000 keys (section 6.5) |
+| Capacity ratios | region coarse step or large input change | O(species × diets) per region | ≤ 11 region steps per tick per area at 32 layers; about 2 on average for 200 active regions (section 4.6) |
+| Lineage compaction | on death (≤ 14 stubs), decade queue | O(1) amortised per death | 700 deaths/year → 700 × 14 checks per sim-year |
+| Promotion / demotion | LOD transition | O(members materialised) | once per transition, not per tick |
+| Predation, famine, disease hooks | region coarse step | O(predator-prey pairs) per region | small |
+
+No mechanism loops over all creatures, all regions or all cells on a clock (V133, NAT-003). The one audit-listed per-call scan that remains in live code (`factionPopulation`, D-08-08) is replaced.
+
+### 10.3 Save representation (Owner ruling D-3)
+
+**Saved (truth):** life blocks, pregnancy records, ancestor stubs, lineage summaries, households, herd records, non-zero bucket entries with their masses and carries, soil nutrient pools (they hold matter), the RNG serials (`promotionSerial` per region).
+
+**Not saved (rebuilt on load):** the due-date queue (from `birthTime`, stage tables, pregnancy `dueAt` and the seeded death-age draw, which is a pure function of `(worldSeed, 'death', id)`), the `childrenOf` index, capacity ratios and `demandG` (from the saved populations and the world's items, flora and fluids).
+
+**Size example:** 20,000 life blocks (1.1 MB) + stubs (3.8 MB) + 2,000 populated regions × 40 keys × 24 B (1.9 MB) ≈ 7 MB before compression. Save size therefore scales with living entities and populated regions, not with 32 × area (DEC-013 §3). The format itself belongs to SIM.00.06 [ADR-003 PROPOSED §11].
+
+## Acceptance tests
+
+Automatable tests for the later code lanes. Each has a fixture, an assertion, and a **mutant that must make it fail** (AGENTS.md rule 4). They run headless on the core (SIM.00.02).
+
+| Id | Fixture | Assertion | Mutant that must fail |
+|---|---|---|---|
+| T-LIFE-1 | 3 humans, 1 dwarf, 1 deer; advance 80 sim-years in hour steps | stages match the species tables at every boundary; an instrumented counter of per-individual work per hour equals the number of due events | a loop that visits every individual each hour (counter exceeds due events) |
+| T-LIFE-2 | 10,000 seeded death-age draws per race | mean and max within 5% of the race's data (section 1.3); human mean 60 ± 1 (V123) | the human table used for all races (dwarf mean fails) |
+| T-MASS-1 | a pregnant human with 30 days of food items | Q-MASS[organics] before = after + logged `metabolism` sink, to the gram; newborn `bodyMass` = accumulated `gestMass` − placenta share | the newborn given a nominal mass instead of `gestMass` (ledger imbalance) |
+| T-MASS-2 | a deer killed by a wolf, then left | prey mass = predator stomach gain + carcass remains; remains hand-off to Lane R has the same grams | the unit removed without a transform |
+| T-MASS-3 | static check of the lifecycle cause table | the only source causes are `spawn:<id>`; no lifecycle transform outputs an ore form (LIFE-002) | adding `birth` as a source, or `bone → ore` |
+| T-CAP-1 | one region, fixed forage regrowth R g/day, one grazer species with intake i g/day; 200 sim-years at L2 | after a 50-year burn-in the population stays within [0.5, 1.5] × R / i and never goes extinct | removing the famine hazard (population exceeds 1.5 × R / i) |
+| T-CAP-2 | the T-CAP-1 fixture with forage doubled | equilibrium population rises by at least 1.8×; a static check finds no comparison of a population count with a numeric literal in the life and capacity modules | reinserting `if (pop >= 200)` (either check fails) |
+| T-LIN-1 | 5,000 births over 300 sim-years with compaction on | every living person's parent ids resolve to a life block or stub, or are null only for founders or crowd-born; no cycles; `generation = max(parent) + 1`; every `NOTABLE` stub survives | compaction that ignores the 3-generation rule (dangling parent) |
+| T-LIN-2 | a stable population of 2,000 over 1,000 sim-years | stub memory ≤ living × 8 × 32 B + notable stubs × 32 B | compaction disabled |
+| T-LOD-1 | 1,000 random promote/demote cycles on 3 seeds (the SIM.30.03 property test) | per key counts, body and gestation mass, lineage tables, tracked id set and Q-FACTPOP are exactly equal before and after | promotion rounding each mass without passing on the residual; demotion dropping the lineage |
+| T-LOD-2 | promote the same region twice from the same state | byte-identical individuals | `Math.random` in the age draw |
+| T-LOD-3 | 100 sim-years of a small world, `lod.mode = "full"` against mixed LOD (ADR-003 §5.6) | conserved totals equal; population within the ADR's SIM.30.05 tolerance | bucket births that ignore `conditionFactor` |
+| T-RACE-1 | load the plan slot list | exactly the nine SRD race ids of `character_options.json` `kind: "race"`; each has a culture record; each `homeRange` is `OPEN` unless an Owner-sourced record exists | dropping `tiefling`; or writing a numeric home range with no Owner source |
+| T-RACE-2 | catalog `people` stats | equal to SRD ability increases (half-elf: Cha +2 plus two +1s) | elf `con: -1` (today's data fails this test until D-08-17 is fixed) |
+| T-NOSCAN-1 | 32-layer fixture with 100 and with 1,000 populated regions | per-tick lifecycle and capacity work grows with active regions and due events, and is the same for 9 and 32 layers with the same populated regions | a per-tick loop over all regions |
+| T-D1-1 | the same seed run with `HOURS_PER_YEAR = 24` and `= 8,064` | identical outcomes measured in sim-years (births, deaths, stages) | a hard-coded 240 s year anywhere in the lifecycle |
+
+## WBS impact
+
+Proposed packages (PROPOSED only; the Coordinator mints real IDs). Every dependency named is a real WBS ID at the base commit.
+
+| Id | Title | Depends on | Acceptance tests |
+|---|---|---|---|
+| PROPOSED-W-01 | Species `life` schema in the catalog: stages, lifespan distributions, fertility, gestation, litter, spacing, origin kind, diet, mass; seeded from `DEUS_HistoricalDemographics.js:128-136` and SRD text | SIM.00.02, WG.65.15, SOC.10.01 | T-LIFE-2, T-RACE-2, T-MASS-3 |
+| PROPOSED-W-02 | Lifecycle core: due-date queue, closed-form aging, death draws, conception, gestation, birth with the mass ledger (replaces D-08-01..06) | SIM.00.02, SIM.00.05, WG.65.15 | T-LIFE-1, T-MASS-1, T-MASS-3, T-D1-1 |
+| PROPOSED-W-03 | Herd records and bucket lifecycle at L2 for wildlife, monsters and livestock (replaces D-08-11..14) | SIM.30.01, SIM.30.02, WG.65.15 | T-LOD-1, T-LOD-2, T-CAP-1 |
+| PROPOSED-W-04 | Region capacity record and pressures; famine, thirst, predation; disease and exposure hooks | SIM.30.01, SIM.50.02, SIM.50.04, SIM.40.01 | T-CAP-1, T-CAP-2, T-NOSCAN-1 |
+| PROPOSED-W-05 | Owned-herd buckets: amend ADR-003 §7.5 so unnamed livestock is counted | SIM.00.01 | T-LOD-1 with an owner key |
+| PROPOSED-W-06 | Lineage store, compaction and the history feed | SIM.00.06, SOC.10.01 | T-LIN-1, T-LIN-2 |
+| PROPOSED-W-07 | People crowd buckets with identity axes and lineage tables (only if the Owner adopts people crowd LOD) | SIM.30.03, SOC.10.01 | T-LOD-1 people variant, T-LOD-3 |
+| PROPOSED-W-08 | Nine race slots and catalog reconciliation: SRD stats, five culture stubs, `nonRacePeoples`, `homeRange: OPEN` **[D-6]** | SOC.10.02, SOC.10.03, WG.62.02 | T-RACE-1, T-RACE-2 |
+| PROPOSED-W-09 | Remove caps and creation-from-nothing (D-08-05, -07, -12, -13, -16) and the legacy history loop (D-08-19) once W-02..W-04 run | SIM.40.10, SIM.00.05 | T-CAP-2, T-MASS-3 |
+| PROPOSED-W-10 | Health and death hook contracts (section 9) with a stub health package | SIM.00.05, SIM.40.05 | T-MASS-2 plus a hook contract test: a stub `health.kill` must produce exactly one `life:died` and one remains hand-off (mutant: double fire) |
+
+**Changes suggested to existing rows** (recommendations to the Coordinator; this lane changes no WBS file):
+- **SIM.40.10** lists only `dep: SIM.40.02` (collapse). Its real prerequisites are WG.65.15 (ledger), SIM.00.05 (systems in the core), SIM.30.02 (summary simulation for "wild counts at summary LOD") and SIM.40.05 (remains to soil). Collapse is needed only for the `collapse` death cause.
+- **SIM.50.07** needs SIM.00.04 (movement), SIM.50.06 (seasons, D-1) and SIM.30.01 (regions); the audit (§6 step 8) already recommends the last two.
+- **SIM.50.09** needs SOC.10.02 (plan expansion and failure rules) for founding and contraction.
+- **SIM.30.01**'s summary schema should include bucket masses and a lineage quantity (Q-LINEAGE), and **SIM.30.03**'s DoD 1 should list lineage conservation.
+- **WG.62.02** cannot finish until the Owner assigns race home ranges (DEC-013 open sub-question).
+
+**Sequencing** (the audit's §6 order governs): PROPOSED-W-01 and W-02 after step 4 (core tick, SIM.00.02-05) and step 2 (WG.65.15); W-03, W-04 and W-07 after step 7 (SIM.30.01-03); W-06 with SIM.00.06; W-08 with SOC.10.02-03; W-09 last. Step 1 (rule-breach fixes) could take D-08-12 early, because creating animals from nothing breaks LIFE-001 today.
+
+## Owner questions
+
+None of these is answered here. Where the design already supports every option as data, it says so.
+
+| Id | Question | Options |
+|---|---|---|
+| OQ-W-01 | Per-race lifespans and stage ages. V123 sets human adulthood at 15 and a mean life of 60; the SRD says humans reach adulthood "in their late teens"; `DEUS_HistoricalDemographics.js:128` gives humans [60, 90]. Which governs, and what number is a tiefling's "a few years longer"? | (a) V123 for humans, SRD text for the other eight; (b) V123's ages and curve for all nine; (c) SRD for all nine, humans included (adulthood about 18); (d) an Owner table. All are data. |
+| OQ-W-02 | Cross-race offspring. The SRD has half-elves and half-orcs but no rule for other pairs. | (a) no cross-race offspring; (b) only the SRD pairs (human + elf → half-elf; half-orcs from human and orc ancestry, where orc is not one of the nine); (c) any pair is fertile and the child takes one parent's race by a seeded draw; (d) an Owner table. |
+| OQ-W-03 | How many named individuals should the world hold, beyond what benchmarks allow? | (a) benchmark only (DEC-014 §2 as written); (b) an Owner floor: every office holder and household head is named; (c) a named quota per faction. |
+| OQ-W-04 | The D-6 slot list: nine SRD races, while the catalog's cultures include goblin, orc and automaton and `docs/design/PEOPLES.md:5` records eleven peoples. | (a) nine SRD races; the three non-SRD cultures kept as `nonRacePeoples` outside the nine; (b) nine SRD races; the three cultures deleted; (c) a different nine chosen by the Owner (SRD baselines would then be missing for some). |
+| OQ-W-05 | People crowd LOD (ADR-003 Q14; DEC-014 §2 is OPEN). | (a) adopt, with lineage tables capped at 8 lineages plus a residual; (b) adopt, with full lineage per bucket (more memory); (c) do not adopt: every person stays tracked, abstract when out of focus. |
+| OQ-W-06 | Monster origins: `troll`, `bog_horror`, `sand_stalker`, `restless_dead`, `ice_wraith`; and whether V75's "monsters keep spawning" means breeding plus arrivals, or a `spawned` source. | (a) the default-by-SRD-type table (section 1.1); (b) all breed; (c) the Owner assigns each species. |
+| OQ-W-07 | Gestation and incubation where the SRD is silent (all races; dragonborn hatch from eggs). | (a) 0.75 sim-years for the eight live-bearing races and an Owner number for dragonborn incubation; (b) gestation scaled with lifespan; (c) an Owner table. |
+| OQ-W-08 | Immigration from outside the world. | (a) none: people arrive only from other regions; (b) an off-map pool as a logged source and sink with a budget, like rain; (c) the world edge is closed to people and animals. |
+| OQ-W-09 | Once D-1 is ruled: should biological durations follow sim-years exactly? Under D-1 (b) a human life is 4 real hours at ×1 and a rat's gestation 14 s (section 0.1). This question does not choose D-1. | (a) biology follows sim-years whatever D-1 is; (b) biology gets its own speed factor; (c) decide after D-1. |
+| OQ-W-10 | Owned animals: ADR-003 §7.5 tracks every owned or tamed animal. | (a) owned-herd buckets for unnamed stock (PROPOSED-W-05); (b) every owned animal tracked; (c) a per-owner tracked budget with the rest in owned-herd buckets. |
+| OQ-W-11 | Race home layer ranges (DEC-013 open sub-question). The catalog's `factions.layers` map (`game/data/DEUS_WorldCatalog.json:7413-7429`) predates DEC-013. | (a) the Owner assigns ranges now; (b) keep the stale map as a `TEST_` stand-in until assigned; (c) all races start on the surface band until assigned. |
+
+**Flags carried by this design:**
+- **[D-6]** sections 5.1, 5.3, PROPOSED-W-08, OQ-W-04.
+- **[D-4]** the water ratio ρW and the `drink` ledger entry read Fluid as the single water authority (sections 3.3, 4.2).
+- **D-1 OWNER_OPEN:** only `HOURS_PER_YEAR` depends on it (section 1.4), tested by T-D1-1; seasonal breeding and migration (M-3) wait for SIM.50.06.
+- **[ADR-003 PROPOSED]:** regions, L0/L1/L2, tracked-unit rules, ledger signature and conserved quantities (sections 0, 6, 10).
+- **DEC-014 OPEN (PM defaults):** crowd LOD for people and the budget (section 6, OQ-W-03, OQ-W-05).
