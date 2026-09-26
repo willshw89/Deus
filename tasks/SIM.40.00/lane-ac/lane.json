@@ -3,7 +3,7 @@
     "taskId":  "SIM.40.00",
     "branch":  "task/lane-ac",
     "writer":  "grok",
-    "reviewer":  "claude",
+    "reviewer":  "gemini",
     "push":  true,
     "allowedPaths":  [
                          "game/data/sim/**",
