@@ -2152,9 +2152,19 @@
                 "row": "build",
                 "from": {"class": "stone", "form": "item"},
                 "to": {"class": "stone", "form": "object"}
+              },
+              {
+                "row": "pick",
+                "from": {"class": "rubble", "form": "strata"},
+                "to": {"class": "rubble", "form": "item"}
+              },
+              {
+                "row": "build",
+                "from": {"class": "rubble", "form": "item"},
+                "to": {"class": "stone", "form": "object"}
               }
             ],
-            "note": "Raw material becomes a product of the same material; offcuts stay as items. A fabricated span must pass the support model (SIM.40.01)."
+            "note": "Raw material becomes a product of the same material; offcuts stay as items. Rubble can be raw material too (SIM.40.05 uses Fabricate on rubble). A fabricated span must pass the support model (SIM.40.01)."
           }
         }
       ]

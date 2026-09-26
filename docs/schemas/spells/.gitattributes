@@ -1,0 +1,4 @@
+# SIM.60.02: keep LF in every clone so tools/spells/validate_spell_effects.js --check is byte-identical
+# (the system gitconfig on this machine sets core.autocrlf=true for fresh clones).
+*.json text eol=lf
+*.md text eol=lf
