@@ -516,4 +516,238 @@ Every covering write reaches decay as `levels:strataChanged` on the member's cel
 - **Triggers:** a structure changing maintenance state (one event per structure), a stage transition (one event per structure), `objects:changed` for root feedback, `levels:strataChanged` for burial.
 - **Cost:** setting flags for a 10×10 house plus its 1-cell halo is at most 12 × 12 = 144 flag writes, once per stage transition. Ecology's establishment keeps its own bounded sampling (moved into the core by ADR-003 SIM.00.05); decay adds a constant-time flag read to it.
 
+## Ruins and re-founding
+
+This section answers R-07 (LIFE-003, SIM.50.09): when a settlement becomes a physical ruin, which traces survive and for how long, salvage with conserved mass, and re-founding on old foundations.
+
+### R-07.1 What exists
+
+| Citation | Code | Finding |
+|---|---|---|
+| `DEUS_Projects.js:135` | `const PHASES = ["camp", "village", "town"];` | Live phases only grow (line 579); nothing steps back (SET-1). |
+| `DEUS_HistoricalDemographics.js:319` | `abandonedYear: null, isRuined: false, population: 0, peakPopulation: 0, historicalCapacity };` | `isRuined` starts false and nothing sets it true (X-7, SET-5)... |
+| `DEUS_History.js:547` | `site.ruined = ds.isRuined ? ds.abandonedYear : null;` | ...so the one reader always leaves `site.ruined` null. |
+| `DEUS_Colonists.js:3733` | `else if (here && (hasTag(here, "building") \|\| hasTag(here, "ruin"))) state = step.exact ? "blocked" : "skipped";` | Ruin cells block building, so foundations are never reused (SET-4; also `UF_Households.js:462`). |
+| `game/data/DEUS_WorldCatalog.json:2204` | `"stone": 2` | Quarrying a 2-stone wall yields 2 stone and leaves rubble (line 2206) that picks for 2 more (LAND-1). |
+
+The Year-0 rule governs where ruins can come from: "Standard New Game begins strictly at World Year 0 (V134). No pre-generated centuries of roads, ruined cities, or exhausted mines" (INV-SIM-01, `docs/INVARIANT_REGISTRY.md:51`). Every ruin in this design comes from a settlement the simulation built and then abandoned. Decay never stamps a ruin.
+
+### R-07.2 The site state machine (fixes X-7 in design)
+
+The site record belongs to SIM.50.09. Decay adds these fields: `state`, `abandonedDay`, `stage`, `predecessorSiteId`.
+
+| State | Entered when | What decay does |
+|---|---|---|
+| ACTIVE | population > 0 | computes upkeep coverage `k` on population or structure events (R-01.7) |
+| DECLINING | SIM.50.09 marks contraction, or `k < 1` | triage: whole structures lose maintenance in a deterministic order |
+| ABANDONED | population 0 for `siteAbandonYears` (1 sy), or SIM.50.09's abandonment event (war, famine, disease) | every structure loses maintenance in one event; `abandonedDay` is set; this is the same fact as the history ledger's `abandonedYear` (`DEUS_HistoricalDemographics.js:521`) |
+| RUIN | ≥ 50 % of the site's built mass is in structures at S3 or later | **sets `isRuined = true`**, so `DEUS_History.js:547` sees it: the X-7 fix |
+| MOUND | ≥ 50 % at S5 or later | none beyond the stage |
+| REFOUNDED | a new site claims the old footprint (R-07.5) | the old record is kept for history; the new site links to it |
+
+- Transitions are evaluated only when one of the site's structures changes stage. Cost is proportional to stage events, never to the number of sites.
+- **The floor (LIFE-003).** A site with an anchor (a history site, a monument, a grave with an anchor record) never goes past MOUND. Its anchor records are never removed (ADR-003 L1683). A site with no anchor keeps the trace rules below, so it still does not vanish within the retention times.
+
+### R-07.3 Trace retention rules
+
+"Removed only by" lists physical processes. Decay itself removes none of these traces within the minimum retention times.
+
+| Rule | Trace | How it is retained | Minimum retention (default) | Removed only by |
+|---|---|---|---|---|
+| **TR-1** Foundations | WALL-BASE and FOUNDATION members of stone, brick and mudbrick walls, and stone footings of timber buildings | Buried slices have life ∞ (R-01.6). In addition, decay never schedules a failure for a FOUNDATION member: its HP stops at the anchor floor `h = 0.25` | ≥ 10,000 sy; indefinitely in practice | salvage (a job; leaves a `robbed` provenance flag, TR-8), erosion (SIM.50.03), collapse from below (Lane Q), blasts |
+| **TR-2** Vaults and cellars | built voids below grade or at layer ≤ -1: cellars, crypts, tunnels, halls | CAVE and SEALED lives: ASHLAR 20,000 sy or ∞, BRICK 5,000, RUBBLESTONE 3,000; the lining's base is TR-1 | ≥ 3,000 sy for the void; the lining indefinitely | Lane Q collapse (the lining then stays as rubble in place), flooding fills but does not remove |
+| **TR-3** Mounds | the elevation anomaly of rubble, fines and soil over a footprint | Decay never moves mass outside the footprint and its 1-cell halo | ≥ 10,000 sy without erosion; SIM.50.03 must keep a mound ≥ 1 slice for ≥ 1,000 sy on a slope with default rates, or report that it cannot | erosion, excavation, salvage |
+| **TR-4** Roads | paved roads (stone slabs as built strata at ground level) and compacted earth paths | Slabs are FOUNDATION members (TR-1). Earth paths keep a `compacted` provenance flag (WG.65.16) that cuts plant establishment to 25 % | slabs as TR-1; the vegetation line for 500 sy; the flag indefinitely | excavation, erosion |
+| **TR-5** Relics | NOBLE, SILVER, SPECIAL, GLASS, CERAMIC, STONEITEM items and uncorroded metal cores | Never leave the ITEM family through decay (R-03.7) | indefinitely | a job picking them up |
+| **TR-6** Graves and remains | remains records, grave objects and their `personId` anchors | Anchored graves (ADR-003 L1683; the anchor schema of `docs/systems/UF_History.md:106`) are never removed. Other remains keep their anchor for `anchorYears` (200 sy) after their bones are gone (R-03.4) | indefinitely for anchored graves; bones 2,000 sy buried | a job (exhumation) |
+| **TR-7** Burn horizons | buried ASH and CHARCOAL | Buried residue has life ∞ (R-04.4) | indefinitely | excavation, erosion |
+| **TR-8** Provenance and traces | WG.65.16 flags on changed cells (built, collapsed, robbed, naturalized); OXIDE, bone phosphate and SOIL-CARBON in residue records | They are ordinary sparse saved state | indefinitely | nothing; they move only with the soil they sit in |
+
+**What a visitor finds at a default stone hamlet** (limestone ASHLAR houses with TIMBER roofs, temperate, FT 0.25, no erosion; approximate, from R-01.6):
+
+| Years after abandonment | What is visible |
+|---|---|
+| 10 | weathered roofs, weeds in doorways (S1-S2) |
+| 100 | roofless houses with standing walls, saplings inside (S3) |
+| 1,000 | the same walls lower and cracked; shrubs and young woodland; an iron-stained floor; ceramic and glass in the leaf litter (S3) |
+| 2,000 | wall stubs and rubble spreads (S4); foundations complete |
+| 10,000 | low grassed or wooded mounds on the old plan (S5), foundations under them, relics and an ash line at the burned house under the soil |
+
+### R-07.4 Salvage with conserved mass
+
+A salvage job (owned by the SIM.50.08 and SIM.50.09 job systems) takes matter from RUBBLE, BUILT or SCRAP and makes items **by mass**:
+- `n = floor(m_taken / unitMass[item])`; `T(RUBBLE or BUILT→ITEM, family, n × unitMass, "salvage")`. The remainder stays where it was, as RUBBLE. Nothing is lost and nothing is created.
+- **Worked example.** A limestone rubble slice: catalog density 2.3 g/cm³ (`game/data/DEUS_WorldCatalog.json:4717`, `"density": 2.3,`) = 143.6 lb/ft³ solid; rubble with 35 % voids gives 50 ft³ × 0.65 × 143.6 = 4,667 lb = 74,672 mu. With an assumed 50 lb (800 mu) stone item: n = 93, taken 74,400 mu, remainder 272 mu stays as RUBBLE in the cell's residue record. This replaces the fixed "2 stone" yields (`game/data/DEUS_WorldCatalog.json:2204`, `:2104`) for ruins, closing LAND-1's 2-in-4-out quarry for this path.
+- BUILT ASHLAR with `h ≥ 0.5` yields dressed blocks (reuse costs less labour); lower HP yields rubble stone.
+- BUILT TIMBER with `h ≥ 0.6` yields reusable beams; lower HP yields firewood. The rot clock stops when the item is picked up.
+- SCRAP yields metal items that can be smelted (recycling existing metal). OXIDE yields nothing (ore guard rule 2).
+- Robbing a FOUNDATION member is allowed (people do dig out old foundations), but it leaves a `robbed` provenance flag on the cells (TR-8), so the plan still reads in the soil.
+
+**SRD tools for the same work (DEC-018, mass-conserving).** *Fabricate* converts "raw materials into products of the same material" (`game/data/srd51/spells.json:6848`): `T(RUBBLE→ITEM)` with the same by-mass rule. *Stone shape* reshapes a stone section "no more than 5 feet in any dimension" (`spells.json:15757`): it can re-form a damaged BUILT section without adding mass. *Move earth* reshapes "dirt, sand, or clay" and "can't manipulate natural stone or stone construction" (`spells.json:12114`): it can strip the soil off a mound (a SOIL transfer), and if structures shift, Lane Q rechecks them. *Wall of stone* made permanent (`spells.json:17322`) enters as a CONJURED source and then decays as ordinary stone.
+
+### R-07.5 Re-founding on existing foundations (SET-4)
+
+1. **Claiming.** The build and household placement rules that refuse ruin cells (`DEUS_Colonists.js:3733`, `UF_Households.js:462`) change to: a ruin cell is **claimable**. A claimed cell is either cleared (salvage) or reused.
+2. **Reuse.** A build job whose plan puts a wall on a cell with WALL-BASE or FOUNDATION built strata of a compatible material at `h ≥ 0.5` builds **only the missing slices**. Only the new slices consume items (`T(ITEM→BUILT)`). The reused slices change `structureId` with no ledger entry (no mass moves). Their decay state resets to maintained; their HP stays as it is until a repair job restores it, which consumes material equal to the mass that was shed.
+3. **Re-roofing.** A standing S3 ruin can be re-roofed: only ROOF members are built. This is the fastest re-foundation.
+4. **Vegetation.** Plants on reclaimed cells become clearing work (Ecology's felling path). Once the cell is maintained again, `reclaimable` is cleared and nothing new establishes.
+5. **The new site** is a new record with `predecessorSiteId`; the old record stays, with state REFOUNDED.
+6. **Which cultures reuse whose ruins** is plan data: DEC-015 plans per race (SOC.10.02, SOC.10.03). The race-to-plan-slot list is D-6, a PM decision the Owner may overturn. **This is a D-6 dependency**, and the policy itself is OQ-R-08.
+
+Prerequisite: LAND-5 (buildings as built strata). Without it there is no foundation stratum to reuse.
+
+## Deep history and LOD
+
+This section answers R-08: summary decay for fast-forward and off-focus regions (SIM.40.08, SIM.30.02, DEC-012), the slow clocks (NAT-003), and the calendar mapping under both D-1 options.
+
+### R-08.1 What exists
+
+- There is no LOD: the world is one area, and systems run at full fidelity or not at all (F-09).
+- The history ledger does not create physical sites (DEC-4); the older generator that stamped ruins is off (`game/data/DEUS_WorldCatalog.json:7670`, `"simulate": false,`).
+- The only slow clocks are `time:hour` and `time:day`, and a decade-scale tick "would need a clock that does not exist yet" (audit §2.5).
+
+### R-08.2 Why decay needs almost no summary model
+
+- **Decay state is per record, not per region.** Members, items and remains carry closed-form schedules in one heap. ADR-003 states the consequence: "an element's HP on day D is the same at L0, L1, L2, or after a deep-history jump of many years" (ADR-003 L1693). **[ADR-003]**
+- **Geology is fine at every LOD.** ADR-003 §16.5 says "Support depends only on geometry, and geometry is fine at every LOD level", and collapse runs the same algorithm in L2 at the coarse tick. So decay's strata writes and Lane Q's rechecks happen the same way in L0, L1 and L2. **[ADR-003]**
+- **The one LOD difference** is timing: an exposure change caused by another event takes effect on the day that event is processed, and L2 processes collapses at its coarse tick of 1 game hour (ADR-003 L1694). That is why the long-run test compares stages and ledger totals, not exact HP (A7 in "Matter ledger long-run test").
+- **What L2 does not do for decay:** nothing is sent to the render feed, and crowd-bucket deaths become aggregate remains (R-03.4).
+
+### R-08.3 Cohort summary: only for matter that has no records
+
+Two kinds of matter may exist in L2 without per-entity records:
+- remains of crowd-bucket deaths (DEC-014's crowd LOD, OPEN), and
+- buildings of a settlement run as an aggregate economy, if SOC.60.01 ("coarse background catch-up for remote settlement economies", `docs/society/DEUS_SOCIETY_WBS.md:118`) builds them as counts rather than strata.
+
+For these, a region keeps **cohort records** `(dc, stage, count, massByForm[])`:
+- Transitions use the same lives in closed form. Each cohort flow is an integer: `floor` for all target classes but the last, which takes the remainder.
+- **Promotion** instantiates members deterministically (seeded by region id and cohort index). Masses are assigned by largest remainder, with ties broken by index, so the region's per-class totals are identical before and after (SIM.30.03's rule, "Mutants that leak 1 unit of water, ore or population ... are caught", `docs/worldgen/DEUS_WORLDGEN_WBS.md:531`).
+- **Demotion** sums member masses into the cohort; nothing is rounded away.
+- Cost: at most 20 classes × 8 stages × (4 B count + 8 forms × 8 B) = 10,880 B per region that holds such matter, and only regions that hold it have a record.
+
+### R-08.4 Fast-forward and deep history
+
+- **Day jumps.** Fast-forward, history mode and off-focus catch-up all advance the day counter and pop every heap entry due up to the new day, in `(dueDay, id)` order (ADR-003 L1696: "It runs the same heaps with day jumps"). **Cost is proportional to due events, not to years.**
+- **Worked example.** Aging a 40-structure site by 10,000 sy: 40 structures × 15 members × at most 6 events (4 thresholds, a failure, a burial change) = 3,600 member events; 2,000 unattended items × 4 steps = 8,000; 200 remains × 3 = 600. Total about 12,200 events, whatever the number of years. At an assumed 1-10 µs per event (heap pop plus a few writes; not measured) that is 12-122 ms, plus Lane Q's rechecks for the failures (C-5).
+- **DEC-4 and Year 0.** History-produced ruins must come from the history-mode core, where "Traces are ordinary sim data, not flavour text" and there is "no second 'trace generator' that could invent material" (ADR-003 §14.2). Decay then only ages what history built. Whether a New Game may start with aged history at all is ADR-003 Q6 against INV-SIM-01 (ADR-003 L1249, §14.3), an Owner question this design does not answer. Decay works the same either way.
+
+### R-08.5 Slow clocks (NAT-003, INV-SIM-02)
+
+- All decay, reclamation and weathering timers are in the **historical** domain (INV-SIM-02).
+- They run at each game-day boundary (ADR-003 L1689) and process due entries in batches of at most ⌈due / 2,400⌉ per tick (ADR-003 L1047). **[ADR-003]**
+- Decay needs no separate hour, season or decade service: each record carries its own due day, so a 3,000-sy wall life is one heap entry, not 3,000 annual ticks. This is how NAT-003's "multi-timescale execution (action, daily, seasonal, century)" (`docs/RISK_REGISTER.md:74`) is met for decay.
+- Climate modifiers come from SIM.50.06's annual summary per region: one event per region per year. Under D-1 option (b) a year boundary is every game day; under (a) it is every N days.
+
+### R-08.6 Calendar mapping (D-1 is OWNER_OPEN; no option is chosen)
+
+Fixed facts: 1 game day = 2,400 ticks = 240 s real at 1x (ADR-003 §3.2). Durations are authored in sy and converted with DPY (section 0.3).
+- **Option (b), keep V123:** DPY = 1 (`DEUS_Core.js:324`); "1 real hour = 15 years" (`DEUS_Core.js:59`).
+- **Option (a), separate day from year:** DPY = N, the Owner's choice. The two N values below come from existing code and are **illustrations only, not proposals**: N = 20 from the archived clock ("4 seasons per year: Spring (days 1-5), Summer (6-10), Autumn (11-15), Winter (16-20)", `archive/plugins/DEUS_Time.js:314`) and N = 336 from the latent 12 months × 28 days in `DEUS_Objects.js:162`.
+
+| Duration (sy) | What it is here | (b) DPY = 1: game days / real time at 1x | (a) N = 20: real time at 1x | (a) N = 336: real time at 1x |
+|---|---|---|---|---|
+| 0.25 | corpse to skeleton, SKY | 0.25 d / 60 s | 20 min | 5.6 h |
+| 1 | site abandonment grace | 1 d / 4 min | 80 min | 22.4 h |
+| 12 | thatch roof fails, SKY | 12 d / 48 min | 16 h | 11.2 days |
+| 60 | timber roof fails, SKY; V123's mean lifespan | 60 d / 4 h | 3.3 days | 56 days |
+| 400 | rubblestone walls fail after roof loss | 400 d / 26.7 h | 22.2 days | 1.02 years |
+| 3,000 | ashlar walls fail after roof loss (wR 90) | 3,000 d / 8.3 days | 167 days | 7.7 years |
+| 10,000 | the long-run test horizon | 10,000 d / 27.8 days | 1.5 years | 25.6 years |
+| 1,000,000 | lithification scale (OQ-R-03) | 10^6 d / 7.6 years | 152 years | 2,557 years |
+
+Real time at 1x is `sy × DPY × 240 s`. At ADR-003's best-effort 16x speed (ADR-003 Q3) divide by 16; history mode and day jumps are not bound to real time at all.
+
+**SRD time limits under D-1.** SRD limits in **days** scale with DPY; limits in **years** do not.
+
+| SRD limit | Under (b) | Under (a), N = 20 | Under (a), N = 336 |
+|---|---|---|---|
+| *gentle repose* 10 days (`spells.json:8417`) | 10 sy | 0.5 sy | 0.03 sy |
+| *raise dead* 10 days (`spells.json:13455`) | 10 sy | 0.5 sy | 0.03 sy |
+| *resurrection* a century (`spells.json:14025`) | 100 sy | 100 sy | 100 sy |
+
+So under (b) a *raise dead* window outlasts this design's skeletonisation (0.25 sy). That mismatch is a D-1 consequence, recorded here for the Owner, not resolved.
+
+## Matter ledger long-run test
+
+This section answers R-09: a deterministic fixture, aged through every stage over more than 10,000 sy, that proves every ledger class exact at every checkpoint, a zero ore delta and trace retention, with mutants that must fail. It is written so SIM.40.09 ("aging an abandoned site through all stages ... exact mass conservation ... zero ore generation ... zero per-frame scan", `docs/worldgen/DEUS_WORLDGEN_WBS.md:542`) can implement it.
+
+### R-09.1 Runner
+
+- Headless core (ADR-003 §2), history mode with day jumps. **[ADR-003]**
+- Run twice at the 9-layer test range (-4..+4) and twice at the 32-layer default (-16..+15), as ADR-003 §17.6 requires. The fixture fits both ranges.
+- Fixed seed; D-1 parameter DPY = 1 for the reference run and DPY = 20 for a second run (the test must pass under both; the stage **days** differ, the stage **years** and ledger totals do not).
+
+### R-09.2 Fixture FX-R-01, an abandoned hamlet
+
+**Structures** (one 64×64 cell patch of one area, surface layer 0, plus the layers named):
+
+| Id | What | Members |
+|---|---|---|
+| H1 | stone house 8×8 with a cellar | limestone ASHLAR walls (`weatherResistance` 50) 2 layers high; TIMBER roof; FERROUS fittings; cellar at layer -1 with an ASHLAR vault and TIMBER props |
+| H2 | mudbrick house 6×6 | MUDBRICK walls 1 layer; THATCH roof |
+| H3 | timber hall 10×6 | TIMBER walls and roof; LIGHTWOOD doors; 200 iron nails as FITTINGS; **burned at y5** (scripted `residue.burn`, kappa 0.6) |
+| H4 | brick tower 4×4 | BRICK walls from layer 0 to layer +2; LIGHTWOOD floors and roof |
+| R1, R2 | roads | R1: 20 cells of RUBBLESTONE slabs; R2: 20 cells of compacted earth path |
+| S1 | cave shrine at layer -3 | ASHLAR altar, TIMBER props, 4 CERAMIC jars, 1 gold ring |
+
+**Items:** an iron longsword (FE blade + ORGANIC grip), a copper pot, 10 silver coins, a glass bottle, 5 cloth bolts, 10 loaves of bread, a pair of leather boots, all in H1 and H3.
+**Remains:** two persons (one in an anchored grave outside H1, one unburied in H3's fire) and one deer carcass.
+**Stand-ins for systems not built yet** (each is a ledgered FIXTURE-FEED source or a scripted event, so the test accounts for it):
+- vegetation: plant objects established on reclaimable cells on a fixed schedule, their biomass booked from AIR, litter booked `T(BIOMASS→SOIL-ORG)` at 0.25 mm per sy;
+- sediment: `source(FIXTURE-FEED, SEDIMENT)` delivering one slice per 1,000 sy to the low side of the patch;
+- water: at y300 the H1 cellar floods through the fluid API (a D-4 dependency);
+- climate: FT 0.25 and a fixed snow load.
+
+**Timeline:** y0 built and maintained; y5 H3 burns; y10 population set to 0; y11 site ABANDONED; run to **y12,000**.
+
+**Checkpoints:** y0, 5, 11, 12, 25, 60, 100, 300, 1,000, 3,000, 5,000, 10,000, 12,000, and every structure stage transition.
+
+### R-09.3 Assertions at every checkpoint
+
+- **A1 Exact classes.** For every (family, form) class, the ledger total equals a recount of the fixture world: strata by material × mass per slice, residue records, items, buried finds, remains, biomass. Integers, exact. (The recount is a test-only walk of the small fixture; the runtime never walks.)
+- **A2 Closure.** Per family: Σ classes + Σ sinks − Σ sources = the y0 total, exactly.
+- **A3 Zero ore delta.** Ore-material strata, ore outcrop objects, ore items and any ore-form mass are unchanged from y0. The ore write guard's rejection log is empty. A static check fails if any transform table entry outputs an ore, coal, gem or fossil-bed form.
+- **A4 Trace retention (LIFE-003).**
+  - At y1,000: ≥ 90 % of H1's WALL-BASE and FOUNDATION y0 mass is still BUILT.
+  - At y3,000 and y10,000: H1, H2 and H4 footprints each stand ≥ 1 slice above their surroundings (TR-3).
+  - The H1 cellar is open, or, if Lane Q collapsed it, its lining is RUBBLE in place (TR-2).
+  - At y12,000: the gold ring, silver coins, glass bottle and ceramic jars exist as ITEM or ITEM-BURIED with their y0 mass (TR-5); the anchored grave record exists (TR-6); H3's ash and charcoal lie under ≥ 1 slice (TR-7); R1's slabs are BUILT and R2's `compacted` flag is set (TR-4).
+- **A5 Stages.** Each structure's stage at each checkpoint equals the stage computed by an **independent oracle**: a separate function that reads only the parameter tables and the fixture geometry, not the implementation.
+- **A6 Determinism.** Two runs produce identical ledger and state checksums at every checkpoint. The 9-layer and 32-layer runs produce identical stages and identical ledger totals.
+- **A7 LOD invariance.** The fixture aged (i) all-L0 day by day, (ii) in L2 at the coarse tick, and (iii) in one day jump with checkpoints gives identical stages and ledger totals (ADR-003 §17.6).
+- **A8 Work bound.** `decay.work_per_tick ≤ ⌈active / 2,400⌉`; zero decay work on maintained days y0-y10, except the fire; cells enqueued per decay event ≤ 64 (C-5); a frame counter shows decay is never called from a render hook.
+- **A9 Save and load.** Saving at y1,000, reloading (the heap is rebuilt from records) and continuing gives the same checksums at y3,000..y12,000 as the uninterrupted run.
+
+**Expected stages (approximate; the oracle computes exact days from data).** Lives from R-01.6 with limestone `wR` 50 (ASHLAR lives × 50/90) and FT 0.25:
+
+| Structure | S1 | S2 | S3 | S4 | S5 |
+|---|---|---|---|---|---|
+| H1 stone house | ~y22 (roof h ≤ 0.85) | ~y22 (halo vegetation) | ~y73 (TIMBER roof, d0 y13 + 60) | ~y1,400 (walls SKY, life about 1,333 sy) | ~y2,500-4,000 (litter plus feed) |
+| H2 mudbrick | ~y14 | ~y20 | ~y24 (THATCH roof, d0 y12 + 12) | ~y63 (MUDBRICK SKY 60 / 1.5) | ~y70-100 (own fines) |
+| H3 timber hall | burned y5 | ~y15 | y5 (fire collapse) | y5-y100 | ~y2,500 |
+| H4 brick tower | ~y16 | ~y20 | ~y37 (LIGHTWOOD roof) | ~y570 (BRICK SKY 800 / 1.5) | ~y3,000 |
+
+### R-09.4 Mutants that must fail
+
+| Mutant | Change | Assertion that must fail |
+|---|---|---|
+| MR-01 residue leak | `residue.burn` computes gas as `floor(m × (1 − a − c))` instead of the remainder | A1, A2 at y5 |
+| MR-02 shed leak | shedding books FINES but does not add them to the residue record | A1 |
+| MR-03 ore creation | the corrosion transform outputs an ore form, or an ore outcrop object, at y1,000 | A3 |
+| MR-04 foundation erasure | FOUNDATION members get a `failDay` (the TR-1 floor removed) | A4 at y3,000 or y10,000 |
+| MR-05 relic erasure | the gold ring and glass rot like organics | A4 at y12,000 |
+| MR-06 vanishing remains | remains removed after 12 game hours (today's `DEUS_Anim.js:1162`) | A1, A4 |
+| MR-07 fire deletes items | today's `DEUS_Fire.js:442` behaviour | A1 at y5 |
+| MR-08 double yield | salvage uses the catalog's fixed 2 + 2 stone | A1, A2 |
+| MR-09 nondeterminism | `Math.random` in the vegetation stand-in or in spill order | A6 |
+| MR-10 full scan | decay iterates all members every tick | A8 |
+| MR-11 stale geometry | burial threshold of one 1-ft slice (half the mass), or a bottom layer hard-coded at -2 | A5, A6 (the 32-layer run, the S1 shrine at layer -3) |
+| MR-12 lost heap | the heap is not rebuilt on load | A9 |
+| MR-13 walls before roofs | ROOF and WALL lives swapped | A5, and the data validator AT-R-02 |
+| MR-14 coal from charcoal | with OQ-R-03's lithification run enabled, buried charcoal becomes coal | A3 |
+
+### R-09.5 Optional deep-time run
+
+Only if the Owner puts lithification in scope (OQ-R-03): FX-R-01L continues FX-R-01 by day jump to 1,000,000 sy, with FIXTURE-FEED burying the patch under ≥ 1 layer (10 ft). ROCK-SED must form from SEDIMENT and SOIL-MIN; A1-A3 must hold, with A3 extended to coal, gems and fossil beds.
+
 <!-- APPEND -->
