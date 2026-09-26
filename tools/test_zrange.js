@@ -37,7 +37,9 @@
  *                                  [--evidence=<dir>] [--keep] [--jobs=n]
  *   (no --z-range: the three configurations -4..4, -16..15 and the legacy -2..2)
  *   --refresh-base          run the base commit (a temp clone) and rewrite tools/zrange/fixtures/base_<sha8>_seed<n>.json
- *   --make-legacy-fixture   run make_legacy on the base commit and write tools/zrange/fixtures/legacy_save_<sha8>_seed<n>.json
+ *   --make-legacy-fixture   run make_legacy on the base commit and write tools/zrange/fixtures/legacy_save_<sha8>_seed<n>.json.gz
+ *   --phase=<p> [--commit=<sha>]  run one phase (core, play, sim, legacy) on the configurations (default: this tree; with
+ *                           --commit, a temp clone of that commit) and print the suite's lines and report (diagnostics)
  * Exit: 0 all checks passed (with --provoke: every provocation caught); 1 a check failed / a provocation not caught;
  *       2 harness problem.
  */
@@ -398,6 +400,24 @@ function loadBase() {
     try {
         if (flag("refresh-base")) { await refreshBase(); process.exit(0); }
         if (flag("make-legacy-fixture")) { await makeLegacyFixture(); process.exit(0); }
+        if (arg("phase", "")) {
+            const ph = arg("phase", ""), commit = arg("commit", "");
+            const clone = commit ? require("./zrange/clone.js").makeClone(commit, `phase_${sha8(commit)}`).dir : ROOT;
+            let save = null;
+            const env = { ZR_PHASE: ph };
+            if (ph === "legacy") { save = legacySaveFile(); Object.assign(env, { ZR_SAVE: save, ZR_FINGERPRINT: legacyFiles().fingerprint }); }
+            const cfgs = ph === "legacy" || commit ? [null] : CONFIGS;
+            const runs = await pool(cfgs.map(c => () => runPhase(clone, `${commit ? `c${sha8(commit)}_` : ""}${c || "own"}_${ph}`, Object.assign({}, env, { DEUS_Z_RANGE: c }))));
+            for (const r of runs) {
+                for (const line of r.text.split(/\r?\n/)) if (/^(PASS|FAIL|ERROR|HARNESS|RESULT)/.test(line)) log(line.slice(0, 2000));
+                const out = path.join(os.tmpdir(), `laneaa_zr_phase_${ph}_${process.pid}_${runs.indexOf(r)}.json`);
+                fs.writeFileSync(out, JSON.stringify(r.report, null, 1));
+                log(`report: ${out}`);
+            }
+            if (save) fs.rmSync(save, { force: true });
+            if (commit && !KEEP) require("./zrange/clone.js").removeTree(clone);
+            process.exit(runs.every(r => r.result && /\(exit 0\)/.test(r.result)) ? 0 : 1);
+        }
         const base = loadBase();
         if (!base) log(`NOTE: no base fixture ${baseFixtureFile()} (node tools/test_zrange.js --refresh-base makes it)`);
         const pv = arg("provoke", ""), all = flag("provoke-all");
