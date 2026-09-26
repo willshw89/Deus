@@ -156,13 +156,20 @@
     })();
     const provoked = name => PROVOKE.includes(`vertical.${name}`);
 
-    // The live Z range from UF.World, refreshed when the world state object changes (a New Game, a load).
-    const ZR = { st: undefined, zMin: 0, zMax: 0, n: 0, levels: null };
-    function zrSync() {
+    // The live Z range from UF.World, refreshed when the world state object changes (a New Game, a load). Hot paths that
+    // hold the state check "st !== ZR.st" themselves and call zrResync only then; keys[i] is String(zMin + i), the level's
+    // key in UF.World.state.levels.
+    const ZR = { st: {}, zMin: 0, zMax: 0, n: 0, levels: null, keys: null };
+    const zrSync = () => { const W = World(); return W && ZR.st === W.state ? ZR : zrResync(); };
+    function zrResync() {
         const W = World(), st = W && W.state;
-        if (ZR.st === st && ZR.levels !== null) return ZR;
         const r = W.zRange();
         ZR.st = st; ZR.zMin = r.zMin; ZR.zMax = r.zMax; ZR.levels = W.levels(); ZR.n = ZR.levels.length;
+        ZR.keys = ZR.levels.map(String);
+        // The per-level caches (index z - zMin) sized to the range, packed (no holes).
+        baseSlots.length = 0;
+        gridSlots.length = 0;
+        for (let k = 0; k < ZR.n; k++) { baseSlots.push(null); gridSlots.push({ st: null, ai: -1, grid: null }); }
         return ZR;
     }
     // vertical.five_levels (seen failing once): a level one past the top of the range reads as a level.
@@ -1125,15 +1132,23 @@
             mixedCount++;
         }
         b.cw = cw; b.dir = dir; b.mixed = mixed; b.mixedCount = mixedCount;
+        setShift(b, size);
+    }
+    // A power-of-two size reads a cell's x and y with a mask and a shift (storeLocate).
+    function setShift(b, size) {
+        const sh = Math.log2(size);
+        b.shift = Number.isInteger(sh) ? sh : -1;
+        b.mask = b.shift >= 0 ? size - 1 : -1;
     }
     // A store whose every chunk is UNIFORM with one cell code (cell: 5 material bytes; no connector).
     function uniformStore(b, cell, size) {
         const cw = Math.ceil(size / CH), nc = cw * cw;
         b.cw = cw; b.dir = new Uint16Array(nc).fill(palIndexOf(cell, 0, 0)); b.mixed = new Array(nc).fill(null); b.mixedCount = 0;
+        setShift(b, size);
     }
     // Point the read cursor (rdM, rdO, rdC) at cell i of a baseline's store (rdH is the caller's: null for a baseline).
     function storeLocate(b, i) {
-        const size = b.size, x = i % size, y = (i - x) / size;
+        const size = b.size, x = b.mask >= 0 ? i & b.mask : i % size, y = b.mask >= 0 ? i >> b.shift : (i - x) / size;
         const c = (y >> CH_SHIFT) * b.cw + (x >> CH_SHIFT), d = b.dir[c];
         if (d === CH_MIXED) {
             const mc = b.mixed[c], li = ((y & CH_MASK) << CH_SHIFT) | (x & CH_MASK);
@@ -1276,8 +1291,10 @@
     // The last baseline read per level (index z - zMin; a numeric check instead of baseline()'s string key).
     const baseSlots = [];
     function baseOf(st, z, ax, ay) {
-        const li = z - zrSync().zMin, s = baseSlots[li], g = genOf(st, z);
-        if (s !== undefined && s.st === st && s.ax === ax && s.ay === ay && s.gen === g && s.seed === st.seed) return s.b;
+        if (st !== ZR.st) zrResync();
+        const li = z - ZR.zMin, s = baseSlots[li];
+        const L = st.levels && (st.levels[ZR.keys[li]] || st.levels["0"]), g = L && L.gen ? L.gen : GEN;
+        if (s != null && s.st === st && s.ax === ax && s.ay === ay && s.gen === g && s.seed === st.seed) return s.b;
         const b = baseline(z, ax, ay);
         baseSlots[li] = { st, ax, ay, gen: g, seed: st.seed, b };
         return b;
@@ -1388,7 +1405,7 @@
      */
     function derivePacked(st, ax, ay, i, z) {
         stats.derives++;
-        zrSync();
+        if (st !== ZR.st) zrResync();
         locate(st, z, ax, ay, i, 1);
         const m = rdM, o = rdO, c = rdC;
         let fill = 0;
@@ -1423,8 +1440,9 @@
     const packedGrids = { st: null, map: new Map() };   // (ax + ay * AREA_STRIDE) * levels + (z - zMin) -> Uint8Array
     const gridSlots = [];                                // the last grid read per level (index z - zMin)
     function packedGridOf(st, z, ax, ay) {
-        const r = zrSync(), li = z - r.zMin, ai = ax + ay * AREA_STRIDE;
-        const slot = gridSlots[li] || (gridSlots[li] = { st: null, ai: -1, grid: null });
+        if (st !== ZR.st) zrResync();
+        const r = ZR, li = z - r.zMin, ai = ax + ay * AREA_STRIDE;
+        const slot = gridSlots[li];
         if (slot.st === st && slot.ai === ai) return slot.grid;
         if (packedGrids.st !== st) { packedGrids.st = st; packedGrids.map.clear(); }
         const key = ai * r.n + li;
@@ -1496,7 +1514,7 @@
         qX |= 0; qY |= 0;
         const W = World();
         qSt = W && W.state;
-        zrSync();
+        if (qSt !== ZR.st) zrResync();
         if (!qSt || !Number.isInteger(qZ) || !W.inWorld(qAx, qAy, qZ) || qX < 0 || qY < 0 || qX >= qSt.size || qY >= qSt.size) return false;
         qI = qY * qSt.size + qX;
         return true;
@@ -1555,6 +1573,7 @@
         let am = (levels[li] = lv || new Map()).get(ai);
         if (!am) { am = new Map(); levels[li].set(ai, am); }
         am.set(i, r);
+        if (colTops.st === st) { const ct = colTops.map.get(ai); if (ct !== undefined) raiseColTop(ct, st.size, i, li); }
         L.strata = L.strata || {};
         (L.strata[key] = L.strata[key] || {})[i] = encodeRecord(r);
         refreshPacked(st, z, ax, ay, i);
@@ -2160,15 +2179,45 @@
         for (let k = 0; k < STRATA; k++) if (SOLID_B[rdM[rdO + k]] === 1) s += STRATA_MATERIALS[rdM[rdO + k] & M_ID].support * hpAt(k) / 255;
         return s / STRATA;
     }
+    // The highest level (index z - zMin) of each chunk column of an area that may hold a solid stratum: a MIXED baseline
+    // chunk, a UNIFORM one whose code has a solid stratum, or a chunk with a change record (WG.00.17). Above it the column
+    // is air, so hasOpaqueOverburden stops there instead of walking to the top of the range. Made once per world state and
+    // area; putDelta raises a column's top when it writes a record above it (a removed record leaves it: still an upper bound).
+    const colTops = { st: null, map: new Map() };   // area index -> { tops: Int16Array(chunks), cw }
+    const palSolid = k => SOLID_B[pal.m[k * STRATA]] | SOLID_B[pal.m[k * STRATA + 1]] | SOLID_B[pal.m[k * STRATA + 2]] | SOLID_B[pal.m[k * STRATA + 3]] | SOLID_B[pal.m[k * STRATA + 4]];
+    function colTopsOf(st, ax, ay) {
+        if (colTops.st !== st) { colTops.st = st; colTops.map.clear(); }
+        const ai = ax + ay * AREA_STRIDE;
+        let e = colTops.map.get(ai);
+        if (e !== undefined) return e;
+        const r = ZR, first = baseOf(st, r.zMin, ax, ay), nc = first.dir.length, tops = new Int16Array(nc).fill(-1);
+        for (let li = r.n - 1; li >= 0; li--) {
+            const bl = baseOf(st, r.zMin + li, ax, ay);
+            for (let c = 0; c < nc; c++) if (tops[c] < 0 && (bl.dir[c] === CH_MIXED || palSolid(bl.dir[c]))) tops[c] = li;
+        }
+        e = { tops, cw: first.cw };
+        const levels = deltaLevels(st);
+        for (let li = 0; li < levels.length; li++) {
+            const am = levels[li] !== undefined ? levels[li].get(ai) : undefined;
+            if (am !== undefined) for (const i of am.keys()) raiseColTop(e, st.size, i, li);
+        }
+        colTops.map.set(ai, e);
+        return e;
+    }
+    function raiseColTop(e, size, i, li) {
+        const x = i % size, y = (i - x) / size, c = (y >> CH_SHIFT) * e.cw + (x >> CH_SHIFT);
+        if (li > e.tops[c]) e.tops[c] = li;
+    }
     /** Any solid stratum above the cell's standing space: in the cell above its solid base (after an air gap), or in any
-     *  cell above it up to the top level (the whole column), or the column's ceiling cap above the top level (19B). A
-     *  5-bit solid mask per cell. */
+     *  cell above it up to the top level (the whole column; levels proven air above the column's top are skipped), or the
+     *  column's ceiling cap above the top level (19B). A 5-bit solid mask per cell. */
     function hasOpaqueOverburden(a, b, c, d, e) {
         if (!cellQuery(a, b, c, d, e)) return false;
         locate(qSt, qZ, qAx, qAy, qI, 1);
         const f = fillOf(rdM, rdO);
         if (f < STRATA && (solidMaskOf(rdM, rdO) >> f) !== 0) return true;
-        for (let z = qZ + 1, top = ZR.zMax; z <= top; z++) {
+        const ct = colTopsOf(qSt, qAx, qAy), colTop = ZR.zMin + ct.tops[(qY >> CH_SHIFT) * ct.cw + (qX >> CH_SHIFT)];
+        for (let z = qZ + 1, top = Math.min(ZR.zMax, colTop); z <= top; z++) {
             locate(qSt, z, qAx, qAy, qI, 2);
             if (solidMaskOf(rdM, rdO) !== 0) return true;
         }
@@ -4715,8 +4764,8 @@
     // The public object
 
     const Levels = {
-        /** Every level of the live world, lowest first (UF.World's Z range, WG.00.17). */
-        get LEVELS() { return World().levels(); },
+        /** Every level of the live world, lowest first (UF.World's Z range, WG.00.17): UF.World.LEVELS, the same array. */
+        LEVELS: null,
         /** The generated core (the legacy range -2..+2): the levels with generator content, entries and checksums. */
         CORE_LEVELS,
         SHAPES, MATERIALS, TILESET_ID, GEN, BIOMES, PRE_CUT_GEN, FEATURE_GEN, FEATURE_PARAMS, FAMILIES,
@@ -4982,6 +5031,8 @@
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;
     window.UF.Levels = Levels;
+    Levels.LEVELS = World().levels();
+    World().onZRange(r => { Levels.LEVELS = r.levels; });
 
     //-------------------------------------------------------------------------
     // Wiring at boot (after every plugin has loaded)

@@ -193,11 +193,13 @@
         return Z_RANGES.default;
     }
     // The live range, kept per state object: the state's zRange; a state without one is a legacy world; no state yet (boot,
-    // title) is the range a New Game would get. zSync() is a single identity check once the state is known.
-    const zr = { state: undefined, range: null, zMin: 0, zMax: 0, levels: null };
-    function zSync() {
+    // title) is the range a New Game would get. zSync() is one identity check once the state is known; zResync() reads a
+    // new state's range. isLevel checks the identity inline and compares plain numbers (the hottest range check).
+    const zr = { state: {}, range: null, zMin: 0, zMax: 0, levels: null };
+    let zMinNow = 0, zMaxNow = -1;
+    const zSync = () => (zr.state === World.state ? zr : zResync());
+    function zResync() {
         const st = World.state;
-        if (zr.state === st && zr.range !== null) return zr;
         let r;
         if (!st) r = newWorldZRange();
         else if (st.zRange === undefined) r = Z_RANGES.legacy;
@@ -211,8 +213,13 @@
         const list = [];
         for (let z = r.zMin; z <= r.zMax; z++) list.push(z);
         zr.state = st; zr.range = r; zr.zMin = r.zMin; zr.zMax = r.zMax; zr.levels = Object.freeze(list);
+        zMinNow = r.zMin; zMaxNow = r.zMax;
+        // LEVELS stays a data property (an accessor would put World in V8's slow dictionary mode: every World.* read slower).
+        World.LEVELS = zr.levels;
+        for (const f of zHooks) f(zr);
         return zr;
     }
+    const zHooks = [];   // f(range) after a new state's range is read (UF.Levels keeps its LEVELS the same array)
     // Map id slot of a level. The legacy levels keep their slots (the ground 0, +1 1, +2 2, -1 3, -2 4: a saved map id
     // stays valid); beyond them +z takes 2z - 1 (+3 -> 5, +4 -> 7, ...) and -z takes 2z (-3 -> 6, -4 -> 8, ...). A slot
     // doesn't depend on the range, so a level's map id is the same in every world.
@@ -230,7 +237,7 @@
         return s % 2 === 1 ? (s + 1) / 2 : -s / 2;
     };
     const zOf = o => (o && o.z !== undefined ? o.z : 0);
-    const isLevel = z => Number.isInteger(z) && z >= zSync().zMin && z <= zr.zMax;
+    const isLevel = z => Number.isInteger(z) && (zr.state === World.state || zResync() !== null) && z >= zMinNow && z <= zMaxNow;
     // Diff and cache key of an area's level: the ground keeps the pre-V80 key "x,y".
     const levelKey = (ax, ay, z) => (z ? `${ax},${ay},${z}` : `${ax},${ay}`);
     // The level on screen matches (ax, ay, z)? (World.viewLevel is defined with the areas below.)
@@ -414,8 +421,9 @@
     const World = {
         config: CONFIG,
         EVENT_BASE,
-        /** Every level of the live world, lowest first (a frozen array from the Z range; a new one when the world changes). */
-        get LEVELS() { return zSync().levels; },
+        /** Every level of the live world, lowest first (a frozen array from the Z range; replaced when the state's range is
+         *  read anew: at a New Game, a load, and the first range check after any other change of UF.World.state). */
+        LEVELS: null,
         state: null,
         _frame: 0,
         hash32,
@@ -439,8 +447,11 @@
         /** The range a New Game gets now (DEUS_Z_RANGE, else Z_RANGES.default). */
         newWorldZRange,
         /** The map id slot of a level (the same in every world; the legacy levels keep theirs). */
-        mapIdSlot: z => slotOf(z)
+        mapIdSlot: z => slotOf(z),
+        /** f(range) whenever the range of a new UF.World.state is read (a plugin keeping its own copy of LEVELS). */
+        onZRange: f => { if (typeof f === "function") zHooks.push(f); }
     };
+    zResync();
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;
     window.UF.World = World;
@@ -527,6 +538,7 @@
             diffs: {},
             objectDiffs: {}
         };
+        zResync();
         buildCache.clear();
         offOcc = null;
         clearPaths(true);
@@ -3277,6 +3289,7 @@
     DataManager.createGameObjects = function() {
         _DataManager_createGameObjects.call(this);
         World.state = null;
+        zResync();
         buildCache.clear();
         clearPaths(true);
         spawnStats = newSpawnStats();
@@ -3333,6 +3346,7 @@
     DataManager.extractSaveContents = function(contents) {
         _DataManager_extractSaveContents.call(this, contents);
         World.state = contents.ufWorld || null;
+        zResync();
         if (World.state && !World.state.objectDiffs) World.state.objectDiffs = {};
         spawnStats = newSpawnStats();
         buildCache.clear();
