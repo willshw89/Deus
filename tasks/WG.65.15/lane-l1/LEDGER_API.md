@@ -18,7 +18,7 @@ A host-agnostic simulation module that keeps integer totals of matter per **mate
 
 It also compares its totals with an independent recount supplied by the caller (`audit`, `assertBalanced`). It keeps a per-interval identity (delta of total = sources − sinks) and a bounded log. It has a JSON-safe `snapshot`/`restore` and a deterministic `checksum`.
 
-It is the ledger that audit finding F-04 says is missing (`docs/audits/LIVING_WORLD_GAP_AUDIT.md:52`, §2.6). It does **not** hook into any gameplay writer yet; §9 describes how a later package does that.
+It is the ledger that audit finding F-04 says is missing (`docs/audits/LIVING_WORLD_GAP_AUDIT.md:51`, §2.6). It does **not** hook into any gameplay writer yet; §9 describes how a later package does that.
 
 ### 1.1 Where it lives and how it loads
 
