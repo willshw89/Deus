@@ -13,7 +13,8 @@ const PROVOCATIONS = {
             "    const validZ = z => Number.isInteger(z) && z >= -2 && z <= 2;"] },
     // The authority accepts one level past the top: the in-game probe must see zMax + 1 accepted.
     authority_past_top: { check: "single_authority", configs: ["-4..4"], phases: ["core"],
-        edits: [[W, "    const isLevel = z => Number.isInteger(z) && z >= zSync().zMin && z <= zr.zMax;", "    const isLevel = z => Number.isInteger(z) && z >= zSync().zMin && z <= zr.zMax + 1; /* PROVOKED */"]] },
+        edits: [[W, "    const isLevel = z => Number.isInteger(z) && (zr.state === World.state || zResync() !== null) && z >= zMinNow && z <= zMaxNow;",
+            "    const isLevel = z => Number.isInteger(z) && (zr.state === World.state || zResync() !== null) && z >= zMinNow && z <= zMaxNow + 1; /* PROVOKED */"]] },
     // The old elevation cap: a box damage above elevation 24 is clipped away.
     elevation_cap_24: { check: "elevation_math", configs: ["-16..15"], phases: ["core"],
         edits: [[L, "const e0 = Math.max(0, elevationOf(minZ, minS)), e1 = Math.min(r.n * STRATA - 1, elevationOf(maxZ, maxS));", "const e0 = Math.max(0, elevationOf(minZ, minS)), e1 = Math.min(24, elevationOf(maxZ, maxS)); /* PROVOKED */"]] },
