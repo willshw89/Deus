@@ -801,12 +801,23 @@
     const PEEK_CACHE = 6;
     const cacheKey = (ax, ay, z = 0) => (World.state ? `${World.state.seed}:${levelKey(ax, ay, z)}` : "");
     let lastUsedKey = null;
+    // The level on screen and the levels a view switch can land on (SIM.00.00: z±1, z±2 of the view's area) are pinned:
+    // eviction passes over them, so a prewarmed level is still cached when it is shown.
+    const pinned = new Set();
     const remember = (key, map) => {
         buildCache.delete(key); // re-insert: the Map's order is least recently used first
         buildCache.set(key, map);
         lastUsedKey = key;
-        while (buildCache.size > PEEK_CACHE) buildCache.delete(buildCache.keys().next().value);
+        if (buildCache.size <= PEEK_CACHE) return;
+        for (const k of Array.from(buildCache.keys())) {
+            if (buildCache.size <= PEEK_CACHE) break;
+            if (k !== key && !pinned.has(k)) buildCache.delete(k);
+        }
     };
+    // A build may be shown when it was on screen before or was made by the prewarm, for this world. A build made only for
+    // an off-screen read is never shown: it may be older than the generators' inputs (one made during world:created).
+    const showable = map => !!map && (map._ufShown === true || map._ufWarm === true) && map._ufState === World.state;
+    const cacheStats = { peekBuilds: 0 };
     /** A cached build of an area's level (tiles and objects; z left out = the ground). Same object on repeated calls until it's evicted. */
     World.peekArea = function(ax, ay, z = 0) {
         if (!this.state || !this.inWorld(ax, ay, z)) return null;
@@ -814,6 +825,7 @@
         let map = buildCache.get(key);
         if (!map) {
             map = this.buildArea(ax, ay, z);
+            cacheStats.peekBuilds++;
             remember(key, map);
         } else if (key !== lastUsedKey) {
             remember(key, map);
@@ -839,7 +851,105 @@
     World.clearPeekCache = () => {
         buildCache.clear();
         lastUsedKey = null;
+        warmView = null;
     };
+
+    //-------------------------------------------------------------------------
+    // Prewarm (SIM.00.00): the levels a view switch can land on are built ahead, at most one build a frame, so showing
+    // one never builds synchronously. The ring of a view on level z is z±1 and z±2 of its area, nearest first. A map
+    // load waits until every level of the view's area is warm (Scene_Map.isReady below); in play Levels asks for one
+    // step a frame while a ring level is missing (after a cleared cache, or a view on +-2 moving inward).
+
+    const WARM = { enabled: true };
+    const warmStats = { builds: 0, replaced: 0, grids: 0, ms: 0, maxMs: 0, lastMs: 0, gridMs: 0, loadSteps: 0, steps: 0, last: null };
+    let warmView = null;                 // the view level the pins and image preloads were made for
+    const warmImages = new Set();        // cache keys whose tileset and unit images were requested for warmView
+    const ringOf = v => [v.z - 1, v.z + 1, v.z - 2, v.z + 2].filter(z => isLevel(z) && World.inWorld(v.x, v.y, z));
+    const areaLevelsOf = v => ringOf(v).concat(LEVELS.filter(z => z !== v.z && Math.abs(z - v.z) > 2));
+    function pinView(v) {
+        pinned.clear();
+        warmImages.clear();
+        warmView = v;
+        if (!v || !World.state) return;
+        pinned.add(cacheKey(v.x, v.y, v.z));
+        for (const z of ringOf(v)) pinned.add(cacheKey(v.x, v.y, z));
+    }
+    // Ask for a level's tileset sheets and the character sheets of its units, so its first frame on screen has them.
+    function preloadImages(ax, ay, z, map) {
+        const ts = window.$dataTilesets && $dataTilesets[map.tilesetId];
+        if (ts) for (const name of ts.tilesetNames) if (name) ImageManager.loadTileset(name);
+        if (map.parallaxName) ImageManager.loadParallax(map.parallaxName);
+        const names = new Set();
+        for (const u of World.unitsInArea(ax, ay, z)) if (u.image && u.image.characterName) names.add(u.image.characterName);
+        for (const name of names) ImageManager.loadCharacter(name);
+    }
+    // One unit of prewarm work for level z of the view's area: a build, else its walk grid, else its images. Null when warm.
+    function warmLevel(v, z) {
+        const key = cacheKey(v.x, v.y, z);
+        const map = buildCache.get(key);
+        if (!showable(map)) {
+            const t0 = performance.now();
+            const fresh = World.buildArea(v.x, v.y, z);
+            if (!fresh) return null;
+            fresh._ufWarm = true;
+            fresh._ufState = World.state;
+            if (map) warmStats.replaced++;
+            remember(key, fresh);
+            const ms = performance.now() - t0;
+            warmStats.builds++;
+            warmStats.ms += ms;
+            warmStats.lastMs = ms;
+            if (ms > warmStats.maxMs) warmStats.maxMs = ms;
+            return { z, did: "build", ms };
+        }
+        const ts = window.$dataTilesets && $dataTilesets[map.tilesetId];
+        const flags = ts ? ts.flags : null;
+        const g = flags ? grids.get(map) : null;
+        if (flags && (!g || g.flags !== flags || g.objects !== map.ufObjects || !g.region)) {
+            const t0 = performance.now();
+            regionsOf(gridOf(map, flags));
+            const ms = performance.now() - t0;
+            warmStats.grids++;
+            warmStats.gridMs += ms;
+            return { z, did: "grid", ms };
+        }
+        if (!warmImages.has(key)) {
+            warmImages.add(key);
+            preloadImages(v.x, v.y, z, map);
+            return { z, did: "images", ms: 0 };
+        }
+        return null;
+    }
+    /**
+     * One step of prewarm work for the view on screen, or null when its ring (z±1, z±2) is warm: one level built (or its
+     * walk grid, or its images requested). opts.all: every level of the view's area, not only the ring.
+     */
+    World.prewarmStep = function(opts = {}) {
+        const v = this.viewLevel();
+        if (!WARM.enabled || !this.state || !v) return null;
+        if (v !== warmView) pinView(v);
+        for (const z of (opts.all ? areaLevelsOf(v) : ringOf(v))) {
+            const r = warmLevel(v, z);
+            if (!r) continue;
+            warmStats.steps++;
+            warmStats.last = r;
+            return r;
+        }
+        return null;
+    };
+    /** Levels of the view's ring (z±1, z±2) that have no build a switch could show (a switch to one would build it then). */
+    World.coldLevels = function() {
+        const v = this.viewLevel();
+        if (!this.state || !v) return [];
+        return ringOf(v).filter(z => !showable(buildCache.get(cacheKey(v.x, v.y, z))));
+    };
+    /** Prewarm and peek-cache numbers: { enabled, ring, cold, cached, pinned, builds, replaced, grids, ms, maxMs, lastMs, gridMs, loadSteps, steps, last, peekBuilds }. */
+    World.prewarmStats = function() {
+        const v = this.viewLevel();
+        return Object.assign({ enabled: WARM.enabled, ring: v ? ringOf(v) : [], cold: this.coldLevels(), cached: Array.from(buildCache.keys()), pinned: Array.from(pinned) },
+            JSON.parse(JSON.stringify(warmStats)), cacheStats);
+    };
+    World.prewarmConfig = WARM;
 
     //-------------------------------------------------------------------------
     // Units
@@ -2729,6 +2839,112 @@
         return true;
     };
 
+    const viewSwitch = { switches: 0, syncBuilds: 0, rebinds: 0, last: null, lastRebind: null };
+    /**
+     * Show another level on screen without a map transfer (SIM.00.00): the Scene_Map, its Spriteset and the simulation
+     * keep running. The level's build (prewarmed; built here only when no build that may be shown is cached, counted in
+     * viewSwitchStats().syncBuilds) becomes $dataMap and $gameMap is set up on it in place. The view (player) goes to
+     * (x, y); the display stays where it was. The Spriteset rebinds its tilemap and character sprites at the start of its
+     * next update (World.rebindSpriteset), so every layer changes level in the same frame. Returns { mapId, level, built,
+     * ms, events, added }, or null when it can't be done here (no started map scene, a transfer under way): the caller
+     * transfers instead (transferView).
+     */
+    World.switchViewInPlace = function(ax, ay, z, x, y, dir) {
+        const scene = SceneManager._scene;
+        if (!this.state || !this.inWorld(ax, ay, z) || !window.$dataMap || !window.$gameMap || !window.$gamePlayer) return null;
+        if (!(scene instanceof Scene_Map) || !scene.isStarted() || !scene._spriteset || $gamePlayer.isTransferring()) return null;
+        const size = this.state.size;
+        if (![x, y].every(c => Number.isInteger(c) && c >= 0 && c < size)) return null;
+        const t0 = performance.now();
+        const out = this.viewLevel(), from = this.currentArea();
+        const mapId = this.areaMapId(ax, ay, z);
+        // The level leaving the screen stays in the peek cache, as a map load keeps it.
+        if (out && $dataMap._ufShown && $dataMap._ufState === this.state) this.adoptBuild(out.x, out.y, out.z, $dataMap);
+        let map = buildCache.get(cacheKey(ax, ay, z));
+        const built = !showable(map);
+        if (built) {
+            map = this.buildArea(ax, ay, z);
+            viewSwitch.syncBuilds++;
+            DataManager.extractMetadata(map);
+            DataManager.extractArrayMetadata(map.events);
+        } else {
+            // Only the unit events are new; DataManager.onLoad isn't called (its aliases re-register tilesets).
+            this.refreshUnitEvents(map, ax, ay, z);
+            for (let i = EVENT_BASE; i < map.events.length; i++) if (map.events[i]) DataManager.extractMetadata(map.events[i]);
+        }
+        map._ufShown = true;
+        map._ufState = this.state;
+        this.adoptBuild(ax, ay, z, map);
+        // Game_Map.setup resets the display: it is put back after the view is placed.
+        const dx = $gameMap.displayX(), dy = $gameMap.displayY();
+        window.$dataMap = map;
+        $gameMap.setup(mapId);
+        $gamePlayer.setDirection(dir || $gamePlayer.direction());
+        $gamePlayer.locate(x, y);
+        $gameMap.setDisplayPos(dx, dy);
+        $gameMap.autoplay();
+        this.lastMapLoad = { mapId, level: { x: ax, y: ay, z }, reused: !built, inPlace: true };
+        pinView(this.viewLevel());
+        const added = this.reconcileEvents();
+        const to = this.currentArea();
+        if (to && !sameArea(from, to)) emit("world:viewAreaChanged", from, to);
+        viewSwitch.switches++;
+        viewSwitch.last = { mapId, level: { x: ax, y: ay, z }, built, ms: performance.now() - t0, events: $gameMap.events().length, added };
+        return Object.assign({}, viewSwitch.last);
+    };
+
+    /**
+     * Bind a Spriteset_Map to the map on screen after a level changed in place (switchViewInPlace): the tilemap takes the
+     * level's tiles and tileset; the event sprites of the level that left are taken off (not destroyed: other plugins may
+     * still hold them) and the new level's events get sprites, while the view, followers and vehicles keep theirs;
+     * balloons and animations end, as a map change ends them. Then world:areaBuilt / world:levelBuilt fire, as after a
+     * map load. Levels calls it at the start of the Spriteset's update. False when it is bound to $dataMap already.
+     */
+    World.rebindSpriteset = function(ss) {
+        const map = window.$dataMap;
+        if (!ss || !ss._tilemap || !ss._characterSprites || !map || !window.$gameMap || ss._ufBoundMap === map) return false;
+        const t0 = performance.now(), split = {};
+        const tm = ss._tilemap;
+        tm.setData($gameMap.width(), $gameMap.height(), $gameMap.data());
+        if (ss._tileset !== $gameMap.tileset()) ss.loadTileset();
+        tm.refresh();
+        ss.removeAllBalloons();
+        ss.removeAllAnimations();
+        split.tiles = performance.now() - t0;
+        const sprites = ss._characterSprites, live = new Set($gameMap.events());
+        let kept = 0, dropped = 0;
+        for (let i = 0; i < sprites.length; i++) {
+            const sp = sprites[i], ch = sp._character;
+            if (!(ch instanceof Game_Event) || live.has(ch)) {
+                sprites[kept++] = sp;
+                continue;
+            }
+            if (sp._shadowSprite && sp._shadowSprite.parent) sp._shadowSprite.parent.removeChild(sp._shadowSprite);
+            if (sp.parent) sp.parent.removeChild(sp);
+            dropped++;
+        }
+        sprites.length = kept;
+        split.drop = performance.now() - t0 - split.tiles;
+        const drawn = new Set(sprites.map(sp => sp._character));
+        const fresh = [];
+        for (const ev of live) if (!drawn.has(ev)) fresh.push(new Sprite_Character(ev));
+        split.create = performance.now() - t0 - split.tiles - split.drop;
+        sprites.unshift(...fresh); // events first, as Spriteset_Map.createCharacters orders them
+        for (const sp of fresh) tm.addChild(sp);
+        ss._ufBoundMap = map;
+        split.add = performance.now() - t0 - split.tiles - split.drop - split.create;
+        const lv = this.viewLevel();
+        if (lv && lv.z === 0) emit("world:areaBuilt", { x: lv.x, y: lv.y });
+        else if (lv) emit("world:levelBuilt", { x: lv.x, y: lv.y, z: lv.z });
+        const ms = performance.now() - t0;
+        split.events = ms - split.tiles - split.drop - split.create - split.add;
+        viewSwitch.rebinds++;
+        viewSwitch.lastRebind = { ms, dropped, added: fresh.length, split };
+        return true;
+    };
+    /** In-place view switches since boot: { switches, syncBuilds (builds a switch had to make), rebinds, last, lastRebind }. */
+    World.viewSwitchStats = () => JSON.parse(JSON.stringify(viewSwitch));
+
     // Returns true when the move was turned into an area transfer (the view keeps its level).
     function tryViewEdge(player, dx, dy) {
         const view = World.viewLevel();
@@ -2817,7 +3033,8 @@
     // that was on screen before is shown again from there (its unit events renewed) when the view comes from another
     // level: switching levels and back doesn't rebuild the ground. Showing the same level again (a map reload, a
     // return from another scene) still rebuilds it, as before. Builds made only for off-screen reads are never shown
-    // (they may be older than the generators' inputs, e.g. one made during world:created).
+    // (they may be older than the generators' inputs, e.g. one made during world:created); prewarmed builds are (SIM.00.00).
+    // Level switches don't come through here: they happen in place (switchViewInPlace); area edges and loads still do.
     const _DataManager_loadMapData = DataManager.loadMapData;
     DataManager.loadMapData = function(mapId) {
         const lv = World.state ? World.levelOfMapId(mapId) : null;
@@ -2828,8 +3045,9 @@
             const cached = World.cachedBuild(lv.x, lv.y, lv.z);
             let map;
             const fromOtherLevel = !!out && (out.x !== lv.x || out.y !== lv.y || out.z !== lv.z) && !(window.$gamePlayer && $gamePlayer._needsMapReload);
-            if (fromOtherLevel && cached && cached._ufShown && cached._ufState === World.state) {
+            if (fromOtherLevel && showable(cached)) {
                 map = cached;
+                map._ufShown = true;
                 World.refreshUnitEvents(map, lv.x, lv.y, lv.z);
                 World.lastMapLoad = { mapId, level: { x: lv.x, y: lv.y, z: lv.z }, reused: true };
             } else {
@@ -2846,6 +3064,25 @@
             return;
         }
         _DataManager_loadMapData.call(this, mapId);
+    };
+
+    // A map load waits for the prewarm (SIM.00.00): every level of the view's area is built before the map starts, one
+    // build a frame of the load, so the switches that follow never build.
+    const _Scene_Map_isReady = Scene_Map.prototype.isReady;
+    Scene_Map.prototype.isReady = function() {
+        if (!_Scene_Map_isReady.call(this)) return false;
+        if (World.prewarmStep({ all: true })) {
+            warmStats.loadSteps++;
+            return false;
+        }
+        return true;
+    };
+
+    // The map a Spriteset_Map draws: World.rebindSpriteset compares it with $dataMap.
+    const _Spriteset_Map_createTilemap = Spriteset_Map.prototype.createTilemap;
+    Spriteset_Map.prototype.createTilemap = function() {
+        _Spriteset_Map_createTilemap.call(this);
+        this._ufBoundMap = window.$dataMap;
     };
 
     const _DataManager_createGameObjects = DataManager.createGameObjects;

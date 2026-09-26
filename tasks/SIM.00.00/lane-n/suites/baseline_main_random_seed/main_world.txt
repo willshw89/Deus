@@ -1,0 +1,40 @@
+Running --deus-test=world on C:\Users\snewt\AppData\Local\Temp\deus_lane_n\main_game
+UF_Test run 2026-09-26T05:39:19.912Z args=[]
+DEBUG_SHEET: Scene_Boot.start called
+AVAILABLE SUITES: selftest, smoke, perf, native_starting_gear, native_survival_dying, native_perf_4x_benchmark, select, minimap, natural_connections, ownership, ecology, projects, settlement, colonists, overseer, world, spawn, worldgen, biomes, tiles, ground, factions, skins, history, objects, walls, doors, items, jobs, floors, wildlife, wildlife_seeds, stance, combat, anim, fog, daynight, timespeed, camera, culling, speech, overhead, look, sheet, talk, fire, vertical, natural_walls, flooding, strata, environment, faction_menus, title, load, setup, depth, select
+SUITE world
+PASS world.in_area_map - area (0,0), map 1000, seed 1326356589
+PASS world.area_size - 256x256, data length 393216, objects 65536
+PASS world.level_ids - levels -2, -1, 0, 1, 2 -> map ids 1004, 1003, 1000, 1001, 1002 (distinct); levelOfMapId round trip true; ground id 1000 (MapIdBase 1000, unchanged); areaOfMapId(level -1) null (want null); inWorld at level 3 / -3: false / false
+PASS world.seeded - area (0,0) built twice: 136601395 / 136601395; generators: uf_levels_terrain, uf_worldgen, uf_underground_resources
+PASS world.diff_applies_live - tile (3,3) 2256 -> 2048
+PASS world.object_diffs - on screen (5,5) = 7; area (0,0) cell (9,9) = 3 through the peek cache (same cached build)
+PASS world.save_roundtrip - 5743191 bytes, 1194 units
+PASS world.single_area_world - 1x1 areas, map 1000; walk from x 98 to x 83 on row 127
+PASS world.unit_enters_view - event 6353 at (97,127), sprite created
+PASS world.faces_its_steps - 14 step(s) taken (0 diagonal), 0 not facing the step's direction; facing 4 after walking west (want 4)
+PASS world.unit_walks_to_goal - at (83,127) in area (0,0), goal (83,127) reached
+SHOT C:\Users\snewt\AppData\Local\Temp\deus_lane_n\main_game\test_output\world.unit_in_view.png
+PASS world.spawn_not_in_walls - an oak was set at (100,100) (free: false); the unit spawned at (100,99), 1 cell(s) away, on a free cell: true
+PASS world.unit_image_refresh - event now draws "$U7_Ranger"
+PASS world.view_wraps_in_round_world - view at (0,127) after stepping east at the edge (expected 0)
+SHOT C:\Users\snewt\AppData\Local\Temp\deus_lane_n\main_game\test_output\world.round_seam_wrap.png
+PASS world.view_wraps_back_west - view returned to (255,127) after stepping west from 0
+PASS world.diff_persists - tile (3,3) is 2048 (expected 2048) and object (5,5) is 7 (expected 7) after leaving and returning
+SHOT C:\Users\snewt\AppData\Local\Temp\deus_lane_n\main_game\test_output\world.path_around_wall.png
+PASS world.path_around_wall - 9x9 ring of 31 wall pieces round (109,91), gap at (109,87); TEST_pather from (109,93) inside to (109,102) outside on the far side: arrived after 484 frames and 27 steps (first plan 27 cells), through the gap: true, wall cells stood on: 0; gave up: never; sent again 0x; test site: 41 objects cleared, nearest unit 27 cells away
+PASS world.path_blocked_goal - goal: the wall piece at (109,95); from inside (109,93): 1 cell(s) ending at (109,94) (want (109,94)); from outside (109,102): 6 cell(s) ending at (109,96) (want (109,96)); wall cells on either path: 0
+FAIL world.path_blocked_fast - goal (109,91) inside the ring with its gap closed; TEST_pather outside at (109,102): no world:unitBlocked within 90 frames; now at (117,94), goal still set; wall cells stood on: 0
+FAIL world.path_gives_up_when_crowded - gaps at (109,87) and (109,95), each held by a unit standing still; TEST_pather from (117,94) sent to (109,91) inside: no give-up within 362 frames (goal still set), 18 steps, now at (135,82); cells inside the ring entered: 0, wall cells stood on: 0 (progress limit 600 map updates)
+PASS world.path_replans - TEST_replanner from (102,91) to (116,91) (14 steps in a straight line); a wall went up on its next path cell (106,91) with 11 cells to go; arrived after 15 steps (a detour round the wall makes it more than 14); steps onto the new wall: 0; re-plans counted (all units) 1; gave up: never
+SHOT C:\Users\snewt\AppData\Local\Temp\deus_lane_n\main_game\test_output\world.eight_way.png
+PASS world.eight_way_steps - FourWay false; open ground, 8 cells each way: TEST_diag8 north-east arrived: 8 steps, 8 diagonal; TEST_diag4 south-east arrived: 8 steps, 8 diagonal (want 8 of 8 diagonal each); TEST_rounder 2 diagonal of 10
+FAIL world.faces_eight_ways - 8-row scratch sheet made; steps not facing their direction 0; rows checked 161 (8-row) / 184 (stock) / 180 (rounder, stock), wrong 6: SE: row 3 (want 2) | SE: row 3 (want 2) | SE: row 3 (want 2) | SE: row 3 (want 2); TEST_diag8 after walking NE: dir8 9 (NE), row 5 drawn by UF_Anim true (want 9, row 5); TEST_diag4 (stock) after walking SE from facing N: dir8 3, direction 6, row 2 (want 3, 6, row 2)
+PASS world.faces_targets - TEST_chopper from (115,99) to chop the tree at (118,96): job now work, stand (117,97) (want (117,97), south-west), at work: dir8 9 (NE), work row 5 (want 9, work row 5); TEST_striker attacking the unit south-west of it: dir8 1 (SW), attack row 1 (want 1, attack row 1); TEST_caster casting at a unit 3 east, 2 south: dir8 3 (SE), cast row 7 (want 3, cast row 7)
+PASS world.path_budget - 100 plans of 40-80 cells (1070 seeded picks; 52 planned paths outside 40-80 cells, 0 of them capped at 12000 cells): average 1.272 ms, p95 4.060 ms, max 9.960 ms; cells expanded median 99, p95 1233, max 1659
+PASS world.no_wall_steps - 94.9 s of play, 1496 map updates: 5977 one-cell steps (3158 diagonal) by 109 units (1 moves of more than one cell), 0 steps by walkers onto blocking cells; planner in this window: 560 plans (559 found, 1 partial, 0 none), 3.895 ms average, p95 7.860 ms and max 468.71 ms (last 512 / all plans), cells expanded 938 average, median 582; queue peak 1, 2 queued; re-plans 1, detours round units 233; gave up: {"goal occupied":2}; region map rebuilt 0x (11.70 ms average); slowest plan so far {"ms":468.7149999999674,"expanded":12000,"reason":"partial","regionMs":0,"length":87}; 41 of 41 test-site objects put back
+PASS world.no_corner_cut - tree line of 7 at row 95 (x 108-114); TEST_rounder (111,93) -> (111,97): arrived in 10 steps (2 diagonal), round an end of the line true; its plan 10 cells, 2 diagonal, 0 past a tree corner; diagonal steps past a blocking corner in the fixture 0; in 94.9 s of play 3158 diagonal steps, 0 past a blocking corner by walkers
+FAIL world.no_path_is_true - 0 "no path" give-ups re-tested at that moment with a flood fill over $gameMap.isPassable (out of the cell and into the next, no water): 0 could reach the goal after all; 
+FAIL world.frame_cost - UF.World.update 5.547 ms average per map update over 1496 updates, worst 470.62 ms; 1179 units; includes planning (the path checks' own findPath calls are outside it)
+PASS world.no_errors - none during world checks
+RESULT: 25 passed, 5 failed (exit 1)

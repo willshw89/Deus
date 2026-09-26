@@ -1,0 +1,22 @@
+{
+  "lane": "lane-n",
+  "taskId": "SIM.00.00",
+  "branch": "task/lane-n",
+  "writer": "claude",
+  "reviewer": "grok",
+  "allowedPaths": [
+    "game/js/plugins/DEUS_Levels.js",
+    "game/js/plugins/DEUS_World.js",
+    "tools/test_layer_switch_inplace.js",
+    "tasks/SIM.00.00/lane-n/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "node",
+      "args": [
+        "tools/test_layer_switch_inplace.js"
+      ],
+      "timeoutSec": 600
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+﻿You are the primary implementer for Lane N (Task SIM.00.00: In-Place Layer Switch & Area Prewarm).
+Read tasks/SIM.00.00/lane-n/BRIEF.md carefully and follow all instructions within it.
+Your allowed paths are (exact):
+- game/js/plugins/DEUS_Levels.js (only view-switch, transfer and area-cache code paths; list every function touched)
+- game/js/plugins/DEUS_World.js (only view-switch, transfer and area-cache code paths; list every function touched)
+- tools/test_layer_switch_inplace.js (new)
+- tasks/SIM.00.00/lane-n/**
+
+Standing rules:
+1. One primary writer per file set.
+2. Workers never push. Only the integrator pushes.
+3. Capture the exit code of every command, one per command ('EXIT=$LASTEXITCODE'). Put raw values in your reports.
+4. FOREGROUND rule: Run tests in the FOREGROUND. Never end your turn while background jobs or child processes are running.
+5. NO ART (DEC-007). Never generate, request or integrate art, and never tell anyone to. Screenshots taken by test harness are evidence, not art.
+6. Commit early (WIP commits allowed on your branch). Do not push. Do not merge. Write only inside allowedPaths.
+
+Deliverables:
+- In-place view change in DEUS_Levels.js and DEUS_World.js (swap tilemap data and layer bindings in place, keep Spriteset and Scene_Map, keep simulation running without pause).
+- Area prewarm for zÂ±1 and zÂ±2 (spread over frames) so peekArea never runs a synchronous buildArea during a switch.
+- New test tools/test_layer_switch_inplace.js asserting 6 required conditions with provocations.
+- Performance measurements in tasks/SIM.00.00/lane-n/perf/.
+Commit messages start '[claude] SIM.00.00'.

@@ -4175,7 +4175,12 @@
         return v ? v.z : null;
     }
 
-    /** Show level z (-2..+2). Keeps the cursor cell and the camera; opts.center: { x, y } to centre on instead (follow). */
+    /**
+     * Show level z (-2..+2). Keeps the cursor cell and the camera; opts.center: { x, y } to centre on instead (follow).
+     * In place (SIM.00.00): the map scene, its Spriteset and the simulation keep running; the level's prewarmed build
+     * goes on screen at once (UF.World.switchViewInPlace) and the switch completes when the Spriteset rebinds at the start
+     * of its next update. Without a started map scene it falls back to a transfer (the pre-SIM.00.00 way).
+     */
     function setView(z, opts = {}) {
         const W = World();
         const v = W && W.viewLevel();
@@ -4184,25 +4189,66 @@
         if ($gamePlayer.isTransferring() || pending) return false;
         const c = opts.center || null;
         const px = c ? c.x | 0 : $gamePlayer.x, py = c ? c.y | 0 : $gamePlayer.y;
-        pending = { from: v.z, to: z, displayX: $gameMap.displayX(), displayY: $gameMap.displayY(), center: c, t0: performance.now(), frames0: mapFrames, zoom: window.UF.Camera ? UF.Camera.zoom() : 1 };
+        pending = { from: v.z, to: z, displayX: $gameMap.displayX(), displayY: $gameMap.displayY(), center: c, t0: performance.now(), frames0: mapFrames,
+            frame0: Graphics.frameCount, zoom: window.UF.Camera ? UF.Camera.zoom() : 1 };
+        const swap = W.switchViewInPlace ? W.switchViewInPlace(v.x, v.y, z, px, py, $gamePlayer.direction()) : null;
+        if (swap) {
+            pending.swap = swap;
+            placeCamera(pending);
+            W.state.view = { x: $gamePlayer.x, y: $gamePlayer.y, z };
+            return true;
+        }
         if (!W.transferView(v.x, v.y, px, py, $gamePlayer.direction(), z)) {
             pending = null;
             return false;
         }
         return true;
     }
+    // The camera after a switch: where it was, or centred on the followed unit.
+    function placeCamera(p) {
+        if (p.center) $gameMap.setDisplayPos(p.center.x - $gameMap.screenTileX() / 2, p.center.y - $gameMap.screenTileY() / 2);
+        else $gameMap.setDisplayPos(p.displayX, p.displayY);
+    }
 
-    // Right after the new level's map is set up: put the camera back where it was (or on the followed unit).
+    // Right after the new level's map is set up (a switch that fell back to a transfer): put the camera back.
     const _Game_Player_performTransfer = Game_Player.prototype.performTransfer;
     Game_Player.prototype.performTransfer = function() {
         const p = pending;
         _Game_Player_performTransfer.call(this);
         if (!p || viewZ() !== p.to) return;
-        if (p.center) $gameMap.setDisplayPos(p.center.x - $gameMap.screenTileX() / 2, p.center.y - $gameMap.screenTileY() / 2);
-        else $gameMap.setDisplayPos(p.displayX, p.displayY);
+        placeCamera(p);
         const st = World().state;
         st.view = { x: this.x, y: this.y, z: p.to };
     };
+
+    // An in-place switch completes when the Spriteset binds to the new level: at the start of its update, before any of
+    // its layers (tiles, characters, objects, items, fog, depth planes) update, so all of them show the new level in the
+    // same frame. This alias sits outside DEUS_Culling's (loaded earlier), so the rebind sees the full character list.
+    const _Spriteset_Map_update_inPlace = Spriteset_Map.prototype.update;
+    Spriteset_Map.prototype.update = function() {
+        if (this._ufBoundMap !== window.$dataMap) finishSwitch(this);
+        _Spriteset_Map_update_inPlace.call(this);
+    };
+    function finishSwitch(ss) {
+        const W = World();
+        if (!W || !W.rebindSpriteset) return;
+        const t0 = performance.now();
+        if (!W.rebindSpriteset(ss)) return;
+        const t1 = performance.now();
+        // What the faction sees on the new level now, not a fog refresh later (DEUS_Fog re-keys its buffers by map id).
+        if (window.UF.Fog && typeof UF.Fog.refresh === "function") UF.Fog.refresh();
+        const p = pending;
+        if (!p || !p.swap || viewZ() !== p.to) return;
+        const rebindMs = t1 - t0, fogMs = performance.now() - t1;
+        pending = null;
+        stats.switches++;
+        stats.lastSwitch = {
+            from: p.from, to: p.to, ms: performance.now() - p.t0, frames: mapFrames - p.frames0, renderFrames: Graphics.frameCount - p.frame0,
+            reused: !p.swap.built, follow: !!p.center, inPlace: true, swapMs: p.swap.ms, rebindMs, fogMs, workMs: p.swap.ms + rebindMs + fogMs,
+            syncBuilds: p.swap.built ? 1 : 0, events: p.swap.events
+        };
+        emit("levels:viewChanged", p.from, p.to);
+    }
 
     // A level switch is a camera move, not a journey: keep the image cache and don't autosave.
     const _Scene_Map_onTransfer = Scene_Map.prototype.onTransfer;
@@ -4219,6 +4265,7 @@
     const _Scene_Map_start = Scene_Map.prototype.start;
     Scene_Map.prototype.start = function() {
         _Scene_Map_start.call(this);
+        ImageManager.loadParallax("BlueSky"); // the sky of +1 and +2 (updateParallax below), ready before an in-place switch shows it
         const W = World();
         if (W && W.reconcileEvents) W.reconcileEvents();
         const st = W && W.state;
@@ -4307,6 +4354,9 @@
         } else if (queuedKey && --queuedKey.ttl <= 0) {
             queuedKey = null;
         }
+        // Prewarm in play (SIM.00.00): at most one step a frame while a level of the view's ring (z±1, z±2) has no build.
+        const W = World();
+        if (!pending && this.isActive() && W && W.prewarmStep) W.prewarmStep();
     };
 
     //-------------------------------------------------------------------------

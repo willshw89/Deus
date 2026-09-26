@@ -1,0 +1,1765 @@
+{
+  "suite": "layer_switch_inplace",
+  "made": "2026-09-26T06:41:43.626Z",
+  "seed": 18,
+  "inPlaceApi": true,
+  "units": 1240,
+  "unitsByLevel": {
+    "0": 769,
+    "1": 1,
+    "2": 1,
+    "-2": 228,
+    "-1": 241
+  },
+  "prewarm": {
+    "enabled": true,
+    "ring": [
+      -1,
+      1,
+      -2,
+      2
+    ],
+    "cold": [],
+    "cached": [
+      "18:0,0,1",
+      "18:0,0,2",
+      "18:0,0,-1",
+      "18:0,0,-2",
+      "18:0,0"
+    ],
+    "pinned": [
+      "18:0,0",
+      "18:0,0,-1",
+      "18:0,0,1",
+      "18:0,0,-2",
+      "18:0,0,2"
+    ],
+    "builds": 4,
+    "replaced": 2,
+    "grids": 4,
+    "ms": 1232.3950000009063,
+    "maxMs": 350.5349999995815,
+    "lastMs": 342.62000000035187,
+    "gridMs": 37.745000001450535,
+    "loadSteps": 12,
+    "steps": 12,
+    "last": {
+      "z": 2,
+      "did": "images",
+      "ms": 0
+    },
+    "peekBuilds": 3
+  },
+  "prewarmWaitMs": 40.39,
+  "switches": [
+    {
+      "round": 1,
+      "from": 0,
+      "to": 1,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 66.88,
+      "newRecord": true,
+      "last": {
+        "from": 0,
+        "to": 1,
+        "ms": 12.74,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 4.73,
+        "rebindMs": 6.08,
+        "fogMs": 0.01,
+        "workMs": 10.81,
+        "syncBuilds": 0,
+        "events": 1
+      },
+      "world": {
+        "switches": 1,
+        "syncBuilds": 0,
+        "rebinds": 1,
+        "last": {
+          "mapId": 1001,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          },
+          "built": false,
+          "ms": 4.725000000689761,
+          "events": 1,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 5.925000000388536,
+          "dropped": 769,
+          "added": 1,
+          "split": {
+            "tiles": 0.3600000000005821,
+            "drop": 1.7400000006091432,
+            "create": 0.08499999967170879,
+            "add": 0.044999999772699084,
+            "events": 3.695000000334403
+          }
+        }
+      },
+      "shown": {
+        "ok": true,
+        "bad": [],
+        "units": 1,
+        "events": 1,
+        "fog": "hidden (disabled in play)",
+        "minimap": "activeZ 1, HUD kept"
+      }
+    },
+    {
+      "round": 1,
+      "from": 1,
+      "to": 2,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 91.41,
+      "newRecord": true,
+      "last": {
+        "from": 1,
+        "to": 2,
+        "ms": 17.8,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 12.06,
+        "rebindMs": 3.11,
+        "fogMs": 0,
+        "workMs": 15.18,
+        "syncBuilds": 0,
+        "events": 1
+      },
+      "world": {
+        "switches": 2,
+        "syncBuilds": 0,
+        "rebinds": 2,
+        "last": {
+          "mapId": 1002,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": 2
+          },
+          "built": false,
+          "ms": 12.064999999893189,
+          "events": 1,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 3.0999999999039574,
+          "dropped": 1,
+          "added": 1,
+          "split": {
+            "tiles": 0.019999999494757503,
+            "drop": 0.09000000045489287,
+            "create": 0.09500000032858225,
+            "add": 0.044999999772699084,
+            "events": 2.8499999998530257
+          }
+        }
+      },
+      "shown": {
+        "ok": true,
+        "bad": [],
+        "units": 1,
+        "events": 1,
+        "fog": "hidden (disabled in play)",
+        "minimap": "activeZ 2, HUD kept"
+      }
+    },
+    {
+      "round": 1,
+      "from": 2,
+      "to": 0,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 64.33,
+      "newRecord": true,
+      "last": {
+        "from": 2,
+        "to": 0,
+        "ms": 30.88,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 22.09,
+        "rebindMs": 8.03,
+        "fogMs": 0,
+        "workMs": 30.13,
+        "syncBuilds": 0,
+        "events": 769
+      },
+      "world": {
+        "switches": 3,
+        "syncBuilds": 0,
+        "rebinds": 3,
+        "last": {
+          "mapId": 1000,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "built": false,
+          "ms": 22.094999999353604,
+          "events": 769,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 8.025000000088767,
+          "dropped": 1,
+          "added": 769,
+          "split": {
+            "tiles": 0.06000000030326191,
+            "drop": 0.08999999954539817,
+            "create": 4.429999999956635,
+            "add": 2.1800000004077447,
+            "events": 1.2649999998757266
+          }
+        }
+      },
+      "shown": {
+        "ok": true,
+        "bad": [],
+        "units": 769,
+        "events": 769,
+        "fog": "hidden (disabled in play)",
+        "minimap": "activeZ 0, HUD kept"
+      }
+    },
+    {
+      "round": 1,
+      "from": 0,
+      "to": -1,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 45.72,
+      "newRecord": true,
+      "last": {
+        "from": 0,
+        "to": -1,
+        "ms": 21.23,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 8.28,
+        "rebindMs": 8.69,
+        "fogMs": 0.01,
+        "workMs": 16.98,
+        "syncBuilds": 0,
+        "events": 241
+      },
+      "world": {
+        "switches": 4,
+        "syncBuilds": 0,
+        "rebinds": 4,
+        "last": {
+          "mapId": 1003,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": -1
+          },
+          "built": false,
+          "ms": 8.275000000139698,
+          "events": 241,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 8.67500000003929,
+          "dropped": 769,
+          "added": 241,
+          "split": {
+            "tiles": 0.05999999939376721,
+            "drop": 2.395000000433356,
+            "create": 4.719999999906577,
+            "add": 0.5899999996472616,
+            "events": 0.9100000006583286
+          }
+        }
+      },
+      "shown": {
+        "ok": true,
+        "bad": [],
+        "units": 241,
+        "events": 241,
+        "fog": "hidden (disabled in play)",
+        "minimap": "activeZ -1, HUD kept"
+      }
+    },
+    {
+      "round": 1,
+      "from": -1,
+      "to": 0,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 80.68,
+      "newRecord": true,
+      "last": {
+        "from": -1,
+        "to": 0,
+        "ms": 27.16,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 14.41,
+        "rebindMs": 9.56,
+        "fogMs": 0,
+        "workMs": 23.97,
+        "syncBuilds": 0,
+        "events": 769
+      },
+      "world": {
+        "switches": 5,
+        "syncBuilds": 0,
+        "rebinds": 5,
+        "last": {
+          "mapId": 1000,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "built": false,
+          "ms": 14.409999999770662,
+          "events": 769,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 9.549999999762804,
+          "dropped": 241,
+          "added": 769,
+          "split": {
+            "tiles": 0.044999999772699084,
+            "drop": 0.44499999967229087,
+            "create": 5.909999999857973,
+            "add": 2.335000000130094,
+            "events": 0.8150000003297464
+          }
+        }
+      },
+      "shown": {
+        "ok": true,
+        "bad": [],
+        "units": 769,
+        "events": 769,
+        "fog": "hidden (disabled in play)",
+        "minimap": "activeZ 0, HUD kept"
+      }
+    },
+    {
+      "round": 2,
+      "from": 0,
+      "to": 1,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 84.18,
+      "newRecord": true,
+      "last": {
+        "from": 0,
+        "to": 1,
+        "ms": 8.98,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 1.8,
+        "rebindMs": 4.19,
+        "fogMs": 2.07,
+        "workMs": 8.06,
+        "syncBuilds": 0,
+        "events": 1
+      },
+      "world": {
+        "switches": 6,
+        "syncBuilds": 0,
+        "rebinds": 6,
+        "last": {
+          "mapId": 1001,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          },
+          "built": false,
+          "ms": 1.8000000000029104,
+          "events": 1,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 4.179999999905704,
+          "dropped": 769,
+          "added": 1,
+          "split": {
+            "tiles": 0.044999999772699084,
+            "drop": 3.3999999996012775,
+            "create": 0.045000000682193786,
+            "add": 0.019999999494757503,
+            "events": 0.6700000003547757
+          }
+        }
+      },
+      "shown": {
+        "ok": true,
+        "bad": [],
+        "units": 1,
+        "events": 1,
+        "fog": "hidden above ground",
+        "minimap": "activeZ 1, HUD kept"
+      }
+    },
+    {
+      "round": 2,
+      "from": 1,
+      "to": 2,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 84.25,
+      "newRecord": true,
+      "last": {
+        "from": 1,
+        "to": 2,
+        "ms": 4.78,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 1.25,
+        "rebindMs": 1.84,
+        "fogMs": 0.92,
+        "workMs": 4.01,
+        "syncBuilds": 0,
+        "events": 1
+      },
+      "world": {
+        "switches": 7,
+        "syncBuilds": 0,
+        "rebinds": 7,
+        "last": {
+          "mapId": 1002,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": 2
+          },
+          "built": false,
+          "ms": 1.2499999993451638,
+          "events": 1,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 1.8449999997756095,
+          "dropped": 1,
+          "added": 1,
+          "split": {
+            "tiles": 0.010000000656873453,
+            "drop": 0.11999999969702912,
+            "create": 0.06500000017695129,
+            "add": 0.019999999494757503,
+            "events": 1.629999999749998
+          }
+        }
+      },
+      "shown": {
+        "ok": true,
+        "bad": [],
+        "units": 1,
+        "events": 1,
+        "fog": "hidden above ground",
+        "minimap": "activeZ 2, HUD kept"
+      }
+    },
+    {
+      "round": 2,
+      "from": 2,
+      "to": 0,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 1362.54,
+      "newRecord": true,
+      "last": {
+        "from": 2,
+        "to": 0,
+        "ms": 1348.61,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 8.1,
+        "rebindMs": 7.64,
+        "fogMs": 1332.32,
+        "workMs": 1348.06,
+        "syncBuilds": 0,
+        "events": 769
+      },
+      "world": {
+        "switches": 8,
+        "syncBuilds": 0,
+        "rebinds": 8,
+        "last": {
+          "mapId": 1000,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "built": false,
+          "ms": 8.100000000013097,
+          "events": 769,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 7.634999999936554,
+          "dropped": 1,
+          "added": 769,
+          "split": {
+            "tiles": 0.044999999772699084,
+            "drop": 0.06000000030326191,
+            "create": 4.544999999779975,
+            "add": 2.1000000006097252,
+            "events": 0.8849999994708924
+          }
+        }
+      },
+      "shown": {
+        "ok": true,
+        "bad": [],
+        "units": 769,
+        "events": 769,
+        "fog": "own cell alpha 150, other levels' cells 255/255/255/255, observers clear 6/6",
+        "minimap": "activeZ 0, HUD kept"
+      }
+    },
+    {
+      "round": 2,
+      "from": 0,
+      "to": -1,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 26.73,
+      "newRecord": true,
+      "last": {
+        "from": 0,
+        "to": -1,
+        "ms": 14.75,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 7.76,
+        "rebindMs": 4.52,
+        "fogMs": 0.78,
+        "workMs": 13.06,
+        "syncBuilds": 0,
+        "events": 241
+      },
+      "world": {
+        "switches": 9,
+        "syncBuilds": 0,
+        "rebinds": 9,
+        "last": {
+          "mapId": 1003,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": -1
+          },
+          "built": false,
+          "ms": 7.7649999993809615,
+          "events": 241,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 4.514999999628344,
+          "dropped": 769,
+          "added": 241,
+          "split": {
+            "tiles": 0.044999999772699084,
+            "drop": 1.5000000003055902,
+            "create": 1.014999999824795,
+            "add": 1.510000000052969,
+            "events": 0.44499999967229087
+          }
+        }
+      },
+      "shown": {
+        "ok": true,
+        "bad": [],
+        "units": 241,
+        "events": 241,
+        "fog": "own cell alpha 150, other levels' cells 255/255/255/255, observers clear 0/0",
+        "minimap": "activeZ -1, HUD kept"
+      }
+    },
+    {
+      "round": 2,
+      "from": -1,
+      "to": 0,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 1302.71,
+      "newRecord": true,
+      "last": {
+        "from": -1,
+        "to": 0,
+        "ms": 1294.57,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 6.86,
+        "rebindMs": 9.26,
+        "fogMs": 1275.79,
+        "workMs": 1291.91,
+        "syncBuilds": 0,
+        "events": 769
+      },
+      "world": {
+        "switches": 10,
+        "syncBuilds": 0,
+        "rebinds": 10,
+        "last": {
+          "mapId": 1000,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "built": false,
+          "ms": 6.859999999505817,
+          "events": 769,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 7.02499999988504,
+          "dropped": 241,
+          "added": 769,
+          "split": {
+            "tiles": 0.05500000042957254,
+            "drop": 0.3499999993437086,
+            "create": 4.335000000537548,
+            "add": 1.4649999993707752,
+            "events": 0.8200000002034358
+          }
+        }
+      },
+      "shown": {
+        "ok": true,
+        "bad": [],
+        "units": 769,
+        "events": 769,
+        "fog": "own cell alpha 150, other levels' cells 255/255/255/255, observers clear 6/6",
+        "minimap": "activeZ 0, HUD kept"
+      }
+    },
+    {
+      "round": 3,
+      "from": 0,
+      "to": 1,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 13.97,
+      "newRecord": true,
+      "last": {
+        "from": 0,
+        "to": 1,
+        "ms": 3.53,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 0.99,
+        "rebindMs": 1.76,
+        "fogMs": 0,
+        "workMs": 2.74,
+        "syncBuilds": 0,
+        "events": 1
+      },
+      "world": {
+        "switches": 11,
+        "syncBuilds": 0,
+        "rebinds": 11,
+        "last": {
+          "mapId": 1001,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          },
+          "built": false,
+          "ms": 0.9899999995468534,
+          "events": 1,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 1.750000000356522,
+          "dropped": 769,
+          "added": 1,
+          "split": {
+            "tiles": 0.030000000151630957,
+            "drop": 1.044999999976426,
+            "create": 0.03500000002532033,
+            "add": 0.01500000053056283,
+            "events": 0.6249999996725819
+          }
+        }
+      },
+      "shown": null
+    },
+    {
+      "round": 3,
+      "from": 1,
+      "to": 2,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 31.6,
+      "newRecord": true,
+      "last": {
+        "from": 1,
+        "to": 2,
+        "ms": 2.77,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 1.13,
+        "rebindMs": 0.94,
+        "fogMs": 0,
+        "workMs": 2.07,
+        "syncBuilds": 0,
+        "events": 1
+      },
+      "world": {
+        "switches": 12,
+        "syncBuilds": 0,
+        "rebinds": 12,
+        "last": {
+          "mapId": 1002,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": 2
+          },
+          "built": false,
+          "ms": 1.134999999521824,
+          "events": 1,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 0.9350000000267755,
+          "dropped": 1,
+          "added": 1,
+          "split": {
+            "tiles": 0.004999999873689376,
+            "drop": 0.09000000045489287,
+            "create": 0.030000000151630957,
+            "add": 0.014999999621068127,
+            "events": 0.7949999999254942
+          }
+        }
+      },
+      "shown": null
+    },
+    {
+      "round": 3,
+      "from": 2,
+      "to": 0,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 66.96,
+      "newRecord": true,
+      "last": {
+        "from": 2,
+        "to": 0,
+        "ms": 13,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 7.89,
+        "rebindMs": 4.4,
+        "fogMs": 0.01,
+        "workMs": 12.31,
+        "syncBuilds": 0,
+        "events": 769
+      },
+      "world": {
+        "switches": 13,
+        "syncBuilds": 0,
+        "rebinds": 13,
+        "last": {
+          "mapId": 1000,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "built": false,
+          "ms": 7.894999999734864,
+          "events": 769,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 4.399999999805004,
+          "dropped": 1,
+          "added": 769,
+          "split": {
+            "tiles": 0.03999999989900971,
+            "drop": 0.07000000005064066,
+            "create": 2.5200000000040745,
+            "add": 0.9550000004310277,
+            "events": 0.8149999994202517
+          }
+        }
+      },
+      "shown": null
+    },
+    {
+      "round": 3,
+      "from": 0,
+      "to": -1,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 123.85,
+      "newRecord": true,
+      "last": {
+        "from": 0,
+        "to": -1,
+        "ms": 15.08,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 9.8,
+        "rebindMs": 4.64,
+        "fogMs": 0.01,
+        "workMs": 14.45,
+        "syncBuilds": 0,
+        "events": 241
+      },
+      "world": {
+        "switches": 14,
+        "syncBuilds": 0,
+        "rebinds": 14,
+        "last": {
+          "mapId": 1003,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": -1
+          },
+          "built": false,
+          "ms": 9.804999999687425,
+          "events": 241,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 4.635000000234868,
+          "dropped": 769,
+          "added": 241,
+          "split": {
+            "tiles": 0.030000000151630957,
+            "drop": 1.0350000002290471,
+            "create": 2.419999999801803,
+            "add": 0.4550000003291643,
+            "events": 0.6949999997232226
+          }
+        }
+      },
+      "shown": null
+    },
+    {
+      "round": 3,
+      "from": -1,
+      "to": 0,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 70.63,
+      "newRecord": true,
+      "last": {
+        "from": -1,
+        "to": 0,
+        "ms": 9.71,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 3.78,
+        "rebindMs": 5.33,
+        "fogMs": 0,
+        "workMs": 9.11,
+        "syncBuilds": 0,
+        "events": 769
+      },
+      "world": {
+        "switches": 15,
+        "syncBuilds": 0,
+        "rebinds": 15,
+        "last": {
+          "mapId": 1000,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "built": false,
+          "ms": 3.7750000001324224,
+          "events": 769,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 5.325000000084401,
+          "dropped": 241,
+          "added": 769,
+          "split": {
+            "tiles": 0.04000000080850441,
+            "drop": 0.33999999959632987,
+            "create": 1.8149999996239785,
+            "add": 2.2500000004583853,
+            "events": 0.879999999597203
+          }
+        }
+      },
+      "shown": null
+    },
+    {
+      "round": 4,
+      "from": 0,
+      "to": 1,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 46.47,
+      "newRecord": true,
+      "last": {
+        "from": 0,
+        "to": 1,
+        "ms": 5.85,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 1.18,
+        "rebindMs": 2.12,
+        "fogMs": 0,
+        "workMs": 3.31,
+        "syncBuilds": 0,
+        "events": 1
+      },
+      "world": {
+        "switches": 16,
+        "syncBuilds": 0,
+        "rebinds": 16,
+        "last": {
+          "mapId": 1001,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          },
+          "built": false,
+          "ms": 1.1799999992945231,
+          "events": 1,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 2.124999999978172,
+          "dropped": 769,
+          "added": 1,
+          "split": {
+            "tiles": 0.03500000002532033,
+            "drop": 1.3450000005832408,
+            "create": 0.04999999964638846,
+            "add": 0.020000000404252205,
+            "events": 0.6749999993189704
+          }
+        }
+      },
+      "shown": null
+    },
+    {
+      "round": 4,
+      "from": 1,
+      "to": 2,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 64.6,
+      "newRecord": true,
+      "last": {
+        "from": 1,
+        "to": 2,
+        "ms": 4.19,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 0.97,
+        "rebindMs": 2.63,
+        "fogMs": 0,
+        "workMs": 3.6,
+        "syncBuilds": 0,
+        "events": 1
+      },
+      "world": {
+        "switches": 17,
+        "syncBuilds": 0,
+        "rebinds": 17,
+        "last": {
+          "mapId": 1002,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": 2
+          },
+          "built": false,
+          "ms": 0.9749999999257852,
+          "events": 1,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 0.9199999994962127,
+          "dropped": 1,
+          "added": 1,
+          "split": {
+            "tiles": 0.004999999873689376,
+            "drop": 0.08999999954539817,
+            "create": 0.02500000027794158,
+            "add": 0.009999999747378752,
+            "events": 0.7900000000518048
+          }
+        }
+      },
+      "shown": null
+    },
+    {
+      "round": 4,
+      "from": 2,
+      "to": 0,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 58.75,
+      "newRecord": true,
+      "last": {
+        "from": 2,
+        "to": 0,
+        "ms": 12.1,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 8.05,
+        "rebindMs": 3.39,
+        "fogMs": 0.01,
+        "workMs": 11.45,
+        "syncBuilds": 0,
+        "events": 769
+      },
+      "world": {
+        "switches": 18,
+        "syncBuilds": 0,
+        "rebinds": 18,
+        "last": {
+          "mapId": 1000,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "built": false,
+          "ms": 8.050000000366708,
+          "events": 769,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 3.3899999998538988,
+          "dropped": 1,
+          "added": 769,
+          "split": {
+            "tiles": 0.03500000002532033,
+            "drop": 0.18000000000029104,
+            "create": 1.1300000005576294,
+            "add": 1.0699999993448728,
+            "events": 0.9749999999257852
+          }
+        }
+      },
+      "shown": null
+    },
+    {
+      "round": 4,
+      "from": 0,
+      "to": -1,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 42.72,
+      "newRecord": true,
+      "last": {
+        "from": 0,
+        "to": -1,
+        "ms": 12.64,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 8.93,
+        "rebindMs": 2.45,
+        "fogMs": 0,
+        "workMs": 11.39,
+        "syncBuilds": 0,
+        "events": 241
+      },
+      "world": {
+        "switches": 19,
+        "syncBuilds": 0,
+        "rebinds": 19,
+        "last": {
+          "mapId": 1003,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": -1
+          },
+          "built": false,
+          "ms": 8.929999999963911,
+          "events": 241,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 2.449999999953434,
+          "dropped": 769,
+          "added": 241,
+          "split": {
+            "tiles": 0.03999999989900971,
+            "drop": 1.1350000004313188,
+            "create": 0.4149999995206599,
+            "add": 0.3400000005058246,
+            "events": 0.5199999995966209
+          }
+        }
+      },
+      "shown": null
+    },
+    {
+      "round": 4,
+      "from": -1,
+      "to": 0,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 80.93,
+      "newRecord": true,
+      "last": {
+        "from": -1,
+        "to": 0,
+        "ms": 8.13,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 3.7,
+        "rebindMs": 3.86,
+        "fogMs": 0,
+        "workMs": 7.56,
+        "syncBuilds": 0,
+        "events": 769
+      },
+      "world": {
+        "switches": 20,
+        "syncBuilds": 0,
+        "rebinds": 20,
+        "last": {
+          "mapId": 1000,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "built": false,
+          "ms": 3.7000000002080924,
+          "events": 769,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 3.8500000000567525,
+          "dropped": 241,
+          "added": 769,
+          "split": {
+            "tiles": 0.045000000682193786,
+            "drop": 0.3299999998489511,
+            "create": 1.975000000129512,
+            "add": 0.5999999993946403,
+            "events": 0.9000000000014552
+          }
+        }
+      },
+      "shown": null
+    },
+    {
+      "round": 5,
+      "from": 0,
+      "to": -1,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 49.55,
+      "newRecord": true,
+      "last": {
+        "from": 0,
+        "to": -1,
+        "ms": 5.08,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 1.98,
+        "rebindMs": 2.28,
+        "fogMs": 0,
+        "workMs": 4.26,
+        "syncBuilds": 0,
+        "events": 241
+      },
+      "world": {
+        "switches": 21,
+        "syncBuilds": 0,
+        "rebinds": 21,
+        "last": {
+          "mapId": 1003,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": -1
+          },
+          "built": false,
+          "ms": 1.975000000129512,
+          "events": 241,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 2.2800000006100163,
+          "dropped": 769,
+          "added": 241,
+          "split": {
+            "tiles": 0.030000000151630957,
+            "drop": 1.1599999997997656,
+            "create": 0.32000000010157237,
+            "add": 0.24500000017724233,
+            "events": 0.525000000379805
+          }
+        }
+      },
+      "shown": null
+    },
+    {
+      "round": 5,
+      "from": -1,
+      "to": 1,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 4,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 4,
+      "framesMoved": 4,
+      "maxUpdateMs": 94.47,
+      "newRecord": true,
+      "last": {
+        "from": -1,
+        "to": 1,
+        "ms": 5.94,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 1.15,
+        "rebindMs": 2.67,
+        "fogMs": 0,
+        "workMs": 3.82,
+        "syncBuilds": 0,
+        "events": 1
+      },
+      "world": {
+        "switches": 22,
+        "syncBuilds": 0,
+        "rebinds": 22,
+        "last": {
+          "mapId": 1001,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          },
+          "built": false,
+          "ms": 1.1450000001786975,
+          "events": 1,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 0.9950000003300374,
+          "dropped": 241,
+          "added": 1,
+          "split": {
+            "tiles": 0.004999999873689376,
+            "drop": 0.3400000005058246,
+            "create": 0.019999999494757503,
+            "add": 0.009999999747378752,
+            "events": 0.6200000007083872
+          }
+        }
+      },
+      "shown": null
+    },
+    {
+      "round": 6,
+      "from": 1,
+      "to": 0,
+      "ok": true,
+      "timedOut": false,
+      "sameScene": true,
+      "sameSpriteset": true,
+      "scenesMade": 0,
+      "spritesetsMade": 0,
+      "builds": 0,
+      "buildsAtDone": 0,
+      "updates": 3,
+      "skipped": 0,
+      "wSkipped": 0,
+      "pausedUpdates": 0,
+      "ticksMoved": 3,
+      "framesMoved": 3,
+      "maxUpdateMs": 86.48,
+      "newRecord": true,
+      "last": {
+        "from": 1,
+        "to": 0,
+        "ms": 26.32,
+        "frames": 0,
+        "renderFrames": 1,
+        "reused": true,
+        "follow": false,
+        "inPlace": true,
+        "swapMs": 9.37,
+        "rebindMs": 15.23,
+        "fogMs": 0,
+        "workMs": 24.6,
+        "syncBuilds": 0,
+        "events": 769
+      },
+      "world": {
+        "switches": 23,
+        "syncBuilds": 0,
+        "rebinds": 23,
+        "last": {
+          "mapId": 1000,
+          "level": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "built": false,
+          "ms": 9.369999999762513,
+          "events": 769,
+          "added": 0
+        },
+        "lastRebind": {
+          "ms": 15.070000000378059,
+          "dropped": 1,
+          "added": 769,
+          "split": {
+            "tiles": 0.07499999992433004,
+            "drop": 0.43000000005122274,
+            "create": 11.300000000119326,
+            "add": 1.524999999674037,
+            "events": 1.7400000006091432
+          }
+        }
+      },
+      "shown": null
+    }
+  ],
+  "load": {
+    "ms": 4089.13,
+    "scenesMade": 1,
+    "diag": {
+      "readyCalls": 13,
+      "readyTrue": 1,
+      "builds0": 0,
+      "warm0": 12,
+      "builds": 9,
+      "buildLog": [
+        0,
+        -1,
+        -2,
+        2,
+        1,
+        0,
+        2,
+        -1,
+        -2
+      ],
+      "prewarmAtStart": {
+        "enabled": true,
+        "ring": [
+          0,
+          2,
+          -1
+        ],
+        "cold": [],
+        "cached": [
+          "18:0,0,1",
+          "18:0,0",
+          "18:0,0,2",
+          "18:0,0,-1",
+          "18:0,0,-2"
+        ],
+        "pinned": [
+          "18:0,0,1",
+          "18:0,0",
+          "18:0,0,2",
+          "18:0,0,-1"
+        ],
+        "builds": 8,
+        "replaced": 6,
+        "grids": 8,
+        "ms": 2577.3250000011103,
+        "maxMs": 524.000000000342,
+        "lastMs": 262.9299999998693,
+        "gridMs": 76.24500000201806,
+        "loadSteps": 24,
+        "steps": 94,
+        "last": {
+          "z": -2,
+          "did": "images",
+          "ms": 0
+        },
+        "peekBuilds": 7
+      }
+    },
+    "prewarm": {
+      "enabled": true,
+      "ring": [
+        -1,
+        1,
+        -2,
+        2
+      ],
+      "cold": [],
+      "cached": [
+        "18:0,0,2",
+        "18:0,0,-1",
+        "18:0,0,-2",
+        "18:0,0,1",
+        "18:0,0"
+      ],
+      "pinned": [
+        "18:0,0",
+        "18:0,0,-1",
+        "18:0,0,1",
+        "18:0,0,-2",
+        "18:0,0,2"
+      ],
+      "builds": 8,
+      "replaced": 6,
+      "grids": 9,
+      "ms": 2577.3250000011103,
+      "maxMs": 524.000000000342,
+      "lastMs": 262.9299999998693,
+      "gridMs": 78.70500000262837,
+      "loadSteps": 24,
+      "steps": 97,
+      "last": {
+        "z": 1,
+        "did": "images",
+        "ms": 0
+      },
+      "peekBuilds": 7
+    }
+  }
+}
