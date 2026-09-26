@@ -1,0 +1,2418 @@
+{
+  "task": "SIM.50.11",
+  "baseCommit": "790387090083848959ce0b95bc560a395336fa3d",
+  "generatedFrom": "tasks/SIM.50.11/gap-audit-people/PEOPLE_GAP_AUDIT.md",
+  "note": "Planning ratings, not code. Proposed IDs are PROPOSED-<AREA>-NN and are not minted WBS IDs. Overlord mode items are Owner questions only (area 9). Nothing here is certified; an independent Grok review decides.",
+  "counts": {
+    "areas": 10,
+    "gaps": 73,
+    "gapsBySeverity": {
+      "BLOCKER": 6,
+      "MAJOR": 48,
+      "MINOR": 19
+    },
+    "proposedPackages": 59,
+    "ownerQuestions": 26,
+    "documentationMismatches": 14,
+    "defectsInPassing": 8
+  },
+  "areas": [
+    {
+      "n": 1,
+      "area": "Individual minds",
+      "rating": "PARTLY PLANNED",
+      "wbsIds": [
+        "SOC.13.01",
+        "WB-002",
+        "SIM.00.05",
+        "GP.08.01",
+        "SIM.40.10",
+        "SOC.51.01"
+      ],
+      "decIds": [
+        "DEC-012",
+        "DEC-014",
+        "DEC-015",
+        "DEC-018"
+      ],
+      "srdRefs": [
+        "srd:rule:adventuring-the-environment, food and water (game/data/srd51/rules.json:4390)",
+        "srd:condition:exhaustion (game/data/srd51/rules.json:10533)",
+        "Acolyte background trait, ideal, bond and flaw tables (game/data/srd51/character_options.json:7223)",
+        "srd:rule:madness (game/data/srd51/rules.json:6291)",
+        "Charm Person (game/data/srd51/spells.json:3415)",
+        "Detect Thoughts (game/data/srd51/spells.json:5723)",
+        "Modify Memory (game/data/srd51/spells.json:12011)",
+        "Zone of Truth (game/data/srd51/spells.json:17870)"
+      ],
+      "codeToday": "PARTIAL",
+      "codeCitations": [
+        "game/js/plugins/DEUS_Colonists.js:1548",
+        "game/js/plugins/DEUS_Colonists.js:5754",
+        "game/js/plugins/DEUS_Colonists.js:5198",
+        "game/js/plugins/DEUS_Jobs.js:375",
+        "game/js/plugins/DEUS_Colonists.js:5111",
+        "game/js/plugins/DEUS_Colonists.js:5614",
+        "game/js/plugins/DEUS_ColonyOverseer.js:79",
+        "game/js/plugins/DEUS_Talk.js:259",
+        "game/js/plugins/DEUS_Colonists.js:643",
+        "game/js/plugins/DEUS_Talk.js:634",
+        "game/js/plugins/DEUS_Colonists.js:5470",
+        "game/js/plugins/DEUS_Colonists.js:2525",
+        "game/js/plugins/DEUS_Colonists.js:2415",
+        "game/js/plugins/DEUS_Colonists.js:2652",
+        "game/js/plugins/DEUS_Colonists.js:628",
+        "game/js/plugins/DEUS_Colonists.js:1488",
+        "game/js/plugins/DEUS_Colonists.js:587",
+        "game/js/plugins/DEUS_Colonists.js:2861",
+        "docs/design/PERSONALITY.md:7"
+      ],
+      "gaps": [
+        {
+          "id": "G1-1",
+          "severity": "BLOCKER",
+          "text": "No WBS row plans the event → memory → mood → behaviour loop that V16 and V94 depend on. In code the loop is cut in two places: thoughts are never summed into a mood, and nothing reads mood."
+        },
+        {
+          "id": "G1-2",
+          "severity": "MAJOR",
+          "text": "Relationships and opinions have only a nominal row (GP.08.01's slice text). Code keeps positive-only bonds and pairs partners with no bond check; EMERGENT_SOCIETY asks for positive and negative changes, memory limits and separate trust, grievance and affection."
+        },
+        {
+          "id": "G1-3",
+          "severity": "MAJOR",
+          "text": "No personality or values model is planned. Founders and immigrants have no facets, so the 72 Year-0 founders all read 50; V94 wants traits and values rolled with culture and family influence."
+        },
+        {
+          "id": "G1-4",
+          "severity": "MAJOR",
+          "text": "No row plans goals or ambitions. The goals hook is empty in code; V17 goal pursuit and V42 \"unhappy or ambitious colonists leave\" need them."
+        },
+        {
+          "id": "G1-5",
+          "severity": "MAJOR",
+          "text": "No crowd-LOD summary for minds and no rule for building a promoted person's mind or keeping named relationships through demotion (section 2.4)."
+        },
+        {
+          "id": "G1-6",
+          "severity": "MINOR",
+          "text": "Non-vital needs are dormant: the social need is written by talk jobs but has no field to change, and nature and comfort have no live job."
+        },
+        {
+          "id": "G1-7",
+          "severity": "MAJOR",
+          "text": "AGENTS.md rule 14 requires the simulation to explain itself through the sheet and look views; `describe()` hides facets (`DEUS_Colonists.js:5621`) and hardcodes mood. No row plans \"why\" panels for minds."
+        },
+        {
+          "id": "G1-8",
+          "severity": "MINOR",
+          "text": "Mental breaks have no row and are out of scope in the design (`docs/design/PERSONALITY.md:637`); the choice is the Owner's (OQ-02)."
+        },
+        {
+          "id": "G1-9",
+          "severity": "MAJOR",
+          "text": "DEC-018 makes SRD spells act in the simulation, but no row links the 21 mind spells (charm, compulsion, fear, memory) and the mind-reading divinations to any mind state; SIM.60.02's schema holds physical primitives only (section 4.2, P-05)."
+        }
+      ],
+      "proposedPackages": [
+        {
+          "id": "PROPOSED-MIND-01",
+          "title": "Mind state schema, world event record and save",
+          "scope": "one versioned schema for a person's mind: needs vector (vital and non-vital), mood (valence) and stress, personality facets and values, a bounded memory ring, bounded relationship slots, goals. One typed, append-only world event record (who, what, where, when, witnesses) that memories point to by event ID. Stable IDs only (INV-CORE-04). Save and migration from today's `unit.data` fields (`needs`, `thoughts`, `socialBonds`, `facets`).",
+          "deps": [
+            "SIM.00.02",
+            "SIM.00.03",
+            "SOC.10.01",
+            "SOC.60.02",
+            "SIM.00.06"
+          ],
+          "acceptanceTests": [
+            "(1) a JSON-Schema validator accepts every mind in a 72-founder fixture world and rejects a fixture with a memory pointing to a missing event",
+            "(2) save, load and save again is byte-identical",
+            "(3) an old save with `thoughts` and `socialBonds` migrates without loss (counts match).",
+            "Mutant: a migration that drops `socialBonds` must fail test 3."
+          ],
+          "tickCost": "CPU none per tick (a data package). Memory about 0.6 KiB per named person (needs 8 B, mood and stress 4 B, 24 facets and 10 values 34 B, a 16-entry memory ring of 16 B = 256 B, 24 relationship slots of 12 B = 288 B, 4 goals of 8 B = 32 B; total 622 B), so 0.6 MiB at N = 1,000. Crowd: about 1 KiB per settlement (40 cohorts × 24 B), 0.2 MiB at S = 200. Per layer: nothing; the region index is at most 4 KiB per area (A-6).",
+          "closes": [
+            "G1-6"
+          ]
+        },
+        {
+          "id": "PROPOSED-MIND-02",
+          "title": "Event appraisal: events become memories",
+          "scope": "data-driven appraisal rules (event kind × the observer's relation to the subject × personality → memory valence, intensity and half-life). Witness selection by perception: range, same or open-to layer, line of sight, and light level once PROPOSED-DEEP-01/02 exist. Hearsay later arrives as a belief with a source (EMERGENT_SOCIETY's separation of truth and knowledge).",
+          "deps": [
+            "SIM.00.04",
+            "PROPOSED-MIND-01",
+            "PROPOSED-DEEP-02"
+          ],
+          "acceptanceTests": [
+            "(1) fixture: A sees friend B die; A gains a memory of kind `witnessed_death` about B with intensity at or above the rule's floor",
+            "(2) C, behind a wall on the same layer, gains no memory",
+            "(3) D, B's rival, gains a memory of the opposite sign",
+            "(4) the same seed and events give byte-identical memories.",
+            "Mutant: witness selection that ignores line of sight must fail test 2."
+          ],
+          "tickCost": "about 4.5 events per tick at L0 (A-7) × 4 appraisals × 2 µs ≈ 36 µs, plus 4.5 witness queries × about 20 spatial probes × 0.1 µs ≈ 9 µs; L1 and L2 appraise only significant events (births, deaths, crimes, battles), well under 1 µs per tick. Total about 0.05 ms, 1.5% of the 3.4 ms 8x budget. Memory: inside MIND-01's ring.",
+          "closes": [
+            "G1-1"
+          ]
+        },
+        {
+          "id": "PROPOSED-MIND-03",
+          "title": "Mood and stress",
+          "scope": "mood is a deterministic function of active memories (decayed in closed form, intensity × 2^(−Δt/half-life)) and need deficits; stress integrates sustained low mood and recovers with rest, company and comfort. Recomputed only for persons marked dirty by a new memory or a need crossing a band, never by a full sweep (INV-CORE-03). Durations are in ticks until the Owner answers OQ-03.",
+          "deps": [
+            "PROPOSED-MIND-02"
+          ],
+          "acceptanceTests": [
+            "(1) mood equals the documented formula on a 50-memory fixture",
+            "(2) after a memory's half-life its contribution halves (±1%)",
+            "(3) sustained negative mood raises stress monotonically and rest lowers it",
+            "(4) no person's mood is recomputed without a dirty mark (instrumented counter).",
+            "Mutant: removing decay must fail test 2; a per-tick full sweep must fail test 4."
+          ],
+          "tickCost": "dirty persons about 18 per tick × 16 memory terms × 0.05 µs ≈ 15 µs. Crowd cohorts: a mood histogram (8 buckets) per cohort stepped at L2, 8,000 cohorts ÷ 100 ticks = 80 updates × 1 µs = 80 µs. About 0.1 ms per tick. Memory: included in MIND-01.",
+          "closes": [
+            "G1-1",
+            "G1-6"
+          ]
+        },
+        {
+          "id": "PROPOSED-MIND-04",
+          "title": "Relationships and opinions",
+          "scope": "pairwise records with separate familiarity, affection, trust, grievance and authority; bounded slots per person with an eviction rule that keeps kin, partner and strongest ties; growth and decay from shared events; rivals and grudges; partner formation through `UF.Households.formPair` only (replacing the bedtime shortcut at `DEUS_Colonists.js:2415`).",
+          "deps": [
+            "SIM.40.10",
+            "PROPOSED-MIND-02"
+          ],
+          "acceptanceTests": [
+            "(1) three shared positive events raise affection past the friend band",
+            "(2) an assault raises grievance and lowers trust on both sides by rule",
+            "(3) an untouched tie decays to acquaintance after its half-life",
+            "(4) eviction never drops kin or partner.",
+            "Mutant: bonds that only increase (today's rule) must fail test 2."
+          ],
+          "tickCost": "updates only on events, about 18 pair updates per tick × 0.2 µs plus slot eviction, under 10 µs. Memory: 288 B per named person (in MIND-01). Crowd: no pairwise records for anonymous people.",
+          "closes": [
+            "G1-2"
+          ]
+        },
+        {
+          "id": "PROPOSED-MIND-05",
+          "title": "Personality and values at birth, founding, arrival and promotion",
+          "scope": "facets (the ten existing ones extended, as V94 says) and values, rolled from the world seed with the culture bias from DEC-015 plan data and parental inheritance from SIM.40.10; the same rule for founders, immigrants, newborns and promoted crowd members; slow drift from strong memories.",
+          "deps": [
+            "SOC.10.03",
+            "SIM.40.10",
+            "OQ-01",
+            "PROPOSED-MIND-01"
+          ],
+          "acceptanceTests": [
+            "(1) no founder reads the default 50 on all facets",
+            "(2) over 1,000 simulated births, child facets correlate with the parents' mean within the configured band",
+            "(3) culture bias shifts the facet mean by the configured amount (±2)",
+            "(4) re-rolling the same person from the same seed is identical.",
+            "Mutant: founders skipped (today's behaviour) must fail test 1."
+          ],
+          "tickCost": "none per tick (runs at birth, founding, arrival, promotion). Memory: 34 B per named person (in MIND-01).",
+          "closes": [
+            "G1-3"
+          ]
+        },
+        {
+          "id": "PROPOSED-MIND-06",
+          "title": "Goals and ambitions",
+          "scope": "long-term goals chosen from personality, values, skills and circumstance (found a household, master a craft, hold an office, avenge a wrong, leave and found a camp per V42); a goal turns into duties through the SOC.13.01 scheduler and plan steps from DEC-015; goals end when met, blocked or replaced.",
+          "deps": [
+            "SOC.13.01",
+            "SOC.10.02",
+            "PROPOSED-MIND-03",
+            "PROPOSED-MIND-05"
+          ],
+          "acceptanceTests": [
+            "(1) a person with high ambition and a craft skill gains a mastery goal that produces apprenticeship or work duties",
+            "(2) a fixture with sustained stress and high ambition produces a V42 departure with a partner",
+            "(3) a goal whose precondition vanishes is dropped within one evaluation.",
+            "Mutant: goals that never create duties must fail test 1."
+          ],
+          "tickCost": "each named person re-evaluates goals once per game day, staggered: 1,000 ÷ 2,400 ticks ≈ 0.4 evaluations per tick × 20 µs ≈ 8 µs. Memory: 32 B per named person (in MIND-01).",
+          "closes": [
+            "G1-4"
+          ]
+        },
+        {
+          "id": "PROPOSED-MIND-07",
+          "title": "Behaviour coupling and breaks",
+          "scope": "mood, stress and personality weight the SOC.13.01 duty choice (work pace, rest, company-seeking, refusing an order within the V52 chain), what a person says (V62, V94; speech only over heads, V92) and, if the Owner chooses, bounded breaks (OQ-02).",
+          "deps": [
+            "SOC.13.01",
+            "PROPOSED-MIND-03",
+            "PROPOSED-MIND-06"
+          ],
+          "acceptanceTests": [
+            "(1) with everything else fixed, a person at mood −80 and one at +80 choose different duty weights by the documented rule",
+            "(2) a break fixture triggers only the break kinds the Owner allows",
+            "(3) survival still wins over any mood effect (V17).",
+            "Mutant: coupling removed must fail test 1."
+          ],
+          "tickCost": "one weight lookup per duty decision, about 5 decisions per tick at L0 × 1 µs = 5 µs.",
+          "closes": [
+            "G1-1",
+            "G1-8"
+          ]
+        },
+        {
+          "id": "PROPOSED-MIND-08",
+          "title": "Minds at crowd LOD: summaries, promotion and demotion",
+          "scope": "per-cohort mood histogram and need means as part of SIM.30.01's summary; deterministic promotion (a person's facets, values and first memories derived from the seed, settlement, cohort and index, plus the cohort's history counters); demotion folds the person into the cohort and keeps named relationships of persons who stay named.",
+          "deps": [
+            "SIM.30.01",
+            "SIM.30.02",
+            "SIM.30.03",
+            "OQ-04",
+            "PROPOSED-MIND-01",
+            "PROPOSED-MIND-02",
+            "PROPOSED-MIND-03",
+            "PROPOSED-MIND-04",
+            "PROPOSED-MIND-05"
+          ],
+          "acceptanceTests": [
+            "(1) 1,000 random promote and demote cycles on 3 seeds keep cohort totals exact",
+            "(2) promoting the same slot twice from the same state is byte-identical",
+            "(3) a named person's relationships to other named persons survive the other's demotion and promotion.",
+            "Mutant: unseeded randomness in promotion must fail test 2."
+          ],
+          "tickCost": "promotion about 50 µs per person; a focus move that promotes 100 people costs 5 ms, so it must be spread over prewarm ticks (at most 20 per tick, 1 ms); demotion about 10 µs per person. Memory: the cohort histogram is in MIND-01's per-settlement figure.",
+          "closes": [
+            "G1-5"
+          ]
+        },
+        {
+          "id": "PROPOSED-MIND-09",
+          "title": "Mind observability and long-run story QA",
+          "scope": "text \"why\" entries in the sheet and look views (current mood with its top three causes, strongest ties, goals; no overhead status text, V92; no art); a headless 100-game-year QA run that measures story yield (relationship changes, departures, grief episodes per 100 person-years) against bands.",
+          "deps": [
+            "OPS.30.01",
+            "PROPOSED-MIND-02",
+            "PROPOSED-MIND-03",
+            "PROPOSED-MIND-04",
+            "PROPOSED-MIND-05",
+            "PROPOSED-MIND-06",
+            "PROPOSED-MIND-07"
+          ],
+          "acceptanceTests": [
+            "(1) for a fixture person, the \"why\" entry lists exactly the three largest mood contributions",
+            "(2) the QA run's metrics fall inside their bands on 3 seeds.",
+            "Mutant: appraisal switched off must push \"relationship changes per 100 person-years\" below its floor and fail test 2."
+          ],
+          "tickCost": "none in play (read on demand); the QA run is offline.",
+          "closes": [
+            "G1-7"
+          ]
+        },
+        {
+          "id": "PROPOSED-MIND-10",
+          "title": "Mind-affecting and mind-reading spells",
+          "scope": "the entity-level half of the spell schema for Lane P's \"creature mind\" group (21 spells) and the mind-reading divinations, with SRD saves, ranges and durations unchanged (DEC-018). Charm and domination set a temporary override on MIND-04 attitude and MIND-07 duty choice; fear and Calm Emotions add or suppress MIND-03 mood terms; Modify Memory edits the target's memory ring but never the world event log (REC-01), so truth and belief stay separate; Detect Thoughts and Zone of Truth read MIND-01 state for GOV-03; when a charm ends, the target gains the memory the SRD gives it (\"When the spell ends, the creature knows it was charmed by you\", Charm Person, `game/data/srd51/spells.json:3415`).",
+          "deps": [
+            "SIM.60.02",
+            "PROPOSED-MIND-01",
+            "PROPOSED-MIND-02",
+            "PROPOSED-MIND-03",
+            "PROPOSED-MIND-04",
+            "PROPOSED-MIND-07",
+            "PROPOSED-HEALTH-01",
+            "PROPOSED-REC-01"
+          ],
+          "acceptanceTests": [
+            "(1) Charm Person on a failed save makes the target treat the caster as friendly for exactly the SRD duration; afterwards the target holds a memory of being charmed and a grievance toward the caster",
+            "(2) Modify Memory changes the target's memory of an event while the world event log still holds the original",
+            "(3) inside a Zone of Truth fixture, an accused person who failed the save cannot give a false alibi but may refuse to answer.",
+            "Mutant: a Modify Memory that edits the world log must fail test 2."
+          ],
+          "tickCost": "per cast event; expiries go through PROPOSED-HEALTH-01's timer wheel; negligible. Memory: about 16 B per active charm or compulsion override.",
+          "closes": [
+            "G1-9"
+          ]
+        }
+      ],
+      "interactions": {
+        "livingWorld": [
+          "SIM.50.02 Cross-layer water (docs/worldgen/DEUS_WORLDGEN_WBS.md:545): PROPOSED-MIND-02",
+          "SIM.50.04 Vegetation (docs/worldgen/DEUS_WORLDGEN_WBS.md:547): PROPOSED-MIND-01",
+          "SIM.50.05 Fire (docs/worldgen/DEUS_WORLDGEN_WBS.md:548): PROPOSED-MIND-02",
+          "SIM.50.06 Seasons and weather (docs/worldgen/DEUS_WORLDGEN_WBS.md:549): PROPOSED-MIND-03",
+          "SIM.50.09 Settlement lifecycle (docs/worldgen/DEUS_WORLDGEN_WBS.md:552): PROPOSED-MIND-06",
+          "SIM.50.10 Catastrophes (docs/worldgen/DEUS_WORLDGEN_WBS.md:553): PROPOSED-MIND-02",
+          "All nine systems SIM.50.02-.10 (no people-side consumer or event output in any row): PROPOSED-MIND-02",
+          "All nine systems SIM.50.02-.10 (V125 no-input run; incarnate perception): PROPOSED-MIND-02",
+          "Structural support and collapse: PROPOSED-MIND-07, PROPOSED-MIND-02",
+          "Reproduction and lifecycle: PROPOSED-MIND-05, PROPOSED-MIND-04",
+          "Population budget and crowd LOD: PROPOSED-MIND-08",
+          "Faction development plans: PROPOSED-MIND-05"
+        ],
+        "spells": [
+          "Creature-targeted damage with no world effect: PROPOSED-MIND-02",
+          "Creature mind (charm, compulsion, fear, confusion): PROPOSED-MIND-10",
+          "Summoned or magical entities: PROPOSED-MIND-10",
+          "Invisibility, stealth and concealment: PROPOSED-MIND-02",
+          "Senses, divination and read-only queries: PROPOSED-MIND-10",
+          "Illusion: PROPOSED-MIND-02",
+          "Crime versus Charm Person (game/data/srd51/spells.json:3415): PROPOSED-MIND-10",
+          "Crime versus Detect Thoughts (game/data/srd51/spells.json:5723): PROPOSED-MIND-01",
+          "Zone of Truth in trials (GOV-03, MIND-10 test 3) (game/data/srd51/spells.json:17870): PROPOSED-MIND-10",
+          "Modify Memory changes belief, never the world record (MIND-10 test 2) (game/data/srd51/spells.json:12011): PROPOSED-MIND-10",
+          "Speak with Dead needs the dead person's memories kept for as long as the corpse can answer (MIND-01 retention, REC-01) (game/data/srd51/spells.json:15402): PROPOSED-MIND-01",
+          "Fireball and the other breaches-floor spells (Lane P: Passwall, Stone Shape, Move Earth, Disintegrate, Earthquake): PROPOSED-MIND-02"
+        ]
+      },
+      "ownerQuestions": [
+        "OQ-01: Personality (V94): which facets and values does every person have, and how do culture and family shape them? Options: (a) Extend today's ten newborn facets (`DEUS_Colonists.js:2652`) with a values list. (b) A facet-and-value set in the Dwarf Fortress manner, re-authored in DEUS terms. (c) The SRD background tables (trait, ideal, bond, flaw; the Acolyte example at `game/data/srd51/character_options.json:7223`).",
+        "OQ-02: Mental breaks and SRD madness (`game/data/srd51/rules.json:6291`). Options: (a) None, as `docs/design/PERSONALITY.md:637` has it. (b) Bounded breaks without violence (refusing work, wandering off). (c) Breaks that can include violence, and SRD madness.",
+        "OQ-03: How long are a year, a season, a pregnancy, a childhood, a memory and a disease in play time? (VISION Q11, `docs/VISION.md:167`; SIM.50.01 D-1; Lane P's Q2.) Options: (a) Separate the day from the year. (b) Keep V123 (one day/night cycle is one year) and scale every duration to it. (c) Slow the life clock and the calendar together.",
+        "OQ-04: Who is always a named individual? DEC-014 §2 lists leaders, heroes and soldiers in formed armies, and leaves the budget to benchmarks. Options: (a) The focus bubble plus the persons DEC-014 lists. (b) The same plus their close kin and ties, so relationships survive demotion. (c) A fixed quota per settlement."
+      ],
+      "priority": 1,
+      "biggestGap": "No row plans the event → memory → mood → behaviour loop, relationships, opinions, personality, goals or breaks. In code, mood was wiped on 2026-09-22 and thoughts change nothing (`DEUS_Colonists.js:5111`)"
+    },
+    {
+      "n": 2,
+      "area": "Government, law, crime and succession",
+      "rating": "PARTLY PLANNED",
+      "wbsIds": [
+        "SOC.20.01",
+        "SOC.21.01",
+        "SOC.22.01",
+        "SOC.22.02",
+        "SOC.23.01",
+        "SOC.23.02",
+        "SOC.23.03",
+        "SOC.33.01",
+        "SOC.50.01"
+      ],
+      "decIds": [
+        "DEC-002",
+        "DEC-014",
+        "DEC-015",
+        "DEC-018"
+      ],
+      "srdRefs": [
+        "Zone of Truth (game/data/srd51/spells.json:17870)",
+        "Detect Thoughts (game/data/srd51/spells.json:5723)",
+        "Charm Person (game/data/srd51/spells.json:3415)",
+        "Arcane Lock (game/data/srd51/spells.json:2284)"
+      ],
+      "codeToday": "PARTIAL",
+      "codeCitations": [
+        "game/js/plugins/DEUS_History.js:540",
+        "game/js/plugins/DEUS_Talk.js:672",
+        "game/js/plugins/DEUS_HistoricalDemographics.js:252",
+        "game/js/plugins/DEUS_HistoricalDemographics.js:17",
+        "game/js/plugins/DEUS_Colonists.js:4806",
+        "game/js/plugins/DEUS_Containers.js:318",
+        "game/js/plugins/DEUS_Items.js:572",
+        "game/js/plugins/DEUS_Doors.js:172",
+        "game/js/plugins/DEUS_Callings.js:63",
+        "docs/design/CHAIN_OF_COMMAND.md:3"
+      ],
+      "gaps": [
+        {
+          "id": "G2-1",
+          "severity": "MAJOR",
+          "text": "No row plans law, crime or justice. The MAGISTRATE office is described but has no leaf; V71 says theft rules need their own approved rules. In code, theft cannot happen and trespass is only a locked door."
+        },
+        {
+          "id": "G2-2",
+          "severity": "BLOCKER",
+          "text": "No row plans legitimacy, unrest or rebellion, which V139 and DEC-014 §4 require as an anti-snowball pressure."
+        },
+        {
+          "id": "G2-3",
+          "severity": "MAJOR",
+          "text": "A dead leader is never replaced in play. SOC.23.02 plans office succession, but dynastic crises, contested claims and regency (DEC-014 §4) have no row."
+        },
+        {
+          "id": "G2-4",
+          "severity": "MAJOR",
+          "text": "Two hierarchy models are not reconciled: V52's rank tree of threes (CHAIN_OF_COMMAND spec) and SOC.20's offices. No row plans the rank tree."
+        },
+        {
+          "id": "G2-5",
+          "severity": "MINOR",
+          "text": "Faction fission (V42) has no row; it needs MIND-06 goals and a founding path."
+        },
+        {
+          "id": "G2-6",
+          "severity": "MINOR",
+          "text": "Calling labels such as Sheriff, Jailor and Thief exist with no behaviour, which misleads readers of the sheet and of the docs."
+        }
+      ],
+      "proposedPackages": [
+        {
+          "id": "PROPOSED-GOV-01",
+          "title": "Law codes and jurisdiction as data",
+          "scope": "a per-faction law set in DEC-015 plan data (acts that are offences, evidence thresholds, sentences, who judges), jurisdiction by site and office; the engineering side is the schema and lookup; the content is Owner-authored (OQ-05).",
+          "deps": [
+            "SOC.20.01",
+            "SOC.10.02",
+            "SOC.10.03"
+          ],
+          "acceptanceTests": [
+            "(1) schema validation of 9 placeholder law sets (`TEST_` names)",
+            "(2) a lookup returns the law of the site where the act happened, not the actor's home site.",
+            "Mutant: jurisdiction taken from the actor's faction must fail test 2."
+          ],
+          "tickCost": "none per tick; about 1 KiB per law set × up to 50 factions.",
+          "closes": [
+            "G2-1"
+          ]
+        },
+        {
+          "id": "PROPOSED-GOV-02",
+          "title": "Crime as intentional acts, with witnesses",
+          "scope": "theft, assault and murder as distinct actions chosen with motive (need, grievance, greed) and risk (watchers, light); ownership never silently changes (V71); witnesses form memories and beliefs through MIND-02; an undetected crime stays unknown.",
+          "deps": [
+            "SIM.00.04",
+            "OQ-07",
+            "PROPOSED-MIND-02",
+            "PROPOSED-MIND-06",
+            "PROPOSED-GOV-01"
+          ],
+          "acceptanceTests": [
+            "(1) fixture: a starving person with low honesty next to an unwatched owned store takes food; a crime record exists, the item's owner is unchanged and it is flagged stolen",
+            "(2) with one witness in line of sight, the witness has a memory naming the thief; with the witness behind a wall, nobody does",
+            "(3) the hauling planner never takes an owned item without creating a crime record.",
+            "Mutant: the planner taking the item silently must fail test 3."
+          ],
+          "tickCost": "a motive check added to duty decisions for persons with a motive, about 5 decisions per tick × 1 µs; crime events are rare. Memory: 32 B per open crime record.",
+          "closes": [
+            "G2-1"
+          ]
+        },
+        {
+          "id": "PROPOSED-GOV-03",
+          "title": "Justice: accusation, evidence, trial, sentence, restitution",
+          "scope": "accusations from witness beliefs, evidence thresholds from GOV-01, a magistrate office (SOC.20.01) that judges, sentences that move real items and people (restitution, detention in a real room, exile, fines in coin per SOC.30), and callings mapped to these roles or removed.",
+          "deps": [
+            "SOC.23.03",
+            "PROPOSED-GOV-01",
+            "PROPOSED-GOV-02",
+            "PROPOSED-REC-01"
+          ],
+          "acceptanceTests": [
+            "(1) a rumour alone cannot convict",
+            "(2) a conviction applies the law's sentence; restitution returns the exact item IDs",
+            "(3) detention needs a real enclosed room.",
+            "Mutant: conviction on rumour must fail test 1."
+          ],
+          "tickCost": "open cases stepped once per game day: 200 settlements × up to 10 cases ÷ 2,400 ticks ≈ 1 case step per tick × 10 µs. Memory: about 128 B per open case.",
+          "closes": [
+            "G2-1",
+            "G2-6"
+          ]
+        },
+        {
+          "id": "PROPOSED-GOV-04",
+          "title": "Legitimacy, unrest and rebellion",
+          "scope": "per-settlement legitimacy and unrest computed from cohort mood (MIND-03), taxes (SOC.33.01), famine, grievances and the ruler's standing; above a threshold, organised rebellion (a new faction or a seceding site) through WAR-01..04.",
+          "deps": [
+            "SOC.23.03",
+            "SOC.33.01",
+            "OQ-08",
+            "PROPOSED-MIND-03",
+            "PROPOSED-MIND-08",
+            "PROPOSED-GOV-01"
+          ],
+          "acceptanceTests": [
+            "(1) unrest is the documented deterministic function of its inputs",
+            "(2) famine alone raises unrest by the configured amount",
+            "(3) anti-snowball fixture: a dominant faction with high taxes and famine sees a rebellion within the configured window on 3 seeds.",
+            "Mutant: unrest that ignores famine must fail test 2."
+          ],
+          "tickCost": "once per settlement per game day: 200 ÷ 2,400 ≈ 0.1 updates per tick × 20 µs. Memory: 32 B per settlement.",
+          "closes": [
+            "G2-2"
+          ]
+        },
+        {
+          "id": "PROPOSED-GOV-05",
+          "title": "Succession, regency, succession crises and faction fission",
+          "scope": "on a ruler's or office holder's death, apply the culture's succession rule (SOC.23.02) in play; minors get regents; several strong claimants with supporters (MIND-04 ties) cause a crisis that can split the faction; V42 departures found new factions with their own relations.",
+          "deps": [
+            "SOC.23.02",
+            "OQ-08",
+            "PROPOSED-MIND-04",
+            "PROPOSED-MIND-06",
+            "PROPOSED-REC-01",
+            "PROPOSED-WAR-01"
+          ],
+          "acceptanceTests": [
+            "(1) a leader's death produces a successor within one game day by the culture's rule",
+            "(2) a minor heir gets a regent",
+            "(3) two claimants of equal support produce a crisis event and, past its threshold, a split with persons conserved.",
+            "Mutant: no successor chosen (today's behaviour) must fail test 1."
+          ],
+          "tickCost": "event-driven on deaths of office holders; a claimant scan over kin and officers (at most 50) costs under 1 ms per event and is rare.",
+          "closes": [
+            "G2-3",
+            "G2-5"
+          ]
+        },
+        {
+          "id": "PROPOSED-GOV-06",
+          "title": "Rank tree and offices reconciled",
+          "scope": "a short design record and schema that maps V52's tree of threes onto SOC.20's offices (who gives which orders), with the V52 numbers as tests; Owner confirms the model (OQ-06).",
+          "deps": [
+            "SOC.20.01",
+            "SOC.21.01"
+          ],
+          "acceptanceTests": [
+            "(1) eight founders give five rank-1, two rank-2 and one rank-3 members (V52)",
+            "(2) every office holder has a place in the order chain.",
+            "Mutant: branching factor 4 must fail test 1."
+          ],
+          "tickCost": "rebalanced on membership changes only, about 0.1 ms per change for 1,000 members.",
+          "closes": [
+            "G2-4"
+          ]
+        }
+      ],
+      "interactions": {
+        "livingWorld": [
+          "SIM.50.08 Land reshaping (docs/worldgen/DEUS_WORLDGEN_WBS.md:551): PROPOSED-GOV-01",
+          "SIM.50.09 Settlement lifecycle (docs/worldgen/DEUS_WORLDGEN_WBS.md:552): PROPOSED-GOV-05",
+          "SIM.50.10 Catastrophes (docs/worldgen/DEUS_WORLDGEN_WBS.md:553): PROPOSED-GOV-04",
+          "Reproduction and lifecycle: PROPOSED-GOV-05",
+          "Population budget and crowd LOD: PROPOSED-GOV-04, PROPOSED-GOV-05",
+          "Faction development plans: PROPOSED-GOV-01"
+        ],
+        "spells": [
+          "Object state (locks, handling, repair, food quality): PROPOSED-GOV-02",
+          "Invisibility, stealth and concealment: PROPOSED-GOV-02",
+          "Illusion: PROPOSED-GOV-02",
+          "Communication: PROPOSED-GOV-03",
+          "Meta-magic, wards and sound: PROPOSED-GOV-02",
+          "Crime versus Charm Person (game/data/srd51/spells.json:3415): PROPOSED-GOV-01",
+          "Crime versus Detect Thoughts (game/data/srd51/spells.json:5723): PROPOSED-GOV-01, PROPOSED-GOV-03",
+          "Zone of Truth in trials (GOV-03, MIND-10 test 3) (game/data/srd51/spells.json:17870): PROPOSED-GOV-03",
+          "Fireball and the other breaches-floor spells (Lane P: Passwall, Stone Shape, Move Earth, Disintegrate, Earthquake): PROPOSED-GOV-04"
+        ]
+      },
+      "ownerQuestions": [
+        "OQ-03: How long are a year, a season, a pregnancy, a childhood, a memory and a disease in play time? (VISION Q11, `docs/VISION.md:167`; SIM.50.01 D-1; Lane P's Q2.) Options: (a) Separate the day from the year. (b) Keep V123 (one day/night cycle is one year) and scale every duration to it. (c) Slow the life clock and the calendar together.",
+        "OQ-05: Law content per people: which acts are offences, what evidence convicts (including magical evidence such as Detect Thoughts or Zone of Truth), which sentences exist, and who judges. Options: (a) The Owner writes nine law sets. (b) One shared baseline plus per-people changes. (c) Laws derived from culture values (CUL-01) within Owner bounds.",
+        "OQ-06: One order hierarchy: V52's tree of threes or SOC.20's offices? Options: (a) The rank tree gives field orders and the offices run administration. (b) Offices only; the V52 tree is retired. (c) The rank tree only.",
+        "OQ-07: Theft and ownership transfer, which V71 says \"need their own approved rules\" (`docs/VISION.md:81`). Options: (a) Theft exists as a crime with motive, risk and detection. (b) Only non-player factions steal. (c) No theft; ownership changes only by gift, trade and inheritance.",
+        "OQ-08: Can the player's own faction rebel, secede or split, taking people away from the player? Options: (a) Yes, like any faction. (b) Only settlements away from the player's home site. (c) No; unrest acts on the player's faction in other ways."
+      ],
+      "priority": 4,
+      "biggestGap": "Law, crime, justice, legitimacy and rebellion have no row (DEC-014 §4 needs rebellions); a dead leader is never replaced in play (`DEUS_Talk.js:672`)"
+    },
+    {
+      "n": 3,
+      "area": "Diplomacy and war",
+      "rating": "PARTLY PLANNED",
+      "wbsIds": [
+        "SOC.40.01",
+        "SOC.40.02",
+        "SOC.41.01",
+        "SOC.42.01",
+        "GP.07.01",
+        "GP.07.02",
+        "GP.08.01",
+        "WG.62.02",
+        "SIM.50.09"
+      ],
+      "decIds": [
+        "DEC-013",
+        "DEC-014",
+        "DEC-015",
+        "DEC-018",
+        "DEC-022"
+      ],
+      "srdRefs": [
+        "Fireball: breaches-floor in Lane P's SIM.60.01 classification; SIM.60.04 fixture",
+        "languages (game/data/srd51/rules.json:707)",
+        "Sending, Message (Lane P communication group)",
+        "Teleportation Circle (Lane P transport group)"
+      ],
+      "codeToday": "PARTIAL",
+      "codeCitations": [
+        "game/js/plugins/DEUS_Factions.js:212",
+        "game/js/plugins/DEUS_Factions.js:546",
+        "docs/systems/UF_Factions.md:90",
+        "game/js/plugins/DEUS_Factions.js:659",
+        "game/js/plugins/DEUS_Combat.js:1361",
+        "game/js/plugins/DEUS_Stance.js:140",
+        "game/js/plugins/DEUS_Stance.js:135",
+        "game/js/plugins/DEUS_History.js:1062",
+        "game/js/plugins/DEUS_World.js:4103",
+        "game/data/DEUS_WorldCatalog.json:7537"
+      ],
+      "gaps": [
+        {
+          "id": "G3-1",
+          "severity": "BLOCKER",
+          "text": "Relations never change in play and no row plans it. Without it there is no war, alliance or anti-snowball pressure between factions (V18, V139)."
+        },
+        {
+          "id": "G3-2",
+          "severity": "MAJOR",
+          "text": "No diplomacy row: GP.08.01 records the gap itself (\"Gap 16\"). Envoys, treaties, alliances, tribute and trade pacts are designed only as an office description."
+        },
+        {
+          "id": "G3-3",
+          "severity": "MAJOR",
+          "text": "Offensive war (goals, declaration, campaigns) has no row; SOC.40 is defensive. In code, NPC factions cannot fight each other at all."
+        },
+        {
+          "id": "G3-4",
+          "severity": "MAJOR",
+          "text": "Armies at crowd LOD and off-screen battles have no row, though DEC-014 §2 names soldiers in formed armies."
+        },
+        {
+          "id": "G3-5",
+          "severity": "MAJOR",
+          "text": "Raids and sieges (V19) and cross-layer assault (DEC-013 §6: tunnelling up or down, floor breaching via SIM.40.01 and GP.07.02) have no row."
+        },
+        {
+          "id": "G3-6",
+          "severity": "MAJOR",
+          "text": "The aftermath of war (conquest, occupation, captives, refugees) has no row; SIM.50.09 names only settlement contraction."
+        },
+        {
+          "id": "G3-7",
+          "severity": "MINOR",
+          "text": "Race attitudes are 13 catalog pairs; `docs/design/PEOPLES.md` §5 \"Relations defaults\" (`docs/design/PEOPLES.md:351`) covers the older eleven peoples; nobody holds a personal attitude to another race. Which peoples exist (V87's eleven or DEC-013's nine) is OQ-25."
+        }
+      ],
+      "proposedPackages": [
+        {
+          "id": "PROPOSED-WAR-01",
+          "title": "Relations that change for logged reasons; race attitudes",
+          "scope": "relation changes only through logged causes (contact, trade, insult, raid, treaty, shared enemy, leaders' opinions from MIND-04); asymmetric grievance memory per faction; a 9 × 9 race-attitude table as Owner data (OQ-09) plus personal attitudes as MIND-04 opinions.",
+          "deps": [
+            "SIM.00.05",
+            "PROPOSED-MIND-04",
+            "PROPOSED-REC-01"
+          ],
+          "acceptanceTests": [
+            "(1) every relation change has a logged cause with an event ID",
+            "(2) a raid lowers the victim's relation to the raider by the rule and records a grievance",
+            "(3) with no causes, relations do not drift.",
+            "Mutant: random drift without a cause must fail test 3."
+          ],
+          "tickCost": "event-driven. Memory: 8 B per faction pair; 50 factions = 1,225 pairs ≈ 10 KiB.",
+          "closes": [
+            "G3-1",
+            "G3-7"
+          ]
+        },
+        {
+          "id": "PROPOSED-WAR-02",
+          "title": "Diplomacy: envoys, treaties, alliances, tribute, trade pacts",
+          "scope": "envoys as real travellers (ENVOY office), a treaty state machine (proposed, agreed, broken), tribute and trade pacts that move physical goods (LIFE-001, INV-SOC-05), language barriers (PROPOSED-CUL-04).",
+          "deps": [
+            "SOC.20.01",
+            "PROPOSED-WAR-01",
+            "PROPOSED-GOV-01",
+            "PROPOSED-LOG-01",
+            "PROPOSED-LOG-02",
+            "PROPOSED-CUL-04"
+          ],
+          "acceptanceTests": [
+            "(1) a treaty moves through its states only by recorded acts",
+            "(2) tribute transfers the exact goods (mass equal before and after)",
+            "(3) breaking a treaty lowers the relation and records a grievance.",
+            "Mutant: tribute without goods moving must fail test 2."
+          ],
+          "tickCost": "each faction leader considers diplomacy once per game day: 50 ÷ 2,400 ≈ 0.02 per tick × 100 µs ≈ 2 µs. Memory: about 64 B per active treaty.",
+          "closes": [
+            "G3-2"
+          ]
+        },
+        {
+          "id": "PROPOSED-WAR-03",
+          "title": "War goals, declaration and campaign planning",
+          "scope": "war goals (land, loot, revenge, tribute, succession claims from GOV-05), declaration by the ruler with council support (SOC.23.03), and campaign plans that use DEC-015's threat mode and SOC.40.02 mobilisation.",
+          "deps": [
+            "SOC.40.02",
+            "SOC.10.02",
+            "PROPOSED-WAR-01",
+            "PROPOSED-GOV-04"
+          ],
+          "acceptanceTests": [
+            "(1) war is declared only with a goal and a cause on record",
+            "(2) a campaign plan names forces that exist",
+            "(3) peace is made when goals are met or the war is lost by rule.",
+            "Mutant: declaring war on a random neighbour must fail test 1."
+          ],
+          "tickCost": "once per faction per game day, as WAR-02.",
+          "closes": [
+            "G3-3"
+          ]
+        },
+        {
+          "id": "PROPOSED-WAR-04",
+          "title": "Armies and battles at LOD",
+          "scope": "armies formed from crowd counts with the SOC.10.01 axes and obligation (DEC-014 §3), marching on the route graph (PROPOSED-LOG-01), supplied (PROPOSED-LOG-05); coarse battles resolve on cohort counts off-screen and promote to named fighters in focus (GP.07.01 combat); the dead become remains (SIM.40.10).",
+          "deps": [
+            "SIM.30.02",
+            "SIM.30.03",
+            "SOC.40.01",
+            "GP.07.01",
+            "PROPOSED-LOG-01",
+            "PROPOSED-LOG-05"
+          ],
+          "acceptanceTests": [
+            "(1) a coarse battle conserves persons (living + dead = before)",
+            "(2) promoting a battle mid-fight is deterministic and keeps totals",
+            "(3) the NPC-vs-NPC case works (today impossible).",
+            "Mutant: casualties not written back to crowd counts must fail test 1."
+          ],
+          "tickCost": "coarse battles stepped every 10 ticks, up to 5 battles × 10 µs ÷ 10 ≈ 5 µs per tick; fine battles use GP.07.01's per-unit cost inside focus. Memory: about 256 B per army.",
+          "closes": [
+            "G3-3",
+            "G3-4"
+          ]
+        },
+        {
+          "id": "PROPOSED-WAR-05",
+          "title": "Raids, sieges and cross-layer assault",
+          "scope": "raiding parties and sieges from real factions (V19 arrivals from off-map factions as data); attackers can tunnel through strata, climb ramps and breach floors (SIM.40.01, GP.07.02, WG.00.20); defenders mobilise (SOC.40.02).",
+          "deps": [
+            "SIM.40.01",
+            "SIM.40.02",
+            "GP.07.02",
+            "WG.00.17",
+            "WG.00.20",
+            "PROPOSED-WAR-03",
+            "PROPOSED-WAR-04"
+          ],
+          "acceptanceTests": [
+            "(1) fixture: attackers on layer −3 dig up into a settlement on −2 and the defenders mobilise",
+            "(2) a siege that cuts the settlement's supply route raises its famine index",
+            "(3) a floor breach by a blast follows SIM.40's attenuation.",
+            "Mutant: attacker pathing that ignores cross-layer connectors must fail test 1."
+          ],
+          "tickCost": "digging and fighting run as ordinary jobs and combat in focus; the siege state is one record per siege stepped once per game hour, negligible.",
+          "closes": [
+            "G3-5"
+          ]
+        },
+        {
+          "id": "PROPOSED-WAR-06",
+          "title": "Aftermath: conquest, occupation, captives, refugees",
+          "scope": "conquered sites change owner and law (GOV-01); captives are held, ransomed, freed or absorbed; refugees move to allied sites (persons conserved); memories of atrocities and liberation (MIND-02) feed later relations.",
+          "deps": [
+            "SIM.50.09",
+            "PROPOSED-WAR-04",
+            "PROPOSED-GOV-05",
+            "PROPOSED-MIND-02"
+          ],
+          "acceptanceTests": [
+            "(1) persons are conserved through conquest (none vanish)",
+            "(2) refugees arrive at a reachable allied site",
+            "(3) a massacre leaves memories in witnesses and lowers the relation.",
+            "Mutant: refugees deleted instead of moved must fail test 1."
+          ],
+          "tickCost": "event-driven; refugee groups travel as PROPOSED-LOG-01 travellers.",
+          "closes": [
+            "G3-6"
+          ]
+        }
+      ],
+      "interactions": {
+        "livingWorld": [
+          "SIM.50.02 Cross-layer water (docs/worldgen/DEUS_WORLDGEN_WBS.md:545): PROPOSED-WAR-05",
+          "SIM.50.05 Fire (docs/worldgen/DEUS_WORLDGEN_WBS.md:548): PROPOSED-WAR-05",
+          "SIM.50.06 Seasons and weather (docs/worldgen/DEUS_WORLDGEN_WBS.md:549): PROPOSED-WAR-03",
+          "SIM.50.08 Land reshaping (docs/worldgen/DEUS_WORLDGEN_WBS.md:551): PROPOSED-WAR-05",
+          "SIM.50.09 Settlement lifecycle (docs/worldgen/DEUS_WORLDGEN_WBS.md:552): PROPOSED-WAR-04, PROPOSED-WAR-06",
+          "Structural support and collapse: PROPOSED-WAR-05",
+          "Population budget and crowd LOD: PROPOSED-WAR-04",
+          "Faction development plans: PROPOSED-WAR-03"
+        ],
+        "spells": [
+          "Invisibility, stealth and concealment: PROPOSED-WAR-05",
+          "Transport, teleport and planar travel: PROPOSED-WAR-05",
+          "Communication: PROPOSED-WAR-02",
+          "Meta-magic, wards and sound: PROPOSED-WAR-05",
+          "Fireball and the other breaches-floor spells (Lane P: Passwall, Stone Shape, Move Earth, Disintegrate, Earthquake): PROPOSED-WAR-05"
+        ]
+      },
+      "ownerQuestions": [
+        "OQ-03: How long are a year, a season, a pregnancy, a childhood, a memory and a disease in play time? (VISION Q11, `docs/VISION.md:167`; SIM.50.01 D-1; Lane P's Q2.) Options: (a) Separate the day from the year. (b) Keep V123 (one day/night cycle is one year) and scale every duration to it. (c) Slow the life clock and the calendar together.",
+        "OQ-09: The attitude table for the nine peoples (content, DEC-015 §4). Options: (a) The Owner writes a 9 × 9 table. (b) Keep the 13 catalog pairs and zero elsewhere (`game/data/DEUS_WorldCatalog.json:7537`). (c) Derive attitudes from culture values and shared history.",
+        "OQ-25: Is V87 (eleven peoples) superseded by DEC-013's nine races (`escalation.md` E2, M-04)? Options: (a) V87 is superseded and `docs/design/PEOPLES.md` is archived. (b) The extra peoples return as creatures or factions that are not races. (c) DEC-013 is amended."
+      ],
+      "priority": 6,
+      "biggestGap": "Relations never change after New Game (`DEUS_Factions.js:546` has only test callers) and no row plans diplomacy (GP.08.01 says \"diplomacy has no leaf, Gap 16\") or offensive war"
+    },
+    {
+      "n": 4,
+      "area": "Culture and religion",
+      "rating": "PARTLY PLANNED",
+      "wbsIds": [
+        "SOC.10.02",
+        "SOC.10.03",
+        "WG.63.05",
+        "WG.63.06"
+      ],
+      "decIds": [
+        "DEC-013",
+        "DEC-015"
+      ],
+      "srdRefs": [
+        "fantasy-historical pantheons (game/data/srd51/rules.json:10977)",
+        "Acolyte background (game/data/srd51/character_options.json:7223)",
+        "languages (game/data/srd51/rules.json:707)",
+        "cleric class (SOC.11.01)",
+        "Tongues, Comprehend Languages (Lane P communication and divination groups)"
+      ],
+      "codeToday": "PARTIAL",
+      "codeCitations": [
+        "game/js/plugins/DEUS_Colonists.js:337",
+        "game/js/plugins/DEUS_Factions.js:168",
+        "game/data/DEUS_WorldCatalog.json:7574",
+        "game/js/plugins/DEUS_Callings.js:61",
+        "game/js/plugins/DEUS_Sheet.js:1952",
+        "game/js/plugins/DEUS_History.js:228",
+        "game/js/plugins/DEUS_History.js:675",
+        "game/data/df_lexicon.json:3",
+        "docs/systems/UF_CultureGrowth.md:94",
+        "docs/design/THEME.md:335"
+      ],
+      "gaps": [
+        {
+          "id": "G4-1",
+          "severity": "MAJOR",
+          "text": "No row plans belief or religion. V65 allows chapels and relics; EMERGENT_SOCIETY asks for beliefs and practices that spread socially; the SRD has pantheons, clerics and the Acolyte background. Content needs the Owner (OQ-10)."
+        },
+        {
+          "id": "G4-2",
+          "severity": "MAJOR",
+          "text": "No row plans rituals, festivals, funerals, burial or remembrance, which EMERGENT_SOCIETY requests (death care, grief linked to real relationships)."
+        },
+        {
+          "id": "G4-3",
+          "severity": "MAJOR",
+          "text": "No row plans languages. The SRD's language table and a dormant lexicon exist; diplomacy, trade and speech need comprehension."
+        },
+        {
+          "id": "G4-4",
+          "severity": "MAJOR",
+          "text": "No row plans learned culture: practices that a community repeats, teaches and changes, so two factions of one race can diverge (`docs/design/EMERGENT_SOCIETY.md:74`). Code culture is a fixed catalog entry."
+        },
+        {
+          "id": "G4-5",
+          "severity": "MINOR",
+          "text": "No row plans cultural works (songs, carvings, tales) as data records tied to real events. Text data only; no art."
+        },
+        {
+          "id": "G4-6",
+          "severity": "MINOR",
+          "text": "The live naming rule is broken by a hardcoded surname pool."
+        },
+        {
+          "id": "G4-7",
+          "severity": "MINOR",
+          "text": "UI text promises sacred shrines that do not exist."
+        }
+      ],
+      "proposedPackages": [
+        {
+          "id": "PROPOSED-CUL-01",
+          "title": "Culture state: practices, values and taboos as data that drift",
+          "scope": "a per-faction practice vector (what the community does, teaches and forbids) seeded from DEC-015 plan data, changed by repeated practice, contact and leadership, with drift limits; persons hold personal variation (MIND-05).",
+          "deps": [
+            "SOC.10.03",
+            "PROPOSED-MIND-05",
+            "PROPOSED-KNOW-03",
+            "PROPOSED-REC-01"
+          ],
+          "acceptanceTests": [
+            "(1) two factions of one race seeded identically diverge after 100 game years under different circumstances on 3 seeds",
+            "(2) a practice that nobody performs for its decay period fades",
+            "(3) drift never leaves the declared bounds.",
+            "Mutant: a culture that never changes (today's behaviour) must fail test 1."
+          ],
+          "tickCost": "once per faction per game day, 50 ÷ 2,400 ≈ 0.02 updates per tick, negligible. Memory: about 64 B per faction.",
+          "closes": [
+            "G4-4"
+          ]
+        },
+        {
+          "id": "PROPOSED-CUL-02",
+          "title": "Beliefs and religion",
+          "scope": "a personal belief record (which practice, how devout), shared practices and roles (clergy as an office, SOC.20.01), holy places as real buildings, faith as a need (MIND-01) and a mood source (MIND-03); spread by social transmission; SRD cleric spells tied to belief (SOC.11.01). Which gods exist is the Owner's choice (OQ-10). The shrine text is removed or made true.",
+          "deps": [
+            "SOC.11.01",
+            "SOC.20.01",
+            "OQ-10",
+            "PROPOSED-MIND-01",
+            "PROPOSED-MIND-03",
+            "PROPOSED-CUL-01"
+          ],
+          "acceptanceTests": [
+            "(1) belief spreads along social ties at the configured rate and not between strangers",
+            "(2) a person whose faith need is unmet loses mood by rule",
+            "(3) no god name outside the Owner-approved list appears in data (validator).",
+            "Mutant: spread that ignores ties must fail test 1."
+          ],
+          "tickCost": "piggybacks on MIND-02's social events, about 4.5 transmission checks per tick × 1 µs. Memory: 8 B per named person; per settlement a congregation count per practice, about 32 B.",
+          "closes": [
+            "G4-1",
+            "G4-7"
+          ]
+        },
+        {
+          "id": "PROPOSED-CUL-03",
+          "title": "Rituals, festivals, funerals and remembrance",
+          "scope": "calendar-driven observances per culture (depends on the calendar question, OQ-03, and SIM.50.06 seasons), funerals and burial that act on real remains (SIM.40.10) and graves as objects, mourning tied to real relationships (MIND-04).",
+          "deps": [
+            "SIM.50.06",
+            "SIM.40.10",
+            "PROPOSED-CUL-01",
+            "PROPOSED-CUL-02",
+            "PROPOSED-MIND-04"
+          ],
+          "acceptanceTests": [
+            "(1) a festival day gathers the members who are free, at a real place",
+            "(2) a death leads to a burial of that body ID, never a duplicate or a vanished corpse after save and load",
+            "(3) only persons with a tie to the dead mourn.",
+            "Mutant: mourners chosen without ties must fail test 3."
+          ],
+          "tickCost": "scheduled events, a few per settlement per game year; negligible. Memory: about 48 B per grave record.",
+          "closes": [
+            "G4-2"
+          ]
+        },
+        {
+          "id": "PROPOSED-CUL-04",
+          "title": "Languages, comprehension and naming",
+          "scope": "languages known per person (SRD standard and exotic languages as data), comprehension checks for speech, trade and diplomacy, learning a language by contact, and one naming rule (catalog syllables or the lexicon) replacing the hardcoded pool.",
+          "deps": [
+            "WG.63.05",
+            "OQ-11",
+            "PROPOSED-MIND-01",
+            "PROPOSED-KNOW-03"
+          ],
+          "acceptanceTests": [
+            "(1) two persons with no shared language cannot complete a trade negotiation without an interpreter",
+            "(2) a year of contact teaches a language by the configured rule",
+            "(3) no generated name comes from a hardcoded list (validator).",
+            "Mutant: comprehension check that always passes must fail test 1."
+          ],
+          "tickCost": "one comprehension lookup per conversation event (0.1 µs); negligible. Memory: 4 B per named person (a language bitset).",
+          "closes": [
+            "G4-3",
+            "G4-6"
+          ]
+        },
+        {
+          "id": "PROPOSED-CUL-05",
+          "title": "Cultural works as data",
+          "scope": "records of works made by persons (a song about a battle, a carved record of a founding) that reference real events (PROPOSED-REC-01), with a creator, material and owner; they affect mood and renown. No images: any visual need is a text-only \"art slot needed\" line for the Owner (DEC-007).",
+          "deps": [
+            "SOC.12.01",
+            "PROPOSED-REC-01",
+            "PROPOSED-REC-02"
+          ],
+          "acceptanceTests": [
+            "(1) every work references an existing event ID",
+            "(2) a work about a victory raises renown of the named hero.",
+            "Mutant: a work with a dangling event reference must fail test 1."
+          ],
+          "tickCost": "event-driven; about 64 B per work.",
+          "closes": [
+            "G4-5"
+          ]
+        }
+      ],
+      "interactions": {
+        "livingWorld": [
+          "SIM.50.06 Seasons and weather (docs/worldgen/DEUS_WORLDGEN_WBS.md:549): PROPOSED-CUL-03",
+          "Decay and reclamation: PROPOSED-CUL-03",
+          "Reproduction and lifecycle: PROPOSED-CUL-03",
+          "Faction development plans: PROPOSED-CUL-01"
+        ],
+        "spells": [
+          "Senses, divination and read-only queries: PROPOSED-CUL-04",
+          "Communication: PROPOSED-CUL-04",
+          "Meta-magic, wards and sound: PROPOSED-CUL-02"
+        ]
+      },
+      "ownerQuestions": [
+        "OQ-03: How long are a year, a season, a pregnancy, a childhood, a memory and a disease in play time? (VISION Q11, `docs/VISION.md:167`; SIM.50.01 D-1; Lane P's Q2.) Options: (a) Separate the day from the year. (b) Keep V123 (one day/night cycle is one year) and scale every duration to it. (c) Slow the life clock and the calendar together.",
+        "OQ-10: Gods and religion. Options: (a) The SRD's fantasy-historical pantheons (`game/data/srd51/rules.json:10977`). (b) THEME's unapproved proposal T21 A, \"two unnamed ways of belief\" (`docs/design/THEME.md:335`). (c) No gods; practices only. (d) Owner-authored pantheons.",
+        "OQ-11: Languages and names. Options: (a) The SRD language table as it is (`game/data/srd51/rules.json:707`). (b) Unnamed per-people languages, with names from catalog syllables only. (c) The committed lexicon, once its provenance is checked (M-13).",
+        "OQ-25: Is V87 (eleven peoples) superseded by DEC-013's nine races (`escalation.md` E2, M-04)? Options: (a) V87 is superseded and `docs/design/PEOPLES.md` is archived. (b) The extra peoples return as creatures or factions that are not races. (c) DEC-013 is amended."
+      ],
+      "priority": 10,
+      "biggestGap": "No row for belief, religion, rituals, festivals, taboos, funerals or languages"
+    },
+    {
+      "n": 5,
+      "area": "Knowledge and technology",
+      "rating": "PARTLY PLANNED",
+      "wbsIds": [
+        "SOC.10.02",
+        "SOC.11.01",
+        "SOC.12.01",
+        "WG.65.17"
+      ],
+      "decIds": [
+        "DEC-015"
+      ],
+      "srdRefs": [
+        "wizard spellbook copying (game/data/srd51/character_options.json:6720)",
+        "Legend Lore (game/data/srd51/spells.json:10445)"
+      ],
+      "codeToday": "PARTIAL",
+      "codeCitations": [
+        "game/js/plugins/DEUS_Select.js:924",
+        "docs/design/TECH_TREE.md:3",
+        "game/js/plugins/DEUS_Colonists.js:423",
+        "game/js/plugins/DEUS_Colonists.js:5372",
+        "game/js/plugins/DEUS_Colonists.js:625",
+        "game/js/plugins/DEUS_Jobs.js:1610",
+        "game/js/plugins/DEUS_Colonists.js:5380",
+        "game/js/plugins/DEUS_Factions.js:670",
+        "docs/design/TECH_TREE.md:120",
+        "docs/systems/UF_CultureGrowth.md:35"
+      ],
+      "gaps": [
+        {
+          "id": "G5-1",
+          "severity": "MAJOR",
+          "text": "No knowledge-holder model: nothing says which person, settlement or record knows a technique, so knowledge cannot spread or be lost."
+        },
+        {
+          "id": "G5-2",
+          "severity": "MAJOR",
+          "text": "No row plans discovery or invention; SOC.10.02 lists a tech path but not how a faction first learns a step, and the tech tree is unbuilt."
+        },
+        {
+          "id": "G5-3",
+          "severity": "MAJOR",
+          "text": "Teaching is nominal: SOC.12.01 names apprentice-to-master progression without teachers, time or access; code has no teaching."
+        },
+        {
+          "id": "G5-4",
+          "severity": "MAJOR",
+          "text": "No row plans diffusion between settlements (by trade, migration, captives, captured records)."
+        },
+        {
+          "id": "G5-5",
+          "severity": "MAJOR",
+          "text": "Loss and dark ages are unplanned, and two designs forbid them (unlocks permanent) while DEC-015 asks for regression conditions. This conflict needs the Owner (OQ-12)."
+        },
+        {
+          "id": "G5-6",
+          "severity": "MINOR",
+          "text": "Knowledge stores (books, libraries, scholars) have no row; scholars exist only as calling labels."
+        }
+      ],
+      "proposedPackages": [
+        {
+          "id": "PROPOSED-KNOW-01",
+          "title": "Knowledge holders: persons, settlements and records",
+          "scope": "techniques as data IDs (from DEC-015 plan data); each named person holds a technique set; each settlement holds the union of its holders plus its records (books, carved instructions as objects); crowd cohorts hold counts of holders.",
+          "deps": [
+            "SOC.10.02",
+            "SOC.12.01",
+            "PROPOSED-MIND-01",
+            "PROPOSED-MIND-08"
+          ],
+          "acceptanceTests": [
+            "(1) a settlement's knowledge equals the union of its holders and records at every save",
+            "(2) demoting and promoting holders keeps each technique's holder count.",
+            "Mutant: a settlement set that is never recomputed after a death must fail test 1."
+          ],
+          "tickCost": "event-driven (learn, death, record made or destroyed). Memory: 200 techniques → 25 B per named person; 5 KiB for 200 settlements; per record object 32 B.",
+          "closes": [
+            "G5-1",
+            "G5-6"
+          ]
+        },
+        {
+          "id": "PROPOSED-KNOW-02",
+          "title": "Discovery and invention",
+          "scope": "a technique is first learned by experiment (work near its prerequisites), observation of a foreign practice, or reading a record; chances from plan prerequisites and the person's skills and curiosity; the tech tree (V77) becomes the prerequisite graph of these techniques.",
+          "deps": [
+            "SOC.10.02",
+            "PROPOSED-KNOW-01",
+            "PROPOSED-MIND-05"
+          ],
+          "acceptanceTests": [
+            "(1) a technique cannot be discovered without its prerequisites",
+            "(2) with prerequisites met, discovery happens within the configured window on 3 seeds",
+            "(3) identical seeds give identical discovery order.",
+            "Mutant: discovery that ignores prerequisites must fail test 1."
+          ],
+          "tickCost": "a check on work-completion events of eligible persons, about 1 event per tick × 2 µs.",
+          "closes": [
+            "G5-2"
+          ]
+        },
+        {
+          "id": "PROPOSED-KNOW-03",
+          "title": "Teaching and apprenticeship",
+          "scope": "teaching as a duty (SOC.13.01) with a teacher, a learner, time and a place; learning rate from both skills; an apprentice who shadows a master gains the technique only by completed sessions (no copied mastery, per EMERGENT_SOCIETY).",
+          "deps": [
+            "SOC.12.01",
+            "SOC.13.01",
+            "PROPOSED-KNOW-01",
+            "PROPOSED-MIND-04"
+          ],
+          "acceptanceTests": [
+            "(1) no learner gains a technique without completed sessions",
+            "(2) a better teacher shortens learning by the configured factor",
+            "(3) a newborn has no taught technique.",
+            "Mutant: free skill gain for being near a master must fail test 1."
+          ],
+          "tickCost": "session ends are events, a few per game hour; negligible.",
+          "closes": [
+            "G5-3"
+          ]
+        },
+        {
+          "id": "PROPOSED-KNOW-04",
+          "title": "Diffusion between settlements",
+          "scope": "techniques move with people and records along the route graph (PROPOSED-LOG-01): migrants, traders, captives, captured books; a foreign technique observed at contact has a chance to be learned.",
+          "deps": [
+            "PROPOSED-KNOW-01",
+            "PROPOSED-LOG-01",
+            "PROPOSED-LOG-02",
+            "PROPOSED-WAR-06"
+          ],
+          "acceptanceTests": [
+            "(1) an isolated settlement never gains a technique it cannot discover itself",
+            "(2) a trade route carries a technique to the partner within the configured window.",
+            "Mutant: diffusion that ignores the route graph must fail test 1."
+          ],
+          "tickCost": "checked per contact event between settlements, a few per game day; negligible.",
+          "closes": [
+            "G5-4"
+          ]
+        },
+        {
+          "id": "PROPOSED-KNOW-05",
+          "title": "Loss, dark ages and rediscovery",
+          "scope": "if the last holder of a technique in a settlement dies and no record survives, the settlement loses it; records decay (SIM.40.07) or are destroyed; archaeology (WG.65.17) can recover a record and so the technique. Whether loss is allowed at all is the Owner's (OQ-12).",
+          "deps": [
+            "SIM.40.07",
+            "WG.65.17",
+            "PROPOSED-KNOW-01",
+            "PROPOSED-REC-04"
+          ],
+          "acceptanceTests": [
+            "(1) killing the last holder with no record removes the technique from the settlement",
+            "(2) an excavated record restores it",
+            "(3) with the Owner's \"permanent unlocks\" option set, nothing is ever lost.",
+            "Mutant: a technique kept after its last holder and record are gone must fail test 1 (loss option on)."
+          ],
+          "tickCost": "an O(1) holder-count check on each death; negligible.",
+          "closes": [
+            "G5-5",
+            "G5-6"
+          ]
+        }
+      ],
+      "interactions": {
+        "livingWorld": [
+          "SIM.50.03 Erosion and sediment (docs/worldgen/DEUS_WORLDGEN_WBS.md:546): PROPOSED-KNOW-05",
+          "SIM.50.04 Vegetation (docs/worldgen/DEUS_WORLDGEN_WBS.md:547): PROPOSED-KNOW-02",
+          "SIM.50.08 Land reshaping (docs/worldgen/DEUS_WORLDGEN_WBS.md:551): PROPOSED-KNOW-02",
+          "SIM.50.09 Settlement lifecycle (docs/worldgen/DEUS_WORLDGEN_WBS.md:552): PROPOSED-KNOW-05",
+          "Decay and reclamation: PROPOSED-KNOW-05",
+          "Population budget and crowd LOD: PROPOSED-KNOW-01",
+          "Faction development plans: PROPOSED-KNOW-02, PROPOSED-KNOW-05"
+        ],
+        "spells": [
+          "Spells are knowledge (game/data/srd51/character_options.json:6720): PROPOSED-KNOW-01, PROPOSED-KNOW-03, PROPOSED-KNOW-04, PROPOSED-KNOW-05"
+        ]
+      },
+      "ownerQuestions": [
+        "OQ-03: How long are a year, a season, a pregnancy, a childhood, a memory and a disease in play time? (VISION Q11, `docs/VISION.md:167`; SIM.50.01 D-1; Lane P's Q2.) Options: (a) Separate the day from the year. (b) Keep V123 (one day/night cycle is one year) and scale every duration to it. (c) Slow the life clock and the calendar together.",
+        "OQ-12: Can knowledge be lost? DEC-015 asks for regression and collapse conditions; two designs say unlocks never lock again (M-08). Options: (a) Loss when the last holder and the last record are gone. (b) Loss only when a settlement collapses or is abandoned. (c) Permanent unlocks."
+      ],
+      "priority": 8,
+      "biggestGap": "No row for discovery, diffusion or loss; the tech tree is not built (`DEUS_Select.js:924`, `docs/design/TECH_TREE.md:3`) and two designs say unlocks never lock again"
+    },
+    {
+      "n": 6,
+      "area": "Health",
+      "rating": "PARTLY PLANNED",
+      "wbsIds": [
+        "SOC.13.01",
+        "WB-002",
+        "SIM.20.01",
+        "SIM.40.10",
+        "GP.07.01"
+      ],
+      "decIds": [
+        "DEC-014",
+        "DEC-018"
+      ],
+      "srdRefs": [
+        "srd:condition:* conditions appendix",
+        "srd:condition:exhaustion (game/data/srd51/rules.json:10533)",
+        "srd:rule:diseases (game/data/srd51/rules.json:5970)",
+        "srd:rule:poisons (game/data/srd51/rules.json:7597)",
+        "srd:rule:madness (game/data/srd51/rules.json:6291)",
+        "resting (game/data/srd51/rules.json:4447)",
+        "Lesser Restoration (game/data/srd51/spells.json:10490)",
+        "Cure Wounds (game/data/srd51/spells.json:5184)",
+        "Contagion (game/data/srd51/spells.json:4519)",
+        "Purify Food and Drink (game/data/srd51/spells.json:13410)",
+        "Protection from Poison (game/data/srd51/spells.json:13364)"
+      ],
+      "codeToday": "PARTIAL",
+      "codeCitations": [
+        "game/js/plugins/DEUS_Colonists.js:1618",
+        "game/js/plugins/DEUS_Colonists.js:1589",
+        "game/js/plugins/DEUS_Colonists.js:1594",
+        "game/js/plugins/DEUS_Environment.js:651",
+        "game/js/plugins/DEUS_Conditions.js:490",
+        "game/js/plugins/DEUS_Conditions.js:1159",
+        "game/js/plugins/DEUS_Combat.js:773",
+        "game/js/plugins/DEUS_Conditions.js:926",
+        "game/js/plugins/DEUS_Colonists.js:92",
+        "game/js/plugins/DEUS_Colonists.js:5396",
+        "game/js/plugins/DEUS_HistoricalDemographics.js:482",
+        "game/js/plugins/DEUS_Combat.js:889",
+        "game/js/plugins/DEUS_Colonists.js:1972",
+        "game/js/plugins/DEUS_Jobs.js:1162",
+        "game/data/DEUS_WorldCatalog.json:11599",
+        "game/js/plugins/DEUS_Callings.js:31",
+        "game/js/plugins/DEUS_Combat.js:1409",
+        "game/js/plugins/DEUS_Colonists.js:2103",
+        "game/js/plugins/DEUS_DeathForensics.js:172",
+        "game/js/plugins/DEUS_DeathForensics.js:51"
+      ],
+      "gaps": [
+        {
+          "id": "G6-1",
+          "severity": "BLOCKER",
+          "text": "No row plans disease, contagion or epidemics, which V139 and DEC-014 §4 require as an anti-snowball pressure. The only disease code needs an archived module."
+        },
+        {
+          "id": "G6-2",
+          "severity": "MAJOR",
+          "text": "No row owns SRD conditions in the simulation. The engine is loaded, but nothing applies conditions and nothing expires them; SIM.00.05's migration list does not name conditions."
+        },
+        {
+          "id": "G6-3",
+          "severity": "MAJOR",
+          "text": "Wounds are nominal (Slice 7 text only) and the model depends on Q12."
+        },
+        {
+          "id": "G6-4",
+          "severity": "MAJOR",
+          "text": "No row plans healers, medicine, herbs or infirmaries; the healing skill has no jobs and Medic is a label."
+        },
+        {
+          "id": "G6-5",
+          "severity": "MAJOR",
+          "text": "No row plans poison or venom; 14 SRD poisons and creature venoms are staged."
+        },
+        {
+          "id": "G6-6",
+          "severity": "MAJOR",
+          "text": "No row links the SRD healing, restoration, poison and disease spells to the health model (section 4.2); SIM.60.02's schema is for physical primitives."
+        },
+        {
+          "id": "G6-7",
+          "severity": "MINOR",
+          "text": "Death forensics defects: condition list always empty, ledger not saved, old-age deaths classed as exhaustion (`DEUS_DeathForensics.js:260`)."
+        },
+        {
+          "id": "G6-8",
+          "severity": "MINOR",
+          "text": "Death from cold or heat skips the dying state and death saves (`DEUS_Environment.js:662`)."
+        },
+        {
+          "id": "G6-9",
+          "severity": "MINOR",
+          "text": "SRD short rests and hit-dice spending are absent, and the flat 1-HP regeneration is not an SRD rule."
+        },
+        {
+          "id": "G6-10",
+          "severity": "MINOR",
+          "text": "SRD madness is staged with no row; whether to use it is the Owner's (OQ-02)."
+        }
+      ],
+      "proposedPackages": [
+        {
+          "id": "PROPOSED-HEALTH-01",
+          "title": "Conditions, exhaustion and rest in the core",
+          "scope": "one owner for conditions in the headless core, loaded from the SRD appendix PH-A entries as data; apply, stack and expire through a timer wheel keyed by expiry tick (no sweep); SRD short and long rests and hit dice; madness only if the Owner chooses (OQ-02).",
+          "deps": [
+            "SIM.00.02",
+            "SIM.00.05",
+            "SOC.11.01"
+          ],
+          "acceptanceTests": [
+            "(1) a table-driven test applies each of the 15 SRD conditions and checks its SRD effect",
+            "(2) a 10-minute condition ends at exactly its expiry tick",
+            "(3) a short rest spends hit dice by the SRD rule.",
+            "Mutant: expiry never scheduled (today's behaviour) must fail test 2."
+          ],
+          "tickCost": "O(expirations) per tick, about 5 × 1 µs. Memory: 16 B per active condition; at 0.1 active conditions per person, 1.6 KiB per 1,000 named. Crowd: per-cohort counts of exhausted and incapacitated, 8 B per cohort.",
+          "closes": [
+            "G6-2",
+            "G6-9",
+            "G6-10"
+          ]
+        },
+        {
+          "id": "PROPOSED-HEALTH-02",
+          "title": "Injuries and wounds",
+          "scope": "the Owner's choice under Q12 (OQ-13); at minimum V105's four body regions, bleeding until bound, reduced work and movement, mending by rest or a healer; wounds as mood sources (MIND-02).",
+          "deps": [
+            "GP.07.01",
+            "PROPOSED-HEALTH-01",
+            "PROPOSED-MIND-02"
+          ],
+          "acceptanceTests": [
+            "(1) a hit above the threshold wounds a region",
+            "(2) bleeding drains HP each interval until bound",
+            "(3) a leg wound slows movement by the configured factor.",
+            "Mutant: binding that does not stop bleeding must fail test 2."
+          ],
+          "tickCost": "bleeding persons only, about 8 at L0 × 1 µs per tick. Memory: 16 B per wounded person.",
+          "closes": [
+            "G6-3"
+          ]
+        },
+        {
+          "id": "PROPOSED-HEALTH-03",
+          "title": "Disease, contagion and epidemics",
+          "scope": "diseases as data (SRD samples plus Owner-approved additions, OQ-14); named persons carry infection state; crowd settlements run a compartment model (susceptible, exposed, infected, recovered) at L2; spread by contact events (MIND-02), bad water (SIM.50.02) and travel along the route graph (PROPOSED-LOG-01); density raises transmission (DEC-014 §4); quarantine by the healer office.",
+          "deps": [
+            "SIM.30.01",
+            "SIM.30.02",
+            "SIM.50.02",
+            "PROPOSED-HEALTH-01",
+            "PROPOSED-LOG-01",
+            "PROPOSED-MIND-02"
+          ],
+          "acceptanceTests": [
+            "(1) a seeded outbreak spreads along the contact and route graph; an isolated settlement stays clean",
+            "(2) doubling density raises the attack rate by the configured factor",
+            "(3) compartment counts always sum to the settlement population",
+            "(4) quarantine lowers spread.",
+            "Mutant: contagion that ignores the graph must infect the isolated settlement and fail test 1."
+          ],
+          "tickCost": "named: one infection check per contact event, about 4.5 × 1 µs per tick. Crowd: 200 settlements × up to 3 active diseases stepped every 100 ticks = 6 updates × 2 µs = 12 µs per tick; route transmission once per game day per edge, about 600 edges ÷ 2,400 = 0.25 per tick. Memory: 8 B per named person, 16 B per settlement per active disease.",
+          "closes": [
+            "G6-1"
+          ]
+        },
+        {
+          "id": "PROPOSED-HEALTH-04",
+          "title": "Poison and venom",
+          "scope": "the 14 SRD poisons and creature venoms as data (delivery, save, effect), applied through HEALTH-01; antitoxin; poison crafting and deliberate poisoning only if the Owner allows them (OQ-15).",
+          "deps": [
+            "WG.68.07",
+            "SOC.12.01",
+            "PROPOSED-HEALTH-01"
+          ],
+          "acceptanceTests": [
+            "(1) a venomous bite applies the stat block's poison and save",
+            "(2) antitoxin gives advantage by the SRD rule.",
+            "Mutant: a failed save that does not apply the poisoned condition must fail test 1."
+          ],
+          "tickCost": "event-driven; negligible.",
+          "closes": [
+            "G6-5"
+          ]
+        },
+        {
+          "id": "PROPOSED-HEALTH-05",
+          "title": "Care: healers, medicine, infirmaries and herbs",
+          "scope": "diagnose and treat as duties (SOC.13.01) with the healing skill; medicine and herbs as real items made from flora (SIM.50.04) and consumed (mass conserved); an infirmary as a room with beds; a healer office for quarantine and triage (SOC.20.01).",
+          "deps": [
+            "SOC.12.01",
+            "SOC.13.01",
+            "SOC.20.01",
+            "SIM.50.04",
+            "PROPOSED-HEALTH-01",
+            "PROPOSED-HEALTH-02",
+            "PROPOSED-HEALTH-03"
+          ],
+          "acceptanceTests": [
+            "(1) a patient is treated by the best free healer in range",
+            "(2) treatment consumes the named supplies; with none, it fails",
+            "(3) recovery in an infirmary is faster by the configured factor.",
+            "Mutant: treatment without supplies must fail test 2."
+          ],
+          "tickCost": "a patient check once per game hour, up to 20 patients ÷ 100 ticks × 5 µs ≈ 1 µs per tick. Memory: about 32 B per patient record.",
+          "closes": [
+            "G6-4"
+          ]
+        },
+        {
+          "id": "PROPOSED-HEALTH-06",
+          "title": "Magical healing and condition spells",
+          "scope": "the entity-level half of the spell schema: SRD healing, restoration, poison, disease and curse spells (Cure Wounds, Lesser and Greater Restoration, Protection from Poison, Contagion, Remove Curse and the rest) act on HEALTH-01..04 state with SRD numbers unchanged (DEC-018); material components are real items.",
+          "deps": [
+            "SIM.60.02",
+            "SOC.11.01",
+            "PROPOSED-HEALTH-01",
+            "PROPOSED-HEALTH-02",
+            "PROPOSED-HEALTH-03",
+            "PROPOSED-HEALTH-04"
+          ],
+          "acceptanceTests": [
+            "(1) Lesser Restoration ends exactly one of the conditions or diseases the SRD lists",
+            "(2) Cure Wounds heals its SRD dice plus modifier, unchanged from the SRD entry",
+            "(3) a spell with a consumed component removes that item.",
+            "Mutant: Restoration ending an unlisted condition must fail test 1."
+          ],
+          "tickCost": "per cast event; negligible.",
+          "closes": [
+            "G6-6"
+          ]
+        },
+        {
+          "id": "PROPOSED-HEALTH-07",
+          "title": "Death forensics and exposure deaths",
+          "scope": "read `Cond.all()` correctly; save the death ledger (or move it into PROPOSED-REC-01); classify old age separately; route cold and heat damage through the dying state.",
+          "deps": [
+            "SIM.20.01",
+            "PROPOSED-HEALTH-01",
+            "PROPOSED-REC-01"
+          ],
+          "acceptanceTests": [
+            "(1) a poisoned person who dies has \"poisoned\" in the forensic record",
+            "(2) the ledger survives save and load",
+            "(3) a cold-damage drop to 0 HP starts dying, not instant death.",
+            "Mutant: the swallowed exception restored must fail test 1."
+          ],
+          "tickCost": "per death event; 64 B per saved ledger record.",
+          "closes": [
+            "G6-7",
+            "G6-8"
+          ]
+        }
+      ],
+      "interactions": {
+        "livingWorld": [
+          "SIM.50.02 Cross-layer water (docs/worldgen/DEUS_WORLDGEN_WBS.md:545): PROPOSED-HEALTH-03",
+          "SIM.50.04 Vegetation (docs/worldgen/DEUS_WORLDGEN_WBS.md:547): PROPOSED-HEALTH-05",
+          "SIM.50.06 Seasons and weather (docs/worldgen/DEUS_WORLDGEN_WBS.md:549): PROPOSED-HEALTH-03",
+          "SIM.50.09 Settlement lifecycle (docs/worldgen/DEUS_WORLDGEN_WBS.md:552): PROPOSED-HEALTH-03",
+          "SIM.50.10 Catastrophes (docs/worldgen/DEUS_WORLDGEN_WBS.md:553): PROPOSED-HEALTH-02",
+          "Reproduction and lifecycle: PROPOSED-HEALTH-03",
+          "Population budget and crowd LOD: PROPOSED-HEALTH-03"
+        ],
+        "spells": [
+          "Healing and hit points: PROPOSED-HEALTH-01, PROPOSED-HEALTH-06",
+          "Creature-targeted damage with no world effect: PROPOSED-HEALTH-02",
+          "Object state (locks, handling, repair, food quality): PROPOSED-HEALTH-03",
+          "Creature conditions, stats, rolls and protections: PROPOSED-HEALTH-01, PROPOSED-HEALTH-03, PROPOSED-HEALTH-04, PROPOSED-HEALTH-06",
+          "Senses, divination and read-only queries: PROPOSED-HEALTH-03",
+          "Disease versus Lesser Restoration (game/data/srd51/spells.json:10490): PROPOSED-HEALTH-03, PROPOSED-HEALTH-01",
+          "Cure Wounds heals hit points only (game/data/srd51/spells.json:5184): PROPOSED-HEALTH-02",
+          "Contagion (game/data/srd51/spells.json:4519): PROPOSED-HEALTH-03",
+          "Purify Food and Drink needs a contamination flag on food and water (HEALTH-03, SIM (game/data/srd51/spells.json:13410): PROPOSED-HEALTH-03",
+          "Protection from Poison acts on HEALTH-04's poison state (game/data/srd51/spells.json:13364): PROPOSED-HEALTH-04",
+          "Tick cost: all of these run per cast event, and expiries go through PROPOSED-HEALTH-01's timer wheel; negligible at the planning point: PROPOSED-HEALTH-01"
+        ]
+      },
+      "ownerQuestions": [
+        "OQ-02: Mental breaks and SRD madness (`game/data/srd51/rules.json:6291`). Options: (a) None, as `docs/design/PERSONALITY.md:637` has it. (b) Bounded breaks without violence (refusing work, wandering off). (c) Breaks that can include violence, and SRD madness.",
+        "OQ-03: How long are a year, a season, a pregnancy, a childhood, a memory and a disease in play time? (VISION Q11, `docs/VISION.md:167`; SIM.50.01 D-1; Lane P's Q2.) Options: (a) Separate the day from the year. (b) Keep V123 (one day/night cycle is one year) and scale every duration to it. (c) Slow the life clock and the calendar together.",
+        "OQ-13: Injuries (VISION Q12, `docs/VISION.md:168`). Options: (a) V105's four body regions with bleeding. (b) SRD hit points only, no wounds. (c) A fuller body-part model.",
+        "OQ-14: Which diseases exist, and how deadly may an epidemic be? Options: (a) The SRD's three sample diseases only (`game/data/srd51/rules.json:5970`). (b) The SRD samples plus Owner-approved additions. (c) Generic data-defined diseases within Owner-set bounds on lethality.",
+        "OQ-15: Poison crafting and deliberate poisoning by people. Options: (a) Allowed to anyone, and a crime where the law says so. (b) Only for certain callings. (c) No crafting; poison comes only from creatures and SRD items."
+      ],
+      "priority": 2,
+      "biggestGap": "No row for disease, contagion or epidemics (DEC-014 §4), poison, healers or conditions; the conditions engine's `tick` has no caller (`DEUS_Conditions.js:1117`)"
+    },
+    {
+      "n": 7,
+      "area": "Travel and logistics",
+      "rating": "PARTLY PLANNED",
+      "wbsIds": [
+        "SIM.50.08",
+        "WG.00.19",
+        "WG.00.20",
+        "SIM.00.04",
+        "SOC.30.02",
+        "SOC.32.01",
+        "SOC.33.01",
+        "WG.62.02",
+        "SIM.30.02"
+      ],
+      "decIds": [
+        "DEC-013",
+        "DEC-014",
+        "DEC-019",
+        "DEC-020"
+      ],
+      "srdRefs": [
+        "travel pace (game/data/srd51/rules.json:4331)",
+        "mounts and vehicles (game/data/srd51/rules.json:3004)",
+        "carrying capacity, Strength x 15 (DEUS_Dnd5e.js:625)",
+        "Teleportation Circle, Transport via Plants (Lane P transport group)",
+        "Find Steed, Phantom Steed (Lane P summons group)"
+      ],
+      "codeToday": "PARTIAL",
+      "codeCitations": [
+        "game/js/plugins/DEUS_World.js:127",
+        "game/js/plugins/DEUS_World.js:1628",
+        "game/js/plugins/DEUS_World.js:2064",
+        "game/js/plugins/DEUS_World.js:2067",
+        "game/js/plugins/DEUS_Levels.js:63",
+        "game/js/plugins/DEUS_Levels.js:2085",
+        "game/js/plugins/DEUS_NaturalConnections.js:31",
+        "game/js/plugins/DEUS_Jobs.js:1412",
+        "game/js/plugins/DEUS_Stockpiles.js:584",
+        "game/js/plugins/DEUS_Jobs.js:610",
+        "game/js/plugins/DEUS_Dnd5e.js:625",
+        "game/js/plugins/DEUS_Items.js:504",
+        "game/js/plugins/DEUS_World.js:1875",
+        "game/js/plugins/DEUS_World.js:1845",
+        "game/js/plugins/DEUS_Colonists.js:3148",
+        "game/js/plugins/DEUS_Colonists.js:648"
+      ],
+      "gaps": [
+        {
+          "id": "G7-1",
+          "severity": "MAJOR",
+          "text": "No row plans travel between settlements at LOD: a regional route graph across 32 layers that off-screen travellers, caravans, armies, migrants and disease use. SIM.30.02 names summaries, not travel; §21's regional graphs are not a WBS row. Today's A* reserves arrays sized by levels × area."
+        },
+        {
+          "id": "G7-2",
+          "severity": "MAJOR",
+          "text": "Autonomous work and hauling never cross a layer. WG.00.20 plans connectors for movement, but no row plans cross-layer job and haul routing, which home bands spanning up to 8 layers need."
+        },
+        {
+          "id": "G7-3",
+          "severity": "MAJOR",
+          "text": "No row plans caravans, trade routes or markets, though V19, SOC.30.02 and SOC.33.01 assume trade exists."
+        },
+        {
+          "id": "G7-4",
+          "severity": "MAJOR",
+          "text": "No row plans pack animals, mounts, carts or boats (SRD mounts and vehicles; V43 animal care)."
+        },
+        {
+          "id": "G7-5",
+          "severity": "MAJOR",
+          "text": "No row plans supply lines or logistical strain (V139)."
+        },
+        {
+          "id": "G7-6",
+          "severity": "MINOR",
+          "text": "Encumbrance: the speed penalty is computed but never read, and mass units disagree (kg against lb)."
+        },
+        {
+          "id": "G7-7",
+          "severity": "MINOR",
+          "text": "Roads would not change routes: every step costs the same, and SIM.50.08 plans roads as terrain only."
+        },
+        {
+          "id": "G7-8",
+          "severity": "MINOR",
+          "text": "Shafts, ladders and natural passages are not pathfinding edges."
+        }
+      ],
+      "proposedPackages": [
+        {
+          "id": "PROPOSED-LOG-01",
+          "title": "Regional route graph and off-screen travel across 32 layers",
+          "scope": "a sparse graph of region portals (ADR-003's 32 × 32 × 2-layer regions) whose edges include stairs, ramps, ladders, shafts and natural passages (WG.00.20), weighted by surface (roads cheaper, SIM.50.08) and hazards; rebuilt only for dirty regions; off-screen travellers advance along edges at L1 or L2; cross-layer job and haul routing uses the same graph; SRD travel pace for speeds.",
+          "deps": [
+            "SIM.00.04",
+            "WG.00.17",
+            "WG.00.20",
+            "SIM.30.01",
+            "SIM.50.08"
+          ],
+          "acceptanceTests": [
+            "(1) a traveller from layer −6 to +2 reaches the goal through connectors only",
+            "(2) an off-screen trip and an on-screen trip over the same route take the same number of ticks (±1 region step)",
+            "(3) a road edge is chosen over an equal-length rough edge",
+            "(4) a change inside one region rebuilds only that region's edges (instrumented counter).",
+            "Mutant: a graph without shaft or ladder edges must fail test 1 on the shaft fixture."
+          ],
+          "tickCost": "travellers at L1 stepped every 10 ticks, about 300 ÷ 10 = 30 updates × 1 µs = 30 µs per tick; region rebuild about 0.5 ms per dirty region, rare. Memory: about 4 portal nodes × 16 B per traversable region; at most 1,024 regions × 64 B = 64 KiB per area; solid or empty-sky regions with no portals cost nothing (A-6).",
+          "closes": [
+            "G7-1",
+            "G7-2",
+            "G7-7",
+            "G7-8"
+          ]
+        },
+        {
+          "id": "PROPOSED-LOG-02",
+          "title": "Caravans and trade routes",
+          "scope": "caravans as real parties with goods, animals and guards, sent from surplus to demand along LOG-01; atomic exchange at arrival (revalidate quantities, ownership, location and willingness, then commit both sides; EMERGENT_SOCIETY); tariffs by SOC.33.01; routes remembered and reused. Trade rules need the Owner (OQ-16).",
+          "deps": [
+            "SOC.30.02",
+            "SOC.33.01",
+            "PROPOSED-LOG-01",
+            "PROPOSED-LOG-04",
+            "PROPOSED-WAR-01"
+          ],
+          "acceptanceTests": [
+            "(1) a trade commits both sides or neither; mass and coin are conserved",
+            "(2) a caravan is sent only with surplus at home and demand at the destination",
+            "(3) raiding a caravan moves its goods, never deletes them.",
+            "Mutant: a half-committed trade must fail test 1."
+          ],
+          "tickCost": "caravans travel as LOG-01 travellers; one route decision per settlement per game day, negligible. Memory: about 64 B per caravan plus its item list.",
+          "closes": [
+            "G7-3"
+          ]
+        },
+        {
+          "id": "PROPOSED-LOG-03",
+          "title": "Markets and exchange",
+          "scope": "a market as a place with sellers, buyers and prices from local supply and demand; coin or barter per OQ-16; households buy from producers (SOC.30.02).",
+          "deps": [
+            "SOC.30.02",
+            "PROPOSED-LOG-02",
+            "PROPOSED-MIND-06"
+          ],
+          "acceptanceTests": [
+            "(1) scarcity raises the local price by the configured rule",
+            "(2) no sale happens without both parties present and willing.",
+            "Mutant: a price that ignores stock must fail test 1."
+          ],
+          "tickCost": "per transaction event; about 256 B per market.",
+          "closes": [
+            "G7-3"
+          ]
+        },
+        {
+          "id": "PROPOSED-LOG-04",
+          "title": "Pack animals, mounts, carts and boats",
+          "scope": "SRD mounts and vehicles as data; draft and pack animals from livestock (SIM.40.10, WG.68.14) with capacity and care needs; carts and boats as items with capacity and terrain limits; the speed penalty read in movement; one mass unit.",
+          "deps": [
+            "SIM.40.10",
+            "WG.68.14",
+            "PROPOSED-LOG-01"
+          ],
+          "acceptanceTests": [
+            "(1) a cart moves more mass per trip than a person by the SRD rule",
+            "(2) a heavily loaded person moves at the SRD encumbered speed",
+            "(3) all item masses and limits use one unit (validator).",
+            "Mutant: the unused speed penalty (today's behaviour) must fail test 2."
+          ],
+          "tickCost": "capacity lookups at haul planning; negligible. Memory: 16 B per vehicle.",
+          "closes": [
+            "G7-4",
+            "G7-6"
+          ]
+        },
+        {
+          "id": "PROPOSED-LOG-05",
+          "title": "Supply for armies, outposts and sieges",
+          "scope": "forces and outposts consume food, water and ammunition from carried stores or supply trains along LOG-01; strain rises with distance and route danger; unsupplied forces lose morale (MIND-03) and health (HEALTH-01).",
+          "deps": [
+            "SOC.32.01",
+            "SOC.42.01",
+            "PROPOSED-LOG-01",
+            "PROPOSED-LOG-02",
+            "PROPOSED-WAR-04"
+          ],
+          "acceptanceTests": [
+            "(1) an army far from its supply consumes stores at the configured rate and suffers when they run out",
+            "(2) cutting a supply route raises strain within one game day.",
+            "Mutant: consumption that does not draw down stores must fail test 1."
+          ],
+          "tickCost": "each army or outpost once per game hour, up to 10 ÷ 100 ticks × 5 µs, negligible.",
+          "closes": [
+            "G7-5"
+          ]
+        }
+      ],
+      "interactions": {
+        "livingWorld": [
+          "SIM.50.02 Cross-layer water (docs/worldgen/DEUS_WORLDGEN_WBS.md:545): PROPOSED-LOG-01, PROPOSED-LOG-04",
+          "SIM.50.03 Erosion and sediment (docs/worldgen/DEUS_WORLDGEN_WBS.md:546): PROPOSED-LOG-01",
+          "SIM.50.06 Seasons and weather (docs/worldgen/DEUS_WORLDGEN_WBS.md:549): PROPOSED-LOG-01",
+          "SIM.50.07 Migration and herds (docs/worldgen/DEUS_WORLDGEN_WBS.md:550): PROPOSED-LOG-04",
+          "SIM.50.08 Land reshaping (docs/worldgen/DEUS_WORLDGEN_WBS.md:551): PROPOSED-LOG-01",
+          "SIM.50.09 Settlement lifecycle (docs/worldgen/DEUS_WORLDGEN_WBS.md:552): PROPOSED-LOG-05",
+          "SIM.50.10 Catastrophes (docs/worldgen/DEUS_WORLDGEN_WBS.md:553): PROPOSED-LOG-01",
+          "Population budget and crowd LOD: PROPOSED-LOG-01, PROPOSED-LOG-05"
+        ],
+        "spells": [
+          "Summoned or magical entities: PROPOSED-LOG-04",
+          "Creature movement and abilities: PROPOSED-LOG-01",
+          "Illusion: PROPOSED-LOG-01",
+          "Transport, teleport and planar travel: PROPOSED-LOG-01",
+          "Fireball and the other breaches-floor spells (Lane P: Passwall, Stone Shape, Move Earth, Disintegrate, Earthquake): PROPOSED-LOG-01",
+          "PROPOSED-LOG-01 treats a permanent Teleportation Circle pair, and any other SRD fixed magical link, as a graph edge with the SRD's conditions: PROPOSED-LOG-01"
+        ]
+      },
+      "ownerQuestions": [
+        "OQ-03: How long are a year, a season, a pregnancy, a childhood, a memory and a disease in play time? (VISION Q11, `docs/VISION.md:167`; SIM.50.01 D-1; Lane P's Q2.) Options: (a) Separate the day from the year. (b) Keep V123 (one day/night cycle is one year) and scale every duration to it. (c) Slow the life clock and the calendar together.",
+        "OQ-16: Trade: coin, barter or both, and who sets prices (V71). Options: (a) Coin (SOC.30) with barter as a fallback. (b) Barter until a faction mints coin. (c) Owner-authored trade customs per people."
+      ],
+      "priority": 5,
+      "biggestGap": "No row for caravans, trade routes, off-screen travel between settlements, pack animals or supply; live hauling and autonomous jobs never cross a layer (`DEUS_Jobs.js:1412`)"
+    },
+    {
+      "n": 8,
+      "area": "Records and legends",
+      "rating": "PARTLY PLANNED",
+      "wbsIds": [
+        "SOC.51.01",
+        "SIM.10.01",
+        "SIM.10.02",
+        "WG.63.06",
+        "WG.65.16",
+        "WG.65.17",
+        "SIM.40.08",
+        "SIM.50.09"
+      ],
+      "decIds": [
+        "DEC-012",
+        "DEC-014",
+        "DEC-018"
+      ],
+      "srdRefs": [
+        "Legend Lore (game/data/srd51/spells.json:10445)",
+        "Speak with Dead (game/data/srd51/spells.json:15402)",
+        "Raise Dead (game/data/srd51/spells.json:13455)",
+        "Revivify (game/data/srd51/spells.json:14115)"
+      ],
+      "codeToday": "PARTIAL",
+      "codeCitations": [
+        "game/js/plugins/DEUS_History.js:861",
+        "game/js/plugins/DEUS_Combat.js:1064",
+        "game/js/plugins/DEUS_History.js:869",
+        "game/js/plugins/DEUS_HistoricalDemographics.js:216",
+        "docs/systems/UF_History.md:92",
+        "game/js/plugins/DEUS_History.js:3660",
+        "game/js/plugins/DEUS_Talk.js:387",
+        "game/js/plugins/DEUS_History.js:417",
+        "docs/systems/UF_History.md:98",
+        "game/js/plugins/DEUS_HistoricalDemographics.js:259",
+        "game/js/plugins/DEUS_History.js:547",
+        "game/js/plugins/DEUS_Items.js:288",
+        "game/js/plugins/DEUS_History.js:493",
+        "game/js/plugins/DEUS_DeathForensics.js:51"
+      ],
+      "gaps": [
+        {
+          "id": "G8-1",
+          "severity": "BLOCKER",
+          "text": "No row plans a live history clock: the people processes (aging, grief, succession, disease deaths, ledger updates) run only on the pre-game path that a Year-0 game skips (P-02, section 2.2). SIM.40.10 plans the biology, but nothing plans routing live events into the historical record."
+        },
+        {
+          "id": "G8-2",
+          "severity": "MAJOR",
+          "text": "No row plans one world event log. The chronicle is 400 text lines, the death ledger is not saved, and SOC.51.01 is per person. Memories (MIND-02), crimes (GOV-02), renown and legends all need events with stable IDs."
+        },
+        {
+          "id": "G8-3",
+          "severity": "MAJOR",
+          "text": "No row plans renown, reputation or rumour (deeds known by others through social spread)."
+        },
+        {
+          "id": "G8-4",
+          "severity": "MAJOR",
+          "text": "Artifacts and item provenance are nominal (WG.65.17's \"forgotten artifacts\"); items have no maker or history."
+        },
+        {
+          "id": "G8-5",
+          "severity": "MAJOR",
+          "text": "Site histories and ruins: no site becomes a ruin, and no row ties a ruin to the events that made it (SIM.50.09 and SIM.40.08 cover the physical side)."
+        },
+        {
+          "id": "G8-6",
+          "severity": "MAJOR",
+          "text": "The history-born D&D character mode named in the brief is defined in no repository document; no row plans exporting a historical person as an SRD character. The mode itself is the Owner's (OQ-18)."
+        },
+        {
+          "id": "G8-7",
+          "severity": "MINOR",
+          "text": "Legends and genealogy queries: the API has no caller and the viewer (HIST-11) is not started."
+        },
+        {
+          "id": "G8-8",
+          "severity": "MINOR",
+          "text": "SRD resurrection (Revivify within a minute, `game/data/srd51/spells.json:14115`; Raise Dead within 10 days, `game/data/srd51/spells.json:13455`) returns a dead person to life under DEC-018, and Lane P notes it revives a retired unit ID. No row says what happens to that person's records, office, heirs, ties and property once succession and inheritance have run. The rule is the Owner's (OQ-17)."
+        }
+      ],
+      "proposedPackages": [
+        {
+          "id": "PROPOSED-REC-01",
+          "title": "World event log and live history clock",
+          "scope": "one append-only, typed event store with stable IDs (deaths, births, pairings, crimes, battles, offices, discoveries, foundings, abandonments), each with participants, place, layer and tick; subscribes to live events and to `time:day` / `time:year` so the historical ledger stays current in play; compaction keeps all deaths, births, battles and offices and trims low-significance events per person beyond a cap; saved; the chronicle and the death ledger become views of it. A revival is its own event type that reopens the person's life record without deleting the death; what it does to offices, heirs and property follows the Owner's rule (OQ-17).",
+          "deps": [
+            "SIM.00.02",
+            "SIM.00.06",
+            "SIM.40.10",
+            "SOC.51.01",
+            "PROPOSED-MIND-01"
+          ],
+          "acceptanceTests": [
+            "(1) a death in play appears in the log, in the person's biography and in the historical ledger",
+            "(2) the log survives save and load byte-identical",
+            "(3) compaction never drops a death, birth or battle",
+            "(4) a 100-game-year run stays under the size cap",
+            "(5) a revival fixture keeps both the death event and the revival event, and the person's ID is the same before and after.",
+            "Mutant: a live death that never reaches the ledger (today's behaviour) must fail test 1; a revival that deletes the death event must fail test 5."
+          ],
+          "tickCost": "every event a memory points to is appended, about 4.5 per tick at L0 (A-7), plus significant events at L1 and L2 (births, deaths, crimes, battles; assumed 0.2 per tick at N = 1,000); at about 1 µs per append that is about 5 µs per tick. Compaction runs once per named person per game day, staggered: 1,000 ÷ 2,400 ≈ 0.4 compactions per tick × 20 µs ≈ 8 µs. About 13 µs per tick in all. Memory: 32 B per event plus references; with a cap of 64 events per named person and all vital events kept, about 2 MiB for 1,000 named persons; crowd events are aggregated per settlement per game day (about 64 B each).",
+          "closes": [
+            "G8-1",
+            "G8-2",
+            "G8-8"
+          ]
+        },
+        {
+          "id": "PROPOSED-REC-02",
+          "title": "Renown, reputation, rumour and legends",
+          "scope": "renown per person and faction from logged deeds; rumours travel as beliefs through social ties (MIND-02, MIND-04), can be wrong, and fade; \"legend\" status for persons whose renown passes a threshold; text-only legends and genealogy queries for the sheet and look views.",
+          "deps": [
+            "PROPOSED-REC-01",
+            "PROPOSED-MIND-02",
+            "PROPOSED-MIND-04"
+          ],
+          "acceptanceTests": [
+            "(1) a deed witnessed by one person spreads to that person's ties at the configured rate and not to strangers",
+            "(2) a false rumour can exist alongside the true event and is marked as belief, not truth",
+            "(3) the genealogy query returns parents and children from the log.",
+            "Mutant: rumour spread without ties must fail test 1."
+          ],
+          "tickCost": "piggybacks on MIND-02 social events (about 4.5 × 1 µs per tick). Memory: 4 B renown per person; rumour beliefs share MIND-01's memory ring.",
+          "closes": [
+            "G8-3",
+            "G8-7"
+          ]
+        },
+        {
+          "id": "PROPOSED-REC-03",
+          "title": "Artifacts and item provenance",
+          "scope": "notable items (made by a master, used in a logged deed, a relic of a faith) carry a maker, a name slot (Owner-approved naming, AGENTS.md rule 7) and a provenance chain of event IDs; durable relics survive decay and burial (SIM.40.07) and can be found (WG.65.17).",
+          "deps": [
+            "SOC.12.01",
+            "SIM.40.07",
+            "WG.65.17",
+            "PROPOSED-REC-01"
+          ],
+          "acceptanceTests": [
+            "(1) an item used to kill a named figure gains that event in its chain",
+            "(2) the chain survives burial and excavation.",
+            "Mutant: provenance lost on save must fail test 2."
+          ],
+          "tickCost": "event-driven. Memory: about 64 B per artifact; about 1,000 artifacts per game century ≈ 64 KiB.",
+          "closes": [
+            "G8-4"
+          ]
+        },
+        {
+          "id": "PROPOSED-REC-04",
+          "title": "Site histories and ruins",
+          "scope": "each site keeps its founding, rulers, battles and abandonment as event references; an abandoned site becomes a ruin (with SIM.50.09 and SIM.40.08 on the physical side) that later settlers and archaeologists can learn about.",
+          "deps": [
+            "SIM.50.09",
+            "SIM.40.08",
+            "WG.65.17",
+            "PROPOSED-REC-01"
+          ],
+          "acceptanceTests": [
+            "(1) a site abandoned in play becomes a ruin with its history attached",
+            "(2) the ruin's history names real events and persons.",
+            "Mutant: `isRuined` never set (today's behaviour) must fail test 1."
+          ],
+          "tickCost": "event-driven. Memory: about 256 B per site; 500 sites ≈ 128 KiB.",
+          "closes": [
+            "G8-5"
+          ]
+        },
+        {
+          "id": "PROPOSED-REC-05",
+          "title": "Historical person export (data feed for the history-born mode)",
+          "scope": "data only: a read-only export of one historical person as SRD 5.1 character fields (race, class and level from SOC.11.01, ability scores, background built from their logged life, bonds from MIND-04 ties, flaws from MIND-05, equipment and artifacts from REC-03). How and when a player uses it is the Owner's (OQ-18); this package defines no mode.",
+          "deps": [
+            "SOC.11.01",
+            "PROPOSED-REC-01",
+            "PROPOSED-REC-03",
+            "PROPOSED-MIND-04",
+            "PROPOSED-MIND-05"
+          ],
+          "acceptanceTests": [
+            "(1) the export validates against the SRD character fields",
+            "(2) every bond in the export names a real tie",
+            "(3) exporting the same person twice from the same state is identical.",
+            "Mutant: a bond with no tie behind it must fail test 2."
+          ],
+          "tickCost": "none (an offline query).",
+          "closes": [
+            "G8-6"
+          ]
+        }
+      ],
+      "interactions": {
+        "livingWorld": [
+          "SIM.50.02 Cross-layer water (docs/worldgen/DEUS_WORLDGEN_WBS.md:545): PROPOSED-REC-01",
+          "SIM.50.03 Erosion and sediment (docs/worldgen/DEUS_WORLDGEN_WBS.md:546): PROPOSED-REC-03, PROPOSED-REC-04",
+          "SIM.50.05 Fire (docs/worldgen/DEUS_WORLDGEN_WBS.md:548): PROPOSED-REC-01",
+          "SIM.50.09 Settlement lifecycle (docs/worldgen/DEUS_WORLDGEN_WBS.md:552): PROPOSED-REC-04",
+          "SIM.50.10 Catastrophes (docs/worldgen/DEUS_WORLDGEN_WBS.md:553): PROPOSED-REC-01, PROPOSED-REC-02",
+          "All nine systems SIM.50.02-.10 (no people-side consumer or event output in any row): PROPOSED-REC-01",
+          "Structural support and collapse: PROPOSED-REC-01",
+          "Decay and reclamation: PROPOSED-REC-03, PROPOSED-REC-04",
+          "Reproduction and lifecycle: PROPOSED-REC-01"
+        ],
+        "spells": [
+          "Object state (locks, handling, repair, food quality): PROPOSED-REC-03",
+          "Senses, divination and read-only queries: PROPOSED-REC-02",
+          "Communication: PROPOSED-REC-01",
+          "Speak with Dead needs the dead person's memories kept for as long as the corpse can answer (MIND-01 retention, REC-01) (game/data/srd51/spells.json:15402): PROPOSED-REC-01",
+          "Legend Lore needs legends that can be looked up by person, place or object (REC-02) (game/data/srd51/spells.json:10445): PROPOSED-REC-02",
+          "Fireball and the other breaches-floor spells (Lane P: Passwall, Stone Shape, Move Earth, Disintegrate, Earthquake): PROPOSED-REC-01",
+          "PROPOSED-REC-01 logs every cast as an event (caster, spell, targets, place, layer, tick), so witnesses, crimes and records use one source: PROPOSED-REC-01"
+        ]
+      },
+      "ownerQuestions": [
+        "OQ-03: How long are a year, a season, a pregnancy, a childhood, a memory and a disease in play time? (VISION Q11, `docs/VISION.md:167`; SIM.50.01 D-1; Lane P's Q2.) Options: (a) Separate the day from the year. (b) Keep V123 (one day/night cycle is one year) and scale every duration to it. (c) Slow the life clock and the calendar together.",
+        "OQ-17: Resurrection (DEC-018; Raise Dead, Revivify): what happens to a revived person's office, heirs, property and ties after succession and inheritance have run? Options: (a) Nothing returns automatically; the revived person may claim it, which can start a succession crisis. (b) Everything returns. (c) The culture's law decides (GOV-01).",
+        "OQ-18: The history-born D&D character mode named in the brief: what is it? No repository document defines it. Options: (a) The Owner defines it and the coordinator adds a row. (b) It is Incarnate mode applied to a historical person. (c) Out of scope for now."
+      ],
+      "priority": 7,
+      "biggestGap": "No world event log, renown, artifact provenance or legends; the chronicle keeps 400 events (`DEUS_History.js:869`); the history-born character mode is defined nowhere"
+    },
+    {
+      "n": 9,
+      "area": "The player's role per mode",
+      "rating": "PARTLY PLANNED",
+      "wbsIds": [
+        "WG.00.11",
+        "SOC.50.01",
+        "SIM.00.03",
+        "GP.07.01"
+      ],
+      "decIds": [
+        "DEC-012",
+        "DEC-017",
+        "DEC-020"
+      ],
+      "srdRefs": [
+        "Darkness (game/data/srd51/spells.json:5291) and darkvision (game/data/srd51/character_options.json:82) limit the incarnate view"
+      ],
+      "codeToday": "PARTIAL",
+      "codeCitations": [
+        "game/js/plugins/DEUS_ColonyOverseer.js:17",
+        "game/js/plugins/DEUS_ColonyOverseer.js:169",
+        "game/js/plugins/DEUS_ColonyOverseer.js:296",
+        "game/js/plugins/DEUS_Select.js:25",
+        "game/js/plugins/DEUS_Combat.js:53",
+        "game/js/plugins/DEUS_Combat.js:1102",
+        "game/js/plugins/DEUS_Colonists.js:1868",
+        "game/js/plugins/DEUS_Combat.js:1475",
+        "game/js/plugins/DEUS_Minimap.js:421",
+        "game/js/plugins/DEUS_Minimap.js:569",
+        "game/js/plugins/DEUS_Minimap.js:108",
+        "game/js/plugins/DEUS_Interact.js:493",
+        "tasks/WG.00.11/state.md:1"
+      ],
+      "gaps": [
+        {
+          "id": "G9-1",
+          "severity": "MAJOR",
+          "text": "WG.00.11 is one line: no list of modes, no switching rules, no input arbitration; the mode state in code is never set. The row's ID also collides with the Year-0 task folder."
+        },
+        {
+          "id": "G9-2",
+          "severity": "MAJOR",
+          "text": "Command mode's policy side (SOC.50.01) is one line; the V52 \"band orders\" design is unbuilt (`docs/design/CHAIN_OF_COMMAND.md:34`)."
+        },
+        {
+          "id": "G9-3",
+          "severity": "MAJOR",
+          "text": "The player's part in combat (V29 toggle, drafting, click targeting) is nominal; the setter and drafting are dormant; DEC-017 and ADR-001 disagree about battle screens (E3)."
+        },
+        {
+          "id": "G9-4",
+          "severity": "MAJOR",
+          "text": "Incarnate mode waits on OD-16 / Q4, and it needs a per-person view of what that person knows and sees (MIND and DEEP packages)."
+        },
+        {
+          "id": "G9-5",
+          "severity": "MAJOR",
+          "text": "Overlord mode, and V125's \"God\" role it may or may not be, are undefined in every document. Owner-designed: listed as Owner questions only, no package."
+        }
+      ],
+      "proposedPackages": [
+        {
+          "id": "PROPOSED-MODE-01",
+          "title": "Mode framework and input arbitration",
+          "scope": "a mode is a policy on which commands the player may send and what the view shows; every player intent enters the simulation through SIM.00.03's command queue; switching rules and precedence; V125's rule that the world runs the same with no input; the WG.00.11 ID collision recorded for the coordinator.",
+          "deps": [
+            "SIM.00.03",
+            "WG.00.11",
+            "OD-16",
+            "OQ-22"
+          ],
+          "acceptanceTests": [
+            "(1) in every mode, a purity lint shows no mode writes simulation state except through the queue",
+            "(2) replaying a command log reproduces the state checksum",
+            "(3) a run with no input produces the same checksum whichever mode is active.",
+            "Mutant: a mode that writes a unit's position directly must fail test 1."
+          ],
+          "tickCost": "per command only; no per-tick cost.",
+          "closes": [
+            "G9-1"
+          ]
+        },
+        {
+          "id": "PROPOSED-MODE-02",
+          "title": "Command mode: direct orders and policies",
+          "scope": "direct orders to a person, band orders to a leader (V52), and policy decrees through offices (SOC.50.01), all as queued commands that the duty scheduler (SOC.13.01) weighs.",
+          "deps": [
+            "SOC.20.01",
+            "SOC.50.01",
+            "SOC.13.01",
+            "PROPOSED-MODE-01",
+            "PROPOSED-GOV-06"
+          ],
+          "acceptanceTests": [
+            "(1) a decree becomes office tasks and then duties",
+            "(2) a direct order outranks a band order, and survival outranks both (V17).",
+            "Mutant: a decree that bypasses the offices must fail test 1."
+          ],
+          "tickCost": "per command.",
+          "closes": [
+            "G9-2"
+          ]
+        },
+        {
+          "id": "PROPOSED-MODE-03",
+          "title": "Combat mode: drafting, attack modes and targeting",
+          "scope": "a combat-mode toggle, drafting (drafted people take no work), per-person attack modes reachable from the UI, click targeting including other layers (GP.07.02); on-map or battle-screen per the Owner's answer to E3.",
+          "deps": [
+            "GP.07.01",
+            "GP.07.02",
+            "OQ-21",
+            "PROPOSED-MODE-01"
+          ],
+          "acceptanceTests": [
+            "(1) a drafted person takes no job",
+            "(2) the attack-mode command reaches `setMode`",
+            "(3) a click on a visible target on a lower layer issues a legal attack.",
+            "Mutant: drafting that does not stop job-taking must fail test 1."
+          ],
+          "tickCost": "per command; drafted persons are skipped by job search (a saving).",
+          "closes": [
+            "G9-3"
+          ]
+        },
+        {
+          "id": "PROPOSED-MODE-04",
+          "title": "Incarnate mode: one person, their knowledge",
+          "scope": "control of one person while the rest of the colony stays autonomous (V125); the view shows only what that person has seen or heard (MIND-02 beliefs, DEEP-02 vision, light from DEEP-01); release returns the person to autonomy.",
+          "deps": [
+            "OD-16",
+            "OQ-22",
+            "SIM.30.04",
+            "PROPOSED-MODE-01",
+            "PROPOSED-MIND-02",
+            "PROPOSED-DEEP-01",
+            "PROPOSED-DEEP-02"
+          ],
+          "acceptanceTests": [
+            "(1) the incarnate view never shows a unit the person has not perceived",
+            "(2) the rest of the faction keeps working (same duty counts as a no-input run)",
+            "(3) releasing control resumes autonomous duty within one decision.",
+            "Mutant: a view that shows all units must fail test 1."
+          ],
+          "tickCost": "the person's surroundings join the L0 focus (at most 9 regions); the perception filter reuses DEEP-02 queries.",
+          "closes": [
+            "G9-4"
+          ]
+        }
+      ],
+      "interactions": {
+        "livingWorld": [
+          "All nine systems SIM.50.02-.10 (V125 no-input run; incarnate perception): PROPOSED-MODE-01, PROPOSED-MODE-04"
+        ],
+        "spells": [
+          "Darkness blocks darkvision, so DEEP-02 needs a magical-darkness case, and so does PROPOSED-MODE-04's incarnate view (game/data/srd51/spells.json:5291): PROPOSED-MODE-04",
+          "PROPOSED-MODE-03's click targeting covers spells aimed at another layer (GP.07.02): PROPOSED-MODE-03"
+        ]
+      },
+      "ownerQuestions": [
+        "OQ-03: How long are a year, a season, a pregnancy, a childhood, a memory and a disease in play time? (VISION Q11, `docs/VISION.md:167`; SIM.50.01 D-1; Lane P's Q2.) Options: (a) Separate the day from the year. (b) Keep V123 (one day/night cycle is one year) and scale every duration to it. (c) Slow the life clock and the calendar together.",
+        "OQ-19: Overlord mode: what is it? No document at the base defines it (section 3.9). Options: (a) The Owner writes its definition and the coordinator adds a row. (b) It is a new name for something already written (V125's \"God\" role, or Command mode); the Owner says which. (c) The term is dropped.",
+        "OQ-20: Overlord mode, the open points once it is defined: which of V125's powers (\"observe, intervene, alter history, or do absolutely nothing\") it has; how it relates to Command, Combat and Incarnate; how it is entered and left; whether \"Overlord\" is the final name. Options: For the Owner to write. This audit lists the points and proposes nothing.",
+        "OQ-21: Battle screens: DEC-017 keeps them, ADR-001 and V45 say combat stays on the map (`escalation.md` E3, M-05). Options: (a) DEC-017 means only \"keep the RMMZ shell available\"; combat stays on the map. (b) Some fights move to `Scene_Battle`. (c) ADR-001 is superseded.",
+        "OQ-22: Possession versus command (VISION Q4, OD-16). OD-16 records the default \"Both modes, switchable\" (`docs/worldgen/DEUS_WORLDGEN_WBS.md:718`) and is `OPEN`. Options: (a) Both, switchable. (b) Command only. (c) Possession only."
+      ],
+      "priority": 9,
+      "biggestGap": "WG.00.11 is a one-line row and OD-16 / VISION Q4 are open; **Overlord mode is not mentioned in any repository document** (flagged, not designed)"
+    },
+    {
+      "n": 10,
+      "area": "Underground life",
+      "rating": "PARTLY PLANNED",
+      "wbsIds": [
+        "WG.64.01",
+        "WG.64.02",
+        "WG.64.06",
+        "WG.66.01",
+        "WG.66.03",
+        "WG.68.07",
+        "WG.68.08",
+        "WG.68.09",
+        "WG.68.10",
+        "WG.62.02",
+        "SIM.50.02"
+      ],
+      "decIds": [
+        "DEC-011",
+        "DEC-013",
+        "DEC-018",
+        "DEC-021"
+      ],
+      "srdRefs": [
+        "vision, light and suffocation (srd:rule:adventuring-the-environment, game/data/srd51/rules.json:4403)",
+        "darkvision (game/data/srd51/character_options.json:82)",
+        "175 of 317 creatures with darkvision, 7 with Sunlight Sensitivity (game/data/srd51/creatures.json)",
+        "torch (game/data/srd51/equipment.json:4134)",
+        "hooded lantern (game/data/srd51/equipment.json:3457)",
+        "Light (game/data/srd51/spells.json:10582)",
+        "Daylight (game/data/srd51/spells.json:5382)",
+        "Continual Flame (game/data/srd51/spells.json:4606)",
+        "Darkness (game/data/srd51/spells.json:5291)"
+      ],
+      "codeToday": "PARTIAL",
+      "codeCitations": [
+        "game/js/plugins/DEUS_Ecology.js:743",
+        "game/js/plugins/DEUS_Ecology.js:843",
+        "game/js/plugins/DEUS_Wildlife.js:454",
+        "game/js/plugins/DEUS_Wildlife.js:684",
+        "game/js/plugins/DEUS_Wildlife.js:656",
+        "game/js/plugins/DEUS_Levels.js:583",
+        "game/js/plugins/DEUS_Levels.js:1038",
+        "game/js/plugins/DEUS_Factions.js:513",
+        "game/js/plugins/DEUS_Colonists.js:5230",
+        "game/js/plugins/DEUS_Colonists.js:4265",
+        "game/js/plugins/DEUS_Conditions.js:810",
+        "game/js/plugins/DEUS_Colonists.js:827",
+        "game/js/plugins/DEUS_Fog.js:268",
+        "game/js/plugins/DEUS_Fog.js:499",
+        "game/data/DEUS_WorldCatalog.json:10173",
+        "game/js/plugins/DEUS_Sheet.js:144",
+        "game/js/plugins/DEUS_DayNight.js:83",
+        "game/js/plugins/DEUS_DayNight.js:186"
+      ],
+      "gaps": [
+        {
+          "id": "G10-1",
+          "severity": "BLOCKER",
+          "text": "Year-0 viability of the four underground-starting races is not planned: no farming, no light, no water on the deepest level in code, and nothing in the WBS checks that an underground faction can feed and water itself (WG.90.01 needs a viable living Year-0 world)."
+        },
+        {
+          "id": "G10-2",
+          "severity": "MAJOR",
+          "text": "No row plans a simulation light field. Darkness changes nothing in play; work stops by the surface clock. Lane P's audit lists the same gap for 26 LIGHT spells (G-LIGHT, its §4.3)."
+        },
+        {
+          "id": "G10-3",
+          "severity": "MAJOR",
+          "text": "No row plans vision and darkvision rules; they exist only in the disabled fog, and sight is a fixed 8 cells. Three of nine races (including dragonborn, placed on the deepest level) have no darkvision."
+        },
+        {
+          "id": "G10-4",
+          "severity": "MAJOR",
+          "text": "No row plans light sources and fuel; the only light never burns out, and the torch has no item."
+        },
+        {
+          "id": "G10-5",
+          "severity": "MAJOR",
+          "text": "No row plans cave flora and fungus succession: WG.68.01-.02 cover the five surface biomes; code grows fungus by floor shape alone."
+        },
+        {
+          "id": "G10-6",
+          "severity": "MAJOR",
+          "text": "No row plans an underground food web: cave flora feeds nothing, the species list is hardcoded, and there is no underground breeding or arrival."
+        },
+        {
+          "id": "G10-7",
+          "severity": "MINOR",
+          "text": "The surface clock drives underground behaviour (animal sleep, work gates)."
+        }
+      ],
+      "proposedPackages": [
+        {
+          "id": "PROPOSED-DEEP-01",
+          "title": "Simulation light field",
+          "scope": "light as simulation state: a sparse registry of light sources per region (fire, torch, lamp, spell, bioluminescence), sky exposure per column from the first opaque stratum above (the same traversal as DEC-021), and a `lightAt(x, y, z)` query that returns bright, dim or dark by the SRD rule; work, perception and animal activity read it instead of the surface clock.",
+          "deps": [
+            "SIM.00.02",
+            "WG.00.17",
+            "SIM.40.01",
+            "SIM.60.02"
+          ],
+          "acceptanceTests": [
+            "(1) a cell 25 ft from a torch in a sealed cave reads dim, 45 ft reads dark (SRD 20 + 20 ft)",
+            "(2) the same cell under an open shaft at noon reads bright",
+            "(3) removing the torch makes the cell dark within one tick",
+            "(4) a sealed cave at surface noon reads dark.",
+            "Mutant: light that ignores the opaque roof (today's surface-clock rule) must fail test 4."
+          ],
+          "tickCost": "queries on demand, about 35 per tick (witnesses, attacks, work) × up to 16 sources × 0.1 µs ≈ 56 µs. Memory: 16 B per light source; 1,000 sources ≈ 16 KiB; sky-exposure cache 1 B per column per area (64 KiB); layers with no sources cost nothing.",
+          "closes": [
+            "G10-2",
+            "G10-7"
+          ]
+        },
+        {
+          "id": "PROPOSED-DEEP-02",
+          "title": "Vision and darkvision",
+          "scope": "SRD senses per race and creature as data (darkvision 30-120 ft, blindsight, Sunlight Sensitivity), perception checks that combine DEEP-01 light with senses (lightly and heavily obscured), used by witnesses (MIND-02), combat and work.",
+          "deps": [
+            "SOC.11.01",
+            "PROPOSED-DEEP-01"
+          ],
+          "acceptanceTests": [
+            "(1) in darkness a dwarf sees a target 50 ft away and a human does not",
+            "(2) a duergar-type creature in sunlight attacks with disadvantage",
+            "(3) the human's attack on an unseen target has disadvantage by the SRD rule.",
+            "Mutant: darkvision ignored (today's live rule) must fail test 1."
+          ],
+          "tickCost": "one extra table lookup per perception query (0.1 µs). Memory: 1 B per person or creature (sense class).",
+          "closes": [
+            "G10-3"
+          ]
+        },
+        {
+          "id": "PROPOSED-DEEP-03",
+          "title": "Light sources and fuel",
+          "scope": "torches, candles, lamps and lanterns as items with SRD radius and burn time; oil and wax as fuel consumed with mass conserved (LIFE-001; burnt fuel goes to the ledger like fire); campfires that need fuel; permanent magical light (Continual Flame) as a source with no fuel.",
+          "deps": [
+            "WG.61.02",
+            "SIM.50.05",
+            "PROPOSED-DEEP-01"
+          ],
+          "acceptanceTests": [
+            "(1) a torch lights for exactly its burn time in ticks and then goes out",
+            "(2) a lantern consumes one pint of oil per 6 hours (SRD), mass conserved",
+            "(3) a campfire with no fuel goes out.",
+            "Mutant: a campfire that never burns out (today's rule) must fail test 3."
+          ],
+          "tickCost": "expiries through a timer wheel, a few per tick; negligible. Memory: 8 B per burning source.",
+          "closes": [
+            "G10-4"
+          ]
+        },
+        {
+          "id": "PROPOSED-DEEP-04",
+          "title": "Cave flora and fungus ecology",
+          "scope": "succession for the ten below-surface biomes, driven by moisture, organic input (detritus and remains washed or carried down, LIFE-001), temperature (WG.64.06) and light, not by surface sunlight; bioluminescent species register as dim light sources (DEEP-01); runs on SIM.50.04's slow clock.",
+          "deps": [
+            "SIM.50.04",
+            "SIM.50.02",
+            "WG.64.06",
+            "OQ-24",
+            "PROPOSED-DEEP-01"
+          ],
+          "acceptanceTests": [
+            "(1) a moist cave with organic input grows fungus and a dry sterile one does not",
+            "(2) fungal biomass never exceeds the organic input plus any declared source (mass ledger)",
+            "(3) a glowing species appears as a light source.",
+            "Mutant: growth from nothing (today's floor-shape rule) must fail test 2."
+          ],
+          "tickCost": "active cave regions on the slow clock, about 20 regions × 50 µs ÷ 100 ticks ≈ 10 µs per tick. Memory: per active region about 64 B.",
+          "closes": [
+            "G10-5"
+          ]
+        },
+        {
+          "id": "PROPOSED-DEEP-05",
+          "title": "Underground food webs and creatures",
+          "scope": "WG.68's carrying capacity and food web applied to the two lower bands: cave grazers eat fungus and detritus, predators eat grazers, SRD creatures placed by an Owner-approved habitat table (the SRD has none); breeding and arrivals below ground (SIM.40.10), crowd counts per region.",
+          "deps": [
+            "WG.68.07",
+            "WG.68.08",
+            "WG.68.09",
+            "WG.68.10",
+            "WG.68.11",
+            "SIM.40.10",
+            "SIM.30.02",
+            "PROPOSED-DEEP-04"
+          ],
+          "acceptanceTests": [
+            "(1) removing the fungus lowers grazer counts and then predator counts, in that order",
+            "(2) overhunting extirpates locally with no respawn (WG.68.11).",
+            "Mutant: species counts that ignore food (today's fixed placement) must fail test 1."
+          ],
+          "tickCost": "about 500 occupied underground regions stepped every 100 ticks = 5 × 5 µs = 25 µs per tick. Memory: about 32 B per region per band (8 species × 4 B); at most 1,024 regions × 32 B = 32 KiB per area.",
+          "closes": [
+            "G10-6"
+          ]
+        },
+        {
+          "id": "PROPOSED-DEEP-06",
+          "title": "Underground farming and Year-0 viability",
+          "scope": "fungus and cave crops with their own growth rules (EMERGENT_SOCIETY asks for underground crops that do not reuse surface sunlight rules), water access below ground (wells into aquifers, SIM.50.02; a non-lava source on the deepest level or a start rule), and a Year-0 viability check for every underground start: food, water and light for the eight founders for a set number of game days with no player input.",
+          "deps": [
+            "SIM.50.02",
+            "WG.62.02",
+            "WG.90.01",
+            "SIM.50.06",
+            "OQ-23",
+            "PROPOSED-DEEP-01",
+            "PROPOSED-DEEP-03",
+            "PROPOSED-DEEP-04"
+          ],
+          "acceptanceTests": [
+            "(1) on 20 seeds, every underground faction survives its first 30 game days with no input",
+            "(2) a fungus farm yields food only with water and organic input",
+            "(3) a start with no reachable water is rejected by worldgen.",
+            "Mutant: the lava-only deepest level (today's rule) must fail test 3."
+          ],
+          "tickCost": "farm plots on the slow clock, about 16 B per plot; the viability check runs at generation only.",
+          "closes": [
+            "G10-1"
+          ]
+        }
+      ],
+      "interactions": {
+        "livingWorld": [
+          "SIM.50.02 Cross-layer water (docs/worldgen/DEUS_WORLDGEN_WBS.md:545): PROPOSED-DEEP-06",
+          "SIM.50.04 Vegetation (docs/worldgen/DEUS_WORLDGEN_WBS.md:547): PROPOSED-DEEP-04",
+          "SIM.50.05 Fire (docs/worldgen/DEUS_WORLDGEN_WBS.md:548): PROPOSED-DEEP-01, PROPOSED-DEEP-03",
+          "SIM.50.06 Seasons and weather (docs/worldgen/DEUS_WORLDGEN_WBS.md:549): PROPOSED-DEEP-01",
+          "SIM.50.07 Migration and herds (docs/worldgen/DEUS_WORLDGEN_WBS.md:550): PROPOSED-DEEP-05",
+          "SIM.50.08 Land reshaping (docs/worldgen/DEUS_WORLDGEN_WBS.md:551): PROPOSED-DEEP-05",
+          "SIM.50.10 Catastrophes (docs/worldgen/DEUS_WORLDGEN_WBS.md:553): PROPOSED-DEEP-05, PROPOSED-DEEP-06",
+          "All nine systems SIM.50.02-.10 (V125 no-input run; incarnate perception): PROPOSED-DEEP-02",
+          "Structural support and collapse: PROPOSED-DEEP-06",
+          "Population budget and crowd LOD: PROPOSED-DEEP-05"
+        ],
+        "spells": [
+          "Creature movement and abilities: PROPOSED-DEEP-02",
+          "Senses, divination and read-only queries: PROPOSED-DEEP-02",
+          "Underground light versus Light (game/data/srd51/spells.json:10582): PROPOSED-DEEP-01, PROPOSED-DEEP-04",
+          "Daylight (game/data/srd51/spells.json:5382): PROPOSED-DEEP-04",
+          "Continual Flame: permanent light with no fuel (DEEP-03), paid for with a consumed item (game/data/srd51/spells.json:4606): PROPOSED-DEEP-03",
+          "Darkness blocks darkvision, so DEEP-02 needs a magical-darkness case, and so does PROPOSED-MODE-04's incarnate view (game/data/srd51/spells.json:5291): PROPOSED-DEEP-02",
+          "PROPOSED-DEEP-06's viability test states whether conjured food and water (Create Food and Water, Goodberry; Lane P's Q1 governs their ledger entry) count toward a start being viable: PROPOSED-DEEP-06"
+        ]
+      },
+      "ownerQuestions": [
+        "OQ-03: How long are a year, a season, a pregnancy, a childhood, a memory and a disease in play time? (VISION Q11, `docs/VISION.md:167`; SIM.50.01 D-1; Lane P's Q2.) Options: (a) Separate the day from the year. (b) Keep V123 (one day/night cycle is one year) and scale every duration to it. (c) Slow the life clock and the calendar together.",
+        "OQ-23: Which people lives in which home layer range at 32 layers? DEC-013 leaves it open (`docs/OWNER_DECISIONS.md:194`), while V132 fixes spawn levels in the 5-level world (M-06). Options: (a) The Owner assigns the ranges. (b) V132's order stretched over the bands (−2 to Lower-2, −1 to Lower-1, and so on). (c) Placement per seed within Owner bounds.",
+        "OQ-24: What feeds life in the deep caves? Options: (a) Organic input from above only (detritus, remains, matter carried by water). (b) That plus geothermal heat (WG.64.06) as a declared energy source. (c) That plus a magical or glowing source, logged in the ledger like Lane P's conjured matter (its Q1).",
+        "OQ-26: Underground darkness on screen. Every view of an underground level gets the midnight screen tone (D-6), a code-applied darkening that DEC-011's amendment holds for an Owner-led review as an off-by-default toggle (`docs/OWNER_DECISIONS.md:157`). Options: (a) Remove the tone now (DEC-011, 1:1). (b) Keep it until the Owner-led review. (c) The Owner-led review decides what darkness looks like."
+      ],
+      "priority": 3,
+      "biggestGap": "No row for a simulation light field, darkvision, light fuel, cave flora succession or underground farming; darkness changes nothing in the simulation, and pools on the deepest level are always lava (`DEUS_Levels.js:1038`)"
+    }
+  ]
+}

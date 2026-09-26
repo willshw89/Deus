@@ -1,0 +1,21 @@
+{
+  "lane": "lane-o2",
+  "taskId": "SIM.50.11",
+  "branch": "task/gap-audit-people",
+  "writer": "claude",
+  "reviewer": "grok",
+  "allowedPaths": [
+    "tasks/SIM.50.11/gap-audit-people/**",
+    "tasks/SIM.50.11/lane-o2/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "node",
+      "args": [
+        "-e",
+        "const fs=require('fs');const d='tasks/SIM.50.11/gap-audit-people/';const t=JSON.parse(fs.readFileSync(d+'people_gap_table.json','utf8'));const a=t.areas||[];const R=['FULLY PLANNED','PARTLY PLANNED','MISSING'];const bad=a.filter((x,i)=>x.n!==i+1||!R.includes(x.rating)||(!(Array.isArray(x.wbsIds)&&x.wbsIds.length)&&x.rating!=='MISSING'));const md=fs.statSync(d+'PEOPLE_GAP_AUDIT.md').size;console.log('areas',a.length,'bad',bad.length,'mdBytes',md);if(a.length!==10||bad.length||md<8000)process.exit(1)"
+      ],
+      "timeoutSec": 60
+    }
+  ]
+}

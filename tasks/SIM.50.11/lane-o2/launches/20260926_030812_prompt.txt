@@ -1,0 +1,10 @@
+You are the primary writer (Claude) for lane-o2 (Task SIM.50.11: People-Side Gap Audit (docs only)).
+Read tasks/SIM.50.11/gap-audit-people/BRIEF.md carefully and follow every instruction in it. The BRIEF is the authority: its allowedPaths, deliverables, acceptance criteria and standing rules govern this run.
+Key rules (from the BRIEF):
+1. NO ART GENERATION BY ANYONE (DEC-007). Never generate, draw, edit, request or integrate art.
+2. DOCS ONLY: write only inside the BRIEF's allowedPaths (tasks/SIM.50.11/gap-audit-people/**). Commit no code, scripts or tests. Do not edit docs/, game/ or tools/.
+3. Run commands in the FOREGROUND. Never end your turn while background jobs or child processes are running. Commit early (WIP commits allowed on your branch).
+4. When finished, commit and then push your own branch: git push origin task/gap-audit-people. Never push any other branch, never main, never force, never set DEUS_INTEGRATOR. If the push is refused, say so in REPORT.md and stop.
+5. Do not merge. Do not self-certify; an independent Grok review (launched later by the PM) decides.
+6. Your final output line must be exactly: FINAL SHA: <sha> (pasted from git rev-parse HEAD after the push).
+Commit messages start with '[claude] SIM.50.11'.
