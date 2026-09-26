@@ -152,7 +152,7 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | **WG.31.01** | Companion Animated Sheet Topology | Gemini | Strict matching coordinate geometry across frames F1, F2, F3 on separate sheets (water, lava, steam, fire). | `PLANNED` |
 | **WG.32.01** | Diagnostic Slotmap Generation (`*_SLOTMAP.png`)| Gemini | Build CLI tool to render transparent grid maps with labeled asset IDs and status overlays. **NO ART GENERATION, BY ANYONE**. | `PLANNED` |
 | **WG.32.02** | Blank Template Sheets (Lane T) | Claude / Grok | Blank template generator (`tools/art/make_blank_templates.js`, `tools/art/test_blank_templates.js`, `tools/art/fixtures/templates/**`, `art/templates/**`). Consumes catalogue; generates one empty template sheet per catalogue sheet with grid, slot IDs, background outside master palette; byte-identical on rerun. **NO ART GENERATION, BY ANYONE**. | `PLANNED` |
-| **WG.33.01** | Manifest ↔ Atlas Bi-Directional Integrity Checker | Gemini | Automated tool asserting 100% agreement between JSON manifest, World-State Registry (`DEUS_WORLD_STATE_REGISTRY.md`), and atlas slots. | `PLANNED` |
+| **WG.33.01** | Manifest   Atlas Bi-Directional Integrity Checker | Gemini | Automated tool asserting 100% agreement between JSON manifest, World-State Registry (`DEUS_WORLD_STATE_REGISTRY.md`), and atlas slots. | `DONE` |
 
 ---
 
