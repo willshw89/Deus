@@ -43,6 +43,6 @@ const PROVOCATIONS = {
     // The 3D search makes scratch for every level of the range.
     scratch_every_level: { check: "path_scratch_bounded", configs: ["-16..15"], phases: ["core"],
         edits: [[W, "        AS3.searchLayers = 0;\n        AS3.lastLayers = [];\n        return AS3.gen;",
-            "        AS3.searchLayers = 0;\n        AS3.lastLayers = [];\n        for (let li = 0; li < zSync().levels.length; li++) layerScratch(li); /* PROVOKED */\n        return AS3.gen;"]] }
+            "        AS3.searchLayers = 0;\n        AS3.lastLayers = [];\n        for (const z of zSync().levels) slot3D(z); /* PROVOKED */\n        return AS3.gen;"]] }
 };
 module.exports = { PROVOCATIONS };

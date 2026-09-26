@@ -2127,34 +2127,54 @@
         return AS.gen;
     }
 
-    // 3D search scratch (WG.00.17): one set of per-cell arrays per layer, made the first time a search reaches that layer
-    // and reused after (the generation stamp marks the current search), so the scratch follows the layers a route can reach,
-    // never the layer count. A node is (z - zMin) * n + cell. The heap grows with the search, to the bound the 3D search
-    // always had (4 entries per node of the area's levels).
-    const AS3 = { n: 0, gen: 0, layers: [], heapCell: null, heapKey: null, allocated: 0, searchLayers: 0, lastLayers: [] };
-    function search3D(n) {
+    // 3D search scratch (WG.00.17): the per-cell arrays hold one slot of cells per level, and a level gets its slot the
+    // first time a search reaches it (the arrays grow by one level of cells; the generation stamp marks the current search),
+    // so the scratch follows the levels routes reach, never the layer count. Inside a search a node is slot * n + cell (flat
+    // arrays: no per-node indirection); a path's cells are global, (z - zMin) * n + cell. The heap grows with the search, to
+    // the bound the 3D search always had (4 entries per node of the area's levels).
+    const AS3 = { n: 0, gen: 0, slots: 0, zOfSlot: [], slotStamp: [], slotOf: null, slotZMin: 0, version: 0,
+        g: null, parent: null, seen: null, closed: null, goal: null, heapCell: null, heapKey: null, searchLayers: 0, lastLayers: [] };
+    function search3D(n, zMin, levels) {
         if (AS3.n !== n) {
-            AS3.n = n; AS3.gen = 0; AS3.layers = []; AS3.allocated = 0;
+            AS3.n = n; AS3.gen = 0; AS3.slots = 0; AS3.zOfSlot = []; AS3.slotStamp = [];
+            AS3.g = AS3.parent = AS3.seen = AS3.closed = AS3.goal = null;
             AS3.heapCell = new Int32Array(4 * n + 8);
             AS3.heapKey = new Float64Array(4 * n + 8);
         }
         if (++AS3.gen > 0xfffffff0) {
-            for (const L of AS3.layers) if (L) { L.seen.fill(0); L.closed.fill(0); L.goal.fill(0); L.stamp = 0; }
+            if (AS3.seen) { AS3.seen.fill(0); AS3.closed.fill(0); AS3.goal.fill(0); }
+            AS3.slotStamp.fill(0);
             AS3.gen = 1;
         }
+        // This search's level -> slot table (the slots stay from search to search, kept by z).
+        if (!AS3.slotOf || AS3.slotOf.length < levels) AS3.slotOf = new Int16Array(levels);
+        AS3.slotOf.fill(-1);
+        for (let k = 0; k < AS3.slots; k++) { const li = AS3.zOfSlot[k] - zMin; if (li >= 0 && li < levels) AS3.slotOf[li] = k; }
+        AS3.slotZMin = zMin;
         AS3.searchLayers = 0;
         AS3.lastLayers = [];
         return AS3.gen;
     }
-    function layerScratch(li) {
-        let L = AS3.layers[li];
-        if (L === undefined) {
-            const n = AS3.n;
-            L = AS3.layers[li] = { g: new Int32Array(n), parent: new Int32Array(n), seen: new Uint32Array(n), closed: new Uint32Array(n), goal: new Uint32Array(n), stamp: 0 };
-            AS3.allocated++;
+    // The slot of level z in this search, made the first time any search reaches z.
+    function slot3D(z) {
+        const li = z - AS3.slotZMin;
+        let k = AS3.slotOf[li];
+        if (k < 0) {
+            k = AS3.slots++;
+            AS3.zOfSlot[k] = z;
+            AS3.slotStamp[k] = 0;
+            const total = AS3.slots * AS3.n;
+            const grow = (A, T) => { const B = new T(total); if (A) B.set(A); return B; };
+            AS3.g = grow(AS3.g, Int32Array);
+            AS3.parent = grow(AS3.parent, Int32Array);
+            AS3.seen = grow(AS3.seen, Uint32Array);
+            AS3.closed = grow(AS3.closed, Uint32Array);
+            AS3.goal = grow(AS3.goal, Uint32Array);
+            AS3.slotOf[li] = k;
+            AS3.version++;
         }
-        if (L.stamp !== AS3.gen) { L.stamp = AS3.gen; AS3.searchLayers++; AS3.lastLayers.push(li); }
-        return L;
+        if (AS3.slotStamp[k] !== AS3.gen) { AS3.slotStamp[k] = AS3.gen; AS3.searchLayers++; AS3.lastLayers.push(z); }
+        return k;
     }
     function growHeap3D(cap) {
         const len = AS3.heapCell.length;
@@ -2212,17 +2232,27 @@
         const is3D = !!(opts.z3d || gz !== sz || (st.version >= 4));
         if (is3D) {
             res.is3D = true;
-            const zMin = zSync().zMin, zMax = zr.zMax;
-            const heapCap = 4 * n * zr.levels.length + 8;
-            const enc3D = (x, y, z) => (z - zMin) * n + (y * size + x);
-            const dec3D = c => {
-                const l = Math.floor(c / n);
-                const z = l + zMin;
-                const rem = c - l * n;
-                const x = rem % size;
-                const y = (rem - x) / size;
-                return { x, y, z };
+            const zMin = zSync().zMin, zMax = zr.zMax, levelCount = zr.levels.length;
+            const heapCap = 4 * n * levelCount + 8;
+            const gen = search3D(n, zMin, levelCount);
+            let G = AS3.g, P = AS3.parent, seen = AS3.seen, closed = AS3.closed, goalMark = AS3.goal, ver = AS3.version;
+            // opts.avoid is a global node id (a cell index reads as the lowest level's, as before WG.00.17); in this search's
+            // ids it exists once its level has a slot.
+            const avoidG = Number.isInteger(opts.avoid) ? opts.avoid : -1;
+            const avoidZ = avoidG >= 0 ? zMin + ((avoidG / n) | 0) : NaN, avoidCell = avoidG >= 0 ? avoidG % n : -1;
+            const avoidId = () => { const li = avoidZ - zMin; if (!(li >= 0 && li < levelCount)) return -1; const k = AS3.slotOf[li]; return k >= 0 ? k * n + avoidCell : -1; };
+            let avoid = avoidId();
+            const refresh = () => { G = AS3.g; P = AS3.parent; seen = AS3.seen; closed = AS3.closed; goalMark = AS3.goal; ver = AS3.version; avoid = avoidId(); };
+            let encZ = NaN, encBase = 0;
+            const enc3D = (x, y, z) => {
+                if (z !== encZ) { encZ = z; encBase = slot3D(z) * n; if (AS3.version !== ver) refresh(); }
+                return encBase + (y * size + x);
             };
+            const dec3D = c => {
+                const k = (c / n) | 0, rem = c - k * n, x = rem % size;
+                return { x, y: (rem - x) / size, z: AS3.zOfSlot[k] };
+            };
+            const toGlobal = c => { const k = (c / n) | 0; return (AS3.zOfSlot[k] - zMin) * n + (c - k * n); };
 
             const tf = typeFlags(), D = typeTable.doors;
             const unit = opts.unit ? (typeof opts.unit === "object" ? opts.unit : World.unit(opts.unit)) : null;
@@ -2257,7 +2287,6 @@
             };
 
             const s = enc3D(sx, sy, sz), goalNode = enc3D(gx, gy, gz);
-            const avoid = Number.isInteger(opts.avoid) ? opts.avoid : -1;
 
             const eight = !fourWay();
             let goals, hOff = 0;
@@ -2283,17 +2312,13 @@
             if (!goals.length) return done("goal walled in");
             if (goals.includes(s)) {
                 res.cells = new Int32Array(0);
-                res.end = s;
+                res.end = toGlobal(s);
                 return done("here");
             }
             if (!enterable(sx, sy, sz)) return done("start walled in");
 
-            const gen = search3D(n);
             let hc = AS3.heapCell, hk = AS3.heapKey;
-            // A node's layer scratch and its cell: sc(c) sets scI and returns the layer's arrays.
-            let scI = 0;
-            const sc = c => { const l = (c / n) | 0; scI = c - l * n; return layerScratch(l); };
-            for (const c of goals) sc(c).goal[scI] = gen;
+            for (const c of goals) goalMark[c] = gen;
 
             const hOf = (x, y, z) => {
                 let ax = Math.abs(x - gx), ay = Math.abs(y - gy);
@@ -2342,17 +2367,18 @@
 
             let from = s;
             const relax = (j, gi) => {
-                const J = sc(j), jj = scI;
-                if (J.closed[jj] === gen || j === avoid) return;
-                if (J.seen[jj] === gen && J.g[jj] <= gi) return;
-                J.seen[jj] = gen;
-                J.g[jj] = gi;
-                J.parent[jj] = from;
+                if (closed[j] === gen || j === avoid) return;
+                if (seen[j] === gen && G[j] <= gi) return;
+                seen[j] = gen;
+                G[j] = gi;
+                P[j] = from;
                 const { x: jx, y: jy, z: jz } = dec3D(j);
                 push(j, (gi + hOf(jx, jy, jz)) * HEAP_TIE - gi);
             };
 
-            { const S0 = sc(s); S0.g[scI] = 0; S0.parent[scI] = -1; S0.seen[scI] = gen; }
+            G[s] = 0;
+            P[s] = -1;
+            seen[s] = gen;
             push(s, hOf(sx, sy, sz) * HEAP_TIE);
 
             const maxNodes = opts.maxNodes > 0 ? opts.maxNodes | 0 : PATHS.maxNodes;
@@ -2361,10 +2387,9 @@
 
             while (hn > 0) {
                 const i = pop();
-                const I = sc(i), ii = scI;
-                if (I.closed[ii] === gen) continue;
-                I.closed[ii] = gen;
-                if (I.goal[ii] === gen) {
+                if (closed[i] === gen) continue;
+                closed[i] = gen;
+                if (goalMark[i] === gen) {
                     found = i;
                     break;
                 }
@@ -2376,7 +2401,7 @@
                 if (hn + 32 > hc.length && growHeap3D(heapCap)) { hc = AS3.heapCell; hk = AS3.heapKey; }
                 expanded++;
                 const { x, y, z } = dec3D(i);
-                const hi = hOf(x, y, z), gI = I.g[ii];
+                const hi = hOf(x, y, z), gI = G[i];
                 if (hi < bestH || (hi === bestH && gI < bestG)) {
                     best = i;
                     bestG = gI;
@@ -2450,11 +2475,11 @@
                 res.partial = true;
             }
             let len = 0;
-            for (let c = end; c !== s; c = sc(c).parent[scI]) len++;
+            for (let c = end; c !== s; c = P[c]) len++;
             const cells = new Int32Array(len);
-            for (let c = end, k = len - 1; c !== s; c = sc(c).parent[scI]) cells[k--] = c;
+            for (let c = end, k = len - 1; c !== s; c = P[c]) cells[k--] = toGlobal(c);
             res.cells = cells;
-            res.end = end;
+            res.end = toGlobal(end);
             res.layers = AS3.searchLayers;
             return done(res.partial ? "partial" : "found");
         }
@@ -2967,8 +2992,8 @@
      *  lastSearchLayers (the levels the last 3D search reached), heapEntries, levels (the world's layer count) }. */
     World.pathScratchStats = function() {
         const bytesPerLayer = AS3.n * 20;   // g, parent, seen, closed, goal: 4 bytes each per cell
-        return { layersAllocated: AS3.allocated, bytesPerLayer, bytes: AS3.allocated * bytesPerLayer + (AS3.heapCell ? AS3.heapCell.length * 12 : 0),
-            lastSearchLayers: AS3.lastLayers.map(li => li + zSync().zMin), heapEntries: AS3.heapCell ? AS3.heapCell.length : 0, levels: zSync().levels.length };
+        return { layersAllocated: AS3.slots, layersWithScratch: AS3.zOfSlot.slice(0, AS3.slots), bytesPerLayer, bytes: AS3.slots * bytesPerLayer + (AS3.heapCell ? AS3.heapCell.length * 12 : 0),
+            lastSearchLayers: AS3.lastLayers.slice(), heapEntries: AS3.heapCell ? AS3.heapCell.length : 0, levels: zSync().levels.length };
     };
     /** Planner numbers since the world was created: plans, ms (average, p95 of the last 512, max), cells expanded, queue, waits. */
     World.pathStats = function() {
