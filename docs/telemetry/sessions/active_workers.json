@@ -58,7 +58,8 @@
     "launchTimeCT": "2026-09-26 00:24:22 CT",
     "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\lane-k\\tasks\\WG.00.09b\\lane-k\\BRIEF.md",
     "launchPromptPath": "C:\\Users\\snewt\\.deus_worktrees\\run_lane_k.ps1",
-    "state": "running"
+    "state": "running",
+    "tip": "a6b4a47d"
   },
   {
     "lane": "Lane N",
@@ -71,7 +72,8 @@
     "launchTimeCT": "2026-09-26 00:24:25 CT",
     "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\lane-n\\tasks\\SIM.00.00\\lane-n\\BRIEF.md",
     "launchPromptPath": "C:\\Users\\snewt\\.deus_worktrees\\run_lane_n.ps1",
-    "state": "running"
+    "state": "running",
+    "tip": "00e36e32"
   },
   {
     "lane": "Lane M",
@@ -84,7 +86,8 @@
     "launchTimeCT": "2026-09-26 00:24:34 CT",
     "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\lane-m\\tasks\\SIM.00.01\\lane-m\\BRIEF.md",
     "launchPromptPath": "C:\\Users\\snewt\\.deus_worktrees\\run_lane_m.ps1",
-    "state": "running"
+    "state": "running",
+    "tip": "ddd1b865"
   },
   {
     "lane": "Lane I",
