@@ -1,5 +1,6 @@
-clone HEAD: 84189d5472aa91e94b30b58644fd49c289c9f52b
+clone HEAD: 51d3915af6beee1476c5b78df76b7c23dceb6a01
 Each line: UF_TEST_PROVOKE=catalogue.<check> node tools/art/test_catalogue.js -> exit code, number of OTHER checks that failed, and the provoked check's own output line (raw).
+checks found in an unprovoked run: 47
 PROVOKE catalogue.schema EXIT=1 otherFails=0 | FAIL catalogue.schema: $id deus-art-catalogue/1.1.0; unsupported keywords 0; 10089 entries, 207 sheets: 2 schema errors ($.entries[0]: missing status; $.entries[1].alphaMode: "PARTIAL" is not in the enum); broken copy rejected with 2 errors
 PROVOKE catalogue.entry_fields EXIT=1 otherFails=0 | FAIL catalogue.entry_fields: 5 entries checked; 10 bad: ALL_SHARED_CHARACTER_AUTOMATON_ANY_DEFAULT band MIDDLE; ALL_SHARED_CHARACTER_AUTOMATON_ANY_DEFAULT id fields do not match band/biome/category; ALL_SHARED_CHARACTER_DRAGONBORN_ANY_CHILD band MIDDLE
 PROVOKE catalogue.rebuild_identical EXIT=1 otherFails=0 | FAIL catalogue.rebuild_identical: 12 outputs; run1 vs run2 differ: art/catalogue/catalogue.json; fresh build vs committed differ: none; catalogue.json sha256 eb5a0fc1ebbf28b8...
@@ -47,4 +48,4 @@ PROVOKE catalogue.depth_no_colours EXIT=1 otherFails=0 | FAIL catalogue.depth_no
 PROVOKE catalogue.no_image_data EXIT=1 otherFails=0 | FAIL catalogue.no_image_data: image files under art/catalogue, docs/art/catalogue, tools/art/fixtures/catalogue: 1 (art/catalogue/provoked.png); outputs with embedded image data: 0
 PROVOKE catalogue.schema_doc_terrains EXIT=1 otherFails=0 | FAIL catalogue.schema_doc_terrains: 29 terrains used; SCHEMA.md lists 29; missing meadow; extra none
 PROVOKE catalogue.conflicts_required EXIT=1 otherFails=0 | FAIL catalogue.conflicts_required: 18/19 required topics present; conflicts.md 133 lines; missing: bible door 64-80
-PROVOKE catalogue.no_such_check EXIT=1 | FAIL catalogue.provoke: UF_TEST_PROVOKE=catalogue.no_such_check names no check (checks: schema, entry_fields, rebuild_id
+PROVOKE catalogue.no_such_check EXIT=1 | FAIL catalogue.provoke: UF_TEST_PROVOKE=catalogue.no_such_check names no check (checks: schema, entry_fields, rebuild_identical, rule_derived_derived_base, rule

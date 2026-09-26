@@ -1,4 +1,4 @@
-clone HEAD: 84189d5472aa91e94b30b58644fd49c289c9f52b
+clone HEAD: 51d3915af6beee1476c5b78df76b7c23dceb6a01
 $ node tools/art/test_catalogue.js
 PASS catalogue.schema: $id deus-art-catalogue/1.1.0; unsupported keywords 0; 10089 entries, 207 sheets: 0 schema errors; broken copy rejected with 2 errors
 PASS catalogue.entry_fields: 10089 entries checked; 0 bad
