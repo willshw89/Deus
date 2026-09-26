@@ -62,31 +62,40 @@ const stats3 = arr => { if (!arr.length) return { samples: 0, min: null, median:
 const PS_PROCS = [
     "$all = @(Get-CimInstance Win32_Process)",
     "$w = @($all | Where-Object { ($_.Name -eq 'claude.exe' -and $_.CommandLine -match ' -p ') -or $_.Name -eq 'grok.exe' -or ($_.Name -eq 'node.exe' -and $_.CommandLine -match 'codex\\.js.* exec') }).Count",
-    "$nw = @($all | Where-Object { $_.Name -eq 'nw.exe' } | ForEach-Object { [pscustomobject]@{ pid = $_.ProcessId; cmd = [string]$_.CommandLine } })",
+    "$nw = @($all | Where-Object { $_.Name -eq 'nw.exe' } | ForEach-Object { [pscustomobject]@{ pid = $_.ProcessId; ppid = $_.ParentProcessId; cmd = [string]$_.CommandLine } })",
     "[pscustomobject]@{ workers = $w; nw = $nw } | ConvertTo-Json -Compress -Depth 3"
 ].join("; ");
-/** { at, aiWorkers, otherNwExe, otherNwPids } now. own: a string in the command line of this run's own nw.exe processes. */
+/** { at, aiWorkers, otherNwExe, otherNw } now. own: { profile: a string in the command line of this run's own nw.exe
+ *  processes, rootPid: the nw.exe this tool started }. A process is this run's own when its command line names the profile
+ *  or its parent chain reaches rootPid; every other nw.exe is listed with its command line (first 160 characters). */
 function procsOf(at, own, out) {
     const j = JSON.parse(String(out).trim());
     const nw = j.nw ? [].concat(j.nw) : [];
-    const others = nw.filter(p => !own || !String(p.cmd || "").includes(own));
-    return { at, aiWorkers: j.workers, otherNwExe: others.length, otherNwPids: others.map(p => p.pid) };
+    const byPid = new Map(nw.map(p => [p.pid, p]));
+    const isOwn = p => {
+        if (!own) return false;
+        if (own.profile && String(p.cmd || "").includes(own.profile)) return true;
+        for (let q = p, n = 0; q && n < 16; q = byPid.get(q.ppid), n++) if (own.rootPid && q.pid === own.rootPid) return true;
+        return false;
+    };
+    const others = nw.filter(p => !isOwn(p));
+    return { at, aiWorkers: j.workers, otherNwExe: others.length, otherNw: others.map(p => ({ pid: p.pid, ppid: p.ppid, cmd: String(p.cmd || "").slice(0, 160) })) };
 }
 const PS_ARGS = ["-NoProfile", "-NonInteractive", "-Command", PS_PROCS];
 function procs(own) {
     const at = new Date().toISOString();
     try { return procsOf(at, own, execFileSync("powershell", PS_ARGS, { encoding: "utf8", windowsHide: true, timeout: 60000 })); }
-    catch (e) { return { at, aiWorkers: null, otherNwExe: null, otherNwPids: [], error: e.message.split("\n")[0] }; }
+    catch (e) { return { at, aiWorkers: null, otherNwExe: null, otherNw: [], error: e.message.split("\n")[0] }; }
 }
 /** The same without blocking the event loop (the checks during a run: the CPU sampler and the DevTools socket keep going). */
 function procsAsync(own) {
     const at = new Date().toISOString();
     return new Promise(resolve => require("child_process").execFile("powershell", PS_ARGS, { encoding: "utf8", windowsHide: true, timeout: 60000 }, (err, out) => {
-        if (err) return resolve({ at, aiWorkers: null, otherNwExe: null, otherNwPids: [], error: err.message.split("\n")[0] });
-        try { resolve(procsOf(at, own, out)); } catch (e) { resolve({ at, aiWorkers: null, otherNwExe: null, otherNwPids: [], error: e.message }); }
+        if (err) return resolve({ at, aiWorkers: null, otherNwExe: null, otherNw: [], error: err.message.split("\n")[0] });
+        try { resolve(procsOf(at, own, out)); } catch (e) { resolve({ at, aiWorkers: null, otherNwExe: null, otherNw: [], error: e.message }); }
     }));
 }
-const LOAD_NOTE = "aiWorkers: PowerShell CIM, claude.exe with ' -p ', grok.exe, node.exe running codex.js exec (the PM's filter); the session running this bench counts as 1. otherNwExe: nw.exe processes whose command line does not name this run's own profile folder.";
+const LOAD_NOTE = "aiWorkers: PowerShell CIM, claude.exe with ' -p ', grok.exe, node.exe running codex.js exec (the PM's filter); the session running this bench counts as 1. otherNwExe: nw.exe processes that are not this run's own (own: the command line names this run's profile folder, or the parent chain reaches the nw.exe the tool started); otherNw lists them with their command lines.";
 
 if (args.includes("--load-probe")) {
     // The pre-run wait (Fix 1 section 3.3). Never kills or pauses anything.
@@ -770,9 +779,11 @@ async function runGame(dir, env, label) {
     const profileDir = path.join(os.tmpdir(), profileName);
     const noThrottle = ["--disable-background-timer-throttling", "--disable-renderer-backgrounding", "--disable-backgrounding-occluded-windows", "--disable-features=CalculateNativeWinOcclusion"];
     // Machine load (Fix 1, P3): processes before the game starts, then the CPU every second and the processes every 15 s.
-    const loadStart = procs(profileName), cpu = cpuSampler(), during = [];
-    const procTimer = setInterval(() => { procsAsync(profileName).then(p => during.push({ at: p.at, aiWorkers: p.aiWorkers, otherNwExe: p.otherNwExe, otherNwPids: p.otherNwPids })); }, 15000);
+    const own = { profile: profileName, rootPid: null };
+    const loadStart = procs(own), cpu = cpuSampler(), during = [];
+    const procTimer = setInterval(() => { procsAsync(own).then(p => during.push({ at: p.at, aiWorkers: p.aiWorkers, otherNwExe: p.otherNwExe, otherNw: p.otherNw, error: p.error })); }, 15000);
     const child = spawn(NW, [dir, `--user-data-dir=${profileDir}`, ...noThrottle, "--deus-test=bench_layers", `--remote-debugging-port=${port}`], { env, stdio: ["ignore", "ignore", "ignore"] });
+    own.rootPid = child.pid;
     const profiles = {}, notes = [];
     let exited = false, exitCode = null;
     const exitP = new Promise(res => child.on("exit", code => { exited = true; exitCode = code; res(); }));
@@ -830,7 +841,7 @@ async function runGame(dir, env, label) {
     clearTimeout(killer);
     cpu.stop();
     clearInterval(procTimer);
-    const loadEnd = procs(profileName);
+    const loadEnd = procs(own);
     try { if (ws) ws.close(); } catch (e) { /* closed */ }
     try { fs.rmSync(profileDir, { recursive: true, force: true }); } catch (e) { /* still locked */ }
     const text = fs.existsSync(resultsFile) ? fs.readFileSync(resultsFile, "utf8") : "";
@@ -857,8 +868,8 @@ function machineLoad(load, phases, preRun) {
         labelRule: "quiet: overall median CPU <= 25 % and no other nw.exe at the start, in any 15 s check or at the end; otherwise loaded (WG.00.09b Fix 1 section 3.3)",
         method: "CPU: os.cpus() idle/total time deltas over all logical CPUs, one sample a second from before nw.exe starts to after it exits (the same quantity as \\Processor(_Total)\\% Processor Time); a sample counts for a phase when its second overlaps the phase's wall span. " + LOAD_NOTE,
         startedAt: load.start.at, finishedAt: load.end.at,
-        start: { aiWorkers: load.start.aiWorkers, otherNwExe: load.start.otherNwExe, otherNwPids: load.start.otherNwPids, error: load.start.error },
-        end: { aiWorkers: load.end.aiWorkers, otherNwExe: load.end.otherNwExe, otherNwPids: load.end.otherNwPids, error: load.end.error },
+        start: { aiWorkers: load.start.aiWorkers, otherNwExe: load.start.otherNwExe, otherNw: load.start.otherNw, error: load.start.error },
+        end: { aiWorkers: load.end.aiWorkers, otherNwExe: load.end.otherNwExe, otherNw: load.end.otherNw, error: load.end.error },
         during: load.during, otherNwExeMax: otherNwMax,
         cpu: { intervalMs: 1000, overall, byPhase, samples: load.cpuSamples },
         preRun: preRun || null
