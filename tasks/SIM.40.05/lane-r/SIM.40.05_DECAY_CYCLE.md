@@ -200,7 +200,7 @@ Stages are derived (ADR-003 L1666) per structure from member states, then per si
 
 **Roofs fail before walls.** Roofs are SKY-exposed from the start; walls are SHELTERED while the roof stands (R-01.6). With the default lives, every roof class fails before every wall class of the same structure: a THATCH roof at 12 sy, a LIGHTWOOD roof at 25 sy and a TIMBER roof at 60 sy, against 96 sy or more for timber walls, about 60 sy after roof loss for mudbrick, and centuries or more for masonry. A data validator (AT-R-02) rejects any table in which a structure's ROOF life at SKY is not shorter than its WALL life at SHELTERED.
 
-**Shedding.** Masonry and mudbrick lose mortar, plaster and surface grains as they weather. At each HP step (the capacity thresholds, at most `steps` per life, default 4) a member books `f_shed / steps` of its mass to FINES. Defaults `f_shed`: MUDBRICK 0.30 (walls melt into their own mound), RUBBLESTONE 0.05, BRICK 0.03, ASHLAR 0.01, timber classes 0 (they rot after breaking instead). FINES land on the foot cell of the member and add to its residue record (a slice is written only when a full slice of mass accumulates).
+**Shedding.** Masonry and mudbrick lose mortar, plaster and surface grains as they weather. At each HP step (the capacity thresholds, at most `steps` per life, default 4) a member books `f_shed / steps` of its mass to FINES. Defaults `f_shed`: MUDBRICK 0.30 (walls melt into their own mound), RUBBLESTONE 0.05, BRICK 0.03, ASHLAR 0.01, timber classes 0 (they rot after breaking instead). FINES accumulate in the member's own **shed pool** (one integer per member, not one record per cell). When the pool holds one slice of mass for every foot cell of the member, decay writes one FINES slice along those foot cells and subtracts exactly that mass; the remainder stays in the pool.
 
 **Rot of organic rubble.** Broken TIMBER, LIGHTWOOD and THATCH (`broken_timber`, `DEUS_Levels.js:1007`) weather on their own schedule: `rotYears[dc][ex]` = the same life as the intact class at that exposure. At the end, `T(RUBBLE→SOIL-ORG, ORGANIC, floor(m × 0.2), "decay.rot")` and `sink(AIR, ORGANIC, m − that, "decay.rot.outgas")`. The 20 % humus fraction is a default.
 
@@ -491,7 +491,7 @@ This section answers R-06: vegetation invading abandoned cells, sediment burial,
 A ruin becomes a buried mound (S5) through four mass transfers, all local and all ledgered:
 1. **Its own rubble.** Fallen roofs and walls bury the wall bases (R-05.4). Lane Q's transform.
 2. **Mudbrick melt and masonry shedding.** FINES collect at the wall foot (R-02.3): `T(BUILT→FINES)`.
-3. **Litter to soil.** Plants on the footprint drop litter (SIM.50.04's `T(BIOMASS→SOIL-ORG)`). The cell's residue record accumulates SOIL-ORG and FINES; when it reaches one slice of soil mass (soil bulk about 80 lb/ft³ × 50 ft³ = 4,000 lb = **64,000 mu**; stale 32,000 mu), decay writes one SOIL stratum on top and subtracts exactly that mass. Default build-up: 0.25 mm per sy on a vegetated footprint, so one 2-ft slice (610 mm) takes about 2,400 sy (stale 1-ft slice: about 1,200 sy).
+3. **Litter to soil.** Plants on the footprint drop litter (SIM.50.04's `T(BIOMASS→SOIL-ORG)`). Litter build-up is uniform over a vegetated footprint, so it is held **per structure footprint** in closed form (a start day and a rate), not per cell: one heap entry per footprint gives the day the next full slice is due. On that day decay writes one SOIL stratum on every footprint cell and books exactly one slice of soil mass per cell (soil bulk about 80 lb/ft³ × 50 ft³ = 4,000 lb = **64,000 mu**; stale 32,000 mu). Default build-up: 0.25 mm per sy on a vegetated footprint, so one 2-ft slice (610 mm) takes about 2,400 sy (stale 1-ft slice: about 1,200 sy).
 4. **Sediment from outside (SIM.50.03).** Slope wash and floods deposit SEDIMENT in low ruins (ADR-003 L1674: "Soil or rubble erodes at an exposed source cell in the same drainage (−k) and deposits at the low cell (+k)"). SIM.50.03 owns the rates. Decay only reacts to the strata-write events on its members' cells.
 
 Wind-blown dust (WG.65.06 names wind transport) is not modelled here.
@@ -512,7 +512,7 @@ Every covering write reaches decay as `levels:strataChanged` on the member's cel
 
 ### R-06.5 Data, triggers and cost
 
-- **Data:** the `reclaimable` flag and the SOIL-ORG and FINES residue in each chunk's sparse trace map (section "Sparse storage and cost").
+- **Data:** the `reclaimable` flag, derived from the structure's state and cached per chunk (not saved); the shed pool per member; the litter schedule per structure footprint (section "Sparse storage and cost").
 - **Triggers:** a structure changing maintenance state (one event per structure), a stage transition (one event per structure), `objects:changed` for root feedback, `levels:strataChanged` for burial.
 - **Cost:** setting flags for a 10×10 house plus its 1-cell halo is at most 12 × 12 = 144 flag writes, once per stage transition. Ecology's establishment keeps its own bounded sampling (moved into the core by ADR-003 SIM.00.05); decay adds a constant-time flag read to it.
 
@@ -732,7 +732,7 @@ This section answers R-09: a deterministic fixture, aged through every stage ove
 | Mutant | Change | Assertion that must fail |
 |---|---|---|
 | MR-01 residue leak | `residue.burn` computes gas as `floor(m × (1 − a − c))` instead of the remainder | A1, A2 at y5 |
-| MR-02 shed leak | shedding books FINES but does not add them to the residue record | A1 |
+| MR-02 shed leak | shedding books FINES but does not add them to the member's shed pool | A1 |
 | MR-03 ore creation | the corrosion transform outputs an ore form, or an ore outcrop object, at y1,000 | A3 |
 | MR-04 foundation erasure | FOUNDATION members get a `failDay` (the TR-1 floor removed) | A4 at y3,000 or y10,000 |
 | MR-05 relic erasure | the gold ring and glass rot like organics | A4 at y12,000 |
@@ -750,4 +750,212 @@ This section answers R-09: a deterministic fixture, aged through every stage ove
 
 Only if the Owner puts lithification in scope (OQ-R-03): FX-R-01L continues FX-R-01 by day jump to 1,000,000 sy, with FIXTURE-FEED burying the patch under ≥ 1 layer (10 ft). ROCK-SED must form from SEDIMENT and SOIL-MIN; A1-A3 must hold, with A3 extended to coal, gems and fossil beds.
 
-<!-- APPEND -->
+## Sparse storage and cost
+
+This section answers R-10: how decay state is represented in memory and saves (D-3: sparse storage covers **both**), how it is scheduled, and what it costs per site, region and layer, with the arithmetic.
+
+### R-10.1 Principles
+
+- Decay state is **per entity** (structure, member, unattended item, remains record, site, cohort) and, for a few point traces, **per touched cell in a sparse chunk map**. Nothing is per cell per tick, and nothing is dense in the layer count.
+- Only **unmaintained** records have heap entries. A maintained world has an empty decay heap except for items and remains.
+- Everything that can be derived is a cache and is not saved (AGENTS.md Rule 14, "save truth, rebuild caches").
+- Chunks are ADR-003's 32×32 cells of one layer (§15.3). **[ADR-003]**
+
+### R-10.2 Data structures
+
+| Structure | Fields (typed layout) | Bytes | Exists for |
+|---|---|---|---|
+| Member | memberId u32, structureId u32, dc u8, ex u8, role u8, flags u8, hp0 u8, pad 3, d0 i32 (game day), rateMilli u32, nextDay i32, shedPool u32, runsOffset u32, runsCount u16, pad 2 | 40 + 4 per run | every member of every structure |
+| Member run | x u8, y u8 (in area), z 6 bits (64 layers of headroom), slice mask 5 bits, 5 spare bits | 4 | one per cell a member covers |
+| Structure | id u32, siteId u32, stage u8, flags u8 (anchor, burned), memberFirst u32, memberCount u16, bbox 4 × u8 + 2 × i8, litterStartDay i32 | 28 | every structure |
+| Site decay fields | state u8, stage u8, pad 2, abandonedDay i32, predecessorSiteId u32 | 12 | every site |
+| Heap entry | nextDay i32, id u32 (kind in the top 3 bits) | 8 | unmaintained members, unattended items, remains, weathering residue, litter footprints |
+| Item decay fields | dc u8, ex u8, cond0 u8, pad, d0 i32, nextDay i32 | 12 | unattended items only |
+| Remains record | personId u32, species u16, stage u8, ex u8, softMu u32, boneMu u32, d0 i32, nextDay i32, cell key u32 | 28 | unmerged remains |
+| Residue entry | cell index u16 + slice u8, present-mask u8, then only present fields as u32: ash, charcoal, soil-org, soil-min, oxide per metal family, bone, remains-anchor list ref | 4 + 4 per field (typically 12-20) | **touched cells only**: burned cells, cells where an item rotted or corroded, cells where remains merged |
+| Chunk structure index | list of structure ids whose bbox overlaps the chunk | 4 per id | chunks that hold built matter |
+| Buried-find list | item ids keyed by cell and slice | 4-8 per item | chunks that hold buried items |
+| Cohort record | 20 classes × 8 stages × (u32 count + 8 forms × 8 B) | ≤ 10,880 | only regions that hold records-less matter (R-08.3) |
+
+**Residue storage adapts to density.** A chunk keeps residue entries in a small sorted array while it has ≤ 64 of them. Past that it switches to a per-chunk plane: 1,024 cells × 24 B = 24 KiB, allocated on demand. The `reclaimable` flag is not stored: it is derived from the structure's state.
+
+**Reverse lookup** (which members does this changed cell touch?) goes cell → chunk → overlapping structure ids → those structures' member runs. That is about 5 structures × 15 members per lookup, with no per-cell member index.
+
+### R-10.3 Memory arithmetic
+
+DEC-014 gives no population numbers: the budget is "sized by post-split simulation performance benchmarks" (`docs/OWNER_DECISIONS.md:205`), and DEC-014 is `OPEN`. The only concrete figure is Year 0: "9 racial factions of 8 founders each = 72 colonists" (`docs/society/DEUS_SOCIETY_WBS.md:19`). So two **assumed** scenarios follow; they are not predictions.
+
+**Per site** (40 structures, 15 members each, 8 runs per member): 600 members × (40 + 32) B = 43,200 B; structures 40 × 28 = 1,120 B; site 12 B. **About 44 KB per site**, all of it at any layer count. When the site is a burned or corroded ruin, add its touched chunks: up to about 4 × 24 KiB = 96 KiB in dense planes, usually much less.
+
+**Scenario Y0** (Year 0: 72 colonists, 9 camps, ≤ 5 structures each): 45 structures × 15 members × 72 B = 48,600 B, plus about 2,000 unattended items × 12 B = 24,000 B. **Under 100 KB.**
+
+**Scenario L** (assumed large world: 200 sites × 50 structures = 10,000 structures; population 50,000; 30 % of structures unmaintained; 200,000 unattended items):
+
+| Item | Arithmetic | Bytes |
+|---|---|---|
+| Members | 150,000 × 72 B | 10.8 MB |
+| Structures | 10,000 × 28 B | 0.28 MB |
+| Heap: members | 45,000 × 8 B | 0.36 MB |
+| Unattended items | 200,000 × (12 B + 8 B heap) | 4.0 MB |
+| Remains | V123's mean lifespan of 60 years gives about 50,000 / 60 ≈ 833 deaths per sy; unmerged for up to 50 sy: 41,700 × (28 + 8) B | 1.5 MB |
+| Residue | about 120,000 touched cells (burned houses, corrosion and rot points, merged remains) × 20 B, or dense planes where clustered | 2.4-4.8 MB |
+| **Total** | | **about 19-22 MB** |
+
+**Per layer.** None of these structures has a size term in the layer count. At 32 layers a world with the same buildings costs the same as at 9 or 5 layers. Underground sites cost what is built there, like surface sites. That meets ADR-003's rule that `heap(32) − heap(9)` on the sparse fixture stays within the chunk directory difference plus 64 KiB (§9.1). **[ADR-003]**
+
+**Per region.** Nothing, unless the region holds records-less matter: then one cohort record of at most 10,880 B (R-08.3).
+
+### R-10.4 CPU per tick
+
+- **Class:** O(k log n) per tick, where k ≤ ⌈due / 2,400⌉ is the number of due heap entries processed that tick (ADR-003 L1047) and n is the heap size. When nothing is due, the cost is one integer comparison of the heap top against the current day.
+- **Scenario L event rate:**
+  - members: 45,000 unmaintained × 6 events per life ÷ a mean life of about 500 sy = 540 per sy;
+  - items: 200,000 × 4 steps ÷ about 50 sy = 16,000 per sy;
+  - remains: 833 × 3 = 2,500 per sy;
+  - residue and litter: about 1,000 per sy;
+  - **about 20,000 events per sy**.
+- **Under D-1 (b), DPY = 1:** 20,000 events per game day = ⌈20,000 / 2,400⌉ = **9 per tick**, 90 per real second at 1x, 1,440 at 16x. Each is a heap pop and push of about log2(290,000) ≈ 18 comparisons (the heap holds about 45,000 members, 200,000 items and 41,700 remains). Only the 540 member events per sy write strata (≤ 64 each) and wake Lane Q (C-5).
+- **Under D-1 (a), DPY = N:** 20,000 / N per game day: 1 per tick at N = 20.
+- **Per frame: zero.** Decay runs only in the core tick (historical domain), never from a render hook (A8).
+- **Event handlers** (exposure recomputation on `levels:strataChanged`, fluid wet/dry, `objects:changed`) cost one reverse lookup (R-10.2) and a reschedule of the affected members only.
+
+### R-10.5 Save representation (D-3)
+
+| What | Saved form | Size |
+|---|---|---|
+| Maintained members | **not saved**: rebuilt at load from the structure's built strata by the deterministic grouping rule (R-02.2), ids assigned in canonical order | 0 |
+| Unmaintained members | `(memberId, ex, hp0, d0, shedPool)` plus runs | about 16 + 4 per run B |
+| Structures | `(id, siteId, stage, flags, litterStartDay)` | about 16 B |
+| Item decay fields | stored on the item record | 12 B per unattended item |
+| Remains | full record until merged | 28 B |
+| Residue | per chunk, present entries only: cell, mask, present values | 12-20 B per touched cell |
+| Heap, reverse index, reclaimable flags, exposure caches | **not saved**; rebuilt at load | 0 |
+| Strata that decay wrote (rubble, fines, ash, soil slices) | ordinary changed-cell records | 11 B each, 22 hex characters in today's format (`DEUS_Levels.js:997`, `:1351`) |
+
+- **Worked example.** A ruined 10×10 house with its halo touches 12 × 12 = 144 cells on 2 layers, at most 288 changed cells × 22 characters ≈ **6.3 KB** of strata save. Under the stale 1-ft model the same house spans the same cells and the record length is the same, because both models have 5 slices per layer.
+- **Scenario L save:** 45,000 unmaintained members × about 48 B ≈ 2.2 MB (the 105,000 members of maintained structures are rebuilt, not saved); items 200,000 × 12 B = 2.4 MB; remains 41,700 × 28 B ≈ 1.2 MB; residue 120,000 × 20 B = 2.4 MB; about 8.2 MB in total, before encoding overhead. Today's only save budget is a 3 MB check on the Levels part (`DEUS_Levels.js:5517`); the SIM.00.06 save format (ADR-003 §11) will need a decay line in its budget.
+- **Load:** rebuilding the heap is O(n log n) once; for about 290,000 entries that is about 5.2 million comparisons (not measured).
+
+### R-10.6 Summary per mechanism
+
+| Mechanism | Reads / writes (sparse form) | Trigger | CPU class | Memory at 32 layers |
+|---|---|---|---|---|
+| Structure decay | member records; HP bytes at thresholds | heap due day (historical domain) | O(log n) per event | 72 B per member, 0 per layer |
+| Exposure | cached sky and wet aggregates; member `ex` | `levels:strataChanged`, fluid wet/dry, collapse event | O(members of ~5 structures) per event | 0 extra |
+| Maintenance and abandonment | site upkeep `k`, triage list | population or structure events | O(structures in site) per event | 12 B per site |
+| Shedding and litter | member shed pool; footprint litter schedule | heap | O(foot cells) per slice write | 4 B per member, 4 B per structure |
+| Items and remains | item fields; remains records | drop, death, heap | O(log n) per event | 20 B per unattended item; 36 B per remains |
+| Fire residue | residue entries | SIM.50.05 burnout | O(components) | 12-20 B per burned cell |
+| Reclamation | derived flag; Ecology's own records | stage and maintenance events | O(footprint cells) per stage | 0 saved |
+| Deep history | the same heaps | day jump | O(due events) | 0 extra |
+| Cohorts (L2 only) | cohort record | region coarse tick or day jump | O(classes × stages) per region | ≤ 10,880 B per region with such matter |
+
+## Acceptance tests
+
+This section answers R-11: automatable tests for SIM.40.05-.09 (and the interfaces with SIM.40.02, SIM.40.10, SIM.50.05 and SIM.50.09), each with a mutant that must fail. Every test runs headless, at the 9-layer test range and the 32-layer default (ADR-003 §17.6), and exits non-zero on failure.
+
+| Id | Leaf | Fixture and assertion | Mutant that must fail |
+|---|---|---|---|
+| AT-R-01 | SIM.40.05 | One member per dc and ex: lazy HP at sampled days equals the closed form; HP bytes are written only at the published thresholds and at failure (≤ `steps` + 1 writes per life) | HP written every day (write count above the bound); or the rate ignores `ex` |
+| AT-R-02 | SIM.40.05 | Data validator: every life > 0 or ∞; ∞ only where the table allows it; for every structure template, ROOF life at SKY < WALL life at SHELTERED; ore, coal, gem or fossil outputs absent from the transform table | ROOF and WALL lives swapped (MR-13): the validator exits 1 |
+| AT-R-03 | SIM.40.05 | A maintained site: zero heap entries for its members and zero decay work over 10 game days (ADR-003 §17.6) | maintenance ignored: entries appear and work > 0 |
+| AT-R-04 | SIM.40.05, SIM.50.09 | Population to 0: ABANDONED after `siteAbandonYears`; at S3 on ≥ 50 % of mass the site is RUIN, `isRuined` is true, and the History reader gives `site.ruined = abandonedYear` | `isRuined` never set (today's X-7) |
+| AT-R-05 | SIM.40.05 with SIM.40.02 | House fixture: at the roof's `failDay`, Lane Q's break path is called once per roof member; wall tops become SKY; ≤ 64 cells enqueued per decay event; the ledger shows `BUILT→RUBBLE`, not a deletion | decay turns the strata to air itself (today's `DEUS_Levels.js:1702` path): ledger leak, no collapse event; or a whole-world support recheck (visit counter above the bound) |
+| AT-R-06 | SIM.40.07 | Ore guard: static transform-table check; the runtime guard rejects an ore write with a non-generation cause and logs it; no recipe accepts OXIDE | corrosion outputs an ore form (MR-03); or an ore sprout like `DEUS_Ecology.js:739` is reintroduced and not rejected |
+| AT-R-07 | SIM.40.07 | An unattended iron longsword at SKY: 4 corrosion steps at the expected days, the grip rots on its own schedule, masses exact; the same sword carried by a unit never changes | attended items decay (breaks the DURABILITY.md:320 reading, OQ-R-04) |
+| AT-R-08 | SIM.40.07 with SIM.40.10 | An off-screen death makes a remains record; stages at the expected days; mass to SOIL-ORG, SOIL-MIN and AIR exact; the anchor is kept for 200 sy; *gentle repose* shifts the clock by 10 game days | remains removed after 12 game hours (MR-06, `DEUS_Anim.js:1162`); or no remains off-screen (`DEUS_Anim.js:1147`) |
+| AT-R-09 | SIM.50.05 with this design | Burn fixture (timber, cloth, iron nails, a lead cup, bone): `residue.burn` totals exact; metals survive; lead becomes SCRAP; charcoal and ash in the residue entry | items deleted (MR-07, `DEUS_Fire.js:442`); or gas by `floor` (MR-01) |
+| AT-R-10 | SIM.40.06 | Plants establish on an abandoned S3 floor within the stand-in schedule and never on a maintained built cell | the `DEUS_Objects.js:266` guard kept (no establishment); or the guard removed entirely (plants on maintained cells) |
+| AT-R-11 | SIM.40.06, SIM.40.07 | A strata write that covers a member or item reclassifies it BURIED in the same tick and reschedules or removes its heap entry; the item becomes ITEM-BURIED; excavation re-exposes it | no burial reclassification: the foundation keeps decaying and A4 fails |
+| AT-R-12 | SIM.40.06 | Members at layers -3 and -12 never get SKY or `FT > 0`; cave fungus halves TIMBER lives; a flood makes members WET | bottom layer hard-coded at -2 or -4 (caught by the -12 member in the 32-layer run) |
+| AT-R-13 | SIM.50.09 | Salvage of a limestone rubble slice yields 93 stones of 800 mu and leaves 272 mu of RUBBLE | fixed 2-stone yields (MR-08); or the remainder dropped |
+| AT-R-14 | SIM.50.09 | Re-founding on H1: ruin cells are claimable; only missing slices consume items; reused slices keep their mass and change `structureId` | ruin cells block building (`DEUS_Colonists.js:3733`); or the whole wall's materials are consumed again |
+| AT-R-15 | SIM.40.08 | LOD invariance (A7): L0 day stepping, L2 coarse ticks and one day jump give identical stages and ledger totals | summary rounding done in floating point, or cohort promotion without largest-remainder assignment |
+| AT-R-16 | SIM.40.08 | Aging FX-R-01 by 10,000 sy processes no more heap events than the oracle's count, and zero in maintained periods | an annual loop that evaluates every member every year (event counter far above the bound) |
+| AT-R-17 | SIM.40.09 | The long-run ledger test, FX-R-01 with A1-A9 | MR-01..MR-14 (section "Matter ledger long-run test") |
+| AT-R-18 | SIM.40.05 | Sparse fixture: decay heap and record bytes identical at 9 and 32 layers; residue planes only in touched chunks | a per-layer dense residue plane: `heap(32) − heap(9)` above 64 KiB |
+| AT-R-19 | SIM.40.05 | Save at y1,000, reload, continue: identical checksums (A9); decay save bytes grow only with unmaintained members, unattended items, remains and touched cells | heap not rebuilt on load (MR-12) |
+| AT-R-20 | SIM.40.05 | D-1 neutrality: FX-R-01 at DPY = 1 and DPY = 20 gives identical stage **years** and ledger totals | one duration authored in days instead of sy |
+| AT-R-21 | SIM.60.03 interface | SRD: a rust monster hit five times destroys a weapon and moves its iron to OXIDE exactly; the antennae destroy a 1-ft cube (7,840 mu) of an unattended iron object; a conjured wooden object that burns leaves residue that is sunk at the spell's expiry | conjured residue kept as permanent charcoal (the CONJURED sink does not balance its source) |
+| AT-R-22 | PROPOSED-R-11 (Owner-gated) | FX-R-01L to 1,000,000 sy: ROCK-SED forms; no ore, coal, gem or fossil-bed output | charcoal becomes coal (MR-14) |
+
+## WBS impact
+
+This section answers R-12. Claude does not mint WBS IDs or change statuses (CANONICAL_ROLES; this lane's brief). Everything below is **PROPOSED** for the Coordinator.
+
+### R-12.1 Where it fits in the audit's order of work
+
+The audit's §6 order: 1) rule-breach fixes, 2) the ledger WG.65.15 moved earlier, 3) WG.00.17, 4) the core tick and slow clocks (ADR-003, SIM.00.02-.05), 5) the material and structure model (not yet in the WBS), 6) SIM.40 support and collapse, then decay, 7) SIM.30 LOD, 8) SIM.50.02-.10. This design's packages sit at step 6 and after, except:
+- the ore guard's runtime check (PROPOSED-R-05) is small and could land with step 2, because it is a ledger rule;
+- the fire residue function (PROPOSED-R-06) closes FIR-3, a LIFE-001 breach; it needs the ledger (step 2) but not the rest.
+
+### R-12.2 Proposed packages
+
+| Id | Title | Real dependencies | Maps to | Acceptance tests |
+|---|---|---|---|---|
+| PROPOSED-R-01 | Decay parameter data (dc, ex, lives, thresholds, residue fractions) and its validator | SIM.40.01, WG.65.15 | SIM.40.05 | AT-R-02, AT-R-20 |
+| PROPOSED-R-02 | Decay members and the closed-form scheduler | SIM.40.01, SIM.40.02, SIM.00.05, WG.00.17, WG.65.15 | SIM.40.05 | AT-R-01, AT-R-05, AT-R-18, AT-R-19 |
+| PROPOSED-R-03 | Maintenance, abandonment and the site state machine (X-7) | SIM.00.05, SIM.40.10, SOC.10.02 | SIM.40.05, SIM.50.09 | AT-R-03, AT-R-04 |
+| PROPOSED-R-04 | Item weathering, remains to soil, buried finds | SIM.40.05, SIM.40.10, WG.65.15 | SIM.40.07 | AT-R-07, AT-R-08, AT-R-11 |
+| PROPOSED-R-05 | Corrosion to OXIDE and the ore guard | WG.65.15, SIM.40.05 | SIM.40.07 | AT-R-06, AT-R-21 |
+| PROPOSED-R-06 | Fire residue function (ash, charcoal, carbon sink) | SIM.50.05, WG.63.04, WG.65.15 | SIM.50.05 | AT-R-09 |
+| PROPOSED-R-07 | Reclamation rule and burial exposure, surface and underground | SIM.40.05, SIM.50.04, SIM.50.03, SIM.50.02 | SIM.40.06 | AT-R-10, AT-R-11, AT-R-12 |
+| PROPOSED-R-08 | Trace retention, salvage by mass and re-founding | SIM.40.08, SIM.50.08, SIM.50.09, SOC.10.03 | SIM.50.09 | AT-R-13, AT-R-14 |
+| PROPOSED-R-09 | Deep-history day jumps and cohort decay | SIM.30.02, SIM.30.03, SIM.40.05 | SIM.40.08 | AT-R-15, AT-R-16 |
+| PROPOSED-R-10 | Long-run matter ledger fixture FX-R-01 | SIM.40.06, SIM.40.07, SIM.40.08, WG.65.15 | SIM.40.09 | AT-R-17 |
+| PROPOSED-R-11 | Lithification (only if the Owner puts it in scope, OQ-R-03) | SIM.50.03, WG.65.08, WG.65.16 | none yet | AT-R-22 |
+| PROPOSED-R-12 | Reconcile the design documents listed below with this design (docs only) | SIM.40.05 | none | a check that fails if a listed conflicting sentence is still present; mutant: re-insert one and the check must fail |
+
+### R-12.3 Recommended changes to existing rows (for the Coordinator)
+
+- **SIM.40.05** lists "SIM.40.01, dep: SIM.00.01" (`docs/worldgen/DEUS_WORLDGEN_WBS.md:538`). It also needs WG.65.15 (the ledger), SIM.00.05 (terrain in the core; ADR-003 Q15, L1258) and the material and structure model (audit §6 step 5, which Lane Q's SIM.40.01 design is expected to cover).
+- **SIM.40.07** needs SIM.40.10 for remains (Lane W's W-03).
+- **SIM.40.08** needs SIM.30.03 as well as SIM.30.02 (promotion must conserve cohort masses).
+- **SIM.50.05** needs PROPOSED-R-06 (or its content) for FIR-3, and SIM.50.06 (audit §6 step 8).
+- **Overlaps.** WG.65.10 "Construction Degradation & Ruins: Maintained → Damaged → Ruined → Collapsed → Overgrown" (`docs/worldgen/DEUS_WORLDGEN_WBS.md:249`) duplicates SIM.40.05/.06. WG.65.01 (lifecycle state machine), WG.65.08 (pedogenesis), WG.65.13 (catch-up), WG.65.14 (disturbed-region scheduler), WG.65.17 (archaeology) and WG.65.18 (multi-century stress test) each overlap a part of this design; WG.61.02 "Closed-Loop Finite Conservation Ledger" (`docs/worldgen/DEUS_WORLDGEN_WBS.md:194`, QUEUED) overlaps WG.65.15. The Coordinator decides which rows to merge or supersede.
+- **Stale geometry in planning text.** WG.65.02 says "1 ft strata cells" (`docs/worldgen/DEUS_WORLDGEN_WBS.md:241`); SIM.30.01 says "256×256×5 Z" (`docs/worldgen/DEUS_WORLDGEN_WBS.md:529`); INV-GEO-01 "1 stratum = 1 ft" and INV-GEO-02 "5 macro-Z levels" (`docs/INVARIANT_REGISTRY.md:29-30`) contradict DEC-013.
+
+### R-12.4 Disagreements flagged (none resolved here)
+
+| Sources | Disagreement | Where it is routed |
+|---|---|---|
+| The brief's chain to rock vs ADR-003 L1683 ("never go past 'buried mound'") and L1680 (compaction "into strata on a century-scale schedule") | The brief asks for soil, sediment and rock; ADR-003 floors meaningful sites at the mound. This design keeps ADR-003's floor for anchored matter (TR-1..TR-8) and applies S6-S7 only to non-anchor matter; lithification is Owner-gated | OQ-R-02, OQ-R-03 |
+| `docs/design/DURABILITY.md:320` vs SIM.40.07 and V138 | "Items have no HP ... Tools don't wear out" vs item weathering | OQ-R-04 |
+| `docs/design/REMAINS.md:175` vs `docs/design/PEOPLES.md:215` vs R-03.4 | three different body decay timings | OQ-R-06 |
+| `docs/design/REMAINS.md:258` vs DEC-011 | stage tints vs "no ... tint" | art slot `remains.<size>.<stage>`; PROPOSED-R-12 |
+| `docs/design/REMAINS.md:428`, `DEUS_Anim.js:1097`, `DEUS_Fire.js:442` vs LIFE-001 | bones "crumble away", remains dropped past a cap, items deleted by fire | R-03.4, R-04; PROPOSED-R-12 |
+| `docs/design/DURABILITY.md:53` and `:557` (dismantle returns 75 %) vs `docs/design/WORLD_ARCHITECTURE.md:236` (dismantle to `build.items`) vs LIFE-001 | neither is by mass | salvage by mass (R-07.4); PROPOSED-R-12 |
+| `docs/design/ECOLOGY.md:128` | a full pass over every level's object grid at load (65,536 reads per level), about 2.1 million at 32 layers | outside decay; flagged for SIM.50.04 |
+| `docs/design/VERTICAL_WORLD.md:288` | dense per-level arrays, against DEC-013 §3 at 32 layers | outside decay; flagged for WG.00.17 |
+| WG.63.04 / SIM.50.05 "permanent ash beds" vs R-04.4 | whether exposed ash weathers | OQ-R-07 |
+| SRD damage threshold (`game/data/srd51/rules.json:7167`) vs V138 | decay against walls with a threshold | OQ-R-09 |
+
+**Dependencies on PM decisions the Owner may overturn:** D-4 (water authority: WET, BURIED-ANOX, flooding, fixture water; R-01.4, R-06.4, R-09.2) and D-6 (race-to-plan slots: re-founding policy; R-07.5). **On an OPEN decision:** DEC-010 (props and natural rock roofs; R-05.5). **On OWNER_OPEN D-1:** every duration (section 0.3, R-08.6).
+
+No escalation file was written: every disagreement above is one the brief tells this lane to flag, and none needed a file outside the allowed paths.
+
+## Owner questions
+
+These are questions, not answers. Each option list starts with the default this design uses so that it can be specified; the Owner may pick any option. D-1 (calendar scale) is already open and is not repeated here.
+
+| Id | Question | Options |
+|---|---|---|
+| OQ-R-01 | How fast should decay run? | (a) the real-world-order default lives in this document (a timber roof in 60 sy, stone walls in millennia); (b) all lives divided by one factor (for example 10) so ruins form within a play session; (c) separate factors for structures and for items and remains. It interacts with D-1 (the mapping table in R-08.6). |
+| OQ-R-02 | How long must ruins stay recognisable (LIFE-003)? | (a) foundations, vaults and mounds indefinitely unless a physical process removes them (default: TR-1..TR-8); (b) at least 10,000 sy, after which natural erosion may erase them; (c) at least 1,000 sy. |
+| OQ-R-03 | Is lithification (sediment to rock) in scope? | (a) no: the cycle ends at consolidated sediment and soil strata (ADR-003 L1680); (b) only in deep-history day jumps, never in live play; (c) yes, live, under the ore guard. |
+| OQ-R-04 | Do unattended items weather, given "Items have no HP ... Tools don't wear out" (`docs/design/DURABILITY.md:320`)? | (a) unattended items weather through a condition field (not HP), tools in use never wear (default); (b) only organic items rot, metal never corrodes; (c) no item weathering (SIM.40.07 would need rewording). |
+| OQ-R-05 | Do mithral, adamantine and magic items decay? | (a) never (default); (b) very slowly; (c) per-item data. |
+| OQ-R-06 | Which remains timings apply, and how long is a dead person's identity kept? | (a) physical durations in sy (skeleton in 0.25 sy in the open) with the anchor kept ≥ 200 sy for *true resurrection* (default); (b) REMAINS.md's game-hour durations as the look, with the physical clock underneath; (c) PEOPLES.md's 30 and 120 days. |
+| OQ-R-07 | Are ash beds permanent when exposed (WG.63.04, SIM.50.05)? | (a) buried ash beds are permanent; exposed ash weathers to soil in about 5 sy (default); (b) exposed ash beds never weather; (c) the ash look stays while its mass goes to soil. |
+| OQ-R-08 | Who may re-found whose ruins? | (a) any culture on any ruin (default); (b) only the same race or culture; (c) per race in the DEC-015 plan data (depends on D-6). |
+| OQ-R-09 | Does decay lower HP past an object's SRD damage threshold? | (a) yes, decay ignores the damage threshold (default); (b) objects with a threshold decay at a reduced rate; (c) they never decay. |
+
+## Not checked
+
+- Nothing was run. There is no code in this lane; every test above is a specification for later code lanes.
+- Every rate, fraction and duration is a design default from real-world orders of magnitude; none was balanced or measured.
+- Memory and CPU figures are arithmetic from the stated assumptions; the per-event time (1-10 µs) is an assumption.
+- Lane Q and Lane W designs did not exist when this was written; the collapse contract (R-05) and the remains hand-off (R-03.4) use assumed names.
+- ADR-003 is PROPOSED; every **[ADR-003]** mark depends on it.
+- A search pass reported ADR-003 merged on `origin/main` after this lane's base; that was not re-checked by the writer beyond `git show` of the Lane M branch file.
+
