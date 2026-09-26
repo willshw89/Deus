@@ -278,3 +278,216 @@ Lane R (SIM.40.05 decay) and Lane Q (SIM.40.01 support) have no deliverable on t
 | IA-R3 | R | Remains at L2 decay in closed form (ADR-003 §17.3), so this design never ticks corpses. |
 | IA-Q1 | Q | Shelter capacity (section 4.4) reads enclosed and roofed cells; Lane Q's support model decides which roofs stand. Natural rock counts as enclosure (V128). |
 | IA-Q2 | Q | Collapse events report crushed units through the violent-death hook in section 9 with `cause = collapse`. |
+
+## Carrying capacity
+
+### 4.1 Principle: limits are physical, never a number
+
+DEC-014 §1 and V139 say there is no arbitrary ceiling on total population. Today there are three ceilings:
+- conception stops at 200 people per faction (`DEUS_Colonists.js:2315`, and `:2886` in the dormant reproduction step),
+- immigration stops at 180 (`DEUS_Colonists.js:3015-3027`, dormant),
+- wildlife is capped at each area's starting count (`capFor`, `DEUS_Ecology.js:223-227`, with floors `PREY_FLOOR = 8` and `MONSTER_FLOOR = 2` at `:46-47`), and herds stop at the species' maximum herd size (`:691-692`).
+
+All of them are removed (section 8). A population is instead limited by the physical supply of **food, water, shelter and space** in the region it lives in, and it is pushed back by **famine, disease and predation**. The equilibrium (the carrying capacity K) is an *outcome* measured by tests (section 11), not a parameter.
+
+### 4.2 The region capacity record
+
+**Data.** One record per region that holds population or food, allocated on demand [ADR-003 PROPOSED region grid]:
+
+| Field | Meaning | Written by | Sparse form and size |
+|---|---|---|---|
+| `forageG` | edible plant biomass standing (g), by diet class (grass, browse, fungus, seeds) | vegetation (SIM.50.04) through ledger events; today plant objects (`objectDiffs`) | 4 × u32 |
+| `storedFoodG` | food items in the region (Q-ITEM food types) | item events | u32 |
+| `waterAccess` | wet cells reachable and wells/springs (count) | Fluid change feed **[D-4]** | u16 |
+| `shelterSlots` | enclosed or roofed standable cells with enough headroom, per size class | strata and object change events (IA-Q1) | 4 × u16 |
+| `walkable` | standable cells per layer of the slab | the V133 per-chunk walkability cache | 2 × u16 |
+| `demandG` | food demand per day of everyone in the region | bucket and individual changes | u32 |
+| `pressure` | last computed ratios (below) | the capacity service | 4 × u16 (fixed-point) |
+
+About 48 bytes per record. At 32 layers an area has 1,024 regions (ADR-003 §5.1); even if every one held population it is 48 KB per area. In practice only regions with creatures or food have a record.
+
+**Trigger.** The record is updated when an input changes (a meal, a harvest, a Fluid wet-cell change, a strata write via `levels:strataChanged` at `DEUS_Levels.js:1558`, a birth or death), by adding the delta. The **ratios** are recomputed only at the region's coarse step (ADR-003 §5.5 schedules only regions that hold state) or when an input changes by more than a threshold. There is no scan of cells: `walkable` and `shelterSlots` come from caches that V133 already requires to be maintained by mutation.
+
+### 4.3 The four ratios
+
+| Ratio | Formula | Effect when below 1 | SRD anchor |
+|---|---|---|---|
+| food ρF | (forage available to the region's diets + stored food) / (`demandG` × days to next step) | rations = ρF; body mass falls (section 3.3); fertility falls through `conditionFactor`; starvation hazard | "one pound of food per day"; "go without food for a number of days equal to 3 + … Constitution modifier (minimum 1)", then exhaustion (`game/data/srd51/rules.json:4403`; exhaustion `:10533`) |
+| water ρW | water available / demand (SRD gallons by size and heat) | the SRD dehydration rule: half water → DC 15 Constitution save or one exhaustion level a day; less → one level automatically | same entry, `rules.json:4403` |
+| shelter ρS | `shelterSlots` / (creatures that need shelter) | exposure hazard in cold or heat (reads SIM.50.06 temperature; today `DEUS_Environment.js` temperature per area) | none (SRD has extreme cold/heat rules in the same environment chapter; the hook passes them through, section 9) |
+| space ρA | `walkable` × 25 ft² / Σ (creature count × space) | crowding: disease contact rate rises (section 4.5); movement slows | SRD size categories: Tiny 2½ × 2½ ft, Small and Medium 5 × 5 ft, Large 10 × 10 ft, Huge 15 × 15 ft (`game/data/srd51/rules.json:9005`) |
+
+**Famine arithmetic from SRD numbers.** For a Medium humanoid with Constitution modifier 0: with no food, 3 days pass without effect, then one exhaustion level a day; exhaustion level 6 is death (SRD exhaustion table). Death therefore comes on day 9. On half rations each day counts as half a day without food (same SRD entry), so death comes on day 18. The bucket rule uses these numbers: the fraction of a bucket that dies of famine in a step is the fraction whose accumulated deficit days crossed `3 + Con + 6`, with Con from the species' SRD Constitution (people: 10 + racial increase; beasts: the creature's CON in `creatures.json`). Animals whose SRD entry has no age text still have a CON score, so the rule has an SRD anchor for every creature.
+
+**Geometry of shelter (DEC-013).** A shelter slot for a creature needs headroom of its height in whole 2 ft slices: Small (3-4 ft, halfling, gnome) 2 slices; Medium up to 6 ft 3 slices; a 6-7 ft Medium (dragonborn "well over 6 feet") 4 slices; Large a full 10 ft layer on a 2 × 2 cell footprint. **Stale model:** under the code's 1 ft strata these would be 4, 6, 7 and 10 strata of a 5 ft level (so a Large creature needs two levels); the counts above assume WG.00.17 has landed.
+
+### 4.4 Per layer and biome band
+
+DEC-013 splits the 32 layers into five biome bands. Which biomes go in which band is OPEN (Owner), so the capacity inputs are keyed by **biome id**, never by band or layer number; the band only groups the table below. Home layer ranges of the races are OPEN too and are not used here (section 5).
+
+| Band (DEC-013) | Layers | Main food supply for `forageG` | Water | Shelter | Gap today |
+|---|---|---|---|---|---|
+| Upper-2 (high sky, peaks) | +10..+15 | cliff and cloud-realm flora (biome data OPEN) | rain capture, snow (SIM.50.06) | caves in peaks, V128 natural rock | no flora or wildlife planned above +2 (`DEUS_Wildlife.js:526` plans only 0, -1, -2) |
+| Upper-1 (low sky, towers, canopy) | +4..+9 | canopy fruit, nesting fliers | rain capture | canopy, towers | same |
+| Surface | 0..+3 | grasses, browse, crops (no crop system loads: the farm hooks call an undefined `UF.Agriculture`, audit F-07) | rivers, lakes, rain | buildings, caves | crops ABSENT |
+| Lower-1 (shallow underground) | -8..-1 | fungus and cave flora, prey arriving from above | seepage, springs (SIM.50.02) | natural rock everywhere (V128) | cave flora feeds nothing (O2 G10-5, G10-6: DEEP-04, DEEP-05; unreviewed) |
+| Lower-2 (deep caverns) | -16..-9 | deep fungus, chemotrophic life (biome data OPEN) | aquifers | natural rock | same, and no light (O2 G10-2) |
+
+Consequence: until an underground food web exists (DEEP-04/05), ρF underground is near zero for anything that does not eat meat brought down from above. Any race the Owner homes underground cannot sustain itself by this model until then. That is a dependency (section 12), not a reason to assign races to layers.
+
+### 4.5 Limiting mechanisms and anti-snowball pressures
+
+| Mechanism | Rule (bucket and individual alike) | Parameters and sources |
+|---|---|---|
+| **Famine** | section 4.3 SRD schedule; also lowers conception through `conditionFactor` (fed mass ÷ target mass) | SRD food and exhaustion rules; `conditionFactor` curve is tuning |
+| **Thirst** | SRD water rule | SRD |
+| **Disease (hook only)** | the capacity service publishes `density = Σ count / walkable` and `contactRate ∝ density × crowding`; the health package (SIM.50.11 follow-ups; O2 G6-1, HEALTH-03) turns it into infections | DEC-014 §4 "epidemic disease in dense settlements"; rate constants belong to the health design |
+| **Predation** | predator buckets kill prey buckets in the same region by a saturating (Holling type II) rate: `kills = a × P × N / (1 + a × h × N)` per step, where `a` is attack rate and `h` handling time; kills move mass by the `predation` ledger entry | `a`, `h` per predator-prey pair are tuning data (not SRD); prey lists from the catalog's `kind` (`grazer`, `vermin`, `predator`, `flier`) |
+| **Exposure** | shelter ratio × temperature below the species' tolerance → exhaustion or damage via the SRD extreme-cold and extreme-heat rules (hook, section 9) | SRD environment chapter; SIM.50.06 temperature |
+| **Logistic strain** (anti-snowball, DEC-014 §4) | a faction's effective food in a region = local supply + imports − transport loss; loss grows with haul distance in regions, so a sprawling faction feeds its far settlements worse | loss per region hop is tuning; SOC.30 (economy) owns hauling |
+| **Rebellion, succession crisis** (DEC-014 §4) | not designed here; lifecycle raises `life:died` for office holders (SOC.20.01 offices) and publishes region pressure, which the SOC rebellion model reads | SOC.20.x (O2 GOV-*, unreviewed) |
+
+**No hidden ceiling test.** Section 11 test T-CAP-2 greps the life and capacity modules for numeric population comparisons, and a behaviour test doubles food and checks that population rises.
+
+### 4.6 CPU class
+
+The capacity service does O(1) work per input change (add a delta) and O(diets + species present) per region coarse step. With ADR-003's scheduling a tick visits at most ⌈R/100⌉ L2 regions (R = 1,024 at 32 layers, so at most 11) and on average (active L2 regions)/100. For 200 active populated regions per area that is 2 region steps per tick, each touching perhaps 10 species × 4 diets: about 80 multiply-adds per tick per area. Layer count enters only through R, and only regions with state are counted.
+
+## Nine races and culture plans
+
+### 5.1 The nine slots **[D-6]**
+
+D-6 is a PM decision (the Owner may object): each of the nine SRD races gets its own culture/faction plan slot. DEC-013 §5 says "exactly 9 races"; DEC-015 says each of the 9 races follows an authored plan; SOC.10.03 wants 9 plan files in `game/data/plans/`. **This design does not create any plan file and does not assign any home layer range.**
+
+| Slot | SRD entry | Catalog `people` | Catalog `cultures` | Size / weight (SRD) | Speed | Darkvision | SRD ability increase vs catalog `stats` |
+|---|---|---|---|---|---|---|---|
+| `human` | `character_options.json:525` | `DEUS_WorldCatalog.json:7307` | `:9308` "Settlers" | Medium, 5 to over 6 ft | 30 ft | none | SRD "each increase by 1"; catalog `stats: {}` (`:7322`) **differs** |
+| `dwarf` | `:45` | `:7334` | `:9394` "Stone-holders" | Medium, 4-5 ft, about 150 lb | 25 ft | 60 ft | SRD Con +2; catalog adds `cha: -1` **not SRD** |
+| `elf` | `:123` | `:7324` | `:9347` "Grove-keepers" | Medium, under 5 to over 6 ft | 30 ft | 60 ft | SRD Dex +2; catalog adds `con: -1` **not SRD** |
+| `halfling` | `:197` | `:7354` | **none** | Small, about 3 ft, about 40 lb | 25 ft | none | Dex +2 (+ Lightfoot Cha +1); catalog matches |
+| `dragonborn` | `:366` | `:7364` | **none** | Medium, well over 6 ft, almost 250 lb | 30 ft | none | Str +2, Cha +1; matches |
+| `gnome` | `:626` | `:7344` | `:9442` "Tinkers" | Small, 3-4 ft, about 40 lb | 25 ft | 60 ft | SRD Int +2; catalog adds `str: -2` **not SRD** |
+| `half-elf` | `:692` | `:7374` | **none** | Medium, 5-6 ft | 30 ft | 60 ft | Cha +2 and two of choice; catalog fixes Dex, Con (a legal choice) |
+| `half-orc` | `:810` | `:7385` | **none** | Medium, 5 to well over 6 ft | 30 ft | 60 ft | Str +2, Con +1; matches |
+| `tiefling` | `:882` | `:7395` | **none** | Medium, human size | 30 ft | 60 ft | Int +1, Cha +2; matches |
+
+SRD line numbers are in `game/data/srd51/character_options.json`; catalog line numbers are in `game/data/DEUS_WorldCatalog.json`. The four catalog `stats` differences are a data defect for a later lane (section 8, D-08-17): SRD numbers are the baseline (DEC-018 principle, the BRIEF's rules bible).
+
+### 5.2 Population-relevant SRD traits
+
+- **Lifespan and maturity:** section 1.3. Long-lived races (elf, dwarf, gnome) have few births per adult-year (code `birthChance` 0.025 elf, 0.09 dwarf, 0.05 gnome against 0.36 human, `DEUS_HistoricalDemographics.js:128-133`), so they recover slowly from losses. That is a real anti-snowball force and needs no extra rule.
+- **Size:** feeds intake (section 3.3), shelter headroom (section 4.3) and space. Small races eat about `(40/150)^0.75 ≈ 0.37` of a Medium ration by the allometric default.
+- **Darkvision (60 ft = 12 cells):** six races have it (dwarf, elf, gnome, half-elf, half-orc, tiefling); human, halfling and dragonborn do not (O2 G10-3 notes dragonborn sits on the deepest level in the stale catalog map). Underground, a race without darkvision needs light to work; a later light model (O2 DEEP-01/03) feeds the capacity record as a `workable` factor. This matters for home ranges, which the Owner assigns.
+- **Speed:** 25 ft races (dwarf, halfling, gnome) forage and haul over fewer cells per step; the logistics loss of section 4.5 reads speed.
+
+### 5.3 Reconciling nine people species and seven cultures (PLAN-4)
+
+The catalog has nine `people` species that match the SRD races exactly (`game/data/DEUS_WorldCatalog.json:7305-7405`) but seven `cultures` (`:9306`): `human`, `elf`, `dwarf`, `gnome`, `goblin`, `orc`, `automaton`.
+- **Four** cultures match SRD races (human, elf, dwarf, gnome).
+- **Five** SRD races have no culture: halfling, dragonborn, half-elf, half-orc, tiefling.
+- **Three** cultures are not SRD races: `goblin`, `orc`, `automaton`. Goblin and orc exist in the SRD as creatures (`srd:creature:goblin`, `srd:creature:orc`), not as playable races. `automaton` has no SRD entry.
+- **Source of the three:** `docs/design/PEOPLES.md:5` records a user decision of 2026-09-19 for eleven factions (Lizardfolk, Dwarves, Elves, Goblins, Gnomes, Humans, Orcs, Kobold, Undead, a tech race, a swarm race). DEC-013 (2026-09-26) later fixed "exactly 9 races", and D-6 picks the nine SRD races. The three extra cultures and PEOPLES.md's eleven are therefore a pre-DEC-013 state.
+
+**Proposal [D-6].** Nine plan slots named after the nine SRD race ids. Each slot has a culture record (five are new stubs; their names, lore and values are Owner TODO per DEC-015 §4). The three non-SRD cultures are **not deleted**: they move to a separate `nonRacePeoples` list that the later lane keeps loading (for monsters-as-societies, if the Owner wants them), outside the nine race slots. OQ-W-04 asks the Owner to confirm or change this.
+
+### 5.4 Home layer ranges stay OPEN
+
+DEC-013 §5 gives each race "one native home layer range", and the race-to-range mapping is an open Owner sub-question. The catalog already contains a placement map `factions.layers` (`game/data/DEUS_WorldCatalog.json:7413-7429`): layer 0 human, elf, halfling, half-elf, half-orc; layer -1 dwarf, gnome; layer -2 tiefling, dragonborn. It predates DEC-013 (it uses the 5-level range). **This design treats it as a stale stand-in, not an Owner assignment,** and every rule here takes a race's home range as data (`plan.homeRange = OPEN`) that WG.62.02 fills after the Owner rules. Soft boundaries (DEC-013 §6) mean the capacity model and migration apply the same rules on every layer.
+
+### 5.5 Links to the DEC-015 plan schema (SOC.10.02-03)
+
+A plan slot reads population state through five named inputs. They are listed so SOC.10.02's schema can reference them by name:
+
+| Plan input | Read from | Used by plan component (DEC-015 §3) |
+|---|---|---|
+| `pop.total[faction]` | Q-FACTPOP counter (ADR-003 §7.8; today `DEUS_Factions.js:194`, kept by events at `:594-625`) | settlement stage thresholds |
+| `pop.byIdentity[faction][craft][civicOffice][class][obligation]` | crowd buckets + tracked individuals (section 6) | class and occupation mix; levies (DEC-014 §3) |
+| `pop.ageStructure[faction][ageBand]` | same | labour and levy capacity |
+| `region.pressure[regionId]` | the capacity record (section 4.2) | build-order mode (peace / threat / famine); expansion trigger |
+| `life.events` (`life:died` for office holders, famine and epidemic flags) | lifecycle hooks (section 9) | failure modes, succession |
+
+Stages beyond town (SET-3, PLAN-3) and the plan files themselves are SOC.10.02-03's work.
+
+## Population LOD
+
+### 6.1 Three kinds of population record [ADR-003 PROPOSED]
+
+| Kind | Who | Record | Steps |
+|---|---|---|---|
+| **Individual, fine** | tracked units in L0/L1 regions (ADR-003 §7.5: people, named, owned, carrying items, wounded, referenced) | full unit record + life block (section 2.1) | L0 every tick, L1 every 10 ticks |
+| **Individual, abstract** | tracked units in L2 regions | ADR's abstract record `{cell, goal, remainingCost, needs}` + life block | the L2 coarse step; lifecycle events by due date |
+| **Crowd bucket** | anonymous creatures in L2 regions; and people beyond the individual budget **if the Owner adopts people crowd LOD** (ADR-003 Q14; DEC-014 §2 PM default) | per region: sorted array of `(key, count, bodyMassG, gestMassG, carry)` | the L2 coarse step (closed form) |
+
+### 6.2 Bucket keys (sparse)
+
+- **Wildlife, monsters, livestock:** key = (species u8, ageBand u8, sex u8, layerInSlab u8). ADR-003 §6 names `count[species][ageBand][sex]`; this design adds the layer within the 2-layer slab so cross-layer counts are kept (the ADR's natural-connections row requires the "bucket z-distribution within a slab" to be kept).
+- **People (only if adopted):** key = (species, ageBand, sex, layerInSlab, faction u16, craft u8, civicOffice u8, class u8, obligation u8). These are DEC-014 §3's axes plus faction. The key space is large but only non-zero keys are stored.
+- **Lineage for people buckets:** each people bucket has a small table `lineageId → count`, capped at the 8 largest lineages plus an `other` residual count. On promotion an individual draws a lineage from this table without replacement; on demotion it adds back. Lineages in the residual are drawn as "unrecorded lineage of this faction", which the Owner may consider an acceptable loss (listed in OQ-W-05).
+
+Entry size: 8 bytes key + 2 count + 8 body mass (u64 for big herds) + 4 gestation mass + 2 carry = 24 bytes. A wildlife region with 5 species × 3 age bands × 2 sexes × 2 layers = 60 keys is 1.4 KB. Dense ADR arrays for 23 species × 4 bands × 2 sexes × 2 bytes would be 368 bytes per region **without** mass; the sparse array is chosen because mass totals are needed for LIFE-001 and most regions hold few species.
+
+### 6.3 Promotion and demotion that conserve counts, mass and lineage
+
+**Promotion (L2 → L1).** For each bucket key, materialise `count` anonymous individuals:
+1. RNG = `(worldSeed, regionId, promotionSerial, key)`; same seed and state give identical individuals (DEC-012 §2).
+2. Age: drawn uniformly inside the age band; `birthTime = now − age`.
+3. Mass: each gets the species' nominal mass for its age; the bucket's residual `bodyMassG − Σ nominal` is split evenly, remainder to the last individual. Σ equals the bucket total exactly. Gestation mass goes to pregnant females the same way (the number of pregnant females is `gestMassG > 0 ? ceil(gestMassG / nominalFetusMass) : 0`, capped by adult females).
+4. Death dates and next stage events are drawn as at birth (section 1.4).
+5. Placement uses habitat rules; terrain is re-checked (ADR-003 §7.3).
+6. People: lineage drawn from the lineage table; household ties are **not** invented (households belong only to tracked individuals).
+
+**Demotion (L1 → L2).** Only anonymous units demote (ADR-003 §7.5). Each adds 1 to its key's count, its mass to `bodyMassG`, its gestation mass to `gestMassG`, its lineage to the lineage table, and its traits to the herd mean. Its unit ID is retired with reason `ABSORBED` (ADR-003 Q-UNITID).
+
+**Conserved on every transition** (checked by the tests in section 11):
+
+| Quantity | Exact? | ADR-003 id |
+|---|---|---|
+| count per (species, ageBand, sex, layer) | yes | Q-POP |
+| tracked individual id set | yes | Q-TRACKED |
+| faction population = tracked + bucket members | yes | Q-FACTPOP |
+| body mass and gestation mass per region | yes, to the gram | Q-MASS[organics] form `body.*` |
+| lineage counts per people bucket (8 named + residual) | yes | new: Q-LINEAGE (proposed) |
+| exact ages of anonymous individuals | **no**, by design; re-drawn within the band | — |
+| individual animal genomes | **no**, by design; herd trait means are kept | — |
+
+### 6.4 Livestock: owned herds
+
+ADR-003 §7.5 makes every owned or tamed animal tracked. A village with 300 sheep would then hold 300 tracked individuals forever. **Proposal (flag for the ADR owner):** an owned animal is tracked only if it is named, carries a rider or load, is wounded, or is referenced by a job. Other owned animals are counted in an **owned-herd bucket**, a crowd bucket with an `ownerId` (faction or household) in its key. Ownership is then conserved as a count. This is an amendment to a PROPOSED ADR, so it is listed as PROPOSED-W-05 and not assumed by the rest of this design.
+
+### 6.5 The individual budget (DEC-014 §2)
+
+DEC-014 §2 sizes the budget by post-split benchmarks, which do not exist yet (ADR-003 §9.2 is PENDING-K3). The budget is therefore **two parameters**, not a number:
+- `N_FINE`: tracked individuals allowed at L0/L1 at once. ADR-003 §5.4's `MAX_L0 = 64` regions already bounds it spatially.
+- `N_NAMED`: all tracked individuals in the world (fine + abstract).
+
+Arithmetic to show the orders of magnitude (assumptions labelled, nothing measured):
+- *Memory.* A fine person today carries needs, facets, skills, thoughts and up to 16 bonds (`DEUS_Colonists.js:2530`). Assume 2 KB. An abstract record plus life block is about 56 + 64 = 120 bytes of typed data; assume 200 bytes with a name. 2,000 fine people = 4 MB; 50,000 abstract = 10 MB.
+- *CPU.* Assume a fine person costs 2 µs per tick and the population share of a 100 ms tick (10 Hz) is 2 ms. Then `N_FINE` ≈ 1,000 at L0, or ≈ 10,000 at L1 (one step per 10 ticks). An abstract person costs O(1) per coarse step (every 100 ticks), so 50,000 abstract individuals cost 500 record updates per tick.
+- *Crowd.* One million anonymous people in buckets across 2,000 populated regions at 40 keys each is 80,000 entries × (24 + lineage table 36) bytes ≈ 4.8 MB, and 80,000 / 100 = 800 key updates per tick.
+
+The real values replace these assumptions when SIM.30.04's benchmark exists. How many named individuals the Owner wants the world to hold is a separate design choice (OQ-W-03).
+
+**What `DEUS_History.js:481-518` does today** is the opposite of a budget: every living historical person becomes a full unit at New Game (REP-4). Under this design the history materialiser promotes only notable persons and the people in regions at L0/L1 at start; the rest enter buckets (people crowd LOD permitting) or stay abstract.
+
+### 6.6 Promotion to named roles
+
+DEC-014 §2 promotes crowd members "when entering the player's focus bubble, becoming leaders, heroes, or soldiers in formed armies". Beyond focus, promotion is triggered by **events** only: a plan assigns an office (SOC.20.01), a levy forms an army (DEC-014 §3 obligation level), or a history record names a person. Each promotion takes one individual out of a bucket with the section 6.3 rules and marks it `NOTABLE` if the role is lasting.
+
+## Migration dependencies
+
+SIM.50.07 (animal migration and herds) and people migration (refugees, settlers) need these first. "Blocked" means the named row cannot pass its acceptance without it.
+
+| # | Dependency | Why | Row that provides it | Status |
+|---|---|---|---|---|
+| M-1 | **A movement model for all units** | Wildlife has no wander, graze or flee in live play: the AI loop is removed (`DEUS_Wildlife.js:1197`; `tick` defined at `:1158`, never called), spawned animals get `ai: null` (`:543`), and off-screen units move only with a goal (`DEUS_World.js:1809`). Migration is movement with a destination; without movement there is none (MIG-1). | SIM.00.04 (one movement model, [ADR-003 PROPOSED]) | blocked |
+| M-2 | **A herd entity** with range, season and route | A herd is only an integer on each unit (`DEUS_Wildlife.js:546`) and a home cell (`:314`) (MIG-2) | PROPOSED-W-03 (herd records, section 12) | blocked |
+| M-3 | **Seasons** | Seasonal travel needs a season; today "seasons" are quarters of one day (audit F-06) and `time:season` has no listener. SIM.50.06 cannot start before the Owner rules D-1 (MIG-3) | SIM.50.06, **D-1 OWNER_OPEN** | blocked on the Owner |
+| M-4 | **LOD regions** | Off-camera herds move as bucket counts between adjacent L2 regions by a deterministic rule (ADR-003 §6 wildlife row); needs the region grid (MIG-4) | SIM.30.01, SIM.30.02 | blocked |
+| M-5 | **Carrying-capacity pressure** | The destination is chosen by pressure: a herd leaves a region when ρF or ρW falls below a species threshold and goes to the neighbour with the best forecast ratios | this design (section 4), PROPOSED-W-04 | designed here |
+| M-6 | **Cross-layer travel under soft home ranges** | DEC-013 §6: races and animals may travel across all layers. The engine can move a unit between levels (`World.moveUnitToLevel`, `DEUS_World.js:1550`), but wildlife never calls it, and herds are planned only for 0, -1, -2 (`DEUS_Wildlife.js:526`) with a hardcoded cave species list (`:454`, MIG-5). A bucket crossing a slab border is a border crossing (ADR-003 §7.7); natural connections give the edges | WG.00.17 (32 layers), SIM.00.04, WG.62.02 (home ranges, **OPEN**) | blocked |
+| M-7 | **Refugees** | A settlement that contracts under famine, war or disease sends people away; today nothing contracts (SET-1) and the live planner only grows | SIM.50.09, DEC-015 failure modes (SOC.10.02) | blocked |
+| M-8 | **Settlement founding** | Refugees or surplus people found a site where pressure is low; DEC-015's expansion rules decide where. Today every history site must exist from the start year (`DEUS_HistoricalDemographics.js:311`) and ruins block building (`DEUS_Colonists.js:3733`, SET-4) | SIM.50.09, SOC.10.02, SIM.40.08 (ruin stages) | blocked |
+| M-9 | **Immigration without creation** | Today `spawnImmigrants` (`DEUS_Colonists.js:3029`, called from `stepImmigration` at `:3141`, which only the dormant history loop calls, `DEUS_History.js:2426`) creates people from nothing. Under LIFE-001 an immigrant must leave a count somewhere else: another region's bucket, or an off-map pool that is an explicit, logged source | this design (section 3.3); the off-map pool is OQ-W-08 | designed; the pool needs the Owner |
+| M-10 | **Mass ledger** | Every move is a transfer of `body.*` mass between regions, which the ledger must accept as a location change, not a transform | WG.65.15 | blocked |
+
+**Migration rule sketch (for SIM.50.07, not a design of it).** At a region's coarse step, a herd or people bucket whose pressure is below its species threshold moves a fraction of its count to the adjacent region (same slab, or across a connection to another slab) with the best forecast ratios. The counts and masses move exactly (section 6.3 fields), and the move is logged as a location change. At L0/L1 the same decision becomes a movement goal for each individual (M-1).
