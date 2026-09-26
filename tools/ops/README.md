@@ -5,7 +5,7 @@ Windows PowerShell 5.1 scripts; nothing here is loaded by the game.
 
 | File | What it does |
 |---|---|
-| `launch_worker.ps1` | Starts one provider CLI session (claude, grok or codex) in a lane worktree, watches it to the end and records what happened. Also the shared function library for the other scripts. |
+| `launch_worker.ps1` | Starts one provider CLI session (claude, grok, codex or gemini) in a lane worktree, watches it to the end and records what happened. Also the shared function library for the other scripts. |
 | `resume_queue.ps1` | One pass of auto-resume: probes providers whose usage limit should have reset, then relaunches queued lanes. Run it on a schedule. |
 | `gate_tests.json` | The suites the merge gate runs, and the suites it deliberately does not run (with reasons). |
 | `hooks/pre-push` | Blocks `git push` unless `DEUS_INTEGRATOR=1`. |
@@ -60,7 +60,8 @@ and returns when the worker has finished.
 
 ### Before it starts (refusals exit 1; nothing is launched and nothing is recorded)
 
-- `-Lane`, `-Provider` (claude | grok | codex), `-BriefPath`, `-TimeoutMinutes` > 0 are required.
+- `-Lane`, `-Provider` (claude | grok | codex | gemini), `-BriefPath`, `-TimeoutMinutes` > 0 are required.
+- `-Effort` (optional): `low`, `medium`, `high`, `xhigh`, `max` or `ultra`. It is applied only when `-ProviderArgs` is not given. The launcher raises a lower value to that provider's DEC-032 floor and does not emit a level above the provider's own scale (that cap is still at or above the floor). When `-Effort` is omitted, the floor is what gets passed. `-Effort` together with `-ProviderArgs` is refused. Passing `-ProviderArgs` without `-Effort` is unchanged.
 - The worktree (`-Worktree`, default `<WorktreeRoot>\<lane>`) must exist and be the top of a git worktree.
 - The brief must exist, be non-empty (not just whitespace) and be inside the worktree.
 - The worktree must be on `lane.json`'s `branch`.
@@ -71,7 +72,7 @@ and returns when the worker has finished.
   worker PID or a live launcher PID. A PID only counts as live if its start time matches the recorded one, so a
   reused PID does not block a lane.
   `RUNNING` entries whose processes are gone are marked `LOST` at this point.
-- The provider CLI must be found (`-ProviderExe` / `-ProviderArgs` override it; the tests use this).
+- The provider CLI must be found (`-ProviderExe` with `-ProviderArgs` overrides the whole command; the tests and the PM wrappers use this, and that pair is byte-for-byte the argument string they passed). `-ProviderExe` without `-ProviderArgs` runs that executable with the built-in command below, which is how the tests substitute a stub without starting a real model.
 - `lane.json` `push`, when present, must be `true` or `false`. `-SavedPrompt` needs `-PromptFile`.
 
 ### The prompt (WG.00.12b)
@@ -153,9 +154,22 @@ same lane (`lane-c2b`) and the same state.
 - `DEUS_RUN_ID` = the run id.
 - `DEUS_INTEGRATOR` is removed, so a worker can never pass the push guard, even if the launching shell is the
   integrator's. `CLAUDECODE` and `CLAUDE_CODE_ENTRYPOINT` are removed as well.
-- Provider command lines: claude `-p --output-format stream-json --verbose --dangerously-skip-permissions`
-  (prompt on stdin); grok `--always-approve --prompt-file <prompt>`; codex `codex.js exec
-  --dangerously-bypass-approvals-and-sandbox --json -` (prompt on stdin).
+- Provider command lines, when `-ProviderArgs` is not set. Effort is added for a worker and not for a probe:
+  claude `-p --output-format stream-json --verbose --dangerously-skip-permissions --effort <level>`
+  (prompt on stdin); grok `--always-approve --prompt-file <prompt> --reasoning-effort <level>`;
+  codex `codex.js exec -c model_reasoning_effort="<level>" --dangerously-bypass-approvals-and-sandbox --json -`
+  (prompt on stdin); gemini, through `cmd.exe /d /s /c`, `gemini --model gemini-3.1-pro-preview --skip-trust --approval-mode yolo --output-format stream-json`
+  (prompt on stdin). The executable name is `gemini` on `PATH`. The launcher does not hard-code a path
+  outside the repo; `cmd.exe` is used only because the installed shim is a `.cmd`, which cannot be started
+  with redirected streams. Gemini CLI 0.61.0 has no thinking-level flag. The built-in alias
+  `gemini-3.1-pro-preview` extends `chat-base-3`, whose `thinkingLevel` is `HIGH`, so that `--model` value
+  is how the thinking level is passed.
+
+  DEC-032 floors, and the highest level the launcher will put on the command: claude floor `high`, highest
+  `max` (`ultra` is sent as `max`); grok floor `xhigh`, highest `max` (`ultra` is sent as `max`); codex floor
+  `xhigh`, highest `ultra`; gemini floor `high`, highest `high` (`xhigh`, `max` and `ultra` stay `high`,
+  and the command stays the model alias above). The registry format does not record the effort. Multi-agent
+  is left at the CLI default: the launcher does not pass `--no-subagents` or any other switch that turns it off.
 
 ### End states
 
@@ -227,7 +241,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/ops/resume_queue.ps1 -
 ```
 
 One pass does the following:
-1. **Probe.** Each provider (claude, grok and codex alike) whose state is `EXHAUSTED` or `LIMITED` and whose
+1. **Probe.** Each known provider (claude, grok, codex and gemini) whose state is `EXHAUSTED` or `LIMITED` and whose
    `resetAt` has passed or is unknown is probed, plus any named in `-Probe`. A probe sends
    "Reply with the single word OK." with a 60 s timeout (`-ProbeTimeoutSeconds`). It passes only on exit 0 with an
    `OK` reply and no usage error. Probe logs go to `<LogRoot>\_probes\`.
