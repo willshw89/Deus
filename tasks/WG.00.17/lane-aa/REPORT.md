@@ -369,4 +369,8 @@ Gate tools and `DEUS_Test.js` are not in that diff.
 
 Worktree at the start of these runs: `63d4156f6e986c5680e2c0246f20b47e4e26a3db`.
 
-The commit that adds this report is recorded by the following `git rev-parse HEAD` after that commit is made. The line the launch prompt asks for is printed after `git push origin task/lane-aa`.
+`git rev-parse HEAD` of the commit that added this report and the gate logs:
+
+```
+79ce07dd543e63a32fce764dd81465a46bb61d6d
+```
