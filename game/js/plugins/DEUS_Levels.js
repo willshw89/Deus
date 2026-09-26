@@ -53,7 +53,8 @@
     "use strict";
 
     const TILESET_ID = 92;
-    const GEN = 4;                        // a save keeps its baseline generator version; version 1, 2 and 3 are preserved below
+    const GEN = 6;                        // a save keeps its baseline generator version; versions 1-4 are preserved below; 5 was never
+                                          // committed (docs/systems/UF_Levels.md); 6 = 4 plus natural cuts and caves (DEUS-TSK-FABLE-19B)
     const LEVELS = Object.freeze([-2, -1, 0, 1, 2]);
     const LABELS = Object.freeze({ 2: "+2", 1: "+1", 0: "Ground", "-1": "-1", "-2": "-2" });
     const SHAPES = Object.freeze({ solid: 1, floor: 2, open: 3, ramp: 4, stairUp: 5, stairDown: 6, stairBoth: 7 });
@@ -707,6 +708,7 @@
     }
 
     function generateBaseline(seed, gen, z, ax, ay, size) {
+        if (gen >= LF_GEN) return landformBaseline(seed, z, ax, ay, size, false);
         const t0 = performance.now();
         const n = size * size;
         const shape = new Uint8Array(n), material = new Uint8Array(n);
@@ -914,6 +916,15 @@
     function checksumOf(z, seed, gen) {
         const W = World(), st = W.state;
         let h = 2166136261 >>> 0;
+        if ((seed === undefined ? (gen || levelGen(st, z)) : (gen || GEN)) >= LF_GEN) {
+            for (let ay = 0; ay < st.areasY; ay++) for (let ax = 0; ax < st.areasX; ax++) {
+                const b = seed === undefined ? baseline(z, ax, ay, undefined, gen) : landformBaseline(seed, z, ax, ay, st.size, true);
+                h = fnvBytes(h, b.strata.m);
+                h = fnvBytes(h, b.conn);
+                if (b.biome) h = fnvBytes(h, b.biome);
+            }
+            if (z !== 0) return hex(h);
+        }
         if (z === 0) {
             const G = window.UF.WorldGen;
             if (!G || typeof G.cellInfo !== "function") return "n/a";
@@ -1040,6 +1051,302 @@
         if (!scratchViews || scratchViews.shape.length !== n) scratchViews = { shape: new Uint8Array(n), material: new Uint8Array(n), water: new Uint8Array(n) };
         standaloneInto(b, scratchViews.shape, scratchViews.material, b.hasWater ? scratchViews.water : null);
         return { shape: scratchViews.shape, material: scratchViews.material, water: b.hasWater ? scratchViews.water : null, biome: b.biome || null };
+    }
+
+    //-------------------------------------------------------------------------
+    // Generator 6 (DEUS-TSK-FABLE-19B, WG.00.08): generator 4 plus the natural cuts and cave networks of
+    // UF_WorldGen.landformPlan, carved into the 25 strata of every column of an area. The strata stay the one terrain
+    // authority: the plan is used once, here, and only its labels (which landform a cell belongs to) are kept.
+    // Pipeline per area, run once and shared by its five baselines:
+    //   1. the five generator 4 baselines (their strata, connectors, pockets, cliff caves, surface and biomes);
+    //   2. the columns (25 material bytes each), each column's top, and the cells nothing may carve (the area's start
+    //      valley r <= 40, the pockets of -1 and -2 with their pools, the cliff caves);
+    //   3. UF_WorldGen.landformPlan (pure: seed, area, climate, those columns): cut floors, crags, cave voids;
+    //   4. here, in order: raise the crags; cut (every stratum at or above a column's cut floor becomes air, top down);
+    //      carve each void [lo, hi) where it is still all solid with solid under it (unless it is a shaft opening into a
+    //      cave below) and over it; turn every solid stratum
+    //      not joined face to face to bedrock (-2 S0) to air (no floating mass; counted); clear the connector of every
+    //      cell whose strata changed; put a ramp on the lower cell of each level crossing of 1-2 strata between two
+    //      cells a walker can stand on (the changed columns and their neighbours);
+    //   5. the final strata and connectors go back into the five baselines (hp null: full HP), with the labels.
+    // docs/systems/UF_Levels.md, section Generator 6.
+
+    const LF_GEN = 6;
+    const COL = 25;                                      // strata per column (-2 S0 .. +2 S4)
+    const LF_PROTECT_R = 40;                             // the start valley (flat to r 30, blended by r 36) and a margin
+    const plans = new Map();                             // plan key -> plan (the last 2 areas)
+    let verifyPlan = null;                               // an explicit-seed checksum's own plan (never the live world's)
+    let warnedNoPlanner = false;
+
+    function planKey(seed, ax, ay, size) {
+        const st = World() && World().state;
+        const sa = st && st.startArea ? st.startArea : { x: 0, y: 0 };
+        return `${seed}:${ax},${ay}:${size}:${st ? st.areasX : 1}x${st ? st.areasY : 1}:${sa.x},${sa.y}`;
+    }
+    function planFor(seed, ax, ay, size, fresh) {
+        const key = planKey(seed, ax, ay, size), cat = catalog(), cl = cat && cat.climate;
+        if (fresh) {
+            if (verifyPlan && verifyPlan.key === key && verifyPlan.cl === cl) return verifyPlan.plan;
+            const plan = buildPlan(seed, ax, ay, size);
+            verifyPlan = { key, cl, plan };
+            return plan;
+        }
+        const e = plans.get(key);
+        if (e && e.cl === cl) return e.plan;
+        const plan = buildPlan(seed, ax, ay, size);
+        plans.set(key, { cl, plan });
+        while (plans.size > 2) plans.delete(plans.keys().next().value);
+        return plan;
+    }
+    // The generator 6 baseline of level z: the plan's own object the first time, later a new one on the same arrays.
+    function landformBaseline(seed, z, ax, ay, size, fresh) {
+        const P = planFor(seed, ax, ay, size, fresh), li = z + 2;
+        if (fresh || !P.handed[li]) { if (!fresh) P.handed[li] = true; return P.base[li]; }
+        const src = P.base[li], b = { z };
+        for (const k of ["biome", "pockets", "cliffCaves", "surface"]) if (src[k] !== undefined) b[k] = src[k];
+        b.strata = { m: src.strata.m, hp: null };
+        b.conn = src.conn;
+        b.size = src.size;
+        b.hasWater = src.hasWater;
+        b.landforms = src.landforms;
+        legacyViewsOf(b);
+        return b;
+    }
+    // The read-only legacy views of a baseline (as toStrata defines them), built on first read.
+    function legacyViewsOf(b) {
+        const n = b.size * b.size;
+        const lazy = (name, which) => Object.defineProperty(b, name, {
+            enumerable: true, configurable: true,
+            get() {
+                const v = new Uint8Array(n);
+                standaloneInto(b, which === 0 ? v : null, which === 1 ? v : null, which === 2 ? v : null);
+                Object.defineProperty(b, name, { value: v, enumerable: true, configurable: true, writable: true });
+                return v;
+            }
+        });
+        lazy("shape", 0);
+        lazy("material", 1);
+        if (b.hasWater) lazy("water", 2);
+    }
+
+    // The top (elevation just above the surface) a walker stands on in level z of column i, or -1: the fill's top, or
+    // with no fill the top of the cell below when its S4 is solid; at least 4 open strata above it (the sky above +2).
+    // The same rule as derivePacked, on a column array.
+    function standTop(col, i, z) {
+        const c0 = i * COL, o = c0 + (z + 2) * STRATA;
+        let fill = 0;
+        while (fill < STRATA && SOLID_B[col[o + fill]] === 1) fill++;
+        if (fill === STRATA) return -1;
+        if (fill === 0 && (z === -2 || SOLID_B[col[o - 1]] !== 1)) return -1;
+        let g = o + fill, head = 0;
+        while (g < c0 + COL && head < 4 && SOLID_B[col[g]] !== 1) { head++; g++; }
+        return head >= 4 || g === c0 + COL ? o - c0 + fill : -1;
+    }
+    // Every solid stratum not joined face to face (up, down, the four sides) to the bedrock layer (-2 S0 of any column)
+    // becomes air: no floating mass. Returns the count; byLevel counts per level.
+    function removeFloating(col, size, byLevel) {
+        const n = size * size, N = n * COL, seen = new Uint8Array(N), q = new Int32Array(N), row = size * COL;
+        let qt = 0;
+        for (let i = 0; i < n; i++) if (SOLID_B[col[i * COL]] === 1) { seen[i * COL] = 1; q[qt++] = i * COL; }
+        for (let qh = 0; qh < qt; qh++) {
+            const v = q[qh], i = (v / COL) | 0, g = v - i * COL, x = i % size;
+            let w;
+            if (g < COL - 1 && !seen[w = v + 1] && SOLID_B[col[w]] === 1) { seen[w] = 1; q[qt++] = w; }
+            if (g > 0 && !seen[w = v - 1] && SOLID_B[col[w]] === 1) { seen[w] = 1; q[qt++] = w; }
+            if (x > 0 && !seen[w = v - COL] && SOLID_B[col[w]] === 1) { seen[w] = 1; q[qt++] = w; }
+            if (x < size - 1 && !seen[w = v + COL] && SOLID_B[col[w]] === 1) { seen[w] = 1; q[qt++] = w; }
+            if (v >= row && !seen[w = v - row] && SOLID_B[col[w]] === 1) { seen[w] = 1; q[qt++] = w; }
+            if (v < N - row && !seen[w = v + row] && SOLID_B[col[w]] === 1) { seen[w] = 1; q[qt++] = w; }
+        }
+        let removed = 0;
+        for (let v = 0; v < N; v++) {
+            if (seen[v] || SOLID_B[col[v]] !== 1) continue;
+            col[v] = M_AIR;
+            removed++;
+            byLevel[((v % COL) / STRATA) | 0]++;
+        }
+        return removed;
+    }
+    const levelOfTop = top => Math.min(2, Math.max(-2, Math.floor(top / STRATA) - 2));   // the level a surface top stands in
+
+    function buildPlan(seed, ax, ay, size) {
+        const t0 = performance.now();
+        const W = World(), st = W && W.state, n = size * size;
+        const base = LEVELS.map(z => generateBaseline(seed, 4, z, ax, ay, size));
+        const t1 = performance.now();
+        const col = new Uint8Array(n * COL), top0 = new Uint8Array(n), protect = new Uint8Array(n);
+        for (let li = 0; li < 5; li++) {
+            const m = base[li].strata.m;
+            for (let i = 0, o = 0, c = li * STRATA; i < n; i++, o += STRATA, c += COL) {
+                col[c] = m[o]; col[c + 1] = m[o + 1]; col[c + 2] = m[o + 2]; col[c + 3] = m[o + 3]; col[c + 4] = m[o + 4];
+            }
+        }
+        for (let i = 0; i < n; i++) {
+            let g = COL - 1;
+            while (g >= 0 && SOLID_B[col[i * COL + g]] !== 1) g--;
+            top0[i] = g + 1;
+        }
+        const mark = (x, y, r) => {
+            for (let yy = Math.max(0, y - r); yy <= Math.min(size - 1, y + r); yy++) for (let xx = Math.max(0, x - r); xx <= Math.min(size - 1, x + r); xx++) protect[yy * size + xx] = 1;
+        };
+        const mid = Math.floor(size / 2);
+        for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (Math.hypot(x - mid, y - mid) <= LF_PROTECT_R) protect[y * size + x] = 1;
+        for (const b of [base[0], base[1]]) for (const p of b.pockets || []) { mark(p.x, p.y, 6); if (p.water) mark(p.water.x, p.water.y, 2); }
+        for (const m of base[2].cliffCaves || []) for (const c of m.tunnel) mark(c.x, c.y, 3);
+        const G = window.UF && UF.WorldGen, cat = catalog();
+        const cl = (cat && cat.climate) || { continentRim: 0.15, seaLevel: 0.2, scale: { elevation: 64, rainfall: 48, temperature: 96, detail: 16 } };
+        const world = { seed, size, areasX: st && st.areasX ? st.areasX : 1, areasY: st && st.areasY ? st.areasY : 1, startArea: st && st.startArea ? st.startArea : { x: 0, y: 0 } };
+        let plan = null;
+        if (G && typeof G.landformPlan === "function") {
+            plan = G.landformPlan({ seed, ax, ay, size, world, cl, col, solid: SOLID_B, top0, protect,
+                biome1: base[1].biome, biome2: base[0].biome, biomeIds: BIOMES.map(b => (b ? b.id : "")) });
+        } else if (!warnedNoPlanner) {
+            warnedNoPlanner = true;
+            console.warn("UF_Levels: generator 6 without UF_WorldGen.landformPlan: the levels are generator 4's (no cuts or caves)");
+        }
+        const t2 = performance.now();
+        const S6 = { raised: 0, cut: 0, carved: 0, rejected: 0, floating: 0, floatingByLevel: [0, 0, 0, 0, 0], connCleared: 0, ramps: 0, rampsByLevel: [0, 0, 0, 0, 0] };
+        const conn = base.map(b => b.conn.slice());
+        if (plan) {
+            for (let i = 0; i < n; i++) {
+                const r = plan.raiseTop[i];
+                for (let g = top0[i]; g < r; g++) { col[i * COL + g] = M_STONE; S6.raised++; }
+            }
+            for (let i = 0; i < n; i++) {
+                const c = plan.cutTop[i];
+                if (c === 255) continue;
+                for (let g = Math.max(1, c); g < COL; g++) if (col[i * COL + g] !== M_AIR) { col[i * COL + g] = M_AIR; S6.cut++; }
+            }
+            const V = plan.voids;
+            for (let v = 0; v < V.count; v++) {
+                const o = V.i[v] * COL, lo = V.lo[v], hi = V.hi[v];
+                let ok = lo >= 1 && hi < COL && (V.openBelow[v] === 1 || SOLID_B[col[o + lo - 1]] === 1) && SOLID_B[col[o + hi]] === 1;
+                for (let g = lo; g < hi && ok; g++) if (SOLID_B[col[o + g]] !== 1) ok = false;
+                if (!ok) { S6.rejected++; continue; }
+                for (let g = lo; g < hi; g++) col[o + g] = M_AIR;
+                S6.carved += hi - lo;
+            }
+            S6.floating = removeFloating(col, size, S6.floatingByLevel);
+            const touched = new Uint8Array(n);
+            for (let li = 0; li < 5; li++) {
+                const m = base[li].strata.m, cn = conn[li];
+                for (let i = 0, o = 0, c = li * STRATA; i < n; i++, o += STRATA, c += COL) {
+                    if (m[o] === col[c] && m[o + 1] === col[c + 1] && m[o + 2] === col[c + 2] && m[o + 3] === col[c + 3] && m[o + 4] === col[c + 4]) continue;
+                    touched[i] = 1;
+                    const sh = (i & 1) << 2;
+                    if ((cn[i >> 1] >> sh) & 15) { cn[i >> 1] &= ~(15 << sh) & 255; S6.connCleared++; }
+                }
+            }
+            for (let z = -2; z <= 1; z++) {
+                const cn = conn[z + 2];
+                for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+                    const i = y * size + x;
+                    if (!(touched[i] || (x > 0 && touched[i - 1]) || (x < size - 1 && touched[i + 1]) || (y > 0 && touched[i - size]) || (y < size - 1 && touched[i + size]))) continue;
+                    if ((cn[i >> 1] >> ((i & 1) << 2)) & 15) continue;
+                    const e = standTop(col, i, z);
+                    if (e < 0) continue;
+                    for (let d = 0; d < 4; d++) {
+                        const nx = x + (d === 1 ? 1 : d === 3 ? -1 : 0), ny = y + (d === 0 ? -1 : d === 2 ? 1 : 0);
+                        if (nx < 0 || ny < 0 || nx >= size || ny >= size) continue;
+                        const e2 = standTop(col, ny * size + nx, z + 1);
+                        if (e2 - e >= 1 && e2 - e <= 2) {
+                            cn[i >> 1] |= RAMP << ((i & 1) << 2);
+                            S6.ramps++;
+                            S6.rampsByLevel[z + 2]++;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        // Labels: which landform each cell of each level belongs to (a cut: the levels from its floor up to its rim; a
+        // crag: +2; a cave void: the levels its air spans). Then each landform's measured result.
+        const grid = new Uint8Array(n * STRATA), features = [null];
+        const planned = plan ? plan.features : [null];
+        const acc = planned.map(() => null);
+        const topNow = i => { let g = COL - 1; while (g >= 0 && SOLID_B[col[i * COL + g]] !== 1) g--; return g + 1; };
+        if (plan) {
+            for (let i = 0; i < n; i++) {
+                const id = plan.cutFeat[i];
+                if (id) {
+                    const t = topNow(i), zf = levelOfTop(t), zr = levelOfTop(top0[i] - 1);
+                    for (let z = zf; z <= zr; z++) grid[i * STRATA + z + 2] = id;
+                    const a = acc[id] || (acc[id] = { columns: 0, minTop: 255, maxDepth: 0, floors: [0, 0, 0, 0, 0], fills: [0, 0, 0, 0, 0], exposed: [0, 0, 0, 0, 0] });
+                    a.columns++;
+                    if (t < a.minTop) a.minTop = t;
+                    a.maxDepth = Math.max(a.maxDepth, top0[i] - t);
+                    a.floors[zf + 2]++;
+                    a.fills[t - (zf + 2) * STRATA]++;
+                    for (let z = zf + 1; z <= zr; z++) a.exposed[z + 2]++;
+                }
+                const rid = plan.raiseFeat[i];
+                if (rid) grid[i * STRATA + 4] = rid;
+            }
+            const V = plan.voids;
+            for (let v = 0; v < V.count; v++) {
+                const i = V.i[v], o = i * COL, id = V.id[v];
+                if (SOLID_B[col[o + V.lo[v]]] === 1) continue;   // rejected: still rock
+                const zl = levelOfTop(V.lo[v]), zh = levelOfTop(V.hi[v] - 1);
+                for (let z = zl; z <= zh; z++) if (!grid[i * STRATA + z + 2]) grid[i * STRATA + z + 2] = id;
+                const a = acc[id] || (acc[id] = { voidCells: 0, strata: 0, byLevel: [0, 0, 0, 0, 0], clearance: {} });
+                a.voidCells++;
+                a.strata += V.hi[v] - V.lo[v];
+                a.byLevel[zl + 2]++;
+                a.clearance[V.hi[v] - V.lo[v]] = (a.clearance[V.hi[v] - V.lo[v]] || 0) + 1;
+            }
+            for (let id = 1; id < planned.length; id++) {
+                const f = planned[id], a = acc[id];
+                if (!f) { features.push(null); continue; }
+                const out = Object.assign({}, f);
+                if (a && a.columns !== undefined) {
+                    out.columns = a.columns;
+                    out.minTop = a.minTop;
+                    out.maxDepth = a.maxDepth;
+                    out.floorLevel = levelOfTop(a.minTop);
+                    out.floorsByLevel = { "-2": a.floors[0], "-1": a.floors[1], "0": a.floors[2], "1": a.floors[3], "2": a.floors[4] };
+                    out.fills = a.fills;
+                    out.exposedLevels = { "-1": a.exposed[1], "0": a.exposed[2], "1": a.exposed[3] };
+                    // Depth class: z-2 a floor on -2; z-1 a floor on -1 S0..S1 (5 ft or more under the ground's surface);
+                    // band 4 strata or more under its rim (about one 5 ft level: a hilltop cut down to the ground, a 4 ft
+                    // valley cut); shallow 1-3 strata (partial-height relief). Exposure: the ground cells left open over a -1
+                    // floor (Z0 -> Z-1) and the -1 cells left open over a -2 floor (Z-1 -> Z-2).
+                    out.depthClass = a.minTop <= 4 ? "z-2" : a.minTop <= 6 ? "z-1" : f.rim - a.minTop >= 4 ? "band" : "shallow";
+                    out.exposesZ1 = a.floors[1] > 0 && a.exposed[2] > 0;
+                    out.exposesZ2 = a.floors[0] > 0 && a.exposed[1] > 0;
+                } else if (a && a.voidCells !== undefined) {
+                    out.voidCells = a.voidCells;
+                    out.voidStrata = a.strata;
+                    out.voidsByLevel = { "-2": a.byLevel[0], "-1": a.byLevel[1], "0": a.byLevel[2], "1": a.byLevel[3], "2": a.byLevel[4] };
+                    out.clearance = a.clearance;
+                }
+                if (out.anchor) out.anchor = Object.freeze(Object.assign({}, out.anchor));
+                features.push(Object.freeze(out));
+            }
+        }
+        const counts = { byKind: {}, byClass: { shallow: 0, band: 0, "z-1": 0, "z-2": 0 }, exposing: { z1: 0, z2: 0 } };
+        for (const f of features) {
+            if (!f) continue;
+            counts.byKind[f.kind] = (counts.byKind[f.kind] || 0) + 1;
+            if (f.depthClass) counts.byClass[f.depthClass]++;
+            if (f.exposesZ1) counts.exposing.z1++;
+            if (f.exposesZ2) counts.exposing.z2++;
+        }
+        const t3 = performance.now();
+        const lfStats = Object.freeze(Object.assign(S6, counts, plan ? { plan: plan.stats, voidsPlanned: plan.voids.count } : { plan: null },
+            { ms: { generator4: t1 - t0, plan: t2 - t1, carve: t3 - t2, total: t3 - t0 } }));
+        const landforms = Object.freeze({ gen: LF_GEN, grid, features: Object.freeze(features), stats: lfStats });
+        for (let li = 0; li < 5; li++) {
+            const m = new Uint8Array(n * STRATA);
+            for (let i = 0, o = 0, c = li * STRATA; i < n; i++, o += STRATA, c += COL) {
+                m[o] = col[c]; m[o + 1] = col[c + 1]; m[o + 2] = col[c + 2]; m[o + 3] = col[c + 3]; m[o + 4] = col[c + 4];
+            }
+            base[li].strata = { m, hp: null };
+            base[li].conn = conn[li];
+            base[li].landforms = landforms;
+        }
+        stats.landformPlans = (stats.landformPlans || 0) + 1;
+        stats.lastLandformMs = t3 - t0;
+        return { base, handed: [false, false, false, false, false], landforms };
     }
 
     //-------------------------------------------------------------------------
@@ -1917,6 +2224,44 @@
             if (solidMaskOf(rdM, rdO) !== 0) return true;
         }
         return false;
+    }
+    /**
+     * Continuous vertical clearance (DEUS-TSK-FABLE-19B): the height in strata (1 stratum = 1 ft) of the unbroken run of
+     * non-solid strata (air, or fluid: not rock) above the surface stood on in a cell (its fill's top, or with no fill the
+     * top of the cell below when solid), counted on through the levels above to the first solid stratum. Infinity: open
+     * to the top of the world (+2 S4). 0: a solid cell or nothing to stand on. No allocation.
+     */
+    function continuousAirHeight(a, b, c, d, e) {
+        if (!cellQuery(a, b, c, d, e)) return 0;
+        locate(qSt, qZ, qAx, qAy, qI, 1);
+        const f = fillOf(rdM, rdO);
+        if (f === STRATA) return 0;
+        if (f === 0) {
+            if (qZ === -2) return 0;
+            locate(qSt, qZ - 1, qAx, qAy, qI, 0);
+            if (SOLID_B[rdM[rdO + 4]] !== 1) return 0;
+            locate(qSt, qZ, qAx, qAy, qI, 1);
+        }
+        let h = 0;
+        for (let s = f; s < STRATA; s++) { if (SOLID_B[rdM[rdO + s]] === 1) return h; h++; }
+        for (let z = qZ + 1; z <= 2; z++) {
+            if (!World().inWorld(qAx, qAy, z)) return Infinity;
+            locate(qSt, z, qAx, qAy, qI, 2);
+            for (let s = 0; s < STRATA; s++) { if (SOLID_B[rdM[rdO + s]] === 1) return h; h++; }
+        }
+        return Infinity;
+    }
+    /** The landform id at a cell (0: none, or a world older than generator 6); UF.Levels.landform(id, ax, ay) describes it. No allocation. */
+    function landformAt(a, b, c, d, e) {
+        if (!cellQuery(a, b, c, d, e)) return 0;
+        const bl = baseOf(qSt, qZ, qAx, qAy), L = bl && bl.landforms;
+        return L ? L.grid[qI * STRATA + qZ + 2] : 0;
+    }
+    function landformsOf(ax, ay) {
+        const W = World(), st = W && W.state;
+        if (!st || !W.inWorld(ax, ay, 0) || levelGen(st, 0) < LF_GEN) return null;
+        const b = baseOf(st, 0, ax, ay);
+        return b && b.landforms ? b.landforms : null;
     }
     /**
      * For DEUS_Fluid (which keeps its 0..7 depth scale): the cell's open volume and faces as bits. capacity (bits 0..2) =
@@ -3056,7 +3401,10 @@
         if (!st || st !== (World() && World().state)) return false;
         const t0 = performance.now();
         st.levels = st.levels || {};
-        for (const z of LEVELS) if (!st.levels[String(z)]) st.levels[String(z)] = { z, gen: GEN, checksum: null, strata: {} };
+        const have = LEVELS.map(z => st.levels[String(z)]).find(L => L && L.gen);
+        const setup = window.UF && UF.NewGameSetup, asked = setup && Number.isInteger(setup.levelGen) && setup.levelGen >= 1 && setup.levelGen <= GEN ? setup.levelGen : GEN;
+        const genNew = have ? have.gen : (st.version | 0) >= 4 ? asked : 4;
+        for (const z of LEVELS) if (!st.levels[String(z)]) st.levels[String(z)] = { z, gen: genNew, checksum: null, strata: {} };
         for (const z of LEVELS) {
             // Allocate Ground too: its checksum still uses its unchanged WorldGen lattice.
             for (let ay = 0; ay < st.areasY; ay++) for (let ax = 0; ax < st.areasX; ax++) baseline(z, ax, ay);
@@ -3473,6 +3821,16 @@
         fluidCanPassLaterally: (...args) => (typeof window !== "undefined" && window.UF && window.UF.Fluid && typeof window.UF.Fluid.fluidCanPassLaterally === "function") ? window.UF.Fluid.fluidCanPassLaterally(...args) : false,
         fluidTypeAt: (...args) => (typeof window !== "undefined" && window.UF && window.UF.Fluid && typeof window.UF.Fluid.fluidTypeAt === "function") ? window.UF.Fluid.fluidTypeAt(...args) : null,
         surfaceAt,
+        continuousAirHeight,
+        landformAt,
+        /** The landform record (frozen; no allocation) of an id in an area: { id, kind, prim, family, host, anchor, ... and
+         *  what was carved: columns, minTop, maxDepth, depthClass, floorsByLevel, fills, exposedLevels | voidCells,
+         *  voidsByLevel, clearance }; null when none. */
+        landform: (id, ax = 0, ay = 0) => { const L = landformsOf(ax, ay); return L && id > 0 && id < L.features.length ? L.features[id] : null; },
+        /** Every landform of an area (index = id) and the generator's counts: { gen, features, stats }; null before generator 6. */
+        landforms: (ax = 0, ay = 0) => { const L = landformsOf(ax, ay); return L ? { gen: L.gen, features: L.features, stats: L.stats } : null; },
+        /** The baseline generator version of level z in this world (6: with natural cuts and caves). */
+        levelGenerator: (z = 0) => { const W = World(), st = W && W.state; return st ? levelGen(st, z) : GEN; },
         migrateSaveToFiveStrata,
         /** Every cached shape grid of an area against a fresh derivation: { grids, cells, mismatches, examples } (slow). */
         verifyPackedGrids: (ax = 0, ay = 0) => verifyPackedGrids(ax, ay),

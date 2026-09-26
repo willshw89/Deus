@@ -616,6 +616,41 @@
     WorldGen.biomeAt = (gx, gy, z = 0) => { const c = WorldGen.cellInfo(gx, gy, z); return c ? c.biomeId : null; };
     WorldGen.surfaceElevationAt = (gx, gy, seed) => (window.UF && UF.Levels && typeof UF.Levels.surfaceElevationAt === "function") ? UF.Levels.surfaceElevationAt(gx, gy, seed) : 0;
 
+    // The stone of the ground and the levels above it at a world cell (a pure function of the seed, the world's
+    // dimensions and the climate; geologyAt and the landform plan both read it).
+    function surfaceStoneId(seed, d, cl, gx, gy) {
+        const f = fieldsFor(seed, d, cl, gx, gy);
+        const localNoise = unit4(seed, SALT.geology, gx, gy);
+        // Volcanic hotspots produce extrusive basalt
+        if (f.v > 0.62 || (f.v > 0.50 && localNoise > 0.70)) return "basalt";
+        // Mountain peaks and high elevations expose massive plutonic granite
+        if (f.e > 0.60 || (f.e > 0.52 && localNoise > 0.60)) return "granite";
+        // High drainage upland slopes form metamorphic slate
+        if (f.e > 0.44 && f.d > 0.48) return "slate";
+        // Contact metamorphism zones form rare marble
+        if (f.e > 0.48 && f.v > 0.45 && localNoise > 0.85) return "marble";
+        // Arid, dry or well-drained basins form sedimentary sandstone
+        if (f.r < 0.38 || f.d < 0.32 || localNoise < 0.22) return "sandstone";
+        // Valleys, lush river basins, and temperate meadows form sedimentary limestone
+        return "limestone";
+    }
+    // The stone of -1 (upper earth) and -2 (deep earth) from the level's geological biome id (UF_Levels).
+    function undergroundStoneId(seed, bId, gx, gy, z) {
+        const localNoise = unit4(seed, SALT.geology, gx, gy);
+        if (z === -1) {
+            if (bId === "chalk_karst") return "limestone";
+            if (bId === "rooted_loam") return localNoise > 0.5 ? "sandstone" : "slate";
+            if (bId === "clay_bed") return "slate";
+            if (bId === "shallow_cave") return localNoise > 0.6 ? "limestone" : "sandstone";
+            return localNoise > 0.6 ? "limestone" : (localNoise > 0.3 ? "sandstone" : "slate");
+        }
+        if (bId === "deep_mine_belt") return "granite";
+        if (bId === "crystal_cavern") return "marble";
+        if (bId === "fossil_bed") return localNoise > 0.5 ? "limestone" : "slate";
+        if (bId === "deep_salt_cavern") return "basalt";
+        return localNoise > 0.5 ? "granite" : (localNoise > 0.25 ? "basalt" : "marble");
+    }
+
     /**
      * Deterministic geological stratum at world coordinates (gx, gy, z).
      * Maps climate fields, elevation, volcanism, and subterranean biomes
@@ -642,52 +677,10 @@
             const lx = gx - ax * size, ly = gy - ay * size;
             const biome = L && typeof L.biomeAt === "function" ? L.biomeAt({ area: { x: ax, y: ay }, x: lx, y: ly, z }) : null;
             const bId = (biome && biome.id) || (typeof biome === "string" ? biome : "");
-            const localNoise = unit4(seed, SALT.geology, gx, gy);
-
-            if (z === -1) {
-                // Upper Earth (z === -1)
-                if (bId === "chalk_karst") stoneId = "limestone";
-                else if (bId === "rooted_loam") stoneId = localNoise > 0.5 ? "sandstone" : "slate";
-                else if (bId === "clay_bed") stoneId = "slate";
-                else if (bId === "shallow_cave") stoneId = localNoise > 0.6 ? "limestone" : "sandstone";
-                else stoneId = localNoise > 0.6 ? "limestone" : (localNoise > 0.3 ? "sandstone" : "slate");
-            } else {
-                // Deep Earth (z === -2)
-                if (bId === "deep_mine_belt") stoneId = "granite";
-                else if (bId === "crystal_cavern") stoneId = "marble";
-                else if (bId === "fossil_bed") stoneId = localNoise > 0.5 ? "limestone" : "slate";
-                else if (bId === "deep_salt_cavern") stoneId = "basalt";
-                else stoneId = localNoise > 0.5 ? "granite" : (localNoise > 0.25 ? "basalt" : "marble");
-            }
+            stoneId = undergroundStoneId(seed, bId, gx, gy, z);
         } else {
             // Surface (z >= 0)
-            const f = fieldsFor(seed, d, cat.climate, gx, gy);
-            const localNoise = unit4(seed, SALT.geology, gx, gy);
-
-            // Volcanic hotspots produce extrusive basalt
-            if (f.v > 0.62 || (f.v > 0.50 && localNoise > 0.70)) {
-                stoneId = "basalt";
-            }
-            // Mountain peaks and high elevations expose massive plutonic granite
-            else if (f.e > 0.60 || (f.e > 0.52 && localNoise > 0.60)) {
-                stoneId = "granite";
-            }
-            // High drainage upland slopes form metamorphic slate
-            else if (f.e > 0.44 && f.d > 0.48) {
-                stoneId = "slate";
-            }
-            // Contact metamorphism zones form rare marble
-            else if (f.e > 0.48 && f.v > 0.45 && localNoise > 0.85) {
-                stoneId = "marble";
-            }
-            // Arid, dry or well-drained basins form sedimentary sandstone
-            else if (f.r < 0.38 || f.d < 0.32 || localNoise < 0.22) {
-                stoneId = "sandstone";
-            }
-            // Valleys, lush river basins, and temperate meadows form sedimentary limestone
-            else {
-                stoneId = "limestone";
-            }
+            stoneId = surfaceStoneId(seed, d, cat.climate, gx, gy);
         }
 
         const matDef = stones[stoneId] || stones.limestone;
@@ -731,11 +724,21 @@
         const c = resolve(st.seed, dims(st), m, waterModels(st), gx, gy, {});
         return {
             biomeId: c.biomeId, biome: m.biomes[c.b], ground: c.groundId, water: c.waterKey,
-            walkable: !c.waterKey && !(c.flags & FLAG_PEAK),
+            walkable: !c.waterKey && !(c.flags & FLAG_PEAK) && groundStandable(st, gx, gy),
             region: { savagery: m.savTiers[c.sav].id, alignment: m.alignTiers[c.align].id },
             fields: c.f, lake: c.lake, peak: !!(c.flags & FLAG_PEAK), geology
         };
     };
+    // A ground cell of a generator 6 world (DEUS-TSK-FABLE-19B) is walkable only on a floor, ramp or stairs of its column:
+    // not inside a hill, not over a cut or a cave. Older grounds keep their climate-only answer (generator 4 worlds
+    // unchanged; below generator 4 the ground's shapes come from this function, so no shape is read there).
+    function groundStandable(st, gx, gy) {
+        const L = window.UF && UF.Levels;
+        if (!L || typeof L.levelGenerator !== "function" || L.levelGenerator(0) < 6 || typeof L.shapeCodeAt !== "function") return true;
+        const size = st.size, ax = Math.floor(gx / size), ay = Math.floor(gy / size);
+        const code = L.shapeCodeAt(ax, ay, gx - ax * size, gy - ay * size, 0);
+        return code === 2 || code >= 4;
+    }
     WorldGen.cellInfoLocal = function(ax, ay, x, y, z = 0) {
         const size = dims().size;
         return WorldGen.cellInfo(ax * size + x, ay * size + y, z);
@@ -973,7 +976,7 @@
         const grid = L.shapeGrid(0, ax, ay);
         return grid ? { code: i => grid[i], surface } : null;
     }
-    WorldGen.volumeStats = {}; // "ax,ay" -> { columns, solid, carved, ramps, groundReplaced, waterSuppressed, sitePiecesSkipped } of the last ground build
+    WorldGen.volumeStats = {}; // "ax,ay" -> { columns, solid, holes, carved, ramps, groundReplaced, waterSuppressed, sitePiecesSkipped } of the last ground build
 
     function groundPalette(cat, m) {
         const T = window.UF && UF.Tiles;
@@ -987,8 +990,9 @@
     }
 
     // Readers for the painter, in area-local coordinates (neighbours outside the area included): solid (the ground cell
-    // is solid), under (its surface is above the ground: S >= 1), kind (ground index painted there), wet (water index + 1
-    // painted there, 0 = none), peak (a mountain peak cell). natural: { kind, wet, peak } of the climate model. col null:
+    // is solid), hole (the ground cell is open: a cut or cave took its floor, generator 6), under (its surface is above
+    // the ground: S >= 1), kind (ground index painted there), wet (water index + 1 painted there, 0 = none), peak (a
+    // mountain peak cell). natural: { kind, wet, peak } of the climate model. col null:
     // nothing is solid and every cell is its natural ground (the painting before the column invariant).
     function columnReader(col, size, d, gx0, gy0, natural, P) {
         const one = d.areasX === 1 && d.areasY === 1;
@@ -1009,19 +1013,29 @@
         const solid = col ? (x, y) => { const i = local(x, y); return i >= 0 ? col.code(i) === 1 : surfaceOut(x, y) >= 1; } : () => false;
         const under = col ? (x, y) => { const i = local(x, y); return i >= 0 ? col.surface[i] >= 1 : surfaceOut(x, y) >= 1; } : () => false;
         const ramp = col ? (x, y) => { const i = local(x, y); return i >= 0 && col.code(i) === 4; } : () => false;
+        const hole = col ? (x, y) => { const i = local(x, y); return i >= 0 && col.code(i) === 3; } : () => false;
         return {
-            solid, under, ramp,
-            kind: (x, y) => solid(x, y) ? P.peakK : under(x, y) ? P.rockK : natural.kind(x, y),
-            wet: (x, y) => solid(x, y) || under(x, y) || ramp(x, y) ? 0 : natural.wet(x, y),
+            solid, under, ramp, hole,
+            kind: (x, y) => solid(x, y) || hole(x, y) ? P.peakK : under(x, y) ? P.rockK : natural.kind(x, y),
+            wet: (x, y) => solid(x, y) || hole(x, y) || under(x, y) || ramp(x, y) ? 0 : natural.wet(x, y),
             peak: natural.peak
         };
     }
 
-    // The ground tiles of one cell: { layer0, layer2, region, solid, carved, ramp }.
+    // The ground tiles of one cell: { layer0, layer2, region, solid, hole, carved, ramp }.
     function paintGround(x, y, R, P) {
+        if (R.hole(x, y)) {
+            // Generator 6 (DEUS-TSK-FABLE-19B): a ground cell that a cut or a cave left without a floor (UF_Levels derives
+            // it open) is impassable ground with region 250, painted as the rock round it until 19C draws what is below
+            // (the History land test, the peaks check and the tile passage all read it as rock; nothing is placed on it).
+            let mask = 0;
+            for (let k = 0; k < 8; k++) if (R.solid(x + NB[k][0], y + NB[k][1]) || R.hole(x + NB[k][0], y + NB[k][1])) mask |= NB[k][2];
+            const tile = P.groundBases[P.peakK] + P.shapes[mask];
+            return { layer0: tile, layer2: tile, region: PEAK_REGION, solid: false, hole: true, carved: false, ramp: false };
+        }
         if (R.solid(x, y)) {
             let mask = 0;
-            for (let k = 0; k < 8; k++) if (R.solid(x + NB[k][0], y + NB[k][1])) mask |= NB[k][2];
+            for (let k = 0; k < 8; k++) if (R.solid(x + NB[k][0], y + NB[k][1]) || R.hole(x + NB[k][0], y + NB[k][1])) mask |= NB[k][2];
             const tile = P.groundBases[P.peakK] + P.shapes[mask];
             // Layer 2 repeats the rock face: UF_Tiles' shade overlay on layer 1 (E tiles, passable) must not open the rock
             // to passage (RMMZ decides passage by the top tile that isn't a [*] tile).
@@ -1073,6 +1087,646 @@
         }, P);
         return paintGround(x, y, R, P);
     };
+
+    //-------------------------------------------------------------------------
+    // Landforms (DEUS-TSK-FABLE-19B, WG.00.08): the natural cuts and cave networks of an area, planned from the seed for
+    // UF_Levels' generator 6, which carves them into the five-strata columns (the one terrain authority: nothing here is
+    // kept as terrain). Pure: the seed, the area, the world's dimensions and start, the catalog's climate and the columns
+    // UF_Levels passes in; no read of UF.World.state. Every number below is frozen for generator 6 (another landform is
+    // another generator version). Elevation g = (z + 2) * 5 + s: 0 (-2 S0) .. 24 (+2 S4); a column's top is the elevation
+    // just above its highest solid stratum (the ground's surface is top 11, a +1 hilltop 16, a +2 summit 21).
+    // docs/systems/UF_WorldGen.md, section Landforms.
+
+    const LF_EDGE = 8;                          // nothing within 8 cells of an area edge (neighbour areas are generated apart)
+    const LF_LATTICE = 32;                      // one surface landform slot per 32 x 32 cells
+    const LF_COVER_MAX = 0.12;                  // surface landforms stop once 12 % of an area's columns are cut
+    const LF_CLASS_P = Object.freeze([0.62, 0.86, 0.975]);    // shallow < .62 <= one band < .86 <= Z-1 < .975 <= Z-2
+    const LF_CLASSES = Object.freeze(["shallow", "band", "z-1", "z-2"]);
+    const LF_FAMILIES = Object.freeze(["TEMP", "WET", "ARID", "HIGH", "VOLC"]);
+    const LF_SLOT_P = Object.freeze([0.62, 0.62, 0.66, 0.66, 0.62]);   // a slot holds a landform, by family
+    const LFS = Object.freeze({ slot: 0x4c460001, bump: 0x4c460002, crag: 0x4c460003, cave: 0x4c460004, open: 0x4c460005 });
+    const C_SH = 1, C_BAND = 2, C_Z1 = 4, C_Z2 = 8;
+    const DX4 = [0, 1, 0, -1], DY4 = [-1, 0, 1, 0];   // N E S W
+
+    // Kinds. prim: channel | bowl | terrace | arc (surface cuts), crag (raised summit rock), cave, opening (a collapse
+    // into a cave). classes: the depth classes it may take (bits: shallow, one band, Z-1, Z-2). w: tendency per family
+    // (TEMP, WET, ARID, HIGH, VOLC) plus 0.1 for every family (tendencies, not exclusive); host: the stone that doubles it.
+    // Walls: steps [rise strata, run cells] from the floor's edge outwards, repeated; every `ledge`-th step is a shelf two
+    // cells wider (ledges, shoulders); bump: the share of wall cells one stratum higher (broken, eroded banks).
+    const lfKind = (id, prim, classes, w, host, style) => Object.freeze({ id, prim, classes, w: Object.freeze(w), host, style: Object.freeze(style) });
+    const LF_KINDS = Object.freeze([
+        null,
+        lfKind("limestone_ravine", "channel", C_BAND | C_Z1 | C_Z2, [5, 1, 1, 1, 0], "limestone", { len: [34, 70], hw: [0.7, 1.6], steps: [[1, 1], [1, 1], [2, 1]], ledge: 3, meander: 0.55, slope: 0.6, bump: 0.12 }),
+        lfKind("sinkhole", "bowl", C_SH | C_BAND | C_Z1 | C_Z2, [4, 1, 0.3, 0.3, 0.5], "limestone", { r0: [0.6, 2.0], steps: [[1, 1], [2, 1]], ledge: 0, irregular: 0.3, bump: 0.1 }),
+        lfKind("karst_cut", "channel", C_SH | C_BAND | C_Z1, [3, 0.5, 0, 0.5, 0], "limestone", { len: [14, 30], hw: [0.5, 1.2], steps: [[2, 1], [1, 1]], ledge: 0, meander: 0.8, slope: 0.8, bump: 0.15 }),
+        lfKind("stream_cut", "channel", C_SH | C_BAND, [3, 3, 1, 1, 0.5], null, { len: [44, 90], hw: [0.5, 1.2], steps: [[1, 1], [1, 2]], ledge: 0, meander: 0.6, slope: 0.35, bump: 0.08 }),
+        lfKind("limestone_cleft", "channel", C_BAND | C_Z1, [2, 0, 0, 1, 0], "limestone", { len: [12, 26], hw: [0.2, 0.6], steps: [[2, 1], [3, 1]], ledge: 0, meander: 0.25, slope: 1.0, bump: 0.1 }),
+        lfKind("drainage_cut", "channel", C_SH | C_BAND, [1, 5, 0, 0, 0], null, { len: [30, 72], hw: [0.3, 0.9], steps: [[1, 1]], ledge: 0, meander: 0.45, slope: 0.4, bump: 0.05 }),
+        lfKind("peat_collapse_hollow", "bowl", C_SH, [0.5, 4, 0, 0, 0], null, { r0: [1.8, 3.6], steps: [[1, 2]], ledge: 0, irregular: 0.35, bump: 0.05 }),
+        lfKind("wet_sinkhole", "bowl", C_SH | C_BAND | C_Z1, [0.5, 3, 0, 0, 0], null, { r0: [0.8, 2.2], steps: [[1, 1]], ledge: 0, irregular: 0.3, bump: 0.08 }),
+        lfKind("water_cut_channel", "channel", C_SH | C_BAND | C_Z1, [1, 3, 0, 0, 0], null, { len: [40, 80], hw: [0.8, 1.8], steps: [[1, 1], [1, 1], [1, 2]], ledge: 0, meander: 0.65, slope: 0.45, bump: 0.08 }),
+        lfKind("arroyo", "channel", C_SH | C_BAND, [0.5, 0, 4, 0, 0], "sandstone", { len: [40, 86], hw: [1.8, 3.2], steps: [[1, 1], [1, 2]], ledge: 0, meander: 0.45, slope: 0.5, bump: 0.06 }),
+        lfKind("canyon", "channel", C_BAND | C_Z1 | C_Z2, [0.3, 0, 3, 1, 0], "sandstone", { len: [44, 84], hw: [1.5, 3.0], steps: [[2, 1], [2, 1], [1, 2]], ledge: 2, meander: 0.35, slope: 0.7, bump: 0.08 }),
+        lfKind("slot_chasm", "channel", C_BAND | C_Z1 | C_Z2, [0, 0, 2, 0.5, 0], "sandstone", { len: [26, 52], hw: [0.2, 0.6], steps: [[3, 1], [2, 1]], ledge: 0, meander: 0.5, slope: 0.9, bump: 0.1 }),
+        lfKind("dry_wash", "channel", C_SH, [0, 0, 4, 0, 0], null, { len: [36, 80], hw: [2.6, 4.6], steps: [[1, 2], [1, 3]], ledge: 0, meander: 0.5, slope: 0.3, bump: 0.05 }),
+        lfKind("erosion_terraces", "terrace", C_SH | C_BAND, [0.5, 0, 3, 1, 0], "sandstone", { r: [8, 13], steps: [[2, 2], [1, 1]], ledge: 0, bump: 0.06 }),
+        lfKind("fault_chasm", "channel", C_Z1 | C_Z2, [0.3, 0, 0, 4, 1], "granite", { len: [56, 110], hw: [0.6, 1.3], steps: [[3, 1], [2, 1], [2, 2]], ledge: 3, meander: 0.06, slope: 0.9, bump: 0.08 }),
+        lfKind("granite_cleft", "channel", C_BAND | C_Z1, [0, 0, 0, 3, 0], "granite", { len: [12, 28], hw: [0.2, 0.6], steps: [[3, 1], [2, 1]], ledge: 0, meander: 0.2, slope: 1.0, bump: 0.08 }),
+        lfKind("rock_cut", "channel", C_SH | C_BAND, [0, 0, 0.5, 3, 0], "granite", { len: [16, 40], hw: [0.6, 1.4], steps: [[2, 1], [3, 1]], ledge: 0, meander: 0.3, slope: 0.9, bump: 0.1 }),
+        lfKind("scree_terraces", "terrace", C_SH | C_BAND, [0, 0, 0, 4, 0], null, { r: [8, 13], steps: [[1, 1]], ledge: 0, bump: 0.12 }),
+        lfKind("fissure", "channel", C_BAND | C_Z1 | C_Z2, [0, 0, 0, 0.5, 5], "basalt", { len: [40, 92], hw: [0.1, 0.5], steps: [[1, 1], [3, 1], [3, 1]], ledge: 0, meander: 0.12, slope: 0.9, bump: 0.12 }),
+        lfKind("caldera_fracture", "arc", C_BAND | C_Z1 | C_Z2, [0, 0, 0, 0, 2], "basalt", { radius: [14, 24], span: [70, 150], arcs: [1, 3], hw: [0.2, 0.7], steps: [[2, 1], [3, 1]], ledge: 0, slope: 1.0, bump: 0.1 }),
+        lfKind("broken_basalt_cut", "channel", C_SH | C_BAND, [0, 0, 0, 0, 3], "basalt", { len: [16, 40], hw: [0.6, 1.5], steps: [[2, 1], [1, 1]], ledge: 0, meander: 0.35, slope: 0.8, bump: 0.3 }),
+        lfKind("summit_crag", "crag", 0, [0, 0, 0, 0, 0], null, {}),
+        lfKind("hill_cave", "cave", 0, [0, 0, 0, 0, 0], null, { level: 0 }),
+        lfKind("massif_cave", "cave", 0, [0, 0, 0, 0, 0], null, { level: 1 }),
+        lfKind("crag_cave", "cave", 0, [0, 0, 0, 0, 0], null, { level: 2 }),
+        lfKind("upper_cave", "cave", 0, [0, 0, 0, 0, 0], null, { level: -1 }),
+        lfKind("lava_tube", "cave", 0, [0, 0, 0, 0, 0], "basalt", { level: -1 }),
+        lfKind("deep_cave", "cave", 0, [0, 0, 0, 0, 0], null, { level: -2 }),
+        lfKind("descending_cave", "cave", 0, [0, 0, 0, 0, 0], null, { level: 0 }),
+        lfKind("lava_tube_collapse", "opening", C_Z1, [0, 0, 0, 0, 0], "basalt", { r0: [0.8, 1.6], steps: [[2, 1], [1, 1]], ledge: 0, irregular: 0.25, bump: 0.15 }),
+        lfKind("karst_window", "opening", C_Z1, [0, 0, 0, 0, 0], "limestone", { r0: [0.8, 1.8], steps: [[2, 1], [1, 1]], ledge: 0, irregular: 0.3, bump: 0.1 })
+    ]);
+    const LF_CODE = new Map(LF_KINDS.map((k, i) => [k ? k.id : "", i]));
+
+    /** The landform family of climate fields: VOLC volcanism > 0.62 (geologyAt's basalt), HIGH mountains or cold
+     *  (glacier, tundra), WET the marsh and swamp rule of classify, ARID rainfall < 0.3, TEMP the rest. */
+    function lfFamily(cl, f) {
+        if (f.v > 0.62) return 4;
+        if (f.e >= cl.mountainLevel || f.t < 0.25) return 3;
+        if (f.r > 0.6 && f.d < 0.35) return 1;
+        if (f.r < 0.3) return 2;
+        return 0;
+    }
+
+    // Wall rise (strata above the floor) at u cells beyond the floor's edge, as a table at quarter cells: index ceil(4u).
+    function lfWallTable(style, maxRise) {
+        const out = [0];
+        let acc = 0, rise = 0;
+        for (let k = 0; rise <= maxRise && k < 64; k++) {
+            const s = style.steps[k % style.steps.length];
+            rise += s[0];
+            acc += s[1] + (style.ledge && k % style.ledge === style.ledge - 1 ? 2 : 0);
+            while (out.length <= acc * 4) out.push(rise);
+        }
+        return { table: Uint8Array.from(out), reach: acc };
+    }
+    const lfRise = (tbl, u) => u <= 0 ? 0 : tbl[Math.min(tbl.length - 1, Math.ceil(u * 4))];
+
+    // The cut field: the lowest floor any landform asks for per column (255 none), and which landform asked.
+    function lfStamp(P, i, F) {
+        if (F >= P.field[i] || P.prot[i]) return;
+        if (P.field[i] >= P.top0[i] && F < P.top0[i]) P.cutCells++;
+        P.field[i] = F;
+        P.owner[i] = P.cur;
+    }
+    const lfBump = (P, k, gx, gy) => k.style.bump && unit4(P.seed, LFS.bump + P.cur, gx, gy) < k.style.bump ? 1 : 0;
+
+    // A swept channel along points (x, y) at 0.5-cell spacing: the floor descends from the rim at both ends (style.slope
+    // strata per cell) to `bed`, is at least one cell wide (so the floor is continuous), tapers and swells; the walls step
+    // up from it. t: distance of each point from the channel's middle.
+    function lfSweep(P, k, pts, rim, bed, hwBase, ph) {
+        const count = pts.length >> 1, half = (count - 1) * 0.25;
+        const W = lfWallTable(k.style, rim - bed), size = P.size, gx0 = P.ax * size, gy0 = P.ay * size;
+        for (let p = 0; p < count; p++) {
+            const t = p * 0.5 - half;
+            const depth = Math.min(rim - bed, Math.floor(k.style.slope * (half - Math.abs(t))));
+            if (depth < 1) continue;
+            const bedT = rim - depth;
+            const hw = hwBase * (0.55 + 0.45 * Math.sqrt(Math.max(0, 1 - (t / half) * (t / half)))) * (1 + 0.22 * Math.sin(t / 4.3 + ph));
+            const floorR = Math.max(hw, 0.72), R = floorR + W.reach + 0.5;
+            const px = pts[p * 2], py = pts[p * 2 + 1];
+            const x0 = Math.max(0, Math.ceil(px - R)), x1 = Math.min(size - 1, Math.floor(px + R));
+            const y0 = Math.max(0, Math.ceil(py - R)), y1 = Math.min(size - 1, Math.floor(py + R));
+            for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+                const i = y * size + x;
+                if (P.prot[i]) continue;
+                const rise = lfRise(W.table, Math.hypot(x - px, y - py) - floorR);
+                lfStamp(P, i, bedT + rise + (rise > 0 ? lfBump(P, k, gx0 + x, gy0 + y) : 0));
+            }
+        }
+    }
+    function lfChannel(P, k, rng, x, y, rim, bed) {
+        const s = k.style, len = s.len[0] + rng() * (s.len[1] - s.len[0]), hw = s.hw[0] + rng() * (s.hw[1] - s.hw[0]);
+        const theta0 = rng() * Math.PI * 2, ph1 = rng() * 6.283, ph2 = rng() * 6.283, ph3 = rng() * 6.283;
+        const lam1 = 7 + rng() * 9, lam2 = 3 + rng() * 4;
+        const heading = t => theta0 + s.meander * (Math.sin(t / lam1 + ph1) + 0.5 * Math.sin(t / lam2 + ph2));
+        const K = Math.ceil(len / 0.5), mid = K >> 1, pts = new Float32Array((K + 1) * 2);
+        pts[mid * 2] = x; pts[mid * 2 + 1] = y;
+        for (let p = mid + 1; p <= K; p++) {
+            const a = heading((p - mid) * 0.5);
+            pts[p * 2] = pts[(p - 1) * 2] + Math.cos(a) * 0.5; pts[p * 2 + 1] = pts[(p - 1) * 2 + 1] + Math.sin(a) * 0.5;
+        }
+        for (let p = mid - 1; p >= 0; p--) {
+            const a = heading((p - mid) * 0.5);
+            pts[p * 2] = pts[(p + 1) * 2] - Math.cos(a) * 0.5; pts[p * 2 + 1] = pts[(p + 1) * 2 + 1] - Math.sin(a) * 0.5;
+        }
+        lfSweep(P, k, pts, rim, bed, hw, ph3);
+        return { length: Math.round(len), halfWidth: Math.round(hw * 10) / 10, heading: Math.round(theta0 * 180 / Math.PI) };
+    }
+    function lfArc(P, k, rng, x, y, rim, bed) {
+        const s = k.style, arcs = s.arcs[0] + Math.floor(rng() * (s.arcs[1] - s.arcs[0] + 1));
+        const R0 = s.radius[0] + rng() * (s.radius[1] - s.radius[0]), a0 = rng() * Math.PI * 2;
+        const cx = x - Math.cos(a0) * R0, cy = y - Math.sin(a0) * R0;
+        for (let q = 0; q < arcs; q++) {
+            const R = R0 + q * (4 + rng() * 3), span = (s.span[0] + rng() * (s.span[1] - s.span[0])) * Math.PI / 180;
+            const hw = s.hw[0] + rng() * (s.hw[1] - s.hw[0]), K = Math.max(2, Math.ceil(R * span / 0.5)), pts = new Float32Array((K + 1) * 2);
+            for (let p = 0; p <= K; p++) {
+                const a = a0 - span / 2 + span * p / K, rr = R * (1 + 0.04 * Math.sin(p * 0.9));
+                pts[p * 2] = cx + Math.cos(a) * rr; pts[p * 2 + 1] = cy + Math.sin(a) * rr;
+            }
+            lfSweep(P, k, pts, rim, q === 0 ? bed : Math.min(rim - 1, bed + 2 * q), hw, rng() * 6.283);
+        }
+        return { arcs, radius: Math.round(R0), centre: { x: Math.round(cx), y: Math.round(cy) } };
+    }
+    // A bowl: floor radius r0, walls stepping up to the rim, an irregular outline (16 radial factors).
+    function lfBowl(P, k, rng, x, y, rim, bed) {
+        const s = k.style, r0 = s.r0[0] + rng() * (s.r0[1] - s.r0[0]), W = lfWallTable(s, rim - bed);
+        const fac = new Float32Array(17);
+        for (let q = 0; q < 16; q++) fac[q] = 1 + s.irregular * (rng() * 2 - 1);
+        fac[16] = fac[0];
+        const size = P.size, gx0 = P.ax * size, gy0 = P.ay * size, R = Math.ceil((Math.max(r0, 0.72) + W.reach) * (1 + s.irregular)) + 1;
+        for (let yy = Math.max(0, y - R); yy <= Math.min(size - 1, y + R); yy++) for (let xx = Math.max(0, x - R); xx <= Math.min(size - 1, x + R); xx++) {
+            const i = yy * size + xx;
+            if (P.prot[i]) continue;
+            const dx = xx - x, dy = yy - y, a = (Math.atan2(dy, dx) / (Math.PI * 2) + 1) * 16 % 16, q = Math.floor(a);
+            const f = fac[q] + (fac[q + 1] - fac[q]) * (a - q);
+            const rise = lfRise(W.table, Math.hypot(dx, dy) / f - Math.max(r0, 0.72));
+            lfStamp(P, i, bed + rise + (rise > 0 ? lfBump(P, k, gx0 + xx, gy0 + yy) : 0));
+        }
+        return { floorRadius: Math.round(r0 * 10) / 10, radius: Math.round(Math.max(r0, 0.72) + W.reach) };
+    }
+    // Terraces on a hill flank: inside a disc, the floor steps up from the lowest ground by the distance (cells) from it;
+    // no deeper than 2 strata per cell from the disc's edge. null when the disc has under 4 strata of relief.
+    function lfTerrace(P, k, rng, x, y) {
+        const s = k.style, R = s.r[0] + rng() * (s.r[1] - s.r[0]), Ri = Math.ceil(R), size = P.size, D = 2 * Ri + 1;
+        let low = 255, high = 0;
+        for (let yy = y - Ri; yy <= y + Ri; yy++) for (let xx = x - Ri; xx <= x + Ri; xx++) {
+            if (xx < 0 || yy < 0 || xx >= size || yy >= size || Math.hypot(xx - x, yy - y) > R) continue;
+            const t = P.top0[yy * size + xx];
+            if (t < low) low = t;
+            if (t > high) high = t;
+        }
+        if (high - low < 4) return null;
+        const W = lfWallTable(s, high - low), dist = new Uint8Array(D * D).fill(255), q = [];
+        for (let yy = y - Ri; yy <= y + Ri; yy++) for (let xx = x - Ri; xx <= x + Ri; xx++) {
+            if (xx < 0 || yy < 0 || xx >= size || yy >= size || Math.hypot(xx - x, yy - y) > R) continue;
+            if (P.top0[yy * size + xx] === low) { dist[(yy - y + Ri) * D + (xx - x + Ri)] = 0; q.push(xx, yy); }
+        }
+        for (let h = 0; h < q.length; h += 2) {
+            const qx = q[h], qy = q[h + 1], dv = dist[(qy - y + Ri) * D + (qx - x + Ri)];
+            for (let d = 0; d < 4; d++) {
+                const nx = qx + DX4[d], ny = qy + DY4[d];
+                if (nx < 0 || ny < 0 || nx >= size || ny >= size || Math.hypot(nx - x, ny - y) > R) continue;
+                const li = (ny - y + Ri) * D + (nx - x + Ri);
+                if (dist[li] > dv + 1) { dist[li] = dv + 1; q.push(nx, ny); }
+            }
+        }
+        const gx0 = P.ax * size, gy0 = P.ay * size;
+        for (let yy = y - Ri; yy <= y + Ri; yy++) for (let xx = x - Ri; xx <= x + Ri; xx++) {
+            if (xx < 0 || yy < 0 || xx >= size || yy >= size) continue;
+            const r = Math.hypot(xx - x, yy - y), dv = dist[(yy - y + Ri) * D + (xx - x + Ri)];
+            if (r > R || dv === 255) continue;
+            const i = yy * size + xx, rise = lfRise(W.table, dv);
+            lfStamp(P, i, Math.max(low + rise + (rise > 0 ? lfBump(P, k, gx0 + xx, gy0 + yy) : 0), P.top0[i] - 2 * Math.floor(R - r)));
+        }
+        return { radius: Math.round(R), low, high };
+    }
+
+    // Caves. A void is strata [lo, hi) of one column carved to air; the column must be solid from lo - 1 (the floor)
+    // to hi (the roof) after the cuts, outside protection, and one cell of rock away from any other network.
+    const lfSolidAfter = (P, i, g) => g < P.raiseTop[i] || (g < P.cutTop[i] && P.solid[P.col[i * 25 + g]] === 1);
+    function lfStep(P, i, dir) {
+        const x = (i % P.size) + DX4[dir], y = ((i / P.size) | 0) + DY4[dir];
+        return x < 0 || y < 0 || x >= P.size || y >= P.size ? -1 : y * P.size + x;
+    }
+    function lfHost(P, i, lo, hi, id) {
+        if (i < 0 || P.prot[i] || P.voidMark[i] || lo < 1 || hi > 24) return false;
+        for (let g = lo - 1; g <= hi; g++) if (!lfSolidAfter(P, i, g)) return false;
+        for (let d = 0; d < 4; d++) {
+            const j = lfStep(P, i, d);
+            if (j >= 0 && P.voidMark[j] && P.voidMark[j] !== id) return false;
+        }
+        return true;
+    }
+    function lfAddVoid(P, i, lo, hi, id, openBelow) {
+        P.vI.push(i); P.vLo.push(lo); P.vHi.push(hi); P.vId.push(id); P.vOpen.push(openBelow ? 1 : 0);
+        P.voidMark[i] = id;
+    }
+    // The tallest void from lo, up to `want` strata (a thinner roof gives a lower one, down to 4), or 0.
+    function lfFit(P, i, lo, want, id) {
+        for (let c = want; c >= 4; c--) if (lfHost(P, i, lo, lo + c, id)) return c;
+        return 0;
+    }
+    function lfFitAny(P, i, lo0, lo1, id) {
+        for (let lo = lo0; lo <= lo1; lo++) if (lfFit(P, i, lo, 4, id)) return true;
+        return false;
+    }
+    function lfChamber(P, id, i, lo, c, r) {
+        const size = P.size, x = i % size, y = (i / size) | 0, R = Math.ceil(r);
+        let cells = 0;
+        for (let yy = y - R; yy <= y + R; yy++) for (let xx = x - R; xx <= x + R; xx++) {
+            if (xx < 0 || yy < 0 || xx >= size || yy >= size || Math.hypot(xx - x, yy - y) > r) continue;
+            const j = yy * size + xx, h = lfFit(P, j, lo, c, id);
+            if (h) { lfAddVoid(P, j, lo, lo + h, id); cells++; }
+        }
+        return cells;
+    }
+    // A passage: `len` cells from i0 heading dir (N E S W), turning now and then; its floor drifts within [lo0, lo1],
+    // `c` strata tall where the rock allows; wide stretches, dead-end branches (sometimes ending in a chamber) and a
+    // chamber at its end by chance. Returns the main line's cells in order.
+    function lfPassage(P, id, rng, i0, dir, len, lo0, lo1, c, o) {
+        const cells = [];
+        let i = i0, lo = lo0;
+        for (let k = 0; k < len && i >= 0; k++) {
+            let h = lfFit(P, i, lo, c, id);
+            for (let alt = lo0; !h && alt <= lo1; alt++) if (alt !== lo && (h = lfFit(P, i, alt, c, id))) lo = alt;
+            if (!h) break;
+            lfAddVoid(P, i, lo, lo + h, id);
+            cells.push(i);
+            if (o.wide && rng() < o.wide) {
+                const sd = lfStep(P, i, (dir + (rng() < 0.5 ? 1 : 3)) & 3), hs = sd >= 0 ? lfFit(P, sd, lo, c, id) : 0;
+                if (hs) lfAddVoid(P, sd, lo, lo + hs, id);
+            }
+            if (o.branch && rng() < o.branch) {
+                const bd = (dir + (rng() < 0.5 ? 1 : 3)) & 3, b0 = lfStep(P, i, bd);
+                if (b0 >= 0) {
+                    const br = lfPassage(P, id, rng, b0, bd, 4 + Math.floor(rng() * 11), lo0, lo1, Math.max(4, c - 1), { wide: 0, branch: 0, chamber: 0.35 });
+                    P.stats.branches++;
+                    if (br.length) P.stats.deadEnds++;
+                }
+            }
+            const r = rng();
+            const nd = r < 0.74 ? dir : r < 0.87 ? (dir + 1) & 3 : (dir + 3) & 3;
+            if (rng() < 0.12) lo = Math.max(lo0, Math.min(lo1, lo + (rng() < 0.5 ? -1 : 1)));
+            let next = -1;
+            for (let t = 0; t < 4 && next < 0; t++) {
+                const dd = t === 0 ? nd : t === 1 ? dir : t === 2 ? (dir + 1) & 3 : (dir + 3) & 3, j = lfStep(P, i, dd);
+                if (j >= 0 && lfFitAny(P, j, lo0, lo1, id)) { next = j; dir = dd; }
+            }
+            i = next;
+        }
+        if (cells.length && o.chamber && rng() < o.chamber) {
+            if (lfChamber(P, id, cells[cells.length - 1], lo, c + 1 + Math.floor(rng() * 3), 1.6 + rng() * 2.0)) P.stats.chambers++;
+        }
+        return cells;
+    }
+    function lfNewFeature(P, code, extra) {
+        const id = P.features.length;
+        if (id > 254) return 0;
+        const k = LF_KINDS[code];
+        P.features.push(Object.assign({ id, kind: k.id, prim: k.prim }, extra));
+        P.cur = id;
+        return id;
+    }
+    // Mouth candidates: a column of rock at `top` (uncut, no crag unless crag) beside a column whose surface is one of
+    // `outside` (the floor a walker comes from), in scan order; { i, dir } with dir pointing into the rock.
+    function lfMouths(P, top, outside, crag) {
+        const out = [], size = P.size;
+        for (let i = 0; i < P.n; i++) {
+            if (P.prot[i] || P.cutTop[i] !== 255 || (crag ? P.raiseTop[i] !== 25 : (P.raiseTop[i] !== 0 || P.top0[i] !== top))) continue;
+            for (let d = 0; d < 4; d++) {
+                const j = lfStep(P, i, (d + 2) & 3);
+                if (j < 0 || P.prot[j] || P.raiseTop[j]) continue;
+                const tj = Math.min(P.top0[j], P.cutTop[j]);
+                if (outside.includes(tj)) { out.push(i, d); break; }
+            }
+        }
+        return out;
+    }
+    // Pick up to `count` start cells from candidate pairs, at least `apart` cells from each other and from `taken`.
+    function lfPick(P, rng, cand, count, apart, taken) {
+        const picked = [], size = P.size, m = cand.length >> 1;
+        for (let tries = 0; picked.length < count * 2 && tries < count * 12 && m; tries++) {
+            const q = Math.floor(rng() * m), i = cand[q * 2], x = i % size, y = (i / size) | 0;
+            if (taken.some(t => Math.hypot((t % size) - x, ((t / size) | 0) - y) < apart)) continue;
+            picked.push(i, cand[q * 2 + 1]);
+            taken.push(i);
+        }
+        return picked;
+    }
+
+    /**
+     * The landform plan of an area for UF_Levels' generator 6 (pure; see the section comment). inp: { seed, ax, ay,
+     * size, world: { seed, size, areasX, areasY, startArea }, cl (catalog climate), col (Uint8Array size * size * 25:
+     * the generator 4 material byte of every stratum, read only), solid (Uint8Array 256: 1 for a solid material byte),
+     * top0 (Uint8Array: each column's top), protect (Uint8Array: 1 = never carved: UF_Levels' pockets, cliff caves, the
+     * start valley), biome1 / biome2 (Uint8Array: the geological biome index of -1 / -2), biomeIds (index -> id) }.
+     * Returns { features (index = id, [0] null), cutTop (Uint8Array, 255 none: every stratum at or above it becomes air),
+     * cutFeat, raiseTop (Uint8Array, 0 none: solid stone up to it), raiseFeat, voids { count, i, lo, hi, id, openBelow (1: a
+     * shaft that opens down into a cave, no floor of its own) }, stats, ms }.
+     */
+    WorldGen.landformPlan = function(inp) {
+        const t0 = now();
+        const { seed, ax, ay, size, col, solid, top0 } = inp, n = size * size, cl = inp.cl, d = dims(inp.world);
+        const gx0 = ax * size, gy0 = ay * size;
+        const P = { seed, ax, ay, size, n, col, solid, top0, cur: 0, cutCells: 0,
+            prot: new Uint8Array(n), distProt: new Uint8Array(n).fill(255), field: new Uint8Array(n).fill(255), owner: new Uint8Array(n),
+            cutTop: null, raiseTop: new Uint8Array(n), raiseFeat: new Uint8Array(n), voidMark: new Uint8Array(n),
+            vI: [], vLo: [], vHi: [], vId: [], vOpen: [], features: [null], stats: { slots: 0, rolled: 0, branches: 0, deadEnds: 0, chambers: 0, shafts: 0, openings: 0, voidsDropped: 0 } };
+
+        // 1. Nothing is carved in UF_Levels' protected cells, within LF_EDGE of the area's edge, in or under water (sea,
+        //    lakes, rivers, the pond) or peaks; landforms deepen by at most 2 strata per cell away from those.
+        const wm = waterModels(inp.world), q = new Int32Array(n);
+        let qt = 0;
+        for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+            const i = y * size + x, gx = gx0 + x, gy = gy0 + y;
+            let p = inp.protect[i] || x < LF_EDGE || y < LF_EDGE || x >= size - LF_EDGE || y >= size - LF_EDGE || wm.isRiverOrPond(gx, gy);
+            if (!p) {
+                const f = fieldsFor(seed, d, cl, gx, gy);
+                p = f.e < cl.seaLevel || f.e >= cl.peakLevel || isLake(seed, cl, f, gx, gy, d.width, d.height);
+            }
+            if (p) { P.prot[i] = 1; P.distProt[i] = 0; q[qt++] = i; }
+        }
+        for (let qh = 0; qh < qt; qh++) {
+            const i = q[qh], dv = P.distProt[i];
+            if (dv >= 8) continue;
+            for (let dd = 0; dd < 4; dd++) {
+                const j = lfStep(P, i, dd);
+                if (j >= 0 && P.distProt[j] > dv + 1) { P.distProt[j] = dv + 1; q[qt++] = j; }
+            }
+        }
+
+        // 2. Surface landforms: one roll per 32 x 32 slot, in slot order. Family from the climate at the anchor; the
+        //    depth class (shallow 62 %, one band 24 %, Z-1 11.5 %, Z-2 2.5 %) from the slot's roll; the kind by the
+        //    family's tendencies and the host stone; a class no kind of the family takes is lowered.
+        const slots = Math.floor(size / LF_LATTICE);
+        for (let ly = 0; ly < slots; ly++) for (let lx = 0; lx < slots; lx++) {
+            if (P.cutCells > LF_COVER_MAX * n) break;
+            P.stats.slots++;
+            const rng = mulberry32(hash32(seed, LFS.slot, ax, ay, lx, ly));
+            let x = Math.floor(lx * LF_LATTICE + 4 + rng() * (LF_LATTICE - 8)), y = Math.floor(ly * LF_LATTICE + 4 + rng() * (LF_LATTICE - 8));
+            const x2 = Math.floor(lx * LF_LATTICE + 4 + rng() * (LF_LATTICE - 8)), y2 = Math.floor(ly * LF_LATTICE + 4 + rng() * (LF_LATTICE - 8));
+            if (P.prot[y * size + x] || P.distProt[y * size + x] < 3) { x = x2; y = y2; }   // a second anchor in the slot
+            const i = y * size + x;
+            const f = fieldsFor(seed, d, cl, gx0 + x, gy0 + y), fam = lfFamily(cl, f);
+            if (rng() >= LF_SLOT_P[fam] || P.prot[i] || P.distProt[i] < 3) continue;
+            const host = surfaceStoneId(seed, d, cl, gx0 + x, gy0 + y), rim = top0[i];
+            const u = rng();
+            let klass = u < LF_CLASS_P[0] ? 0 : u < LF_CLASS_P[1] ? 1 : u < LF_CLASS_P[2] ? 2 : 3;
+            const pick = rng(), shape = rng();
+            let code = 0;
+            for (; klass >= 0 && !code; klass--) {
+                const bit = 1 << klass, list = [];
+                let total = 0;
+                for (let c = 1; c < LF_KINDS.length; c++) {
+                    const k = LF_KINDS[c];
+                    if (!(k.classes & bit) || !k.w.some(v => v > 0) || k.prim === "opening") continue;
+                    const w = (k.w[fam] + 0.1) * (k.host === host ? 2 : 1);
+                    list.push(c, w);
+                    total += w;
+                }
+                let r = pick * total;
+                for (let e = 0; e < list.length && !code; e += 2) if ((r -= list[e + 1]) <= 0) code = list[e];
+                if (!code && list.length) code = list[list.length - 2];
+            }
+            klass++;
+            // Floors: shallow 1-3 strata under the rim; one band 4-6 under it but no lower than -1 S2 (top 7: in a valley a
+            // one-band cut stops 4 ft down); Z-1 on -1 S0..S1 (top 5-6, 5-6 ft under the ground); Z-2 on -2 S0..S2 (top 1-3).
+            const bed = klass === 0 ? rim - 1 - Math.floor(shape * 3) : klass === 1 ? Math.max(7, rim - 4 - Math.floor(shape * 3))
+                : klass === 2 ? 5 + Math.floor(shape * 2) : 1 + Math.floor(shape * 3);
+            if (!code || bed >= rim || bed < 1) continue;
+            const k = LF_KINDS[code], id = lfNewFeature(P, code, { family: LF_FAMILIES[fam], host, planned: LF_CLASSES[klass], anchor: { x, y }, rim, bed });
+            if (!id) break;
+            const geo = k.prim === "channel" ? lfChannel(P, k, rng, x, y, rim, bed) : k.prim === "arc" ? lfArc(P, k, rng, x, y, rim, bed)
+                : k.prim === "bowl" ? lfBowl(P, k, rng, x, y, rim, bed) : lfTerrace(P, k, rng, x, y);
+            if (!geo) { P.features.pop(); continue; }
+            Object.assign(P.features[id], geo);
+            P.stats.rolled++;
+        }
+
+        // 3. The cut: the field, no deeper than 2 strata per cell from protection, never below -2 S0. A cut that would
+        //    remove the whole roof of a cave below it (a generator 4 hall, a pool's cavern) opens that cave only when the
+        //    landform is that deep: a shallow or one-band landform keeps one stratum of roof; a Z-1 landform may open a
+        //    cave whose floor is on -1, not deeper; a Z-2 landform or a collapse opening any.
+        const floorLevelOf = top => Math.floor(top / 5) - 2;
+        const finishCut = () => {
+            const cutTop = new Uint8Array(n).fill(255), cutFeat = new Uint8Array(n);
+            for (let i = 0; i < n; i++) {
+                let F = P.field[i];
+                if (F >= top0[i]) continue;
+                if (P.distProt[i] < 8) F = Math.max(F, top0[i] - 2 * P.distProt[i]);
+                if (F < 1) F = 1;
+                const f = P.features[P.owner[i]], o = i * 25;
+                if (F < top0[i] && solid[col[o + F - 1]] !== 1) {
+                    let a = F - 1;                                   // the cut opens a cave: its floor and roof
+                    while (a >= 0 && solid[col[o + a]] !== 1) a--;
+                    let r = F - 1;
+                    while (r < 25 && solid[col[o + r]] !== 1) r++;
+                    const deepest = !f ? -2 : f.prim === "opening" || f.planned === "z-2" ? -2 : f.planned === "z-1" ? -1 : 3;
+                    if (floorLevelOf(a + 1) < deepest) F = r + 1;     // not that deep: keep the roof's lowest stratum
+                }
+                if (F >= top0[i]) continue;
+                cutTop[i] = F;
+                cutFeat[i] = P.owner[i];
+            }
+            P.cutTop = cutTop;
+            P.cutFeat = cutFeat;
+        };
+        finishCut();
+
+        // 4. Summit crags: 1-2 small blobs of +2 summit (top 21) raised to the top of the world (+2 S4), inside uncut
+        //    summit ground; they host the +2 caves (a +2 cave's roof is the crag's own top stratum: section Z+2 cap).
+        const rngC = mulberry32(hash32(seed, LFS.crag, ax, ay));
+        const summitOk = (x, y, r) => {
+            for (let yy = y - r; yy <= y + r; yy++) for (let xx = x - r; xx <= x + r; xx++) {
+                if (xx < 0 || yy < 0 || xx >= size || yy >= size) return false;
+                const j = yy * size + xx;
+                if (top0[j] !== 21 || P.cutTop[j] !== 255 || P.prot[j]) return false;
+            }
+            return true;
+        };
+        const cragCand = [];
+        for (let y = LF_EDGE; y < size - LF_EDGE; y += 6) for (let x = LF_EDGE; x < size - LF_EDGE; x += 6) if (summitOk(x, y, 5)) cragCand.push(y * size + x, 0);
+        const cragCount = 1 + (rngC() < 0.6 ? 1 : 0), crags = lfPick(P, rngC, cragCand, cragCount, 30, []);
+        for (let c = 0; c < crags.length; c += 2) {
+            const ci = crags[c], x = ci % size, y = (ci / size) | 0, rr = 2.4 + rngC() * 1.8, ph = rngC() * 6.283;
+            const id = lfNewFeature(P, LF_CODE.get("summit_crag"), { family: LF_FAMILIES[lfFamily(cl, fieldsFor(seed, d, cl, gx0 + x, gy0 + y))], host: surfaceStoneId(seed, d, cl, gx0 + x, gy0 + y), anchor: { x, y }, radius: Math.round(rr * 10) / 10 });
+            if (!id) break;
+            let cells = 0;
+            for (let yy = y - 5; yy <= y + 5; yy++) for (let xx = x - 5; xx <= x + 5; xx++) {
+                const a = Math.atan2(yy - y, xx - x), r = Math.hypot(xx - x, yy - y) / (1 + 0.28 * Math.sin(a * 3 + ph));
+                if (r > rr) continue;
+                const j = yy * size + xx;
+                P.raiseTop[j] = 25; P.raiseFeat[j] = id; cells++;
+            }
+            P.features[id].cells = cells;
+        }
+
+        // 5. Cave networks, each from its own seeded stream, in this order: hill caves (Z0, in +1/+2 rock beside the
+        //    ground), massif caves (+1, in +2 summit rock beside a +1 hilltop), crag caves (+2), upper caves (-1, from a
+        //    -1 hall; a lava tube under volcanic ground), deep caves (-2, from a -2 hall), one descending network (rare).
+        const caveRng = s => mulberry32(hash32(seed, LFS.cave, ax, ay, s));
+        const taken = [];
+        const addNetwork = (code, rng, start, dir, len, lo0, lo1, c, o, extra) => {
+            const x = start % size, y = (start / size) | 0;
+            const id = lfNewFeature(P, code, Object.assign({ family: LF_FAMILIES[lfFamily(cl, fieldsFor(seed, d, cl, gx0 + x, gy0 + y))], anchor: { x, y } }, extra));
+            if (!id) return null;
+            const cells = lfPassage(P, id, rng, start, dir, len, lo0, lo1, c, o);
+            if (!cells.length) { P.features.pop(); return null; }
+            P.features[id].mainLine = cells.length;
+            return { id, cells };
+        };
+        {   // Z0
+            const rng = caveRng(0), cand = lfMouths(P, 16, [10, 11], false).concat(lfMouths(P, 21, [10, 11], false));
+            const starts = lfPick(P, rng, cand, 3 + (rng() < 0.5 ? 1 : 0), 24, taken);
+            for (let s = 0; s < starts.length; s += 2) {
+                const i = starts[s];
+                addNetwork(LF_CODE.get("hill_cave"), rng, i, starts[s + 1], 16 + Math.floor(rng() * 22), 10, 11, top0[i] >= 21 ? 7 : 5,
+                    { wide: 0.25, branch: 0.14, chamber: 0.6 }, { host: surfaceStoneId(seed, d, cl, gx0 + i % size, gy0 + ((i / size) | 0)), level: 0 });
+            }
+        }
+        {   // +1
+            const rng = caveRng(1), starts = lfPick(P, rng, lfMouths(P, 21, [15, 16], false), 1 + (rng() < 0.5 ? 1 : 0), 24, taken);
+            for (let s = 0; s < starts.length; s += 2) {
+                const i = starts[s];
+                addNetwork(LF_CODE.get("massif_cave"), rng, i, starts[s + 1], 10 + Math.floor(rng() * 14), 15, 16, 5,
+                    { wide: 0.2, branch: 0.1, chamber: 0.5 }, { host: surfaceStoneId(seed, d, cl, gx0 + i % size, gy0 + ((i / size) | 0)), level: 1 });
+            }
+        }
+        {   // +2
+            const rng = caveRng(2), starts = lfPick(P, rng, lfMouths(P, 25, [21], true), 1, 0, taken);
+            for (let s = 0; s < starts.length; s += 2) {
+                const i = starts[s];
+                addNetwork(LF_CODE.get("crag_cave"), rng, i, starts[s + 1], 3 + Math.floor(rng() * 5), 20, 20, 4,
+                    { wide: 0.3, branch: 0, chamber: 0.5 }, { host: surfaceStoneId(seed, d, cl, gx0 + i % size, gy0 + ((i / size) | 0)), level: 2, cap: "the crag's +2 S4 stratum" });
+            }
+        }
+        const hallBeside = (lvl) => {   // rock columns beside a hall floor of level -1 (lvl 5) or -2 (lvl 0), uncut
+            const out = [];
+            for (let i = 0; i < n; i++) {
+                if (P.prot[i] || P.cutTop[i] !== 255 || !solid[col[i * 25 + lvl + 1]]) continue;   // rock, not the hall itself
+                for (let dd = 0; dd < 4; dd++) {
+                    const j = lfStep(P, i, dd);
+                    if (j >= 0 && P.cutTop[j] === 255 && solid[col[j * 25 + lvl]] && !solid[col[j * 25 + lvl + 1]]) { out.push(i, (dd + 2) & 3); break; }
+                }
+            }
+            return out;
+        };
+        const tubes = [], karst = [];
+        {   // -1
+            const rng = caveRng(3), starts = lfPick(P, rng, hallBeside(5), 3, 28, taken);
+            for (let s = 0; s < starts.length; s += 2) {
+                const i = starts[s], x = i % size, y = (i / size) | 0;
+                const volcanic = lfFamily(cl, fieldsFor(seed, d, cl, gx0 + x, gy0 + y)) === 4;
+                const stone = volcanic ? "basalt" : undergroundStoneId(seed, inp.biomeIds[inp.biome1[i]] || "", gx0 + x, gy0 + y, -1);
+                const net = volcanic
+                    ? addNetwork(LF_CODE.get("lava_tube"), rng, i, starts[s + 1], 40 + Math.floor(rng() * 40), 5, 6, 6, { wide: 0.5, branch: 0.04, chamber: 0.2 }, { host: stone, level: -1 })
+                    : addNetwork(LF_CODE.get("upper_cave"), rng, i, starts[s + 1], 18 + Math.floor(rng() * 26), 5, 6, 6, { wide: 0.25, branch: 0.16, chamber: 0.5 }, { host: stone, level: -1 });
+                if (net && volcanic) tubes.push(net);
+                else if (net && stone === "limestone") karst.push(net);
+            }
+        }
+        {   // -2
+            const rng = caveRng(4), starts = lfPick(P, rng, hallBeside(0), 2, 28, taken);
+            for (let s = 0; s < starts.length; s += 2) {
+                const i = starts[s];
+                addNetwork(LF_CODE.get("deep_cave"), rng, i, starts[s + 1], 16 + Math.floor(rng() * 24), 1, 2, 7,
+                    { wide: 0.25, branch: 0.16, chamber: 0.5 }, { host: undergroundStoneId(seed, inp.biomeIds[inp.biome2[i]] || "", gx0 + i % size, gy0 + ((i / size) | 0), -2), level: -2 });
+            }
+        }
+        {   // A descending network (about half the areas): a hill cave that slopes down one stratum per cell into -1,
+            // runs on, and may slope on down into a chamber at -2; beside its -1 run, a shaft from -2 to the passage roof.
+            const rng = caveRng(5);
+            if (rng() < 0.55) {
+                const starts = lfPick(P, rng, lfMouths(P, 16, [10, 11], false).concat(lfMouths(P, 21, [10, 11], false)), 1, 24, taken);
+                if (starts.length) {
+                    const i0 = starts[0];
+                    let dir = starts[1];
+                    const id = lfNewFeature(P, LF_CODE.get("descending_cave"), { family: LF_FAMILIES[lfFamily(cl, fieldsFor(seed, d, cl, gx0 + i0 % size, gy0 + ((i0 / size) | 0)))],
+                        host: surfaceStoneId(seed, d, cl, gx0 + i0 % size, gy0 + ((i0 / size) | 0)), anchor: { x: i0 % size, y: (i0 / size) | 0 }, level: 0 });
+                    const flat = 4 + Math.floor(rng() * 5), run1 = 6 + Math.floor(rng() * 9), deeper = rng() < 0.7;
+                    const plan = [];
+                    for (let k = 0; k < flat; k++) plan.push(10);
+                    for (let lo = 9; lo >= 5; lo--) plan.push(lo);
+                    for (let k = 0; k < run1; k++) plan.push(k < run1 / 2 ? 5 : 6);
+                    if (deeper) { plan.push(5); for (let lo = 4; lo >= 1; lo--) plan.push(lo); }
+                    const cells = [];
+                    let i = i0, lowest = 10;
+                    for (let k = 0; k < plan.length && i >= 0; k++) {
+                        const lo = plan[k], h = lfFit(P, i, lo, 6, id);
+                        if (h < 5) break;
+                        lfAddVoid(P, i, lo, lo + h, id);
+                        cells.push(i);
+                        lowest = Math.min(lowest, lo);
+                        if (k + 1 >= plan.length) break;
+                        const r = rng(), nd = r < 0.8 ? dir : r < 0.9 ? (dir + 1) & 3 : (dir + 3) & 3;
+                        let next = -1;
+                        for (let t = 0; t < 3 && next < 0; t++) {
+                            const dd = t === 0 ? nd : t === 1 ? dir : (nd === dir ? (dir + 1) & 3 : nd), j = lfStep(P, i, dd);
+                            if (j >= 0 && lfFit(P, j, plan[k + 1], 5, id) >= 5) { next = j; dir = dd; }
+                        }
+                        i = next;
+                    }
+                    if (!cells.length) P.features.pop();
+                    else {
+                        if (lowest <= 2) { if (lfChamber(P, id, cells[cells.length - 1], lowest, 6, 2.2)) P.stats.chambers++; }
+                        // The shaft: a side column of the -1 run, open from -2 S1 to the passage's roof, with a small chamber at
+                        // its foot on -2.
+                        for (let k = flat + 5; k < cells.length && !P.features[id].shaft; k++) {
+                            const pi = cells[k], vi = P.vI.lastIndexOf(pi), top = vi >= 0 ? P.vHi[vi] : 0;
+                            if (!top || P.vLo[vi] > 6) continue;
+                            for (let side = 1; side <= 3 && !P.features[id].shaft; side += 2) {
+                                const sd = lfStep(P, pi, (dir + side) & 3);
+                                if (sd < 0 || P.prot[sd] || P.voidMark[sd] || !lfSolidAfter(P, sd, top)) continue;
+                                let g = top - 1;
+                                while (g >= 1 && lfSolidAfter(P, sd, g)) g--;
+                                const from = g + 1;                                // 1: down to bedrock; else into the cave below
+                                if (from > 4 || top - from < 6) continue;
+                                let apart = true;
+                                for (let dd = 0; dd < 4; dd++) { const j = lfStep(P, sd, dd); if (j >= 0 && P.voidMark[j] && P.voidMark[j] !== id) apart = false; }
+                                if (!apart) continue;
+                                lfAddVoid(P, sd, from, top, id, from > 1);
+                                if (from === 1) lfChamber(P, id, sd, 1, 4, 2.0);
+                                P.features[id].shaft = { x: sd % size, y: (sd / size) | 0, from, to: top, intoCave: from > 1 };
+                                P.stats.shafts++;
+                            }
+                        }
+                        Object.assign(P.features[id], { mainLine: cells.length, lowestFloor: lowest });
+                    }
+                }
+            }
+        }
+
+        // 6. Openings: a lava tube's roof has fallen in at 1-3 places, a limestone cave now and then (40 %) at one: a pit
+        //    from the surface down to the passage floor (a steep bowl). Every void is checked again against the final cut.
+        const rngO = mulberry32(hash32(seed, LFS.open, ax, ay));
+        const opening = (net, code, count) => {
+            const cells = net.cells, stepK = Math.floor(cells.length / (count + 1));
+            for (let o = 1; o <= count && stepK >= 4; o++) {
+                const ci = cells[o * stepK], vi = P.vI.indexOf(ci);
+                if (vi < 0 || P.distProt[ci] < 4 || top0[ci] > 16) continue;
+                const x = ci % size, y = (ci / size) | 0, rim = top0[ci], bed = P.vLo[vi];
+                const id = lfNewFeature(P, code, { family: P.features[net.id].family, host: P.features[net.id].host, planned: "z-1", anchor: { x, y }, rim, bed, network: net.id });
+                if (!id) return;
+                Object.assign(P.features[id], lfBowl(P, LF_KINDS[code], rngO, x, y, rim, bed));
+                P.stats.openings++;
+            }
+        };
+        for (const t of tubes) opening(t, LF_CODE.get("lava_tube_collapse"), 1 + Math.floor(rngO() * 3));
+        for (const kn of karst) if (rngO() < 0.4) opening(kn, LF_CODE.get("karst_window"), 1);
+        finishCut();
+        const vCount = P.vI.length, vi = new Int32Array(vCount), vlo = new Uint8Array(vCount), vhi = new Uint8Array(vCount), vid = new Uint8Array(vCount), vopen = new Uint8Array(vCount);
+        let kept = 0;
+        for (let v = 0; v < vCount; v++) {
+            const i = P.vI[v], lo = P.vLo[v], hi = P.vHi[v];
+            let ok = true;
+            for (let g = P.vOpen[v] ? lo : lo - 1; g <= hi && ok; g++) if (!lfSolidAfter(P, i, g)) ok = false;
+            if (!ok) { P.stats.voidsDropped++; continue; }
+            vi[kept] = i; vlo[kept] = lo; vhi[kept] = hi; vid[kept] = P.vId[v]; vopen[kept] = P.vOpen[v]; kept++;
+        }
+        for (const f of P.features) if (f) Object.freeze(f);
+        return {
+            gen: 6, features: P.features, cutTop: P.cutTop, cutFeat: P.cutFeat, raiseTop: P.raiseTop, raiseFeat: P.raiseFeat,
+            voids: { count: kept, i: vi.subarray(0, kept), lo: vlo.subarray(0, kept), hi: vhi.subarray(0, kept), id: vid.subarray(0, kept), openBelow: vopen.subarray(0, kept) },
+            stats: P.stats, ms: now() - t0
+        };
+    };
+    WorldGen.LANDFORM_KINDS = Object.freeze(LF_KINDS.map(k => (k ? k.id : "")));
+    WorldGen.LANDFORM_CLASSES = LF_CLASSES;
+    /** The landform family (TEMP, WET, ARID, HIGH, VOLC) of climate fields (fieldsFor). */
+    WorldGen.landformFamily = f => LF_FAMILIES[lfFamily(catalog().climate, f)];
 
     //-------------------------------------------------------------------------
     // The generator
@@ -1142,7 +1796,7 @@
         // (the surface is at +1 or +2 above it), the cell is the rock face, impassable, never grass or water; a cell dug
         // or carved inside a hill (cave mouths) is bare rock floor. Everything else is painted as before.
         const col = z === 0 ? groundColumns(ctx.areaX, ctx.areaY, false) : null; // null: a save from before the column levels (gen < 4)
-        const volume = { solid: 0, carved: 0, ramps: 0, groundReplaced: 0, waterSuppressed: 0, sitePiecesSkipped: 0 };
+        const volume = { solid: 0, holes: 0, carved: 0, ramps: 0, groundReplaced: 0, waterSuppressed: 0, sitePiecesSkipped: 0 };
         if (z === 0) {
             const P = groundPalette(cat, m);
             const R = columnReader(col, size, d, gx0, gy0, {
@@ -1160,8 +1814,9 @@
                     ctx.setTile(x, y, 0, t.layer0);
                     if (t.layer2) ctx.setTile(x, y, 2, t.layer2);
                     if (t.region) ctx.setTile(x, y, 5, t.region);
-                    if (t.solid) {
-                        volume.solid++;
+                    if (t.solid || t.hole) {
+                        if (t.solid) volume.solid++;
+                        else volume.holes++;
                         if (water[i]) volume.waterSuppressed++;
                         else volume.groundReplaced++;
                     } else if (t.carved || t.ramp) {
@@ -1227,6 +1882,7 @@
         const counts = {};
         const biomeCells = {};
         const L = window.UF && UF.Levels;
+        const lfCutWorld = !!(L && typeof L.levelGenerator === "function" && L.levelGenerator(z) >= 6 && typeof L.shapeCodeAt === "function");
         for (let y = 0; y < size; y++) {
             for (let x = 0; x < size; x++) {
                 const i = y * size + x;
@@ -1241,6 +1897,7 @@
                 } else if (z !== 0) continue;
                 const isRamp = L && (typeof L.shapeCodeAt === "function" ? L.shapeCodeAt(ctx.areaX, ctx.areaY, x, y, z) === 4 : (typeof L.shapeAt === "function" && (L.shapeAt(ctx.areaX, ctx.areaY, x, y, z) === "ramp" || L.shapeAt(ctx.areaX, ctx.areaY, x, y, z) === 4)));
                 if (isRamp) continue; // Don't place on ramps
+                if (lfCutWorld && L.shapeCodeAt(ctx.areaX, ctx.areaY, x, y, z) !== 2) continue; // generator 6: only on a floor (not over a cut, not on a cave's roof edge)
                 const table = plantTable(m, biome[i], m.alignTiers[align[i]].id);
                 const list = water[i] ? table.water : table.land;
                 for (let k = 0; k < list.length; k++) {
@@ -1260,8 +1917,8 @@
                 for (const piece of s.pieces || []) {
                     const o = m.objectById.get(piece.object);
                     if (!o || !inside(s.x + piece.dx, s.y + piece.dy)) continue;
-                    // Never inside a hill: a piece whose ground cell is solid rock is left out (counted).
-                    if (col && col.code((s.y + piece.dy) * size + s.x + piece.dx) === 1) { volume.sitePiecesSkipped++; continue; }
+                    // Never inside a hill or over a hole: a piece whose ground cell is solid rock or open is left out (counted).
+                    if (col && (col.code((s.y + piece.dy) * size + s.x + piece.dx) === 1 || col.code((s.y + piece.dy) * size + s.x + piece.dx) === 3)) { volume.sitePiecesSkipped++; continue; }
                     ctx.setObject(s.x + piece.dx, s.y + piece.dy, o.typeId);
                     counts[piece.object] = (counts[piece.object] || 0) + 1;
                 }
@@ -1298,6 +1955,7 @@
                         } else if (z !== 0) continue;
                         const isRamp = L && (typeof L.shapeCodeAt === "function" ? L.shapeCodeAt(ctx.areaX, ctx.areaY, x, y, z) === 4 : (typeof L.shapeAt === "function" && (L.shapeAt(ctx.areaX, ctx.areaY, x, y, z) === "ramp" || L.shapeAt(ctx.areaX, ctx.areaY, x, y, z) === 4)));
                         if (isRamp) continue;
+                        if (lfCutWorld && L.shapeCodeAt(ctx.areaX, ctx.areaY, x, y, z) !== 2) continue; // generator 6: only on a floor
                         if (typeIds.has(objects[i])) have++;
                         else if (dist >= r0 && objects[i] === 0 && !water[i] && !(flags[i] & FLAG_PEAK) && waterDist[i] > (o.entry.avoidWater | 0)
                             && !inClearing(x, y) && !(siteMask && siteMask[i]) && !ctx.isTemplateCell(x, y)) {
