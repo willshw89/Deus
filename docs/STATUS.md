@@ -124,6 +124,7 @@
 | **DEF-COORD-EXIT-01** | `WG.00.12` | `MINOR` | Four 22:46 test runs captured $LASTEXITCODE inside powershell.exe -Command. | `OPEN` | PM / Coordinator |
 | **DEF-OPS-LOG-01** | `WG.00.12` | `MINOR` | Claude -p launches without redirect left task logs at 0 bytes (task-35425, task-35427); run_lane_a_grok.ps1, run_lane_c3.ps1, run_review_8d1c7c37.ps1 and lane-c3\BRIEF.md are 0 bytes. | `OPEN` | PM / Coordinator |
 | **DEF-COORD-BOARD-HASH-02** | `GOVERNANCE` | `MINOR` | Board 2026-09-25_2340 lists task/lane-c1 = 4f346b9a and task/lane-c2 = e99da6f2 in sync with origin (EXIT=128 on git cat-file); lists lane-c3 70dad277 as in sync while origin/task/lane-c3 = 048752c8. | `OPEN` | PM / Coordinator |
+| **DEF-COORD-BOARD-HASH-03** | `GOVERNANCE` | `MINOR` | Board 2026-09-26_0104 published non-existent full SHA for Lane I tip (`a0183d684e20...` instead of real `a0183d68ad21...`); boards must use only git rev-parse output. | `OPEN` | Coordinator |
 | **DEF-Z2-PROOF-LEDGE-01** | `WG.00.08` | `MINOR` | no_floating_solids checks connectivity to bedrock/edge, not support; single stone ledge attached to wall passes. Queued as DEC-010. | `OPEN` | PM |
 | **DEF-Z2-PROOF-FLUIDPATH-01** | `WG.00.08` | `MINOR` | seed 18 ravine holds no natural fluid; fluid-skip path exercised only through 6 test-planted water columns. | `OPEN` | PM |
 | **DEF-Z2-PROOF-PLAN-01** | `WG.00.08` | `MINOR` | footprint compares carve to engine own plan; plan errors caught only by target-column and column-count checks. | `OPEN` | PM |
