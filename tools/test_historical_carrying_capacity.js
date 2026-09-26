@@ -13,9 +13,12 @@ const { performance } = require("perf_hooks");
 const { spawnSync } = require("child_process");
 const ROOT = path.resolve(__dirname, "..");
 const PLUGIN = "game/js/plugins/DEUS_HistoricalDemographics.js";
-const CANDIDATE = "4af58ddd486b8e5d97d24877fd1b826131724c1d";
-const CANDIDATE_SHA256 = "d0a09bfda8ab63ff3eec5b362c63896ea0c3dbcb3aeeeb574c48c3113c995e4e";
-const CANDIDATE_BYTES = 52586;
+const CANDIDATE = "0859ed3c6e3ea475abad9e00353f8961cfcec2cc";
+const CANDIDATE_SHA256 = "fca4a15abc45a88bff836d97ab77936581e4679fe104e17b2596d079f9015cdc";
+const CANDIDATE_BYTES = 52898;
+// Directive 001-F re-freeze (ATK-YEAR0-002): only the plugin comes from CANDIDATE. The Year-1 founding world
+// stays at the HIST-09 bootstrap; later History refuses to generate before HistoricalDemographics is loaded.
+const BOOTSTRAP = "4af58ddd486b8e5d97d24877fd1b826131724c1d";
 const LEGACY = "931b993e60545b24bddaa71ab433ebac8e967eb8";
 const LEGACY_NORMALIZED_SHA256 = "647592fc4a65b474f5f12835cee80a461d1f0c86ba847559b3ec835791471c2e";
 const MODULES = ["World", "WorldGen", "Factions", "History", "Levels"];
@@ -67,13 +70,13 @@ function expectedProfiles() {
         tiefling: p([70, 110], [18, 65], .30, 3, .004, .0003, .0003)
     };
 }
-function frozenBundle(commit) {
+function frozenBundle(commit, pluginCommit = commit) {
     const files = {}, sources = [];
-    const read = file => {
-        const result = spawnSync("git", ["show", `${commit}:${file}`], { cwd: ROOT, windowsHide: true, maxBuffer: 16 * 1024 * 1024 });
-        assert(!result.error && result.status === 0, `Cannot load frozen input ${commit}:${file}`);
+    const read = (file, from = commit) => {
+        const result = spawnSync("git", ["show", `${from}:${file}`], { cwd: ROOT, windowsHide: true, maxBuffer: 16 * 1024 * 1024 });
+        assert(!result.error && result.status === 0, `Cannot load frozen input ${from}:${file}`);
         files[file] = result.stdout.toString("utf8");
-        sources.push({ path: file, commit, bytes: result.stdout.length, sha256: sha(result.stdout) });
+        sources.push({ path: file, commit: from, bytes: result.stdout.length, sha256: sha(result.stdout) });
         return files[file];
     };
     const list = {}; vm.runInNewContext(read("game/js/plugins.js"), list, { timeout: 1000 });
@@ -81,11 +84,11 @@ function frozenBundle(commit) {
     assert(plugins.length === MODULES.length && plugins.every((p, i) => p.name === `DEUS_${MODULES[i]}`), "Frozen bootstrap order changed");
     for (const p of plugins) read(`game/js/plugins/${p.name}.js`);
     const catalog = JSON.parse(read("game/data/UF_WorldCatalog.json"));
-    read(PLUGIN);
-    return { commit, files, plugins, catalog, sources, sourceDigest: sha(text(sources)) };
+    read(PLUGIN, pluginCommit);
+    return { commit: pluginCommit, files, plugins, catalog, sources, sourceDigest: sha(text(sources)) };
 }
 function sourceBundle({ verifyWorkingCandidate = true } = {}) {
-    const data = frozenBundle(CANDIDATE), source = data.sources.find(s => s.path === PLUGIN);
+    const data = frozenBundle(BOOTSTRAP, CANDIDATE), source = data.sources.find(s => s.path === PLUGIN);
     assert(source.sha256 === CANDIDATE_SHA256 && source.bytes === CANDIDATE_BYTES, "CANDIDATE_MISMATCH: frozen plugin hash/length differs from dispatch packet");
     if (verifyWorkingCandidate) {
         const disk = fs.readFileSync(path.join(ROOT, PLUGIN));
@@ -557,7 +560,7 @@ function runContracts(data, { mutant = null, only = null } = {}) {
         commonStatus, commonContractBasis: "Established behavior, envelope, locality, migration preservation and atomicity contracts; the reconciled ASTRA-14 identity/provenance acceptance checks are reported separately.",
         packetStatus, packetPolicy: packet.policy, packetChecks: packet.checks, observedMetadata: packet.observedMetadata,
         packetPassed: packet.checks.filter(c => c.status === "PASS").length, packetFailed: packet.checks.filter(c => c.status === "FAIL").length,
-        candidate: { commit: CANDIDATE, sha256: CANDIDATE_SHA256, bytes: CANDIDATE_BYTES, sourceDigest: data.sourceDigest },
+        candidate: { commit: CANDIDATE, bootstrap: BOOTSTRAP, sha256: CANDIDATE_SHA256, bytes: CANDIDATE_BYTES, sourceDigest: data.sourceDigest },
         legacyFixture: { commit: LEGACY, normalizedEngineSha256: LEGACY_NORMALIZED_SHA256, years: legacyState ? 40 : null },
         mutant, checks, observations, passed: checks.filter(c => c.status === "PASS").length, failed: checks.filter(c => c.status === "FAIL").length, wallMs: performance.now() - started };
 }

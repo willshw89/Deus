@@ -11,12 +11,12 @@
  *   UF.NewGameSetup payload (keys, types, JSON round trip).
  * Section B (gating): the clock's save/load round trip keeps year 0 (DEUS_Core.js makeSaveContents /
  *   extractSaveContents, both the deusTime and the legacy ufTime key).
- * Section C (known open, ATK-YEAR0-002 proposed): a headless New Game fed the payload Section A emits, run
+ * Section C (gating since ATK-YEAR0-002): a headless New Game fed the payload Section A emits, run
  *   through the real World / Factions / History / Levels / HistoricalDemographics plugins. Checks the live clock
- *   year, the saved clock year, and the clock constructor. These fail today; they're reported, not gating,
- *   unless --strict. If one starts passing the suite exits 1 so it gets promoted to gating.
+ *   year, the saved clock year, and the clock constructor. A check listed in KNOWN_OPEN is reported, not gating,
+ *   unless --strict; if one starts passing the suite exits 1 so it gets promoted to gating. None is listed now.
  * Section D (Rule 4): every mutant must be caught by the checks it targets, and Section C gets a
- *   discrimination run proving its checks can pass.
+ *   discrimination run proving its checks also pass under an independent minimal implementation.
  *
  * Usage: node tools/test_new_game_year0.js [--strict]
  */
@@ -32,8 +32,9 @@ const STRICT = process.argv.includes("--strict");
 const SEED = 424242;
 const SEED_MAX = 0x7ffffffe;
 
-// Section C checks that fail on the current code base (proposed defect ATK-YEAR0-002).
-const KNOWN_OPEN = new Set(["new_game_clock_year_is_0", "new_game_save_year_is_0", "clock_constructor_keeps_year_0"]);
+// Section C checks that fail on the current code base. The three ATK-YEAR0-002 checks were promoted to gating
+// once the runtime fix landed (0859ed3c, Directive 001-F).
+const KNOWN_OPEN = new Set();
 const NEW_GAME_PLUGINS = ["DEUS_Core", "DEUS_World", "DEUS_WorldGen", "DEUS_Factions", "DEUS_History", "DEUS_Levels",
     "DEUS_Dnd5e", "DEUS_Callings", "DEUS_HistoricalDemographics"];
 
@@ -389,18 +390,28 @@ const CORE_MUTANTS = [
       edit: { "$ufTime.year = _tData.year;": "$ufTime.year = _tData.year || 1;" } }
 ];
 
-// Not a proposed fix: the smallest edits that make the New Game pipeline carry the setup year into the clock,
-// used only to show Section C's checks can pass.
+// Section C mutants: each puts back one way a Year 0 New Game ends up at year 1.
+const SECTION_C_MUTANTS = [
+    { name: "core_restores_or_1 (pre-ATK-YEAR0-002 code)", kills: ["clock_constructor_keeps_year_0"],
+      edit: { DEUS_Core: { "this.year = Number.isInteger(setupYear) && setupYear >= 0 ? setupYear : 0;": "this.year = (window.UF && UF.NewGameSetup && UF.NewGameSetup.year) || 1;" } } },
+    { name: "history_founds_year_0_at_1", kills: ["new_game_clock_year_is_0", "new_game_save_year_is_0"],
+      edit: { DEUS_History: { "const foundedYear = targetYear === 0 ? 0 : 1;": "const foundedYear = 1;" } } },
+    { name: "history_clock_floor_1", kills: ["new_game_clock_year_is_0", "new_game_save_year_is_0"],
+      edit: { DEUS_History: { "if (live && window.$ufTime) $ufTime.year = demographics.currentYear;": "if (live && window.$ufTime) $ufTime.year = Math.max(1, demographics.currentYear);" } } }
+];
+
+// Not the shipped fix: the smallest edits that carry the setup year straight into the clock. Section C's checks
+// must pass under it too, so they pin the contract rather than one implementation.
 const SECTION_C_DISCRIMINATION = {
     DEUS_History: { "if (live && window.$ufTime) $ufTime.year = demographics.currentYear;": "if (live && window.$ufTime) $ufTime.year = UF.NewGameSetup.year;" },
-    DEUS_Core: { "this.year = (window.UF && UF.NewGameSetup && UF.NewGameSetup.year) || 1;": "this.year = (window.UF && UF.NewGameSetup && UF.NewGameSetup.year !== undefined) ? UF.NewGameSetup.year : 1;" }
+    DEUS_Core: { "this.year = Number.isInteger(setupYear) && setupYear >= 0 ? setupYear : 0;": "this.year = (window.UF && UF.NewGameSetup && UF.NewGameSetup.year !== undefined) ? UF.NewGameSetup.year : 1;" }
 };
 
 //-----------------------------------------------------------------------------
 
 function print(checks, known) {
     for (const c of checks) {
-        const tag = c.pass ? (known && KNOWN_OPEN.has(c.name) ? "FIXED?" : "PASS") : (known && KNOWN_OPEN.has(c.name) ? "OPEN ATK-YEAR0-002" : "FAIL");
+        const tag = c.pass ? (known && KNOWN_OPEN.has(c.name) ? "FIXED?" : "PASS") : (known && KNOWN_OPEN.has(c.name) ? "OPEN" : "FAIL");
         console.log(`  [${tag}] ${c.name}: ${c.msg}`);
     }
 }
@@ -425,14 +436,14 @@ function main() {
     print(b.checks, false);
     for (const c of b.checks) if (!c.pass) problems.push(`FAIL ${c.name}`);
 
-    console.log("\n--- Section C: headless New Game fed the Section A payload (known open unless --strict) ---");
+    console.log("\n--- Section C: headless New Game fed the Section A payload (DEUS_Core.js, DEUS_History.js) ---");
     const c = runSectionC(a.payload);
     print(c.checks, true);
     console.log(`  history after New Game: ${JSON.stringify(c.diag)} (${c.ms.toFixed(0)} ms)`);
     let cOpen = 0;
     for (const x of c.checks) {
         if (!KNOWN_OPEN.has(x.name)) { if (!x.pass) problems.push(`FAIL ${x.name}`); continue; }
-        if (x.pass) problems.push(`FIXED? ${x.name} now passes: close ATK-YEAR0-002 for it and drop it from KNOWN_OPEN`);
+        if (x.pass) problems.push(`FIXED? ${x.name} now passes: drop it from KNOWN_OPEN`);
         else { cOpen++; if (STRICT) problems.push(`FAIL ${x.name} (--strict)`); }
     }
 
@@ -444,6 +455,11 @@ function main() {
     }
     for (const m of CORE_MUTANTS) {
         const r = mutantResult(m, runSectionB({ DEUS_Core: m.edit }).checks);
+        console.log(`  [${r.caught ? "PASS" : "FAIL"}] mutant ${m.name} caught: ${r.detail}`);
+        if (!r.caught) problems.push(`mutant ${m.name} survived`);
+    }
+    for (const m of SECTION_C_MUTANTS) {
+        const r = mutantResult(m, runSectionC(a.payload, m.edit).checks);
         console.log(`  [${r.caught ? "PASS" : "FAIL"}] mutant ${m.name} caught: ${r.detail}`);
         if (!r.caught) problems.push(`mutant ${m.name} survived`);
     }
@@ -460,9 +476,9 @@ function main() {
         console.log("==================================================");
         process.exit(1);
     }
-    console.log(`SETUP CONTRACT PASSED: ${gating} gating checks, ${MENUS_MUTANTS.length + CORE_MUTANTS.length} mutants caught (ATK-YEAR0-001 closure criterion).`);
+    console.log(`SETUP CONTRACT PASSED: ${gating} gating checks, ${MENUS_MUTANTS.length + CORE_MUTANTS.length + SECTION_C_MUTANTS.length} mutants caught (ATK-YEAR0-001 closure criterion).`);
     if (cOpen) {
-        console.log(`INV-SIM-01 END-TO-END NOT MET: ${cOpen} Section C checks fail (ATK-YEAR0-002, proposed): a Year 0 New Game runs its clock and save at year 1.`);
+        console.log(`INV-SIM-01 END-TO-END NOT MET: ${cOpen} known-open Section C checks fail.`);
         console.log("Run with --strict to gate on INV-SIM-01 end to end.");
     } else {
         console.log("INV-SIM-01 END-TO-END MET: clock, save and constructor all at year 0.");
