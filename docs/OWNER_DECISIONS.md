@@ -407,3 +407,15 @@ Every decision item recorded in this log must provide:
 - **Geology-first method:** Rock bodies span layers. Per-biome placement rules on top of geology. Vertical links: physical cause, surface tells, passages, shared resources.
 - **Supersedes:** WG.00.04 (old 5 biomes) and DEC-013 band ranges. Replaces 25-biome drafting (Directive 0069-BR). Each of the 6 biomes is expressed across all 5 depths (30 biome-depth combinations).
 - **World Map:** 3x3 grid of 256x256 maps (approx 768x768 tiles). Wraps on all edges (round world). Coarse resolution whole-world generation first. Current map runs full detail, other 8 run at ADR-003 LOD summary level.
+
+---
+
+### Decision `DEC-031`: Crossload Routing and Effort Policy
+- **Date Logged:** 2026-09-26
+- **Status:** `DECIDED` (Owner ruling 10:19 CT)
+- **Decider:** Owner
+- **Summary:**
+  1. **Routing during Claude constraint:** While Claude is >=97% usage or Codex is exhausted: Writers = Grok (grok-4.7). Reviewers of Grok code = Gemini (or Claude if budget allows). Reviewers of Claude code = Grok. No model reviews its own code. Claude budget reserved for in-flight work.
+  2. **Models:** Frontier only (no flash/mini/small tiers).
+  3. **Effort by judgment:** `top` (grok xhigh / claude max / codex ultra) for hard/high-risk writing (sim engines, refactors) and its reviews; `high` for ordinary lanes and reviews; `medium` or lower for routine ops, pulses, and record-only work.
+  4. **Tooling:** `pm_ops\start_review.ps1 -Provider gemini` runs Gemini reviews. Gemini reviews must touch only `tasks/<T>/<lane>/review_gemini_<sha8>.md`, use subject `[gemini] <T> review <sha8>`, and hold exactly one VERDICT line. lane.json reviewer must be `gemini`.
