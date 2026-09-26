@@ -9223,7 +9223,7 @@
     "G-TEMP"
    ],
    "confidence": "MEDIUM",
-   "notes": "Contact heat transfer from a heatFlux on one object. Contact ignition is additive (Owner question Q3 covers the scope of added fire effects)."
+   "notes": "Contact heat transfer from a heatFlux on one object. Contact ignition is additive, under the DEC-018 ruling that fire ignites combustible materials."
   },
   {
    "id": "srd:spell:hellish-rebuke",
