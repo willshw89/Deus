@@ -193,6 +193,9 @@ Every decision item recorded in this log must provide:
   - **Z-Range Coordinate Mapping:** Default `-16..+15` (surface = 0). Status: `OPEN` (PM default).
   - **Race-to-Band/Layer-Range Mapping:** Which specific race occupies which home layer range. Status: `OPEN` (Owner assigns).
   - **Biome Assignment per Band:** Mapping of the 25 specific biomes into the 5 bands. Status: `OPEN` (Owner assigns).
+- **Amendment Note (2026-09-26, Directive 0035-AJ D-2 & D-3):**
+  - **D-2 Stratum/slice thickness is 2 ft:** A layer is 10 ft = 5 slices of 2 ft; squares are 5 ft. Stale code references to 1-ft strata and 5-ft levels (audit F-01) are superseded; WG.00.17 aligns all feet conversions (`Z_STEP_FEET`, blast geometry).
+  - **D-3 Sparse storage is mandatory in-memory as well as in saves:** Uniform columns stored compactly (run-length), levels allocated on demand, bounded 3D path-search scratch (audit F-02). WG.00.17 DoD enforces the in-memory layout.
 
 ---
 
@@ -310,5 +313,89 @@ Every decision item recorded in this log must provide:
   2. **True 3D Geometry:** Range calculation uses true 3D Euclidean distance (5 ft grid cells, 10 ft layer height).
   3. **Vertical Modifiers:** Falling projectiles and dropped objects gain velocity/impact damage based on height fallen; shooting upward incurs a range penalty.
   4. **Volume Area Damage:** Area-of-effect blasts (fireball, explosive shells) hitting a floor propagate cross-layer volume damage downward per DEC-013 §12. Targeting UI allows selecting visible cells on lower layers viewed through openings.
+
+---
+
+### Decision `DEC-023`: Ore and Mineral Deposits Never Respawn (Ruling D-5)
+- **Date Logged:** 2026-09-26
+- **Status:** `DECIDED` (Owner ruling relayed by PM, Directive 0035-AJ §1)
+- **Decider:** Owner
+- **Summary:**
+  1. **Finite Minerals:** VISION rules V74, V83, INV-SIM-03, and LIFE-002 stand as binding law. Ore, stone, and gem deposits are finite in the geological stratum.
+  2. **Bug Removal:** Sprouting of ores, stones, and gems over time in `DEUS_Ecology.js` (audit VEG-1, F-03) is classified as a code defect to be removed in `SIM.50.12`.
+  3. **No Spontaneous Regeneration:** Minerals do not respawn silently. Any reintroduction of materials must occur solely through closed-loop mass conservation / erosion / reclamation mechanics (see DEC-028).
+
+---
+
+### Decision `DEC-024`: Unified Water Simulation Authority (`DEUS_Fluid`) & Legacy Flood Retirement (Ruling D-4)
+- **Date Logged:** 2026-09-26
+- **Status:** `DECIDED (PM)` (Owner may object; Directive 0035-AJ §1)
+- **Decider:** PM (Grok Bot)
+- **Summary:**
+  1. **Single Water Authority:** The physical fluid solver `DEUS_Fluid` is established as the sole authoritative water simulation system in Project DEUS.
+  2. **Retirement of Volume-Less Flood Fill:** The legacy flood-fill mechanism in `DEUS_Levels.js:3389` that generated water without conserved volume (audit WAT-1, F-05) is retired.
+  3. **Reconciliation:** All four disparate water stores (WAT-5) converge onto `DEUS_Fluid`. The integration is validated in Playtest (F5) with `window.UF.Fluid`.
+
+---
+
+### Decision `DEC-025`: Nine SRD Culture and Faction Development Plans (Ruling D-6)
+- **Date Logged:** 2026-09-26
+- **Status:** `DECIDED (PM)` (Owner may object; Directive 0035-AJ §1)
+- **Decider:** PM (Grok Bot)
+- **Summary:**
+  1. **Nine Culture Plans:** Each of the 9 SRD 5.1 races (Dwarf, Elf, Halfling, Human, Dragonborn, Gnome, Half-Elf, Half-Orc, Tiefling per `game/data/srd51/character_options.json`) receives its own dedicated culture and faction development plan (DEC-015, SOC.10.03 slots).
+  2. **Catalog Expansion:** Expands the world catalog culture templates from 7 to 9.
+  3. **Layer Mapping:** Specific race-to-home-layer assignments remain `OPEN` (DEC-013).
+
+---
+
+### Decision `DEC-026`: Calendar Scale vs Solar Day (`OWNER_OPEN`, Ruling D-1)
+- **Date Logged:** 2026-09-26
+- **Status:** `OPEN` (Owner question relayed by PM, Directive 0035-AJ §1)
+- **Decider:** Owner
+- **Question:** How should the game calendar reconcile the solar day with the annual seasonal cycle given VISION rule V123 (1 game day = 1 year, making seasons the four 6-hour quarters of a day)?
+- **Options:**
+  - Option A: Decouple the solar day from the calendar year (multi-day year with distinct diurnal cycles per season).
+  - Option B: Retain V123 (1 day = 1 year; 6-hour micro-seasons).
+  - Option C: Slow both the biological lifecycle clock and the calendar in lockstep.
+- **Recommended Default:** Option A.
+- **What Happens If Unanswered:** `SIM.50.06` (seasonal simulation) remains held until an authoritative ruling is recorded.
+
+---
+
+### Decision `DEC-027`: SRD 5.1 Combat Authority (d20 vs AC, SRD Damage, HP, Actions, Conditions; V64 Retired)
+- **Date Logged:** 2026-09-26
+- **Status:** `DECIDED` (Owner ruling 08:20 CT, Directive 0062-BK)
+- **Decider:** Owner
+- **Summary:**
+  1. **Authoritative Combat Law:** DEUS combat mechanics are canonically governed by SRD 5.1 rules — d20 attack rolls vs Armor Class (AC), SRD damage dice, SRD stat blocks/hit points, initiative, action economy, and conditions.
+  2. **Retirement of V64:** VISION rule V64 (OSRS-style accuracy/strength combat) is formally RETIRED. Rule V47 is reinstated as the authoritative combat specification.
+  3. **Data & Engine Integration:** The SRD 5.1 dataset in `game/data/srd51/` is authoritative for combat resolution. Rules are evaluated behind `UF.Rules` with pure, deterministic, seeded dice logic compatible with headless simulation under ADR-003.
+
+---
+
+### Decision `DEC-028`: Matter Conservation by Weight & Closed-Loop World Reclamation
+- **Date Logged:** 2026-09-26
+- **Status:** `DECIDED` (Owner ruling 08:25 CT, Directive 0063-BL)
+- **Decider:** Owner
+- **Summary:**
+  1. **Conservation by Weight:** Every material, block, item, and structure carries an invariant weight. Mining a block yields items of equivalent aggregate weight; building consumes exact weight; structural collapse yields debris/rubble of identical weight. Matter is neither created nor destroyed.
+  2. **World Terrain Reclamation:** The terrain slowly reclaims loose and abandoned outdoor items (stone, timber, bone, metal, corpses, ruins) by weight. When sufficient mass accumulates at a coordinate, it regenerates solid terrain blocks of the corresponding base material:
+     - Stone / masonry rubble → solid stone.
+     - Wood / organic detritus / corpses / bone → soil / fertile earth.
+     - Metals → rust / scrap or trace mineral veins, never virgin ore veins (finite ore rule DEC-023 preserved).
+  3. **Exemptions:** Items stored within active, claimed, or enclosed structures are exempt from reclamation.
+  4. **Accounting Authority:** The per-class mass ledger `game/js/sim/ledger*` (`WG.65.15`) is the single authoritative accounting instrument across mining, construction, collapse (`SIM.40.01`), decay (`SIM.40.05`), and reclamation.
+
+---
+
+### Decision `DEC-029`: Handling Policy for Credential Incidents (SEC-2026-09-26-01)
+- **Date Logged:** 2026-09-26
+- **Status:** `DECIDED` (Owner ruling ~07:40 CT, Directive 0060-BI)
+- **Decider:** Owner
+- **Summary:**
+  1. **In-Tree Remediation:** Incident `SEC-2026-09-26-01` (hardcoded API key literal committed in historical commit `224b1b36`) is resolved in-tree via Lane Z security tooling (`OPS.70.02`), removing the fallback and redacting references.
+  2. **History Purge Declined:** The Owner explicitly DECLINED git history purges, filter-repo, or forced pushes on `origin/main` to preserve absolute commit immutability.
+  3. **Revocation Authority:** Credential revocation is handled directly by the Owner externally.
 
 
