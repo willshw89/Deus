@@ -1,0 +1,7 @@
+﻿You are the independent neutral reviewer for Lane E (Task WG.00.09).
+Read REVIEW_BRIEF.md carefully.
+Review the full diff of docs/systems/UF_Depth_Attack_Plan.md from 710fa095 to 20bfce90 (which incorporates Grok's N5 and N6 fixes in commit 20bfce90).
+Verify whether findings N1 through N6 are all properly resolved and verify that no new defects have been introduced.
+Form your own verdict independently: CLEAN PASS or CHANGES REQUESTED.
+Commit your review to tasks/DEUS-TSK-FABLE-19C/claude_review.md with commit message starting with '[claude] WG.00.09'.
+Do not edit engine code or test harnesses. Do not push. Do not merge.
