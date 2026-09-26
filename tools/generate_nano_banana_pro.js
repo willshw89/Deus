@@ -11,10 +11,21 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 
-const API_KEY = process.env.GEMINI_API_KEY || 'AQ.Ab8RN6LoiuLx4FO6xapsuiH4W5UgcaKcE0PnsitFP_ZIavw-MQ';
+// The API key comes from the environment only. There is no hard-coded fallback
+// (OPS.70.02 security finding, 2026-09-26; see docs/telemetry/security_incidents.json).
+const API_KEY = process.env.GEMINI_API_KEY;
 const MODEL = 'gemini-3-pro-image';
 
+function requireApiKey() {
+    if (!API_KEY || !String(API_KEY).trim()) {
+        console.error('ERROR: GEMINI_API_KEY is not set. Export it in your shell environment before running this tool (never commit a key; see docs/SECURITY_AND_SECRETS.md).');
+        process.exit(1);
+    }
+    return API_KEY;
+}
+
 function generateWithNanoBananaPro({ prompt, outputPath, referenceImagePaths = [] }) {
+    requireApiKey();
     return new Promise((resolve, reject) => {
         const parts = [];
 

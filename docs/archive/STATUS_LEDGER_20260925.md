@@ -3679,7 +3679,7 @@ Delivered per user directives ("Generate with Nano Banana Pro", "According to wh
 
 
 ## Adult Male Human 100% Google Nano Banana Pro 12-Sprite Action Suite — 2026-09-19 (Gemini)
-Delivered per user directives ("Alright, Let's work on our humans. Start generating", "AQ.Ab8RN6LoiuLx4FO6xapsuiH4W5UgcaKcE0PnsitFP_ZIavw-MQ Generate the human", "nano banana pro", "Lets do 4 directions, FF5 sprite style, generated in nano II, 12 sprites at a time... Lets make it more of a serious chibi", "ONE CREATURE / DEMOGRAPHIC AT A TIME WITH INVARIANT UNIFORM SCALE", "DEDICATED HAULING / CARRYING POSE", "12 SPRITES AT A TIME WITH FIRST SHEET AS IMAGE REFERENCE", "ZERO FLYING PROJECTILES ON SPRITE SHEETS; SPELL INITIATION ONLY"):
+Delivered per user directives ("Alright, Let's work on our humans. Start generating", "[REDACTED — revoked credential, see SECURITY incident 2026-09-26] Generate the human", "nano banana pro", "Lets do 4 directions, FF5 sprite style, generated in nano II, 12 sprites at a time... Lets make it more of a serious chibi", "ONE CREATURE / DEMOGRAPHIC AT A TIME WITH INVARIANT UNIFORM SCALE", "DEDICATED HAULING / CARRYING POSE", "12 SPRITES AT A TIME WITH FIRST SHEET AS IMAGE REFERENCE", "ZERO FLYING PROJECTILES ON SPRITE SHEETS; SPELL INITIATION ONLY"):
 - **100% Google Nano Banana Pro (`gemini-3-pro-image`) Generation**:
   - Leveraged the user's validated Gemini API key directly against Google Nano Banana Pro (`models/gemini-3-pro-image`) via `tools/generate_nano_banana_pro.js`.
   - First produced master 12-sprite walk reference generation (`art/raw/human_male_pro_walk.png` and `human_male_pro_4d_walk.png`).

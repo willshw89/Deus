@@ -1,0 +1,42 @@
+{
+    "schema":  "deus.security_incidents.v1",
+    "policy":  "docs/SECURITY_AND_SECRETS.md section 6 step 4: sanitized post-mortem entries only. Never record a credential value, prefix, or hash here.",
+    "incidents":  [
+                      {
+                          "id":  "SEC-2026-09-26-01",
+                          "date_found":  "2026-09-26",
+                          "found_by":  "Lane Z (OPS.70.02 secrets/dependency scanner), first real-repo scan; escalation tasks/OPS.70.02/lane-z/escalation.md on task/lane-z at 7fe90dd2",
+                          "credential_type":  "Google Gemini API key (Google-API-key-shaped token), hard-coded",
+                          "value_recorded":  false,
+                          "locations":  [
+                                            {
+                                                "path":  "tools/generate_nano_banana_pro.js",
+                                                "line":  14,
+                                                "context":  "hard-coded fallback in API_KEY = process.env.GEMINI_API_KEY || \u003cliteral\u003e"
+                                            },
+                                            {
+                                                "path":  "docs/archive/STATUS_LEDGER_20260925.md",
+                                                "line":  3682,
+                                                "context":  "same token pasted into an archived ledger entry (AR-010 section)"
+                                            }
+                                        ],
+                          "first_introduced":  {
+                                                   "commit":  "224b1b36",
+                                                   "date":  "2026-09-19T21:04:24-05:00",
+                                                   "note":  "first commit whose diff adds the fallback line in tools/generate_nano_banana_pro.js"
+                                               },
+                          "exposure":  "Private GitHub repository willshw89/Deus. The token remains in git history of main and in the trees of the task/salvage branches cut before the fix (80 of 81 local/origin refs at time of finding).",
+                          "actions_taken":  [
+                                                "Removed from the working tree on main in the commit that adds this record on task/lane-z (sha filled in by the follow-up commit): tools/generate_nano_banana_pro.js now reads process.env.GEMINI_API_KEY only and exits with a clear error when it is unset; the docs occurrence is replaced by a redaction marker.",
+                                                "Full tracked-tree search after the fix: 0 occurrences."
+                                            ],
+                          "runbook":  {
+                                          "revocation":  "PENDING: Owner to revoke key via the provider console",
+                                          "history_purge":  "DECLINED pending Owner: no history rewrite or force push approved",
+                                          "verification":  "main tree clean after the fix; older branches carry the token until they merge main; git history retains it (known, accepted pending Owner)"
+                                      },
+                          "status":  "OPEN: Owner to revoke key; history purge declined pending Owner",
+                          "follow_up":  "OPS.70.02 scanner to support a baseline/allowlist keyed by fingerprint (hash, never the value) so this known historical finding does not block, while any new finding still fails."
+                      }
+                  ]
+}
