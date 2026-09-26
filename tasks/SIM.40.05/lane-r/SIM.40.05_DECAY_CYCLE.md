@@ -157,8 +157,8 @@ If `k < 1`, the site keeps whole structures maintained in a deterministic triage
 ### R-01.8 Ledger entries and SRD
 
 - Losing HP is not a mass transfer; it books nothing. Mass moves only when an element sheds fines (R-02.3), breaks (Lane Q's collapse path) or weathers after breaking. Every such move is listed in "Structure stages".
-- **SRD baseline (DEC-018).** SRD object Armor Class by material (Cloth, paper, rope 11; Crystal, glass, ice 13; Wood, bone 15; Stone 17; Iron, steel 19; Mithral 21; Adamantine 23; `game/data/srd51/rules.json:6962`) and SRD object hit points by size (`rules.json:7016`) stay the baseline for `maxHP` and AC; Lane Q maps them to elements. Decay only lowers HP over time on top of them.
-- **Damage threshold.** The SRD says damage below an object's damage threshold "is considered superficial and doesn't reduce the object's hit points" (`rules.json:7167`). Decay is not damage from an attack or effect, so this design lets decay lower HP regardless of the threshold; otherwise a castle wall with a threshold would never decay, contradicting V138 (`docs/VISION.md:132`). This is a design choice, flagged for the reviewer.
+- **SRD baseline (DEC-018).** SRD object Armor Class by material (Cloth, paper, rope 11; Crystal, glass, ice 13; Wood, bone 15; Stone 17; Iron, steel 19; Mithral 21; Adamantine 23; `game/data/srd51/rules.json:6962`) and SRD object hit points by size (`game/data/srd51/rules.json:7025`) stay the baseline for `maxHP` and AC; Lane Q maps them to elements. Decay only lowers HP over time on top of them.
+- **Damage threshold.** The SRD says damage below an object's damage threshold "is considered superficial and doesn't reduce the object's hit points" (`game/data/srd51/rules.json:7167`). Decay is not damage from an attack or effect, so this design lets decay lower HP regardless of the threshold; otherwise a castle wall with a threshold would never decay, contradicting V138 (`docs/VISION.md:132`). This is a design choice, flagged for the reviewer.
 
 ## Structure stages
 
@@ -244,7 +244,7 @@ This section answers R-03: what happens to loose items, remains and metal. It co
 |---|---|---|
 | `DEUS_Items.js:7` | `@plugindesc [DEUS Items] Ground item entities, inventory stacks, material properties, decay rates, and container storage.` | The header claims decay rates; there is no item age, condition or decay code (DEC-2). |
 | `DEUS_Anim.js:77` | `const REMAINS_HOURS = 12;` | Remains are a sprite entry kept 12 game hours (catalog `"remainsHours": 12`, `game/data/DEUS_WorldCatalog.json:9922`)... |
-| `DEUS_Anim.js:1162` | `until: nowMinutes() + Math.round(remainsHours() * 60)` | ...then removed (`DEUS_Anim.js:1260`, `list.splice(i, 1);`), leaving nothing (DEC-3). |
+| `DEUS_Anim.js:1162` | `until: nowMinutes() + Math.round(remainsHours() * 60)` | ...then removed (`DEUS_Anim.js:1261`, `list.splice(i, 1);`), leaving nothing (DEC-3). |
 | `DEUS_Anim.js:78` | `const REMAINS_CAP = 200;` | Past 200, the oldest remains are dropped (`DEUS_Anim.js:1097`). |
 | `DEUS_Anim.js:1147` | `if (!cols \|\| !u.area \|\| !W.isDisplayed(u)) {` | A death off-screen leaves no remains at all. Remains depend on the view, which DEC-012's sim/render split forbids. |
 | `DEUS_Combat.js:1073` | `if (w && w.unit(victim.id)) w.removeUnit(victim.id);` | The dead unit is deleted; its body mass goes nowhere (REP-2). |
@@ -295,9 +295,9 @@ Default lives, sy, unattended (design defaults; real-world orders of magnitude):
 
 **SRD links.**
 - *Gentle repose*: "the target is protected from decay" for 10 days (`game/data/srd51/spells.json:8417`). It pauses the remains clock: `d0 += 10 game days`. Under D-1 (b) that is 10 sy; under (a) it is 10 / N sy.
-- Time limits that assume a body persists: *raise dead* "dead no longer than 10 days" (`spells.json:13455`), *resurrection* "no more than a century" (`spells.json:14025`), *true resurrection* 200 years (`spells.json:16818`). The remains record keeps its `personId` **anchor** for at least `anchorYears` (default 200 sy) even after all its mass has become soil: a zero-mass record, so no matter is invented and the SRD windows still have a target (TR-6).
-- *Speak with dead* needs a corpse that "must still have a mouth" (`spells.json:15402`): true while the skull is present (stage FRESH or SKELETAL).
-- *Animate dead* uses bones or a corpse (`spells.json:1838`): it takes the REMAINS record's mass into a BODY (Lane W's transform); nothing is created.
+- Time limits that assume a body persists: *raise dead* "dead no longer than 10 days" (`game/data/srd51/spells.json:13455`), *resurrection* "no more than a century" (`game/data/srd51/spells.json:14025`), *true resurrection* 200 years (`game/data/srd51/spells.json:16818`). The remains record keeps its `personId` **anchor** for at least `anchorYears` (default 200 sy) even after all its mass has become soil: a zero-mass record, so no matter is invented and the SRD windows still have a target (TR-6).
+- *Speak with dead* needs a corpse that "must still have a mouth" (`game/data/srd51/spells.json:15402`): true while the skull is present (stage FRESH or SKELETAL).
+- *Animate dead* uses bones or a corpse (`game/data/srd51/spells.json:1838`): it takes the REMAINS record's mass into a BODY (Lane W's transform); nothing is created.
 
 ### R-03.5 Bone, stone, glass and ceramic items
 
@@ -329,10 +329,10 @@ Scaled by catalog `corrosionResistance` (iron 30 at `game/data/DEUS_WorldCatalog
 
 **SRD corrosion (DEC-018: SRD numbers first, physics on top).**
 - Rust monster, Rust Metal: a nonmagical metal weapon that hits it "takes a permanent and cumulative -1 penalty to damage rolls. If its penalty drops to -5, the weapon is destroyed" (`game/data/srd51/creatures.json:30549`). Each -1 books `T(ITEM→OXIDE, FE, floor(m_fe / 5), "srd.rust_metal")`, and destruction books the remainder.
-- Rust monster, Antennae: "If the object isn't being worn or carried, the touch destroys a 1-foot cube of it"; armor loses 1 AC per touch and is destroyed at AC 10 (`creatures.json:30573`). A 1-foot cube of iron is about 490 lb = 7,840 mu: `T(ITEM or BUILT→OXIDE, FE, min(7,840, m), "srd.antennae")`. Armor loses `m / (AC_base − 10)` per touch.
-- Black pudding and gray ooze corrode metal (and the pudding wood) by eating it (`creatures.json:28401`, `:28733`). Metal goes to OXIDE; eaten wood goes to the creature (`T(ITEM→BODY)`, Lane W).
-- *Mending* "repairs a single break or tear in an object" no larger than 1 foot (`spells.json:11589`). It restores a broken item's condition, but it cannot restore mass that has become OXIDE or rotted away. No matter is created.
-- *Creation* makes objects that last by material, down to 1 minute for adamantine or mithral (`spells.json:5091`): a CONJURED source at casting and a CONJURED sink at expiry (DEC-018's PM default). Decay never turns conjured matter into lasting residue: any residue of a conjured object inherits its expiry and is sunk with it.
+- Rust monster, Antennae: "If the object isn't being worn or carried, the touch destroys a 1-foot cube of it"; armor loses 1 AC per touch and is destroyed at AC 10 (`game/data/srd51/creatures.json:30573`). A 1-foot cube of iron is about 490 lb = 7,840 mu: `T(ITEM or BUILT→OXIDE, FE, min(7,840, m), "srd.antennae")`. Armor loses `m / (AC_base − 10)` per touch.
+- Black pudding and gray ooze corrode metal (and the pudding wood) by eating it (`game/data/srd51/creatures.json:28402`, `:28734`). Metal goes to OXIDE; eaten wood goes to the creature (`T(ITEM→BODY)`, Lane W).
+- *Mending* "repairs a single break or tear in an object" no larger than 1 foot (`game/data/srd51/spells.json:11589`). It restores a broken item's condition, but it cannot restore mass that has become OXIDE or rotted away. No matter is created.
+- *Creation* makes objects that last by material, down to 1 minute for adamantine or mithral (`game/data/srd51/spells.json:5091`): a CONJURED source at casting and a CONJURED sink at expiry (DEC-018's PM default). Decay never turns conjured matter into lasting residue: any residue of a conjured object inherits its expiry and is sunk with it.
 
 ### R-03.7 Durable relics and buried finds
 
@@ -583,7 +583,7 @@ A salvage job (owned by the SIM.50.08 and SIM.50.09 job systems) takes matter fr
 - SCRAP yields metal items that can be smelted (recycling existing metal). OXIDE yields nothing (ore guard rule 2).
 - Robbing a FOUNDATION member is allowed (people do dig out old foundations), but it leaves a `robbed` provenance flag on the cells (TR-8), so the plan still reads in the soil.
 
-**SRD tools for the same work (DEC-018, mass-conserving).** *Fabricate* converts "raw materials into products of the same material" (`game/data/srd51/spells.json:6848`): `T(RUBBLE→ITEM)` with the same by-mass rule. *Stone shape* reshapes a stone section "no more than 5 feet in any dimension" (`spells.json:15757`): it can re-form a damaged BUILT section without adding mass. *Move earth* reshapes "dirt, sand, or clay" and "can't manipulate natural stone or stone construction" (`spells.json:12114`): it can strip the soil off a mound (a SOIL transfer), and if structures shift, Lane Q rechecks them. *Wall of stone* made permanent (`spells.json:17322`) enters as a CONJURED source and then decays as ordinary stone.
+**SRD tools for the same work (DEC-018, mass-conserving).** *Fabricate* converts "raw materials into products of the same material" (`game/data/srd51/spells.json:6848`): `T(RUBBLE→ITEM)` with the same by-mass rule. *Stone shape* reshapes a stone section "no more than 5 feet in any dimension" (`game/data/srd51/spells.json:15757`): it can re-form a damaged BUILT section without adding mass. *Move earth* reshapes "dirt, sand, or clay" and "can't manipulate natural stone or stone construction" (`game/data/srd51/spells.json:12114`): it can strip the soil off a mound (a SOIL transfer), and if structures shift, Lane Q rechecks them. *Wall of stone* made permanent (`game/data/srd51/spells.json:17322`) enters as a CONJURED source and then decays as ordinary stone.
 
 ### R-07.5 Re-founding on existing foundations (SET-4)
 
@@ -661,9 +661,9 @@ Real time at 1x is `sy × DPY × 240 s`. At ADR-003's best-effort 16x speed (ADR
 
 | SRD limit | Under (b) | Under (a), N = 20 | Under (a), N = 336 |
 |---|---|---|---|
-| *gentle repose* 10 days (`spells.json:8417`) | 10 sy | 0.5 sy | 0.03 sy |
-| *raise dead* 10 days (`spells.json:13455`) | 10 sy | 0.5 sy | 0.03 sy |
-| *resurrection* a century (`spells.json:14025`) | 100 sy | 100 sy | 100 sy |
+| *gentle repose* 10 days (`game/data/srd51/spells.json:8417`) | 10 sy | 0.5 sy | 0.03 sy |
+| *raise dead* 10 days (`game/data/srd51/spells.json:13455`) | 10 sy | 0.5 sy | 0.03 sy |
+| *resurrection* a century (`game/data/srd51/spells.json:14025`) | 100 sy | 100 sy | 100 sy |
 
 So under (b) a *raise dead* window outlasts this design's skeletonisation (0.25 sy). That mismatch is a D-1 consequence, recorded here for the Owner, not resolved.
 
