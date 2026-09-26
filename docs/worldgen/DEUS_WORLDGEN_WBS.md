@@ -1,8 +1,8 @@
 # DEUS WorldGen Work Breakdown Structure
 
 **Namespace:** WG  
-**Rev:** 18  
-**IDs:** Stable. Next free in WG.00 is WG.00.17  
+**Rev:** 19  
+**IDs:** Stable. Next free in WG.00 is WG.00.18  
 **Canonical Authority:** the Owner approves; the Coordinator records; the PM signs off.  
 **Status:** CANONICAL ON MAIN  
 **Permanent Project-Control Anchor:** WBS IDs are immutable. Never silently renumber, merge, or reuse them. Once committed, a leaf changes only by status (`PLANNED` → `DONE`) or retirement via `SUPERSEDED`.
@@ -102,6 +102,7 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | **WG.00.14** | Year-0 Contract (INV-SIM-01) | Claude | No pre-Year-0 simulated history at new game. Alias note: work filed under `tasks/WG.00.11/` (commits `37ac57da`, `0859ed3c`, `a8e42502`); folder not renamed. | `DONE-unverified` | |
 | **WG.00.15** | M-GEN-01: Vertical Biome Coupling | Claude | M-GEN-01: vertical biome coupling, plus raising `survey.tested` cap from 12 to 64. | `PLANNED` | |
 | **WG.00.16** | Depth-Shading Revisit After Palette Migration | Claude / Owner | Options memo with harness renders; Owner ruling recorded as update to DEC-006. | `PLANNED` | |
+| **WG.00.17** | Z-Range Configurable Setting & Expansion to 9 Layers | Claude | Make Z-range a single configurable setting in engine core, then expand from 5 to 9 layers (-4..+4: surface 0, four underground -1..-4, four upper +1..+4). Refactor hardcoded spots (DEUS_Levels.js L1137 5 fixed maps, L1805 +2 offset/slice cap 24, all +2/5/24 assumptions). Depends on Lanes K and N merging; inputs: ADR-003 9-layer memory/save/LOD design. Do NOT open code lane yet. | `PLANNED` | |
 
 
 ---
@@ -184,6 +185,7 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | **WG.61.01** | Deterministic 3D Vein WorldGen Generator | Fable | Inject 3D continuous vein clusters into strata matching Balance v0.1 targets. | `QUEUED` (FABLE-20) |
 | **WG.61.02** | Closed-Loop Finite Conservation Ledger | Fable | Runtime tracking of mass conservation across mining, crafting, wear, and salvage. | `QUEUED` (FABLE-20) |
 | **WG.62.01** | Canonical Initial Racial Spawn WorldGen | Fable | Spawn placement: Z-2 Tiefling/Dragonborn, Z-1 Dwarf/Gnome, Z0 Human/Half-Orc, Z+1 Halfling/Half-Elf, Z+2 Elf; seeds 8 multi-hat founders per faction with minimal institutional coverage (cross-ref `SOC.21.01`). | `QUEUED` |
+| **WG.62.02** | Race Home-Layer Assignment in WorldGen | Fable | Procedural spawn placement and native habitat generation for 9 races across 9 Z layers (-4..+4) and 5 vertical biome bands (Surface 0, Upper-1 +1..+2, Upper-2 +3..+4, Lower-1 -1..-2, Lower-2 -3..-4). Soft home layers with cross-layer travel/trade/war. Depends on WG.00.17 and race design doc. | `PLANNED` |
 
 ---
 
@@ -462,7 +464,7 @@ SELECT NEXT UNBLOCKED LEAF
 
 ### M1 — World Generation Foundation
 
-*Milestone membership: WG.00.06, WG.00.07, WG.00.08, WG.00.10, WG.00.14, WG.00.15, WG.61.01, WG.61.02, WG.62.01, WG.84.01, WG.86.01, WG.90.01 (defined in §3 tables above).*
+*Milestone membership: WG.00.06, WG.00.07, WG.00.08, WG.00.10, WG.00.14, WG.00.15, WG.00.17, WG.61.01, WG.61.02, WG.62.01, WG.62.02, WG.84.01, WG.86.01, WG.90.01 (defined in §3 tables above).*
 
 | ID | Title | Status (evidence) | Source | Depends on | Writer → Reviewer | Definition of done | Size | Gate |
 |---|---|---|---|---|---|---|---|---|
@@ -502,7 +504,7 @@ Why (survey 2026-09-26, `main` `d1f9cec5`):
   - DEUS_Fluid steps only the viewed area (L736-745).
   - DEUS_Ecology rolls the current area plus one rotating area (header L22-27).
 
-Rows are numbered in the SIM namespace. **SIM.10 is already history and population** (SIM.10.01/.02), so LOD uses the new band **SIM.30**, and the architecture band is **SIM.00**.
+Rows are numbered in the SIM namespace. **SIM.10 is already history and population** (SIM.10.01/.02), LOD uses band **SIM.30**, the architecture band is **SIM.00**, and structural integrity, collapse & decay use band **SIM.40** (Directive 0021-V §6–§7).
 
 | ID | Title | Status (evidence) | Source | Depends on | Writer → Reviewer | Definition of done | Size | Gate |
 |---|---|---|---|---|---|---|---|---|
@@ -520,6 +522,15 @@ Rows are numbered in the SIM namespace. **SIM.10 is already history and populati
 | SIM.30.03 | **Promotion and demotion with conservation.** Expand a region from its summary to full detail, and collapse it back | PLANNED | ADR-003 | dep: SIM.30.02 | Claude → Grok (mutation) | 1. Property test over 1000 random promote and demote cycles on 3 seeds: every conserved total is exactly equal before and after. 2. `promote(s)` twice from the same seed and state is byte-identical. 3. Named units and history persons are never lost or duplicated. 4. Mutants that leak 1 unit of water, ore or population, or that use unseeded randomness, are caught | L | — |
 | SIM.30.04 | **LOD scheduler and perf budget.** Tick-budget allocation between full and coarse regions, hysteresis on focus changes, and prewarm on approach (shares Lane N's prewarm) | PLANNED | ADR-003; Lane K K3 harness | dep: SIM.30.03 | Claude → Grok | Bench on the reference laptop: full-detail tick and coarse-region tick meet the ADR budgets at 1x and 8x. No frame spike above the budget when focus moves across a region border (Lane K harness) | M | — |
 | SIM.30.05 | **Long-run LOD QA:** mixed-LOD versus all-full detail | PLANNED | ADR-003 | dep: SIM.30.04 | Claude → Grok | On a small fixture world over 100 game years, conserved quantities match exactly, and aggregate statistics (population, resources, water) are within ADR tolerances. Joins GATE as a nightly (OPS.50.06) | M | — |
+| SIM.40.01 | **Support model design** (materials, vertical propagation, span limits, V128 natural rock, V133 change-driven). Specification of load-bearing rules and span capacities | PLANNED | Directive 0021-V §6; V137; ADR-003 | WG.00.17, dep: SIM.00.01 | Claude → Grok (attack) | Support model spec in docs/systems/: which materials bear load, downward propagation through strata and Z layers, span limits for floors/bridges/roofs, natural rock support (V128). Recomputes only near mutations (V133; zero per-tick full-world scans). Grok review artifact approves | M | — |
+| SIM.40.02 | **Collapse event simulation** (downward cascading, rubble/talus mass conservation LIFE-001, V95 impact damage, deep-history DEC-012) | PLANNED | Directive 0021-V §6; V137; LIFE-001; V95 | dep: SIM.40.01 | Claude → Grok | Unsupported cells collapse and cascade downward through Z layers. Conserves mass into rubble or talus (LIFE-001). Damages or kills units and objects below (V95). Leaves physical traces for deep-history (DEC-012). Grok review artifact approves | L | — |
+| SIM.40.03 | **Colonist structural behaviour** (props, pillars, avoid dangerous excavation) | PLANNED | Directive 0021-V §6; V137 | dep: SIM.40.02 | Claude → Grok | Colonist builders and miners respect structural support limits: erect props/pillars, maintain supported spans, and avoid unsafe digging unless overridden. Grok review artifact approves | M | — |
+| SIM.40.04 | **Collapse QA & fixtures** (deterministic cave-in, tall tower +1..+4, mass conservation, perf bound) | PLANNED | Directive 0021-V §6; V137 | dep: SIM.40.02 | Claude → Grok (mutation) | Automated test suite: deterministic cave-in fixture, tall tower collapse across +1..+4, exact mass conservation assertions, and perf benchmark proving zero full-world scan per tick. Mutants for leaked mass and missed triggers caught. Exits 0 | M | — |
+| SIM.40.05 | **Decay model** (unmaintained structure HP loss by material/exposure, roofs fail first, walls fail, feeds collapse) | PLANNED | Directive 0021-V §7; V138; LIFE-001 | SIM.40.01, dep: SIM.00.01 | Claude → Grok | Decay simulation: unmaintained structures lose HP based on material (wood fast, stone slow, metal rusts) and exposure. Roofs fail before walls, feeding into SIM.40.02 collapse. Change-driven, LOD-aware, scheduled in slow ticks. Grok review artifact approves | M | — |
+| SIM.40.06 | **Nature reclaiming** (vegetation invasion, soil/sediment burial, visible stages: intact -> weathered -> overgrown -> collapsed -> buried mound) | PLANNED | Directive 0021-V §7; V138; LIFE-001 | dep: SIM.40.05 | Claude → Grok | Nature reclamation: vegetation spreads into abandoned cells; sediment slowly buries low ruins. Structures progress visibly: intact -> weathered -> overgrown -> collapsed -> buried mound. Grok review artifact approves | M | — |
+| SIM.40.07 | **Item weathering & burial** (rot, rust, sediment burial, durable relics, LIFE-001 mass conservation, LIFE-002 no ore creation) | PLANNED | Directive 0021-V §7; V138; LIFE-001; LIFE-002 | dep: SIM.40.05 | Claude → Grok | Item weathering: loose organic items decompose into soil; metals rust; durable relics become buried finds. Mass strictly conserved (LIFE-001); mineral ore is never generated (LIFE-002). Grok review artifact approves | M | — |
+| SIM.40.08 | **Deep-history decay integration** (summary-level decay for fast-forward, LIFE-003 trace retention) | PLANNED | Directive 0021-V §7; V138; DEC-012; LIFE-003 | SIM.40.05, dep: SIM.30.02 | Claude → Grok | Deep-history fast-forward executes summary decay so ancient sites appear in appropriate decay stages upon discovery. Recognizable traces preserved (foundations, mounds, vaults; LIFE-003). Grok review artifact approves | M | — |
+| SIM.40.09 | **Decay QA & fixtures** (deterministic aging fixture, mass conservation, no ore creation, perf bound) | PLANNED | Directive 0021-V §7; V138 | SIM.40.06, SIM.40.07, dep: SIM.40.08 | Claude → Grok (mutation) | Automated test suite: deterministic fixture aging an abandoned site through all stages, exact mass conservation assertions, zero ore generation verification, and perf benchmark proving zero per-frame scan. Mutants caught. Exits 0 | M | — |
 
 ---
 
@@ -569,13 +580,13 @@ The Owner clarified this on 2026-09-25 at 23:41 CT. **Art is a stream of its own
 | Milestone | Packages | of which OWNER-GATED | Notes |
 |---|---|---|---|
 | M0 Operations & Governance | 43 | 11 | 8 WG.00.12 sub-packages + 35 OPS |
-| M1 World Generation Foundation | 14 | 1 | includes new WG.00.14, WG.00.15, SIM.90.01 |
+| M1 World Generation Foundation | 16 | 1 | includes new WG.00.14, WG.00.15, WG.00.17, WG.62.02, SIM.90.01 |
 | M2 Rendering & Depth | 16 | 4 | includes new WG.00.16 |
-| M3 Simulation | 29 | 2 | band rows (e.g. WG.66.01–08) count as one package each; includes 11 new SIM.00/SIM.30 rows (*Owner-ordered 2026-09-26*) |
+| M3 Simulation | 38 | 2 | band rows (e.g. WG.66.01–08) count as one package each; includes 11 SIM.00/SIM.30 rows plus 9 new SIM.40.01–.09 collapse & decay rows (*Owner-ordered 2026-09-26, Directive 0021-V*) |
 | M4 Civilization & Gameplay | 16 | 16 | every package waits on an Owner decision, playtest or approval |
 | M5 Content & Art (4 stages) | 32 | 15 | Stage 1: 12 (1 gated, a decision only) · Stage 2: 3 (0) · **Stage 3: 12 (all 12 "OWNER-GATED: requires Owner involvement")** · Stage 4: 5 (2 gated, Owner visual verification) |
 | M6 Release | 9 | 3 | all new REL IDs |
-| **Total** | **159** | **52** | Band rows stand for about 286 underlying WBS leaves (148 + 11 Owner-ordered 2026-09-26) |
+| **Total** | **170** | **52** | Band rows stand for about 297 underlying WBS leaves |
 
 A **package** here is one table row. Band rows (such as WG.22.01–25) keep their underlying leaf IDs and are split into leaf lanes when they start. The counts were produced by a script over this file's tables.
 
@@ -684,6 +695,7 @@ Notes:
 
 | Rev | Date | Change |
 |:---:|:---:|:---|
+| 19 | 2026-09-26 | Directive 0021-V: Record DEC-013 (9 Z layers, 9 races, one home layer per race, 5 biome bands). Added WG.00.17 (Z-range configurable setting / 9 layers), WG.62.02 (Race home-layer assignment in WorldGen), SIM.40.01–SIM.40.04 (Structural integrity & collapse), and SIM.40.05–SIM.40.09 (Urban decay & nature reclamation). Next free WG.00 is WG.00.18. |
 | 18 | 2026-09-26 | Owner approved master WBS ('Follow the WBS', 00:00 CT). Added §5 master packages (OPS, SIM, GP, REL); minted WG.00.14 (Year-0, alias tasks/WG.00.11), WG.00.15, WG.00.16, WG.20.02, WG.32.02; SIM.00/SIM.30 Owner-ordered 2026-09-26 (DEC-012); DW crosswalk fix; Rule 1/3/4 notes; closedBy column. OD-1..OD-18 OPEN (directive 0018-R). |
 | 17 | 2026-09-25 | Rev 16 row misdescribed WG.00.13; WG.00.13 = Master Palette Engine Migration, consolidation is WG.00.12. Align roles with CANONICAL_ROLES, DEC-001 and DEC-007 (Directive 001-L). |
 | 16 | 2026-09-25 | Add WG.00.13 (Consolidation, Machine Governance & Backup Infrastructure / Directive 001). |

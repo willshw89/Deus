@@ -165,3 +165,26 @@ Every decision item recorded in this log must provide:
   1. **Sim/render split:** The simulation becomes plain JavaScript modules with ZERO dependency on RPG Maker, PIXI, or the DOM. Headless node runs the entire simulation on its own fixed tick (10 Hz). RPG Maker is purely an observer/renderer that consumes state snapshots and issues player orders into a command queue.
   2. **Level-of-Detail (LOD):** The active player/camera region simulates at full tick fidelity. Distant regions simulate as coarse aggregate summaries at reduced frequency (water volume, populations, biomass, temperature). Promotion from coarse to fine is deterministic (same seed + state = identical world); demotion conserves all mass, energy, and population.
   3. **Roadmap:** Implemented in milestone M3 (SIM.00 and SIM.30 packages). Lane M writes the architectural decision record (ADR-003).
+
+---
+
+### Decision `DEC-013`: Nine Z Layers, Nine Races, One Home Layer per Race, and Five Biome Bands
+- **Date Logged:** 2026-09-26
+- **Status:** `DECIDED` (Owner ruling 00:34 & 00:37 CT, directive 0021-V)
+- **Decider:** Owner
+- **Summary:**
+  1. **Nine Z Layers:** The world simulation and presentation expand to 9 vertical Z layers (up from 5 layers, formerly -2..+2).
+  2. **Nine Races with One Home Layer:** Exactly 9 races exist in the world, each assigned one native home layer where its settlements and natural habitat generate.
+  3. **Soft Home Boundaries:** "Home layer" defines where a race's settlements and native populations materialize; it is not a hard barrier. Races may travel, explore, trade, migrate, and engage in conflict across all Z layers.
+  4. **Five Vertical Biome Bands:** The 25 pipeline biomes are partitioned into 5 vertical bands of 5 biomes each:
+     - **Band Surface:** Layer 0 (5 biomes)
+     - **Band Upper-1:** Layers +1 and +2 (5 biomes)
+     - **Band Upper-2:** Layers +3 and +4 (5 biomes)
+     - **Band Lower-1:** Layers -1 and -2 (5 biomes)
+     - **Band Lower-2:** Layers -3 and -4 (5 biomes)
+     The two layers in each band share that band's biome set.
+- **Open Sub-Questions (with PM defaults):**
+  - **Z-Range Coordinate Mapping:** Default `-4..+4` (surface = 0, four underground layers `-1..-4`, four upper layers `+1..+4`). Status: `OPEN` (PM default).
+  - **Race-to-Layer Mapping:** Which specific race occupies which home layer. Status: `OPEN` (no default; Owner assigns).
+  - **Strata per Layer:** Remains at 5 strata per layer unless testing demonstrates a need to modify. Status: `OPEN` (PM default).
+  - **Biome Assignment per Band:** Mapping of the 25 specific biomes into the 5 bands. Status: `OPEN` (Owner assigns).
