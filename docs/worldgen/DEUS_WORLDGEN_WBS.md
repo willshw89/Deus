@@ -1,8 +1,8 @@
 # DEUS WorldGen Work Breakdown Structure
 
 **Namespace:** WG  
-**Rev:** 23  
-**IDs:** Stable. Next free in WG.00 is WG.00.24  
+**Rev:** 24  
+**IDs:** Stable. Next free in WG.00 is WG.00.25  
 **Canonical Authority:** the Owner approves; the Coordinator records; the PM signs off.  
 **Status:** CANONICAL ON MAIN  
 **Permanent Project-Control Anchor:** WBS IDs are immutable. Never silently renumber, merge, or reuse them. Once committed, a leaf changes only by status (`PLANNED` → `DONE`) or retirement via `SUPERSEDED`.
@@ -109,6 +109,7 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | **WG.00.21** | Layer Occlusion Culling Rule & Exposed-Area Bound | Claude / Grok | Anything covered by opaque upper layer is not drawn (tiles, units, effects). Draw cost bounded by exposed visible screen area (V133). Traverses from viewed layer down to first opaque surface; cells under solid cover cost zero. Benchmark: 32-layer stress scene costs approx same as 5 layers when solid. (DEC-018; dep: Lane K follow-up, WG.00.17). | `PLANNED` | |
 | **WG.00.22** | Multi-Depth Presentation Catalogue Slots & Asset Placeholders | Gemini / Codex | Catalogue entries and blank tile/sprite slots for depth cues 1–6: visible inner side walls of openings, rim shadows cast onto lower layers, darker baked tile palettes, height edges and ramps, hanging/falling props (roots, vines, stalactites, waterfalls, dust, light shafts), deep light sources against darkness. Data manifests and blank slots only; zero art generation (DEC-007; DEC-011 amendment). | `PLANNED` | |
 | **WG.00.23** | Overlook Zoom-Out Multi-Layer View (Owner-Led Placeholder) | Owner / Claude | Future overlook zoom-out view where units on multiple layers are visibly moving. Sequenced post-K, post-N, post-32-layer refactor, and post-benchmark headroom proof. Simplified/low-detail sprites and capped animation rates at far zoom. DEC-011 1:1 scale lock governs now. | `PLANNED` | |
+| **WG.00.24** | Custom Multi-Layer PixiJS Map Renderer (Fallback) | Owner / Claude | Benchmark-gated fallback map renderer inside RMMZ Scene_Map. Replaces stock Spriteset_Map/Tilemap if stock renderer cannot meet 32 layers, occlusion culling, and 1:1 flat rendering within frame budget. Menus, dialogue, save, database, and battle remain stock RMMZ. Gated on Lane K normal + 0019-T stress baselines, §18 occlusion benchmark, and Owner go/no-go. Zero code opened before benchmarks. (DEC-017; Directive 0028-AC §4). | `PLANNED` | |
 
 
 ---
@@ -130,8 +131,8 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 
 | WBS Leaf | Title | Owner | Scope & Deliverables | Status |
 | :--- | :--- | :---: | :--- | :---: |
-| **WG.20.01** | Semantic Asset Schema & Naming Spec | Gemini | Schema: `BIOME_Z_CATEGORY_TYPE_VARIANT_STATE`; consumes all `VISUAL_REQUIRED` states from natural systems (groundwater, drainage, soil moisture, succession, wildfire, snowpack, geomorphology, karst, geothermal). | `PLANNED` |
-| **WG.20.02** | Unified Art Catalogue | Claude | Unified machine-readable manifest (`game/data/DEUS_ArtCatalogue.json` + `docs/art/catalogue/*.md`) of every tile and sprite needed. Ingests ASSET_MANIFEST, AssetIndex, WorldCatalog, SEG-00-18, AR rows. Contains no image data. | `PLANNED` |
+| **WG.20.01** | Semantic Asset Schema & Naming Spec | Gemini | Schema: `BIOME_Z_CATEGORY_TYPE_VARIANT_STATE`; consumes all `VISUAL_REQUIRED` states from natural systems. **NO ART GENERATION, BY ANYONE**. | `PLANNED` |
+| **WG.20.02** | Unified Art Catalogue (Lane S) | Claude / Grok | Machine-readable manifest (`art/catalogue/**`, `docs/art/catalogue/**`, `tools/art/build_catalogue.js`, `tools/art/test_catalogue.js`, `tools/art/fixtures/catalogue/**`). Governed by DEC-016 scale chart and DEC-013 geometry (5 ft cells, 10 ft layers, 5 strata of 2 ft per layer, 32 layers -16..+15 in `art/catalogue/geometry.json`). Organised across 25 biomes in 5 vertical bands. Adds slots for edge/cliff strips (1–5 strata), ramps/slopes, decay-stage overlays, opening wall faces, rim shadows, depth palettes, hanging props, deep light sources. Schema `deus-art-catalogue/1.1.0`, deterministic `build_catalogue.js --check`, 100% coverage, ≥10 Grok mutants killed. Contains entries/slots only, status MISSING, zero image data. **NO ART GENERATION, BY ANYONE**. | `PLANNED` |
 | **WG.21.01** | Ground Autotile & Macro-Variety Rules | Gemini | Min 1 core autotile + 3–6 subtle variants + 2–4 low-frequency breakups per biome; consumes 4 soil moisture bands (`DRY`, `NORMAL`, `MOIST`, `SATURATED`). | `PLANNED` |
 | **WG.21.02** | Flora & Silviculture Variety Rules | Gemini | Min 3 micro-flora + 3 small/medium/large shrubs + 3 tree variants + stump + fallen log; accounts for pioneer succession weeds and charred tree skeletons. | `PLANNED` |
 | **WG.21.03** | Geological Variety Rules | Gemini | Min 3 pebble clusters + 3 small + 3 medium rocks + 2–3 boulders + 2 outcrops + scree; consumes mineral patinas (Cu, Fe) and karst dissolution textures. | `PLANNED` |
@@ -149,8 +150,8 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | **WG.30.01** | Master Sheet Allocation & Dimensions | Gemini | A1 (water/anim/depth 1..5), A2 (ground/moisture), A3 (buildings), A4 (walls/cliffs), A5 (floors), B–E (props/scatter); pre-allocates slots for all natural systems. | `PLANNED` |
 | **WG.30.02** | Autotile Block Geometric Mapping | Gemini | Formal 2x3 mini-tile mapping for 48px RMMZ autotile reconstruction. | `PLANNED` |
 | **WG.31.01** | Companion Animated Sheet Topology | Gemini | Strict matching coordinate geometry across frames F1, F2, F3 on separate sheets (water, lava, steam, fire). | `PLANNED` |
-| **WG.32.01** | Diagnostic Slotmap Generation (`*_SLOTMAP.png`)| Gemini | Build CLI tool to render transparent grid maps with labeled asset IDs and status overlays. | `PLANNED` |
-| **WG.32.02** | Blank Template Sheets | Claude | Blank template sheets: one empty sheet per catalogue sheet at correct dimensions, with grid, slot IDs, transparent or magenta fill, sidecar JSON (`tools/art_templates/`, `art/templates/`). | `PLANNED` |
+| **WG.32.01** | Diagnostic Slotmap Generation (`*_SLOTMAP.png`)| Gemini | Build CLI tool to render transparent grid maps with labeled asset IDs and status overlays. **NO ART GENERATION, BY ANYONE**. | `PLANNED` |
+| **WG.32.02** | Blank Template Sheets (Lane T) | Claude / Grok | Blank template generator (`tools/art/make_blank_templates.js`, `tools/art/test_blank_templates.js`, `tools/art/fixtures/templates/**`, `art/templates/**`). Consumes catalogue; generates one empty template sheet per catalogue sheet with grid, slot IDs, background outside master palette; byte-identical on rerun. **NO ART GENERATION, BY ANYONE**. | `PLANNED` |
 | **WG.33.01** | Manifest ↔ Atlas Bi-Directional Integrity Checker | Gemini | Automated tool asserting 100% agreement between JSON manifest, World-State Registry (`DEUS_WORLD_STATE_REGISTRY.md`), and atlas slots. | `PLANNED` |
 
 ---
@@ -161,8 +162,9 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | :--- | :--- | :---: | :--- | :---: |
 | **WG.40.01** | Prompt Compilation Architecture | Gemini | Standardized prompt format declaring exact slot dimensions, palette ramps, and references. (SUSPENDED under DEC-007) | `PLANNED` |
 | **WG.40.02** | Automated Source Extraction & Palette Snapper | Gemini | Python/Node pipeline to extract raw cells and snap strictly to `deus_master_world_palette_v1.hex` (limited to Owner-supplied art). | `PLANNED` |
-| **WG.41.01** | Runtime Sheet Insertion & Versioning | Gemini | Scripted insertion into pre-assigned blank sheet slots; update status in manifest. | `PLANNED` |
+| **WG.41.01** | Placement & Validator Tooling (Lane U) | Claude / Grok | Tooling pipeline (`tools/art/place_art.js`, `tools/art/validate_art.js`, `tools/art/test_place_art.js`, `tools/art/fixtures/place/**`, `docs/art/APPROVALS_FORMAT.md`). `art/APPROVALS.md` is Owner-only. Validates Owner-approved art against scale chart (DEC-016), master palette, dimensions, template residue; places pixels 1:1 into template slots; DERIVED_PENDING for variants. Tests use synthetic run-time blocks only. **NO ART GENERATION, BY ANYONE**. | `PLANNED` |
 | **WG.41.02** | Owner Review & Approval Pipeline | Gemini / User | Playtest inspection; user explicit YEA / NAY gate for every visual pack. | `PLANNED` |
+
 
 ---
 
@@ -549,7 +551,17 @@ Rows are numbered in the SIM namespace. **SIM.10 is already history and populati
 | SIM.50.09 | **Settlement lifecycle and ruins resettlement** (growth, abandonment, re-founding on ruins) | PLANNED | Directive 0021-V Addendum §14; V142; LIFE-003 | SIM.50.08, dep: SIM.40.08 | Claude → Grok | Factions expand camps into towns, contract or abandon under war/famine/disease. Later settlers found new homes on existing stone ruins, reusing foundations and materials | M | — |
 | SIM.50.10 | **Catastrophic geological events** (earthquakes, karst sinkholes, volcanic eruptions, caldera breaches) | PLANNED | Directive 0021-V Addendum §14; V142; WG.63.03 | SIM.50.01, dep: SIM.40.02 | Claude → Grok | Rare catastrophic events alter geology: earthquakes trigger mass cave-ins, underground karst cavities collapse into surface sinkholes, volcanic fissures erupt lava. Leaves geomorphic scars (WG.63.04) | M | — |
 
+#### M3.4 Hyper-realistic SRD spell effects (SIM.60). Owner-ordered 2026-09-26 (DEC-018, Directive 0028-AC §5)
+
+| ID | Title | Status (evidence) | Source | Depends on | Writer → Reviewer | Definition of done | Size | Gate |
+|---|---|---|---|---|---|---|---|---|
+| SIM.60.01 | **SRD spell-effect audit** (`docs/audits/SRD_SPELL_EFFECT_AUDIT.md`, `docs/audits/srd_spell_effect_audit.json`). Classify all 327 spells in `game/data/srd51/spells.json` by world systems needed: heat, force, water, cold, earth, light, life, NONE. Quotes SRD baseline fields, names WBS deps, drafts primitive list. Docs only; no dependencies; Lane P (PM) | PLANNED | Directive 0028-AC §5; DEC-018 | — | Claude → Grok | Exhaustive audit report and 100% JSON classification of all 327 spells; drafts primitive list; zero code modifications; Grok review artifact approves | M | — |
+| SIM.60.02 | **Spell-effect schema** (data-driven JSON Schema of reusable primitives: ignite, heat flux, impulse/blast via SIM.40.01, fluid source/sink, temperature/freeze, mass-conserving terrain edit, light, growth/decay) | PLANNED | Directive 0028-AC §5; DEC-018 | dep: SIM.60.01 | Claude → Grok | Validated JSON Schema in docs/schemas/spells/ and data fixtures; zero per-spell code; Grok review artifact approves | M | — |
+| SIM.60.03 | **Spell-effect runtime in headless sim core** (physical propagation of heat, impulse, fluids, freezing, terrain alteration decoupled from presentation frames) | PLANNED | Directive 0028-AC §5; DEC-018 | SIM.60.02, SIM.00.03, SIM.50.05, SIM.50.02, SIM.40.01–.02, GP.07.02, SIM.50.06 | Claude → Grok | Core headless runtime processes spell effects physically; SRD baseline stats untouched; mass conserved into rubble/water/ice; Grok review artifact approves | L | — |
+| SIM.60.04 | **Spell-effect QA fixtures** (fireball floor breach, flood down stairwell, lake freeze, stone wall vs mass ledger, SRD stat invariance) | PLANNED | Directive 0028-AC §5; DEC-018 | dep: SIM.60.03 | Claude → Grok (mutation) | Automated test suite: fireball ignites wooden floor and breaches to layer below, flood cascades down stairwell, lake freezes, wall of stone matches mass ledger, SRD damage/range unchanged. Mutants caught. Exits 0 | M | — |
+
 ---
+
 
 ### M4 — Civilization & Gameplay (slices, society, player layer)
 
@@ -599,12 +611,12 @@ The Owner clarified this on 2026-09-25 at 23:41 CT. **Art is a stream of its own
 |---|---|---|---|
 | M0 Operations & Governance | 43 | 11 | 8 WG.00.12 sub-packages + 35 OPS |
 | M1 World Generation Foundation | 18 | 1 | includes new WG.00.14, WG.00.15, WG.00.17, WG.00.19, WG.00.20, WG.62.02, SIM.90.01 |
-| M2 Rendering & Depth | 19 | 5 | includes new WG.00.16, WG.00.18, WG.00.21, WG.00.23 |
-| M3 Simulation | 49 | 2 | band rows (e.g. WG.66.01–08) count as one package each; includes 11 SIM.00/SIM.30 rows, 10 SIM.40.01–.10 collapse/decay/reproduction rows, plus 10 new SIM.50.01–.10 living-world rows (*Owner-ordered 2026-09-26, Directive 0021-V §14*) |
+| M2 Rendering & Depth | 20 | 6 | includes new WG.00.16, WG.00.18, WG.00.21, WG.00.23, WG.00.24 |
+| M3 Simulation | 53 | 2 | band rows (e.g. WG.66.01–08) count as one package each; includes 11 SIM.00/SIM.30 rows, 10 SIM.40.01–.10 collapse/decay/reproduction rows, 10 SIM.50.01–.10 living-world rows, plus 4 new SIM.60.01–.04 spell-effect rows (*Owner-ordered 2026-09-26, Directive 0028-AC §5*) |
 | M4 Civilization & Gameplay | 17 | 16 | includes new GP.07.02 cross-layer 3D targeting; every package waits on an Owner decision, playtest or approval |
 | M5 Content & Art (4 stages) | 33 | 15 | Stage 1: 13 (includes WG.00.22; 1 gated, a decision only) · Stage 2: 3 (0) · **Stage 3: 12 (all 12 "OWNER-GATED: requires Owner involvement")** · Stage 4: 5 (2 gated, Owner visual verification) |
 | M6 Release | 9 | 3 | all new REL IDs |
-| **Total** | **188** | **53** | Band rows stand for about 298 underlying WBS leaves |
+| **Total** | **193** | **54** | Band rows stand for about 298 underlying WBS leaves |
 
 A **package** here is one table row. Band rows (such as WG.22.01–25) keep their underlying leaf IDs and are split into leaf lanes when they start. The counts were produced by a script over this file's tables.
 
@@ -713,6 +725,7 @@ Notes:
 
 | Rev | Date | Change |
 |:---:|:---:|:---|
+| 24 | 2026-09-26 | Directive 0028-AC: New authority split (PM launches/merges directly); recorded DEC-016 (Scale chart governing authority), DEC-017 (RMMZ shell & custom PixiJS fallback), DEC-018 (Hyper-realistic SRD spells), DEC-019..022 (renumbered Addendum items); added SIM.60.01–SIM.60.04 (SRD spell effects), WG.00.24 (Custom multi-layer PixiJS map renderer fallback); updated Lanes S (WG.20.01/.02), T (WG.32.01/.02), U (WG.41.01) DoD and scope ('NO ART GENERATION, BY ANYONE'). Next free WG.00 is WG.00.25. |
 | 23 | 2026-09-26 | Directive 0021-V Addendum (§§15–20): Added WG.00.19 (In-Layer Height Presentation & Multi-Strata Movement), WG.00.20 (Seamless Inter-Layer Ramps), WG.00.21 (Layer Occlusion Culling Rule), WG.00.22 (Multi-Depth Presentation Catalogue Slots), WG.00.23 (Overlook Zoom-Out Multi-Layer View), and GP.07.02 (Cross-Layer 3D Targeting, Ballistics & Volume Damage). Next free WG.00 is WG.00.24. |
 | 22 | 2026-09-26 | Directive 0021-V Addendum (§14): Added WG.00.18 (Layer-View presentation Owner-led placeholder), SIM.50.01 (Living World Gap Audit), and SIM.50.02–SIM.50.10 (Nine living-world physical simulation systems across 32 layers). Next free WG.00 is WG.00.19. |
 | 21 | 2026-09-26 | Directive 0021-V Addendum (§12–§13): DEC-013 amended (32 Z layers supersede 9, range -16..+15, 320 ft height, 10 ft layers, 2 ft strata); updated WG.00.17 (32-layer Z-range refactor with sparse storage and 9-layer test support), WG.62.02 (race home-layer ranges across 5 bands/32 layers), and SIM.40.01 (cross-layer blast propagation and material attenuation). |

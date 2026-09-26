@@ -227,7 +227,44 @@ Every decision item recorded in this log must provide:
 
 ---
 
-### Decision `DEC-016`: In-Layer Height (Strata) Presentation & Movement Rules
+### Decision `DEC-016`: The scale chart is the governing size authority for the art catalogue, templates and placement
+- **Date Logged:** 2026-09-26
+- **Decider:** Owner (00:11 CT, "the most important is the scale chart"; relayed by PM 0019-S/0028-AC)
+- **Status:** `DECIDED`
+- **Ruling:** Every catalogue entry's pixel size, envelope, footprint and anchor derive from the scale chart (`art/reference/DEUS_HUMAN_SCALE_STRIP_V1.png`, whose numeric source is `game/data/DEUS_ScaleRegistry.json`; the two are not independent evidence), citing one chart row per entry. The catalogue builder (`tools/art/build_catalogue.js`), template generator (`tools/art/make_blank_templates.js`) and placement validator (`tools/art/validate_art.js`) enforce it. Disagreements with other documents go to the Owner and are never resolved by workers. Sim distances (DEC-013 geometry) govern the simulation. Where geometry and chart imply different px/ft, it is an Owner question (`stratumPx`).
+- **Open:** If "the scale chart" means a different file, the Owner names it and DEC-016 is amended.
+
+---
+
+### Decision `DEC-017`: Keep RMMZ for menus, dialogue, saving, database and battle; fallback map renderer is a custom multi-layer PixiJS renderer inside RMMZ, decided after demo benchmarks
+- **Date Logged:** 2026-09-26
+- **Decider:** Owner (01:38 CT, relayed by PM 0028-AC)
+- **Status:** `DECIDED` (shell). The fallback trigger is `OPEN` until the benchmarks.
+- **Ruling:** RMMZ remains the engine for menus, dialogue, saving, the database and battle screens. If the stock RMMZ map (`Spriteset_Map`/`Tilemap`) cannot meet the goals, the fallback is a **custom multi-layer PixiJS map renderer inside RMMZ**. It replaces map drawing inside `Scene_Map` only; all other scenes, windows, save, database and battle are untouched, so it is not an engine swap. The goals are 32 layers, the §18 occlusion rule, DEC-011 1:1 flat layers, and the stress scene within frame budget. The go/no-go is decided with the Owner after the demo benchmarks: Lane K normal plus 0019-T stress baselines, and the §18 32-vs-5-layer occlusion benchmark. No renderer code lane opens before then.
+- **Consequences:**
+  - ADR-003 Rev 3 adopts this as its exit/fallback path (§13 "Engine Exit Path").
+  - Added WBS placeholder row "Custom multi-layer PixiJS map renderer (fallback)" (`WG.00.24`), gated on Lane K benchmarks and Owner go/no-go.
+  - Benchmark hygiene note: benchmarks share CPU with other workers, so each perf record must note concurrent worker count and CPU %, and go/no-go evidence needs one quiet-machine rerun.
+
+---
+
+### Decision `DEC-018`: SRD spells are hyper-realistic: effects play out physically in the simulation; SRD numbers stay the rules baseline
+- **Date Logged:** 2026-09-26
+- **Decider:** Owner (01:39 CT, relayed by PM 0028-AC)
+- **Status:** `DECIDED`. Per-spell details are `OPEN` pending the audit.
+- **Ruling:** Spell effects play out physically in the living-world simulation:
+  - Fire ignites combustible materials and spreads
+  - Blasts damage structures and can breach floors into lower layers
+  - Water floods and flows
+  - Cold freezes liquid into ice
+  - Earth spells reshape physical terrain strata
+  SRD 5.1 damage, range, saves, area, duration and casting stay the rules baseline, and physical consequences are added on top, never replacing SRD numbers. It is data-driven: one spell-effect schema of reusable primitives, and ZERO per-spell code.
+- **Open Sub-Question (PM default):** Conjured matter (*create water*, *wall of stone*) versus LIFE-001 mass conservation. The default is that conjured matter is an explicitly modelled magical source/sink, logged in the conservation ledger like the rain/evaporation exception.
+- **WBS Integration:** `SIM.60.01` (audit), `SIM.60.02` (schema), `SIM.60.03` (runtime), `SIM.60.04` (QA fixtures).
+
+---
+
+### Decision `DEC-019`: In-Layer Height (Strata) Presentation & Movement Rules
 - **Date Logged:** 2026-09-26
 - **Status:** `DECIDED` (Owner ruling 01:17–01:19 CT, directive 0021-V Addendum §15)
 - **Decider:** Owner
@@ -242,18 +279,18 @@ Every decision item recorded in this log must provide:
 
 ---
 
-### Decision `DEC-017`: Seamless Inter-Layer Ramps and Camera-Follow Behavior
+### Decision `DEC-020`: Seamless Inter-Layer Ramps and Camera-Follow Behavior
 - **Date Logged:** 2026-09-26
 - **Status:** `DECIDED` (Owner ruling 01:21 CT, directive 0021-V Addendum §16)
 - **Decider:** Owner
 - **Summary:**
-  1. **Seamless Transitions:** Ramps and slopes carry units continuously from one layer to the next. A ramp is a run of cells rising one stratum per cell (5 cells = one 10 ft layer). At the top stratum, the unit's Z becomes Z+1 with zero screen transfer, fade, or pause. Depends on Lane N (in-place layer switch) and DEC-016 stratum height offsets.
+  1. **Seamless Transitions:** Ramps and slopes carry units continuously from one layer to the next. A ramp is a run of cells rising one stratum per cell (5 cells = one 10 ft layer). At the top stratum, the unit's Z becomes Z+1 with zero screen transfer, fade, or pause. Depends on Lane N (in-place layer switch) and DEC-019 stratum height offsets.
   2. **Camera-Follow Default:** When the player unit crosses a ramp boundary between layers, the camera view automatically follows the player's current layer. Non-player units crossing simply transfer layer membership lists (Lane K per-frame membership refresh).
   3. **Pathfinding & Construction:** Multi-Z pathfinding treats ramps, stairs, and ladders as traversable layer connectors. Colonists can build ramps. Art catalogue adds ramp/slope pieces per terrain (placeholders only; DEC-007).
 
 ---
 
-### Decision `DEC-018`: Occlusion Rule for Layer Rendering (Zero-Cost Solid Cover)
+### Decision `DEC-021`: Occlusion Rule for Layer Rendering (Zero-Cost Solid Cover)
 - **Date Logged:** 2026-09-26
 - **Status:** `DECIDED` (Owner ruling 01:24 CT, directive 0021-V Addendum §18)
 - **Decider:** Owner
@@ -264,7 +301,7 @@ Every decision item recorded in this log must provide:
 
 ---
 
-### Decision `DEC-019`: Cross-Layer 3D Targeting, Ballistics, and Volume Damage
+### Decision `DEC-022`: Cross-Layer 3D Targeting, Ballistics, and Volume Damage
 - **Date Logged:** 2026-09-26
 - **Status:** `DECIDED` (Owner ruling 01:35 CT, directive 0021-V Addendum §20)
 - **Decider:** Owner
@@ -273,4 +310,5 @@ Every decision item recorded in this log must provide:
   2. **True 3D Geometry:** Range calculation uses true 3D Euclidean distance (5 ft grid cells, 10 ft layer height).
   3. **Vertical Modifiers:** Falling projectiles and dropped objects gain velocity/impact damage based on height fallen; shooting upward incurs a range penalty.
   4. **Volume Area Damage:** Area-of-effect blasts (fireball, explosive shells) hitting a floor propagate cross-layer volume damage downward per DEC-013 §12. Targeting UI allows selecting visible cells on lower layers viewed through openings.
+
 
