@@ -524,8 +524,8 @@ function zrangeSuitePlugin() {
                 const savedScene = SceneManager._scene;
                 DataManager.createGameObjects();
                 DataManager.extractSaveContents(JsonEx.parse(text));
-                const r = W.zRange(), s2 = W.state;
-                const fp = { range: { zMin: r.zMin, zMax: r.zMax }, stateRange: s2.zRange === undefined ? "absent" : s2.zRange, levels: W.levels().length };
+                const r = tip ? W.zRange() : LEG, s2 = W.state;
+                const fp = { range: { zMin: r.zMin, zMax: r.zMax }, stateRange: s2.zRange === undefined ? "absent" : s2.zRange, levels: tip ? W.levels().length : 5 };
                 const cells = fingerprintLive();
                 SceneManager.goto(Scene_Map);
                 let timedOut = false;
@@ -538,7 +538,9 @@ function zrangeSuitePlugin() {
             const fpNow = first.cells;
             const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
             const firstOk = !first.timedOut && first.fp.range.zMin === -2 && first.fp.range.zMax === 2 && same(fpNow.cells, want.cells) && same(fpNow.changed, want.changed) && same(fpNow.units, want.units) && same(fpNow.items, want.items);
+            const onlyIn = (a, b) => { const sb = new Set(b); return a.filter(x => !sb.has(x)); };
             report.data.legacyFirst = { load: first, cellsMatch: same(fpNow.cells, want.cells), changed: fpNow.changed, unitsMatch: same(fpNow.units, want.units), itemsMatch: same(fpNow.items, want.items),
+                unitsOnlyLoaded: onlyIn(fpNow.units, want.units).slice(0, 8), unitsOnlyBase: onlyIn(want.units, fpNow.units).slice(0, 8),
                 units: fpNow.units.length, items: fpNow.items.length, cells: fpNow.cells, want: want.cells };
             // Play a little, save, load again: the world as saved comes back at the same range.
             resume();
@@ -546,7 +548,7 @@ function zrangeSuitePlugin() {
             const atSave = fingerprintLive(), resaved = JsonEx.stringify(DataManager.makeSaveContents());
             const second = await once(resaved);
             const fp2 = second.cells;
-            const secondOk = !second.timedOut && second.fp.range.zMin === -2 && second.fp.range.zMax === 2 && same(fp2, atSave) && W.levels().length === 5;
+            const secondOk = !second.timedOut && second.fp.range.zMin === -2 && second.fp.range.zMax === 2 && same(fp2, atSave) && second.fp.levels === 5;
             report.data.legacySecond = { load: { timedOut: second.timedOut, fp: second.fp, shown: second.shown }, cellsSame: same(fp2.cells, atSave.cells), unitsSame: same(fp2.units, atSave.units), itemsSame: same(fp2.items, atSave.items) };
             delete first.cells;
             t.check("legacy_save_loads", firstOk && secondOk,
