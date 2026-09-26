@@ -18,11 +18,13 @@
  *   case (a) when to - 2 is a level and to - 1 is exposed with an open cell: depth 2 is bound and wanted;
  *   case (b) when to - 2 is a level and to - 1 has no open cell: depth 2 is neither bound nor wanted;
  *   "-"      when to - 2 is not a level (the 0->-1 switch at -2..+2).
- * In the pinned world the fixture's -2 has no open cell, so the 0->-1 switch is case (b) wherever -3 exists, and the
- * other four switches are case (a) with depth 2 on a level of -2..+2. The "open" variants have the probe open one cell of
- * -2 at the first map start (all five strata air; a solid cell with solid neighbours and nobody standing there, at x and
- * y 3..9 of the area: outside every place the fixture scene can be built, whose centre is at least 20 cells from the
- * area's edges), so the 0->-1 switch becomes case (a) with depth 2 on the new level -3.
+ * The gate's world is not seeded (each run makes its own). Where -3 exists, an all-air cell of -2 stands on -3's solid
+ * top and is a floor (DEUS_Levels derivePacked), so -2 has had no open cell in any run: the 0->-1 switch is case (b)
+ * and the other four are case (a) with depth 2 on a level of -2..+2. Each switch is classified from the probe, not
+ * assumed. The "open" variants have the probe open one cell of -2 at the first map start (its five strata air over a
+ * -3 cell cut to a stone floor; a solid cell with solid neighbours and nobody standing there, at x and y 3..9 of the
+ * area: outside every place the fixture scene can be built, whose centre is at least 20 cells from the area's edges),
+ * so the 0->-1 switch becomes case (a) with depth 2 on the new level -3.
  *
  * Variants (edits: exact source edits of the clone's DEUS_Depth.js, each target exactly once):
  *   plain           no edit. PASS when switch_same_frame PASSes with both cases seen: every case (a) switch has the planes
@@ -113,17 +115,20 @@ function probePlugin() {
         rows.push(row);
         write();
     };
-    // ZR_SD2_OPEN=1: one cell of -2 made open (all air) at the first map start, far from any place of the fixture scene.
+    // ZR_SD2_OPEN=1: one cell of -2 made open at the first map start, far from any place of the fixture scene. An all-air
+    // cell is a floor when the top stratum of the cell below is solid (DEUS_Levels derivePacked), so the -3 cell under it
+    // keeps only its bottom stratum (a stone floor) and the -2 cell becomes all air: open.
     const openFar = () => {
-        const W = UF.World, L = UF.Levels, v = W.viewLevel(), z = -2;
-        const ref = (x, y) => ({ area: { x: v.x, y: v.y }, x, y, z });
+        const W = UF.World, L = UF.Levels, v = W.viewLevel();
+        const ref = (x, y, z) => ({ area: { x: v.x, y: v.y }, x, y, z });
         opened = { tried: true, area: { x: v.x, y: v.y } };
         for (let y = 3; y <= 9 && !opened.cell; y++) for (let x = 3; x <= 9 && !opened.cell; x++) {
             let solid = true;
-            for (let dy = -1; dy <= 1 && solid; dy++) for (let dx = -1; dx <= 1 && solid; dx++) if (L.shapeAt(ref(x + dx, y + dy)) !== "solid") solid = false;
-            if (!solid || W.standerAt(v.x, v.y, x, y, z) || W.standerAt(v.x, v.y, x, y, z + 1)) continue;
-            const ok = L.setStrata(ref(x, y), { m: ["air", "air", "air", "air", "air"] }, { cause: "test" });
-            opened.cell = { x, y, z, ok, after: L.shapeAt(ref(x, y)), refusal: ok ? null : JSON.stringify(L.lastRefusal ? L.lastRefusal() : null) };
+            for (let dy = -1; dy <= 1 && solid; dy++) for (let dx = -1; dx <= 1 && solid; dx++) if (L.shapeAt(ref(x + dx, y + dy, -2)) !== "solid") solid = false;
+            if (!solid || [-3, -2, -1].some(z => W.standerAt(v.x, v.y, x, y, z))) continue;
+            const low = L.setStrata(ref(x, y, -3), { m: ["stone", "air", "air", "air", "air"] }, { cause: "test" });
+            const ok = low && L.setStrata(ref(x, y, -2), { m: ["air", "air", "air", "air", "air"] }, { cause: "test" });
+            opened.cell = { x, y, z: -2, ok, after: L.shapeAt(ref(x, y, -2)), below: L.shapeAt(ref(x, y, -3)), refusal: ok ? null : JSON.stringify(L.lastRefusal ? L.lastRefusal() : null) };
         }
         write();
     };
