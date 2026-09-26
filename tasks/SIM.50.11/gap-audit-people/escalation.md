@@ -23,6 +23,13 @@ Owner of the fix: the coordinator (WBS files are coordinator-only). Suggested fi
 
 V87 is not marked superseded. This lane's brief settles which one the audit uses ("the 9 SRD races (DEC-013)"), so the audit follows DEC-013 and lists the stale V87 row as a documentation mismatch. The Owner or coordinator decides whether V87 is superseded.
 
+## E3. DEC-017 keeps RMMZ "battle screens"; ADR-001 says DEUS does not use them
+
+- `docs/OWNER_DECISIONS.md:243` (DEC-017, 2026-09-26): "RMMZ remains the engine for menus, dialogue, saving, the database and battle screens."
+- `docs/adr/ADR-001-RMMZ-Battle-Stack-Audit.md:37` (ACCEPTED 2026-09-25): "Project DEUS does **NOT** use `Scene_Battle` or standard `BattleManager` transitions." V45 (`docs/VISION.md:53`) also puts combat on the map with no battle screen.
+
+This touches audit area 9 (the player's role in Combat mode). The brief does not settle it, so the audit records it as an Owner question and does not choose. Possible readings for the Owner: (a) DEC-017 means only "keep the RMMZ shell available" and on-map combat stays; (b) some fights move to `Scene_Battle`; (c) ADR-001 is superseded.
+
 ## What was not done
 
 - No file outside `tasks/SIM.50.11/gap-audit-people/**` was changed.
