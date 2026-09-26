@@ -647,7 +647,8 @@
     };
     // The window's cells in the area's own coordinates. The areas loop (scrollType 3), so near the edge the view's display
     // origin wraps (a view centred at y 6 has its display at y 255.5) and the window runs past the seam: it is read in up to
-    // four pieces, never as one clamped or distance-based query (B1, Fix 1: an item at y 3 was never found there).
+    // four pieces inside 0..size-1, never as one query around the unwrapped window (B1, Fix 1: its items at y 3 were never
+    // found, and the clamped wall window dropped the wall faces past the seam).
     const SEAM_FAULT = provoked("entities_at_seam"); // the provocation: the old unwrapped item query and clamped wall window
     function windowPieces(win, size) {
         if (SEAM_FAULT) return [[win.x0, win.y0, win.x1, win.y1]];
@@ -670,10 +671,12 @@
         if (config.entities.items && I && SEAM_FAULT && I.find) {
             const near = { x: win.dx + win.cols / 2, y: win.dy + win.rows / 2 }, radius = Math.hypot(win.cols / 2 + ENTITY_MARGIN, win.rows / 2 + ENTITY_MARGIN + ENTITY_TALL);
             for (const f of I.find({ area: level, near, radius })) see(f.item);
-        } else if (config.entities.items && I && I.atIn) {
-            // The window's cells, one index lookup each (bounded by the window, not by the level's item count).
+        } else if (config.entities.items && I && I.find) {
+            // One query per piece of the window, centred on the piece in the area's own coordinates, kept to the piece's cells
+            // (one piece away from the seam: the cost of the single query it replaces; a cell lookup per window cell cost more).
             for (const [x0, y0, x1, y1] of windowPieces(win, World().state.size)) {
-                for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) for (const it of I.atIn(level, x, y)) see(it);
+                const near = { x: (x0 + x1) / 2, y: (y0 + y1) / 2 }, radius = Math.hypot((x1 - x0) / 2, (y1 - y0) / 2) + 0.5;
+                for (const f of I.find({ area: level, near, radius })) if (f.x >= x0 && f.x <= x1 && f.y >= y0 && f.y <= y1) see(f.item);
             }
         }
         for (const [id, s] of this._items) if (!keep.has(id)) { this.releaseSprite(s); this._items.delete(id); }
