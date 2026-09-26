@@ -1,0 +1,50 @@
+// DEUS_B1Repro.js - scratch B1 reproduction suite (temp clone only, never committed).
+(() => {
+    "use strict";
+    const _start = Scene_Boot.prototype.start;
+    Scene_Boot.prototype.start = function() {
+        _start.call(this);
+        if (!(window.UF && UF.Test && UF.Test.active)) return;
+        UF.Test.suite("b1_repro", async t => {
+            const W = UF.World, L = UF.Levels, D = UF.Depth, I = UF.Items, w = UF.Test.write;
+            const area = W.viewLevel(), size = W.state.size;
+            w("TRACE b1r world seed " + W.state.seed + ", size " + size + ", loop x " + $gameMap.isLoopHorizontal() + " y " + $gameMap.isLoopVertical() + ", scrollType " + $dataMap.scrollType);
+            if (UF.Environment && UF.Environment.setWeather) UF.Environment.setWeather({ x: area.x, y: area.y }, "clear");
+            if (UF.Time && UF.Time.setForTest) UF.Time.setForTest(12, 0);
+            const itemTypeId = ["stone", "oak_log", "log", "wood", "berries", "rations"].find(id => I.type(id) && I.type(id).image);
+            const img = I.type(itemTypeId).image;
+            const order = (process.env.B1_ORDER || "interior,seam").split(",");
+            const cx = size / 2;
+            for (const kind of order) {
+                const cy = kind === "seam" ? 6 : 128;
+                const ic = { x: cx + 3, y: cy - 3 };
+                L.setShape({ area, x: ic.x, y: ic.y, z: 1 }, "floor", { material: "stone" });
+                L.setShape({ area, x: ic.x, y: ic.y, z: 2 }, "open");
+                if (L.view() !== 0) { L.setView(0, { center: { x: cx, y: cy } }); await t.waitUntil(() => !L.switching() && L.view() === 0 && SceneManager._scene instanceof Scene_Map && SceneManager._scene.isStarted(), 30000, "the ground view"); await t.waitFrames(8); }
+                L.setView(2, { center: { x: cx, y: cy } });
+                await t.waitUntil(() => !L.switching() && L.view() === 2 && SceneManager._scene instanceof Scene_Map && SceneManager._scene.isStarted(), 30000, "the +2 view");
+                await t.waitFrames(8);
+                w("TRACE b1r " + kind + ": view centre (" + cx + "," + cy + "), display (" + $gameMap.displayX() + "," + $gameMap.displayY() + "); +1 shape at the item cell " + L.shapeAt({ area, x: ic.x, y: ic.y, z: 1 }) + "; sheet " + img + " ready before I.create " + ImageManager.loadCharacter(img).isReady());
+                const it = I.create(itemTypeId, 3, { area: { x: area.x, y: area.y, z: 1 }, x: ic.x, y: ic.y });
+                let firstVisible = -1, firstFound = -1, firstReady = -1;
+                for (let k = 0; k <= 60; k++) {
+                    const r = D.root(), pl = r ? r.planes[0] : null, win = r ? r._win : null;
+                    const bmp = ImageManager.loadCharacter(img);
+                    let found = false, hits = 0;
+                    if (pl && pl.level && win && it) {
+                        const near = { x: win.dx + win.cols / 2, y: win.dy + win.rows / 2 }, radius = Math.hypot(win.cols / 2 + 3, win.rows / 2 + 3 + 6);
+                        const h = I.find({ area: { x: pl.level.x, y: pl.level.y, z: pl.level.z }, near, radius });
+                        hits = h.length; found = h.some(q => q.item.id === it.id);
+                    }
+                    const s = pl && it ? pl._items.get(it.id) : null;
+                    if (bmp.isReady() && firstReady < 0) firstReady = k;
+                    if (found && firstFound < 0) firstFound = k;
+                    if (s && s.visible && firstVisible < 0) firstVisible = k;
+                    if (k <= 8 || k % 10 === 0) w("TRACE b1r " + kind + " +" + k + " frame " + Graphics.frameCount + ": sheet ready " + bmp.isReady() + "; rebuildItems query finds it " + found + " (" + hits + " hit(s), near " + (win ? (win.dx + win.cols / 2) + "," + (win.dy + win.rows / 2) : "-") + "); tracked " + !!s + "; visible " + (s ? s.visible : "-") + "; plane level " + (pl && pl.level ? pl.level.z : "-") + "; window y " + (win && win.y0) + ".." + (win && win.y1) + "; item (" + it.x + "," + it.y + "," + it.z + ")");
+                    if (k < 60) await t.waitFrames(1);
+                }
+                t.check(kind + "_item_drawn", firstVisible >= 0, "item " + itemTypeId + " x3 at (" + ic.x + "," + ic.y + ",+1), view centre (" + cx + "," + cy + "): sheet ready at +" + firstReady + ", found by the plane's query at +" + firstFound + ", sprite visible at +" + firstVisible + " frame(s) (-1: never in 60)");
+            }
+        }, { isDefault: false });
+    };
+})();

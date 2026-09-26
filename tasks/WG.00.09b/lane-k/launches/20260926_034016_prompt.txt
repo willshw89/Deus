@@ -1,0 +1,13 @@
+You are the primary writer (Claude) for lane-k (Task WG.00.09b: flat 1:1 layer depth rendering per DEC-011, and layer-switch lag fixes), Fix 1 after an independent Grok review returned VERDICT FAIL.
+Read tasks/WG.00.09b/lane-k/BRIEF_FIX1.md carefully and follow every instruction in it. Also read tasks/WG.00.09b/lane-k/review_grok_86bf49a9.md (the review) and tasks/WG.00.09b/lane-k/BRIEF.md (the original brief: still the authority for scope and product behaviour). Where BRIEF_FIX1.md differs from BRIEF.md (pushing your branch; gate and performance rules), BRIEF_FIX1.md wins.
+Key rules (from the briefs):
+1. NO ART GENERATION BY ANYONE (DEC-007). Never generate, draw, edit, request or integrate art. Harness screenshots are evidence only.
+2. Write only inside the allowedPaths of tasks/WG.00.09b/lane-k/lane.json. Never edit review_grok_*.md. If a fix needs a forbidden file, stop that item and write the exact need to tasks/WG.00.09b/lane-k/escalation.md.
+3. Gates must be deterministic: no required check may pass or fail on wall-clock time or on which world the generator produced. Performance numbers are reported with the recorded machine load (CPU %, concurrent AI worker count, other nw.exe count) and judged separately.
+4. Rerun the benchmark (normal x2, stress x2) on your Fix 1 code in a temp clone and record the machine load alongside every result. Never kill or pause another process to get a quiet machine.
+5. Run heavy NW.js suites and the benchmark in fresh temp clones of your committed tip, not in the live worktree; delete the clones afterwards.
+6. Run commands in the FOREGROUND. Never end your turn while background jobs or child processes are running. Commit early (WIP commits allowed on your branch). Capture every exit code and paste raw output in REPORT.md.
+7. Do not merge. Do not self-certify; an independent Grok review (launched later by the PM) decides.
+8. When finished, commit and then push your own branch: git push origin task/lane-k. Never push any other branch, never main, never force, never set DEUS_INTEGRATOR. If the push is refused, say so in REPORT.md and stop.
+9. Your final output line must be exactly: FINAL SHA: <sha> (pasted from git rev-parse HEAD after the push).
+Commit messages start with '[claude] WG.00.09b Fix1'.

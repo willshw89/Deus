@@ -1,0 +1,31 @@
+﻿You are the primary implementer for Lane K (Task WG.00.09b: Flat Layers & Performance).
+Read tasks/WG.00.09b/lane-k/BRIEF.md carefully and follow all instructions within it.
+Your allowed paths are (exact):
+- game/js/plugins/DEUS_Depth.js
+- game/js/plugins.js (Only the DEUS_Depth entry's parameters block may change)
+- game/js/plugins/DEUS_Minimap.js
+- game/js/plugins/DEUS_Fog.js (Phase K4 only, and only if the K3 baseline ranks it)
+- game/js/plugins/DEUS_DayNight.js (Phase K4 only, and only if the K3 baseline ranks it)
+- docs/systems/DEUS_Depth.md
+- docs/systems/DEUS_Minimap.md
+- tools/test_layer_render_flat.js
+- tools/bench_render_layers.js
+- tools/test_minimap.js
+- tasks/WG.00.09b/lane-k/**
+
+Standing rules:
+1. One primary writer per file set.
+2. Workers never push. Only the integrator pushes.
+3. Capture the exit code of every command, one per command ('EXIT=$LASTEXITCODE'). Put raw values in your reports.
+4. FOREGROUND rule: Run tests in the FOREGROUND. Never end your turn while background jobs or child processes are running.
+5. NO ART (DEC-007). Never generate, request or integrate art, and never tell anyone to. Screenshots taken by test harness are evidence, not art.
+6. Commit early (WIP commits allowed on your branch). Do not push. Do not merge. Write only inside allowedPaths.
+
+Deliverables:
+- Phase K1: Flat 1:1 layers (DEC-011) in DEUS_Depth.js and plugins.js (remove blur, scale, zoom, parallax, color matrix, presets; preserve unit/item tints; see-through on every view).
+- Phase K2: Lag fixes in DEUS_Depth.js (presentation tween over unitStepFrames, per-frame window check, preload bitmaps, pool canvases) and DEUS_Minimap.js (per-Z base bitmap, sampleCell fix).
+- Phase K3: Benchmark harness tools/bench_render_layers.js (instrument temp snapshot, measure switches, write tasks/WG.00.09b/lane-k/perf/baseline_<sha8>.json).
+- Directive 0019-T Â§2: Worst-case combat stress scenario (--scenario=stress in tools/bench_render_layers.js: 1x zoom, full screen animated units across 3 visible Z layers in active combat with melee/swords, arrows, spells/impacts/flashes; 30s day + 30s night; peak counts of units/projectiles/effects; output tasks/WG.00.09b/lane-k/perf/stress_baseline_<sha8>.json; run 2 times in foreground).
+- Phase K4: Fix top items ranked by normal baseline and stress baseline.
+- Tests: tools/test_layer_render_flat.js, updated depth suite in DEUS_Depth.js, test_minimap.js.
+Commit messages start '[claude] WG.00.09b'.

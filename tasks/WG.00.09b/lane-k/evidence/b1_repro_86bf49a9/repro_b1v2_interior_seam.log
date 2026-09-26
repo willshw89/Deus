@@ -1,0 +1,44 @@
+snapshot: C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_repro_b1v2_interior_seam
+plugins: DEUS_Core > DEUS_Visuals > DEUS_Movement8D > DEUS_Perspective25D > DEUS_ColonyOverseer > DEUS_World > DEUS_WorldGen > DEUS_Tiles > DEUS_Factions > DEUS_History > DEUS_Objects > DEUS_Walls > DEUS_Doors > DEUS_Items > DEUS_Jobs > DEUS_Floors > DEUS_Generator > DEUS_Colonists > DEUS_Projects > DEUS_Wildlife > DEUS_Ecology > DEUS_Stance > DEUS_Combat > DEUS_Anim > DEUS_Fog > DEUS_DayNight > DEUS_TimeSpeed > DEUS_Camera > DEUS_Culling > DEUS_Speech > DEUS_Look > DEUS_Interact > DEUS_Sheet > DEUS_Talk > DEUS_Fire > DEUS_Levels > DEUS_Ownership > DEUS_Environment > DEUS_NaturalConnections > DEUS_FactionMenus > DEUS_Depth > DEUS_Test > DEUS_B1Repro > UF_Test
+Running --deus-test=b1_repro on C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_repro_b1v2_interior_seam
+UF_Test run 2026-09-26T08:52:00.356Z args=[]
+DEBUG_SHEET: Scene_Boot.start called
+AVAILABLE SUITES: selftest, smoke, perf, native_starting_gear, native_survival_dying, native_perf_4x_benchmark, select, minimap, natural_connections, ownership, ecology, projects, settlement, colonists, overseer, world, spawn, worldgen, biomes, tiles, ground, factions, skins, history, objects, walls, doors, items, jobs, floors, wildlife, wildlife_seeds, stance, combat, anim, fog, daynight, timespeed, camera, culling, speech, overhead, look, sheet, talk, fire, vertical, natural_walls, flooding, strata, environment, faction_menus, title, load, setup, depth, layers_flat, b1_repro, select
+SUITE b1_repro
+TRACE b1r world seed 777968282, size 256, loop x true y true, scrollType 3
+TRACE b1r interior: view centre (128,128), display (119.5,121.5); +1 shape at the item cell floor; sheet !$UF_Item_Stone ready before I.create false
+TRACE b1r interior +0 frame 83: sheet ready false; rebuildItems query finds it true (1 hit(s), near 127.5,127.5); tracked false; visible -; plane level 1; window y 112..137; item (131,125,1)
+TRACE b1r interior +1 frame 84: sheet ready true; rebuildItems query finds it true (1 hit(s), near 127.5,127.5); tracked true; visible true; plane level 1; window y 112..137; item (131,125,1)
+TRACE b1r interior +2 frame 85: sheet ready true; rebuildItems query finds it true (1 hit(s), near 127.5,127.5); tracked true; visible true; plane level 1; window y 112..137; item (131,125,1)
+TRACE b1r interior +3 frame 86: sheet ready true; rebuildItems query finds it true (1 hit(s), near 127.5,127.5); tracked true; visible true; plane level 1; window y 112..137; item (131,125,1)
+TRACE b1r interior +4 frame 87: sheet ready true; rebuildItems query finds it true (1 hit(s), near 127.5,127.5); tracked true; visible true; plane level 1; window y 112..137; item (131,125,1)
+TRACE b1r interior +5 frame 88: sheet ready true; rebuildItems query finds it true (1 hit(s), near 127.5,127.5); tracked true; visible true; plane level 1; window y 112..137; item (131,125,1)
+TRACE b1r interior +6 frame 89: sheet ready true; rebuildItems query finds it true (1 hit(s), near 127.5,127.5); tracked true; visible true; plane level 1; window y 112..137; item (131,125,1)
+TRACE b1r interior +7 frame 90: sheet ready true; rebuildItems query finds it true (1 hit(s), near 127.5,127.5); tracked true; visible true; plane level 1; window y 112..137; item (131,125,1)
+TRACE b1r interior +8 frame 91: sheet ready true; rebuildItems query finds it true (1 hit(s), near 127.5,127.5); tracked true; visible true; plane level 1; window y 112..137; item (131,125,1)
+TRACE b1r interior +10 frame 93: sheet ready true; rebuildItems query finds it true (1 hit(s), near 127.5,127.5); tracked true; visible true; plane level 1; window y 112..137; item (131,125,1)
+TRACE b1r interior +20 frame 103: sheet ready true; rebuildItems query finds it true (1 hit(s), near 127.5,127.5); tracked true; visible true; plane level 1; window y 112..137; item (131,125,1)
+TRACE b1r interior +30 frame 113: sheet ready true; rebuildItems query finds it true (1 hit(s), near 127.5,127.5); tracked true; visible true; plane level 1; window y 112..137; item (131,125,1)
+TRACE b1r interior +40 frame 123: sheet ready true; rebuildItems query finds it true (1 hit(s), near 127.5,127.5); tracked true; visible true; plane level 1; window y 112..137; item (131,125,1)
+TRACE b1r interior +50 frame 133: sheet ready true; rebuildItems query finds it true (1 hit(s), near 127.5,127.5); tracked true; visible true; plane level 1; window y 112..137; item (131,125,1)
+TRACE b1r interior +60 frame 145: sheet ready true; rebuildItems query finds it true (1 hit(s), near 127.5,127.5); tracked true; visible true; plane level 1; window y 112..137; item (131,125,1)
+PASS b1_repro.interior_item_drawn - item stone x3 at (131,125,+1), view centre (128,128): sheet ready at +1, found by the plane's query at +0, sprite visible at +1 frame(s) (-1: never in 60)
+TRACE b1r seam: view centre (128,6), display (119.5,255.5); +1 shape at the item cell floor; sheet !$UF_Item_Stone ready before I.create true
+TRACE b1r seam +0 frame 169: sheet ready true; rebuildItems query finds it false (0 hit(s), near 127.5,261.5); tracked false; visible -; plane level 1; window y 246..271; item (131,3,1)
+TRACE b1r seam +1 frame 171: sheet ready true; rebuildItems query finds it false (0 hit(s), near 127.5,261.5); tracked false; visible -; plane level 1; window y 246..271; item (131,3,1)
+TRACE b1r seam +2 frame 173: sheet ready true; rebuildItems query finds it false (0 hit(s), near 127.5,261.5); tracked false; visible -; plane level 1; window y 246..271; item (131,3,1)
+TRACE b1r seam +3 frame 175: sheet ready true; rebuildItems query finds it false (0 hit(s), near 127.5,261.5); tracked false; visible -; plane level 1; window y 246..271; item (131,3,1)
+TRACE b1r seam +4 frame 176: sheet ready true; rebuildItems query finds it false (0 hit(s), near 127.5,261.5); tracked false; visible -; plane level 1; window y 246..271; item (131,3,1)
+TRACE b1r seam +5 frame 177: sheet ready true; rebuildItems query finds it false (0 hit(s), near 127.5,261.5); tracked false; visible -; plane level 1; window y 246..271; item (131,3,1)
+TRACE b1r seam +6 frame 178: sheet ready true; rebuildItems query finds it false (0 hit(s), near 127.5,261.5); tracked false; visible -; plane level 1; window y 246..271; item (131,3,1)
+TRACE b1r seam +7 frame 179: sheet ready true; rebuildItems query finds it false (0 hit(s), near 127.5,261.5); tracked false; visible -; plane level 1; window y 246..271; item (131,3,1)
+TRACE b1r seam +8 frame 180: sheet ready true; rebuildItems query finds it false (0 hit(s), near 127.5,261.5); tracked false; visible -; plane level 1; window y 246..271; item (131,3,1)
+TRACE b1r seam +10 frame 182: sheet ready true; rebuildItems query finds it false (0 hit(s), near 127.5,261.5); tracked false; visible -; plane level 1; window y 246..271; item (131,3,1)
+TRACE b1r seam +20 frame 192: sheet ready true; rebuildItems query finds it false (0 hit(s), near 127.5,261.5); tracked false; visible -; plane level 1; window y 246..271; item (131,3,1)
+TRACE b1r seam +30 frame 204: sheet ready true; rebuildItems query finds it false (0 hit(s), near 127.5,261.5); tracked false; visible -; plane level 1; window y 246..271; item (131,3,1)
+TRACE b1r seam +40 frame 214: sheet ready true; rebuildItems query finds it false (0 hit(s), near 127.5,261.5); tracked false; visible -; plane level 1; window y 246..271; item (131,3,1)
+TRACE b1r seam +50 frame 224: sheet ready true; rebuildItems query finds it false (0 hit(s), near 127.5,261.5); tracked false; visible -; plane level 1; window y 246..271; item (131,3,1)
+TRACE b1r seam +60 frame 234: sheet ready true; rebuildItems query finds it false (0 hit(s), near 127.5,261.5); tracked false; visible -; plane level 1; window y 246..271; item (131,3,1)
+FAIL b1_repro.seam_item_drawn - item stone x3 at (131,3,+1), view centre (128,6): sheet ready at +0, found by the plane's query at +-1, sprite visible at +-1 frame(s) (-1: never in 60)
+RESULT: 1 passed, 1 failed (exit 1)
+results: C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_repro_b1v2_interior_seam\test_output\results.txt; screenshots in C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_repro_b1v2_interior_seam\test_output

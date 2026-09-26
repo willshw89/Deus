@@ -1,0 +1,53 @@
+UF_Test run 2026-09-26T05:15:53.394Z args=[]
+DEBUG_SHEET: Scene_Boot.start called
+AVAILABLE SUITES: selftest, smoke, perf, native_starting_gear, native_survival_dying, native_perf_4x_benchmark, select, minimap, natural_connections, ownership, ecology, projects, settlement, colonists, overseer, world, spawn, worldgen, biomes, tiles, ground, factions, skins, history, objects, walls, doors, items, jobs, floors, wildlife, wildlife_seeds, stance, combat, anim, fog, daynight, timespeed, camera, culling, speech, overhead, look, sheet, talk, fire, vertical, natural_walls, flooding, strata, environment, faction_menus, title, load, setup, depth, select
+SUITE depth
+PASS depth.preconditions - world true, levels true, view 0, surface grid true, screen 816x624
+PASS depth.proof_scene - natural window at (116,156): ground 65, +1 91, +2 65 cells; hole (117,159), deck 3 cells from (118,158)
+PASS depth.planes_present - view 2; depth 1 -> level 1, 2 paint(s), 80016 opaque samples; depth 2 -> level 0, 2 paint(s), 72384 opaque samples; last paint 4.4 ms, last peek 0.0 ms
+PASS depth.repaint_cost - repaints of one 1008x816 plane: 4.4 / 3.2 / 4.3 / 3.2 / 2.8 ms (bound 16; this machine, nw.exe harness)
+PASS depth.projection_origin - centre -> (408.3,312.2) want (408,312); left edge -> x 12.8 want 12.5 at scale 0.9693877551020408; origin {"x":0.5,"y":0.5}
+PASS depth.exposure_by_upper_geometry - floor cell (116,161) unchanged by the planes; open cell (116,158) shows the level below
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.planes_only_plus2.png
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.planes_only_plus2_tiles.png
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.canvas_depth1.png
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.canvas_depth2.png
+PASS depth.mask_order - deck cell (118,158) at screen (152,149): drawn #d89a55, depth 1 texels {#351d16 #492a19 #d89a55 #8e4d30}, ground texel under it #71864d/255
+PASS depth.depth2_through_depth1 - low ground (116,157) at screen (69,109): drawn #71864d/255, ground texel #71864d/255, ground texels {#b2d7f3 #71864d #71aee7}, depth 1 alpha there 0; under the hole (117,159) the ground draws #616161/255 (tiles 3490/793/3490)
+PASS depth.entities_drawn - fixtures: oak placed at (118,159), item stone x3 at (121,160), unit added; +1 plane draws 21 object(s), 1 unit(s), 1 item stack(s), 38 wall/ramp frame(s); unit at (124,160) probed at screen (431,246): drawn (#fbdcc8 vs #35312d without units)
+PASS depth.crisp_nearest - 56576 opaque samples, 0 colour(s) not in the 62-colour source set; smooth false, baseTexture scaleMode 0 (0 nearest, 1 linear), sprite texture is the bitmap's
+PASS depth.parallax_bounded - edge shift depth 1 12.5 px, depth 2 24.2 px (bound 36); a pan of 2 tiles moved a low-ground point on depth 1 from x 59.3 to -33.7 (-93.1 px, want -93.1); the point under the centre stays at x 408.3; display back at 115.5 (was 115.5)
+PASS depth.tunables_take_effect - scale 0.9693877551020408 -> 0.9 -> 0.9693877551020408
+PASS depth.preset_filters - filters A [], B [ColorMatrixFilter], C [ColorMatrixFilter,BlurFilter], D [BlurFilter], E [ColorMatrixFilter,BlurFilter]
+PASS depth.one_level_below - preset D, maxDepth 1: depth 1 level 1, depth 2 hidden, void shown
+PASS depth.void_beyond - low ground (116,157) at screen (48,96): planes render #08080c/255, screen #08080c, void #08080c
+PASS depth.blur_by_default - preset D blur 1.5 px, filters [BlurFilter]; 39209 of 56576 sampled pixels are blends (want > 500)
+PASS depth.depth_transform_progressive - eye 140 ft: depth 1 scale 0.959 brightness 0.92 saturation -0.1 contrast -0.045 blur 0.6; depth 2 scale 0.921 brightness 0.82 saturation -0.22 contrast -0.1 blur 1.2; planes scaled 0.959 / 0.921, filters [ColorMatrixFilter,BlurFilter] / [ColorMatrixFilter,BlurFilter]; active tilemap scale 1, filters none; depth 2 edge shift 32.2 px (bound 36)
+PASS depth.entities_inherit_treatment - unit sprite in the +1 plane: child of the plane, world scale 0.959 vs plane 0.959, own filters none; body pixel #fbdcc8 under deus_scale, #dac1b1 under deus_color
+PASS depth.blur_off_no_blur - filters with blur 0: [ColorMatrixFilter] / [ColorMatrixFilter]
+PASS depth.color_off_baseline - filters none; terrace pixel #352d24, source texels {#514945 #35312d #352d24 #45352d}
+PASS depth.visual_settings_no_physics - unchanged: {"unit":{"x":124,"y":160,"z":1},"shapeUnit":"floor","shapeChain":"open","walkChain":false,"walkUnit":true,"objects":1}
+PASS depth.config_deterministic - deus resolves to the same values after A / 60 ft / E: 2 level(s) below, eye 140 ft, level 6 ft, void #08080c; depth 1 scale 0.958904109589041 brightness 0.92 saturation -0.1 contrast -0.045 blur 0.6; depth 2 scale 0.9210526315789473 brightness 0.82 saturation -0.22 contrast -0.1 blur 1.2
+FAIL depth.treatment_cost - GL renderer "ANGLE (NVIDIA GeForce RTX 4060 Laptop GPU Direct3D11 vs_5_0 ps_5_0)"; median engine tick (update + render submit) over 2 x 60 frames: planes off 31.3 ms, recession only 54.5 ms (compositing itself +23.2), colour +14.6 ms (bound 4), blur quality 1 +12.9 ms (bound 16.7, the shipped setting), blur quality 2 +33.2 ms; median frame intervals off 32, deus_scale 55, deus_color 70, deus_q1 68, deus_q2 89 ms; this machine, nw.exe harness, simulation paused, RMMZ editor open
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.plus2_off.png
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.tune_A_baseline.png
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.tune_B_scale.png
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.tune_C_scale_color.png
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.tune_D_full.png
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.plus2_A_eye190.png
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.plus2_A_eye120.png
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.plus2_A_eye60.png
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.plus2_A_eye30.png
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.plus2_B.png
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.plus2_C.png
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.plus2_D_oneLevelBlur.png
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.plus1_off.png
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.plus1_A_eye190.png
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.plus1_D_oneLevelBlur.png
+SHOT C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_before_3a9daa0f\test_output\depth.plus1_tune_D_full.png
+PASS depth.screenshots_written - depth.plus2_off.png 248211 B, depth.tune_A_baseline.png 211684 B, depth.tune_B_scale.png 207842 B, depth.tune_C_scale_color.png 214103 B, depth.tune_D_full.png 308724 B, depth.plus2_A_eye190.png 211684 B, depth.plus2_A_eye120.png 222752 B, depth.plus2_A_eye60.png 227455 B, depth.plus2_A_eye30.png 185415 B, depth.plus2_B.png 214474 B, depth.plus2_C.png 300337 B, depth.plus2_D_oneLevelBlur.png 189096 B, depth.plus1_off.png 201294 B, depth.plus1_A_eye190.png 169936 B, depth.plus1_D_oneLevelBlur.png 194956 B, depth.plus1_tune_D_full.png 200221 B
+PASS depth.ground_draws_nothing - view 0, visible planes 0, void hidden
+PASS depth.canvases_freed - 4 canvas layers alive after 3 level switches (want 4: two planes x two layers of the spriteset on screen)
+PASS depth.hotkey_free - keyMapper[118] was undefined before the plugin took it
+PASS depth.no_errors - none
+RESULT: 27 passed, 1 failed (exit 1)

@@ -81,6 +81,7 @@ class MockSprite {
         this.y = 0;
     }
     addChild(c) { this.children.push(c); }
+    update() {}
 }
 global.Sprite = MockSprite;
 
@@ -228,6 +229,70 @@ check("reload_restores_exact_state", afterReload === false && Minimap.isExplored
 // Monster #2 at (200,200,0) outside visible range
 const isMonster2Visible = UF.Fog.isVisible(200, 200, 0);
 check("hostile_out_of_sight", isMonster2Visible === false, "Hostile at (200,200,0) is outside line of sight");
+
+// Scenario H (WG.00.09b K2): one base bitmap per Z. Switching back to a Z tab that is already built repaints nothing
+// (the old setter dirtied all 256 chunks on every switch: 32 frames at 8 chunks a frame); a tab never built is filled
+// once; a cell change on a tab that is not shown still reaches that tab.
+Minimap.activeZ = 0;
+Minimap.processDirty(0);
+Minimap.activeZ = -1;
+const dirtyFirstVisit = Minimap.stats().dirtyCount;
+Minimap.processDirty(0);
+Minimap.activeZ = 0;
+const dirtyBack = Minimap.stats().dirtyCount;
+check("z_switch_back_no_full_redirty", dirtyFirstVisit === 256 && dirtyBack === 0,
+    `first visit of the -1 tab dirties ${dirtyFirstVisit} chunk(s) (want 256, built once); back on the built Z0 tab: ${dirtyBack} dirty chunk(s) (want 0)`);
+Minimap.activeZ = -1;
+Minimap.invalidate(20, 20, 0);
+Minimap.activeZ = 0;
+const dirtyChanged = Minimap.stats().dirtyCount;
+check("z_switch_keeps_offtab_changes", dirtyChanged === 1, `a Z0 cell changed while the -1 tab was shown: ${dirtyChanged} dirty chunk(s) on returning to Z0 (want 1)`);
+Minimap.processDirty(0);
+
+// Scenario I (WG.00.09b K2): a tab samples its own level. The mock wall at (60,60) exists on Z0 only; the -1 tab must draw
+// the -1 cell (solid rock in the mock), never Z0's wall (the old sampleCell read objects from the level on screen).
+const puts = new Map();
+const putBefore = MockContext.prototype.putImageData;
+MockContext.prototype.putImageData = function(img, x, y) { puts.set(`${x},${y}`, img); };
+const atInBefore = UF.Objects.atIn;
+UF.Objects.atIn = (area, x, y) => (area && area.z === 0 ? atInBefore(area, x, y) : null);
+const pixelAt = (x, y) => { const img = puts.get(`${(x >> 4) * 16},${(y >> 4) * 16}`); if (!img) return null; const i = ((y & 15) * 16 + (x & 15)) * 4; return [img.data[i], img.data[i + 1], img.data[i + 2]]; };
+const same = (a, b) => !!a && !!b && a[0] === b[0] && a[1] === b[1] && a[2] === b[2];
+Minimap.explore(60, 60, 1, 0);
+Minimap.explore(60, 60, 1, -1);
+Minimap.processDirty(0);                  // Z0 tab
+const onZ0 = pixelAt(60, 60);
+Minimap.activeZ = -1;
+Minimap.processDirty(0);                  // -1 tab
+const onZm1 = pixelAt(60, 60);
+Minimap.activeZ = 0;
+const STONE_WALL = [148, 163, 184], SOLID_WALL = [71, 85, 105];
+check("tab_samples_its_own_level", same(onZ0, STONE_WALL) && !!onZm1 && !same(onZm1, STONE_WALL) && same(onZm1, SOLID_WALL),
+    `(60,60): Z0 tab ${onZ0 ? onZ0.join(",") : "not drawn"} (want the wall ${STONE_WALL.join(",")}); -1 tab ${onZm1 ? onZm1.join(",") : "not drawn"} (want the -1 rock ${SOLID_WALL.join(",")}, never Z0's wall)`);
+UF.Objects.atIn = atInBefore;
+MockContext.prototype.putImageData = putBefore;
+
+// Scenario J (WG.00.09b K4): the overlay (every unit of the world and a texture upload) is redrawn at most every 4 updates
+// while the view is still, and at once when the camera moves (the old sprite redrew it on every update).
+const hudScene = new MockScene_Map();
+hudScene.addChild = () => {};
+hudScene.createDeusMinimap();
+const hud = hudScene._deusMinimap;
+let redraws = 0;
+const redrawInner = hud.updateOverlay;
+hud.updateOverlay = function() { redraws++; return redrawInner.call(this); };
+$gameMap.displayX = () => 40;
+$gameMap.displayY = () => 40;
+hud.update();
+redraws = 0;
+for (let i = 0; i < 12; i++) hud.update();
+const stillRedraws = redraws;
+redraws = 0;
+$gameMap.displayX = () => 41;
+hud.update();
+const moveRedraws = redraws;
+check("overlay_throttled", stillRedraws >= 2 && stillRedraws <= 3 && moveRedraws === 1,
+    `12 updates with a still camera redrew the overlay ${stillRedraws} time(s) (want 2-3, every 4th update); a camera move redrew it ${moveRedraws} time(s) in that update (want 1)`);
 
 // Test negative / mutant fixtures
 Minimap.invalidate(-10, -50, 0);
