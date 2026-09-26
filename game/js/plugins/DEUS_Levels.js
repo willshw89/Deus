@@ -1,10 +1,10 @@
 //=============================================================================
-// DEUS_Levels.js - Five persistent levels (+2 to -2): cell shapes, one map per level, switching the view
+// DEUS_Levels.js - The persistent levels of the world Z range: cell strata and shapes, one map per level, switching the view
 //=============================================================================
 
 /*:
  * @target MZ
- * @plugindesc [DEUS Levels] Multi-level vertical world: 5 persistent elevation layers (-2 to +2), caverns, and Z-level transitions.
+ * @plugindesc [DEUS Levels] Multi-level vertical world: the persistent layers of the world Z range (new worlds -16..+15), caverns, and Z-level transitions.
  * @author UF project
  * @base DEUS_World
  * @orderAfter DEUS_World
@@ -20,8 +20,12 @@
  * @orderAfter DEUS_Fire
  *
  * @help
- * The world is five persistent 256x256 levels at the same x,y (VISION V80,
- * docs/design/VERTICAL_WORLD.md): -2, -1, Ground, +1, +2. Vertical slice 1
+ * The world is persistent 256x256 levels at the same x,y (VISION V80,
+ * docs/design/VERTICAL_WORLD.md), one per z of the world Z range (UF.World,
+ * WG.00.17, docs/systems/DEUS_ZRange.md): new worlds -16..+15, a save made
+ * before WG.00.17 -2..+2. -2, -1, Ground, +1, +2 are generated as before;
+ * the layers below -2 are solid rock and the layers above +2 open air (and
+ * the mountain rock that rises above +2). Vertical slice 1
  * (docs/design/VERTICAL_BUILD_PLAN.md section 5) is here:
  *
  * - Cells: every cell of every level has a shape (solid, floor, open, ramp,
@@ -54,12 +58,17 @@
 
     const TILESET_ID = 92;
     // A save keeps its baseline generator version; versions 1 to 4 are preserved below. Generator 5 (DEUS-TSK-FABLE-19B)
-    // is generator 4 plus the natural cuts and caves carved into the strata of an area's five levels at once.
+    // is generator 4 plus the natural cuts and caves carved into the strata of an area's five core levels at once.
     const GEN = 5;
     const PRE_CUT_GEN = 4;                // a pre-V80 save migrates to the generator it had before 19B (no cuts under its settlement)
     const KNOWN_GENS = Object.freeze([1, 2, 3, 4, 5]);
-    const LEVELS = Object.freeze([-2, -1, 0, 1, 2]);
-    const LABELS = Object.freeze({ 2: "+2", 1: "+1", 0: "Ground", "-1": "-1", "-2": "-2" });
+    // The levels of a world come from its Z range (UF.World, the one authority: WG.00.17, docs/systems/DEUS_ZRange.md).
+    // Every generator version makes content for the core, the legacy range -2..+2 (generated together, checksummed, and
+    // the only levels with a level entry from New Game); the world's other levels are made around it (volumeOf): solid
+    // rock below, open air above except the mountain rock that rises out of the core (its ceiling caps, materialized).
+    const CORE = window.UF.World.Z_RANGES.legacy;
+    const CORE_LEVELS = Object.freeze(Array.from({ length: CORE.zMax - CORE.zMin + 1 }, (_, k) => CORE.zMin + k));
+    const labelOf = z => (z === 0 ? "Ground" : z > 0 ? `+${z}` : String(z));
     const SHAPES = Object.freeze({ solid: 1, floor: 2, open: 3, ramp: 4, stairUp: 5, stairDown: 6, stairBoth: 7 });
     const SHAPE_NAMES = ["", "solid", "floor", "open", "ramp", "stairUp", "stairDown", "stairBoth"];
     const MATERIALS = Object.freeze(["stone", "soil", "wood"]);
@@ -147,7 +156,17 @@
     })();
     const provoked = name => PROVOKE.includes(`vertical.${name}`);
 
-    const isLevel = z => (Number.isInteger(z) && z >= -2 && z <= 2) || (provoked("five_levels") && z === 3);
+    // The live Z range from UF.World, refreshed when the world state object changes (a New Game, a load).
+    const ZR = { st: undefined, zMin: 0, zMax: 0, n: 0, levels: null };
+    function zrSync() {
+        const W = World(), st = W && W.state;
+        if (ZR.st === st && ZR.levels !== null) return ZR;
+        const r = W.zRange();
+        ZR.st = st; ZR.zMin = r.zMin; ZR.zMax = r.zMax; ZR.levels = W.levels(); ZR.n = ZR.levels.length;
+        return ZR;
+    }
+    // vertical.five_levels (seen failing once): a level one past the top of the range reads as a level.
+    const isLevel = z => World().isLevel(z) || (provoked("five_levels") && z === zrSync().zMax + 1);
 
     //-------------------------------------------------------------------------
     // Seeded noise (self-contained, so a change elsewhere never changes a saved world's levels)
@@ -434,8 +453,10 @@
     const stats = { generated: 0, genMs: 0, lastGenMs: 0, shapeReads: 0, switches: 0, lastSwitch: null, migrations: 0, checksumMismatches: 0, composeMs: 0,
         strataWrites: 0, strataDamaged: 0, strataDestroyed: 0, strataMigrations: 0, strataSchemaErrors: 0, derives: 0, gridBuilds: 0, featureMs: 0 };
 
+    // The generator of a level: its level entry's; a level without an entry (outside the core, WG.00.17) takes the
+    // ground's (one generator makes a world's column: generator 5's volume spans it); else GEN.
     function levelGen(st, z) {
-        const L = st && st.levels && st.levels[String(z)];
+        const L = st && st.levels && (st.levels[String(z)] || st.levels["0"]);
         return L && L.gen ? L.gen : GEN;
     }
 
@@ -710,12 +731,15 @@
         return selected;
     }
 
-    // One level's baseline. Generator 5 and later generate the five levels of the area together (generateVolume: the
-    // natural cuts and caves span levels) and hand out this level's.
+    // One level's baseline. Generator 5 and later generate the levels of the area together (volumeOf: the natural cuts
+    // and caves span the core) and hand out this level's. Older generators make each core level on its own; a level
+    // outside the core is solid rock below it and open air above it (outerBaseline), the same for every generator.
     function generateBaseline(seed, gen, z, ax, ay, size) {
-        if (gen >= FEATURE_GEN) return volumeOf(seed, gen, ax, ay, size)[z + 2];
+        if (gen >= FEATURE_GEN) return volumeOf(seed, gen, ax, ay, size)[z - zrSync().zMin];
+        if (z < CORE.zMin || z > CORE.zMax) return outerBaseline(z, size);
         const t0 = performance.now();
         const b = finishBaseline(levelArrays(seed, gen, z, ax, ay, size), z, gen, size);
+        seal(b);
         const ms = performance.now() - t0;
         stats.generated++;
         stats.genMs += ms;
@@ -908,7 +932,7 @@
         const st = W && W.state;
         if (!st || !isLevel(z)) return null;
         const s = seed === undefined ? st.seed : seed, g = gen === undefined ? levelGen(st, z) : gen;
-        const key = `${s}:${g}:${z}:${ax},${ay}:${st.size}:${st.areasX},${st.areasY}`;
+        const r = zrSync(), key = `${s}:${g}:${z}:${ax},${ay}:${st.size}:${st.areasX},${st.areasY}:${r.zMin}..${r.zMax}`;
         let b = baselines.get(key);
         if (!b) {
             b = generateBaseline(s, g, z, ax, ay, st.size);
@@ -965,9 +989,21 @@
     }
 
     // FNV-1a over a baseline's strata bytes, connectors, biome codes and caps (the checksum of generator 5 and later).
+    // The bytes are read from the store in the dense order they had before WG.00.17 (cell by cell, then the connector
+    // bytes), so a checksum doesn't depend on the storage.
     function strataHash(h, b) {
-        h = fnvBytes(h, b.strata.m);
-        h = fnvBytes(h, b.conn);
+        const n = b.size * b.size, sM = rdM, sO = rdO, sC = rdC;
+        for (let i = 0; i < n; i++) {
+            storeLocate(b, i);
+            for (let t = 0; t < STRATA; t++) { h ^= rdM[rdO + t]; h = Math.imul(h, 16777619) >>> 0; }
+        }
+        for (let i = 0; i < n; i += 2) {
+            storeLocate(b, i);
+            let v = rdC;
+            if (i + 1 < n) { storeLocate(b, i + 1); v |= rdC << 4; }
+            h ^= v; h = Math.imul(h, 16777619) >>> 0;
+        }
+        rdM = sM; rdO = sO; rdC = sC;
         if (b.biome) h = fnvBytes(h, b.biome);
         if (b.caps && b.caps.size) {
             const keys = [...b.caps.keys()].sort((p, q) => p - q), buf = new Uint8Array(keys.length * 6);
@@ -982,7 +1018,7 @@
     }
 
     //-------------------------------------------------------------------------
-    // Strata (DEUS-TSK-FABLE-19A): the one geometry authority. Every 5 ft cell of every level is five 1 ft strata,
+    // Strata (DEUS-TSK-FABLE-19A): the one geometry authority. Every 5 ft cell of every level is five 2 ft strata (DEC-013; 1 ft before WG.00.17),
     // S0 (bottom) .. S4 (top). A stratum is two bytes: its material (id in the low 6 bits, 0 = air; 0x80 = constructed)
     // and its HP (0..255 = 0..100 % of the material's max HP). A level's seeded baseline keeps the material bytes only
     // (Uint8Array size*size*5; an unchanged solid stratum is at full HP by definition) and a 4-bit connector code per
@@ -990,12 +1026,13 @@
     // UF.World.state.levels[z].strata["ax,ay"][i]. The shape codes the rest of the game reads (solid, floor, open,
     // ramp, stairs) are derived from the strata here and nowhere else. docs/systems/UF_Levels.md, section Strata.
 
-    const STRATA = 5, CELL_FT = 5;
+    // STRATA is the record format (five strata a cell, frozen). The feet come from UF.Space, the scale authority
+    // (DEC-013 item 2, WG.00.17): a 5 ft cell, 2 ft strata (1 ft before WG.00.17), so a level is 10 ft.
+    const STRATA = 5, CELL_FT = window.UF.Space.GRID_SIZE_FEET, STRATUM_FT = window.UF.Space.STRATUM_FEET;
     const M_AIR = 0, M_STONE = 1, M_SOIL = 2, M_WOOD = 3, M_WATER = 4, M_LAVA = 5;
     const M_BUILT = 0x80, M_ID = 0x3f;
     const STRATA_SCHEMA = 1;
     const REC = 11, REC_M = 1, REC_HP = 6;       // a changed cell: [connector, m0..m4, hp0..hp4]
-    const LEVEL_KEY = ["-2", "-1", "0", "1", "2"];
     const AREA_STRIDE = 4096;                    // area index in the change maps: ax + ay * 4096
     // Material table. Diagnostic values, not balanced: maxHP in HP points; resist multiplies incoming damage by damage
     // type (a type not listed: 1); support is what a full-HP stratum carries (0..1); debris is what a destroyed stratum
@@ -1030,6 +1067,142 @@
 
     const connOf = (conn, i) => (conn[i >> 1] >> ((i & 1) << 2)) & 15;
 
+    //-------------------------------------------------------------------------
+    // Sparse baseline storage (WG.00.17, ADR-003 15.3). A baseline keeps its strata in chunks of 32 x 32 cells of its
+    // level. A UNIFORM chunk holds one cell code for all its cells (five material bytes and a connector: all air, all
+    // stone, ...) and no arrays; a MIXED chunk holds arrays (materials, 5 bytes a cell; connectors, 4 bits a cell). The
+    // directory b.dir (2 bytes a chunk) says which: CH_MIXED, or the palette index of the uniform code. It is built when
+    // the baseline is made (the generator works on dense arrays and drops them) and is a cache, never saved. Reads never
+    // allocate. A baseline never changes once made: a change is a record (putDelta) laid over it, saved as a diff. The
+    // live kind of a chunk (chunkInfo) is MIXED once its baseline is MIXED or any of its cells has a record: the first
+    // write to a UNIFORM chunk splits it, at the cost of that one record. docs/systems/DEUS_ZRange.md, Storage.
+    const CH = 32, CH_SHIFT = 5, CH_MASK = 31, CH_CELLS = 1024, CH_MIXED = 0xffff;
+    // The palette of uniform cell codes, shared by every baseline: materials pal.m[k * STRATA ..], connector pal.c[k].
+    const pal = { m: new Uint8Array(16 * STRATA), c: new Uint8Array(16), n: 0, index: new Map() };
+    function palIndexOf(m, o, conn) {
+        const key = m[o] + m[o + 1] * 0x100 + m[o + 2] * 0x10000 + m[o + 3] * 0x1000000 + m[o + 4] * 0x100000000 + conn * 0x10000000000;
+        let k = pal.index.get(key);
+        if (k !== undefined) return k;
+        k = pal.n++;
+        if (k >= pal.c.length) {
+            const pm = new Uint8Array(pal.m.length * 2), pc = new Uint8Array(pal.c.length * 2);
+            pm.set(pal.m); pc.set(pal.c);
+            pal.m = pm; pal.c = pc;
+        }
+        for (let t = 0; t < STRATA; t++) pal.m[k * STRATA + t] = m[o + t];
+        pal.c[k] = conn;
+        pal.index.set(key, k);
+        return k;
+    }
+    const AIR_CELL = new Uint8Array(STRATA), STONE_CELL = new Uint8Array(STRATA).fill(M_STONE);
+    // The chunk store of dense strata m (5 bytes a cell) and conn (4 bits a cell) of a size x size level, onto b.
+    function chunkify(b, m, conn, size) {
+        const cw = Math.ceil(size / CH), nc = cw * cw;
+        const dir = new Uint16Array(nc), mixed = new Array(nc).fill(null);
+        let mixedCount = 0;
+        for (let cy = 0; cy < cw; cy++) for (let cx = 0; cx < cw; cx++) {
+            const x0 = cx * CH, y0 = cy * CH, x1 = Math.min(size, x0 + CH), y1 = Math.min(size, y0 + CH);
+            const i0 = y0 * size + x0, o0 = i0 * STRATA, c0 = connOf(conn, i0);
+            let uniform = true;
+            scan: for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+                const i = y * size + x, o = i * STRATA;
+                if (connOf(conn, i) !== c0 || m[o] !== m[o0] || m[o + 1] !== m[o0 + 1] || m[o + 2] !== m[o0 + 2] || m[o + 3] !== m[o0 + 3] || m[o + 4] !== m[o0 + 4]) {
+                    uniform = false;
+                    break scan;
+                }
+            }
+            const c = cy * cw + cx;
+            if (uniform) { dir[c] = palIndexOf(m, o0, c0); continue; }
+            const mc = { m: new Uint8Array(CH_CELLS * STRATA), conn: new Uint8Array(CH_CELLS >> 1) };
+            for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+                const i = y * size + x, o = i * STRATA, li = ((y & CH_MASK) << CH_SHIFT) | (x & CH_MASK), lo = li * STRATA;
+                for (let t = 0; t < STRATA; t++) mc.m[lo + t] = m[o + t];
+                const cc = connOf(conn, i);
+                if (cc) mc.conn[li >> 1] |= cc << ((li & 1) << 2);
+            }
+            dir[c] = CH_MIXED;
+            mixed[c] = mc;
+            mixedCount++;
+        }
+        b.cw = cw; b.dir = dir; b.mixed = mixed; b.mixedCount = mixedCount;
+    }
+    // A store whose every chunk is UNIFORM with one cell code (cell: 5 material bytes; no connector).
+    function uniformStore(b, cell, size) {
+        const cw = Math.ceil(size / CH), nc = cw * cw;
+        b.cw = cw; b.dir = new Uint16Array(nc).fill(palIndexOf(cell, 0, 0)); b.mixed = new Array(nc).fill(null); b.mixedCount = 0;
+    }
+    // Point the read cursor (rdM, rdO, rdC) at cell i of a baseline's store (rdH is the caller's: null for a baseline).
+    function storeLocate(b, i) {
+        const size = b.size, x = i % size, y = (i - x) / size;
+        const c = (y >> CH_SHIFT) * b.cw + (x >> CH_SHIFT), d = b.dir[c];
+        if (d === CH_MIXED) {
+            const mc = b.mixed[c], li = ((y & CH_MASK) << CH_SHIFT) | (x & CH_MASK);
+            rdM = mc.m; rdO = li * STRATA; rdC = connOf(mc.conn, li);
+        } else {
+            rdM = pal.m; rdO = d * STRATA; rdC = pal.c[d];
+        }
+    }
+    // The first write into a UNIFORM chunk of a baseline being made (the caps materialized above the core): its arrays,
+    // filled with its uniform code. Never called once the baseline is sealed.
+    function splitChunk(b, c) {
+        if (b.dir[c] === CH_MIXED) return b.mixed[c];
+        const k = b.dir[c], mc = { m: new Uint8Array(CH_CELLS * STRATA), conn: new Uint8Array(CH_CELLS >> 1) };
+        for (let li = 0; li < CH_CELLS; li++) for (let t = 0; t < STRATA; t++) mc.m[li * STRATA + t] = pal.m[k * STRATA + t];
+        if (pal.c[k]) mc.conn.fill(pal.c[k] | (pal.c[k] << 4));
+        b.dir[c] = CH_MIXED;
+        b.mixed[c] = mc;
+        b.mixedCount++;
+        return mc;
+    }
+    function storeSetStratum(b, x, y, t, v) {
+        const mc = splitChunk(b, (y >> CH_SHIFT) * b.cw + (x >> CH_SHIFT));
+        mc.m[(((y & CH_MASK) << CH_SHIFT) | (x & CH_MASK)) * STRATA + t] = v;
+    }
+    // A made baseline: its dense working arrays become the chunk store; b.strata.m and b.conn stay readable as dense
+    // copies built on first read (diagnostics and older tools; nothing in the game reads them).
+    function seal(b) {
+        if (b.dir) return b;
+        chunkify(b, b.strata.m, b.conn, b.size);
+        delete b.strata;
+        delete b.conn;
+        defineDense(b);
+        return b;
+    }
+    function defineDense(b) {
+        const build = () => {
+            const n = b.size * b.size, m = new Uint8Array(n * STRATA), conn = new Uint8Array((n + 1) >> 1);
+            const sM = rdM, sO = rdO, sC = rdC;
+            for (let i = 0; i < n; i++) {
+                storeLocate(b, i);
+                for (let t = 0; t < STRATA; t++) m[i * STRATA + t] = rdM[rdO + t];
+                if (rdC) conn[i >> 1] |= rdC << ((i & 1) << 2);
+            }
+            rdM = sM; rdO = sO; rdC = sC;
+            Object.defineProperty(b, "strata", { value: { m, hp: null }, enumerable: false, configurable: true, writable: true });
+            Object.defineProperty(b, "conn", { value: conn, enumerable: false, configurable: true, writable: true });
+        };
+        Object.defineProperty(b, "strata", { enumerable: false, configurable: true, get() { build(); return b.strata; } });
+        Object.defineProperty(b, "conn", { enumerable: false, configurable: true, get() { build(); return b.conn; } });
+    }
+    // A level outside the core: solid rock below it, open air above it, every chunk UNIFORM (no arrays).
+    function outerBaseline(z, size) {
+        const b = { z, size, hasWater: false, outer: true };
+        uniformStore(b, z < CORE.zMin ? STONE_CELL : AIR_CELL, size);
+        defineDense(b);
+        defineLegacyViews(b, false);
+        return b;
+    }
+    /** Bytes held by a baseline's store: { dir, mixed (arrays of its MIXED chunks), chunks, mixedChunks, dense (compat copies built) }. */
+    function storeBytes(b) {
+        const out = { dir: b.dir ? b.dir.byteLength : 0, mixed: 0, mixedM: 0, mixedConn: 0, chunks: b.dir ? b.dir.length : 0, mixedChunks: b.mixedCount || 0, dense: 0 };
+        if (b.mixed) for (const mc of b.mixed) if (mc) { out.mixedM += mc.m.byteLength; out.mixedConn += mc.conn.byteLength; }
+        out.mixed = out.mixedM + out.mixedConn;
+        const ds = Object.getOwnPropertyDescriptor(b, "strata"), dc = Object.getOwnPropertyDescriptor(b, "conn");
+        if (ds && ds.value) out.dense += ds.value.m.byteLength;
+        if (dc && dc.value) out.dense += dc.value.byteLength;
+        return out;
+    }
+
     // A baseline's strata from the generator's working arrays (shape, material and water codes per cell), made in the
     // same call and then dropped: solid -> 5 strata, ramp -> S0..S2 and its connector, floor and stairs -> S0 (stairs
     // with their connector), open -> 5 air. A natural pool (water) is fluid in S1..S2: water on -1, lava on -2.
@@ -1043,16 +1216,20 @@
             if (s >= RAMP && s <= STAIR_BOTH) conn[i >> 1] |= s << ((i & 1) << 2);
             if (water && water[i] && fill < 2) { m[o + 1] = fluid; m[o + 2] = fluid; }
         }
-        b.strata = { m, hp: null };    // hp null: every baseline solid stratum is at full HP
+        b.strata = { m, hp: null };    // hp null: every baseline solid stratum is at full HP (dense until seal())
         b.conn = conn;
         b.size = size;
         b.hasWater = !!water;
-        // Read-only legacy views (b.shape, b.material, b.water: one code per cell, what the generator made), built on
-        // the first read and kept: code written before the strata still reads them. Writing into them changes nothing.
+        defineLegacyViews(b, !!water);
+        return b;
+    }
+    // Read-only legacy views (b.shape, b.material, b.water: one code per cell, what the generator made), built on the
+    // first read and kept: code written before the strata still reads them. Writing into them changes nothing.
+    function defineLegacyViews(b, water) {
         const lazy = (name, which) => Object.defineProperty(b, name, {
             enumerable: true, configurable: true,
             get() {
-                const v = new Uint8Array(n);
+                const v = new Uint8Array(b.size * b.size);
                 standaloneInto(b, which === 0 ? v : null, which === 1 ? v : null, which === 2 ? v : null);
                 Object.defineProperty(b, name, { value: v, enumerable: true, configurable: true, writable: true });
                 return v;
@@ -1061,19 +1238,23 @@
         lazy("shape", 0);
         lazy("material", 1);
         if (water) lazy("water", 2);
-        return b;
     }
     // The generator's codes back from a baseline's strata alone (no cells above or below): exact for every baseline.
+    // A sealed baseline is read through its store (the read cursor is kept as it was).
     function standaloneInto(b, shapeOut, matOut, waterOut) {
-        const m = b.strata.m, conn = b.conn, n = b.size * b.size;
+        const n = b.size * b.size, sealed = !!b.dir, sM = rdM, sO = rdO, sC = rdC;
+        let m = null, conn = null;
+        if (!sealed) { m = b.strata.m; conn = b.conn; }
         for (let i = 0; i < n; i++) {
-            const o = i * STRATA;
+            let o, c;
+            if (sealed) { storeLocate(b, i); m = rdM; o = rdO; c = rdC; } else { o = i * STRATA; c = connOf(conn, i); }
             let fill = 0;
             while (fill < STRATA && SOLID_B[m[o + fill]] === 1) fill++;
-            if (shapeOut) { const c = connOf(conn, i); shapeOut[i] = fill === STRATA ? SOLID : c ? c : fill > 0 ? FLOOR : OPEN; }
+            if (shapeOut) shapeOut[i] = fill === STRATA ? SOLID : c ? c : fill > 0 ? FLOOR : OPEN;
             if (matOut) matOut[i] = fill > 0 ? LEGACY_B[m[o]] : STONE;
             if (waterOut) waterOut[i] = FLUID_B[m[o]] | FLUID_B[m[o + 1]] | FLUID_B[m[o + 2]] | FLUID_B[m[o + 3]] | FLUID_B[m[o + 4]];
         }
+        if (sealed) { rdM = sM; rdO = sO; rdC = sC; }
     }
     // Scratch copies of the legacy views for checksums and metrics (reused: never kept, never handed out).
     let scratchViews = null;
@@ -1090,23 +1271,23 @@
     const pack = (shape, constructed, material) => (shape & 7) | (constructed ? 8 : 0) | ((material & 15) << 4);
     const unpack = p => ({ shape: SHAPE_NAMES[p & 7] || "", code: p & 7, constructed: (p & 8) !== 0, material: MATERIALS[p >> 4] || String(p >> 4) });
     const areaKey = (ax, ay) => `${ax},${ay}`;
-    const genOf = (st, z) => { const L = st.levels && st.levels[LEVEL_KEY[z + 2]]; return L && L.gen ? L.gen : GEN; };
+    const genOf = (st, z) => levelGen(st, z);
 
-    // The last baseline read per level (a numeric check instead of baseline()'s string key).
-    const baseSlots = [null, null, null, null, null];
+    // The last baseline read per level (index z - zMin; a numeric check instead of baseline()'s string key).
+    const baseSlots = [];
     function baseOf(st, z, ax, ay) {
-        const s = baseSlots[z + 2], g = genOf(st, z);
-        if (s !== null && s.st === st && s.ax === ax && s.ay === ay && s.gen === g && s.seed === st.seed) return s.b;
+        const li = z - zrSync().zMin, s = baseSlots[li], g = genOf(st, z);
+        if (s !== undefined && s.st === st && s.ax === ax && s.ay === ay && s.gen === g && s.seed === st.seed) return s.b;
         const b = baseline(z, ax, ay);
-        baseSlots[z + 2] = { st, ax, ay, gen: g, seed: st.seed, b };
+        baseSlots[li] = { st, ax, ay, gen: g, seed: st.seed, b };
         return b;
     }
 
-    // The changed cells, decoded: per level (z + 2) a Map of area index -> Map of cell index -> record. Rebuilt from the
-    // save whenever UF.World.state is another object (a load, a New Game). Unreadable saved records are reported and
-    // skipped (they stay in the save untouched).
+    // The changed cells, decoded: per level (index z - zMin, made when the level has a change) a Map of area index -> Map
+    // of cell index -> record. Rebuilt from the save whenever UF.World.state is another object (a load, a New Game).
+    // Unreadable saved records are reported and skipped (they stay in the save untouched).
     const HEX = "0123456789abcdef";
-    const deltas = { st: null, levels: null, errors: [] };
+    const deltas = { st: null, levels: null, zMin: 0, errors: [] };
     function encodeRecord(r) {
         let s = "";
         for (let k = 0; k < REC; k++) s += HEX[r[k] >> 4] + HEX[r[k] & 15];
@@ -1133,23 +1314,28 @@
     const schemaKnown = st => st.strataSchemaVersion === undefined || st.strataSchemaVersion === STRATA_SCHEMA;
     function deltaLevels(st) {
         if (deltas.st === st) return deltas.levels;
+        const r0 = zrSync();
         deltas.st = st;
-        deltas.levels = [new Map(), new Map(), new Map(), new Map(), new Map()];
+        deltas.zMin = r0.zMin;
+        deltas.levels = new Array(r0.n);
         deltas.errors = [];
         if (!st || !st.levels || !schemaKnown(st)) return deltas.levels;
         const n = st.size * st.size;
-        for (let li = 0; li < 5; li++) {
-            const L = st.levels[LEVEL_KEY[li]], saved = L && L.strata;
+        for (const key in st.levels) {
+            const L = st.levels[key], saved = L && L.strata;
             if (!saved) continue;
-            if (typeof saved !== "object" || Array.isArray(saved)) { deltas.errors.push(`level ${LEVEL_KEY[li]}: strata is not an object`); continue; }
+            const z = Number(key);
+            if (!isLevel(z)) { deltas.errors.push(`level ${key}: outside the world's Z range ${r0.zMin}..${r0.zMax}`); continue; }
+            if (typeof saved !== "object" || Array.isArray(saved)) { deltas.errors.push(`level ${key}: strata is not an object`); continue; }
+            const li = z - r0.zMin;
             for (const ak in saved) {
                 const a = parseAreaKey(ak), cells = saved[ak];
-                if (!a || !cells || typeof cells !== "object") { deltas.errors.push(`level ${LEVEL_KEY[li]} area "${ak}"`); continue; }
+                if (!a || !cells || typeof cells !== "object") { deltas.errors.push(`level ${key} area "${ak}"`); continue; }
                 let map = null;
                 for (const k in cells) {
                     const i = Number(k), r = decodeRecord(cells[k]);
-                    if (!Number.isInteger(i) || i < 0 || i >= n || !r) { deltas.errors.push(`level ${LEVEL_KEY[li]} area ${ak} cell ${k}: ${JSON.stringify(cells[k])}`); continue; }
-                    if (!map) { map = new Map(); deltas.levels[li].set(a.x + a.y * AREA_STRIDE, map); }
+                    if (!Number.isInteger(i) || i < 0 || i >= n || !r) { deltas.errors.push(`level ${key} area ${ak} cell ${k}: ${JSON.stringify(cells[k])}`); continue; }
+                    if (!map) { map = new Map(); (deltas.levels[li] = deltas.levels[li] || new Map()).set(a.x + a.y * AREA_STRIDE, map); }
                     map.set(i, r);
                 }
             }
@@ -1161,13 +1347,16 @@
         return deltas.levels;
     }
 
+    // The changed cells of one level of an area (Map cell index -> record), or undefined when it has none.
+    const deltaMapOf = (st, z, ax, ay) => { const lv = deltaLevels(st)[z - deltas.zMin]; return lv !== undefined ? lv.get(ax + ay * AREA_STRIDE) : undefined; };
+
     // The cell located last: material bytes rdM[rdO..rdO+4], HP bytes rdH[rdHO..] (rdH null: the baseline's full HP),
     // connector rdC. Module-level so a read allocates nothing. slot: which scratch a legacy ground cell uses (0 below,
     // 1 the cell, 2 above), so the three cells of one derivation never share one.
     let rdM = null, rdO = 0, rdH = null, rdHO = 0, rdC = 0;
     const legacyGroundRec = [new Uint8Array(REC), new Uint8Array(REC), new Uint8Array(REC)];
     function locate(st, z, ax, ay, i, slot) {
-        const am = deltaLevels(st)[z + 2].get(ax + ay * AREA_STRIDE);
+        const lv = deltaLevels(st)[z - deltas.zMin], am = lv !== undefined ? lv.get(ax + ay * AREA_STRIDE) : undefined;
         const r = am !== undefined ? am.get(i) : undefined;
         if (r !== undefined) { rdM = r; rdO = REC_M; rdH = r; rdHO = REC_HP; rdC = r[0]; return; }
         const b = baseOf(st, z, ax, ay);
@@ -1181,7 +1370,8 @@
             rdM = rec; rdO = REC_M; rdH = rec; rdHO = REC_HP; rdC = 0;
             return;
         }
-        rdM = b.strata.m; rdO = i * STRATA; rdH = b.strata.hp; rdHO = rdO; rdC = connOf(b.conn, i);
+        storeLocate(b, i);
+        rdH = null; rdHO = rdO;   // a baseline stratum is at full HP
     }
     const hpAt = k => rdH !== null ? rdH[rdHO + k] : (SOLID_B[rdM[rdO + k]] === 1 ? 255 : 0);
     const fillOf = (m, o) => { let f = 0; while (f < STRATA && SOLID_B[m[o + f]] === 1) f++; return f; };
@@ -1192,12 +1382,13 @@
      * The legacy packed code of a cell, derived from its strata and the cells above and below (the table in
      * docs/systems/UF_Levels.md). fill = solid strata stacked from S0. fill 5: solid. A connector (ramp, stairs): that
      * connector. Otherwise the standing surface is the top of the fill, or with fill 0 the top stratum (S4) of the cell
-     * below when it is solid (below -2 there is only lava: no surface). No surface: open. A surface with under 4 strata
-     * of headroom (counted on into the cell above; the sky above +2) can't be stood on: solid. Material and the
-     * constructed flag come from the stratum stood on.
+     * below when it is solid (nothing is below the bottom level zMin: no surface). No surface: open. A surface with under
+     * 4 strata of headroom (counted on into the cell above; the sky above the top level zMax, unless the column has a
+     * ceiling cap) can't be stood on: solid. Material and the constructed flag come from the stratum stood on.
      */
     function derivePacked(st, ax, ay, i, z) {
         stats.derives++;
+        zrSync();
         locate(st, z, ax, ay, i, 1);
         const m = rdM, o = rdO, c = rdC;
         let fill = 0;
@@ -1205,7 +1396,7 @@
         if (fill === STRATA) return pack(SOLID, (m[o] & M_BUILT) !== 0, LEGACY_B[m[o]]);
         let sup = -1;
         if (fill > 0) sup = m[o + fill - 1];
-        else if (z > -2) {
+        else if (z > ZR.zMin) {
             locate(st, z - 1, ax, ay, i, 0);
             if (SOLID_B[rdM[rdO + 4]] === 1) sup = rdM[rdO + 4];
         }
@@ -1214,7 +1405,7 @@
         let head = 0, s = fill;
         while (s < STRATA && SOLID_B[m[o + s]] === 0) { head++; s++; }
         if (s === STRATA && head < 4) {
-            if (z === 2) head = capCode(st, ax, ay, i) !== 0 ? head : STRATA * 2;   // the sky above +2, unless the column is capped
+            if (z === ZR.zMax) head = capCode(st, ax, ay, i) !== 0 ? head : STRATA * 2;   // the sky above the top level, unless the column is capped
             else {
                 locate(st, z + 1, ax, ay, i, 2);
                 for (let t = 0; t < STRATA && head < 4 && SOLID_B[rdM[rdO + t]] === 0; t++) head++;
@@ -1226,16 +1417,17 @@
     // The derived packed codes of a whole level of an area, kept per world state: a read-only view of the strata, built
     // from them (derivePacked) on first use after a load or a New Game and refreshed by putDelta for the changed cell and
     // the cells above and below it, the only cells whose derivation reads it. 65,536 bytes per level of a 256 x 256 area;
-    // the last GRID_KEEP grids are kept. A shape read is one array read; whole-level passes (painting, flood walls, the
-    // ground's cliffs) read the grid instead of deriving every cell again.
+    // the last GRID_KEEP grids are kept (they follow the levels read, never the layer count). A shape read is one array
+    // read; whole-level passes (painting, flood walls, the ground's cliffs) read the grid instead of deriving every cell.
     const GRID_KEEP = 15;
-    const packedGrids = { st: null, map: new Map() };   // (ax + ay * AREA_STRIDE) * 5 + (z + 2) -> Uint8Array
-    const gridSlots = [0, 1, 2, 3, 4].map(() => ({ st: null, ai: -1, grid: null }));   // the last grid read per level
+    const packedGrids = { st: null, map: new Map() };   // (ax + ay * AREA_STRIDE) * levels + (z - zMin) -> Uint8Array
+    const gridSlots = [];                                // the last grid read per level (index z - zMin)
     function packedGridOf(st, z, ax, ay) {
-        const li = z + 2, ai = ax + ay * AREA_STRIDE, slot = gridSlots[li];
+        const r = zrSync(), li = z - r.zMin, ai = ax + ay * AREA_STRIDE;
+        const slot = gridSlots[li] || (gridSlots[li] = { st: null, ai: -1, grid: null });
         if (slot.st === st && slot.ai === ai) return slot.grid;
         if (packedGrids.st !== st) { packedGrids.st = st; packedGrids.map.clear(); }
-        const key = ai * 5 + li;
+        const key = ai * r.n + li;
         let grid = packedGrids.map.get(key);
         if (grid === undefined) {
             const n = st.size * st.size;
@@ -1255,9 +1447,9 @@
     // After a cell's strata changed: re-derive it and the cells above and below in the grids that exist.
     function refreshPacked(st, z, ax, ay, i) {
         if (packedGrids.st !== st) return;
-        const ai = ax + ay * AREA_STRIDE;
-        for (let zz = Math.max(-2, z - 1); zz <= Math.min(2, z + 1); zz++) {
-            const g = packedGrids.map.get(ai * 5 + zz + 2);
+        const r = zrSync(), ai = ax + ay * AREA_STRIDE;
+        for (let zz = Math.max(r.zMin, z - 1); zz <= Math.min(r.zMax, z + 1); zz++) {
+            const g = packedGrids.map.get(ai * r.n + zz - r.zMin);
             if (g !== undefined) g[i] = derivePacked(st, ax, ay, i, zz);
         }
     }
@@ -1265,15 +1457,15 @@
     function verifyPackedGrids(ax, ay) {
         const st = World().state, out = { grids: 0, cells: 0, mismatches: 0, examples: [] };
         if (packedGrids.st !== st) return out;
-        const ai = ax + ay * AREA_STRIDE, n = st.size * st.size;
-        for (let li = 0; li < 5; li++) {
-            const g = packedGrids.map.get(ai * 5 + li);
+        const r = zrSync(), ai = ax + ay * AREA_STRIDE, n = st.size * st.size;
+        for (let li = 0; li < r.n; li++) {
+            const g = packedGrids.map.get(ai * r.n + li);
             if (g === undefined) continue;
             out.grids++;
             for (let i = 0; i < n; i++) {
                 out.cells++;
-                const p = derivePacked(st, ax, ay, i, li - 2);
-                if (g[i] !== p) { out.mismatches++; if (out.examples.length < 5) out.examples.push({ z: li - 2, x: i % st.size, y: (i / st.size) | 0, cached: g[i], derived: p }); }
+                const p = derivePacked(st, ax, ay, i, li + r.zMin);
+                if (g[i] !== p) { out.mismatches++; if (out.examples.length < 5) out.examples.push({ z: li + r.zMin, x: i % st.size, y: (i / st.size) | 0, cached: g[i], derived: p }); }
             }
         }
         return out;
@@ -1282,7 +1474,7 @@
     // Packed shape of a cell (0 for outside the world).
     function packedAt(ax, ay, x, y, z) {
         const W = World(), st = W && W.state;
-        if (!st || !isLevel(z) || z < -2 || z > 2 || !W.inWorld(ax, ay, z) || x < 0 || y < 0 || x >= st.size || y >= st.size) return 0;
+        if (!st || !isLevel(z) || !W.inWorld(ax, ay, z) || x < 0 || y < 0 || x >= st.size || y >= st.size) return 0;
         stats.shapeReads++;
         return packedGridOf(st, z, ax, ay)[y * st.size + x];
     }
@@ -1304,7 +1496,8 @@
         qX |= 0; qY |= 0;
         const W = World();
         qSt = W && W.state;
-        if (!qSt || !Number.isInteger(qZ) || qZ < -2 || qZ > 2 || !W.inWorld(qAx, qAy, qZ) || qX < 0 || qY < 0 || qX >= qSt.size || qY >= qSt.size) return false;
+        zrSync();
+        if (!qSt || !Number.isInteger(qZ) || !W.inWorld(qAx, qAy, qZ) || qX < 0 || qY < 0 || qX >= qSt.size || qY >= qSt.size) return false;
         qI = qY * qSt.size + qX;
         return true;
     }
@@ -1321,31 +1514,46 @@
     }
     function sameAsBaseline(b, i, r) {
         if (b.legacyGround) return false;
-        if (connOf(b.conn, i) !== r[0]) return false;
-        const m = b.strata.m, o = i * STRATA;
-        for (let k = 0; k < STRATA; k++) {
-            if (m[o + k] !== r[REC_M + k]) return false;
-            const hp = b.strata.hp ? b.strata.hp[o + k] : (SOLID_B[m[o + k]] === 1 ? 255 : 0);
-            if (hp !== r[REC_HP + k]) return false;
+        const sM = rdM, sO = rdO, sC = rdC;
+        storeLocate(b, i);
+        let same = rdC === r[0];
+        for (let k = 0; same && k < STRATA; k++) {
+            const v = rdM[rdO + k];
+            if (v !== r[REC_M + k] || (SOLID_B[v] === 1 ? 255 : 0) !== r[REC_HP + k]) same = false;   // a baseline stratum is at full HP
         }
-        return true;
+        rdM = sM; rdO = sO; rdC = sC;
+        return same;
+    }
+    // A level's entry in the save (UF.World.state.levels[z]): the core's exist from New Game; a level outside the core gets
+    // one with its first change (WG.00.17: an unchanged level costs 0 bytes in the save) and loses it with its last.
+    function levelEntry(st, z) {
+        const key = String(z);
+        return st.levels[key] || (st.levels[key] = { z, gen: levelGen(st, 0), strata: {} });
+    }
+    function dropEmptyOuterEntry(st, z) {
+        const L = st.levels[String(z)];
+        if (!L || (z >= CORE.zMin && z <= CORE.zMax)) return;
+        if (Object.keys(L).every(k => k === "z" || k === "gen" || (k === "strata" && !Object.keys(L.strata).length))) delete st.levels[String(z)];
     }
     // Store a cell's record (null: back to the baseline) in the decoded maps and the save.
     function putDelta(st, z, ax, ay, i, r) {
-        const lv = deltaLevels(st)[z + 2], ai = ax + ay * AREA_STRIDE, key = areaKey(ax, ay);
-        const L = st.levels[LEVEL_KEY[z + 2]];
+        const levels = deltaLevels(st), li = z - deltas.zMin, ai = ax + ay * AREA_STRIDE, key = areaKey(ax, ay);
+        const lv = levels[li];
         if (r === null) {
-            const am = lv.get(ai);
+            const L = st.levels[String(z)];
+            const am = lv !== undefined ? lv.get(ai) : undefined;
             if (am) { am.delete(i); if (!am.size) lv.delete(ai); }
             if (L && L.strata && L.strata[key]) {
                 delete L.strata[key][i];
                 if (!Object.keys(L.strata[key]).length) delete L.strata[key];
             }
+            dropEmptyOuterEntry(st, z);
             refreshPacked(st, z, ax, ay, i);
             return;
         }
-        let am = lv.get(ai);
-        if (!am) { am = new Map(); lv.set(ai, am); }
+        const L = levelEntry(st, z);
+        let am = (levels[li] = lv || new Map()).get(ai);
+        if (!am) { am = new Map(); levels[li].set(ai, am); }
         am.set(i, r);
         L.strata = L.strata || {};
         (L.strata[key] = L.strata[key] || {})[i] = encodeRecord(r);
@@ -1538,7 +1746,7 @@
         const W = World(), i = y * st.size + x;
         const before = currentRecord(st, z, ax, ay, i);
         const from = [-1, -1, -1], to = [-1, -1, -1];
-        for (let d = -1; d <= 1; d++) if (z + d >= -2 && z + d <= 2 && W.inWorld(ax, ay, z + d)) from[d + 1] = derivePacked(st, ax, ay, i, z + d);
+        for (let d = -1; d <= 1; d++) if (W.inWorld(ax, ay, z + d)) from[d + 1] = derivePacked(st, ax, ay, i, z + d);
         const b = baseOf(st, z, ax, ay);
         putDelta(st, z, ax, ay, i, sameAsBaseline(b, i, rec) ? null : rec);
         for (let d = -1; d <= 1; d++) if (from[d + 1] >= 0) to[d + 1] = derivePacked(st, ax, ay, i, z + d);
@@ -1585,7 +1793,7 @@
         };
         if (!st || !st.levels) return refuse("no levels in this world");
         if (!schemaKnown(st)) return refuse(`this save's strata schema ${JSON.stringify(st.strataSchemaVersion)} is unknown: no changes are written`);
-        if (!isLevel(r.z) || r.z < -2 || r.z > 2 || !W.inWorld(r.ax, r.ay, r.z) || r.x < 0 || r.y < 0 || r.x >= st.size || r.y >= st.size) return refuse(`level ${ref && ref.z} or cell (${r.x},${r.y}) doesn't exist`);
+        if (!isLevel(r.z) || !W.inWorld(r.ax, r.ay, r.z) || r.x < 0 || r.y < 0 || r.x >= st.size || r.y >= st.size) return refuse(`level ${ref && ref.z} or cell (${r.x},${r.y}) doesn't exist`);
         if (r.z === 0 && levelGen(st, 0) < 4) return refuse("the ground has no column in this world (generator < 4)");
         const m = spec && spec.m;
         if (!m || typeof m.length !== "number" || m.length !== STRATA) return refuse("m must list five materials, S0 first");
@@ -1624,7 +1832,7 @@
     function strataAt(ref) {
         const r = refOf(ref || {});
         const W = World(), st = W && W.state;
-        if (!st || !isLevel(r.z) || r.z < -2 || r.z > 2 || !W.inWorld(r.ax, r.ay, r.z) || r.x < 0 || r.y < 0 || r.x >= st.size || r.y >= st.size) return null;
+        if (!st || !isLevel(r.z) || !W.inWorld(r.ax, r.ay, r.z) || r.x < 0 || r.y < 0 || r.x >= st.size || r.y >= st.size) return null;
         const rec = currentRecord(st, r.z, r.ax, r.ay, r.y * st.size + r.x);
         const out = { materials: [], constructed: [], hp: [], bytes: [], connector: rec[0] ? SHAPE_NAMES[rec[0]] : null, fill: 0, changed: false };
         for (let k = 0; k < STRATA; k++) {
@@ -1635,7 +1843,7 @@
             out.bytes.push(v);
         }
         out.fill = fillOf(rec, REC_M);
-        const am = deltaLevels(st)[r.z + 2].get(r.ax + r.ay * AREA_STRIDE);
+        const am = deltaMapOf(st, r.z, r.ax, r.ay);
         out.changed = !!(am && am.has(r.y * st.size + r.x));
         return out;
     }
@@ -1729,7 +1937,7 @@
         const W = World();
         if (!st || !st.levels) return "no levels in this world";
         if (!schemaKnown(st)) return `this save's strata schema ${JSON.stringify(st.strataSchemaVersion)} is unknown`;
-        if (!Number.isInteger(z) || z < -2 || z > 2 || !W.inWorld(ax, ay, z) || x < 0 || y < 0 || x >= st.size || y >= st.size) return `level ${z} or cell (${x},${y}) doesn't exist`;
+        if (!Number.isInteger(z) || !W.inWorld(ax, ay, z) || x < 0 || y < 0 || x >= st.size || y >= st.size) return `level ${z} or cell (${x},${y}) doesn't exist`;
         if (z === 0 && levelGen(st, 0) < 4) return "the ground has no column in this world (generator < 4)";
         return "";
     }
@@ -1762,7 +1970,10 @@
     }
 
     const FALLOFF = { constant: t => 1, linear: t => 1 - t, quadratic: t => (1 - t) * (1 - t) };
-    const levelOfElevation = e => Math.floor(e / STRATA) - 2;
+    // The column elevation scale of the world (WG.00.17): e = (z - zMin) * STRATA + s, 0 at the bottom stratum of the
+    // lowest level, levels x STRATA - 1 at the top (24 at the legacy range, 159 at -16..+15). zrSync() first.
+    const levelOfElevation = e => Math.floor(e / STRATA) + ZR.zMin;
+    const elevationOf = (z, s) => (z - ZR.zMin) * STRATA + s;
     function newSummary() { return { ok: true, cells: 0, strataHit: 0, strataDestroyed: 0, skipped: 0, destroyed: [], levels: [] }; }
     function addResults(sum, results, x, y, z) {
         let wrote = false;
@@ -1784,11 +1995,12 @@
      * Damage a volume. Two forms:
      *   applyVolumeDamage(area, minX, minY, minZ, minS, maxX, maxY, maxZ, maxS, damage, damageType = "impact"[, { source }]):
      *     every stratum of the box, from level minZ stratum minS up to level maxZ stratum maxS (it crosses levels: the
-     *     25 strata of a column are one elevation scale, e = (z + 2) * 5 + s, 0..24), takes the damage.
+     *     strata of a column are one elevation scale, e = (z - zMin) * 5 + s, 0 .. levels x 5 - 1), takes the damage.
      *   applyVolumeDamage({ center: { area, x, y, z, s = 2 }, radius (feet), damage, damageType = "impact",
      *     falloff: "constant" | "linear" (default) | "quadratic", source }):
      *     a sphere around the middle of that stratum; a stratum takes damage x falloff(distance / radius) when its middle
-     *     is within the radius (a cell is 5 ft across, a stratum 1 ft high). It crosses levels the same way.
+     *     is within the radius (DEC-013: a cell is 5 ft across, a stratum 2 ft high; 1 ft before WG.00.17, so the same
+     *     radius now reaches half as many strata up and down). It crosses levels the same way.
      * One area per call (cells past the area's edge are left out). Returns { ok, cells, strataHit, strataDestroyed,
      * skipped, destroyed: [{ x, y, z, stratum, material }], levels } or { ok: false, reason }.
      */
@@ -1801,8 +2013,8 @@
         if (badNumber(damage) || damage < 0) return { ok: false, reason: `damage ${JSON.stringify(damage)} isn't a number >= 0` };
         if (typeof damageType !== "string" || !damageType) return { ok: false, reason: "damageType must be a name" };
         if (minS < 0 || minS >= STRATA || maxS < 0 || maxS >= STRATA) return { ok: false, reason: "strata are 0..4" };
-        const ax = a ? a.x | 0 : 0, ay = a ? a.y | 0 : 0;
-        const e0 = Math.max(0, (minZ + 2) * STRATA + minS), e1 = Math.min(24, (maxZ + 2) * STRATA + maxS);
+        const ax = a ? a.x | 0 : 0, ay = a ? a.y | 0 : 0, r = zrSync();
+        const e0 = Math.max(0, elevationOf(minZ, minS)), e1 = Math.min(r.n * STRATA - 1, elevationOf(maxZ, maxS));
         const x0 = Math.max(0, minX), y0 = Math.max(0, minY), x1 = Math.min(st.size - 1, maxX), y1 = Math.min(st.size - 1, maxY);
         const sum = newSummary(), source = (opts && opts.source) || null;
         if (e0 > e1 || x0 > x1 || y0 > y1) return sum;
@@ -1810,7 +2022,7 @@
             for (let z = levelOfElevation(e0); z <= levelOfElevation(e1); z++) {
                 if (damageRefusal(st, ax, ay, x, y, z)) { sum.skipped++; continue; }
                 const hits = [];
-                for (let s = 0; s < STRATA; s++) { const e = (z + 2) * STRATA + s; if (e >= e0 && e <= e1) hits.push([s, damage]); }
+                for (let s = 0; s < STRATA; s++) { const e = elevationOf(z, s); if (e >= e0 && e <= e1) hits.push([s, damage]); }
                 if (!anyMatter(st, ax, ay, y * st.size + x, z, hits)) continue;
                 addResults(sum, damageCell(st, ax, ay, x, y, z, hits, damageType, source), x, y, z);
             }
@@ -1825,14 +2037,16 @@
         const area = c.area || spec.area || { x: 0, y: 0 }, ax = area.x | 0, ay = area.y | 0;
         const cs = c.s !== undefined ? c.s : 2, falloff = FALLOFF[spec.falloff || "linear"];
         const damage = spec.damage, radius = spec.radius, damageType = spec.damageType || "impact", source = spec.source || null;
-        if (![c.x, c.y, c.z, cs].every(Number.isInteger) || cs < 0 || cs >= STRATA || c.z < -2 || c.z > 2) return { ok: false, reason: "center needs integer x, y, z (-2..2) and s (0..4)" };
+        const r = zrSync();
+        if (![c.x, c.y, c.z, cs].every(Number.isInteger) || cs < 0 || cs >= STRATA || !World().isLevel(c.z)) return { ok: false, reason: `center needs integer x, y, z (${r.zMin}..${r.zMax}) and s (0..4)` };
         if (badNumber(radius) || radius <= 0) return { ok: false, reason: `radius ${JSON.stringify(radius)} isn't a number > 0 (feet)` };
         if (badNumber(damage) || damage < 0) return { ok: false, reason: `damage ${JSON.stringify(damage)} isn't a number >= 0` };
         if (!falloff) return { ok: false, reason: `unknown falloff ${JSON.stringify(spec.falloff)} (constant, linear, quadratic)` };
         if (typeof damageType !== "string") return { ok: false, reason: "damageType must be a name" };
-        const px = (c.x + 0.5) * CELL_FT, py = (c.y + 0.5) * CELL_FT, pe = (c.z + 2) * STRATA + cs + 0.5;
+        // Positions in feet: a cell's middle across, a stratum's middle up (elevation + 0.5 strata of STRATUM_FT each).
+        const px = (c.x + 0.5) * CELL_FT, py = (c.y + 0.5) * CELL_FT, pe = (elevationOf(c.z, cs) + 0.5) * STRATUM_FT;
         const rc = Math.ceil(radius / CELL_FT), r2 = radius * radius;
-        const e0 = Math.max(0, Math.floor(pe - radius)), e1 = Math.min(24, Math.floor(pe + radius));
+        const e0 = Math.max(0, Math.floor((pe - radius) / STRATUM_FT)), e1 = Math.min(r.n * STRATA - 1, Math.floor((pe + radius) / STRATUM_FT));
         const sum = newSummary();
         for (let y = Math.max(0, c.y - rc); y <= Math.min(st.size - 1, c.y + rc); y++) {
             for (let x = Math.max(0, c.x - rc); x <= Math.min(st.size - 1, c.x + rc); x++) {
@@ -1842,7 +2056,7 @@
                     if (damageRefusal(st, ax, ay, x, y, z)) { sum.skipped++; continue; }
                     const hits = [];
                     for (let s = 0; s < STRATA; s++) {
-                        const de = (z + 2) * STRATA + s + 0.5 - pe, d2 = h2 + de * de;
+                        const de = (elevationOf(z, s) + 0.5) * STRATUM_FT - pe, d2 = h2 + de * de;
                         if (d2 <= r2) hits.push([s, damage * falloff(Math.sqrt(d2) / radius)]);
                     }
                     if (!hits.length || !anyMatter(st, ax, ay, y * st.size + x, z, hits)) continue;
@@ -1864,16 +2078,16 @@
         const f = fillOf(rdM, rdO);
         return f > 0 ? f - 1 : -1;
     }
-    /** The column elevation (0..24 = (z + 2) * 5 + stratum) of the stratum stood on in the cell: the top of its solid base,
-     *  or with none the cell below's S4 when that is solid; -1 when there is nothing to stand on. */
+    /** The column elevation (e = (z - zMin) * 5 + stratum; 0..24 at the legacy range) of the stratum stood on in the cell:
+     *  the top of its solid base, or with none the cell below's S4 when that is solid; -1 when there is nothing to stand on. */
     function worldStrataElevationAt(a, b, c, d, e) {
         if (!cellQuery(a, b, c, d, e)) return -1;
         locate(qSt, qZ, qAx, qAy, qI, 1);
         const f = fillOf(rdM, rdO);
-        if (f > 0) return (qZ + 2) * STRATA + f - 1;
-        if (qZ > -2) {
+        if (f > 0) return elevationOf(qZ, f - 1);
+        if (qZ > ZR.zMin) {
             locate(qSt, qZ - 1, qAx, qAy, qI, 0);
-            if (SOLID_B[rdM[rdO + 4]] === 1) return (qZ + 2) * STRATA - 1;
+            if (SOLID_B[rdM[rdO + 4]] === 1) return elevationOf(qZ, 0) - 1;
         }
         return -1;
     }
@@ -1947,15 +2161,14 @@
         return s / STRATA;
     }
     /** Any solid stratum above the cell's standing space: in the cell above its solid base (after an air gap), or in any
-     *  cell above it up to +2 (the 25-strata column), or the column's ceiling cap above +2 (19B). A 5-bit solid mask per
-     *  cell. */
+     *  cell above it up to the top level (the whole column), or the column's ceiling cap above the top level (19B). A
+     *  5-bit solid mask per cell. */
     function hasOpaqueOverburden(a, b, c, d, e) {
         if (!cellQuery(a, b, c, d, e)) return false;
         locate(qSt, qZ, qAx, qAy, qI, 1);
         const f = fillOf(rdM, rdO);
         if (f < STRATA && (solidMaskOf(rdM, rdO) >> f) !== 0) return true;
-        for (let z = qZ + 1; z <= 2; z++) {
-            if (!World().inWorld(qAx, qAy, z)) break;
+        for (let z = qZ + 1, top = ZR.zMax; z <= top; z++) {
             locate(qSt, z, qAx, qAy, qI, 2);
             if (solidMaskOf(rdM, rdO) !== 0) return true;
         }
@@ -1964,8 +2177,8 @@
     /**
      * For DEUS_Fluid (which keeps its 0..7 depth scale): the cell's open volume and faces as bits. capacity (bits 0..2) =
      * the cell's non-solid strata in fluid depth units (STRATA_TO_FLUID); DOWN (8): S0 open and the cell below's S4 open
-     * (not at -2); UP (16): S4 open and the cell above's S0 open (the sky above +2); SIDE (32): any stratum open. 0 outside
-     * the world or for a solid cell.
+     * (not on the bottom level); UP (16): S4 open and the cell above's S0 open (the sky above the top level, unless capped);
+     * SIDE (32): any stratum open. 0 outside the world or for a solid cell.
      */
     function getStrataFluidPassage(a, b, c, d, e) {
         if (!cellQuery(a, b, c, d, e)) return 0;
@@ -1974,12 +2187,12 @@
         const open = STRATA - (SOLID_B[rdM[rdO]] + SOLID_B[rdM[rdO + 1]] + SOLID_B[rdM[rdO + 2]] + SOLID_B[rdM[rdO + 3]] + SOLID_B[rdM[rdO + 4]]);
         if (!open) return 0;
         let bits = STRATA_TO_FLUID[open] | FLUID_PASS.SIDE;
-        if ((mask & 1) === 0 && qZ > -2) {
+        if ((mask & 1) === 0 && qZ > ZR.zMin) {
             locate(qSt, qZ - 1, qAx, qAy, qI, 0);
             if (SOLID_B[rdM[rdO + 4]] === 0) bits |= FLUID_PASS.DOWN;
         }
         if ((mask & 16) === 0) {
-            if (qZ === 2) { if (capCode(qSt, qAx, qAy, qI) === 0) bits |= FLUID_PASS.UP; }   // a capped column is closed above
+            if (qZ === ZR.zMax) { if (capCode(qSt, qAx, qAy, qI) === 0) bits |= FLUID_PASS.UP; }   // a capped column is closed above
             else {
                 locate(qSt, qZ + 1, qAx, qAy, qI, 2);
                 if (SOLID_B[rdM[rdO]] === 0) bits |= FLUID_PASS.UP;
@@ -2007,7 +2220,9 @@
     // the world's size and catalog climate (never of the live world state), so any area regenerates the same way.
 
     const FEATURE_GEN = 5;
-    const E_TOP = 25;                  // elevations 0..24 (e = (z + 2) * 5 + s); 25 is the top of +2, where the model ends
+    // The generator works in its own frame, the core column -2..+2 (frozen with generator 5, WG.00.17): elevations
+    // 0..24 (e = (z + 2) * 5 + s, core index z + 2); 25 is the top of +2, where the generated model ends.
+    const E_TOP = 25;
     const DEFAULT_CLIMATE = Object.freeze({ continentRim: 0.15, seaLevel: 0.2, scale: Object.freeze({ elevation: 64, rainfall: 48, temperature: 96, detail: 16 }) });
     const deepFreeze = o => {
         if (o && typeof o === "object" && !Object.isFrozen(o)) { Object.freeze(o); for (const k of Object.keys(o)) deepFreeze(o[k]); }
@@ -2095,27 +2310,61 @@
     // function of the key, so a dropped one regenerates identically).
     const VOLUME_KEEP = 3;
     const volumes = new Map();
+    // The baselines of a generator-5 area, one per level of the world's Z range (index z - zMin). The core levels are
+    // generated together and carved exactly as before WG.00.17, then sealed into chunk stores; the levels around the core
+    // are outerBaseline's (rock below, air above), with the rock of the core's ceiling caps materialized above +2
+    // (materializeCaps). The last VOLUME_KEEP areas are kept: a pure function of the key (the range included), so a
+    // dropped one regenerates identically.
     function volumeOf(seed, gen, ax, ay, size) {
-        const W = World(), st = W && W.state;
-        const key = `${seed}:${gen}:${ax},${ay}:${size}:${st && st.areasX ? `${st.areasX}x${st.areasY}` : "1x1"}`;
+        const W = World(), st = W && W.state, r = zrSync();
+        const key = `${seed}:${gen}:${ax},${ay}:${size}:${st && st.areasX ? `${st.areasX}x${st.areasY}` : "1x1"}:${r.zMin}..${r.zMax}`;
         let v = volumes.get(key);
         if (v) return v;
         const t0 = performance.now();
-        v = LEVELS.map(z => finishBaseline(levelArrays(seed, gen, z, ax, ay, size), z, gen, size));
+        const core = CORE_LEVELS.map(z => finishBaseline(levelArrays(seed, gen, z, ax, ay, size), z, gen, size));
         const tBase = performance.now() - t0;
-        carveNaturalFeatures(seed, gen, ax, ay, size, v);
+        carveNaturalFeatures(seed, gen, ax, ay, size, core);
         const ms = performance.now() - t0;
-        stats.generated += 5;
+        stats.generated += core.length;
         stats.genMs += ms;
         stats.lastGenMs = ms;
         stats.featureMs = ms - tBase;
+        const t1 = performance.now();
+        for (const b of core) seal(b);
+        v = new Array(r.n);
+        for (let z = r.zMin; z <= r.zMax; z++) v[z - r.zMin] = z >= CORE.zMin && z <= CORE.zMax ? core[z - CORE.zMin] : outerBaseline(z, size);
+        v[r.n - 1].topCaps = materializeCaps(v, core[core.length - 1], r, size);
+        stats.sealMs = performance.now() - t1;
         volumes.set(key, v);
         while (volumes.size > VOLUME_KEEP) volumes.delete(volumes.keys().next().value);
         return v;
     }
 
+    // The ceiling caps of the core's top (+2), generated on its baseline (b2.caps: the rock of a mountain rising above
+    // +2), as strata of the levels above it: a cap of t strata fills S0.. of +3 upward. What doesn't fit under zMax stays
+    // a cap above the top level (returned: the top baseline's topCaps, read by capCode). At the legacy range nothing is
+    // above +2, so every cap stays one; at -16..+15 every cap fits (thickness 3..12 strata).
+    function materializeCaps(v, b2, r, size) {
+        const caps = b2.caps || new Map();
+        if (r.zMax === CORE.zMax || !caps.size) return caps;
+        const rest = new Map();
+        for (const [i, code] of caps) {
+            const mat = code & 0xff, t = (code >> 8) & 0xff, x = i % size, y = (i - x) / size;
+            let k = 0;
+            for (; k < t; k++) {
+                const z = CORE.zMax + 1 + ((k / STRATA) | 0);
+                if (z > r.zMax) break;
+                storeSetStratum(v[z - r.zMin], x, y, k % STRATA, mat);
+            }
+            if (k < t) rest.set(i, mat | ((t - k) << 8));
+            stats.capStrataMaterialized = (stats.capStrataMaterialized || 0) + k;
+        }
+        return rest;
+    }
+
     /**
-     * Carve the natural cuts and caves of an area into its five baselines' strata (bs[z + 2]), in place. Order: host
+     * Carve the natural cuts and caves of an area into its five core baselines' strata (bs[z + 2], the core -2..+2:
+     * the generator's own frame, frozen with it), in place. Order: host
      * rock and protections, cave networks (+2 massifs and their caps first), shafts and skylights, cuts, ramps where a
      * carved slope meets the next level, removal of any natural solid no longer connected to bedrock. Keeps the feature
      * descriptors on the ground baseline (bs[2].features) and the caps on +2's (bs[4].caps).
@@ -2746,19 +2995,22 @@
     }
 
     //-------------------------------------------------------------------------
-    // The ceiling cap (19B): rock above +2 over a column where the mountain rises beyond the model (a +2 massif). The
-    // model has no level above +2; a cap is the minimal record of the rock there: material, thickness (ft), HP. It is
-    // opaque (hasOpaqueOverburden, continuousAirHeight), carries a +2 floor's headroom, blocks fluids rising out of the
-    // top, and can be damaged and breached like a stratum (applyCapDamage). A generator-5 baseline keeps its caps in
-    // +2's baseline (caps: Map cell -> material | thickness << 8, at full HP); a changed cap is saved sparse in
-    // UF.World.state.levels["2"].caps["ax,ay"][cell] = 6 hex digits (material, thickness, HP; "000000" = breached).
+    // The ceiling cap (19B): rock above the top level of the world over a column where the mountain rises beyond it (a +2
+    // massif). A cap is the minimal record of that rock: material, thickness (strata: 2 ft each since WG.00.17, 1 ft
+    // before), HP. It is opaque (hasOpaqueOverburden, continuousAirHeight), carries a top-level floor's headroom, blocks
+    // fluids rising out of the top, and can be damaged and breached like a stratum (applyCapDamage). Generator 5 makes the
+    // caps on +2's baseline (caps: Map cell -> material | thickness << 8, at full HP). WG.00.17: the part of a cap that fits
+    // under the top level zMax is strata of the levels above +2 (materializeCaps); the rest stays the cap, held by the
+    // top level's baseline (topCaps; at the legacy range that is +2 and the whole cap, as before). A changed cap is saved
+    // sparse in UF.World.state.levels[zMax].caps["ax,ay"][cell] = 6 hex digits (material, thickness, HP; "000000" =
+    // breached): levels["2"] at the legacy range.
 
     const capState = { st: null, map: null };
     function capDeltas(st) {
         if (capState.st === st) return capState.map;
         capState.st = st;
         capState.map = new Map();
-        const L = st && st.levels && st.levels["2"], saved = L && L.caps;
+        const L = st && st.levels && st.levels[String(zrSync().zMax)], saved = L && L.caps;
         if (!saved || typeof saved !== "object") return capState.map;
         const n = st.size * st.size;
         for (const ak in saved) {
@@ -2776,14 +3028,14 @@
         }
         return capState.map;
     }
-    // A column's cap as one number (no allocation): 0 = none (open sky above +2), else material byte | thickness << 8 |
-    // HP (0..255) << 16.
+    // A column's cap as one number (no allocation): 0 = none (open sky above the top level), else material byte |
+    // thickness << 8 | HP (0..255) << 16.
     function capCode(st, ax, ay, i) {
         const cd = capDeltas(st).get(ax + ay * AREA_STRIDE);
         if (cd !== undefined) { const v = cd.get(i); if (v !== undefined) return v; }
-        const b = baseOf(st, 2, ax, ay);
-        if (!b || !b.caps) return 0;
-        const c = b.caps.get(i);
+        const b = baseOf(st, zrSync().zMax, ax, ay);
+        if (!b || !b.topCaps) return 0;
+        const c = b.topCaps.get(i);
         return c === undefined ? 0 : c | (255 << 16);
     }
     function capInfo(code) {
@@ -2792,17 +3044,19 @@
         return { material: mat.key, thickness, hp, maxHP: mat.maxHP * thickness, remainingHP: mat.maxHP * thickness * hp / 255,
             opaque: mat.solid, support: mat.support, anchored: true };
     }
-    // Store a column's cap (0: breached) and tell the world: +2's derived cell reads the cap (and +1's reads +2).
+    // Store a column's cap (0: breached) and tell the world: the top level's derived cell reads the cap (and the level
+    // below it reads the top level).
     function writeCap(st, ax, ay, x, y, code, cause) {
-        const i = y * st.size + x, before = capCode(st, ax, ay, i);
+        const i = y * st.size + x, before = capCode(st, ax, ay, i), top = zrSync().zMax;
         if (before === code) return false;
-        const from = derivePacked(st, ax, ay, i, 2);
-        const b = baseOf(st, 2, ax, ay), base = b && b.caps && b.caps.has(i) ? b.caps.get(i) | (255 << 16) : 0;
-        const ai = ax + ay * AREA_STRIDE, key = areaKey(ax, ay), L = st.levels["2"];
+        const from = derivePacked(st, ax, ay, i, top);
+        const b = baseOf(st, top, ax, ay), base = b && b.topCaps && b.topCaps.has(i) ? b.topCaps.get(i) | (255 << 16) : 0;
+        const ai = ax + ay * AREA_STRIDE, key = areaKey(ax, ay), L = code === base ? st.levels[String(top)] : levelEntry(st, top);
         let am = capDeltas(st).get(ai);
         if (code === base) {
             if (am) { am.delete(i); if (!am.size) capDeltas(st).delete(ai); }
-            if (L.caps && L.caps[key]) { delete L.caps[key][i]; if (!Object.keys(L.caps[key]).length) delete L.caps[key]; if (!Object.keys(L.caps).length) delete L.caps; }
+            if (L && L.caps && L.caps[key]) { delete L.caps[key][i]; if (!Object.keys(L.caps[key]).length) delete L.caps[key]; if (!Object.keys(L.caps).length) delete L.caps; }
+            dropEmptyOuterEntry(st, top);
         } else {
             if (!am) { am = new Map(); capDeltas(st).set(ai, am); }
             am.set(i, code);
@@ -2810,12 +3064,12 @@
             const hx = v => (v & 0xff).toString(16).padStart(2, "0");
             (L.caps[key] = L.caps[key] || {})[i] = hx(code) + hx(code >> 8) + hx(code >> 16);
         }
-        refreshPacked(st, 2, ax, ay, i);
-        const to = derivePacked(st, ax, ay, i, 2);
-        const ref = { area: { x: ax, y: ay }, x, y, z: 2 };
+        refreshPacked(st, top, ax, ay, i);
+        const to = derivePacked(st, ax, ay, i, top);
+        const ref = { area: { x: ax, y: ay }, x, y, z: top };
         emit("levels:capChanged", ref, { before: capInfo(before), after: capInfo(code), cause });
         if (from !== to) {
-            redrawAround(ax, ay, x, y, 2);
+            redrawAround(ax, ay, x, y, top);
             emit("levels:shapeChanged", ref, unpack(from), unpack(to));
             notifyWorldCellChanged(ref, unpack(from), unpack(to), cause);
         }
@@ -2823,7 +3077,7 @@
     }
     /** A column's cap: { material, thickness, hp, maxHP, remainingHP, opaque, support, anchored, changed } or null. */
     function capAt(a, b, c, d, e) {
-        if (!cellQuery(a, b, c, d, e === undefined && typeof a === "number" ? 2 : e)) return null;
+        if (!cellQuery(a, b, c, d, e === undefined && typeof a === "number" ? zrSync().zMax : e)) return null;
         const code = capCode(qSt, qAx, qAy, qI), info = capInfo(code);
         if (info) { const am = capDeltas(qSt).get(qAx + qAy * AREA_STRIDE); info.changed = !!(am && am.has(qI)); }
         return info;
@@ -2831,16 +3085,17 @@
     /** Set (spec { material, thickness 1..255, hp 1..255 }) or remove (null) a column's cap. Returns true or false (lastRefusal). */
     function setCap(ref, spec, opts = {}) {
         const W = World(), st = W && W.state, r = refOf(ref || {});
-        const refuse = reason => { lastRefusal = { ref: { area: { x: r.ax, y: r.ay }, x: r.x, y: r.y, z: 2 }, cap: spec, reason }; return false; };
-        if (!st || !st.levels || !st.levels["2"]) return refuse("no levels in this world");
+        const top = zrSync().zMax;
+        const refuse = reason => { lastRefusal = { ref: { area: { x: r.ax, y: r.ay }, x: r.x, y: r.y, z: top }, cap: spec, reason }; return false; };
+        if (!st || !st.levels || !st.levels["0"]) return refuse("no levels in this world");
         if (!schemaKnown(st)) return refuse(`this save's strata schema ${JSON.stringify(st.strataSchemaVersion)} is unknown: no changes are written`);
-        if (!W.inWorld(r.ax, r.ay, 2) || r.x < 0 || r.y < 0 || r.x >= st.size || r.y >= st.size) return refuse(`cell (${r.x},${r.y}) doesn't exist`);
+        if (!W.inWorld(r.ax, r.ay, top) || r.x < 0 || r.y < 0 || r.x >= st.size || r.y >= st.size) return refuse(`cell (${r.x},${r.y}) doesn't exist`);
         let code = 0;
         if (spec) {
             const id = typeof spec.material === "string" ? MATERIAL_ID.get(spec.material) : spec.material;
             const t = spec.thickness, hp = spec.hp === undefined ? 255 : spec.hp;
             if (id === undefined || SOLID_B[id & 0xff] !== 1 || (id & M_BUILT)) return refuse(`a cap is a natural solid material, not ${JSON.stringify(spec.material)}`);
-            if (!Number.isInteger(t) || t < 1 || t > 255) return refuse("thickness must be 1..255 ft");
+            if (!Number.isInteger(t) || t < 1 || t > 255) return refuse("thickness must be 1..255 strata");
             if (!Number.isInteger(hp) || hp < 1 || hp > 255) return refuse("hp must be 1..255");
             code = id | (t << 8) | (hp << 16);
         }
@@ -2854,17 +3109,18 @@
      */
     function applyCapDamage(a, b, c, d, e, f) {
         let ref, damage, damageType, opts;
-        if (a && typeof b === "number" && typeof c === "number") { ref = { area: a, x: b, y: c, z: 2 }; damage = d; damageType = e; opts = f; }
+        if (a && typeof b === "number" && typeof c === "number") { ref = { area: a, x: b, y: c, z: zrSync().zMax }; damage = d; damageType = e; opts = f; }
         else { ref = a; damage = b; damageType = c; opts = d; }
         damageType = typeof damageType === "string" && damageType ? damageType : "impact";
         const W = World(), st = W && W.state, r = refOf(ref || {});
         if (!st || !st.levels || !schemaKnown(st)) return { ok: false, reason: "no writable levels in this world" };
-        if (!W.inWorld(r.ax, r.ay, 2) || r.x < 0 || r.y < 0 || r.x >= st.size || r.y >= st.size) return { ok: false, reason: `cell (${r.x},${r.y}) doesn't exist` };
+        const top = zrSync().zMax;
+        if (!W.inWorld(r.ax, r.ay, top) || r.x < 0 || r.y < 0 || r.x >= st.size || r.y >= st.size) return { ok: false, reason: `cell (${r.x},${r.y}) doesn't exist` };
         if (badNumber(damage) || damage < 0) return { ok: false, reason: `damage ${JSON.stringify(damage)} isn't a number >= 0` };
         const i = r.y * st.size + r.x, code = capCode(st, r.ax, r.ay, i);
         if (!code) return { ok: false, reason: "no cap over this column" };
         const mat = STRATA_MATERIALS[code & M_ID], thickness = (code >> 8) & 0xff, hpBefore = (code >> 16) & 0xff;
-        const cref = { area: { x: r.ax, y: r.ay }, x: r.x, y: r.y, z: 2 };
+        const cref = { area: { x: r.ax, y: r.ay }, x: r.x, y: r.y, z: top };
         const ctx = { ref: cref, stratum: "cap", material: mat.key, constructed: false, damageType, damage,
             effective: damage * (mat.resist[damageType] !== undefined ? mat.resist[damageType] : 1), source: (opts && opts.source) || null };
         runHooks(mat.key, ctx);
@@ -2877,15 +3133,15 @@
     }
 
     //-------------------------------------------------------------------------
-    // Clearance (19B): continuous air in the column, in feet (strata), across levels. Physical data only: no creature's
-    // needs are decided here.
+    // Clearance (19B): continuous air in the column, in strata (2 ft each since WG.00.17, DEC-013; 1 ft before, when the
+    // count was also the feet), across levels. Physical data only: no creature's needs are decided here.
 
     /**
-     * The continuous AIR strata above a cell's standing surface, in feet: from the stratum stood on (the top of the
+     * The continuous AIR strata above a cell's standing surface (a count of strata; x UF.Space.STRATUM_FEET for feet): from the stratum stood on (the top of the
      * cell's solid base, or the S4 of the cell below when the cell's S0 is open; worldStrataElevationAt) up through the
      * cells above to the first stratum that isn't air: a solid one, or a fluid one (water and lava are not clearance: a
-     * floor under a pool has 0 ft; the air above a fluid isn't counted). Infinity when every stratum above up to +2's S4
-     * is air and the column has no cap (open sky); 0 for a solid cell; -1 when there is nothing to stand on (outside the
+     * floor under a pool has 0; the air above a fluid isn't counted). Infinity when every stratum above up to the top
+     * level's S4 is air and the column has no cap (open sky); 0 for a solid cell; -1 when there is nothing to stand on (outside the
      * world, or an open cell over open space).
      * Arguments (ref), (area, x, y[, z]) or (ax, ay, x, y, z); no allocation.
      */
@@ -2895,7 +3151,7 @@
         let s = fillOf(rdM, rdO), z = qZ;
         if (s === STRATA) return 0;
         if (s === 0) {
-            if (qZ === -2) return -1;
+            if (qZ === ZR.zMin) return -1;
             locate(qSt, qZ - 1, qAx, qAy, qI, 0);
             if (SOLID_B[rdM[rdO + 4]] !== 1) return -1;
             locate(qSt, qZ, qAx, qAy, qI, 1);
@@ -2907,20 +3163,21 @@
                 h++;
                 s++;
             }
-            if (z === 2) return capCode(qSt, qAx, qAy, qI) !== 0 ? h : Infinity;
+            if (z === ZR.zMax) return capCode(qSt, qAx, qAy, qI) !== 0 ? h : Infinity;
             z++;
             s = 0;
             locate(qSt, z, qAx, qAy, qI, 2);
         }
     }
-    /** Continuous air strata (ft) from column elevation e (0..24) upward in a cell, ending at the first solid or fluid
-     *  stratum: 0 when e itself is solid or fluid; Infinity to the open sky (no cap). airRunAt(area, x, y, e) or
-     *  airRunAt(ax, ay, x, y, e). No allocation. */
+    /** Continuous air strata from column elevation e (e = (z - zMin) * 5 + s; 0..24 at the legacy range) upward in a
+     *  cell, ending at the first solid or fluid stratum: 0 when e itself is solid or fluid; Infinity to the open sky (no
+     *  cap). airRunAt(area, x, y, e) or airRunAt(ax, ay, x, y, e). No allocation. */
     function airRunAt(a, b, c, d, e) {
         let ax, ay, x, y, el;
         if (typeof a === "number") { ax = a; ay = b; x = c; y = d; el = e; }
         else { ax = a ? a.x | 0 : 0; ay = a ? a.y | 0 : 0; x = b; y = c; el = d; }
-        if (!Number.isInteger(el) || el < 0 || el >= E_TOP || !cellQuery(ax, ay, x, y, ((el / STRATA) | 0) - 2)) return -1;
+        const r = zrSync();
+        if (!Number.isInteger(el) || el < 0 || el >= r.n * STRATA || !cellQuery(ax, ay, x, y, levelOfElevation(el))) return -1;
         let z = qZ, s = el % STRATA, h = 0;
         locate(qSt, z, qAx, qAy, qI, 1);
         for (;;) {
@@ -2929,7 +3186,7 @@
                 h++;
                 s++;
             }
-            if (z === 2) return capCode(qSt, qAx, qAy, qI) !== 0 ? h : Infinity;
+            if (z === ZR.zMax) return capCode(qSt, qAx, qAy, qI) !== 0 ? h : Infinity;
             z++;
             s = 0;
             locate(qSt, z, qAx, qAy, qI, 2);
@@ -2967,8 +3224,8 @@
             else (L.unmigratedCells[ak] = L.unmigratedCells[ak] || {})[k] = v;
             rec.invalid++;
         };
-        for (const z of LEVELS) {
-            const L = st.levels[String(z)];
+        for (const key of Object.keys(st.levels)) {
+            const z = Number(key), L = st.levels[key];
             if (!L || L.cells === undefined) continue;
             const cells = L.cells;
             delete L.cells;
@@ -3094,7 +3351,7 @@
         ];
         for (const [dx, dy, dz] of neighbors) {
             const nz = r.z + dz;
-            if (nz < -2 || nz > 2) continue;
+            if (!World().isLevel(nz)) continue;
             const ns = packedAt(r.ax, r.ay, r.x + dx, r.y + dy, nz) & 7;
             if (ns === FLOOR || ns === OPEN || ns === RAMP) return true;
         }
@@ -3114,7 +3371,7 @@
         ];
         for (const d of directions) {
             const nz = r.z + d.dz;
-            if (nz < -2 || nz > 2) continue;
+            if (!World().isLevel(nz)) continue;
             const ns = packedAt(r.ax, r.ay, r.x + d.dx, r.y + d.dy, nz) & 7;
             if (ns === FLOOR || ns === OPEN || ns === RAMP) {
                 faces.push(d.dir);
@@ -3132,7 +3389,7 @@
         // Update exposed faces for the 6 orthogonal neighbors
         for (const [dx, dy, dz] of [[-1,0,0], [1,0,0], [0,-1,0], [0,1,0], [0,0,-1], [0,0,1]]) {
             const nz = r.z + dz;
-            if (nz >= -2 && nz <= 2) {
+            if (World().isLevel(nz)) {
                 emit("levels:faceExposed", { area, x: r.x + dx, y: r.y + dy, z: nz });
             }
         }
@@ -3238,13 +3495,16 @@
         const out = poolBuffers[slot], b = baseline(z, ax, ay);
         if (b.legacyGround) out.fill(0);
         else {
-            const m = b.strata.m;
-            for (let i = 0, o = 0; i < n; i++, o += STRATA) {
+            const sM = rdM, sO = rdO, sC = rdC;
+            for (let i = 0; i < n; i++) {
+                storeLocate(b, i);
+                const m = rdM, o = rdO;
                 out[i] = FLUID_B[m[o]] ? m[o] & M_ID : FLUID_B[m[o + 1]] ? m[o + 1] & M_ID : FLUID_B[m[o + 2]] ? m[o + 2] & M_ID
                     : FLUID_B[m[o + 3]] ? m[o + 3] & M_ID : FLUID_B[m[o + 4]] ? m[o + 4] & M_ID : M_AIR;
             }
+            rdM = sM; rdO = sO; rdC = sC;
         }
-        const am = deltaLevels(st)[z + 2].get(ax + ay * AREA_STRIDE);
+        const am = deltaMapOf(st, z, ax, ay);
         if (am !== undefined) {
             for (const [i, r] of am) {
                 let f = M_AIR;
@@ -4007,7 +4267,7 @@
         const r = refOf(ref);
         const p = packedAt(r.ax, r.ay, r.x, r.y, r.z);
         if (!p) return "";
-        const label = LABELS[r.z];
+        const label = labelOf(r.z);
         const s = p & 7;
         let text;
         const fl = isFlooded(ref);
@@ -4040,7 +4300,7 @@
     // else GEN.
     function newLevelGen(st, gen) {
         if (KNOWN_GENS.includes(gen)) return gen;
-        for (const z of [0, -1, -2, 1, 2]) { const L = st.levels[String(z)]; if (L && KNOWN_GENS.includes(L.gen)) return L.gen; }
+        for (const key of ["0"].concat(Object.keys(st.levels))) { const L = st.levels[key]; if (L && KNOWN_GENS.includes(L.gen)) return L.gen; }
         const req = window.UF && UF.NewGameSetup ? UF.NewGameSetup.levelsGen : undefined;
         return KNOWN_GENS.includes(req) && req >= 4 ? req : GEN;
     }
@@ -4049,9 +4309,12 @@
         const t0 = performance.now();
         st.levels = st.levels || {};
         const g = newLevelGen(st, gen);
-        for (const z of LEVELS) if (!st.levels[String(z)]) st.levels[String(z)] = { z, gen: g, checksum: null, strata: {} };
-        for (const z of LEVELS) {
-            // Allocate Ground too: its checksum still uses its unchanged WorldGen lattice.
+        // The core levels have their entries (generator, checksum, changes) from the start; a level outside the core gets
+        // one with its first change (levelEntry), so an unchanged one costs nothing in the save (WG.00.17).
+        for (const z of CORE_LEVELS) if (!st.levels[String(z)]) st.levels[String(z)] = { z, gen: g, checksum: null, strata: {} };
+        for (const z of CORE_LEVELS) {
+            // Allocate Ground too: its checksum still uses its unchanged WorldGen lattice. (Generator 5 makes the area's
+            // levels outside the core with its core, in volumeOf.)
             for (let ay = 0; ay < st.areasY; ay++) for (let ax = 0; ax < st.areasX; ax++) baseline(z, ax, ay);
             if (!st.levels[String(z)].checksum) st.levels[String(z)].checksum = checksumOf(z);
         }
@@ -4103,11 +4366,11 @@
         return record;
     }
 
-    // A version-4 world on load: regenerate the baselines and compare them with the checksums made at New Game. A
+    // A version-4 world on load: regenerate the core baselines and compare them with the checksums made at New Game. A
     // mismatch is reported, never repaired silently.
     function verifyLevels(st) {
         const bad = [];
-        for (const z of LEVELS) {
+        for (const z of CORE_LEVELS) {
             const L = st.levels[String(z)];
             if (!L) { bad.push(`${z}: missing`); continue; }
             const now = checksumOf(z);
@@ -4176,7 +4439,7 @@
     }
 
     /**
-     * Show level z (-2..+2). Keeps the cursor cell and the camera; opts.center: { x, y } to centre on instead (follow).
+     * Show level z (a level of the world Z range). Keeps the cursor cell and the camera; opts.center: { x, y } to centre on instead (follow).
      * In place (SIM.00.00): the map scene, its Spriteset and the simulation keep running; the level's prewarmed build
      * goes on screen at once (UF.World.switchViewInPlace) and the switch completes when the Spriteset rebinds at the start
      * of its next update. Without a started map scene it falls back to a transfer (the pre-SIM.00.00 way).
@@ -4306,7 +4569,7 @@
     function step(dz) {
         const z = viewZ();
         if (z === null) return false;
-        const to = Math.max(-2, Math.min(2, z + dz));
+        const r = zrSync(), to = Math.max(r.zMin, Math.min(r.zMax, z + dz));
         return to !== z && setView(to);
     }
 
@@ -4392,15 +4655,16 @@
             b.strokeRect(0, 0, PLATE_W, PLATE_H, "rgba(56, 189, 248, 0.85)");
             b.fillRect(1, 1, PLATE_W - 2, 1, "rgba(160, 240, 255, 0.35)");
 
-            this.drawButton(4, 3, 28, 26, "▼", z > -2);
-            this.drawButton(PLATE_W - 32, 3, 28, 26, "▲", z < 2);
+            const r = zrSync();
+            this.drawButton(4, 3, 28, 26, "▼", z > r.zMin);
+            this.drawButton(PLATE_W - 32, 3, 28, 26, "▲", z < r.zMax);
 
             b.fontSize = 15;
             b.fontBold = true;
             b.outlineColor = "rgba(0, 0, 0, 0.95)";
             b.outlineWidth = 3;
             b.textColor = z === 0 ? "#ffffff" : z < 0 ? "#94a3b8" : "#7dd3fc";
-            b.drawText(LABELS[z], 34, 3, PLATE_W - 68, 26, "center");
+            b.drawText(labelOf(z), 34, 3, PLATE_W - 68, 26, "center");
         }
         drawButton(x, y, w, h, label, enabled) {
             const b = this.bitmap;
@@ -4414,9 +4678,9 @@
             b.textColor = enabled ? "#a0f0ff" : "#475569";
             b.drawText(label, x, y, w, h, "center");
         }
-        /** The label shown ("+2", "+1", "Ground", "-1", "-2"), or "" when hidden. */
+        /** The label shown ("+2", "+1", "Ground", "-1", ...: labelOf), or "" when hidden. */
         text() {
-            return this._z === null ? "" : LABELS[this._z];
+            return this._z === null ? "" : labelOf(this._z);
         }
         update() {
             super.update();
@@ -4451,9 +4715,13 @@
     // The public object
 
     const Levels = {
-        LEVELS, SHAPES, MATERIALS, TILESET_ID, GEN, BIOMES, PRE_CUT_GEN, FEATURE_GEN, FEATURE_PARAMS, FAMILIES,
+        /** Every level of the live world, lowest first (UF.World's Z range, WG.00.17). */
+        get LEVELS() { return World().levels(); },
+        /** The generated core (the legacy range -2..+2): the levels with generator content, entries and checksums. */
+        CORE_LEVELS,
+        SHAPES, MATERIALS, TILESET_ID, GEN, BIOMES, PRE_CUT_GEN, FEATURE_GEN, FEATURE_PARAMS, FAMILIES,
         isLevel,
-        label: z => (isLevel(z) && z !== 3 ? LABELS[z] : ""),
+        label: z => (isLevel(z) && z !== zrSync().zMax + 1 ? labelOf(z) : ""),
         levelKey: (ax, ay, z = 0) => isLevel(z) ? (z ? `${ax},${ay},${z}` : `${ax},${ay}`) : null,
         zOf,
         levelArea: ref => ({ x: ref.area.x, y: ref.area.y, z: zOf(ref) }),
@@ -4538,13 +4806,19 @@
         FLUID_PASS,
         HEIGHT_STATES,
         FLUID_STATES,
-        /** Bytes held by the strata of one area's five baselines (the budget check; builds them when missing). */
+        /** Bytes held by one area's baselines, every level of the world's Z range (the storage check; builds them when
+         *  missing; WG.00.17). perLevel[z]: { dir (the directory, 2 B a chunk), strata and connectors (the arrays of its
+         *  MIXED chunks), chunks, mixedChunks, uniformChunks, dense (compat copies built), legacyViewsBuilt }. Totals: dir,
+         *  strata, connectors, shapeGrids, biome, surface, legacyViews, dense, caps (generated and top), chunks, mixedChunks,
+         *  outerMixedChunks (MIXED chunks of the levels outside the core: the mountain rock above +2), total. */
         strataMemory: (ax = 0, ay = 0) => {
             const W = World(), st = W && W.state;
             if (!st) return null;
-            const out = { perLevel: {}, strata: 0, connectors: 0, shapeGrids: 0, biome: 0, surface: 0, legacyViews: 0, caps: 0, capEntries: 0 };
+            const r = zrSync();
+            const out = { perLevel: {}, dir: 0, strata: 0, connectors: 0, shapeGrids: 0, biome: 0, surface: 0, legacyViews: 0, dense: 0, caps: 0, capEntries: 0,
+                chunks: 0, mixedChunks: 0, outerMixedChunks: 0, levels: r.n };
             let surf = null;
-            for (const z of LEVELS) {
+            for (const z of r.levels) {
                 const b = baseline(z, ax, ay);
                 if (!b) continue;
                 const own = Object.getOwnPropertyDescriptor(b, "shape");
@@ -4552,18 +4826,47 @@
                     const d = Object.getOwnPropertyDescriptor(b, k);
                     return n + (d && d.value ? d.value.byteLength : 0);
                 }, 0);
-                out.perLevel[z] = { strata: b.strata.m.byteLength + (b.strata.hp ? b.strata.hp.byteLength : 0), connectors: b.conn.byteLength, legacyViewsBuilt: !!(own && own.value) };
-                out.strata += out.perLevel[z].strata;
-                out.connectors += b.conn.byteLength;
+                const sb = storeBytes(b);
+                out.perLevel[z] = { dir: sb.dir, strata: sb.mixedM, connectors: sb.mixedConn, chunks: sb.chunks, mixedChunks: sb.mixedChunks, uniformChunks: sb.chunks - sb.mixedChunks,
+                    dense: sb.dense, legacyViewsBuilt: !!(own && own.value) };
+                out.dir += sb.dir;
+                out.strata += sb.mixedM;
+                out.connectors += sb.mixedConn;
+                out.dense += sb.dense;
+                out.chunks += sb.chunks;
+                out.mixedChunks += sb.mixedChunks;
+                if (z < CORE.zMin || z > CORE.zMax) out.outerMixedChunks += sb.mixedChunks;
                 out.biome += b.biome ? b.biome.byteLength : 0;
-                if (b.caps) { out.capEntries += b.caps.size; out.caps += b.caps.size * 8; }   // a Map entry: 2 numbers (about 8 B of data)
+                for (const caps of [b.caps, b.topCaps !== b.caps ? b.topCaps : null]) if (caps) { out.capEntries += caps.size; out.caps += caps.size * 8; }   // a Map entry: 2 numbers (about 8 B of data)
                 if (b.surface && b.surface !== surf) { out.surface += b.surface.byteLength; surf = b.surface; }
                 out.legacyViews += views;
             }
-            if (packedGrids.st === st) for (let li = 0; li < 5; li++) { const g = packedGrids.map.get((ax + ay * AREA_STRIDE) * 5 + li); if (g) out.shapeGrids += g.byteLength; }
-            out.total = out.strata + out.connectors + out.shapeGrids + out.biome + out.surface + out.legacyViews + out.caps;
+            if (packedGrids.st === st) for (let li = 0; li < r.n; li++) { const g = packedGrids.map.get((ax + ay * AREA_STRIDE) * r.n + li); if (g) out.shapeGrids += g.byteLength; }
+            out.total = out.dir + out.strata + out.connectors + out.shapeGrids + out.biome + out.surface + out.legacyViews + out.dense + out.caps;
             return out;
         },
+        /** The chunks of one level of an area (WG.00.17): { level, chunks, cw, baselineMixed, uniform, split (UNIFORM in the
+         *  baseline, MIXED now: a change record in it), mixedNow, records, kinds (per chunk: 0 UNIFORM, 1 MIXED baseline,
+         *  2 split) }. */
+        chunkInfo: (ax = 0, ay = 0, z = 0) => {
+            const W = World(), st = W && W.state;
+            if (!st || !W.inWorld(ax, ay, z)) return null;
+            const b = baseline(z, ax, ay), size = st.size, nc = b.dir.length;
+            const kinds = new Uint8Array(nc);
+            for (let c = 0; c < nc; c++) kinds[c] = b.dir[c] === CH_MIXED ? 1 : 0;
+            const am = deltaMapOf(st, z, ax, ay);
+            let records = 0;
+            if (am !== undefined) for (const i of am.keys()) {
+                records++;
+                const x = i % size, y = (i - x) / size, c = (y >> CH_SHIFT) * b.cw + (x >> CH_SHIFT);
+                if (kinds[c] === 0) kinds[c] = 2;
+            }
+            let uniform = 0, baselineMixed = 0, split = 0;
+            for (let c = 0; c < nc; c++) { if (kinds[c] === 0) uniform++; else if (kinds[c] === 1) baselineMixed++; else split++; }
+            return { level: z, chunks: nc, cw: b.cw, chunkCells: CH_CELLS, baselineMixed, uniform, split, mixedNow: baselineMixed + split, records, kinds: Array.from(kinds) };
+        },
+        /** The shared palette of uniform cell codes (WG.00.17): { entries, bytes }. */
+        paletteInfo: () => ({ entries: pal.n, bytes: pal.m.byteLength + pal.c.byteLength }),
         stratumAt: ref => {
             const r = refOf(ref);
             const W = World(), st = W && W.state;
@@ -4644,7 +4947,7 @@
         checksum: (z, seed, gen) => checksumOf(z, seed, gen),
         migrate,
         verifyLevels,
-        /** The level on screen (-2..+2), or null off the world maps. */
+        /** The level on screen (a level of the world Z range), or null off the world maps. */
         view: () => viewZ(),
         setView,
         up: () => step(1),
@@ -4687,7 +4990,7 @@
         const W = World();
         if (!W || W._ufLevelsHooked) return;
         W._ufLevelsHooked = true;
-        W.registerGenerator("uf_levels_terrain", paintLevel, 5, { levels: LEVELS.filter(z => z !== 0) });
+        W.registerGenerator("uf_levels_terrain", paintLevel, 5, { levels: z => z !== 0 });   // every level of the world's Z range but the ground
         // vertical.offscreen_state (seen failing once): off-screen walkers go back to the straight step.
         if (provoked("offscreen_state") && W.pathConfig) W.pathConfig.offscreenPaths = false;
         if (window.UF.Events && UF.Events.on) {
@@ -5040,43 +5343,47 @@
         const objType = O.types().find(o => o.passable !== true && o.image) || O.types()[0];
         const itemType = I.types()[0];
 
-        //---------------------------------------------------------------- five_levels
+        //---------------------------------------------------------------- five_levels (WG.00.17: the levels of the Z range)
+        // The world's levels are its Z range; the five core levels have their entries and checksums from New Game (a level
+        // outside the core has none until it changes); a level past either end of the range doesn't exist.
         {
-            const st = W.state;
+            const st = W.state, r0 = W.zRange(), levels = W.levels();
             const keys = Object.keys(st.levels || {}).map(Number).sort((a, b) => a - b);
-            const want = LEVELS.slice();
+            const want = levels.slice(), core = CORE_LEVELS.slice(), past = r0.zMax + 1, below = r0.zMin - 1;
             const regen = {}, lens = {};
-            for (const z of LEVELS) {
+            for (const z of core) {
                 regen[z] = z === 0 ? checksumOf(0) : checksumOf(z, st.seed, levelGen(st, z));
                 if (z !== 0) {
                     const b = baseline(z);
                     lens[z] = `${b.shape.length}/${b.material.length}`;
                 }
             }
-            const lensOk = LEVELS.filter(z => z !== 0).every(z => lens[z] === `${size * size}/${size * size}`);
-            const sumsOk = LEVELS.every(z => st.levels[String(z)] && st.levels[String(z)].checksum === regen[z] && regen[z] !== "n/a");
+            const lensOk = core.filter(z => z !== 0).every(z => lens[z] === `${size * size}/${size * size}`);
+            const sumsOk = core.every(z => st.levels[String(z)] && st.levels[String(z)].checksum === regen[z] && regen[z] !== "n/a");
+            const entriesOk = keys.filter(z => !core.includes(z)).every(z => Object.keys(st.levels[String(z)].strata || {}).length || st.levels[String(z)].caps) && core.every(z => keys.includes(z));
             let threw = null;
             try {
-                W.addUnit({ name: "TEST_sixth", image: img, area, x: 1, y: 1, z: 3, data: { kind: "test" } });
+                W.addUnit({ name: "TEST_sixth", image: img, area, x: 1, y: 1, z: past, data: { kind: "test" } });
             } catch (e) {
                 threw = e.message;
             }
             const sixth = [
-                ["Levels.isLevel(3)", Levels.isLevel(3) === false],
-                ["World.inWorld(3)", W.inWorld(area.x, area.y, 3) === false],
-                ["World.areaMapId(3)", W.areaMapId(area.x, area.y, 3) === 0],
-                ["World.setObject(3)", W.setObject(area.x, area.y, 10, 10, objType ? objType.typeId : 1, 3) === false],
-                ["Levels.setShape(3)", setShape({ area, x: 10, y: 10, z: 3 }, "floor") === false],
-                ["World.addUnit(z 3) throws", !!threw]
+                [`Levels.isLevel(${past})`, Levels.isLevel(past) === false],
+                [`World.inWorld(${past})`, W.inWorld(area.x, area.y, past) === false],
+                [`World.inWorld(${below})`, W.inWorld(area.x, area.y, below) === false],
+                [`World.areaMapId(${past})`, W.areaMapId(area.x, area.y, past) === 0],
+                [`World.setObject(${past})`, W.setObject(area.x, area.y, 10, 10, objType ? objType.typeId : 1, past) === false],
+                [`Levels.setShape(${past})`, setShape({ area, x: 10, y: 10, z: past }, "floor") === false],
+                [`World.addUnit(z ${past}) throws`, !!threw]
             ];
-            const idsOk = LEVELS.every(z => { const l = W.levelOfMapId(W.areaMapId(area.x, area.y, z)); return !!l && l.z === z; }) && W.areaMapId(area.x, area.y, 0) === W.config.mapIdBase + area.y * st.areasX + area.x;
+            const idsOk = levels.every(z => { const l = W.levelOfMapId(W.areaMapId(area.x, area.y, z)); return !!l && l.z === z; }) && W.areaMapId(area.x, area.y, 0) === W.config.mapIdBase + area.y * st.areasX + area.x;
             const open = z => { const b = baseline(z); let n = 0; for (let i = 0; i < b.shape.length; i++) if (b.shape[i] === FLOOR) n++; return n; };
             t.check("five_levels",
-                JSON.stringify(Levels.LEVELS) === JSON.stringify(want) && JSON.stringify(keys) === JSON.stringify(want) && lensOk && sumsOk && sixth.every(s => s[1]) && idsOk && st.version === 4,
-                `LEVELS ${JSON.stringify(Levels.LEVELS)}; saved levels ${JSON.stringify(keys)}; world version ${st.version}; baseline sizes ${JSON.stringify(lens)}; ` +
-                `checksums saved/regenerated: ${LEVELS.map(z => `${z} ${st.levels[String(z)] ? st.levels[String(z)].checksum : "MISSING"}/${regen[z]}`).join(", ")}; ` +
+                JSON.stringify(Levels.LEVELS) === JSON.stringify(want) && entriesOk && lensOk && sumsOk && sixth.every(s => s[1]) && idsOk && st.version === 4,
+                `LEVELS ${r0.zMin}..${r0.zMax} (${levels.length}); saved level entries ${JSON.stringify(keys)} (core ${JSON.stringify(core)}${entriesOk ? "" : ", WRONG"}); world version ${st.version}; baseline sizes ${JSON.stringify(lens)}; ` +
+                `checksums saved/regenerated: ${core.map(z => `${z} ${st.levels[String(z)] ? st.levels[String(z)].checksum : "MISSING"}/${regen[z]}`).join(", ")}; ` +
                 `floor cells in the baselines: -1 ${open(-1)}, -2 ${open(-2)} of ${size * size} (the rest rock or soil), +1 ${open(1)}, +2 ${open(2)} (open air); ` +
-                `a sixth level refused: ${sixth.map(s => `${s[0]} ${s[1] ? "ok" : "NOT REFUSED"}`).join(", ")}${threw ? ` ("${threw}")` : ""}; map ids ${LEVELS.map(z => `${z}->${W.areaMapId(area.x, area.y, z)}`).join(" ")}; ` +
+                `a level past the range refused: ${sixth.map(s => `${s[0]} ${s[1] ? "ok" : "NOT REFUSED"}`).join(", ")}${threw ? ` ("${threw}")` : ""}; map ids ${levels.map(z => `${z}->${W.areaMapId(area.x, area.y, z)}`).join(" ")}; ` +
                 `New Game levels made in ${stats.initMs !== undefined ? stats.initMs.toFixed(0) : "?"} ms (${stats.generated} baselines generated so far, last ${stats.lastGenMs.toFixed(1)} ms)${note}`);
         }
 
@@ -5117,10 +5424,10 @@
             t.check("underground_biomes", geographyOk && deterministic, report.join("; "));
             const before = JSON.stringify(st.levels), viewBefore = JSON.stringify(st.view);
             ensureWorldLevels(st);
-            const allAllocated = LEVELS.every(z => {
+            const allAllocated = CORE_LEVELS.every(z => {
                 const b = baseline(z);
                 return b && b.shape.length === size * size && b.material.length === size * size && !!st.levels[String(z)].checksum;
-            });
+            }) && W.levels().every(z => !!baseline(z));
             t.check("complete_at_start", allAllocated && stats.initializedBeforeCreated === st.seed &&
                 JSON.stringify(st.levels) === before && JSON.stringify(st.view) === viewBefore,
                 `all five ${size}x${size} baselines allocated; early initialization seed ${stats.initializedBeforeCreated}/${st.seed}; repeated initialization preserves saved edits/checksums/view ${JSON.stringify(st.levels) === before && JSON.stringify(st.view) === viewBefore}`);
@@ -5444,10 +5751,10 @@
 
         //---------------------------------------------------------------- persistence (a real save and load of the running game)
         {
-            // One shape change (the ground: a tile change), one object, one item and one unit on each of the five levels.
+            // One shape change (the ground: a tile change), one object, one item and one unit on each of the five core levels.
             const fx = {};
             let fi = 0;
-            for (const z of LEVELS) {
+            for (const z of CORE_LEVELS) {
                 const x = cx - 3 + fi, y = cy - 2; // along the patch's north row
                 fi++;
                 const lv = { x: area.x, y: area.y, z };
@@ -5493,10 +5800,10 @@
             const W2 = World(), st2 = W2.state;
             const per = [];
             let ok = true;
-            for (const z of LEVELS) {
+            for (const z of CORE_LEVELS) {
                 const f = fx[z], lv = { x: area.x, y: area.y, z };
                 const u = W2.unit(f.unit);
-                const others = LEVELS.filter(o => o !== z);
+                const others = CORE_LEVELS.filter(o => o !== z);
                 const unitOk = !!u && zOf(u) === z && u.x === f.cell.x && u.y === f.cell.y && u.data.keep === z;
                 const oc = f.obj;
                 const objOk = !!oc && O.typeIdIn(lv, oc.x, oc.y) === objType.typeId && others.every(o => O.typeIdIn({ x: area.x, y: area.y, z: o }, oc.x, oc.y) !== objType.typeId || (fx[o].obj && fx[o].obj.x === oc.x && fx[o].obj.y === oc.y));
@@ -5506,9 +5813,9 @@
                 if (z === 0) shapeOk = W2.getTile(area.x, area.y, f.tileCell.x, f.tileCell.y, 0) === f.tileNow;
                 else shapeOk = Levels.shapeAt({ area, x: f.cell.x, y: f.cell.y, z }) === "floor" && Levels.cellAt({ area, x: f.cell.x, y: f.cell.y, z }).constructed === true;
                 if (!(unitOk && objOk && itemOk && shapeOk)) ok = false;
-                per.push(`${LABELS[z]}: ${z === 0 ? "tile" : "shape"} ${shapeOk ? "kept" : "LOST"}, object ${objOk ? "kept" : "LOST/LEAKED"}, item ${itemOk ? "kept" : "LOST/LEAKED"}, unit ${unitOk ? "kept" : "LOST/MOVED"}`);
+                per.push(`${labelOf(z)}: ${z === 0 ? "tile" : "shape"} ${shapeOk ? "kept" : "LOST"}, object ${objOk ? "kept" : "LOST/LEAKED"}, item ${itemOk ? "kept" : "LOST/LEAKED"}, unit ${unitOk ? "kept" : "LOST/MOVED"}`);
             }
-            const regen = LEVELS.map(z => ({ z, saved: st2.levels[String(z)].checksum, now: z === 0 ? checksumOf(0) : checksumOf(z, st2.seed, levelGen(st2, z)) }));
+            const regen = CORE_LEVELS.map(z => ({ z, saved: st2.levels[String(z)].checksum, now: z === 0 ? checksumOf(0) : checksumOf(z, st2.seed, levelGen(st2, z)) }));
             const sumsOk = regen.every(r => r.saved === r.now && r.now !== "n/a");
             const other = checksumOf(-1, st2.seed + 1, levelGen(st2, -1));
             t.check("persistence", ok && sumsOk && other !== regen.find(r => r.z === -1).now && st2.version === 4,
@@ -5516,13 +5823,13 @@
                 `baselines regenerated from seed ${st2.seed}: ${regen.map(r => `${r.z} ${r.saved === r.now ? "same" : `DIFFERENT (${r.saved}/${r.now})`}`).join(", ")}; seed + 1 gives -1 checksum ${other} (${other !== regen.find(r => r.z === -1).now ? "different" : "SAME"})${note}`);
             t.check("save_size", sizeNow <= 3 * 1024 * 1024 && saveBytes > 0,
                 `save contents ${sizeNow} characters of JSON (V50 limit 3 MB = ${3 * 1024 * 1024}), ${zipped} zipped (RMMZ level 1), measured with JsonEx.stringify(DataManager.makeSaveContents()); ` +
-                `${W2.units().length} units, changed strata cells ${LEVELS.map(z => `${z}: ${Object.values(st2.levels[String(z)].strata || {}).reduce((n, c) => n + Object.keys(c).length, 0)}`).join(", ")}${note}`);
+                `${W2.units().length} units, changed strata cells ${Object.keys(st2.levels).map(k => `${k}: ${Object.values(st2.levels[k].strata || {}).reduce((n, c) => n + Object.keys(c).length, 0)}`).join(", ")}${note}`);
             // Clean up the fixtures (in the reloaded world).
             for (const u of made.units) if (W2.unit(u.id)) W2.removeUnit(u.id);
             for (const o of made.objects) O.setIn(o.lv, o.x, o.y, null);
             for (const o of made.counterObjects) O.setIn(o.lv, o.x, o.y, o.type);
             for (const it of made.items) if (it) I.remove(it.id);
-            for (const z of LEVELS) if (fx[z].item) I.remove(fx[z].item);
+            for (const z of CORE_LEVELS) if (fx[z].item) I.remove(fx[z].item);
             if (fx[0] && fx[0].tileCell) W2.setTile(area.x, area.y, fx[0].tileCell.x, fx[0].tileCell.y, 0, fx[0].tileWas);
             for (const s of made.shapes.reverse()) putDelta(st2, s.z, area.x, area.y, s.y * size + s.x, null);
         }
@@ -5577,7 +5884,7 @@
                 const hash = arr => { let h = 2166136261 >>> 0; for (let i = 0; i < arr.length; i++) { h ^= (arr[i] | 0) & 0xffff; h = Math.imul(h, 16777619) >>> 0; } return h >>> 0; };
                 const build = W2.buildArea(0, 0, 0);
                 const tilesHash = hash(build.data), objHash = hash(build.ufObjects);
-                const levelsOk = JSON.stringify(Object.keys(st.levels).map(Number).sort((a, b) => a - b)) === JSON.stringify(LEVELS) && st.version === 4 && (st.migrations || []).length === 1 && st.migrations[0].from === (pw.version | 0);
+                const levelsOk = JSON.stringify(Object.keys(st.levels).map(Number).sort((a, b) => a - b)) === JSON.stringify(CORE_LEVELS) && st.version === 4 && (st.migrations || []).length === 1 && st.migrations[0].from === (pw.version | 0);
                 SceneManager.goto(Scene_Map);
                 await t.waitUntil(() => settled() && SceneManager._scene._spriteset, 30000, "the pre-V80 save's map").catch(() => {});
                 await t.waitFrames(10);
@@ -5627,27 +5934,30 @@
             const i = (size >> 1) * size + (size >> 1);
             putDelta(st, -1, area.x, area.y, i, currentRecord(st, -1, area.x, area.y, i));   // a record equal to its baseline
         }
-        const noCells = LEVELS.every(z => { const L = st.levels[LEVEL_KEY[z + 2]]; return !!L && L.cells === undefined && (L.strata === undefined || (typeof L.strata === "object" && !Array.isArray(L.strata))); });
-        const flat = LEVELS.every(z => { const b = baseline(z, area.x, area.y); return !!b && b.strata.m instanceof Uint8Array && b.strata.m.length === n * STRATA && b.strata.hp === null; });
+        const noCells = Object.keys(st.levels).every(k => { const L = st.levels[k]; return !!L && L.cells === undefined && (L.strata === undefined || (typeof L.strata === "object" && !Array.isArray(L.strata))); })
+            && CORE_LEVELS.every(z => !!st.levels[String(z)]);
+        // WG.00.17: every level's baseline is a chunk store (a 2-byte directory entry per chunk; MIXED chunks with arrays,
+        // UNIFORM ones without), HP implicit; its dense compat copy (built on this read) is n x 5 bytes.
+        const flat = W.levels().every(z => { const b = baseline(z, area.x, area.y); return !!b && b.dir instanceof Uint16Array && b.dir.length === b.cw * b.cw && b.mixed.filter(Boolean).length === b.mixedCount && b.strata.m.length === n * STRATA && b.strata.hp === null; });
         let records = 0, differ = 0, saved = 0;
         const lv = deltaLevels(st);
-        for (let li = 0; li < 5; li++) {
+        for (let li = 0; li < lv.length; li++) {
+            if (lv[li] === undefined) continue;
             for (const [ai, am] of lv[li]) {
-                const b = baseOf(st, li - 2, ai % AREA_STRIDE, (ai - (ai % AREA_STRIDE)) / AREA_STRIDE);
+                const b = baseOf(st, li + deltas.zMin, ai % AREA_STRIDE, (ai - (ai % AREA_STRIDE)) / AREA_STRIDE);
                 for (const [i, r] of am) { records++; if (!sameAsBaseline(b, i, r)) differ++; }
             }
-            const s = st.levels[LEVEL_KEY[li]].strata || {};
-            for (const k in s) saved += Object.keys(s[k]).length;
         }
+        for (const k in st.levels) { const s = st.levels[k].strata || {}; for (const a in s) saved += Object.keys(s[a]).length; }
         const units = W.units().filter(u => u.area && u.area.x === area.x && u.area.y === area.y);
         const fliers = units.filter(u => u.data && u.data.through);
         const standable = u => Levels.standableShape({ area, x: u.x, y: u.y, z: zOf(u) });
         const colonists = units.filter(u => u.data && u.data.kind === "colonist");
         const offStand = colonists.filter(u => !standable(u));
         const offOthers = units.filter(u => !(u.data && u.data.through) && !(u.data && u.data.kind === "colonist") && !standable(u));
-        const byLevel = LEVELS.map(z => `${z}: ${units.filter(u => zOf(u) === z).length}`).join(", ");
+        const byLevel = W.levels().filter(z => units.some(u => zOf(u) === z)).map(z => `${z}: ${units.filter(u => zOf(u) === z).length}`).join(", ");
         t.check("strata_live", st.strataSchemaVersion === STRATA_SCHEMA && noCells && flat && records === saved && differ === records && deltas.errors.length === 0 && colonists.length > 0 && offStand.length === 0,
-            `strataSchemaVersion ${st.strataSchemaVersion}; no legacy levels[z].cells ${noCells}; five baselines of area ${area.x},${area.y} flat Uint8Array ${n}x5, HP implicit ${flat}; ` +
+            `strataSchemaVersion ${st.strataSchemaVersion}; no legacy levels[z].cells ${noCells}; the ${W.levels().length} baselines of area ${area.x},${area.y} chunk stores (dense copy ${n}x5), HP implicit ${flat}; ` +
             `saved strata records ${saved}, decoded ${records}, differing from their baseline ${differ}, unreadable ${deltas.errors.length}; ` +
             `units of the area ${units.length} (by level ${byLevel}); colonists ${colonists.length}, on cells not standable by their derived shape ${offStand.length}${offStand.length ? `: ${offStand.slice(0, 4).map(u => `${u.name} (${u.x},${u.y},${zOf(u)}) ${Levels.shapeAt({ area, x: u.x, y: u.y, z: zOf(u) })}`).join("; ")}` : ""}; ` +
             `other walkers on such cells (not judged) ${offOthers.length}${offOthers.length ? ` (${offOthers.slice(0, 4).map(u => `${u.name} (${u.x},${u.y},${zOf(u)}) ${Levels.shapeAt({ area, x: u.x, y: u.y, z: zOf(u) })}`).join("; ")})` : ""}; fliers ${fliers.length}`);
@@ -5754,12 +6064,12 @@
             t.check("tunnel_restored", back.every(b => b.shape === "solid" && !b.changed && !b.pass && !b.walk) && tilesBack,
                 `after setStrata with the saved strata: ${back.map(b => `${b.shape}${b.changed ? " (record)" : ""}`).join(", ")}; walkable ${back.map(b => b.walk).join("/")}; map passable ${back.map(b => b.pass).join("/")}; tiles as before ${tilesBack}`);
         }
-        for (const z of LEVELS) packedAt(area.x, area.y, 0, 0, z);   // every level's grid built
+        for (const z of CORE_LEVELS) packedAt(area.x, area.y, 0, 0, z);   // every core level's grid built (others may be cached too)
         const flip = provoked("shape_grids_coherent") ? packedGridOf(st, -1, area.x, area.y) : null;
         if (flip) flip[0] ^= 7;
         const vg = verifyPackedGrids(area.x, area.y);
         if (flip) flip[0] ^= 7;
-        t.check("shape_grids_coherent", vg.grids === 5 && vg.cells === 5 * n && vg.mismatches === 0,
+        t.check("shape_grids_coherent", vg.grids >= CORE_LEVELS.length && vg.cells === vg.grids * n && vg.mismatches === 0,
             `${vg.grids} cached shape grids of area ${area.x},${area.y}, ${vg.cells} cells re-derived from the strata after normal play and the tunnel: ${vg.mismatches} differ${vg.examples.length ? ` (${JSON.stringify(vg.examples)})` : ""}`);
         setView(0);
         await t.waitUntil(() => settled() && viewZ() === 0, 20000, "back to the ground").catch(() => {});

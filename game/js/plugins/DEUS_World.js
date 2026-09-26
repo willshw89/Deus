@@ -99,10 +99,13 @@
  * regrowth onto such a cell waits until the unit has left.
  *
  * Levels (2026-09-19, VISION V80, docs/design/VERTICAL_BUILD_PLAN.md): every
- * area has five levels, z = -2..+2 (0 = the ground). Units, tiles and objects
+ * area has the levels of the world's Z range (WG.00.17: one setting, saved
+ * per world; new worlds -16..+15, 0 = the ground; a save made before it
+ * keeps -2..+2; docs/systems/DEUS_ZRange.md). Units, tiles and objects
  * carry z; a trailing z argument that is left out means the ground. One map
  * id per level: MapIdBase + slot * areas + area index, slot 0 = ground (so
- * the ground keeps its old ids), 1 = +1, 2 = +2, 3 = -1, 4 = -2. The legacy
+ * the ground keeps its old ids), 1 = +1, 2 = +2, 3 = -1, 4 = -2, then +z
+ * 2z - 1 and -z 2z (+3 = 5, -3 = 6, ...). The legacy
  * calls stay ground-only on purpose: currentArea() / areaOfMapId() /
  * isAreaMap() answer only for the ground (null while another level is on
  * screen), and world:tileChanged / world:objectChanged / world:areaBuilt fire
@@ -150,12 +153,84 @@
     const areaKey = (ax, ay) => `${ax},${ay}`;
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
-    // Levels (VISION V80): z -2..+2, 0 = the ground. A record's z sits beside its area (unit.z, item.z); an API
-    // handle may carry it inside the area ({ x, y, z }). A missing z is the ground.
-    const LEVELS = Object.freeze([-2, -1, 0, 1, 2]);
-    const SLOT = { 0: 0, 1: 1, 2: 2, "-1": 3, "-2": 4 }; // map id slot of each level; the ground keeps slot 0 (changed only by a test provocation)
+    // Levels (VISION V80): 0 = the ground. A record's z sits beside its area (unit.z, item.z); an API handle may carry it
+    // inside the area ({ x, y, z }). A missing z is the ground.
+    //
+    // The Z range (WG.00.17, DEC-013) is the one authority for which levels exist: every level list, level index, range
+    // check, map id slot and view-stepping bound derives from it. It is data, kept per world in UF.World.state.zRange =
+    // { zMin, zMax } and saved with it. A New Game takes DEUS_Z_RANGE from the environment ("zMin..zMax" or a name of
+    // Z_RANGES; nw.exe inherits it from the tool that starts it), else Z_RANGES.default. A world state without zRange was
+    // made before WG.00.17: it keeps the legacy range, and no layer is ever generated into it (ADR-003 Q16 is open for the
+    // Owner). docs/systems/DEUS_ZRange.md.
+    const Z_RANGES = Object.freeze({
+        default: Object.freeze({ zMin: -16, zMax: 15 }),   // DEC-013: 32 layers, surface 0 (the split is the PM default, OPEN for the Owner)
+        test: Object.freeze({ zMin: -4, zMax: 4 }),        // the 9-layer test mode (DEC-013 item 1)
+        legacy: Object.freeze({ zMin: -2, zMax: 2 })       // 5 levels: worlds made before WG.00.17; every generator version makes content for these
+    });
+    const Z_RANGE_MAX_LAYERS = 256;                         // z is an 8-bit offset from zMin in packed keys (ADR-003 15.2)
+    /** A usable range: integer bounds holding the legacy levels, at most Z_RANGE_MAX_LAYERS layers; else null. */
+    function checkZRange(zMin, zMax) {
+        const L = Z_RANGES.legacy;
+        if (!Number.isInteger(zMin) || !Number.isInteger(zMax) || zMin > L.zMin || zMax < L.zMax || zMax - zMin + 1 > Z_RANGE_MAX_LAYERS) return null;
+        return Object.freeze({ zMin, zMax });
+    }
+    /** { zMin, zMax } from "zMin..zMax" (e.g. "-4..4", "-16..+15"), a name of Z_RANGES or an object; null when not usable. */
+    function parseZRange(v) {
+        if (v && typeof v === "object") return checkZRange(v.zMin, v.zMax);
+        const s = String(v === undefined || v === null ? "" : v).trim();
+        if (Object.prototype.hasOwnProperty.call(Z_RANGES, s)) return Z_RANGES[s];
+        const m = /^([+-]?\d+)\s*\.\.\s*([+-]?\d+)$/.exec(s);
+        return m ? checkZRange(Number(m[1]), Number(m[2])) : null;
+    }
+    /** The range a New Game gets: DEUS_Z_RANGE (the harness override) when it names a usable range, else Z_RANGES.default. */
+    function newWorldZRange() {
+        const env = typeof process !== "undefined" && process.env ? process.env.DEUS_Z_RANGE : undefined;
+        if (env === undefined || env === "") return Z_RANGES.default;
+        const r = parseZRange(env);
+        if (r) return r;
+        console.error(`DEUS_World: DEUS_Z_RANGE=${JSON.stringify(env)} is not a usable Z range ("zMin..zMax" holding ${Z_RANGES.legacy.zMin}..${Z_RANGES.legacy.zMax}, ` +
+            `at most ${Z_RANGE_MAX_LAYERS} layers, or ${Object.keys(Z_RANGES).join(" / ")}); a New Game gets ${Z_RANGES.default.zMin}..${Z_RANGES.default.zMax}`);
+        return Z_RANGES.default;
+    }
+    // The live range, kept per state object: the state's zRange; a state without one is a legacy world; no state yet (boot,
+    // title) is the range a New Game would get. zSync() is a single identity check once the state is known.
+    const zr = { state: undefined, range: null, zMin: 0, zMax: 0, levels: null };
+    function zSync() {
+        const st = World.state;
+        if (zr.state === st && zr.range !== null) return zr;
+        let r;
+        if (!st) r = newWorldZRange();
+        else if (st.zRange === undefined) r = Z_RANGES.legacy;
+        else {
+            r = parseZRange(st.zRange);
+            if (!r) {
+                console.error(`DEUS_World: this world's zRange ${JSON.stringify(st.zRange)} is not usable; its levels are read as the legacy ${Z_RANGES.legacy.zMin}..${Z_RANGES.legacy.zMax}`);
+                r = Z_RANGES.legacy;
+            }
+        }
+        const list = [];
+        for (let z = r.zMin; z <= r.zMax; z++) list.push(z);
+        zr.state = st; zr.range = r; zr.zMin = r.zMin; zr.zMax = r.zMax; zr.levels = Object.freeze(list);
+        return zr;
+    }
+    // Map id slot of a level. The legacy levels keep their slots (the ground 0, +1 1, +2 2, -1 3, -2 4: a saved map id
+    // stays valid); beyond them +z takes 2z - 1 (+3 -> 5, +4 -> 7, ...) and -z takes 2z (-3 -> 6, -4 -> 8, ...). A slot
+    // doesn't depend on the range, so a level's map id is the same in every world.
+    const SLOT = {};   // overrides: set only by a test provocation (world.level_ids)
+    const slotOf = z => {
+        if (SLOT[z] !== undefined) return SLOT[z];
+        const L = Z_RANGES.legacy;
+        if (z >= 0) return z <= L.zMax ? z : 2 * z - 1;
+        return z >= L.zMin ? L.zMax - z : -2 * z;
+    };
+    const zOfSlot = s => {
+        const L = Z_RANGES.legacy;
+        if (s <= L.zMax) return s;
+        if (s <= L.zMax - L.zMin) return L.zMax - s;
+        return s % 2 === 1 ? (s + 1) / 2 : -s / 2;
+    };
     const zOf = o => (o && o.z !== undefined ? o.z : 0);
-    const isLevel = z => Number.isInteger(z) && z >= -2 && z <= 2;
+    const isLevel = z => Number.isInteger(z) && z >= zSync().zMin && z <= zr.zMax;
     // Diff and cache key of an area's level: the ground keeps the pre-V80 key "x,y".
     const levelKey = (ax, ay, z) => (z ? `${ax},${ay},${z}` : `${ax},${ay}`);
     // The level on screen matches (ax, ay, z)? (World.viewLevel is defined with the areas below.)
@@ -247,12 +322,14 @@
     }
 
     //-------------------------------------------------------------------------
-    // UF.Space: Authoritative spatial standard (VISION V127, 5ft/cell, 5ft/Z)
+    // UF.Space: Authoritative spatial standard (VISION V127; DEC-013 item 2: a 5 ft cell, 2 ft strata, 5 strata = a 10 ft layer)
     //-------------------------------------------------------------------------
 
     const Space = {
         GRID_SIZE_FEET: 5,
-        Z_STEP_FEET: 5,
+        STRATUM_FEET: 2,       // DEC-013 (1 ft before WG.00.17)
+        STRATA_PER_LAYER: 5,
+        Z_STEP_FEET: 10,       // one layer: STRATA_PER_LAYER x STRATUM_FEET (5 before WG.00.17); derived just below
         FEET_PER_CELL: 5,
 
         feetToCells(feet) {
@@ -313,7 +390,7 @@
             const gridDist = Space.chebyshev(a, b);
             const dz = Math.abs(Space.zOf(a) - Space.zOf(b));
             if (dz === 0) return gridDist * 5;
-            return Math.round(Math.sqrt((gridDist * 5) ** 2 + (dz * 5) ** 2));
+            return Math.round(Math.sqrt((gridDist * 5) ** 2 + (dz * Space.Z_STEP_FEET) ** 2));
         },
 
         inMeleeReach(attacker, target, reachFeet = 5) {
@@ -329,6 +406,7 @@
             return distFeet <= maxRangeFeet;
         }
     };
+    Space.Z_STEP_FEET = Space.STRATA_PER_LAYER * Space.STRATUM_FEET;
 
     // The public object
 
@@ -336,7 +414,8 @@
     const World = {
         config: CONFIG,
         EVENT_BASE,
-        LEVELS,
+        /** Every level of the live world, lowest first (a frozen array from the Z range; a new one when the world changes). */
+        get LEVELS() { return zSync().levels; },
         state: null,
         _frame: 0,
         hash32,
@@ -344,7 +423,23 @@
         zOf: Space.zOf,
         isLevel,
         levelKey,
-        Space
+        Space,
+        /** The named Z ranges (default, test, legacy): data, docs/systems/DEUS_ZRange.md. */
+        Z_RANGES,
+        /** The live world's Z range { zMin, zMax } (frozen). Without a world: the range a New Game would get. */
+        zRange: () => zSync().range,
+        /** Every level of the live world, lowest first (the same array as LEVELS). */
+        levels: () => zSync().levels,
+        /** The number of levels of the live world. */
+        levelCount: () => zSync().levels.length,
+        /** 0 for the lowest level, levelCount() - 1 for the top one; -1 for a z that isn't a level. */
+        levelIndex: z => (isLevel(z) ? z - zr.zMin : -1),
+        /** { zMin, zMax } from "zMin..zMax", a range name or an object; null when it isn't a usable range. */
+        parseZRange,
+        /** The range a New Game gets now (DEUS_Z_RANGE, else Z_RANGES.default). */
+        newWorldZRange,
+        /** The map id slot of a level (the same in every world; the legacy levels keep theirs). */
+        mapIdSlot: z => slotOf(z)
     };
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;
@@ -418,8 +513,10 @@
             s = Math.floor(Math.random() * 0x7ffffffe) + 1;
         }
         const worldSize = 256;
+        const zRange = newWorldZRange();
         this.state = {
             version: 4,
+            zRange: { zMin: zRange.zMin, zMax: zRange.zMax },   // the world's levels (WG.00.17): saved, never changed afterwards
             seed: s,
             areasX: CONFIG.areasX,
             areasY: CONFIG.areasY,
@@ -500,13 +597,13 @@
 
     const worldDims = () => (World.state ? World.state : CONFIG);
 
-    /** True for an area inside the world grid and a level -2..+2 (z left out = the ground). */
+    /** True for an area inside the world grid and a level of the world's Z range (z left out = the ground). */
     World.inWorld = (ax, ay, z = 0) => Number.isInteger(ax) && Number.isInteger(ay) && ax >= 0 && ay >= 0 && ax < worldDims().areasX && ay < worldDims().areasY && isLevel(z);
     /** Map ID of an area's level: MapIdBase + slot * areas + ay * areasX + ax (ground slot 0, so ground ids are unchanged). 0 for a non-level z. */
     World.areaMapId = (ax, ay, z = 0) => {
         if (!World.inWorld(ax, ay, z)) return 0;
         const d = worldDims();
-        return CONFIG.mapIdBase + SLOT[z] * d.areasX * d.areasY + ay * d.areasX + ax;
+        return CONFIG.mapIdBase + slotOf(z) * d.areasX * d.areasY + ay * d.areasX + ax;
     };
     /** The ground area of a map ID, or null (another level's map, or not a world map). Ground-only by design (VISION V80). */
     World.areaOfMapId = function(mapId) {
@@ -520,9 +617,11 @@
         const d = worldDims();
         const n = d.areasX * d.areasY;
         const i = mapId - CONFIG.mapIdBase;
-        if (!Number.isInteger(i) || i < 0 || i >= n * LEVELS.length) return null;
+        if (!Number.isInteger(i) || i < 0) return null;
         const slot = Math.floor(i / n), j = i % n;
-        const z = LEVELS.find(l => SLOT[l] === slot);
+        let z = zOfSlot(slot);
+        if (slotOf(z) !== slot || !isLevel(z)) z = zSync().levels.find(l => slotOf(l) === slot);   // an overridden slot (provocation)
+        if (z === undefined) return null;
         return { x: j % d.areasX, y: Math.floor(j / d.areasX), z };
     };
     World.isAreaMap = mapId => World.areaOfMapId(mapId) !== null;
@@ -554,12 +653,14 @@
      *        objects (Uint16Array), setObject(x, y, type), getObject(x, y),   (object types: UF_Objects)
      *        addEvent({ name, x, y, image, note, priorityType, through, directionFix, walkAnime }) -> event id }
      * Generators must be deterministic: use ctx.rng / UF.World.rngFor / hashes of coordinates only, never Math.random.
-     * opts.levels: the levels the generator paints (default [0], the ground). ctx.z says which level is being built.
+     * opts.levels: the levels the generator paints (default [0], the ground), or a function z -> true for a rule over
+     * every level of the world's Z range (WG.00.17: a list is read when the area is built, so it never outlives a range).
+     * ctx.z says which level is being built.
      */
     World.registerGenerator = function(name, fn, order = 100, opts = {}) {
         const i = generators.findIndex(g => g.name === name);
         if (i >= 0) generators.splice(i, 1);
-        const levels = Array.isArray(opts && opts.levels) ? opts.levels.filter(isLevel) : [0];
+        const levels = typeof (opts && opts.levels) === "function" ? opts.levels : Array.isArray(opts && opts.levels) ? opts.levels.slice() : [0];
         generators.push({ name, fn, order, levels });
         generators.sort((a, b) => a.order - b.order);
     };
@@ -647,7 +748,7 @@
                 return id;
             }
         };
-        for (const g of generators) if (g.levels.includes(z)) g.fn(ctx);
+        for (const g of generators) if (typeof g.levels === "function" ? g.levels(z) : g.levels.includes(z)) g.fn(ctx);
 
         if (tpl) {
             // The template is an overlay: only cells it paints (any tile on layers 0-3) replace the generated ground.
@@ -798,7 +899,7 @@
     // setTile/setObject patch the cached copy. Its unit events are a snapshot from build time: don't read them
     // (refreshUnitEvents renews them when a cached build becomes the map on screen).
     const buildCache = new Map();
-    const PEEK_CACHE = 6;
+    const PEEK_CACHE = 9;   // the view and the 8 levels a map load warms (WG.00.17; 6 before: a 5-level area never filled it)
     const cacheKey = (ax, ay, z = 0) => (World.state ? `${World.state.seed}:${levelKey(ax, ay, z)}` : "");
     let lastUsedKey = null;
     // The level on screen and the levels a view switch can land on (SIM.00.00: z±1, z±2 of the view's area) are pinned:
@@ -856,16 +957,24 @@
 
     //-------------------------------------------------------------------------
     // Prewarm (SIM.00.00): the levels a view switch can land on are built ahead, at most one build a frame, so showing
-    // one never builds synchronously. The ring of a view on level z is z±1 and z±2 of its area, nearest first. A map
-    // load waits until every level of the view's area is warm (Scene_Map.isReady below); in play Levels asks for one
-    // step a frame while a ring level is missing (after a cleared cache, or a view on +-2 moving inward).
+    // one never builds synchronously. The ring of a view on level z is z±1 and z±2 of its area, nearest first (it holds
+    // the levels DEUS_Depth draws below the view). A map load waits until every level within LOAD_WARM_REACH of the view
+    // is warm (Scene_Map.isReady below), so the rings of the views the next switches land on are warm too; in play Levels
+    // asks for one step a frame while a ring level is missing (after a cleared cache, or a view moving outward).
+    // WG.00.17: Lane N's load warmed every level of a 5-level area, which is every level within 4 of any view; the load
+    // keeps that reach at every Z range, so map builds follow the view (at most 8 besides it) and never the layer count.
 
     const WARM = { enabled: true };
     const warmStats = { builds: 0, replaced: 0, grids: 0, ms: 0, maxMs: 0, lastMs: 0, gridMs: 0, loadSteps: 0, steps: 0, last: null };
     let warmView = null;                 // the view level the pins and image preloads were made for
     const warmImages = new Set();        // cache keys whose tileset and unit images were requested for warmView
     const ringOf = v => [v.z - 1, v.z + 1, v.z - 2, v.z + 2].filter(z => isLevel(z) && World.inWorld(v.x, v.y, z));
-    const areaLevelsOf = v => ringOf(v).concat(LEVELS.filter(z => z !== v.z && Math.abs(z - v.z) > 2));
+    const LOAD_WARM_REACH = 4;
+    const areaLevelsOf = v => {   // a map load's levels: the ring first, then out to LOAD_WARM_REACH, nearest first
+        const out = ringOf(v);
+        for (let d = 3; d <= LOAD_WARM_REACH; d++) for (const z of [v.z - d, v.z + d]) if (isLevel(z) && World.inWorld(v.x, v.y, z)) out.push(z);
+        return out;
+    };
     function pinView(v) {
         pinned.clear();
         warmImages.clear();
@@ -922,7 +1031,7 @@
     }
     /**
      * One step of prewarm work for the view on screen, or null when its ring (z±1, z±2) is warm: one level built (or its
-     * walk grid, or its images requested). opts.all: every level of the view's area, not only the ring.
+     * walk grid, or its images requested). opts.all: every level within LOAD_WARM_REACH of the view, not only the ring.
      */
     World.prewarmStep = function(opts = {}) {
         const v = this.viewLevel();
@@ -1237,9 +1346,9 @@
      */
     World.addUnit = function(spec) {
         const st = this.state;
-        // The unit's level: spec.z, else spec.area.z, else the ground. Anything but -2..+2 is refused (VISION V80).
+        // The unit's level: spec.z, else spec.area.z, else the ground. A level outside the world's Z range is refused (VISION V80).
         const z = spec.z !== undefined ? spec.z : zOf(spec.area);
-        if (!isLevel(z)) throw new Error(`UF_World.addUnit: level ${JSON.stringify(z)} doesn't exist (levels are -2..+2)`);
+        if (!isLevel(z)) throw new Error(`UF_World.addUnit: level ${JSON.stringify(z)} doesn't exist (levels are ${zSync().zMin}..+${zr.zMax})`);
         const id = st.nextUnitId++;
         const image = spec.image || {};
         const data = spec.data || {};
@@ -1596,7 +1705,7 @@
     let offOcc = null, offOccFrame = -1;
     const occKey = (ax, ay, z, x, y) => {
         const d = worldDims(), size = World.state.size;
-        return (((z + 2) * d.areasY + ay) * d.areasX + ax) * size * size + y * size + x;
+        return (((z - zSync().zMin) * d.areasY + ay) * d.areasX + ax) * size * size + y * size + x;
     };
     function offscreenOccupancy() {
         if (offOcc && offOccFrame === World._frame) return offOcc;
@@ -1642,7 +1751,7 @@
         }
         const size = World.state.size, n2 = size * size;
         const curZ = zOf(u);
-        const here = p.is3D ? ((curZ + 2) * n2 + u.y * size + u.x) : (u.y * size + u.x);
+        const here = p.is3D ? ((curZ - zSync().zMin) * n2 + u.y * size + u.x) : (u.y * size + u.x);
         const left = p.cells.length - p.i;
         if (left < p.bestLeft) {
             p.bestLeft = left;
@@ -1659,7 +1768,7 @@
         let nx, ny, nz;
         if (p.is3D) {
             const l = Math.floor(next / n2);
-            nz = l - 2;
+            nz = l + zSync().zMin;
             const rem = next - l * n2;
             nx = rem % size;
             ny = (rem - nx) / size;
@@ -2018,6 +2127,45 @@
         return AS.gen;
     }
 
+    // 3D search scratch (WG.00.17): one set of per-cell arrays per layer, made the first time a search reaches that layer
+    // and reused after (the generation stamp marks the current search), so the scratch follows the layers a route can reach,
+    // never the layer count. A node is (z - zMin) * n + cell. The heap grows with the search, to the bound the 3D search
+    // always had (4 entries per node of the area's levels).
+    const AS3 = { n: 0, gen: 0, layers: [], heapCell: null, heapKey: null, allocated: 0, searchLayers: 0, lastLayers: [] };
+    function search3D(n) {
+        if (AS3.n !== n) {
+            AS3.n = n; AS3.gen = 0; AS3.layers = []; AS3.allocated = 0;
+            AS3.heapCell = new Int32Array(4 * n + 8);
+            AS3.heapKey = new Float64Array(4 * n + 8);
+        }
+        if (++AS3.gen > 0xfffffff0) {
+            for (const L of AS3.layers) if (L) { L.seen.fill(0); L.closed.fill(0); L.goal.fill(0); L.stamp = 0; }
+            AS3.gen = 1;
+        }
+        AS3.searchLayers = 0;
+        AS3.lastLayers = [];
+        return AS3.gen;
+    }
+    function layerScratch(li) {
+        let L = AS3.layers[li];
+        if (L === undefined) {
+            const n = AS3.n;
+            L = AS3.layers[li] = { g: new Int32Array(n), parent: new Int32Array(n), seen: new Uint32Array(n), closed: new Uint32Array(n), goal: new Uint32Array(n), stamp: 0 };
+            AS3.allocated++;
+        }
+        if (L.stamp !== AS3.gen) { L.stamp = AS3.gen; AS3.searchLayers++; AS3.lastLayers.push(li); }
+        return L;
+    }
+    function growHeap3D(cap) {
+        const len = AS3.heapCell.length;
+        if (len >= cap) return false;
+        const next = Math.min(cap, len * 2);
+        const hc = new Int32Array(next), hk = new Float64Array(next);
+        hc.set(AS3.heapCell); hk.set(AS3.heapKey);
+        AS3.heapCell = hc; AS3.heapKey = hk;
+        return true;
+    }
+
     function recordPlan(res) {
         const s = pathStats;
         s.plans++;
@@ -2064,11 +2212,12 @@
         const is3D = !!(opts.z3d || gz !== sz || (st.version >= 4));
         if (is3D) {
             res.is3D = true;
-            const totalNodes = 5 * n;
-            const enc3D = (x, y, z) => (z + 2) * n + (y * size + x);
+            const zMin = zSync().zMin, zMax = zr.zMax;
+            const heapCap = 4 * n * zr.levels.length + 8;
+            const enc3D = (x, y, z) => (z - zMin) * n + (y * size + x);
             const dec3D = c => {
                 const l = Math.floor(c / n);
-                const z = l - 2;
+                const z = l + zMin;
                 const rem = c - l * n;
                 const x = rem % size;
                 const y = (rem - x) / size;
@@ -2091,7 +2240,7 @@
             const shapeAt = (x, y, z) => (L && typeof L.shapeCodeAt === "function" ? L.shapeCodeAt(area.x, area.y, x, y, z) : (L && typeof L.shapeAt === "function" ? (L.shapeAt(area.x, area.y, x, y, z) === "floor" ? 2 : (L.shapeAt(area.x, area.y, x, y, z) === "ramp" ? 4 : (L.shapeAt(area.x, area.y, x, y, z) === "solid" ? 1 : 3))) : (z === 0 ? 2 : 3)));
 
             const enterable = (x, y, z) => {
-                if (x < 0 || y < 0 || x >= size || y >= size || z < -2 || z > 2) return false;
+                if (x < 0 || y < 0 || x >= size || y >= size || z < zMin || z > zMax) return false;
                 const s = shapeAt(x, y, z);
                 if (s !== 2 && s < 4) return false;
                 const g = getGrid(z);
@@ -2139,9 +2288,12 @@
             }
             if (!enterable(sx, sy, sz)) return done("start walled in");
 
-            const gen = searchArrays(totalNodes);
-            const G = AS.g, P = AS.parent, seen = AS.seen, closed = AS.closed, goalMark = AS.goal, hc = AS.heapCell, hk = AS.heapKey;
-            for (const c of goals) goalMark[c] = gen;
+            const gen = search3D(n);
+            let hc = AS3.heapCell, hk = AS3.heapKey;
+            // A node's layer scratch and its cell: sc(c) sets scI and returns the layer's arrays.
+            let scI = 0;
+            const sc = c => { const l = (c / n) | 0; scI = c - l * n; return layerScratch(l); };
+            for (const c of goals) sc(c).goal[scI] = gen;
 
             const hOf = (x, y, z) => {
                 let ax = Math.abs(x - gx), ay = Math.abs(y - gy);
@@ -2190,29 +2342,29 @@
 
             let from = s;
             const relax = (j, gi) => {
-                if (closed[j] === gen || j === avoid) return;
-                if (seen[j] === gen && G[j] <= gi) return;
-                seen[j] = gen;
-                G[j] = gi;
-                P[j] = from;
+                const J = sc(j), jj = scI;
+                if (J.closed[jj] === gen || j === avoid) return;
+                if (J.seen[jj] === gen && J.g[jj] <= gi) return;
+                J.seen[jj] = gen;
+                J.g[jj] = gi;
+                J.parent[jj] = from;
                 const { x: jx, y: jy, z: jz } = dec3D(j);
                 push(j, (gi + hOf(jx, jy, jz)) * HEAP_TIE - gi);
             };
 
-            G[s] = 0;
-            P[s] = -1;
-            seen[s] = gen;
+            { const S0 = sc(s); S0.g[scI] = 0; S0.parent[scI] = -1; S0.seen[scI] = gen; }
             push(s, hOf(sx, sy, sz) * HEAP_TIE);
 
             const maxNodes = opts.maxNodes > 0 ? opts.maxNodes | 0 : PATHS.maxNodes;
-            const heapMax = hc.length - 4;
-            let found = -1, best = s, bestH = hOf(sx, sy, sz), capped = false, expanded = 0;
+            const heapMax = heapCap - 4;
+            let found = -1, best = s, bestG = 0, bestH = hOf(sx, sy, sz), capped = false, expanded = 0;
 
             while (hn > 0) {
                 const i = pop();
-                if (closed[i] === gen) continue;
-                closed[i] = gen;
-                if (goalMark[i] === gen) {
+                const I = sc(i), ii = scI;
+                if (I.closed[ii] === gen) continue;
+                I.closed[ii] = gen;
+                if (I.goal[ii] === gen) {
                     found = i;
                     break;
                 }
@@ -2220,16 +2372,19 @@
                     capped = true;
                     break;
                 }
+                // Room for this node's pushes (at most 18): the heap grows, up to heapCap.
+                if (hn + 32 > hc.length && growHeap3D(heapCap)) { hc = AS3.heapCell; hk = AS3.heapKey; }
                 expanded++;
                 const { x, y, z } = dec3D(i);
-                const hi = hOf(x, y, z);
-                if (hi < bestH || (hi === bestH && G[i] < G[best])) {
+                const hi = hOf(x, y, z), gI = I.g[ii];
+                if (hi < bestH || (hi === bestH && gI < bestG)) {
                     best = i;
+                    bestG = gI;
                     bestH = hi;
                 }
 
                 from = i;
-                const curCost = G[i];
+                const curCost = gI;
                 const curShape = shapeAt(x, y, z);
                 const gEff = getGrid(z).eff;
                 const e = gEff[y * size + x];
@@ -2258,7 +2413,7 @@
                 }
 
                 // 2. Ramp UP: if curShape is RAMP, step to orthogonal (nx, ny) at z + 1
-                if (curShape === 4 && z < 2) {
+                if (curShape === 4 && z < zMax) {
                     for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
                         const nx = x + dx, ny = y + dy;
                         if (enterable(nx, ny, z + 1)) relax(enc3D(nx, ny, z + 1), curCost + STEP_COST);
@@ -2266,7 +2421,7 @@
                 }
 
                 // 3. Ramp DOWN: if orthogonal (nx, ny) at z - 1 is RAMP, step down to it
-                if (z > -2) {
+                if (z > zMin) {
                     for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
                         const nx = x + dx, ny = y + dy;
                         if (shapeAt(nx, ny, z - 1) === 4 && enterable(nx, ny, z - 1)) {
@@ -2276,12 +2431,12 @@
                 }
 
                 // 4. Stairs UP
-                if ((curShape === 5 || curShape === 7) && z < 2) {
+                if ((curShape === 5 || curShape === 7) && z < zMax) {
                     if (enterable(x, y, z + 1)) relax(enc3D(x, y, z + 1), curCost + STEP_COST);
                 }
 
                 // 5. Stairs DOWN
-                if ((curShape === 6 || curShape === 7) && z > -2) {
+                if ((curShape === 6 || curShape === 7) && z > zMin) {
                     if (enterable(x, y, z - 1)) relax(enc3D(x, y, z - 1), curCost + STEP_COST);
                 }
             }
@@ -2295,11 +2450,12 @@
                 res.partial = true;
             }
             let len = 0;
-            for (let c = end; c !== s; c = P[c]) AS.trace[len++] = c;
+            for (let c = end; c !== s; c = sc(c).parent[scI]) len++;
             const cells = new Int32Array(len);
-            for (let k = 0; k < len; k++) cells[k] = AS.trace[len - 1 - k];
+            for (let c = end, k = len - 1; c !== s; c = sc(c).parent[scI]) cells[k--] = c;
             res.cells = cells;
             res.end = end;
+            res.layers = AS3.searchLayers;
             return done(res.partial ? "partial" : "found");
         }
 
@@ -2626,7 +2782,7 @@
         }
         const size = World.state.size, n2 = size * size;
         const curZ = zOf(u);
-        const here = p.is3D ? ((curZ + 2) * n2 + ev.y * size + ev.x) : (ev.y * size + ev.x);
+        const here = p.is3D ? ((curZ - zSync().zMin) * n2 + ev.y * size + ev.x) : (ev.y * size + ev.x);
         const left = p.cells.length - p.i;
         if (left < p.bestLeft) {
             p.bestLeft = left;
@@ -2644,7 +2800,7 @@
         let nx, ny, nz;
         if (p.is3D) {
             const l = Math.floor(next / n2);
-            nz = l - 2;
+            nz = l + zSync().zMin;
             const rem = next - l * n2;
             nx = rem % size;
             ny = (rem - nx) / size;
@@ -2731,7 +2887,7 @@
         if (!res.cells) return null;
         const out = Array.from(res.cells, c => {
             if (res.is3D) {
-                const l = Math.floor(c / n2), z = l - 2, rem = c - l * n2, x = rem % size, y = (rem - x) / size;
+                const l = Math.floor(c / n2), z = l + zSync().zMin, rem = c - l * n2, x = rem % size, y = (rem - x) / size;
                 return { x, y, z };
             }
             return { x: c % size, y: (c - (c % size)) / size };
@@ -2801,11 +2957,18 @@
         const size = this.state.size, n2 = size * size;
         return Array.from(p.cells.subarray(p.i), c => {
             if (p.is3D) {
-                const l = Math.floor(c / n2), z = l - 2, rem = c - l * n2, x = rem % size, y = (rem - x) / size;
+                const l = Math.floor(c / n2), z = l + zSync().zMin, rem = c - l * n2, x = rem % size, y = (rem - x) / size;
                 return { x, y, z };
             }
             return { x: c % size, y: (c - (c % size)) / size };
         });
+    };
+    /** The 3D search scratch (WG.00.17): { layersAllocated (layers with scratch arrays so far), bytesPerLayer, bytes,
+     *  lastSearchLayers (the levels the last 3D search reached), heapEntries, levels (the world's layer count) }. */
+    World.pathScratchStats = function() {
+        const bytesPerLayer = AS3.n * 20;   // g, parent, seen, closed, goal: 4 bytes each per cell
+        return { layersAllocated: AS3.allocated, bytesPerLayer, bytes: AS3.allocated * bytesPerLayer + (AS3.heapCell ? AS3.heapCell.length * 12 : 0),
+            lastSearchLayers: AS3.lastLayers.map(li => li + zSync().zMin), heapEntries: AS3.heapCell ? AS3.heapCell.length : 0, levels: zSync().levels.length };
     };
     /** Planner numbers since the world was created: plans, ms (average, p95 of the last 512, max), cells expanded, queue, waits. */
     World.pathStats = function() {
@@ -3066,8 +3229,8 @@
         _DataManager_loadMapData.call(this, mapId);
     };
 
-    // A map load waits for the prewarm (SIM.00.00): every level of the view's area is built before the map starts, one
-    // build a frame of the load, so the switches that follow never build.
+    // A map load waits for the prewarm (SIM.00.00): the view's ring (z±1, z±2) is built before the map starts, one build a
+    // frame of the load, so the switches that follow never build.
     const _Scene_Map_isReady = Scene_Map.prototype.isReady;
     Scene_Map.prototype.isReady = function() {
         if (!_Scene_Map_isReady.call(this)) return false;
@@ -4124,8 +4287,9 @@
 
             t.check("area_size", size === 256 && $dataMap.width === 256 && $dataMap.height === 256 && $dataMap.data.length === 256 * 256 * 6 && $dataMap.ufObjects && $dataMap.ufObjects.length === 256 * 256,
                 `${$dataMap.width}x${$dataMap.height}, data length ${$dataMap.data.length}, objects ${$dataMap.ufObjects ? $dataMap.ufObjects.length : "missing"}`);
-            // Five levels (VISION V80): the ground keeps its map id; each level has its own id that levelOfMapId turns back
-            // into that level; the legacy areaOfMapId knows only the ground; a sixth level doesn't exist.
+            // The levels of the world's Z range (VISION V80, WG.00.17): the ground keeps its map id; each level has its own id
+            // that levelOfMapId turns back into that level; the legacy areaOfMapId knows only the ground; no level exists
+            // beyond the range.
             {
                 const ids = W.LEVELS.map(z => W.areaMapId(area.x, area.y, z));
                 const back = ids.map(id => W.levelOfMapId(id));
@@ -4133,10 +4297,11 @@
                 const distinct = new Set(ids).size === W.LEVELS.length && ids.every(id => id > 0);
                 const groundId = W.areaMapId(area.x, area.y) === W.areaMapId(area.x, area.y, 0) && W.areaMapId(0, 0) === W.config.mapIdBase;
                 const legacyGround = W.areaOfMapId(W.areaMapId(area.x, area.y, -1)) === null && sameArea(W.areaOfMapId(W.areaMapId(area.x, area.y)), area);
-                const noSixth = W.inWorld(area.x, area.y, 3) === false && W.inWorld(area.x, area.y, -3) === false && W.areaMapId(area.x, area.y, 3) === 0;
+                const zr0 = W.zRange(), above = zr0.zMax + 1, below = zr0.zMin - 1;
+                const noSixth = W.inWorld(area.x, area.y, above) === false && W.inWorld(area.x, area.y, below) === false && W.areaMapId(area.x, area.y, above) === 0;
                 t.check("level_ids", roundTrip && distinct && groundId && legacyGround && noSixth,
                     `levels ${W.LEVELS.join(", ")} -> map ids ${ids.join(", ")} (${distinct ? "distinct" : "NOT distinct"}); levelOfMapId round trip ${roundTrip}; ground id ${W.areaMapId(0, 0)} (MapIdBase ${W.config.mapIdBase}, ${groundId ? "unchanged" : "CHANGED"}); ` +
-                    `areaOfMapId(level -1) ${JSON.stringify(W.areaOfMapId(W.areaMapId(area.x, area.y, -1)))} (want null); inWorld at level 3 / -3: ${W.inWorld(area.x, area.y, 3)} / ${W.inWorld(area.x, area.y, -3)}${PROVOKE.length ? ` [PROVOKED: ${PROVOKE.join(", ")}]` : ""}`);
+                    `areaOfMapId(level -1) ${JSON.stringify(W.areaOfMapId(W.areaMapId(area.x, area.y, -1)))} (want null); inWorld at level ${above} / ${below}: ${W.inWorld(area.x, area.y, above)} / ${W.inWorld(area.x, area.y, below)}${PROVOKE.length ? ` [PROVOKED: ${PROVOKE.join(", ")}]` : ""}`);
             }
 
             const tpl = W.template();
