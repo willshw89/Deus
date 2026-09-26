@@ -714,7 +714,11 @@ This section answers R-08: summary decay for fast-forward and off-focus regions 
 
 - **Decay state is per record, not per region.** Members, items and remains carry closed-form schedules in one heap. ADR-003 states the consequence: "an element's HP on day D is the same at L0, L1, L2, or after a deep-history jump of many years" (ADR-003 L1693). **[ADR-003]**
 - **Geology is fine at every LOD.** ADR-003 §16.5 says "Support depends only on geometry, and geometry is fine at every LOD level", and collapse runs the same algorithm in L2 at the coarse tick. So decay's strata writes and Lane Q's rechecks happen the same way in L0, L1 and L2. **[ADR-003]**
-- **The one LOD difference** is timing: an exposure change caused by another event takes effect on the day that event is processed, and L2 processes collapses at its coarse tick of 1 game hour (ADR-003 L1694). That is why the long-run test compares stages and ledger totals, not exact HP (A7 in "Matter ledger long-run test").
+- **The one LOD difference** is timing, and Fix 1 narrows it.
+  - ADR-003 lets an exposure change caused by another event take effect on the day that event is processed, and L2 processes collapses at its coarse tick of 1 game hour (ADR-003 L1694).
+  - Under R-01.2 a change caused by a decay failure is rebased at the failure's own instant (`atYt`, R-05.3 C-3), so decay-caused chains are the same at every LOD.
+  - A change with a non-decay cause (a fire, a dig, a flood) takes the instant of the tick in which it is processed. In L2 that tick is on the coarse grid, so such a change can land up to 1 game hour later than in L0.
+  - That is why the long-run test compares stages and ledger totals across LOD levels, not exact HP (A7 in "Matter ledger long-run test"). FX-R-01's scripted events are at whole years, which lie on the coarse grid, so they do not shift.
 - **What L2 does not do for decay:** nothing is sent to the render feed, and crowd-bucket deaths become aggregate remains (R-03.4).
 
 ### R-08.3 Cohort summary: only for matter that has no records
@@ -731,14 +735,22 @@ For these, a region keeps **cohort records** `(dc, stage, count, massByForm[])`:
 
 ### R-08.4 Fast-forward and deep history
 
-- **Day jumps.** Fast-forward, history mode and off-focus catch-up all advance the day counter and pop every heap entry due up to the new day, in `(dueDay, id)` order (ADR-003 L1696: "It runs the same heaps with day jumps"). **Cost is proportional to due events, not to years.**
+- **Day jumps.** Fast-forward, history mode and off-focus catch-up all advance the day counter and pop every heap entry due up to the new day, in `(dueYt, id)` order (ADR-003 L1696: "It runs the same heaps with day jumps"). **Cost is proportional to due events, not to years.**
 - **Worked example.** Aging a 40-structure site by 10,000 sy: 40 structures × 15 members × at most 6 events (4 thresholds, a failure, a burial change) = 3,600 member events; 2,000 unattended items × 4 steps = 8,000; 200 remains × 3 = 600. Total about 12,200 events, whatever the number of years. At an assumed 1-10 µs per event (heap pop plus a few writes; not measured) that is 12-122 ms, plus Lane Q's rechecks for the failures (C-5).
 - **DEC-4 and Year 0.** History-produced ruins must come from the history-mode core, where "Traces are ordinary sim data, not flavour text" and there is "no second 'trace generator' that could invent material" (ADR-003 §14.2). Decay then only ages what history built. Whether a New Game may start with aged history at all is ADR-003 Q6 against INV-SIM-01 (ADR-003 L1249, §14.3), an Owner question this design does not answer. Decay works the same either way.
 
 ### R-08.5 Slow clocks (NAT-003, INV-SIM-02)
 
 - All decay, reclamation and weathering timers are in the **historical** domain (INV-SIM-02).
-- They run at each game-day boundary (ADR-003 L1689) and process due entries in batches of at most ⌈due / 2,400⌉ per tick (ADR-003 L1047). **[ADR-003]**
+- **Keys (Fix 1, review MINOR-2).** Every decaying record is keyed by its next event's instant, `dueYt` (R-01.2), then its id. The key never loses sub-day precision, and it is the same under every DPY. A heap entry is `(dueYt, id)`, 12 bytes (R-10.2). The first version keyed an integer game day, `nextDay`, which cannot place a 0.25-sy corpse stage or a 0.05-sy food life at DPY 1, where a game day is a whole sy.
+- **Two drains share that key.**
+
+| Heap | Holds | Drained | Why |
+|---|---|---|---|
+| **Long heap** | decay members, litter footprints, residue weathering, pedogenesis, and item corrosion and rot steps (all lives ≥ 1 sy) | at each game-day boundary (ADR-003 L1689). At the boundary that starts day D, an entry is due when `dueYt × DPY ≤ D × 2,400`, that is, when its instant is not after the boundary. The batch is processed in `(dueYt, id)` order, at most ⌈due / 2,400⌉ per tick (ADR-003 L1047, L1690) | **Intentional.** These events are years to millennia apart. Processing them up to one game day late changes no whole-year checkpoint (below) and no chained instant (R-01.2 rebases at the causing instant, not the processing day) |
+| **Short heap** | remains records and FOOD items, the only classes with lives under 1 sy (R-03.3, R-03.4) | every tick. An entry is due when `dueYt × DPY ≤ tick`; `dueYt × DPY` is an exact integer tick. At most `B_short` entries per tick (default 16); any excess waits in key order, which delays it and never drops it | At DPY 1 a day-boundary drain would show a 0.25-sy corpse stage up to 0.75 game day (180 s real) late, and it would bunch every food event onto the day boundary |
+
+- **Whole-year checkpoints stay day-keyed on purpose.** A checkpoint at year Y is sampled after both heaps have drained every entry with `dueYt ≤ 2,400 × Y`, and none later. An entry is in that set exactly when its instant is at most Y, so the set does not depend on DPY. For the long heap, `ceilDiv(dueYt × DPY, 2,400) ≤ Y × DPY` holds exactly when `dueYt ≤ 2,400 × Y`, because `ceilDiv(x, n) ≤ m` ⟺ `x ≤ m × n` for integers. FX-R-01's checkpoints (R-09.2) are whole years, so they need no sub-day key. The short heap exists for play-time placement and for AT-R-08, not for the long-run test. **[ADR-003]**
 - Decay needs no separate hour, season or decade service: each record carries its own due day, so a 3,000-sy wall life is one heap entry, not 3,000 annual ticks. This is how NAT-003's "multi-timescale execution (action, daily, seasonal, century)" (`docs/RISK_REGISTER.md:74`) is met for decay.
 - Climate modifiers come from SIM.50.06's annual summary per region: one event per region per year. Under D-1 option (b) a year boundary is every game day; under (a) it is every N days.
 
@@ -779,7 +791,10 @@ This section answers R-09: a deterministic fixture, aged through every stage ove
 
 - Headless core (ADR-003 §2), history mode with day jumps. **[ADR-003]**
 - Run twice at the 9-layer test range (-4..+4) and twice at the 32-layer default (-16..+15), as ADR-003 §17.6 requires. The fixture fits both ranges.
-- Fixed seed; D-1 parameter DPY = 1 for the reference run and DPY = 20 for a second run (the test must pass under both; the stage **days** differ, the stage **years** and ledger totals do not).
+- Fixed seed; D-1 parameter DPY = 1 for the reference run and DPY = 20 for a second run. The test must pass under both.
+  - **Identical in both runs:** every transition instant (in yt), and every checkpoint's stages and ledger totals. This holds because no formula in R-01.2 contains DPY.
+  - **Different:** only the game day, and so the calendar year, on which an event is processed (R-08.5). Take H1's first band, at instant 3,353,604 yt (year 1,397.335). At DPY 1 it is processed at the boundary of day 1,398, which is calendar year 1,398. At DPY 20 it is processed on day 27,947, which is still calendar year 1,397. Both runs include it at the y1,398 checkpoint, and neither at y1,397.
+  - So AT-R-20 compares instants and checkpoint states. It does not compare the calendar year of processing (review MAJOR-1).
 
 ### R-09.2 Fixture FX-R-01, an abandoned hamlet
 
@@ -787,7 +802,7 @@ This section answers R-09: a deterministic fixture, aged through every stage ove
 
 | Id | What | Members |
 |---|---|---|
-| H1 | stone house 8×8 with a cellar | limestone ASHLAR walls (`weatherResistance` 50) 2 layers high; TIMBER roof; FERROUS fittings; cellar at layer -1 with an ASHLAR vault and TIMBER props |
+| H1 | stone house 8×8 with a cellar | limestone ASHLAR walls (`weatherResistance` 50) 2 layers high; TIMBER roof covering the wall tops; FERROUS fittings; cellar at layer -1 with an ASHLAR vault and TIMBER props |
 | H2 | mudbrick house 6×6 | MUDBRICK walls 1 layer; THATCH roof |
 | H3 | timber hall 10×6 | TIMBER walls and roof; LIGHTWOOD doors; 200 iron nails as FITTINGS; **burned at y5** (scripted `residue.burn`, kappa 0.6) |
 | H4 | brick tower 4×4 | BRICK walls from layer 0 to layer +2; LIGHTWOOD floors and roof |
@@ -796,11 +811,14 @@ This section answers R-09: a deterministic fixture, aged through every stage ove
 
 **Items:** an iron longsword (FE blade + ORGANIC grip), a copper pot, 10 silver coins, a glass bottle, 5 cloth bolts, 10 loaves of bread, a pair of leather boots, all in H1 and H3.
 **Remains:** two persons (one in an anchored grave outside H1, one unburied in H3's fire) and one deer carcass.
+**Wood and stone.** All fixture wood (TIMBER, LIGHTWOOD, doors) is elm, whose `rotResistance` is 50 (`game/data/DEUS_WorldCatalog.json:4680`), so the timber scaling `rR / 50` is 1. H1's limestone is `weatherResistance` 50 (`game/data/DEUS_WorldCatalog.json:4721`).
+
 **Stand-ins for systems not built yet** (each is a ledgered FIXTURE-FEED source or a scripted event, so the test accounts for it):
-- vegetation: plant objects established on reclaimable cells on a fixed schedule, their biomass booked from AIR, litter booked `T(BIOMASS→SOIL-ORG)` at 0.25 mm per sy;
+- vegetation: the patch holds no plant objects at y0. A structure's first plant object is established on its first reclaimable cell (canonical cell order, footprint then halo) 1 sy after the later of two instants: the structure entering S1, or the structure losing maintenance. After that, one more plant arrives each sy on the next such cell. Biomass is booked from AIR, and litter is booked `T(BIOMASS→SOIL-ORG)` at 0.25 mm per sy. Every instant here is a whole-year offset from a decay instant, so the schedule is DPY-free;
 - sediment: `source(FIXTURE-FEED, SEDIMENT)` delivering one slice per 1,000 sy to the low side of the patch;
 - water: at y300 the H1 cellar floods through the fluid API (a D-4 dependency);
-- climate: FT 0.25 and a fixed snow load.
+- climate: FT 0.25 above ground and a fixed snow load;
+- scripted events (the fire at y5, population 0 at y10, the flood at y300, the sediment feed) happen at whole-year instants. Whole years lie on every DPY's day grid and on L2's coarse grid.
 
 **Timeline:** y0 built and maintained; y5 H3 burns; y10 population set to 0; y11 site ABANDONED; run to **y12,000**.
 
@@ -816,20 +834,45 @@ This section answers R-09: a deterministic fixture, aged through every stage ove
   - At y3,000 and y10,000: H1, H2 and H4 footprints each stand ≥ 1 slice above their surroundings (TR-3).
   - The H1 cellar is open, or, if Lane Q collapsed it, its lining is RUBBLE in place (TR-2).
   - At y12,000: the gold ring, silver coins, glass bottle and ceramic jars exist as ITEM or ITEM-BURIED with their y0 mass (TR-5); the anchored grave record exists (TR-6); H3's ash and charcoal lie under ≥ 1 slice (TR-7); R1's slabs are BUILT and R2's `compacted` flag is set (TR-4).
-- **A5 Stages.** Each structure's stage at each checkpoint equals the stage computed by an **independent oracle**: a separate function that reads only the parameter tables and the fixture geometry, not the implementation.
-- **A6 Determinism.** Two runs produce identical ledger and state checksums at every checkpoint. The 9-layer and 32-layer runs produce identical stages and identical ledger totals.
+- **A5 Stages and instants.** Each structure's stage at each checkpoint, and the instant (yt) of every member failure and stage transition, equal those computed by an **independent oracle**. The oracle is a separate function with its own code that implements R-01.2's clock and rebase rule. It reads only the parameter tables, the fixture geometry and the stand-in schedule, not the implementation. It uses the same instants the implementation must use, so a schedule taken from the HP byte or from a per-day rate fails here (MR-15).
+- **A6 Determinism.** Two runs produce identical ledger and state checksums at every checkpoint. The 9-layer and 32-layer runs produce identical stages and identical ledger totals. The DPY 1 and DPY 20 runs produce identical transition instants (yt), and identical stages and ledger totals at every checkpoint (R-09.1, AT-R-20).
 - **A7 LOD invariance.** The fixture aged (i) all-L0 day by day, (ii) in L2 at the coarse tick, and (iii) in one day jump with checkpoints gives identical stages and ledger totals (ADR-003 §17.6).
 - **A8 Work bound.** `decay.work_per_tick ≤ ⌈active / 2,400⌉`; zero decay work on maintained days y0-y10, except the fire; cells enqueued per decay event ≤ 64 (C-5); a frame counter shows decay is never called from a render hook.
 - **A9 Save and load.** Saving at y1,000, reloading (the heap is rebuilt from records) and continuing gives the same checksums at y3,000..y12,000 as the uninterrupted run.
 
-**Expected stages (approximate; the oracle computes exact days from data).** Lives from R-01.6 with limestone `wR` 50 (ASHLAR lives × 50/90) and FT 0.25:
+**Expected instants and stages (Fix 1: recomputed with R-01.2's clock).** The S1, S2, S3 and S4 instants follow exactly from three inputs: R-01.2's clock, the fixture's stand-ins and the assumptions below. They are what the oracle must reproduce, in yt, and they are the same under DPY 1 and DPY 20. The writer's scratch calculation (REPORT.md) produced them with integer arithmetic. S5 depends on Lane Q's spill geometry and on the litter and feed stand-ins, so it stays approximate until Lane Q's rule is fixed. The first version printed the life-table years rounded, which R-01.2 now produces exactly. It also printed approximate S1 and S2 years from an unspecified vegetation schedule.
 
-| Structure | S1 | S2 | S3 | S4 | S5 |
-|---|---|---|---|---|---|
-| H1 stone house | ~y22 (roof h ≤ 0.85) | ~y22 (halo vegetation) | ~y73 (TIMBER roof, d0 y13 + 60) | ~y4,290 (four upper bands fall near y1,400, 2,520, 3,480, 4,290; top-band SKY life about 1,333 sy) | ~y5,000-7,000 (litter plus feed over the last rubble) |
-| H2 mudbrick | ~y14 | ~y20 | ~y24 (THATCH roof, d0 y12 + 12) | ~y95 (two upper bands near y62 and y95; SKY 60 / 1.5) | ~y100-150 (its own fines, which count as SEDIMENT cover) |
-| H3 timber hall | burned y5 | ~y15 | y5 (fire collapse) | y5-y100 | ~y2,500 |
-| H4 brick tower | ~y16 | ~y20 | ~y37 (LIGHTWOOD roof) | ~y1,570 (seven upper bands from y563 to y1,569; SKY 800 / 1.5) | ~y3,000-4,000 |
+Clocks: the site is ABANDONED at y11. Masonry and TIMBER members start at y13 (`t0 = 31,200` yt), THATCH and LIGHTWOOD members at y12 (`t0 = 28,800` yt), each with `rem0 = R` (abandonment grace, R-01.7). Lives (R-01.2; FT 0.25; elm timber scaling 1):
+
+| Members | Class and exposure | `lifeYt` | In sy |
+|---|---|---|---|
+| H1 roof | TIMBER, SKY (no frost modifier) | 60 × 2,400 = 144,000 | 60 |
+| H1 walls | ASHLAR, wR 50 (scaling 50/90); `M_ft = 1 + 2 × 0.25 × 0.5 = 1.25` = 10/8; SHELTERED | ceilDiv(20,000 × 2,400 × 50 × 8, 90 × 10) = 21,333,334 | 8,888.889 |
+| H1 walls | the same, SKY | ceilDiv(3,000 × 2,400 × 50 × 8, 90 × 10) = 3,200,000 | 1,333.333 |
+| H2 roof | THATCH, SKY | 28,800 | 12 |
+| H2 walls | MUDBRICK, `M_ft = 1.5` = 12/8; SHELTERED / SKY | ceilDiv(400 × 2,400 × 8, 12) = 640,000 / ceilDiv(60 × 2,400 × 8, 12) = 96,000 | 266.667 / 40 |
+| H4 roof | LIGHTWOOD, SKY | 25 × 2,400 = 60,000 | 25 |
+| H4 walls | BRICK, `M_ft` = 12/8; SHELTERED / SKY | 4,000,000 / 1,280,000 | 1,666.667 / 533.333 |
+
+| Structure | S1 | S2 (stand-in) | S3 | Upper-band failures, yt (year) | S4 | S5 (approximate) |
+|---|---|---|---|---|---|---|
+| H1 stone house | 52,800 (y22.000): the roof's `cross(850,000)` | 55,200 (y23.000) | 175,200 (y73.000): the roof's `failYt` | 3,353,604 (1,397.335); 6,055,246 (2,523.019); 8,351,640 (3,479.850); 10,303,576 (4,293.157) | 10,303,576 (y4,293.157) | ~y5,000-7,000 (litter plus feed over the last rubble) |
+| H2 mudbrick | 33,120 (y13.800) | 35,520 (y14.800) | 57,600 (y24.000) | 149,640 (62.350); 227,875 (94.948) | 227,875 (y94.948) | ~y100-150 (its own fines, which count as SEDIMENT cover) |
+| H3 timber hall | 12,000 (y5.000): burned, already S3 | 28,800 (y12.000): 1 sy after the site loses maintenance at y11 | 12,000 (y5.000): fire collapse | none: the fire brought the hall down | y5-y100 (depends on how much the scripted fire leaves standing; Lane Q) | ~y2,500 |
+| H4 brick tower | 37,800 (y15.750) | 40,200 (y16.750) | 88,800 (y37.000) | 1,350,368 (562.653); 2,208,235 (920.098); 2,791,585 (1,163.160); 3,188,263 (1,328.443); 3,458,004 (1,440.835); 3,641,427 (1,517.261); 3,766,156 (1,569.232) | 3,766,156 (y1,569.232) | ~y3,000-4,000 |
+
+**Worked: H1's first band.** From y13 the top band is SHELTERED. At the roof's failure it is rebased to SKY (R-01.2, R-05.4):
+- `rem0 = 1,000,000 − floorDiv((175,200 − 31,200) × 10^6, 21,333,334) = 1,000,000 − 6,749 = 993,251`;
+- `t0 = 175,200`;
+- `lifeYt = 3,200,000`;
+- `failYt = 175,200 + ceilDiv(993,251 × 3,200,000, 10^6) = 175,200 + 3,178,404 = 3,353,604` yt (year 1,397.335).
+
+Band 2 has been SHELTERED since y13. It is rebased at 3,353,604 to `rem0 = 844,263` and fails at 6,055,246. Band 3 is rebased to `rem0 = 717,623` and fails at 8,351,640; band 4 to `rem0 = 609,980`, failing at 10,303,576. The review recomputed these years from the unquantized life table as 1,397, 2,523, 3,480 and 4,293. They agree with the exact instants above (years 1,397.335, 2,523.019, 3,479.850 and 4,293.157) to within rounding.
+
+**Assumptions of this table** (ASSUMED; part of R-05's PARTIAL status):
+- **Roofs.** Each roof fails at its own `failYt` (HP 0). Under Lane Q's support rule a roof may break earlier, at a threshold write, from its own weight or from the fixture's snow load. The oracle then takes that write's instant, `cross(floorDiv(k × R, maxHP))`, as the roof's failure. The band chain follows from it by the same rebase rule, and every later instant moves.
+- **Spill.** The rubble of a failed band spills off the 1-cell-wide wall top to the wall foot, so the band below is left open to the sky, not buried.
+- **Sides.** The four sides of a structure share one exposure and one `t0` per band, so each band fails at one instant.
 
 ### R-09.4 Mutants that must fail
 
@@ -849,6 +892,8 @@ This section answers R-09: a deterministic fixture, aged through every stage ove
 | MR-12 lost heap | the heap is not rebuilt on load | A9 |
 | MR-13 walls before roofs | ROOF and WALL lives swapped | A5, and the data validator AT-R-02 |
 | MR-14 coal from charcoal | with OQ-R-03's lithification run enabled, buried charcoal becomes coal | A3 |
+| MR-15 per-day rate from the HP byte | the schedule uses ADR-003 L1653's form with `rateMilli = ceil(1000 × maxHP / (lifeYears × DPY))` on the HP byte (maxHP 120), the first version's rule | A5 (H1's first band fails at y1,407 at DPY 1 and y1,263 at DPY 20, against the oracle's 3,353,604 yt, year 1,397.335) and A6/AT-R-20 (the two DPY runs disagree) |
+| MR-16 rebase at the processing day | an exposure change is rebased at the start of the day on which it is processed, not at the causing instant (`atYt`) | A5 at DPY 1 (H1's second band fails at 6,056,602 yt against the oracle's 6,055,246) and A6/AT-R-20 (at DPY 20 the mutant gives 6,055,276, so the two runs disagree) |
 
 ### R-09.5 Optional deep-time run
 
@@ -869,19 +914,19 @@ This section answers R-10: how decay state is represented in memory and saves (D
 
 | Structure | Fields (typed layout) | Bytes | Exists for |
 |---|---|---|---|
-| Member | memberId u32, structureId u32, dc u8, ex u8, role u8, flags u8, hp0 u8, pad 3, d0 i32 (game day), rateMilli u32, nextDay i32, shedPool u32, runsOffset u32, runsCount u16, pad 2 | 40 + 4 per run | every member of every structure |
+| Member | memberId u32, structureId u32, dc u8, ex u8, role u8, flags u8, **t0 f64** (instant in yt, an integer below 2^53), **rem0 u32** (millionths of life left at t0), **lifeYt u32** (0xFFFFFFFF = ∞), shedPool u32, runsOffset u32, runsCount u16, pad 2. Fix 1: the clock (R-01.2) replaces hp0 u8, pad 3, d0 i32, rateMilli u32 and nextDay i32. The next event is recomputed from the clock and kept only in the heap | 40 + 4 per run | every member of every structure |
 | Member run | x u8, y u8 (in area), z 6 bits (64 layers of headroom), slice mask 5 bits, 5 spare bits | 4 | one per cell a member covers |
-| Structure | id u32, siteId u32, stage u8, flags u8 (anchor, burned), memberFirst u32, memberCount u16, bbox 4 × u8 + 2 × i8, litterStartDay i32 | 28 | every structure |
-| Site decay fields | state u8, stage u8, pad 2, abandonedDay i32, predecessorSiteId u32 | 12 | every site |
-| Heap entry | nextDay i32, id u32 (kind in the top 3 bits) | 8 | unmaintained members, unattended items, remains, weathering residue, litter footprints |
-| Item decay fields | dc u8, ex u8, cond0 u8, pad, d0 i32, nextDay i32 | 12 | unattended items only |
-| Remains record | personId u32, species u16, stage u8, ex u8, softMu u32, boneMu u32, d0 i32, nextDay i32, cell key u32 | 28 | unmerged remains |
-| Residue entry | cell index u16 + slice u8, present-mask u8, then only present fields as u32: ash, charcoal, soil-org, soil-min, oxide per metal family, bone, remains-anchor list ref | 4 + 4 per field (typically 12-20) | **touched cells only**: burned cells, cells where an item rotted or corroded, cells where remains merged |
+| Structure | id u32, siteId u32, stage u8, flags u8 (anchor, burned), memberFirst u32, memberCount u16, bbox 4 × u8 + 2 × i8, litterStartYt f64 | 32 (30 + 2 pad) | every structure |
+| Site decay fields | state u8, stage u8, pad 2, abandonedYt f64, predecessorSiteId u32 | 16 | every site |
+| Heap entry | dueYt f64, id u32 (kind in the top 3 bits). Two heaps with this entry form: long and short (R-08.5) | 12 | long heap: unmaintained members, non-food unattended items, weathering residue, litter footprints. Short heap: remains, FOOD items |
+| Item decay fields | dc u8, ex u8, step u8, flags u8, rem0 u32, lifeYt u32, t0 f64 | 20 | unattended items only |
+| Remains record | personId u32, species u16, stage u8, ex u8, softMu u32, boneMu u32, t0 f64, rem0 u32, lifeYt u32, cell key u32 | 36 | unmerged remains |
+| Residue entry | cell index u16 + slice u8, present-mask u8, then only present fields as u32: ash, charcoal, soil-org, soil-min, oxide per metal family, bone, remains-anchor list ref | 4 + 4 per field (typically 12-20), plus a 16-B clock block (t0 f64, rem0 u32, lifeYt u32) for each field that is weathering, kept in a per-chunk side list | **touched cells only**: burned cells, cells where an item rotted or corroded, cells where remains merged |
 | Chunk structure index | list of structure ids whose bbox overlaps the chunk | 4 per id | chunks that hold built matter |
 | Buried-find list | item ids keyed by cell and slice | 4-8 per item | chunks that hold buried items |
 | Cohort record | 20 classes × 8 stages × (u32 count + 8 forms × 8 B) | ≤ 10,880 | only regions that hold records-less matter (R-08.3) |
 
-**Residue storage adapts to density.** A chunk keeps residue entries in a small sorted array while it has ≤ 64 of them. Past that it switches to a per-chunk plane: 1,024 cells × 24 B = 24 KiB, allocated on demand. The `reclaimable` flag is not stored: it is derived from the structure's state.
+**Residue storage adapts to density.** A chunk keeps residue entries in a small sorted array while it has ≤ 64 of them. Past that it switches to a per-chunk plane: 1,024 cells × 24 B = 24 KiB, allocated on demand. The clock blocks stay in the side list, so the plane stays 24 B a cell. The `reclaimable` flag is not stored: it is derived from the structure's state.
 
 **Reverse lookup** (which members does this changed cell touch?) goes cell → chunk → overlapping structure ids → those structures' member runs. That is about 5 structures × 15 members per lookup, with no per-cell member index.
 
@@ -889,21 +934,21 @@ This section answers R-10: how decay state is represented in memory and saves (D
 
 DEC-014 gives no population numbers: the budget is "sized by post-split simulation performance benchmarks" (`docs/OWNER_DECISIONS.md:205`), and DEC-014 is `OPEN`. The only concrete figure is Year 0: "9 racial factions of 8 founders each = 72 colonists" (`docs/society/DEUS_SOCIETY_WBS.md:19`). So two **assumed** scenarios follow; they are not predictions.
 
-**Per site** (40 structures, 15 members each, 8 runs per member): 600 members × (40 + 32) B = 43,200 B; structures 40 × 28 = 1,120 B; site 12 B. **About 44 KB per site**, all of it at any layer count. When the site is a burned or corroded ruin, add its touched chunks: up to about 4 × 24 KiB = 96 KiB in dense planes, usually much less.
+**Per site** (40 structures, 15 members each, 8 runs per member): 600 members × (40 + 32) B = 43,200 B; structures 40 × 32 = 1,280 B; site 16 B. **About 44 KB per site**, all of it at any layer count. When the site is a burned or corroded ruin, add its touched chunks: up to about 4 × 24 KiB = 96 KiB in dense planes, usually much less.
 
-**Scenario Y0** (Year 0: 72 colonists, 9 camps, ≤ 5 structures each): 45 structures × 15 members × 72 B = 48,600 B, plus about 2,000 unattended items × 12 B = 24,000 B. **Under 100 KB.**
+**Scenario Y0** (Year 0: 72 colonists, 9 camps, ≤ 5 structures each): 45 structures × 15 members × 72 B = 48,600 B, plus about 2,000 unattended items × (20 B + 12 B heap) = 64,000 B. **About 113 KB.** The first version counted items at 12 B and no heap entry, which gave under 100 KB.
 
 **Scenario L** (assumed large world: 200 sites × 50 structures = 10,000 structures; population 50,000; 30 % of structures unmaintained; 200,000 unattended items):
 
 | Item | Arithmetic | Bytes |
 |---|---|---|
 | Members | 150,000 × 72 B | 10.8 MB |
-| Structures | 10,000 × 28 B | 0.28 MB |
-| Heap: members | 45,000 × 8 B | 0.36 MB |
-| Unattended items | 200,000 × (12 B + 8 B heap) | 4.0 MB |
-| Remains | V123's mean lifespan of 60 years gives about 50,000 / 60 ≈ 833 deaths per sy; unmerged for up to 50 sy: 41,700 × (28 + 8) B | 1.5 MB |
-| Residue | about 120,000 touched cells (burned houses, corrosion and rot points, merged remains) × 20 B, or dense planes where clustered | 2.4-4.8 MB |
-| **Total** | | **about 19-22 MB** |
+| Structures | 10,000 × 32 B | 0.32 MB |
+| Heap: members | 45,000 × 12 B | 0.54 MB |
+| Unattended items | 200,000 × (20 B + 12 B heap) | 6.4 MB |
+| Remains | V123's mean lifespan of 60 years gives about 50,000 / 60 ≈ 833 deaths per sy; unmerged for up to 50 sy: 41,700 × (36 + 12) B | 2.0 MB |
+| Residue | about 120,000 touched cells (burned houses, corrosion and rot points, merged remains) × 20 B, or dense planes where clustered, plus an assumed 20,000 weathering fields × 16 B clock blocks (0.32 MB) | 2.7-5.1 MB |
+| **Total** | | **about 23-25 MB** (first version: 19-22 MB, before the clock fields) |
 
 **Per layer.** None of these structures has a size term in the layer count. At 32 layers a world with the same buildings costs the same as at 9 or 5 layers. Underground sites cost what is built there, like surface sites. That meets ADR-003's rule that `heap(32) − heap(9)` on the sparse fixture stays within the chunk directory difference plus 64 KiB (§9.1). **[ADR-003]**
 
@@ -911,45 +956,51 @@ DEC-014 gives no population numbers: the budget is "sized by post-split simulati
 
 ### R-10.4 CPU per tick
 
-- **Class:** O(k log n) per tick, where k ≤ ⌈due / 2,400⌉ is the number of due heap entries processed that tick (ADR-003 L1047) and n is the heap size. When nothing is due, the cost is one integer comparison of the heap top against the current day.
+- **Class:** O(k log n) per tick, where k ≤ ⌈due / 2,400⌉ is the number of due heap entries processed that tick (ADR-003 L1047) and n is the heap size. When nothing is due, the cost is one comparison of a heap top against the current boundary: once per game day for the long heap, once per tick for the short heap (R-08.5).
 - **Scenario L event rate:**
   - members: 45,000 unmaintained × 6 events per life ÷ a mean life of about 500 sy = 540 per sy;
   - items: 200,000 × 4 steps ÷ about 50 sy = 16,000 per sy;
   - remains: 833 × 3 = 2,500 per sy;
   - residue and litter: about 1,000 per sy;
   - **about 20,000 events per sy**.
-- **Under D-1 (b), DPY = 1:** 20,000 events per game day = ⌈20,000 / 2,400⌉ = **9 per tick**, 90 per real second at 1x, 1,440 at 16x. Each is a heap pop and push of about log2(290,000) ≈ 18 comparisons (the heap holds about 45,000 members, 200,000 items and 41,700 remains). Only the 540 member events per sy write strata (≤ 64 each) and wake Lane Q (C-5).
+- **Under D-1 (b), DPY = 1:** 20,000 events per game day = ⌈20,000 / 2,400⌉ = **9 per tick**, 90 per real second at 1x, 1,440 at 16x. Each is a heap pop and push of at most about log2(245,000) ≈ 18 comparisons. The long heap holds about 245,000 entries (45,000 members and most of the 200,000 items); the short heap holds about 42,000 (41,700 remains and the food). Only the 540 member events per sy write strata (≤ 64 each) and wake Lane Q (C-5).
 - **Under D-1 (a), DPY = N:** 20,000 / N per game day: 1 per tick at N = 20.
+- **Short heap:** remains at 2,500 per sy are about 1 per tick at DPY 1 (2,500 / 2,400), well inside `B_short` = 16.
 - **Per frame: zero.** Decay runs only in the core tick (historical domain), never from a render hook (A8).
-- **Event handlers** (exposure recomputation on `levels:strataChanged`, fluid wet/dry, `objects:changed`) cost one reverse lookup (R-10.2) and a reschedule of the affected members only.
+- **Event handlers** (exposure recomputation on `levels:strataChanged`, fluid wet/dry, `objects:changed`) cost one reverse lookup (R-10.2) and a rebase (R-01.2) of the affected members only.
 
 ### R-10.5 Save representation (D-3)
 
 | What | Saved form | Size |
 |---|---|---|
 | Maintained members | **not saved**: rebuilt at load from the structure's built strata by the deterministic grouping rule (R-02.2), ids assigned in canonical order | 0 |
-| Unmaintained members | `(memberId, ex, hp0, d0, shedPool)` plus runs | about 16 + 4 per run B |
-| Structures | `(id, siteId, stage, flags, litterStartDay)` | about 16 B |
-| Item decay fields | stored on the item record | 12 B per unattended item |
-| Remains | full record until merged | 28 B |
-| Residue | per chunk, present entries only: cell, mask, present values | 12-20 B per touched cell |
+| Unmaintained members | `(memberId, ex, t0, rem0, lifeYt, shedPool)` plus runs. `lifeYt` is saved, not re-derived, because it is the life in force since `t0`. Re-deriving it at load from the current modifiers would move the schedule whenever the climate or roots had changed since (A9) | about 28 + 4 per run B |
+| Structures | `(id, siteId, stage, flags, litterStartYt)` | about 20 B |
+| Item decay fields | stored on the item record | 20 B per unattended item |
+| Remains | full record until merged | 36 B |
+| Residue | per chunk, present entries only: cell, mask, present values, and the clock block of each weathering field | 12-20 B per touched cell, + 16 B per weathering field |
 | Heap, reverse index, reclaimable flags, exposure caches | **not saved**; rebuilt at load | 0 |
 | Strata that decay wrote (rubble, fines, ash, soil slices) | ordinary changed-cell records | 11 B each, 22 hex characters in today's format (`DEUS_Levels.js:997`, `:1351`) |
 
 - **Worked example.** A ruined 10×10 house with its halo touches 12 × 12 = 144 cells on 2 layers, at most 288 changed cells × 22 characters ≈ **6.3 KB** of strata save. Under the stale 1-ft model the same house spans the same cells and the record length is the same, because both models have 5 slices per layer.
-- **Scenario L save:** 45,000 unmaintained members × about 48 B ≈ 2.2 MB (the 105,000 members of maintained structures are rebuilt, not saved); items 200,000 × 12 B = 2.4 MB; remains 41,700 × 28 B ≈ 1.2 MB; residue 120,000 × 20 B = 2.4 MB; about 8.2 MB in total, before encoding overhead. Today's only save budget is a 3 MB check on the Levels part (`DEUS_Levels.js:5517`); the SIM.00.06 save format (ADR-003 §11) will need a decay line in its budget.
-- **Load:** rebuilding the heap is O(n log n) once; for about 290,000 entries that is about 5.2 million comparisons (not measured).
+- **Scenario L save:**
+  - members: 45,000 unmaintained × about (28 + 32) B ≈ 2.7 MB (the 105,000 members of maintained structures are rebuilt, not saved);
+  - items: 200,000 × 20 B = 4.0 MB;
+  - remains: 41,700 × 36 B ≈ 1.5 MB;
+  - residue: 120,000 × 20 B + 20,000 × 16 B ≈ 2.7 MB;
+  - **about 10.9 MB in total**, before encoding overhead. The first version gave 8.2 MB, before the clock fields. Today's only save budget is a 3 MB check on the Levels part (`DEUS_Levels.js:5517`); the SIM.00.06 save format (ADR-003 §11) will need a decay line in its budget.
+- **Load:** rebuilding the two heaps is O(n log n) once. Each entry's `dueYt` is recomputed from its saved clock (R-01.2). For about 290,000 entries that is about 5.2 million comparisons (not measured).
 
 ### R-10.6 Summary per mechanism
 
 | Mechanism | Reads / writes (sparse form) | Trigger | CPU class | Memory at 32 layers |
 |---|---|---|---|---|
-| Structure decay | member records; HP bytes at thresholds | heap due day (historical domain) | O(log n) per event | 72 B per member, 0 per layer |
+| Structure decay | member clocks; HP bytes at thresholds | long-heap due instant, drained at day boundaries (historical domain) | O(log n) per event | 72 B per member, 0 per layer |
 | Exposure | cached sky and wet aggregates; member `ex` | `levels:strataChanged`, fluid wet/dry, collapse event | O(members of ~5 structures) per event | 0 extra |
-| Maintenance and abandonment | site upkeep `k`, triage list | population or structure events | O(structures in site) per event | 12 B per site |
-| Shedding and litter | member shed pool; footprint litter schedule | heap | O(foot cells) per slice write | 4 B per member, 4 B per structure |
-| Items and remains | item fields; remains records | drop, death, heap | O(log n) per event | 20 B per unattended item; 36 B per remains |
-| Fire residue | residue entries | SIM.50.05 burnout | O(components) | 12-20 B per burned cell |
+| Maintenance and abandonment | site upkeep `k`, triage list | population or structure events | O(structures in site) per event | 16 B per site |
+| Shedding and litter | member shed pool; footprint litter schedule | heap | O(foot cells) per slice write | 4 B per member, 8 B per structure |
+| Items and remains | item clocks; remains clocks | drop, death; long heap (items), short heap every tick (remains, food) | O(log n) per event | 32 B per unattended item (20 + 12 heap); 48 B per remains (36 + 12) |
+| Fire residue | residue entries | SIM.50.05 burnout | O(components) | 12-20 B per burned cell, + 16 B per weathering field |
 | Reclamation | derived flag; Ecology's own records | stage and maintenance events | O(footprint cells) per stage | 0 saved |
 | Deep history | the same heaps | day jump | O(due events) | 0 extra |
 | Cohorts (L2 only) | cohort record | region coarse tick or day jump | O(classes × stages) per region | ≤ 10,880 B per region with such matter |
@@ -976,7 +1027,7 @@ This section answers R-11: automatable tests for SIM.40.05-.09 (and the interfac
 | AT-R-14 | SIM.50.09 | Re-founding on H1: ruin cells are claimable; only missing slices consume items; reused slices keep their mass and change `structureId` | ruin cells block building (`DEUS_Colonists.js:3733`); or the whole wall's materials are consumed again |
 | AT-R-15 | SIM.40.08 | LOD invariance (A7): L0 day stepping, L2 coarse ticks and one day jump give identical stages and ledger totals | summary rounding done in floating point, or cohort promotion without largest-remainder assignment |
 | AT-R-16 | SIM.40.08 | Aging FX-R-01 by 10,000 sy processes no more heap events than the oracle's count, and zero in maintained periods | an annual loop that evaluates every member every year (event counter far above the bound) |
-| AT-R-17 | SIM.40.09 | The long-run ledger test, FX-R-01 with A1-A9 | MR-01..MR-14 (section "Matter ledger long-run test") |
+| AT-R-17 | SIM.40.09 | The long-run ledger test, FX-R-01 with A1-A9 | MR-01..MR-16 (section "Matter ledger long-run test") |
 | AT-R-18 | SIM.40.05 | Sparse fixture: decay heap and record bytes identical at 9 and 32 layers; residue planes only in touched chunks | a per-layer dense residue plane: `heap(32) − heap(9)` above 64 KiB |
 | AT-R-19 | SIM.40.05 | Save at y1,000, reload, continue: identical checksums (A9); decay save bytes grow only with unmaintained members, unattended items, remains and touched cells | heap not rebuilt on load (MR-12) |
 | AT-R-20 | SIM.40.05 | D-1 neutrality: FX-R-01 at DPY = 1 and DPY = 20 gives identical stage **years** and ledger totals | one duration authored in days instead of sy |
