@@ -1,0 +1,313 @@
+{
+  "task": "SIM.40.01",
+  "baseCommit": "84ee3b55f3f8c1b8a16710ccf3878795d98d1683",
+  "document": "tasks/SIM.40.01/lane-q/SIM.40.01_STRUCTURAL_SUPPORT.md",
+  "requirements": [
+    {
+      "id": "Q-01",
+      "section": "## Material model",
+      "status": "COVERED",
+      "notes": "Sections 2.1-2.8: today's table cited (DEUS_Levels.js:994-1016), the property set, natural materials with kg per 2-ft voxel, SRD AC/HP link and spans; new loose materials (rubble, loose_fill, sediment, ash, ice, scrap, mineral_trace, broken_timber, dust; snow reserved) and assemblies with free ids 6-37; the exact loose record; input to PROPOSED-Q-01. DT values and most HP values are marked extrapolated (OQ-Q-10). Fix 1: one kg rounding rule (nearest integer, halves up, once) stated in section 2.3; timber_floor 121, timber_roof 139 and conjured_stone 389 kg per voxel now follow it; floating-ice capacity is the integer floor(7 h^2 / 2) with h = 61 cm per stratum (13,023 and 52,094 kg)."
+    },
+    {
+      "id": "Q-02",
+      "section": "## Buildings as strata",
+      "status": "COVERED",
+      "notes": "Sections 3.1-3.6: element-by-element table (walls, floors, roofs, doors, windows, stairs, ramps, columns, bridges, furniture, conjured walls), thickness in 2-ft slices, the build job writing strata through setStrata with the constructed flag (DEUS_Levels.js:1602), foundations as reusable strata (SET-4), save and object migration, catalogue slot names only (DEC-011, DEC-007)."
+    },
+    {
+      "id": "Q-03",
+      "section": "## Support model",
+      "status": "COVERED",
+      "notes": "Sections 4.1-4.6: members, bearing and lateral support to the world floor at zMin, span table derived from cantilever bending with S_MAX 12, load and capacity with HP bands, natural rock and ledges (V128), vertical propagation across -16..+15. The natural-rock bound is the design default while DEC-010 is OPEN (OQ-Q-01)."
+    },
+    {
+      "id": "Q-04",
+      "section": "## Localized support recheck",
+      "status": "COVERED",
+      "notes": "Sections 5.1-5.7: triggers (levels:strataChanged at DEUS_Levels.js:1558 and load events with band throttling), one FIFO queue with SUPPORT_BUDGET 256, local evaluation, lazy per-chunk records, worst-case bound table with arithmetic, determinism, area edges and LOD (proposes an amendment to PROPOSED ADR-003 section 16.5)."
+    },
+    {
+      "id": "Q-05",
+      "section": "## Sudden collapse",
+      "status": "COVERED",
+      "notes": "Sections 6.1-6.6: failing state and warnings, the cascade through layers, equal-mass conversion to loose debris, talus by angle of repose with a budget, SRD falling (1d6 per 10 ft) and Earthquake collapse (5d6, burial DC 20) as the damage baseline with an extrapolated addition (OQ-Q-08), and the recheck the rubble triggers. Fix 1: one fall-length rule (section 6.2 step 3): a unit's fall is dropTop = e1 - landing strata (the drop of the surface it stood on), so one layer is 10 ft and 1d6; dropGap = e0 - (landing + 1) is the debris's air gap and feeds only the debris addition; section 6.5, T10 and the collapse:impact payload use the same rule."
+    },
+    {
+      "id": "Q-06",
+      "section": "## Decay-driven collapse",
+      "status": "COVERED",
+      "notes": "Sections 7.1-7.6 state the Lane Q side of the contract with Lane R (C1-C9: HP-only writes through the strata writer, capacityThresholdsHP band crossings, Collapse.breakElement as the one HP-0 path, events back, mass, roofs before walls by the support rule, foundations, time domains), an abandoned-house walk-through ending as rubble, and the D-1 duration table. Lane R pushed its side (origin/task/lane-r 6613418f, R-05, unreviewed) before this design was finished; ownership agrees, and the naming differences are resolved in section 9.7 by adopting Lane R's names. Both sides are unreviewed."
+    },
+    {
+      "id": "Q-07",
+      "section": "## Blasts across layers",
+      "status": "COVERED",
+      "notes": "Sections 8.1-8.8: existing applyVolumeDamage cited with its gaps (SUP-5), the PROPOSED ADR-003 section 18.2 rule adopted with half-feet geometry (10-ft layers, 2-ft slices), the pass and resist tables per material and damage type (ADR Q18), SRD area versus physical remainder for units on both layers, worked numbers, breaching and debris, coupling to GP.07.02, DEC-022 and SIM.60 primitives, cost. Table values are extrapolated (OQ-Q-10)."
+    },
+    {
+      "id": "Q-08",
+      "section": "## Mass ledger",
+      "status": "PARTIAL",
+      "notes": "Sections 9.1-9.7: families, forms and units; ledger entries for 19 paths including build, dig, mine, quarry, collapse, blast, rubble clearing, salvage and conjured matter; how each LAND-1 leak closes with the mutant that catches it; conjured matter as a logged source/sink (DEC-018 PM default, not answered); checks; no ore creation (LIFE-002). PARTIAL because the ledger unit and family list are not reconciled across the sibling lanes: Lane Q uses kg, Lane R 1/16 lb, Lane W grams (section 9.7); raised in escalation.md for the PM. Fix 1: lava solidifies at 2 du (2,053 kg each) per basalt voxel of 4,106 kg, basalt's one kgPerVoxel; an odd last du becomes basalt-lineage loose rubble (section 9.1, section 9.2 row 18)."
+    },
+    {
+      "id": "Q-09",
+      "section": "## Sparse storage and cost",
+      "status": "COVERED",
+      "notes": "Sections 10.1-10.5: every structure with its sparse representation, size and whether it is saved; memory per building, region and layer at 32 layers with arithmetic; save size; CPU per tick with budgets and position in the tick; LOD regions and a batched deep-history ruin reduction. All figures are arithmetic, not measured."
+    },
+    {
+      "id": "Q-10",
+      "section": "## Hooks and events",
+      "status": "COVERED",
+      "notes": "Sections 11.1-11.3: 11 emitted events with payloads and in-tick order, APIs (Support.query, wouldSupport, digRisk, enqueue, Collapse.trigger, Volume.damage, Loose.*, Ledger.*), and per-consumer contracts for SIM.40.02, SIM.40.03, SIM.40.04, SIM.50.10, SIM.50.02 (D-4 dependency flagged), SIM.50.05, SIM.60, GP.07.02 and Lane W."
+    },
+    {
+      "id": "Q-11",
+      "section": "## Acceptance tests",
+      "status": "COVERED",
+      "notes": "Sections 12.1-12.3: 18 automatable tests (T1-T18) including the deterministic cave-in, towers across +1..+4 and +4..+15, blasts breaching one and two floors, exact ledger totals per path, zero full-world scans, each with at least one mutant that must fail, run at the 9-layer and 32-layer ranges; fixture list for SIM.40.04."
+    },
+    {
+      "id": "Q-12",
+      "section": "## WBS impact",
+      "status": "COVERED",
+      "notes": "Section 13: eight PROPOSED-Q packages with real dependency IDs and tests, the dependency changes the audit section 6 asks for, notes for the PM and ADR owner, and the rulings the design depends on (D-1 open, D-4 and D-6 flagged). Owner questions are in the '## Owner questions' section (OQ-Q-01..14) and in ownerQuestions below."
+    }
+  ],
+  "proposedPackages": [
+    {
+      "id": "PROPOSED-Q-01",
+      "title": "Material and structure model: property table as catalogue data, ids 6-37, loose record, object and item kg, compositions, load-time validator",
+      "deps": [
+        "WG.00.17",
+        "WG.65.15",
+        "SIM.00.01"
+      ],
+      "acceptanceTests": [
+        "Validator rejects a material missing any section 2.2 property; mutant: remove spanBase from one id, the validator must exit 1",
+        "Loose kg exact over 1,000 random deposits and takes; mutant: store loose mass as a 1/255 fill fraction, the exactness check must fail",
+        "T12 no ore: mutant rust -> iron ore row must fail"
+      ]
+    },
+    {
+      "id": "PROPOSED-Q-02",
+      "title": "Constructions as constructed strata (LAND-5, SUP-2, SET-4): build jobs write strata, balanced build masses, foundations and re-founding, save migration, removal of the isRoofed roof-deck side effect",
+      "deps": [
+        "PROPOSED-Q-01",
+        "WG.00.17",
+        "WG.65.15"
+      ],
+      "acceptanceTests": [
+        "T14 save migration; mutant: migration forgets the rubble object's mass",
+        "A built floor over a room is supported only through built walls; mutant: the build job places an object again, the floor must be reported unsupported",
+        "T5 build row: ledger balances; mutant: 1 kg leaked in the build transform"
+      ]
+    },
+    {
+      "id": "PROPOSED-Q-03",
+      "title": "Mass-conserving earthworks (LAND-1): mine, dig, quarry, dismantle, rubble clearing, salvage, spoil, rebuild from rubble",
+      "deps": [
+        "PROPOSED-Q-01",
+        "PROPOSED-Q-02",
+        "WG.65.15"
+      ],
+      "acceptanceTests": [
+        "T5 rows for mine, dig, quarry, dismantle, clearing, salvage, rebuild; mutants: mining yields 2 stone with no spoil; dig drops a free stone 1 in 4; rubble pick yields 2 stone; roof-deck side effect restored"
+      ]
+    },
+    {
+      "id": "PROPOSED-Q-04",
+      "title": "Support evaluation and localized recheck: members, records, queue, failing set, warnings, Support.query / wouldSupport / digRisk",
+      "deps": [
+        "PROPOSED-Q-01",
+        "PROPOSED-Q-02",
+        "SIM.00.02",
+        "SIM.00.05",
+        "WG.00.17"
+      ],
+      "acceptanceTests": [
+        "T1 deterministic cave-in; mutant: levels:strataChanged not enqueued",
+        "T6 zero full-world scans; mutant: per-tick sweep over all chunks",
+        "T7 local bound; mutant: S_MAX uncapped",
+        "T18 warning and rescue; mutant: failTick ignored"
+      ]
+    },
+    {
+      "id": "PROPOSED-Q-05",
+      "title": "Volume damage with attenuation: ADR-003 section 18 rule plus this design's pass/resist tables, breach order, SRD area versus remainder, ignition, debris",
+      "deps": [
+        "PROPOSED-Q-01",
+        "SIM.00.02",
+        "WG.00.17"
+      ],
+      "acceptanceTests": [
+        "T3 blast breaches one floor; mutant: attenuation removed (all passPm 1000)",
+        "T4 blast breaches two floors; mutants: breach order reversed; 1-ft stratum height",
+        "T13 SRD numbers unchanged (with SIM.60.04); mutant: physics adds damage to creatures inside the SRD area"
+      ]
+    },
+    {
+      "id": "PROPOSED-Q-06",
+      "title": "Stable terrain at generation: extend the floating-rock pass to spans",
+      "deps": [
+        "PROPOSED-Q-04",
+        "WG.00.17",
+        "WG.00.08"
+      ],
+      "acceptanceTests": [
+        "T8 a fresh world has zero failing members at both ranges; mutant: the stability pass skipped"
+      ]
+    },
+    {
+      "id": "PROPOSED-Q-07",
+      "title": "Falls, impacts and burial for units and objects (V95, SUP-4)",
+      "deps": [
+        "PROPOSED-Q-04",
+        "SIM.00.04",
+        "WG.00.17"
+      ],
+      "acceptanceTests": [
+        "T10 falls and burial: units on one-stratum floors at S0 of +1, +2 and +3 fall dropTop = 5, 10, 15 strata (10, 20, 30 ft) and take 1d6, 2d6, 3d6; mutants: the unit's fall measured as the air gap dropGap (0, 1, 2 dice); 1-ft stratum height (0, 1, 1 dice); burial not applied"
+      ]
+    },
+    {
+      "id": "PROPOSED-Q-08",
+      "title": "Support observability (AGENTS.md Rule 14): UF_Look and UF_Sheet explain why a member is supported or failing",
+      "deps": [
+        "PROPOSED-Q-04"
+      ],
+      "acceptanceTests": [
+        "Support.query matches a fresh evaluation after every mutation in the T1 fixture; mutant: a stale record kept after a dig"
+      ]
+    }
+  ],
+  "ownerQuestions": [
+    {
+      "id": "OQ-Q-01",
+      "question": "DEC-010 is OPEN: how far may natural rock reach sideways from a support?",
+      "options": [
+        "(a) recommended: bounded by the material and thickness span table, keeping rechecks local (V133)",
+        "(b) unbounded lateral connectivity as the generator does, which needs a whole-area connectivity search after every dig",
+        "(c) DEC-010 option 2: full vertical support, no overhangs"
+      ]
+    },
+    {
+      "id": "OQ-Q-02",
+      "question": "How strong should materials be?",
+      "options": [
+        "(a) recommended: the physically derived table",
+        "(b) the same table with every span doubled",
+        "(c) one span per material class (rock, soil, timber, masonry)"
+      ]
+    },
+    {
+      "id": "OQ-Q-03",
+      "question": "How realistic should constructed spans be (proposed: timber floors and roofs clear 20 ft, stone vaults 30 ft, bridge piers every 20 ft)?",
+      "options": [
+        "(a) recommended: as proposed",
+        "(b) more generous (timber 30 ft, vaults 50 ft)",
+        "(c) stricter (timber 15 ft)"
+      ]
+    },
+    {
+      "id": "OQ-Q-04",
+      "question": "Does furniture carry load?",
+      "options": [
+        "(a) recommended: furniture is load only, never support",
+        "(b) heavy furniture can prop a ceiling like a post",
+        "(c) furniture is neither load nor support"
+      ]
+    },
+    {
+      "id": "OQ-Q-05",
+      "question": "Do units' weights load floors?",
+      "options": [
+        "(a) recommended: no, except Huge and Gargantuan creatures",
+        "(b) every unit is load",
+        "(c) no unit is load"
+      ]
+    },
+    {
+      "id": "OQ-Q-06",
+      "question": "Item masses and build costs, given that a 5-ft masonry wall cell weighs about 3.9 t with exact mass",
+      "options": [
+        "(a) realistic masses: more, heavier building items",
+        "(b) abstract load units: today's item counts, with item kg set so each recipe balances exactly",
+        "(c) a middle scale"
+      ]
+    },
+    {
+      "id": "OQ-Q-07",
+      "question": "Where does mining spoil go (a mined voxel's mass beyond the stone items)?",
+      "options": [
+        "(a) left as loose rubble at the work cell, to be hauled",
+        "(b) moved to a designated spoil heap as part of the job",
+        "(c) all of it yields as items"
+      ]
+    },
+    {
+      "id": "OQ-Q-08",
+      "question": "Collapse damage to creatures",
+      "options": [
+        "(a) recommended: SRD Earthquake numbers (Dex save, 5d6, burial DC 20) plus +1d6 per further 10 ft the debris fell (dropGap), cap 20d6",
+        "(b) the SRD numbers alone",
+        "(c) damage scaled only by debris mass and height"
+      ]
+    },
+    {
+      "id": "OQ-Q-09",
+      "question": "Warning before a structure falls",
+      "options": [
+        "(a) recommended: short creaks by material (timber 20 ticks, masonry 5, rock 0-10), none after a blast",
+        "(b) no warning ever",
+        "(c) long warnings (several game hours)"
+      ]
+    },
+    {
+      "id": "OQ-Q-10",
+      "question": "Blast feel: damage thresholds (SRD gives the rule, no numbers), the pass table, and whether 'spreads around corners' spells spread physical energy around corners",
+      "options": [
+        "(a) recommended: the proposed tables with around-corners propagation where the SRD text says so",
+        "(b) the same tables, straight lines only (ADR-003 rule)",
+        "(c) tune both on the SIM.60.04 fixtures with the Owner"
+      ]
+    },
+    {
+      "id": "OQ-Q-11",
+      "question": "Roof decks that old saves got for free (DEUS_Floors.js:276)",
+      "options": [
+        "(a) keep them with a logged one-time migration source",
+        "(b) remove them on load",
+        "(c) convert them to items on the floor below"
+      ]
+    },
+    {
+      "id": "OQ-Q-12",
+      "question": "Soil cannot span without depth: a soil tunnel with less than 20 ft of cover falls in unless propped",
+      "options": [
+        "(a) accept: props become a real mining task (SIM.40.03)",
+        "(b) give soil a 1-cell span at any thickness",
+        "(c) soil tunnels never fall"
+      ]
+    },
+    {
+      "id": "OQ-Q-13",
+      "question": "Generated terrain that exceeds the spans",
+      "options": [
+        "(a) the generator adds natural pillars",
+        "(b) the generator thins or removes the overhang",
+        "(c) generated terrain is exempt until something nearby changes"
+      ]
+    },
+    {
+      "id": "OQ-Q-14",
+      "question": "Walls fill a whole 5-ft cell, with thin walls expressed by their mass",
+      "options": [
+        "(a) recommended: whole cells, as wall objects block a cell today",
+        "(b) walls on the edges between cells, a new geometry and a much larger change"
+      ]
+    }
+  ]
+}
