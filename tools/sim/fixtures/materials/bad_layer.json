@@ -1,0 +1,10 @@
+{
+  "expect": "E_LAYER_COUNT",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.geometry.layerCount",
+      "value": 32
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "expect": "E_BOM",
+  "steps": [
+    {
+      "op": "set",
+      "path": "masses.objects.wall_stone.massMu",
+      "value": 1
+    }
+  ]
+}

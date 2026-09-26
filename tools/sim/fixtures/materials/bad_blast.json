@@ -1,0 +1,10 @@
+{
+  "expect": "E_BLAST_GROUP",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=granite].blastGroup",
+      "value": "nope"
+    }
+  ]
+}

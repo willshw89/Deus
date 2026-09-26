@@ -1,0 +1,6379 @@
+{
+  "schema": 1,
+  "mu": {
+    "id": "MU_SIZE",
+    "proposal": "1 mu = 1 g",
+    "proposalMuPerKg": 1000,
+    "confirmed": false,
+    "status": "PM_DEFAULT_UNCONFIRMED"
+  },
+  "geometry": {
+    "squareFt": 5,
+    "sliceFt": 2,
+    "layerFt": 10,
+    "slicesPerLayer": 5,
+    "footMilliMetre": 3048,
+    "rounding": "Nearest integer kilogram, halves up, of density times 50 ft^3. mu = that kilogram times proposalMuPerKg. A derived row rounds once from the parent's integer kilogram.",
+    "legacyHalfSlice": {
+      "rule": "A legacy save's stratum is half the height of one slice of the same square. Its mu is massPerSlice divided by 2. An odd mu gives the extra 1 to the upper half. This package does not migrate saves.",
+      "implemented": false,
+      "status": "PM_DEFAULT"
+    }
+  },
+  "calendar": {
+    "status": "OWNER_OPEN",
+    "ref": "D-1"
+  },
+  "exemption": {
+    "id": "DEC-028.3",
+    "text": "Items stored within active, claimed, or enclosed structures are exempt from reclamation.",
+    "implemented": false,
+    "appliedBy": "consumers",
+    "status": "SOURCED",
+    "source": "docs/OWNER_DECISIONS.md DEC-028"
+  },
+  "disagreements": [
+    {
+      "id": "D-MU-UNIT",
+      "status": "PM_DEFAULT_UNCONFIRMED",
+      "text": "Lane Q uses integer kilograms, Lane R assumes 1 mu = 1/16 lb, Lane W uses grams, and the ledger leaves mu unset. This catalogue proposes 1 mu = 1 g (1000 mu per kg) so the Lane Q integers and the catalogue weight field both land on integers. The proposal is not confirmed."
+    },
+    {
+      "id": "D-SOIL-SPLIT",
+      "text": "Lane Q §9.1 splits soil 950 mineral / 50 organic. The ledger keeps soil mineral and humus organic so a transform never crosses families. The split is stored and not applied."
+    },
+    {
+      "id": "D-FIRE-SINK",
+      "text": "Lane R sends combustion gas to an AIR sink. The ledger has no such sink and keeps ash plus charcoal. The gas fraction is retained as charcoal. Lane R fractions are stored with applied:false."
+    },
+    {
+      "id": "D-RECLAIM-ORGANIC",
+      "text": "DEC-028 sends wood, organics, corpses and bone to soil. The ledger rot and litter rows end at humus, not soil. Both are recorded. The applied ledger class is humus."
+    },
+    {
+      "id": "D-RECLAIM-RUBBLE",
+      "text": "DEC-028 says stone and masonry rubble become solid stone. The ledger has no rubble-to-stone row. The applied path is weather to sediment, then lithify to stone."
+    },
+    {
+      "id": "D-NOBLE",
+      "text": "DEC-028 allows metals to become rust, scrap or trace. Lane R NOBLE never corrodes, and the ledger has no gold or platinum trace class. Noble metal reclaims as scrap of the same class."
+    },
+    {
+      "id": "D-TIN",
+      "text": "The catalogue has tin and bronze. The ledger has no sn family. Tin mass is unmapped. Bronze's 880/1000 copper share is cu_metal; the 120/1000 tin share is unmapped. The 88/12 split is Lane Q's example, a PM default."
+    },
+    {
+      "id": "D-BONE",
+      "text": "The ledger has no bone class (LEDGER_API.md §10). Bone is booked as biomass and rots to humus."
+    },
+    {
+      "id": "D-ASH-MASS",
+      "text": "Lane Q ash is 850 kg per slice (0.6 t/m3). Lane R's 40 lb/ft3 is a different slice mass. The Lane Q integer is the one used."
+    },
+    {
+      "id": "D-CHARCOAL-MASS",
+      "text": "Lane Q gives no charcoal slice mass. Lane R's 15 lb/ft3 is converted by the kilogram rounding rule to 340 kg."
+    },
+    {
+      "id": "D-WATER-SLICE",
+      "text": "7 du per 10-ft layer does not divide by 5 slices. Per-slice water is null."
+    },
+    {
+      "id": "D-SALVAGE-RATE",
+      "text": "DEUS_ResourceRegistry.json salvageRecoveryRates.masonry_structures is 0.8. Lane Q cites a 75 percent return. Neither fraction is applied. Salvage returns the whole mass; nothing is deleted."
+    },
+    {
+      "id": "D-OBJECT-VOXEL",
+      "text": "Catalogue object masses are the build bill or the conserving yield. They are not a count of Lane Q voxels. SIM.40.11 has to reconcile the two."
+    },
+    {
+      "id": "D-CATALOG-YIELD",
+      "text": "Several catalogue actions do not conserve mass (wall quarry that also leaves rubble, door dismantle that returns half, chop that drops hardware or fruit). Those counts are recorded and not applied."
+    },
+    {
+      "id": "D-GOLD-NUGGET",
+      "text": "gold_outcrop yields the gold item, which is booked as au_metal. The outcrop's mass is au_ore. The applied path is mine then smelt, equal mu, no new metal."
+    },
+    {
+      "id": "D-RUBBLE-OBJECT",
+      "text": "The rubble and rubble_pillar props yield stone in the catalogue. The applied yield stays class rubble (ledger pick)."
+    },
+    {
+      "id": "D-GRAVEL-OBJECT",
+      "text": "The gravel prop's only yield is one stone item, so the prop is booked as stone. The strata material gravel is class rubble."
+    },
+    {
+      "id": "D-CLAY-ACTIONS",
+      "text": "clay_deposit gather yields 2 clay and quarry yields 3, and both remove the prop. The quarry count is the applied mass."
+    },
+    {
+      "id": "D-CAMPFIRE-RUIN",
+      "text": "The catalogue ruin of campfire is bones_pile. That is not applied. Collapse follows the log and stone bill."
+    },
+    {
+      "id": "D-TIMBER-INFILL",
+      "text": "timber_frame is described as organic plus mineral infill. The published kilogram figure is 0.12 of the species only. No infill mass is invented."
+    },
+    {
+      "id": "D-WOOD-COLLAPSE",
+      "text": "Lane Q debris of timber is broken_timber in place. The ledger has no wood object-to-strata row. Collapse is booked as salvage to a wood item of equal mass, named broken_timber."
+    },
+    {
+      "id": "D-SCRAP-FORM",
+      "text": "Metal classes have no strata form. Loose scrap is booked as the metal item form."
+    },
+    {
+      "id": "D-TREE-CLASS",
+      "text": "LEDGER_API.md §9.2 calls trees biomass objects. Lane Q's trunk is wood, and the chop yield is wood. Trees are booked as wood. The hook text is not applied."
+    },
+    {
+      "id": "D-GLASS",
+      "text": "Lane R names glass, ceramic, lead and special metals. The ledger has no class for them. They are not given a stand-in class. Glass and ceramic decay lives are recorded only as class keys with no mass."
+    },
+    {
+      "id": "D-SNOW",
+      "text": "Snow is reserved. Class water has no snow form, so no ledger class is assigned."
+    },
+    {
+      "id": "D-ICE-BULK",
+      "text": "Loose ice bulk is 607 kg, which is 0.6 of the 1,011 kg slice. A broken slice still deposits 1,011 kg."
+    }
+  ],
+  "decayClasses": {
+    "ASHLAR": {
+      "unit": "milliYear",
+      "status": "PM_DEFAULT",
+      "SEALED": {
+        "infinite": true
+      },
+      "SHELTERED": 20000000,
+      "SKY": 3000000,
+      "WET": 1500000,
+      "BURIED_AER": {
+        "infinite": true
+      },
+      "BURIED_ANOX": {
+        "infinite": true
+      },
+      "CAVE": 20000000
+    },
+    "RUBBLESTONE": {
+      "unit": "milliYear",
+      "status": "PM_DEFAULT",
+      "SEALED": 3000000,
+      "SHELTERED": 1500000,
+      "SKY": 400000,
+      "WET": 200000,
+      "BURIED_AER": {
+        "infinite": true
+      },
+      "BURIED_ANOX": {
+        "infinite": true
+      },
+      "CAVE": 3000000
+    },
+    "BRICK": {
+      "unit": "milliYear",
+      "status": "PM_DEFAULT",
+      "SEALED": 5000000,
+      "SHELTERED": 2500000,
+      "SKY": 800000,
+      "WET": 300000,
+      "BURIED_AER": {
+        "infinite": true
+      },
+      "BURIED_ANOX": {
+        "infinite": true
+      },
+      "CAVE": 5000000
+    },
+    "MUDBRICK": {
+      "unit": "milliYear",
+      "status": "PM_DEFAULT",
+      "SEALED": 1000000,
+      "SHELTERED": 400000,
+      "SKY": 60000,
+      "WET": 15000,
+      "BURIED_AER": {
+        "infinite": true
+      },
+      "BURIED_ANOX": {
+        "infinite": true
+      },
+      "CAVE": 800000
+    },
+    "TIMBER": {
+      "unit": "milliYear",
+      "status": "PM_DEFAULT",
+      "SEALED": 400000,
+      "SHELTERED": 150000,
+      "SKY": 60000,
+      "WET": 25000,
+      "BURIED_AER": 40000,
+      "BURIED_ANOX": 2000000,
+      "CAVE": 50000
+    },
+    "LIGHTWOOD": {
+      "unit": "milliYear",
+      "status": "PM_DEFAULT",
+      "SEALED": 150000,
+      "SHELTERED": 60000,
+      "SKY": 25000,
+      "WET": 10000,
+      "BURIED_AER": 15000,
+      "BURIED_ANOX": 500000,
+      "CAVE": 20000
+    },
+    "THATCH": {
+      "unit": "milliYear",
+      "status": "PM_DEFAULT",
+      "SEALED": 60000,
+      "SHELTERED": 30000,
+      "SKY": 12000,
+      "WET": 5000,
+      "BURIED_AER": 8000,
+      "BURIED_ANOX": 200000,
+      "CAVE": 10000
+    },
+    "TEXTILE": {
+      "unit": "milliYear",
+      "status": "PM_DEFAULT",
+      "SEALED": 200000,
+      "SHELTERED": 30000,
+      "SKY": 3000,
+      "WET": 1000,
+      "BURIED_AER": 10000,
+      "BURIED_ANOX": 1000000,
+      "CAVE": 5000
+    },
+    "FLESH": {
+      "unit": "milliYear",
+      "status": "PM_DEFAULT",
+      "SEALED": 1000,
+      "SHELTERED": 500,
+      "SKY": 100,
+      "WET": 50,
+      "BURIED_AER": 500,
+      "BURIED_ANOX": 50000,
+      "CAVE": 200
+    },
+    "BONE": {
+      "note": "Uses the skeletal row of SIM.40.05 R-03.4, in milli-years.",
+      "freshToSkeletalMilli": {
+        "SKY": 250,
+        "SHELTERED": 500,
+        "BURIED_AER": 5000,
+        "BURIED_ANOX": 1000000,
+        "CAVE": 1000
+      },
+      "skeletalToSoilMilli": {
+        "SKY": 50000,
+        "SHELTERED": 500000,
+        "BURIED_AER": 2000000,
+        "BURIED_ANOX": 10000000,
+        "CAVE": 20000000
+      },
+      "status": "PM_DEFAULT"
+    },
+    "FERROUS": {
+      "unit": "milliYear",
+      "status": "PM_DEFAULT",
+      "SEALED": 2000000,
+      "SHELTERED": 300000,
+      "SKY": 60000,
+      "WET": 25000,
+      "BURIED_AER": 150000,
+      "BURIED_ANOX": 3000000,
+      "CAVE": 400000
+    },
+    "CUPROUS": {
+      "unit": "milliYear",
+      "status": "PM_DEFAULT",
+      "SEALED": {
+        "infinite": true
+      },
+      "SHELTERED": 20000000,
+      "SKY": 5000000,
+      "WET": 1500000,
+      "BURIED_AER": 8000000,
+      "BURIED_ANOX": 30000000,
+      "CAVE": 20000000
+    },
+    "LEADTIN": {
+      "unit": "milliYear",
+      "status": "PM_DEFAULT",
+      "SEALED": {
+        "infinite": true
+      },
+      "SHELTERED": 10000000,
+      "SKY": 3000000,
+      "WET": 800000,
+      "BURIED_AER": 5000000,
+      "BURIED_ANOX": 20000000,
+      "CAVE": 10000000
+    },
+    "SILVER": {
+      "unit": "milliYear",
+      "status": "PM_DEFAULT",
+      "SEALED": {
+        "infinite": true
+      },
+      "SHELTERED": {
+        "infinite": true
+      },
+      "SKY": 30000000,
+      "WET": 10000000,
+      "BURIED_AER": 20000000,
+      "BURIED_ANOX": {
+        "infinite": true
+      },
+      "CAVE": {
+        "infinite": true
+      }
+    },
+    "NOBLE": {
+      "infinite": true,
+      "status": "PM_DEFAULT",
+      "note": "Never corrodes (SIM.40.05 R-03.6)."
+    },
+    "GLASS": {
+      "infinite": true,
+      "status": "PM_DEFAULT",
+      "note": "No ledger glass class. Not a material row. Reasoned gap D-GLASS."
+    },
+    "CERAMIC": {
+      "infinite": true,
+      "status": "PM_DEFAULT",
+      "note": "No ledger ceramic class. Reasoned gap."
+    },
+    "STONEITEM": {
+      "infinite": true,
+      "status": "PM_DEFAULT"
+    },
+    "FOOD": {
+      "unit": "milliYear",
+      "status": "PM_DEFAULT",
+      "SEALED": 1000,
+      "SHELTERED": 500,
+      "SKY": 100,
+      "WET": 50,
+      "BURIED_AER": 500,
+      "BURIED_ANOX": 50000,
+      "CAVE": 200
+    },
+    "statusNote": "Lives are milli-years of simulated time (design year x 1000). DPY and the tick rate are null (D-1 OWNER_OPEN). Infinity is infinite:true, not a chosen year."
+  },
+  "materials": [
+    {
+      "id": "air",
+      "strataId": 0,
+      "kind": "none",
+      "massless": true,
+      "massPerSlice": 0,
+      "kgPerSlice": 0,
+      "massStatus": "SOURCED",
+      "reason": "Air is not matter. Strata id 0 is the empty voxel.",
+      "blastGroup": "air",
+      "support": {
+        "spanBase": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "none",
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 6,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "granite",
+      "strataId": 32,
+      "kind": "natural",
+      "ledger": {
+        "class": "stone",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 2750,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4754 density 2.75",
+      "kgPerSlice": 3894,
+      "massPerSlice": 3894000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "spanBase": [
+          2,
+          3,
+          3,
+          4,
+          6,
+          9,
+          12
+        ],
+        "maxUnsupportedSpanSquares": 12,
+        "spans": true,
+        "ratedLoadKg": 77880,
+        "weightClass": "rock",
+        "srdAC": 17,
+        "maxHP": 255,
+        "dt": 10,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 0,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "weatherResistance",
+        "value": 95,
+        "status": "SOURCED",
+        "source": "DEUS_WorldCatalog.json:4754"
+      },
+      "blastGroup": "natural_rock",
+      "decay": {
+        "note": "Natural strata have no decay class (SIM.40.05 R-01.3).",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "quarry",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "stone",
+            "form": "item",
+            "item": "stone",
+            "count": 259,
+            "mu": 3885000
+          },
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 9000,
+            "lineage": "granite"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 3894000,
+            "lineage": "granite"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "solid stone",
+        "ledgerClass": "stone",
+        "ledgerForm": "strata",
+        "path": [
+          "break:stone->rubble",
+          "weather:rubble->sediment",
+          "lithify:sediment->stone"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-RUBBLE",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "basalt",
+      "strataId": 33,
+      "kind": "natural",
+      "ledger": {
+        "class": "stone",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 2900,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4773 density 2.9",
+      "kgPerSlice": 4106,
+      "massPerSlice": 4106000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "spanBase": [
+          2,
+          3,
+          3,
+          4,
+          6,
+          9,
+          12
+        ],
+        "maxUnsupportedSpanSquares": 12,
+        "spans": true,
+        "ratedLoadKg": 82120,
+        "weightClass": "rock",
+        "srdAC": 17,
+        "maxHP": 240,
+        "dt": 10,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 1,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "weatherResistance",
+        "value": 90,
+        "status": "SOURCED",
+        "source": "DEUS_WorldCatalog.json:4773"
+      },
+      "blastGroup": "natural_rock",
+      "decay": {
+        "note": "Natural strata have no decay class (SIM.40.05 R-01.3).",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "quarry",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "stone",
+            "form": "item",
+            "item": "stone",
+            "count": 273,
+            "mu": 4095000
+          },
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 11000,
+            "lineage": "basalt"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 4106000,
+            "lineage": "basalt"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "solid stone",
+        "ledgerClass": "stone",
+        "ledgerForm": "strata",
+        "path": [
+          "break:stone->rubble",
+          "weather:rubble->sediment",
+          "lithify:sediment->stone"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-RUBBLE",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "slate",
+      "strataId": 34,
+      "kind": "natural",
+      "ledger": {
+        "class": "stone",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 2650,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4791 density 2.65",
+      "kgPerSlice": 3752,
+      "massPerSlice": 3752000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "spanBase": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          8,
+          11
+        ],
+        "maxUnsupportedSpanSquares": 11,
+        "spans": true,
+        "ratedLoadKg": 75040,
+        "weightClass": "rock",
+        "srdAC": 17,
+        "maxHP": 210,
+        "dt": 10,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 0,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "weatherResistance",
+        "value": 90,
+        "status": "SOURCED",
+        "source": "DEUS_WorldCatalog.json:4791"
+      },
+      "blastGroup": "natural_rock",
+      "decay": {
+        "note": "Natural strata have no decay class (SIM.40.05 R-01.3).",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "quarry",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "stone",
+            "form": "item",
+            "item": "stone",
+            "count": 250,
+            "mu": 3750000
+          },
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 2000,
+            "lineage": "slate"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 3752000,
+            "lineage": "slate"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "solid stone",
+        "ledgerClass": "stone",
+        "ledgerForm": "strata",
+        "path": [
+          "break:stone->rubble",
+          "weather:rubble->sediment",
+          "lithify:sediment->stone"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-RUBBLE",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "marble",
+      "strataId": 35,
+      "kind": "natural",
+      "ledger": {
+        "class": "stone",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 2700,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4810 density 2.7",
+      "kgPerSlice": 3823,
+      "massPerSlice": 3823000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "spanBase": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          8,
+          11
+        ],
+        "maxUnsupportedSpanSquares": 11,
+        "spans": true,
+        "ratedLoadKg": 76460,
+        "weightClass": "rock",
+        "srdAC": 17,
+        "maxHP": 150,
+        "dt": 10,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 0,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "weatherResistance",
+        "value": 65,
+        "status": "SOURCED",
+        "source": "DEUS_WorldCatalog.json:4810"
+      },
+      "blastGroup": "natural_rock",
+      "decay": {
+        "note": "Natural strata have no decay class (SIM.40.05 R-01.3).",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "quarry",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "stone",
+            "form": "item",
+            "item": "stone",
+            "count": 254,
+            "mu": 3810000
+          },
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 13000,
+            "lineage": "marble"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 3823000,
+            "lineage": "marble"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "solid stone",
+        "ledgerClass": "stone",
+        "ledgerForm": "strata",
+        "path": [
+          "break:stone->rubble",
+          "weather:rubble->sediment",
+          "lithify:sediment->stone"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-RUBBLE",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "limestone",
+      "strataId": 36,
+      "kind": "natural",
+      "ledger": {
+        "class": "stone",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 2300,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4717 density 2.3",
+      "kgPerSlice": 3256,
+      "massPerSlice": 3256000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "spanBase": [
+          1,
+          2,
+          3,
+          3,
+          5,
+          7,
+          11
+        ],
+        "maxUnsupportedSpanSquares": 11,
+        "spans": true,
+        "ratedLoadKg": 65120,
+        "weightClass": "rock",
+        "srdAC": 17,
+        "maxHP": 120,
+        "dt": 10,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 2,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "weatherResistance",
+        "value": 50,
+        "status": "SOURCED",
+        "source": "DEUS_WorldCatalog.json:4717"
+      },
+      "blastGroup": "natural_rock",
+      "decay": {
+        "note": "Natural strata have no decay class (SIM.40.05 R-01.3).",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "quarry",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "stone",
+            "form": "item",
+            "item": "stone",
+            "count": 217,
+            "mu": 3255000
+          },
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 1000,
+            "lineage": "limestone"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 3256000,
+            "lineage": "limestone"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "solid stone",
+        "ledgerClass": "stone",
+        "ledgerForm": "strata",
+        "path": [
+          "break:stone->rubble",
+          "weather:rubble->sediment",
+          "lithify:sediment->stone"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-RUBBLE",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "sandstone",
+      "strataId": 37,
+      "kind": "natural",
+      "ledger": {
+        "class": "stone",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 2100,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4736 density 2.1",
+      "kgPerSlice": 2973,
+      "massPerSlice": 2973000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "spanBase": [
+          1,
+          2,
+          2,
+          3,
+          4,
+          6,
+          9
+        ],
+        "maxUnsupportedSpanSquares": 9,
+        "spans": true,
+        "ratedLoadKg": 59460,
+        "weightClass": "rock",
+        "srdAC": 17,
+        "maxHP": 105,
+        "dt": 10,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 3,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "weatherResistance",
+        "value": 45,
+        "status": "SOURCED",
+        "source": "DEUS_WorldCatalog.json:4736"
+      },
+      "blastGroup": "natural_rock",
+      "decay": {
+        "note": "Natural strata have no decay class (SIM.40.05 R-01.3).",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "quarry",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "stone",
+            "form": "item",
+            "item": "stone",
+            "count": 198,
+            "mu": 2970000
+          },
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 3000,
+            "lineage": "sandstone"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 2973000,
+            "lineage": "sandstone"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "solid stone",
+        "ledgerClass": "stone",
+        "ledgerForm": "strata",
+        "path": [
+          "break:stone->rubble",
+          "weather:rubble->sediment",
+          "lithify:sediment->stone"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-RUBBLE",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "stone",
+      "strataId": 1,
+      "kind": "natural",
+      "ledger": {
+        "class": "stone",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 2300,
+      "densityStatus": "SOURCED",
+      "densitySource": "Alias materials.aliases.stone = stones:limestone at DEUS_WorldCatalog.json:4969; limestone density :4717",
+      "kgPerSlice": 3256,
+      "massPerSlice": 3256000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "resolvesBy": "geologyAt",
+      "sameMassAs": "limestone",
+      "support": {
+        "spanBase": [
+          1,
+          2,
+          3,
+          3,
+          5,
+          7,
+          11
+        ],
+        "maxUnsupportedSpanSquares": 11,
+        "spans": true,
+        "ratedLoadKg": 65120,
+        "weightClass": "rock",
+        "srdAC": 17,
+        "maxHP": 120,
+        "dt": 10,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 2,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "weatherResistance",
+        "value": 50,
+        "status": "SOURCED",
+        "source": "limestone alias"
+      },
+      "blastGroup": "natural_rock",
+      "decay": {
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "quarry",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "stone",
+            "form": "item",
+            "item": "stone",
+            "count": 217,
+            "mu": 3255000
+          },
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 1000,
+            "lineage": "limestone"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 3256000,
+            "lineage": "limestone"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "solid stone",
+        "ledgerClass": "stone",
+        "ledgerForm": "strata",
+        "path": [
+          "break:stone->rubble",
+          "weather:rubble->sediment",
+          "lithify:sediment->stone"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-RUBBLE",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "soil",
+      "strataId": 2,
+      "kind": "natural",
+      "ledger": {
+        "class": "soil",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "laneQSplit": {
+        "mineralPerMille": 950,
+        "organicPerMille": 50,
+        "applied": false,
+        "disagreement": "D-SOIL-SPLIT"
+      },
+      "densityKgM3": 1600,
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "SIM.40.01 §2.3 extrapolated 1.6 t/m3; no catalogue density",
+      "kgPerSlice": 2265,
+      "massPerSlice": 2265000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 35000,
+        "spanBase": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          2
+        ],
+        "maxUnsupportedSpanSquares": 2,
+        "spans": true,
+        "ratedLoadKg": 4530,
+        "weightClass": "soil",
+        "srdAC": 10,
+        "maxHP": 40,
+        "dt": 0,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 3,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "none",
+        "note": "Erosion is SIM.50.03, not decay.",
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "soil",
+      "decay": {
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "dig",
+            "fromClass": "soil",
+            "fromForm": "strata",
+            "class": "soil",
+            "form": "item",
+            "mu": 2265000,
+            "note": "No soil item in the catalogue."
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "soil",
+            "fromForm": "strata",
+            "class": "soil",
+            "form": "strata",
+            "mu": 2265000,
+            "debrisMaterial": "loose_fill"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "soil",
+        "ledgerForm": "strata",
+        "path": [
+          "identity"
+        ],
+        "direct": true,
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "wood",
+      "strataId": 3,
+      "kind": "natural",
+      "catalogKey": "oak",
+      "ledger": {
+        "class": "wood",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 750,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4611 density 0.75",
+      "kgPerSlice": 1062,
+      "massPerSlice": 1062000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 40000,
+        "spanBase": [
+          1,
+          1,
+          2,
+          2,
+          3,
+          3,
+          3
+        ],
+        "maxUnsupportedSpanSquares": 3,
+        "spans": true,
+        "ratedLoadKg": 5310,
+        "weightClass": "wood",
+        "srdAC": 15,
+        "maxHP": 60,
+        "dt": 5,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 4,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 3,
+        "ignitePts": 5,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "rotResistance",
+        "value": 75,
+        "status": "SOURCED"
+      },
+      "blastGroup": "natural_wood",
+      "combustion": {
+        "laneR": {
+          "ashPerMille": 10,
+          "charPerMilleAtKappa0": 300,
+          "gasPerMille": 690,
+          "applied": false,
+          "status": "PM_DEFAULT"
+        },
+        "ledger": {
+          "ashPerMille": 10,
+          "charPerMille": 990,
+          "ashClass": "ash",
+          "charClass": "charcoal",
+          "applied": true
+        },
+        "disagreement": "D-FIRE-SINK",
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "note": "Natural trunk. Built timber uses TIMBER or LIGHTWOOD.",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "item": "log",
+            "count": 132,
+            "mu": 1056000
+          },
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "mu": 6000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "mu": 1062000,
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "rot:wood->humus"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "oak",
+      "kind": "natural",
+      "catalogKey": "oak",
+      "ledger": {
+        "class": "wood",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 750,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4611 density 0.75",
+      "kgPerSlice": 1062,
+      "massPerSlice": 1062000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 40000,
+        "spanBase": [
+          1,
+          1,
+          2,
+          2,
+          3,
+          3,
+          3
+        ],
+        "maxUnsupportedSpanSquares": 3,
+        "spans": true,
+        "ratedLoadKg": 5310,
+        "weightClass": "wood",
+        "srdAC": 15,
+        "maxHP": 60,
+        "dt": 5,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 4,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 3,
+        "ignitePts": 5,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "rotResistance",
+        "value": 75,
+        "status": "SOURCED"
+      },
+      "blastGroup": "natural_wood",
+      "combustion": {
+        "laneR": {
+          "ashPerMille": 10,
+          "charPerMilleAtKappa0": 300,
+          "gasPerMille": 690,
+          "applied": false,
+          "status": "PM_DEFAULT"
+        },
+        "ledger": {
+          "ashPerMille": 10,
+          "charPerMille": 990,
+          "ashClass": "ash",
+          "charClass": "charcoal",
+          "applied": true
+        },
+        "disagreement": "D-FIRE-SINK",
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "note": "Natural trunk. Built timber uses TIMBER or LIGHTWOOD.",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "item": "log",
+            "count": 132,
+            "mu": 1056000
+          },
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "mu": 6000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "mu": 1062000,
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "rot:wood->humus"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "pine",
+      "kind": "natural",
+      "catalogKey": "pine",
+      "ledger": {
+        "class": "wood",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 450,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4570 density 0.45",
+      "kgPerSlice": 637,
+      "massPerSlice": 637000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 40000,
+        "spanBase": [
+          1,
+          1,
+          2,
+          2,
+          3,
+          3,
+          3
+        ],
+        "maxUnsupportedSpanSquares": 3,
+        "spans": true,
+        "ratedLoadKg": 3185,
+        "weightClass": "wood",
+        "srdAC": 15,
+        "maxHP": 60,
+        "dt": 5,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 4,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 3,
+        "ignitePts": 5,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "rotResistance",
+        "value": 30,
+        "status": "SOURCED"
+      },
+      "blastGroup": "natural_wood",
+      "combustion": {
+        "laneR": {
+          "ashPerMille": 10,
+          "charPerMilleAtKappa0": 300,
+          "gasPerMille": 690,
+          "applied": false,
+          "status": "PM_DEFAULT"
+        },
+        "ledger": {
+          "ashPerMille": 10,
+          "charPerMille": 990,
+          "ashClass": "ash",
+          "charClass": "charcoal",
+          "applied": true
+        },
+        "disagreement": "D-FIRE-SINK",
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "note": "Natural trunk. Built timber uses TIMBER or LIGHTWOOD.",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "item": "log",
+            "count": 79,
+            "mu": 632000
+          },
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "mu": 5000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "mu": 637000,
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "rot:wood->humus"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "birch",
+      "kind": "natural",
+      "catalogKey": "birch",
+      "ledger": {
+        "class": "wood",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 650,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4589 density 0.65",
+      "kgPerSlice": 920,
+      "massPerSlice": 920000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 40000,
+        "spanBase": [
+          1,
+          1,
+          2,
+          2,
+          3,
+          3,
+          3
+        ],
+        "maxUnsupportedSpanSquares": 3,
+        "spans": true,
+        "ratedLoadKg": 4600,
+        "weightClass": "wood",
+        "srdAC": 15,
+        "maxHP": 60,
+        "dt": 5,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 4,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 3,
+        "ignitePts": 5,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "rotResistance",
+        "value": 35,
+        "status": "SOURCED"
+      },
+      "blastGroup": "natural_wood",
+      "combustion": {
+        "laneR": {
+          "ashPerMille": 10,
+          "charPerMilleAtKappa0": 300,
+          "gasPerMille": 690,
+          "applied": false,
+          "status": "PM_DEFAULT"
+        },
+        "ledger": {
+          "ashPerMille": 10,
+          "charPerMille": 990,
+          "ashClass": "ash",
+          "charClass": "charcoal",
+          "applied": true
+        },
+        "disagreement": "D-FIRE-SINK",
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "note": "Natural trunk. Built timber uses TIMBER or LIGHTWOOD.",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "item": "log",
+            "count": 115,
+            "mu": 920000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "mu": 920000,
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "rot:wood->humus"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "wood_ash",
+      "kind": "natural",
+      "catalogKey": "wood_ash",
+      "ledger": {
+        "class": "wood",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 680,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4633 density 0.68 (catalogue key woods.ash; renamed so it is not the ash residue)",
+      "kgPerSlice": 963,
+      "massPerSlice": 963000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 40000,
+        "spanBase": [
+          1,
+          1,
+          2,
+          2,
+          3,
+          3,
+          3
+        ],
+        "maxUnsupportedSpanSquares": 3,
+        "spans": true,
+        "ratedLoadKg": 4815,
+        "weightClass": "wood",
+        "srdAC": 15,
+        "maxHP": 60,
+        "dt": 5,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 4,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 3,
+        "ignitePts": 5,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "rotResistance",
+        "value": 40,
+        "status": "SOURCED"
+      },
+      "blastGroup": "natural_wood",
+      "combustion": {
+        "laneR": {
+          "ashPerMille": 10,
+          "charPerMilleAtKappa0": 300,
+          "gasPerMille": 690,
+          "applied": false,
+          "status": "PM_DEFAULT"
+        },
+        "ledger": {
+          "ashPerMille": 10,
+          "charPerMille": 990,
+          "ashClass": "ash",
+          "charClass": "charcoal",
+          "applied": true
+        },
+        "disagreement": "D-FIRE-SINK",
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "note": "Natural trunk. Built timber uses TIMBER or LIGHTWOOD.",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "item": "log",
+            "count": 120,
+            "mu": 960000
+          },
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "mu": 3000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "mu": 963000,
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "rot:wood->humus"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "willow",
+      "kind": "natural",
+      "catalogKey": "willow",
+      "ledger": {
+        "class": "wood",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 420,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4654 density 0.42",
+      "kgPerSlice": 595,
+      "massPerSlice": 595000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 40000,
+        "spanBase": [
+          1,
+          1,
+          2,
+          2,
+          3,
+          3,
+          3
+        ],
+        "maxUnsupportedSpanSquares": 3,
+        "spans": true,
+        "ratedLoadKg": 2975,
+        "weightClass": "wood",
+        "srdAC": 15,
+        "maxHP": 60,
+        "dt": 5,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 4,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 3,
+        "ignitePts": 5,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "rotResistance",
+        "value": 25,
+        "status": "SOURCED"
+      },
+      "blastGroup": "natural_wood",
+      "combustion": {
+        "laneR": {
+          "ashPerMille": 10,
+          "charPerMilleAtKappa0": 300,
+          "gasPerMille": 690,
+          "applied": false,
+          "status": "PM_DEFAULT"
+        },
+        "ledger": {
+          "ashPerMille": 10,
+          "charPerMille": 990,
+          "ashClass": "ash",
+          "charClass": "charcoal",
+          "applied": true
+        },
+        "disagreement": "D-FIRE-SINK",
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "note": "Natural trunk. Built timber uses TIMBER or LIGHTWOOD.",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "item": "log",
+            "count": 74,
+            "mu": 592000
+          },
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "mu": 3000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "mu": 595000,
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "rot:wood->humus"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "elm",
+      "kind": "natural",
+      "catalogKey": "elm",
+      "ledger": {
+        "class": "wood",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 600,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4675 density 0.60",
+      "kgPerSlice": 850,
+      "massPerSlice": 850000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 40000,
+        "spanBase": [
+          1,
+          1,
+          2,
+          2,
+          3,
+          3,
+          3
+        ],
+        "maxUnsupportedSpanSquares": 3,
+        "spans": true,
+        "ratedLoadKg": 4250,
+        "weightClass": "wood",
+        "srdAC": 15,
+        "maxHP": 60,
+        "dt": 5,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 4,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 3,
+        "ignitePts": 5,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "rotResistance",
+        "value": 50,
+        "status": "SOURCED"
+      },
+      "blastGroup": "natural_wood",
+      "combustion": {
+        "laneR": {
+          "ashPerMille": 10,
+          "charPerMilleAtKappa0": 300,
+          "gasPerMille": 690,
+          "applied": false,
+          "status": "PM_DEFAULT"
+        },
+        "ledger": {
+          "ashPerMille": 10,
+          "charPerMille": 990,
+          "ashClass": "ash",
+          "charClass": "charcoal",
+          "applied": true
+        },
+        "disagreement": "D-FIRE-SINK",
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "note": "Natural trunk. Built timber uses TIMBER or LIGHTWOOD.",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "item": "log",
+            "count": 106,
+            "mu": 848000
+          },
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "mu": 2000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "mu": 850000,
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "rot:wood->humus"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "yew",
+      "kind": "natural",
+      "catalogKey": "yew",
+      "ledger": {
+        "class": "wood",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 670,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4696 density 0.67",
+      "kgPerSlice": 949,
+      "massPerSlice": 949000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 40000,
+        "spanBase": [
+          1,
+          1,
+          2,
+          2,
+          3,
+          3,
+          3
+        ],
+        "maxUnsupportedSpanSquares": 3,
+        "spans": true,
+        "ratedLoadKg": 4745,
+        "weightClass": "wood",
+        "srdAC": 15,
+        "maxHP": 60,
+        "dt": 5,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 4,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 3,
+        "ignitePts": 5,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "rotResistance",
+        "value": 80,
+        "status": "SOURCED"
+      },
+      "blastGroup": "natural_wood",
+      "combustion": {
+        "laneR": {
+          "ashPerMille": 10,
+          "charPerMilleAtKappa0": 300,
+          "gasPerMille": 690,
+          "applied": false,
+          "status": "PM_DEFAULT"
+        },
+        "ledger": {
+          "ashPerMille": 10,
+          "charPerMille": 990,
+          "ashClass": "ash",
+          "charClass": "charcoal",
+          "applied": true
+        },
+        "disagreement": "D-FIRE-SINK",
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "note": "Natural trunk. Built timber uses TIMBER or LIGHTWOOD.",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "item": "log",
+            "count": 118,
+            "mu": 944000
+          },
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "mu": 5000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "mu": 949000,
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "rot:wood->humus"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "water",
+      "strataId": 4,
+      "kind": "natural",
+      "ledger": {
+        "class": "water",
+        "family": "water",
+        "unit": "du"
+      },
+      "ledgerForm": "fluid",
+      "massStatus": "OWNER_OPEN",
+      "reason": "A 10-ft layer is 7 du (DEUS_Fluid.js:50 DEPTH_MAX). 7 does not divide by 5 slices. No per-slice rounding is chosen.",
+      "layerDu": 7,
+      "layerDuStatus": "SOURCED",
+      "layerDuSource": "DEUS_Fluid.js:50",
+      "kgPerDu": 1011,
+      "muPerDu": 1011000,
+      "perDuStatus": "PM_DEFAULT",
+      "perDuSource": "SIM.40.01 §2.3 ice voxel holds 1 du at 1,011 kg",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "fluid",
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "water",
+      "decay": {
+        "status": "PM_DEFAULT"
+      },
+      "reclaim": {
+        "dec028": "water",
+        "ledgerClass": "water",
+        "ledgerForm": "fluid",
+        "path": [
+          "identity"
+        ],
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "lava",
+      "strataId": 5,
+      "kind": "natural",
+      "ledger": {
+        "class": "lava",
+        "family": "mineral",
+        "unit": "du"
+      },
+      "ledgerForm": "fluid",
+      "massStatus": "PM_DEFAULT",
+      "reason": "Lava is counted in du, not as a solid slice.",
+      "kgPerDu": 2053,
+      "muPerDu": 2053000,
+      "perDuStatus": "PM_DEFAULT",
+      "solidify": {
+        "duPerBasaltVoxel": 2,
+        "basaltId": "basalt",
+        "basaltKg": 4106,
+        "remainderRubbleKg": 2053,
+        "status": "PM_DEFAULT",
+        "source": "SIM.40.01 §9.1"
+      },
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "fluid",
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "ignitesNeighbours": true,
+      "blastGroup": "lava",
+      "decay": {
+        "status": "PM_DEFAULT"
+      },
+      "reclaim": {
+        "dec028": "solid stone",
+        "ledgerClass": "stone",
+        "ledgerForm": "strata",
+        "path": [
+          "solidify:lava->stone"
+        ],
+        "direct": true,
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "rubble",
+      "strataId": 6,
+      "kind": "loose",
+      "ledger": {
+        "class": "rubble",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "0.6 times the parent voxel, SIM.40.01 §2.4",
+      "kgPerSlice": 1954,
+      "massPerSlice": 1954000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "bulkKgByLineage": {
+        "granite": 2336,
+        "basalt": 2464,
+        "slate": 2251,
+        "marble": 2294,
+        "limestone": 1954,
+        "sandstone": 1784,
+        "stone": 1954
+      },
+      "bulkRule": "roundHalfUp(parentKg * 3 / 5)",
+      "support": {
+        "bearingKg": 30000,
+        "spanBase": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "loose",
+        "repose": 2,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 5,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "loose",
+      "decay": {
+        "outputClass": "sediment",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "pick",
+            "fromClass": "rubble",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "item",
+            "mu": 1954000,
+            "note": "No rubble item in the catalogue. The pick keeps class rubble."
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "rubble",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 1954000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "solid stone",
+        "ledgerClass": "stone",
+        "ledgerForm": "strata",
+        "path": [
+          "weather:rubble->sediment",
+          "lithify:sediment->stone"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-RUBBLE",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "loose_fill",
+      "strataId": 7,
+      "kind": "loose",
+      "ledger": {
+        "class": "soil",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 1350,
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "SIM.40.01 §2.4 1.35 t/m3",
+      "kgPerSlice": 1911,
+      "massPerSlice": 1911000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 20000,
+        "spanBase": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "loose",
+        "repose": 1,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 4,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "loose",
+      "decay": {
+        "outputClass": "soil",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "dig",
+            "fromClass": "soil",
+            "fromForm": "strata",
+            "class": "soil",
+            "form": "item",
+            "mu": 1911000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "soil",
+            "fromForm": "strata",
+            "class": "soil",
+            "form": "strata",
+            "mu": 1911000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "soil",
+        "ledgerForm": "strata",
+        "path": [
+          "identity"
+        ],
+        "direct": true,
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "sediment",
+      "strataId": 8,
+      "kind": "loose",
+      "ledger": {
+        "class": "sediment",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 1500,
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "SIM.40.01 §2.4 1.5 t/m3",
+      "kgPerSlice": 2124,
+      "massPerSlice": 2124000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 20000,
+        "spanBase": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "loose",
+        "repose": 1,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 3,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "loose",
+      "decay": {
+        "outputClass": "stone",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "notMined": true,
+        "reason": "Class sediment has no item form.",
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "sediment",
+            "fromForm": "strata",
+            "class": "sediment",
+            "form": "strata",
+            "mu": 2124000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "sediment",
+            "fromForm": "strata",
+            "class": "sediment",
+            "form": "strata",
+            "mu": 2124000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "solid stone",
+        "ledgerClass": "stone",
+        "ledgerForm": "strata",
+        "path": [
+          "lithify:sediment->stone"
+        ],
+        "direct": true,
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "ash",
+      "strataId": 9,
+      "kind": "loose",
+      "ledger": {
+        "class": "ash",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 600,
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "SIM.40.01 §2.4 0.6 t/m3. Lane R R-04.3 is a different figure (D-ASH-MASS).",
+      "kgPerSlice": 850,
+      "massPerSlice": 850000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "disagreement": "D-ASH-MASS",
+      "support": {
+        "bearingKg": 20000,
+        "spanBase": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "loose",
+        "repose": 1,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 3,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "ash",
+      "decay": {
+        "outputClass": "humus",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "notMined": true,
+        "reason": "No ledger row moves ash from strata to item.",
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "ash",
+            "fromForm": "strata",
+            "class": "ash",
+            "form": "strata",
+            "mu": 850000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "ash",
+            "fromForm": "strata",
+            "class": "ash",
+            "form": "strata",
+            "mu": 850000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "weather:ash->humus"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "ice",
+      "strataId": 10,
+      "kind": "natural",
+      "ledger": {
+        "class": "water",
+        "family": "water",
+        "unit": "du"
+      },
+      "ledgerForm": "ice",
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "Not the solid-ice 917 kg/m3. SIM.40.01 §2.3: one slice holds 1 du, 1,011 kg.",
+      "kgPerSlice": 1011,
+      "massPerSlice": 1011000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "duPerSlice": 1,
+      "solidIceKg": 1298,
+      "solidIceNote": "Cited and not used. The load is the 1 du figure.",
+      "support": {
+        "spanBase": [
+          2,
+          3,
+          3,
+          4,
+          6,
+          9,
+          12
+        ],
+        "maxUnsupportedSpanSquares": 12,
+        "spans": true,
+        "weightClass": "ice",
+        "srdAC": 13,
+        "maxHP": 15,
+        "dt": 0,
+        "floatCapacity": {
+          "formula": "floor(7 * hCm * hCm / 2)",
+          "hCmPerStratum": 61,
+          "status": "PM_DEFAULT",
+          "source": "SIM.40.01 §4.3"
+        },
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 0,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "ice",
+      "decay": {
+        "note": "Melting is SIM.50.06.",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "water",
+            "fromForm": "ice",
+            "class": "water",
+            "form": "ice",
+            "mu": 1011000,
+            "debrisMaterial": "ice"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "water",
+            "fromForm": "ice",
+            "class": "water",
+            "form": "ice",
+            "mu": 1011000,
+            "looseBulkKg": 607
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "water",
+        "ledgerClass": "water",
+        "ledgerForm": "fluid",
+        "path": [
+          "thaw:ice->fluid"
+        ],
+        "direct": true,
+        "status": "PM_DEFAULT"
+      },
+      "looseBulkKg": 607
+    },
+    {
+      "id": "iron",
+      "kind": "constructed",
+      "referenceVoxel": true,
+      "densityKgM3": 7870,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4888",
+      "kgPerSlice": 11143,
+      "massPerSlice": 11143000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledgerForm": "item",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "metal",
+        "srdAC": 19,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 0,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "dc": "FERROUS",
+        "outputClass": "fe_metal",
+        "outputForm": "item",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "notMined": true,
+        "reason": "Reference voxel of a metal, not a stratum.",
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "fe_metal",
+            "fromForm": "item",
+            "class": "fe_metal",
+            "form": "item",
+            "mu": 11143000
+          }
+        ]
+      },
+      "ledger": {
+        "class": "fe_metal",
+        "family": "fe",
+        "unit": "mu"
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "fe_metal",
+            "fromForm": "item",
+            "class": "fe_metal",
+            "form": "item",
+            "mu": 11143000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "trace",
+        "ledgerClass": "fe_trace",
+        "ledgerForm": "strata",
+        "path": [
+          "rust"
+        ],
+        "direct": true,
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "copper",
+      "kind": "constructed",
+      "referenceVoxel": true,
+      "densityKgM3": 8960,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4830",
+      "kgPerSlice": 12686,
+      "massPerSlice": 12686000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledgerForm": "item",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "metal",
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 0,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "dc": "CUPROUS",
+        "outputClass": "cu_metal",
+        "outputForm": "item",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "notMined": true,
+        "reason": "Reference voxel of a metal, not a stratum.",
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "cu_metal",
+            "fromForm": "item",
+            "class": "cu_metal",
+            "form": "item",
+            "mu": 12686000
+          }
+        ]
+      },
+      "ledger": {
+        "class": "cu_metal",
+        "family": "cu",
+        "unit": "mu"
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "cu_metal",
+            "fromForm": "item",
+            "class": "cu_metal",
+            "form": "item",
+            "mu": 12686000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "trace",
+        "ledgerClass": "cu_trace",
+        "ledgerForm": "strata",
+        "path": [
+          "rust"
+        ],
+        "direct": true,
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "silver",
+      "kind": "constructed",
+      "referenceVoxel": true,
+      "densityKgM3": 10490,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4928",
+      "kgPerSlice": 14852,
+      "massPerSlice": 14852000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledgerForm": "item",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "metal",
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 0,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "dc": "SILVER",
+        "outputClass": "ag_metal",
+        "outputForm": "item",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "notMined": true,
+        "reason": "Reference voxel of a metal, not a stratum.",
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "ag_metal",
+            "fromForm": "item",
+            "class": "ag_metal",
+            "form": "item",
+            "mu": 14852000
+          }
+        ]
+      },
+      "ledger": {
+        "class": "ag_metal",
+        "family": "ag",
+        "unit": "mu"
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "ag_metal",
+            "fromForm": "item",
+            "class": "ag_metal",
+            "form": "item",
+            "mu": 14852000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "trace",
+        "ledgerClass": "ag_trace",
+        "ledgerForm": "strata",
+        "path": [
+          "rust"
+        ],
+        "direct": true,
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "gold",
+      "kind": "constructed",
+      "referenceVoxel": true,
+      "densityKgM3": 19320,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4948",
+      "kgPerSlice": 27354,
+      "massPerSlice": 27354000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledgerForm": "item",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "metal",
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 0,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "dc": "NOBLE",
+        "outputClass": "au_metal",
+        "outputForm": "item",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "notMined": true,
+        "reason": "Reference voxel of a metal, not a stratum.",
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "au_metal",
+            "fromForm": "item",
+            "class": "au_metal",
+            "form": "item",
+            "mu": 27354000
+          }
+        ]
+      },
+      "ledger": {
+        "class": "au_metal",
+        "family": "au",
+        "unit": "mu"
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "au_metal",
+            "fromForm": "item",
+            "class": "au_metal",
+            "form": "item",
+            "mu": 27354000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "scrap",
+        "ledgerClass": "au_metal",
+        "ledgerForm": "item",
+        "path": [
+          "salvage"
+        ],
+        "direct": true,
+        "disagreement": "D-NOBLE",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "platinum",
+      "kind": "constructed",
+      "referenceVoxel": true,
+      "densityKgM3": 21450,
+      "densityStatus": "PLACEHOLDER",
+      "densitySource": "PLACEHOLDER 21.45 g/cm3, not in the catalogue",
+      "kgPerSlice": 30370,
+      "massPerSlice": 30370000,
+      "massStatus": "PLACEHOLDER",
+      "ledgerForm": "item",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "metal",
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 0,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "dc": "NOBLE",
+        "outputClass": "pt_metal",
+        "outputForm": "item",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "notMined": true,
+        "reason": "Reference voxel of a metal, not a stratum.",
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "pt_metal",
+            "fromForm": "item",
+            "class": "pt_metal",
+            "form": "item",
+            "mu": 30370000
+          }
+        ]
+      },
+      "ledger": {
+        "class": "pt_metal",
+        "family": "pt",
+        "unit": "mu"
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "pt_metal",
+            "fromForm": "item",
+            "class": "pt_metal",
+            "form": "item",
+            "mu": 30370000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "scrap",
+        "ledgerClass": "pt_metal",
+        "ledgerForm": "item",
+        "path": [
+          "salvage"
+        ],
+        "direct": true,
+        "disagreement": "D-NOBLE",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "steel",
+      "kind": "constructed",
+      "referenceVoxel": true,
+      "densityKgM3": 7850,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4908",
+      "kgPerSlice": 11114,
+      "massPerSlice": 11114000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledgerForm": "item",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "metal",
+        "srdAC": 19,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 0,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "dc": "FERROUS",
+        "outputClass": "steel",
+        "outputForm": "item",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "notMined": true,
+        "reason": "Reference voxel of a metal, not a stratum.",
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "steel",
+            "fromForm": "item",
+            "class": "steel",
+            "form": "item",
+            "mu": 11114000
+          }
+        ]
+      },
+      "ledger": {
+        "class": "steel",
+        "family": "fe",
+        "unit": "mu"
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "steel",
+            "fromForm": "item",
+            "class": "steel",
+            "form": "item",
+            "mu": 11114000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "trace",
+        "ledgerClass": "fe_trace",
+        "ledgerForm": "strata",
+        "path": [
+          "rust"
+        ],
+        "direct": true,
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "tin",
+      "kind": "constructed",
+      "referenceVoxel": true,
+      "densityKgM3": 7310,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4849",
+      "kgPerSlice": 10350,
+      "massPerSlice": 10350000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledgerForm": "item",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "metal",
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 0,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "dc": "LEADTIN",
+        "outputForm": "item",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "notMined": true,
+        "reason": "Reference voxel of a metal, not a stratum.",
+        "postings": [
+          {
+            "process": "identity",
+            "mu": 0,
+            "unmappedMu": 10350000
+          }
+        ]
+      },
+      "unmapped": {
+        "element": "sn",
+        "perMille": 1000,
+        "mu": 10350000,
+        "reason": "Ledger families have no sn (LEDGER_API.md §10).",
+        "disagreement": "D-TIN"
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "mu": 0,
+            "unmappedMu": 10350000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "scrap or trace",
+        "unmappedElement": "sn",
+        "path": [],
+        "disagreement": "D-TIN",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "bronze",
+      "kind": "constructed",
+      "referenceVoxel": true,
+      "densityKgM3": 8700,
+      "densityStatus": "SOURCED",
+      "densitySource": "DEUS_WorldCatalog.json:4868",
+      "kgPerSlice": 12318,
+      "massPerSlice": 12318000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledgerForm": "item",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "metal",
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 0,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "dc": "CUPROUS",
+        "outputClass": "cu_metal",
+        "outputForm": "item",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "notMined": true,
+        "reason": "Reference voxel of a metal, not a stratum.",
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "cu_metal",
+            "fromForm": "item",
+            "class": "cu_metal",
+            "form": "item",
+            "mu": 10839840,
+            "unmappedMu": 1478160
+          }
+        ]
+      },
+      "ledger": {
+        "class": "cu_metal",
+        "family": "cu",
+        "unit": "mu",
+        "mappedPerMille": 880
+      },
+      "laneQPerMille": {
+        "cu": 880,
+        "sn": 120,
+        "appliedToLedger": false,
+        "disagreement": "D-TIN"
+      },
+      "unmapped": {
+        "element": "sn",
+        "perMille": 120,
+        "mu": 1478160,
+        "reason": "Ledger families have no sn.",
+        "disagreement": "D-TIN"
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "cu_metal",
+            "fromForm": "item",
+            "class": "cu_metal",
+            "form": "item",
+            "mu": 10839840,
+            "unmappedMu": 1478160
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "trace",
+        "ledgerClass": "cu_trace",
+        "ledgerForm": "strata",
+        "mappedMu": 10839840,
+        "unmappedElement": "sn",
+        "unmappedMu": 1478160,
+        "path": [
+          "rust:cu_metal->cu_trace"
+        ],
+        "disagreement": "D-TIN",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "electrum",
+      "kind": "constructed",
+      "referenceVoxel": true,
+      "densityKgM3": 13597,
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "Harmonic mean of catalogue gold 19.32 and silver 10.49, 50/50 by mass",
+      "kgPerSlice": 19251,
+      "massPerSlice": 19251000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledgerForm": "item",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "metal",
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 0,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "dc": "NOBLE",
+        "outputClass": "electrum",
+        "outputForm": "item",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "notMined": true,
+        "reason": "Reference voxel of a metal, not a stratum.",
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "electrum",
+            "fromForm": "item",
+            "class": "electrum",
+            "form": "item",
+            "mu": 19251000
+          }
+        ]
+      },
+      "ledger": {
+        "class": "electrum",
+        "composition": {
+          "au": 1,
+          "ag": 1
+        },
+        "unit": "mu"
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "electrum",
+            "fromForm": "item",
+            "class": "electrum",
+            "form": "item",
+            "mu": 19251000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "scrap",
+        "ledgerClass": "electrum",
+        "ledgerForm": "item",
+        "path": [
+          "salvage"
+        ],
+        "direct": true,
+        "disagreement": "D-NOBLE",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "scrap",
+      "strataId": 11,
+      "kind": "loose",
+      "ledger": {
+        "class": "fe_metal",
+        "family": "fe",
+        "unit": "mu"
+      },
+      "ledgerForm": "item",
+      "disagreement": "D-SCRAP-FORM",
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "0.25 times the parent metal voxel, SIM.40.01 §2.4. Generic row is iron.",
+      "kgPerSlice": 2786,
+      "massPerSlice": 2786000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "bulkKgByLineage": {
+        "iron": 2786,
+        "copper": 3172,
+        "silver": 3713,
+        "gold": 6839,
+        "platinum": 7593,
+        "steel": 2779,
+        "tin": 2588,
+        "bronze": 3080,
+        "electrum": 4813
+      },
+      "bulkRule": "roundHalfUp(parentKg / 4)",
+      "support": {
+        "bearingKg": 30000,
+        "spanBase": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "loose",
+        "repose": 2,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 5,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "loose",
+      "decay": {
+        "dc": "FERROUS",
+        "outputClass": "fe_trace",
+        "outputForm": "strata",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "fe_metal",
+            "fromForm": "item",
+            "class": "fe_metal",
+            "form": "item",
+            "mu": 2786000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "fe_metal",
+            "fromForm": "item",
+            "class": "fe_metal",
+            "form": "item",
+            "mu": 2786000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "trace",
+        "ledgerClass": "fe_trace",
+        "ledgerForm": "strata",
+        "path": [
+          "rust:fe_metal->fe_trace"
+        ],
+        "classByElement": {
+          "iron": "fe_trace",
+          "copper": "cu_trace",
+          "silver": "ag_trace",
+          "steel": "fe_trace",
+          "gold": "au_metal",
+          "platinum": "pt_metal",
+          "electrum": "electrum"
+        },
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "mineral_trace",
+      "strataId": 12,
+      "kind": "loose",
+      "ledger": {
+        "class": "fe_trace",
+        "family": "fe",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "classByElement": {
+        "iron": "fe_trace",
+        "copper": "cu_trace",
+        "silver": "ag_trace",
+        "steel": "fe_trace"
+      },
+      "densityKgM3": 1800,
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "SIM.40.01 §2.4 1.8 t/m3",
+      "kgPerSlice": 2549,
+      "massPerSlice": 2549000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 20000,
+        "spanBase": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "trace",
+        "repose": 1,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 3,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "loose",
+      "decay": {
+        "note": "Trace stays trace. It is not a resource.",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "notMined": true,
+        "reason": "Trace classes have no item form and no mine row.",
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "fe_trace",
+            "fromForm": "strata",
+            "class": "fe_trace",
+            "form": "strata",
+            "mu": 2549000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "fe_trace",
+            "fromForm": "strata",
+            "class": "fe_trace",
+            "form": "strata",
+            "mu": 2549000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "trace",
+        "ledgerClass": "fe_trace",
+        "ledgerForm": "strata",
+        "path": [
+          "identity"
+        ],
+        "neverOre": true,
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "broken_timber",
+      "strataId": 13,
+      "kind": "loose",
+      "ledger": {
+        "class": "wood",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 250,
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "SIM.40.01 §2.4 0.25 t/m3",
+      "kgPerSlice": 354,
+      "massPerSlice": 354000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "spanBase": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "loose",
+        "repose": 2,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 5,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 4,
+        "ignitePts": 3,
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "broken_timber",
+      "combustion": {
+        "laneR": {
+          "ashPerMille": 10,
+          "charPerMilleAtKappa0": 300,
+          "gasPerMille": 690,
+          "applied": false,
+          "status": "PM_DEFAULT"
+        },
+        "ledger": {
+          "ashPerMille": 10,
+          "charPerMille": 990,
+          "ashClass": "ash",
+          "charClass": "charcoal",
+          "applied": true
+        },
+        "disagreement": "D-FIRE-SINK",
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "dc": "LIGHTWOOD",
+        "outputClass": "humus",
+        "outputForm": "strata",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "item": "log",
+            "count": 44,
+            "mu": 352000
+          },
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "mu": 2000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "chop",
+            "fromClass": "wood",
+            "fromForm": "strata",
+            "class": "wood",
+            "form": "item",
+            "mu": 354000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "rot:wood->humus"
+        ],
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "dust",
+      "strataId": 14,
+      "kind": "loose",
+      "ledger": {
+        "class": "sediment",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 1000,
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "SIM.40.01 §2.4 1.0 t/m3",
+      "kgPerSlice": 1416,
+      "massPerSlice": 1416000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 20000,
+        "spanBase": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "loose",
+        "repose": 1,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 4,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "loose",
+      "decay": {
+        "outputClass": "sediment",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "notMined": true,
+        "reason": "Dust is booked as sediment, which has no item form.",
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "sediment",
+            "fromForm": "strata",
+            "class": "sediment",
+            "form": "strata",
+            "mu": 1416000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "sediment",
+            "fromForm": "strata",
+            "class": "sediment",
+            "form": "strata",
+            "mu": 1416000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "solid stone",
+        "ledgerClass": "stone",
+        "ledgerForm": "strata",
+        "path": [
+          "lithify:sediment->stone"
+        ],
+        "disagreement": "D-RECLAIM-RUBBLE",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "snow",
+      "strataId": 15,
+      "kind": "loose",
+      "reserved": true,
+      "unmapped": {
+        "element": "snow",
+        "reason": "Class water has no snow form. Reserved for SIM.50.06.",
+        "disagreement": "D-SNOW"
+      },
+      "massStatus": "PLACEHOLDER",
+      "reason": "SIM.40.01 §2.4 id 15 is reserved for SIM.50.06.",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "reserved",
+        "status": "PLACEHOLDER"
+      },
+      "porosity": {
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "status": "PLACEHOLDER"
+      }
+    },
+    {
+      "id": "masonry",
+      "strataId": 16,
+      "kind": "constructed",
+      "ledger": {
+        "class": "stone",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "object",
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "0.30 x limestone kg, SIM.40.01 §2.5",
+      "kgPerSlice": 977,
+      "massPerSlice": 977000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 200000,
+        "spanAny": 1,
+        "maxUnsupportedSpanSquares": 1,
+        "spans": true,
+        "ratedLoadKg": 5000,
+        "weightClass": "masonry",
+        "srdAC": 17,
+        "maxHP": 54,
+        "dt": 10,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 2,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "weatherResistance",
+        "note": "Uses the stone's weatherResistance.",
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "masonry",
+      "decay": {
+        "dc": "RUBBLESTONE",
+        "outputClass": "rubble",
+        "outputForm": "strata",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "item": "stone",
+            "count": 65,
+            "mu": 975000
+          },
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 2000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 977000,
+            "debrisMaterial": "rubble"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "solid stone",
+        "ledgerClass": "stone",
+        "ledgerForm": "strata",
+        "path": [
+          "break:stone->rubble",
+          "weather:rubble->sediment",
+          "lithify:sediment->stone"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-RUBBLE",
+        "status": "PM_DEFAULT"
+      },
+      "bill": {
+        "lines": [
+          {
+            "material": "limestone",
+            "mu": 977000
+          }
+        ],
+        "totalMu": 977000
+      }
+    },
+    {
+      "id": "ashlar",
+      "strataId": 17,
+      "kind": "constructed",
+      "ledger": {
+        "class": "stone",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "object",
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "0.40 x marble kg (dressed stone 2.7)",
+      "kgPerSlice": 1529,
+      "massPerSlice": 1529000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "spanAny": 1,
+        "maxUnsupportedSpanSquares": 1,
+        "spans": true,
+        "ratedLoadKg": 8000,
+        "weightClass": "masonry",
+        "srdAC": 17,
+        "maxHP": 72,
+        "dt": 10,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 1,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "weatherResistance",
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "ashlar",
+      "decay": {
+        "dc": "ASHLAR",
+        "outputClass": "rubble",
+        "outputForm": "strata",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "item": "stone",
+            "count": 101,
+            "mu": 1515000
+          },
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 14000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 1529000,
+            "debrisMaterial": "rubble"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "solid stone",
+        "ledgerClass": "stone",
+        "ledgerForm": "strata",
+        "path": [
+          "break:stone->rubble",
+          "weather:rubble->sediment",
+          "lithify:sediment->stone"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-RUBBLE",
+        "status": "PM_DEFAULT"
+      },
+      "bill": {
+        "lines": [
+          {
+            "material": "marble",
+            "mu": 1529000
+          }
+        ],
+        "totalMu": 1529000
+      }
+    },
+    {
+      "id": "brick",
+      "strataId": 18,
+      "kind": "constructed",
+      "ledger": {
+        "class": "stone",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "object",
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "0.20 x brick density 1.9 t/m3 voxel",
+      "kgPerSlice": 538,
+      "massPerSlice": 538000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 150000,
+        "spanAny": 1,
+        "maxUnsupportedSpanSquares": 1,
+        "spans": true,
+        "ratedLoadKg": 3000,
+        "weightClass": "masonry",
+        "srdAC": 15,
+        "maxHP": 36,
+        "dt": 5,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 2,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "weatherResistance",
+        "value": 50,
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "masonry",
+      "decay": {
+        "dc": "BRICK",
+        "outputClass": "rubble",
+        "outputForm": "strata",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "item": "stone",
+            "count": 35,
+            "mu": 525000
+          },
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 13000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 538000,
+            "debrisMaterial": "rubble"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "solid stone",
+        "ledgerClass": "stone",
+        "ledgerForm": "strata",
+        "path": [
+          "break:stone->rubble",
+          "weather:rubble->sediment",
+          "lithify:sediment->stone"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-RUBBLE",
+        "status": "PM_DEFAULT"
+      },
+      "bill": {
+        "lines": [
+          {
+            "material": "brick",
+            "mu": 538000
+          }
+        ],
+        "totalMu": 538000
+      }
+    },
+    {
+      "id": "stone_vault",
+      "strataId": 19,
+      "kind": "constructed",
+      "ledger": {
+        "class": "stone",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "object",
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "0.35 x limestone",
+      "kgPerSlice": 1140,
+      "massPerSlice": 1140000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "spanAny": 3,
+        "maxUnsupportedSpanSquares": 3,
+        "spans": true,
+        "ratedLoadKg": 8000,
+        "weightClass": "masonry",
+        "srdAC": 17,
+        "maxHP": 63,
+        "dt": 10,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 1,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "weatherResistance",
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "ashlar",
+      "decay": {
+        "dc": "ASHLAR",
+        "outputClass": "rubble",
+        "outputForm": "strata",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "item": "stone",
+            "count": 76,
+            "mu": 1140000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 1140000,
+            "debrisMaterial": "rubble"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "solid stone",
+        "ledgerClass": "stone",
+        "ledgerForm": "strata",
+        "path": [
+          "break:stone->rubble",
+          "weather:rubble->sediment",
+          "lithify:sediment->stone"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-RUBBLE",
+        "status": "PM_DEFAULT"
+      },
+      "bill": {
+        "lines": [
+          {
+            "material": "limestone",
+            "mu": 1140000
+          }
+        ],
+        "totalMu": 1140000
+      }
+    },
+    {
+      "id": "foundation",
+      "strataId": 20,
+      "kind": "constructed",
+      "ledger": {
+        "class": "stone",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "object",
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "0.60 x limestone",
+      "kgPerSlice": 1954,
+      "massPerSlice": 1954000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "masonry",
+        "srdAC": 17,
+        "maxHP": 108,
+        "dt": 10,
+        "spreadFootingMultiplier": 4,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 1,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "buried",
+        "note": "Slowest mineral exposure.",
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "ashlar",
+      "decay": {
+        "outputClass": "rubble",
+        "outputForm": "strata",
+        "exposureDefault": "BURIED",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "item": "stone",
+            "count": 130,
+            "mu": 1950000
+          },
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 4000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 1954000,
+            "debrisMaterial": "rubble"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "solid stone",
+        "ledgerClass": "stone",
+        "ledgerForm": "strata",
+        "path": [
+          "break:stone->rubble",
+          "weather:rubble->sediment",
+          "lithify:sediment->stone"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-RUBBLE",
+        "status": "PM_DEFAULT"
+      },
+      "bill": {
+        "lines": [
+          {
+            "material": "limestone",
+            "mu": 1954000
+          }
+        ],
+        "totalMu": 1954000
+      }
+    },
+    {
+      "id": "rammed_earth",
+      "strataId": 21,
+      "kind": "constructed",
+      "ledger": {
+        "class": "soil",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "0.30 x compacted earth 1.9 t/m3",
+      "kgPerSlice": 807,
+      "massPerSlice": 807000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 60000,
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "soil",
+        "srdAC": 10,
+        "maxHP": 30,
+        "dt": 0,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 3,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "washes",
+        "note": "Fastest mineral class.",
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "masonry",
+      "decay": {
+        "dc": "MUDBRICK",
+        "outputClass": "soil",
+        "outputForm": "strata",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "dig",
+            "fromClass": "soil",
+            "fromForm": "strata",
+            "class": "soil",
+            "form": "item",
+            "mu": 807000,
+            "note": "Rammed earth is mineral earth. The ledger dig row is strata to item; the built voxel is still that mass of soil."
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "soil",
+            "fromForm": "strata",
+            "class": "soil",
+            "form": "strata",
+            "mu": 807000,
+            "debrisMaterial": "loose_fill"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "soil",
+        "ledgerForm": "strata",
+        "path": [
+          "identity"
+        ],
+        "status": "PM_DEFAULT"
+      },
+      "bill": {
+        "lines": [
+          {
+            "material": "soil",
+            "mu": 807000
+          }
+        ],
+        "totalMu": 807000
+      },
+      "disagreement": "D-SOIL-SPLIT"
+    },
+    {
+      "id": "timber_floor",
+      "strataId": 22,
+      "kind": "constructed",
+      "ledger": {
+        "class": "wood",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "object",
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "52 kg/m2 x 2.322576 m2",
+      "kgPerSlice": 121,
+      "massPerSlice": 121000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "spanAny": 2,
+        "maxUnsupportedSpanSquares": 2,
+        "spans": true,
+        "ratedLoadKg": 1000,
+        "weightClass": "timber",
+        "srdAC": 15,
+        "maxHP": 27,
+        "dt": 5,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 4,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 3,
+        "ignitePts": 5,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "rotResistance",
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "timber",
+      "combustion": {
+        "laneR": {
+          "ashPerMille": 10,
+          "charPerMilleAtKappa0": 250,
+          "gasPerMille": 740,
+          "applied": false,
+          "status": "PM_DEFAULT"
+        },
+        "ledger": {
+          "ashPerMille": 10,
+          "charPerMille": 990,
+          "ashClass": "ash",
+          "charClass": "charcoal",
+          "applied": true
+        },
+        "disagreement": "D-FIRE-SINK",
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "dc": "LIGHTWOOD",
+        "outputClass": "wood",
+        "outputForm": "item",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 121000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 121000,
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "rot:wood->humus"
+        ],
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      },
+      "bill": {
+        "lines": [
+          {
+            "material": "oak",
+            "mu": 121000
+          }
+        ],
+        "totalMu": 121000
+      },
+      "speciesScale": {
+        "oak": 121000,
+        "pine": 73000,
+        "birch": 105000,
+        "wood_ash": 110000,
+        "willow": 68000,
+        "elm": 97000,
+        "yew": 108000
+      }
+    },
+    {
+      "id": "timber_wall",
+      "strataId": 23,
+      "kind": "constructed",
+      "ledger": {
+        "class": "wood",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "object",
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "0.25 x oak",
+      "kgPerSlice": 266,
+      "massPerSlice": 266000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 40000,
+        "spanAny": 1,
+        "maxUnsupportedSpanSquares": 1,
+        "spans": true,
+        "ratedLoadKg": 1500,
+        "weightClass": "timber",
+        "srdAC": 15,
+        "maxHP": 27,
+        "dt": 5,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 3,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 3,
+        "ignitePts": 5,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "rotResistance",
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "timber",
+      "combustion": {
+        "laneR": {
+          "ashPerMille": 10,
+          "charPerMilleAtKappa0": 300,
+          "gasPerMille": 690,
+          "applied": false,
+          "status": "PM_DEFAULT"
+        },
+        "ledger": {
+          "ashPerMille": 10,
+          "charPerMille": 990,
+          "ashClass": "ash",
+          "charClass": "charcoal",
+          "applied": true
+        },
+        "disagreement": "D-FIRE-SINK",
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "dc": "TIMBER",
+        "outputClass": "wood",
+        "outputForm": "item",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 266000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 266000,
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "rot:wood->humus"
+        ],
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      },
+      "bill": {
+        "lines": [
+          {
+            "material": "oak",
+            "mu": 266000
+          }
+        ],
+        "totalMu": 266000
+      },
+      "speciesScale": {
+        "oak": 266000,
+        "pine": 160000,
+        "birch": 231000,
+        "wood_ash": 241000,
+        "willow": 149000,
+        "elm": 213000,
+        "yew": 238000
+      }
+    },
+    {
+      "id": "timber_frame",
+      "strataId": 24,
+      "kind": "constructed",
+      "ledger": {
+        "class": "wood",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "object",
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "0.12 x oak. Mineral infill is named and not given a mass (D-TIMBER-INFILL).",
+      "kgPerSlice": 127,
+      "massPerSlice": 127000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 15000,
+        "spanAny": 1,
+        "maxUnsupportedSpanSquares": 1,
+        "spans": true,
+        "ratedLoadKg": 800,
+        "weightClass": "timber",
+        "srdAC": 15,
+        "maxHP": 18,
+        "dt": 0,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 3,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 3,
+        "ignitePts": 5,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "rotResistance",
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "timber",
+      "combustion": {
+        "laneR": {
+          "ashPerMille": 10,
+          "charPerMilleAtKappa0": 300,
+          "gasPerMille": 690,
+          "applied": false,
+          "status": "PM_DEFAULT"
+        },
+        "ledger": {
+          "ashPerMille": 10,
+          "charPerMille": 990,
+          "ashClass": "ash",
+          "charClass": "charcoal",
+          "applied": true
+        },
+        "disagreement": "D-FIRE-SINK",
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "dc": "TIMBER",
+        "outputClass": "wood",
+        "outputForm": "item",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 127000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 127000,
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "rot:wood->humus"
+        ],
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      },
+      "bill": {
+        "lines": [
+          {
+            "material": "oak",
+            "mu": 127000
+          }
+        ],
+        "totalMu": 127000
+      },
+      "speciesScale": {
+        "oak": 127000,
+        "pine": 76000,
+        "birch": 110000,
+        "wood_ash": 115000,
+        "willow": 71000,
+        "elm": 102000,
+        "yew": 113000
+      },
+      "disagreement": "D-TIMBER-INFILL"
+    },
+    {
+      "id": "timber_post",
+      "strataId": 25,
+      "kind": "constructed",
+      "ledger": {
+        "class": "wood",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "object",
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "0.04 x oak",
+      "kgPerSlice": 42,
+      "massPerSlice": 42000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 20000,
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "timber",
+        "srdAC": 15,
+        "maxHP": 18,
+        "dt": 0,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 6,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 3,
+        "ignitePts": 5,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "rotResistance",
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "timber",
+      "combustion": {
+        "laneR": {
+          "ashPerMille": 10,
+          "charPerMilleAtKappa0": 300,
+          "gasPerMille": 690,
+          "applied": false,
+          "status": "PM_DEFAULT"
+        },
+        "ledger": {
+          "ashPerMille": 10,
+          "charPerMille": 990,
+          "ashClass": "ash",
+          "charClass": "charcoal",
+          "applied": true
+        },
+        "disagreement": "D-FIRE-SINK",
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "dc": "TIMBER",
+        "outputClass": "wood",
+        "outputForm": "item",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 42000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 42000,
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "rot:wood->humus"
+        ],
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      },
+      "bill": {
+        "lines": [
+          {
+            "material": "oak",
+            "mu": 42000
+          }
+        ],
+        "totalMu": 42000
+      },
+      "speciesScale": {
+        "oak": 42000,
+        "pine": 25000,
+        "birch": 36000,
+        "wood_ash": 38000,
+        "willow": 24000,
+        "elm": 34000,
+        "yew": 38000
+      }
+    },
+    {
+      "id": "timber_roof",
+      "strataId": 26,
+      "kind": "constructed",
+      "ledger": {
+        "class": "wood",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "object",
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "60 kg/m2",
+      "kgPerSlice": 139,
+      "massPerSlice": 139000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "spanAny": 2,
+        "maxUnsupportedSpanSquares": 2,
+        "spans": true,
+        "ratedLoadKg": 400,
+        "weightClass": "timber",
+        "srdAC": 15,
+        "maxHP": 18,
+        "dt": 0,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 3,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 3,
+        "ignitePts": 5,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "rotResistance",
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "timber",
+      "combustion": {
+        "laneR": {
+          "ashPerMille": 10,
+          "charPerMilleAtKappa0": 250,
+          "gasPerMille": 740,
+          "applied": false,
+          "status": "PM_DEFAULT"
+        },
+        "ledger": {
+          "ashPerMille": 10,
+          "charPerMille": 990,
+          "ashClass": "ash",
+          "charClass": "charcoal",
+          "applied": true
+        },
+        "disagreement": "D-FIRE-SINK",
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "dc": "LIGHTWOOD",
+        "outputClass": "wood",
+        "outputForm": "item",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 139000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 139000,
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "rot:wood->humus"
+        ],
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      },
+      "bill": {
+        "lines": [
+          {
+            "material": "oak",
+            "mu": 139000
+          }
+        ],
+        "totalMu": 139000
+      },
+      "speciesScale": {
+        "oak": 139000,
+        "pine": 83000,
+        "birch": 120000,
+        "wood_ash": 126000,
+        "willow": 78000,
+        "elm": 111000,
+        "yew": 124000
+      }
+    },
+    {
+      "id": "thatch_roof",
+      "strataId": 27,
+      "kind": "constructed",
+      "ledger": {
+        "class": "wood",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "object",
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "41 kg/m2",
+      "kgPerSlice": 95,
+      "massPerSlice": 95000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "spanAny": 2,
+        "maxUnsupportedSpanSquares": 2,
+        "spans": true,
+        "ratedLoadKg": 200,
+        "weightClass": "thatch",
+        "srdAC": 11,
+        "maxHP": 5,
+        "dt": 0,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 5,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 5,
+        "ignitePts": 1,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "rotResistance",
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "thatch",
+      "combustion": {
+        "laneR": {
+          "ashPerMille": 50,
+          "charPerMilleAtKappa0": 100,
+          "gasPerMille": 850,
+          "applied": false,
+          "status": "PM_DEFAULT"
+        },
+        "ledger": {
+          "ashPerMille": 50,
+          "charPerMille": 950,
+          "ashClass": "ash",
+          "charClass": "charcoal",
+          "applied": true
+        },
+        "disagreement": "D-FIRE-SINK",
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "dc": "THATCH",
+        "outputClass": "wood",
+        "outputForm": "item",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 95000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 95000,
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "rot:wood->humus"
+        ],
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      },
+      "bill": {
+        "lines": [
+          {
+            "material": "oak",
+            "mu": 95000
+          }
+        ],
+        "totalMu": 95000
+      }
+    },
+    {
+      "id": "bridge_deck",
+      "strataId": 28,
+      "kind": "constructed",
+      "ledger": {
+        "class": "wood",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "object",
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "0.14 x oak",
+      "kgPerSlice": 149,
+      "massPerSlice": 149000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "spanAny": 2,
+        "maxUnsupportedSpanSquares": 2,
+        "spans": true,
+        "ratedLoadKg": 3000,
+        "weightClass": "timber",
+        "srdAC": 15,
+        "maxHP": 27,
+        "dt": 5,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 5,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 3,
+        "ignitePts": 5,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "rotResistance",
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "timber",
+      "combustion": {
+        "laneR": {
+          "ashPerMille": 10,
+          "charPerMilleAtKappa0": 250,
+          "gasPerMille": 740,
+          "applied": false,
+          "status": "PM_DEFAULT"
+        },
+        "ledger": {
+          "ashPerMille": 10,
+          "charPerMille": 990,
+          "ashClass": "ash",
+          "charClass": "charcoal",
+          "applied": true
+        },
+        "disagreement": "D-FIRE-SINK",
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "dc": "LIGHTWOOD",
+        "outputClass": "wood",
+        "outputForm": "item",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 149000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 149000,
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "rot:wood->humus"
+        ],
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      },
+      "bill": {
+        "lines": [
+          {
+            "material": "oak",
+            "mu": 149000
+          }
+        ],
+        "totalMu": 149000
+      },
+      "speciesScale": {
+        "oak": 149000,
+        "pine": 89000,
+        "birch": 129000,
+        "wood_ash": 135000,
+        "willow": 83000,
+        "elm": 119000,
+        "yew": 133000
+      }
+    },
+    {
+      "id": "iron_grate",
+      "strataId": 29,
+      "kind": "constructed",
+      "ledger": {
+        "class": "fe_metal",
+        "family": "fe",
+        "unit": "mu"
+      },
+      "ledgerForm": "object",
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "0.01 x iron voxel",
+      "kgPerSlice": 111,
+      "massPerSlice": 111000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "spanAny": 2,
+        "maxUnsupportedSpanSquares": 2,
+        "spans": true,
+        "ratedLoadKg": 1500,
+        "weightClass": "metal",
+        "srdAC": 19,
+        "maxHP": 54,
+        "dt": 10,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 6,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "corrosionResistance",
+        "value": 30,
+        "status": "SOURCED",
+        "source": "DEUS_WorldCatalog.json:4893"
+      },
+      "blastGroup": "iron_grate",
+      "decay": {
+        "dc": "FERROUS",
+        "outputClass": "fe_metal",
+        "outputForm": "item",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "fe_metal",
+            "fromForm": "object",
+            "class": "fe_metal",
+            "form": "item",
+            "mu": 111000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "fe_metal",
+            "fromForm": "object",
+            "class": "fe_metal",
+            "form": "item",
+            "mu": 111000,
+            "debrisMaterial": "scrap",
+            "disagreement": "D-SCRAP-FORM"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "trace",
+        "ledgerClass": "fe_trace",
+        "ledgerForm": "strata",
+        "path": [
+          "rust:fe_metal->fe_trace"
+        ],
+        "status": "PM_DEFAULT"
+      },
+      "bill": {
+        "lines": [
+          {
+            "material": "iron",
+            "mu": 111000
+          }
+        ],
+        "totalMu": 111000
+      }
+    },
+    {
+      "id": "conjured_stone",
+      "strataId": 30,
+      "kind": "constructed",
+      "ledger": {
+        "class": "stone",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "object",
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "0.10 x granite",
+      "kgPerSlice": 389,
+      "massPerSlice": 389000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "spanAny": 2,
+        "maxUnsupportedSpanSquares": 2,
+        "spans": true,
+        "ratedLoadKg": 2000,
+        "weightClass": "masonry",
+        "srdAC": 15,
+        "maxHP": 18,
+        "dt": 0,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 0,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "weather": {
+        "input": "weatherResistance",
+        "value": 95,
+        "note": "As granite. Conjured mass is a magic source, ownerConfirmed false on the ledger magic row.",
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "conjured",
+      "decay": {
+        "dc": "ASHLAR",
+        "outputClass": "rubble",
+        "outputForm": "strata",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "item": "stone",
+            "count": 25,
+            "mu": 375000
+          },
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 14000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 389000,
+            "debrisMaterial": "rubble"
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "solid stone",
+        "ledgerClass": "stone",
+        "ledgerForm": "strata",
+        "path": [
+          "break:stone->rubble",
+          "weather:rubble->sediment",
+          "lithify:sediment->stone"
+        ],
+        "direct": false,
+        "disagreement": "D-RECLAIM-RUBBLE",
+        "status": "PM_DEFAULT"
+      },
+      "bill": {
+        "lines": [
+          {
+            "material": "granite",
+            "mu": 389000
+          }
+        ],
+        "totalMu": 389000
+      }
+    },
+    {
+      "id": "stairs_reserved",
+      "strataId": 31,
+      "kind": "constructed",
+      "reserved": true,
+      "massStatus": "PLACEHOLDER",
+      "reason": "SIM.40.01 §2.5 id 31 is reserved.",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "reserved",
+        "status": "PLACEHOLDER"
+      },
+      "porosity": {
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "status": "PLACEHOLDER"
+      }
+    },
+    {
+      "id": "fe_ore_rock",
+      "strataId": 38,
+      "kind": "natural",
+      "ore": true,
+      "reserved": true,
+      "ledger": {
+        "class": "fe_ore",
+        "family": "fe",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "massStatus": "OWNER_OPEN",
+      "reason": "Vein grade is not set (WG.61). The host-rock mass is not assigned to the finite family, and it is not stripped of the ore either.",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "rock",
+        "status": "OWNER_OPEN"
+      },
+      "porosity": {
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "natural_rock",
+      "decay": {
+        "status": "OWNER_OPEN"
+      },
+      "reclaim": {
+        "dec028": "not ore",
+        "neverOre": true,
+        "note": "No process outputs this ore class.",
+        "status": "OWNER_OPEN"
+      }
+    },
+    {
+      "id": "cu_ore_rock",
+      "strataId": 39,
+      "kind": "natural",
+      "ore": true,
+      "reserved": true,
+      "ledger": {
+        "class": "cu_ore",
+        "family": "cu",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "massStatus": "OWNER_OPEN",
+      "reason": "Vein grade is not set (WG.61). The host-rock mass is not assigned to the finite family, and it is not stripped of the ore either.",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "rock",
+        "status": "OWNER_OPEN"
+      },
+      "porosity": {
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "natural_rock",
+      "decay": {
+        "status": "OWNER_OPEN"
+      },
+      "reclaim": {
+        "dec028": "not ore",
+        "neverOre": true,
+        "note": "No process outputs this ore class.",
+        "status": "OWNER_OPEN"
+      }
+    },
+    {
+      "id": "ag_ore_rock",
+      "strataId": 40,
+      "kind": "natural",
+      "ore": true,
+      "reserved": true,
+      "ledger": {
+        "class": "ag_ore",
+        "family": "ag",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "massStatus": "OWNER_OPEN",
+      "reason": "Vein grade is not set (WG.61). The host-rock mass is not assigned to the finite family, and it is not stripped of the ore either.",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "rock",
+        "status": "OWNER_OPEN"
+      },
+      "porosity": {
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "natural_rock",
+      "decay": {
+        "status": "OWNER_OPEN"
+      },
+      "reclaim": {
+        "dec028": "not ore",
+        "neverOre": true,
+        "note": "No process outputs this ore class.",
+        "status": "OWNER_OPEN"
+      }
+    },
+    {
+      "id": "au_ore_rock",
+      "strataId": 41,
+      "kind": "natural",
+      "ore": true,
+      "reserved": true,
+      "ledger": {
+        "class": "au_ore",
+        "family": "au",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "massStatus": "OWNER_OPEN",
+      "reason": "Vein grade is not set (WG.61). The host-rock mass is not assigned to the finite family, and it is not stripped of the ore either.",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "rock",
+        "status": "OWNER_OPEN"
+      },
+      "porosity": {
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "natural_rock",
+      "decay": {
+        "status": "OWNER_OPEN"
+      },
+      "reclaim": {
+        "dec028": "not ore",
+        "neverOre": true,
+        "note": "No process outputs this ore class.",
+        "status": "OWNER_OPEN"
+      }
+    },
+    {
+      "id": "pt_ore_rock",
+      "strataId": 42,
+      "kind": "natural",
+      "ore": true,
+      "reserved": true,
+      "ledger": {
+        "class": "pt_ore",
+        "family": "pt",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "massStatus": "OWNER_OPEN",
+      "reason": "Vein grade is not set (WG.61). The host-rock mass is not assigned to the finite family, and it is not stripped of the ore either.",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "rock",
+        "status": "OWNER_OPEN"
+      },
+      "porosity": {
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "natural_rock",
+      "decay": {
+        "status": "OWNER_OPEN"
+      },
+      "reclaim": {
+        "dec028": "not ore",
+        "neverOre": true,
+        "note": "No process outputs this ore class.",
+        "status": "OWNER_OPEN"
+      }
+    },
+    {
+      "id": "ore_reserved_43",
+      "strataId": 43,
+      "kind": "natural",
+      "ore": true,
+      "reserved": true,
+      "massStatus": "OWNER_OPEN",
+      "reason": "SIM.40.01 §2.7 ids 43-47 are reserved for ore-bearing rock. No element is assigned.",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "reserved",
+        "status": "OWNER_OPEN"
+      },
+      "porosity": {
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "status": "OWNER_OPEN"
+      }
+    },
+    {
+      "id": "ore_reserved_44",
+      "strataId": 44,
+      "kind": "natural",
+      "ore": true,
+      "reserved": true,
+      "massStatus": "OWNER_OPEN",
+      "reason": "SIM.40.01 §2.7 ids 43-47 are reserved for ore-bearing rock. No element is assigned.",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "reserved",
+        "status": "OWNER_OPEN"
+      },
+      "porosity": {
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "status": "OWNER_OPEN"
+      }
+    },
+    {
+      "id": "ore_reserved_45",
+      "strataId": 45,
+      "kind": "natural",
+      "ore": true,
+      "reserved": true,
+      "massStatus": "OWNER_OPEN",
+      "reason": "SIM.40.01 §2.7 ids 43-47 are reserved for ore-bearing rock. No element is assigned.",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "reserved",
+        "status": "OWNER_OPEN"
+      },
+      "porosity": {
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "status": "OWNER_OPEN"
+      }
+    },
+    {
+      "id": "ore_reserved_46",
+      "strataId": 46,
+      "kind": "natural",
+      "ore": true,
+      "reserved": true,
+      "massStatus": "OWNER_OPEN",
+      "reason": "SIM.40.01 §2.7 ids 43-47 are reserved for ore-bearing rock. No element is assigned.",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "reserved",
+        "status": "OWNER_OPEN"
+      },
+      "porosity": {
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "status": "OWNER_OPEN"
+      }
+    },
+    {
+      "id": "ore_reserved_47",
+      "strataId": 47,
+      "kind": "natural",
+      "ore": true,
+      "reserved": true,
+      "massStatus": "OWNER_OPEN",
+      "reason": "SIM.40.01 §2.7 ids 43-47 are reserved for ore-bearing rock. No element is assigned.",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "reserved",
+        "status": "OWNER_OPEN"
+      },
+      "porosity": {
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "status": "OWNER_OPEN"
+      }
+    },
+    {
+      "id": "sand",
+      "strataId": 48,
+      "kind": "loose",
+      "ledger": {
+        "class": "soil",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 1600,
+      "densityStatus": "PLACEHOLDER",
+      "densitySource": "No catalogue density. 1600 kg/m3 stands in and is not a measured sand value.",
+      "kgPerSlice": 2265,
+      "massPerSlice": 2265000,
+      "massStatus": "PLACEHOLDER",
+      "support": {
+        "bearingKg": 20000,
+        "spanBase": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "loose",
+        "repose": 1,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 4,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "loose",
+      "decay": {
+        "status": "PLACEHOLDER"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "dig",
+            "fromClass": "soil",
+            "fromForm": "strata",
+            "class": "soil",
+            "form": "item",
+            "item": "sand",
+            "count": 1510,
+            "mu": 2265000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "soil",
+            "fromForm": "strata",
+            "class": "soil",
+            "form": "strata",
+            "mu": 2265000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "soil",
+        "ledgerForm": "strata",
+        "path": [
+          "identity"
+        ],
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "clay",
+      "strataId": 49,
+      "kind": "loose",
+      "ledger": {
+        "class": "soil",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 1800,
+      "densityStatus": "PLACEHOLDER",
+      "densitySource": "No catalogue density. 1800 kg/m3 stands in.",
+      "kgPerSlice": 2549,
+      "massPerSlice": 2549000,
+      "massStatus": "PLACEHOLDER",
+      "support": {
+        "bearingKg": 20000,
+        "spanBase": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "loose",
+        "repose": 1,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 2,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "loose",
+      "decay": {
+        "status": "PLACEHOLDER"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "dig",
+            "fromClass": "soil",
+            "fromForm": "strata",
+            "class": "soil",
+            "form": "item",
+            "item": "clay",
+            "count": 1699,
+            "mu": 2548500
+          },
+          {
+            "process": "dig",
+            "fromClass": "soil",
+            "fromForm": "strata",
+            "class": "soil",
+            "form": "item",
+            "mu": 500
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "soil",
+            "fromForm": "strata",
+            "class": "soil",
+            "form": "strata",
+            "mu": 2549000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "soil",
+        "ledgerForm": "strata",
+        "path": [
+          "identity"
+        ],
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "gravel",
+      "strataId": 50,
+      "kind": "loose",
+      "ledger": {
+        "class": "rubble",
+        "family": "mineral",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 1500,
+      "densityStatus": "PLACEHOLDER",
+      "densitySource": "No catalogue density. 1500 kg/m3 stands in, the sediment figure, not a measured gravel.",
+      "kgPerSlice": 2124,
+      "massPerSlice": 2124000,
+      "massStatus": "PLACEHOLDER",
+      "support": {
+        "bearingKg": 30000,
+        "spanBase": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "loose",
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 5,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "blastGroup": "loose",
+      "decay": {
+        "status": "PLACEHOLDER"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "pick",
+            "fromClass": "rubble",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "item",
+            "mu": 2124000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "rubble",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 2124000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "solid stone",
+        "ledgerClass": "stone",
+        "ledgerForm": "strata",
+        "path": [
+          "weather:rubble->sediment",
+          "lithify:sediment->stone"
+        ],
+        "disagreement": "D-RECLAIM-RUBBLE",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "bone",
+      "strataId": 51,
+      "kind": "loose",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "item",
+      "disagreement": "D-BONE",
+      "densityKgM3": 1900,
+      "densityStatus": "PLACEHOLDER",
+      "densitySource": "No catalogue density and no ledger bone class. 1900 kg/m3 stands in.",
+      "kgPerSlice": 2690,
+      "massPerSlice": 2690000,
+      "massStatus": "PLACEHOLDER",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "loose",
+        "srdAC": 15,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 3,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "dc": "BONE",
+        "outputClass": "humus",
+        "outputForm": "strata",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "biomass",
+            "fromForm": "item",
+            "class": "biomass",
+            "form": "item",
+            "item": "bone",
+            "mu": 2690000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "rot",
+            "fromClass": "biomass",
+            "fromForm": "item",
+            "class": "humus",
+            "form": "strata",
+            "mu": 2690000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "rot:biomass->humus"
+        ],
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "charcoal",
+      "strataId": 52,
+      "kind": "loose",
+      "ledger": {
+        "class": "charcoal",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityKgM3": 240,
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "Lane R R-04.3 15 lb/ft3 rounded to 240 kg/m3. Slice 340 kg. D-CHARCOAL-MASS.",
+      "kgPerSlice": 340,
+      "massPerSlice": 340000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "disagreement": "D-CHARCOAL-MASS",
+      "support": {
+        "bearingKg": 20000,
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "loose",
+        "repose": 1,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 4,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 3,
+        "ignitePts": 5,
+        "status": "PM_DEFAULT"
+      },
+      "combustion": {
+        "ledger": {
+          "ashPerMille": 1000,
+          "charPerMille": 0,
+          "ashClass": "ash",
+          "charClass": "charcoal",
+          "applied": true
+        },
+        "status": "PM_DEFAULT",
+        "note": "Ledger burn charcoal to ash keeps the whole mass."
+      },
+      "decay": {
+        "outputClass": "humus",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "notMined": true,
+        "reason": "No ledger row moves charcoal strata to a charcoal item. The item exists; the strata move is not in the table.",
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "charcoal",
+            "fromForm": "strata",
+            "class": "charcoal",
+            "form": "strata",
+            "mu": 340000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "charcoal",
+            "fromForm": "strata",
+            "class": "charcoal",
+            "form": "strata",
+            "mu": 340000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "weather:charcoal->humus"
+        ],
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "humus",
+      "strataId": 53,
+      "kind": "loose",
+      "ledger": {
+        "class": "humus",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "strata",
+      "densityStatus": "PM_DEFAULT",
+      "densitySource": "Lane R R-06.3 litter bulk 80 lb/ft3 x 50 ft3 = 4000 lb ≈ 1814 kg after half-up. Not a catalogue density.",
+      "kgPerSlice": 1814,
+      "massPerSlice": 1814000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "support": {
+        "bearingKg": 20000,
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "loose",
+        "repose": 1,
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "perm": 4,
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 0,
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "notMined": true,
+        "reason": "Humus has no item form.",
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "humus",
+            "fromForm": "strata",
+            "class": "humus",
+            "form": "strata",
+            "mu": 1814000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "humus",
+            "fromForm": "strata",
+            "class": "humus",
+            "form": "strata",
+            "mu": 1814000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "identity"
+        ],
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      }
+    },
+    {
+      "id": "flesh",
+      "kind": "loose",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic",
+        "unit": "mu"
+      },
+      "ledgerForm": "item",
+      "densityKgM3": 1000,
+      "densityStatus": "PLACEHOLDER",
+      "densitySource": "No catalogue density. 1000 kg/m3 stands in for a body-scale reference, not a measured value.",
+      "kgPerSlice": 1416,
+      "massPerSlice": 1416000,
+      "massStatus": "PLACEHOLDER",
+      "support": {
+        "spanAny": 0,
+        "maxUnsupportedSpanSquares": 0,
+        "spans": false,
+        "weightClass": "loose",
+        "status": "PM_DEFAULT"
+      },
+      "porosity": {
+        "status": "PLACEHOLDER"
+      },
+      "flam": {
+        "cls": 1,
+        "ignitePts": 5,
+        "status": "PM_DEFAULT"
+      },
+      "combustion": {
+        "laneR": {
+          "ashPerMille": 10,
+          "charPerMilleAtKappa0": 50,
+          "gasPerMille": 940,
+          "applied": false,
+          "status": "PM_DEFAULT"
+        },
+        "ledger": {
+          "ashPerMille": 10,
+          "charPerMille": 990,
+          "ashClass": "ash",
+          "charClass": "charcoal",
+          "applied": true
+        },
+        "disagreement": "D-FIRE-SINK",
+        "status": "PM_DEFAULT"
+      },
+      "decay": {
+        "dc": "FLESH",
+        "outputClass": "humus",
+        "outputForm": "strata",
+        "status": "PM_DEFAULT"
+      },
+      "yield": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "biomass",
+            "fromForm": "item",
+            "class": "biomass",
+            "form": "item",
+            "mu": 1416000
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "rot",
+            "fromClass": "biomass",
+            "fromForm": "item",
+            "class": "humus",
+            "form": "strata",
+            "mu": 1416000
+          }
+        ]
+      },
+      "reclaim": {
+        "dec028": "soil",
+        "ledgerClass": "humus",
+        "ledgerForm": "strata",
+        "path": [
+          "rot:biomass->humus"
+        ],
+        "disagreement": "D-RECLAIM-ORGANIC",
+        "status": "PM_DEFAULT"
+      },
+      "note": "Corpses and food share this class. Creature form is SIM.40.10's mass, not booked here."
+    }
+  ]
+}

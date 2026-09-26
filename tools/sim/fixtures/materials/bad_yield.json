@@ -1,0 +1,10 @@
+{
+  "expect": "E_YIELD_MASS",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=granite].yield.postings.0.mu",
+      "value": 1
+    }
+  ]
+}

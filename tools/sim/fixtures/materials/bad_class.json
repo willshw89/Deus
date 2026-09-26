@@ -1,0 +1,10 @@
+{
+  "expect": "E_LEDGER_CLASS",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=granite].ledger.class",
+      "value": "nope"
+    }
+  ]
+}

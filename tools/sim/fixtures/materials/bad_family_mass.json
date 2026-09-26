@@ -1,0 +1,20 @@
+{
+  "expect": "E_FAMILY_MASS",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=granite].collapse.postings.0.class",
+      "value": "humus"
+    },
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=granite].collapse.postings.0.form",
+      "value": "strata"
+    },
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=granite].collapse.postings.0.process",
+      "value": "identity"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "expect": "E_TRANSFORM",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=granite].yield.postings.0.process",
+      "value": "smelt"
+    }
+  ]
+}
