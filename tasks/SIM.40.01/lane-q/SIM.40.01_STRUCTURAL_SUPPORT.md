@@ -14,7 +14,7 @@
 ### 0.1 Inputs read
 
 - **Audit:** `docs/audits/LIVING_WORLD_GAP_AUDIT.md` (SIM.50.01; the audit cites code at `75cf2ff3`). Sections read in full: §1, §2.1-§2.7, §3.7, §3.8, §3.9, §4.1-§4.3, §5, §6, §7, §8, §9, §10, Appendix A and B.
-- **WBS:** `docs/worldgen/DEUS_WORLDGEN_WBS.md` Rev 25 (`:3`): WG.00.17 (`:105`), WG.63.04 (`:210`), WG.65.15 (`:254`), WG.65.16 (`:255`), SIM.00.00-.06 (`:519-525`), SIM.30.01-.05 (`:529-533`), SIM.40.01-.10 (`:534-543`), SIM.50.02-.10 (`:545-553`), SIM.60.01-.04 (`:559-562`), GP.07.02 (`:578`). `docs/society/DEUS_SOCIETY_WBS.md` was checked for SOC rows that touch buildings; only SOC.10.03 (plan data, a SIM.50.08 dependency at `DEUS_WORLDGEN_WBS.md:551`) matters here.
+- **WBS:** `docs/worldgen/DEUS_WORLDGEN_WBS.md` Rev 25 (`:3`): WG.00.17 (`:105`), WG.63.04 (`:210`), WG.65.15 (`:254`), WG.65.16 (`:255`), SIM.00.00-.06 (`:519-525`), SIM.30.01-.05 (`:529-533`), SIM.40.01-.10 (`:534-543`), SIM.50.02-.10 (`:545-553`), SIM.60.01-.04 (`:559-562`), GP.07.02 (`:578`). `docs/society/DEUS_SOCIETY_WBS.md` was checked for SOC rows that touch buildings; only SOC.10.03 (plan data, a SIM.50.08 dependency at `docs/worldgen/DEUS_WORLDGEN_WBS.md:551`) matters here.
 - **Decisions:** `docs/OWNER_DECISIONS.md` DEC-010 (`:137-147`), DEC-011 (`:150-157`), DEC-012 (`:161-168`), DEC-013 (`:172-195`), DEC-014 (`:199-208`), DEC-015 (`:212-226`), DEC-018 (`:251-263`), DEC-019 (`:267-278`), DEC-020 (`:282-289`), DEC-021 (`:293-300`), DEC-022 (`:304-312`).
 - **VISION:** V74 (`docs/VISION.md:84`), V83 (`:94`), V95 (`:106`), V133 (`:127`), V136 (`:130`), V137 (`:131`), V138 (`:132`), V139 (`:133`), V140 (`:134`), V141 (`:135`), V142 (`:136`); V123 and V128 are decision-log entries (`:338-342`, `:365-367`).
 - **Invariants and risks:** INV-SIM-02 and INV-SIM-03 (`docs/INVARIANT_REGISTRY.md:52-53`); LIFE-001..004 (`docs/RISK_REGISTER.md:60-63`); NAT-003 (`docs/RISK_REGISTER.md:74`).
@@ -29,7 +29,7 @@
 
 ### 0.2 Method
 
-1. Read the audit rows for this lane and re-checked every code line this document cites at the base commit. The audit cites `75cf2ff3`. Between `75cf2ff3` and the base only `DEUS_Levels.js` (from line 4175 on) and `DEUS_World.js` changed (`git diff --stat 75cf2ff3 84ee3b55 -- game/`), so the audit's `DEUS_Levels.js` citations below line 4175 still hold; the self-test caller of `applyVolumeDamage` moved from `:5682` to `:5732`.
+1. Read the audit rows for this lane and re-checked every code line this document cites at the base commit. The audit cites `75cf2ff3`. Between `75cf2ff3` and the base only `DEUS_Levels.js` (from line 4175 on) and `DEUS_World.js` changed (`git diff --stat 75cf2ff3 84ee3b55 -- game/`), so the audit's `DEUS_Levels.js` citations below line 4175 still hold; the self-test caller of `applyVolumeDamage` moved from line 5682 (at `75cf2ff3`) to `DEUS_Levels.js:5732`.
 2. Absence claims come from `git grep` at the base, each with its exit code (1 = no match): `fallDamage|unitFell|fallThrough` (exit 1), `porosit|permeab|loadCapacity|maxLoad` (exit 1), and a strata `rubble` material in `DEUS_Levels.js` (exit 1). The commands are in REPORT.md.
 3. Numbers: masses are density × voxel volume; spans come from a cantilever self-weight bending estimate (§4.3); both were computed with an ad-hoc `node -e` run that is not kept. SRD numbers are quoted from the files above; where the SRD has no number the table says **extrapolated**.
 4. Every mechanism states: rule; data read and written with its sparse representation; trigger; ledger entries; CPU per tick and memory at 32 layers; what the SRD says.
@@ -176,7 +176,7 @@ A constructed voxel is not solid timber or solid stone: a 5 ft cell holds a wall
 | 18 | brick (fired brick, 1 ft) | mineral | 0.20 × brick (1.9) | 538 | 15 (extrapolated) | 36 | 5 | 1 | 3,000 | 150,000 | 2 | 0 | 50 (extrapolated) | rubble |
 | 19 | stone_vault (arched floor or ceiling) | mineral | 0.35 × limestone | 1,140 | 17 | 63 | 10 | 3 | 8,000 | null | 1 | 0 | stone's | rubble |
 | 20 | foundation (footing) | mineral | 0.60 × limestone | 1,954 | 17 | 108 | 10 | 0 | — | null (spreads load: the soil voxel under it gets 4 × its bearingKg) | 1 | 0 | buried: slowest class | rubble |
-| 21 | rammed_earth | mineral + organic | 0.30 × compacted earth (1.9) | 807 | 10 (extrapolated) | 30 | 0 | 0 | — | 60,000 | 3 | 0 | washes out: fastest mineral class | loose_fill |
+| 21 | rammed_earth | mineral + organic | 0.30 × compacted earth (1.9) | 807 | 10 (extrapolated) | 30 (extrapolated) | 0 | 0 | — | 60,000 | 3 | 0 | washes out: fastest mineral class | loose_fill |
 | 22 | timber_floor (planks on joists) | organic | 52 kg/m² | 120 | 15 | 27 | 5 | 2 | 1,000 | — | 4 | 3 / 5 | species rotResistance | broken_timber |
 | 23 | timber_wall (log or plank) | organic | 0.25 × species | 266 (oak) | 15 | 27 | 5 | 1 | 1,500 | 40,000 | 3 | 3 / 5 | rotResistance | broken_timber |
 | 24 | timber_frame (framed, infilled) | organic + mineral infill | 0.12 × species | 127 | 15 | 18 | 0 | 1 | 800 | 15,000 | 3 | 3 / 5 | rotResistance | broken_timber |
@@ -259,7 +259,7 @@ Rule: anything that carries load or encloses space becomes constructed strata; a
 The build job (`DEUS_Jobs.js:707-728`) keeps its transactional shape (materials must lie on the cell; the world accepts the change first; only then are materials consumed) and changes what it writes:
 1. **Plan.** The job's target is a list of voxels `[(cell, z, s, assembly)]` from the catalogue entry (for example `wall_stone`: S1-S4 in `masonry` on a foundation). Before the job is offered, `Support.wouldSupport(voxels)` (§11.2) must say every planned voxel will be supported. This replaces the walkability test at `DEUS_Colonists.js:3736` ("unsupported airborne" builds).
 2. **Materials.** Required mass = Σ planned voxels × `kgPerVoxel`, by family. The catalogue `build.items` for each constructed type must supply exactly that mass plus a declared `wasteKg` (offcuts, broken bricks); a load-time data check fails when Σ(item count × item kg) ≠ strata kg + wasteKg (§9.2, OQ-Q-06 on item masses).
-3. **Write.** `setStrata(ref, { m }, { constructed: true, cause: "build:<typeId>", refuseIfStanding: true })` per cell, which already refuses when a unit stands there (`DEUS_Levels.js:1543-1546`, V68).
+3. **Write.** `setStrata(ref, { m }, { constructed: true, cause: "build:<typeId>", refuseIfStanding: true })` per cell, which already refuses when a unit stands there (`DEUS_Levels.js:1545-1547`, V68).
 4. **Ledger.** `transform(ITEM → STRATUM_BUILT, family, kg, "build")` for the strata mass and `transform(ITEM → LOOSE, family, wasteKg, "build:waste")` for the waste, deposited as loose debris at the cell (§9.2).
 5. **Events.** `levels:strataChanged` with cause `build:<typeId>` (`DEUS_Levels.js:1558`), which also enqueues the support recheck (§5.1).
 6. **Refusal.** A refused write leaves every material on the cell, as today.
@@ -352,7 +352,7 @@ All integer arithmetic.
 
 - **Rock is structure.** V128 makes natural rock count as enclosure and ground (`docs/VISION.md:365-366`). Here rock members are members like walls: a floor can span from a cave wall, and a room can be part rock, part masonry.
 - **Rock is not "always supported".** This replaces the rule at `docs/design/VERTICAL_BUILD_PLAN.md:445` and `docs/design/TERRAIN_LEVELS.md:206`. An undercut ledge or a widened cave can fall (V137, SUP-1).
-- **DEC-010.** DEC-010 is OPEN; its default is option 1, "lateral connectivity is sufficient" (`docs/OWNER_DECISIONS.md:142-146`). This design keeps lateral connectivity and bounds it by the span table. Unbounded connectivity would make every recheck a flood fill to bedrock or the area edge, as the generation pass does over every voxel of an area (`DEUS_Levels.js:2698`: `N = n * E_TOP`, 1,638,400 voxels at 256 × 256 × 25; 10,485,760 at 160 strata). That is a full-area scan per mutation and breaks V133. OQ-Q-01 asks the Owner.
+- **DEC-010.** DEC-010 is OPEN; its default is option 1, "lateral connectivity is sufficient" (`docs/OWNER_DECISIONS.md:142-146`). This design keeps lateral connectivity and bounds it by the span table. Unbounded connectivity would make every recheck a flood fill to bedrock or the area edge, as the generation pass does over every voxel of an area (`DEUS_Levels.js:2699`: `N = n * E_TOP`, 1,638,400 voxels at 256 × 256 × 25; 10,485,760 at 160 strata). That is a full-area scan per mutation and breaks V133. OQ-Q-01 asks the Owner.
 - **Ceiling caps.** Until WG.00.17 replaces them with real upper layers, the legacy caps above +2 stay anchored by definition (`DEUS_Levels.js:2793`: `anchored: true`). They count as bearing.
 - **A stable world at generation.** The generator must leave no member beyond its span, or play would bring down virgin terrain at the first nearby dig. The floating-rock pass (`DEUS_Levels.js:2695-2721`) is extended to also remove, thicken or pillar over-span natural members (PROPOSED-Q-06). The test in §12 (T8) evaluates every member of a fresh world once in test mode and expects zero failures.
 
@@ -412,7 +412,7 @@ Records exist only for lateral members (overhangs, cave ceilings, floors and roo
 | One changed voxel | ≤ 6 members enqueued directly | itself, above, below, 4 neighbours minus duplicates |
 | Distance wave after a removal | ≤ (2 × S_MAX² + 2 × S_MAX + 1) × R members | the diamond of radius 12 is 313 columns; R is the number of members per column overlapping the elevation window, 1-2 in practice (a column's members are separated by air) |
 | One tick | ≤ SUPPORT_BUDGET × 64 = 16,384 reads | about 0.1 ms at 10⁸ simple operations per second (not measured) |
-| A fireball through a timber floor | about 25 voxels destroyed, ≤ 150 enqueues | one tick |
+| A fireball through a timber floor | about 9 voxels destroyed (the cells within about 1.8 cells of the centre, §8.5), ≤ 54 enqueues | one tick |
 | 9 vs 32 layers | identical except the bottom walk | the walk is bounded by the layer count through UNIFORM chunks (≤ 32 reads) |
 
 ### 5.6 Determinism
@@ -549,7 +549,7 @@ For illustration only, not a choice: Y = 20 is the archived clock's year (`archi
 | Citation | Code | Finding |
 |---|---|---|
 | `DEUS_Levels.js:1795` | `function applyVolumeDamage(a, minX, minY, minZ, minS, maxX, maxY, maxZ, maxS, damage, damageType = "impact", opts = {}) {` | Box and sphere damage across levels. |
-| `DEUS_Levels.js:5732` | `const sum = applyVolumeDamage(a1, fx.x, fx.y + 1, -1, 1, fx.x, fx.y + 4, -1, 4, provoked("dig_tunnel") ? 0 : 100000, "dig", { source: "TEST_strata_tunnel" });` | The only caller is a self-test (the audit's `:5682` at `75cf2ff3`). |
+| `DEUS_Levels.js:5732` | `const sum = applyVolumeDamage(a1, fx.x, fx.y + 1, -1, 1, fx.x, fx.y + 4, -1, 4, provoked("dig_tunnel") ? 0 : 100000, "dig", { source: "TEST_strata_tunnel" });` | The only caller is a self-test (line 5682 in the audit, at `75cf2ff3`). |
 | `DEUS_Levels.js:1764` | `const FALLOFF = { constant: t => 1, linear: t => 1 - t, quadratic: t => (1 - t) * (1 - t) };` | Distance falloff only; nothing between the centre and a target attenuates it. |
 | `DEUS_Levels.js:1791` | `is within the radius (a cell is 5 ft across, a stratum 1 ft high). It crosses levels the same way.` | Vertical distance counts 1 ft per stratum. |
 | `DEUS_Levels.js:1805` | `const e0 = Math.max(0, (minZ + 2) * STRATA + minS), e1 = Math.min(24, (maxZ + 2) * STRATA + maxS);` | The 0..24 cap (also `:1835`). |
@@ -587,7 +587,7 @@ Per mille passed through one voxel (`passPm`) and damage multiplier on the voxel
 | broken timber (loose) | 400 | 700 | 600 | 0 | 0 | 3 |
 | masonry, brick, rammed earth | 60 | 400 | 300 | 100 | 1000 | — |
 | ashlar, stone vault, foundation | 50 | 350 | 250 | 100 | 800 | — |
-| timber floor, wall, frame, post, roof, bridge deck | 250 | 700 | 600 | 2000 | 1200 (today's wood blast 1.2, `:1007`) | 5 |
+| timber floor, wall, frame, post, roof, bridge deck | 250 | 700 | 600 | 2000 | 1200 (today's wood blast 1.2, `DEUS_Levels.js:1007`) | 5 |
 | thatch roof | 700 | 900 | 800 | 2000 | 1500 | 1 |
 | iron grate | 800 | 800 | 800 | 0 | 500 | — |
 | conjured stone | 200 | 800 | 600 | 100 | 1000 | — |
@@ -674,7 +674,7 @@ ADR-003 leaves the per-material mass tables to "SIM.40.01 with WG.65.15" (ADR §
 | 5 | Quarry or dismantle a built element | `wall_stone` quarry yields 2 stone and leaves `rubble` (`game/data/DEUS_WorldCatalog.json:2204-2206`), whose pick yields 2 more (`:2104`) | 2 stone in, 4 out | `STRATUM_BUILT → ITEM` (salvage: `floor(salvagePm × kg / 1000 / itemKg)` items); `STRATUM_BUILT → LOOSE` (the rest as rubble or broken timber) | Out ≤ in by construction; DURABILITY's 75 % return keeps its number and its missing 25 % becomes debris |
 | 6 | Collapse | none (no collapse exists) | — | `STRATUM_* → LOOSE` per voxel (§6.3); `OBJECT → OBJECT(remains) + LOOSE` | §6.3 |
 | 7 | Blast destroys a voxel | `DEUS_Levels.js:1702` (becomes air) | the voxel's mass disappears | `STRATUM_* → LOOSE` (debris at the cell, then it falls) | HP loss alone has no entry |
-| 8 | Clear rubble | `rubble` object pick yields 2 stone (`:2104`) | stone from a label | `LOOSE → ITEM` (`floor(kg / itemKg)` rubble-stone items; the remainder stays loose); hauling moves items (no entry); dumping is `ITEM → LOOSE` | |
+| 8 | Clear rubble | `rubble` object pick yields 2 stone (`game/data/DEUS_WorldCatalog.json:2104`) | stone from a label | `LOOSE → ITEM` (`floor(kg / itemKg)` rubble-stone items; the remainder stays loose); hauling moves items (no entry); dumping is `ITEM → LOOSE` | |
 | 9 | Salvage a ruin | — | — | as row 5, for any owner's built strata; items lying there are moved | SET-4 |
 | 10 | Rebuild from rubble | — | — | `LOOSE (masonry lineage) → STRATUM_BUILT (masonry)`; mortar `ITEM → STRATUM_BUILT` | §3.4 |
 | 11 | Fire burns out a timber voxel (SIM.50.05) | `DEUS_Fire.js:348-351` ends a burning record; burnt objects become their `becomes` | no carbon or ash mass (audit FIR-3) | organic share: `sink(organic, kg, "combustion")`; mineral share: `STRATUM_BUILT → LOOSE (ash)` | Burning is a named sink (ADR §7.9) |
@@ -805,4 +805,97 @@ Before the core exists the same names go through `UF.Events`. Inside a phase, ev
 - **SIM.60 spells** use §8.7's mapping. **GP.07.02** uses `Volume.damage` for area impacts and §6.5's fall rule for dropped objects.
 - **Lane W (SIM.40.10).** Units killed in a collapse become bodies by Lane W's transform (`BODY`); buried bodies stay where they are.
 
-<!-- CONTINUES -->
+## Acceptance tests
+
+### 12.1 Rules for every test
+
+- Headless, deterministic, integer; each runs at the 9-layer test range and at the 32-layer default (A9), on the ADR's sparse fixture (terrain and a colony on -1..+1, everything else UNIFORM) or a hand-built fixture named below.
+- Each test prints PASS or FAIL per check and exits 1 on any FAIL (ENGINE_RULES §6: tests must be able to fail). Each lists at least one mutant, a deliberate code change the test must catch; the SIM.40.04 harness runs every mutant and expects a failing exit.
+- Seeds and dice come from the core's seeded streams (ADR §10.1); the expected numbers are computed from the formulas of this document by the test, not typed in.
+
+### 12.2 The tests
+
+| Id | Name | Fixture and steps | Pass when | Mutant that must fail it |
+|---|---|---|---|---|
+| T1 | Deterministic cave-in | A limestone cave on layer -2, 17 cells wide with a 1-cell natural pillar in the middle (two stable 8-cell halves), 10 strata of rock above. Remove the pillar's voxels by a dig job | The ceiling members at distance ≥ 6 from the walls fail and fall; the rubble kg equals their kg; two runs give identical checksums | (a) the `levels:strataChanged` handler does not enqueue (missed trigger): nothing falls. (b) `spanEff` computed with `band / 7` |
+| T2 | Tower across several upper layers | A 3 × 3 masonry tower with timber floors on +1..+4 (both ranges) and a second tower on +4..+15 on a rock pinnacle (32 layers only). A blast destroys the base ring | Every tower voxel ends as loose matter at or below its base within the chain budget's ticks; kg exact per family | (a) the bottom search stops at the legacy -2 or the 0..24 cap: fails only at 32 layers. (b) the member on a failed member's top is not enqueued |
+| T3 | Blast breaches one floor | Timber floor at S0 of layer z; fire energy 28, radius 40 hf, centre S2 of z. Variant: natural limestone floor | Timber: the voxels §8.5 predicts are destroyed, the room below takes 14 at S2 of z-1 and its timber ignites. Limestone: nothing below takes damage | (a) attenuation removed (all `passPm` 1000): the room under limestone takes damage. (b) the destroyed floor does not count as air for later shells |
+| T4 | Blast breaches two floors | Three timber floors on z, z-1, z-2; an impact energy chosen by the test from §8.2 so that exactly two break | Exactly the voxels the formula predicts are destroyed; units on z-1 and z-2 take the predicted remainders; the debris lands on z-2's floor | (a) breach order reversed (outer shells first). (b) stratum height 2 hf (1 ft strata) instead of 4 hf |
+| T5 | Exact ledger totals | One run per path of §9.2 (build, mine rock, mine soil, dig, quarry, dismantle, collapse, blast, clear rubble, salvage, rebuild from rubble, fire burn-out, Wall of Stone created and ended early, Disintegrate, Passwall, migration) | For every family and form, `Δtotal = Σ sources − Σ sinks` exactly, and each event balances | (a) 1 kg leaked in the collapse transform. (b) mining yields 2 stone and no spoil. (c) the dig drops a free stone 1 time in 4. (d) the rubble pick yields 2 stone. (e) the `isRoofed` roof deck side effect restored. (f) the conjured source not logged |
+| T6 | Zero full-world scans | 10,000 idle ticks, then one dig, at both ranges; a counter of chunk reads and member evaluations made by support, collapse and talus | Idle: 0 reads and `support.work_per_tick` = 0. After the dig: reads ≤ the §5.5 bound. The two ranges differ by at most the bottom-walk term | A per-tick sweep over all chunks or all member records |
+| T7 | Local bound | A dig beside a large lateral structure (a 20 × 20 stone-vault hall) | Evaluations ≤ 6 + 313 × R for the measured R | S_MAX not capped (search radius 64) |
+| T8 | A stable world at generation | The seed fixture, freshly generated at both ranges; a test-mode pass that evaluates every member once | Zero failing members | The generator's stability pass skipped (a 20-cell soil overhang survives) |
+| T9 | Decay hand-off, roofs first | The 6 × 6 timber house of §7.3; the test lowers HP through the strata writer band by band, as Lane R would | The four middle roof cells fail at band 7, the roof ring at band 3, the walls only at HP 0; debris kg equals the kg removed | HP-only writes that change the band do not enqueue |
+| T10 | Falls and burial | A unit on a timber floor at S0 of +2 over an open room down to the ground at 0 (20 ft); remove the floor's supports. A second unit stands where the debris lands | The first unit takes the seeded 2d6 and lands prone; the second makes a Dexterity save and on a failure takes 5d6 and is buried (DC 20 to escape) | (a) fall height from 1 ft strata (1d6). (b) burial not applied |
+| T11 | Determinism across ranges and hosts | T1-T4 twice at each range, in node and in NW.js | Identical checksums per range; node and NW.js equal (ADR §10.4) | `Math.random` in the talus spill order |
+| T12 | No ore | The transform table at load; then a run that rusts iron, blasts an ore vein and lithifies sediment | Ore kg per element never increases | A transform row rust → iron ore |
+| T13 | SRD numbers unchanged | With SIM.60.04: a Fireball's creature saves and damage with the physics on and off | Identical rules-layer results | The physics adds its own damage to creatures inside the SRD area |
+| T14 | Save migration | A legacy save (-2..+2, 1 ft strata) with `wall_wood`, `wall_stone`, `wall_brick`, a door, a `DEUS_Floors` roof deck and a `rubble` object | Assemblies written, wall objects gone, door kept, rubble kg kept; ledger baseline plus the logged migration sources equal the recount | The migration forgets the rubble object's mass |
+| T15 | Talus | 20 rubble voxels dropped on one cell beside an open shaft | No neighbour step above the repose limit; spills in canonical order; the kg that pours down the shaft lands on the layer below; mass exact | No spill (a 20-voxel column stands) |
+| T16 | Wall of Stone | A 10-panel wall (§2.5); then one with a 30 ft unsupported span; then a wall broken to rubble and its concentration ended | Source exactly 10 × 10 × 382 = 38,200 kg; the 30 ft span is refused at creation (the SRD's 20 ft rule); the early-end sink equals the provenance kg left, rubble included | (a) source not logged. (b) the span check skipped |
+| T17 | Overload pancake | A stone vault storey collapses onto a timber floor below it | The timber floor fails by overload, and the cascade reaches the ground floor | Superimposed load ignored (Lsup = 0) |
+| T18 | Warning and rescue | Remove the wall under one end of a timber floor so that it is over span; place a `timber_post` 10 ticks later | `support:failing` with `failTick` 20 ticks after detection; the post makes it bearing again; `support:rescued`; nothing collapses | (a) `failTick` ignored (instant collapse). (b) the new post does not enqueue the member above it |
+
+### 12.3 Fixtures to build (for SIM.40.04)
+
+Cave (T1), tower at two heights (T2), floor stack (T3, T4, T17), timber house (T9, T18), fall column (T10), legacy save with every wall type (T14), talus shaft (T15), Wall of Stone panels (T16), plus the ADR's sparse and seed fixtures (T5-T8, T11, T12). Each exists at -4..+4 and -16..+15 except T2's second tower and T14 (legacy range only).
+
+## WBS impact
+
+This lane does not mint WBS IDs or change statuses. New work items are `PROPOSED-Q-NN`; every dependency named is a real WBS row.
+
+### 13.1 Proposed packages
+
+| Id | Title | Depends on | Acceptance tests (each with a mutant, §12) |
+|---|---|---|---|
+| PROPOSED-Q-01 | **Material and structure model** (audit §6 step 5, the prerequisite SIM.40.01's row does not list): the §2 property table as catalogue data, ids 6-37, the loose record, object and item kg, compositions, and a load-time validator | WG.00.17, WG.65.15, SIM.00.01 | Validator rejects a material missing a §2.2 property (mutant: drop `spanBase` from one id); loose kg exact over 1,000 random deposits and takes (mutant: kg kept as a 1/255 fill fraction); T12 |
+| PROPOSED-Q-02 | **Constructions as constructed strata** (LAND-5, SUP-2, SET-4): build jobs write strata, catalogue build masses balance, foundations and re-founding, the save migration, and removal of the `isRoofed` roof-deck side effect | PROPOSED-Q-01, WG.00.17, WG.65.15 | T14; a built floor over a room is supported only by built walls (mutant: the build places an object again: the floor is unsupported); T5 build row |
+| PROPOSED-Q-03 | **Mass-conserving earthworks** (LAND-1): mine, dig, quarry, dismantle, rubble clearing, salvage, spoil, rebuild from rubble | PROPOSED-Q-01, PROPOSED-Q-02, WG.65.15 | T5 rows for these paths, with mutants (b)-(e) |
+| PROPOSED-Q-04 | **Support evaluation and local recheck**: members, records, queue, failing set, warnings, `Support.query`, `wouldSupport`, `digRisk` | PROPOSED-Q-01, PROPOSED-Q-02, SIM.00.02, SIM.00.05, WG.00.17 | T1, T6, T7, T18 |
+| PROPOSED-Q-05 | **Volume damage with attenuation** (ADR §18 rule plus §8's tables): shells, breach order, SRD area versus remainder, ignition, debris | PROPOSED-Q-01, SIM.00.02, WG.00.17 | T3, T4, T13 (with SIM.60.04) |
+| PROPOSED-Q-06 | **Stable terrain at generation**: extend the floating-rock pass to spans | PROPOSED-Q-04, WG.00.17, WG.00.08 | T8 |
+| PROPOSED-Q-07 | **Falls, impacts and burial** for units and objects (V95, SUP-4) | PROPOSED-Q-04, SIM.00.04, WG.00.17 | T10 |
+| PROPOSED-Q-08 | **Support observability** (AGENTS.md Rule 14): UF_Look and UF_Sheet explain why a member is supported or failing | PROPOSED-Q-04 | `Support.query` matches a fresh evaluation after every mutation in T1 (mutant: a stale record after a dig) |
+
+SIM.40.02 (collapse) is then the §6 cascade, talus and conversion on top of PROPOSED-Q-04 and -07; SIM.40.03 the colonist behaviour of §11.3; SIM.40.04 the §12 suite. Whether PROPOSED-Q-04 is folded into SIM.40.02 is the Coordinator's call.
+
+### 13.2 Dependency changes the audit asks for (§6) and this design needs
+
+| Row | Today (`docs/worldgen/DEUS_WORLDGEN_WBS.md`) | Add |
+|---|---|---|
+| WG.65.15 (`:254`) | PLANNED, M3 after SIM.30.03 (audit §6 step 2) | Move before SIM.40 and SIM.50 (audit §6 step 2); its scope gains §9.1's families and forms |
+| SIM.40.02 (`:535`) | dep: SIM.40.01 | PROPOSED-Q-01, -02, -04, -07, WG.65.15 |
+| SIM.40.04 (`:537`) | dep: SIM.40.02 | PROPOSED-Q-05, -06 |
+| SIM.40.05 (`:538`) | SIM.40.01, dep: SIM.00.01 | PROPOSED-Q-01, SIM.40.02 (decay hands off to collapse, §7) |
+| SIM.40.01 and SIM.40.05 | WG.00.17, SIM.00.01 | SIM.00.05 (the terrain sub-lane), as ADR-003's Q15 proposes |
+| SIM.50.08 (`:551`) | SIM.50.01, dep: SOC.10.03 | WG.65.15 and PROPOSED-Q-03 (audit §6 step 8: "the ledger and step 5") |
+| SIM.50.09 (`:552`) | SIM.50.08, dep: SIM.40.08 | PROPOSED-Q-02 (foundations, SET-4) |
+| SIM.50.10 (`:553`) | SIM.50.01, dep: SIM.40.02 | PROPOSED-Q-05 |
+| GP.07.02 (`:578`) | dep: WG.00.17, SIM.00.00, SIM.40.01 | PROPOSED-Q-05 |
+| SIM.60.03 (`:561`) | includes SIM.40.01-.02 | PROPOSED-Q-05 |
+| SIM.40.01 (`:534`) | DoD: "Support model spec in docs/systems/" | The reviewed spec is this file in the lane folder (the PM moved it); where it lands after review is the Coordinator's decision |
+
+**For the PM and the ADR owner (not Owner questions):** §5.7 proposes that the support queue runs every tick at every LOD level instead of ADR §16.5's coarse tick in L2, and §8.2 proposes the `aroundCorners` propagation next to ADR §18.2's straight lines. Both amend PROPOSED ADR-003.
+
+**Rulings this design depends on:** D-1 (calendar) is OWNER_OPEN and is not chosen here (§7.6). D-4 (DEUS_Fluid as the single water authority) is a PM decision the Owner may overturn: the fluid load, `levels:breach` draining and seepage hooks (§11.3) assume it, and move unchanged to any other authority. D-6 (race-to-plan slots) is a PM decision: assemblies are per material, and which race builds with which assemblies is DEC-015 plan data, so D-6 changes plan files, not this design. D-2, D-3 and D-5 are Owner rulings this design follows (2 ft strata and 10 ft layers; sparse memory and saves; no ore respawn).
+
+## Owner questions
+
+None of these is answered here. Where an option is marked "recommended" that is a proposal for the Owner to accept or reject, and the design's numbers use it only until the Owner rules.
+
+| Id | Question | Options | Where it matters |
+|---|---|---|---|
+| OQ-Q-01 | DEC-010 is OPEN (default: lateral connectivity suffices). How far may natural rock reach sideways from a support? | (a) recommended: bounded by the material and thickness span table (§4.3), which keeps rechecks local (V133); (b) unbounded lateral connectivity, as the generator does, which needs a whole-area connectivity search after every dig; (c) DEC-010 option 2: full vertical support, no overhangs | §4.5 |
+| OQ-Q-02 | How strong should materials be? | (a) recommended: the physically derived table (§2.3, §4.3); (b) the same table with every span doubled for more dramatic caves; (c) one span per material class (rock, soil, timber, masonry) | §2, §4 |
+| OQ-Q-03 | How realistic should constructed spans be? Proposed: timber floors and roofs clear 20 ft between walls, stone vaults 30 ft, bridges need a pier every 20 ft | (a) recommended: as proposed; (b) more generous (timber 30 ft, vaults 50 ft); (c) stricter (timber 15 ft) | §2.5, §4.3 |
+| OQ-Q-04 | Does furniture carry load? | (a) recommended: furniture is load only, never support; (b) heavy furniture (tables, beds, chests) can prop a ceiling like a post; (c) furniture is neither load nor support | §4.1 |
+| OQ-Q-05 | Do units' weights load floors? | (a) recommended: no, except Huge and Gargantuan creatures (SRD sizes); (b) every unit is load; (c) no unit is load | §4.1, §10.4 |
+| OQ-Q-06 | Item masses and build costs. With exact mass, a 5 ft masonry wall cell weighs about 3.9 t | (a) realistic masses: more, heavier building items (a stone wall cell needs many stones); (b) abstract "load units": today's item counts, with item kg set so that each recipe balances exactly in the ledger; (c) a middle scale | §3.3, §9.2 |
+| OQ-Q-07 | Where does mining spoil go (the mass of a mined voxel beyond the stone items)? | (a) left as loose rubble at the work cell, to be hauled; (b) moved to a designated spoil heap as part of the job; (c) all of it yields as items | §9.2 row 3 |
+| OQ-Q-08 | Collapse damage to creatures | (a) recommended: the SRD Earthquake numbers (Dexterity save, 5d6, burial DC 20) plus +1d6 per further 10 ft fallen, capped at 20d6; (b) the SRD numbers alone; (c) damage scaled only by debris mass and height | §6.5 |
+| OQ-Q-09 | Warning before a structure falls | (a) recommended: short creaks by material (timber 20 ticks, masonry 5, rock 0-10), none after a blast; (b) no warning ever; (c) long warnings (several game hours) so that players can react | §6.1 |
+| OQ-Q-10 | Blast feel: damage thresholds (the SRD gives the rule, not numbers), the pass table, and whether "spreads around corners" spells spread their physical energy around corners | (a) recommended: the §8.3 tables, with around-corners propagation for the spells whose SRD text says so; (b) the same tables, straight lines only (the ADR's rule); (c) tune both on the SIM.60.04 fixtures with the Owner | §2.3, §8 |
+| OQ-Q-11 | Roof decks that old saves got for free (`DEUS_Floors.js:276`) | (a) keep them with a logged one-time migration source; (b) remove them on load; (c) convert them to items on the floor below | §3.5 |
+| OQ-Q-12 | Soil cannot span without depth: a tunnel in soil with less than 20 ft of cover falls in unless propped | (a) accept (props become a real mining task, SIM.40.03); (b) give soil a small span (1 cell) at any thickness; (c) soil tunnels never fall | §4.3 |
+| OQ-Q-13 | Generated terrain that exceeds the spans | (a) the generator adds natural pillars; (b) the generator thins or removes the overhang; (c) generated terrain is exempt until something nearby changes | §4.5, PROPOSED-Q-06 |
+| OQ-Q-14 | Walls fill a whole 5 ft cell, with thin walls expressed by their mass (as wall objects block a cell today) | (a) recommended: whole cells; (b) walls on the edges between cells, a new geometry and a much larger change | §3.2 |
