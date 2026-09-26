@@ -30,3 +30,10 @@ At `b612bc72`, three WBS rows cite decision ids that `docs/OWNER_DECISIONS.md` g
 - Lane N (SIM.00.00) was merged at `e27e8be5` while Rev 3 was being written. It changes `game/js/plugins/DEUS_Levels.js` and `game/js/plugins/DEUS_World.js`.
 - The brief pins citations to `b612bc72`, and the ADR keeps that pin and says so.
 - Appendix C of the ADR counts which citations into those two files still read the same at `e27e8be5`. A later amendment can re-pin them.
+
+## E4. Are the five band ranges DECIDED or OPEN?
+
+- DEC-013 as amended lists the five band ranges (LOWER2 −16..−9 to UPPER2 +10..+15) in its summary (`docs/OWNER_DECISIONS.md:186-191`). As OPEN it records only the Z range (`:193`) and the biome and race assignments (`:194-195`).
+- The Rev 3 brief (`tasks/SIM.00.01/lane-m/BRIEF_REV3.md`, required change 2) and directive 0028-AC §2 item 3 call the band ranges "PM defaults, OPEN for the Owner".
+- **Why this doesn't block Rev 3.** Either way the ADR holds the bands as data in world state and hard-codes no range (ADR §5.1). The ADR quotes both sources and doesn't pick one.
+- **What it needs.** The coordinator states the bands' status in `docs/OWNER_DECISIONS.md`.
