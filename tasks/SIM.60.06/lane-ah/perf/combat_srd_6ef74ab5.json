@@ -1,0 +1,2848 @@
+{
+ "task": "SIM.60.06",
+ "lane": "lane-ah",
+ "mode": "both",
+ "seconds": 30,
+ "measuredSha": "6ef74ab5d0ff08a79c8ef062c28850577eceb68f",
+ "machine": {
+  "host": "MSI",
+  "cpus": 16,
+  "cpu": "AMD Ryzen 7 8845HS w/ Radeon 780M Graphics",
+  "totalMemGb": 31.3
+ },
+ "method": "nw.exe harness (--deus-test=bench_combat_srd) on a snapshot copy of game/ under %TEMP%. The copy's DEUS_Test watchdog is raised from 180 s to 600 s so a day/night base pass and a day/night SRD pass fit in one process. Fighters carry SRD stat-block ids from tools/bench/combat_srd/roster.js. Resolution is UF.Rules.attack and UF.Rules.damage (host resolveAttack when the catalog weapon key is that action). sim.rules and render are separate timers. The driver is a due bucket; resolution.fullScans counts roster walks. Machine load: runs[].machineLoad.",
+ "runs": [
+  {
+   "task": "SIM.60.06",
+   "scenario": "stress",
+   "mode": "both",
+   "seconds": 30,
+   "seed": "0x5eed0019",
+   "startedAt": "2026-09-26T17:43:00.521Z",
+   "phases": [
+    {
+     "phase": "base_day_30s",
+     "frames": 292,
+     "wallStart": 1790444584233,
+     "wallEnd": 1790444614177,
+     "frameMs": {
+      "median": 74.33,
+      "p95": 302.525,
+      "worst": 472.92
+     },
+     "fps": {
+      "atMedian": 13.454,
+      "atP95": 3.306,
+      "atWorst": 2.115
+     },
+     "target": {
+      "met": false,
+      "fps": 13.454,
+      "budgetMs": 16.667,
+      "overMs": 16.7,
+      "rule": "met when the median frame interval is at most 16.7 ms (WG.00.09b over-budget line; a 60 Hz frame is 16.666... ms)"
+     },
+     "over16_7": 292,
+     "over33_4": 288,
+     "over50": 228,
+     "tickMs": {
+      "median": 70.56,
+      "p95": 299.12,
+      "worst": 470.615,
+      "mean": 99.846
+     },
+     "drawCalls": {
+      "median": 212,
+      "p95": 218,
+      "max": 230
+     },
+     "simMs": {
+      "median": 0,
+      "p95": 0,
+      "worst": 0,
+      "mean": 0
+     },
+     "renderMs": {
+      "median": 6.795,
+      "p95": 9.63,
+      "worst": 14.825,
+      "mean": 7.042
+     },
+     "costs": {
+      "simulationResolutionMs": {
+       "median": 0,
+       "p95": 0,
+       "worst": 0,
+       "mean": 0
+      },
+      "renderingMs": {
+       "median": 6.795,
+       "p95": 9.63,
+       "worst": 14.825,
+       "mean": 7.042
+      },
+      "note": "sim.rules is time inside UF.Rules.attack and UF.Rules.damage. render is time inside the engine render submission. The two accumulators are independent. sim.rules is not render subtracted from the frame."
+     },
+     "parts": {
+      "render": {
+       "median": 6.795,
+       "p95": 9.63,
+       "worst": 14.825,
+       "mean": 7.042
+      },
+      "update": {
+       "median": 63.305,
+       "p95": 292.715,
+       "worst": 462.07,
+       "mean": 92.765
+      },
+      "update.world": {
+       "median": 7.995,
+       "p95": 14.355,
+       "worst": 28.895,
+       "mean": 8.562
+      }
+     },
+     "peak": {
+      "projectilesAlive": 42,
+      "impactsAlive": 27,
+      "dueVisits": 10523,
+      "fullScans": 0,
+      "units": 221,
+      "lastDue": 22
+     },
+     "wallMs": 30038.8,
+     "hour": 12,
+     "resolve": false,
+     "resolution": {
+      "rulesCalls": 0,
+      "fromStatBlock": 0,
+      "hostAttacks": 0,
+      "hostErrors": 0,
+      "rulesAttacks": 0,
+      "killingBlows": 0,
+      "fullScans": 0
+     },
+     "engine": {
+      "worldUpdateCalls": 584,
+      "unitsInAreaCalls": 575
+     },
+     "cpuPercent": {
+      "samples": 31,
+      "min": 51.1,
+      "median": 66.8,
+      "max": 83.3
+     }
+    },
+    {
+     "phase": "base_night_30s",
+     "frames": 250,
+     "wallStart": 1790444615940,
+     "wallEnd": 1790444645508,
+     "frameMs": {
+      "median": 88.545,
+      "p95": 404.9,
+      "worst": 620.55
+     },
+     "fps": {
+      "atMedian": 11.294,
+      "atP95": 2.47,
+      "atWorst": 1.611
+     },
+     "target": {
+      "met": false,
+      "fps": 11.294,
+      "budgetMs": 16.667,
+      "overMs": 16.7,
+      "rule": "met when the median frame interval is at most 16.7 ms (WG.00.09b over-budget line; a 60 Hz frame is 16.666... ms)"
+     },
+     "over16_7": 250,
+     "over33_4": 250,
+     "over50": 236,
+     "tickMs": {
+      "median": 85.115,
+      "p95": 385.975,
+      "worst": 616.455,
+      "mean": 117.124
+     },
+     "drawCalls": {
+      "median": 216,
+      "p95": 224,
+      "max": 230
+     },
+     "simMs": {
+      "median": 0,
+      "p95": 0,
+      "worst": 0,
+      "mean": 0
+     },
+     "renderMs": {
+      "median": 6.79,
+      "p95": 9.17,
+      "worst": 13.91,
+      "mean": 7.027
+     },
+     "costs": {
+      "simulationResolutionMs": {
+       "median": 0,
+       "p95": 0,
+       "worst": 0,
+       "mean": 0
+      },
+      "renderingMs": {
+       "median": 6.79,
+       "p95": 9.17,
+       "worst": 13.91,
+       "mean": 7.027
+      },
+      "note": "sim.rules is time inside UF.Rules.attack and UF.Rules.damage. render is time inside the engine render submission. The two accumulators are independent. sim.rules is not render subtracted from the frame."
+     },
+     "parts": {
+      "render": {
+       "median": 6.79,
+       "p95": 9.17,
+       "worst": 13.91,
+       "mean": 7.027
+      },
+      "update": {
+       "median": 76.98,
+       "p95": 379.35,
+       "worst": 609.8,
+       "mean": 110.061
+      },
+      "update.world": {
+       "median": 9.77,
+       "p95": 20.055,
+       "worst": 49.935,
+       "mean": 10.717
+      }
+     },
+     "peak": {
+      "projectilesAlive": 42,
+      "impactsAlive": 27,
+      "dueVisits": 19118,
+      "fullScans": 0,
+      "units": 221,
+      "lastDue": 22
+     },
+     "wallMs": 30091.8,
+     "hour": 22,
+     "resolve": false,
+     "resolution": {
+      "rulesCalls": 0,
+      "fromStatBlock": 0,
+      "hostAttacks": 0,
+      "hostErrors": 0,
+      "rulesAttacks": 0,
+      "killingBlows": 0,
+      "fullScans": 0
+     },
+     "engine": {
+      "worldUpdateCalls": 500,
+      "unitsInAreaCalls": 1064
+     },
+     "cpuPercent": {
+      "samples": 31,
+      "min": 51,
+      "median": 63.5,
+      "max": 81.4
+     }
+    },
+    {
+     "phase": "srd_day_30s",
+     "frames": 228,
+     "wallStart": 1790444646429,
+     "wallEnd": 1790444676383,
+     "frameMs": {
+      "median": 101.95,
+      "p95": 370.355,
+      "worst": 537.715
+     },
+     "fps": {
+      "atMedian": 9.809,
+      "atP95": 2.7,
+      "atWorst": 1.86
+     },
+     "target": {
+      "met": false,
+      "fps": 9.809,
+      "budgetMs": 16.667,
+      "overMs": 16.7,
+      "rule": "met when the median frame interval is at most 16.7 ms (WG.00.09b over-budget line; a 60 Hz frame is 16.666... ms)"
+     },
+     "over16_7": 228,
+     "over33_4": 228,
+     "over50": 228,
+     "tickMs": {
+      "median": 98.095,
+      "p95": 359.02,
+      "worst": 532.88,
+      "mean": 128.663
+     },
+     "drawCalls": {
+      "median": 220,
+      "p95": 226,
+      "max": 233
+     },
+     "simMs": {
+      "median": 0.26,
+      "p95": 0.47,
+      "worst": 1.495,
+      "mean": 0.282
+     },
+     "renderMs": {
+      "median": 7.25,
+      "p95": 9.69,
+      "worst": 19.76,
+      "mean": 7.458
+     },
+     "costs": {
+      "simulationResolutionMs": {
+       "median": 0.26,
+       "p95": 0.47,
+       "worst": 1.495,
+       "mean": 0.282
+      },
+      "renderingMs": {
+       "median": 7.25,
+       "p95": 9.69,
+       "worst": 19.76,
+       "mean": 7.458
+      },
+      "note": "sim.rules is time inside UF.Rules.attack and UF.Rules.damage. render is time inside the engine render submission. The two accumulators are independent. sim.rules is not render subtracted from the frame."
+     },
+     "parts": {
+      "render": {
+       "median": 7.25,
+       "p95": 9.69,
+       "worst": 19.76,
+       "mean": 7.458
+      },
+      "sim.rules": {
+       "median": 0.26,
+       "p95": 0.47,
+       "worst": 1.495,
+       "mean": 0.282
+      },
+      "update": {
+       "median": 90.695,
+       "p95": 350.8,
+       "worst": 525.045,
+       "mean": 121.166
+      },
+      "update.world": {
+       "median": 12.74,
+       "p95": 23.48,
+       "worst": 36.5,
+       "mean": 13.251
+      }
+     },
+     "peak": {
+      "projectilesAlive": 42,
+      "impactsAlive": 27,
+      "dueVisits": 26985,
+      "fullScans": 0,
+      "units": 221,
+      "lastDue": 22
+     },
+     "wallMs": 30065.7,
+     "hour": 12,
+     "resolve": true,
+     "resolution": {
+      "rulesCalls": 1692,
+      "fromStatBlock": 1692,
+      "hostAttacks": 841,
+      "hostErrors": 0,
+      "rulesAttacks": 851,
+      "killingBlows": 17,
+      "fullScans": 0
+     },
+     "engine": {
+      "worldUpdateCalls": 456,
+      "unitsInAreaCalls": 1302
+     },
+     "cpuPercent": {
+      "samples": 30,
+      "min": 38.9,
+      "median": 66.2,
+      "max": 83.9
+     }
+    },
+    {
+     "phase": "srd_night_30s",
+     "frames": 217,
+     "wallStart": 1790444676893,
+     "wallEnd": 1790444707097,
+     "frameMs": {
+      "median": 93.205,
+      "p95": 379.295,
+      "worst": 1171.55
+     },
+     "fps": {
+      "atMedian": 10.729,
+      "atP95": 2.636,
+      "atWorst": 0.854
+     },
+     "target": {
+      "met": false,
+      "fps": 10.729,
+      "budgetMs": 16.667,
+      "overMs": 16.7,
+      "rule": "met when the median frame interval is at most 16.7 ms (WG.00.09b over-budget line; a 60 Hz frame is 16.666... ms)"
+     },
+     "over16_7": 217,
+     "over33_4": 217,
+     "over50": 216,
+     "tickMs": {
+      "median": 90.62,
+      "p95": 382.67,
+      "worst": 1168.215,
+      "mean": 136.599
+     },
+     "drawCalls": {
+      "median": 215,
+      "p95": 227,
+      "max": 231
+     },
+     "simMs": {
+      "median": 0.185,
+      "p95": 0.36,
+      "worst": 1.735,
+      "mean": 0.203
+     },
+     "renderMs": {
+      "median": 6.23,
+      "p95": 8.23,
+      "worst": 13.495,
+      "mean": 6.386
+     },
+     "costs": {
+      "simulationResolutionMs": {
+       "median": 0.185,
+       "p95": 0.36,
+       "worst": 1.735,
+       "mean": 0.203
+      },
+      "renderingMs": {
+       "median": 6.23,
+       "p95": 8.23,
+       "worst": 13.495,
+       "mean": 6.386
+      },
+      "note": "sim.rules is time inside UF.Rules.attack and UF.Rules.damage. render is time inside the engine render submission. The two accumulators are independent. sim.rules is not render subtracted from the frame."
+     },
+     "parts": {
+      "render": {
+       "median": 6.23,
+       "p95": 8.23,
+       "worst": 13.495,
+       "mean": 6.386
+      },
+      "sim.rules": {
+       "median": 0.185,
+       "p95": 0.36,
+       "worst": 1.735,
+       "mean": 0.203
+      },
+      "update": {
+       "median": 84.185,
+       "p95": 376.845,
+       "worst": 1161.905,
+       "mean": 130.172
+      },
+      "update.world": {
+       "median": 12.355,
+       "p95": 19.01,
+       "worst": 26.04,
+       "mean": 12.547
+      }
+     },
+     "peak": {
+      "projectilesAlive": 42,
+      "impactsAlive": 27,
+      "dueVisits": 34486,
+      "fullScans": 0,
+      "units": 221,
+      "lastDue": 22
+     },
+     "wallMs": 30257.4,
+     "hour": 22,
+     "resolve": true,
+     "resolution": {
+      "rulesCalls": 1618,
+      "fromStatBlock": 1618,
+      "hostAttacks": 806,
+      "hostErrors": 0,
+      "rulesAttacks": 812,
+      "killingBlows": 11,
+      "fullScans": 0
+     },
+     "engine": {
+      "worldUpdateCalls": 434,
+      "unitsInAreaCalls": 1568
+     },
+     "cpuPercent": {
+      "samples": 30,
+      "min": 33.7,
+      "median": 46.8,
+      "max": 86.9
+     }
+    }
+   ],
+   "notes": [],
+   "placeholders": {
+    "arrow": {
+     "size": "12x4 px",
+     "color": "#8b5a2b",
+     "note": "arrow in flight: no arrow sprite in the game"
+    },
+    "spellOrb": {
+     "size": "10x10 px",
+     "color": "#ff7a1a",
+     "note": "spell projectile in flight: no spell projectile in the game"
+    },
+    "impactLower": {
+     "size": "24x24 px",
+     "color": "#ffd24a",
+     "note": "impact on a lower level: RMMZ animations need a Game_Event"
+    }
+   },
+   "stress": {
+    "cells": 221,
+    "units": 221,
+    "byLevel": {
+     "0": 52,
+     "+2": 82,
+     "+1": 87
+    },
+    "roles": {
+     "melee": 112,
+     "archer": 64,
+     "caster": 45
+    },
+    "srdIds": {
+     "srd:creature:wolf": 16,
+     "srd:creature:giant-spider": 16,
+     "srd:creature:guard": 16,
+     "srd:creature:hobgoblin": 16,
+     "srd:creature:goblin": 32,
+     "srd:creature:orc": 16,
+     "srd:creature:boar": 16,
+     "srd:creature:skeleton": 16,
+     "srd:creature:scout": 16,
+     "srd:creature:bandit": 16,
+     "srd:creature:barbed-devil": 15,
+     "srd:creature:will-o-wisp": 15,
+     "srd:creature:specter": 15
+    },
+    "combatLevels": 0,
+    "zoom": 1,
+    "effectPaths": {
+     "walk": "due bucket, UF.World.sendUnit ping-pong",
+     "melee": "host resolveAttack when the catalog key matches the stat-block action; otherwise UF.Rules.attack",
+     "arrows": "visual placeholder; the SRD ranged attack resolves on the due frame",
+     "spells": "printed spell action through UF.Rules (hurl flame, shock, life drain); visual orb",
+     "sustain": "bench onUnitDeath counts a killing blow and restores printed HP so the unit stays in the window"
+    }
+   },
+   "resolution": {
+    "fullScans": 0,
+    "dueVisits": 34486,
+    "frames": 2044,
+    "setupWalks": 5,
+    "maxDue": 23,
+    "population": 221,
+    "rulesCalls": 3395,
+    "fromStatBlock": 3395,
+    "hostAttacks": 1687,
+    "hostErrors": 0,
+    "rulesAttacks": 1708,
+    "killingBlows": 29
+   },
+   "engine": {
+    "worldUpdateCalls": 2066,
+    "unitsInAreaCalls": 4771,
+    "combatEnabled": false,
+    "note": "worldUpdateCalls counts UF.World.update. That function walks every unit (DEUS_World.js). This bench does not change it. fullScans counts combat-roster walks by the stress driver."
+   },
+   "finishedAt": "2026-09-26T17:45:07.100Z",
+   "run": 1,
+   "wallSeconds": 175.8,
+   "exit": 0,
+   "machineLoad": {
+    "label": "loaded",
+    "labelRule": "quiet: overall median CPU <= 25 % and no other nw.exe at the start, in any 15 s check or at the end; otherwise loaded",
+    "method": "CPU: os.cpus() idle/total time deltas over all logical CPUs, one sample a second. aiWorkers: PowerShell CIM, claude.exe with ' -p ', grok.exe, node.exe running codex.js exec (the PM's filter); the session running this bench counts as 1. otherNwExe: nw.exe processes that are not this run's own.",
+    "startedAt": "2026-09-26T17:42:11.759Z",
+    "finishedAt": "2026-09-26T17:45:07.650Z",
+    "start": {
+     "aiWorkers": 4,
+     "otherNwExe": 26,
+     "otherNw": [
+      {
+       "pid": 25484,
+       "ppid": 23632,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-4..4_sim_20444_1790444470575 --us"
+      },
+      {
+       "pid": 27508,
+       "ppid": 25484,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+      },
+      {
+       "pid": 10248,
+       "ppid": 27508,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+      },
+      {
+       "pid": 22820,
+       "ppid": 25484,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1712,6803162792856528205,112071618261163571"
+      },
+      {
+       "pid": 12408,
+       "ppid": 23260,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-16..15_sim_20444_1790444470689 --"
+      },
+      {
+       "pid": 11176,
+       "ppid": 25484,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+      },
+      {
+       "pid": 23512,
+       "ppid": 25484,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+      },
+      {
+       "pid": 24444,
+       "ppid": 12408,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+      },
+      {
+       "pid": 17788,
+       "ppid": 25484,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+      },
+      {
+       "pid": 18636,
+       "ppid": 24444,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+      },
+      {
+       "pid": 26544,
+       "ppid": 25484,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+      },
+      {
+       "pid": 26644,
+       "ppid": 12408,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1688,17109433693965537223,62242029359803412"
+      },
+      {
+       "pid": 4308,
+       "ppid": 12408,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+      },
+      {
+       "pid": 12228,
+       "ppid": 12408,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+      },
+      {
+       "pid": 8956,
+       "ppid": 21656,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-2..2_sim_20444_1790444470801 --us"
+      },
+      {
+       "pid": 7024,
+       "ppid": 12408,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+      },
+      {
+       "pid": 2852,
+       "ppid": 12408,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+      },
+      {
+       "pid": 16676,
+       "ppid": 8956,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+      },
+      {
+       "pid": 26884,
+       "ppid": 8956,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1692,15612796203691390649,43360380829577254"
+      },
+      {
+       "pid": 2752,
+       "ppid": 8956,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+      },
+      {
+       "pid": 4968,
+       "ppid": 8956,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+      },
+      {
+       "pid": 9368,
+       "ppid": 8956,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+      },
+      {
+       "pid": 3868,
+       "ppid": 8956,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+      },
+      {
+       "pid": 22604,
+       "ppid": 25484,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=171"
+      },
+      {
+       "pid": 14948,
+       "ppid": 12408,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=168"
+      },
+      {
+       "pid": 21972,
+       "ppid": 8956,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=169"
+      }
+     ]
+    },
+    "end": {
+     "aiWorkers": 4,
+     "otherNwExe": 8,
+     "otherNw": [
+      {
+       "pid": 23920,
+       "ppid": 25160,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_snapshots\\lanek_layers_flat_12096_179044470706"
+      },
+      {
+       "pid": 11016,
+       "ppid": 23920,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+      },
+      {
+       "pid": 23512,
+       "ppid": 11016,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+      },
+      {
+       "pid": 20880,
+       "ppid": 23920,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1672,7189622749333298106,816912641694022759"
+      },
+      {
+       "pid": 3256,
+       "ppid": 23920,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+      },
+      {
+       "pid": 10024,
+       "ppid": 23920,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+      },
+      {
+       "pid": 20684,
+       "ppid": 23920,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+      },
+      {
+       "pid": 17000,
+       "ppid": 23920,
+       "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+      }
+     ]
+    },
+    "during": [
+     {
+      "at": "2026-09-26T17:42:27.242Z",
+      "aiWorkers": 4,
+      "otherNwExe": 26,
+      "otherNw": [
+       {
+        "pid": 25484,
+        "ppid": 23632,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-4..4_sim_20444_1790444470575 --us"
+       },
+       {
+        "pid": 27508,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 10248,
+        "ppid": 27508,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 22820,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1712,6803162792856528205,112071618261163571"
+       },
+       {
+        "pid": 12408,
+        "ppid": 23260,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-16..15_sim_20444_1790444470689 --"
+       },
+       {
+        "pid": 11176,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 23512,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 24444,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 17788,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 18636,
+        "ppid": 24444,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 26544,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 26644,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1688,17109433693965537223,62242029359803412"
+       },
+       {
+        "pid": 4308,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 12228,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 8956,
+        "ppid": 21656,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-2..2_sim_20444_1790444470801 --us"
+       },
+       {
+        "pid": 7024,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 2852,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 16676,
+        "ppid": 8956,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 26884,
+        "ppid": 8956,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1692,15612796203691390649,43360380829577254"
+       },
+       {
+        "pid": 2752,
+        "ppid": 8956,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 4968,
+        "ppid": 8956,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 9368,
+        "ppid": 8956,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 3868,
+        "ppid": 8956,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 22604,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=171"
+       },
+       {
+        "pid": 14948,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=168"
+       },
+       {
+        "pid": 21972,
+        "ppid": 8956,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=169"
+       }
+      ]
+     },
+     {
+      "at": "2026-09-26T17:42:42.255Z",
+      "aiWorkers": 4,
+      "otherNwExe": 26,
+      "otherNw": [
+       {
+        "pid": 25484,
+        "ppid": 23632,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-4..4_sim_20444_1790444470575 --us"
+       },
+       {
+        "pid": 27508,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 10248,
+        "ppid": 27508,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 22820,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1712,6803162792856528205,112071618261163571"
+       },
+       {
+        "pid": 12408,
+        "ppid": 23260,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-16..15_sim_20444_1790444470689 --"
+       },
+       {
+        "pid": 11176,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 23512,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 24444,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 17788,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 18636,
+        "ppid": 24444,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 26544,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 26644,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1688,17109433693965537223,62242029359803412"
+       },
+       {
+        "pid": 4308,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 12228,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 8956,
+        "ppid": 21656,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-2..2_sim_20444_1790444470801 --us"
+       },
+       {
+        "pid": 7024,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 2852,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 16676,
+        "ppid": 8956,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 26884,
+        "ppid": 8956,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1692,15612796203691390649,43360380829577254"
+       },
+       {
+        "pid": 2752,
+        "ppid": 8956,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 4968,
+        "ppid": 8956,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 9368,
+        "ppid": 8956,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 3868,
+        "ppid": 8956,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 22604,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=171"
+       },
+       {
+        "pid": 14948,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=168"
+       },
+       {
+        "pid": 21972,
+        "ppid": 8956,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=169"
+       }
+      ]
+     },
+     {
+      "at": "2026-09-26T17:42:57.265Z",
+      "aiWorkers": 4,
+      "otherNwExe": 28,
+      "otherNw": [
+       {
+        "pid": 25484,
+        "ppid": 23632,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-4..4_sim_20444_1790444470575 --us"
+       },
+       {
+        "pid": 27508,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 10248,
+        "ppid": 27508,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 22820,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1712,6803162792856528205,112071618261163571"
+       },
+       {
+        "pid": 12408,
+        "ppid": 23260,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-16..15_sim_20444_1790444470689 --"
+       },
+       {
+        "pid": 11176,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 23512,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 24444,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 17788,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 18636,
+        "ppid": 24444,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 26544,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 26644,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1688,17109433693965537223,62242029359803412"
+       },
+       {
+        "pid": 4308,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 12228,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 7024,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 2852,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 22604,
+        "ppid": 25484,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=171"
+       },
+       {
+        "pid": 14948,
+        "ppid": 12408,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=168"
+       },
+       {
+        "pid": 21084,
+        "ppid": 11576,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-4..4_play_20444_1790444571644 --u"
+       },
+       {
+        "pid": 19180,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 4456,
+        "ppid": 19180,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 18880,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1672,8436610151444071821,120854773694729137"
+       },
+       {
+        "pid": 20568,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 21736,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 23020,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 6348,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 7352,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=data_decoder.mojom.DataDecoderService --field-tri"
+       },
+       {
+        "pid": 10028,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=167"
+       }
+      ]
+     },
+     {
+      "at": "2026-09-26T17:43:12.281Z",
+      "aiWorkers": 4,
+      "otherNwExe": 26,
+      "otherNw": [
+       {
+        "pid": 21084,
+        "ppid": 11576,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-4..4_play_20444_1790444571644 --u"
+       },
+       {
+        "pid": 19180,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 4456,
+        "ppid": 19180,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 18880,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1672,8436610151444071821,120854773694729137"
+       },
+       {
+        "pid": 20568,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 21736,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 23020,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 6348,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 10028,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=167"
+       },
+       {
+        "pid": 27192,
+        "ppid": 14504,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-16..15_play_20444_1790444579499 -"
+       },
+       {
+        "pid": 8708,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 2892,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1668,13481088365653206644,16238615477436663"
+       },
+       {
+        "pid": 10568,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 1616,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 7892,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 2204,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 3616,
+        "ppid": 20756,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-2..2_play_20444_1790444579733 --u"
+       },
+       {
+        "pid": 26012,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 20436,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1692,6885290356507975028,917689693176872294"
+       },
+       {
+        "pid": 22752,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 12220,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 26580,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 7208,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 27580,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=166"
+       },
+       {
+        "pid": 15072,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=169"
+       },
+       {
+        "pid": 26072,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=chrome.mojom.UtilWin --field-trial-handle=1668,13"
+       }
+      ]
+     },
+     {
+      "at": "2026-09-26T17:43:27.297Z",
+      "aiWorkers": 4,
+      "otherNwExe": 25,
+      "otherNw": [
+       {
+        "pid": 21084,
+        "ppid": 11576,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-4..4_play_20444_1790444571644 --u"
+       },
+       {
+        "pid": 19180,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 4456,
+        "ppid": 19180,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 18880,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1672,8436610151444071821,120854773694729137"
+       },
+       {
+        "pid": 20568,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 21736,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 23020,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 6348,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 10028,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=167"
+       },
+       {
+        "pid": 27192,
+        "ppid": 14504,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-16..15_play_20444_1790444579499 -"
+       },
+       {
+        "pid": 8708,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 2892,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1668,13481088365653206644,16238615477436663"
+       },
+       {
+        "pid": 10568,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 1616,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 7892,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 2204,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 3616,
+        "ppid": 20756,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-2..2_play_20444_1790444579733 --u"
+       },
+       {
+        "pid": 26012,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 20436,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1692,6885290356507975028,917689693176872294"
+       },
+       {
+        "pid": 22752,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 12220,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 26580,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 7208,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 27580,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=166"
+       },
+       {
+        "pid": 15072,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=169"
+       }
+      ]
+     },
+     {
+      "at": "2026-09-26T17:43:42.303Z",
+      "aiWorkers": 4,
+      "otherNwExe": 27,
+      "otherNw": [
+       {
+        "pid": 21084,
+        "ppid": 11576,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-4..4_play_20444_1790444571644 --u"
+       },
+       {
+        "pid": 19180,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 4456,
+        "ppid": 19180,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 18880,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1672,8436610151444071821,120854773694729137"
+       },
+       {
+        "pid": 20568,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 21736,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 23020,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 6348,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 10028,
+        "ppid": 21084,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=167"
+       },
+       {
+        "pid": 27192,
+        "ppid": 14504,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-16..15_play_20444_1790444579499 -"
+       },
+       {
+        "pid": 8708,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 2892,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1668,13481088365653206644,16238615477436663"
+       },
+       {
+        "pid": 10568,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 1616,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 7892,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 2204,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 3616,
+        "ppid": 20756,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-2..2_play_20444_1790444579733 --u"
+       },
+       {
+        "pid": 26012,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 20436,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1692,6885290356507975028,917689693176872294"
+       },
+       {
+        "pid": 22752,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 12220,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 26580,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 7208,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 27580,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=166"
+       },
+       {
+        "pid": 15072,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=169"
+       },
+       {
+        "pid": 21716,
+        "ppid": 27192,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=chrome.mojom.UtilWin --field-trial-handle=1668,13"
+       },
+       {
+        "pid": 16536,
+        "ppid": 3616,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=chrome.mojom.UtilWin --field-trial-handle=1692,68"
+       }
+      ]
+     },
+     {
+      "at": "2026-09-26T17:43:57.304Z",
+      "aiWorkers": 4,
+      "otherNwExe": 28,
+      "otherNw": [
+       {
+        "pid": 11716,
+        "ppid": 23476,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-4..4_core_20444_1790444623857 --u"
+       },
+       {
+        "pid": 3212,
+        "ppid": 11716,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 26716,
+        "ppid": 3212,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 23232,
+        "ppid": 11716,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1600,13198642349513906394,10150169536649351"
+       },
+       {
+        "pid": 16080,
+        "ppid": 11716,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 6840,
+        "ppid": 11716,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 24212,
+        "ppid": 11716,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 3660,
+        "ppid": 11716,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 21252,
+        "ppid": 11716,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=160"
+       },
+       {
+        "pid": 4500,
+        "ppid": 11208,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-16..15_core_20444_1790444631333 -"
+       },
+       {
+        "pid": 12200,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 18912,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1044,3426530042739258805,339920384274207186"
+       },
+       {
+        "pid": 10444,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 26552,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 20256,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 5656,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 23272,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=data_decoder.mojom.DataDecoderService --field-tri"
+       },
+       {
+        "pid": 23592,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=104"
+       },
+       {
+        "pid": 24252,
+        "ppid": 19208,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-2..2_core_20444_1790444634650 --u"
+       },
+       {
+        "pid": 11448,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 23432,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1124,15593188082349957481,14602556362805971"
+       },
+       {
+        "pid": 7380,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 24164,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 27252,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 5252,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 12216,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=data_decoder.mojom.DataDecoderService --field-tri"
+       },
+       {
+        "pid": 24092,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=112"
+       },
+       {
+        "pid": 21428,
+        "ppid": 11716,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=chrome.mojom.UtilWin --field-trial-handle=1600,13"
+       }
+      ]
+     },
+     {
+      "at": "2026-09-26T17:44:12.318Z",
+      "aiWorkers": 4,
+      "otherNwExe": 25,
+      "otherNw": [
+       {
+        "pid": 11716,
+        "ppid": 23476,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-4..4_core_20444_1790444623857 --u"
+       },
+       {
+        "pid": 3212,
+        "ppid": 11716,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 26716,
+        "ppid": 3212,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 23232,
+        "ppid": 11716,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1600,13198642349513906394,10150169536649351"
+       },
+       {
+        "pid": 16080,
+        "ppid": 11716,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 6840,
+        "ppid": 11716,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 24212,
+        "ppid": 11716,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 3660,
+        "ppid": 11716,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 21252,
+        "ppid": 11716,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=160"
+       },
+       {
+        "pid": 4500,
+        "ppid": 11208,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-16..15_core_20444_1790444631333 -"
+       },
+       {
+        "pid": 12200,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 18912,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1044,3426530042739258805,339920384274207186"
+       },
+       {
+        "pid": 10444,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 26552,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 20256,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 5656,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 23592,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=104"
+       },
+       {
+        "pid": 24252,
+        "ppid": 19208,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-2..2_core_20444_1790444634650 --u"
+       },
+       {
+        "pid": 11448,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 23432,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1124,15593188082349957481,14602556362805971"
+       },
+       {
+        "pid": 7380,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 24164,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 27252,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 5252,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 24092,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=112"
+       }
+      ]
+     },
+     {
+      "at": "2026-09-26T17:44:27.333Z",
+      "aiWorkers": 4,
+      "otherNwExe": 26,
+      "otherNw": [
+       {
+        "pid": 4500,
+        "ppid": 11208,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-16..15_core_20444_1790444631333 -"
+       },
+       {
+        "pid": 12200,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 18912,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1044,3426530042739258805,339920384274207186"
+       },
+       {
+        "pid": 10444,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 26552,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 20256,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 5656,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 23592,
+        "ppid": 4500,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=104"
+       },
+       {
+        "pid": 24252,
+        "ppid": 19208,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-2..2_core_20444_1790444634650 --u"
+       },
+       {
+        "pid": 11448,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 23432,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1124,15593188082349957481,14602556362805971"
+       },
+       {
+        "pid": 7380,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 24164,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 27252,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 5252,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 24092,
+        "ppid": 24252,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=112"
+       },
+       {
+        "pid": 11004,
+        "ppid": 21380,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\legacy_20444_1790444664326 --user-"
+       },
+       {
+        "pid": 12516,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 27456,
+        "ppid": 12516,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 16876,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1668,3026541137147727064,518727302135073027"
+       },
+       {
+        "pid": 19944,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 12328,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 7884,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 9988,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 23144,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=data_decoder.mojom.DataDecoderService --field-tri"
+       },
+       {
+        "pid": 27496,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=166"
+       }
+      ]
+     },
+     {
+      "at": "2026-09-26T17:44:42.344Z",
+      "aiWorkers": 4,
+      "otherNwExe": 9,
+      "otherNw": [
+       {
+        "pid": 11004,
+        "ppid": 21380,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\legacy_20444_1790444664326 --user-"
+       },
+       {
+        "pid": 12516,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 27456,
+        "ppid": 12516,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 16876,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1668,3026541137147727064,518727302135073027"
+       },
+       {
+        "pid": 19944,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 12328,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 7884,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 9988,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 27496,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=166"
+       }
+      ]
+     },
+     {
+      "at": "2026-09-26T17:44:57.351Z",
+      "aiWorkers": 4,
+      "otherNwExe": 9,
+      "otherNw": [
+       {
+        "pid": 11004,
+        "ppid": 21380,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\legacy_20444_1790444664326 --user-"
+       },
+       {
+        "pid": 12516,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 27456,
+        "ppid": 12516,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_test_p"
+       },
+       {
+        "pid": 16876,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=gpu-process --field-trial-handle=1668,3026541137147727064,518727302135073027"
+       },
+       {
+        "pid": 19944,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --field-trial-handle"
+       },
+       {
+        "pid": 12328,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=storage.mojom.StorageService --field-trial-handle"
+       },
+       {
+        "pid": 7884,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 9988,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=renderer --no-sandbox --disable-background-timer-throttling --file-url-path-"
+       },
+       {
+        "pid": 27496,
+        "ppid": 11004,
+        "cmd": "\"C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe\" --type=utility --utility-sub-type=audio.mojom.AudioService --field-trial-handle=166"
+       }
+      ]
+     }
+    ],
+    "otherNwExeMax": 28,
+    "cpu": {
+     "intervalMs": 1000,
+     "overall": {
+      "samples": 173,
+      "min": 33.7,
+      "median": 61.2,
+      "max": 87.2
+     },
+     "byPhase": {
+      "base_day_30s": {
+       "samples": 31,
+       "min": 51.1,
+       "median": 66.8,
+       "max": 83.3
+      },
+      "base_night_30s": {
+       "samples": 31,
+       "min": 51,
+       "median": 63.5,
+       "max": 81.4
+      },
+      "srd_day_30s": {
+       "samples": 30,
+       "min": 38.9,
+       "median": 66.2,
+       "max": 83.9
+      },
+      "srd_night_30s": {
+       "samples": 30,
+       "min": 33.7,
+       "median": 46.8,
+       "max": 86.9
+      }
+     },
+     "samples": [
+      {
+       "t": 1790444533271,
+       "cpu": 61
+      },
+      {
+       "t": 1790444534252,
+       "cpu": 59.3
+      },
+      {
+       "t": 1790444535261,
+       "cpu": 54.1
+      },
+      {
+       "t": 1790444536272,
+       "cpu": 56.2
+      },
+      {
+       "t": 1790444537283,
+       "cpu": 51.4
+      },
+      {
+       "t": 1790444538291,
+       "cpu": 48.4
+      },
+      {
+       "t": 1790444539300,
+       "cpu": 54.9
+      },
+      {
+       "t": 1790444540312,
+       "cpu": 53.7
+      },
+      {
+       "t": 1790444541319,
+       "cpu": 47.1
+      },
+      {
+       "t": 1790444542329,
+       "cpu": 51.9
+      },
+      {
+       "t": 1790444543339,
+       "cpu": 47.4
+      },
+      {
+       "t": 1790444544348,
+       "cpu": 53.3
+      },
+      {
+       "t": 1790444545360,
+       "cpu": 57.2
+      },
+      {
+       "t": 1790444546371,
+       "cpu": 53.7
+      },
+      {
+       "t": 1790444547390,
+       "cpu": 54.7
+      },
+      {
+       "t": 1790444548397,
+       "cpu": 56.1
+      },
+      {
+       "t": 1790444549407,
+       "cpu": 48.7
+      },
+      {
+       "t": 1790444550422,
+       "cpu": 52.6
+      },
+      {
+       "t": 1790444551432,
+       "cpu": 59.8
+      },
+      {
+       "t": 1790444552443,
+       "cpu": 60.5
+      },
+      {
+       "t": 1790444553448,
+       "cpu": 48.5
+      },
+      {
+       "t": 1790444554463,
+       "cpu": 58.3
+      },
+      {
+       "t": 1790444555478,
+       "cpu": 59.4
+      },
+      {
+       "t": 1790444556483,
+       "cpu": 55
+      },
+      {
+       "t": 1790444557484,
+       "cpu": 62.6
+      },
+      {
+       "t": 1790444558494,
+       "cpu": 67
+      },
+      {
+       "t": 1790444559500,
+       "cpu": 81.7
+      },
+      {
+       "t": 1790444560509,
+       "cpu": 59.9
+      },
+      {
+       "t": 1790444561519,
+       "cpu": 59.5
+      },
+      {
+       "t": 1790444562524,
+       "cpu": 56.9
+      },
+      {
+       "t": 1790444563533,
+       "cpu": 67.2
+      },
+      {
+       "t": 1790444564538,
+       "cpu": 73.7
+      },
+      {
+       "t": 1790444565550,
+       "cpu": 54.8
+      },
+      {
+       "t": 1790444566563,
+       "cpu": 59.7
+      },
+      {
+       "t": 1790444567567,
+       "cpu": 56.2
+      },
+      {
+       "t": 1790444568581,
+       "cpu": 60
+      },
+      {
+       "t": 1790444569593,
+       "cpu": 58.1
+      },
+      {
+       "t": 1790444570600,
+       "cpu": 63.7
+      },
+      {
+       "t": 1790444571615,
+       "cpu": 71.7
+      },
+      {
+       "t": 1790444572627,
+       "cpu": 69.6
+      },
+      {
+       "t": 1790444573640,
+       "cpu": 66.1
+      },
+      {
+       "t": 1790444574651,
+       "cpu": 58.8
+      },
+      {
+       "t": 1790444575661,
+       "cpu": 66.6
+      },
+      {
+       "t": 1790444576674,
+       "cpu": 64.3
+      },
+      {
+       "t": 1790444577693,
+       "cpu": 61.1
+      },
+      {
+       "t": 1790444578696,
+       "cpu": 64.3
+      },
+      {
+       "t": 1790444579708,
+       "cpu": 68.8
+      },
+      {
+       "t": 1790444580723,
+       "cpu": 87.2
+      },
+      {
+       "t": 1790444581734,
+       "cpu": 81.2
+      },
+      {
+       "t": 1790444582747,
+       "cpu": 73.1
+      },
+      {
+       "t": 1790444583755,
+       "cpu": 65
+      },
+      {
+       "t": 1790444584764,
+       "cpu": 74
+      },
+      {
+       "t": 1790444585777,
+       "cpu": 81.9
+      },
+      {
+       "t": 1790444586786,
+       "cpu": 65.6
+      },
+      {
+       "t": 1790444587798,
+       "cpu": 67.1
+      },
+      {
+       "t": 1790444588808,
+       "cpu": 71.4
+      },
+      {
+       "t": 1790444589814,
+       "cpu": 68.3
+      },
+      {
+       "t": 1790444590822,
+       "cpu": 65.9
+      },
+      {
+       "t": 1790444591829,
+       "cpu": 69
+      },
+      {
+       "t": 1790444592836,
+       "cpu": 83.3
+      },
+      {
+       "t": 1790444593840,
+       "cpu": 67.5
+      },
+      {
+       "t": 1790444594846,
+       "cpu": 69.4
+      },
+      {
+       "t": 1790444595858,
+       "cpu": 53
+      },
+      {
+       "t": 1790444596864,
+       "cpu": 56.3
+      },
+      {
+       "t": 1790444597875,
+       "cpu": 51.1
+      },
+      {
+       "t": 1790444598888,
+       "cpu": 54.4
+      },
+      {
+       "t": 1790444599902,
+       "cpu": 69.8
+      },
+      {
+       "t": 1790444600912,
+       "cpu": 67.6
+      },
+      {
+       "t": 1790444601918,
+       "cpu": 61.5
+      },
+      {
+       "t": 1790444602933,
+       "cpu": 66.8
+      },
+      {
+       "t": 1790444603941,
+       "cpu": 64.4
+      },
+      {
+       "t": 1790444604950,
+       "cpu": 65.2
+      },
+      {
+       "t": 1790444605961,
+       "cpu": 64.6
+      },
+      {
+       "t": 1790444606973,
+       "cpu": 54.4
+      },
+      {
+       "t": 1790444607983,
+       "cpu": 69.9
+      },
+      {
+       "t": 1790444608994,
+       "cpu": 76.4
+      },
+      {
+       "t": 1790444610006,
+       "cpu": 61.3
+      },
+      {
+       "t": 1790444611018,
+       "cpu": 72.3
+      },
+      {
+       "t": 1790444612031,
+       "cpu": 68.6
+      },
+      {
+       "t": 1790444613037,
+       "cpu": 58.9
+      },
+      {
+       "t": 1790444614046,
+       "cpu": 61
+      },
+      {
+       "t": 1790444615055,
+       "cpu": 53.9
+      },
+      {
+       "t": 1790444616068,
+       "cpu": 61.2
+      },
+      {
+       "t": 1790444617082,
+       "cpu": 63.1
+      },
+      {
+       "t": 1790444618094,
+       "cpu": 60.7
+      },
+      {
+       "t": 1790444619106,
+       "cpu": 52.5
+      },
+      {
+       "t": 1790444620116,
+       "cpu": 62.5
+      },
+      {
+       "t": 1790444621123,
+       "cpu": 72.2
+      },
+      {
+       "t": 1790444622131,
+       "cpu": 81.4
+      },
+      {
+       "t": 1790444623140,
+       "cpu": 73
+      },
+      {
+       "t": 1790444624151,
+       "cpu": 65.6
+      },
+      {
+       "t": 1790444625163,
+       "cpu": 80.6
+      },
+      {
+       "t": 1790444626178,
+       "cpu": 76.4
+      },
+      {
+       "t": 1790444627185,
+       "cpu": 63.5
+      },
+      {
+       "t": 1790444628196,
+       "cpu": 69.7
+      },
+      {
+       "t": 1790444629204,
+       "cpu": 64.3
+      },
+      {
+       "t": 1790444630219,
+       "cpu": 56.6
+      },
+      {
+       "t": 1790444631230,
+       "cpu": 61.1
+      },
+      {
+       "t": 1790444632259,
+       "cpu": 67.7
+      },
+      {
+       "t": 1790444633261,
+       "cpu": 61.7
+      },
+      {
+       "t": 1790444634274,
+       "cpu": 62.2
+      },
+      {
+       "t": 1790444635286,
+       "cpu": 72.5
+      },
+      {
+       "t": 1790444636298,
+       "cpu": 79.2
+      },
+      {
+       "t": 1790444637304,
+       "cpu": 62.1
+      },
+      {
+       "t": 1790444638316,
+       "cpu": 65.3
+      },
+      {
+       "t": 1790444639324,
+       "cpu": 51
+      },
+      {
+       "t": 1790444640336,
+       "cpu": 54.5
+      },
+      {
+       "t": 1790444641338,
+       "cpu": 60.2
+      },
+      {
+       "t": 1790444642348,
+       "cpu": 63.3
+      },
+      {
+       "t": 1790444643359,
+       "cpu": 65.1
+      },
+      {
+       "t": 1790444644359,
+       "cpu": 62.8
+      },
+      {
+       "t": 1790444645367,
+       "cpu": 79.8
+      },
+      {
+       "t": 1790444646372,
+       "cpu": 75.4
+      },
+      {
+       "t": 1790444647387,
+       "cpu": 59.4
+      },
+      {
+       "t": 1790444648398,
+       "cpu": 52.4
+      },
+      {
+       "t": 1790444649399,
+       "cpu": 60.5
+      },
+      {
+       "t": 1790444650411,
+       "cpu": 58.6
+      },
+      {
+       "t": 1790444651421,
+       "cpu": 66
+      },
+      {
+       "t": 1790444652429,
+       "cpu": 70.5
+      },
+      {
+       "t": 1790444653430,
+       "cpu": 82.4
+      },
+      {
+       "t": 1790444654439,
+       "cpu": 71.6
+      },
+      {
+       "t": 1790444655454,
+       "cpu": 69.8
+      },
+      {
+       "t": 1790444656464,
+       "cpu": 60.8
+      },
+      {
+       "t": 1790444657477,
+       "cpu": 66
+      },
+      {
+       "t": 1790444658492,
+       "cpu": 58.4
+      },
+      {
+       "t": 1790444659502,
+       "cpu": 65
+      },
+      {
+       "t": 1790444660513,
+       "cpu": 71.6
+      },
+      {
+       "t": 1790444661526,
+       "cpu": 71.8
+      },
+      {
+       "t": 1790444662530,
+       "cpu": 72.7
+      },
+      {
+       "t": 1790444663531,
+       "cpu": 71.7
+      },
+      {
+       "t": 1790444664547,
+       "cpu": 76.1
+      },
+      {
+       "t": 1790444665567,
+       "cpu": 83.9
+      },
+      {
+       "t": 1790444666571,
+       "cpu": 81.8
+      },
+      {
+       "t": 1790444667582,
+       "cpu": 66.2
+      },
+      {
+       "t": 1790444668582,
+       "cpu": 69
+      },
+      {
+       "t": 1790444669599,
+       "cpu": 74.7
+      },
+      {
+       "t": 1790444670601,
+       "cpu": 74.9
+      },
+      {
+       "t": 1790444671610,
+       "cpu": 67.7
+      },
+      {
+       "t": 1790444672622,
+       "cpu": 60
+      },
+      {
+       "t": 1790444673629,
+       "cpu": 60.3
+      },
+      {
+       "t": 1790444674645,
+       "cpu": 42.4
+      },
+      {
+       "t": 1790444675657,
+       "cpu": 51.6
+      },
+      {
+       "t": 1790444676664,
+       "cpu": 38.9
+      },
+      {
+       "t": 1790444677673,
+       "cpu": 43.7
+      },
+      {
+       "t": 1790444678682,
+       "cpu": 35.9
+      },
+      {
+       "t": 1790444679703,
+       "cpu": 56.8
+      },
+      {
+       "t": 1790444680712,
+       "cpu": 55.1
+      },
+      {
+       "t": 1790444681718,
+       "cpu": 52.8
+      },
+      {
+       "t": 1790444682731,
+       "cpu": 47.4
+      },
+      {
+       "t": 1790444683744,
+       "cpu": 38.7
+      },
+      {
+       "t": 1790444684760,
+       "cpu": 48.6
+      },
+      {
+       "t": 1790444685766,
+       "cpu": 43.1
+      },
+      {
+       "t": 1790444686779,
+       "cpu": 46.8
+      },
+      {
+       "t": 1790444687792,
+       "cpu": 46.5
+      },
+      {
+       "t": 1790444688799,
+       "cpu": 40.9
+      },
+      {
+       "t": 1790444689812,
+       "cpu": 46.5
+      },
+      {
+       "t": 1790444690827,
+       "cpu": 39.6
+      },
+      {
+       "t": 1790444691842,
+       "cpu": 40
+      },
+      {
+       "t": 1790444692857,
+       "cpu": 56.8
+      },
+      {
+       "t": 1790444693865,
+       "cpu": 49.1
+      },
+      {
+       "t": 1790444694865,
+       "cpu": 54
+      },
+      {
+       "t": 1790444695876,
+       "cpu": 50.6
+      },
+      {
+       "t": 1790444696887,
+       "cpu": 48.2
+      },
+      {
+       "t": 1790444697898,
+       "cpu": 62.3
+      },
+      {
+       "t": 1790444698905,
+       "cpu": 46.3
+      },
+      {
+       "t": 1790444699916,
+       "cpu": 39.4
+      },
+      {
+       "t": 1790444700925,
+       "cpu": 51.2
+      },
+      {
+       "t": 1790444701938,
+       "cpu": 68.1
+      },
+      {
+       "t": 1790444702944,
+       "cpu": 86.9
+      },
+      {
+       "t": 1790444703956,
+       "cpu": 61.8
+      },
+      {
+       "t": 1790444704970,
+       "cpu": 42.3
+      },
+      {
+       "t": 1790444705984,
+       "cpu": 33.7
+      },
+      {
+       "t": 1790444706997,
+       "cpu": 39.8
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "writtenAt": "2026-09-26T17:45:08.227Z"
+}

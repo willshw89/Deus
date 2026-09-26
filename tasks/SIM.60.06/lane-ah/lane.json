@@ -1,0 +1,38 @@
+{
+    "lane":  "lane-ah",
+    "taskId":  "SIM.60.06",
+    "branch":  "task/lane-ah",
+    "writer":  "grok",
+    "reviewer":  "gemini",
+    "push":  true,
+    "blocked":  false,
+    "allowedPaths":  [
+                         "tools/bench_combat_srd.js",
+                         "tools/bench/combat_srd/**",
+                         "tasks/SIM.60.06/**"
+                     ],
+    "gateTests":  [
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/bench_combat_srd.js",
+                                       "--self-test"
+                                   ],
+                          "timeoutSec":  900
+                      },
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/rules/test_srd_rules.js"
+                                   ],
+                          "timeoutSec":  900
+                      },
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/check_deus_syntax.js"
+                                   ],
+                          "timeoutSec":  600
+                      }
+                  ]
+}
