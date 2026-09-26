@@ -3,6 +3,7 @@
 // the ADR with the cited lines as they are at a given commit, so each claim can be judged by a reader.
 // It does not judge claims. Usage:
 //   node tasks/SIM.00.01/lane-m/cite_check.js --adr <rev>:<path> | --adr-file <path>  --rev <commit> [--out <file>] [--json <file>]
+//     [--compare <commit>]   also report, per unpinned citation, whether the cited lines read the same at <commit>
 // A citation is `File.ext:N`, `File.ext:N-M`, or a bare `:N` / `:N-M` that refers to the last file named before it
 // (same line first, then earlier lines of the same section). A citation followed by "at `<sha>`" is read at <sha>.
 "use strict";
@@ -12,6 +13,7 @@ const fs = require("fs");
 const args = process.argv.slice(2);
 const opt = k => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : undefined; };
 const ADR_REV = opt("--adr"), ADR_FILE = opt("--adr-file"), REV = opt("--rev"), OUT = opt("--out"), JSON_OUT = opt("--json");
+const CMP = opt("--compare");
 if ((!ADR_REV && !ADR_FILE) || !REV) {
     console.error("usage: cite_check.js (--adr <rev>:<path> | --adr-file <path>) --rev <commit> [--out f] [--json f]");
     process.exit(2);
@@ -82,6 +84,7 @@ for (let li = 0; li < lines.length; li++) {
 
 const out = [], json = [];
 let n = 0, missing = 0, outOfRange = 0;
+const cmp = { same: 0, changed: [] };
 for (const c of cites) {
     n++;
     const rev = c.pin || REV;
@@ -96,6 +99,11 @@ for (const c of cites) {
         body = pick.map(k => k < 0 ? "      ..." : `${String(k).padStart(6)}  ${fl[k - 1].trim().slice(0, 220)}`);
     }
     const id = "C" + String(n).padStart(3, "0");
+    if (CMP && !c.pin && status === "OK") {
+        const f2 = fileLines(path, CMP), a = fl.slice(c.a - 1, c.b).join("\n");
+        const b = f2 && c.b <= f2.length ? f2.slice(c.a - 1, c.b).join("\n") : null;
+        if (a === b) cmp.same++; else cmp.changed.push(id + " " + path + ":" + c.a + (c.b !== c.a ? "-" + c.b : ""));
+    }
     const claim = lines[c.adrLine - 1].trim().slice(0, 600);
     out.push(`### ${id} ADR:${c.adrLine} ${path || c.file}:${c.a}${c.b !== c.a ? "-" + c.b : ""}${c.pin ? " @" + c.pin : ""}${c.bare ? " (bare, file from " + c.ctxBack + " line(s) back)" : ""} ${status}`,
         `section: ${c.section}`, `claim: ${claim}`, ...body, "");
@@ -105,4 +113,5 @@ const head = `# ADR-003 citation dump\n\nADR: ${ADR_FILE || ADR_REV}\nCode/doc r
 if (OUT) fs.writeFileSync(OUT, head + out.join("\n")); else process.stdout.write(head + out.join("\n"));
 if (JSON_OUT) fs.writeFileSync(JSON_OUT, JSON.stringify(json, null, 1));
 console.error(`citations ${n}  NO_FILE ${missing}  OUT_OF_RANGE ${outOfRange}`);
+if (CMP) { console.error(`compare ${CMP}: same text ${cmp.same}, changed ${cmp.changed.length}`); for (const x of cmp.changed) console.error("  changed " + x); }
 process.exit(0);
