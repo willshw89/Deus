@@ -3,7 +3,7 @@
 **Owner:** Claude Code · **File:** `game/js/plugins/UF_World.js` · **Load order:** after UF_ProcGen, before the plugins that use it (UF_WorldGen … UF_Interact), before `UF_Test`
 
 ## 1. Purpose
-The world has one 256×256 area with five separate persistent levels: -2, -1, Ground (0), +1 and +2 (VISION V80). Each level builds from deterministic generators and its saved changes. UF_Levels owns the versioned baseline and migration; UF_World owns level addressing, map caches, units and paths. Units remain in one world registry and continue walking on their own level while another level is rendered. Other systems must schedule against their records' levels, not the view; the World seam alone does not establish that every consumer simulates all five levels.
+The world has one 256×256 area with the separate persistent levels of its **Z range** (VISION V80; WG.00.17, `docs/systems/DEUS_ZRange.md`): new worlds have 32 layers, -16..+15, with the ground at 0; a save made before WG.00.17 keeps its five levels -2..+2. The range is one setting, kept per world in `state.zRange`. Each level builds from deterministic generators and its saved changes. UF_Levels owns the versioned baseline and migration; UF_World owns level addressing, map caches, units and paths. Units remain in one world registry and continue walking on their own level while another level is rendered. Other systems must schedule against their records' levels, not the view; the World seam alone does not establish that every consumer simulates every level.
 
 **Paths (2026-09-19):** on-screen and off-screen walkers follow terrain-aware paths on their own level. Current eight-direction planning, diagonal corner rules, facing and the existing movement/sliding integration are retained. Ground-only APIs remain deliberately ground-only so an unadapted plugin cannot mistake underground terrain for the surface.
 
@@ -14,11 +14,11 @@ Anything not listed here is internal.
 | Member | Description |
 |---|---|
 | `config` | Plugin parameters: `areasX`, `areasY` (default 1×1), `size` (256), `mapIdBase` (1000), `tilesetId`, `groundTileId`, `templateMapId` (0 = none), `startInWorld`, `seed` (0 = random each New Game), `unitStepFrames` |
-| `state` | The saved world: `{ version, seed, areasX, areasY, size, startArea: {x,y}, units: {id: unit}, nextUnitId, diffs, objectDiffs }` plus what other plugins keep there (`items`, `jobs`, `factions`, …). Read it; change it only through the functions below. |
+| `state` | The saved world: `{ version, zRange: {zMin, zMax} (absent in a save made before WG.00.17: -2..+2), seed, areasX, areasY, size, startArea: {x,y}, units: {id: unit}, nextUnitId, diffs, objectDiffs }` plus what other plugins keep there (`items`, `jobs`, `factions`, …). Read it; change it only through the functions below. |
 | `newWorld(seed?)` | Creates a fresh world. Called automatically on New Game. |
 | `hash32(...ints)`, `mulberry32(seed)` | The seeded hash and random-number generator every plugin uses (never `Math.random` in the simulation). |
-| `currentArea()` | Ground-only `{x, y}`, or `null` when another level or a non-world map is on screen; use `viewLevel()` for all five |
-| `inWorld(ax, ay, z = 0)` | Whether the area exists |
+| `currentArea()` | Ground-only `{x, y}`, or `null` when another level or a non-world map is on screen; use `viewLevel()` for every level |
+| `inWorld(ax, ay, z = 0)` | Whether the area exists and `z` is a level of the world's Z range |
 | `areaMapId(ax, ay, z = 0)` / `areaOfMapId(mapId)` / `isAreaMap(mapId)` | Ground keeps its IDs; the latter two recognize only Ground. Invalid area/level returns map ID 0 |
 | `isStartArea(ax, ay)` | Whether this is the start area |
 | `rngFor(ax, ay, salt)` | Deterministic random function for an area. Returns numbers in [0, 1). |
@@ -33,16 +33,20 @@ Anything not listed here is internal.
 
 ### Level seam (merged 2026-09-19; runtime integration checks pending)
 
-- Record coordinates store `z` beside `area`: unit/goal `{ area: {x,y}, x, y, z }`. An API area handle may be `{x,y,z}`. Missing/undefined means Ground; explicit invalid levels (including null, strings, fractions, NaN and levels outside -2..+2) are not rounded into Ground. `addUnit` throws; mutators/path entry points refuse.
-- `LEVELS` = `[-2,-1,0,1,2]`; `zOf(record)` defaults only missing z; `isLevel(z)` validates; `levelKey(ax,ay,z)` keeps ground spelling `"ax,ay"`, otherwise `"ax,ay,z"`. `sameArea` deliberately compares only x/y.
-- `levelOfMapId(id)` → `{x,y,z}` or null; `isWorldMap(id)`; `viewLevel()` returns a frozen shared level handle or null. Slots: Ground=0, +1=1, +2=2, -1=3, -2=4; ID = MapIdBase + slot × area count + area index.
-- Generators default to Ground only; explicitly register `{levels:[...]}` for other levels. The start template is ground-only. `buildArea`/`peekArea` return null for invalid areas/levels.
+- Record coordinates store `z` beside `area`: unit/goal `{ area: {x,y}, x, y, z }`. An API area handle may be `{x,y,z}`. Missing/undefined means Ground; explicit invalid levels (including null, strings, fractions, NaN and levels outside the world's Z range) are not rounded into Ground. `addUnit` throws; mutators/path entry points refuse.
+- The Z range (WG.00.17, `docs/systems/DEUS_ZRange.md`): `zRange()` → frozen `{zMin, zMax}` (without a world: the range a New Game gets); `levels()` and `LEVELS` → every level, lowest first (a frozen array replaced when a new state is read); `levelCount()`, `levelIndex(z)` (`z - zMin`, -1 for a non-level); `Z_RANGES` (`default` -16..+15, `test` -4..+4, `legacy` -2..+2); `parseZRange(v)`; `newWorldZRange()` (the environment's `DEUS_Z_RANGE`, else the default); `mapIdSlot(z)`; `onZRange(f)` (called when a new state's range is read). A New Game writes `state.zRange`; a state without it is a legacy world.
+- `zOf(record)` defaults only missing z; `isLevel(z)` validates against the range; `levelKey(ax,ay,z)` keeps ground spelling `"ax,ay"`, otherwise `"ax,ay,z"`. `sameArea` deliberately compares only x/y.
+- `levelOfMapId(id)` → `{x,y,z}` or null; `isWorldMap(id)`; `viewLevel()` returns a frozen shared level handle or null. Slots: Ground=0, +1=1, +2=2, -1=3, -2=4 (kept, so saved ids stay valid), then +z = 2z − 1 and −z = 2z (+3=5, −3=6, …, +15=29, −16=32), the same in every world; ID = MapIdBase + slot × area count + area index.
+- Generators default to Ground only; explicitly register `{levels:[...]}` for other levels, or `{levels: z => bool}` for a rule over every level of the range (read when an area is built, so it never outlives a range). The start template is ground-only. `buildArea`/`peekArea` return null for invalid areas/levels.
 - `setDerivedTile(ax,ay,x,y,layer,tileId,z=0)` updates built maps and path grids without recording a tile diff (UF_Levels stores shape changes). `adoptBuild(ax,ay,z,map)`, `cachedBuild(ax,ay,z=0)`, `refreshUnitEvents(map,ax,ay,z=0)`, `reconcileEvents()` support view switching.
-- Cache: six least-recently-used level builds, with outgoing shown maps retained. Re-entering another shown level reuses its build and refreshes unit events; explicit reload rebuilds. Loading another world clears caches and plans.
+- Cache: nine least-recently-used level builds (`PEEK_CACHE`; six before WG.00.17), with outgoing shown maps retained. The prewarm builds the view's ring (z±1, z±2); a map load waits for every level within `LOAD_WARM_REACH` (4) of the view, so builds follow the view and never the layer count. Re-entering another shown level reuses its build and refreshes unit events; explicit reload rebuilds. Loading another world clears caches and plans.
 - `moveUnitToLevel(unitOrId,z,x?,y?)` changes a registered unit's level/cell, clears its goal/path and updates its event. It checks level and cell bounds; its caller must validate landing passability. `sendUnit` refuses cross-level goals until route integration.
 - `transferView(ax,ay,x,y,dir?,z?)` defaults to the current view level (else Ground); it never changes a unit's level. `reachable` uses area.z. Door checks receive the tested level; no boot-time bypass skips UF_Doors.
 - New Game accepts `state.viewStart = {area:{x,y},x,y,z}` from the founding system. Omitted area uses `startArea`; omitted z uses area.z or Ground. The initial view transfer uses that level (a dwarven primary home at -1 opens map 1003), while invalid founding levels throw rather than falling back to Ground.
 - Persistent level baselines and their version/checksum metadata belong to UF_Levels; tile/object differences and unit records belong to UF_World. Ground diff keys and map IDs remain unchanged. These APIs do not authorize reconstructing or overwriting a saved baseline.
+
+### Scale (`UF.Space`)
+`GRID_SIZE_FEET` 5 (a square is 5 ft × 5 ft), `STRATUM_FEET` 2, `STRATA_PER_LAYER` 5, `Z_STEP_FEET` 10 (a layer; derived from the two before it). DEC-013 item 2, WG.00.17: a stratum was 1 ft and `Z_STEP_FEET` 5 before. `rulesDistanceFeet(a, b)` counts a level apart as `Z_STEP_FEET`. DEUS_Levels reads its cell and stratum feet from here (sphere damage, clearance in strata × `STRATUM_FEET`).
 
 ### Units
 A unit record: `{ id, name, image: { characterName, characterIndex }, area: {x, y}, z, x, y, dir, dir8, goal, stuckFrames, data }`. Put your system's per-unit state in **`data`** (for example `data.needs`). It's saved with the unit. `data.through: true` (fliers) makes the unit's event pass through everything.
@@ -90,6 +94,7 @@ How units move:
 | `reachable(area, sx, sy, gx, gy)` | Whether (gx, gy) can be walked to from (sx, sy), from the region map (instant; doors count as open, units ignored). A blocked goal cell is never reachable itself: ask about its neighbours. |
 | `pathOf(unitId)` | The cells still ahead on the unit's current plan (`[{x, y}]`, next step first), or `null` |
 | `pathStats()` / `resetPathStats()` | Planner numbers since the world was created: `plans, found, partial, none, avgMs, p95Ms` (last 512 plans), `maxMs, maxPlan, avgExpanded, medianExpanded, maxExpanded, queuedTotal, queuePeak, queueNow, replans, detours, waitFrames, blocked {reason: n}, regionBuilds, regionMsAvg, gridBuilds, gridMsAvg, cachedPlans` |
+| `pathScratchStats()` | The 3D search scratch (WG.00.17): `{ layersAllocated, layersWithScratch, bytesPerLayer, bytes, lastSearchLayers, heapEntries, levels }`. A level gets its scratch slot (`g`, `parent`, `seen`, `closed`, `goal`: 20 B a cell) the first time a search reaches it, so a route within one level allocates one level of scratch, never one per layer of the range; a path's cells stay global ids, `(z − zMin) × size² + cell` |
 | `pathConfig` | Settings (read them; tests may change them): `enabled` (true), `maxNodes` (12,000), `plansPerUpdate` (4), `waitFrames` (30), `maxStepFails` (3), `maxPartialLegs` (8), `progressFrames` (600), `offscreenPaths` (true; tests may disable) |
 
 **The path rule is the on-screen stepping rule**, per cell and per direction:
@@ -128,7 +133,7 @@ How units move:
 ## 5. Checks (UF_Test suite `world`, a default suite)
 | Check | Proves |
 |---|---|
-| `in_area_map`, `area_size`, `level_ids` | New Game starts in the world's start area, a 256×256 map with a full data array and object grid, five distinct map IDs round-trip, ground ID is unchanged, ground-only APIs exclude other levels, sixth levels are refused |
+| `in_area_map`, `area_size`, `level_ids` | New Game starts in the world's start area, a 256×256 map with a full data array and object grid, every level's map ID is distinct and round-trips, ground ID is unchanged, ground-only APIs exclude other levels, a level one past either end of the Z range is refused (WG.00.17; before, the levels 3 and -3) |
 | `seeded` | Building the same area twice gives the same data |
 | `diff_applies_live`, `object_diffs`, `diff_persists` | `setTile`/`setObject` show immediately, go through the peek cache off screen, and are still there later |
 | `save_roundtrip` | The world state survives serialization |

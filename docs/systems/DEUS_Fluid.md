@@ -9,14 +9,14 @@
 
 ## 1. Executive Summary & Core Mandate
 
-`DEUS_Fluid.js` implements a high-performance, strictly conserved 0..7 volumetric fluid dynamics engine across 5 physical Z-levels (`[-2, -1, 0, 1, 2]`) for both **water** (freshwater) and **lava** (magma).
+`DEUS_Fluid.js` implements a high-performance, strictly conserved 0..7 volumetric fluid dynamics engine across the physical Z-levels of the world's Z range (WG.00.17, `docs/systems/DEUS_ZRange.md`: `UF.World.zRange()`, -16..+15 for new worlds, -2..+2 for a save made before it; the legacy range when the file runs without the World, a node test of it alone) for both **water** (freshwater) and **lava** (magma).
 
 ### Core Architectural Principle
 > **"Stable state costs almost nothing. Change creates work."**
 > A settled lake, a calm reservoir, or an undisturbed underground magma chamber costs effectively **0 ms CPU** per simulation tick. Fluid cells only enter active processing when physical change occurs (e.g. wall breached, door opened, liquid added, floor channeled).
 
 ### Key Performance Capabilities
-1. **Active Dirty-Cell Set**: A 256×256×5 world contains 327,680 cells, but an active waterfall or breached room processes only its active cells (e.g. 50–200 cells), never scanning all cells or Z-levels.
+1. **Active Dirty-Cell Set**: A 256×256 world of 32 levels contains 2,097,152 cells (327,680 at five), but an active waterfall or breached room processes only its active cells (e.g. 50–200 cells), never scanning all cells or Z-levels.
 2. **Bounded Processing Budget**: Throttled at a default budget of `512` cells per tick, ensuring zero frame drops and a rock-solid **60 FPS** even at **4× simulation speed** during catastrophic breaches.
 3. **Strict Mass Conservation**: Zero fluid duplication or deletion in closed chambers ($V_{\text{final}} \equiv V_{\text{initial}}$ across arbitrary simulation steps).
 
@@ -39,20 +39,20 @@ Every cell holds an integer depth from `0` to `7`, bit-packed into a compact `Ui
 
 ## 3. Data Representation & Memory Layout
 
-Each map area `(ax, ay)` manages 5 discrete elevation layers:
+Each map area `(ax, ay)` manages one grid per level **that has had fluid** (sparse since WG.00.17: a level's grid and its flood cache are made on the first write of fluid to it, `gridFor`; a level without fluid costs nothing and `getFloodGrid` answers it with a shared read-only grid of zeros). A grid cell:
 - Low 4 bits (`val & 0x07`): Liquid depth (`0` to `7`).
 - High 4 bits (`(val >> 4) & 0x0F`): Liquid type (`0` = none, `1` = water, `2` = lava).
 
 ```text
 Memory footprint per 256x256 level: 64 KB (Uint8Array)
-Total memory for 5 Z-levels: 320 KB per active area
+Before WG.00.17: 5 grids made up front, 320 KB per area; now 64 KB (and 64 KB of flood cache) per level with fluid
 ```
 
 ### Fast $O(1)$ Deduplicated Queue
 The active queue uses a flat integer indexing schema:
-$$\text{cellId} = (z + 2) \times (\text{size} \times \text{size}) + (y \times \text{size} + x)$$
-Accompanied by an `inQueue` byte map (`Uint8Array(5 * size * size)`):
-- Pushes are $O(1)$ and skipped if `inQueue[cellId] === 1`.
+$$\text{cellId} = (z - z_{\min}) \times (\text{size} \times \text{size}) + (y \times \text{size} + x)$$
+($z_{\min}$: the area's origin, the world's lowest level when the area's data was made.) Accompanied by `inQueue`, the `Set` of queued cell ids (WG.00.17; before, a byte map `Uint8Array(5 * size * size)` of every level):
+- Pushes are $O(1)$ and skipped if `inQueue.has(cellId)`.
 - Dequeues use an advancing `head` pointer ($O(1)$ amortized) with periodic compaction, creating **zero GC memory churn** during simulation.
 
 ---
@@ -64,7 +64,7 @@ Every simulation step (`stepArea(ax, ay, budget)`) pops up to `budget` cells fro
 ### Priority 1: Vertical Gravity Downward Transfer
 1. Liquid in cell $(x, y, z)$ checks if cell $(x, y, z - 1)$ can receive fluid.
 2. Conditions for downward flow:
-   - $z > -2$ (not at the bedrock bottom of the world).
+   - $z > z_{\min}$ (not on the lowest level of the world's Z range).
    - Cell below $(x, y, z - 1)$ is not a solid rock wall or barrier.
    - Floor boundary is open, excavated, or channeled (shape $\ne$ `solid`).
 3. If valid:
@@ -121,8 +121,8 @@ Fluid cells are never polled by scanning the map. They are woken up exclusively 
 | `walkable` | `(ax, ay, x, y, opts)` | `boolean` | Returns true if cell is passable for unit according to fluid depth/type. |
 | `isFlooded` | `(ref)` | `{ flooded: boolean, type: string, depth: number }` | Backward-compatible query for legacy callers. |
 | `isSubmerged` | `(ref)` | `boolean` | True if water depth $\ge 7$. |
-| `getFloodGrid`| `(area, z)` | `Uint8Array` | Returns visual overlay grid (1=water, 2=lava). |
+| `getFloodGrid`| `(area, z)` | `Uint8Array` or `null` | Returns visual overlay grid (1=water, 2=lava); a shared read-only grid of zeros for a level of the range without fluid; `null` outside the range. |
 | `step` | `(area, budget)` | `number` | Steps dirty queue for area up to budget. |
 | `tick` | `(budget)` | `number` | Steps simulation for active view level. |
-| `diagnostics` | `(ax, ay)` | `object` | Returns active queue length, volume, and timing metrics. |
+| `diagnostics` | `(ax, ay)` | `object` | Returns active queue length, volume, and timing metrics; `gridsAllocated` (level grids made: only levels that had fluid) and `bytes` (their bytes plus about 8 B a queued flag), WG.00.17. |
 | `reset` | `none` | `void` | Clears all allocated grids and resets queue state. |
