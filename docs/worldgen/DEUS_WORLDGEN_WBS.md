@@ -14,13 +14,14 @@
 This document defines the authoritative, step-by-step path from the initial five-strata physical world foundation all the way to **DEUS WORLDGEN v1 — COMPLETE**.
 
 ### Binding Production Rules
-1. **Strict Linear WBS Execution:** Only ONE implementation leaf may be active at any given time across all agents. No overlapping implementation agents.
+1. **Linear vs Parallel Execution:** Formerly strictly linear; superseded by parallel-lane policy ([`docs/STATUS.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/STATUS.md) §3). Multiple independent lanes may execute concurrently with non-overlapping write sets.
 2. **Repository Facts Over Assumptions:** Every leaf begins by verifying repository facts and dependencies.
-3. **Strict Separation of Concerns:**
-   - **Gemini:** Integration Coordinator, Architecture/Standard Authority, Pipeline & Tooling Author, QC & Verification Auditor.
-   - **Fable:** Bounded Engine Systems Implementation Agent (executing explicit copy-paste prompts).
-   - **Nano Banana Pro (`gemini-3-pro-image`):** Source art generator only. Never chooses atlas positions. Never renders UI frames or borders. Never creates approval mockups.
-4. **Actual RMMZ Runtime Verification:** Definition of Done requires running in actual RMMZ Playtest (NW.js / F5). Automated test harnesses must prove capability to fail (Rule 4).
+3. **Strict Separation of Concerns (Canonically defined in [`docs/CANONICAL_ROLES.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/CANONICAL_ROLES.md)):**
+   - **Gemini:** Coordinator, Integration Authority, WBS Controller. Manages task routing, merges, origin pushes. Zero engine code edits; no QC or self-certification authority.
+   - **Fable / Claude:** Primary implementer for engine, simulation, and society leaves.
+   - **Grok:** Independent adversarial review, mutation testing, invariant attacks, and verification sign-offs.
+   - **Nano Banana Pro:** [FROZEN per DEC-007] Zero art generation without direct Owner involvement.
+4. **Actual RMMZ Runtime Verification:** Definition of Done requires running in actual RMMZ Playtest (NW.js / F5). Automated test harnesses must prove capability to fail (Rule 4); see DEC-001 (plain-Node proof accepted in principle, suspended pending passing proof).
 5. **No Blind Mass Art Generation:** Every asset must possess an explicit semantic ID, metadata specification, and pre-allocated permanent atlas slot before generation.
 6. **Production Blur Elimination:** Depth compositing utilizes physical geometry, scale recession, subtle parallax, and restrained brightness/saturation/contrast steps. **Blur is OFF for production.**
 7. **World Year 0 Starting Principle:** Every standard DEUS New Game begins at World Year 0. Worldgen creates the initial viable Year-0 physical world (geology, 5 macro-Z levels, 5 strata, hydrology, ecology, finite materials, 9 faction starting camps of 8 founders = 72 colonists). History is NOT pre-materialized (no pre-generating centuries of roads, abandoned towns, old kingdoms, historical mines, exhausted veins, battlefield debris, or ancient coins). All history emerges through live simulation. Simulating forward (100, 250, 500 years) is preserved as a developer / simulation / scenario tool, not a standard New Game starting option. The WG.90 completion gate requires a viable living Year-0 world ready for simulation, not pre-aged historical materialization.
@@ -93,10 +94,10 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | **WG.00.06** | Five-Strata Geometry Foundation | Fable / Gemini | Strata storage (5x1ft/cell), derived cached shapes, damage API, native smoke gate. | `DONE` (FABLE-19A / edba004) |
 | **WG.00.07** | Fluid ↔ Strata Reconciliation | Gemini | Resolve fluid depth adapter (0..7) with physical strata (0..4, S0-S4), buoyancy, saturation. | `DONE` (2f47203) |
 | **WG.00.08** | Cuts + Caves on All Five Z | Fable / Gemini | Partial-height terrain, chasms, sinkholes, Z0→Z-1 & Z-1→Z-2 deep cuts, cave roofs. | `REVIEW` (DEUS Directive 001) |
-| **WG.00.09** | Global Five-Z Depth Renderer | Fable | Five-plane compositor, physical scale recession, no blur, chunk exposure cache. | `QUEUED` (FABLE-19C) |
+| **WG.00.09** | Global Five-Z Depth Renderer | Fable | Five-plane compositor, physical scale recession, no blur, chunk exposure cache. | `QUEUED` (FABLE-19C / DEFINE/PRE-ATTACK active in Lane E) |
 | **WG.00.10** | Startup & Load Performance Baseline | Gemini / Fable | 256x256x5 area memory budget (<3.5MB), tick budget (<0.2ms), load time benchmarks. | `QUEUED` |
 | **WG.00.11** | Incarnation & Command Layer | Fable / Gemini | Player avatar direct possession vs top-down RTS colonist command switching, input arbitration, camera follow. | `QUEUED` |
-| **WG.00.12** | Consolidation Without Moving Files | Codex / Claude Subagent | Non-moving consolidation tooling, boot/load census, RMMZ battle stack audit, tested external backup. | `IN_PROGRESS` (Lane C1) |
+| **WG.00.12** | Consolidation Without Moving Files | Codex / Claude Subagent | Non-moving consolidation tooling, boot/load census, RMMZ battle stack audit, tested external backup. | `IN_PROGRESS` (C2b; C1/C2/C3/F merged) |
 | **WG.00.13** | Master Palette Engine Migration | Fable / Gemini | Planned engine, shader, and tooling migration from runtime uf.hex to deus_master_world_palette_v1.hex (226 colors); dedicated harness & tests. | `PLANNED` |
 
 ---
@@ -359,6 +360,7 @@ SELECT NEXT UNBLOCKED LEAF
 
 | Rev | Date | Change |
 |:---:|:---:|:---|
+| 17 | 2026-09-25 | Rev 16 row misdescribed WG.00.13; WG.00.13 = Master Palette Engine Migration, consolidation is WG.00.12. Align roles with CANONICAL_ROLES, DEC-001 and DEC-007 (Directive 001-L). |
 | 16 | 2026-09-25 | Add WG.00.13 (Consolidation, Machine Governance & Backup Infrastructure / Directive 001). |
 | 15 | 2026-09-25 | WG.00.08 returned to REVIEW per DEUS Directive 001; WG.00.07 strata range corrected to 0..4 (S0-S4); WG.00.12 added. |
 | 14 | 2026-09-25 | Add WG.00.11 (Incarnation & Command Layer). Adopt integer rev header and immutable ID governance. Next free in WG.00 is WG.00.12. |

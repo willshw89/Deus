@@ -81,7 +81,7 @@ Mass production begins with one core biome to achieve golden visual quality befo
 | `DW.01.03` | `WG.00.03` | Human / World Scale Strip | `DONE` |
 | `DW.01.04` | `WG.00.04` | Biome Identity Standard | `DONE` |
 | `DW.01.05` | `WG.00.05` | Palette Architecture & Material Ramps | `DONE` |
-| `DW.01.06` | `WG.00.06` | Seamless Autotile & Terrain Assembly Standard | `DONE` (Geometry Foundation) |
+| `DW.01.06` | `WG.00.06` | Five-Strata Geometry Foundation | `DONE` |
 
 *Rule:* Never issue new `DW.*` IDs. All new world and environment tasks must be minted under the canonical `WG` namespace in `docs/worldgen/DEUS_WORLDGEN_WBS.md`.
 
