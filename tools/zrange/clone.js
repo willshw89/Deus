@@ -3,7 +3,7 @@
 /**
  * tools/zrange/clone.js (WG.00.17, lane AA): a throwaway clone of this repository at a commit, under %TEMP%, for the
  * heavy NW.js runs (run_tests, bench, provocations), so nothing runs in the worktree. The clone is a local clone
- * (objects hardlinked) with a sparse checkout of game/ and tools/ only, core.autocrlf off (the files are byte for byte
+ * (objects hardlinked) with a sparse checkout of game/, tools/ and art/palette/ (tools/test_palette.js) only, core.autocrlf off (the files are byte for byte
  * the commit's).
  *
  * Usage: node tools/zrange/clone.js <commit> <name>     -> prints the clone's folder (%TEMP%\laneaa_clones\<name>)
@@ -42,7 +42,7 @@ function makeClone(commit, name) {
     fs.mkdirSync(BASE, { recursive: true });
     git(["-c", "core.autocrlf=false", "clone", "--local", "--no-checkout", "-q", ROOT, dir]);
     git(["config", "core.autocrlf", "false"], dir);
-    git(["sparse-checkout", "set", "--no-cone", "/game/", "/tools/"], dir);
+    git(["sparse-checkout", "set", "--no-cone", "/game/", "/tools/", "/art/palette/"], dir);
     git(["checkout", "-q", "--detach", commit], dir);
     return { dir, head: git(["rev-parse", "HEAD"], dir).trim() };
 }
