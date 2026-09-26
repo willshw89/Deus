@@ -36,8 +36,8 @@
     {
       "id": "Q-06",
       "section": "## Decay-driven collapse",
-      "status": "PARTIAL",
-      "notes": "Sections 7.1-7.6 state Lane Q's side of the contract with Lane R (C1-C9: HP-only writes, band crossings, events back, mass, roofs before walls by the support rule, foundations, time domains), an abandoned-house walk-through ending as rubble, and the D-1 duration table. PARTIAL because Lane R (SIM.40.05) had no design on its branch when this was written (origin/task/lane-r tip d9766aa2), so the contract is one-sided until Lane R answers it."
+      "status": "COVERED",
+      "notes": "Sections 7.1-7.6 state the Lane Q side of the contract with Lane R (C1-C9: HP-only writes through the strata writer, capacityThresholdsHP band crossings, Collapse.breakElement as the one HP-0 path, events back, mass, roofs before walls by the support rule, foundations, time domains), an abandoned-house walk-through ending as rubble, and the D-1 duration table. Lane R pushed its side (origin/task/lane-r 6613418f, R-05, unreviewed) before this design was finished; ownership agrees, and the naming differences are resolved in section 9.7 by adopting Lane R's names. Both sides are unreviewed."
     },
     {
       "id": "Q-07",
@@ -48,8 +48,8 @@
     {
       "id": "Q-08",
       "section": "## Mass ledger",
-      "status": "COVERED",
-      "notes": "Sections 9.1-9.6: families, forms and units; ledger entries for 19 paths including build, dig, mine, quarry, collapse, blast, rubble clearing, salvage and conjured matter; how each LAND-1 leak closes with the mutant that catches it; conjured matter as a logged source/sink (DEC-018 PM default, not answered); checks; no ore creation (LIFE-002)."
+      "status": "PARTIAL",
+      "notes": "Sections 9.1-9.7: families, forms and units; ledger entries for 19 paths including build, dig, mine, quarry, collapse, blast, rubble clearing, salvage and conjured matter; how each LAND-1 leak closes with the mutant that catches it; conjured matter as a logged source/sink (DEC-018 PM default, not answered); checks; no ore creation (LIFE-002). PARTIAL because the ledger unit and family list are not reconciled across the sibling lanes: Lane Q uses kg, Lane R 1/16 lb, Lane W grams (section 9.7); raised in escalation.md for the PM."
     },
     {
       "id": "Q-09",
@@ -80,7 +80,11 @@
     {
       "id": "PROPOSED-Q-01",
       "title": "Material and structure model: property table as catalogue data, ids 6-37, loose record, object and item kg, compositions, load-time validator",
-      "deps": ["WG.00.17", "WG.65.15", "SIM.00.01"],
+      "deps": [
+        "WG.00.17",
+        "WG.65.15",
+        "SIM.00.01"
+      ],
       "acceptanceTests": [
         "Validator rejects a material missing any section 2.2 property; mutant: remove spanBase from one id, the validator must exit 1",
         "Loose kg exact over 1,000 random deposits and takes; mutant: store loose mass as a 1/255 fill fraction, the exactness check must fail",
@@ -90,7 +94,11 @@
     {
       "id": "PROPOSED-Q-02",
       "title": "Constructions as constructed strata (LAND-5, SUP-2, SET-4): build jobs write strata, balanced build masses, foundations and re-founding, save migration, removal of the isRoofed roof-deck side effect",
-      "deps": ["PROPOSED-Q-01", "WG.00.17", "WG.65.15"],
+      "deps": [
+        "PROPOSED-Q-01",
+        "WG.00.17",
+        "WG.65.15"
+      ],
       "acceptanceTests": [
         "T14 save migration; mutant: migration forgets the rubble object's mass",
         "A built floor over a room is supported only through built walls; mutant: the build job places an object again, the floor must be reported unsupported",
@@ -100,7 +108,11 @@
     {
       "id": "PROPOSED-Q-03",
       "title": "Mass-conserving earthworks (LAND-1): mine, dig, quarry, dismantle, rubble clearing, salvage, spoil, rebuild from rubble",
-      "deps": ["PROPOSED-Q-01", "PROPOSED-Q-02", "WG.65.15"],
+      "deps": [
+        "PROPOSED-Q-01",
+        "PROPOSED-Q-02",
+        "WG.65.15"
+      ],
       "acceptanceTests": [
         "T5 rows for mine, dig, quarry, dismantle, clearing, salvage, rebuild; mutants: mining yields 2 stone with no spoil; dig drops a free stone 1 in 4; rubble pick yields 2 stone; roof-deck side effect restored"
       ]
@@ -108,7 +120,13 @@
     {
       "id": "PROPOSED-Q-04",
       "title": "Support evaluation and localized recheck: members, records, queue, failing set, warnings, Support.query / wouldSupport / digRisk",
-      "deps": ["PROPOSED-Q-01", "PROPOSED-Q-02", "SIM.00.02", "SIM.00.05", "WG.00.17"],
+      "deps": [
+        "PROPOSED-Q-01",
+        "PROPOSED-Q-02",
+        "SIM.00.02",
+        "SIM.00.05",
+        "WG.00.17"
+      ],
       "acceptanceTests": [
         "T1 deterministic cave-in; mutant: levels:strataChanged not enqueued",
         "T6 zero full-world scans; mutant: per-tick sweep over all chunks",
@@ -119,7 +137,11 @@
     {
       "id": "PROPOSED-Q-05",
       "title": "Volume damage with attenuation: ADR-003 section 18 rule plus this design's pass/resist tables, breach order, SRD area versus remainder, ignition, debris",
-      "deps": ["PROPOSED-Q-01", "SIM.00.02", "WG.00.17"],
+      "deps": [
+        "PROPOSED-Q-01",
+        "SIM.00.02",
+        "WG.00.17"
+      ],
       "acceptanceTests": [
         "T3 blast breaches one floor; mutant: attenuation removed (all passPm 1000)",
         "T4 blast breaches two floors; mutants: breach order reversed; 1-ft stratum height",
@@ -129,7 +151,11 @@
     {
       "id": "PROPOSED-Q-06",
       "title": "Stable terrain at generation: extend the floating-rock pass to spans",
-      "deps": ["PROPOSED-Q-04", "WG.00.17", "WG.00.08"],
+      "deps": [
+        "PROPOSED-Q-04",
+        "WG.00.17",
+        "WG.00.08"
+      ],
       "acceptanceTests": [
         "T8 a fresh world has zero failing members at both ranges; mutant: the stability pass skipped"
       ]
@@ -137,7 +163,11 @@
     {
       "id": "PROPOSED-Q-07",
       "title": "Falls, impacts and burial for units and objects (V95, SUP-4)",
-      "deps": ["PROPOSED-Q-04", "SIM.00.04", "WG.00.17"],
+      "deps": [
+        "PROPOSED-Q-04",
+        "SIM.00.04",
+        "WG.00.17"
+      ],
       "acceptanceTests": [
         "T10 falls and burial; mutants: fall height from 1-ft strata; burial not applied"
       ]
@@ -145,26 +175,139 @@
     {
       "id": "PROPOSED-Q-08",
       "title": "Support observability (AGENTS.md Rule 14): UF_Look and UF_Sheet explain why a member is supported or failing",
-      "deps": ["PROPOSED-Q-04"],
+      "deps": [
+        "PROPOSED-Q-04"
+      ],
       "acceptanceTests": [
         "Support.query matches a fresh evaluation after every mutation in the T1 fixture; mutant: a stale record kept after a dig"
       ]
     }
   ],
   "ownerQuestions": [
-    { "id": "OQ-Q-01", "question": "DEC-010 is OPEN: how far may natural rock reach sideways from a support?", "options": ["(a) recommended: bounded by the material and thickness span table, keeping rechecks local (V133)", "(b) unbounded lateral connectivity as the generator does, which needs a whole-area connectivity search after every dig", "(c) DEC-010 option 2: full vertical support, no overhangs"] },
-    { "id": "OQ-Q-02", "question": "How strong should materials be?", "options": ["(a) recommended: the physically derived table", "(b) the same table with every span doubled", "(c) one span per material class (rock, soil, timber, masonry)"] },
-    { "id": "OQ-Q-03", "question": "How realistic should constructed spans be (proposed: timber floors and roofs clear 20 ft, stone vaults 30 ft, bridge piers every 20 ft)?", "options": ["(a) recommended: as proposed", "(b) more generous (timber 30 ft, vaults 50 ft)", "(c) stricter (timber 15 ft)"] },
-    { "id": "OQ-Q-04", "question": "Does furniture carry load?", "options": ["(a) recommended: furniture is load only, never support", "(b) heavy furniture can prop a ceiling like a post", "(c) furniture is neither load nor support"] },
-    { "id": "OQ-Q-05", "question": "Do units' weights load floors?", "options": ["(a) recommended: no, except Huge and Gargantuan creatures", "(b) every unit is load", "(c) no unit is load"] },
-    { "id": "OQ-Q-06", "question": "Item masses and build costs, given that a 5-ft masonry wall cell weighs about 3.9 t with exact mass", "options": ["(a) realistic masses: more, heavier building items", "(b) abstract load units: today's item counts, with item kg set so each recipe balances exactly", "(c) a middle scale"] },
-    { "id": "OQ-Q-07", "question": "Where does mining spoil go (a mined voxel's mass beyond the stone items)?", "options": ["(a) left as loose rubble at the work cell, to be hauled", "(b) moved to a designated spoil heap as part of the job", "(c) all of it yields as items"] },
-    { "id": "OQ-Q-08", "question": "Collapse damage to creatures", "options": ["(a) recommended: SRD Earthquake numbers (Dex save, 5d6, burial DC 20) plus +1d6 per further 10 ft fallen, cap 20d6", "(b) the SRD numbers alone", "(c) damage scaled only by debris mass and height"] },
-    { "id": "OQ-Q-09", "question": "Warning before a structure falls", "options": ["(a) recommended: short creaks by material (timber 20 ticks, masonry 5, rock 0-10), none after a blast", "(b) no warning ever", "(c) long warnings (several game hours)"] },
-    { "id": "OQ-Q-10", "question": "Blast feel: damage thresholds (SRD gives the rule, no numbers), the pass table, and whether 'spreads around corners' spells spread physical energy around corners", "options": ["(a) recommended: the proposed tables with around-corners propagation where the SRD text says so", "(b) the same tables, straight lines only (ADR-003 rule)", "(c) tune both on the SIM.60.04 fixtures with the Owner"] },
-    { "id": "OQ-Q-11", "question": "Roof decks that old saves got for free (DEUS_Floors.js:276)", "options": ["(a) keep them with a logged one-time migration source", "(b) remove them on load", "(c) convert them to items on the floor below"] },
-    { "id": "OQ-Q-12", "question": "Soil cannot span without depth: a soil tunnel with less than 20 ft of cover falls in unless propped", "options": ["(a) accept: props become a real mining task (SIM.40.03)", "(b) give soil a 1-cell span at any thickness", "(c) soil tunnels never fall"] },
-    { "id": "OQ-Q-13", "question": "Generated terrain that exceeds the spans", "options": ["(a) the generator adds natural pillars", "(b) the generator thins or removes the overhang", "(c) generated terrain is exempt until something nearby changes"] },
-    { "id": "OQ-Q-14", "question": "Walls fill a whole 5-ft cell, with thin walls expressed by their mass", "options": ["(a) recommended: whole cells, as wall objects block a cell today", "(b) walls on the edges between cells, a new geometry and a much larger change"] }
+    {
+      "id": "OQ-Q-01",
+      "question": "DEC-010 is OPEN: how far may natural rock reach sideways from a support?",
+      "options": [
+        "(a) recommended: bounded by the material and thickness span table, keeping rechecks local (V133)",
+        "(b) unbounded lateral connectivity as the generator does, which needs a whole-area connectivity search after every dig",
+        "(c) DEC-010 option 2: full vertical support, no overhangs"
+      ]
+    },
+    {
+      "id": "OQ-Q-02",
+      "question": "How strong should materials be?",
+      "options": [
+        "(a) recommended: the physically derived table",
+        "(b) the same table with every span doubled",
+        "(c) one span per material class (rock, soil, timber, masonry)"
+      ]
+    },
+    {
+      "id": "OQ-Q-03",
+      "question": "How realistic should constructed spans be (proposed: timber floors and roofs clear 20 ft, stone vaults 30 ft, bridge piers every 20 ft)?",
+      "options": [
+        "(a) recommended: as proposed",
+        "(b) more generous (timber 30 ft, vaults 50 ft)",
+        "(c) stricter (timber 15 ft)"
+      ]
+    },
+    {
+      "id": "OQ-Q-04",
+      "question": "Does furniture carry load?",
+      "options": [
+        "(a) recommended: furniture is load only, never support",
+        "(b) heavy furniture can prop a ceiling like a post",
+        "(c) furniture is neither load nor support"
+      ]
+    },
+    {
+      "id": "OQ-Q-05",
+      "question": "Do units' weights load floors?",
+      "options": [
+        "(a) recommended: no, except Huge and Gargantuan creatures",
+        "(b) every unit is load",
+        "(c) no unit is load"
+      ]
+    },
+    {
+      "id": "OQ-Q-06",
+      "question": "Item masses and build costs, given that a 5-ft masonry wall cell weighs about 3.9 t with exact mass",
+      "options": [
+        "(a) realistic masses: more, heavier building items",
+        "(b) abstract load units: today's item counts, with item kg set so each recipe balances exactly",
+        "(c) a middle scale"
+      ]
+    },
+    {
+      "id": "OQ-Q-07",
+      "question": "Where does mining spoil go (a mined voxel's mass beyond the stone items)?",
+      "options": [
+        "(a) left as loose rubble at the work cell, to be hauled",
+        "(b) moved to a designated spoil heap as part of the job",
+        "(c) all of it yields as items"
+      ]
+    },
+    {
+      "id": "OQ-Q-08",
+      "question": "Collapse damage to creatures",
+      "options": [
+        "(a) recommended: SRD Earthquake numbers (Dex save, 5d6, burial DC 20) plus +1d6 per further 10 ft fallen, cap 20d6",
+        "(b) the SRD numbers alone",
+        "(c) damage scaled only by debris mass and height"
+      ]
+    },
+    {
+      "id": "OQ-Q-09",
+      "question": "Warning before a structure falls",
+      "options": [
+        "(a) recommended: short creaks by material (timber 20 ticks, masonry 5, rock 0-10), none after a blast",
+        "(b) no warning ever",
+        "(c) long warnings (several game hours)"
+      ]
+    },
+    {
+      "id": "OQ-Q-10",
+      "question": "Blast feel: damage thresholds (SRD gives the rule, no numbers), the pass table, and whether 'spreads around corners' spells spread physical energy around corners",
+      "options": [
+        "(a) recommended: the proposed tables with around-corners propagation where the SRD text says so",
+        "(b) the same tables, straight lines only (ADR-003 rule)",
+        "(c) tune both on the SIM.60.04 fixtures with the Owner"
+      ]
+    },
+    {
+      "id": "OQ-Q-11",
+      "question": "Roof decks that old saves got for free (DEUS_Floors.js:276)",
+      "options": [
+        "(a) keep them with a logged one-time migration source",
+        "(b) remove them on load",
+        "(c) convert them to items on the floor below"
+      ]
+    },
+    {
+      "id": "OQ-Q-12",
+      "question": "Soil cannot span without depth: a soil tunnel with less than 20 ft of cover falls in unless propped",
+      "options": [
+        "(a) accept: props become a real mining task (SIM.40.03)",
+        "(b) give soil a 1-cell span at any thickness",
+        "(c) soil tunnels never fall"
+      ]
+    },
+    {
+      "id": "OQ-Q-13",
+      "question": "Generated terrain that exceeds the spans",
+      "options": [
+        "(a) the generator adds natural pillars",
+        "(b) the generator thins or removes the overhang",
+        "(c) generated terrain is exempt until something nearby changes"
+      ]
+    },
+    {
+      "id": "OQ-Q-14",
+      "question": "Walls fill a whole 5-ft cell, with thin walls expressed by their mass",
+      "options": [
+        "(a) recommended: whole cells, as wall objects block a cell today",
+        "(b) walls on the edges between cells, a new geometry and a much larger change"
+      ]
+    }
   ]
 }

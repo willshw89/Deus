@@ -25,7 +25,7 @@
 - **Sibling and proposed inputs (unreviewed or not on main):**
   - ADR-003 Rev 3, `origin/task/lane-m:docs/adr/ADR-003_sim_render_split_and_lod.md` (commit `2e32f596`; a Grok review commit `9e0ef94d` on that branch). It is not on main at the base, so this design cites it as **PROPOSED** (§0.4).
   - Lane P's SRD spell-effect audit, `origin/task/lane-p:docs/audits/SRD_SPELL_EFFECT_AUDIT.md` (tip `352d1983`), unreviewed input for primitive names (`volumeDamage`, `terrainEdit`, `conjureMatter`, `forceBarrier`).
-  - Lanes R (SIM.40.05 decay) and W (SIM.40.10 population): at the time of writing their branches hold only their BRIEF and `lane.json` (`origin/task/lane-r` tip `d9766aa2`, `origin/task/lane-w` tip `31892ae7`). The interface with Lane R is written here as explicit assumptions (§7).
+  - Lanes R (SIM.40.05 decay) and W (SIM.40.10 population): when this design was started their branches held only their BRIEF and `lane.json` (`d9766aa2`, `31892ae7`). Both pushed designs before this one was finished (`origin/task/lane-r` tip `6613418f`, `origin/task/lane-w` tip `bed949e8`); their interface sections were read and every difference is in §9.7. The interface with Lane R is §7.
 
 ### 0.2 Method
 
@@ -155,7 +155,7 @@ Loose materials are matter that bears weight but never spans or gives lateral su
 | 6 | rubble | parent's (stone rubble: mineral; masonry rubble: mineral) | 0.6 × parent kg (granite rubble 2,336) | 2 (38.7°; rock rubble repose 35-40°) | 5 | 0 | collapse, blast, dismantle remainder, mine spoil | sediment (weathering) |
 | 7 | loose_fill | mineral + organic as soil | 1,911 (1.35 t/m³) | 1 (21.8°) | 4 | 0 | dig, soil collapse, earthworks | soil (compaction) |
 | 8 | sediment | mineral | 2,124 (1.5 t/m³) | 1 | 3 | 0 | erosion (SIM.50.03), rubble weathering | stone (lithification, Lane R) |
-| 9 | ash | mineral (the non-combustible part of wood) | 850 (0.6 t/m³) | 1 | 3 | 0 | fire burn-out (SIM.50.05) | soil |
+| 9 | ash | its source's family (ORGANIC for wood ash, as Lane R's residue rule books it, §9.7) | 850 (0.6 t/m³) | 1 | 3 | 0 | fire burn-out (SIM.50.05) | soil |
 | 11 | scrap | `metal:<element>` of the source | 0.25 × metal kg (iron scrap 2,786) | 2 | 5 | 0 | destroyed metal assemblies | mineral_trace (rust) |
 | 12 | mineral_trace | `metal:<element>` (oxide; never ore) | 2,549 (1.8 t/m³) | 1 | 3 | 0 | rust and corrosion of metal items and scrap (SIM.40.07) | stays (LIFE-002) |
 | 13 | broken_timber | organic | 354 (0.25 t/m³) | 2 | 5 | 4 | destroyed timber assemblies (DURABILITY DU8 name) | soil (rot) |
@@ -262,7 +262,8 @@ The build job (`DEUS_Jobs.js:707-728`) keeps its transactional shape (materials 
 3. **Write.** `setStrata(ref, { m }, { constructed: true, cause: "build:<typeId>", refuseIfStanding: true })` per cell, which already refuses when a unit stands there (`DEUS_Levels.js:1545-1547`, V68).
 4. **Ledger.** `transform(ITEM → STRATUM_BUILT, family, kg, "build")` for the strata mass and `transform(ITEM → LOOSE, family, wasteKg, "build:waste")` for the waste, deposited as loose debris at the cell (§9.2).
 5. **Events.** `levels:strataChanged` with cause `build:<typeId>` (`DEUS_Levels.js:1558`), which also enqueues the support recheck (§5.1).
-6. **Refusal.** A refused write leaves every material on the cell, as today.
+6. **Structure index.** The job records each built voxel run with its structure id, site id and role (ROOF, WALL-UPPER, WALL-BASE, FLOOR, FOUNDATION, PROP, FITTING) in a sparse structure index, which Lane R's decay members read (§9.7, §10.1).
+7. **Refusal.** A refused write leaves every material on the cell, as today.
 
 Dismantle and quarry of a built element become the reverse: strata → items (a salvage fraction) plus the remainder as loose debris, never more out than in (§9.2).
 
@@ -490,7 +491,7 @@ For a collapsing member M in column (x, y) with voxels `e0..e1`:
 
 ### 7.1 Who owns what (the Lane Q / Lane R interface)
 
-Lane R (SIM.40.05, `origin/task/lane-r`) has no design on its branch at the time of writing. Its brief asks it to state the hand-off "with localized support rechecks (interface contract with Lane Q stated explicitly)" (its R-05). This is Lane Q's side of that contract; Lane R's document may amend it.
+Lane R (SIM.40.05) had no design on its branch when this section was first written. It has since pushed one (`origin/task/lane-r` tip `6613418f`, section "Decay-driven collapse", R-05.1-R-05.5, unreviewed), written against assumed Lane Q names. The two sides agree on the split of ownership; §9.7 lists the naming differences, and this section now uses Lane R's names where Lane R assumed one (`capacityThresholdsHP`, `breakElement`).
 
 | Owner | Owns |
 |---|---|
@@ -500,8 +501,8 @@ Lane R (SIM.40.05, `origin/task/lane-r`) has no design on its branch at the time
 
 ### 7.2 The contract
 
-- **C1. Decay lowers HP, nothing else.** Decay writes HP bytes of constructed voxels (and of natural voxels, if Lane R weathers rock) only through the strata writer, with cause `decay:<reason>`. At HP 0 the writer destroys the voxel (`DEUS_Levels.js:1699-1703`), and with PROPOSED-Q-01 the destroyed voxel becomes its loose debris rather than air. From there Lane Q's collapse path runs.
-- **C2. Band crossings, not daily steps.** Support reacts only when a voxel's band `(hp + 31) >> 5` changes (§4.4). Lane R should schedule the HP write for each band crossing (at most 8 per voxel) rather than every day, which generalises ADR §17.3's `failDay` into a `nextBandDay` heap.
+- **C1. Decay lowers HP, nothing else.** Decay writes HP bytes of constructed voxels (and of natural voxels, if Lane R weathers rock) only through the strata writer, with cause `decay:<reason>`. At HP 0 the voxel goes through `Collapse.breakElement(ref, cause)` (§11.2), the one break path that blasts, picks and fire also use; it replaces today's "HP 0 becomes air" (`DEUS_Levels.js:1699-1703`) with the voxel's loose debris. From there Lane Q's collapse path runs.
+- **C2. Band crossings, not daily steps.** Support reacts only when a voxel's band `(hp + 31) >> 5` changes (§4.4). Lane Q publishes the band boundaries as `capacityThresholdsHP[material]` (HP bytes 224, 192, 160, 128, 96, 64, 32). Lane R writes HP only when its closed-form HP crosses one of them, at most 8 times per voxel (its default is every other one, 4 `steps`), which generalises ADR §17.3's `failDay` into a `nextBandDay` heap.
 - **C3. Events back to Lane R.** `support:failing`, `collapse:begin`, `collapse:landed` and `collapse:end` carry the member key and, when known, the site id (§11), so Lane R can derive the "collapsed" stage.
 - **C4. Mass.** Everything from intact wall to rubble is a Lane Q transform with exact kg (§6.3). Rubble to sediment to soil or stone is Lane R's, with families unchanged.
 - **C5. Inputs Lane Q offers.** `Support.query(ref)` (§11.2) returns thickness, dist, band, load ratio and the failing state, so Lane R can, for example, decay overloaded members faster.
@@ -653,12 +654,12 @@ ADR-003 leaves the per-material mass tables to "SIM.40.01 with WG.65.15" (ADR §
 
 | Family | Unit | What it covers |
 |---|---|---|
-| `mineral` | kg | rock of every type, the mineral part of soil, rubble, loose fill, sediment, ash, dust, mortar, brick, conjured stone, lava |
-| `organic` | kg | wood and timber assemblies, thatch, broken timber, the organic part of soil, plants, food, bodies (Lane W) |
+| `mineral` | kg | rock of every type, the mineral part of soil, rubble, loose fill, sediment, dust, mortar, brick, conjured stone, lava |
+| `organic` | kg | wood and timber assemblies, thatch, broken timber, ash and charcoal (Lane R R-04.2), the organic part of soil, plants, food, bodies (Lane W) |
 | `metal:<element>` | kg | iron, copper, tin, silver, gold (lead and platinum reserved): metal items and assemblies, scrap, mineral_trace, and the metal part of ore rock |
 | `water` | fluid depth unit (du) | liquid water (Q-WATER, ADR §7.8), ice and snow. An ice voxel holds exactly 1 du, so its load is 1,011 kg, the water in one du (§2.3), not the 1,298 kg of a solid ice voxel. Lake ice uses a frozen flag on the fluid cell and changes nothing in the ledger |
 
-- **Composition.** A material with more than one family carries integer per-mille shares: soil mineral 950 / organic 50; timber organic 990 / mineral 10 (its ash); ore rock mineral plus `metal:<element>` by grade; bronze copper 880 / tin 120. Splits use `floor` for the first family and the remainder for the last, so they are exact.
+- **Composition.** A material with more than one family carries integer per-mille shares: soil mineral 950 / organic 50; ore rock mineral plus `metal:<element>` by grade; bronze copper 880 / tin 120. Splits use `floor` for the first family and the remainder for the last, so they are exact.
 - **Rock type** (granite, limestone, ...) is a sub-total inside `mineral`, carried as the loose record's lineage, so a mined granite stone and its rubble stay granite.
 - **Lava.** Lava is a fluid counted in du (Q-LAVA, ADR §7.8) and belongs to the `mineral` family at a fixed kg per du; its solidification into basalt (SIM.50.10) must use an exact integer ratio. Proposal: 3 du of lava become 2 basalt voxels, with the lava du defined as 2,738 kg and lava-born basalt as 4,107 kg per voxel (SIM.50.10 confirms).
 - **Forms:** `STRATUM_NATURAL`, `STRATUM_BUILT`, `LOOSE`, `ITEM`, `OBJECT`, `FLUID`, `HELD` (spell-held), `BODY` (Lane W). A ledger key is `(family, form)`, with rock type as a sub-key. ADR-003's Q-STRATA, Q-ITEM, Q-OBJ and Q-WATER are these forms (ADR §7.8).
@@ -677,7 +678,7 @@ ADR-003 leaves the per-material mass tables to "SIM.40.01 with WG.65.15" (ADR §
 | 8 | Clear rubble | `rubble` object pick yields 2 stone (`game/data/DEUS_WorldCatalog.json:2104`) | stone from a label | `LOOSE → ITEM` (`floor(kg / itemKg)` rubble-stone items; the remainder stays loose); hauling moves items (no entry); dumping is `ITEM → LOOSE` | |
 | 9 | Salvage a ruin | — | — | as row 5, for any owner's built strata; items lying there are moved | SET-4 |
 | 10 | Rebuild from rubble | — | — | `LOOSE (masonry lineage) → STRATUM_BUILT (masonry)`; mortar `ITEM → STRATUM_BUILT` | §3.4 |
-| 11 | Fire burns out a timber voxel (SIM.50.05) | `DEUS_Fire.js:348-351` ends a burning record; burnt objects become their `becomes` | no carbon or ash mass (audit FIR-3) | organic share: `sink(organic, kg, "combustion")`; mineral share: `STRATUM_BUILT → LOOSE (ash)` | Burning is a named sink (ADR §7.9) |
+| 11 | Fire burns out a timber voxel (SIM.50.05) | `DEUS_Fire.js:348-351` ends a burning record; burnt objects become their `becomes` | no carbon or ash mass (audit FIR-3) | Lane R's `residue.burn` (its R-04.2): `T(BUILT→ASH, ORGANIC, ash)`, `T(BUILT→CHARCOAL, ORGANIC, char)`, `sink(AIR, ORGANIC, gas, "fire.outgas")` | Burning is a named sink (ADR §7.9); the residue rule is Lane R's (§9.7) |
 | 12 | Conjured matter (Wall of Stone) | — | — | `source(mineral, kg, "conjured:wall-of-stone")` at creation; if concentration ends early, `sink(mineral, kg left, "conjured-end:wall-of-stone")` for exactly the provenance-tagged kg that remains, wherever it is | DEC-018 PM default; §9.4 |
 | 13 | Disintegrate | — | — | `STRATUM_* → LOOSE (dust)`; objects and items to dust the same way | The SRD's dust is matter |
 | 14 | Passwall | — | — | `STRATUM_* → HELD` for the duration; `HELD → STRATUM_*` at the end | |
@@ -713,6 +714,27 @@ DEC-018's open sub-question (`docs/OWNER_DECISIONS.md:262`) has the PM default t
 - No transform may output an ore id (38-47) or an ore item unless its input is ore of the same element with at least that metal kg. Blasting a vein gives ore-lineage rubble (the ore was already there); rust gives `mineral_trace`; lithification gives sandstone or mudstone; none gives ore.
 - A load-time check fails any transform-table row whose output is ore from a non-ore input (§12, T12). The live ore sprouts (audit VEG-1, F-03, D-5 Owner ruling) are removed under audit §6 step 1, not here; the ledger test fails any ore source regardless.
 
+### 9.7 Reconciliation with Lanes R and W (both unreviewed)
+
+Lane R (`origin/task/lane-r`, tip `6613418f`, `tasks/SIM.40.05/lane-r/SIM.40.05_DECAY_CYCLE.md`) and Lane W (`origin/task/lane-w`, tip `bed949e8`, `tasks/SIM.40.10/lane-w/SIM.40.10_POPULATION_LIFECYCLE.md`) pushed their designs while this one was being written. Both were written before this design existed on the branch, so each assumed Lane Q names. The table records every difference found and what this design does about it. Nothing here edits their files.
+
+| Topic | Lane R | Lane W | This design (Lane Q) | Resolution proposed |
+|---|---|---|---|---|
+| Ledger mass unit | 1 mu = 1/16 lb, "assumed" pending SIM.40.01 and WG.65.15 (its §0.2) | integer grams, "Assumption A-MASS" (its §0) | integer kg (§1, §9.1) | **Unresolved: one ledger needs one unit.** Lane Q recommends 1 g for every family except water (du): it is fine enough for Lane W's small creatures, Lane Q's tables convert exactly (× 1,000), and Lane R's tables convert once (1 mu = 28.349523125 g, rounded per table entry at data time). With grams one fully solid 256 × 256 × 160-voxel area of granite is 65,536 × 160 × 3,894,000 ≈ 4.1 × 10¹³ g, under 2⁵³ ≈ 9.0 × 10¹⁵, so totals are kept per area and family and summed only for reports. The PM or WG.65.15 decides; see `escalation.md` |
+| Families | STONE (per lithology), EARTH, ORGANIC, BONE, FE, CU (Cu, Sn, Zn), PB, AG, AU, PT, SPECIAL, GLASS, WATER | organics, water (the ADR's list) | mineral, organic, metal:<element>, water | Adopt Lane R's finer list; it refines this one: `mineral` = STONE ∪ EARTH ∪ GLASS, `metal:<element>` = FE, CU, PB, AG, AU, PT, and BONE is its own family. Rock type stays a sub-key (Lane R: "STONE (per lithology)") |
+| Ash and charcoal | ORGANIC family, ASH and CHARCOAL forms, by `residue.burn` (its R-04.2) | — | an earlier draft put ash in `mineral`; §2.4 and §9.2 row 11 now follow Lane R | Adopt Lane R's: fire residue is Lane R's rule. The ash loose material (id 9) keeps its source's family; §9.2 row 11 becomes Lane R's `T(BUILT→ASH, ORGANIC)`, `T(BUILT→CHARCOAL, ORGANIC)` and `sink(AIR, ORGANIC, gas, "fire.outgas")` |
+| Forms | NATURAL, BUILT, RUBBLE, SCRAP (as items), FINES, SEDIMENT, SOIL-MIN, SOIL-ORG, SOIL-CARBON, ITEM, ITEM-BURIED, REMAINS, ASH, CHARCOAL, OXIDE, ROCK-SED, BIOMASS, BODY | BODY and its own | STRATUM_NATURAL, STRATUM_BUILT, LOOSE (with a material), ITEM, OBJECT, FLUID, HELD, BODY | Same meaning, different grain: this design's LOOSE with material rubble, sediment, ash, dust, mineral_trace or scrap is Lane R's RUBBLE, SEDIMENT, ASH, FINES, OXIDE or SCRAP. Lane R's SCRAP is an item form; this design also allows loose scrap voxels for large quantities. WG.65.15 fixes one list; OBJECT, FLUID and HELD must be on it |
+| "Member" | a **decay member**: up to 64 built strata of one structure with one decay class, exposure and role (its R-02.2) | — | a **support member**: one vertical run of solid voxels (§4.1) | Two different things. Both documents should say "decay member" and "support member" |
+| Roles and structure ids | expects Lane Q's build path to write roles (ROOF, WALL-UPPER, WALL-BASE, FLOOR, FOUNDATION, PROP, FITTING) and a structure id into a member index (R-02.2) | — | added as §3.3 step 6 | Adopted: the build job (§3.3) also writes each built voxel run's structure id, site id and role into a sparse structure index (§10.1) |
+| HP thresholds | writes HP only when it crosses `capacityThresholdsHP[material]` (an assumed Lane Q name), default 4 steps (its C-1) | — | 8 bands, `band = (hp + 31) >> 5` (§4.4) | Adopted Lane R's name: Lane Q publishes `capacityThresholdsHP[material]` as the band boundaries (HP bytes 224, 192, 160, 128, 96, 64, 32). Lane R may write at a subset (its `steps`); support evaluates whatever is written, and roofs still fail first because the first write already leaves band 8 (§7.2 C6) |
+| Break path at HP 0 | calls `collapse.breakElement(ref, "decay")` (assumed name, its C-2) | — | `Collapse.breakElement` (§7.2 C1, §11.2) | Adopted: `Collapse.breakElement(ref, cause)` is the one path every HP-0 event takes (blast, pick, decay, fire); the writer calls it (§11.2) |
+| Collapse event back to decay | `structure:collapsed` or the ADR feed's `EFFECT(collapse)` with cells, forms and masses (its C-3) | IA-Q2: crushed units reported through its violent-death hook with `cause = collapse` | `collapse:landed`, `collapse:end`, `collapse:impact` (§11.1) | Lane R subscribes to `collapse:landed` and `collapse:end`; `collapse:impact` calls Lane W's violent-death hook with `cause: "collapse"` |
+| Support cost per decay event | assumed a 4-cell span and 80 reads per evaluation, ≤ 5,120 reads per event (its C-5) | — | S_MAX 12; ≤ 64 reads per evaluation with stored `dist` (§5.5) | A decay event of ≤ 64 strata enqueues ≤ 64 members, ≤ 64 × 64 = 4,096 reads, plus a bounded distance wave only if something fails |
+| Decay classes | ASHLAR, RUBBLESTONE, BRICK, MUDBRICK, TIMBER, LIGHTWOOD, THATCH, FERROUS, ... (its R-01.3) | — | the `weather` column (§2.3-§2.5) | Mapping: masonry → RUBBLESTONE; ashlar, stone_vault, conjured_stone → ASHLAR; brick → BRICK; rammed_earth → MUDBRICK; timber_wall, timber_post, timber_frame → TIMBER; timber_floor, timber_roof, bridge_deck → LIGHTWOOD; thatch_roof → THATCH; iron_grate → FERROUS; foundation → the class of its stone, BURIED exposure. Natural strata have no decay class (Lane R agrees) |
+| Timber wall mass | assumed 20 % solid wood, 400 lb a slice, "Lane Q decides the real number" (its R-04.3) | — | `timber_wall` 266 kg (oak, fill 0.25) | This design's number |
+| Salvage and re-founding | salvage by mass, remainder stays RUBBLE (R-07.4); reuse wall bases and foundations at h ≥ 0.5 and build only the missing slices (R-07.5) | — | §9.2 rows 5, 8, 9, 10; §3.4 | Compatible; this design adopts "build only the missing slices" for re-founding |
+| Shelter | — | IA-Q1: shelter reads enclosed, roofed cells; Lane Q decides which roofs stand | `Support.query`, collapse events | Compatible |
+
 ## Sparse storage and cost
 
 ### 10.1 Data structures (memory and saves, D-3)
@@ -725,6 +747,7 @@ DEC-018's open sub-question (`docs/OWNER_DECISIONS.md:262`) has the PM default t
 | Member records (support) | dist, rootDir, band, load band, Lsup, tributary, flags | per chunk open-addressing table, only for lateral members of touched chunks (§5.4) | 16 B each; 32 B at load factor 0.5 | no (derived, rebuilt lazily) |
 | Failing set | member key, cause, fail tick | array | 16 B each | yes |
 | `supportDirty`, `talusDirty` | member or cell keys | ring buffers, starting at 4,096 and 1,024 entries, doubling when full | 32 KB and 8 KB | yes (pending work) |
+| Structure index | per built voxel run: structure id, site id, role (§3.3 step 6) | per structure, a list of runs `(chunk-local cell, e0, e1, role)` | about 8 B a run; a 6 × 6 two-storey house has about 60 runs, 480 B | yes (not derivable) |
 | Lazy-init flag | chunk touched since load | one spare bit in the chunk directory byte | 0 | no |
 | Blast scratch | pass value per voxel in the box | transient, freed after the event | ≤ 190 KB (Meteor Swarm) | no |
 
@@ -790,6 +813,7 @@ Before the core exists the same names go through `UF.Events`. Inside a phase, ev
 | `Support.digRisk(ref)` | `{ members, kg, cells }` that would fail if the voxel were removed | bounded as §5.5 |
 | `Support.enqueue(ref, cause)` | for load changes made outside the writers (aggregated fluid load) | O(1) |
 | `Collapse.trigger(memberKeys, cause)` | forced collapse (sinkholes, earthquake fissures) | as §6 |
+| `Collapse.breakElement(ref, cause)` | the one path a voxel at HP 0 takes, whatever brought it there (blast, pick, decay, fire): it becomes its debris and its dependants are enqueued (Lane R's assumed name, §9.7) | O(1) plus the enqueues |
 | `Volume.damage(event)` | §8.2 | §8.8 |
 | `Loose.deposit(ref, lineage, kg, cause)`, `Loose.take(ref, kg, cause)`, `Loose.at(ref)` | loose matter | O(log n) in the chunk's array |
 | `Ledger.transform / source / sink` | WG.65.15 (A5) | O(1) |
@@ -803,7 +827,7 @@ Before the core exists the same names go through `UF.Events`. Inside a phase, ev
 - **SIM.50.02 water.** Fluid is load on floors (enqueued on load-band changes). `levels:breach` drains a pool through a breached floor. Each material's `perm` class (§2.2) sets seepage through floors and walls. Floating ice bears on water (§4.3). This depends on D-4 (DEUS_Fluid as the single water authority, a PM decision the Owner may still overturn): if the Owner keeps a different authority, these hooks move to it unchanged.
 - **SIM.50.05 fire.** Fire lowers timber HP through the strata writer (cause `fire`); band crossings wake support; a burnt-out voxel becomes ash plus a combustion sink (§9.2 row 11); blasts ignite by §8.3.
 - **SIM.60 spells** use §8.7's mapping. **GP.07.02** uses `Volume.damage` for area impacts and §6.5's fall rule for dropped objects.
-- **Lane W (SIM.40.10).** Units killed in a collapse become bodies by Lane W's transform (`BODY`); buried bodies stay where they are.
+- **Lane W (SIM.40.10).** `collapse:impact` reports crushed units through Lane W's violent-death hook with `cause: "collapse"` (its IA-Q2); their bodies become remains by Lane W's transform (`BODY`), and buried bodies stay where they are. Lane W's shelter counts roofs that support keeps standing (its IA-Q1).
 
 ## Acceptance tests
 
@@ -875,7 +899,7 @@ SIM.40.02 (collapse) is then the §6 cascade, talus and conversion on top of PRO
 | SIM.60.03 (`:561`) | includes SIM.40.01-.02 | PROPOSED-Q-05 |
 | SIM.40.01 (`:534`) | DoD: "Support model spec in docs/systems/" | The reviewed spec is this file in the lane folder (the PM moved it); where it lands after review is the Coordinator's decision |
 
-**For the PM and the ADR owner (not Owner questions):** §5.7 proposes that the support queue runs every tick at every LOD level instead of ADR §16.5's coarse tick in L2, and §8.2 proposes the `aroundCorners` propagation next to ADR §18.2's straight lines. Both amend PROPOSED ADR-003.
+**For the PM and the ADR owner (not Owner questions):** §5.7 proposes that the support queue runs every tick at every LOD level instead of ADR §16.5's coarse tick in L2, and §8.2 proposes the `aroundCorners` propagation next to ADR §18.2's straight lines. Both amend PROPOSED ADR-003. Separately, Lanes Q, R and W chose three different ledger mass units (kg, 1/16 lb, g) and two family lists; one ledger needs one of each, so this is raised in `tasks/SIM.40.01/lane-q/escalation.md` with a proposal (§9.7).
 
 **Rulings this design depends on:** D-1 (calendar) is OWNER_OPEN and is not chosen here (§7.6). D-4 (DEUS_Fluid as the single water authority) is a PM decision the Owner may overturn: the fluid load, `levels:breach` draining and seepage hooks (§11.3) assume it, and move unchanged to any other authority. D-6 (race-to-plan slots) is a PM decision: assemblies are per material, and which race builds with which assemblies is DEC-015 plan data, so D-6 changes plan files, not this design. D-2, D-3 and D-5 are Owner rulings this design follows (2 ft strata and 10 ft layers; sparse memory and saves; no ore respawn).
 
