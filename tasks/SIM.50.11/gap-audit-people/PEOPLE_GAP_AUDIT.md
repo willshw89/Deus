@@ -836,4 +836,285 @@ Code today: **PARTIAL** (hauling inside one settlement on one level and 3D A* ov
   - Acceptance tests: (1) an army far from its supply consumes stores at the configured rate and suffers when they run out; (2) cutting a supply route raises strain within one game day. Mutant: consumption that does not draw down stores must fail test 1.
   - Tick cost: each army or outpost once per game hour, up to 10 ÷ 100 ticks × 5 µs, negligible.
 
-<!-- PART D -->
+### 3.8 Records and legends (priority 7)
+
+**What the plan and the rules require.**
+- V134 and INV-SIM-01: history is not pre-materialised; it emerges through live simulation.
+- V63 (`docs/VISION.md:73`): "the chronicle says who was lost".
+- LIFE-003 (`docs/RISK_REGISTER.md:62`): ruins and history must not be erased too fast.
+- The brief: records should feed "the history-born D&D character mode". No repository document defines that mode (area 9).
+
+**Coverage by the WBS.**
+
+| Sub-element | WBS row that names it | Covered? |
+|---|---|---|
+| Per-person life chronicle and biography | SOC.51.01 (`docs/society/DEUS_SOCIETY_WBS.md:110`) | yes |
+| History and population records | SIM.10.01 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:526`), SIM.10.02 | yes (pre-game path) |
+| Place names from events | WG.63.06 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:212`) | yes |
+| Terrain provenance | WG.65.16 | yes |
+| Archaeology | WG.65.17 | yes |
+| Ruins and traces | SIM.40.08, SIM.50.09 | yes |
+| A live history clock during play | none | no |
+| One world event log (typed, compacted, saved) | none (SIM.30.01 "history counters" only) | no |
+| Renown, reputation, rumour | none | no |
+| Artifacts and item provenance | WG.65.17 "forgotten artifacts" | nominal |
+| Famous figures and legends | none | no |
+| History-born character export | none | no |
+
+Rating: **PARTLY PLANNED**.
+
+**What exists in code.**
+
+| Citation | Excerpt | Meaning |
+|---|---|---|
+| `DEUS_History.js:861` | `History.addEvent = function(e) {` | LIVE chronicle writer... |
+| `DEUS_Combat.js:1064` | `H.addEvent({ type: "death", text, factions: fid ? [fid] : [], area, x, y });` | ...fed by deaths in combat and broken doors (`DEUS_Doors.js:448`) only. |
+| `DEUS_History.js:869` | `const keep = (History.config() && History.config().eventsKept) \|\| 400;` | The chronicle keeps 400 text events. |
+| `DEUS_HistoricalDemographics.js:216` | `state.events.push({ id: state.nextEventId++, year: state.currentYear, type, factionId, siteId` | The typed ledger (foundings, births, deaths, successions) exists only on the pre-game path. |
+| `docs/systems/UF_History.md:92` | `synchronization back into the historical snapshot is not implemented` | Births and deaths in play never reach the ledger. |
+| `DEUS_History.js:3660` | `Input.keyMapper[72] = "ufChronicle";` | LIVE: H opens the chronicle. |
+| `DEUS_Talk.js:387` | `The newest chronicle event of the unit's faction (at its site first)` | LIVE: "news" reads the chronicle directly; news does not travel between people. |
+| `DEUS_History.js:417` | `History.genealogy = function(id, state = UF.World.state) {` | An API with no caller in play. |
+| `docs/systems/UF_History.md:98` | `**Roadmap only: requirements prepared under ASTRA-16; implementation NOT STARTED.**` | The lore and genealogy viewer has not been started. |
+| `DEUS_HistoricalDemographics.js:259` | `chosen.title = faction.rulerTitle; chosen.wasRuler = true; chosen.pedigreeAnchor = true;` | Rulers are the only notable figures. |
+| `DEUS_History.js:547` | `site.ruined = ds.isRuined ? ds.abandonedYear : null;` | `isRuined` is never set true (SIM.50.01 X-7), so no site becomes a ruin. |
+| `DEUS_Items.js:288` | `* opts = { mat, q } optional material and quality.` | Items carry no maker, name or history. |
+| `DEUS_History.js:493` | `const dnd = Dnd.assignClass(stats, statsSeed, p.id, p.species);` | Every materialised citizen gets an SRD class, the nearest thing to a history-born character; there is no way to pick one as a player character. |
+| `DEUS_DeathForensics.js:51` | `const deathLedgerRecords = [];` | The death ledger is not saved (area 6). |
+
+Code today: **PARTIAL** (a thin, capped text chronicle is LIVE; the typed ledger runs pre-game only; renown, artifacts, legends and the history-born export are ABSENT).
+
+**Gaps.**
+
+| ID | Severity | Gap | Package |
+|---|---|---|---|
+| G8-1 | BLOCKER | No row plans a live history clock: the people processes (aging, grief, succession, disease deaths, ledger updates) run only on the pre-game path that a Year-0 game skips (P-02, section 2.2). SIM.40.10 plans the biology, but nothing plans routing live events into the historical record. | REC-01 |
+| G8-2 | MAJOR | No row plans one world event log. The chronicle is 400 text lines, the death ledger is not saved, and SOC.51.01 is per person. Memories (MIND-02), crimes (GOV-02), renown and legends all need events with stable IDs. | REC-01 |
+| G8-3 | MAJOR | No row plans renown, reputation or rumour (deeds known by others through social spread). | REC-02 |
+| G8-4 | MAJOR | Artifacts and item provenance are nominal (WG.65.17's "forgotten artifacts"); items have no maker or history. | REC-03 |
+| G8-5 | MAJOR | Site histories and ruins: no site becomes a ruin, and no row ties a ruin to the events that made it (SIM.50.09 and SIM.40.08 cover the physical side). | REC-04 |
+| G8-6 | MAJOR | The history-born D&D character mode named in the brief is defined in no repository document; no row plans exporting a historical person as an SRD character. The mode itself is the Owner's (OQ-18). | REC-05 |
+| G8-7 | MINOR | Legends and genealogy queries: the API has no caller and the viewer (HIST-11) is not started. | REC-02 |
+
+**Proposed packages.**
+
+- **PROPOSED-REC-01 World event log and live history clock** (G8-1, G8-2).
+  - Scope: one append-only, typed event store with stable IDs (deaths, births, pairings, crimes, battles, offices, discoveries, foundings, abandonments), each with participants, place, layer and tick; subscribes to live events and to `time:day` / `time:year` so the historical ledger stays current in play; compaction keeps all deaths, births, battles and offices and trims low-significance events per person beyond a cap; saved; the chronicle and the death ledger become views of it.
+  - Depends on: MIND-01 (event record), SIM.00.02, SIM.00.06, SIM.40.10, SOC.51.01.
+  - Acceptance tests: (1) a death in play appears in the log, in the person's biography and in the historical ledger; (2) the log survives save and load byte-identical; (3) compaction never drops a death, birth or battle; (4) a 100-game-year run stays under the size cap. Mutant: a live death that never reaches the ledger (today's behaviour) must fail test 1.
+  - Tick cost: significant events are rare (A-7 puts about 0.2 per tick at N = 1,000); an append costs about 1 µs. Memory: 32 B per event plus references; with a cap of 64 events per named person and all vital events kept, about 2 MiB for 1,000 named persons; crowd events are aggregated per settlement per game day (about 64 B each).
+
+- **PROPOSED-REC-02 Renown, reputation, rumour and legends** (G8-3, G8-7).
+  - Scope: renown per person and faction from logged deeds; rumours travel as beliefs through social ties (MIND-02, MIND-04), can be wrong, and fade; "legend" status for persons whose renown passes a threshold; text-only legends and genealogy queries for the sheet and look views.
+  - Depends on: REC-01, MIND-02, MIND-04.
+  - Acceptance tests: (1) a deed witnessed by one person spreads to that person's ties at the configured rate and not to strangers; (2) a false rumour can exist alongside the true event and is marked as belief, not truth; (3) the genealogy query returns parents and children from the log. Mutant: rumour spread without ties must fail test 1.
+  - Tick cost: piggybacks on MIND-02 social events (about 4.5 × 1 µs per tick). Memory: 4 B renown per person; rumour beliefs share MIND-01's memory ring.
+
+- **PROPOSED-REC-03 Artifacts and item provenance** (G8-4).
+  - Scope: notable items (made by a master, used in a logged deed, a relic of a faith) carry a maker, a name slot (Owner-approved naming, AGENTS.md rule 7) and a provenance chain of event IDs; durable relics survive decay and burial (SIM.40.07) and can be found (WG.65.17).
+  - Depends on: REC-01, SOC.12.01, SIM.40.07, WG.65.17.
+  - Acceptance tests: (1) an item used to kill a named figure gains that event in its chain; (2) the chain survives burial and excavation. Mutant: provenance lost on save must fail test 2.
+  - Tick cost: event-driven. Memory: about 64 B per artifact; about 1,000 artifacts per game century ≈ 64 KiB.
+
+- **PROPOSED-REC-04 Site histories and ruins** (G8-5).
+  - Scope: each site keeps its founding, rulers, battles and abandonment as event references; an abandoned site becomes a ruin (with SIM.50.09 and SIM.40.08 on the physical side) that later settlers and archaeologists can learn about.
+  - Depends on: REC-01, SIM.50.09, SIM.40.08, WG.65.17.
+  - Acceptance tests: (1) a site abandoned in play becomes a ruin with its history attached; (2) the ruin's history names real events and persons. Mutant: `isRuined` never set (today's behaviour) must fail test 1.
+  - Tick cost: event-driven. Memory: about 256 B per site; 500 sites ≈ 128 KiB.
+
+- **PROPOSED-REC-05 Historical person export (data feed for the history-born mode)** (G8-6).
+  - Scope: data only: a read-only export of one historical person as SRD 5.1 character fields (race, class and level from SOC.11.01, ability scores, background built from their logged life, bonds from MIND-04 ties, flaws from MIND-05, equipment and artifacts from REC-03). How and when a player uses it is the Owner's (OQ-18); this package defines no mode.
+  - Depends on: REC-01, REC-03, MIND-04, MIND-05, SOC.11.01.
+  - Acceptance tests: (1) the export validates against the SRD character fields; (2) every bond in the export names a real tie; (3) exporting the same person twice from the same state is identical. Mutant: a bond with no tie behind it must fail test 2.
+  - Tick cost: none (an offline query).
+
+### 3.9 The player's role per mode (priority 9)
+
+**What the plan and the rules require.**
+- V4 (`docs/VISION.md:16`): no protagonist; the player is given one generated faction.
+- V5 and V17: the player commands the way DF does; orders are never required.
+- V125 (`docs/VISION.md:122`): "The player is God (may observe, intervene, alter history, or do absolutely nothing; the world must continue regardless)".
+- V29 (`docs/VISION.md:37`): U7-style combat mode, per-character attack modes, click targeting.
+- DEC-020 (`docs/OWNER_DECISIONS.md:288`): the camera follows "the player unit" across ramps, which assumes a player unit exists.
+- DEC-017 (`docs/OWNER_DECISIONS.md:243`) keeps RMMZ "battle screens", while ADR-001 says DEUS does not use them (`docs/adr/ADR-001-RMMZ-Battle-Stack-Audit.md:37`); see `escalation.md` E3.
+- VISION Q4 (`docs/VISION.md:163`) and OD-16 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:718`): possession vs command is open; the recommended default is "Both modes, switchable".
+- The docs name three modes: Command, Combat and Incarnate (`docs/art/DEUS_SCALE_AND_ASSET_MASTER_BIBLE.md:179`, `docs/systems/DEUS_Minimap.md:137`).
+
+**Overlord mode (flagged, not designed).** No WBS row, VISION row, DEC, OD, ADR, system page or design document mentions an Overlord mode. A search of the base for "overlord" (case-insensitive, excluding this lane's folder) finds only: a game title in `docs/design/CRAFTING.md:71`; the word in an unapproved proposal (PE21, PE3) listing terms that must not be used in the swarm and star-born peoples' own names (`docs/design/PEOPLES.md:53`, `docs/design/PEOPLES.md:278`); and a DF-derived ruler title in `game/data/df_entities.json:95` and two tools. What is undefined: what the mode is; what the player can do and see in it; how it relates to Command, Incarnate and V125's "God"; whether it has powers ("intervene, alter history"); how it enters and leaves; and whether the name is final. These are Owner questions OQ-19 and OQ-20. No package below covers Overlord.
+
+**Coverage by the WBS.**
+
+| Sub-element | WBS row that names it | Covered? |
+|---|---|---|
+| Command mode: orders and policies | SOC.50.01 (`docs/society/DEUS_SOCIETY_WBS.md:109`), WG.00.11 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:99`) | yes (one line each) |
+| All player intents through one command queue | SIM.00.03 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:522`) | yes |
+| Incarnate mode (possession) | WG.00.11 | yes (one line) |
+| Mode switching and input arbitration | WG.00.11 | yes (one line) |
+| Combat mode: drafting and combat orders | GP.07.01 via `docs/SLICES.md:72` | nominal |
+| Overlord mode | none | no (Owner-designed) |
+| V125 God role and its powers | none | no |
+| History-born character mode | none | no |
+
+Rating: **PARTLY PLANNED**.
+
+**What exists in code.**
+
+| Citation | Excerpt | Meaning |
+|---|---|---|
+| `DEUS_ColonyOverseer.js:17` | `The player is an overseer, not a character on the map (VISION V4):` | LIVE: the player has no body on the map. |
+| `DEUS_ColonyOverseer.js:169` | `Game_Player.prototype.moveByInput = function() {};` | LIVE: no walking body can be steered. |
+| `DEUS_ColonyOverseer.js:296` | `Col.order(selUnit.id, { type: "move", target: { x: mx, y: my } });` | LIVE: right-click moves the selected colonist. |
+| `DEUS_Select.js:25` | `Left-drag with no tool: selects all player units inside the box.` | LIVE: box selection and designations (Command mode in practice). |
+| `DEUS_Combat.js:53` | `const MODES = ["nearest", "weakest", "strongest", "protect", "defend", "flee", "manual"];` | LIVE for AI: per-unit attack modes... |
+| `DEUS_Combat.js:1102` | `Combat.setMode = function(unit, mode) {` | ...but nothing in play calls the setter. |
+| `DEUS_Colonists.js:1868` | `const isDrafted = u => !!(u && u.data && (u.data.drafted === true` | Drafting is read but only a test sets it; the overseer adapter sets `drafted: false` (`DEUS_ColonyOverseer.js:75`). |
+| `DEUS_Combat.js:1475` | `Input.keyMapper[75] = "ufCombatRaid"; // K` | The only combat key is a debug raid. |
+| `DEUS_Minimap.js:421` | `if (m === "command" \|\| m === "combat" \|\| m === "incarnate") {` | A mode setter that nothing calls... |
+| `DEUS_Minimap.js:569` | `const modeTag = Minimap.mode === "command" ? "CMD" : (Minimap.mode === "combat" ? "CBT" : "INC");` | ...so the minimap label always reads CMD. |
+| `DEUS_Minimap.js:108` | `incarnatedUnitId: null, // For incarnate mode` | DORMANT: never read. |
+| `DEUS_Interact.js:493` | `add("follow", "Follow with camera", () => selectColonist(hit, true));` | LIVE: camera follow, which is not possession. |
+| `tasks/WG.00.11/state.md:1` | `# Task State: WG.00.11 — Standard New Game Year 0 Contract (INV-SIM-01)` | The WG.00.11 task folder holds the Year-0 contract (now WG.00.14), not the Incarnation layer. |
+
+Code today: **PARTIAL** (Command in practice LIVE; Combat autonomous only; Incarnate and switching DORMANT or ABSENT; Overlord ABSENT).
+
+**Gaps.**
+
+| ID | Severity | Gap | Package |
+|---|---|---|---|
+| G9-1 | MAJOR | WG.00.11 is one line: no list of modes, no switching rules, no input arbitration; the mode state in code is never set. The row's ID also collides with the Year-0 task folder. | MODE-01 |
+| G9-2 | MAJOR | Command mode's policy side (SOC.50.01) is one line; the V52 "band orders" design is unbuilt (`docs/design/CHAIN_OF_COMMAND.md:34`). | MODE-02 |
+| G9-3 | MAJOR | The player's part in combat (V29 toggle, drafting, click targeting) is nominal; the setter and drafting are dormant; DEC-017 and ADR-001 disagree about battle screens (E3). | MODE-03 |
+| G9-4 | MAJOR | Incarnate mode waits on OD-16 / Q4, and it needs a per-person view of what that person knows and sees (MIND and DEEP packages). | MODE-04 |
+| G9-5 | MAJOR | Overlord mode, and V125's "God" role it may or may not be, are undefined in every document. Owner-designed: listed as Owner questions only, no package. | none (OQ-19, OQ-20) |
+
+**Proposed packages** (non-Overlord only).
+
+- **PROPOSED-MODE-01 Mode framework and input arbitration** (G9-1).
+  - Scope: a mode is a policy on which commands the player may send and what the view shows; every player intent enters the simulation through SIM.00.03's command queue; switching rules and precedence; V125's rule that the world runs the same with no input; the WG.00.11 ID collision recorded for the coordinator.
+  - Depends on: SIM.00.03, WG.00.11, OD-16.
+  - Acceptance tests: (1) in every mode, a purity lint shows no mode writes simulation state except through the queue; (2) replaying a command log reproduces the state checksum; (3) a run with no input produces the same checksum whichever mode is active. Mutant: a mode that writes a unit's position directly must fail test 1.
+  - Tick cost: per command only; no per-tick cost.
+
+- **PROPOSED-MODE-02 Command mode: direct orders and policies** (G9-2).
+  - Scope: direct orders to a person, band orders to a leader (V52), and policy decrees through offices (SOC.50.01), all as queued commands that the duty scheduler (SOC.13.01) weighs.
+  - Depends on: MODE-01, SOC.20.01, SOC.50.01, SOC.13.01, GOV-06.
+  - Acceptance tests: (1) a decree becomes office tasks and then duties; (2) a direct order outranks a band order, and survival outranks both (V17). Mutant: a decree that bypasses the offices must fail test 1.
+  - Tick cost: per command.
+
+- **PROPOSED-MODE-03 Combat mode: drafting, attack modes and targeting** (G9-3).
+  - Scope: a combat-mode toggle, drafting (drafted people take no work), per-person attack modes reachable from the UI, click targeting including other layers (GP.07.02); on-map or battle-screen per the Owner's answer to E3.
+  - Depends on: MODE-01, GP.07.01, GP.07.02, OQ-21.
+  - Acceptance tests: (1) a drafted person takes no job; (2) the attack-mode command reaches `setMode`; (3) a click on a visible target on a lower layer issues a legal attack. Mutant: drafting that does not stop job-taking must fail test 1.
+  - Tick cost: per command; drafted persons are skipped by job search (a saving).
+
+- **PROPOSED-MODE-04 Incarnate mode: one person, their knowledge** (G9-4).
+  - Scope: control of one person while the rest of the colony stays autonomous (V125); the view shows only what that person has seen or heard (MIND-02 beliefs, DEEP-02 vision, light from DEEP-01); release returns the person to autonomy.
+  - Depends on: MODE-01, OD-16, MIND-02, DEEP-01, DEEP-02, SIM.30.04 (focus follows the person).
+  - Acceptance tests: (1) the incarnate view never shows a unit the person has not perceived; (2) the rest of the faction keeps working (same duty counts as a no-input run); (3) releasing control resumes autonomous duty within one decision. Mutant: a view that shows all units must fail test 1.
+  - Tick cost: the person's surroundings join the L0 focus (at most 9 regions); the perception filter reuses DEEP-02 queries.
+
+### 3.10 Underground life (priority 3)
+
+**What the plan and the rules require.**
+- DEC-013 (`docs/OWNER_DECISIONS.md:187`): layers −16..+15; below the surface, Lower-1 (−8..−1) and Lower-2 (−16..−9), 16 layers and 10 of the 25 biomes; races have home layer ranges (race-to-band mapping OPEN).
+- V132 (`docs/VISION.md:126`): tieflings and dragonborn found on the deepest level, dwarves and gnomes on the next; the code does the same (`DEUS_Factions.js:149`, `DEUS_Factions.js:150`).
+- V134 / WG.90.01: a viable living Year-0 world for all nine factions.
+- DEC-011: no tint, fog filter or shading overlay for layers; any presentation of darkness is out of scope here.
+- Design only: `docs/worldgen/DEUS_CREATURE_ECOLOGY.md:217` (cave beetles, blind fish and bats feeding on subterranean fungi) and `:219` (torchlight and mining lower a cave predator's habitat); `docs/design/VERTICAL_NATURAL_WORLD.md:416` (cave homes need torches and lamps).
+- SRD (section 2.6): bright light, dim light and darkness (`game/data/srd51/rules.json:4403`); darkvision on six of the nine races, none on human, halfling and dragonborn (`game/data/srd51/character_options.json:82`); 175 of 317 creatures have darkvision, 7 have Sunlight Sensitivity (`game/data/srd51/creatures.json:16444`); torch 1 hour (`game/data/srd51/equipment.json:4134`), hooded lantern 6 hours per pint of oil (`game/data/srd51/equipment.json:3457`); Light, Daylight, Continual Flame and Darkness spells. No SRD creature has an environment or habitat field, and "Underdark" occurs 0 times.
+
+**Coverage by the WBS.**
+
+| Sub-element | WBS row that names it | Covered? |
+|---|---|---|
+| Karst caves, fissures | WG.64.01, WG.64.02 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:223`) | yes |
+| Underground heat | WG.64.06 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:228`) | yes |
+| Aquifers, cave lakes, underground rivers | WG.66.01, WG.66.03 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:270`), SIM.50.02 | yes |
+| Cave creatures, lairs, habitat | WG.68.07-.10 (generic, `docs/worldgen/DEUS_WORLDGEN_WBS.md:308`) | yes (generic) |
+| Race home layers | WG.62.02 | yes |
+| Food web base underground | WG.68.09 (generic food web) | nominal |
+| Cave flora and fungus succession | none (WG.68.01-.02 are the five surface biomes) | no |
+| Simulation light field | none (WG.00.22 is presentation catalogue slots for "deep light sources") | no |
+| Vision and darkvision | none | no |
+| Light sources and fuel | none | no |
+| Underground farming | none | no |
+| Year-0 viability of underground starts | none (WG.90.01 is the overall gate) | no |
+
+Rating: **PARTLY PLANNED**.
+
+**What exists in code.**
+
+| Citation | Excerpt | Meaning |
+|---|---|---|
+| `DEUS_Ecology.js:743` | `{ sprout: "cave_mushrooms", matures: ["tower_cap", "glow_caps", "cave_moss"], weights: [5, 3, 2], delay: 120 },` | LIVE: cave sprouts grow into fungus and moss on −1 (the −2 table is line 748)... |
+| `DEUS_Ecology.js:843` | `if (sh !== "floor" && sh !== 0) continue; // Must be open cavern floor, not solid cave rock` | ...placed by floor shape alone; light and moisture play no part. |
+| `DEUS_Wildlife.js:454` | `const caveSpecies = speciesList().filter(s => ["giant_spider", "bat", "rat", "troll", "bog_horror"].includes(s.id));` | Five cave species, hardcoded, placed once at world creation. |
+| `DEUS_Wildlife.js:684` | `const EDIBLE_OBJECTS = new Set(["grass_tuft", "bush", "tall_grass", "reeds", "berry_bush", "wildflowers"]);` | No cave flora is food for wildlife, so the cave food chain has no base. |
+| `DEUS_Wildlife.js:656` | `if (DN && typeof DN.phase === "function") return DN.phase();` | Cave animals sleep by the surface day (the phase defaults to z = 0). |
+| `DEUS_Levels.js:583` | `water[idx] = 1;` | Each cave pocket gets one small pool; the only natural underground water... |
+| `DEUS_Levels.js:1038` | `const fluid = z === -2 ? M_LAVA : M_WATER;` | ...and on the deepest level it is always lava. |
+| `DEUS_Factions.js:513` | `f.areaInfo = { ...f.areaInfo, rule: "underground-pocket", biome: null, water: null, disc: 3 };` | Underground homes record no water source. |
+| `DEUS_Colonists.js:5230` | `if (UF.Agriculture && UF.Agriculture.planJob && UF.Agriculture.planJob(u)) return true;` | `UF.Agriculture` is never defined: no farming, above or below ground. |
+| `DEUS_Colonists.js:4265` | `if (evening() \|\| (window.UF && UF.DayNight && UF.DayNight.isNight && UF.DayNight.isNight())) return null;` | Work stops at surface night, not in underground darkness. |
+| `DEUS_Conditions.js:810` | `return !this.has(unit, "blinded") &&` | `canSee` checks conditions only; darkness never counts as heavily obscured. |
+| `DEUS_Colonists.js:827` | `d.sight = 8;` | Every colonist has a fixed sight, whatever their race. |
+| `DEUS_Fog.js:268` | `// Darkvision 60 ft = 12 grid squares. Superior Darkvision 120 ft = 24 grid squares.` | Darkvision exists only in fog of war... |
+| `DEUS_Fog.js:499` | `// Fog of war is temporarily removed from the game per user directive 2026-09-22` | ...which is switched off, so darkvision is DORMANT. |
+| `game/data/DEUS_WorldCatalog.json:10173` | `"source": true,` | Campfires are the only light-tagged objects and never burn out: no fuel. |
+| `DEUS_Sheet.js:144` | `{ inputs: ["firewood", "fiber"], output: "torch", count: 2 },` | A torch recipe exists, but the catalog has no torch item. |
+| `DEUS_DayNight.js:83` | `if (underground(z)) return KEYS[0].tone.slice();` | Render fact (DEC-011): any view of −1 or −2 gets the midnight screen tone (section 8, D-6). |
+| `DEUS_DayNight.js:186` | `DayNight.enableGlows = false; // Glow effects disabled for the moment per user directive` | The light-glow renderer, the only place fungus glows, is off. |
+
+Code today: **PARTIAL** (cave fungus, cave herds, pools and underground homes exist; light, darkvision, fuel, farming and a cave food chain are ABSENT or DORMANT). The code has 5 levels, so "underground" is −1 and −2 only (SIM.50.01 F-01).
+
+**Gaps.**
+
+| ID | Severity | Gap | Package |
+|---|---|---|---|
+| G10-1 | BLOCKER | Year-0 viability of the four underground-starting races is not planned: no farming, no light, no water on the deepest level in code, and nothing in the WBS checks that an underground faction can feed and water itself (WG.90.01 needs a viable living Year-0 world). | DEEP-06 |
+| G10-2 | MAJOR | No row plans a simulation light field. Darkness changes nothing in play; work stops by the surface clock. Lane P's audit lists the same gap for 26 LIGHT spells (G-LIGHT, unreviewed). | DEEP-01 |
+| G10-3 | MAJOR | No row plans vision and darkvision rules; they exist only in the disabled fog, and sight is a fixed 8 cells. Three of nine races (including dragonborn, placed on the deepest level) have no darkvision. | DEEP-02 |
+| G10-4 | MAJOR | No row plans light sources and fuel; the only light never burns out, and the torch has no item. | DEEP-03 |
+| G10-5 | MAJOR | No row plans cave flora and fungus succession: WG.68.01-.02 cover the five surface biomes; code grows fungus by floor shape alone. | DEEP-04 |
+| G10-6 | MAJOR | No row plans an underground food web: cave flora feeds nothing, the species list is hardcoded, and there is no underground breeding or arrival. | DEEP-05 |
+| G10-7 | MINOR | The surface clock drives underground behaviour (animal sleep, work gates). | DEEP-01 |
+
+**Proposed packages.** No package proposes any tint, fog filter, shading overlay or scaling (DEC-011); light is simulation state only. Any art need is a text-only "art slot needed" line for the Owner (DEC-007); none is proposed here.
+
+- **PROPOSED-DEEP-01 Simulation light field** (G10-2, G10-7).
+  - Scope: light as simulation state: a sparse registry of light sources per region (fire, torch, lamp, spell, bioluminescence), sky exposure per column from the first opaque stratum above (the same traversal as DEC-021), and a `lightAt(x, y, z)` query that returns bright, dim or dark by the SRD rule; work, perception and animal activity read it instead of the surface clock.
+  - Depends on: SIM.00.02, WG.00.17, SIM.40.01 (opacity of strata); SIM.60.02 uses it for LIGHT spells.
+  - Acceptance tests: (1) a cell 25 ft from a torch in a sealed cave reads dim, 45 ft reads dark (SRD 20 + 20 ft); (2) the same cell under an open shaft at noon reads bright; (3) removing the torch makes the cell dark within one tick; (4) a sealed cave at surface noon reads dark. Mutant: light that ignores the opaque roof (today's surface-clock rule) must fail test 4.
+  - Tick cost: queries on demand, about 35 per tick (witnesses, attacks, work) × up to 16 sources × 0.1 µs ≈ 56 µs. Memory: 16 B per light source; 1,000 sources ≈ 16 KiB; sky-exposure cache 1 B per column per area (64 KiB); layers with no sources cost nothing.
+
+- **PROPOSED-DEEP-02 Vision and darkvision** (G10-3).
+  - Scope: SRD senses per race and creature as data (darkvision 30-120 ft, blindsight, Sunlight Sensitivity), perception checks that combine DEEP-01 light with senses (lightly and heavily obscured), used by witnesses (MIND-02), combat and work.
+  - Depends on: DEEP-01, SOC.11.01 (race traits).
+  - Acceptance tests: (1) in darkness a dwarf sees a target 50 ft away and a human does not; (2) a duergar-type creature in sunlight attacks with disadvantage; (3) the human's attack on an unseen target has disadvantage by the SRD rule. Mutant: darkvision ignored (today's live rule) must fail test 1.
+  - Tick cost: one extra table lookup per perception query (0.1 µs). Memory: 1 B per person or creature (sense class).
+
+- **PROPOSED-DEEP-03 Light sources and fuel** (G10-4).
+  - Scope: torches, candles, lamps and lanterns as items with SRD radius and burn time; oil and wax as fuel consumed with mass conserved (LIFE-001; burnt fuel goes to the ledger like fire); campfires that need fuel; permanent magical light (Continual Flame) as a source with no fuel.
+  - Depends on: DEEP-01, WG.61.02 (ledger), SIM.50.05 (fire).
+  - Acceptance tests: (1) a torch lights for exactly its burn time in ticks and then goes out; (2) a lantern consumes one pint of oil per 6 hours (SRD), mass conserved; (3) a campfire with no fuel goes out. Mutant: a campfire that never burns out (today's rule) must fail test 3.
+  - Tick cost: expiries through a timer wheel, a few per tick; negligible. Memory: 8 B per burning source.
+
+- **PROPOSED-DEEP-04 Cave flora and fungus ecology** (G10-5).
+  - Scope: succession for the ten below-surface biomes, driven by moisture, organic input (detritus and remains washed or carried down, LIFE-001), temperature (WG.64.06) and light, not by surface sunlight; bioluminescent species register as dim light sources (DEEP-01); runs on SIM.50.04's slow clock.
+  - Depends on: SIM.50.04, DEEP-01, SIM.50.02, WG.64.06; the energy source is the Owner's (OQ-24).
+  - Acceptance tests: (1) a moist cave with organic input grows fungus and a dry sterile one does not; (2) fungal biomass never exceeds the organic input plus any declared source (mass ledger); (3) a glowing species appears as a light source. Mutant: growth from nothing (today's floor-shape rule) must fail test 2.
+  - Tick cost: active cave regions on the slow clock, about 20 regions × 50 µs ÷ 100 ticks ≈ 10 µs per tick. Memory: per active region about 64 B.
+
+- **PROPOSED-DEEP-05 Underground food webs and creatures** (G10-6).
+  - Scope: WG.68's carrying capacity and food web applied to the two lower bands: cave grazers eat fungus and detritus, predators eat grazers, SRD creatures placed by an Owner-approved habitat table (the SRD has none); breeding and arrivals below ground (SIM.40.10), crowd counts per region.
+  - Depends on: WG.68.07-.11, DEEP-04, SIM.40.10, SIM.30.02.
+  - Acceptance tests: (1) removing the fungus lowers grazer counts and then predator counts, in that order; (2) overhunting extirpates locally with no respawn (WG.68.11). Mutant: species counts that ignore food (today's fixed placement) must fail test 1.
+  - Tick cost: about 500 occupied underground regions stepped every 100 ticks = 5 × 5 µs = 25 µs per tick. Memory: about 32 B per region per band (8 species × 4 B); at most 1,024 regions × 32 B = 32 KiB per area.
+
+- **PROPOSED-DEEP-06 Underground farming and Year-0 viability** (G10-1).
+  - Scope: fungus and cave crops with their own growth rules (EMERGENT_SOCIETY asks for underground crops that do not reuse surface sunlight rules), water access below ground (wells into aquifers, SIM.50.02; a non-lava source on the deepest level or a start rule), and a Year-0 viability check for every underground start: food, water and light for the eight founders for a set number of game days with no player input.
+  - Depends on: DEEP-01, DEEP-03, DEEP-04, SIM.50.02, WG.62.02, WG.90.01, SIM.50.06; race placement per OQ-23.
+  - Acceptance tests: (1) on 20 seeds, every underground faction survives its first 30 game days with no input; (2) a fungus farm yields food only with water and organic input; (3) a start with no reachable water is rejected by worldgen. Mutant: the lava-only deepest level (today's rule) must fail test 3.
+  - Tick cost: farm plots on the slow clock, about 16 B per plot; the viability check runs at generation only.
+
+<!-- PART E -->
