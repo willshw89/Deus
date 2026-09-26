@@ -34,7 +34,7 @@ const REL = {
     scaleChart: 'art/reference/DEUS_HUMAN_SCALE_STRIP_V1.png',
     brief: 'tasks/WG.32.02/lane-t/BRIEF.md'
 };
-// BRIEF WG.32.02 asks for a 4096x4096 ATLAS; 4096 is not a multiple of 48 (see escalation.md).
+// BRIEF WG.32.02 asks for a 4096x4096 ATLAS; 4096 is not a multiple of 48 (tasks/WG.32.02/lane-t/escalation.md E1).
 const ATLAS_SIDE = 4096;
 const RMMZ_A2_TILES = [16, 12];
 const RMMZ_A2_FIRST_TILE_ID = 2816;
