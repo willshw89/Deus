@@ -1,0 +1,66 @@
+{
+  "format": "deus-blank-template/1",
+  "generator": "tools/art/make_blank_templates.js",
+  "about": "TEST_ fixture sidecar (mini template slot map); the real sidecars also carry colours, ticks and labels, which the checker does not read. No image data.",
+  "sheetId": "ATLAS_SURFACE_TEST_TILE_01",
+  "kind": "ATLAS",
+  "group": {
+    "band": "SURFACE",
+    "biome": "SHARED",
+    "type": "TILE"
+  },
+  "runtimeFile": null,
+  "w": 288,
+  "h": 96,
+  "gridPx": 48,
+  "slots": [
+    {
+      "slotId": "ATLAS_SURFACE_TEST_TILE_01:0001",
+      "entryId": "SURFACE_SHARED_TERRAIN_TEST-SOIL-DRY_A2_DEFAULT",
+      "x": 0,
+      "y": 0,
+      "w": 48,
+      "h": 48
+    },
+    {
+      "slotId": "ATLAS_SURFACE_TEST_TILE_01:0002",
+      "entryId": "SURFACE_SHARED_WATER_TEST-POOL_A1_DEFAULT",
+      "x": 48,
+      "y": 0,
+      "w": 48,
+      "h": 48
+    },
+    {
+      "slotId": "ATLAS_SURFACE_TEST_TILE_01:0003",
+      "entryId": "LOWER1_SHARED_TERRAIN_TEST-MOSS_A2_DEFAULT",
+      "x": 96,
+      "y": 0,
+      "w": 48,
+      "h": 48
+    },
+    {
+      "slotId": "ATLAS_SURFACE_TEST_TILE_01:0004",
+      "entryId": "SURFACE_SHARED_TOP_TEST-TRAIL_V1_DEFAULT",
+      "x": 144,
+      "y": 0,
+      "w": 48,
+      "h": 48
+    },
+    {
+      "slotId": "ATLAS_SURFACE_TEST_TILE_01:0005",
+      "entryId": "SURFACE_SHARED_EDGE_TEST-SOIL-DRY_N-H1_DEFAULT",
+      "x": 192,
+      "y": 0,
+      "w": 48,
+      "h": 48
+    },
+    {
+      "slotId": "ATLAS_SURFACE_TEST_TILE_01:0006",
+      "entryId": "SURFACE_SHARED_STONE_TEST-BOULDER_V1_DEFAULT",
+      "x": 240,
+      "y": 0,
+      "w": 48,
+      "h": 96
+    }
+  ]
+}
