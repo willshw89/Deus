@@ -1,0 +1,10 @@
+{
+  "expect": "E_UNIT",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=granite].yield.postings.0.du",
+      "value": 1
+    }
+  ]
+}

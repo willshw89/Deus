@@ -1,0 +1,10 @@
+{
+  "expect": "E_STATUS",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=granite].massStatus",
+      "value": "VERIFIED"
+    }
+  ]
+}

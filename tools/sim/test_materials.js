@@ -21,6 +21,7 @@ const catalogue = readJson(path.join(ROOT, "game", "data", "sim", "materials.jso
 const masses = readJson(path.join(ROOT, "game", "data", "sim", "mass_tables.json"));
 const interactions = readJson(path.join(ROOT, "game", "data", "sim", "interactions.json"));
 const ledger = require(path.join(ROOT, "game", "js", "sim", "ledger_defaults.js"));
+const { createLedger } = require(path.join(ROOT, "game", "js", "sim", "ledger.js"));
 const live = require(path.join(ROOT, "game", "data", "DEUS_WorldCatalog.json"));
 const SRC = fs.readFileSync(path.join(ROOT, "game", "js", "sim", "materials.js"), "utf8").replace(/\r\n/g, "\n");
 
@@ -88,15 +89,40 @@ function purity(src) {
     const code = codeOnly(src);
     const bad = [];
     if (/\b(window|document|globalThis|process|require|console|Date|fetch|setTimeout|setInterval|nw|XMLHttpRequest|eval|Function|Buffer|localStorage)\b/.test(code)) bad.push("E_HOST");
-    if (/\b(LAYER_COUNT|N_LAYERS|LAYERS)\b/.test(code)) bad.push("E_LAYER_COUNT");
+    if (/\b(LAYER_COUNT|N_LAYERS|LAYERS)\b/.test(code) || /\b32\s*\*\s*5\b/.test(code) || /\b160\b/.test(code)) bad.push("E_LAYER_COUNT");
     if (/\bSTRATA_FT\b/.test(code)) bad.push("E_ONE_FT");
     if (/Math\.random/.test(code)) bad.push("E_RANDOM");
     return bad;
 }
+function ledgerAmt(p) {
+    if (p.du != null && p.mu == null) return p.du;
+    return p.mu || 0;
+}
 function postingSum(ps) {
     let t = 0;
-    for (let i = 0; i < ps.length; i++) t += (ps[i].mu || 0) + (ps[i].unmappedMu || 0);
+    for (let i = 0; i < ps.length; i++) t += ledgerAmt(ps[i]) + (ps[i].unmappedMu || 0);
     return t;
+}
+// Sum amounts taken from the original source. A later step that moves the same mass is not added again.
+function covered(ps, keys) {
+    let t = 0;
+    if (!ps) return 0;
+    for (let i = 0; i < ps.length; i++) {
+        const p = ps[i];
+        if (!p.class) { t += (p.mu || 0) + (p.du || 0) + (p.unmappedMu || 0); continue; }
+        if (keys[p.fromClass + "|" + p.fromForm]) t += ledgerAmt(p) + (p.unmappedMu || 0);
+    }
+    return t;
+}
+function materialKeys(m) {
+    const keys = {};
+    if (m.ledger && m.ledger.class && m.ledgerForm) keys[m.ledger.class + "|" + m.ledgerForm] = 1;
+    return keys;
+}
+function objectKeys(o) {
+    const keys = {};
+    (o.lines || []).forEach(function (ln) { keys[ln.class + "|" + (ln.form || "object")] = 1; });
+    return keys;
 }
 
 const clean = bag();
@@ -105,10 +131,14 @@ check("clean_validate", cleanErrs.length === 0, cleanErrs.slice(0, 8).join(" | "
 
 const api = M.createMaterials(clean);
 const api2 = M.createMaterials(bag());
-check("determinism_checksum", api.checksum() === api2.checksum() && api.checksum() === M.createMaterials(clone(clean)).checksum(), api.checksum());
+const altered = bag();
+altered.catalogue.schema = 99;
+check("determinism_checksum", api.checksum() === api2.checksum() && api.checksum() === M.createMaterials(clone(clean)).checksum() && api.checksum() !== M.createMaterials(altered).checksum(), api.checksum());
 
 check("purity_clean", purity(SRC).length === 0, purity(SRC).join(","));
 check("mutant_layer_count_killed", purity(SRC + "\nconst LAYER_COUNT = 32;\n").indexOf("E_LAYER_COUNT") >= 0);
+check("mutant_layer_product_killed", purity(SRC + "\nfunction layers(){ return 32 * 5; }\n").indexOf("E_LAYER_COUNT") >= 0);
+check("mutant_layer_160_killed", purity(SRC + "\nfunction layers(){ return 160; }\n").indexOf("E_LAYER_COUNT") >= 0);
 check("mutant_one_ft_killed", purity(SRC + "\nconst STRATA_FT = 1;\n").indexOf("E_ONE_FT") >= 0);
 check("mutant_host_killed", purity(SRC + "\nwindow.DEUS = 1;\n").indexOf("E_HOST") >= 0);
 check("mutant_random_killed", purity(SRC + "\nMath.random();\n").indexOf("E_RANDOM") >= 0);
@@ -132,7 +162,8 @@ catalogue.materials.forEach(function (m) {
     matter++;
     const y = m.yield && m.yield.postings;
     const c = m.collapse && m.collapse.postings;
-    if (!y || !c || postingSum(y) !== m.massPerSlice || postingSum(c) !== m.massPerSlice) massLeak++;
+    const keys = materialKeys(m);
+    if (!y || !c || covered(y, keys) !== m.massPerSlice || covered(c, keys) !== m.massPerSlice) massLeak++;
     const src = {};
     if (m.ledger && m.ledger.class && oreNames[m.ledger.class]) src[m.ledger.class] = m.massPerSlice;
     if (oreBad(y, src) || oreBad(c, src)) oreLeak++;
@@ -149,7 +180,8 @@ Object.keys(masses.objects).forEach(function (id) {
     if (o.massless) return;
     const src = {};
     (o.lines || []).forEach(function (ln) { if (oreNames[ln.class]) src[ln.class] = (src[ln.class] || 0) + ln.mu; });
-    if (!o.yield || !o.collapse || postingSum(o.yield.postings) !== o.massMu || postingSum(o.collapse.postings) !== o.massMu) massLeak++;
+    const keys = objectKeys(o);
+    if (!o.yield || !o.collapse || covered(o.yield.postings, keys) !== o.massMu || covered(o.collapse.postings, keys) !== o.massMu) massLeak++;
     if (oreBad(o.yield.postings, src) || oreBad(o.collapse.postings, src)) oreLeak++;
     if (o.bill) {
         let s = 0;
@@ -261,6 +293,96 @@ function kill(name, data, code, localBad) {
     const sum = w.combustion.ledger.ashPerMille + w.combustion.ledger.charPerMille;
     kill("mutant_combustion", d, "E_COMBUSTION_MASS", sum !== 1000);
 })();
+
+function throwsCode(fn, code) {
+    try { fn(); return false; } catch (e) { return e.code === code; }
+}
+check("ice_slice_du", api.massOf("ice", "strata", 1) === 1);
+check("lava_unit_mu", api.material("lava").ledger.unit === "mu" && typeof api.material("lava").muPerDu === "number");
+check("reclaim_by_strata_id", api.reclaimTarget(32) && api.reclaimTarget(32).ledgerClass === api.reclaimTarget("granite").ledgerClass);
+check("massof_rejects_iron_strata", throwsCode(function () { api.massOf("iron", "strata", 1); }, "E_FORM"));
+check("massof_rejects_bone_strata", throwsCode(function () { api.massOf("bone", "strata", 1); }, "E_FORM"));
+check("massof_slice_overflow", throwsCode(function () { api.massOf("granite", "strata", Math.pow(2, 52)); }, "E_AMOUNT"));
+check("massof_object_overflow", throwsCode(function () { api.massOf("wall_stone", "object", Math.pow(2, 52)); }, "E_AMOUNT"));
+check("massof_ruin_overflow", throwsCode(function () { api.massOf("wall_stone", "ruin", Math.pow(2, 52)); }, "E_AMOUNT"));
+
+check("water_thaw_du", (function () {
+    const iceDu = api.massOf("ice", "strata", 1);
+    const L = createLedger();
+    L.register("water", "fluid", 7, "demo");
+    const afterFluid = L.familyTotal("water");
+    L.register("water", "ice", iceDu, "demo");
+    const afterIce = L.familyTotal("water");
+    L.seal();
+    L.transform("water", "ice", "water", "fluid", iceDu, "thaw");
+    const fluid = L.amount("water", "fluid");
+    const ice = L.amount("water", "ice");
+    const family = L.familyTotal("water");
+    const bal = L.assertBalanced();
+    const families = L.totals().families;
+    const names = Object.keys(families).sort();
+    console.log("iceDu from massOf = " + iceDu);
+    console.log("water family after fluid 7 = " + afterFluid);
+    console.log("water family after one ice slice = " + afterIce);
+    console.log("after thaw water/fluid = " + fluid + " water/ice = " + ice + " water family = " + family);
+    names.forEach(function (f) { console.log("family " + f + " = " + families[f]); });
+    console.log("balanced = " + bal.ok);
+    return iceDu === 1 && afterFluid === 7 && afterIce === 8 && fluid === 8 && ice === 0 && family === 8 && bal.ok === true;
+})());
+
+function materialStart(m) {
+    const start = {};
+    let part = m.massPerSlice;
+    if (m.unmapped && typeof m.unmapped.mu === "number") part -= m.unmapped.mu;
+    if (part > 0 && m.ledger && m.ledger.class && m.ledgerForm) start[m.ledger.class + "|" + m.ledgerForm] = part;
+    return start;
+}
+function objectStart(o) {
+    const start = {};
+    (o.lines || []).forEach(function (ln) {
+        const k = ln.class + "|" + (ln.form || "object");
+        start[k] = (start[k] || 0) + ln.mu;
+    });
+    return start;
+}
+function postYield(start, ps) {
+    const L = createLedger();
+    Object.keys(start).sort().forEach(function (k) {
+        if (!start[k]) return;
+        const parts = k.split("|");
+        L.register(parts[0], parts[1], start[k], "yield");
+    });
+    L.seal();
+    for (let i = 0; i < ps.length; i++) {
+        const p = ps[i];
+        if (!p.class || p.process === "identity" || p.process === "none") continue;
+        const amt = ledgerAmt(p);
+        if (!amt) continue;
+        L.transform(p.fromClass, p.fromForm, p.class, p.form, amt, "yield");
+    }
+    const bal = L.assertBalanced();
+    if (!bal.ok) throw new Error("unbalanced");
+}
+let postFail = 0, postN = 0;
+const postWhy = [];
+function tryPost(label, start, ps) {
+    postN++;
+    try { postYield(start, ps || []); }
+    catch (e) {
+        postFail++;
+        if (postWhy.length < 6) postWhy.push(label + " " + (e.code || "") + " " + String(e.message).slice(0, 140));
+    }
+}
+catalogue.materials.forEach(function (m) {
+    if (typeof m.massPerSlice !== "number" || m.massless || !m.yield) return;
+    tryPost("mat " + m.id, materialStart(m), m.yield.postings);
+});
+Object.keys(masses.objects).forEach(function (id) {
+    const o = masses.objects[id];
+    if (o.massless || !o.yield) return;
+    tryPost("obj " + id, objectStart(o), o.yield.postings);
+});
+check("yield_lists_post", postFail === 0 && postN > 0, postWhy.join(" | "));
 
 console.log("RESULT: " + passed + " passed, " + failed + " failed");
 process.exit(failed === 0 ? 0 : 1);

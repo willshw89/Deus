@@ -1,0 +1,10 @@
+{
+  "expect": "E_OWNER_OPEN",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=water].massStatus",
+      "value": "PLACEHOLDER"
+    }
+  ]
+}

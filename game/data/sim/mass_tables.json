@@ -158,7 +158,7 @@
   "items": {
     "log": {
       "massMu": 8000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "ledger": {
         "class": "wood",
         "family": "organic"
@@ -167,7 +167,7 @@
     },
     "firewood": {
       "massMu": 2000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "ledger": {
         "class": "wood",
         "family": "organic"
@@ -176,7 +176,7 @@
     },
     "stone": {
       "massMu": 15000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "ledger": {
         "class": "stone",
         "family": "mineral"
@@ -185,7 +185,7 @@
     },
     "ore_iron": {
       "massMu": 12000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "ledger": {
         "class": "fe_ore",
         "family": "fe"
@@ -194,7 +194,7 @@
     },
     "ore_copper": {
       "massMu": 10000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "ledger": {
         "class": "cu_ore",
         "family": "cu"
@@ -203,7 +203,7 @@
     },
     "gold": {
       "massMu": 100,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "ledger": {
         "class": "au_metal",
         "family": "au"
@@ -212,7 +212,7 @@
     },
     "gem_rough": {
       "massMu": 50,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "ledger": {
         "class": "gem",
         "family": "gem"
@@ -221,7 +221,7 @@
     },
     "gem_cut": {
       "massMu": 20,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "ledger": {
         "class": "gem",
         "family": "gem"
@@ -230,7 +230,7 @@
     },
     "bar_iron": {
       "massMu": 4000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "ledger": {
         "class": "fe_metal",
         "family": "fe"
@@ -283,7 +283,7 @@
     },
     "seeds": {
       "massMu": 50,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "ledger": {
         "class": "biomass",
         "family": "organic"
@@ -292,7 +292,7 @@
     },
     "fiber": {
       "massMu": 200,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "ledger": {
         "class": "biomass",
         "family": "organic"
@@ -301,7 +301,7 @@
     },
     "straw": {
       "massMu": 500,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "ledger": {
         "class": "biomass",
         "family": "organic"
@@ -354,7 +354,7 @@
     },
     "hide": {
       "massMu": 3000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "ledger": {
         "class": "biomass",
         "family": "organic"
@@ -363,7 +363,7 @@
     },
     "bone": {
       "massMu": 500,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "ledger": {
         "class": "biomass",
         "family": "organic"
@@ -373,7 +373,7 @@
     },
     "wool": {
       "massMu": 400,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "ledger": {
         "class": "biomass",
         "family": "organic"
@@ -818,7 +818,7 @@
     "campfire": {
       "massless": false,
       "massMu": 69000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "stone",
@@ -893,7 +893,9 @@
             "mu": 24000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 3
           }
         ]
       },
@@ -907,7 +909,7 @@
     "wall_wood": {
       "massless": false,
       "massMu": 8000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -950,7 +952,9 @@
             "mu": 8000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 1
           }
         ]
       },
@@ -961,7 +965,7 @@
     "wall_stone": {
       "massless": false,
       "massMu": 30000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "stone",
@@ -1015,7 +1019,7 @@
     "floor_straw": {
       "massless": false,
       "massMu": 1000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -1066,7 +1070,7 @@
     "crib": {
       "massless": false,
       "massMu": 8000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -1109,7 +1113,9 @@
             "mu": 8000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 1
           }
         ]
       },
@@ -1119,7 +1125,7 @@
     "workbench": {
       "massless": false,
       "massMu": 38000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "stone",
@@ -1194,7 +1200,9 @@
             "mu": 8000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 1
           }
         ]
       },
@@ -1204,7 +1212,7 @@
     "furnace": {
       "massless": false,
       "massMu": 90000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "stone",
@@ -1255,7 +1263,7 @@
     "smithy": {
       "massless": false,
       "massMu": 72000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "fe_metal",
@@ -1344,7 +1352,9 @@
             "mu": 4000,
             "family": "fe",
             "debrisMaterial": "scrap",
-            "disagreement": "D-SCRAP-FORM"
+            "disagreement": "D-SCRAP-FORM",
+            "item": "bar_iron",
+            "count": 1
           },
           {
             "process": "break",
@@ -1364,7 +1374,9 @@
             "mu": 8000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 1
           }
         ]
       },
@@ -1374,7 +1386,7 @@
     "bowyer_bench": {
       "massless": false,
       "massMu": 16000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -1417,7 +1429,9 @@
             "mu": 16000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
           }
         ]
       },
@@ -1427,7 +1441,7 @@
     "fletcher_bench": {
       "massless": false,
       "massMu": 31000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "stone",
@@ -1502,7 +1516,9 @@
             "mu": 16000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
           }
         ]
       },
@@ -1512,7 +1528,7 @@
     "tanning_rack": {
       "massless": false,
       "massMu": 24400,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -1587,7 +1603,9 @@
             "mu": 24000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 3
           }
         ]
       },
@@ -1597,7 +1615,7 @@
     "weapon_rack": {
       "massless": false,
       "massMu": 16000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -1640,7 +1658,9 @@
             "mu": 16000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
           }
         ]
       },
@@ -1650,7 +1670,7 @@
     "door_wood": {
       "massless": false,
       "massMu": 8000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -1693,7 +1713,9 @@
             "mu": 8000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 1
           }
         ]
       },
@@ -1703,7 +1725,7 @@
     "door_stone": {
       "massless": false,
       "massMu": 30000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "stone",
@@ -1756,7 +1778,7 @@
     "door_iron": {
       "massless": false,
       "massMu": 8000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "fe_metal",
@@ -1799,7 +1821,9 @@
             "mu": 8000,
             "family": "fe",
             "debrisMaterial": "scrap",
-            "disagreement": "D-SCRAP-FORM"
+            "disagreement": "D-SCRAP-FORM",
+            "item": "bar_iron",
+            "count": 2
           }
         ]
       },
@@ -1811,7 +1835,7 @@
     "bed_wood": {
       "massless": false,
       "massMu": 16200,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -1886,7 +1910,9 @@
             "mu": 16000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
           }
         ]
       },
@@ -1896,7 +1922,7 @@
     "chest_wood": {
       "massless": false,
       "massMu": 16200,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -1971,7 +1997,9 @@
             "mu": 16000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
           }
         ]
       },
@@ -1981,7 +2009,7 @@
     "dining_table": {
       "massless": false,
       "massMu": 16000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -2024,7 +2052,9 @@
             "mu": 16000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
           }
         ]
       },
@@ -2034,7 +2064,7 @@
     "dining_bench": {
       "massless": false,
       "massMu": 8000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -2077,7 +2107,9 @@
             "mu": 8000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 1
           }
         ]
       },
@@ -2087,7 +2119,7 @@
     "kitchen_counter": {
       "massless": false,
       "massMu": 16000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -2130,7 +2162,9 @@
             "mu": 16000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
           }
         ]
       },
@@ -2140,7 +2174,7 @@
     "kitchen_pantry": {
       "massless": false,
       "massMu": 31000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "stone",
@@ -2215,7 +2249,9 @@
             "mu": 16000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
           }
         ]
       },
@@ -2225,7 +2261,7 @@
     "kitchen_hearth": {
       "massless": false,
       "massMu": 68000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "stone",
@@ -2300,7 +2336,9 @@
             "mu": 8000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 1
           }
         ]
       },
@@ -2310,7 +2348,7 @@
     "shop_counter": {
       "massless": false,
       "massMu": 31000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "stone",
@@ -2385,7 +2423,9 @@
             "mu": 16000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
           }
         ]
       },
@@ -2395,7 +2435,7 @@
     "apothecary_bench": {
       "massless": false,
       "massMu": 31000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "stone",
@@ -2470,7 +2510,9 @@
             "mu": 16000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
           }
         ]
       },
@@ -2480,7 +2522,7 @@
     "pottery_kiln": {
       "massless": false,
       "massMu": 45000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "stone",
@@ -2531,7 +2573,7 @@
     "mason_bench": {
       "massless": false,
       "massMu": 53000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "stone",
@@ -2606,7 +2648,9 @@
             "mu": 8000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 1
           }
         ]
       },
@@ -2616,7 +2660,7 @@
     "wall_timber_frame": {
       "massless": false,
       "massMu": 4100,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "fe_metal",
@@ -2682,7 +2726,9 @@
             "mu": 500,
             "family": "fe",
             "debrisMaterial": "scrap",
-            "disagreement": "D-SCRAP-FORM"
+            "disagreement": "D-SCRAP-FORM",
+            "item": "hardware_iron",
+            "count": 1
           },
           {
             "process": "salvage",
@@ -2693,7 +2739,9 @@
             "mu": 3600,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "plank_dressed",
+            "count": 2
           }
         ]
       },
@@ -2706,12 +2754,13 @@
     "wall_brick": {
       "massless": false,
       "massMu": 5200,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "soil",
           "family": "mineral",
-          "mu": 1200
+          "mu": 1200,
+          "form": "strata"
         },
         {
           "class": "stone",
@@ -2792,12 +2841,13 @@
     "wall_ashlar": {
       "massless": false,
       "massMu": 7200,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "soil",
           "family": "mineral",
-          "mu": 1200
+          "mu": 1200,
+          "form": "strata"
         },
         {
           "class": "stone",
@@ -2910,7 +2960,7 @@
     "bridge": {
       "massless": false,
       "massMu": 32000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -2953,7 +3003,9 @@
             "mu": 32000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 4
           }
         ]
       },
@@ -2967,7 +3019,7 @@
     "well": {
       "massless": false,
       "massMu": 60000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "stone",
@@ -3021,7 +3073,7 @@
     "stump": {
       "massless": false,
       "massMu": 8000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -3067,7 +3119,7 @@
     "oak": {
       "massless": false,
       "massMu": 32000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -3138,7 +3190,7 @@
     "birch": {
       "massless": false,
       "massMu": 24000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -3209,7 +3261,7 @@
     "pine": {
       "massless": false,
       "massMu": 32000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -3280,7 +3332,7 @@
     "fir_snow": {
       "massless": false,
       "massMu": 32000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -3351,7 +3403,7 @@
     "fruit_tree_bare": {
       "massless": false,
       "massMu": 32000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -3422,7 +3474,7 @@
     "fruit_tree": {
       "massless": false,
       "massMu": 32900,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -3481,7 +3533,9 @@
             "mu": 32000,
             "family": "organic",
             "debrisMaterial": "broken_timber",
-            "disagreement": "D-WOOD-COLLAPSE"
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 4
           }
         ]
       },
@@ -3497,7 +3551,7 @@
     "tree_savanna": {
       "massless": false,
       "massMu": 24000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -3568,7 +3622,7 @@
     "tree_swamp": {
       "massless": false,
       "massMu": 24000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -3639,7 +3693,7 @@
     "mangrove": {
       "massless": false,
       "massMu": 24000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -3710,7 +3764,7 @@
     "tree_tropical": {
       "massless": false,
       "massMu": 40000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -3781,7 +3835,7 @@
     "palm": {
       "massless": false,
       "massMu": 16000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -3852,7 +3906,7 @@
     "dead_tree": {
       "massless": false,
       "massMu": 20000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -3947,7 +4001,7 @@
     "tree_cursed": {
       "massless": false,
       "massMu": 16000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -4018,7 +4072,7 @@
     "berry_bush_bare": {
       "massless": false,
       "massMu": 200,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -4059,7 +4113,7 @@
     "berry_bush": {
       "massless": false,
       "massMu": 400,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -4112,7 +4166,7 @@
     "bush": {
       "massless": false,
       "massMu": 400,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -4155,7 +4209,7 @@
     "desert_shrub": {
       "massless": false,
       "massMu": 200,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -4198,7 +4252,7 @@
     "snow_bush": {
       "massless": false,
       "massMu": 200,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -4241,7 +4295,7 @@
     "cactus": {
       "massless": false,
       "massMu": 300,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -4284,7 +4338,7 @@
     "cactus_tall": {
       "massless": false,
       "massMu": 400,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -4327,7 +4381,7 @@
     "grass_tuft": {
       "massless": false,
       "massMu": 200,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -4370,7 +4424,7 @@
     "reeds": {
       "massless": false,
       "massMu": 1000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -4413,7 +4467,7 @@
     "flowers": {
       "massless": false,
       "massMu": 100,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -4454,7 +4508,7 @@
     "flowers_purple": {
       "massless": false,
       "massMu": 100,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -4495,7 +4549,7 @@
     "flowers_blue": {
       "massless": false,
       "massMu": 100,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -4536,7 +4590,7 @@
     "flowers_white": {
       "massless": false,
       "massMu": 100,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -4577,7 +4631,7 @@
     "fern": {
       "massless": false,
       "massMu": 200,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -4620,7 +4674,7 @@
     "lichen": {
       "massless": false,
       "massMu": 100,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -4661,7 +4715,7 @@
     "wild_grain": {
       "massless": false,
       "massMu": 550,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -4716,7 +4770,7 @@
     "wheat_wild": {
       "massless": false,
       "massMu": 550,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -4771,7 +4825,7 @@
     "lily_pad": {
       "massless": false,
       "massMu": 100,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -4812,7 +4866,7 @@
     "rocks_small": {
       "massless": false,
       "massMu": 30000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "stone",
@@ -4855,7 +4909,7 @@
     "gravel": {
       "massless": false,
       "massMu": 15000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "stone",
@@ -4903,7 +4957,7 @@
     "granite_boulder": {
       "massless": false,
       "massMu": 90000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "stone",
@@ -4957,7 +5011,7 @@
     "ironstone": {
       "massless": false,
       "massMu": 69000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "fe_ore",
@@ -5019,7 +5073,9 @@
             "form": "item",
             "mu": 24000,
             "family": "fe",
-            "sameClass": true
+            "sameClass": true,
+            "item": "ore_iron",
+            "count": 2
           },
           {
             "process": "break",
@@ -5038,7 +5094,7 @@
     "copper_outcrop": {
       "massless": false,
       "massMu": 65000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "cu_ore",
@@ -5100,7 +5156,9 @@
             "form": "item",
             "mu": 20000,
             "family": "cu",
-            "sameClass": true
+            "sameClass": true,
+            "item": "ore_copper",
+            "count": 2
           },
           {
             "process": "break",
@@ -5119,7 +5177,7 @@
     "gold_outcrop": {
       "massless": false,
       "massMu": 45100,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "au_ore",
@@ -5134,6 +5192,18 @@
       ],
       "yield": {
         "postings": [
+          {
+            "process": "mine",
+            "fromClass": "au_ore",
+            "fromForm": "object",
+            "class": "au_ore",
+            "form": "item",
+            "mu": 100,
+            "family": "au",
+            "sameClass": true,
+            "gap": "D-AU-ORE-ITEM",
+            "note": "No au_ore item in the catalogue. The mine row's only output form is item."
+          },
           {
             "process": "smelt",
             "fromClass": "au_ore",
@@ -5183,7 +5253,9 @@
             "form": "item",
             "mu": 100,
             "family": "au",
-            "sameClass": true
+            "sameClass": true,
+            "gap": "D-AU-ORE-ITEM",
+            "note": "No au_ore item in the catalogue. The mine row's only output form is item."
           },
           {
             "process": "break",
@@ -5204,7 +5276,7 @@
     "crystal_small": {
       "massless": false,
       "massMu": 50,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "gem",
@@ -5237,7 +5309,9 @@
             "class": "gem",
             "form": "item",
             "mu": 50,
-            "family": "gem"
+            "family": "gem",
+            "item": "gem_rough",
+            "count": 1
           }
         ]
       },
@@ -5247,7 +5321,7 @@
     "crystal": {
       "massless": false,
       "massMu": 150,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "gem",
@@ -5291,7 +5365,9 @@
             "class": "gem",
             "form": "item",
             "mu": 150,
-            "family": "gem"
+            "family": "gem",
+            "item": "gem_rough",
+            "count": 3
           }
         ]
       },
@@ -5301,7 +5377,7 @@
     "bones_pile": {
       "massless": false,
       "massMu": 1000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -5344,26 +5420,26 @@
     "rubble": {
       "massless": false,
       "massMu": 30000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "rubble",
           "family": "mineral",
-          "mu": 30000
+          "mu": 30000,
+          "form": "strata"
         }
       ],
       "yield": {
         "postings": [
           {
-            "process": "pick",
+            "process": "identity",
             "fromClass": "rubble",
             "fromForm": "strata",
             "class": "rubble",
-            "form": "item",
+            "form": "strata",
             "mu": 30000,
             "family": "mineral",
-            "sameClass": true,
-            "note": "Catalogue yields stone. Not applied (D-RUBBLE-OBJECT). The prop is loose strata; rubble has no object form."
+            "note": "Catalogue yields stone. Not applied (D-RUBBLE-OBJECT). The prop is loose strata; rubble has no object form. No rubble item. The mass stays loose rubble strata (SIM.40.01 §9.2 row 8)."
           }
         ]
       },
@@ -5391,26 +5467,26 @@
     "rubble_pillar": {
       "massless": false,
       "massMu": 45000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "rubble",
           "family": "mineral",
-          "mu": 45000
+          "mu": 45000,
+          "form": "strata"
         }
       ],
       "yield": {
         "postings": [
           {
-            "process": "pick",
+            "process": "identity",
             "fromClass": "rubble",
             "fromForm": "strata",
             "class": "rubble",
-            "form": "item",
+            "form": "strata",
             "mu": 45000,
             "family": "mineral",
-            "sameClass": true,
-            "note": "Catalogue yields stone. Not applied (D-RUBBLE-OBJECT). The prop is loose strata; rubble has no object form."
+            "note": "Catalogue yields stone. Not applied (D-RUBBLE-OBJECT). The prop is loose strata; rubble has no object form. No rubble item. The mass stays loose rubble strata (SIM.40.01 §9.2 row 8)."
           }
         ]
       },
@@ -5438,7 +5514,7 @@
     "glow_caps": {
       "massless": false,
       "massMu": 200,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -5481,7 +5557,7 @@
     "cave_mushrooms": {
       "massless": false,
       "massMu": 200,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -5524,7 +5600,7 @@
     "tower_cap": {
       "massless": false,
       "massMu": 32000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "wood",
@@ -5595,7 +5671,7 @@
     "cave_moss": {
       "massless": false,
       "massMu": 400,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -5638,7 +5714,7 @@
     "spore_reeds": {
       "massless": false,
       "massMu": 1000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -5681,7 +5757,7 @@
     "stalagmite": {
       "massless": false,
       "massMu": 75000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "stone",
@@ -5735,7 +5811,7 @@
     "crystal_spire": {
       "massless": false,
       "massMu": 150,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "gem",
@@ -5779,7 +5855,9 @@
             "class": "gem",
             "form": "item",
             "mu": 150,
-            "family": "gem"
+            "family": "gem",
+            "item": "gem_rough",
+            "count": 3
           }
         ]
       },
@@ -5789,7 +5867,7 @@
     "sapling": {
       "massless": false,
       "massMu": 200,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -5832,7 +5910,7 @@
     "skeleton": {
       "massless": false,
       "massMu": 1000,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "biomass",
@@ -5879,12 +5957,13 @@
     "clay_deposit": {
       "massless": false,
       "massMu": 4500,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "soil",
           "family": "mineral",
-          "mu": 4500
+          "mu": 4500,
+          "form": "strata"
         }
       ],
       "yield": {
@@ -5927,12 +6006,13 @@
     "sand_deposit": {
       "massless": false,
       "massMu": 4500,
-      "massStatus": "PM_DEFAULT",
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
       "lines": [
         {
           "class": "soil",
           "family": "mineral",
-          "mu": 4500
+          "mu": 4500,
+          "form": "strata"
         }
       ],
       "yield": {

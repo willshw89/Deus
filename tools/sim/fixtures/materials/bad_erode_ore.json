@@ -1,0 +1,10 @@
+{
+  "expect": "E_ORE_OUTPUT",
+  "steps": [
+    {
+      "op": "set",
+      "path": "interactions.erodes.0.to",
+      "value": "cu_ore"
+    }
+  ]
+}

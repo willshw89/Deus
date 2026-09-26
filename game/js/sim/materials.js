@@ -4,7 +4,8 @@
 // Host-agnostic sim module in the same sense as game/js/sim/ledger.js: CommonJS, no host global, no clock, no randomness.
 // It does not load files and it does not post to the ledger. Callers pass the catalogue, the mass tables and the
 // interaction matrix. validate(data, ledgerDefaults) returns named errors; it does not throw for a bad catalogue.
-// Amounts are non-negative safe integers. Iteration is sorted. The same data gives the same checksum.
+// Amounts are non-negative safe integers. A water-family slice is du; every other mass is mu.
+// Iteration is sorted. The same data gives the same checksum. A different catalogue gives a different checksum.
 //
 // mu size is a proposal on the catalogue (PM_DEFAULT_UNCONFIRMED). This file does not choose a calendar scale.
 
@@ -63,16 +64,6 @@ function indexMaterials(list) {
     return { byId: byId, byStrata: byStrata };
 }
 
-function postingSum(ps) {
-    var t = 0, i, u;
-    if (!ps) return 0;
-    for (i = 0; i < ps.length; i++) {
-        u = ps[i].unmappedMu || 0;
-        t += (ps[i].mu || 0) + u;
-    }
-    return t;
-}
-
 function createMaterials(data) {
     var bag = isObj(data) ? data : {};
     var cat = isObj(bag.catalogue) ? bag.catalogue : {};
@@ -87,24 +78,41 @@ function createMaterials(data) {
         if (!m && (typeof id === "number" || (typeof id === "string" && id === String(Number(id))))) m = idx.byStrata[Number(id)];
         return m ? copy(m) : null;
     }
+    function failAmount() {
+        var e = new Error("E_AMOUNT");
+        e.code = "E_AMOUNT";
+        throw e;
+    }
+    function failForm() {
+        var e = new Error("E_FORM");
+        e.code = "E_FORM";
+        throw e;
+    }
+    function sliceOf(m, count) {
+        var slice;
+        if (m.massless) return 0;
+        slice = m.massPerSlice;
+        if (!isAmount(slice)) return null;
+        if (count > 0 && slice > Math.floor(MAX / count)) failAmount();
+        return slice * count;
+    }
+    // A strata id is readable as a slice when the ledger class has a strata form, or the record's own
+    // form is ice or fluid (water is booked in du; ice's slice form is "ice"). Bone sets strataForm.bookable false.
+    function sliceReadable(m) {
+        if (m.strataForm && m.strataForm.bookable === false) return false;
+        if (m.ledgerForm === "strata" || m.ledgerForm === "ice" || m.ledgerForm === "fluid") return true;
+        return typeof m.strataId === "number";
+    }
     function massOf(id, form, count) {
-        var row, m, slice;
-        if (!isAmount(count)) {
-            var e = new Error("E_AMOUNT");
-            e.code = "E_AMOUNT";
-            throw e;
-        }
+        var row, m;
+        if (!isAmount(count)) failAmount();
         if (count === 0) return 0;
         if (form === "item") {
             row = items[id];
             if (!row) return null;
             if (row.massless) return 0;
             if (!isAmount(row.massMu)) return null;
-            if (row.massMu > Math.floor(MAX / count)) {
-                var e2 = new Error("E_AMOUNT");
-                e2.code = "E_AMOUNT";
-                throw e2;
-            }
+            if (row.massMu > Math.floor(MAX / count)) failAmount();
             return row.massMu * count;
         }
         if (form === "object" || form === "ruin") {
@@ -112,19 +120,21 @@ function createMaterials(data) {
             if (row) {
                 if (row.massless) return 0;
                 if (!isAmount(row.massMu)) return null;
+                if (row.massMu > Math.floor(MAX / count)) failAmount();
                 return row.massMu * count;
             }
             m = idx.byId[id];
-            if (m && isAmount(m.massPerSlice)) return m.massPerSlice * count;
+            if (m && m.massless) return 0;
+            if (m && isAmount(m.massPerSlice)) return sliceOf(m, count);
             return null;
         }
         m = idx.byId[id];
         if (!m && typeof id === "number") m = idx.byStrata[id];
+        if (!m && typeof id === "string" && id === String(Number(id))) m = idx.byStrata[Number(id)];
         if (!m) return null;
-        if (m.massless) return 0;
-        slice = m.massPerSlice;
-        if (!isAmount(slice)) return null;
-        return slice * count;
+        if (form !== "strata" && form !== m.ledgerForm) failForm();
+        if (form === "strata" && !sliceReadable(m)) failForm();
+        return sliceOf(m, count);
     }
     function yieldOf(id) {
         var m = idx.byId[id], o = objects[id];
@@ -206,25 +216,51 @@ function validate(data, ledgerDefaults) {
     function isOre(name) { var c = clsOf(name); return !!(c && c.ore === true); }
     function formsOf(name) { var c = clsOf(name); return c && Array.isArray(c.forms) ? c.forms : []; }
     function familyName(name) { var c = clsOf(name); return c && typeof c.family === "string" ? c.family : null; }
+    function familyUnit(name) {
+        var c = clsOf(name), keys, i, fam, unit, u;
+        if (!c || !ledger.families) return null;
+        if (c.family) return ledger.families[c.family] ? ledger.families[c.family].unit : null;
+        if (!isObj(c.composition)) return null;
+        keys = sortedKeys(c.composition);
+        unit = null;
+        for (i = 0; i < keys.length; i++) {
+            fam = ledger.families[keys[i]];
+            u = fam ? fam.unit : null;
+            if (!u) return null;
+            if (unit && unit !== u) return null;
+            unit = u;
+        }
+        return unit;
+    }
 
     function statusOk(node, where) {
+        var i, keys, k, v;
+        if (Array.isArray(node)) {
+            for (i = 0; i < node.length; i++) statusOk(node[i], where + "[" + i + "]");
+            return;
+        }
         if (!isObj(node)) return;
-        var keys = sortedKeys(node), i, k, v;
+        keys = sortedKeys(node);
         for (i = 0; i < keys.length; i++) {
             k = keys[i];
             v = node[k];
-            if (k === "status" && !STATUS[v]) err("E_STATUS", where + ".status");
-            else if (isObj(v)) statusOk(v, where + "." + k);
+            if (k === "status" || /Status$/.test(k)) {
+                if (!STATUS[v]) err("E_STATUS", where + "." + k);
+            } else if (isObj(v) || Array.isArray(v)) statusOk(v, where + "." + k);
         }
     }
     statusOk(cat, "catalogue");
     statusOk(masses, "masses");
+    statusOk(ix, "interactions");
+
+    if (!masses.muRef || !mu || masses.muRef !== mu.id) err("E_MU_STATUS", "muRef");
 
     if (!Array.isArray(cat.materials)) {
         err("E_SCHEMA", "materials");
         errors.sort();
         return errors;
     }
+    var items = masses.items || {}, objects = masses.objects || {};
     var byId = {}, strataUsed = {}, mi, m;
     for (mi = 0; mi < cat.materials.length; mi++) {
         m = cat.materials[mi];
@@ -269,15 +305,6 @@ function validate(data, ledgerDefaults) {
         }
         return true;
     }
-    function famMap(ps) {
-        var map = {}, i, p;
-        for (i = 0; i < ps.length; i++) {
-            p = ps[i];
-            if (!p.class) continue;
-            if (!famAdd(map, p.class, p.mu || 0, p.family || null)) err("E_FAMILY_MASS", "posting " + (p.class || "?"));
-        }
-        return map;
-    }
     function famEqual(a, b, where) {
         var keys = {}, i, k, list;
         for (k in a) if (has(a, k)) keys[k] = 1;
@@ -288,27 +315,118 @@ function validate(data, ledgerDefaults) {
             if ((a[k] || 0) !== (b[k] || 0)) err("E_FAMILY_MASS", where + " " + k);
         }
     }
-    function checkPostings(ps, where, mass, sourceOre) {
-        var i, p, sum, name;
+    function holdingsFam(h) {
+        var map = {}, k, parts;
+        for (k in h) if (has(h, k) && h[k]) {
+            parts = k.split("|");
+            if (!famAdd(map, parts[0], h[k], null)) err("E_FAMILY_MASS", "holding " + k);
+        }
+        return map;
+    }
+    function ledgerAmt(p) {
+        var unit = p.class ? familyUnit(p.class) : null;
+        if (unit === "du") return isAmount(p.du) ? p.du : 0;
+        return isAmount(p.mu) ? p.mu : 0;
+    }
+    // Postings are an ordered script. Amounts taken from the original source must sum to the source
+    // mass (a later step may move that same mass onward). Final holdings must keep each family.
+    function checkPostings(ps, where, mass, sourceOre, startMap, sourceFamilies) {
+        var i, p, h = {}, k, from, to, amt, extra, covered = 0, original = {}, taken = {}, name, unit, massCode, applied;
+        massCode = where.indexOf("collapse") >= 0 ? "E_COLLAPSE_MASS" : "E_YIELD_MASS";
+        for (k in startMap) if (has(startMap, k)) { h[k] = startMap[k]; original[k] = 1; }
         if (!ps) return;
-        sum = postingSum(ps);
-        if (isAmount(mass) && sum !== mass) err(where.indexOf("collapse") >= 0 ? "E_COLLAPSE_MASS" : "E_YIELD_MASS", where);
         for (i = 0; i < ps.length; i++) {
             p = ps[i];
             name = procOf(p);
-            if (p.class) {
-                if (!clsOf(p.class)) err("E_LEDGER_CLASS", where + " " + p.class);
-                else if (formsOf(p.class).indexOf(p.form) < 0) err("E_FORM", where + " " + p.class + " " + p.form);
-                if (p.fromClass && clsOf(p.fromClass) && formsOf(p.fromClass).indexOf(p.fromForm) < 0) err("E_FORM", where + " from " + p.fromClass + " " + p.fromForm);
-                if (!transformOk(p)) err("E_TRANSFORM", where + " " + name + " " + p.fromClass + "->" + p.class);
-                if (!isAmount(p.mu)) err("E_MASS", where);
-                if (isOre(p.class)) {
-                    var allowed = sourceOre && sourceOre[p.class] >= p.mu && p.sameClass === true;
-                    if (!allowed) err("E_ORE_OUTPUT", where + " " + p.class);
-                }
+            if (!p.class) {
+                if (p.mu != null && !isAmount(p.mu)) err("E_MASS", where);
+                if (p.du != null && !isAmount(p.du)) err("E_MASS", where);
+                if (p.unmappedMu != null && !isAmount(p.unmappedMu)) err("E_MASS", where + " unmapped");
+                covered += (p.mu || 0) + (p.du || 0) + (p.unmappedMu || 0);
+                continue;
             }
+            unit = familyUnit(p.class);
+            if (!clsOf(p.class)) err("E_LEDGER_CLASS", where + " " + p.class);
+            else if (formsOf(p.class).indexOf(p.form) < 0) err("E_FORM", where + " " + p.class + " " + p.form);
+            if (p.fromClass && clsOf(p.fromClass) && formsOf(p.fromClass).indexOf(p.fromForm) < 0) err("E_FORM", where + " from " + p.fromClass + " " + p.fromForm);
+            if (!transformOk(p)) err("E_TRANSFORM", where + " " + name + " " + p.fromClass + "->" + p.class);
+            if (unit === "du") {
+                if (p.du == null || p.mu != null) err("E_UNIT", where + " " + p.class);
+                else if (!isAmount(p.du)) err("E_MASS", where);
+            } else if (unit === "mu") {
+                if (p.mu == null || p.du != null) err("E_UNIT", where + " " + p.class);
+                else if (!isAmount(p.mu)) err("E_MASS", where);
+            } else if (!isAmount(p.mu)) err("E_MASS", where);
             if (p.unmappedMu != null && !isAmount(p.unmappedMu)) err("E_MASS", where + " unmapped");
+            amt = ledgerAmt(p);
+            extra = isAmount(p.unmappedMu) ? p.unmappedMu : 0;
+            from = p.fromClass + "|" + p.fromForm;
+            to = p.class + "|" + p.form;
+            if (original[from]) covered += amt + extra;
+            applied = (h[from] || 0) >= amt;
+            if (!applied) err(massCode, where);
+            else {
+                h[from] = (h[from] || 0) - amt;
+                h[to] = (h[to] || 0) + amt;
+                if (original[from] && amt) famAdd(taken, p.class, amt, p.family || null);
+            }
+            if (isOre(p.class)) {
+                var allowed = sourceOre && sourceOre[p.class] >= amt && p.sameClass === true;
+                if (!allowed) err("E_ORE_OUTPUT", where + " " + p.class);
+            }
+            if (p.form === "item" && !p.item) {
+                var bulkOk = p.bulk === true && procOf(p) === "identity" && p.fromForm === "item" && p.fromClass === p.class;
+                var gapOk = typeof p.gap === "string" && p.gap.length > 0;
+                if (!bulkOk && !gapOk) err("E_ITEM_TYPE", where + " " + p.class);
+            }
         }
+        checkItemCounts(ps, where);
+        if (isAmount(mass) && covered !== mass) err(massCode, where);
+        if (sourceFamilies) {
+            famEqual(sourceFamilies, taken, where);
+            famEqual(sourceFamilies, holdingsFam(h), where);
+        }
+    }
+    function materialStart(m) {
+        var start = {}, ledgerPart = m.massPerSlice, key;
+        if (m.unmapped && isAmount(m.unmapped.mu)) ledgerPart -= m.unmapped.mu;
+        if (ledgerPart < 0) ledgerPart = 0;
+        if (m.ledger && m.ledger.class && m.ledgerForm && ledgerPart > 0) {
+            key = m.ledger.class + "|" + m.ledgerForm;
+            start[key] = ledgerPart;
+        }
+        return start;
+    }
+    function objectStart(row) {
+        var start = {}, i, form, key;
+        for (i = 0; i < row.lines.length; i++) {
+            form = row.lines[i].form || "object";
+            key = row.lines[i].class + "|" + form;
+            start[key] = (start[key] || 0) + (row.lines[i].mu || 0);
+        }
+        return start;
+    }
+    function reclaimStepOk(step) {
+        var parsed, proc, from, to, i, r;
+        if (step === "identity" || step === "none") return true;
+        parsed = /^([a-z_]+):([A-Za-z0-9_]+)->([A-Za-z0-9_]+)$/.exec(step);
+        if (parsed) {
+            proc = parsed[1];
+            from = parsed[2];
+            to = parsed[3];
+            for (i = 0; i < ledger.transforms.length; i++) {
+                r = ledger.transforms[i];
+                if (r.id !== proc) continue;
+                if (r.from === from && r.to === to) return true;
+                // thaw:ice->fluid names forms of one class. stone->rubble names classes.
+                if (r.from === r.to && r.fromForms.indexOf(from) >= 0 && r.toForms.indexOf(to) >= 0) return true;
+            }
+            return false;
+        }
+        if (/^[a-z_]+$/.test(step)) {
+            for (i = 0; i < ledger.transforms.length; i++) if (ledger.transforms[i].id === step) return true;
+        }
+        return false;
     }
     function sourceOreOf(m) {
         var o = {}, c;
@@ -336,8 +454,14 @@ function validate(data, ledgerDefaults) {
         } else if (m.massPerSlice == null) {
             var openOk = m.massStatus === "OWNER_OPEN" || m.massStatus === "PLACEHOLDER" || (m.ledgerForm === "fluid" && m.massStatus === "PM_DEFAULT");
             if (!openOk) err("E_MASS", where + " open");
-        } else if (!isAmount(m.massPerSlice)) err("E_MASS", where);
-        if (isAmount(m.kgPerSlice) && isAmount(m.massPerSlice) && perKg && m.massPerSlice !== m.kgPerSlice * perKg) err("E_MU_SCALE", where);
+        } else if (!isAmount(m.massPerSlice) || m.massPerSlice < 1) err("E_MASS", where);
+        if (m.id === "water" || (isInt(m.strataId) && m.strataId >= 38 && m.strataId <= 47)) {
+            if (m.massStatus !== "OWNER_OPEN" || m.massPerSlice != null) err("E_OWNER_OPEN", where + " mass");
+        }
+        if (familyUnit(m.ledger && m.ledger.class) !== "du" && isAmount(m.kgPerSlice) && isAmount(m.massPerSlice) && perKg && m.massPerSlice !== m.kgPerSlice * perKg) err("E_MU_SCALE", where);
+        if (isAmount(m.supportLoadKgPerSlice) || isAmount(m.supportLoadMuPerSlice)) {
+            if (!isAmount(m.supportLoadKgPerSlice) || !isAmount(m.supportLoadMuPerSlice) || !perKg || m.supportLoadMuPerSlice !== m.supportLoadKgPerSlice * perKg) err("E_MU_SCALE", where + " supportLoad");
+        }
         if (m.ledger && m.ledger.class) {
             var c = clsOf(m.ledger.class);
             if (!c) err("E_LEDGER_CLASS", where + " " + m.ledger.class);
@@ -351,13 +475,18 @@ function validate(data, ledgerDefaults) {
                 if (m.ledger.family) err("E_ALLOY", where + " family");
             } else if (m.ledger.family && c && c.family && m.ledger.family !== c.family) err("E_LEDGER_FAMILY", where);
             if (c && c.family && ledger.families && !has(ledger.families, c.family) && m.ledger.family) err("E_LEDGER_FAMILY", where);
+            if (c && familyUnit(m.ledger.class) && m.ledger.unit !== familyUnit(m.ledger.class)) err("E_UNIT", where + " ledger.unit");
+            if (c && typeof m.strataId === "number") {
+                var sliceForm = formsOf(m.ledger.class).indexOf("strata") >= 0 || m.ledgerForm === "ice" || m.ledgerForm === "fluid";
+                if (!sliceForm && (!m.strataForm || m.strataForm.bookable !== false || typeof m.strataForm.gap !== "string" || !m.strataForm.gap)) err("E_FORM", where + " strata");
+            }
         } else if (!m.massless && !m.reserved && !(m.unmapped && m.unmapped.reason)) {
             if (m.massPerSlice != null) err("E_LEDGER_CLASS", where);
         }
         if (m.unmapped && !m.unmapped.reason) err("E_GAP_UNDECLARED", where);
         if (m.laneQPerMille && m.laneQPerMille.appliedToLedger === true) err("E_GAP_UNDECLARED", where + " applied");
         if (m.blastGroup && ix.blast && ix.blast.groups && !has(ix.blast.groups, m.blastGroup)) err("E_BLAST_GROUP", where);
-        if (m.decay && m.decay.dc && cat.decayClasses && !has(cat.decayClasses, m.decay.dc)) err("E_SCHEMA", where + " decay");
+        if (m.decay && m.decay.dc && !(cat.decayClasses && isObj(cat.decayClasses[m.decay.dc]))) err("E_SCHEMA", where + " decay");
         if (m.decay && m.decay.outputClass) {
             if (!clsOf(m.decay.outputClass)) err("E_LEDGER_CLASS", where + " decay");
             if (isOre(m.decay.outputClass)) err("E_ORE_OUTPUT", where + " decay");
@@ -417,16 +546,20 @@ function validate(data, ledgerDefaults) {
             if (!bas || m.solidify.duPerBasaltVoxel * m.kgPerDu !== bas.kgPerSlice) err("E_COLLAPSE_MASS", where + " solidify");
             if (m.solidify.remainderRubbleKg !== m.kgPerDu) err("E_COLLAPSE_MASS", where + " remainder");
         }
+        if (m.reclaim && Array.isArray(m.reclaim.path)) {
+            var pi;
+            for (pi = 0; pi < m.reclaim.path.length; pi++) {
+                if (!reclaimStepOk(m.reclaim.path[pi])) err("E_PATH", where + " " + m.reclaim.path[pi]);
+            }
+        }
         if (isAmount(m.massPerSlice) && !m.massless) {
             var oreSrc = sourceOreOf(m);
-            if (m.yield && m.yield.postings) {
-                checkPostings(m.yield.postings, where + " yield", m.massPerSlice, oreSrc);
-                famEqual(sourceFam(m), famMap(m.yield.postings), where + " yield");
-            } else err("E_YIELD_MASS", where + " missing");
-            if (m.collapse && m.collapse.postings) {
-                checkPostings(m.collapse.postings, where + " collapse", m.massPerSlice, oreSrc);
-                famEqual(sourceFam(m), famMap(m.collapse.postings), where + " collapse");
-            } else err("E_COLLAPSE_MASS", where + " missing");
+            var start = materialStart(m);
+            var fam = sourceFam(m);
+            if (m.yield && m.yield.postings) checkPostings(m.yield.postings, where + " yield", m.massPerSlice, oreSrc, start, fam);
+            else err("E_YIELD_MASS", where + " missing");
+            if (m.collapse && m.collapse.postings) checkPostings(m.collapse.postings, where + " collapse", m.massPerSlice, oreSrc, start, fam);
+            else err("E_COLLAPSE_MASS", where + " missing");
         }
         if (m.ledger && m.ledger.composition && isAmount(m.massPerSlice)) {
             var den = 0, ck = sortedKeys(m.ledger.composition), ci;
@@ -461,6 +594,7 @@ function validate(data, ledgerDefaults) {
         if (row.catalogWeightTimes1000 != null && row.catalogWeightTimes1000 !== row.massMu) err("E_ITEM_WEIGHT", where);
         if (!row.ledger || !clsOf(row.ledger.class)) err("E_LEDGER_CLASS", where);
         else if (familyName(row.ledger.class) && row.ledger.family !== familyName(row.ledger.class)) err("E_LEDGER_FAMILY", where);
+        if (row.ledger && row.ledger.unit && familyUnit(row.ledger.class) && row.ledger.unit !== familyUnit(row.ledger.class)) err("E_UNIT", where);
     }
     function lineFam(lines) {
         var map = {}, i;
@@ -486,7 +620,11 @@ function validate(data, ledgerDefaults) {
         for (i = 0; i < row.lines.length; i++) {
             lineSum += row.lines[i].mu || 0;
             if (!clsOf(row.lines[i].class)) err("E_LEDGER_CLASS", where + " " + row.lines[i].class);
-            else if (familyName(row.lines[i].class) && row.lines[i].family !== familyName(row.lines[i].class)) err("E_LEDGER_FAMILY", where);
+            else {
+                if (familyName(row.lines[i].class) && row.lines[i].family !== familyName(row.lines[i].class)) err("E_LEDGER_FAMILY", where);
+                var lineForm = row.lines[i].form || "object";
+                if (formsOf(row.lines[i].class).indexOf(lineForm) < 0) err("E_FORM", where + " line " + row.lines[i].class + " " + lineForm);
+            }
         }
         if (lineSum !== row.massMu) err("E_BOM", where + " lines");
         if (Array.isArray(row.bill)) {
@@ -500,25 +638,21 @@ function validate(data, ledgerDefaults) {
             if (sum !== row.massMu) err("E_BOM", where);
         }
         var bag = oreBag(row.lines);
+        var start = objectStart(row);
+        var fam = lineFam(row.lines);
         ps = row.yield && row.yield.postings;
         if (!ps) err("E_YIELD_MASS", where);
-        else {
-            checkPostings(ps, where + " yield", row.massMu, bag);
-            famEqual(lineFam(row.lines), famMap(ps), where + " yield");
-            checkItemCounts(ps, where);
-        }
+        else checkPostings(ps, where + " yield", row.massMu, bag, start, fam);
         ps = row.collapse && row.collapse.postings;
         if (!ps) err("E_COLLAPSE_MASS", where);
-        else {
-            checkPostings(ps, where + " collapse", row.massMu, bag);
-            famEqual(lineFam(row.lines), famMap(ps), where + " collapse");
-        }
+        else checkPostings(ps, where + " collapse", row.massMu, bag, start, fam);
     }
     function checkItemCounts(ps, where) {
         var i, p;
         for (i = 0; i < ps.length; i++) {
             p = ps[i];
-            if (p.item && p.count != null && items[p.item] && p.count * items[p.item].massMu !== p.mu) err("E_BOM", where + " count " + p.item);
+            var led = p.du != null && p.mu == null ? p.du : p.mu;
+            if (p.item && p.count != null && items[p.item] && p.count * items[p.item].massMu !== led) err("E_BOM", where + " count " + p.item);
         }
     }
 

@@ -1,0 +1,15 @@
+{
+  "expect": "E_SCHEMA",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.decayClasses.notAClass",
+      "value": "nope"
+    },
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=granite].decay.dc",
+      "value": "notAClass"
+    }
+  ]
+}

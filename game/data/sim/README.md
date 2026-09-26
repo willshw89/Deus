@@ -17,9 +17,9 @@ Catalogue, mass tables and interaction matrix for SIM.40.00. A later package (se
 
 `mu` is the ledger's integer mass unit. Its size is the object `mu` in `materials.json`: proposal `1 mu = 1 g` (`proposalMuPerKg` 1000), `status` `PM_DEFAULT_UNCONFIRMED`, `confirmed` false. Lane Q published kilograms, Lane R assumed 1/16 lb, Lane W used grams, and `ledger_defaults.js` leaves the size unset. The gram proposal is the one that keeps both the Lane Q integers and the catalogue weight field on integers. It is not an Owner decision. Options are in the lane report.
 
-Water and lava are counted in `du` (1/7 of a full 10-ft cell, `DEUS_Fluid.js` `DEPTH_MAX` 7). Ice stores both: 1 du and 1,011 kg of load per slice (SIM.40.01 §2.3). A 10-ft water layer is 7 du, which does not divide by 5 slices, so water has no per-slice mu.
+The water family is booked in `du` (1/7 of a full 10-ft cell, `DEUS_Fluid.js` `DEPTH_MAX` 7), the unit in `ledger_defaults.js`. An ice slice is 1 du. Its support load is 1,011 kg (`supportLoadKgPerSlice`) and `supportLoadMuPerSlice` under the unconfirmed mu proposal. Neither load is posted. A 10-ft water layer is 7 du, which does not divide by 5 slices, so water has no per-slice amount. Class `lava` is family `mineral`, so its ledger unit is mu. `muPerDu` is the fixed conversion from the fluid hook's du.
 
-Geometry used for the kilogram rounding, and for nothing else: a square is 5 ft, a slice is 2 ft, a layer is 10 ft, five slices to a layer. One slice is 50 ft³. The metre used in the rounding is 0.3048 (`footMilliMetre` 3048). Density times that volume is rounded to the nearest integer kilogram, halves up. `massPerSlice` is that kilogram times `proposalMuPerKg`. A row derived from a parent (a fill, a loose fraction) multiplies the parent's integer kilogram and rounds once.
+Geometry used for the kilogram rounding, and for nothing else: a square is 5 ft, a slice is 2 ft, a layer is 10 ft, five slices to a layer. One slice is 50 ft³. The metre used in the rounding is 0.3048 (`footMilliMetre` 3048). Density times that volume is rounded to the nearest integer kilogram, halves up. For every family except water, `massPerSlice` is that kilogram times `proposalMuPerKg`. A water-family `massPerSlice` is du. A row derived from a parent (a fill, a loose fraction) multiplies the parent's integer kilogram and rounds once.
 
 ## Legacy half-height slices
 
@@ -29,8 +29,8 @@ Older saves use a stratum half the height of one slice of the same 5-ft square. 
 
 1. Load the three JSON files and `ledger_defaults.js`.
 2. `validate`. Ship only data that returns no errors.
-3. `massOf(id, form, count)` for a slice (`strata`), an item (`item`), or a catalogue object (`object` or `ruin`). A null return is an open or placeholder mass (water, snow, an ore vein with no grade). A massless object returns 0.
-4. `yieldOf(id)` and the collapse postings are alternative paths. Each sums to the source mu. Post a path with `ledger.transform` using the posting's process, classes and forms. Do not add the two paths together.
+3. `massOf(id, form, count)` for a slice (`strata`), an item (`item`), or a catalogue object (`object` or `ruin`). The number is the ledger amount: du for a water-family slice, mu otherwise. A null return is an open or placeholder mass (water, snow, an ore vein with no grade). A massless object returns 0. A form the record cannot take throws `E_FORM`. A product past the safe integer throws `E_AMOUNT`.
+4. `yieldOf(id)` and the collapse postings are alternative paths. Post the list in order. Each step's amount is in its class family's unit (`du` on a water posting, `mu` on every other). Amounts taken from the original source sum to the source. A later step may move that same amount onward (`mine` then `smelt`). `identity` is not a ledger row. Do not add the two paths together.
 5. `billOfMaterials(elementId)` is the build cost. The lines sum to the element mu, so the build consumes that weight and no other.
 6. `reclaimTarget(id)` is the DEC-028 endpoint the ledger can actually book. `dec028` is the Owner's word for it; `ledgerClass` is the class the current ledger rows reach. Where those differ, the record carries a disagreement id. Do not invent a transform the ledger refuses.
 7. `exemption` (DEC-028.3) is recorded and `implemented` is false. Items in an active, claimed or enclosed structure are exempt. The consumer applies that rule. This package does not.
@@ -39,7 +39,7 @@ Ore classes (`fe_ore`, `cu_ore`, `ag_ore`, `au_ore`, `pt_ore`) appear as world-g
 
 ## Status words
 
-`SOURCED` cites a catalogue field or a line of code. `PM_DEFAULT` is a design default from SIM.40.01 or SIM.40.05. `PM_DEFAULT_UNCONFIRMED` depends on the unconfirmed mu size, or on the assumption that a catalogue `weight` is kilograms. `OWNER_OPEN` is null on purpose (calendar scale, water per slice, vein grade). `PLACEHOLDER` is a stand-in density or a reserved id with no mass.
+`SOURCED` cites a catalogue field or a line of code. `PM_DEFAULT` is a design default from SIM.40.01 or SIM.40.05. `PM_DEFAULT_UNCONFIRMED` is the mu proposal and every mass that is the proposal times a kilogram figure, including carried item masses and massful object rows, plus the assumption that a catalogue `weight` is kilograms. `OWNER_OPEN` is null on purpose (calendar scale, water per slice, vein grade for strata ids 38-47). Those open values stay `OWNER_OPEN`. `PLACEHOLDER` is a stand-in density or a reserved id with no mass.
 
 ## Open points
 

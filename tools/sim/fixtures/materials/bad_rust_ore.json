@@ -1,0 +1,10 @@
+{
+  "expect": "E_ORE_OUTPUT",
+  "steps": [
+    {
+      "op": "set",
+      "path": "interactions.rusts.0.to",
+      "value": "fe_ore"
+    }
+  ]
+}

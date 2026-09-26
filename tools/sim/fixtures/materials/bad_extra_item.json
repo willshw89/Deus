@@ -1,0 +1,18 @@
+{
+  "expect": "E_COVERAGE",
+  "steps": [
+    {
+      "op": "set",
+      "path": "masses.items.not_a_real_item",
+      "value": {
+        "massMu": 1,
+        "massStatus": "PM_DEFAULT",
+        "ledger": {
+          "class": "stone",
+          "family": "mineral"
+        },
+        "oreItem": false
+      }
+    }
+  ]
+}

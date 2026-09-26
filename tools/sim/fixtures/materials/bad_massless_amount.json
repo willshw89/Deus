@@ -1,0 +1,10 @@
+{
+  "expect": "E_MASSLESS",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=air].massPerSlice",
+      "value": 1
+    }
+  ]
+}

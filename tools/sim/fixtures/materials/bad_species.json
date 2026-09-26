@@ -1,0 +1,10 @@
+{
+  "expect": "E_MU_SCALE",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=timber_wall].speciesScale.oak",
+      "value": 1
+    }
+  ]
+}
