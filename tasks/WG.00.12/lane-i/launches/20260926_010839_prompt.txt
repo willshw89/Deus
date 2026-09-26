@@ -1,0 +1,14 @@
+﻿You are the independent reviewer (Grok) for Lane I (Task WG.00.12: Automated Merge Gate).
+Reviewed tip: a0183d68ad21fab6daf7f9cfee8f8d5dbbf352f5 on task/lane-i.
+Allowed edit paths for your review (EXACT):
+- tasks/WG.00.12/lane-i/review_grok_a0183d68.md
+
+Reviewer rules (non-negotiable):
+1. Review commit must touch ONLY tasks/WG.00.12/lane-i/review_grok_a0183d68.md.
+2. Inside that file, include the full 40-character commit hash: a0183d68ad21fab6daf7f9cfee8f8d5dbbf352f5.
+3. Include an explicit verdict line: 'VERDICT: PASS' or 'VERDICT: CLEAN PASS' or a clear non-PASS.
+4. Subject tag of your git commit must start with '[grok]'.
+5. Independently inspect tools/governance/merge_gate.js, tools/governance/test_merge_gate.js, and tools/governance/MERGE_GATE.md.
+6. Verify checks (a)-(g) vs merge_gate.js, mutant table honesty, reason-code coverage gaps, and gateTests/quarantine behavior.
+7. Re-run node tools/governance/test_merge_gate.js in a fresh temporary clone and record the real exit code and test count.
+8. Do NOT modify any other files. Do NOT merge. Do NOT push.
