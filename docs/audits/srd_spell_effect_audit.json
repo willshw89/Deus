@@ -67,8 +67,8 @@
     "breaches-floor": 13
    },
    "byConservation": {
-    "none": 246,
-    "transform": 48,
+    "none": 243,
+    "transform": 51,
     "conjured-source": 24,
     "conjured-sink": 1
    },
@@ -870,7 +870,7 @@
    ],
    "wbsGaps": [],
    "confidence": "MEDIUM",
-   "notes": "Shape change: original mass held and restored on reversion (Owner question Q1(c)). SRD numbers (hit points, forms) unchanged."
+   "notes": "Shape change, provisionally classified as a transform (original mass held and restored on reversion) pending Owner question Q1(c). SRD numbers (hit points, forms) unchanged."
   },
   {
    "id": "srd:spell:animate-dead",
@@ -2456,13 +2456,15 @@
    ],
    "physicalEffects": "A storm cloud (a cylinder 10 feet tall with a 60-foot radius) forms 100 feet overhead, spanning about ten layers of open air. Each bolt falls to a point, and added: it ignites flammable cells within 5 feet (the same lightning rule as Lightning Bolt). In existing stormy weather the spell takes control of the storm (SRD).",
    "crossLayer": "targets-through-openings",
-   "conservation": "none",
+   "conservation": "transform",
    "wbsDeps": [
     "SIM.00.00",
     "WG.00.17",
     "GP.07.02",
     "SIM.50.05",
-    "SIM.50.06"
+    "SIM.50.06",
+    "WG.61.02",
+    "WG.65.15"
    ],
    "wbsGaps": [
     "G-GAS"
@@ -3430,7 +3432,7 @@
    ],
    "wbsGaps": [],
    "confidence": "MEDIUM",
-   "notes": "NONE reason: entity summon. Summoned bodies are treated as outside Q-MASS (working assumption, Owner question Q1(e))."
+   "notes": "NONE reason: entity summon. Provisionally classified with no ledger entry (bodies outside Q-MASS) pending Owner question Q1(e)."
   },
   {
    "id": "srd:spell:conjure-celestial",
@@ -3534,7 +3536,7 @@
    ],
    "wbsGaps": [],
    "confidence": "LOW",
-   "notes": "NONE reason: entity summon. The runtime must query the world for a 10-foot cube of the chosen element. Whether the source matter is consumed is unstated (working assumption: it is not; Owner question Q1(e))."
+   "notes": "NONE reason: entity summon. The runtime must query the world for a 10-foot cube of the chosen element. Whether the source matter is consumed is unstated. It is provisionally classified as not consumed, pending Owner question Q1(e)."
   },
   {
    "id": "srd:spell:conjure-fey",
@@ -4207,7 +4209,7 @@
     "G-GAS"
    ],
    "confidence": "HIGH",
-   "notes": "Create mode is a conjured source and Destroy mode a conjured sink. The record lists the source by the precedence rule (doc §1.4). Extinguishing is SRD-stated, so the extinguish primitive (HEAT) is listed."
+   "notes": "Create mode is a conjured source and Destroy mode a conjured sink (Owner question Q1(a)). The record lists the source by the precedence rule (doc §1.3). Extinguishing is SRD-stated, so the extinguish primitive (HEAT) is listed."
   },
   {
    "id": "srd:spell:create-undead",
@@ -5671,13 +5673,15 @@
    ],
    "physicalEffects": "SRD: \"You instantly light or snuff out a candle, a torch, or a small campfire\", or \"instantly make a flower blossom, a seed pod open, or a leaf bud bloom\". The other options are harmless sensory effects in a 5-foot cube.",
    "crossLayer": "targets-through-openings",
-   "conservation": "none",
+   "conservation": "transform",
    "wbsDeps": [
     "SIM.00.00",
     "WG.00.17",
     "GP.07.02",
     "SIM.50.04",
-    "SIM.50.05"
+    "SIM.50.05",
+    "WG.61.02",
+    "WG.65.15"
    ],
    "wbsGaps": [],
    "confidence": "HIGH",
@@ -8140,7 +8144,7 @@
    ],
    "wbsGaps": [],
    "confidence": "MEDIUM",
-   "notes": "Shape change with an unstated weight: working assumption is that the original mass is held and restored (Owner question Q1(c))."
+   "notes": "Shape change with an unstated weight, provisionally classified as a transform (original mass held and restored) pending Owner question Q1(c)."
   },
   {
    "id": "srd:spell:glibness",
@@ -12703,7 +12707,7 @@
    ],
    "wbsGaps": [],
    "confidence": "MEDIUM",
-   "notes": "Instant overgrowth and doubled yield add organic mass with no stated source. Working assumption: conjured organic source (Owner question Q1(a)). The alternative is drawing soil nutrients, a cross-family transform (Q1(c)). The half-mile enrichment is a vegetation-model modifier with a 1-year lifetime (SIM.50.04)."
+   "notes": "Instant overgrowth and doubled yield add organic mass with no stated source. Provisionally classified as a conjured organic source, pending Owner question Q1(a). The alternative (drawing soil nutrients, a cross-family transform) is part of Q1(c). The half-mile enrichment is a vegetation-model modifier with a 1-year lifetime (SIM.50.04)."
   },
   {
    "id": "srd:spell:poison-spray",
@@ -12821,7 +12825,7 @@
    ],
    "wbsGaps": [],
    "confidence": "MEDIUM",
-   "notes": "Shape change: the original mass is held and restored (working assumption, Owner question Q1(c))."
+   "notes": "Shape change, provisionally classified as a transform (original mass held and restored) pending Owner question Q1(c)."
   },
   {
    "id": "srd:spell:power-word-kill",
@@ -13007,13 +13011,15 @@
    ],
    "physicalEffects": "SRD options: \"light or snuff out a candle, a torch, or a small campfire\", \"chill, warm, or flavor up to 1 cubic foot of nonliving material for 1 hour\", clean or soil a small object, a mark for 1 hour, or a trinket lasting until the end of the next turn.",
    "crossLayer": "targets-through-openings",
-   "conservation": "none",
+   "conservation": "transform",
    "wbsDeps": [
     "SIM.00.00",
     "WG.00.17",
     "GP.07.02",
     "SIM.50.05",
-    "SIM.50.06"
+    "SIM.50.06",
+    "WG.61.02",
+    "WG.65.15"
    ],
    "wbsGaps": [
     "G-TEMP"
@@ -14752,7 +14758,7 @@
    ],
    "wbsGaps": [],
    "confidence": "MEDIUM",
-   "notes": "Shape change: the original mass is held and restored (Owner question Q1(c)). Equipment falls, merges or is worn (SRD)."
+   "notes": "Shape change, provisionally classified as a transform (original mass held and restored) pending Owner question Q1(c). Equipment falls, merges or is worn (SRD)."
   },
   {
    "id": "srd:spell:shatter",
@@ -16784,7 +16790,7 @@
     "G-LIGHT"
    ],
    "confidence": "MEDIUM",
-   "notes": "A forceBarrier plus a local weather and shelter override (read by DEUS_Environment shelter insulation). SRD: \"All other creatures and objects are barred from passing through it.\" Working reading: rain and flood water are barred too."
+   "notes": "A forceBarrier plus a local weather and shelter override (read by DEUS_Environment shelter insulation). SRD: \"All other creatures and objects are barred from passing through it.\" Audit reading of that SRD sentence: rain and flood water count as barred."
   },
   {
    "id": "srd:spell:tongues",
@@ -17704,7 +17710,7 @@
    ],
    "wbsGaps": [],
    "confidence": "MEDIUM",
-   "notes": "Conjured organic matter for the duration (paired sink at the end). Whether the brush burns is SRD-silent (Owner question Q4). As dense brush it would be heavy fuel."
+   "notes": "Conjured organic matter for the duration (paired sink at the end, Owner question Q1(b)). Whether the brush burns is SRD-silent (Owner question Q4). As dense brush it would be heavy fuel."
   },
   {
    "id": "srd:spell:warding-bond",
