@@ -455,4 +455,385 @@ Code today: **PARTIAL** (static relations, contact and faction aid LIVE; diploma
   - Acceptance tests: (1) persons are conserved through conquest (none vanish); (2) refugees arrive at a reachable allied site; (3) a massacre leaves memories in witnesses and lowers the relation. Mutant: refugees deleted instead of moved must fail test 1.
   - Tick cost: event-driven; refugee groups travel as PROPOSED-LOG-01 travellers.
 
-<!-- PART C -->
+### 3.4 Culture and religion (priority 10)
+
+**What the plan and the rules require.**
+- V39 (`docs/VISION.md:48`): each faction has its own culture (species, build style, work priorities, personality bias).
+- V65 (`docs/VISION.md:75`): Arthurian fantasy with chapels and holy relics; specific lore needs the Owner's approval. AGENTS.md rule 7: no new lore, names or factions without approval.
+- DEC-015 §4 (`docs/OWNER_DECISIONS.md:226`): race-specific cultural lore, names and values are Owner-authored; schemas are engineering work.
+- Design only: `docs/design/EMERGENT_SOCIETY.md:50` (religion generated from approved content and actor beliefs; no unapproved gods or doctrines), `docs/design/EMERGENT_SOCIETY.md:69-70` (death care; beliefs and religion emerge through social transmission), `docs/design/EMERGENT_SOCIETY.md:74` (learned culture diverges between factions of one people).
+- SRD: the fantasy-historical pantheons appendix (`game/data/srd51/rules.json:10977`), the Acolyte background with personality, ideal, bond and flaw tables (`game/data/srd51/character_options.json:7223`), the cleric class (SOC.11.01), and standard and exotic languages (`game/data/srd51/rules.json:707`).
+
+**Coverage by the WBS.**
+
+| Sub-element | WBS row that names it | Covered? |
+|---|---|---|
+| Culture data slots (values, lore, names per race) | SOC.10.03 (`docs/society/DEUS_SOCIETY_WBS.md:60`), SOC.10.02 (architectural style) | yes (schema slots; content Owner TODO) |
+| Cultural place names and toponymy | WG.63.05, WG.63.06 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:211`) | yes |
+| Beliefs, religion, deities, clergy | none (SOC.11.01 is the cleric class only) | no |
+| Rituals, festivals, holidays | none | no |
+| Taboos and customs | none (SOC.10.03 "values", nominal) | nominal |
+| Funerals, burial, remembrance | none | no |
+| Languages and comprehension | none (WG.63.05 names only) | no |
+| Art and cultural works as data | none | no |
+| Learned culture and drift | none | no |
+
+Rating: **PARTLY PLANNED**.
+
+**What exists in code.**
+
+| Citation | Excerpt | Meaning |
+|---|---|---|
+| `DEUS_Colonists.js:337` | `const p = cultureOf(ref).priorities \|\| {};` | LIVE: a species' catalog culture weights job priorities and picks build pieces; it never changes. |
+| `DEUS_Factions.js:168` | `const ethos = [pick(cfg.ethos).id];` | LIVE once at New Game: each faction rolls ethos tags, which only set starting relations (line 205). |
+| `game/data/DEUS_WorldCatalog.json:7574` | `"id": "pious",` | The only faith-like value, a data tag with no mechanic. |
+| `DEUS_Callings.js:61` | `[41, "Cleric", "High"],` | A label; no job or check reads it. |
+| `DEUS_Sheet.js:1952` | `this.text("Prayers and blessings may be received at sacred shrines."` | UI text promises shrines that do not exist. |
+| `DEUS_History.js:228` | `// Names: syllables from the catalog (factions.names), never a fixed list of proper nouns` | LIVE naming rule for places and founders... |
+| `DEUS_History.js:675` | `const human = ["Hawthorne", "Miller", "Baker", "Fletcher", "Blackwood",` | ...which a hardcoded English surname pool breaks. |
+| `game/data/df_lexicon.json:3` | `"sylvic":  "sylv-lord",` | A 196 KB six-language lexicon with no reference in `game/js`: DORMANT data. |
+| `docs/systems/UF_CultureGrowth.md:94` | `There are no customs, festivals, laws, religion, equipment restrictions` | Even the archived culture module disclaims culture content. |
+| `docs/design/THEME.md:335` | `**PROPOSAL T21 A (recommended): two unnamed ways of belief, the chapel and the old stones.**` | An unapproved proposal for belief. |
+
+Code today: **PARTIAL** for culture (static catalog priorities, ethos, names); **ABSENT** for religion, rituals, festivals, taboos, languages and cultural works. Zero whole-word hits in the loaded plugins for god, temple, ritual, festival, holiday, taboo, belief and worship.
+
+**Gaps.**
+
+| ID | Severity | Gap | Package |
+|---|---|---|---|
+| G4-1 | MAJOR | No row plans belief or religion. V65 allows chapels and relics; EMERGENT_SOCIETY asks for beliefs and practices that spread socially; the SRD has pantheons, clerics and the Acolyte background. Content needs the Owner (OQ-10). | CUL-02 |
+| G4-2 | MAJOR | No row plans rituals, festivals, funerals, burial or remembrance, which EMERGENT_SOCIETY requests (death care, grief linked to real relationships). | CUL-03 |
+| G4-3 | MAJOR | No row plans languages. The SRD's language table and a dormant lexicon exist; diplomacy, trade and speech need comprehension. | CUL-04 |
+| G4-4 | MAJOR | No row plans learned culture: practices that a community repeats, teaches and changes, so two factions of one race can diverge (`docs/design/EMERGENT_SOCIETY.md:74`). Code culture is a fixed catalog entry. | CUL-01 |
+| G4-5 | MINOR | No row plans cultural works (songs, carvings, tales) as data records tied to real events. Text data only; no art. | CUL-05 |
+| G4-6 | MINOR | The live naming rule is broken by a hardcoded surname pool. | CUL-04 |
+| G4-7 | MINOR | UI text promises sacred shrines that do not exist. | CUL-02 |
+
+**Proposed packages.** Content (gods, doctrines, customs, names) is Owner-authored; these packages build schemas and mechanics with `TEST_` placeholders only (AGENTS.md rule 7).
+
+- **PROPOSED-CUL-01 Culture state: practices, values and taboos as data that drift** (G4-4).
+  - Scope: a per-faction practice vector (what the community does, teaches and forbids) seeded from DEC-015 plan data, changed by repeated practice, contact and leadership, with drift limits; persons hold personal variation (MIND-05).
+  - Depends on: SOC.10.03, MIND-05, PROPOSED-KNOW-03 (teaching), PROPOSED-REC-01.
+  - Acceptance tests: (1) two factions of one race seeded identically diverge after 100 game years under different circumstances on 3 seeds; (2) a practice that nobody performs for its decay period fades; (3) drift never leaves the declared bounds. Mutant: a culture that never changes (today's behaviour) must fail test 1.
+  - Tick cost: once per faction per game day, 50 ÷ 2,400 ≈ 0.02 updates per tick, negligible. Memory: about 64 B per faction.
+
+- **PROPOSED-CUL-02 Beliefs and religion** (G4-1, G4-7).
+  - Scope: a personal belief record (which practice, how devout), shared practices and roles (clergy as an office, SOC.20.01), holy places as real buildings, faith as a need (MIND-01) and a mood source (MIND-03); spread by social transmission; SRD cleric spells tied to belief (SOC.11.01). Which gods exist is the Owner's choice (OQ-10). The shrine text is removed or made true.
+  - Depends on: MIND-01, MIND-03, SOC.11.01, SOC.20.01, CUL-01; content per OQ-10.
+  - Acceptance tests: (1) belief spreads along social ties at the configured rate and not between strangers; (2) a person whose faith need is unmet loses mood by rule; (3) no god name outside the Owner-approved list appears in data (validator). Mutant: spread that ignores ties must fail test 1.
+  - Tick cost: piggybacks on MIND-02's social events, about 4.5 transmission checks per tick × 1 µs. Memory: 8 B per named person; per settlement a congregation count per practice, about 32 B.
+
+- **PROPOSED-CUL-03 Rituals, festivals, funerals and remembrance** (G4-2).
+  - Scope: calendar-driven observances per culture (depends on the calendar question, OQ-03, and SIM.50.06 seasons), funerals and burial that act on real remains (SIM.40.10) and graves as objects, mourning tied to real relationships (MIND-04).
+  - Depends on: CUL-01, CUL-02, SIM.50.06, SIM.40.10, MIND-04.
+  - Acceptance tests: (1) a festival day gathers the members who are free, at a real place; (2) a death leads to a burial of that body ID, never a duplicate or a vanished corpse after save and load; (3) only persons with a tie to the dead mourn. Mutant: mourners chosen without ties must fail test 3.
+  - Tick cost: scheduled events, a few per settlement per game year; negligible. Memory: about 48 B per grave record.
+
+- **PROPOSED-CUL-04 Languages, comprehension and naming** (G4-3, G4-6).
+  - Scope: languages known per person (SRD standard and exotic languages as data), comprehension checks for speech, trade and diplomacy, learning a language by contact, and one naming rule (catalog syllables or the lexicon) replacing the hardcoded pool.
+  - Depends on: MIND-01, WG.63.05, PROPOSED-KNOW-03.
+  - Acceptance tests: (1) two persons with no shared language cannot complete a trade negotiation without an interpreter; (2) a year of contact teaches a language by the configured rule; (3) no generated name comes from a hardcoded list (validator). Mutant: comprehension check that always passes must fail test 1.
+  - Tick cost: one comprehension lookup per conversation event (0.1 µs); negligible. Memory: 4 B per named person (a language bitset).
+
+- **PROPOSED-CUL-05 Cultural works as data** (G4-5).
+  - Scope: records of works made by persons (a song about a battle, a carved record of a founding) that reference real events (PROPOSED-REC-01), with a creator, material and owner; they affect mood and renown. No images: any visual need is a text-only "art slot needed" line for the Owner (DEC-007).
+  - Depends on: PROPOSED-REC-01, PROPOSED-REC-02, SOC.12.01.
+  - Acceptance tests: (1) every work references an existing event ID; (2) a work about a victory raises renown of the named hero. Mutant: a work with a dangling event reference must fail test 1.
+  - Tick cost: event-driven; about 64 B per work.
+
+### 3.5 Knowledge and technology (priority 8)
+
+**What the plan and the rules require.**
+- V77 and V84 (`docs/VISION.md:87`, `docs/VISION.md:95`): a builder technology tree that unlocks by building; faction-wide building levels.
+- DEC-015 §3 (`docs/OWNER_DECISIONS.md:223`): "Technology & Knowledge Paths: Craft and construction unlocks", plus "Expansion & Failure Modes ... societal regression/collapse conditions" (`docs/OWNER_DECISIONS.md:225`).
+- V63 (`docs/VISION.md:73`): skills grow by doing, and "a death loses everything they learned".
+- Design only: `docs/design/EMERGENT_SOCIETY.md:49` ("Education needs teachers, learners, time, access and actual learning"), `docs/systems/DEUS_SKILLS_AND_PROFICIENCY_STANDARD.md:251` (skills are not inherited; learned through apprenticeship), `docs/design/AUTONOMOUS_CIVILIZATION.md:71` (settlement knowledge updated by observation).
+
+**Coverage by the WBS.**
+
+| Sub-element | WBS row that names it | Covered? |
+|---|---|---|
+| Tech path in the plan data | SOC.10.02 (`docs/society/DEUS_SOCIETY_WBS.md:59`) | yes |
+| Class progression | SOC.11.01 | yes |
+| Craft progression apprentice → master | SOC.12.01 (`docs/society/DEUS_SOCIETY_WBS.md:62`) | yes |
+| Teaching as an act (teacher, learner, time) | SOC.12.01 names only the progression | nominal |
+| Discovery and invention | none | no |
+| Diffusion between settlements | none | no |
+| Loss of knowledge, dark ages | SOC.10.02 "expansion & collapse rules", not about knowledge | nominal |
+| Knowledge stores (books, libraries, scholars) | none | no |
+| Rediscovery through archaeology | WG.65.17 "forgotten artifacts" | nominal |
+
+Rating: **PARTLY PLANNED**.
+
+**What exists in code.**
+
+| Citation | Excerpt | Meaning |
+|---|---|---|
+| `DEUS_Select.js:924` | `if (window.UF && UF.Tech && typeof UF.Tech.canBuild === "function") {` | DORMANT: `UF.Tech` is never defined outside a test stub. |
+| `docs/design/TECH_TREE.md:3` | `Design written 2026-09-19 by Claude Code. **Not built.**` | The tech tree is a spec. |
+| `DEUS_Colonists.js:423` | `// Population milestones: new plan steps that unlock as the colony grows.` | LIVE: the only unlocks are population milestones. |
+| `DEUS_Colonists.js:5372` | `// Skills: one point per five jobs of the kind.` | LIVE: learning by doing, capped at 20. |
+| `DEUS_Colonists.js:625` | `skillNames().forEach((name, i) => { out[name] = Math.floor(unit01(worldSeed, SALT.skill, unitId, i) * 6); });` | Newborn skills are seeded random 0-5, not taught. |
+| `DEUS_Jobs.js:1610` | `if (unit && window.UF && UF.Proficiency && typeof UF.Proficiency.gainXp === "function") {` | DORMANT: the proficiency module is archived. |
+| `DEUS_Colonists.js:5380` | `d.skills[skill] = Math.min(MAX_SKILL, (d.skills[skill] \| 0) + 1);` | Skill lives on the person and is lost with them, unrecorded. |
+| `DEUS_Factions.js:670` | `discoverFaction: id => Factions.meet(id),` | LIVE: "met" is the only knowledge a faction has of another. |
+| `docs/design/TECH_TREE.md:120` | `Unlocks are permanent: a node never locks again (§12 D4).` | The design rules out loss... |
+| `docs/systems/UF_CultureGrowth.md:35` | `a faction's achieved knowledge never shrinks when a building is destroyed or its maker dies` | ...and so does the archived culture module, while DEC-015 asks for regression conditions. |
+
+Code today: **PARTIAL** (learning by doing and population unlocks LIVE; research, teaching, diffusion and loss ABSENT; tech tree DORMANT).
+
+**Gaps.**
+
+| ID | Severity | Gap | Package |
+|---|---|---|---|
+| G5-1 | MAJOR | No knowledge-holder model: nothing says which person, settlement or record knows a technique, so knowledge cannot spread or be lost. | KNOW-01 |
+| G5-2 | MAJOR | No row plans discovery or invention; SOC.10.02 lists a tech path but not how a faction first learns a step, and the tech tree is unbuilt. | KNOW-02 |
+| G5-3 | MAJOR | Teaching is nominal: SOC.12.01 names apprentice-to-master progression without teachers, time or access; code has no teaching. | KNOW-03 |
+| G5-4 | MAJOR | No row plans diffusion between settlements (by trade, migration, captives, captured records). | KNOW-04 |
+| G5-5 | MAJOR | Loss and dark ages are unplanned, and two designs forbid them (unlocks permanent) while DEC-015 asks for regression conditions. This conflict needs the Owner (OQ-12). | KNOW-05 |
+| G5-6 | MINOR | Knowledge stores (books, libraries, scholars) have no row; scholars exist only as calling labels. | KNOW-01, KNOW-05 |
+
+**Proposed packages.**
+
+- **PROPOSED-KNOW-01 Knowledge holders: persons, settlements and records** (G5-1, G5-6).
+  - Scope: techniques as data IDs (from DEC-015 plan data); each named person holds a technique set; each settlement holds the union of its holders plus its records (books, carved instructions as objects); crowd cohorts hold counts of holders.
+  - Depends on: SOC.10.02, SOC.12.01, MIND-01, MIND-08.
+  - Acceptance tests: (1) a settlement's knowledge equals the union of its holders and records at every save; (2) demoting and promoting holders keeps each technique's holder count. Mutant: a settlement set that is never recomputed after a death must fail test 1.
+  - Tick cost: event-driven (learn, death, record made or destroyed). Memory: 200 techniques → 25 B per named person; 5 KiB for 200 settlements; per record object 32 B.
+
+- **PROPOSED-KNOW-02 Discovery and invention** (G5-2).
+  - Scope: a technique is first learned by experiment (work near its prerequisites), observation of a foreign practice, or reading a record; chances from plan prerequisites and the person's skills and curiosity; the tech tree (V77) becomes the prerequisite graph of these techniques.
+  - Depends on: KNOW-01, SOC.10.02, MIND-05.
+  - Acceptance tests: (1) a technique cannot be discovered without its prerequisites; (2) with prerequisites met, discovery happens within the configured window on 3 seeds; (3) identical seeds give identical discovery order. Mutant: discovery that ignores prerequisites must fail test 1.
+  - Tick cost: a check on work-completion events of eligible persons, about 1 event per tick × 2 µs.
+
+- **PROPOSED-KNOW-03 Teaching and apprenticeship** (G5-3).
+  - Scope: teaching as a duty (SOC.13.01) with a teacher, a learner, time and a place; learning rate from both skills; an apprentice who shadows a master gains the technique only by completed sessions (no copied mastery, per EMERGENT_SOCIETY).
+  - Depends on: KNOW-01, SOC.12.01, SOC.13.01, MIND-04 (who teaches whom).
+  - Acceptance tests: (1) no learner gains a technique without completed sessions; (2) a better teacher shortens learning by the configured factor; (3) a newborn has no taught technique. Mutant: free skill gain for being near a master must fail test 1.
+  - Tick cost: session ends are events, a few per game hour; negligible.
+
+- **PROPOSED-KNOW-04 Diffusion between settlements** (G5-4).
+  - Scope: techniques move with people and records along the route graph (PROPOSED-LOG-01): migrants, traders, captives, captured books; a foreign technique observed at contact has a chance to be learned.
+  - Depends on: KNOW-01, PROPOSED-LOG-01, PROPOSED-LOG-02, PROPOSED-WAR-06.
+  - Acceptance tests: (1) an isolated settlement never gains a technique it cannot discover itself; (2) a trade route carries a technique to the partner within the configured window. Mutant: diffusion that ignores the route graph must fail test 1.
+  - Tick cost: checked per contact event between settlements, a few per game day; negligible.
+
+- **PROPOSED-KNOW-05 Loss, dark ages and rediscovery** (G5-5, G5-6).
+  - Scope: if the last holder of a technique in a settlement dies and no record survives, the settlement loses it; records decay (SIM.40.07) or are destroyed; archaeology (WG.65.17) can recover a record and so the technique. Whether loss is allowed at all is the Owner's (OQ-12).
+  - Depends on: KNOW-01, SIM.40.07, WG.65.17, PROPOSED-REC-04.
+  - Acceptance tests: (1) killing the last holder with no record removes the technique from the settlement; (2) an excavated record restores it; (3) with the Owner's "permanent unlocks" option set, nothing is ever lost. Mutant: a technique kept after its last holder and record are gone must fail test 1 (loss option on).
+  - Tick cost: an O(1) holder-count check on each death; negligible.
+
+### 3.6 Health (priority 2)
+
+**What the plan and the rules require.**
+- V105 (`docs/VISION.md:116`): hit points decide death; large hits wound a body part (bleeding until bound, a hurt arm or leg); healers or rest mend them. VISION Q12 (injuries) is open (`docs/VISION.md:168`).
+- V43 (`docs/VISION.md:59`): healing is one of the colony's labors.
+- V139 / DEC-014 §4: "epidemic disease in dense settlements" as an anti-snowball pressure.
+- SRD rules (section 2.6): conditions, six-level exhaustion, food and water, resting and hit dice, 3 diseases, 14 poisons, madness (`docs/SRD5_1_COVERAGE_MANIFEST.md:88`).
+- Design only: the HEALER_DIRECTOR office (public health, quarantine, contagion response) in `docs/society/DEUS_PERSON_AND_INSTITUTIONS.md`; SOC.13.01's inputs in that document include "injury, sickness".
+
+**Coverage by the WBS.**
+
+| Sub-element | WBS row that names it | Covered? |
+|---|---|---|
+| Hunger, thirst, fatigue arbitration | SOC.13.01, WB-002 | yes |
+| Causes of death | SIM.20.01 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:528`) | yes |
+| Natural lifespan and death | SIM.40.10 | yes |
+| Wounds and bleeding | GP.07.01, only through `docs/SLICES.md:72` ("Body-part wounds, bleeding") | nominal |
+| SRD conditions and exhaustion | none | no |
+| Disease and contagion | none | no |
+| Epidemics across settlements | none (DEC-014 §4 only) | no |
+| Poison and venom | none | no |
+| Healers, medicine, infirmaries | none | no |
+| Magical healing and condition spells | none (SIM.60 covers physical effects; see section 4.2) | no |
+| Madness | none | no |
+
+Rating: **PARTLY PLANNED**.
+
+**What exists in code.**
+
+| Citation | Excerpt | Meaning |
+|---|---|---|
+| `DEUS_Colonists.js:1618` | `if (n.daysWithoutFood > Math.max(1, 3 + conMod)) addExhaustion(u, 1, "hunger");` | LIVE: SRD starvation, checked daily. |
+| `DEUS_Colonists.js:1589` | `n.exhaustion = Math.min(6, (n.exhaustion \| 0) + levels);` | LIVE: the six-level ladder... |
+| `DEUS_Colonists.js:1594` | `dieOf(u, cause); // level 6 is death (SRD p. 358)` | ...and level 6 kills. |
+| `DEUS_Environment.js:651` | `unit.data.hp = Math.max(0, unit.data.hp - coldDmg);` | LIVE: cold damage (heat at line 666). |
+| `DEUS_Conditions.js:490` | `add(unit, conditionId, options = {}) {` | The conditions engine: nothing outside the file ever adds a condition. |
+| `DEUS_Conditions.js:1159` | `tickAll(units, currentTick = now()) {` | Expiry would run through `tick` (line 1117) via `tickAll`, which has no caller, so timed conditions would never end. |
+| `DEUS_Combat.js:773` | `const mod = Cond.attackRollModifiers(attacker, target, {` | LIVE on every attack; in practice only exhaustion and 0-HP unconsciousness can affect it. |
+| `DEUS_Conditions.js:926` | `if (this.has(attacker, "poisoned")) disSources.push("attacker_poisoned");` | Poison is wired in but nothing ever poisons anyone. |
+| `DEUS_Colonists.js:92` | `require("./UF_Sanitation.js");` | The disease module exists only in `archive/plugins/`, so... |
+| `DEUS_Colonists.js:5396` | `S.infect(u, "dysentery");` | ...dysentery from bad water never fires: DORMANT. |
+| `DEUS_HistoricalDemographics.js:482` | `if (!cause && rng() < Math.min(1, profile.diseaseMortality + (risk.disease \|\| 0))) cause = "disease";` | A flat yearly disease death rate, pre-game only, with no contagion. |
+| `DEUS_Combat.js:889` | `if (remainingDamage >= targetMaxHp) {` | LIVE: massive damage kills outright; otherwise colonists start SRD dying... |
+| `DEUS_Colonists.js:1972` | `if (d.failures >= 3) dieOf(u, "wounds");` | ...with death saving throws. No body parts, bleeding or infection. |
+| `DEUS_Jobs.js:1162` | `define("stabilize", {` | LIVE: first aid (a Wisdom (Medicine) check). |
+| `game/data/DEUS_WorldCatalog.json:11599` | `"jobs": [],` | The "healing" skill has no jobs. |
+| `DEUS_Callings.js:31` | `[11, "Medic", "Critical"],` | A label with no medical behaviour. |
+| `DEUS_Combat.js:1409` | `if (st.tick % every === 0) regen();` | LIVE, not SRD: every unit regains 1 HP per 100 combat ticks. Short rests and hit dice are ABSENT. |
+| `DEUS_Colonists.js:2103` | `if (Number.isFinite(d.hp) && Number.isFinite(d.maxHp) && d.hp >= 1) d.hp = d.maxHp;` | LIVE: a long rest restores all HP. |
+| `DEUS_DeathForensics.js:172` | `for (const c of ac) condList.push(typeof c === "string" ? c : c.id \|\| c.name);` | Defect: `Cond.all()` returns an object, so this throws, the error is swallowed and the condition list is always empty. |
+| `DEUS_DeathForensics.js:51` | `const deathLedgerRecords = [];` | The death ledger is memory-only and lost on save and load. |
+
+Code today: **PARTIAL**. SRD exhaustion, starvation, thirst, exposure, dying and death saves, first aid and long rest are LIVE; conditions other than exhaustion and unconsciousness, disease, poison, wounds, healers and short rest are DORMANT or ABSENT; the SRD data is staged (section 2.6). Tick: needs every 60 ticks, one pass over colonists; the rescue search is patients × colonists every 30 ticks (`DEUS_Colonists.js:5275`).
+
+**Gaps.**
+
+| ID | Severity | Gap | Package |
+|---|---|---|---|
+| G6-1 | BLOCKER | No row plans disease, contagion or epidemics, which V139 and DEC-014 §4 require as an anti-snowball pressure. The only disease code needs an archived module. | HEALTH-03 |
+| G6-2 | MAJOR | No row owns SRD conditions in the simulation. The engine is loaded, but nothing applies conditions and nothing expires them; SIM.00.05's migration list does not name conditions. | HEALTH-01 |
+| G6-3 | MAJOR | Wounds are nominal (Slice 7 text only) and the model depends on Q12. | HEALTH-02 |
+| G6-4 | MAJOR | No row plans healers, medicine, herbs or infirmaries; the healing skill has no jobs and Medic is a label. | HEALTH-05 |
+| G6-5 | MAJOR | No row plans poison or venom; 14 SRD poisons and creature venoms are staged. | HEALTH-04 |
+| G6-6 | MAJOR | No row links the SRD healing, restoration, poison and disease spells to the health model (section 4.2); SIM.60.02's schema is for physical primitives. | HEALTH-06 |
+| G6-7 | MINOR | Death forensics defects: condition list always empty, ledger not saved, old-age deaths classed as exhaustion (`DEUS_DeathForensics.js:260`). | HEALTH-07 |
+| G6-8 | MINOR | Death from cold or heat skips the dying state and death saves (`DEUS_Environment.js:662`). | HEALTH-07 |
+| G6-9 | MINOR | SRD short rests and hit-dice spending are absent, and the flat 1-HP regeneration is not an SRD rule. | HEALTH-01 |
+| G6-10 | MINOR | SRD madness is staged with no row; whether to use it is the Owner's (OQ-02). | HEALTH-01 |
+
+**Proposed packages.**
+
+- **PROPOSED-HEALTH-01 Conditions, exhaustion and rest in the core** (G6-2, G6-9, G6-10).
+  - Scope: one owner for conditions in the headless core, loaded from the SRD appendix PH-A entries as data; apply, stack and expire through a timer wheel keyed by expiry tick (no sweep); SRD short and long rests and hit dice; madness only if the Owner chooses (OQ-02).
+  - Depends on: SIM.00.02, SIM.00.05, SOC.11.01.
+  - Acceptance tests: (1) a table-driven test applies each of the 15 SRD conditions and checks its SRD effect; (2) a 10-minute condition ends at exactly its expiry tick; (3) a short rest spends hit dice by the SRD rule. Mutant: expiry never scheduled (today's behaviour) must fail test 2.
+  - Tick cost: O(expirations) per tick, about 5 × 1 µs. Memory: 16 B per active condition; at 0.1 active conditions per person, 1.6 KiB per 1,000 named. Crowd: per-cohort counts of exhausted and incapacitated, 8 B per cohort.
+
+- **PROPOSED-HEALTH-02 Injuries and wounds** (G6-3).
+  - Scope: the Owner's choice under Q12 (OQ-13); at minimum V105's four body regions, bleeding until bound, reduced work and movement, mending by rest or a healer; wounds as mood sources (MIND-02).
+  - Depends on: HEALTH-01, GP.07.01, MIND-02.
+  - Acceptance tests: (1) a hit above the threshold wounds a region; (2) bleeding drains HP each interval until bound; (3) a leg wound slows movement by the configured factor. Mutant: binding that does not stop bleeding must fail test 2.
+  - Tick cost: bleeding persons only, about 8 at L0 × 1 µs per tick. Memory: 16 B per wounded person.
+
+- **PROPOSED-HEALTH-03 Disease, contagion and epidemics** (G6-1).
+  - Scope: diseases as data (SRD samples plus Owner-approved additions, OQ-14); named persons carry infection state; crowd settlements run a compartment model (susceptible, exposed, infected, recovered) at L2; spread by contact events (MIND-02), bad water (SIM.50.02) and travel along the route graph (PROPOSED-LOG-01); density raises transmission (DEC-014 §4); quarantine by the healer office.
+  - Depends on: HEALTH-01, PROPOSED-LOG-01, SIM.30.01, SIM.30.02, SIM.50.02, MIND-02.
+  - Acceptance tests: (1) a seeded outbreak spreads along the contact and route graph; an isolated settlement stays clean; (2) doubling density raises the attack rate by the configured factor; (3) compartment counts always sum to the settlement population; (4) quarantine lowers spread. Mutant: contagion that ignores the graph must infect the isolated settlement and fail test 1.
+  - Tick cost: named: one infection check per contact event, about 4.5 × 1 µs per tick. Crowd: 200 settlements × up to 3 active diseases stepped every 100 ticks = 6 updates × 2 µs = 12 µs per tick; route transmission once per game day per edge, about 600 edges ÷ 2,400 = 0.25 per tick. Memory: 8 B per named person, 16 B per settlement per active disease.
+
+- **PROPOSED-HEALTH-04 Poison and venom** (G6-5).
+  - Scope: the 14 SRD poisons and creature venoms as data (delivery, save, effect), applied through HEALTH-01; antitoxin; poison crafting only if the Owner allows it.
+  - Depends on: HEALTH-01, WG.68.07, SOC.12.01.
+  - Acceptance tests: (1) a venomous bite applies the stat block's poison and save; (2) antitoxin gives advantage by the SRD rule. Mutant: a failed save that does not apply the poisoned condition must fail test 1.
+  - Tick cost: event-driven; negligible.
+
+- **PROPOSED-HEALTH-05 Care: healers, medicine, infirmaries and herbs** (G6-4).
+  - Scope: diagnose and treat as duties (SOC.13.01) with the healing skill; medicine and herbs as real items made from flora (SIM.50.04) and consumed (mass conserved); an infirmary as a room with beds; a healer office for quarantine and triage (SOC.20.01).
+  - Depends on: HEALTH-01, HEALTH-02, HEALTH-03, SOC.12.01, SOC.13.01, SOC.20.01, SIM.50.04.
+  - Acceptance tests: (1) a patient is treated by the best free healer in range; (2) treatment consumes the named supplies; with none, it fails; (3) recovery in an infirmary is faster by the configured factor. Mutant: treatment without supplies must fail test 2.
+  - Tick cost: a patient check once per game hour, up to 20 patients ÷ 100 ticks × 5 µs ≈ 1 µs per tick. Memory: about 32 B per patient record.
+
+- **PROPOSED-HEALTH-06 Magical healing and condition spells** (G6-6).
+  - Scope: the entity-level half of the spell schema: SRD healing, restoration, poison, disease and curse spells (Cure Wounds, Lesser and Greater Restoration, Protection from Poison, Contagion, Remove Curse and the rest) act on HEALTH-01..04 state with SRD numbers unchanged (DEC-018); material components are real items.
+  - Depends on: SIM.60.02, SOC.11.01, HEALTH-01..04.
+  - Acceptance tests: (1) Lesser Restoration ends exactly one of the conditions or diseases the SRD lists; (2) Cure Wounds heals its SRD dice plus modifier, unchanged from the SRD entry; (3) a spell with a consumed component removes that item. Mutant: Restoration ending an unlisted condition must fail test 1.
+  - Tick cost: per cast event; negligible.
+
+- **PROPOSED-HEALTH-07 Death forensics and exposure deaths** (G6-7, G6-8). Fold into the existing SIM.20.01 if the coordinator prefers; the outline lists the tests to add.
+  - Scope: read `Cond.all()` correctly; save the death ledger (or move it into PROPOSED-REC-01); classify old age separately; route cold and heat damage through the dying state.
+  - Depends on: SIM.20.01, HEALTH-01, PROPOSED-REC-01.
+  - Acceptance tests: (1) a poisoned person who dies has "poisoned" in the forensic record; (2) the ledger survives save and load; (3) a cold-damage drop to 0 HP starts dying, not instant death. Mutant: the swallowed exception restored must fail test 1.
+  - Tick cost: per death event; 64 B per saved ledger record.
+
+### 3.7 Travel and logistics (priority 5)
+
+**What the plan and the rules require.**
+- V19 (`docs/VISION.md:28`): migrants, traders and raiders arrive at the edges.
+- DEC-013 §6: races travel and trade across all 32 layers. DEC-020 / WG.00.20: ramps, stairs and ladders are multi-Z pathfinding connectors. DEC-019 / WG.00.19: movement by stratum height.
+- V139 / DEC-014 §4: "supply/logistical strain" as a counter-pressure.
+- V71: trade rules need approval. SOC.33.01 plans tariffs; SOC.30.02 plans coin circulation including colonist purchase.
+- `docs/PERFORMANCE_ARCHITECTURE.md:360` §21: off-screen entities travel along abstract regional node graphs.
+- SRD: travel pace (`game/data/srd51/rules.json:4331`), mounts and vehicles (`game/data/srd51/rules.json:3004`), carrying capacity.
+- Frozen standard, not built: `docs/systems/DEUS_RESOURCE_ECONOMY_STANDARD.md:9` (reach bands in haul-days, trade expeditions).
+
+**Coverage by the WBS.**
+
+| Sub-element | WBS row that names it | Covered? |
+|---|---|---|
+| Roads as terrain | SIM.50.08 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:551`) | yes |
+| Cross-layer connectors and multi-Z pathfinding | WG.00.20 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:108`), WG.00.19 | yes |
+| One movement model in the core | SIM.00.04 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:523`) | yes |
+| Stockpiles and quartermaster | SOC.32.01 | yes |
+| Coin circulation, tariffs | SOC.30.02, SOC.33.01 | yes |
+| Cross-layer trade between races | WG.62.02 (one clause) | nominal |
+| Hauling as work | GP.04.01 (Slice 4) | nominal |
+| Off-screen travel between settlements at LOD | SIM.30.02 names populations, not travel | nominal |
+| Caravans and trade routes | none | no |
+| Markets and exchange | SOC.30.02 "Colonist Purchase" | nominal |
+| Pack animals, mounts, vehicles, boats | none | no |
+| Supply lines for armies and outposts | none | no |
+
+Rating: **PARTLY PLANNED**.
+
+**What exists in code.**
+
+| Citation | Excerpt | Meaning |
+|---|---|---|
+| `DEUS_World.js:127` | `areasX: num("AreasX", 1),` | One 256 × 256 area; every settlement shares it. |
+| `DEUS_World.js:1628` | `// Off screen, walkers on their own area follow a planned path on their own level, one cell per step` | Off-screen travel is the same cell stepping; there is no abstract travel. |
+| `DEUS_World.js:2064` | `const is3D = !!(opts.z3d \|\| gz !== sz \|\| (st.version >= 4));` | LIVE: 3D A* over all five levels... |
+| `DEUS_World.js:2067` | `const totalNodes = 5 * n;` | ...sized by level count × area, 327,680 nodes per search. |
+| `DEUS_Levels.js:63` | `const SHAPES = Object.freeze({ solid: 1, floor: 2, open: 3, ramp: 4, stairUp: 5, stairDown: 6, stairBoth: 7 });` | Ramps and stairs are the only connectors. |
+| `DEUS_Levels.js:2085` | `shaftChance: 0.4, shaftReach: 20,` | Shafts are carved, but A* has no climb or fall edge; ladders are art names only. |
+| `DEUS_NaturalConnections.js:31` | `const VERSION = 1, TYPE = "natural_travel", DEPTHS = [0, -1, -2];` | Natural passages go only from the ground down and are not in the A* graph. |
+| `DEUS_Jobs.js:1412` | `const candidates = open().filter(j => sameLevel(j.target, unit) && matches(j, filter));` | LIVE: open jobs are same-level only... |
+| `DEUS_Stockpiles.js:584` | `const piles = Stockpiles.all(uArea, uZ, factionId)` | ...and so are haul destinations: autonomous work and hauling never cross a layer. |
+| `DEUS_Jobs.js:610` | `define("haul", {` | LIVE: two-phase hauling within a settlement. |
+| `DEUS_Dnd5e.js:625` | `const maxWeight = Math.round(str * 15 * mult * 10) / 10;` | SRD carrying capacity, enforced on pickup... |
+| `DEUS_Items.js:504` | `speedPenalty: curWeight > maxWeight ? 1.5 :` | ...but the speed penalty is never read, and item mass is in kilograms (line 404) against a limit in pounds. |
+| `DEUS_World.js:1875` | `R = (window.UF && UF.Roads) \|\| null;` | No loaded plugin defines roads; the roads plugin is archived (`docs/systems/UF_Roads.md:3`)... |
+| `DEUS_World.js:1845` | `const STEP_COST = 5, DIAG_COST = 7;` | ...and every step costs the same, so a road would not change a route. |
+| `DEUS_Colonists.js:3148` | `function stepMerchantCaravan(ref) {` | A caravan with a pack sheep (line 3190) exists, exported but never called: DORMANT. |
+| `DEUS_Colonists.js:648` | `// Internal Barter & Credit Ledger` | LIVE: credits inside the colony; no exchange between factions. |
+
+Code today: **PARTIAL** (hauling inside one settlement on one level and 3D A* over stairs and ramps are LIVE; roads, caravans, markets, pack animals, vehicles, supply and inter-settlement travel are DORMANT or ABSENT). Tick: 4 new path plans per map update; off-screen units step every 16 frames.
+
+**Gaps.**
+
+| ID | Severity | Gap | Package |
+|---|---|---|---|
+| G7-1 | MAJOR | No row plans travel between settlements at LOD: a regional route graph across 32 layers that off-screen travellers, caravans, armies, migrants and disease use. SIM.30.02 names summaries, not travel; §21's regional graphs are not a WBS row. Today's A* reserves arrays sized by levels × area. | LOG-01 |
+| G7-2 | MAJOR | Autonomous work and hauling never cross a layer. WG.00.20 plans connectors for movement, but no row plans cross-layer job and haul routing, which home bands spanning up to 8 layers need. | LOG-01 |
+| G7-3 | MAJOR | No row plans caravans, trade routes or markets, though V19, SOC.30.02 and SOC.33.01 assume trade exists. | LOG-02, LOG-03 |
+| G7-4 | MAJOR | No row plans pack animals, mounts, carts or boats (SRD mounts and vehicles; V43 animal care). | LOG-04 |
+| G7-5 | MAJOR | No row plans supply lines or logistical strain (V139). | LOG-05 |
+| G7-6 | MINOR | Encumbrance: the speed penalty is computed but never read, and mass units disagree (kg against lb). | LOG-04 |
+| G7-7 | MINOR | Roads would not change routes: every step costs the same, and SIM.50.08 plans roads as terrain only. | LOG-01 |
+| G7-8 | MINOR | Shafts, ladders and natural passages are not pathfinding edges. | LOG-01 |
+
+**Proposed packages.**
+
+- **PROPOSED-LOG-01 Regional route graph and off-screen travel across 32 layers** (G7-1, G7-2, G7-7, G7-8).
+  - Scope: a sparse graph of region portals (ADR-003's 32 × 32 × 2-layer regions) whose edges include stairs, ramps, ladders, shafts and natural passages (WG.00.20), weighted by surface (roads cheaper, SIM.50.08) and hazards; rebuilt only for dirty regions; off-screen travellers advance along edges at L1 or L2; cross-layer job and haul routing uses the same graph; SRD travel pace for speeds.
+  - Depends on: SIM.00.04, WG.00.17, WG.00.20, SIM.30.01, SIM.50.08.
+  - Acceptance tests: (1) a traveller from layer −6 to +2 reaches the goal through connectors only; (2) an off-screen trip and an on-screen trip over the same route take the same number of ticks (±1 region step); (3) a road edge is chosen over an equal-length rough edge; (4) a change inside one region rebuilds only that region's edges (instrumented counter). Mutant: a graph without shaft or ladder edges must fail test 1 on the shaft fixture.
+  - Tick cost: travellers at L1 stepped every 10 ticks, about 300 ÷ 10 = 30 updates × 1 µs = 30 µs per tick; region rebuild about 0.5 ms per dirty region, rare. Memory: about 4 portal nodes × 16 B per traversable region; at most 1,024 regions × 64 B = 64 KiB per area; solid or empty-sky regions with no portals cost nothing (A-6).
+
+- **PROPOSED-LOG-02 Caravans and trade routes** (G7-3).
+  - Scope: caravans as real parties with goods, animals and guards, sent from surplus to demand along LOG-01; atomic exchange at arrival (revalidate quantities, ownership, location and willingness, then commit both sides; EMERGENT_SOCIETY); tariffs by SOC.33.01; routes remembered and reused. Trade rules need the Owner (OQ-16).
+  - Depends on: LOG-01, LOG-04, SOC.30.02, SOC.33.01, WAR-01.
+  - Acceptance tests: (1) a trade commits both sides or neither; mass and coin are conserved; (2) a caravan is sent only with surplus at home and demand at the destination; (3) raiding a caravan moves its goods, never deletes them. Mutant: a half-committed trade must fail test 1.
+  - Tick cost: caravans travel as LOG-01 travellers; one route decision per settlement per game day, negligible. Memory: about 64 B per caravan plus its item list.
+
+- **PROPOSED-LOG-03 Markets and exchange** (G7-3).
+  - Scope: a market as a place with sellers, buyers and prices from local supply and demand; coin or barter per OQ-16; households buy from producers (SOC.30.02).
+  - Depends on: LOG-02, SOC.30.02, MIND-06 (wants).
+  - Acceptance tests: (1) scarcity raises the local price by the configured rule; (2) no sale happens without both parties present and willing. Mutant: a price that ignores stock must fail test 1.
+  - Tick cost: per transaction event; about 256 B per market.
+
+- **PROPOSED-LOG-04 Pack animals, mounts, carts and boats** (G7-4, G7-6).
+  - Scope: SRD mounts and vehicles as data; draft and pack animals from livestock (SIM.40.10, WG.68.14) with capacity and care needs; carts and boats as items with capacity and terrain limits; the speed penalty read in movement; one mass unit.
+  - Depends on: LOG-01, SIM.40.10, WG.68.14.
+  - Acceptance tests: (1) a cart moves more mass per trip than a person by the SRD rule; (2) a heavily loaded person moves at the SRD encumbered speed; (3) all item masses and limits use one unit (validator). Mutant: the unused speed penalty (today's behaviour) must fail test 2.
+  - Tick cost: capacity lookups at haul planning; negligible. Memory: 16 B per vehicle.
+
+- **PROPOSED-LOG-05 Supply for armies, outposts and sieges** (G7-5).
+  - Scope: forces and outposts consume food, water and ammunition from carried stores or supply trains along LOG-01; strain rises with distance and route danger; unsupplied forces lose morale (MIND-03) and health (HEALTH-01).
+  - Depends on: LOG-01, LOG-02, SOC.32.01, SOC.42.01, WAR-04.
+  - Acceptance tests: (1) an army far from its supply consumes stores at the configured rate and suffers when they run out; (2) cutting a supply route raises strain within one game day. Mutant: consumption that does not draw down stores must fail test 1.
+  - Tick cost: each army or outpost once per game hour, up to 10 ÷ 100 ticks × 5 µs, negligible.
+
+<!-- PART D -->
