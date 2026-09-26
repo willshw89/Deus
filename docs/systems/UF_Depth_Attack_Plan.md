@@ -1,16 +1,16 @@
 # UF Depth Attack Plan — WG.00.09 / DEUS-TSK-FABLE-19C
 
-**Status:** Revised specification. Owner ruling R1 = D recorded. No engine implementation.  
+**Status:** Revised specification. Owner ruling R1 = D is DEC-006 in `docs/OWNER_DECISIONS.md`. No engine implementation.  
 **Date:** 2026-09-25  
-**Writer:** Grok (Lane E, Directive 001-F; owner ruling R1 = D and R2–R11)  
-**Reviewer:** Claude CLI session (re-review of `37fc1473`: CHANGES REQUESTED, `tasks/DEUS-TSK-FABLE-19C/claude_review.md` Section 4)  
+**Writer:** Grok (Lane E). This pass folds N1–N4 from the Section 5 re-review.  
+**Reviewer:** Claude CLI session. Section 4 re-reviewed `37fc1473`. Section 5 re-reviewed `87c1e5b8` (CHANGES REQUESTED, four minors, `tasks/DEUS-TSK-FABLE-19C/claude_review.md`). This pass answers Section 5.  
 **Branch:** `task/lane-e`  
 **Plugin under attack (read-only until the freeze lifts):** `game/js/plugins/DEUS_Depth.js`  
 **Future harness (not created here):** `tools/test_global_depth_renderer.js`
 
 This document is the definition the compositor has to meet and the attack that has to fail a wrong one. It does not edit `DEUS_Depth.js`, `DEUS_Levels.js`, `DEUS_WorldGen.js`, `DEUS_Fluid.js`, `plugins.js`, or `game/data`. Frame times below are acceptance bars. They are not measurements from this session. The shade-table counts and the seed-18 column counts cited below are the review's measurements, not a new run.
 
-This revision records the owner's ruling on CR-19C-R1 (option D: scale-only depth separation until tile art is on the master palette) and folds R2–R11 from the re-review. CR-19C-B1 and M2–M8 stay as the previous revision resolved them. The decisions are in the sections named there and are logged in section 9. `DEUS_Levels.js` and `DEUS_WorldGen.js` stay read-only. The compositor in `DEUS_Depth` owns the live-layer cutout and reads strata through public bytes.
+This revision folds N1–N4 from the re-review of `87c1e5b8` (`tasks/DEUS-TSK-FABLE-19C/claude_review.md` Section 5). Owner ruling CR-19C-R1 is option D, recorded as DEC-006 in `docs/OWNER_DECISIONS.md` (commit `eefd1f2c`). R2–R11 stay as the previous revision resolved them. CR-19C-B1 and M2–M8 stay as resolved. The decisions are in the sections named there and are logged in section 9. `DEUS_Levels.js` and `DEUS_WorldGen.js` stay read-only. The compositor in `DEUS_Depth` owns the live-layer cutout and reads strata through public bytes.
 
 Authorities read for this plan: `AGENTS.md` Rule 12 and Rule 13, `docs/systems/UF_Levels.md` (Strata; Natural cuts and caves), `docs/systems/DEUS_Depth.md`, `docs/audits/GROK_PRE_19C_ARCHITECTURE_REVIEW.md`, `docs/handoffs/HANDOFF_DEUS_TSK_FABLE_19C_DEPTH.md`, `docs/adr/ADR-002-Palette-Canonicalization.md`, `docs/art/DEUS_PALETTE_ARCHITECTURE_STANDARD.md`, `art/palette/deus_master_world_palette_v1.hex` (226 colors), `docs/art/DEUS_PaletteRegistry.json`, `docs/PERFORMANCE_ARCHITECTURE.md` (`PERF-003`, `PERF-005`).
 
@@ -189,9 +189,9 @@ For each spot, read `dHit` from the pooled window table at `(x + 2, y + 2)`:
 2. `dHit = 0` and `V > 0` and `UF.Levels.shapeCodeAt` (on the wrapped `wx, wy`) is `SHAPES.open` (`3`): do not draw `open_air`. Draw one opaque tile of the hit material on the lower layer, via the tilemap's own `_addTile`, at this cell's `dx, dy`. Scale is the live map's scale, which is 1. Look keys, resolved once at load through `UF.Levels.tileOf`: stone → `rock`, soil → `soil`, wood → `rock`. Those are the SOLID looks (`looksOfPacked` at `:1457`: a non-soil solid is `rock`). `mined_stone`, `mined_soil`, and `deck_wood` are walkable dug or constructed floors; a natural roof next to solid rock would read as a floor while `UF.Look` still reports "Open air". The id stored is that base (autotile shape 0). The hit material byte comes from the same reader as the block fill (section 6.1), one byte, no allocation.
 3. Otherwise: the original `_addSpot`. Meadows, lip floors, and `z ≤ 0` cells whose ray hits inside the viewed cell keep the tile the painter already chose. On `z ≤ 0` an `open` shape is already opaque, so case 2 does not run there.
 
-The wrapper allocates nothing: `dHit` is a pooled `Uint8Array`, the three tile ids are numbers from load, the wrap is integer arithmetic, and the material byte is an index into an existing typed array or a `charCodeAt` on the existing hex string. A column-word change inside the window sets the live tilemap's `_needsRepaint` so the next paint rebuilds spots.
+The wrapper allocates nothing: `dHit` is a pooled `Uint8Array`, the three tile ids are numbers from load, the wrap is integer arithmetic, and the material byte is an index into an existing typed array or a `charCodeAt` on the existing hex string. A column-word change inside the window marks that block dirty (section 6.3). The handler does not set `_needsRepaint`. The depth update sets the live tilemap's `_needsRepaint` after it rebuilds the summary for a dirty in-window block, or because `V` or `H` changed (section 6.2). The following render then rebuilds spots from the new summary.
 
-A still camera still repaints. Stock `Tilemap.update` advances `animationFrame` every 30 frames (`rmmz_core.js:2327-2329`), and `updateTransform` rebuilds every spot when that frame changes (`:2378`). The wrapper therefore runs 285 times (19×15) every 30 frames with the camera still, and again on every live start-tile change. Those rebuilds are inside `C-LIVE-ALLOC` (section 8.2). Heap sampled around the wrapper body stays flat. There is no GC exemption for the wrapper.
+A still camera still repaints. Stock `Tilemap.update` advances `animationFrame` every 30 frames (`rmmz_core.js:2327-2329`), and `updateTransform` rebuilds every spot when that frame changes (`:2378`). The wrapper therefore runs 285 times (19×15) every 30 frames with the camera still, and again on every live start-tile change. `C-LIVE-ALLOC` runs those rebuilds on the stub's recording layers (section 8.2). Stock `Tilemap.Layer.addRect` (`rmmz_core.js:2926-2928`) pushes a new 7-element array per rect. That allocation is outside the depth budget and is not on the stub path. The nw.js pan benchmark reports garbage collections during a live rebuild and does not fail on them (section 8.5). The stub check is the wrapper's proof.
 
 Lower planes use the same ownership rule on their canvas, not a mask (section 6.2). A plane cell with `dHit = d` and shape `open` draws the same solid look of the hit material (`rock` / `soil`), taken from the source sheet (section 5.3), at that plane's `tilePx`. That includes plane-owned `open` cells at `z ≤ 0`: `cave_floor` plus `hole_edge` would mark a hole over rock as a dug floor. A ground cell the plane owns whose stock tile is already an opaque floor keeps that tile. A cell the plane does not own is not drawn.
 
@@ -292,19 +292,19 @@ Sprite-sheet frames stay legal. In-window A1 water on a plane that is actually b
 
 ### 5.1 Why a color matrix fails
 
-The handoff's "4% brightness and saturation" and the pre-19C review's `ColorMatrixFilter` describe a luminance target. They do not describe a legal pixel. PIXI `brightness` / `saturate` / `contrast` write RGB triples that are not in `art/palette/deus_master_world_palette_v1.hex`. That file is the master palette (ADR-002): **226** active colors, 30 reserved slots, 58 ramps. `art/palette/uf.hex` is the legacy 384-color list and is not the shade authority.
+The handoff's "4% brightness and saturation" and the pre-19C review's `ColorMatrixFilter` describe a luminance target. They do not describe a legal pixel. PIXI `brightness` / `saturate` / `contrast` write RGB triples that are not in `art/palette/deus_master_world_palette_v1.hex`. That file is the master palette (ADR-002): **226** active colors, 30 reserved slots, 58 ramps. `art/palette/uf.hex` has 256 lines and 250 distinct colors (ADR-002 Rev 2 §5). It is not the shade authority.
 
 `#08080C`, the current `voidColor`, sits in the Rule 13 prose range and is **not** one of the 226. The compositor's void texel is master color `NEUT_VOID_CAP`, `#0C0D12`. The sky parallax never shows through `dHit = 5`.
 
 Production forbids `PIXI.filters.ColorMatrixFilter` the same way it forbids blur. The mutant `colormatrix_production` is a plane whose filter list contains one. `no_production_filter` reads the filter list and `filterConstructs`. It does not look at `.mask` (that is `no_sprite_mask`).
 
-### 5.2 Owner ruling R1 = D: scale only until the art is on the palette
+### 5.2 Owner ruling R1 = D (DEC-006): scale only until the art is on the palette
 
 The registry's ramps are 3 to 5 tones, and adjacent tones sit about 25–45% apart in luminance (review §3.2, on `docs/art/DEUS_PaletteRegistry.json`). A nearest-luminance pick at `k(d) = 1 − 0.04d` changes **0 of 226** colors at depth 1 and **0 of 226** at depth 2. Depth 3 changes 11. Depth 4 changes 92. The handoff's 96 / 92 / 88 / 84% figures are not achievable by that pick. They are retired as a pixel formula.
 
 The previous revision's ramp-step proposal (one step at depths 1–2, a second at 3–4) changes 192 of 226 colors at every depth. Median luminance ratio is 0.67 at depths 1–2 and 0.47 at depths 3–4 (review §4.4.2). Depth 1 equals depth 2 for every color, and depth 3 equals depth 4. Of 11,741,932 opaque texels in `game/img/tilesets/*.png`, 0.01% are master hexes (review §4.4.3), so on today's art a stepped `deus` would still match `deus_scale`. Once master-palette art lands, the same planes would drop by a third.
 
-**Owner ruling, CR-19C-R1 = D.** Scale-only depth separation. No color darkening, until tile art is migrated to the master palette. Shading is revisited after that migration. This implementation does not apply a ramp step, an ordered dither, or a continuous darken.
+**Owner ruling, CR-19C-R1 = D, recorded as DEC-006 in `docs/OWNER_DECISIONS.md`.** Scale-only depth separation. No color darkening, until tile art is migrated to the master palette. Shading is revisited after that migration. This implementation does not apply a ramp step, an ordered dither, or a continuous darken.
 
 Until that revisit:
 
@@ -348,7 +348,7 @@ After palette migration, when a non-identity column exists:
 - Build the copies at scene start, not on first bind. A first-bind `getImageData` plus a per-texel search on about 2 Mpx hitches in play.
 - Character and object sheets: built at scene start for sheets already in use, then lazily on first use, keyed `(sheet, shared-column)`, LRU cap 32. A dropped entry is rebuilt the next time it is used, not during a still frame.
 
-A plane repaint is `clearRect` of the existing canvas, then `drawImage` from the source sheet (or the shared copy, after the revisit) for cells the plane owns, then `baseTexture.update` of the existing texture. No `getImageData`, no `putImageData`, no `new ImageData`, no `new Bitmap`, no per-pixel remap. `getImageData` is legal only inside a sheet-copy build, which returns a fresh `ImageData` the platform will not let us reuse. That build is outside the frame budget and outside the repaint budget. The panning benchmark (section 8.5) warms the canvases first, then samples heap around each plane flush.
+A plane repaint is `clearRect` of the existing canvas, then `drawImage` from the source sheet (or the shared copy, after the revisit) for cells the plane owns, then `baseTexture.update` of the existing texture. No `getImageData`, no `putImageData`, no `new ImageData`, no `new Bitmap`, no per-pixel remap. `getImageData` is legal only inside a sheet-copy build, which returns a fresh `ImageData` the platform will not let us reuse. That build is outside the frame budget and outside the repaint budget. The panning benchmark (section 8.5) warms the canvases first, then samples heap around each plane flush and subtracts an empty sample pair taken in the same run.
 
 **Fixture.** `S-SHADE-VIS`, `S-PAL-CANVAS`, and `S-PASS` paint from `tools/test_fixtures/depth_shade_master.png`. That sheet has opaque master-hex texels and at least one opaque non-master RGB. A missing fixture exits 2. Today's tilesets have too few master texels for those checks (review §4.4.3).
 
@@ -402,6 +402,8 @@ A plane is updated and drawn only when its presence bit is set. `maxD` alone is 
 
 Rebuild the summary when the depth-canvas start tile changes, when `V` changes, when `H` changes, or when a block overlapping the canvas rectangle is dirty. The depth-canvas start tile is the live start tile minus 2 (section 3.5). Keying on `floor(displayX)` is wrong for 20 px of every 48. Rebuild in `updateTilemap` after the stock origin is set, so the wrapper's `(x + 2, y + 2)` index is already valid when the live `updateTransform` runs. Any of those bumps one generation integer before the depth update runs. A still camera on a clean window compares that generation and one packed flags word (`exposed` and `voids`). Both counts zero: return. A visible plane: write `x`, `y`, and `scale` only (section 6.4). The 30-frame animation rebuild still runs the wrapper (section 3.5); it does not rebuild this summary.
 
+A dig shows on the live cutout on the frame after the dig. `Scene_Map.update` calls `Scene_Message.prototype.update` first (`rmmz_scenes.js:819-820`), which reaches `Spriteset_Map.updateTilemap` and this depth update, and only then calls `updateMainMultiply` (`:824`). That reaches `$gameMap.update` and the colonist job tick, where digging happens (`DEUS_Colonists.js:5748-5756`). `Graphics._onTick` renders after that update (`rmmz_core.js:808-815`). `Tilemap.updateTransform` is what consumes `_needsRepaint` (`:2376-2386`). On the dig frame the summary is still the pre-dig word. `patchTile` calls `_tilemap.refresh()` in that same dig (`DEUS_World.js:700`, `rmmz_core.js:2360-2362`), so the render rebuilds spots from the old `dHit` and then clears the flag. The next frame's depth update rebuilds the summary from the dirty block. After that rebuild, and after a rebuild caused by `V` or `H` changing, the depth update sets `_needsRepaint`. The `cellChanged` handler only marks the block dirty (section 6.3). The render of that next frame runs the wrapper against the new summary. A start-tile change rebuilds spots in stock `updateTransform` because `startX` or `startY` changed, and `updateTilemap` has already rebuilt the summary before that. `C-DIG-REPAINT` drives this order. `repaint_left_to_handler` sets the flag only in the handler and fails that check.
+
 **No view mask.** A PIXI sprite mask is `MASK_TYPES.SPRITE` and is drawn by `SpriteMaskFilter` through a temporary render texture. That is the shader pass section 4.4 removes the color matrix to avoid, and `plane.filters` does not list a mask, so `no_production_filter` would not see it. The mutant `sprite_mask_production` must fail `no_sprite_mask`: no plane, and no child of a plane, has `.mask` set, and `SpriteMaskFilter` is constructed zero times.
 
 Tiles bake ownership into the canvas paint. For plane `d`, `clearRect` the existing canvas, then `drawImage` only cells with `dHit = d`. The current plugin's "open cells are transparent" is not that rule: on `z ≤ 0` an `open` cell is an opaque tile and would hide a deeper plane. Cells the plane does not own are left clear. The roof substitute of section 3.5 covers an owned cell whose map tile is transparent.
@@ -418,7 +420,7 @@ Treat events as dirty marks. Recompute on the next depth update, not inside the 
 
 | Event | Mask |
 |---|---|
-| `levels:cellChanged` | Re-read that column's bag pointer and rewrite its 25-bit word from section 6.1. If the word is unchanged, do not bump the window generation. If the block overlaps the canvas rectangle, bump the generation and set the live tilemap `_needsRepaint`. |
+| `levels:cellChanged` | Re-read that column's bag pointer and rewrite its 25-bit word from section 6.1. If the word is unchanged, do not bump the window generation. If the block overlaps the canvas rectangle, bump the generation and mark the block dirty. Do not set `_needsRepaint` here. The depth update sets that flag after it rebuilds the summary (section 6.2). |
 | `levels:strataDestroyed` | Ignore. Redundant with `cellChanged`. |
 | `levels:strataChanged` alone | Ignore. An HP-only hit emits this and does not change solidity. |
 | `levels:shapeChanged` | Not an exposure signal. A shape can change while the solid word does not, and a solid word can change while the derived shape stays `open`. |
@@ -464,7 +466,7 @@ A unit walking on a lower plane, staying inside the window, updates the existing
 
 Allocation that is legal: the block pool, the shade table, the nibble table, the scratch objects, and the sprite-object pool, all at load or scene create. Shaded sheet copies are legal only after the R1 = D revisit, built at scene start. A strata event that writes into a pooled array is legal. A strata event that allocates is not. Sheet-copy `ImageData` is legal only in that build.
 
-`UF.Depth.stats()` keeps `frameAllocs`, `summaryRebuilds`, `canvasUploads`, `peeks`, `filterConstructs`, `maskConstructs`, `offPaletteTexels`. There is no mask upload counter: there is no mask. `frameAllocs` resets at the start of the depth update. The counter is not the proof of zero allocation. It only sees paths the implementer instrumented. The proof is `C-LIVE-ALLOC` (section 8.2), the same idea as `tools/test_strata_foundation.js` `no_allocation_queries`: `--expose-gc`, no GC, heap growth under 1 byte per frame. That check runs the live `Tilemap.prototype._addAllSpots` with the wrapper installed, so the 30-frame rebuild is in the sample. Heap around the wrapper body is the wrapper's budget. The mutant `alloc_unwired` leaves `frameAllocs` at 0 while the update allocates, and `C-LIVE-ALLOC` still fails.
+`UF.Depth.stats()` keeps `frameAllocs`, `summaryRebuilds`, `canvasUploads`, `peeks`, `filterConstructs`, `maskConstructs`, `offPaletteTexels`. There is no mask upload counter: there is no mask. `frameAllocs` resets at the start of the depth update. The counter is not the proof of zero allocation. It only sees paths the implementer instrumented. The proof is `C-LIVE-ALLOC` (section 8.2), measured the way `tools/test_strata_foundation.js` `no_allocation_queries` measures (`:768-787`): `--expose-gc`, three windows, each after `global.gc()`, a `PerformanceObserver` on `gc`, zero collections inside the windows, and the least window judged. Each window is long enough that a budget of 1 byte per frame is at least 100 times the empty-window growth measured in the same run. The stub's live tilemap uses recording layers, so stock `addRect` is not on the path. That stock allocation is outside the depth budget. The mutant `alloc_unwired` leaves `frameAllocs` at 0 while the update allocates, and `C-LIVE-ALLOC` still fails.
 
 `C-STILL` / `C-ALLOC` at `exposed = 0` stay. They return after the early-out. They do not satisfy this section.
 
@@ -499,9 +501,26 @@ Draw a candidate only when the foot column has `dHit = d`.
 - Solid anywhere above the creature (`dHit < d`): the sprite is omitted. Do not draw a crown into a neighbouring hole.
 - Hole through this level (`dHit > d`): this plane draws no floor and no entity. The creature is a candidate of the deeper level whose `d` equals `dHit`, and that level's entity list is the one that contains it.
 
-No sprite mask and no masked container. Tall frames are cropped with `setFrame` against the columns they overlap. A 48×96 wall covers the foot cell and the cell to the north, where the cap sits. The foot rule above decides whether the sprite exists. The north cell decides the cap: if the north cell's `dHit` is not `d`, `setFrame` keeps the lower 48 px (the face) and drops the upper 48 px (the cap). If both cells match, the frame is the full 96 px.
+No sprite mask and no masked container. Tall and wide frames are cropped with `setFrame` against the columns they overlap. The foot rule above decides whether the sprite exists. The crop decides which texels of that sprite are drawn.
 
-A sprite wider than 48 px whose east or west column has a different `dHit` is cropped the same way on X: `setFrame` keeps the 48 px strip of the foot cell and drops the overhang whose column's `dHit` is not `d`. A rectangle cannot express L-shaped ownership. The crop is the largest axis-aligned rectangle that includes the foot cell and only cells whose `dHit` equals `d`. Any cell of the authored frame outside that rectangle is dropped, including an L-shaped remainder. The crop is the rule that wins. A GPU mask is not a second opinion.
+The crop is the largest axis-aligned rectangle of 48 px cells that includes the foot cell, contains only cells whose `dHit` equals `d`, and lies inside the authored frame. Area is `width × height` in pixels. A rectangle cannot express L-shaped ownership. Any cell of the authored frame outside the chosen rectangle is dropped, including an L-shaped remainder. The crop is the rule that wins. A GPU mask is not a second opinion. `setFrame` coordinates are in the authored frame, origin at its top-left.
+
+When two or more such rectangles share that maximum area, break the tie in this order:
+
+1. Greater height.
+2. Greater width.
+3. The rectangle whose bottom edge lies on the foot row, ahead of one that extends below the foot.
+4. The rectangle whose left edge is closer to the foot column. If those distances are equal, the one that starts further west (lower `x` in the frame).
+
+A 48×96 wall covers the foot cell and the cell to the north, where the cap sits. If the north cell's `dHit` is not `d`, the only rectangle is the foot cell: `setFrame` keeps the lower 48 px (the face) and drops the upper 48 px (the cap). If both cells match, the full 96 px is the largest rectangle.
+
+A sprite wider than one cell uses the same rule. A mismatched side column is outside the rectangle. A matching side column stays when it is inside the largest rectangle.
+
+- One-sided. A 144×48 sprite centred on its foot cell (west, foot, east). Only the east column has a different `dHit`. The largest rectangle keeps the west column and the foot: 96×48, `setFrame(0, 0, 96, 48)`.
+- Two-sided. The same sprite, east and west both different. The only rectangle is the foot cell: 48×48, `setFrame(48, 0, 48, 48)`.
+- Tie. A 96×96 sprite whose foot is the south-west cell. The north-west cell matches `d`, the south-east cell matches `d`, and the north-east cell does not. `{foot, north}` is 48×96 and the foot row is 96×48. Both are 4,608 px². Greater height wins: the west column, 48×96, `setFrame(0, 0, 48, 96)`.
+
+`entity_clip` expects those frames (section 8.2).
 
 Standing frames only, off the viewed level. The set rebuild stays on the existing object, item, and unit events. If the window cell is unchanged, no unit was added or removed, and the summary generation is unchanged, do not sort and do not rebind frames. Positions of tracked units follow every frame by writing existing sprite coordinates (section 6.4).
 
@@ -530,7 +549,7 @@ No check may print a hardcoded success. Until a check has been seen failing on i
 | Harness | Runs | Does not run |
 |---|---|---|
 | Node vm, no PIXI. Same plugin load as `tools/test_strata_foundation.js`. | Column oracle, `tilePx`, shade table, `blockWord`, wrap, world-identity. | Pixels, filters, sprites, applied `plane.scale`, layer size, upload counters. |
-| Node vm, PIXI stub, `node --expose-gc`. The stub records `scale`, `mask`, `filters`, `setFrame`, `visible`, construct counts, and canvas draw calls. Its `x` / `y` / `scale` setters allocate nothing. It includes stock `Tilemap.prototype._addAllSpots` so the live wrapper can run. | Binding, `O-SHAFT-DRAW`, `O-Z0`, filter and mask constructs, entity visibility and crop, `C-LIVE-ALLOC`, `S-RELATIVE`, `S-SCALE-INT`, `S-PAD`, `C-STILL`, `C-HP`, `C-ALLOC`, `C-ONE`. | The composited framebuffer. |
+| Node vm, PIXI stub, `node --expose-gc`. The stub records `scale`, `mask`, `filters`, `setFrame`, `visible`, construct counts, and canvas draw calls. Its `x` / `y` / `scale` setters allocate nothing. The live tilemap keeps stock `_addAllSpots`, `_addSpot`, `_addSpotTile`, `_addTile`, `_addAutotile`, `_addShadow`, and `_readMapData`. Its two layers are recording layers: `addRect` writes into a typed array allocated when the layer is constructed, and `clear` resets a count (`C-LIVE-ALLOC`). | Binding, `O-SHAFT-DRAW`, `O-Z0`, filter and mask constructs, entity visibility and crop, `C-LIVE-ALLOC`, `C-DIG-REPAINT`, `S-RELATIVE`, `S-SCALE-INT`, `S-PAD`, `C-STILL`, `C-HP`, `C-ALLOC`, `C-ONE`. | The composited framebuffer. |
 | nw.js, the way the old depth suite ran through `tools/test_snapshot.js`, with `--js-flags=--expose-gc` when an allocation check is repeated there. Handoff §10.1 asked for pure Node.js VM execution; this render harness is the departure recorded in section 9. | `P-CUTOUT`, `S-PAL-CANVAS`, `S-PASS`, `S-SHADE-VIS`, `palette_exact`, `void_palette`, `alpha_locked`, the picture gate, the panning benchmark. | — |
 
 Oracle functions live in the test file. They recompute `dHit`, `tilePx`, and the identity shade table from strata bytes, the hex file, and the registry. They do not call `shapeAt`.
@@ -613,11 +632,11 @@ Each row is the build and the expected result. "Node" and "stub" and "nw" name t
 | Id | Build | Expect |
 |---|---|---|
 | `C-FAR` | `cellChanged` outside the canvas rectangle | That block marked dirty if cached. Summary generation unchanged. |
-| `C-DIG` | Destroy one in-window stratum (the writer emits `cellChanged` and then `strataDestroyed`) | `blockWord` for that column changes. The other 255 words stay. The next update has the new `dHit`. A listener that ignores only `strataDestroyed` still passes, and is not a kill of `cache_ignores_destroy`. |
+| `C-DIG` | Destroy one in-window stratum (the writer emits `cellChanged` and then `strataDestroyed`) | `blockWord` for that column changes. The other 255 words stay. The next update has the new `dHit`. This check does not read the live wrapper. `C-DIG-REPAINT` does. A listener that ignores only `strataDestroyed` still passes, and is not a kill of `cache_ignores_destroy`. |
 | `C-WORLD` | Fill a block, replace `World().state` (`world:created` or a load), same area coordinates, different strata | The next `blockWord` does not return the previous world's word. |
 | `C-WRAP` | One-area map, column `x = -1` and column `x = size - 1`, on a row `y` where `blockWord(size-1, y) ≠ blockWord(size-1, y-1)` | The same word. An unwrapped read of `x = -1` that picks the neighbour row is visibly wrong. |
 
-**Cache (stub).** These read upload and rebuild counters, constructed layer size, or "no plane bound".
+**Cache (stub).** These read upload and rebuild counters, constructed layer size, "no plane bound", or, for `C-DIG-REPAINT`, the live wrapper's decision on the frame after a dig.
 
 | Id | Build | Expect |
 |---|---|---|
@@ -625,12 +644,13 @@ Each row is the build and the expected result. "Node" and "stub" and "nw" name t
 | `C-HP` | HP-only `strataChanged` | Word unchanged, no summary rebuild, no upload. |
 | `C-ONE` | One shape-`open` cell in the area, outside the canvas rectangle, and no in-window `dHit ≥ 1` | `exposed = 0`, no plane bound. |
 | `C-ALLOC` | During `C-STILL` | The instrumented counter stays 0. This does not run the exposed path. |
+| `C-DIG-REPAINT` | Two separate runs. The order in each run is `Scene_Map.update` then render (`rmmz_scenes.js:819-824`, `Graphics._onTick` at `rmmz_core.js:808-815`). Run A opens a `+1` floor into a hole (`dHit` moves from 0 to at least 1). Run B builds a floor over a hole (`dHit` moves from at least 1 to 0). Frame N of a run: depth update, then the dig on an in-window column, then `updateTransform`. Frame N+1: depth update, then `updateTransform`. The dig emits `cellChanged`. | On frame N+1 the wrapper's recorded decision for that cell matches the new `dHit`. Run A skips the spot (section 3.5 case 1). Run B draws the live tile (case 3). Frame N may still show the pre-dig decision, because the dig lands after that frame's summary rebuild. A build that sets `_needsRepaint` only in the `cellChanged` handler, and not in the depth update after the summary rebuild, still shows the old decision on frame N+1 and fails. |
 
 **Allocation (stub, `--expose-gc`).**
 
 | Id | Build | Expect |
 |---|---|---|
-| `C-LIVE-ALLOC` | Warm the canvases. Five-level opening, `exposed > 0`, plane 4's presence bit set. Camera still. Stock `Tilemap.prototype._addAllSpots` runs with the wrapper installed, so 240 frames include 8 live-spot rebuilds (`animationFrame` every 30). 120 frames with units still, then 120 frames with one unit walking on a lower plane inside the window. | `gc` count does not rise during the 240 frames. `heapUsed` grows by less than 1 byte per frame. Heap sampled around the wrapper body is the wrapper's budget: zero GCs, growth under 1 byte per frame. `frameAllocs` is 0. A counter that stays 0 while a `{}` runs still fails the heap side. Stock Tilemap allocations outside the wrapper are reported and are not this check's fail. `C-ALLOC` is not this check. |
+| `C-LIVE-ALLOC` | Warm the canvases. Five-level opening, `exposed > 0`, plane 4's presence bit set. Camera still. The stub's live tilemap has two recording layers. `addRect` writes seven integers into a typed array allocated when the layer is constructed, sized for every rect a 19×15 rebuild can emit. `addRect` past that capacity exits 2. It does not grow the array. `clear` resets a count. Neither `addRect` nor `clear` allocates. Stock methods above the layers stay stock: `Tilemap.prototype._addAllSpots`, `_addSpot`, `_addSpotTile`, `_addTile`, `_addAutotile`, `_addShadow`, `_readMapData` (`rmmz_core.js:2422-2461`, `:2473`, `:2500`, `:2604`, `:2618`). `animationFrame` still advances every 30 frames, so the wrapper runs. Measure the way `no_allocation_queries` does (`tools/test_strata_foundation.js:768-787`). First, three empty windows in the same run: `global.gc()`, then heap statistics, no depth work and no rebuild, then heap statistics again. `emptyLeast` is the least of those three growths. The review measured that floor at 616 bytes (`claude_review.md` §5.5.1). `framesPerWindow` is the smallest multiple of 60 that is at least `max(61600, 100 * max(emptyLeast, 0))`, so a budget of 1 byte per frame is at least 100 times the empty-window growth. At the reviewed 616-byte floor that is 61,620 frames. Three judged windows follow. Each starts with `global.gc()`, then runs `framesPerWindow` frames (the first half with units still, the second half with one unit walking on a lower plane inside the window), then reads `v8.getHeapStatistics().used_heap_size`. A `PerformanceObserver` on `gc` counts collections whose `startTime` falls inside a window. Judge the least growth. The harness loop that drives the frames allocates nothing inside a judged window. | Zero garbage collections inside the judged windows. The least growth is under 1 byte per frame in that window. With the recording layers, eight rebuilds grow the heap by the empty-window figure (616 bytes in the review's probe, the same as a window with no work), so a correct build stays under the long-window budget. `frameAllocs` is 0. A counter that stays 0 while a `{}` runs still fails the heap side. Stock `Tilemap.Layer.addRect` (`:2926-2928`) pushes a new 7-element array per rect. The review measured 311,544 bytes over eight rebuilds of one rect per spot, about 1,298 bytes per frame across 240 frames, which fails this budget. That allocation is outside the depth budget and is not on this path. A stub that installs stock layers fails. `C-ALLOC` is not this check. |
 
 **Render (nw, unless noted).**
 
@@ -643,7 +663,7 @@ Each row is the build and the expected result. "Node" and "stub" and "nw" name t
 | `void_palette` | nw, a `dHit = 5` column | Centre texel is `#0C0D12`. Not `#08080C`. Not the parallax clear color. |
 | `alpha_locked` | nw, a solid floor pixel on a bound plane | The composited texel equals that plane's own texel. `plane.alpha` is 1. A blend with the void fails. |
 | `entity_under_roof` | Stub, a unit in a window cell with `dHit < d` | The sprite is not visible. No body pixel in a shaft from that sprite. |
-| `entity_clip` | Stub, a 48×96 wall whose north cell has a different `dHit`; and a sprite wider than 48 px whose east or west column has a different `dHit` | North mismatch: `setFrame` height is 48, the lower half. East/west mismatch: `setFrame` width is 48, the foot cell. No `.mask`. An L-shaped remainder is dropped. |
+| `entity_clip` | Stub. Four frames. The foot column's `dHit` equals the plane's `d` in each. (1) A 48×96 wall whose north cell has a different `dHit`. (2) A 144×48 sprite centred on its foot cell, only the east column different. (3) The same 144×48 sprite, east and west both different. (4) A 96×96 sprite, foot at the south-west cell, north-west cell matching, south-east cell matching, north-east cell different. | The rectangle from section 7. (1) The lower half: `setFrame(0, 48, 48, 48)`. (2) West column plus the foot: `setFrame(0, 0, 96, 48)`. (3) The foot cell: `setFrame(48, 0, 48, 48)`. (4) Greater height wins the tie: `setFrame(0, 0, 48, 96)`. No `.mask`. An L-shaped remainder is dropped. A crop that always keeps only the foot cell fails (2) and (4). |
 | `standing_frame` | Stub, 60 frames, a lower-plane unit | The frame rectangle does not change. |
 | `no_physics_write` | Node, snapshot strata bytes, one shape code, and one unit position; run the F7 cycle and the three eye heights | The snapshot matches. |
 | `overburden_as_ray` | Node, a meadow (`hasOpaqueOverburden` false) and `O-ROOF-V` | Meadow `dHit = 0`. Roof `dHit = 0`. An exposure path that calls `hasOpaqueOverburden` to decide the hole fails the meadow. |
@@ -675,6 +695,8 @@ Each row is a build that looks plausible and is wrong. The check name is what mu
 | One open cell at the far corner binds four planes | `hasOpenCells` | `C-ONE` |
 | Every `strataChanged` rebuilds the window | HP event treated as exposure | `C-HP` |
 | Digging one cell leaves the old word | `cellChanged` ignored | `C-DIG` |
+| A dig's new `dHit` is in the next summary, and the live cutout keeps the old decision until the animation tick | `_needsRepaint` is set in the handler, before the summary rebuild, and not after it | `C-DIG-REPAINT` |
+| A 144×48 sprite with only the east column different is cropped to the foot cell | The crop ignores the largest rectangle | `entity_clip` |
 | Still camera, `exposed = 0`, allocates | Early-out path allocates | `C-ALLOC` |
 | Opening in view, or a walking lower unit, allocates | Live path allocates | `C-LIVE-ALLOC` |
 | `frameAllocs` stays 0 because it is never incremented | Counter unwired | `C-LIVE-ALLOC` |
@@ -713,6 +735,7 @@ In-memory source patches, same mechanism as `tools/test_strata_foundation.js`. A
 | `full_grid_open_scan` | Bind planes if any `SHAPES.open` exists in the 256×256 | `C-ONE` |
 | `strata_changed_dirties` | HP-only event bumps the summary | `C-HP` |
 | `cache_ignores_destroy` | Neither `cellChanged` nor `strataDestroyed` rewrites the word | `C-DIG` |
+| `repaint_left_to_handler` | The depth update does not set `_needsRepaint` after a summary rebuild. Only the `cellChanged` handler sets it. | `C-DIG-REPAINT` |
 | `cache_ignores_world` | The LRU is not dropped on `world:created` or on a state-identity change | `C-WORLD` |
 | `cache_no_wrap` | Block index uses the raw `x` with no modulo | `C-WRAP` |
 | `alloc_per_frame` | The update allocates an object after the early-out, on a path `exposed > 0` actually reaches | `C-LIVE-ALLOC` |
@@ -745,7 +768,7 @@ Each shot names the column class under the sample:
 
 The person who signs the gate opens the files and writes what is in them. `P-CUTOUT` is the automated form of the same samples. The signed gate is still a person looking at the pictures.
 
-On those frames: a roof column is the hit material's `rock` / `soil` look, not the void and not a dug floor; a hole column is the plane the ray names and the next plane's contribution at that pixel is 0; a viewed-level floor pixel is unchanged with the planes toggled; under `off` a hole is the void texel; an entity on an exposed lower floor is a child of that plane at `tilePx(d) / 48` with no filter and no mask; the same entity under a solid roof is absent; a tall sprite's cap does not appear in a column whose `dHit` differs, and a wide sprite's east/west overhang is dropped the same way; every opaque master pixel is a master hex; non-master pixels match the source. Depths separate by scale. They do not separate by color until the shade revisit.
+On those frames: a roof column is the hit material's `rock` / `soil` look, not the void and not a dug floor; a hole column is the plane the ray names and the next plane's contribution at that pixel is 0; a viewed-level floor pixel is unchanged with the planes toggled; under `off` a hole is the void texel; an entity on an exposed lower floor is a child of that plane at `tilePx(d) / 48` with no filter and no mask; the same entity under a solid roof is absent; a tall sprite's cap does not appear in a column whose `dHit` differs; a wide sprite is the section 7 rectangle (a matching neighbour stays, a mismatched overhang is outside the rectangle, and an equal-area tie keeps the taller rectangle); every opaque master pixel is a master hex; non-master pixels match the source. Depths separate by scale. They do not separate by color until the shade revisit.
 
 60 FPS is not claimed here. The measurement method, when someone runs it, is: editor closed, simulation idle, zoom locked at 1.00×, two interleaved rounds of 60 frames, median and worst of the engine tick (`Graphics.FPSCounter.duration` or the harness equivalent). Report the planes-off baseline in the same run.
 
@@ -755,9 +778,9 @@ On those frames: a roof column is the hit material's `rock` / `soil` look, not t
 | Same scene, one `cellChanged` outside the window | Summary not rebuilt. Depth root stays on the early-out. |
 | Still camera, five-level opening, no water, units still, production preset | Zero depth-canvas repaints per frame. Added tick versus planes disabled ≤ 2.00 ms median. Depth-pass render ≤ 6.00 ms median. Whole engine tick ≤ 16.7 ms median. |
 | Planes-off baseline already above 16.7 ms | Say so. The depth delta still has to meet 0.02 ms (hidden) or 2.00 ms (opening). Do not call the frame 60 FPS. |
-| One dirty plane, forced window repaint | That plane under 16 ms. The other planes do not repaint on that frame. Heap sampled immediately before and after that plane's paint and flush grows by less than 1 byte. |
+| One dirty plane, forced window repaint | That plane under 16 ms. The other planes do not repaint on that frame. Heap is sampled the way `no_allocation_queries` samples (`global.gc()`, then `used_heap_size`), once around an empty pair and once around that plane's paint and flush. The flush's growth minus the empty pair's growth is under 1 byte. A garbage collection inside the flush fails. |
 | A1 water in one lower window | That plane may repaint every 30 frames. The others do not. |
-| Pan benchmark | Canvases warmed first. Camera steps one cell every 8 frames, four presence bits set, 120 frames. Report GC count and repaint ms. A GC or a heap growth of 1 byte or more inside a depth-canvas flush fails. A GC or a heap growth of 1 byte or more inside the `_addSpot` wrapper fails. Stock Tilemap allocations outside the wrapper are reported separately and are not a depth-pass fail. |
+| Pan benchmark | Canvases warmed first. Camera steps one cell every 8 frames, four presence bits set, 120 frames. Report garbage-collection count and repaint ms. A depth-canvas flush is judged against an empty sample pair taken the same way in the same run (`global.gc()`, heap before, no paint, heap after). A garbage collection inside the flush fails. A flush whose heap growth exceeds the empty pair by 1 byte or more fails. Garbage collections during a live tilemap rebuild are reported and do not fail the benchmark. In nw.js the live layers are stock, so a collection can land while the wrapper is on the stack in a correct build (about 19 rebuilds in 120 frames: 15 start-tile changes and 4 animation ticks). `C-LIVE-ALLOC` is the wrapper's proof. |
 | Debug blur forced on, then off | On: off-palette blends appear. Off: `filterConstructs` does not rise further, filter list is empty, added tick returns to the production number within 0.5 ms. |
 
 The 2.00 ms added-tick bar is the budget with no `BlurFilter`, no `ColorMatrixFilter`, and no `SpriteMaskFilter`. The live cutout skips rects inside the tilemap's existing paint. It is not a new pass, and it is not a reason to put a filter back. If a measured opening needs more than 2.00 ms, the report says the number and stops.
@@ -768,7 +791,7 @@ Answered for the future implementation, as requirements.
 
 1. Recurring update work: yes, a depth-root update. It must return after two integer compares when the window is clean and nothing is exposed.
 2. New draw calls: yes, up to four planes, and only for planes whose presence bit is set, and only for columns whose `dHit` equals that plane. `exposed = 0` means zero lower-plane draws. The live map draws fewer rects where `dHit ≥ 1`, not more.
-3. Hot-path allocations: forbidden on the depth update, the plane repaint, and the `_addSpot` wrapper. Section 6.4. Sheet build is outside that path.
+3. Hot-path allocations: forbidden on the depth update, the plane repaint, and the `_addSpot` wrapper. Section 6.4. Sheet build is outside that path. Stock `Tilemap.Layer.addRect` allocates inside the engine's own layer. That allocation is outside the depth budget. The stub proves the wrapper with recording layers (`C-LIVE-ALLOC`). The nw.js pan reports live-rebuild collections and does not charge them to the wrapper.
 4. New textures: the eight plane canvases (32,219,136 bytes), created with the scene, not per frame. No shaded sheet copies until R1 = D is lifted. No mask texture. No per-entity bitmap. No map-sized bitmap.
 5. New cache: the 16×16 solid-word blocks, keyed by world-state identity. Derived, dropped by LRU, rebuilt from public strata bytes, never saved.
 6. Save size: none. The planes are derived. No new save field.
@@ -786,7 +809,7 @@ These are the sentences an implementer will otherwise follow from an older doc, 
 | A lip (`S4` of the band below) is a full level down, `dHit = 1`, drawn by plane 1 | It is one foot down. `zHit = floor((e + 1) / 5) - 2`, `dHit = max(0, V - zHit)`. The live map and that level's entity list already own it. **Plan decision (within handoff §9 authority), B1.** |
 | Handoff §2: query `hasOpaqueOverburden`, `continuousAirHeight`, and `worldStrataElevationAt` for sight | Those stay gameplay adapters. Exposure is `columnHit` (section 3.2). |
 | Handoff §2: the ceiling cap is a sight stop | The ray ignores the cap. `O-CAP` locks that. The cap stays overburden for a creature inside `+2`. |
-| Handoff §5 and pre-19C §2.3: a `ColorMatrixFilter` at `k(d) = 1 - 0.04d`; the 2026-09-24 brief's 96 / 92 / 88 / 84 % | The filter is a production fail. The 4% nearest-luminance pick changes 0 of 226 colors at depths 1 and 2 on this registry. The ramp-step proposal darkens depths 1–2 to median 0.67. **Owner ruling R1 = D:** scale-only recession, no color darkening, until tile art is on the master palette. Shading is revisited after that migration (section 5.2). |
+| Handoff §5 and pre-19C §2.3: a `ColorMatrixFilter` at `k(d) = 1 - 0.04d`; the 2026-09-24 brief's 96 / 92 / 88 / 84 % | The filter is a production fail. The 4% nearest-luminance pick changes 0 of 226 colors at depths 1 and 2 on this registry. The ramp-step proposal darkens depths 1–2 to median 0.67. **Owner ruling R1 = D (DEC-006 in `docs/OWNER_DECISIONS.md`):** scale-only recession, no color darkening, until tile art is on the master palette. Shading is revisited after that migration (section 5.2). |
 | Handoff §5: palette `art/palette/uf.hex`, and quantise every off-palette texel | ADR-002. Master hexes go through the table (identity under R1 = D). Non-master texels pass through unchanged until the art is on the palette (ADR-002 §2.2). **Plan decision (within handoff §9 authority), M2.** |
 | Handoff §7: invalidate on every `levels:strataChanged` | Ignore HP-only. Dirty on `cellChanged` only. `strataDestroyed` is redundant and is not a source. |
 | Handoff §7 item 4: lower-level animation on `$deusAnimationMaster.frame3` | That symbol is not in the game code. Bound planes keep the map's 30-frame A1 cadence. No other motion. |
