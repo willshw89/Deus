@@ -2,10 +2,10 @@
 
 - **Task ID:** `DEUS-TSK-FABLE-19C`
 - **WBS ID:** `WG.00.09`
-- **Role:** Writer: Grok (Lane E) | Reviewer: Claude CLI session (diff review of `5964f772`: CHANGES REQUESTED, `claude_review.md` Section 6)
+- **Role:** Writer: Grok (Lane E) | Reviewer: Claude CLI session (diff review of `5964f772`: CHANGES REQUESTED, `claude_review.md` Section 6; N5 and N6 folded, awaiting diff review)
 - **Branch / Worktree:** `task/lane-e` (`C:\Users\snewt\.deus_worktrees\lane-e`)
-- **Last Commit:** `[claude] WG.00.09 Diff review of UF_Depth_Attack_Plan.md commit 5964f772` (plan last changed in `5964f772`, Grok)
-- **Current Gate:** The plan at `5964f772` was diff-reviewed on 2026-09-25 (Section 6). Verdict: **CHANGES REQUESTED** (0 BLOCKER, 0 MAJOR, 2 MINOR). N2 and N4 are resolved, and N3 is resolved as asked. N1 is partly resolved and continues as N5. N6 is new. Both N5 and N6 are text edits for Grok. Engine implementation has not started and stays blocked.
+- **Last Commit:** `[grok] WG.00.09 Address N5 N6` (plan and this state file)
+- **Current Gate:** Section 6 findings N5 and N6 are folded into the plan. The Section 6 verdict on `5964f772` was **CHANGES REQUESTED** (0 BLOCKER, 0 MAJOR, 2 MINOR). That verdict stays until Claude's diff review of this revision. Engine implementation has not started and stays blocked.
 
 ## Owned File Set
 - `docs/systems/UF_Depth_Attack_Plan.md` (Grok)
@@ -28,7 +28,7 @@ Plugins, harnesses, and `game/data` stay read-only for this lane.
    - **R9.** Eight canvases are 32,219,136 bytes. Shaded copies are 0 under R1 = D. After migration, share equal table columns, skip sheets with no master texel, build at scene start. Tileset 92 four sheets = 8,110,080 bytes per copy.
    - **R10.** Preset `off` keeps the cutout and the roof fallback; holes show the void texel. Handoff §10.1's pure-Node request vs the nw.js render harness is logged in §9.
    - **R11.** Fill follows `deltaLevels` on unknown schema and unreadable records. Wide sprites crop to the largest axis-aligned rectangle of matching `dHit` that includes the foot cell; L-shaped remainder is dropped. Section 5 found `entity_clip` disagreed with that rectangle and the rule had no tie-break. N3 (item 8) pins both.
-4. **Code freeze held.** The R2–R11 commit (`87c1e5b8`) and the N1–N4 commit (`5964f772`) each edit only `docs/systems/UF_Depth_Attack_Plan.md` and this state file. No edit under `game/js/`, `tools/`, or `game/data/`.
+4. **Code freeze held.** The R2–R11 commit (`87c1e5b8`), the N1–N4 commit (`5964f772`), and this N5–N6 commit each edit only `docs/systems/UF_Depth_Attack_Plan.md` and this state file. No edit under `game/js/`, `tools/`, or `game/data/`.
 5. **Independent review** (Claude, 2026-09-25) at `tasks/DEUS-TSK-FABLE-19C/claude_review.md`. Verdict on `c846fc7c`: **CHANGES REQUESTED** (1 BLOCKER, 8 MAJOR, 9 MINOR).
 6. **Re-review of `37fc1473`** (Claude, 2026-09-25), `claude_review.md` Section 4. Verdict: **CHANGES REQUESTED** (0 BLOCKER, 1 MAJOR, 10 MINOR). B1 and M2–M8 were already resolved in the design. M1 awaited the owner (R1). R2–R11 were text edits.
 7. **Re-review of `87c1e5b8`** (Claude, 2026-09-25, Directive 001-H), `claude_review.md` Section 5. Verdict: **CHANGES REQUESTED** (0 BLOCKER, 0 MAJOR, 4 MINOR).
@@ -38,7 +38,7 @@ Plugins, harnesses, and `game/data` stay read-only for this lane.
    - **New at that review (N2):** an ordering gap.
    - **Evidence:** a heap probe of stock `Tilemap.Layer.addRect` (311,544 B over 8 rebuilds; an empty measurement window is 616 B), plus a code read of the update order.
 8. **N1–N4 folded** into `docs/systems/UF_Depth_Attack_Plan.md` (`5964f772`, Grok). Text only. No harness was created or run.
-   - **N1.** `C-LIVE-ALLOC` uses two recording layers (`addRect` writes a pooled typed array; `clear` resets a count). Stock `_addAllSpots` through `_readMapData` stay stock. Stock `addRect` allocation is outside the depth budget. The check is three windows after `global.gc()`, least window judged, zero collections, under 1 byte per frame, with `framesPerWindow` at least 100 times the same-run empty-window growth (61,620 frames at the reviewed 616 B floor), matching `tools/test_strata_foundation.js` `no_allocation_queries` (`:768-787`). The pan benchmark reports live-rebuild collections and judges a depth-canvas flush net of an empty sample pair.
+   - **N1.** `C-LIVE-ALLOC` uses two recording layers (`addRect` writes a pooled typed array; `clear` resets a count). Stock `_addAllSpots` through `_readMapData` stay stock. Stock `addRect` allocation is outside the depth budget. The check is three windows after `global.gc()`, least window judged, zero collections, under 1 byte per frame, with `framesPerWindow` at least 100 times the same-run empty-window growth (61,620 frames at the reviewed 616 B floor), matching `tools/test_strata_foundation.js` `no_allocation_queries` (`:768-787`). The pan benchmark reports live-rebuild collections and judges a depth-canvas flush net of an empty sample pair. Section 6 found that floor and that 1-byte flush comparison can still fail a correct build. N5 (item 10) replaces both.
    - **N2.** The `cellChanged` handler only marks the block dirty. The depth update sets `_needsRepaint` after it rebuilds the summary for a dirty in-window block, or because `V` or `H` changed. New stub check `C-DIG-REPAINT`. New mutant `repaint_left_to_handler`.
    - **N3.** Section 7 tie-break: greater height, then greater width, then the foot row as the bottom edge, then the left edge closer to the foot. `entity_clip` expects the one-sided 96×48 frame, the two-sided 48×48 foot cell, and the tie's 48×96 column.
    - **N4.** Header, §5.2, and the §9 row cite DEC-006 in `docs/OWNER_DECISIONS.md`. `art/palette/uf.hex` is cited as 256 lines and 250 distinct colors.
@@ -51,21 +51,13 @@ Plugins, harnesses, and `game/data` stay read-only for this lane.
      - A Node heap probe of stock `Tilemap.update` plus `updateTransform`: 31 B per frame, all of it from `_sortChildren`.
      - A frame loop that allocates nothing grew by a fixed 61,424 to 176,624 B per window, at every window length.
      - A survey of sidecar anchors: 40 sheets are 96 or 192 px wide with centred anchors.
+10. **N5 and N6 folded** into `docs/systems/UF_Depth_Attack_Plan.md` (this commit). Text only. No harness was created or run. The Section 6 verdict on `5964f772` stays CHANGES REQUESTED until the next diff review.
+    - **N5.** The stub frame driver is named in §8.1. Inside a judged window it does not call stock `update` or `updateTransform`. It advances `animationFrame`, repeats the repaint test at `rmmz_core.js:2376-2380`, calls stock `_addAllSpots`, and clears `_needsRepaint`. The stub's `_sortChildren` is a no-op. The stock sort is outside the depth budget, as stock `addRect` is. The spot chain list includes `_addSpotTile` (`:2465`), `_addNormalTile` (`:2483`), and `_addTableEdge` (`:2579`). `framesPerWindow` is the smallest multiple of 60 that is at least `max(1000000, 100 * emptyLeast)`. At the reviewed 616 B empty floor that is 1,000,020 frames. The sentence that stretched the 240-frame probe across that window is gone. New stub check `C-REPAINT-ALLOC` forces one plane's repaint bit for the whole window and judges it the same way. New mutant `alloc_in_repaint`. The §8.5 flush rows report the least of three flush windows minus the least of three empty windows and do not fail that net. A garbage collection inside a flush still fails.
+    - **N6.** Section 7 places the uncropped frame by its sidecar anchor on the foot point and crops the map cells that frame overlaps. Area and the tie-break use the intersection with the frame. After the crop, `anchor = (sidecarPixel − cropOrigin) / cropSize`. `entity_clip` reads `setFrame`, the anchor, and the drawn rectangle. Case (4) states the uncropped anchor `(0.25, 1)`. Case (5) is `!$UF_Birch.json`, anchor `[48, 95]`: `setFrame(0, 0, 72, 96)`, anchor `(2/3, 95/96)`, drawn x `[−48, +24)`, y `[−95, +1)`. New mutant `anchor_fraction_kept` leaves the uncropped fraction and fails case (2). `C-DIG-REPAINT` now drives frames with the same driver, and it exits 2 if `animationFrame` changes between frame N and frame N+1.
 
 ## Exact Next Step
-- **Grok:** fold N5 and N6 from `claude_review.md` Section 6.2 into the plan.
-  - **N5:**
-    - Name the stub frame driver. Stock `updateTransform` and `_sortChildren` must not run inside a judged window.
-    - Raise the `C-LIVE-ALLOC` window floor to at least 1,000,000 frames.
-    - Add a stub proof, with a mutant, that a plane repaint allocates nothing.
-    - Stop failing single-pair nw flush samples at 1 B.
-  - **N6:**
-    - Define the §7 crop in map cells, placed by the sidecar anchor.
-    - Re-express the anchor after the crop.
-    - Make `entity_clip` assert the drawn rectangle.
-    - Add a centred 96 px case, plus a mutant that keeps the anchor fraction.
-  - Do not start `DEUS_Depth.js` or `tools/test_global_depth_renderer.js`.
-- **Claude:** diff review of that revision. Re-probe only if the frame driver or the window rule changes shape again.
+- **Claude:** diff review of this revision. Section 6.6 said a re-probe happens only if the frame driver or the window rule changes shape. Both changed in this pass.
+- **Grok:** wait for that diff review. Do not start `DEUS_Depth.js` or `tools/test_global_depth_renderer.js`.
 - **Coordinator:**
   - `main` is merged into `task/lane-e` (`6633993d`), so DEC-006 (`eefd1f2c`) and ADR-002 Rev 2 are in the branch.
   - m7 is still an open art decision (Rule 13 cap range vs the master void ramp). If ADR-002 Rev 2 is accepted, it also decides the void texel (Section 5.3 item 1).
@@ -75,17 +67,12 @@ Plugins, harnesses, and `game/data` stay read-only for this lane.
 ## Open Defects / Questions
 - **CR-19C-R1:** resolved. Owner ruling DEC-006 = Option D (`docs/OWNER_DECISIONS.md`, `eefd1f2c`); the plan implements it and cites it.
 - **CR-19C-R2–R11:** resolved in the plan. R4 and R11(b) continued as N1 and N3 and are folded below.
-- **CR-19C-N1 (MINOR):** partly resolved (Section 6). The recording layers, the scope sentence and the nw reporting are in. The rest continues as N5.
-- **CR-19C-N2 (MINOR):** resolved. The depth update sets `_needsRepaint` after the post-dig summary rebuild. `C-DIG-REPAINT` and `repaint_left_to_handler` cover it.
-- **CR-19C-N3 (MINOR):** resolved as asked. Section 7 has a height-first tie-break, and `entity_clip` expects the frames that rule produces. See N6.
+- **CR-19C-N1 (MINOR):** partly resolved in Section 6. The remainder is folded as N5 (item 10). Not yet re-reviewed.
+- **CR-19C-N2 (MINOR):** resolved. The depth update sets `_needsRepaint` after the post-dig summary rebuild. `C-DIG-REPAINT` and `repaint_left_to_handler` cover it. This pass points `C-DIG-REPAINT` at the stub frame driver and exits 2 when `animationFrame` changes on frame N+1.
+- **CR-19C-N3 (MINOR):** resolved as asked. The crop gap continued as N6 and is folded in item 10. Not yet re-reviewed.
 - **CR-19C-N4 (MINOR):** resolved. DEC-006 is cited in the header, §5.2, and §9. `uf.hex` is 256 lines and 250 distinct colors.
-- **CR-19C-N5 (MINOR):** `C-LIVE-ALLOC` can still fail a build that allocates nothing, for three reasons:
-  - Stock `updateTransform` runs `_sortChildren` (`.bind(this)` plus a sort) on every frame, which costs 31 B per frame.
-  - The window floor is set from a no-loop empty window (616 to 18,120 B). A loop that allocates nothing grew by a fixed 61,424 to 176,624 B per window.
-  - The §8.5 flush rows compare single sample pairs at a 1 B threshold, and the measured jitter was 192 B.
-- **CR-19C-N6 (MINOR):** the §7 crop has two gaps:
-  - It counts 48 px cells of the authored frame. 40 sheets have 96 or 192 px frames with centred anchors, so those cells straddle map columns.
-  - After a crop, the PIXI anchor is a fraction of the cropped frame, so the kept texels can move: 24 px east in `entity_clip` case 2. `entity_clip` reads only `setFrame` and can't see the shift.
+- **CR-19C-N5 (MINOR):** folded (item 10). The stub frame driver, the 1,000,000-frame floor, `C-REPAINT-ALLOC`, and the three-window flush report are in the plan. Not yet re-reviewed.
+- **CR-19C-N6 (MINOR):** folded (item 10). The crop is in map cells, the anchor is re-expressed after `setFrame`, and `entity_clip` asserts the drawn rectangle, including the Birch sheet. Not yet re-reviewed.
 - **ADR-002 Rev 2 (PROPOSED, in this branch since the merge of `main`):** `uf.hex` becomes canonical for runtime, but the plan's void texel `#0C0D12` is a master colour. This is for the coordinator.
 - **m7 (still open):** Rule 13's cap range (`#08080C`–`#121218`) against the master void ramp (`#060709`, `#0C0D12`, `#14161C`).
 - Not updated in this lane: `tasks/DEUS-TSK-FABLE-19C/messages.jsonl`, `docs/STATUS.md`, `docs/AUDIT_LOG.md`. Those belong to the coordinator.
