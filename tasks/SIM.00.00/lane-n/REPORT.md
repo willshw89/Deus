@@ -67,7 +67,7 @@ Every command was run in the foreground from the worktree root, one exit code ea
 
 (The runner's exit is about the main-vs-tip comparison; each suite's own RESULT line is in `test_changes.md`.) Before any
 change, baselines on main with random seeds: `node tools/run_tests.js <suite> --game <main snapshot>` exit 1 for vertical
-(8/3), world (25/5), spawn (4/2); exit 0 for natural_walls (6/0), flooding (8/0), strata (6/0).
+(8/3), world (25/5), spawn (4/2); exit 0 for natural_walls (6/0), flooding (8/0), strata (6/0) (`suites/baseline_main_random_seed/`).
 
 ## Evidence
 

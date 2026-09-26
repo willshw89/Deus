@@ -43,7 +43,8 @@ fail on `main` without this lane: vertical `underground_biomes`, `offscreen_stat
 `path_gives_up_when_crowded`, `faces_eight_ways`, `no_corner_cut`, `no_path_is_true`, `frame_cost`; spawn
 `all_units_on_standable_cells`, `after_play`. Earlier main runs with random seeds (before any lane change) also failed
 vertical `offscreen_state`, `save_size`, `surface_migration`, world `path_blocked_fast`, `path_gives_up_when_crowded`,
-`faces_eight_ways`, `no_path_is_true`, `frame_cost` and spawn `all_units_on_standable_cells`, `after_play`.
+`faces_eight_ways`, `no_path_is_true`, `frame_cost` and spawn `all_units_on_standable_cells`, `after_play` (results files in
+`suites/baseline_main_random_seed/`).
 
 The existing vertical suite now drives the in-place switch through its own key presses: `switch_view` and `follow_view`
 pass on the tip, and its `switch_time` reports ground -> -1 24 ms / -1 -> ground 23 ms, 0 map frames, builds reused
