@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "1.0.0",
+  "profile": "fixture",
+  "rules": {
+    "AU-GLOBAL-001": {
+      "id": "AU-GLOBAL-001",
+      "level": "MUST",
+      "section": "global",
+      "title": "Fixture rule",
+      "statement": "MUST: Fixture."
+    }
+  },
+  "closedSets": {
+    "damageTypes": [
+      "acid",
+      "bludgeoning"
+    ],
+    "spellSchools": [
+      "evocation"
+    ],
+    "biomes": [
+      "temperate"
+    ],
+    "surfaces": [
+      "stone"
+    ],
+    "gaits": [
+      "walk"
+    ]
+  },
+  "categories": {
+    "foot": {
+      "id": "foot",
+      "folder": "se",
+      "variantMin": 3,
+      "attenuationClass": "point",
+      "layerAudibility": "positional"
+    },
+    "ui": {
+      "id": "ui",
+      "folder": "se",
+      "variantMin": 1,
+      "attenuationClass": "ui",
+      "layerAudibility": "global"
+    }
+  },
+  "format": {
+    "extension": ".ogg",
+    "sampleRate": 44100,
+    "bitDepth": 16
+  },
+  "loudnessTargets": {
+    "sfx": {
+      "integratedLufs": -18,
+      "truePeakDbtp": -1
+    }
+  },
+  "naming": {
+    "stemPattern": "^[a-z][a-z0-9]*_[a-z0-9]+(-[a-z0-9]+)*_[a-z0-9]+(-[a-z0-9]+)*_01$"
+  },
+  "attenuation": {
+    "classes": {
+      "point": {
+        "positional": true,
+        "priority": 50
+      },
+      "ui": {
+        "positional": false,
+        "priority": 100
+      }
+    }
+  },
+  "eventGenerators": [],
+  "events": [
+    {
+      "eventId": "foot.stone.walk",
+      "category": "foot",
+      "folder": "se",
+      "stem": "foot_stone_walk_1",
+      "variants": 3,
+      "loop": false,
+      "attenuationClass": "point",
+      "layerAudibility": "positional"
+    }
+  ],
+  "legacyCensus": []
+}

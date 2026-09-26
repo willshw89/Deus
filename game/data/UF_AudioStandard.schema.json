@@ -1,0 +1,301 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deus.local/UF_AudioStandard.schema.json",
+  "title": "DEUS Audio Standard",
+  "description": "Machine-readable DEUS audio standard and the per-sound event row. Draft 2020-12. The validator enforces this schema plus the semantic rules in docs/audio/DEUS_AUDIO_STANDARD.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "profile",
+    "rules",
+    "closedSets",
+    "categories",
+    "format",
+    "loudnessTargets",
+    "naming",
+    "attenuation",
+    "eventGenerators",
+    "events"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "profile": { "enum": ["full", "fixture"] },
+    "rules": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^AU-[A-Z]+-\\d{3}$" },
+      "additionalProperties": { "$ref": "#/$defs/rule" }
+    },
+    "closedSets": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string", "minLength": 1 }
+      }
+    },
+    "categories": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/category" }
+    },
+    "format": {
+      "type": "object",
+      "required": ["extension", "sampleRate", "bitDepth"],
+      "properties": {
+        "extension": { "const": ".ogg" },
+        "sampleRate": { "const": 44100 },
+        "bitDepth": { "const": 16 }
+      },
+      "additionalProperties": true
+    },
+    "loudnessTargets": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "type": "object" }
+    },
+    "naming": {
+      "type": "object",
+      "required": ["stemPattern"],
+      "properties": {
+        "stemPattern": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "attenuation": {
+      "type": "object",
+      "required": ["classes"],
+      "properties": {
+        "classes": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "type": "object" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "geometry": { "type": "object" },
+    "groundKindMap": { "type": "object" },
+    "waterKindMap": { "type": "object" },
+    "weatherProjection": { "type": "object" },
+    "biomeDepthDefaults": { "type": "object" },
+    "legacyBiomeRouting": { "type": "object" },
+    "legacyBiomeDepthHint": { "type": "object" },
+    "legacyRegistryRouting": { "type": "object" },
+    "legacyMenuBgm": { "type": "array" },
+    "sizePlayback": { "type": "object" },
+    "footPlayback": { "type": "object" },
+    "weaponMap": { "type": "object" },
+    "systemSounds": { "type": "array" },
+    "eventGenerators": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/generator" }
+    },
+    "events": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/event" }
+    },
+    "legacyCensus": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/legacyFile" }
+    },
+    "openQuestions": {
+      "type": "object",
+      "propertyNames": { "pattern": "^OQ-\\d{2}$" },
+      "additionalProperties": { "$ref": "#/$defs/note" }
+    },
+    "proposedFollowUps": {
+      "type": "object",
+      "propertyNames": { "pattern": "^PROPOSED-AM-\\d{2}$" },
+      "additionalProperties": { "$ref": "#/$defs/note" }
+    }
+  },
+  "$defs": {
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "level", "section", "title", "statement"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^AU-[A-Z]+-\\d{3}$" },
+        "level": { "enum": ["MUST", "SHOULD"] },
+        "section": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "statement": { "type": "string", "minLength": 1 }
+      }
+    },
+    "note": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "statement"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "statement": { "type": "string", "minLength": 1 }
+      }
+    },
+    "category": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["id", "folder", "variantMin"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "folder": { "enum": ["bgm", "bgs", "me", "se"] },
+        "variantMin": { "type": "integer", "minimum": 1, "maximum": 99 },
+        "namingPattern": { "type": "string" },
+        "channels": { "enum": ["mono", "stereo"] },
+        "attenuationClass": { "type": "string" },
+        "layerAudibility": { "enum": ["global", "positional", "focus-only"] },
+        "loudness": { "type": "string" },
+        "requiredSets": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "generatorId",
+        "category",
+        "folder",
+        "eventId",
+        "stem",
+        "variants",
+        "loop",
+        "attenuationClass",
+        "layerAudibility",
+        "axes"
+      ],
+      "properties": {
+        "generatorId": { "type": "string", "minLength": 1 },
+        "category": { "type": "string", "minLength": 1 },
+        "folder": { "enum": ["bgm", "bgs", "me", "se"] },
+        "eventId": { "type": "string", "minLength": 1 },
+        "stem": { "type": "string", "minLength": 1 },
+        "variants": { "type": "integer", "minimum": 1, "maximum": 99 },
+        "variantsWhenLoop": { "type": "integer", "minimum": 1, "maximum": 99 },
+        "loop": { "type": "boolean" },
+        "loopWhen": { "type": "object" },
+        "attenuationClass": { "type": "string", "minLength": 1 },
+        "attenuationWhen": { "type": "object" },
+        "layerAudibility": { "enum": ["global", "positional", "focus-only"] },
+        "loudness": { "type": "string" },
+        "bpm": { "type": "integer", "minimum": 1 },
+        "beatsPerBar": { "type": "integer", "minimum": 1, "maximum": 16 },
+        "axes": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+    "event": {
+      "description": "One per-sound event row. Attenuation class and layer audibility are required. Loop sample points are optional and are checked semantically when loop is true.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eventId",
+        "category",
+        "folder",
+        "stem",
+        "variants",
+        "loop",
+        "attenuationClass",
+        "layerAudibility"
+      ],
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(\\.[a-z0-9]+(-[a-z0-9]+)*)+$"
+        },
+        "category": { "type": "string", "minLength": 1 },
+        "folder": { "enum": ["bgm", "bgs", "me", "se"] },
+        "stem": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*_[a-z0-9]+(-[a-z0-9]+)*_[a-z0-9]+(-[a-z0-9]+)*_01$"
+        },
+        "variants": { "type": "integer", "minimum": 1, "maximum": 99 },
+        "loop": { "type": "boolean" },
+        "loopStart": { "type": ["integer", "null"] },
+        "loopLength": { "type": ["integer", "null"] },
+        "loopContract": { "enum": ["full-file", "samples"] },
+        "attenuationClass": { "type": "string", "minLength": 1 },
+        "layerAudibility": { "enum": ["global", "positional", "focus-only"] },
+        "loudness": { "type": "string" },
+        "channels": { "enum": ["mono", "stereo"] },
+        "priority": { "type": "integer" },
+        "damageType": { "type": "string" },
+        "hitMaterial": { "type": "string" },
+        "hitOutcome": { "type": "string" },
+        "spellSchool": { "type": "string" },
+        "spellExtra": { "type": "string" },
+        "deliveryShape": { "type": "string" },
+        "phase": { "type": "string" },
+        "biome": { "type": "string" },
+        "depthBand": { "type": "string" },
+        "weather": { "type": "string" },
+        "season": { "type": "string" },
+        "surface": { "type": "string" },
+        "gait": { "type": "string" },
+        "weaponGroup": { "type": "string" },
+        "workAction": { "type": "string" },
+        "creatureType": { "type": "string" },
+        "race": { "type": "string" },
+        "vocalSubject": { "type": "string" },
+        "vocalCall": { "type": "string" },
+        "emote": { "type": "string" },
+        "musicState": { "type": "string" },
+        "stemRole": { "type": "string" },
+        "bpm": { "type": "integer", "minimum": 1 },
+        "beatsPerBar": { "type": "integer", "minimum": 1, "maximum": 16 },
+        "muffledStem": { "type": ["string", "null"] }
+      },
+      "examples": [
+        {
+          "eventId": "foot.stone.walk",
+          "category": "foot",
+          "folder": "se",
+          "stem": "foot_stone_walk_01",
+          "variants": 3,
+          "loop": false,
+          "attenuationClass": "point",
+          "layerAudibility": "positional",
+          "channels": "mono",
+          "loudness": "sfx",
+          "surface": "stone",
+          "gait": "walk"
+        }
+      ]
+    },
+    "legacyFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["folder", "file", "stem", "ext", "size", "mapsTo"],
+      "properties": {
+        "folder": { "enum": ["bgm", "bgs", "me", "se"] },
+        "file": { "type": "string", "minLength": 1 },
+        "stem": { "type": "string", "minLength": 1 },
+        "ext": { "type": "string", "minLength": 1 },
+        "size": { "type": "integer", "minimum": 0 },
+        "mapsTo": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "minLength": 1 },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 }
+            }
+          ]
+        },
+        "nearest": { "type": "string" }
+      }
+    }
+  }
+}
