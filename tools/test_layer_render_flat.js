@@ -81,7 +81,7 @@ if (provoke) {
         const p = runOnce(`lanek_${suite}_p_${name}`, name);
         const l = p.lines.get(name);
         const caught = !!l && !l.pass;
-        if (!p.result) harness++;
+        if (!p.result) { harness++; console.log(`  (no RESULT line; run_tests said: ${(p.stderr || "").trim().split(String.fromCharCode(10)).slice(-3).join(" | ") || "nothing"})`); }
         if (!caught) bad++;
         console.log(`${caught ? "CAUGHT" : "NOT CAUGHT"} depth.${name}: ${l ? `${l.pass ? "PASS" : "FAIL"} ${suite}.${name} - ${l.detail}` : "the check did not run"} [${p.result || "no RESULT line"}, ${(p.ms / 1000).toFixed(1)} s]`);
     }

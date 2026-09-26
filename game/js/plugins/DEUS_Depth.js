@@ -810,7 +810,8 @@
         this.spriteId = Sprite._counter++;
         // Below the lower tile layer (z 0) of the map on screen: its opaque tiles are the exposure mask. The
         // exposure provocation lifts the planes above the tile layer, so a floor cell would change too.
-        this.z = provoked("exposure") ? 0.5 : -1;
+        const exposureFault = provokedAny("exposure", "exposure_by_upper_geometry");
+        this.z = exposureFault ? 0.5 : -1;
         this._main = mainTilemap || null;
         // The void below the last drawn level: under the planes, over the parallax. Where the level on screen and the
         // drawn level(s) below are all open, this is what shows (never the sky). The void_beyond provocation hides it.
@@ -826,9 +827,10 @@
         // The exposure mask: the planes and the void draw only inside the viewed level's open cells (a stencil Graphics mask,
         // not a filter). The viewed level's tiles occlude them as well, but a solid cell whose art has transparent pixels
         // (AUDIT_LOG A9) must still not show the level below. The exposure provocation drops it with the tile-layer order.
-        this._mask = new PIXI.Graphics();
-        this.addChild(this._mask);
-        this.mask = provoked("exposure") ? null : this._mask;
+        this._exposureMask = new PIXI.Graphics();
+        this.addChild(this._exposureMask);
+        this.mask = exposureFault ? null : this._exposureMask; // (not this._mask: that is PIXI's own field behind .mask)
+        if (exposureFault) this._exposureMask.visible = false; // not a mask then, and never drawn itself
         this._maskX = NaN;
         this._maskY = NaN;
         this._maskRev = -1;
@@ -950,7 +952,7 @@
     /** The exposure mask: one rectangle per horizontal run of open cells of the viewed level in the tilemap's window, placed
      *  with the tilemap's own rounding. Rebuilt when the window's start cell or a shape changes; moved every frame. */
     Sprite_DepthRoot.prototype.updateMask = function(viewOx, viewOy) {
-        const m = this._mask, main = this._main;
+        const m = this._exposureMask, main = this._main;
         const margin = main && Number.isFinite(main._margin) ? main._margin : 20;
         const ox = Math.ceil(viewOx), oy = Math.ceil(viewOy);
         const sx = Math.floor((ox - margin) / TW), sy = Math.floor((oy - margin) / TH);
