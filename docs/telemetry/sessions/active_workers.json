@@ -1,6 +1,7 @@
 [
   {
     "lane": "Lane C2b",
+    "role": "writer",
     "provider": "Claude / claude-opus-5-5",
     "taskId": "task-36642",
     "pid": 2060,
@@ -16,6 +17,7 @@
   },
   {
     "lane": "Lane I",
+    "role": "writer",
     "provider": "Claude / claude-opus-5-5",
     "taskId": "task-36644",
     "pid": 5824,
@@ -31,6 +33,7 @@
   },
   {
     "lane": "Lane J",
+    "role": "writer",
     "provider": "Claude / claude-opus-5-5",
     "taskId": "task-36646",
     "pid": 18904,
@@ -46,6 +49,7 @@
   },
   {
     "lane": "Lane K",
+    "role": "writer",
     "provider": "Claude / claude-opus-5-5",
     "taskId": "task-36648",
     "pid": 12860,
@@ -58,6 +62,7 @@
   },
   {
     "lane": "Lane N",
+    "role": "writer",
     "provider": "Claude / claude-opus-5-5",
     "taskId": "task-36650",
     "pid": 6948,
@@ -70,6 +75,7 @@
   },
   {
     "lane": "Lane M",
+    "role": "writer",
     "provider": "Claude / claude-opus-5-5",
     "taskId": "task-36652",
     "pid": 12596,
@@ -78,6 +84,42 @@
     "launchTimeCT": "2026-09-26 00:24:34 CT",
     "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\lane-m\\tasks\\SIM.00.01\\lane-m\\BRIEF.md",
     "launchPromptPath": "C:\\Users\\snewt\\.deus_worktrees\\run_lane_m.ps1",
+    "state": "running"
+  },
+  {
+    "lane": "Lane I",
+    "role": "reviewer",
+    "provider": "Grok / grok-1.0",
+    "taskId": "task-37038",
+    "pid": 21316,
+    "worktree": "C:\\Users\\snewt\\.deus_worktrees\\lane-i",
+    "branch": "task/lane-i",
+    "launchTimeCT": "2026-09-26 01:00:07 CT",
+    "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\run_review_lane_i.ps1",
+    "state": "running"
+  },
+  {
+    "lane": "Lane C2b",
+    "role": "reviewer",
+    "provider": "Grok / grok-1.0",
+    "taskId": "task-37040",
+    "pid": 20964,
+    "worktree": "C:\\Users\\snewt\\.deus_worktrees\\lane-c2b",
+    "branch": "task/lane-c2b",
+    "launchTimeCT": "2026-09-26 01:00:17 CT",
+    "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\run_review_lane_c2b.ps1",
+    "state": "running"
+  },
+  {
+    "lane": "Lane J",
+    "role": "reviewer",
+    "provider": "Grok / grok-1.0",
+    "taskId": "task-37042",
+    "pid": 4480,
+    "worktree": "C:\\Users\\snewt\\.deus_worktrees\\lane-j",
+    "branch": "task/lane-j",
+    "launchTimeCT": "2026-09-26 01:00:29 CT",
+    "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\run_review_lane_j.ps1",
     "state": "running"
   }
 ]
