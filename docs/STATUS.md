@@ -21,21 +21,22 @@
 
 ## In progress
 - **Incident Correction (Directive 001-H sec 6):** Coordinator output file overwrite at 17:13:55 logged as `DEF-COORD-INJECT-01`; `b1ua8l2oj.output` had real 29/0 EXIT=0 result confirmed by `task-34196.log:1084`; `bvwyow104.output` was hook-script SyntaxError (EXIT=1); coordinator ceased all worker temp file touches.
+- **Worker Relaunch (Directive 001-K §1):** Lane H original worker (Claude PID 6276, `task-35425`) exited at 23:18:50 with uncommitted work while background evidence runs were still executing. Reason: Claude CLI completed its single-prompt turn expecting an asynchronous callback notification ("I don't need a monitor here: the background evidence run will notify me when it finishes..."). Coordinator waited for all background node test runs to complete, then relaunched the worker via `resume_lane_h.ps1` as `task-35727` (PID 21660) at 23:25.
 - **Lane A (Claude / Fable):** WG.00.08 Merged into `main` (`0f7f26cd`), but WG.00.08 stays in `REVIEW` per Directive 001-H sec 2 until Grok verifier commits PASS, DEC-001 is recorded, and PM signs off.
 - **Lane B (Claude / Fable):** WG.00.11 Merged into `main` (`8c0c210c`). Hardening suite verified passing.
 - **Lane C1 (Claude CLI):** WG.00.12 Merged into `main` (`e07c86ea`). Backup infrastructure verified.
 - **Lane C2 (Claude CLI):** WG.00.12 Merged into `main` (`83bcc1a7`). Machine governance checker verified (88/88 checks pass, 22 mutants killed). Hook installation held until Lane E merges.
 - **Lane C3 (Claude CLI):** WG.00.12 Merged into `main` (`8db39b0b`). Revised ADR-002 (uf.hex canonical for runtime).
 - **Lane D (Grok PM):** Adversarial review delivered (verdicts recorded).
-- **Lane E (Grok Writer / Claude Reviewer):** WG.00.09 Follow-up: Grok revision (`37fc1473`) re-reviewed by Claude (`2150c513`). Verdict: **CHANGES REQUESTED** (0 blocker, 1 major R1, 10 minor). Finding status: B1: Resolved; M1: Partly resolved (R1); M2: Resolved; M3: Resolved; M4: Resolved; M5: Resolved except R2, R8; M6: Resolved; M7: Resolved; M8: Resolved. Owner ruling DEC-006 / R1 = Option D recorded in `OWNER_DECISIONS.md`.
+- **Lane E (Grok Writer / Claude Reviewer):** WG.00.09 Follow-up: Grok revision (`37fc1473`) re-reviewed by Claude (`2150c513`). Verdict: **CHANGES REQUESTED** (0 blocker, 1 major R1, 10 minor). Grok committed `5964f772` claiming N1–N4 addressed; review pending. Claude diff review active (`task-35543`, PID 6480).
 - **Lane F (Claude CLI):** WG.00.12 Merged into `main` (`d09a1295`). 8-test post-F suite all passed with EXIT=0. Pushed to `origin`.
 - **Lane G (Claude CLI):** WG.00.11 Merged into `main` (`da2c16b2`). Provenance: coordinator re-ran in lane-g worktree; PM reproduced exit 0 on lane-g and on merged main da2c16b2 (30/30 gating checks pass, 15 mutants caught, world_age 29/29 pass, carrying capacity 23/23 pass).
-- **Lane H (Claude / Fable):** WG.00.08 Fresh Z-2 cut proof (`tools/test_generated_z2_cut_proof.js`) per Directive 001-I sec B. Worktree `lane-h`.
+- **Lane H (Claude / Fable):** WG.00.08 Fresh Z-2 cut proof (`tools/test_generated_z2_cut_proof.js`) per Directive 001-I sec B. Worktree `lane-h`. Original worker `task-35425` (PID 6276) exited; relaunched as `task-35727` (PID 21660).
 - **Lane C2b (Claude):** WG.00.12 Governance hardener (`tools/governance/check_claims.js`) per Directive 001-I sec C. Worktree `lane-c2b`.
 
 ---
 
-## 2. Active Parallel Work Lanes (DEUS Directive 001-I)
+## 2. Active Parallel Work Lanes (DEUS Directive 001-K)
 
 | Lane | Objective & WBS ID | Provider / Model | Worker Task ID & Branch | Worktree Path | Last Output / mtime | Current Gate & Status |
 |---|---|---|---|---|---|---|
@@ -46,10 +47,10 @@
 | **Lane C2b** | **Governance Hardening** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | `task-35427` (PID 7264)<br>`task/lane-c2b` | `C:\Users\snewt\.deus_worktrees\lane-c2b` | Active | **STATUS: ACTIVE WRITER.**<br>• Hardening check_claims.js against PM attack per Directive 001-I sec C. |
 | **Lane C3** | **Palette ADR Revision & Review** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Merged `8db39b0b`<br>`task/lane-c3` | `C:\Users\snewt\.deus_worktrees\lane-c3` | 2026-09-25 16:54:51 | **STATUS: INTEGRATED TO MAIN.**<br>• Revised ADR-002 (uf.hex canonical for runtime now). Merged to main and pushed to origin. |
 | **Lane D** | **Adversarial Review** | Grok (PM instance) / `grok-4.7` | Via Owner | Main checkout | 2026-09-25 16:48:00 | **STATUS: DELIVERED.**<br>• ATK-19B-001 CLOSED; ATK-19B-002 KEEP OPEN (F2); ATK-YEAR0-001 KEEP OPEN (F1); WG.00.08 stays REVIEW. |
-| **Lane E** | **WG.00.09 DEFINE / PRE-ATTACK** (`WG.00.09`) | Grok CLI (Writer) / Claude (Reviewer) | `task-35543` (PID 6480)<br>`task/lane-e` | `C:\Users\snewt\.deus_worktrees\lane-e` | 2026-09-25 23:17:10 | **STATUS: DIFF REVIEW ACTIVE (Claude).**<br>• Grok committed `5964f772` addressing N1–N4, pushed to origin. Claude task-35543 diff-reviewing against `710fa095`. |
+| **Lane E** | **WG.00.09 DEFINE / PRE-ATTACK** (`WG.00.09`) | Grok CLI (Writer) / Claude (Reviewer) | `task-35543` (PID 6480)<br>`task/lane-e` | `C:\Users\snewt\.deus_worktrees\lane-e` | 2026-09-25 23:17:10 | **STATUS: DIFF REVIEW ACTIVE (Claude).**<br>• Grok committed `5964f772` claiming N1–N4 addressed (review pending), pushed to origin. Claude task-35543 diff-reviewing against `710fa095`. |
 | **Lane F** | **OneDrive-Link Migration Prep** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Merged `d09a1295`<br>`task/lane-f` | `C:\Users\snewt\.deus_worktrees\lane-f` | 2026-09-25 16:52:09 | **STATUS: INTEGRATED TO MAIN.**<br>• Post-F test suite 8/8 EXIT=0; pushed to origin. |
 | **Lane G** | **ATK-YEAR0-002 Runtime Fix & Test Maint** (`WG.00.11`) | Claude CLI / `claude-opus-5-5` | Merged `da2c16b2`<br>`task/lane-g` | `C:\Users\snewt\.deus_worktrees\lane-g` | 2026-09-25 17:50:51 | **STATUS: INTEGRATED TO MAIN.**<br>• Runtime Year 0 integrated. |
-| **Lane H** | **Z-2 Cut Proof & Fluid Hardening** (`WG.00.08`) | Claude CLI (Fable) / `claude-opus-5-5` | `task-35425` (PID 6276)<br>`task/lane-h` | `C:\Users\snewt\.deus_worktrees\lane-h` | Active | **STATUS: ACTIVE WRITER.**<br>• Hardening test_generated_z2_cut_proof.js per Directive 001-I sec B. |
+| **Lane H** | **Z-2 Cut Proof & Fluid Hardening** (`WG.00.08`) | Claude CLI (Fable) / `claude-opus-5-5` | `task-35727` (PID 21660)<br>ex-`task-35425` (PID 6276)<br>`task/lane-h` | `C:\Users\snewt\.deus_worktrees\lane-h` | Active | **STATUS: ACTIVE WRITER (RELAUNCHED).**<br>• PID 6276 exited at 23:18:50 with uncommitted work while background runs completed. Relaunched as task-35727 (PID 21660) at 23:25. |
 
 ---
 
