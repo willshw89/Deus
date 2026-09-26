@@ -1,3 +1,288 @@
+# WG.00.09b Lane K: Fix 2 report (post-merge FAIL of `layers_flat.switch_same_frame`)
+
+Date: 2026-09-26. Writer: Claude (Lane K). Branch `task/lane-k`.
+- Brief: `BRIEF_FIX2.md`. Base: `00ff1c59`, which is Fix 1 `abdb6bbe`, plus Grok CLEAN PASS `0315c84a`, plus the PM's merge of
+  main `1f683b94`.
+- **Code commit: `c2184c94`** (`c2184c949650765a4fe8237eccc09c9106537e86`). Every gate below ran in a fresh temp clone of this
+  commit, and so did the benchmark and the switch-cost run. The one exception is the merge-base comparison, which ran on
+  `00ff1c59` as stated.
+- The commits after `c2184c94` change only `tasks/WG.00.09b/lane-k/**` and `docs/systems/DEUS_Depth.md`. I ran
+  `git diff --stat c2184c94 HEAD -- game tools` before committing this report: it printed nothing, `DIFF_GAME_TOOLS_EXIT=0`.
+- The branch tip is the commit that adds this section. Its SHA is the session's final output line.
+- Not a self-certification: the independent Grok review decides.
+
+## F2.1 Root cause (the PM's reading, confirmed and corrected)
+**Confirmed.** Lane N's in-place switch runs in this order:
+1. `DEUS_Levels.js` `Spriteset_Map.update` alias → `finishSwitch`
+2. `UF.World.rebindSpriteset`, which emits `world:levelBuilt` / `world:areaBuilt`
+3. DEUS_Depth's listener, which only called `root.rebuild()`
+4. `UF.Fog.refresh`
+5. `emit("levels:viewChanged")`
+6. then the spriteset's own update, where DEUS_Depth's `update()` paints the planes
+7. then `Scene_Map.update` and DEUS_Depth's `lateUpdate()`, where the units are scanned and placed. The spriteset's own update
+   leaves the units to this pass once `_lateSeen` is true, which it always is on a kept root.
+
+**Corrected.** The PM's note says "the planes are bound, shown and painted at levels:viewChanged". They were bound and shown,
+**but not painted**:
+- `bind()` calls `tilemap.refresh()`. The paint happens in the next `updateTransform`, which runs in step 6.
+- The old check's `paints > 0` was cumulative. The planes outlive an in-place switch, so it counted the previous level's
+  paints.
+- `bind()` also clears the plane's entity sprites, which is why units A and B had no sprite at the event.
+- The stricter check made this visible. Reproduction on `3538594d` (the test change only; the renderer as on `00ff1c59`), in
+  a fresh clone, `node tools/test_layer_render_flat.js`, EXIT=1 (`evidence/fix2_repro_3538594d/repro_layers_flat.log`,
+  trimmed):
+  ```
+  FAIL layers_flat.switch_same_frame - switches 0->2 2->1 1->0 0->-1 -1->0: 0->2 at levels:viewChanged (frame 86): planes 1:shown NOT PAINTED since bound (2 paint(s)), 0:shown NOT PAINTED since bound (2 paint(s)) (want levels [1, 0], shown and painted); 1 unit(s) in the window, NOT DRAWN ON THEIR CELL: TEST_flat_A#5337@1; first drawn frame (frame 86): planes 1:shown painted since bound (3 paint(s)), 0:shown painted since bound (3 paint(s)); 1 unit(s) in the window, all with a frame on their cell; 2->1 at levels:viewChanged (frame 172): ... NOT PAINTED ...; NOT DRAWN ON THEIR CELL: TEST_flat_B#5338@-1; first drawn frame (frame 172): ... painted ...; all with a frame on their cell; 1->0 ... (frame 193) same pattern; 0->-1 (frame 220): -2 NOT PAINTED, 0 units; first drawn frame (frame 220) painted; -1->0 (frame 247) same pattern as 1->0
+  required checks: 11/12 PASS
+  EXIT=1 DURATION_MS=30780
+  ```
+
+**Also found:** `depth.canvases_freed` could no longer fail.
+- In-place switches make no spriteset, so the switches never touched the canvas pool.
+- Its provocation was `NOT CAUGHT` on the merge base `00ff1c59` (`evidence/fix2_base_00ff1c59/provoke_canvases_freed.log`,
+  EXIT=1) and on WIP `c98e80a2` (`evidence/fix2_wip_c98e80a2/provoke_depth.log`: 15/16 caught, EXIT=1).
+- The merge caused this, not Fix 2. It is fixed in F2.3.
+
+## F2.2 The drawn-frame measurement
+The new second observation samples the root just before the first `Graphics.app.render` after the event. RMMZ renders once
+per tick, after the tick's updates (`Graphics._onTick`).
+
+| Switch | Before the fix (`3538594d`), at the event | Before the fix, first drawn frame | After the fix (`c2184c94`, gate 1 run 1), at the event | After the fix, first drawn frame |
+|---|---|---|---|---|
+| 0→+2 | frame 86: planes not painted, unit A no sprite | frame 86: complete | frame 86: complete | frame 87: complete |
+| +2→+1 | 172: not painted, unit B no sprite | 172: complete | 180: complete | 180: complete |
+| +1→0 | 193: not painted, unit B no sprite | 193: complete | 201: complete | 201: complete |
+| 0→−1 | 220: not painted (no unit in the window) | 220: complete | 228: complete | 228: complete |
+| −1→0 | 247: not painted, unit B no sprite | 247: complete | 255: complete | 255: complete |
+
+- Before the fix, the frame the player saw was already complete. The lag was in the state that `levels:viewChanged`
+  listeners see. The same frame number means the render came right after the update that switched.
+- After the fix, both moments are complete on every switch, in all 3 gate runs.
+- "Complete" means:
+  - the planes are the new view's levels below it, shown and painted since bound;
+  - every unit in the window on those levels has a visible sprite with a ready bitmap and a frame, on its cell's foot;
+  - no sprite of another level is left on a plane.
+
+## F2.3 The change (code commit `c2184c94`; WIP commits `3538594d`, `c98e80a2`)
+- **`game/js/plugins/DEUS_Depth.js`, renderer.** The `world:levelBuilt` / `world:areaBuilt` listener calls
+  `Sprite_DepthRoot.levelShown()`, which does `rebuild()` then `sync()`. `sync()` is `update(false)` plus the unit pass
+  (`updateUnits`). It runs regardless of `_lateSeen`. The rebuild has already dropped the unit candidate list, so it is made
+  again.
+  - This listener runs inside `UF.World.rebindSpriteset`. `finishSwitch` emits `levels:viewChanged` only after
+    `rebindSpriteset` returns (`DEUS_Levels.js` `finishSwitch`, read-only for me). So the planes are bound, painted and
+    their units placed before that event, whatever the order of the listeners of either event.
+  - On a map transfer the events fire in `Scene_Map.create`, before the new scene has a spriteset. `rootOf()` is null
+    there, since `SceneManager.changeScene` sets `_scene` before `create()`. So the transfer path is unchanged:
+    `createCharacters` binds, paints and places everything.
+  - Other routes considered:
+    - An alias of `UF.World.rebindSpriteset` would wrap another subsystem's method for the same effect.
+    - A `levels:viewChanged` listener would depend on listener order, which the brief rules out.
+  - No Lane N file was needed or touched. `escalation.md` has no Fix 2 item.
+  - Provocation `depth.switch_same_frame` now also skips the in-place sync (`levelShown`) and holds the new planes' units
+    back one more frame (`_unitsLate`, read once in `lateUpdate`). Both observations of the check then fail.
+  - A `_paintsAtBind` counter on each plane, for the check.
+  - Comments corrected: the switch is in place, and the canvas pool serves map transfers.
+- **`DEUS_Depth.js`, checks** (details in `test_changes.md` "Fix 2"):
+  - `switch_same_frame` is stricter. It judges exactly the 5 switches, at the event and in the first drawn frame, and
+    requires the planes' levels and a paint since bound, units on their cell's foot, and no stale sprites.
+  - `canvases_freed` goes through 2 map transfers (`UF.World.transferView`) and checks the planes are bound when each new
+    scene starts.
+  - Required counts unchanged: 12 and 27.
+- **Docs.** `docs/systems/DEUS_Depth.md`: §3 (the in-place order, which event binds and places, the cost), §5, §6, §7.
+  `test_changes.md`.
+
+## F2.4 Gates on `c2184c94` (each in its own fresh clone; raw logs in `evidence/fix2_c2184c94/`)
+**`node tools/test_layer_render_flat.js`, 3 consecutive runs** (through `determinism_runs.js`; `gate1_layers_flat_x3.log`):
+```
+RUN 1 | node tools/test_layer_render_flat.js | load at start: CPU 13.8 % (3 s), AI workers 2, nw.exe 0 (2026-09-26T11:21:05.193Z) | EXIT=0 DURATION_MS=28289 | RESULT: all required checks passed (exit 0) | required checks: 12/12 PASS | passed 12, failed 0 | world seed 1535928102
+RUN 2 | node tools/test_layer_render_flat.js | load at start: CPU 14.4 % (3 s), AI workers 2, nw.exe 0 (2026-09-26T11:21:36.834Z) | EXIT=0 DURATION_MS=33499 | RESULT: all required checks passed (exit 0) | required checks: 12/12 PASS | passed 12, failed 0 | world seed 1899970059
+RUN 3 | node tools/test_layer_render_flat.js | load at start: CPU 12.6 % (3 s), AI workers 2, nw.exe 0 (2026-09-26T11:22:13.660Z) | EXIT=0 DURATION_MS=33845 | RESULT: all required checks passed (exit 0) | required checks: 12/12 PASS | passed 12, failed 0 | world seed 355984856
+=== every run exited 0 ===
+```
+Run 1's `switch_same_frame` line (trimmed):
+```
+PASS layers_flat.switch_same_frame - switches 0->2 2->1 1->0 0->-1 -1->0: 0->2 at levels:viewChanged (frame 86): planes 1:shown painted since bound (3 paint(s)), 0:shown painted since bound (3 paint(s)); 1 unit(s) in the window, all with a frame on their cell; first drawn frame (frame 87): planes 1:shown painted since bound (3 paint(s)), 0:shown painted since bound (3 paint(s)); 1 unit(s) in the window, all with a frame on their cell; 2->1 at levels:viewChanged (frame 180): ... all with a frame on their cell; first drawn frame (frame 180): ...; 1->0 (frame 201) ...; 0->-1 (frame 228) ...; -1->0 at levels:viewChanged (frame 255): planes -1:shown painted since bound (25 paint(s)), -2:shown painted since bound (20 paint(s)); 1 unit(s) in the window, all with a frame on their cell; first drawn frame (frame 255): ... all with a frame on their cell
+```
+**`node tools/test_layer_render_flat.js --provoke --jobs 3`** (`gate1_provoke_layers_flat.log`), trimmed:
+```
+required checks: 12/12 PASS
+CAUGHT depth.flat_no_filters: FAIL layers_flat.flat_no_filters - plus2: planes on levels [1, 0], Container filters [ColorMatrixFilter]; ...
+CAUGHT depth.flat_position: FAIL layers_flat.flat_position - before the pan depth 1 off by (1,0), depth 2 off by (1,0); ...
+CAUGHT depth.flat_crisp: FAIL layers_flat.flat_crisp - 53504 opaque samples of the +2 planes' tile render, 14931 colour(s) not in the 51-colour source set, ...
+CAUGHT depth.switch_same_frame: FAIL layers_flat.switch_same_frame - switches 0->2 2->1 1->0 0->-1 -1->0: 0->2 at levels:viewChanged (frame 80): planes 1:shown NOT PAINTED since bound (2 paint(s)), 0:shown NOT PAINTED since bound (2 paint(s)) (want levels [1, 0], shown and painted); 1 unit(s) in the ...
+CAUGHT depth.unit_step_same_frame: FAIL layers_flat.unit_step_same_frame - unit A missing; unit E outside the window at x 196, stepped to (195,184) in frame 115: sprite NOT made ...
+CAUGHT depth.every_view_sees_through: FAIL layers_flat.every_view_sees_through - ...
+CAUGHT depth.scan_candidates_only: FAIL layers_flat.scan_candidates_only - 1205 unit(s) tested per frame; 695 on the planes' levels, 1205 in the world; ...
+CAUGHT depth.item_change_scoped: FAIL layers_flat.item_change_scoped - ... a stone given to unit A (held): [{"items":false,"all":true,"objects":true}, ...
+RESULT: all required checks passed, 8 provocation(s) run (exit 0)
+EXIT=0 DURATION_MS=161052
+```
+In that log, the provoked `switch_same_frame` line shows both observations failing:
+- at all 5 events the planes are NOT PAINTED, and in the 4 events with a unit in the window it is `NOT DRAWN ON THEIR CELL`;
+- in those 4 first drawn frames the unit is `NOT DRAWN ON THEIR CELL` too, because the units are held back. The frames are
+  81, 176, 197 and 251; the 0→−1 frame 224 has no unit in the window.
+
+**`node tools/test_layer_render_flat.js --suite depth`** (`gate2_depth.log`):
+```
+run: RESULT: 27 passed, 0 failed (exit 0) in 36.6 s (snapshot exit 0); snapshot C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_depth_15664_1790421959929 (deleted)
+  PASS depth.canvases_freed - after 4 in-place level switches and 2 map transfer(s) (a new spriteset each): 4 canvas layers in use, 4 canvases made since boot, 0 destroyed, 0 pooled (want 4 / 4 / 0 / 0); at each new scene's start, view 2: planes on levels [1 1 paint(s), 0 1 paint(s)]; view 2: planes on levels [1 1 paint(s), 0 1 paint(s)]
+required checks: 27/27 PASS
+RESULT: all required checks passed (exit 0)
+EXIT=0 DURATION_MS=36730
+```
+**`node tools/test_layer_render_flat.js --suite depth --provoke --jobs 3`** (`gate2_provoke_depth.log`). This run is not in the
+brief's list; `canvases_freed` changed, so I ran it. Trimmed:
+```
+required checks: 27/27 PASS
+CAUGHT depth.planes_present ... CAUGHT depth.entities_at_seam: (15 lines, as in Fix 1)
+CAUGHT depth.canvases_freed: FAIL depth.canvases_freed - after 4 in-place level switches and 2 map transfer(s) (a new spriteset each): 4 canvas layers in use, 12 canvases made since boot, 8 destroyed, 0 pooled (want 4 / 4 / 0 / 0); ...
+RESULT: all required checks passed, 16 provocation(s) run (exit 0)
+EXIT=0 DURATION_MS=272326
+```
+**`node tools/test_minimap.js`** (`gate3_minimap.log`): `RESULT: 24 passed, 0 failed (exit 0)`, `EXIT=0 DURATION_MS=107`.
+
+**`node tools/test_layer_switch_inplace.js`** (Lane N's gate; `gate4_layer_switch_inplace.log`), trimmed:
+```
+PASS layer_switch_inplace.same_scene_and_spriteset - Ground->+1: scene same, spriteset same, Scene_Map made 0, Spriteset_Map made 0; ...
+PASS layer_switch_inplace.ticks_never_skipped - ...
+PASS layer_switch_inplace.no_sync_build_after_prewarm - ...
+PASS layer_switch_inplace.switch_within_one_frame - Ground->+1: frames 0, renderFrames 1, ms 33.41 (work 29.35: swap 3.9, rebind 25.44, fog 0.01), in place true, reused true; ...
+PASS layer_switch_inplace.new_level_shown_at_once - ...
+PASS layer_switch_inplace.save_load_keeps_view_and_world - ...
+PASS layer_switch_inplace.no_errors - harness errors during the suite: none (0 before it); console.error calls: none
+RESULT: 7 passed, 0 failed (exit 0)
+SUMMARY: 7/7 checks passed; 34 s
+EXIT=0 DURATION_MS=36710
+```
+**`node tools/check_deus_syntax.js`** (`gate5_check_deus_syntax.log`): `Checked 52 DEUS plugin files. Errors: 0`,
+`EXIT=0 DURATION_MS=3616`.
+
+**`node tools/test_palette.js`** (`gate6_test_palette.log`): `Palette loaded successfully`, `EXIT=0 DURATION_MS=77`.
+
+**Syntax of the changed .js files:** `node --check game/js/plugins/DEUS_Depth.js EXIT=0`;
+`node --check tasks/WG.00.09b/lane-k/perf/fix2_switch_cost.js EXIT=0`.
+
+## F2.5 Benchmark on `c2184c94` (fresh clone; normal ×2 and stress ×2)
+The fix adds a flag test to `lateUpdate`, the per-frame unit path, so stress ran too.
+- Procedure: a 30 s `--load-probe` before each run, then `--scenario normal|stress --runs 1 [--append] --pre-log <probe>`,
+  as in Fix 1. Files: `perf/baseline_c2184c94.json`, `perf/stress_baseline_c2184c94.json`, `perf/logs_c2184c94/`.
+- Load, copied from the logs. Every probe was quiet: CPU median 15.1 / 15.0 / 12.2 / 2.9 % over 30 s, no other nw.exe.
+  ```
+  normal run 1: machine load quiet: CPU overall median 23.9 % (min 10.5, max 43.3, 111 samples); AI workers 1 at start, 1 at the end; other nw.exe 0 / max 0 / 0
+  normal run 2: machine load quiet: CPU overall median 24.5 % (min 16, max 52.7, 108 samples); AI workers 1 at start, 1 at the end; other nw.exe 0 / max 0 / 0
+  stress run 1: machine load quiet: CPU overall median 17.9 % (min 10.3, max 43.4, 110 samples); AI workers 1 at start, 1 at the end; other nw.exe 0 / max 0 / 0
+  stress run 2: machine load quiet: CPU overall median 14.6 % (min 8.9, max 33.1, 110 samples); AI workers 1 at start, 1 at the end; other nw.exe 0 / max 0 / 0
+  ```
+- Stress (0019-T):
+  ```
+  run 1 stress_day_30s    frame median  63.03 p95 190.27  worst 311.125 ms (15.865 fps at the median)  tick 61.25 ms   draws 182  CPU 11.8/15.3/27 %
+  run 1 stress_night_30s  frame median 71.635 p95 180.825 worst 344.78  ms (13.96 fps at the median)   tick 67.075 ms  draws 174  CPU 10.9/13.7/19.2 %
+  run 2 stress_day_30s    frame median  67.21 p95 204.98  worst 511.975 ms (14.879 fps at the median)  tick 64.23 ms   draws 210  CPU 10.9/13.9/22.8 %
+  run 2 stress_night_30s  frame median 67.675 p95 323.495 worst 535.365 ms (14.777 fps at the median)  tick 66.105 ms  draws 203  CPU 10.7/14.2/27.1 %
+  ```
+- Normal, steady views and the six switches (each switch phase is 30 frames after the request):
+  ```
+  run 1 steady_+2 15.95 / steady_+1 32.025 / steady_Ground 66.505 / steady_-1 89.755 ms frame median
+  run 2 steady_+2 15.99 / steady_+1 45.735 / steady_Ground 49.775 / steady_-1 54.065 ms frame median
+  run 1 switch phases frame median 60.33-97.175 ms, worst 360.43-691.085 ms
+  run 2 switch phases frame median 16.84-77.675 ms, worst 357.095-728.445 ms
+  ```
+- DEUS_Levels' `lastSwitch.ms` (from the request to the rebind, DEUS_Depth's sync included) was **8.9–29.2 ms** over the
+  12 in-place switches. The Fix 1 transfer switches measured 86.7–493.6 ms (`perf/baseline_eb446e06.json`).
+  - The bench's request-to-settled time was 34.6–179.1 ms, including the frames the harness waits. Fix 1: 105.0–515.0 ms.
+  - The switch phases' worst frames (357–728 ms) are in the same range as the steady views' worst frames (202–465 ms in
+    these runs). With the simulation running, I can't attribute them to the switch.
+  - The main behind these numbers differs from Fix 1's, so they are not a before/after of Fix 2. F2.6 is that comparison.
+- The K4 ranking (`perf/rank_k4.js`) was not re-run: the brief asks only for the bench.
+
+## F2.6 What the fix costs at a switch (Lane N's instrument, one run on each commit, seed 18, 23 switches)
+`node tools/test_layer_switch_inplace.js --evidence=<dir>` ran on `00ff1c59` and on `c2184c94`, both 7/7 EXIT=0
+(`evidence/fix2_c2184c94/inplace_perf_*`). Then
+`node tasks/WG.00.09b/lane-k/perf/fix2_switch_cost.js <before> <after>`, EXIT=0 (full table in
+`perf/fix2_switch_cost_output.txt`):
+```
+events    median    1.24 ->    7.31   max   11.01 ->   24.35   (23 / 23 switches)
+rebind    median    5.81 ->   12.35   max   13.49 ->   26.49   (23 / 23 switches)
+work      median   11.36 ->   19.46   max 1631.74 -> 1539.11   (23 / 23 switches)
+maxUpdate median   59.22 ->   52.24   max 1649.45 -> 1550.20   (23 / 23 switches)
+```
+- `events` is the time of all `world:*Built` listeners inside the rebind. The paint of the two planes and the unit pass
+  moved there from later in the same frame: about +6 ms median.
+- `maxUpdate` is the slowest `SceneManager.updateMain` around each switch. It did not go up (one run each).
+- The 1.5–1.6 s maxima are the rounds with the fog forced on (`UF.Fog.refresh`), in both runs.
+- Wall-clock numbers, reported and not gated.
+
+## F2.7 Scope
+`git diff --name-status 00ff1c59 HEAD` (run before this report was committed; DIFF_EXIT=0). Evidence and log folders are
+counted, not listed:
+```
+      1 A	tasks/WG.00.09b/lane-k/BRIEF_FIX2.md                       (PM, d137fe13)
+      2 A	tasks/WG.00.09b/lane-k/evidence/fix2_base_00ff1c59/...
+     18 A	tasks/WG.00.09b/lane-k/evidence/fix2_c2184c94/...
+      2 A	tasks/WG.00.09b/lane-k/evidence/fix2_repro_3538594d/...
+      5 A	tasks/WG.00.09b/lane-k/evidence/fix2_wip_c98e80a2/...
+      1 A	tasks/WG.00.09b/lane-k/launches/20260926_055850_prompt.txt  (ops, 43d61f1f)
+      1 A	tasks/WG.00.09b/lane-k/perf/baseline_c2184c94.json
+      1 A	tasks/WG.00.09b/lane-k/perf/fix2_switch_cost.js
+      1 A	tasks/WG.00.09b/lane-k/perf/fix2_switch_cost_output.txt
+      8 A	tasks/WG.00.09b/lane-k/perf/logs_c2184c94/...
+      1 A	tasks/WG.00.09b/lane-k/perf/stress_baseline_c2184c94.json
+      1 M	docs/systems/DEUS_Depth.md
+      1 M	game/js/plugins/DEUS_Depth.js
+      1 M	tasks/WG.00.09b/lane-k/test_changes.md
+```
+- Every path is inside `lane.json` `allowedPaths`. This `REPORT.md` is added after the listing.
+- `DEUS_Levels.js`, `DEUS_World.js` and `tools/test_layer_switch_inplace.js` are not touched.
+- `git diff --stat 0315c84a HEAD -- tasks/WG.00.09b/lane-k/review_grok_abdb6bbe.md tasks/WG.00.09b/lane-k/lane.json`
+  printed nothing, EXIT=0.
+- The untracked `launches/20260926_052850_prompt.txt` in the worktree is not mine. It is left untracked and uncommitted.
+- No art was generated, requested or integrated (DEC-007). The two PNGs in `evidence/fix2_c2184c94/inplace_perf_c2184c94/`
+  are harness screenshots.
+
+## F2.8 Screenshots (opened)
+Lane N's tool took these on `c2184c94`, round 1, 2 frames after each switch completed. That is not the first drawn frame;
+the check's observation F2.2 is the first-frame evidence.
+- `layer_switch_inplace.2_p2.png`: the +2 view (plate "+2", minimap tab +2).
+  - Through +2's open air, the ground level is drawn 1:1: meadow, trees, stumps, grass, a chest, and a grid of about 120
+    colonists without health bars. The planes draw no bars; bars belong to the viewed level's units.
+  - Two test units stand on wooden tiles to the right of the centre, and one has a health bar.
+- `layer_switch_inplace.3_Ground.png`: the ground view (plate "Ground", minimap tab 0). The same colonists stand on the
+  same cells, each now with its green health bar (the level on screen).
+- Together they show the lower level's units drawn by the planes at their own cells' positions after an in-place switch.
+
+## Fix 2: not done / known problems
+- **Not tried in the RMMZ editor's Playtest (F5).** Every run was the nw.exe harness.
+- **The event-time sync depends on Lane N's statement order in `finishSwitch`**: rebind, then fog, then `levels:viewChanged`.
+  If that order changes, `switch_same_frame` fails. That is intended, but the fix is not independent of a file I don't own.
+- **The first-drawn-frame observation wraps `Graphics.app.render`.** `Graphics._onTick` calls `this._app.render()`. It is
+  test-only and restored after the suite, but it depends on that engine detail.
+- **More work inside the rebind.** The planes' paint and unit pass now run inside Lane N's `rebindMs`, about +6 ms median
+  (F2.6). The frame total did not rise in one run each. Lane N's figures for `rebindMs` include DEUS_Depth's part from
+  now on.
+- **`canvases_freed` now does 2 map transfers inside the depth suite.** These are same-level reloads with a synchronous
+  rebuild of the level.
+  - The depth runs took 33.0–36.6 s here, against 33.9–39.9 s in Fix 1's five driver runs, so no added time stands out.
+  - A transfer also clears RMMZ's image cache, as every transfer does.
+- **`unit_step_same_frame`'s provocation fails with a different text** ("unit A missing"). See `test_changes.md`.
+- **`escalation.md` is unchanged.** Its E4 switch figures are for the transfer switches of `eb446e06`; F2.5 has the
+  in-place figures.
+- **Screenshots.** I did not keep screenshots from the layers_flat / depth gate runs: the driver deletes its snapshot
+  folders.
+- **Temp clones.** My 25 `%TEMP%\lanek-fix2-*` items (clones, logs, the gate script) were deleted before this report was
+  committed. `%TEMP%\deus_layer_switch\` is the Lane N tool's own parent folder and was empty; it is left.
+
+## Fix 2: try it in RMMZ
+1. Close the RMMZ editor, open the project, start a Playtest (F5), New Game.
+2. Switch levels with "," / "." or the plate's buttons: Ground → +2 → +1 → Ground → −1 → Ground.
+3. Expected: in the frame the new level appears, the levels below show through its open cells at 1:1, with their units
+   standing on their cells. No frame shows them missing or popping in, and there is no scene fade (the switch is in place).
+
+## Fix 2: decisions needed
+- None for Lane K. If Lane N's `finishSwitch` order is ever changed, its owner should keep the rebind before
+  `levels:viewChanged`, or tell Lane K.
+
+---
+
 # WG.00.09b Lane K: Fix 1 report (after Grok FAIL on 86bf49a9)
 
 Date: 2026-09-26. Writer: Claude (Lane K). Branch `task/lane-k`.
