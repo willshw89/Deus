@@ -1,0 +1,108 @@
+{
+    "schema": "deus.dependency_baseline.v1",
+    "about": "Known, pre-existing require findings of tools/security/check_dependencies.js (OPS.70.02). Keyed by path + kind + spec. A new finding still fails; an entry that no longer matches fails as STALE_BASELINE. Remove an entry when its file is fixed.",
+    "entries": [
+        {
+            "path": "game/js/plugins/DEUS_Colonists.js",
+            "kind": "MISSING_RELATIVE",
+            "spec": "./UF_SettlementPillars.js",
+            "reason": "Pre-existing on main (already at lane base 425b594c): UF_SettlementPillars.js was removed by the DEUS rename commit 0544ef02 (2026-09-22). The require sits in a try/catch fallback, so the game never loads it; the plugin gets the module from window.UF instead. Fix or retire: PROPOSED-Z-05."
+        },
+        {
+            "path": "game/js/plugins/DEUS_Colonists.js",
+            "kind": "MISSING_RELATIVE",
+            "spec": "./UF_Sanitation.js",
+            "reason": "Pre-existing on main (already at lane base 425b594c): UF_Sanitation.js was removed by the DEUS rename commit 0544ef02 (2026-09-22). The require sits in a try/catch fallback, so the game never loads it; the plugin gets the module from window.UF instead. Fix or retire: PROPOSED-Z-05."
+        },
+        {
+            "path": "game/js/plugins/DEUS_Colonists.js",
+            "kind": "MISSING_RELATIVE",
+            "spec": "./UF_Callings.js",
+            "reason": "Pre-existing on main (already at lane base 425b594c): UF_Callings.js was removed by the DEUS rename commit 0544ef02 (2026-09-22). The require sits in a try/catch fallback, so the game never loads it; the plugin gets the module from window.UF instead. Fix or retire: PROPOSED-Z-05."
+        },
+        {
+            "path": "game/js/plugins/DEUS_Colonists.js",
+            "kind": "MISSING_RELATIVE",
+            "spec": "./js/plugins/UF_Callings.js",
+            "reason": "Pre-existing on main (already at lane base 425b594c): UF_Callings.js was removed by the DEUS rename commit 0544ef02 (2026-09-22). The require sits in a try/catch fallback, so the game never loads it; the plugin gets the module from window.UF instead. Fix or retire: PROPOSED-Z-05."
+        },
+        {
+            "path": "game/js/plugins/DEUS_Colonists.js",
+            "kind": "MISSING_RELATIVE",
+            "spec": "./game/js/plugins/UF_Callings.js",
+            "reason": "Pre-existing on main (already at lane base 425b594c): UF_Callings.js was removed by the DEUS rename commit 0544ef02 (2026-09-22). The require sits in a try/catch fallback, so the game never loads it; the plugin gets the module from window.UF instead. Fix or retire: PROPOSED-Z-05."
+        },
+        {
+            "path": "game/js/plugins/DEUS_World.js",
+            "kind": "MISSING_RELATIVE",
+            "spec": "./UF_Callings.js",
+            "reason": "Pre-existing on main (already at lane base 425b594c): UF_Callings.js was removed by the DEUS rename commit 0544ef02 (2026-09-22). The require sits in a try/catch fallback, so the game never loads it; the plugin gets the module from window.UF instead. Fix or retire: PROPOSED-Z-05."
+        },
+        {
+            "path": "game/js/plugins/DEUS_World.js",
+            "kind": "MISSING_RELATIVE",
+            "spec": "./game/js/plugins/UF_Callings.js",
+            "reason": "Pre-existing on main (already at lane base 425b594c): UF_Callings.js was removed by the DEUS rename commit 0544ef02 (2026-09-22). The require sits in a try/catch fallback, so the game never loads it; the plugin gets the module from window.UF instead. Fix or retire: PROPOSED-Z-05."
+        },
+        {
+            "path": "tools/benchmark_performance.js",
+            "kind": "MISSING_RELATIVE",
+            "spec": "../game/js/plugins/UF_Proficiency.js",
+            "reason": "Pre-existing on main (already at lane base 425b594c): UF_Proficiency.js was removed by the DEUS rename commit 0544ef02 (2026-09-22). This legacy script throws MODULE_NOT_FOUND when run. Fix or retire: PROPOSED-Z-05."
+        },
+        {
+            "path": "tools/test_callings_system.js",
+            "kind": "MISSING_RELATIVE",
+            "spec": "../game/js/plugins/UF_Callings.js",
+            "reason": "Pre-existing on main (already at lane base 425b594c): UF_Callings.js was removed by the DEUS rename commit 0544ef02 (2026-09-22). This legacy script throws MODULE_NOT_FOUND when run. Fix or retire: PROPOSED-Z-05."
+        },
+        {
+            "path": "tools/test_callings_system.js",
+            "kind": "MISSING_RELATIVE",
+            "spec": "../game/js/plugins/UF_ProfileTabs.js",
+            "reason": "Pre-existing on main (already at lane base 425b594c): UF_ProfileTabs.js was removed by the DEUS rename commit 0544ef02 (2026-09-22). This legacy script throws MODULE_NOT_FOUND when run. Fix or retire: PROPOSED-Z-05."
+        },
+        {
+            "path": "tools/test_physical_inventory_proof.js",
+            "kind": "MISSING_RELATIVE",
+            "spec": "../game/js/plugins/UF_Containers.js",
+            "reason": "Pre-existing on main (already at lane base 425b594c): UF_Containers.js was removed by the DEUS rename commit 0544ef02 (2026-09-22). This legacy script throws MODULE_NOT_FOUND when run. Fix or retire: PROPOSED-Z-05."
+        },
+        {
+            "path": "tools/test_physical_inventory_proof.js",
+            "kind": "MISSING_RELATIVE",
+            "spec": "../game/js/plugins/UF_Resources.js",
+            "reason": "Pre-existing on main (already at lane base 425b594c): UF_Resources.js was removed by the DEUS rename commit 0544ef02 (2026-09-22). This legacy script throws MODULE_NOT_FOUND when run. Fix or retire: PROPOSED-Z-05."
+        },
+        {
+            "path": "tools/test_srd_equipment_proof.js",
+            "kind": "MISSING_RELATIVE",
+            "spec": "../game/js/plugins/UF_Conditions.js",
+            "reason": "Pre-existing on main (already at lane base 425b594c): UF_Conditions.js was removed by the DEUS rename commit 0544ef02 (2026-09-22). This legacy script throws MODULE_NOT_FOUND when run. Fix or retire: PROPOSED-Z-05."
+        },
+        {
+            "path": "tools/test_srd_equipment_proof.js",
+            "kind": "MISSING_RELATIVE",
+            "spec": "../game/js/plugins/UF_Rules.js",
+            "reason": "Pre-existing on main (already at lane base 425b594c): UF_Rules.js was removed by the DEUS rename commit 0544ef02 (2026-09-22). This legacy script throws MODULE_NOT_FOUND when run. Fix or retire: PROPOSED-Z-05."
+        },
+        {
+            "path": "tools/test_srd_rules_proof.js",
+            "kind": "MISSING_RELATIVE",
+            "spec": "../game/js/plugins/UF_Conditions.js",
+            "reason": "Pre-existing on main (already at lane base 425b594c): UF_Conditions.js was removed by the DEUS rename commit 0544ef02 (2026-09-22). This legacy script throws MODULE_NOT_FOUND when run. Fix or retire: PROPOSED-Z-05."
+        },
+        {
+            "path": "tools/test_srd_rules_proof.js",
+            "kind": "MISSING_RELATIVE",
+            "spec": "../game/js/plugins/UF_Rules.js",
+            "reason": "Pre-existing on main (already at lane base 425b594c): UF_Rules.js was removed by the DEUS rename commit 0544ef02 (2026-09-22). This legacy script throws MODULE_NOT_FOUND when run. Fix or retire: PROPOSED-Z-05."
+        },
+        {
+            "path": "tools/test_unified_capability_proof.js",
+            "kind": "MISSING_RELATIVE",
+            "spec": "../game/js/plugins/UF_Proficiency.js",
+            "reason": "Pre-existing on main (already at lane base 425b594c): UF_Proficiency.js was removed by the DEUS rename commit 0544ef02 (2026-09-22). This legacy script throws MODULE_NOT_FOUND when run. Fix or retire: PROPOSED-Z-05."
+        }
+    ]
+}
