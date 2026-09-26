@@ -1430,18 +1430,6 @@
             savePng("planes_only_plus2_tiles", render);
             savePng("canvas_depth1", p1._tilemap._lowerLayer.bitmap);
             savePng("canvas_depth2", p2._tilemap._lowerLayer.bitmap);
-            // The deck (a +1 floor over opaque low ground) is the strongest case: seen from +2 it must show depth 1's planks, never the ground under them.
-            const deckCell = deck.find(c => onScreen(c.x, c.y)) || null;
-            const maskCell = deckCell || airOverTerrace;
-            let maskOk = false, detail6 = "";
-            if (maskCell) {
-                const pp = cellScreen(maskCell.x, maskCell.y);
-                const gx = Math.round(pp.x), gy = Math.round(pp.y);
-                const seen = render.getPixel(gx, gy), want1 = neighbours(p1, gx, gy), tx2 = texelOf(p2, gx, gy);
-                maskOk = want1.has(seen);
-                detail6 = `${deckCell ? "deck" : "terrace"} cell (${maskCell.x},${maskCell.y}) at screen (${gx},${gy}): drawn ${seen}, depth 1 texels {${[...want1].slice(0, 4).join(" ")}}, ground texel under it ${tx2.color}/${tx2.alpha}`;
-            }
-            t.check("mask_order", !!maskCell && maskOk, detail6 || "no deck or terrace cell under open air in view");
             // The two-depth chain: a low-ground cell (open on +2 and on +1) shows the ground's texel, with depth 1 transparent there.
             // The cell must have ground art under it: kinds the live Outside_A2 sheet does not paint are transparent (AUDIT_LOG A9).
             let chainCell = null, chainCandidates = 0;
@@ -1459,6 +1447,36 @@
                 chainOk = seenA === 255 && want2.has(seen) && tx1.alpha === 0;
                 detail7 = `low ground (${chainCell.x},${chainCell.y}) at screen (${gx},${gy}): drawn ${seen}/${seenA}, ground texel ${tx2.color}/${tx2.alpha}, ground texels {${[...want2].slice(0, 4).join(" ")}}, depth 1 alpha there ${tx1.alpha}`;
             }
+            // Mask order: a +1 floor seen from +2 shows depth 1's texel, never the ground under it. Only a floor over PAINTED ground
+            // tells the order apart: over transparent ground (AUDIT_LOG A9, or a cut) depth 1 wins whatever the order. The fixture
+            // deck is used where its ground is painted; otherwise one more deck cell is laid over low ground with painted ground (not
+            // the chain cell) and the planes repaint.
+            const opaqueUnder = c => { const pc = cellScreen(c.x, c.y); return texelOf(p2, Math.round(pc.x), Math.round(pc.y)).alpha === 255; };
+            let maskCell = deck.find(c => onScreen(c.x, c.y) && opaqueUnder(c)) || null, maskKind = "deck";
+            if (!maskCell) {
+                let spot = null;
+                for (let y = best.wy; y < best.wy + ROWS && !spot; y++) for (let x = best.wx; x < best.wx + COLS && !spot; x++) {
+                    if (!(onScreen(x, y) && far(x, y) && shAt(shape2, x, y) === OPEN && shAt(shape1, x, y) === OPEN)) continue;
+                    if ((chainCell && chainCell.x === x && chainCell.y === y) || deck.some(c => c.x === x && c.y === y) || !opaqueUnder({ x, y })) continue;
+                    spot = { x, y };
+                }
+                if (spot && L.setShape({ area, x: spot.x, y: spot.y, z: 1 }, "floor", { constructed: true, material: "wood" })) {
+                    deck.push(spot);
+                    maskCell = spot;
+                    maskKind = "added deck";
+                    await t.waitFrames(4);
+                }
+            }
+            let maskOk = false, detail6 = "";
+            if (maskCell) {
+                const maskRender = maskKind === "deck" ? render : planesOnly();
+                const pp = cellScreen(maskCell.x, maskCell.y);
+                const gx = Math.round(pp.x), gy = Math.round(pp.y);
+                const seen = maskRender.getPixel(gx, gy), want1 = neighbours(p1, gx, gy), tx2 = texelOf(p2, gx, gy);
+                maskOk = tx2.alpha === 255 && want1.has(seen);
+                detail6 = `${maskKind} cell (${maskCell.x},${maskCell.y}) at screen (${gx},${gy}): drawn ${seen}, depth 1 texels {${[...want1].slice(0, 4).join(" ")}}, ground texel under it ${tx2.color}/${tx2.alpha}`;
+            }
+            t.check("mask_order", !!maskCell && maskOk, detail6 || "no +1 floor over painted ground in view, and no low-ground cell with painted ground to lay one on");
             // The carved hole is a visual fixture (in the screenshots); what the ground draws under a hill is reported, not judged here.
             if (hole) {
                 const c = cellScreen(hole.x, hole.y);

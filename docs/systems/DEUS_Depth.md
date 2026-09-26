@@ -1,92 +1,129 @@
 # DEUS_Depth
-Vertical depth compositing: while a level above the ground is on screen, the level below it (depth 1) and, through that level's open cells, the level two below (depth 2) are drawn beneath the tile layer of the map on screen, each scaled about the viewport centre by a camera model (a pinhole eye `EyeHeightFt` above the viewed level, every level 6 ft lower: `scale = eye / (eye + 6 ft × depth)`), every pixel still nearest-sampled; beyond the last drawn level lies the void. User direction 2026-09-24 (the last of three that day, see the VISION decision log): "showing 2 layers, but zooming them at the correct distance to simulate being 6 feet farther away", before any blur. The earlier relayed addendum ("DEUS — VERTICAL DEPTH COMPOSITING VISUAL DIRECTION UPDATE": crisp projection first, value cues second, no blur by default) and the user's intermediate "one level below, blurred, black beyond" survive as presets.
 
-**Owner:** Fable / Claude Code · **File:** `game/js/plugins/DEUS_Depth.js` · **Load order:** after `DEUS_Levels`, `DEUS_Camera`, `DEUS_Culling` (`@base DEUS_Levels`); before `DEUS_Test`.
+Flat layer compositing. On every view, wherever the viewed level's cell is open, the levels below are drawn 1:1 through it, down to `MaxDepth` levels below; beyond them lies the void.
 
-## 1. Purpose
-`DEUS_Levels` shows one level at a time on its own RMMZ map. On `+1` and `+2` the open-air look of tileset 92 is composed transparent (`DEUS_Levels` `compose()`), so until now the BlueSky parallax showed through open air and nothing of the terrain below was drawn. This plugin draws the levels below through those openings. The projection is the addendum's
+- **Owner decision DEC-011** (2026-09-25 23:54 CT, relayed by PM 0017-Q): every Z layer renders 1:1. There is no blur, no scale or zoom, no parallax or projection offset, and no ColorMatrix, alpha or tint depth shading or any other filter. Visual depth effects will be revisited later, and only with the Owner.
+- **Owner, 2026-09-25 23:52 CT**, on the Ground view: "it doesnt look like we have cuts down to z-2 yet". So see-through applies on every view, not only on +1/+2.
+- This supersedes the camera-model projection, the `deus` preset (colour matrix plus blur) and presets A–E of 2026-09-24 (DEC-006/R1, superseded).
 
-```
-projectedScreen = centre + (unprojectedScreen - centre) * depthScale
-```
+**Owner:** Claude Code (Lane K, WG.00.09b) · **File:** `game/js/plugins/DEUS_Depth.js` · **Load order:** after `DEUS_Levels`, `DEUS_Camera`, `DEUS_Culling` (`@base DEUS_Levels`); before `DEUS_Test`. **Parameter:** `MaxDepth` (2). `plugins.js` passes `{"MaxDepth": "2"}`.
 
-with the centre at the viewport centre (the camera focus), so a hole's opening stays over the terrain seen through it at the centre of view, and lower geometry recedes inward towards the edges by `(1 - scale) * half the viewport` (12 px at 0.97, 24 px at 0.94 on the 816 px view). Camera movement therefore gives a small natural parallax, proportional to the scale, never more than that edge shift.
+## 1. What is drawn
+- **Views and planes.** On a view at level z, depth 1 shows level z−1 through z's open cells, and depth 2 shows level z−2 through the open cells of both. Below the last drawn level, or below −2 where no level exists, the void colour `#08080C` shows.
+  - +2 shows +1 and the ground.
+  - +1 shows the ground and −1.
+  - Ground shows −1 and −2.
+  - −1 shows −2, then the void.
+  - −2 shows the void at its open cells.
+  - A level with no open cell binds nothing.
+  - `config.exposes(z)` (every level) decides which levels' open cells show what is below. The provocation `ground_draws_through_openings` restores the old `z > 0` rule.
+- **Solid cells stay opaque.** The planes and the void sit under the map's lower tile layer (`Sprite_DepthRoot`, `z = −1`, a child of `Spriteset_Map._tilemap`), so the viewed level's own tiles hide them.
+  - They are also clipped by a stencil mask (a `PIXI.Graphics`, not a filter) to the viewed level's open cells. The mask is one rectangle per horizontal run of open cells in the tilemap's window, rebuilt when the start cell or a shape changes and moved every frame.
+  - A solid cell whose art has transparent pixels (AUDIT_LOG A9) still shows nothing below.
+- **Open cells of the viewed level are not painted by the map.** While the planes are on, the map tilemap instance gets its own `_addSpot`, which skips the viewed level's open cells.
+  - On +1/+2 those cells are transparent open air anyway.
+  - On the ground they are painted as rock face (DEUS_WorldGen), and below the ground as `cave_floor` + `hole_edge` (DEUS_Levels). Either would hide what is below.
+  - Switching the planes off repaints them as before.
+- **Each plane skips its own level's open cells** (`DepthTilemap.skipCell`), so depth 2 shows through depth 1's open cells and the void through the last plane's.
+- **1:1.** A plane's canvas sits exactly where the map tilemap puts its own: `Sprite_DepthPlane.unprojected()` uses the tilemap's rounding (`startX × 48 − ceil(displayX × 48)`). Its scale is 1, its alpha 1, its `filters` null; the canvases are nearest-sampled.
+  - `UF.Depth.project` is the identity and `edgeShift()` is 0.
+  - The removed centre projection comes back only under the provocations `projection_origin` (0.97) and `parallax_bounded` (0.80).
+- **Colours that stay:** a unit's own `data.tint` and an item's material or type tint. These are the entities' colours, not depth shading.
+- **Canvas size.** `PAD` is 0: nothing projects inward any more. Each canvas is the tilemap's window, 912 × 720 px (19 × 15 tiles).
+  - A canvas is repainted when the window's start tile changes, on a refresh (tile or shape events), or every 30 frames while A1 water is in the window (the water frame of the map, rule 12).
+  - Repaint cost: 1.3–8.3 ms per plane (`repaint_cost`, runs of 2026-09-26, this machine).
+- **Data.** `UF.World.peekArea` gives the lower levels' cached builds (they are never re-read per frame). `UF.Levels.shapeGrid` gives the open cells, cached per level and patched cell by cell on `levels:shapeChanged` / `levels:cellChanged`.
 
-## 2. How it draws
-- **Depth planes.** A `Sprite_DepthRoot` is a child of `Spriteset_Map._tilemap` with `z = -1`: it renders after the parallax and before the lower tile layer (`z 0`). It owns a full-viewport void rectangle (`config.voidColor`, `#08080C`, rule 13's near-black range) drawn first, then two `Sprite_DepthPlane`s, depth 2 over the void and depth 1 over depth 2. Where the viewed level and every drawn level below are open, the void shows, never the sky. `config.maxDepth` (2 by default; 1 = one level then the void) says how many planes are bound.
-- **Camera model.** `config.camera = { eyeHeightFt: 190, levelHeightFt: 6 }`; a preset scale of `"camera"` resolves to `eye / (eye + depth × levelHeight)`: 190 ft → 0.969 / 0.941 (the addendum's 0.97 / 0.94), 120 ft → 0.952 / 0.909, 60 ft → 0.909 / 0.833, 30 ft → 0.833 / 0.714. `UF.Depth.setEyeHeight(ft)` re-derives the current preset's scales.
-- **Exposure mask = the viewed level's own tiles.** Because the planes sit under the tile layer and the open-air look is transparent, the viewed level's floors, rock faces, ramps and constructed decks occlude the planes everywhere except at its `open` cells. Depth 1's own open cells are transparent in its canvas as well, so depth 2 shows only through them (the two-depth chain, e.g. from `+2` through a hole in a `+1` terrace down to the ground). This performs the addendum's "render lower → project → restrict through exposed regions → composite beneath active geometry" by occlusion rather than by a stencil; the result is the same physically.
-- **Each plane is a stock `Tilemap`** (`DepthTilemap`) whose layers are canvas layers (`DepthCanvasLayer`): the engine's own spot logic (`_addAllSpots`, `_addAutotile`, A1 water frames, A4 walls, table edges, shadows) runs unchanged, and every `addRect` is a `drawImage` into a `Bitmap` with `smooth = false` set explicitly (the MZ `Bitmap` default is `smooth = true`, i.e. LINEAR). The stock WebGL layers were not usable: the renderer plugin `rpgtilemap` shares its three internal textures between every tilemap, so a second tileset (the ground's 91 under the levels' 92) would fight the map on screen for them.
-- **Data:** `UF.World.peekArea(area.x, area.y, z)`, the cached build of the lower level (built once if it never was; the ground's build is the one that was on screen). Its tileset (`$dataTilesets[map.tilesetId]`: 91 for the ground, 92 for the levels) supplies the sheets through `ImageManager.loadTileset` and the flags; both canvas layers get the sheets (the stock Tilemap feeds only its lower WebGL layer, because its layers share the renderer plugin's textures). Build policy: the plane keeps its build's `data` array, which `UF.World.setDerivedTile` / `setTile` patch in place; when a tile event for that level arrives and the peek cache (6 entries, LRU) has evicted the build meanwhile, the plane reads the level again before repainting. Nothing is re-read per frame, since a re-read can be a synchronous build. A plane may therefore show a build made for off-screen reads; the level's own tiles derive from its shapes (levels) or the seeded generator plus diffs (ground), so the difference from the level once shown is confined to what a generator adds after `world:created`.
-- **Window:** the viewport plus 48 px (`PAD`) on every side, so the inward projection never uncovers the window's edge. Each canvas is 1008 × 816 px (21 × 17 tiles). It is repainted only when the start tile changes, on a refresh, or, when A1 water is in the window, every 30 frames with the water frame of the map on screen (a sprite-frame step of the tileset, rule 12; the plugin synthesizes no motion). Per-frame cost otherwise: position and scale.
-- **Value cues** (presets B and C): one `PIXI.filters.ColorMatrixFilter` per plane (brightness, saturation, contrast), rendered at 1:1 screen resolution so it stays crisp. **Blur** (preset C only): a `PIXI.filters.BlurFilter`, for the comparison; never on by default.
-- **Entities of the lower level** (user direction 2026-09-24: "all of the assets on the layers below too, like trees and creatures"): each plane has an entity container between its tile layers, in unprojected screen coordinates shifted by the canvas origin, so the plane's transform projects them with the tiles. In it: the level's **objects** through a subclass of the live object layer (`UF.Objects.Sprite_Layer`) fed the lower level's build (the build is swapped in for `$dataMap` during its synchronous rebuild and placement, because wall autotile masks read the map on screen); its **items** on the ground (`UF.Items.find` on the level, UF_Items' frame rule: column 1, row 0 of the sheet, material or type tint); its **units** (`UF.World.unitsInArea`, the sheet's standing frame: sidecar `facings` rows for 8-direction sheets, RPG Maker's 3 × 4 rows otherwise, `characterIndex` block, sidecar anchor; dead or hidden units skipped); its **natural walls / cliff faces** (`UF.Levels.naturalWallCells` + `naturalWallFrame`) and, on the ground, its **ramps and stairs** (`groundConnectorCells`, the look's B-sheet frame). Sprites are pooled and sorted by foot position like the map on screen (items one below a unit on the same cell; walls at `max(7, y)`; connectors at 0.5). Unit and item sets are re-read when the view crosses a cell, on `objects:levelChanged` / `objects:changed` / `items:changed` / `world:unitAdded` / `world:unitRemoved` / `world:unitLevelChanged`, and every `config.entityRefreshFrames` (60) frames; tracked units' positions follow every frame. Nothing animates (V50: off the level on screen nothing moves). The shared sheets are forced to nearest sampling (`BaseTexture.setStyle`), which is identical at 1:1 on the map on screen.
-- Nothing is drawn on the ground or underground views: their hole look (`cave_floor` + `hole_edge`) is opaque art (`config.exposes(z)` is `z > 0`). Not drawn on the lower levels yet: fire (`DEUS_Fire`'s layer), the flood overlay, speech, stance rings and designations. Fog of the lower level is not applied (fog is off for development).
+## 2. Entities of the lower levels
+Objects, items, units, natural walls/cliff faces and, on the ground, ramps and stairs are pooled sprites in the plane's entity container. They are masked and sorted with the plane.
 
-## 3. Public API (`UF.Depth`)
+- **Objects:** a subclass of `UF.Objects.Sprite_Layer`, fed the level's build. It rebuilds on `objects:levelChanged` / `objects:changed` for that level, on a repaint, or when the view crosses a cell.
+- **Items:** `UF.Items.find` on the level, using the frame rule of UF_Items. On `items:changed` only the item sprites of the plane whose level holds the item are re-read, and only if the item is on the ground there or was drawn there. A held item (an arrow shot, a meal) touches no plane. Before K4, combat rebuilt every plane's walls and objects on every arrow.
+- **Walls and connectors:** `UF.Levels.naturalWallCells` / `groundConnectorCells`, re-read on a repaint or when the view crosses a cell. The walls' near-black upper caps (rule 13) are the lower level's own. For example, the bottom row of a cut shows the caps of the rock south of it.
+- **Safety net:** items and walls are re-read at least every `config.entityRefreshFrames` (300) frames.
+- **Units (K2):**
+  - **Membership every frame.** One pass over a candidate list: the world's units on the bound planes' levels, tested against the view window plus 3 cells (6 cells upwards for tall sprites).
+    - The list is remade when `UF.World.units()` returns a new array (a unit was added or removed), on `world:unitLevelChanged` / `world:unitAreaChanged`, when the planes are bound again, and at least every 60 frames.
+    - No `world:unitMoved` listener is used. `UF.Events.emit` writes a synchronous log line per listener of every `world:*` event (DEUS_Core; about 0.14 ms each, escalated in `tasks/WG.00.09b/lane-k/escalation.md`).
+  - **Same frame.** RMMZ updates the spriteset before the map, so the unit pass runs again after `Scene_Map.update` (`lateUpdate`). A step taken this frame gets its sprite's target before this frame is drawn.
+    - Units are placed against the display origin the tiles of this frame were placed with (`_cam`), so a scroll inside the map update cannot shift them off their cells.
+    - The spriteset's own update leaves the units to the late pass once one has run (K4: they used to run twice).
+  - **Walk.** When a unit's cell changes, its sprite walks from where it is drawn to the new cell over `UF.World.config.unitStepFrames` (16) simulation ticks (`UF.World._frame`, so it follows the time speed and stops while paused). It plays the sheet's walk columns while it moves: the sidecar's `animations.walk` at `frameMs`, or RPG Maker's 1, 2, 1, 0 at 10 ticks.
+    - A move of more than 2 cells (a fall or a placement) is not walked.
+    - Loop seams are crossed the short way.
+    - This is presentation only; the simulation is not touched. Frames are discrete sheet frames (rule 12).
+  - **Preload.** Every unit sheet of the area on screen starts loading at `Scene_Map.start`, at a rebuild (the planes' levels), and on `world:unitAdded` / `world:unitImageChanged` / level or area changes. A sprite never waits for its sheet after a switch.
+- **Not drawn on lower levels:** attack, cast and hurt frames, hitsplats, bars and RMMZ animations. DEUS_Anim and DEUS_Combat work only on Game_Events of the viewed level (escalation.md E5). Also not drawn: fire, the flood overlay, speech, stance rings, designations, fog.
+
+## 3. Level switches and canvases
+A level switch is still a map transfer (DEUS_Levels / DEUS_World; Lane N's in-place switch is 0017-Q). DEUS_Depth makes the switch cheap on its side:
+- **Canvas pool.** `Scene_Map.terminate` (after RMMZ's background snapshot) returns the planes' 4 canvases to a module pool, and the next spriteset takes them.
+  - Since boot, 4 canvases are made and none after that (`canvases_freed`). Without the pool (its provocation), 4 switches made 16 and destroyed 12.
+- **Bound in the switch's first frame.** The root binds, paints and places the planes when it is made (`createCharacters`). So in the frame of `levels:viewChanged` every visible plane is painted and every unit in the window has a frame (`switch_same_frame`).
+- **Measured:** request to started took 90–169 ms per switch after K4, in 12 switches. The planes' own part is the pooled canvases, peeks of cached builds (about 0.01 ms) and one paint of about 2–3 ms per plane.
+
+## 4. Public API (`UF.Depth`)
 | Member | Description |
 |---|---|
-| `config` | Developer-tunable: `enabled`, `preset`, `maxDepth` (2), `camera { eyeHeightFt: 140, levelHeightFt: 6 }`, `voidColor` (`0x08080c`), `origin { x: 0.5, y: 0.5 }` (fraction of the viewport), `maxParallaxPx` (36; diagnostic bound on the edge shift, three quarters of a tile), `exposes(z)`, `entities { objects, items, units, walls }` (all true), `entityRefreshFrames` (60), `blurQuality` (1; PIXI BlurFilter passes per direction, 2 is smoother at about twice the cost), `depths { 1: { scale, brightness, saturation, contrast, blur, alpha }, 2: {…} }` (the resolved values of the preset; `alpha` stays 1 by default because a fade in alpha lets the void show through). After editing, call `touch()` (looks) or `refresh()` (entities). |
-| `PRESETS` | `deus` (default; owner direction "DEPTH COMPOSITING VISUAL TUNING", 2026-09-24): eye 140 ft (0.959 / 0.921), fade in colour (brightness 0.92 / 0.82, saturation −0.10 / −0.22 ≈ 93 % / 85 %, contrast −0.045 / −0.10 ≈ 95.5 % / 90 %), blur 0.6 / 1.2 px, alpha 1; `deus_scale` its recession only; `deus_color` recession + fade/colour, no blur; `A` camera-model zoom, crisp (the fc3b358 baseline at 190 ft; A keeps the eye height set); `B` A + value step (brightness 0.93 / 0.86, saturation −0.15 / −0.30, contrast −0.06 / −0.12); `C` B + blur 0.5 / 0.8 px; `D` the level below at scale 1 blurred 1.5 px (use with `maxDepth` 1); `E` D + brightness 0.90, saturation −0.15; `off`. Tuning values, not frozen. |
-| `preset(name)` → bool | Apply a preset (a preset may set the eye height). F7 (keyMapper 118, free: F9 is RMMZ's debug key, F6 is `DEUS_NaturalConnections`') cycles deus → deus_scale → deus_color → A → B → C → D → E → off in play and logs the values to the console. |
-| `cameraScale(depth)`, `setEyeHeight(ft)` | The camera-model scale of a depth; move the eye and re-derive the current preset's scales. |
-| `setEnabled(on)`, `touch()`, `refresh()`, `rebuild()` | Turn the planes on/off; pick up config edits; repaint; re-bind the planes to the level on screen. |
-| `center()` | The projection origin on screen. |
-| `project(depth, sx, sy)` → `{ x, y }` | Where an unprojected screen point lands at that depth. |
-| `edgeShift(depth)` → px | `(1 - scale) * half the viewport`. |
-| `planes()` | The visible planes (`depth`, `level { x, y, z }`, `map`, `scale`, `x`, `y`, `unprojected(viewOx, viewOy)`, `entityCounts()` → `{ objects, units, items, walls }`). |
+| `config` | `enabled`, `maxDepth` (2), `voidColor` (`0x08080c`), `exposes(z)` (every level), `entities { objects, items, units, walls }`, `entityRefreshFrames` (300, the safety net for items and walls). After editing, call `touch()` or `refresh()`; `enabled` and `maxDepth` take effect on the next frame by themselves. |
+| `PAD` | 0 |
+| `project(depth, sx, sy)` | the identity `{ x: sx, y: sy }` (kept for callers; DEC-011) |
+| `edgeShift()` | 0 |
+| `setEnabled(on)`, `touch()`, `refresh()`, `rebuild()` | Turn the planes on or off (the map repaints its open cells accordingly); pick up config edits; repaint the planes; bind again. |
+| `planes()` | The visible bound planes (`depth`, `level`, `map`, `unprojected()`, `entityCounts()`, `inEntityWindow(win, x, y, size)`). |
 | `root()` | The `Sprite_DepthRoot` of the map scene, or null. |
-| `describe()`, `stats()` | The active values; `{ enabled, preset, view, origin, rebuilds, paints, lastPaintMs, peeks, lastPeekMs, planes: [{ depth, z, visible, scale, x, y, paints, water, filters, bitmap }] }`. |
+| `isOpen(ax, ay, x, y, z)` | Whether a cell is open, from the cached shape grid. |
+| `describe()`, `stats()` | `describe()`: "2 level(s) below, drawn 1:1 (DEC-011), void #08080c". `stats()`: `{ enabled, maxDepth, view, seeThrough, voidVisible, rebuilds, paints, lastPaintMs, peeks, lastPeekMs, layersAlive, canvasesMade, canvasesDestroyed, pooled, updates, lastUpdateMs, unitSteps, preloads, mainRepaints, unitsScanned, candidateRebuilds, entityRebuilds, itemRebuilds, itemDirties, objectDirties, planes: [{ depth, z, visible, scale, x, y, alpha, paints, water, entities, filters, bitmap }] }`. |
 
-Plugin parameters: `Preset` (start preset, default deus), `MaxDepth` (2), `EyeHeightFt` (140; overrides the preset's).
+Removed (DEC-011): the presets `deus`, `deus_scale`, `deus_color`, `A`–`E`, `off` (use `setEnabled`); `preset()`, `cameraScale()`, `setEyeHeight()`, `center()`; `config.camera`, `origin`, `maxParallaxPx`, `blurQuality`, `depths`; the `Preset` and `EyeHeightFt` parameters; the F7 hotkey (`Input.keyMapper[118]` is free again).
 
-**The treatment is one per plane.** The colour matrix and the blur are filters on the plane container, which holds the tiles and the entity sprites, so a tree, a unit, a stone, a wall and the ground of one level share one projection scale, one colour treatment and one blur; no sprite carries a filter of its own. The blur is a final effect on the composited plane; the sources (canvas layers, sheets) stay nearest-sampled, and at the active level nothing changes.
-
-## 4. Events
-Listened: `levels:shapeChanged`, `levels:cellChanged` (the open-cell cache is cleared and the planes repaint), `world:levelTileChanged` (repaint that level's plane), `world:tileChanged` (repaint the ground plane), `world:levelBuilt` / `world:areaBuilt` (re-bind), `world:created` (clear caches). Emitted: none.
-
-## 5. Save data
-None. The planes are derived from the levels' builds; nothing is written to `UF.World.state`.
+## 5. Events
+- **Listened:**
+  - `levels:shapeChanged`, `levels:cellChanged`: patch the open-cell cache, repaint that level's plane, and repaint the map when the cell is on the viewed level.
+  - `world:levelTileChanged`, `world:tileChanged`: repaint that level's plane.
+  - `world:levelBuilt`, `world:areaBuilt`: bind again.
+  - `world:created`: clear the caches.
+  - `objects:levelChanged`, `objects:changed`: the object layer of that level.
+  - `items:changed`: the item sprites of the plane concerned.
+  - `world:unitAdded`, `world:unitImageChanged`: preload.
+  - `world:unitLevelChanged`, `world:unitAreaChanged`: remake the unit candidates and preload.
+- **Emitted:** none.
+- **Save data:** none.
 
 ## 6. Checks
-Suite `depth` (not a default suite): `node tools/test_snapshot.js --name depth --plugins DEUS_Depth --suite depth`. Provocation: `UF_TEST_PROVOKE=depth.<check>` in a harness run. The suite finds the 17 × 13 window of the world with the most balanced mix of `+2`, `+1` and ground cells (or raises a fixture hill when the world has none), carves a hole in the `+1` terrace under `+2` open air and lays a three-cell wooden deck over low ground on `+1`, then views it from `+2`.
+Two suites, not default suites.
 
-| Check | Proves | Provocation |
-|---|---|---|
-| `preconditions`, `proof_scene` | The world, the levels and the surface grid exist; the window, hole and deck were found or built | (fixture-only) |
-| `planes_present` | On `+2` depth 1 shows level `+1` and depth 2 the ground, both painted, both with opaque pixels | the root binds nothing |
-| `repaint_cost` | Five repaints of one 1008 × 816 plane each take under 16 ms (numbers in the detail; this machine, nw.exe harness) | — |
-| `projection_origin` | The world point under the viewport centre is drawn at the centre; the left edge is drawn at `cx * (1 - scale)` | origin at the top-left corner |
-| `exposure_by_upper_geometry` | With the planes on and off, the pixels of a `+2` floor cell are identical and those of an open cell differ (the level below shows) | the planes are drawn above the tile layer |
-| `mask_order` | Through `+2` open air the wooden deck (a `+1` floor over opaque low ground) shows depth 1's plank texel, never the ground under it (a terrace cell is the fallback) | depth 2 drawn over depth 1 |
-| `depth2_through_depth1` | A low-ground cell (open on `+2` and `+1`) shows the ground's texel projected at depth 2 (0.94), with depth 1 transparent there; the detail also reports what the ground draws under the carved hole (nothing today: AUDIT_LOG A9) | depth 1's open cells filled black |
-| `entities_drawn` | An oak, a three-item stack and a `TEST_depth_unit` placed on the `+1` terrace in view are counted by the `+1` plane (with at least one wall/ramp frame), and the unit's body pixels in the planes' render change when units are switched off | no entities drawn at all |
-| `crisp_nearest` | Every opaque pixel of a render of the planes alone, entities switched off, is a colour of their source canvases (nearest sampling adds no colours) | `smooth = true` (bilinear) |
-| `parallax_bounded` | The edge shift of both depths is under `maxParallaxPx`; after a two-tile pan a fixed low-ground point has moved by `96 × scale` ± 1.5 px on depth 1; the point under the centre stays put | depth 1 scale 0.80 |
-| `tunables_take_effect` | Editing `config.depths[1].scale` changes the plane's scale on the next frame | — |
-| `preset_filters` | A has no filter, B a ColorMatrixFilter, C ColorMatrix + Blur, D a BlurFilter only, E both | — |
-| `one_level_below` | With `maxDepth` 1 and preset D only depth 1 is bound and the void is shown | — |
-| `void_beyond` | With one level below, a low-ground cell (open on `+2` and `+1`) renders the void colour in the planes' own render and on screen, never the sky | the void hidden |
-| `blur_by_default` | Preset D carries a BlurFilter and its render holds blended colours absent from the source canvases (the blur is real) | the blur asked for is never applied |
-| `depth_transform_progressive` | Under `deus`: depth 1 scaled, faded and blurred; depth 2 more so on every axis; both planes carry the colour matrix and blur; the active tilemap has scale 1, no filter, alpha 1; depth 2's edge shift under the bound | depth 2 given depth 1's values |
-| `entities_inherit_treatment` | The test unit's sprite is a child of the `+1` plane with the plane's world scale and no filter of its own, and its body pixel differs between `deus_scale` and `deus_color` (the colour treatment reaches the entity) | — |
-| `blur_off_no_blur` | Blur 0 on both depths leaves the colour matrix and no BlurFilter | — |
-| `color_off_baseline` | Neutral colour and blur 0 leave no filter, and a terrace pixel equals its source texel | — |
-| `visual_settings_no_physics` | Cycling every preset and two eye heights changes no unit position, cell shape, walkability or object | — |
-| `config_deterministic` | `deus` resolves to the same depths, eye height and description after A, 60 ft and E | — |
-| `treatment_cost` | Median engine tick (update + render submission, `Graphics.FPSCounter.duration`) over two interleaved rounds of 60 frames under five conditions: planes off, recession only, colour only, the full treatment at blur quality 1 and at quality 2. The colour treatment must add under 4 ms and the shipped blur (quality 1) under one frame (16.7 ms); every number is in the detail (this machine, nw.exe harness, editor open) | — |
-| `screenshots_written` | `plus2_off`, `tune_A_baseline` (A at 190 ft), `tune_B_scale`, `tune_C_scale_color`, `tune_D_full`, `plus2_A_eye190/120/60/30`, `plus2_B`, `plus2_C`, `plus2_D_oneLevelBlur`, `plus1_off`, `plus1_A_eye190`, `plus1_D_oneLevelBlur`, `plus1_tune_D_full` exist and are not empty; the suite also dumps `planes_only_plus2` (with entities), `planes_only_plus2_tiles` (tiles only: the render the tile checks read), `canvas_depth1`, `canvas_depth2` | — |
-| `ground_draws_nothing` | Back on the ground no plane and no void is visible | — |
-| `canvases_freed` | After three level switches exactly four canvas layers are alive (the spriteset on screen); the old spritesets' planes were destroyed with them | — |
-| `hotkey_free` | `Input.keyMapper[118]` was unassigned before the plugin took it | — |
-| `no_errors` | No uncaught error during the suite | — |
+- **`depth`**: `node tools/test_snapshot.js --name depth --plugins DEUS_Depth --suite depth`. 26 checks. They are listed with their changes in `tasks/WG.00.09b/lane-k/test_changes.md`: preconditions, proof_scene, planes_present, repaint_cost, projection_origin, exposure_by_upper_geometry, mask_order, depth2_through_depth1, entities_drawn, crisp_nearest, parallax_bounded, tunables_take_effect, no_filters_any_state, one_level_below, void_beyond, no_blends, flat_transform, entities_inherit_treatment, visual_settings_no_physics, config_deterministic, planes_cost, screenshots_written, ground_draws_through_openings, canvases_freed, hotkey_free, no_errors.
+- **`layers_flat`**: `node tools/test_layer_render_flat.js`. The driver requires every check, and `--provoke` proves each provocable check can fail. The same driver runs the depth suite with `--suite depth`. 12 checks: preconditions, fixtures, flat_position, flat_crisp, unit_step_same_frame, scan_candidates_only, item_change_scoped, every_view_sees_through, flat_no_filters, switch_same_frame, screenshots_written, no_errors.
+- **Provocations:** `UF_TEST_PROVOKE=depth.<check>`. Each is listed in `test_changes.md`.
+- **The suites set the harness clock to 12:00** (`UF.Time.setForTest`), because DEUS_DayNight tones the screen by the hour.
+- **Fixtures:**
+  - A 3 × 2 Z-2 cut is laid on the low ground nearest the window centre: the ground open; under it one −1 floor cell and five −1 open cells over a −2 floor.
+  - Test units are named `TEST_*`.
+  - The New Game seed differs per harness run, so the windows differ per run.
 
-## 7. Status (2026-09-24)
-- **Depth treatment (owner direction "DEPTH COMPOSITING VISUAL TUNING"; run `depth14`, the last clean run, 2026-09-24, the suite alone, RMMZ editor open):** `RESULT: 28 passed, 0 failed (exit 0)`. `depth_transform_progressive`: eye 140 ft, depth 1 scale 0.959 / brightness 0.92 / saturation −0.10 / contrast −0.045 / blur 0.6 px, depth 2 scale 0.921 / 0.82 / −0.22 / −0.10 / 1.2 px, both planes carrying `[ColorMatrixFilter, BlurFilter]`, the active tilemap at scale 1 with no filter, depth 2's edge shift 32.2 px; `entities_inherit_treatment`: the unit sprite is a child of the `+1` plane at world scale 0.959 with no filter, its body pixel `#fbdcc8` under `deus_scale` and `#dac1b1` under `deus_color`; `blur_off_no_blur`, `color_off_baseline` (terrace pixel `#352d24`, a source texel), `visual_settings_no_physics` (unit position, shapes, walkability and the object unchanged through every preset and two eye heights), `config_deterministic` (`deus` resolves to the same values after A, 60 ft and E) all PASS. Provocation seen failing (`depthP10`, depth 2 given depth 1's values). **Cost (`treatment_cost`, median engine tick over 2 × 60 frames, simulation paused, GL renderer "ANGLE (NVIDIA GeForce RTX 4060 Laptop GPU Direct3D11)"):** planes off 45.7 ms, recession only 62.5 ms (the compositing itself +16.9), colour −1.2 ms (free within noise), blur quality 1 +14.7 ms (the shipped setting), blur quality 2 +34.4 ms. These numbers are contaminated: the RMMZ editor was open throughout and the baseline of an idle map is 46 ms; between runs the same baseline ranged from 18 to 50 ms. The ordering (off < recession ≈ colour < blur 1 < blur 2) is what the design predicts; the absolute cost of the blur must be read in Playtest with F2 while cycling F7 before it is accepted.
-- **Screenshots opened (run `depth13`, natural window at (174,166), the +2 summit in the lower half, the +1 terrace across the middle with the oak, the test unit, the stone, the deck and the hole, the ground along the top with crop rows, a colonist, a bush and grass):** `tune_A_baseline` (A at 190 ft): all three surfaces at full brightness, told apart mainly by the black caps and the grass; `tune_B_scale` (140 ft): the terrace and ground a little smaller, a subtle change; `tune_C_scale_color`: the terrace slightly darker and greyer, the ground clearly darker and olive, the three elevations reading distinctly; `tune_D_full`: as C with a light softening of the terrace and a stronger one of the ground (the crop rows and the colonist soft but readable), the summit crisp; `plus1_tune_D_full`: from `+1`, the ground softened and darkened under open air. Fable's reading: D reads as three physical elevations and stays pixel art at these strengths; C is the fallback if any blur is refused; B alone changes little.
-- **Entities (run `depth9`, 2026-09-24):** `RESULT: 21 passed, 0 failed (exit 0)`. `entities_drawn`: an oak placed at (238,167), a stone stack at (241,167) and a `TEST_depth_unit` snapped to (244,167) on the `+1` terrace; the `+1` plane drew 11 objects, 1 unit, 1 item stack and 24 wall/ramp frames; the unit's body pixel in the planes' render read `#fbdcc8` (skin) against `#35312d` (terrace stone) with units switched off. Provocation seen failing (run `depthP9`: no entities drawn, all counts 0, the pixel unchanged). Screenshots opened from `depth9`: `plus2_A_eye190` shows, through the summit's open air, the terrace's oak, the pink-haired test unit, the grey stone, grass tufts and the wooden deck, the terrace's black cliff caps and brown wall faces along its lower edges, and the ground beyond with a yellow-crowned tree and grass; `plus1_A_eye190` shows the same entities at 1.0 on the `+1` view; `plus2_A_eye60` the same scene with every entity shrunk with its plane; `planes_only_plus2` the two planes alone. Rule-13 note: the black caps sit on the cell north of each `+1` wall, so from `+2` they appear as black blocks along the summit's edges through the open air, as the `+1` view draws them beside its core.
-- **Works (snapshot harness, not the editor Playtest):** `node tools/test_snapshot.js --name depth5 --plugins DEUS_Depth --suite depth` (2026-09-24, the fifth clean run, before the entity layers) → `RESULT: 20 passed, 0 failed (exit 0)`. Repaints of one plane 2.2–4.9 ms (`repaint_cost`), the peek of the cached lower builds 0.0 ms; at 190 ft the world point under the viewport centre is drawn at (408.3, 312.2) for a centre of (408, 312) and the left edge at 12.8 px for 12.5 wanted (plane positions are rounded to whole pixels); a two-tile pan moves a low-ground point by −93.1 px at 0.969 (want −93.1) and the point under the centre stays; 56 k sampled pixels of the planes' render hold no colour outside the source canvases (nearest sampling); with one level below, a low-ground cell renders `#08080c` (the void) on screen; preset D's render is 73 % blends (the blur is real); four canvas layers alive after three level switches.
-- **Provocations seen failing (each in its own snapshot run, 2026-09-24):** `projection_origin` (origin at the corner: centre drawn at 395.6), `exposure_by_upper_geometry` (planes above the tile layer: the floor cell changed), `depth2_through_depth1` (depth 1 filled black: alpha 255 there), `crisp_nearest` (`smooth = true`: 41 365 foreign colours), `planes_present` (nothing bound), `mask_order` (depth 2 over depth 1: the deck cell drew the ground's `#b28210`), `parallax_bounded` (scale 0.80: edge shift 81.6 px), `void_beyond` (void hidden: transparent render, screen `#080910`), `blur_by_default` (no filter: 0 blends). The measured checks without a provocation (`repaint_cost`, `tunables_take_effect`, `preset_filters`, `one_level_below`, `screenshots_written`, `ground_draws_nothing`, `canvases_freed`, `hotkey_free`, `no_errors`) compare live values against fixed expectations.
-- **Screenshots opened (run `depth5`, natural window at (86,116) with 70 ground / 73 `+1` / 78 `+2` cells, a hole carved at (87,117), a three-cell deck from (99,117)):** `plus2_off`: the `+2` summit's dark stone (a tree, grass, a rock pile on it) over the BlueSky parallax. `plus2_A_eye190`: the `+1` terrace (the same dark stone, at 0.969) beside and below the summit, the ground (grass with its shade squares, at 0.941) at the right edge, the deck on the terrace, and the hole as a dark stippled square (the void under the ground's transparent rock plus the ground's shade tile); everything crisp. `plus2_A_eye120`, `_eye60`, `_eye30`: the terrace and ground shrink toward the centre step by step; at 60 and 30 ft the terrace's wall face under the summit's edge shows as a widening dark band and the ground reads as a miniature. `plus2_B`: as 190 ft with the lower levels slightly darker and greyer. `plus2_C`: the same with a soft haze over the lower levels. `plus2_D_oneLevelBlur`: the terrace blurred, black where the ground would be. `plus1_off`, `plus1_A_eye190`, `plus1_D_oneLevelBlur`: the same from `+1` (the summit's core as soil-wall tiles with black caps, the ground beneath open air at 0.969, or blurred). `planes_only_plus2`, `canvas_depth1`, `canvas_depth2`: the planes' own renders.
-- **What the pictures say (Fable's reading, for the user's judgement):** at 190 ft the camera-model zoom is the addendum's look: the lower terrain sits "farther below" without softness, and the deck and the hole line up with what is under them at the centre of view. Two things limit the effect and are not the compositing's doing: (1) the `+2` summit and the `+1` terrace share the same `cave_floor` look and the painter draws no hanging faces, so the step alone reads weakly at 190 ft; (2) the ground draws nothing under hills (AUDIT_LOG A9), so under a terrace hole you see the void, not rock. One artefact is inherent to scaling about the centre: a lower-level feature exactly under an upper edge shifts toward the centre by `(1 − scale) × distance`, so the `+1` wall face under the summit's centre-facing edge peeks out (1–4 px at 190 ft, up to 12 px at the screen edge; a wide band at 30 ft). The non-integer nearest scale drops one texel row or column every 33 px (0.969) or 17 px (0.941); with the camera moving these rows crawl, which only Playtest can judge.
-- **Not done / known problems:** no editor Playtest (F5) yet; fog of the lower level is not applied; units, objects, items and the sprite-drawn cliff faces of the lower level are not drawn; underground views draw nothing (opaque hole art); the seed of a harness New Game differs per run, so the proof window differs per run (the checks find it from the surface grid each time).
+## 7. Status (2026-09-26, Lane K, branch `task/lane-k`)
+- **Gates at 4da2e734:**
+
+  | Command | Exit | Result |
+  |---|---|---|
+  | `node tools/test_layer_render_flat.js` | 0 | 12/12 |
+  | `node tools/test_snapshot.js --name depth --plugins DEUS_Depth --suite depth` | 0 | 26/26 |
+  | `node tools/test_minimap.js` | 0 | 24/24 |
+
+  The final commit re-runs them; see the report.
+- **Provocations:** 8/8 `layers_flat` and 15/15 `depth` provocations fail their check. `mask_order` needed a stronger probe first: over ground without art it could not tell the order apart. The check now probes a +1 floor over painted ground, laying one deck cell if the world has none in view.
+- **Screenshots** (opened) are in `tasks/WG.00.09b/lane-k/evidence/after_<sha8>/`, with the before set in `before_3a9daa0f/`:
+  - `plus2_flat`: +1 and the ground at 1:1 through +2's open air.
+  - `plus1_flat`: the ground and −1 through +1's.
+  - `ground_flat`: through the cut, the −1 floor with a test unit and the −2 floor.
+  - `minus1_off` / `minus1_flat`: the −2 floor through −1's open cells, under the blue cave tone.
+- **Cost:** see `tasks/WG.00.09b/lane-k/perf/` and `escalation.md`.
+  - With the simulation paused, the planes cost about 0.25–0.5 ms per tick (`paused_+2_planes_on/off`; `planes_cost` +0.5 ms).
+  - Under the stress scenario after K4, DEUS_Depth takes about 1.1 ms (update) + 1.1 ms (late pass) + 0.37 ms (render) per tick, against 3.4–3.7 + 1.1 + 0.36 before K4.
+  - A frame is dominated by the simulation (escalation.md E1–E3), not by the planes.
+- **Not done / known:**
+  - Not tried in the editor's Playtest (F5).
+  - Lower-level combat frames and effects are not drawn (E5).
+  - A switch is still a map transfer (Lane N).
+  - Fog of the lower levels is not applied.
