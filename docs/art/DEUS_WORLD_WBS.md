@@ -2,7 +2,7 @@
 
 **Document ID:** `DEUS-WORLD-WBS-v1.0`  
 **Namespace:** DW  
-**Rev:** 2  
+**Rev:** 3  
 **IDs:** Stable.  
 **Authority:** Project Owner Directive (2026-09-24)  
 **Maintained by:** Gemini & Claude Code  
@@ -38,15 +38,15 @@ The foundation phase establishes machine-enforceable rules, scales, and referenc
 
 ## 3. Phase DW.02 — Core Biome Ground & Water Assemblies (Temperate First)
 
-Mass production begins with one core biome to achieve golden visual quality before expanding.
+Mass production begins with one core biome to achieve golden visual quality before expanding. FLAG FOR REBUILD (DEC-030: 6 biomes x 5 bands + 15 transitions; art stays Owner-gated).
 
 | WBS ID | Leaf Name | Description | Status |
 |---|---|---|---|
-| **DW.02.01** | **Temperate Verdant Turf Autotile Suite** | Seamless base loam, swale meadow, sunlit rise, clover turf (Outside_A2). | QUEUED |
-| **DW.02.02** | **Temperate Flora & Groundcover Elements** | Slender blades, clover clusters, wild flowering tufts, low bushes (Outside_B). | QUEUED |
-| **DW.02.03** | **Temperate Freshwater & Shore Progression** | Shallow pebble stream, deep water, shoreline mud/gravel transitions (Outside_A1). | QUEUED |
-| **DW.02.04** | **Temperate Cliff & Elevation Strata** | 2-grid vertical rock cliffs, shelf ledges, cut stone steps. | QUEUED |
-| **DW.02.05** | **Temperate Common Trees Suite** | Multi-tile Common Oak (~84 px), Birch (~88 px), Pine (~92 px) with stumps/logs. | QUEUED |
+| **DW.02.01** | **Temperate Verdant Turf Autotile Suite** | Seamless base loam, swale meadow, sunlit rise, clover turf (Outside_A2). FLAG FOR REBUILD (DEC-030: 6 biomes x 5 bands + 15 transitions; art stays Owner-gated). | QUEUED |
+| **DW.02.02** | **Temperate Flora & Groundcover Elements** | Slender blades, clover clusters, wild flowering tufts, low bushes (Outside_B). FLAG FOR REBUILD (DEC-030: 6 biomes x 5 bands + 15 transitions; art stays Owner-gated). | QUEUED |
+| **DW.02.03** | **Temperate Freshwater & Shore Progression** | Shallow pebble stream, deep water, shoreline mud/gravel transitions (Outside_A1). FLAG FOR REBUILD (DEC-030: 6 biomes x 5 bands + 15 transitions; art stays Owner-gated). | QUEUED |
+| **DW.02.04** | **Temperate Cliff & Elevation Strata** | 2-grid vertical rock cliffs, shelf ledges, cut stone steps. FLAG FOR REBUILD (DEC-030: 6 biomes x 5 bands + 15 transitions; art stays Owner-gated). | QUEUED |
+| **DW.02.05** | **Temperate Common Trees Suite** | Multi-tile Common Oak (~84 px), Birch (~88 px), Pine (~92 px) with stumps/logs. FLAG FOR REBUILD (DEC-030: 6 biomes x 5 bands + 15 transitions; art stays Owner-gated). | QUEUED |
 
 ---
 
@@ -63,19 +63,22 @@ Mass production begins with one core biome to achieve golden visual quality befo
 
 ## 5. Phase DW.04 — Secondary Biomes (Expansion)
 
+Secondary biomes expansion suite. FLAG FOR REBUILD (DEC-030: 6 biomes x 5 bands + 15 transitions; art stays Owner-gated).
+
 | WBS ID | Leaf Name | Description | Status |
 |---|---|---|---|
-| **DW.04.01** | **Wetland / Swamp Biome Suite** | Peat soil, murky water, cypress/willow trees, reeds, mossy hummocks. | QUEUED |
-| **DW.04.02** | **Arid / Badlands Biome Suite** | Red clay, sandstone strata, scrub brush, dry wash gravel. | QUEUED |
-| **DW.04.03** | **Highland / Mountain Foothills Suite** | Craggy slate/granite, scree slopes, alpine scrub (zero snow). | QUEUED |
-| **DW.04.04** | **Volcanic / Deep Subterranean Suite** | Basalt slabs, ash loam, obsidian outcroppings, glowing magma seams. | QUEUED |
+| **DW.04.01** | **Wetland / Swamp Biome Suite** | Peat soil, murky water, cypress/willow trees, reeds, mossy hummocks. FLAG FOR REBUILD (DEC-030: 6 biomes x 5 bands + 15 transitions; art stays Owner-gated). | QUEUED |
+| **DW.04.02** | **Arid / Badlands Biome Suite** | Red clay, sandstone strata, scrub brush, dry wash gravel. FLAG FOR REBUILD (DEC-030: 6 biomes x 5 bands + 15 transitions; art stays Owner-gated). | QUEUED |
+| **DW.04.03** | **Highland / Mountain Foothills Suite** | Craggy slate/granite, scree slopes, alpine scrub (zero snow). FLAG FOR REBUILD (DEC-030: 6 biomes x 5 bands + 15 transitions; art stays Owner-gated). | QUEUED |
+| **DW.04.04** | **Volcanic / Deep Subterranean Suite** | Basalt slabs, ash loam, obsidian outcroppings, glowing magma seams. FLAG FOR REBUILD (DEC-030: 6 biomes x 5 bands + 15 transitions; art stays Owner-gated). | QUEUED |
 
 ---
 
 ## 6. DW-to-WG Canonical Crosswalk & Namespace Deprecation
 
 > **GOVERNANCE NOTICE (DEUS Directive 001, 2026-09-25):**  
-> The `DW` prefix is **DEPRECATED** for new leaves. Canonical world leaves are unified under `docs/worldgen/DEUS_WORLDGEN_WBS.md` (`WG` namespace). Historical `DW.01` leaves map 1:1 to canonical `WG.00` leaves as follows:
+> The `DW` prefix is **DEPRECATED** for new leaves. Canonical world leaves are unified under `docs/worldgen/DEUS_WORLDGEN_WBS.md` (`WG` namespace). Historical `DW.01` leaves map 1:1 to canonical `WG.00` leaves as follows:  
+> *Note: The crosswalk table below is a reference table and not leaf rows; IDs are prefixed with `Legacy ` to prevent leaf duplicate-ID collisions in governance tooling.*
 
 | Legacy DW ID | Canonical WG ID | Canonical Leaf Title | Status |
 |:---:|:---:|---|:---:|
@@ -85,10 +88,10 @@ Mass production begins with one core biome to achieve golden visual quality befo
 | Legacy `DW.01.04` | `WG.00.04` | Biome Identity Standard | `DONE` |
 | Legacy `DW.01.05` | `WG.00.05` | Palette Architecture & Material Ramps | `DONE` |
 | Legacy `DW.01.06` | *(no WG.00 equivalent; closest `WG.10.01` / `WG.30.02`)* | Seamless Autotile & Terrain Assembly Standard | `AUTHORIZED / PAUSED AT GATE` |
-| Legacy `DW.02.01–05` | `WG.50.01–03` *(water → `WG.57.01`)* | Temperate Z0 Golden Packs | `PLANNED` |
+| Legacy `DW.02.01–05` | `WG.50.01–03` *(water → `WG.57.01`)* | Temperate Z0 Golden Packs. FLAG FOR REBUILD (DEC-030: 6 biomes x 5 bands + 15 transitions; art stays Owner-gated). | `PLANNED` |
 | Legacy `DW.03.01` | `WG.10.02` | Architecture: Wall & Cliff Structural Architecture | `PLANNED` |
 | Legacy `DW.03.02–04` | *(no WG leaf; Gap 6)* | Architecture Packs (Doors, Roofs, Floors) | `QUEUED` |
-| Legacy `DW.04.01–04` | `WG.51.01–04` | Remaining Z0 Biome Packs (WET, ARID, HIGH, VOLC) | `PLANNED` |
+| Legacy `DW.04.01–04` | `WG.51.01–04` | Remaining Z0 Biome Packs (WET, ARID, HIGH, VOLC). FLAG FOR REBUILD (DEC-030: 6 biomes x 5 bands + 15 transitions; art stays Owner-gated). | `PLANNED` |
 
 *Rule:* Never issue new `DW.*` IDs. All new world and environment tasks must be minted under the canonical `WG` namespace in `docs/worldgen/DEUS_WORLDGEN_WBS.md`.
 
@@ -98,6 +101,7 @@ Mass production begins with one core biome to achieve golden visual quality befo
 
 | Rev | Date | Change |
 |:---:|:---:|:---|
+| 3 | 2026-09-26 | Flagged DW.02 and DW.04 biome packs and crosswalk rows for rebuild per DEC-030 (6 biomes x 5 bands + 15 transitions; art Owner-gated); noted crosswalk reference status. |
 | 2 | 2026-09-26 | Added Rev header, Namespace, Revision Log table, and prefixed crosswalk IDs to avoid check_claims duplicate ID detection. |
 | 1 | 2026-09-24 | Initial version of World-Art WBS with DW phase definitions. |
 

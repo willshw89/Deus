@@ -1,7 +1,7 @@
 # DEUS WorldGen Work Breakdown Structure
 
 **Namespace:** WG  
-**Rev:** 27  
+**Rev:** 28  
 **IDs:** Stable. Next free in WG.00 is WG.00.35  
 **Canonical Authority:** the Owner approves; the Coordinator records; the PM signs off.  
 **Status:** CANONICAL ON MAIN  
@@ -748,6 +748,7 @@ Notes:
 
 | Rev | Date | Change |
 |:---:|:---:|:---|
+| 28 | 2026-09-26 | Directive 0082-CE: Documented 9c0e7b57 additions (OPS.30.06, OPS.10.04, OPS.20.06, SIM.60.07), WG.50–57 rebuild flags, SIM.50.13 dependency and SIM.50.12 re-scoping, closures (SIM.60.01, SIM.40.10 -> DONE), IN_REVIEW updates (OPS.30.01, OPS.70.02), notes on OPS.10.01/OPS.20.01/SIM.40.01/SIM.40.05, and superseded notes for WG.00.04 & WG.68.02. |
 | 27 | 2026-09-26 | Re-applied WG WBS edits from 0536d392 corruption: WG.00.17 notes, WG.62.02 scope, world-grid packages WG.00.25..28, biome-stack packages WG.00.29..34; superseded WG.00.04 & WG.68.02. |
 | 26 | 2026-09-26 | Directives 0035-AJ, 0062-BK, 0063-BL: Minted SIM.40.00 (Material/strata model), SIM.40.11 (Matter ledger & reclamation), SIM.50.11 (People-side gap audit), SIM.50.12 (Living-world rule-breach fix), SIM.50.13 (Ore sprouting & fluid solver fixes), SIM.60.05 (SRD combat rules engine), SIM.60.06 (Combat stress benchmark), SIM.10.05 (Underground Year-0 viability). Recorded DEC-023..DEC-028. |
 | 25 | 2026-09-26 | Directive 0030-AE: Minted SIM.00.00 (Lane N layer-switch in-place, merged e27e8be5; Grok CLEAN PASS 14777983); closed SIM.50.01 (Living world gap audit, merged 4614dbfa; Grok PASS 15745e41). Rev 25 (194 packages, 54 Owner-gated). |

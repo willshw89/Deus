@@ -422,3 +422,21 @@ Every decision item recorded in this log must provide:
   2. **Models:** Frontier only (no flash/mini/small tiers).
   3. **Effort by judgment:** `top` (grok xhigh / claude max / codex ultra) for hard/high-risk writing (sim engines, refactors) and its reviews; `high` for ordinary lanes and reviews; `medium` or lower for routine ops, pulses, and record-only work.
   4. **Tooling:** `pm_ops\start_review.ps1 -Provider gemini` runs Gemini reviews. Gemini reviews must touch only `tasks/<T>/<lane>/review_gemini_<sha8>.md`, use subject `[gemini] <T> review <sha8>`, and hold exactly one VERDICT line. lane.json reviewer must be `gemini`.
+
+---
+
+### Decision `DEC-032`: Owner Model Standard
+- **Date Logged:** 2026-09-26
+- **Status:** `DECIDED` (Owner ruling 11:23–11:24 CT, Directive 0082-CE)
+- **Decider:** Owner
+- **Summary:**
+  1. **Tiers:** "Big" designates the hardest or highest-risk lanes: WG.00.17 (32-layer core), SIM.60.05 / SIM.60.06 (SRD combat), SIM.40.00 / SIM.40.11 (mass ledger), and SIM.00.01 (ADR-003 performance). Everything else is "Standard".
+  2. **Claude:** Standard is `claude-opus-5-5` at effort `high`. Big is `claude-fable-5-1` at effort `max` (writer).
+  3. **Codex:** Standard is `gpt-5.6-sol` at `xhigh`. Big is `gpt-6-astra` at `ultra`. Codex is exhausted account-wide (5.6 included) until Tue Sep 29 21:34 CT.
+  4. **Gemini:** `gemini-3.1-pro-preview` at thinking `HIGH`, falling back to `gemini-3.8-flash` at thinking `HIGH` (Gemini CLI 0.61.0).
+  5. **Grok:** `grok-4.7` at `xhigh`. `xhigh` is the Grok floor; nothing launches Grok below it.
+  6. **Effort Floor:** Effort never falls below the tier standard, including on fallback models.
+  7. **Fallback:** Step down each provider's model chain on limit errors, and return to the top model after the reset.
+  8. **Multi-Agent:** On for every provider and role by default. The only exception is tiny routine or record-only jobs.
+  9. **Reviews:** Never review your own provider's code.
+  10. **Context:** Y and Z reviews that ran at high effort are being re-run at xhigh (launched 11:27 CT).

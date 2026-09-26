@@ -10,6 +10,7 @@
 
 ## 0. Global Rules and Freezes
 - **DEC-007 Art Freeze (Owner, 2026-09-25):** No art of any kind may be generated, requested from any generator, or integrated as newly generated art by anyone (PM, Gemini, or any worker) without direct Owner involvement. All earlier autonomous-generation mandates are suspended. Test-harness PNG renders used as test evidence are allowed and not art.
+- **Owner Model Standard (DEC-032, 2026-09-26 11:23–11:24 CT):** Formal model tiers established: "Big" lanes (WG.00.17, SIM.60.05/.06, SIM.40.00/.11, SIM.00.01) require claude-fable-5-1 (max effort), gpt-6-astra (ultra; exhausted until Sep 29), gemini-3.1-pro-preview (HIGH thinking, fallback: 3.8-flash HIGH), grok-4.7 (xhigh floor). Multi-agent default on; cross-provider reviews mandatory.
 - **Migration Freeze:** The physical copy to `C:\Dev\DEUS` is frozen until all active writers commit and pause at a synchronized freeze point.
 - **Pre-Commit Hook Status:** Hook is **NOT installed** (waits for Grok pass on Lane C2b AND Lane E merge, per Directive 001-I §C).
 - **WG.00.08 Gate:** WG.00.08 cannot close until a passing Lane H proof, independent Grok verification, and PM sign-off.
