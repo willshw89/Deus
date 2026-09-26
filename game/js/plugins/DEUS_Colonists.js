@@ -547,7 +547,9 @@
 
             // Civic infrastructure: Town Square plaza and paths connecting to households
             const civicSteps = [];
-            const households = (H && H.all) ? H.all().filter(h => sameLevel(h, c)) : [];
+            // Left out while DEUS_Projects owns the settlement layout (DEUS-TSK-FABLE-17): DEUS_Floors has no "road"
+            // floor kind, so these steps could never be built and only kept colonists failing a job every 900 ticks.
+            const households = (H && H.all && !projectsManaged()) ? H.all().filter(h => sameLevel(h, c)) : [];
             if (households.length > 0) {
                 civicSteps.push({
                     id: "town_square_plaza",
@@ -3365,6 +3367,13 @@
         _claimTick = localTicks; _claimIndex = idx;
         return idx;
     }
+    // A bed kept for another household (DEUS_Projects: a cottage being built or standing for a family,
+    // DEUS-TSK-FABLE-17) is never claimed by anyone outside that family.
+    const keptForOthers = (u, area, x, y) => {
+        const P = window.UF && UF.Projects;
+        const who = P && typeof P.bedReservedFor === "function" ? P.bedReservedFor(area, x, y) : null;
+        return !!who && !who.includes(u.id);
+    };
     const bedStands = (u, b) => { const O = Objects(); return !!(O && b && typeof b === "object" && sameLevel(b, u) && isBedType(O.atIn(levelArea(u), b.x, b.y))); };
     // A record still worth keeping: the bed stands, or its square is free ground a household may still build on.
     const bedRecordUsable = u => {
@@ -3393,6 +3402,7 @@
         for (const b of O.findIn(area, { near: { x: c.site.x, y: c.site.y }, radius: bedSearchRadius(c), tags: ["bed"], unsorted: true })) {
             const holder = claims.get(bedKeyAt(u, b.x, b.y));
             if (holder !== undefined && holder !== u.id) continue; // held by a living colonist: never displaced
+            if (keptForOthers(u, area, b.x, b.y)) continue;
             if (Own && typeof Own.ownerOf === "function") {
                 const owner = Own.ownerOf({ kind: "object", area: copyArea(u.area), z: zOf(u), x: b.x, y: b.y });
                 if (owner && owner.kind === "unit" && owner.id !== u.id) continue;
@@ -3403,6 +3413,26 @@
         if (!best) return null;
         u.data.bed = { area: copyArea(u.area), x: best.x, y: best.y, z: zOf(u) };
         if (Own && typeof Own.assignBed === "function") { try { Own.assignBed(u, { area: copyArea(u.area), z: zOf(u), x: best.x, y: best.y }); } catch (e) { console.error(e); } }
+        _claimTick = -1;
+        emit("colonists:bedClaimed", u, u.data.bed);
+        return u.data.bed;
+    }
+    /**
+     * Claims one particular standing bed for the colonist (DEUS-TSK-FABLE-16: a household moving into its cottage takes
+     * the cottage's beds; the communal bed it held is free for the next claimant). ref: { area, z, x, y }. Null when no
+     * bed stands there, the cell is on another level, or another living colonist holds it; else the new record.
+     */
+    function claimBedAt(u, ref) {
+        const O = Objects();
+        if (!O || !u || !u.data || u.data.dead || !ref || !Number.isFinite(ref.x) || !Number.isFinite(ref.y)) return null;
+        const b = { area: copyArea(ref.area || u.area), x: ref.x | 0, y: ref.y | 0, z: ref.z === undefined ? zOf(u) : ref.z | 0 };
+        if (!sameLevel(b, u) || !bedStands(u, b)) return null;
+        const holder = bedClaims().get(bedKeyAt(b, b.x, b.y));
+        if (holder !== undefined && holder !== u.id) return null;
+        if (keptForOthers(u, { x: b.area.x, y: b.area.y, z: b.z }, b.x, b.y)) return null;
+        u.data.bed = b;
+        const Own = window.UF && UF.Ownership;
+        if (Own && typeof Own.assignBed === "function") { try { Own.assignBed(u, { area: copyArea(b.area), z: b.z, x: b.x, y: b.y }); } catch (e) { console.error(e); } }
         _claimTick = -1;
         emit("colonists:bedClaimed", u, u.data.bed);
         return u.data.bed;
@@ -3557,6 +3587,7 @@
         const permitted = beds.filter(b => {
             const holder = claims.get(bedKeyAt(u, b.x, b.y));
             if (holder !== undefined && holder !== u.id) return false; // another colonist's claimed bed (DEUS-TSK-FABLE-13)
+            if (keptForOthers(u, levelArea(u), b.x, b.y)) return false; // a family's cottage bed (DEUS-TSK-FABLE-17)
             const owner = UF.Ownership && UF.Ownership.ownerOf({ kind: "object", area: copyArea(u.area), z: zOf(u), x: b.x, y: b.y });
             return !owner || owner.kind === "public" || owner.kind === "unit" && owner.id === u.id || owner.kind === "faction" && owner.id === u.data.faction;
         });
@@ -5639,7 +5670,7 @@
         get: colonist,
         isColonist,
         assess, hazardOf, threatOf, criticalNeed, onUnitMoved, PRIORITY,
-        claimBed, claimedBed, allocateBeds, bedClaims, bedSearchRadius,
+        claimBed, claimBedAt, claimedBed, allocateBeds, bedClaims, bedSearchRadius,
         raiseAlarm, refugeFor, douseJob, burningPatientsFor, openJobs, feedJob, feedPatientsFor,
         state: colonyState,
         faction: () => (window.UF.Factions ? UF.Factions.get(factionId()) : null),

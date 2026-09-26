@@ -30,6 +30,7 @@
     "use strict";
 
     const RING_BUFFER_SIZE = 16;
+    const FIRE_RECENT_BEATS = 60;         // a death of burns within this many fire beats of the last burn names that fire
     const VALID_CAUSES = [
         "combat",
         "fire",
@@ -327,13 +328,17 @@
             deathSource: sourceName,
             primaryCause: classification.primaryCause,
             contributingCauses: classification.contributingCauses,
-            // The fire that killed a burn casualty (DEUS-TSK-FABLE-16): what UF_Fire attached when the unit died in a
-            // burning cell, else the provenance of the fire on the cell the unit died on, else null. Only a death by
-            // fire (the raw cause, or the classifier's burning flag) carries one.
+            // The fire that killed a burn casualty (DEUS-TSK-FABLE-16/17): only a death whose primary cause is fire
+            // carries one (a burning unit killed by a blow died of the blow). What UF_Fire attached when the unit died
+            // in a burning cell; else the fire that last burned it (d.lastFire, stamped by UF_Fire on every burn) when
+            // that was within FIRE_RECENT_BEATS, as when it walked out burning and died of its burns; else the fire on
+            // the cell it died on; else null.
             fireProvenance: (function() {
-                if (!(rawCause === "fire" || rawCause === "burned" || classification.primaryCause === "fire" || classification.burning)) return null;
+                if (classification.primaryCause !== "fire") return null;
                 if (d.fireProvenance && typeof d.fireProvenance === "object") return d.fireProvenance;
                 const Fire = (typeof window !== "undefined" && window.UF && window.UF.Fire) || (typeof global !== "undefined" && global.UF && global.UF.Fire);
+                const beatNow = Fire && typeof Fire.beatNow === "function" ? Fire.beatNow() : null;
+                if (d.lastFire && d.lastFire.provenance && (beatNow === null || beatNow - (d.lastFire.beat | 0) <= FIRE_RECENT_BEATS)) return d.lastFire.provenance;
                 if (Fire && typeof Fire.provenanceAt === "function" && victim.area) {
                     try { return Fire.provenanceAt({ x: victim.area.x, y: victim.area.y, z: zOf(victim) }, victim.x, victim.y); } catch (_) { return null; }
                 }
@@ -382,8 +387,12 @@
             const fp = record.fireProvenance;
             const c = fp.sourceCell || {};
             const on = fp.startedOn && typeof fp.startedOn === "object" ? ` on day ${fp.startedOn.day} at ${fp.startedOn.time}` : "";
-            // The structured sentence the packet asks for, in the ring buffer and on the console.
-            record.fireDeathText = `Burned to death by fire ${fp.fireId} originating from ${fp.sourceType}${fp.sourceObjectId ? ` (${fp.sourceObjectId})` : ""} at (${c.x}, ${c.y}, ${c.z | 0}) via ${Number.isFinite(fp.spreadSteps) ? fp.spreadSteps : (fp.spreadParents || []).length} spread steps`;
+            // The structured sentence the packet asks for, in the ring buffer and on the console: UF_Fire's own wording
+            // (one source), this plugin's copy only when UF_Fire is absent. The fire lists the casualty.
+            const FireSys = (typeof window !== "undefined" && window.UF && window.UF.Fire) || (typeof global !== "undefined" && global.UF && global.UF.Fire);
+            record.fireDeathText = FireSys && typeof FireSys.describeProvenance === "function" ? FireSys.describeProvenance(fp)
+                : `Burned to death by fire ${fp.fireId} originating from ${fp.sourceType}${fp.sourceObjectId ? ` (${fp.sourceObjectId})` : ""} at (${c.x}, ${c.y}, ${c.z | 0}) via ${Number.isFinite(fp.spreadSteps) ? fp.spreadSteps : (fp.spreadParents || []).length} spread steps`;
+            if (FireSys && typeof FireSys.noteCasualty === "function") { try { FireSys.noteCasualty(victim, fp); } catch (_) {} }
             recordEvent(victim, { type: "burned to death", text: record.fireDeathText, detail: fp.fireId });
             console.warn(`[DEATH FORENSICS] ${record.name} died on Day ${record.gameDay} at ${record.gameTime} at (${record.worldPosition.x},${record.worldPosition.y},z=${record.worldPosition.z}). ${record.fireDeathText}; the fire started at beat ${fp.startedAt}${on}, first fuel ${fp.firstFuelIgnited}, spread chain [${(fp.spreadParents || []).join(" -> ") || "none"}].`);
         } else {

@@ -598,13 +598,21 @@
         const size = state.size, ax = f.home.area.x, ay = f.home.area.y;
         const cat = catalog() || {};
         const blocked = new Set((Array.isArray(cat.groundKinds) ? cat.groundKinds : []).filter(g => g.passable === false).map(g => g.id));
+        // From ground generator 5 (DEUS-TSK-FABLE-17) a camp stands on valley ground only: under a +1 or +2 hill the
+        // ground cell is solid rock, and a camp there (its chest, its people) would be walled inside the hill. Worlds of
+        // an older generator keep the camps they were made with.
+        const L = window.UF && UF.Levels;
+        const genOf = st => (st && st.levels && st.levels["0"] && st.levels["0"].gen) || (L && L.GEN) || 0;
+        const volumetric = !!L && typeof L.surfaceElevationAt === "function" && genOf(state) >= 5;
         return withWorldState(state, () => {
             const memo = new Map();
             const land = (x, y) => {
                 const k = y * size + x;
                 if (!memo.has(k)) {
                     const c = cellInfo(ax * size + x, ay * size + y);
-                    memo.set(k, !!c && c.walkable && !c.peak && !c.water && !blocked.has(c.ground));
+                    let ok = !!c && c.walkable && !c.peak && !c.water && !blocked.has(c.ground);
+                    if (ok && volumetric) ok = L.surfaceElevationAt(ax * size + x, ay * size + y, state.seed, genOf(state)) === 0;
+                    memo.set(k, ok);
                 }
                 return memo.get(k);
             };

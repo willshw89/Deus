@@ -80,21 +80,44 @@
                 "DEUS_Dnd5e",
                 "DEUS_Callings",
                 "DEUS_HistoricalDemographics",
-                "DEUS_DeathForensics"
+                "DEUS_DeathForensics",
+                // Households (partner pairs, families, their homes) for DEUS_Projects' domestic housing
+                // (DEUS-TSK-FABLE-17): not in plugins.js while the editor holds it; register it there when the editor
+                // is closed and drop this line.
+                "UF_Households"
             ];
+            // Companions that must live on the page (DEUS-TSK-FABLE-17). require() runs a file in NW.js's Node
+            // context, where `window` is Node's own global and RMMZ's classes do not exist: such a plugin never
+            // reaches the page's window.UF and its Scene_Boot / DataManager hooks never install (an NW.js probe on
+            // 2026-09-24 showed UF.Households and UF.DeathForensics on Node's global only). These are read from the
+            // file require would load and evaluated in the page's global scope, synchronously, then checked.
+            const PAGE_COMPANIONS = { DEUS_DeathForensics: "DeathForensics", UF_Households: "Households" };
             for (const name of companionPlugins) {
                 const paths = [
                     `./js/plugins/${name}.js`,
                     `./game/js/plugins/${name}.js`,
                     `./${name}.js`
                 ];
+                let loaded = false, lastError = null;
                 for (const p of paths) {
                     try {
+                        if (PAGE_COMPANIONS[name]) {
+                            const file = require.resolve(p);
+                            (0, eval)(`${fs.readFileSync(file, "utf8")}\n//# sourceURL=js/plugins/${name}.js`);
+                            const ok = !!(window.UF && window.UF[PAGE_COMPANIONS[name]]);
+                            log(`[CORE] Companion plugin ${name} evaluated in the page from ${file}: window.UF.${PAGE_COMPANIONS[name]} ${ok ? "present" : "MISSING"}`);
+                            loaded = ok;
+                            if (!ok) lastError = new Error(`window.UF.${PAGE_COMPANIONS[name]} missing after evaluation`);
+                            break;
+                        }
                         require(p);
-                        log(`[CORE] Synchronously loaded companion plugin ${name}`);
+                        log(`[CORE] Synchronously loaded companion plugin ${name} (Node context: reaches the page only through global.UF)`);
+                        loaded = true;
                         break;
-                    } catch (_) {}
+                    } catch (e) { lastError = e; }
                 }
+                // A companion that fails to load says so (DEUS-TSK-FABLE-17: the loop used to swallow every error).
+                if (!loaded) log(`[CORE] Companion plugin ${name} NOT loaded: ${lastError && lastError.message ? lastError.message : lastError}`);
             }
 
             let isAutoTest = false;

@@ -488,6 +488,9 @@
             emit("environment:unitBurned", unit, dmg);
 
             if (d.hp <= 0) {
+                // Its burns killed it: the death is recorded as fire, with the provenance UF_Fire stamped on the unit
+                // when it was burned (d.lastFire; DEUS-TSK-FABLE-17).
+                if (!d.deathCause) d.deathCause = "fire";
                 if (C && typeof C.onUnitDeath === "function") C.onUnitDeath(unit, null);
                 else if (W && typeof W.removeUnit === "function") W.removeUnit(unit.id);
                 return;
@@ -499,7 +502,8 @@
         if (FireSys && typeof FireSys.ignite === "function" && unit.area) {
             const roll = (W && W.hash32 ? (W.hash32(W.state.seed, 0xfa11, beat, unit.id) >>> 0) % 100 : 50);
             if (roll < 20) {
-                FireSys.ignite(levelArea(unit), unit.x, unit.y, { cause: "running_flame" });
+                // The ground it sets alight joins the fire that caught it (DEUS-TSK-FABLE-17).
+                FireSys.ignite(levelArea(unit), unit.x, unit.y, { cause: "running_flame", carried: d.lastFire || null });
             }
         }
 

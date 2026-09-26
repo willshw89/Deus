@@ -88,6 +88,10 @@ Rule 4 mutants (each exit 1 on 2026-09-24): `panics_into_fire_when_choked` (a st
 
 `tools/test_stabilization.js` reads the Medicine check's result at `jobs:done` (the finished job is pruned from `UF_Jobs`' list before the check runs since the idle fallback): 12/12.
 
+## 5b. A named bed (DEUS-TSK-FABLE-16, 2026-09-24)
+
+`UF.Colonists.claimBedAt(unit, { area, z, x, y })` claims one particular standing bed for the colonist: refused (`null`) when no bed stands there, the cell is on another level, or another living colonist holds it; else `data.bed` becomes that cell (the earlier claim lapses with it, so the communal bed a household member held is free for the next claimant), `UF.Ownership.assignBed` is told when present, the claim index is invalidated and `colonists:bedClaimed` is emitted. `DEUS_Projects` uses it when a household moves into its cottage.
+
 ## 6. Known limits
 
 - No water container item exists in the catalog: the torture suite adds a harness-only `TEST_waterskin` (`liquid: "water"`); a real one is the catalog owner's to add, and a skin is not emptied by a douse.

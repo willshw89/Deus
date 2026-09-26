@@ -200,7 +200,7 @@
     async function run() {
         try {
             await waitUntil(() => SceneManager._scene instanceof Scene_Map && SceneManager._scene.isStarted() && ImageManager.isReady(),
-                30000, "the map scene to start");
+                180000, "the map scene to start"); // a New Game world takes about 60 s to create (2026-09-24 runs); 30 s timed out every suite
             await waitFrames(60); // let the fade-in finish
             write(`AVAILABLE SUITES: ${suites.map(s => s.name).join(", ")}`);
             const selected = suites.filter(s => Test.only ? s.name === Test.only : s.isDefault);

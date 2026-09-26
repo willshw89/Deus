@@ -96,7 +96,7 @@
     function make(u) {
         const s = state(), c = context(u);
         if (!s || !c) return null;
-        const h = Object.assign({ id: `household:${s.nextId++}`, members: [], foundedTick: tick(), generation: 0, home: null, reason: "No home planned" }, c);
+        const h = Object.assign({ id: `household:${s.nextId++}`, members: [], foundedTick: tick(), generation: 0, home: null, homeBuildingId: null, reason: "No home planned" }, c);
         if (u.data && u.data.familyId) h.familyId = u.data.familyId;
         if (u.data && u.data.surname) h.surname = u.data.surname;
         if (u.data && u.data.lineageId) h.lineageId = u.data.lineageId;
@@ -240,7 +240,9 @@
                 }
             }
             generations();
-            ensureTownHallHomes(people);
+            // The founders' shared town-hall home is this plugin's own plan; while DEUS_Projects owns housing its
+            // communal shelter is the emergency shelter and its cottages are the homes (DEUS-TSK-FABLE-16/17).
+            if (!projectsHouse()) ensureTownHallHomes(people);
             for (const h of all()) if (h.home) syncHome(h);
             return all();
         } finally { reconciling = false; }
@@ -677,9 +679,64 @@
         return res;
     }
 
+    // DEUS_Projects owns domestic housing while it is enabled with a cottage blueprint (DEUS-TSK-FABLE-16): this
+    // planner then plans no home of its own, so two planners never site houses for one household.
+    const projectsHouse = () => !!(window.UF && UF.Projects && (typeof UF.Projects.isEnabled !== "function" || UF.Projects.isEnabled()) &&
+        typeof UF.Projects.blueprint === "function" && UF.Projects.blueprint("household_cottage"));
+    /**
+     * A finished dwelling becomes the household's home (DEUS-TSK-FABLE-16): spec = { buildingId, x, y, w, h, area, z,
+     * wall, door, walls: [{x,y}], doors: [{x,y}], beds: [{x,y}], hearth: {x,y}, storage: {x,y}|null, entrance: {x,y} }.
+     * Sets homeBuildingId and a home record this plugin's enclosure and shelter checks read; beds go to members in
+     * order. Returns the home record, or null for an unknown household.
+     */
+    function assignHome(refH, spec) {
+        const h = resolve(refH);
+        if (!h || !spec || !Number.isFinite(spec.x) || !Number.isFinite(spec.y)) return null;
+        const people = members(h);
+        const beds = (spec.beds || []).map((b, i) => ({ x: b.x, y: b.y, unitId: people[i] ? people[i].id : null }));
+        // Each bed beyond the adults is a child's corner (DEUS-TSK-FABLE-17): canConceiveChild counts "child" rooms, so a
+        // couple in a cottage with a spare bed may have a child (DEUS_Projects gives a couple that spare bed).
+        const childCorners = Math.max(0, beds.length - people.filter(adult).length);
+        const home = {
+            id: `dwelling_${spec.buildingId}`, buildingId: spec.buildingId, x: spec.x, y: spec.y, w: spec.w | 0, h: spec.h | 0,
+            area: copyArea(spec.area || h.area), z: spec.z === undefined ? zOf(h) : spec.z,
+            wall: spec.wall || "wall_wood", door: spec.door || "door_wood",
+            walls: (spec.walls || []).map(p => ({ x: p.x, y: p.y })), doors: (spec.doors || []).map(p => ({ x: p.x, y: p.y })),
+            beds, sleeping: beds.map(b => ({ x: b.x, y: b.y })), spots: beds.slice(0, 2).map(b => ({ x: b.x, y: b.y })),
+            hearth: spec.hearth ? { x: spec.hearth.x, y: spec.hearth.y } : null, storage: spec.storage ? { x: spec.storage.x, y: spec.storage.y } : null,
+            entrance: spec.entrance ? { x: spec.entrance.x, y: spec.entrance.y } : null,
+            rooms: [{ type: "living", name: "Cottage", x: spec.x, y: spec.y, w: spec.w | 0, h: spec.h | 0, hearth: spec.hearth ? { x: spec.hearth.x, y: spec.hearth.y } : null }, { type: "bedroom", name: "Sleeping corner", beds: beds.length }]
+                .concat(Array.from({ length: childCorners }, () => ({ type: "child", name: "Child's corner" }))),
+            annexes: [], isShared: false, source: "projects", steps: []
+        };
+        h.homeBuildingId = spec.buildingId;
+        h.home = home;
+        h.isMovedIn = true;
+        h.reason = "Home built";
+        emit("households:homeAssigned", h, home);
+        return home;
+    }
+    function releaseHome(refH, reason) {
+        const h = resolve(refH);
+        if (!h) return false;
+        h.homeBuildingId = null;
+        h.home = null;
+        h.isMovedIn = false;
+        h.reason = reason || "No home planned";
+        emit("households:homeReleased", h);
+        return true;
+    }
+    /** Whether the household has an adequate permanent home: a dwelling of its own (not shared), enclosed, with a bed for every member (up to `capacity` when given). */
+    function isHoused(refH, capacity) {
+        const h = resolve(refH);
+        if (!h || !h.homeBuildingId || !h.home || h.home.isShared) return false;
+        const need = Number.isFinite(capacity) ? Math.min(members(h).length, capacity) : members(h).length;
+        return strictEnclosure(h, h.home) && structures(h).reduce((n, p) => n + (p.beds || []).length, 0) >= need;
+    }
     function planSteps(u) {
         u = unitOf(u);
         if (!person(u) || dead(u)) return [];
+        if (projectsHouse()) return [];
         if (!of(u)) reconcile();
         const h = of(u);
         if (!h || !samePlace(h, u) || !adult(u)) return [];
@@ -967,11 +1024,15 @@
             cells: home.sleeping.map(p => ({ x: p.x, y: p.y })), door: ref(h, home.doors[1] || home.doors[0]) };
     }
     const root = typeof window !== "undefined" ? window : (typeof global !== "undefined" ? global : {});
-    root.UF = root.UF || {};
+    // One namespace object for DEUS and UF (as DEUS_Containers does): DEUS_Core may load this file as a companion
+    // before it creates window.DEUS itself (DEUS-TSK-FABLE-17), and must then keep this object, not replace it.
+    root.DEUS = root.DEUS || root.UF || {};
+    root.UF = root.DEUS;
     const UF = root.UF;
     UF.Households = { state, all, of, members, structures, reconcile, formPair, pairReason: (a, b) => pairReason(unitOf(a), unitOf(b)),
         closeKin: (a, b) => closeKin(unitOf(a), unitOf(b)), planSteps, sitePlanSteps, demands, describe, roomForPair, CAPACITY, callingFor,
-        isEnclosed, isSheltered, activeFocalHousehold, childRooms, canConceiveChild, hasCommunalLiving, hasBedroom, join, make };
+        isEnclosed, isSheltered, activeFocalHousehold, childRooms, canConceiveChild, hasCommunalLiving, hasBedroom, join, make,
+        assignHome, releaseHome, isHoused, projectsHouse };
     function checkEnclosures() {
         const s = state();
         if (!s || !s.byId) return;

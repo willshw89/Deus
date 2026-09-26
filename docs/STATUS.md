@@ -7,8 +7,9 @@ Update this whenever reality changes. Write only what you've checked, and say ho
 **Current slice:** Slice 1: Autonomous Colonist AI & Settlement Construction (Autonomous Shelter Construction Loop COMPLETE — AWAITING USER REVIEW)
 
 ## In progress
-- **Astra (2026-09-24):** On hold / consumed per user directive ("ASTRA USE IS CONSUMED, FABLE ONLY FOR THE TIME BEING"). `DEUS-TSK-ASTRA-17` paused.
-- **Gemini (2026-09-24):** Clean source control integration and automated verification complete.
+- **Fable / Claude Code (2026-09-24):** In progress on `DEUS-TSK-FABLE-17` (authoritative writer for simulation & engine: hearth containment, domestic housing progression, volumetric terrain column & Z=0 cliff walls audit/refinement, and commit).
+- **Gemini (2026-09-24):** In progress on `CHARART-02 Candidate / Human Golden Pack Input` (ratified in `docs/CHARART_MASTER_CHARTER.md`; pilot visual geometry proof & non-living art production pipeline for AR-2010 and AR-2100..2102).
+- **Astra (2026-09-24):** On hold / consumed per user directive.
 
 ## DEUS-TSK-GEMINI-09 — Survival Defect Prevention, Hearth Containment, Volumetric Z0 Terrain & Housing Progression (2026-09-24)
 - **Status**: `COMPLETED — PASS`

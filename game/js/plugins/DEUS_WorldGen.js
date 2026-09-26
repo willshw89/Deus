@@ -945,6 +945,136 @@
     }
 
     //-------------------------------------------------------------------------
+    // The ground's column (DEUS-TSK-FABLE-16, owner directive 2026-09-24): hard volumetric terrain invariant. For every
+    // natural cell whose surface S (UF_Levels) is +1 or +2, the ground cell under it (z = 0) is solid rock, and at S = 2
+    // the +1 cell is solid too (UF_Levels' shapes). The ground's tiles follow those shapes here: a solid ground cell is
+    // the rock face ground kind (peak_rock: impassable, region 250), never grass, dirt or water; a cell carved or dug
+    // inside a hill (cave mouths, tunnels) is bare rock floor (rock); a ramp (natural: an S = 0 cell at the foot of a
+    // one-step rise) is dry ground, never water, and UF_Levels draws the ramp over it. UF_Levels draws the cliff faces.
+
+    let columnWarned = false;
+    // The column of an area's ground: { code(i) -> shape code 0..7, surface: Int8Array of S } or null when the ground has
+    // no column (no UF_Levels, a save from before generator 4: the ground's shape is its tiles). perCell: read shapes
+    // one cell at a time (a repaint) instead of copying the area's grid (a build).
+    function groundColumns(ax, ay, perCell) {
+        const L = window.UF && UF.Levels, m = compiled();
+        if (!L || typeof L.groundVolumetric !== "function" || !L.groundVolumetric()) return null;
+        if (!m || m.groundIndex.get("peak_rock") === undefined || m.groundIndex.get("rock") === undefined) {
+            if (!columnWarned) console.warn("UF_WorldGen: groundKinds lacks peak_rock or rock; the ground is painted without its column");
+            columnWarned = true;
+            return null;
+        }
+        const surface = L.surfaceGrid(ax, ay);
+        if (!surface) return null;
+        if (perCell) {
+            const size = UF.World.state.size;
+            return { code: i => L.shapeCodeAt(ax, ay, i % size, (i - (i % size)) / size, 0), surface };
+        }
+        const grid = L.shapeGrid(0, ax, ay);
+        return grid ? { code: i => grid[i], surface } : null;
+    }
+    WorldGen.volumeStats = {}; // "ax,ay" -> { columns, solid, carved, ramps, groundReplaced, waterSuppressed, sitePiecesSkipped } of the last ground build
+
+    function groundPalette(cat, m) {
+        const T = window.UF && UF.Tiles;
+        return {
+            shapes: shapeTable(),
+            waterBases: m.waterKeys.map(k => autotileBase(cat.water.surface[k])),
+            groundBases: m.groundIds.map((id, k) => (T && T.groundBase(id) !== null ? T.groundBase(id) : Tilemap.TILE_ID_A2 + k * 48)),
+            peakK: m.groundIndex.get("peak_rock"), rockK: m.groundIndex.get("rock"),
+            joins: (a, b) => !!(T && T.joins && T.joins(m.groundIds[a], m.groundIds[b]))
+        };
+    }
+
+    // Readers for the painter, in area-local coordinates (neighbours outside the area included): solid (the ground cell
+    // is solid), under (its surface is above the ground: S >= 1), kind (ground index painted there), wet (water index + 1
+    // painted there, 0 = none), peak (a mountain peak cell). natural: { kind, wet, peak } of the climate model. col null:
+    // nothing is solid and every cell is its natural ground (the painting before the column invariant).
+    function columnReader(col, size, d, gx0, gy0, natural, P) {
+        const one = d.areasX === 1 && d.areasY === 1;
+        const L = window.UF && UF.Levels;
+        const outside = new Map(); // cells of other areas (multi-area worlds): their surface height; their caves and digs aren't seen
+        const surfaceOut = (x, y) => {
+            const wx = ((gx0 + x) % d.width + d.width) % d.width, wy = ((gy0 + y) % d.height + d.height) % d.height;
+            const key = wy * 65536 + wx;
+            let s = outside.get(key);
+            if (s === undefined) {
+                s = L && typeof L.surfaceElevationAt === "function" ? L.surfaceElevationAt(wx, wy) : 0;
+                outside.set(key, s);
+            }
+            return s;
+        };
+        const local = (x, y) => one ? (((y % size) + size) % size) * size + (((x % size) + size) % size)
+            : (x >= 0 && y >= 0 && x < size && y < size ? y * size + x : -1);
+        const solid = col ? (x, y) => { const i = local(x, y); return i >= 0 ? col.code(i) === 1 : surfaceOut(x, y) >= 1; } : () => false;
+        const under = col ? (x, y) => { const i = local(x, y); return i >= 0 ? col.surface[i] >= 1 : surfaceOut(x, y) >= 1; } : () => false;
+        const ramp = col ? (x, y) => { const i = local(x, y); return i >= 0 && col.code(i) === 4; } : () => false;
+        return {
+            solid, under, ramp,
+            kind: (x, y) => solid(x, y) ? P.peakK : under(x, y) ? P.rockK : natural.kind(x, y),
+            wet: (x, y) => solid(x, y) || under(x, y) || ramp(x, y) ? 0 : natural.wet(x, y),
+            peak: natural.peak
+        };
+    }
+
+    // The ground tiles of one cell: { layer0, layer2, region, solid, carved, ramp }.
+    function paintGround(x, y, R, P) {
+        if (R.solid(x, y)) {
+            let mask = 0;
+            for (let k = 0; k < 8; k++) if (R.solid(x + NB[k][0], y + NB[k][1])) mask |= NB[k][2];
+            const tile = P.groundBases[P.peakK] + P.shapes[mask];
+            // Layer 2 repeats the rock face: UF_Tiles' shade overlay on layer 1 (E tiles, passable) must not open the rock
+            // to passage (RMMZ decides passage by the top tile that isn't a [*] tile).
+            return { layer0: tile, layer2: tile, region: PEAK_REGION, solid: true, carved: false, ramp: false };
+        }
+        const carved = R.under(x, y);
+        const w = R.wet(x, y);
+        let mask = 0, layer0;
+        if (w) {
+            for (let k = 0; k < 8; k++) if (R.wet(x + NB[k][0], y + NB[k][1])) mask |= NB[k][2];
+            layer0 = P.waterBases[w - 1] + P.shapes[mask];
+        } else {
+            const g = R.kind(x, y);
+            for (let k = 0; k < 8; k++) {
+                const ng = R.kind(x + NB[k][0], y + NB[k][1]);
+                if (ng === g || P.joins(ng, g)) mask |= NB[k][2];
+            }
+            layer0 = P.groundBases[g] + P.shapes[mask];
+        }
+        return { layer0, layer2: 0, region: !w && !carved && R.peak(x, y) ? PEAK_REGION : 0, solid: false, carved, ramp: R.ramp(x, y) };
+    }
+
+    /**
+     * The ground tiles of cell (x, y) of area (ax, ay) as a build paints them now (UF_Levels' shapes with their saved
+     * changes): { layer0, layer2, region, solid, carved }, or null without a world or catalog. UF_Levels repaints a
+     * ground cell whose shape changed, and its neighbours, with this.
+     */
+    WorldGen.groundTilesAt = function(ax, ay, x, y) {
+        const cat = catalog(), m = compiled(), st = window.UF.World && UF.World.state;
+        if (!cat || !m || !st) return null;
+        const d = dims(st), size = st.size, gx0 = ax * size, gy0 = ay * size, wm = waterModels(st);
+        const cells = new Map();
+        const natural = (lx, ly) => {
+            const gx = ((gx0 + lx) % d.width + d.width) % d.width, gy = ((gy0 + ly) % d.height + d.height) % d.height;
+            const key = gy * 65536 + gx;
+            let c = cells.get(key);
+            if (!c) {
+                const r = resolve(st.seed, d, m, wm, gx, gy, {});
+                c = { g: r.g, w: r.w, flags: r.flags };
+                cells.set(key, c);
+            }
+            return c;
+        };
+        const P = groundPalette(cat, m);
+        const R = columnReader(groundColumns(ax, ay, true), size, d, gx0, gy0, {
+            kind: (lx, ly) => natural(lx, ly).g,
+            wet: (lx, ly) => natural(lx, ly).w,
+            peak: (lx, ly) => (natural(lx, ly).flags & FLAG_PEAK) !== 0
+        }, P);
+        return paintGround(x, y, R, P);
+    };
+
+    //-------------------------------------------------------------------------
     // The generator
 
     function generate(ctx) {
@@ -1008,50 +1138,36 @@
 
         // 2. Tiles: water autotiles join any water; ground autotiles join the same ground kind (biome borders get outlines).
         // Painted by uf_worldgen on z = 0 only (paintLevel owns levels other than ground).
+        // Column invariant (DEUS-TSK-FABLE-16, owner directive 2026-09-24): where UF_Levels says the ground cell is solid
+        // (the surface is at +1 or +2 above it), the cell is the rock face, impassable, never grass or water; a cell dug
+        // or carved inside a hill (cave mouths) is bare rock floor. Everything else is painted as before.
+        const col = z === 0 ? groundColumns(ctx.areaX, ctx.areaY, false) : null; // null: a save from before the column levels (gen < 4)
+        const volume = { solid: 0, carved: 0, ramps: 0, groundReplaced: 0, waterSuppressed: 0, sitePiecesSkipped: 0 };
         if (z === 0) {
-            const shapes = shapeTable();
-            const waterBases = m.waterKeys.map(k => autotileBase(cat.water.surface[k]));
-            const groundBases = m.groundIds.map((id, k) => (window.UF.Tiles && UF.Tiles.groundBase(id) !== null ? UF.Tiles.groundBase(id) : Tilemap.TILE_ID_A2 + k * 48));
-            const L = window.UF && UF.Levels;
-            const b = L && typeof L.baseline === "function" ? L.baseline(0, ctx.areaX, ctx.areaY) : null;
-            const rockBase = (L && typeof L.tileBase === "function") ? L.tileBase("rock") : 4352;
-            const isSolidUnder = (cx, cy) => {
-                if (cx < 0 || cy < 0 || cx >= size || cy >= size) return false;
-                const idx = cy * size + cx;
-                return b && b.shape && b.shape[idx] === 1;
-            };
+            const P = groundPalette(cat, m);
+            const R = columnReader(col, size, d, gx0, gy0, {
+                kind: (x, y) => groundAt(x, y),
+                wet: (x, y) => {
+                    if (d.areasX === 1 && d.areasY === 1) return water[(((y % size) + size) % size) * size + (((x % size) + size) % size)];
+                    return inside(x, y) ? water[y * size + x] : probe(x, y).w;
+                },
+                peak: (x, y) => inside(x, y) && (flags[y * size + x] & FLAG_PEAK) !== 0
+            }, P);
             for (let y = 0; y < size; y++) {
                 for (let x = 0; x < size; x++) {
                     const i = y * size + x;
-                    if (b && b.shape && b.shape[i] === 1) {
-                        // Hard Volumetric Invariant: cell is solid cliff/hill supporting volume under S >= 1!
-                        let rockMask = 0;
-                        for (let k = 0; k < 8; k++) {
-                            if (isSolidUnder(x + NB[k][0], y + NB[k][1])) rockMask |= NB[k][2];
-                        }
-                        ctx.setTile(x, y, 0, rockBase + shapes[rockMask]);
-                        continue;
-                    }
-                    if (b && b.shape && b.shape[i] === 4) {
-                        // Natural ramp connecting Z0 to Z1
-                        const rampBase = (L && typeof L.tileBase === "function") ? L.tileBase("ramp_up") : 0;
-                        ctx.setTile(x, y, 0, groundBases[ground[i]] + shapes[0]);
-                        if (rampBase > 0) ctx.setTile(x, y, 1, rampBase);
-                        continue;
-                    }
-                    let mask = 0;
-                    if (water[i]) {
-                        for (let k = 0; k < 8; k++) if (waterAt(x + NB[k][0], y + NB[k][1])) mask |= NB[k][2];
-                        ctx.setTile(x, y, 0, waterBases[water[i] - 1] + shapes[mask]);
-                    } else {
-                        const g = ground[i];
-                        for (let k = 0; k < 8; k++) {
-                            const ng = groundAt(x + NB[k][0], y + NB[k][1]);
-                            const joins = ng === g || (window.UF && UF.Tiles && UF.Tiles.joins && UF.Tiles.joins(m.groundIds[ng], m.groundIds[g]));
-                            if (joins) mask |= NB[k][2];
-                        }
-                        ctx.setTile(x, y, 0, groundBases[g] + shapes[mask]);
-                        if (flags[i] & FLAG_PEAK) ctx.setTile(x, y, 5, PEAK_REGION);
+                    const t = paintGround(x, y, R, P);
+                    ctx.setTile(x, y, 0, t.layer0);
+                    if (t.layer2) ctx.setTile(x, y, 2, t.layer2);
+                    if (t.region) ctx.setTile(x, y, 5, t.region);
+                    if (t.solid) {
+                        volume.solid++;
+                        if (water[i]) volume.waterSuppressed++;
+                        else volume.groundReplaced++;
+                    } else if (t.carved || t.ramp) {
+                        if (t.carved) volume.carved++;
+                        else volume.ramps++;
+                        if (water[i]) volume.waterSuppressed++;
                     }
                 }
             }
@@ -1144,6 +1260,8 @@
                 for (const piece of s.pieces || []) {
                     const o = m.objectById.get(piece.object);
                     if (!o || !inside(s.x + piece.dx, s.y + piece.dy)) continue;
+                    // Never inside a hill: a piece whose ground cell is solid rock is left out (counted).
+                    if (col && col.code((s.y + piece.dy) * size + s.x + piece.dx) === 1) { volume.sitePiecesSkipped++; continue; }
                     ctx.setObject(s.x + piece.dx, s.y + piece.dy, o.typeId);
                     counts[piece.object] = (counts[piece.object] || 0) + 1;
                 }
@@ -1207,6 +1325,7 @@
         let total = 0;
         for (let i = 0; i < cells; i++) if (objects[i]) total++;
         WorldGen.stats[`${ctx.areaX},${ctx.areaY}`] = counts;
+        if (z === 0) WorldGen.volumeStats[`${ctx.areaX},${ctx.areaY}`] = Object.assign({ columns: !!col }, volume);
         WorldGen.lastBuild = { area: { x: ctx.areaX, y: ctx.areaY }, ms: now() - started, objects: total, biomes: biomeCells, sites: sites.length };
     }
 

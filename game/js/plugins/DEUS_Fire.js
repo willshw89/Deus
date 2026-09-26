@@ -161,7 +161,7 @@
         if (c.sourceTypes) return c.sourceTypes;
         const set = new Set();
         const O = Objects();
-        if (O) for (const t of O.types()) { const r = ruleForType(t); if (r && r.source) set.add(t.typeId); }
+        if (O) for (const t of O.types()) { const r = ruleForType(t); if (r && r.source) set.add(t.typeId || t.id); }
         c.sourceTypes = set;
         return set;
     }
@@ -326,7 +326,10 @@
      * (the player, a burning unit, a script; o.sourceType / o.sourceObjectId / o.sourceCell may name it).
      */
     function provenanceFor(f, area, x, y, type, o) {
-        const parent = o.parent && o.parent.rec && o.parent.rec.provenance ? o.parent : null;
+        // A burning unit that sets the ground alight carries its fire (o.carried = { key, provenance }, the cell and
+        // fire that caught it, DEUS-TSK-FABLE-17): the new cell joins that fire as a spread from the cell it caught in.
+        const carried = o.carried && o.carried.provenance && o.carried.key ? { key: o.carried.key, rec: { provenance: o.carried.provenance } } : null;
+        const parent = o.parent && o.parent.rec && o.parent.rec.provenance ? o.parent : carried;
         if (parent) {
             const pp = parent.rec.provenance;
             let parents = (Array.isArray(pp.spreadParents) ? pp.spreadParents : []).concat([parent.key]);
@@ -365,11 +368,26 @@
         for (const id of done.slice(0, done.length - FIRE_HISTORY)) delete f.fires[id];
     }
     const provenanceCopy = p => (p ? Object.assign({}, p, { sourceCell: p.sourceCell ? Object.assign({}, p.sourceCell) : null, spreadParents: (p.spreadParents || []).slice(), startedOn: p.startedOn ? Object.assign({}, p.startedOn) : null }) : null);
+    /**
+     * A unit a fire killed (DEUS-TSK-FABLE-17): listed once in its fire's casualties, whichever path the death took
+     * (in the burning cell here, or later of its burns through UF_Environment's burning status and UF_Combat).
+     * Returns true when the fire's record was found.
+     */
+    function noteCasualty(u, prov, beat) {
+        const f = fireState();
+        const fire = f && f.fires && prov ? f.fires[prov.fireId] : null;
+        if (!fire || !u) return false;
+        if (!fire.casualties.some(c => c.unitId === u.id)) {
+            fire.casualties.push({ unitId: u.id, name: u.name || null, beat: Number.isFinite(beat) ? beat : f.beat, cell: { x: u.x, y: u.y, z: zOf(u) }, spreadSteps: prov.spreadSteps | 0 });
+        }
+        return true;
+    }
 
     /**
      * Light a cell. opts: { cause, force (ignore a wet cell), parent: { key, rec } (spread from that burning cell),
      * source: { type, objectId, cell } (an escape from a fire source), sourceType / sourceObjectId / sourceCell (what
-     * lit it otherwise) }. True when the cell burns now (it wasn't burning, its object burns).
+     * lit it otherwise), carried: { key, provenance } (a burning unit's fire, UF.Environment's running flame) }. True
+     * when the cell burns now (it wasn't burning, its object burns).
      */
     function ignite(area, x, y, opts) {
         if (!acceptsArea(area)) return false;
@@ -386,7 +404,7 @@
         const provenance = provenanceFor(f, area, x, y, type, o);
         const fire = f.fires[provenance.fireId];
         if (fire) { fire.cells++; fire.burning++; fire.out = null; }
-        f.burning[key] = { since: f.beat, fuel: Math.max(1, Math.round(num(rule.burn, 1))), obj: type.id, fireId: provenance.fireId, parent: o.parent ? o.parent.key : null, provenance };
+        f.burning[key] = { since: f.beat, fuel: Math.max(1, Math.round(num(rule.burn, 1))), obj: type.id, fireId: provenance.fireId, parent: o.parent ? o.parent.key : (o.carried && o.carried.key ? o.carried.key : null), provenance };
         delete f.wet[key];
         indexAdd(key);
         emit("fire:ignited", copyArea(area), x, y, o.cause || "unknown", type.id, provenanceCopy(provenance));
@@ -666,7 +684,13 @@
             if (d.hp <= 0) { d.hp = 0; died = true; }
         }
         d.burnedAt = b;
-        if (W.isDisplayed(u)) {
+        // The fire that burned it, dead or alive (DEUS-TSK-FABLE-17): a unit that walks out burning and dies of its
+        // burns later, or sets other ground alight, still carries this fire's provenance.
+        {
+            const f = fireState(), key = keyOf(levelArea(u), u.x, u.y), rec = f && f.burning ? f.burning[key] : null;
+            if (rec && rec.provenance) d.lastFire = { key, beat: b, provenance: provenanceCopy(rec.provenance) };
+        }
+        if (typeof W.isDisplayed === "function" && W.isDisplayed(u)) {
             // Sprites only (VISION V58): the damage number, and the sheet's own hurt frames when its sidecar lists them.
             // No UF.Combat.playHitAnimation: that is a code-made recoil and red flash.
             try {
@@ -688,13 +712,10 @@
             // The casualty carries the provenance of the fire it stood in (DEUS-TSK-FABLE-16): the forensic record
             // names the fire, where it started and how many spread steps brought it here, before Combat's death path
             // (whose own recordDeath call is the second one and does nothing).
-            const area = levelArea(u), f = fireState();
-            const rec = f && f.burning ? f.burning[keyOf(area, u.x, u.y)] : null;
-            const prov = rec && rec.provenance ? provenanceCopy(rec.provenance) : null;
+            const prov = d.lastFire && d.lastFire.beat === b ? provenanceCopy(d.lastFire.provenance) : null;
             if (prov) {
                 d.fireProvenance = prov;
-                const fire = f.fires[prov.fireId];
-                if (fire) fire.casualties.push({ unitId: u.id, name: u.name || null, beat: b, cell: { x: u.x, y: u.y, z: zOf(area) }, spreadSteps: prov.spreadSteps | 0 });
+                noteCasualty(u, prov, b);
             }
             d.deathCause = "fire";
             const Forensics = window.UF && UF.DeathForensics;
@@ -1304,6 +1325,8 @@
             return `Burned to death by fire ${prov.fireId} originating from ${prov.sourceType}${prov.sourceObjectId ? ` (${prov.sourceObjectId})` : ""} at (${c.x}, ${c.y}, ${c.z | 0}) via ${prov.spreadSteps | 0} spread steps`;
         },
         isHearthType,
+        /** List a unit a fire killed in that fire's casualties (once): (unit, provenance, beat?) -> bool. */
+        noteCasualty,
         /** How the fire source on a cell is held, or null: { contained, state, escapeChance, sourceType, objectId, by }. */
         sourceInfoAt: (area, x, y) => sourceInfoAt(area, x, y),
         /**
@@ -1356,9 +1379,10 @@
         },
         errors: () => errors.slice()
     };
-    window.DEUS = window.DEUS || {};
-    window.UF = window.DEUS;
-    window.UF.Fire = Fire;
+    const ns = window.DEUS || window.UF || {};
+    window.DEUS = ns;
+    window.UF = ns;
+    ns.Fire = Fire;
 
     //-------------------------------------------------------------------------
     // Events and boot
