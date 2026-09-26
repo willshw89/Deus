@@ -1,0 +1,14 @@
+# command: node tools/test_generated_z2_cut_proof.js --mutants
+# worktree: lane-h (task/lane-h), HEAD a12f94a7 (game/ identical to main f21e3bb5), test blob 1a8d963a (uncommitted working copy)
+# node: v24.19.0
+# started: 2026-09-25T23:25:43-05:00
+MUTANT cut_type_renamed: exit 1; designated ravine_identity FAILED; failed: ravine_identity
+MUTANT cut_carve_disabled: exit 1; designated ravine_footprint_matches_plan FAILED; failed: first_air_is_3ft, z_minus2_is_floor, z_minus1_is_open, z0_is_open, z_plus1_z_plus2_open, ravine_identity, ravine_footprint_matches_plan
+MUTANT fluid_skip_removed: exit 1; designated fluid_conserved_across_cut FAILED; failed: ravine_footprint_matches_plan, fluid_conserved_across_cut
+MUTANT floor_capped_zminus1: exit 1; designated z_minus2_is_floor FAILED; failed: first_air_is_3ft, z_minus2_is_floor, z_minus1_is_open, ravine_identity, ravine_footprint_matches_plan
+MUTANT floating_slab_left: exit 1; designated no_floating_solids FAILED; failed: no_floating_solids
+MUTANT pool_undercut: exit 1; designated fluid_rests_on_support FAILED; failed: ravine_footprint_matches_plan, fluid_rests_on_support
+MUTANT probe_perturbs: exit 1; designated probe_read_only FAILED; failed: probe_read_only
+MUTANT error_injected: exit 1; designated no_vm_errors FAILED; failed: no_vm_errors
+MUTANTS: 8/8 caught by their designated check (exit 1) (92 s)
+# exit: 0  (91 s)
