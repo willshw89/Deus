@@ -1,0 +1,22 @@
+# tools/test_survival_needs_loop.js  category=KILLED_TIMEOUT  exit=TIMEOUT  ms=180153  decided by timeout (runner)
+== stdout ==
+=== Survival needs loop, SRD 5.1 model (DEUS_Colonists.js) headless checks ===
+PASS survival.plugins_load - UF.Colonists with tickNeeds/exhaustionEffects/endOfDay; a berry feeds 0.1 lb of the day's pound (weighs 0.1 lb), so a day is 10 berries
+PASS survival.food_data_contract - 8 food items carry weight, nutrition and water; rations: 2 lb, feeds 1 day, srd:gear:rations-1-day; DEUS-marked: berries fruit mushroom root meat_raw meat_cooked fish
+PASS survival.needs_srd_record - founder #1: {"model":"srd","day":"1:0:1","foodLb":0,"waterGal":0,"daysWithoutFood":0,"exhaustion":0,"fromNeeds":0,"lastRestDay":null}; founder #2's meter record replaced: true
+PASS survival.no_meter_drift - 600 updates within one day changed no founder's food, days-without-food or exhaustion (the SRD counts days, not ticks)
+PASS survival.drinks_a_gallon_a_day - after 601 updates every founder has drunk exactly once (gallons 1 1.2 1 1 1 1 1 1; food adds a little water on top)
+PASS survival.eats_a_pound_a_day - #2 ate 10 berries (10 expected) for 1 lb and stopped; 3 left in its pack
+PASS survival.nutrition_and_water_are_not_weight - #3 ate 1 ration (2 lb) for 1 lb of the day (1 expected) and kept 1; #4 ate 4 fruit for 1 lb and 0.20 gal (0.20 expected)
+PASS survival.supper_preempts_labor - at 19:00 with 0 lb eaten, #1's haul #300 (carrying log) was cancelled "survival: hunger" after 11 updates; 3 log at its feet, 0 items carried (common_clothesx1+pouchx1+gold_coinx15), reservations released
+PASS survival.labor_resumes_after_supper - #1 ate its pound from the larder after 614 updates; idle fallback move#387 (0 open project jobs) after 1 more (no need pending: true)
+PASS survival.day_end_food_counts - after the day ended: a pound -> 0 days without food, half a pound -> 2.5, nothing -> 3; the day's food and water counters reset; no exhaustion yet
+PASS survival.starvation_exhaustion - #4 (Con modifier 0, limit 3 days): day 4 without food -> exhaustion 1, day 5 -> 2 (from hunger 2)
+PASS survival.water_rules - #5 no water: 1 level, then 3 (two more while already exhausted); #6 half a gallon: seeded d20 19 passes DC 15 -> 0 level(s)
+PASS survival.exhaustion_effects_ladder - levels 0..6 -> [speed, hp max, checks, attacks, dead]: 11000 11100 0.51100 0.51110 0.50.5110 00.5110 00.5111
+PASS survival.level5_stops_labor - #7 at level 5: chop#388 cancelled "survival: exhaustion"; now resting where it stands (44,29)
+PASS survival.level6_kills - 1 death(s): #7 of hunger; #7 removed, 7 colonists left
+FAIL survival.long_rest_rules - #8 at 01:00: rest of 4800 ticks done; hit points 3 -> 10; exhaustion stayed 1 on half a pound, then 0 after a rest on the full pound and gallon
+PASS survival.no_errors_main - no console errors in the main run
+== stderr ==
+

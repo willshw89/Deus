@@ -1,0 +1,61 @@
+# tools/test_households.js  category=PASS  exit=0  ms=266  decided by exit_0 (-)
+== stdout ==
+PASS households.unrelated_founders_stay_single
+PASS households.ids_stable
+PASS households.timestamp_uses_time_api
+PASS households.explicit_adult_pair
+PASS households.birth_joins_mother
+PASS households.genealogy_true_generation
+PASS households.save_roundtrip
+PASS households.missing_is_not_deceased
+PASS households.actual_death_retained
+PASS households.minor_pair_refused
+PASS households.unwilling_pair_refused
+PASS households.different_species_refused
+PASS households.nonbreeding_refused
+PASS households.parent_pair_refused
+PASS households.cousin_pair_refused
+PASS households.different_levels_not_joined
+PASS households.plan_progress_persists
+PASS households.two_rooms_exact_build_steps
+PASS households.planning_never_stamps
+PASS households.unfinished_privacy_refused
+PASS households.real_objects_meet_supported_demand
+PASS households.beds_assigned_to_residents
+PASS households.stable_beds_do_not_emit_assignments
+PASS households.npc_door_faction
+PASS households.actual_private_room
+PASS households.temporarily_open_door_delays_privacy
+PASS households.child_bystander_blocks_privacy
+PASS households.new_child_adds_bed_demand
+PASS households.missing_wall_reopens_demand
+PASS households.homes_do_not_overlap
+PASS households.overflow_explicit
+PASS households.solid_underground_not_stamped
+PASS households.bounded_retry_once_per_day
+PASS households.retry_same_day_next_month
+PASS households.bed_claim_never_stolen
+PASS households.goblin_uses_existing_cultural_fallback
+PASS households.missing_cultural_recipe_stays_blocked
+PASS households.natural_endpoint_changes_preferred_plot - preferred (51,52); selected (60,52)
+PASS households.natural_landing_changes_preferred_plot - preferred (51,52); selected (60,52)
+PASS households.other_level_natural_access_does_not_reserve_plot - identical coordinates on -1/-2 leave the Ground home plot available
+PASS households.saved_seeded_structural_variety - 2 footprint areas, 16 structural signatures, 4 rotations
+PASS households.same_seed_same_design
+PASS households.larger_new_families_get_capacity_and_area
+PASS households.all_orientations_have_aisles_and_hearth_clearance
+PASS households.varied_built_rooms_preserve_privacy
+PASS households.growing_family_reserves_real_annex
+PASS households.expansion_preserves_built_main_geometry
+PASS households.built_annex_satisfies_child_bed
+PASS households.separate_annex_does_not_invade_parent_privacy
+PASS households.design_and_annex_survive_save
+PASS households.growth_without_plot_reports_expansion_blocked
+PASS households.legacy_home_geometry_not_redesigned
+PASS households.legacy_private_spots_preserved
+PASS households.hearth_buffer_rejects_existing_fuel_cover
+PASS households.homes_preserve_reserved_unbuilt_farms - Every candidate cell on Ground is reserved by real farming policy seam
+PASS households.farms_on_other_level_do_not_block_home
+RESULT: 56 passed, 0 failed
+== stderr ==
+

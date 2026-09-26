@@ -1,0 +1,8 @@
+# tools/test_autonomous_work_recovery.js  category=KILLED_TIMEOUT  exit=TIMEOUT  ms=180146  decided by timeout (runner)
+== stdout ==
+=== Autonomous work recovery (DEUS_Projects.js) headless checks ===
+PASS recovery.plugins_load - Projects with staleReason/cellFault/refusedAt; fast config: cadence 600, stale 120, retry 600, give up 6000 ticks
+PASS recovery.haul_stack_vanishes_in_transit - 3 hauls lost their stack on the way ({"the item is gone":3}); squares with a failure count: 0; walls 20/20 after 1.3 h; 0 assign calls
+PASS recovery.open_build_materials_vanish - build at (27,22) lost 1 logs -> failed (stale: the materials are gone) after 8 updates; logs hauled again yes; wall standing true; phase 2
+== stderr ==
+

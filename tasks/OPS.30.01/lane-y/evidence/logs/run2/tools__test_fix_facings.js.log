@@ -1,0 +1,24 @@
+# tools/test_fix_facings.js  category=FAIL_OTHER  exit=1  ms=69  decided by other (stderr)
+== stdout ==
+Male 5 Row 1 Col 0 : { skinDiff: 38, alphaDiff: -7, facing: 'LEFT' }
+Male 5 Row 2 Col 0 : { skinDiff: -38, alphaDiff: 7, facing: 'RIGHT' }
+Male 5 Row 1 Col 1 : { skinDiff: 32, alphaDiff: 4, facing: 'LEFT' }
+Male 5 Row 2 Col 1 : { skinDiff: -32, alphaDiff: -4, facing: 'RIGHT' }
+Male 5 Row 1 Col 2 : { skinDiff: -29, alphaDiff: 11, facing: 'RIGHT' }
+Male 5 Row 2 Col 2 : { skinDiff: 29, alphaDiff: -11, facing: 'LEFT' }
+== stderr ==
+C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\tools\test_fix_facings.js:107
+testFiles.forEach(file => {
+^
+
+ReferenceError: testFiles is not defined
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\tools\test_fix_facings.js:107:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.19.0

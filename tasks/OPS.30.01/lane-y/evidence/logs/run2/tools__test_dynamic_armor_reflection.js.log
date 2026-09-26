@@ -1,0 +1,33 @@
+# tools/test_dynamic_armor_reflection.js  category=FAIL_API_DRIFT  exit=1  ms=296  decided by api_drift (stderr)
+== stdout ==
+Testing procedural generation across combinations...
+Generated [m_knight_tanned_red]: Charset 144x192 & Portrait 144x144
+Generated [m_forester_fair_brown]: Charset 144x192 & Portrait 144x144
+Generated [m_blacksmith_dark_black]: Charset 144x192 & Portrait 144x144
+Generated [m_elder_sage_silver]: Charset 144x192 & Portrait 144x144
+Generated [f_huntress_fair_blonde]: Charset 144x192 & Portrait 144x144
+Generated [f_peasant_tanned_auburn]: Charset 144x192 & Portrait 144x144
+Generated [f_warrior_dark_black]: Charset 144x192 & Portrait 144x144
+Generated [f_matron_elder_silver]: Charset 144x192 & Portrait 144x144
+Generated [child_boy]: Charset 144x192 & Portrait 144x144
+Generated [child_girl]: Charset 144x192 & Portrait 144x144
+
+=== PROCEDURAL GENERATION TEST PASS: 10/10 COMBINATIONS VERIFIED ===
+=== RUNNING DYNAMIC ARMOR REFLECTION & CLEAN-SHAVEN VERIFICATION ===
+PASS: faceset_no_facial_hair - compositePortrait produced identical clean-shaven faceset regardless of beard parameter (diffCount = 0)
+== stderr ==
+C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\tools\test_dynamic_armor_reflection.js:69
+    typeof UF.Generator.clothingIndexForUnit === 'function' &&
+                        ^
+
+TypeError: Cannot read properties of undefined (reading 'clothingIndexForUnit')
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\tools\test_dynamic_armor_reflection.js:69:25)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.19.0

@@ -1,0 +1,5 @@
+# tools/test_r4c2_foreshorten.js  category=PASS  exit=0  ms=72  decided by exit_0 (-)
+== stdout ==
+Saved test_r4c2.png
+== stderr ==
+

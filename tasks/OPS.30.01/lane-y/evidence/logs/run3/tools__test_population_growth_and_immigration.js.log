@@ -1,0 +1,12 @@
+# tools/test_population_growth_and_immigration.js  category=FAIL_API_DRIFT  exit=1  ms=78  decided by api_drift (stderr)
+== stdout ==
+
+Results: 0 passed, 7 failed
+== stderr ==
+FAIL population_growth.conception_chance_logistic_curve: Cannot read properties of undefined (reading 'generate')
+FAIL population_growth.twin_chance_scaling: Cannot read properties of undefined (reading 'generate')
+FAIL population_growth.cooldown_and_gestation_scaling: Cannot read properties of undefined (reading 'generate')
+FAIL population_growth.immigration_wave_probabilities: Cannot read properties of undefined (reading 'generate')
+FAIL population_growth.spawn_immigrants_perimeter_and_integration: Cannot read properties of undefined (reading 'generate')
+FAIL population_growth.carrying_capacity_capping_at_200: Cannot read properties of undefined (reading 'generate')
+FAIL population_growth.carrying_capacity_equilibrium_reactivation: Cannot read properties of undefined (reading 'generate')

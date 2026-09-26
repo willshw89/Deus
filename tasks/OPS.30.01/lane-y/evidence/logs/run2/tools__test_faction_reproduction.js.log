@@ -1,0 +1,25 @@
+# tools/test_faction_reproduction.js  category=FAIL_MISSING_REFERENCE  exit=1  ms=58  decided by enoent (stderr)
+== stdout ==
+
+== stderr ==
+node:fs:484
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open 'C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\game\js\plugins\UF_Goals.js'
+    at Object.readFileSync (node:fs:484:20)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\tools\test_faction_reproduction.js:8:22)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\snewt\\AppData\\Local\\Temp\\deus-lane-y-census2\\game\\js\\plugins\\UF_Goals.js'
+}
+
+Node.js v24.19.0

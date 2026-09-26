@@ -1,0 +1,8 @@
+# tools/test_project_construction_loop.js  category=KILLED_TIMEOUT  exit=TIMEOUT  ms=180182  decided by timeout (runner)
+== stdout ==
+=== Project construction loop (DEUS_Projects.js + DEUS_Jobs.js) headless checks ===
+PASS loop.plugins_load - UF.Projects v1, UF.Jobs, UF.Colonists loaded
+PASS loop.clearability_query - berry_bush:not berry_bush_bare:not oak:clearable stump:clearable bush:clearable rocks_small:clearable flowers:clearable reeds:clearable
+PASS loop.unclearable_site_rejected - first choice (26,20); with a berry bush on it the chooser moved to (35,20); a project there reports the cell blocked; bush removed: (26,20) again
+== stderr ==
+

@@ -1,0 +1,724 @@
+# tools/test_historical_carrying_capacity.js  category=PASS  exit=0  ms=27075  decided by exit_0 (-)
+== stdout ==
+{
+  "task": "DEUS-TSK-ASTRA-14",
+  "suite": "historical-carrying-capacity-contracts",
+  "status": "PASS",
+  "commonStatus": "PASS",
+  "commonContractBasis": "Established behavior, envelope, locality, migration preservation and atomicity contracts; the reconciled ASTRA-14 identity/provenance acceptance checks are reported separately.",
+  "packetStatus": "PASS",
+  "packetPolicy": "Reconciled ASTRA-14 owner-approved schema/model/profile identities and canonical SHA-256 provenance contract",
+  "packetChecks": [
+    {
+      "id": "PACKET_DEFAULT_PROFILE_TAG",
+      "status": "PASS",
+      "expected": {
+        "profileKind": "promoted-default",
+        "profileId": "v1",
+        "profileVersion": "1.0.0-provisional-astra08",
+        "demographicProfileVersion": "1.0.0-provisional-astra08"
+      },
+      "observed": {
+        "profileKind": "promoted-default",
+        "profileId": "v1",
+        "profileVersion": "1.0.0-provisional-astra08",
+        "demographicProfileVersion": "1.0.0-provisional-astra08"
+      },
+      "mapping": "Profile ID, calibration version and legacy demographicProfileVersion are distinct fields."
+    },
+    {
+      "id": "PACKET_DEMOGRAPHIC_MODEL",
+      "status": "PASS",
+      "expected": {
+        "version": 7,
+        "schemaVersion": 7,
+        "historyModelId": "historical_demographics_v1",
+        "historyModelVersion": 1
+      },
+      "observed": {
+        "version": 7,
+        "schemaVersion": 7,
+        "historyModelId": "historical_demographics_v1",
+        "historyModelVersion": 1
+      },
+      "mapping": "Root version/schemaVersion are 7; the independently versioned historical_demographics_v1 model is version 1."
+    },
+    {
+      "id": "PACKET_CAPACITY_MODEL_IDENTITY",
+      "status": "PASS",
+      "expected": {
+        "capacityModelId": "local_density_v1",
+        "capacityModelVersion": 1,
+        "configId": "local_density_v1",
+        "configVersion": 1
+      },
+      "observed": {
+        "initial": {
+          "capacityModelId": "local_density_v1",
+          "capacityModelVersion": 1,
+          "configId": "local_density_v1",
+          "configVersion": 1
+        },
+        "callerIds": [
+          {
+            "requestedId": "TEST_UNSUPPORTED_CAPACITY",
+            "rejected": true,
+            "diagnostic": "HistoricalDemographics: unsupported capacityModel.id: TEST_UNSUPPORTED_CAPACITY",
+            "persisted": null
+          },
+          {
+            "requestedId": null,
+            "rejected": true,
+            "diagnostic": "HistoricalDemographics: unsupported capacityModel.id: null",
+            "persisted": null
+          },
+          {
+            "requestedId": 1,
+            "rejected": true,
+            "diagnostic": "HistoricalDemographics: unsupported capacityModel.id: 1",
+            "persisted": null
+          }
+        ],
+        "callerVersions": [
+          {
+            "requestedVersion": 2,
+            "status": "REJECTED_WITHOUT_MUTATION",
+            "diagnostic": "HistoricalDemographics: unsupported capacityModel.version: 2"
+          },
+          {
+            "requestedVersion": null,
+            "status": "REJECTED_WITHOUT_MUTATION",
+            "diagnostic": "HistoricalDemographics: unsupported capacityModel.version: null"
+          },
+          {
+            "requestedVersion": "1",
+            "status": "REJECTED_WITHOUT_MUTATION",
+            "diagnostic": "HistoricalDemographics: unsupported capacityModel.version: 1"
+          }
+        ],
+        "contradictoryConfigIds": [
+          {
+            "rootId": "local_density_v1",
+            "configId": "TEST_UNSUPPORTED_CAPACITY",
+            "status": "REJECTED_WITHOUT_MUTATION",
+            "diagnostic": "HistoricalDemographics: unsupported capacityModel.id: TEST_UNSUPPORTED_CAPACITY"
+          },
+          {
+            "rootId": "local_density_v1",
+            "configId": null,
+            "status": "REJECTED_WITHOUT_MUTATION",
+            "diagnostic": "HistoricalDemographics: unsupported capacityModel.id: null"
+          },
+          {
+            "rootId": "local_density_v1",
+            "configId": 1,
+            "status": "REJECTED_WITHOUT_MUTATION",
+            "diagnostic": "HistoricalDemographics: unsupported capacityModel.id: 1"
+          }
+        ]
+      },
+      "mapping": "Both root and config IDs/versions must agree, including caller-supplied capacityModel.id boundaries."
+    },
+    {
+      "id": "PACKET_CUSTOM_CANNOT_CLAIM_V1",
+      "status": "PASS",
+      "expected": {
+        "profileKind": "custom",
+        "profileId": null,
+        "profileVersion": null,
+        "demographicProfileVersion": "custom"
+      },
+      "observed": {
+        "initial": {
+          "profileKind": "custom",
+          "profileId": null,
+          "profileVersion": null,
+          "demographicProfileVersion": "custom"
+        },
+        "normalizedClaims": [
+          {
+            "claim": "v1",
+            "tags": {
+              "profileKind": "custom",
+              "profileId": null,
+              "profileVersion": null,
+              "demographicProfileVersion": "custom"
+            }
+          },
+          {
+            "claim": "1.0.0-provisional-astra08",
+            "tags": {
+              "profileKind": "custom",
+              "profileId": null,
+              "profileVersion": null,
+              "demographicProfileVersion": "custom"
+            }
+          }
+        ],
+        "rejectedSpoofs": [
+          {
+            "key": "profileKind",
+            "value": "promoted-default",
+            "status": "REJECTED_WITHOUT_MUTATION"
+          },
+          {
+            "key": "demographicProfileVersion",
+            "value": "1.0.0-provisional-astra08",
+            "status": "REJECTED_WITHOUT_MUTATION"
+          }
+        ],
+        "migrated": {
+          "profileKind": "custom",
+          "profileId": null,
+          "profileVersion": null,
+          "demographicProfileVersion": "custom"
+        },
+        "migratedHash": "3089a195939cf5d1977c0612e4c57ef380498ad98b65e07e8541d42c966b0790"
+      },
+      "mapping": "create and genuine v6 migration normalize all four custom tags; validate rejects the two promoted-claim fields explicitly named in the packet."
+    },
+    {
+      "id": "PACKET_CUSTOM_PROFILE_FINGERPRINT",
+      "status": "PASS",
+      "expected": "Canonical parameter SHA-256 matches independent Node oracle, repeats across processes and changes with each biological parameter",
+      "observed": {
+        "algorithm": "Node crypto SHA-256",
+        "defaultKnownHash": "e6d1fa7e53f4e606f2545bb149e0f4620127ffe5bd27cdaa30d1a772b801ba48",
+        "defaultObservedHash": "e6d1fa7e53f4e606f2545bb149e0f4620127ffe5bd27cdaa30d1a772b801ba48",
+        "customObservedHash": "aeb1fa42e74bad9f018b9e53578b9a32b32e7874eebc19fc6e17b720c6c0512f",
+        "variants": [
+          {
+            "field": "lifespan[0]",
+            "expected": "06e0fbdbfa1a64961a5905c307c66b2638e6570ec16adc5ca6579cf51f493a6d",
+            "observed": "06e0fbdbfa1a64961a5905c307c66b2638e6570ec16adc5ca6579cf51f493a6d"
+          },
+          {
+            "field": "lifespan[1]",
+            "expected": "8c0cfa0520ad937b459426a0711f539699f493fbf4f24159714684bb02b5c8e4",
+            "observed": "8c0cfa0520ad937b459426a0711f539699f493fbf4f24159714684bb02b5c8e4"
+          },
+          {
+            "field": "reproductiveAge[0]",
+            "expected": "a41218c9baacd7a46f06e11b92ae9f303808e8f2685ef97cbff999faaba19bf7",
+            "observed": "a41218c9baacd7a46f06e11b92ae9f303808e8f2685ef97cbff999faaba19bf7"
+          },
+          {
+            "field": "reproductiveAge[1]",
+            "expected": "a312747b71db4a985569452ed73ecf9cf8b6ac6952eb9046cf64da6f0bed1bac",
+            "observed": "a312747b71db4a985569452ed73ecf9cf8b6ac6952eb9046cf64da6f0bed1bac"
+          },
+          {
+            "field": "birthChance",
+            "expected": "def9ff6747b85b0bcb6f4096c1af56c6b8349ee55436e98fdbbef4dabfecb0f1",
+            "observed": "def9ff6747b85b0bcb6f4096c1af56c6b8349ee55436e98fdbbef4dabfecb0f1"
+          },
+          {
+            "field": "birthSpacingYears",
+            "expected": "fd74bae36efdd881feae79aaa3fc2f761c2792482da5045cc90f9cb90de8f43f",
+            "observed": "fd74bae36efdd881feae79aaa3fc2f761c2792482da5045cc90f9cb90de8f43f"
+          },
+          {
+            "field": "infantMortality",
+            "expected": "7fde7540ab0cb381c3a38cb5a41e70ee7af824df365c8510e6ea05b90ad13930",
+            "observed": "7fde7540ab0cb381c3a38cb5a41e70ee7af824df365c8510e6ea05b90ad13930"
+          },
+          {
+            "field": "diseaseMortality",
+            "expected": "5fd7d6a63d61f10b85d2a2a4ffc7267d95e874802bf68dfebda0fc8443553ce2",
+            "observed": "5fd7d6a63d61f10b85d2a2a4ffc7267d95e874802bf68dfebda0fc8443553ce2"
+          },
+          {
+            "field": "exposureMortality",
+            "expected": "d660409d0fbdb25a485e80009441cca0f45366f4769fecddbe579e8d3b5f4059",
+            "observed": "d660409d0fbdb25a485e80009441cca0f45366f4769fecddbe579e8d3b5f4059"
+          }
+        ],
+        "controls": [
+          {
+            "field": "lifespan[0]",
+            "status": "STALE_HASH_REJECTED_BY_INDEPENDENT_ORACLE"
+          },
+          {
+            "field": "lifespan[1]",
+            "status": "STALE_HASH_REJECTED_BY_INDEPENDENT_ORACLE"
+          },
+          {
+            "field": "reproductiveAge[0]",
+            "status": "STALE_HASH_REJECTED_BY_INDEPENDENT_ORACLE"
+          },
+          {
+            "field": "reproductiveAge[1]",
+            "status": "STALE_HASH_REJECTED_BY_INDEPENDENT_ORACLE"
+          },
+          {
+            "field": "birthChance",
+            "status": "STALE_HASH_REJECTED_BY_INDEPENDENT_ORACLE"
+          },
+          {
+            "field": "birthSpacingYears",
+            "status": "STALE_HASH_REJECTED_BY_INDEPENDENT_ORACLE"
+          },
+          {
+            "field": "infantMortality",
+            "status": "STALE_HASH_REJECTED_BY_INDEPENDENT_ORACLE"
+          },
+          {
+            "field": "diseaseMortality",
+            "status": "STALE_HASH_REJECTED_BY_INDEPENDENT_ORACLE"
+          },
+          {
+            "field": "exposureMortality",
+            "status": "STALE_HASH_REJECTED_BY_INDEPENDENT_ORACLE"
+          },
+          {
+            "field": "profileHash",
+            "status": "MALFORMED_HASH_REJECTED_BY_INDEPENDENT_ORACLE"
+          }
+        ],
+        "reorderedHash": "aeb1fa42e74bad9f018b9e53578b9a32b32e7874eebc19fc6e17b720c6c0512f",
+        "freshProcess": {
+          "workerPid": 21860,
+          "candidate": "0859ed3c6e3ea475abad9e00353f8961cfcec2cc",
+          "candidateSha256": "fca4a15abc45a88bff836d97ab77936581e4679fe104e17b2596d079f9015cdc",
+          "hashes": [
+            "e6d1fa7e53f4e606f2545bb149e0f4620127ffe5bd27cdaa30d1a772b801ba48",
+            "aeb1fa42e74bad9f018b9e53578b9a32b32e7874eebc19fc6e17b720c6c0512f",
+            "aeb1fa42e74bad9f018b9e53578b9a32b32e7874eebc19fc6e17b720c6c0512f"
+          ]
+        }
+      },
+      "mapping": "Sorted species keys; fixed seven-field parameter order; numeric JSON values; ranges keep endpoint order. Hash controls target the independent verifier, not unspecified production hash validation."
+    }
+  ],
+  "observedMetadata": {
+    "defaults": {
+      "top": {
+        "version": 7,
+        "schemaVersion": 7,
+        "historyModelId": "historical_demographics_v1",
+        "historyModelVersion": 1,
+        "capacityModelId": "local_density_v1",
+        "capacityModelVersion": 1,
+        "demographicProfileVersion": "1.0.0-provisional-astra08",
+        "profileKind": "promoted-default",
+        "profileId": "v1",
+        "profileVersion": "1.0.0-provisional-astra08",
+        "profileHash": "e6d1fa7e53f4e606f2545bb149e0f4620127ffe5bd27cdaa30d1a772b801ba48",
+        "domain": "historical",
+        "seed": 0,
+        "yearsSimulated": 0,
+        "startYear": 1,
+        "currentYear": 1,
+        "dimensions": {
+          "size": 256,
+          "areasX": 1,
+          "areasY": 1
+        },
+        "nextEventId": 55,
+        "eventsDiscarded": 0
+      },
+      "config": {
+        "capacityModel": {
+          "id": "local_density_v1",
+          "version": 1,
+          "defaultBaseline": 160,
+          "minimumScale": 0.1,
+          "minCapacity": 60,
+          "maxCapacity": 350
+        },
+        "recentYears": 20,
+        "eventLimit": 400,
+        "dynastyInheritance": "maternal",
+        "compression": "deferred",
+        "profileHash": "e6d1fa7e53f4e606f2545bb149e0f4620127ffe5bd27cdaa30d1a772b801ba48"
+      }
+    },
+    "custom": {
+      "top": {
+        "version": 7,
+        "schemaVersion": 7,
+        "historyModelId": "historical_demographics_v1",
+        "historyModelVersion": 1,
+        "capacityModelId": "local_density_v1",
+        "capacityModelVersion": 1,
+        "demographicProfileVersion": "custom",
+        "profileKind": "custom",
+        "profileId": null,
+        "profileVersion": null,
+        "profileHash": "aeb1fa42e74bad9f018b9e53578b9a32b32e7874eebc19fc6e17b720c6c0512f",
+        "domain": "historical",
+        "seed": 0,
+        "yearsSimulated": 0,
+        "startYear": 1,
+        "currentYear": 1,
+        "dimensions": {
+          "size": 256,
+          "areasX": 1,
+          "areasY": 1
+        },
+        "nextEventId": 55,
+        "eventsDiscarded": 0
+      },
+      "config": {
+        "capacityModel": {
+          "id": "local_density_v1",
+          "version": 1,
+          "defaultBaseline": 160,
+          "minimumScale": 0.1,
+          "minCapacity": 60,
+          "maxCapacity": 350
+        },
+        "recentYears": 20,
+        "eventLimit": 400,
+        "dynastyInheritance": "maternal",
+        "compression": "deferred",
+        "profileHash": "aeb1fa42e74bad9f018b9e53578b9a32b32e7874eebc19fc6e17b720c6c0512f"
+      }
+    },
+    "validationObservations": [
+      {
+        "id": "ROOT_HASH_FORGED",
+        "gating": false,
+        "observed": "ACCEPTED",
+        "diagnostic": null,
+        "inputUnchanged": true
+      },
+      {
+        "id": "CONFIG_HASH_FORGED",
+        "gating": false,
+        "observed": "ACCEPTED",
+        "diagnostic": null,
+        "inputUnchanged": true
+      },
+      {
+        "id": "HASHES_MISSING",
+        "gating": false,
+        "observed": "ACCEPTED",
+        "diagnostic": null,
+        "inputUnchanged": true
+      },
+      {
+        "id": "STALE_CUSTOM_BIOLOGY_HASH",
+        "gating": false,
+        "observed": "ACCEPTED",
+        "diagnostic": null,
+        "inputUnchanged": true
+      },
+      {
+        "id": "CUSTOM_ARBITRARY_KIND_VERSION",
+        "gating": false,
+        "observed": "ACCEPTED",
+        "diagnostic": null,
+        "inputUnchanged": true
+      },
+      {
+        "id": "CUSTOM_PROMOTED_ID_VERSION",
+        "gating": false,
+        "observed": "ACCEPTED",
+        "diagnostic": null,
+        "inputUnchanged": true
+      },
+      {
+        "id": "DEFAULT_ID_VERSION_MISSING",
+        "gating": false,
+        "observed": "ACCEPTED",
+        "diagnostic": null,
+        "inputUnchanged": true
+      },
+      {
+        "id": "SCHEMA_FIELD_MISSING",
+        "gating": false,
+        "observed": "ACCEPTED",
+        "diagnostic": null,
+        "inputUnchanged": true
+      }
+    ],
+    "observationPolicy": "Nongating validation coverage observations; packet gates are the five named checks above."
+  },
+  "packetPassed": 5,
+  "packetFailed": 0,
+  "candidate": {
+    "commit": "0859ed3c6e3ea475abad9e00353f8961cfcec2cc",
+    "bootstrap": "4af58ddd486b8e5d97d24877fd1b826131724c1d",
+    "sha256": "fca4a15abc45a88bff836d97ab77936581e4679fe104e17b2596d079f9015cdc",
+    "bytes": 52898,
+    "sourceDigest": "4edb1e9c7f2c9182ea2bf6a6ef8c4d7018308ccb1c5d2795022df03024493276"
+  },
+  "legacyFixture": {
+    "commit": "931b993e60545b24bddaa71ab433ebac8e967eb8",
+    "normalizedEngineSha256": "647592fc4a65b474f5f12835cee80a461d1f0c86ba847559b3ec835791471c2e",
+    "years": 40
+  },
+  "mutant": null,
+  "checks": [
+    {
+      "id": "DEFAULTS",
+      "name": "Omitted and undefined profiles use independent expected defaults and v7 metadata",
+      "status": "PASS",
+      "elapsedMs": 9.07470000000012
+    },
+    {
+      "id": "CUSTOM",
+      "name": "Caller profiles remain custom and are copied without affecting later defaults",
+      "status": "PASS",
+      "elapsedMs": 3.828899999999976
+    },
+    {
+      "id": "CUSTOM_PROVENANCE",
+      "name": "Caller-supplied biology cannot claim promoted profile provenance",
+      "status": "PASS",
+      "elapsedMs": 1.1464000000000851
+    },
+    {
+      "id": "VALIDATE_PURE",
+      "name": "validate accepts deeply frozen v7 input without any mutation",
+      "status": "PASS",
+      "elapsedMs": 3.513799999999719
+    },
+    {
+      "id": "VERSIONS",
+      "name": "Unknown schema and mismatched model versions reject without mutation",
+      "status": "PASS",
+      "elapsedMs": 14.968699999999899
+    },
+    {
+      "id": "CAPACITY_REJECTION",
+      "name": "Missing, noninteger and out-of-range capacities reject without mutation",
+      "status": "PASS",
+      "elapsedMs": 21.85380000000032
+    },
+    {
+      "id": "CREATE_CAPACITY",
+      "name": "create enforces explicit capacity bounds and preserves source",
+      "status": "PASS",
+      "elapsedMs": 7.5228000000001884
+    },
+    {
+      "id": "ABSOLUTE_CREATE_BOUNDS",
+      "name": "Caller model cannot widen create's mandatory [60,350] capacity range",
+      "status": "PASS",
+      "elapsedMs": 1.4782000000000153
+    },
+    {
+      "id": "ABSOLUTE_VALIDATE_BOUNDS",
+      "name": "Caller model cannot widen validate's mandatory [60,350] capacity range",
+      "status": "PASS",
+      "elapsedMs": 3.594100000000253
+    },
+    {
+      "id": "MODEL_INPUT_SHAPE",
+      "name": "Malformed capacity-model containers are rejected at create",
+      "status": "PASS",
+      "elapsedMs": 1.884099999999762
+    },
+    {
+      "id": "MODEL_VALUES",
+      "name": "Malformed capacity-model numbers and inconsistent versions reject",
+      "status": "PASS",
+      "elapsedMs": 15.041799999999967
+    },
+    {
+      "id": "CAPACITY_DERIVATION",
+      "name": "Capacity follows the specified seeded algorithm and source IDs",
+      "status": "PASS",
+      "elapsedMs": 2.564300000000003
+    },
+    {
+      "id": "DENSITY_RATE",
+      "name": "Ordinary fertility is reduced by the independent density probability",
+      "status": "PASS",
+      "elapsedMs": 1.6586999999999534
+    },
+    {
+      "id": "BIRTH_ONE",
+      "name": "Base birthChance=1 still obeys site density pressure",
+      "status": "PASS",
+      "elapsedMs": 0.6734000000001288
+    },
+    {
+      "id": "ANNUAL_ORDER",
+      "name": "Earlier births do not change later households' annual density probability",
+      "status": "PASS",
+      "elapsedMs": 0.7976000000003296
+    },
+    {
+      "id": "ANNUAL_DEATHS",
+      "name": "Density uses pre-death census throughout the year",
+      "status": "PASS",
+      "elapsedMs": 0.7523000000001048
+    },
+    {
+      "id": "LOCAL_CAPACITY",
+      "name": "Two same-species sites use their own capacities and censuses",
+      "status": "PASS",
+      "elapsedMs": 2.6581999999998516
+    },
+    {
+      "id": "DENSITY_FLOOR",
+      "name": "At and above capacity fertility retains the nonzero 0.1 floor",
+      "status": "PASS",
+      "elapsedMs": 3.4863000000000284
+    },
+    {
+      "id": "LEGACY_REQUIRES_MIGRATION",
+      "name": "Real v6 states reject step/validate with explicit migration diagnostic",
+      "status": "PASS",
+      "elapsedMs": 603.9850999999999
+    },
+    {
+      "id": "MIGRATION_PRESERVATION",
+      "name": "Real populated v6 migration preserves all existing records and custom biology",
+      "status": "PASS",
+      "elapsedMs": 13.704099999999926
+    },
+    {
+      "id": "MIGRATION_IDEMPOTENCE",
+      "name": "Explicit migration is byte-idempotent on already migrated v7",
+      "status": "PASS",
+      "elapsedMs": 11.226000000000113
+    },
+    {
+      "id": "MIGRATION_REJECTION",
+      "name": "Migration rejects unknown versions and malformed legacy capacity",
+      "status": "PASS",
+      "elapsedMs": 20.062999999999647
+    },
+    {
+      "id": "MIGRATION_ATOMICITY",
+      "name": "Malformed v6 migration rejects without changing original state or version",
+      "status": "PASS",
+      "elapsedMs": 41.013900000000376
+    }
+  ],
+  "observations": [
+    {
+      "id": "MIGRATION_FAILURE_ATOMICITY",
+      "status": "UNCHANGED",
+      "detail": "ASTRA-14 retains atomic failure as the mandatory MIGRATION_ATOMICITY check.",
+      "fromVersion": 6,
+      "afterVersion": 6
+    }
+  ],
+  "passed": 23,
+  "failed": 0,
+  "wallMs": 26088.877,
+  "contractWallMs": 5159.6603,
+  "mutants": [
+    {
+      "name": "no_density_pressure",
+      "expectedContract": "DENSITY_RATE",
+      "status": "PASS",
+      "childExitCode": 1,
+      "observedContract": {
+        "id": "DENSITY_RATE",
+        "name": "Ordinary fertility is reduced by the independent density probability",
+        "status": "FAIL",
+        "diagnostic": "DENSITY_RATE: DENSITY_RATE: observed births differ from independent start-population probability oracle",
+        "elapsedMs": 5.383600000000115
+      },
+      "diagnostic": "DENSITY_RATE: DENSITY_RATE: observed births differ from independent start-population probability oracle"
+    },
+    {
+      "name": "universal_constant",
+      "expectedContract": "LOCAL_CAPACITY",
+      "status": "PASS",
+      "childExitCode": 1,
+      "observedContract": {
+        "id": "LOCAL_CAPACITY",
+        "name": "Two same-species sites use their own capacities and censuses",
+        "status": "FAIL",
+        "diagnostic": "LOCAL_CAPACITY: LOCAL_CAPACITY: observed births differ from independent start-population probability oracle",
+        "elapsedMs": 6.497899999999845
+      },
+      "diagnostic": "LOCAL_CAPACITY: LOCAL_CAPACITY: observed births differ from independent start-population probability oracle"
+    },
+    {
+      "name": "live_census_order_dependent",
+      "expectedContract": "ANNUAL_ORDER",
+      "status": "PASS",
+      "childExitCode": 1,
+      "observedContract": {
+        "id": "ANNUAL_ORDER",
+        "name": "Earlier births do not change later households' annual density probability",
+        "status": "FAIL",
+        "diagnostic": "ANNUAL_ORDER: ANNUAL_ORDER: observed births differ from independent start-population probability oracle",
+        "elapsedMs": 4.7970000000000255
+      },
+      "diagnostic": "ANNUAL_ORDER: ANNUAL_ORDER: observed births differ from independent start-population probability oracle"
+    },
+    {
+      "name": "base_birth_1_bypass",
+      "expectedContract": "BIRTH_ONE",
+      "status": "PASS",
+      "childExitCode": 1,
+      "observedContract": {
+        "id": "BIRTH_ONE",
+        "name": "Base birthChance=1 still obeys site density pressure",
+        "status": "FAIL",
+        "diagnostic": "BIRTH_ONE: BIRTH_ONE: observed births differ from independent start-population probability oracle",
+        "elapsedMs": 3.7733000000002903
+      },
+      "diagnostic": "BIRTH_ONE: BIRTH_ONE: observed births differ from independent start-population probability oracle"
+    },
+    {
+      "name": "unsupported_version_accepted",
+      "expectedContract": "VERSIONS",
+      "status": "PASS",
+      "childExitCode": 1,
+      "observedContract": {
+        "id": "VERSIONS",
+        "name": "Unknown schema and mismatched model versions reject without mutation",
+        "status": "FAIL",
+        "diagnostic": "VERSIONS: VERSIONS: expected rejection, got success",
+        "elapsedMs": 12.153099999999995
+      },
+      "diagnostic": "VERSIONS: VERSIONS: expected rejection, got success"
+    },
+    {
+      "name": "malformed_capacity_accepted",
+      "expectedContract": "CAPACITY_REJECTION",
+      "status": "PASS",
+      "childExitCode": 1,
+      "observedContract": {
+        "id": "CAPACITY_REJECTION",
+        "name": "Missing, noninteger and out-of-range capacities reject without mutation",
+        "status": "FAIL",
+        "diagnostic": "CAPACITY_REJECTION: CAPACITY_REJECTION null: expected rejection, got success",
+        "elapsedMs": 8.370800000000145
+      },
+      "diagnostic": "CAPACITY_REJECTION: CAPACITY_REJECTION null: expected rejection, got success"
+    },
+    {
+      "name": "migration_rewrites_custom_profile",
+      "expectedContract": "MIGRATION_PRESERVATION",
+      "status": "PASS",
+      "childExitCode": 1,
+      "observedContract": {
+        "id": "MIGRATION_PRESERVATION",
+        "name": "Real populated v6 migration preserves all existing records and custom biology",
+        "status": "FAIL",
+        "diagnostic": "MIGRATION_PRESERVATION: Migration rewrote caller's custom profiles",
+        "elapsedMs": 546.5544999999997
+      },
+      "diagnostic": "MIGRATION_PRESERVATION: Migration rewrote caller's custom profiles"
+    },
+    {
+      "name": "migration_non_idempotence",
+      "expectedContract": "MIGRATION_IDEMPOTENCE",
+      "status": "PASS",
+      "childExitCode": 1,
+      "observedContract": {
+        "id": "MIGRATION_IDEMPOTENCE",
+        "name": "Explicit migration is byte-idempotent on already migrated v7",
+        "status": "FAIL",
+        "diagnostic": "MIGRATION_IDEMPOTENCE: Migration changed an already migrated v7 state",
+        "elapsedMs": 517.0619000000002
+      },
+      "diagnostic": "MIGRATION_IDEMPOTENCE: Migration changed an already migrated v7 state"
+    }
+  ],
+  "mutantsPassed": 8,
+  "mutantsFailed": 0
+}
+== stderr ==
+

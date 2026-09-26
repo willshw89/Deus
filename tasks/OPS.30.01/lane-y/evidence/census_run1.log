@@ -1,0 +1,211 @@
+# census run 1: fresh clone C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1 (git clone -c core.autocrlf=false <worktree>; checkout --detach 425b594c...; push url disabled), runner at 3335730734b7676bc6830ced8c974a82830df395
+$ git -C C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1 rev-parse HEAD
+425b594c146d5f353c10faa11f4b5d47f499b45f
+$ node tools/ops/run_gate.js --census --root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1 --out tasks/OPS.30.01/lane-y/evidence/census_run1.json --log-dir C:\Users\snewt\AppData\Local\Temp\deus-lane-y-logs\run1 --budget-sec 360
+run_gate: census of 188 suites, root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1, HEAD 425b594c146d5f353c10faa11f4b5d47f499b45f, timeout 180 s, up to 3 at once, budget 360 s
+CENSUS 1/188 tools/test_all_animated_objects_live.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_all_animated_objects_live.js:112 names "nwjs": const nwExe = path.join(rmmzDir, 'nwjs-win', 'nw.exe');
+CENSUS 2/188 tools/test_all_faction_menus.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_all_faction_menus.js:35 names "run_tests": childProcess.execSync(`"${process.execPath}" tools/run_tests.js faction_menus --game "${SNAPSHOT_DIR}"`, {
+CENSUS 3/188 tools/test_ally_movement_exclusive_action_square.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_ally_movement_exclusive_action_square.js:211 names "run_tests": const out = childProcess.execSync(`"${nodePath}" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 4/188 tools/test_building_variety_live.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_building_variety_live.js:209 names "run_tests": const out = childProcess.execSync(`"${nodePath}" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 5/188 tools/test_callings_and_clearing_live.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_callings_and_clearing_live.js:257 names "run_tests": const out = childProcess.execSync(`"${nodePath}" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 6/188 tools/test_chest_left_click_info.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_chest_left_click_info.js:12 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe";
+CENSUS 7/188 tools/test_container_item_interactions.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_container_item_interactions.js:12 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe";
+CENSUS 8/188 tools/test_continuous_frontier_progression.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_continuous_frontier_progression.js:168 names "run_tests": const out = childProcess.execSync(`"${nodePath}" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 9/188 tools/test_cooperative_homestead_construction.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_cooperative_homestead_construction.js:201 names "run_tests": const out = childProcess.execSync(`"${nodePath}" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 10/188 tools/test_creatures_ingame.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_creatures_ingame.js:84 names "run_tests": const out = childProcess.execSync(`"${process.execPath}" tools/run_tests.js wildlife --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 11/188 tools/test_culling_native.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_culling_native.js:20 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe";
+CENSUS 12/188 tools/test_dwarves_ingame.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_dwarves_ingame.js:163 names "run_tests": const out = childProcess.execSync(`"${process.execPath}" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 13/188 tools/test_elves_ingame.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_elves_ingame.js:165 names "run_tests": const out = childProcess.execSync(`"${process.execPath}" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 14/188 tools/test_faction_menus_clean.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_faction_menus_clean.js:14 names "run_tests": const out = childProcess.execSync(`"${process.execPath}" tools/run_tests.js faction_menus`, {
+CENSUS 15/188 tools/test_factions_live.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_factions_live.js:71 names "run_tests": const out = childProcess.execSync(`"C:\\Program Files\\nodejs\\node.exe" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 16/188 tools/test_fog_z_level_live.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_fog_z_level_live.js:124 names "run_tests": // 3. Run NW.js headless using run_tests.js harness
+CENSUS 17/188 tools/test_golden_art_review_live.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_golden_art_review_live.js:240 names "run_tests": console.log('Running in-engine test suite via run_tests.js...');
+CENSUS 18/188 tools/test_greater_z_roof_live.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_greater_z_roof_live.js:153 names "run_tests": const out = childProcess.execSync(`"${nodePath}" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 19/188 tools/test_human_dwarf_8d_live.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_human_dwarf_8d_live.js:163 names "run_tests": const out = childProcess.execSync(`"${process.execPath}" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 20/188 tools/test_human_female_variations_live.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_human_female_variations_live.js:150 names "run_tests": // 3. Run test using run_tests.js against snapshot
+CENSUS 21/188 tools/test_human_male_live_ingame.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_human_male_live_ingame.js:137 names "run_tests": // 3. Run test runner against snapshot using run_tests.js
+CENSUS 22/188 tools/test_human_male_variations_live.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_human_male_variations_live.js:145 names "run_tests": path.join(ROOT, 'tools', 'run_tests.js'),
+CENSUS 23/188 tools/test_layer_switch_inplace.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_layer_switch_inplace.js:438 names "run_tests": const r = spawnSync(process.execPath, [path.join(ROOT, "tools", "run_tests.js"), SUITE, "--game", dir], { encoding: "utf8", timeout: 420000 });
+CENSUS 24/188 tools/test_light_wall_occlusion_live.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_light_wall_occlusion_live.js:157 names "run_tests": // 3. Run test using run_tests.js against snapshot
+CENSUS 25/188 tools/test_live_town_center_progression.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_live_town_center_progression.js:165 names "run_tests": const out = childProcess.execSync(`"${nodePath}" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 26/188 tools/test_ludeon_planning.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_ludeon_planning.js:189 names "run_tests": const out = childProcess.execSync(`"${nodePath}" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 27/188 tools/test_menu_ingame.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_menu_ingame.js:47 names "run_tests": const out = childProcess.execSync(`"${process.execPath}" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 28/188 tools/test_perf_benchmark.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_perf_benchmark.js:12 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe";
+CENSUS 29/188 tools/test_post_town_hall_progression.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_post_town_hall_progression.js:155 names "run_tests": const out = childProcess.execSync(`"${nodePath}" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 30/188 tools/test_round_world_live.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_round_world_live.js:117 names "run_tests": const out = childProcess.execSync(`"${nodePath}" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 31/188 tools/test_seamless_seam_live.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_seamless_seam_live.js:83 names "run_tests": const out = childProcess.execSync(`"${nodePath}" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 32/188 tools/test_snapshot.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_snapshot.js names "test_snapshot": (the file's own path)
+CENSUS 33/188 tools/test_standard_4d_ingame.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_standard_4d_ingame.js:145 names "run_tests": const out = childProcess.execSync(`"${nodePath}" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 34/188 tools/test_standard_8d_ingame.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_standard_8d_ingame.js:238 names "run_tests": const out = childProcess.execSync(`"${nodePath}" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 35/188 tools/test_temperate_arid_transition_live.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_temperate_arid_transition_live.js:311 names "run_tests": const out = childProcess.execSync(`"${nodePath}" tools/run_tests.js temperate_arid_live --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 36/188 tools/test_tilesets_live.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_tilesets_live.js:75 names "run_tests": const out = childProcess.execSync(`"C:\\Program Files\\nodejs\\node.exe" "${path.join(ROOT, 'tools', 'run_tests.js')}" smoke --game "${SNAPSHOT_DIR}"`, { stdio:
+CENSUS 37/188 tools/test_title_menu.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_title_menu.js:48 names "nw.exe": childProcess.execSync('nw.exe game', { cwd: ROOT, timeout: 15000 });
+CENSUS 38/188 tools/test_town_hall_ai_live.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_town_hall_ai_live.js:214 names "run_tests": const out = childProcess.execSync(`"${nodePath}" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 39/188 tools/test_underground_room.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_underground_room.js:47 names "run_tests": const out = childProcess.execSync(`"C:\\Program Files\\nodejs\\node.exe" "${path.join(ROOT, 'tools', 'run_tests.js')}" smoke --game "${SNAPSHOT_DIR}"`, { stdio:
+CENSUS 40/188 tools/test_unpartnered_shelter_progression.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_unpartnered_shelter_progression.js:206 names "run_tests": const out = childProcess.execSync(`"${nodePath}" tools/run_tests.js smoke --game "${SNAPSHOT_DIR}"`, { cwd: ROOT, encoding: 'utf8' });
+CENSUS 41/188 tools/test_walls_ingame.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_walls_ingame.js:140 names "run_tests": `"C:\\Program Files\\nodejs\\node.exe" "${path.join(ROOT, 'tools', 'run_tests.js')}" walls --game "${SNAPSHOT_DIR}"`,
+CENSUS 42/188 tools/test_water_ingame.js NEEDS_NWJS (not run) EXIT=- - | static screen: tools/test_water_ingame.js:44 names "run_tests": const out = childProcess.execSync(`"C:\\Program Files\\nodejs\\node.exe" "${path.join(ROOT, 'tools', 'run_tests.js')}" smoke --game "${SNAPSHOT_DIR}"`, { stdio:
+CENSUS 43/188 tools/art/test_place_art.js PASS EXIT=0 6601ms
+CENSUS 44/188 tools/art/test_catalogue.js FAIL_OTHER EXIT=1 8050ms | FAIL catalogue.rebuild_identical: 12 outputs; run1 vs run2 differ: none; fresh build vs committed differ: art/catalogue/catalogue.json, art/catalogue/conflicts.md; catalogue.json sha256 9bc98b86a8c8e504...
+CENSUS 45/188 tools/check_deus_syntax.js PASS EXIT=0 3962ms
+CENSUS 46/188 tools/art/test_blank_templates.js PASS EXIT=0 36046ms
+CENSUS 47/188 tools/sim/test_ledger.js PASS EXIT=0 11659ms
+CENSUS 48/188 tools/sim/test_ledger_longrun.js PASS EXIT=0 21736ms
+CENSUS 49/188 tools/test_19b_performance_determinism.js FAIL_API_DRIFT EXIT=1 75ms | TypeError: WA.initNewWorld is not a function
+CENSUS 50/188 tools/test_adam_res.js FAIL_MISSING_REFERENCE EXIT=1 48ms | Error: ENOENT: no such file or directory, open 'C:\Program Files\GOG Galaxy\Games\Ultima 7\STATIC\PALETTES.FLX'
+CENSUS 51/188 tools/test_adam_scales.js FAIL_MISSING_REFERENCE EXIT=1 46ms | Error: ENOENT: no such file or directory, open 'C:\Program Files\GOG Galaxy\Games\Ultima 7\STATIC\PALETTES.FLX'
+CENSUS 52/188 tools/test_aging_and_lifespan.js PASS EXIT=0 52ms
+CENSUS 53/188 tools/test_agriculture.js FAIL_MISSING_REFERENCE EXIT=1 50ms | Error: ENOENT: no such file or directory, open '<root>\game\js\plugins\UF_Agriculture.js'
+CENSUS 54/188 tools/test_all_object_charsets.js FAIL_OTHER EXIT=1 17953ms | Icon Art Check FAIL on oak (<root>\art\masters\oak_icon.png):
+CENSUS 55/188 tools/test_all_walk_cycles.js FAIL_MISSING_REFERENCE EXIT=1 442ms | Error: ENOENT: no such file or directory, open '<root>\game\test_output\all_males_walk_cycles_4step.png'
+CENSUS 56/188 tools/governance/test_check_claims.js PASS EXIT=0 148583ms
+CENSUS 57/188 tools/governance/test_merge_gate.js KILLED_TIMEOUT EXIT=- 180200ms | killed after 180 s (timeout) with its whole process tree
+CENSUS 58/188 tools/test_autonomous_settlement_closure.js PASS EXIT=0 62228ms
+CENSUS 59/188 tools/test_biome_standard.js PASS EXIT=0 252ms
+CENSUS 60/188 tools/test_birth_rate_halved.js FAIL_OTHER EXIT=1 44ms | AssertionError [ERR_ASSERTION]: UF_Colonists.js must check roll < 0.5 for 50% conception rate
+CENSUS 61/188 tools/test_callings_system.js FAIL_MISSING_REFERENCE EXIT=1 44ms | Error: Cannot find module '../game/js/plugins/UF_Callings.js'
+CENSUS 62/188 tools/test_clean_attack_sheet.js PASS EXIT=0 147ms
+CENSUS 63/188 tools/test_clean_bow_sheet.js PASS EXIT=0 165ms
+CENSUS 64/188 tools/test_clean_downed_sheet.js PASS EXIT=0 129ms
+CENSUS 65/188 tools/test_clean_haul_sheet.js PASS EXIT=0 187ms
+CENSUS 66/188 tools/test_clean_magic_sheet.js PASS EXIT=0 146ms
+CENSUS 67/188 tools/test_clean_u7_composites.js FAIL_MISSING_REFERENCE EXIT=1 95ms | Error: ENOENT: no such file or directory, open '<root>\scratch\u7_modular_test\clean_combo_A.png'
+CENSUS 68/188 tools/test_clean_walk_sheet.js PASS EXIT=0 145ms
+CENSUS 69/188 tools/test_clean_walk_sheet2.js PASS EXIT=0 145ms
+CENSUS 70/188 tools/test_clean_walk_sheet3.js PASS EXIT=0 159ms
+CENSUS 71/188 tools/test_clean_work_sheet.js PASS EXIT=0 136ms
+CENSUS 72/188 tools/test_column_landforms.js PASS EXIT=0 486ms
+CENSUS 73/188 tools/test_combat_dying_integration.js PASS EXIT=0 79ms
+CENSUS 74/188 tools/test_conditions_native_closure.js PASS EXIT=0 1424ms
+CENSUS 75/188 tools/test_conditions_system.js PASS EXIT=0 60ms
+CENSUS 76/188 tools/test_cooperative_building_and_offspring_pairbonding.js FAIL_MISSING_REFERENCE EXIT=1 61ms | FAIL coop_pairbond.founder_1to1_pairbonding_at_creation: Error: ENOENT: no such file or directory, open '<root>\game\js\plugins\UF_CultureGrowth.js'
+CENSUS 77/188 tools/test_culture_growth.js FAIL_MISSING_REFERENCE EXIT=1 43ms | Error: ENOENT: no such file or directory, open '<root>\game\js\plugins\UF_CultureGrowth.js'
+CENSUS 78/188 tools/test_d20_equipment_slots.js FAIL_MISSING_REFERENCE EXIT=1 48ms | Error: Cannot find module '<root>\game\js\plugins\UF_Rules.js'
+CENSUS 79/188 tools/test_deer_action_boxes.js PASS EXIT=0 155ms
+CENSUS 80/188 tools/test_diagonal_corners_and_doorways.js FAIL_API_DRIFT EXIT=1 55ms | FAIL diagonal_geometry.corner_cut_rejected_around_obstacle: unit.canPassDiagonally is not a function
+CENSUS 81/188 tools/test_duplicate_registration.js PASS EXIT=0 62ms
+CENSUS 82/188 tools/test_dynamic_armor_reflection.js FAIL_API_DRIFT EXIT=1 244ms | TypeError: Cannot read properties of undefined (reading 'clothingIndexForUnit')
+CENSUS 83/188 tools/test_ecology.js FAIL_API_DRIFT EXIT=1 52ms | FAIL ecology.renewable_vs_finite: Cannot read properties of undefined (reading 'isRenewableObject')
+CENSUS 84/188 tools/test_extraction_difficulty.js FAIL_MISSING_REFERENCE EXIT=1 48ms | Error: ENOENT: no such file or directory, open '<root>\game\js\plugins\UF_Skills.js'
+CENSUS 85/188 tools/test_eye_variations.js FAIL_MISSING_REFERENCE EXIT=1 46ms | Error: ENOENT: no such file or directory, open '<root>\game\test_output\eye_e1_1x.png'
+CENSUS 86/188 tools/test_facing_detection.js PASS EXIT=0 65ms
+CENSUS 87/188 tools/test_faction_construction_and_homes.js FAIL_API_DRIFT EXIT=1 74ms | FAIL faction_construction.all_faction_founders_are_settlers: TypeError: Cannot read properties of undefined (reading 'setup')
+CENSUS 88/188 tools/test_faction_founder_pairbonding.js FAIL_MISSING_REFERENCE EXIT=1 63ms | Error: ENOENT: no such file or directory, open '<root>\game\js\plugins\UF_Outposts.js'
+CENSUS 89/188 tools/test_faction_reproduction.js FAIL_MISSING_REFERENCE EXIT=1 43ms | Error: ENOENT: no such file or directory, open '<root>\game\js\plugins\UF_Goals.js'
+CENSUS 90/188 tools/test_faction_starting_gear.js FAIL_MISSING_REFERENCE EXIT=1 68ms | Error: History: HistoricalDemographics, Callings and Dnd5e must be loaded before New Game
+CENSUS 91/188 tools/test_family_compounds_and_shops.js PASS EXIT=0 84ms
+CENSUS 92/188 tools/test_family_integration.js FAIL_MISSING_REFERENCE EXIT=1 52ms | Error: ENOENT: no such file or directory, open '<root>\game\js\plugins\UF_FireSafety.js'
+CENSUS 93/188 tools/test_farm_view.js FAIL_MISSING_REFERENCE EXIT=1 48ms | Error: ENOENT: no such file or directory, open '<root>\game\js\plugins\UF_FarmView.js'
+CENSUS 94/188 tools/test_female_u7_composites.js FAIL_MISSING_REFERENCE EXIT=1 92ms | Error: ENOENT: no such file or directory, open '<root>\scratch\u7_modular_test\f_combo_A.png'
+CENSUS 95/188 tools/test_ff5_candidates.js FAIL_MISSING_REFERENCE EXIT=1 48ms | Error: ENOENT: no such file or directory, open '<root>\game\test_output\settler_ff5_c1_1x.png'
+CENSUS 96/188 tools/test_ff5_proportions_and_footsteps.js FAIL_MISSING_REFERENCE EXIT=1 55ms | Error: ENOENT: no such file or directory, open '<root>\scratch\peasant_48_test.png'
+CENSUS 97/188 tools/test_fire_safety.js FAIL_MISSING_REFERENCE EXIT=1 46ms | Error: ENOENT: no such file or directory, open '<root>\game\js\plugins\UF_FireSafety.js'
+CENSUS 98/188 tools/test_fix_facings.js FAIL_OTHER EXIT=1 60ms | ReferenceError: testFiles is not defined
+CENSUS 99/188 tools/test_fixed_cycle.js FAIL_MISSING_REFERENCE EXIT=1 116ms | Error: ENOENT: no such file or directory, open '<root>\game\test_output\fixed_male_walk_cycle_filmstrip.png'
+CENSUS 100/188 tools/test_fixed_walk_playback.js PASS EXIT=0 131ms
+CENSUS 101/188 tools/test_foliage_sprite_animations.js PASS EXIT=0 328ms
+CENSUS 102/188 tools/test_gen3_metrics.js PASS EXIT=0 197ms
+CENSUS 103/188 tools/test_generated_z2_cut_proof.js PASS EXIT=0 42664ms
+CENSUS 104/188 tools/test_autonomous_project_dispatch.js KILLED_TIMEOUT EXIT=- 180134ms | killed after 180 s (timeout) with its whole process tree
+CENSUS 105/188 tools/test_generator_combinations.js PASS EXIT=0 371ms
+CENSUS 106/188 tools/test_goals.js FAIL_MISSING_REFERENCE EXIT=1 47ms | Error: ENOENT: no such file or directory, open '<root>\game\js\plugins\UF_Goals.js'
+CENSUS 107/188 tools/test_ground_shades_prototype.js PASS EXIT=0 44ms
+CENSUS 108/188 tools/test_hare_action_boxes.js PASS EXIT=0 178ms
+CENSUS 109/188 tools/test_haul_builder.js PASS EXIT=0 62ms
+CENSUS 110/188 tools/test_hazard_reflex.js PASS EXIT=0 594ms
+CENSUS 111/188 tools/test_hazard_torture_live.js PASS EXIT=0 3777ms
+CENSUS 112/188 tools/test_hearth_containment_and_provenance.js PASS EXIT=0 102ms
+CENSUS 113/188 tools/test_hist_metadata_contracts.js FAIL_MISSING_REFERENCE EXIT=1 15626ms | FATAL: History: HistoricalDemographics, Callings and Dnd5e must be loaded before New Game
+CENSUS 114/188 tools/test_geology_strata.js PASS EXIT=0 23322ms
+CENSUS 115/188 tools/test_historical_carrying_capacity.js PASS EXIT=0 21235ms
+CENSUS 116/188 tools/test_households.js PASS EXIT=0 266ms
+CENSUS 117/188 tools/test_human_inheritance.js PASS EXIT=0 56ms
+CENSUS 118/188 tools/test_liquid_depth_simulation.js PASS EXIT=0 468ms
+CENSUS 119/188 tools/test_material_recipes.js FAIL_API_DRIFT EXIT=1 48ms | TypeError: Cannot read properties of undefined (reading 'handler')
+CENSUS 120/188 tools/test_material_refining_and_tech_pacing.js FAIL_MISSING_REFERENCE EXIT=1 47ms | Error: ENOENT: no such file or directory, open '<root>\game\js\plugins\UF_CultureGrowth.js'
+CENSUS 121/188 tools/test_material_substitution.js FAIL_API_DRIFT EXIT=1 48ms | TypeError: Cannot read properties of undefined (reading 'matchesRequirement')
+CENSUS 122/188 tools/test_minimap.js PASS EXIT=0 57ms
+CENSUS 123/188 tools/test_multi_deficit_settlement.js PASS EXIT=0 763ms
+CENSUS 124/188 tools/test_native_resolution_standard.js PASS EXIT=0 88ms
+CENSUS 125/188 tools/test_autonomous_work_recovery.js KILLED_TIMEOUT EXIT=- 180146ms | killed after 180 s (timeout) with its whole process tree
+CENSUS 126/188 tools/test_history_materialization_and_world_age.js PASS EXIT=0 105267ms
+CENSUS 127/188 tools/test_native_survival_soak.js FAIL_OTHER EXIT=1 119747ms | RESULT: SOAK CHECKS FAILED (7 passed, 2 failed, exit 1)
+LEFTOVERS: none
+CENSUS COUNTS PASS=46 FAIL_MISSING_DEPENDENCY=0 FAIL_API_DRIFT=7 FAIL_MISSING_REFERENCE=24 FAIL_OTHER=5 KILLED_TIMEOUT=3 NEEDS_NWJS=42
+CENSUS PARTIAL: 127/188 measured -> C:\Users\snewt\.deus_worktrees\lane-y\tasks\OPS.30.01\lane-y\evidence\census_run1.json; run the same command again to continue
+EXIT=3
+$ node tools/ops/run_gate.js --census --root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1 --out tasks/OPS.30.01/lane-y/evidence/census_run1.json --log-dir C:\Users\snewt\AppData\Local\Temp\deus-lane-y-logs\run1 --budget-sec 360
+run_gate: census of 188 suites, root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1, HEAD 425b594c146d5f353c10faa11f4b5d47f499b45f, timeout 180 s, up to 3 at once, budget 360 s, resuming (127 already measured)
+CENSUS 128/188 tools/test_natural_connections.js FAIL_API_DRIFT EXIT=1 60ms | FAIL natural_connections.seeded_mock_determinism_and_pairing: TypeError: Cannot read properties of undefined (reading 'state')
+CENSUS 129/188 tools/test_object_originality.js FAIL_OTHER EXIT=1 5718ms | Originality Check Failures:
+CENSUS 130/188 tools/test_palette.js PASS EXIT=0 49ms
+CENSUS 131/188 tools/test_palette_standard.js PASS EXIT=0 277ms
+CENSUS 132/188 tools/test_physical_inventory_proof.js FAIL_MISSING_REFERENCE EXIT=1 48ms | Error: Cannot find module '../game/js/plugins/UF_Containers.js'
+CENSUS 133/188 tools/test_population_growth_and_immigration.js FAIL_API_DRIFT EXIT=1 70ms | FAIL population_growth.conception_chance_logistic_curve: Cannot read properties of undefined (reading 'generate')
+CENSUS 134/188 tools/test_portrait_clothing_offsets.js FAIL_MISSING_REFERENCE EXIT=1 85ms | Error: ENOENT: no such file or directory, open '<root>\scratch\u7_modular_test\test_cloth0_ty_75.png'
+CENSUS 135/188 tools/test_object_art.js FAIL_OTHER EXIT=1 6591ms | Art Check Failures:
+CENSUS 136/188 tools/test_production_history_demographics.js FAIL_OTHER EXIT=1 47ms | FAIL: Error: Production candidate mismatch before regression tests
+CENSUS 137/188 tools/test_profile_tabs.js FAIL_MISSING_REFERENCE EXIT=1 50ms | Error: ENOENT: no such file or directory, open '<root>\game\js\plugins\UF_ProfileTabs.js'
+CENSUS 138/188 tools/test_process_human_12.js FAIL_MISSING_REFERENCE EXIT=1 388ms | + FullyQualifiedErrorId : FileNotFoundException
+CENSUS 139/188 tools/test_r4c2_foreshorten.js PASS EXIT=0 72ms
+CENSUS 140/188 tools/test_regrowth_construction_guard.js FAIL_API_DRIFT EXIT=1 61ms | TypeError: Cannot read properties of undefined (reading 'setIn')
+CENSUS 141/188 tools/test_resize_face.js PASS EXIT=0 293ms
+CENSUS 142/188 tools/test_resource_economy_standard.js PASS EXIT=0 44ms
+CENSUS 143/188 tools/test_resource_node_materials.js FAIL_API_DRIFT EXIT=1 52ms | TypeError: Cannot read properties of undefined (reading 'materialOf')
+CENSUS 144/188 tools/test_round_world.js FAIL_OTHER EXIT=1 52ms | ReferenceError: Scene_Map is not defined
+CENSUS 145/188 tools/test_sanitation_system.js FAIL_MISSING_REFERENCE EXIT=1 40ms | Error: ENOENT: no such file or directory, open '<root>\game\js\plugins\UF_Sanitation.js'
+CENSUS 146/188 tools/test_scale_standard.js PASS EXIT=0 199ms
+CENSUS 147/188 tools/test_seamless_map_edges.js FAIL_OTHER EXIT=1 54ms | ReferenceError: Scene_Map is not defined
+CENSUS 148/188 tools/test_second_by_second_history.js FAIL_API_DRIFT EXIT=1 74ms | FAIL second_by_second.universal_year_1_founding: TypeError: Cannot read properties of undefined (reading 'generate')
+CENSUS 149/188 tools/test_new_game_year0.js PASS EXIT=0 13870ms
+CENSUS 150/188 tools/test_project_construction_loop.js KILLED_TIMEOUT EXIT=- 180182ms | killed after 180 s (timeout) with its whole process tree
+CENSUS 151/188 tools/test_settlement_pillars.js FAIL_MISSING_REFERENCE EXIT=1 56ms | Error: ENOENT: no such file or directory, open '<root>\game\js\plugins\UF_SettlementPillars.js'
+CENSUS 152/188 tools/test_settlement_domestic_housing.js KILLED_TIMEOUT EXIT=- 180194ms | killed after 180 s (timeout) with its whole process tree
+CENSUS 153/188 tools/test_sheep_action_boxes.js PASS EXIT=0 273ms
+CENSUS 154/188 tools/test_side_combos.js PASS EXIT=0 142ms
+CENSUS 155/188 tools/test_slice_human.js FAIL_MISSING_REFERENCE EXIT=1 466ms | + FullyQualifiedErrorId : FileNotFoundException
+CENSUS 156/188 tools/test_srd_character_presentation.js PASS EXIT=0 151ms
+CENSUS 157/188 tools/test_srd_combat_proof.js FAIL_MISSING_REFERENCE EXIT=1 58ms | Error: ENOENT: no such file or directory, open '<root>\game\js\plugins\UF_Conditions.js'
+CENSUS 158/188 tools/test_srd_equipment_proof.js FAIL_MISSING_REFERENCE EXIT=1 55ms | Error: Cannot find module '<root>\game\js\plugins\UF_Conditions.js'
+CENSUS 159/188 tools/test_srd_parity.js PASS EXIT=0 67ms
+CENSUS 160/188 tools/test_srd_rules_proof.js FAIL_MISSING_REFERENCE EXIT=1 56ms | Error: Cannot find module '<root>\game\js\plugins\UF_Conditions.js'
+CENSUS 161/188 tools/test_settlement_projects.js PASS EXIT=0 2564ms
+CENSUS 162/188 tools/test_stabilization.js PASS EXIT=0 943ms
+CENSUS 163/188 tools/test_stockpiles_designation.js PASS EXIT=0 104ms
+CENSUS 164/188 tools/test_settlement_expansion_multi_dwelling.js KILLED_TIMEOUT EXIT=- 180202ms | killed after 180 s (timeout) with its whole process tree
+CENSUS 165/188 tools/test_starter_kit_and_stockpile.js PASS EXIT=0 57314ms
+CENSUS 166/188 tools/test_strata_cuts_and_caves.js KILLED_TIMEOUT EXIT=- 180165ms | killed after 180 s (timeout) with its whole process tree
+CENSUS 167/188 tools/test_strata_fluid_reconciliation.js KILLED_TIMEOUT EXIT=- 180171ms | killed after 180 s (timeout) with its whole process tree
+CENSUS 168/188 tools/test_strata_foundation.js PASS EXIT=0 148842ms
+LEFTOVERS: none
+CENSUS COUNTS PASS=62 FAIL_MISSING_DEPENDENCY=0 FAIL_API_DRIFT=12 FAIL_MISSING_REFERENCE=34 FAIL_OTHER=10 KILLED_TIMEOUT=8 NEEDS_NWJS=42
+GATE SUITE NOT PASSING: tools/test_strata_cuts_and_caves.js KILLED_TIMEOUT
+CENSUS PARTIAL: 168/188 measured -> C:\Users\snewt\.deus_worktrees\lane-y\tasks\OPS.30.01\lane-y\evidence\census_run1.json; run the same command again to continue
+EXIT=3
+$ node tools/ops/run_gate.js --census --root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1 --out tasks/OPS.30.01/lane-y/evidence/census_run1.json --log-dir C:\Users\snewt\AppData\Local\Temp\deus-lane-y-logs\run1 --budget-sec 360
+run_gate: census of 188 suites, root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1, HEAD 425b594c146d5f353c10faa11f4b5d47f499b45f, timeout 180 s, up to 3 at once, budget 360 s, resuming (168 already measured)
+CENSUS 169/188 tools/test_time_domains_proof.js PASS EXIT=0 62ms
+CENSUS 170/188 tools/test_u7_modular_composition.js PASS EXIT=0 209ms
+CENSUS 171/188 tools/test_unified_capability_proof.js FAIL_MISSING_REFERENCE EXIT=1 66ms | Error: Cannot find module '../game/js/plugins/UF_Proficiency.js'
+CENSUS 172/188 tools/test_upper_elevation_terrain.js FAIL_API_DRIFT EXIT=1 2442ms | TypeError: Tilemap.isTileA1 is not a function
+CENSUS 173/188 tools/test_v2_clean_u7_composites.js PASS EXIT=0 115ms
+CENSUS 174/188 tools/test_var2_suite.js FAIL_OTHER EXIT=1 611ms | no index at <root>\reference\u7_originality_index.json: run with --build-index first
+CENSUS 175/188 tools/test_var_suite.js FAIL_OTHER EXIT=1 606ms | no index at <root>\reference\u7_originality_index.json: run with --build-index first
+CENSUS 176/188 tools/test_vertical_worldgen_proof.js FAIL_OTHER EXIT=1 201ms | FAIL: Subterranean stair landing is dry after the fluid simulation (cellAt.water=true, flooded=true, floodType=water)
+CENSUS 177/188 tools/test_survival_regressions.js PASS EXIT=0 26037ms
+CENSUS 178/188 tools/test_walk_triplets.js PASS EXIT=0 154ms
+CENSUS 179/188 tools/test_wolf_cleanup.js PASS EXIT=0 97ms
+CENSUS 180/188 tools/test_z_cavern_gen.js PASS EXIT=0 133ms
+CENSUS 181/188 tools/test_z_doors.js FAIL_API_DRIFT EXIT=1 62ms | FAIL z_doors.legacy_refuses_level_aliasing: Cannot read properties of undefined (reading 'at')
+CENSUS 182/188 tools/test_z_fire.js FAIL_API_DRIFT EXIT=1 60ms | FAIL z_fire.legacy_refuses_levels_without_mutation: TypeError: Cannot read properties of undefined (reading 'ignite')
+CENSUS 183/188 tools/test_z_floors.js FAIL_API_DRIFT EXIT=1 52ms | FAIL z_floors.legacy_ground_read_write: Cannot read properties of undefined (reading 'canLay')
+CENSUS 184/188 tools/test_z_flora.js FAIL_API_DRIFT EXIT=1 81ms | FAIL z_flora.depth_specific_natural_and_kit: TypeError: generators.get(...) is not a function
+CENSUS 185/188 tools/test_z_ownership.js FAIL_API_DRIFT EXIT=1 51ms | FAIL ownership_z.legacy_ground_key: Cannot read properties of undefined (reading 'keyOf')
+CENSUS 186/188 tools/test_z_walls.js FAIL_API_DRIFT EXIT=1 49ms | FAIL walls_z.legacy_lookup: Cannot read properties of undefined (reading 'baseAt')
+CENSUS 187/188 tools/test_volumetric_terrain_column.js PASS EXIT=0 71679ms
+CENSUS 188/188 tools/test_survival_needs_loop.js KILLED_TIMEOUT EXIT=- 180108ms | killed after 180 s (timeout) with its whole process tree
+LEFTOVERS: none
+CENSUS COUNTS PASS=70 FAIL_MISSING_DEPENDENCY=0 FAIL_API_DRIFT=19 FAIL_MISSING_REFERENCE=35 FAIL_OTHER=13 KILLED_TIMEOUT=9 NEEDS_NWJS=42
+GATE SUITE NOT PASSING: tools/test_strata_cuts_and_caves.js KILLED_TIMEOUT
+CENSUS COMPLETE: 188/188 measured -> C:\Users\snewt\.deus_worktrees\lane-y\tasks\OPS.30.01\lane-y\evidence\census_run1.json
+EXIT=0

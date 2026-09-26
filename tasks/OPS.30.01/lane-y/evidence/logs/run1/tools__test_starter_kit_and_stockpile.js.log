@@ -1,0 +1,19 @@
+# tools/test_starter_kit_and_stockpile.js  category=PASS  exit=0  ms=57314  decided by exit_0 (-)
+== stdout ==
+=== Starter Kit & 9-Tile Stockpile Verification ===
+PASS 1: Tool types (shovel, pickaxe, axe) exist and resolve correctly.
+Starting chest contains 7 item stacks:
+  - 5x meat_cooked (id: 1)
+  - 5x meat_cooked (id: 2)
+  - 5x meat_cooked (id: 3)
+  - 1x meat_cooked (id: 4)
+  - 1x shovel (id: 5)
+  - 1x stone_pick (id: 6)
+  - 1x stone_axe (id: 7)
+PASS 2: Central chest contains exact starter kit (16 cooked meat, 1 shovel, 1 pickaxe, 1 axe).
+PASS 3: All 9 starting tiles (3x3 centered on chest) are designated as physical stockpile squares.
+PASS 4: Colony state initializes with all 9 stockpile tiles.
+
+ALL STARTER CHEST & STOCKPILE CHECKS PASSED!
+== stderr ==
+

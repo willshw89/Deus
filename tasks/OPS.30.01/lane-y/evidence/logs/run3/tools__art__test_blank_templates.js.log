@@ -1,0 +1,109 @@
+# tools/art/test_blank_templates.js  category=PASS  exit=0  ms=45592  decided by exit_0 (-)
+== stdout ==
+INFO temp folder C:\Users\snewt\AppData\Local\Temp\deus-run-gate-1r5lIw\s0\tmp\deus-blank-templates-test-yG7ceS
+INFO fixture: 5 sheets, 28 paint slots, 31 entries, geometry text sha256 a1b95e7eb35208a0d1406a49e04fd7f977999e7751b5f96d20d45bc0a1b60235
+PASS templates.run
+PASS templates.one_per_sheet
+PASS templates.dimensions
+PASS templates.census
+PASS templates.slot_edges
+PASS templates.interior
+PASS templates.free_area
+PASS templates.labels
+PASS templates.sidecar
+PASS templates.png_chunks
+INFO run1 sha256 TEST_ATLAS_SURFACE.png 1437d21c8d95d5c18feffef644ea98c54c11821d733e4dc50a0797e35aa871cf
+INFO run1 sha256 TEST_A2_SURFACE.png b4ee04a59b6a47265b362b101e7f54415afca885560273b4ec6aa948e8536244
+INFO run1 sha256 $TEST_Human.png a542c5fde1718221c316606cfed3648d7b9359cea7f9cc1d306d3da5e2b3e9b4
+INFO run1 sha256 $TEST_Ogre.png bbf6ff2432161400f5325bb3cec99775db4ab78f0841c368f4f9a78db0064f1d
+INFO run1 sha256 $TEST_Horse.png 8cdcbee81a4675d6428792926ef68ddd516fa67ffe28c72044dccc3a3daef05d
+INFO run2 sha256 $TEST_Horse.png 8cdcbee81a4675d6428792926ef68ddd516fa67ffe28c72044dccc3a3daef05d
+INFO run2 sha256 $TEST_Human.png a542c5fde1718221c316606cfed3648d7b9359cea7f9cc1d306d3da5e2b3e9b4
+INFO run2 sha256 $TEST_Ogre.png bbf6ff2432161400f5325bb3cec99775db4ab78f0841c368f4f9a78db0064f1d
+INFO run2 sha256 TEST_A2_SURFACE.png b4ee04a59b6a47265b362b101e7f54415afca885560273b4ec6aa948e8536244
+INFO run2 sha256 TEST_ATLAS_SURFACE.png 1437d21c8d95d5c18feffef644ea98c54c11821d733e4dc50a0797e35aa871cf
+PASS templates.determinism
+PASS templates.bg_magenta
+PASS templates.palette
+INFO opaque colours in templates: #00FFFFFF, #FFFF00FF, #FF00FFFF; master palette 226 colours
+PASS templates.stratum_param[changed_split]
+PASS templates.stratum_param[stale_catalogue_refused]
+PASS templates.stratum_param[stale_rects_refused]
+PASS templates.stratum_param[invalid_zero_stratum_refused]
+PASS templates.stratum_param[invalid_sum_not_layerPx_refused]
+PASS templates.stratum_param[invalid_too_few_strata_refused]
+PASS templates.stratum_param[invalid_fractional_refused]
+PASS templates.stratum_param[invalid_not_an_array_refused]
+PASS templates.stratum_param[irregular_split]
+PASS templates.stratum_param[layerPx_param]
+PASS templates.tall_medium[off_by_default]
+PASS templates.tall_medium[on_adds_slots]
+PASS templates.tall_medium[disabled_use_refused]
+PASS templates.readability_floor
+PASS templates.refusals[variant_has_slot]
+PASS templates.refusals[huge_has_slot]
+PASS templates.refusals[slot_overlap]
+PASS templates.refusals[slot_out_of_sheet]
+PASS templates.refusals[slot_too_small]
+PASS templates.refusals[missing_scale_row]
+PASS templates.refusals[duplicate_slot_id]
+PASS templates.refusals[bad_slot_id]
+PASS templates.refusals[unknown_sheet]
+PASS templates.refusals[frame_size_mismatch]
+PASS templates.refusals[frames_do_not_divide]
+PASS templates.refusals[unknown_frame_class]
+PASS templates.refusals[envelope_exceeds_slot]
+PASS templates.refusals[z_out_of_range]
+PASS templates.refusals[old_schema]
+PASS templates.refusals[tile_size_mismatch]
+PASS templates.refusals[character_sheet_size]
+PASS templates.refusals[atlas_too_big]
+PASS templates.refusals[unsafe_sheet_id]
+PASS templates.refusals[sheet_id_case_clash]
+PASS templates.refusals[geometry_missing]
+PASS templates.refusals[palette_missing]
+PASS templates.refusals[grid_colour_in_palette]
+PASS templates.refusals[label_colour_in_palette]
+PASS templates.refusals[magenta_in_palette]
+PASS templates.refusals[usage_no_out]
+PASS templates.refusals[usage_bad_bg]
+PASS templates.out_dir_safety[rerun_keeps_readme_removes_stale]
+PASS templates.out_dir_safety[painted_template_refused]
+PASS templates.out_dir_safety[unknown_file_refused]
+PASS templates.out_dir_safety[unknown_png_refused]
+PASS templates.out_dir_safety[file_as_out_refused]
+PASS templates.no_literals
+INFO literal scan: 113 numeric literals checked against 8,9,10,15,16,19,20,24,26,28,32,42,48,64,96,144,192,288,384
+PASS templates.mutants[control_passes]
+PASS templates.mutants[wrong_sheet_size]
+INFO mutant wrong_sheet_size killed by dimensions: dimensions: TEST_ATLAS_SURFACE: PNG is 4097x4096, catalogue says 4096x4096
+PASS templates.mutants[shifted_slot]
+INFO mutant shifted_slot killed by slot_edges: slot_edges: TEST_ATLAS_SURFACE:0000 (0,0 96x96): 93 boundary pixel(s) not grid colour
+PASS templates.mutants[missing_sheet]
+INFO mutant missing_sheet killed by one_per_sheet: one_per_sheet: missing $TEST_Horse.png
+PASS templates.mutants[extra_colour]
+INFO mutant extra_colour killed by census: census: TEST_ATLAS_SURFACE: 132 pixel(s) outside {bg #00000000, grid #00FFFFFF, label #FFFF00FF}, e.g. (193,116) #010203FF, (194,116) #010203FF, (195,116) #010203FF
+PASS templates.mutants[hardcoded_stratum]
+INFO mutant hardcoded_stratum killed by stratum_param: changed_split: split [20,19,19,19,19]: exit 2 codes STRATUM_HEIGHT_MISMATCH stderr: REFUSED STRATUM_HEIGHT_MISMATCH: TEST_SURFACE_B1_RAMP_RISE1_V1_BASE: GEOM_STRATUM_1 needs frame ; literal scan: 19,19,19,19,20
+PASS templates.mutants[sha_check_removed]
+INFO mutant sha_check_removed killed by stratum_param: stale_catalogue_refused: exit 2 codes STRATUM_HEIGHT_MISMATCH stderr: REFUSED STRATUM_HEIGHT_MISMATCH: TEST_SURFACE_B1_RAMP_RISE1_V1_BASE: GEOM_STRATUM_1 needs frame height 20 from
+PASS templates.mutants[ticks_off]
+INFO mutant ticks_off killed by interior: interior: TEST_ATLAS_SURFACE:0009: 25 interior pixel(s) differ from grid/tick/background e.g. (50,156) #FFFF00FF want #00000000
+PASS templates.mutants[grid_offset]
+INFO mutant grid_offset killed by free_area: free_area: TEST_ATLAS_SURFACE: 682216 pixel(s) outside slots differ from grid/background e.g. (480,1) #00000000 want #00FFFFFF
+PASS templates.mutants[labels_off]
+INFO mutant labels_off killed by labels: labels: TEST_ATLAS_SURFACE:0000: label reads "       " (want "0000 AB"), 68 pixel(s) differ
+PASS templates.mutants[sidecar_xy_swapped]
+INFO mutant sidecar_xy_swapped killed by sidecar: sidecar: TEST_ATLAS_SURFACE:0001: x is 0, want 96
+PASS templates.mutants[variant_slot_allowed]
+INFO mutant variant_slot_allowed killed by refusals: variant_has_slot: want exit 2 codes VARIANT_HAS_SLOT; got exit 0; out written: true
+PASS templates.mutants[palette_check_removed]
+INFO mutant palette_check_removed killed by refusals: grid_colour_in_palette: want exit 2 codes PALETTE_COLLISION; got exit 0; out written: true
+PASS templates.mutants[timestamp_in_sidecar]
+INFO mutant timestamp_in_sidecar killed by determinism: two runs differ
+PASS templates.fixture_contract
+PASS templates.fixture_drift
+PASS templates.repo_untouched
+RESULT: 77 passed, 0 failed
+== stderr ==
+

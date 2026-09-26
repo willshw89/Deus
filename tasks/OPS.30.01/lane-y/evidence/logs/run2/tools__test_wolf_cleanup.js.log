@@ -1,0 +1,6 @@
+# tools/test_wolf_cleanup.js  category=PASS  exit=0  ms=112  decided by exit_0 (-)
+== stdout ==
+Foreground box inside cell: { minX: 5, maxX: 244, minY: 5, maxY: 181, fgW: 240, fgH: 177 }
+Absolute coordinates: { x0: 590, y0: 395, x1: 829, y1: 571 }
+== stderr ==
+

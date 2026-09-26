@@ -1,0 +1,50 @@
+# tools/test_native_resolution_standard.js  category=PASS  exit=0  ms=88  decided by exit_0 (-)
+== stdout ==
+=== DEUS NATIVE RESOLUTION STANDARD TEST SUITE (DW.01.02) ===
+
+--- Fixture A: Native 48x48 original DEUS tile ---
+PASS: Fixture A overall status is PASS
+PASS: Fixture A passes native grid check
+PASS: Fixture A passes tile size check
+PASS: Fixture A passes binary alpha check
+
+--- Fixture B: Native 84x84 multi-tile tree source ---
+PASS: Fixture B overall status is PASS
+PASS: Fixture B size check verifies intendedNativeWidth/Height
+PASS: Fixture B grid check passes for multi-tile dimensions
+PASS: Fixture B sidecar schema passes
+
+--- Fixture C: Legacy U7 16->48 stand-in ---
+PASS: Fixture C passes in legacy mode (--legacy-3x)
+PASS: Fixture C fails when checked in native mode
+PASS: Fixture C error explains 16px enlarged 3x rejection
+
+--- Fixture D: Disguised 3x block art submitted as native DEUS art ---
+PASS: Fixture D overall status is FAIL
+PASS: Fixture D fails anti-fraud check
+PASS: Fixture D rejects 100% 3x3 solid blocks with clear message
+
+--- Fixture E: Wrong-size native asset ---
+PASS: Fixture E overall status is FAIL
+PASS: Fixture E fails size check (not multiple of 48)
+PASS: Fixture E fails grid check
+
+--- Fixture F: Smoothed/resampled non-binary alpha fixture ---
+PASS: Fixture F overall status is FAIL
+PASS: Fixture F fails binary alpha check
+PASS: Fixture F reports offending semi-transparent pixel
+
+--- Fixture G: Original native art with 1-pixel variations ---
+PASS: Fixture G overall status is PASS
+PASS: Fixture G passes: 1-pixel variations do NOT trigger legacy block failure
+PASS: Fixture G passes binary alpha
+
+==================================================
+TOTAL CHECKS: 23
+PASSED: 23
+FAILED: 0
+==================================================
+
+ALL FIXTURES A-G PASSED: Native resolution standard verified.
+== stderr ==
+

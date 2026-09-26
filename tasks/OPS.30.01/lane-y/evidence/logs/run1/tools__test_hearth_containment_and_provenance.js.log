@@ -1,0 +1,20 @@
+# tools/test_hearth_containment_and_provenance.js  category=PASS  exit=0  ms=102  decided by exit_0 (-)
+== stdout ==
+=== DEUS Hearth Containment, Fire Provenance & Forensics Test Suite ===
+PASS hearth_provenance.plugins_load - UF.Fire and UF.DeathForensics loaded with full provenance & containment APIs
+PASS hearth_provenance.hearth_recognized_contained - Hearth recognized as contained (escapeChance=0)
+PASS hearth_provenance.hearth_containment_14_days - Standard communal shelter with kitchen hearth survived 3360 beats (14 days) with 0 spontaneous ignitions (ignitions=0)
+PASS hearth_provenance.open_fire_has_escape_chance - Open campfire in wild has natural escapeChance=0.0005
+PASS hearth_provenance.first_spread_ignited - Brush adjacent to campfire caught fire
+PASS hearth_provenance.provenance_hop1_records_origin - Hop 1 Provenance: ID=fire-1, source=campfire at (20,20), fuel=brush
+PASS hearth_provenance.provenance_chain_preserves_root_fire_id - Hop 2 Provenance preserves root fire ID (fire-1), spreadSteps=1, parents=[0,0:20,21]
+PASS hearth_provenance.burn_casualty_recorded_in_forensics - Casualty recorded: Test Colonist, primaryCause=fire
+PASS hearth_provenance.casualty_attaches_structured_fire_provenance - Structured death text: "Burned to death by fire fire-1 originating from open_fire (campfire) at (20, 20, 0) via 1 spread steps"
+PASS hearth_provenance.long_chain_keeps_root_fire_id - 8 cells: ids [fire-2 fire-2 fire-2 fire-2 fire-2 fire-2 fire-2 fire-2], steps [0 1 2 3 4 5 6 7]; last cell's parents [0,0:4,26 0,0:5,26 0,0:6,26 0,0:7,26 0,0:8,26 0,0:9,26 0,0:10,26]; fire summary cells 8
+PASS hearth_provenance.fire_ids_continue_after_reload - saved state had fires up to fire-2 (10 burning cells); after the reload the chain's last cell reads fire-2, 7 steps; the next fire is fire-3 (nextFireId now 4)
+
+======================================================
+RESULT: 11 passed, 0 failed (exit 0)
+======================================================
+== stderr ==
+[DEATH FORENSICS] Test Colonist died on Day 1 at 12:00 at (20,22,z=0). Burned to death by fire fire-1 originating from open_fire (campfire) at (20, 20, 0) via 1 spread steps; the fire started at beat 3360 on day 1 at 12:00, first fuel brush, spread chain [0,0:20,21].

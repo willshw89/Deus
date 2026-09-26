@@ -1,0 +1,17 @@
+# tools/test_multi_deficit_settlement.js  category=PASS  exit=0  ms=694  decided by exit_0 (-)
+== stdout ==
+=== Multi-deficit settlement brain (DEUS_Projects.js) headless checks ===
+PASS brain.plugins_load - UF.Projects brain with deficits shelter/food/bed/storage/housing and blueprints communal_shelter, household_cottage, communal_stockpile, bedding_expansion, food_cache
+PASS brain.deficits_measured_by_nutrition - food 8 lb of nutrition (12.4 lb by weight) = 1 colonist-days, needs 2 more; storage 1/8 slots; beds 3/8 sheltered; shelter 0/1
+PASS brain.brain_ranks_by_utility - communal_shelter:5.00  food_cache:1.33  bedding_expansion:0.94  communal_stockpile:0.88  household_cottage:-; opened communal_shelter adding {"shelter":1,"bed":11}
+PASS brain.no_project_spam - after 12 cycles: {"communal_shelter":1,"food_cache":1,"communal_stockpile":1}; beds: deficit 5, 11 covered by the shelter, unmet 0
+PASS brain.critical_food_first - food 0/0.5 days (critical): food_cache:9.0  bedding_expansion:-  communal_shelter:-  communal_stockpile:-  household_cottage:-; opened Food cache #1 on 1 cell(s) near (25,36): phase 1/2 larder, 0/1 cells, 1 jobs open, 0 taken
+PASS brain.food_cache_forages_to_target - done after 183 updates: larder stockpile at (25,36) registered for food; reserve 0.544 days (3.6 lb in the larder, 0.75 lb on the ground)
+PASS brain.duplicate_prevention_beds - Bedding #1 on 4 cell(s) near (31,31): phase 1/1 beds, 0/4 cells, 4 jobs open, 0 taken; capacity {"bed":4}, cells (31,31) (33,31) (31,33) (33,33) all sheltered; 1 bedding project(s) after six cycles
+PASS brain.bedding_built_by_founders - done after 123 updates: 4/4 beds laid; beds now 8/8
+PASS brain.storage_project_builds_stockpile - done after 74 updates: 9/9 stockpile cells, 9 registered with stores; storage now 10/8 slots; one stockpile project in 1 project(s)
+PASS brain.no_errors - no console errors during the run
+
+RESULT: 10 passed, 0 failed (exit 0)
+== stderr ==
+

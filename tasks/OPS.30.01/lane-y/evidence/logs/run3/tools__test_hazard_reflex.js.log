@@ -1,0 +1,17 @@
+# tools/test_hazard_reflex.js  category=PASS  exit=0  ms=551  decided by exit_0 (-)
+== stdout ==
+=== Hazard reflex and decision order (DEUS_Colonists.js + DEUS_Jobs.js) headless checks ===
+PASS reflex.plugins_load - Jobs lethalHazardAt/inLethalHazard/safeCellNear + extinguish; Colonists assess/onUnitMoved; Environment loaded; Combat loaded
+PASS reflex.hauling_settler_on_fire_drops_job_and_flees - Founder 1 took haul #1 after 14 updates; stepped onto the burning row y=26 at (32,26) -> haul failed "emergency: lethal hazard" (4 updates after the fire was set); reflex move to (32,25) 1 update(s) later; safe after 1 more at (32,25); assess on the burning square: 2 hazard (fire)
+PASS reflex.work_resumes_only_from_safe_ground - Founder 1's first ordinary job after the fire (move) began after 6 updates standing at (32,22), in a hazard: false
+PASS reflex.does_not_flee_into_fire - nine burning squares around (12,50): reflex to (12,48) at distance 2, burning false; Founder 8 ends at (12,48), burning false
+PASS reflex.burning_triggers_self_extinguish - hazard "burning"; Founder 6 on open ground: roll (done), Founder 7 beside the pond: water (done); both out after 120 updates, hit points 8/10
+PASS reflex.grappler_step_breaks_grapple - held before: true; after one step (distance 1) still held: true; after the second step (distance 2) released: true
+PASS reflex.threat_response_run_or_hold - unarmed Founder 3: assess 3 threat (runs), ran (move to (36,44), 6 from the wolf vs 1), now 15 away; armed Founder 4: chop failed "emergency: threat" after 22 updates, assess 3 threat (holds ground), takes no work while threatened: true; {"assessR":true,"ran":true,"farther":true,"gotAway":true,"cut":true,"holds":true,"noWork":true}
+PASS reflex.priority_order_assessed - unable=1, hazard=2, threat=3, aid=4, critical=5, orders=6, work=7, routine=8, idle=9
+PASS reflex.save_load_preserves_reflex_state - flight saved after 1 updates (31157 bytes, JSON-clean true); units identical after the round trip true, reflex job identical true (#38 hazard), threat kept; safe after 4 more updates at (12,18)
+PASS reflex.no_errors - no console errors during 216 updates
+
+RESULT: 10 passed, 0 failed (exit 0)
+== stderr ==
+

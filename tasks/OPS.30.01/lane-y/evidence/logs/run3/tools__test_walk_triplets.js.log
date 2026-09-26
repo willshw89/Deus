@@ -1,0 +1,5 @@
+# tools/test_walk_triplets.js  category=PASS  exit=0  ms=119  decided by exit_0 (-)
+== stdout ==
+Saved game/test_output/walk_triplets_test.png
+== stderr ==
+

@@ -1,0 +1,6 @@
+$ node tools/ops/run_gate.js --root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1 --suite tools/test_strata_cuts_and_caves.js --timeout 580
+run_gate: gate mode, 1 suites from --suite, root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1, HEAD 425b594c146d5f353c10faa11f4b5d47f499b45f, timeout 580 s each, one at a time
+GATE tools/test_strata_cuts_and_caves.js EXIT=0 217556ms
+LEFTOVERS: none
+RESULT: 1 passed, 0 failed
+EXIT=0

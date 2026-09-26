@@ -1,0 +1,19 @@
+# tools/test_stabilization.js  category=PASS  exit=0  ms=943  decided by exit_0 (-)
+== stdout ==
+=== Dying and first aid (DEUS_Colonists.js + DEUS_Jobs.js stabilize) headless checks ===
+PASS stabilize.plugins_load - UF.Jobs has the stabilize job; UF.Colonists has stabilize/woundedAtZero/dying; a round is 360 ticks
+PASS stabilize.unconscious_starts_dying - #1 at 0 hit points after 4 updates: dying record {"successes":0,"failures":0,"stable":false,"since":60,"nextRoundAt":420,"wakeAt":null}; its chop cancelled "survival: unconscious"; decides nothing
+PASS stabilize.rescue_job_emergency - #6 took stabilize#6 for #1 after 1 updates (0 worker(s) cut "emergency: aid"); patient reserved by 6, one rescuer
+PASS stabilize.medicine_check_stabilizes - after 365 updates: stable; check d20 12 + 5 (Wis 20) + 2 (Medicine) = 19 against DC 10; rescuer #6 at distance 1
+PASS stabilize.stable_not_healed - hit points 0 (still 0), unconscious true, wakes in 1.00 h (1d4), patient reservation released
+PASS stabilize.stable_skips_death_saves - half a round later the stable patient still shows 0/0 saves (was 0/0), hit points 0
+PASS stabilize.wakes_with_one_hit_point - #1 came to after 444 updates with 1 hit point(s); dying record cleared
+PASS stabilize.no_errors_main - no console errors in the main run
+PASS stabilize.death_saves_by_the_round - seed 7: rolls 20 -> conscious, plugin conscious; seed 11: rolls 2 11 7 20 -> conscious, plugin conscious; seed 13: rolls 2 4 11 15 2 -> dead, plugin dead; seed 17: rolls 13 10 6 20 -> conscious, plugin conscious; seed 19: rolls 13 12 5 8 8 -> dead, plugin dead
+PASS stabilize.damage_at_zero_fails_saves - #1: one hit at 0 -> 1 failure; stabilised, hit again -> dying again with 1 failure; a critical hit -> dead and removed
+PASS stabilize.rescue_priority - patient #1: rescuer 3 (thirsty #3 helps before drinking; #2 at exhaustion 5 cannot)
+PASS stabilize.no_errors - no console errors during the run
+
+RESULT: 12 passed, 0 failed (exit 0)
+== stderr ==
+

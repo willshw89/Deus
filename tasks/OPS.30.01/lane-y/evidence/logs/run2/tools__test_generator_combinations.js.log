@@ -1,0 +1,17 @@
+# tools/test_generator_combinations.js  category=PASS  exit=0  ms=291  decided by exit_0 (-)
+== stdout ==
+Testing procedural generation across combinations...
+Generated [m_knight_tanned_red]: Charset 144x192 & Portrait 144x144
+Generated [m_forester_fair_brown]: Charset 144x192 & Portrait 144x144
+Generated [m_blacksmith_dark_black]: Charset 144x192 & Portrait 144x144
+Generated [m_elder_sage_silver]: Charset 144x192 & Portrait 144x144
+Generated [f_huntress_fair_blonde]: Charset 144x192 & Portrait 144x144
+Generated [f_peasant_tanned_auburn]: Charset 144x192 & Portrait 144x144
+Generated [f_warrior_dark_black]: Charset 144x192 & Portrait 144x144
+Generated [f_matron_elder_silver]: Charset 144x192 & Portrait 144x144
+Generated [child_boy]: Charset 144x192 & Portrait 144x144
+Generated [child_girl]: Charset 144x192 & Portrait 144x144
+
+=== PROCEDURAL GENERATION TEST PASS: 10/10 COMBINATIONS VERIFIED ===
+== stderr ==
+

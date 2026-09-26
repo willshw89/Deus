@@ -1,0 +1,10 @@
+# tip census run 3: fresh clone C:\Users\snewt\AppData\Local\Temp\deus-lane-y-tip3 of task/lane-y at 2d9f513c40c683338d50c6ea3dc945b5fb4687c5
+$ git -C C:\Users\snewt\AppData\Local\Temp\deus-lane-y-tip3 rev-parse HEAD
+2d9f513c40c683338d50c6ea3dc945b5fb4687c5
+$ node tools/ops/run_gate.js --census --root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-tip3 --suite tools/ops/test_run_gate.js --out tasks/OPS.30.01/lane-y/evidence/census_tip_run3.json
+run_gate: census of 1 suites, root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-tip3, HEAD 2d9f513c40c683338d50c6ea3dc945b5fb4687c5, timeout 180 s, up to 3 at once
+CENSUS 1/1 tools/ops/test_run_gate.js PASS EXIT=0 61256ms
+LEFTOVERS: none
+CENSUS COUNTS PASS=1 FAIL_MISSING_DEPENDENCY=0 FAIL_API_DRIFT=0 FAIL_MISSING_REFERENCE=0 FAIL_OTHER=0 KILLED_TIMEOUT=0 NEEDS_NWJS=0
+CENSUS COMPLETE: 1/1 measured -> C:\Users\snewt\.deus_worktrees\lane-y\tasks\OPS.30.01\lane-y\evidence\census_tip_run3.json
+EXIT=0

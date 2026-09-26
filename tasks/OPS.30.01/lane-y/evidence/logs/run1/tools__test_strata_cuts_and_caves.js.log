@@ -1,0 +1,7 @@
+# tools/test_strata_cuts_and_caves.js  category=KILLED_TIMEOUT  exit=TIMEOUT  ms=180165  decided by timeout (runner)
+== stdout ==
+=== DEUS-TSK-FABLE-19B natural cuts and all-Z caves: regression seed 18, second seed 3, seed set 18,3,21,4 ===
+INFO newWorld seed 18: generator 5 18047 ms, generator 4 (same code, levelsGen 4) 17796 ms, pre-19B code 16279 ms; natural features 598 ms
+INFO seed set built: 18, 3, 21, 4 (174 s)
+== stderr ==
+

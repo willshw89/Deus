@@ -1,0 +1,65 @@
+# tools/test_time_domains_proof.js  category=PASS  exit=0  ms=62  decided by exit_0 (-)
+== stdout ==
+--- Running Multi-Domain Time Architecture Proof Suite (Mutant: false) ---
+
+[Proof 1] First Combat/Tick Proof: Cenric vs Wolf while Wynn builds wall
+PASS: Encounter enc_cenric_wolf is active
+PASS: Cenric is enrolled in combat
+PASS: Wolf is enrolled in combat
+PASS: Wynn is NOT in combat (civilian)
+PASS: Wynn accumulated all 100 work units across 20 engine ticks (got 100)
+PASS: Wynn completed the wooden wall during concurrent combat
+PASS: Tactical encounter advanced exactly 2 rounds to round 3 (got 3)
+PASS: Engine completed exactly 20 logical ticks (got 20)
+
+[Proof 2] Movement Budget & Continuity (30 ft = 6 cells across engine ticks)
+PASS: Combatant speed is 30 ft
+PASS: Combatant speed is 6 cells (5 ft/cell standard)
+PASS: Initial movement budget is 30 ft
+PASS: Initial movement budget is 6 cells
+PASS: Spent 1 cell (5 ft) movement on tick 1
+PASS: Remaining movement is 25 ft
+PASS: Remaining movement is 5 cells
+PASS: Spent 2 cells (10 ft) movement on tick 2
+PASS: Remaining movement is 15 ft
+PASS: Remaining movement is 3 cells
+PASS: Spent remaining 3 cells (15 ft) movement on tick 3
+PASS: Remaining movement is 0 ft
+PASS: Remaining movement is 0 cells
+PASS: Excess movement beyond 30 ft allowance is strictly rejected
+PASS: Movement budget reset to 30 ft on round boundary
+PASS: Movement budget reset to 6 cells on round boundary
+PASS: Standard action reset to 1 on round boundary
+PASS: Reaction reset to 1 on round boundary
+
+[Proof 3] Tactical Spell Duration (1 minute = 10 rounds, immune to historical compression)
+PASS: Scheduled 10-round tactical spell
+PASS: Historical time advanced 24 hours (got 24h)
+PASS: Historical time advanced 1 day
+PASS: Tactical spell DID NOT expire from historical time acceleration
+PASS: Tactical spell is still active after 9 rounds
+PASS: Tactical spell expired exactly on the 10th round boundary (1 minute)
+
+[Proof 4] Routine Work Continuity (continuous work accumulation without d20 turns)
+PASS: Excavation work rate is 8.0 work/tick based on capability +4
+PASS: Work completed in exactly 25 continuous engine ticks
+PASS: Excavation reached full 200 work units (got 200)
+PASS: No tactical rounds were consumed by routine continuous labor
+
+[Proof 5] Combat Interruption & Resumption (carpenter pauses, fights, resumes wall)
+PASS: Carpenter made 40% initial progress on wall (got 40)
+PASS: Carpenter is actively engaged in tactical combat
+PASS: Wall job is paused during combat
+PASS: Job progress preserved at 40 during tactical round 1
+PASS: Job progress preserved at 40 during tactical round 2
+PASS: Job progress preserved at 40 during tactical round 3
+PASS: Carpenter has exited tactical combat mode
+PASS: Wall job resumed as active
+PASS: Resumed from exactly 40 work units
+PASS: Wall construction completed successfully to 100% (got 100)
+
+Results: 46 passed, 0 failed
+
+Multi-Domain Time Architecture Proof Suite PASSED (100%).
+== stderr ==
+

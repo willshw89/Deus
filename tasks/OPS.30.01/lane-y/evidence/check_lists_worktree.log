@@ -1,0 +1,5 @@
+$ node tools/ops/run_gate.js --check-lists
+run_gate: check-lists, root C:\Users\snewt\.deus_worktrees\lane-y, gate list C:\Users\snewt\.deus_worktrees\lane-y\tools\ops\gate_tests.json, quarantine C:\Users\snewt\.deus_worktrees\lane-y\tools\ops\quarantine.json
+NOTE: tools/test_generated_z2_cut_proof.js is on the gate_tests.json quarantine list but quarantine.json records it passing in every run
+CHECK-LISTS: OK (9 gate, 117 quarantined, 63 passingNotGated, 188 tracked suites)
+EXIT=0

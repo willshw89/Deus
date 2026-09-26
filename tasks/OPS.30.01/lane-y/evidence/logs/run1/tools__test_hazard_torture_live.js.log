@@ -1,0 +1,17 @@
+# tools/test_hazard_torture_live.js  category=PASS  exit=0  ms=3777  decided by exit_0 (-)
+== stdout ==
+=== Environmental and combat torture (DEUS_Colonists.js, DEUS_Jobs.js) headless checks ===
+PASS torture.plugins_load - Jobs fireNear/carriesWater/isAflame + douse + extinguish, safeCellNear with a route; Colonists assess/raiseAlarm/refugeFor/douseJob, idle scan interval 60; Environment, Conditions and Combat loaded
+PASS torture.fire_under_hauler_drops_load_and_douses - Founder 1 carried 5 logs (35.3 lb, unencumbered); on the burning square (47,33) the haul went failed "emergency: lethal hazard" after 4 updates, 5 logs at its feet, 0 carried, aflame true; reflex to (47,32) by a 1-square route, water beside it true after 1; then water after 1; out and off the fire after 30, calm after 2, hit points 10/10, later steps into fire 0
+PASS torture.choked_escape_uses_corridor - Founder 2 at work at (20,50) with fire all round but a corridor: assess 2 (fire nearby); chop failed "emergency: fire nearby" after 29; route [(20,49) (19,49) (18,49) (17,49) (16,49)] taken after 1, done after 10 at (16,49); steps into fire 0, aflame false
+PASS torture.burning_ally_doused_by_water_carrier - Founder 1 paralyzed (can act false, assess 1) and aflame; Founder 2 (assess 4 douse) lost its chop "emergency: aid" after 28, took douse #2 (water) after 1; Founder 1 out after 35 (done), hit points 9
+PASS torture.burning_ally_doused_from_pond_or_smothered - beside the pond: Founder 4 took douse (water) after 24, Founder 3 out after 34; no water: Founder 6 took douse (smother) after 27, Founder 5 out after 123; all three alive true (hit points 9/9/8)
+PASS torture.armed_holds_and_alarms_unarmed_runs_to_friend - Founder 1 (club) at work beside the wolf: assess 3 holds ground; chop failed "emergency: threat" after 29; facing 4 (4 = west, the wolf), engaged true, job null; alarm on the wolf told 6; Founder 3 (club, 6 away) alarmed, assess 3 holds ground, standing at (41,38) since; Founder 2 (unarmed, 2 from the wolf): assess 3 runs, ran for an armed friend to (38,38) 2 from Founder 3, 8 from the wolf, now 6 away after 1
+PASS torture.grapple_breaks_on_two_square_displacement_all_directions - 128 grappler-and-victim runs of two steps in eight directions from eight sides: 96 held at one square, 160 released beyond, 0 wrong
+PASS torture.idle_scan_bounded_and_wakes_on_post - 5 UF.Jobs.open() calls in 300 updates with 8 idle founders and no open job (10 sweeps; an empty list is looked at once per 60 ticks for the whole colony); a chop posted was taken after 2 update(s)
+PASS torture.save_load_mid_route_flight_finishes - saved 33 updates in, at waypoint 1 of 5 (11083 bytes, JSON-clean true); units identical after the round trip true, route identical true; done after 6 at (16,49), steps into fire 0
+PASS torture.no_errors - no console errors in any scene
+
+RESULT: 10 passed, 0 failed (exit 0)
+== stderr ==
+

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "baseCommit": "1111111111111111111111111111111111111111",
+  "measuredAt": "2026-09-26",
+  "timeoutSec": 180,
+  "concurrency": 3,
+  "runs": 3,
+  "suites": [
+    {
+      "path": "tools/test_fail.js",
+      "category": "FAIL_OTHER",
+      "firstErrorLine": "FAIL second_check: expected 2, got 3",
+      "exitCode": 1,
+      "ms": 80,
+      "owner": null
+    },
+    {
+      "path": "tools/test_nw_binary_ref.js",
+      "category": "NEEDS_NWJS",
+      "firstErrorLine": "static screen: tools/test_nw_binary_ref.js:8 names \"nw.exe\" (fixture)",
+      "exitCode": null,
+      "ms": null,
+      "owner": null
+    },
+    {
+      "path": "tools/test_fail.js",
+      "category": "FAIL_OTHER",
+      "firstErrorLine": "FAIL second_check: expected 2, got 3",
+      "exitCode": 1,
+      "ms": 80,
+      "owner": null
+    }
+  ],
+  "passingNotGated": [
+    {
+      "path": "tools/sub/test_pass_nested.js",
+      "ms": 70
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+# tools/test_upper_elevation_terrain.js  category=FAIL_API_DRIFT  exit=1  ms=2256  decided by api_drift (stderr)
+== stdout ==
+=== DEUS-TSK-GEMINI-06 Verification Suite ===
+PASS determinism_same_seed 
+PASS determinism_different_seeds_vary 
+PASS starter_clearing_flat_datum_zero 
+FAIL volumetric_layer_integrity (tested 1024 coordinate columns across Z0, Z1, Z2)
+PASS upper_z1_presence (Z1 cells = 24512)
+PASS upper_z2_presence (Z2 cells = 26681)
+PASS contiguous_z2_plateau_size (Largest contiguous Z+2 plateau = 12926 cells, required >= 1,500)
+PASS natural_ramps_z0_to_z1 (Found 259 ramps connecting Z0 to Z1)
+PASS natural_ramps_z1_to_z2 (Found 379 ramps connecting Z1 to Z2)
+PASS surface_objects_anchored_to_elevation (Placed objects = 3452, Misplaced = 0)
+== stderr ==
+C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\game\js\plugins\DEUS_Levels.js:3378
+                else if (Tilemap.isTileA1(tile) && tile >= Tilemap.TILE_ID_A1 + 4 * 48) liq0 = "lava";
+                                 ^
+
+TypeError: Tilemap.isTileA1 is not a function
+    at _doComputeFloods (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\game\js\plugins\DEUS_Levels.js:3378:34)
+    at computeFloods (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\game\js\plugins\DEUS_Levels.js:3319:13)
+    at floodTypeAt (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\game\js\plugins\DEUS_Levels.js:3579:13)
+    at isFlooded (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\game\js\plugins\DEUS_Levels.js:3595:21)
+    at Object.cellAt (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\game\js\plugins\DEUS_Levels.js:4471:24)
+    at Object.generateUnderground [as fn] (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\game\js\plugins\DEUS_WorldGen.js:1362:25)
+    at World.buildArea (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\game\js\plugins\DEUS_World.js:650:65)
+    at World.peekArea (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\game\js\plugins\DEUS_World.js:827:24)
+    at areaMapOf (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\game\js\plugins\DEUS_World.js:1921:27)
+    at getGrid (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\game\js\plugins\DEUS_World.js:2084:44)
+
+Node.js v24.19.0

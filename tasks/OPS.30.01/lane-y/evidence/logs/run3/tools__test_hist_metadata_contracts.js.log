@@ -1,0 +1,5 @@
+# tools/test_hist_metadata_contracts.js  category=FAIL_MISSING_REFERENCE  exit=1  ms=10989  decided by missing_plugin (stderr)
+== stdout ==
+
+== stderr ==
+FATAL: History: HistoricalDemographics, Callings and Dnd5e must be loaded before New Game

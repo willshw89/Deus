@@ -1,0 +1,45 @@
+{
+  "lane": "lane-y",
+  "taskId": "OPS.30.01",
+  "branch": "task/lane-y",
+  "writer": "claude",
+  "reviewer": "grok",
+  "allowedPaths": [
+    "tools/ops/run_gate.js",
+    "tools/ops/test_run_gate.js",
+    "tools/ops/quarantine.json",
+    "tools/ops/fixtures/run_gate/**",
+    "tasks/OPS.30.01/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "node",
+      "args": [
+        "tools/ops/test_run_gate.js"
+      ],
+      "timeoutSec": 600
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/ops/run_gate.js",
+        "--check-lists"
+      ],
+      "timeoutSec": 600
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/ops/run_gate.js"
+      ],
+      "timeoutSec": 1800
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/check_deus_syntax.js"
+      ],
+      "timeoutSec": 600
+    }
+  ]
+}

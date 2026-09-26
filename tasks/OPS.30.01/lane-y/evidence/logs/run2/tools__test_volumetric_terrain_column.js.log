@@ -1,0 +1,43 @@
+# tools/test_volumetric_terrain_column.js  category=PASS  exit=0  ms=85382  decided by exit_0 (-)
+== stdout ==
+=== Volumetric terrain column (DEUS-TSK-FABLE-16 part 3): seeds 20260923, 20260924 ===
+INFO seed20260923: newWorld 12613 ms, ground build 3884 ms (peek cache; 0 = built during newWorld), tileset 91, plugins 5
+PASS seed20260923.columns_exist - ground generator 4, surface grid present
+PASS seed20260923.column_profiles - 65536 cells: S0 14343, S1 24512, S2 26681; carved cave cells excepted 36; ground ramps 200; violations 0
+PASS seed20260923.z0_solid_rock_tiles - 51157 ground SOLID cells: not rock face 0, layer 2 not rock 0, tile-passable 0, walkable 0, region != 250 0
+PASS seed20260923.z0_solid_no_objects - 0 object(s) on ground SOLID cells
+PASS seed20260923.ramps_caves_walkable - 200 ground ramps (not walkable/dry: 0), 36 carved cave cells (not walkable rock floor: 0)
+PASS seed20260923.volume_stats - WorldGen.volumeStats {"columns":true,"solid":51157,"open":0,"carved":36,"ramps":200,"groundReplaced":50545,"waterSuppressed":614,"sitePiecesSkipped":0}; grid: solid 51157, carved 36, ramps 200
+PASS seed20260923.natural_wall_cells - expected 903 exposed SOLID cells, listed 903: missing 0, extra 0, wrong mask 0, wrong material 0
+PASS seed20260923.natural_wall_spec - spec 48x96, cap 48 px #0a0a10 (edge #121218); allowed #08080C..#121218
+PASS seed20260923.natural_wall_frame - frame 48x96; fills #0a0a10@y0+48, #121218@y0+2; face blits 4 at y 48/48/72/72
+PASS seed20260923.ground_connectors - 212 listed of 212 ground ramps/stairs (ramps 200, stairs down 12); looks ramp_up, stair_down
+PASS seed20260923.sprite_z0 - view (0,0,0); window x 115..134, y 90..106: 20 wall frames for 20 natural wall cells (edge (124,97) drawn 48x96), 6 connector frames for 6 ramps/stairs; generator 3: 0 sprites
+PASS seed20260923.path_never_solid - valley (162,188) -> (166,188) across a 3-cell hill: 6 steps on levels 0; steps on solid/open 0, through the hill's run 0
+PASS seed20260923.unit_refused_hill - sent accepted from (124,98) to hill cell (124,97); after 800 frames at (124,98,0), frames on a solid/open cell 0, reached the hill cell false
+PASS seed20260923.unit_walks_legal_route - walker (162,188) -> (166,188) (planned 6 steps): arrived after 94 frames; frames on a solid/open cell 0
+PASS seed20260923.dig_repaint - dig (124,97): setShape floor true, ground rock, walkable true, layer2 0, region 0, still a wall false, cell north now exposed true; fresh build differs on 0 of 27 tiles; fill: setShape solid true, tiles restored true, blocked true
+PASS seed20260923.site_pieces_skipped - site "chest_wood" pieces: valley (124,100) -> type 72 (want 72), hill (124,95) -> type 0 (want 0); sitePiecesSkipped 1
+PASS seed20260923.no_errors - none (0 warning(s))
+INFO seed20260924: newWorld 15712 ms, ground build 4938 ms (peek cache; 0 = built during newWorld), tileset 91, plugins 5
+PASS seed20260924.columns_exist - ground generator 4, surface grid present
+PASS seed20260924.column_profiles - 65536 cells: S0 22547, S1 27035, S2 15954; carved cave cells excepted 48; ground ramps 183; violations 0
+PASS seed20260924.z0_solid_rock_tiles - 42941 ground SOLID cells: not rock face 0, layer 2 not rock 0, tile-passable 0, walkable 0, region != 250 0
+PASS seed20260924.z0_solid_no_objects - 0 object(s) on ground SOLID cells
+PASS seed20260924.ramps_caves_walkable - 183 ground ramps (not walkable/dry: 0), 48 carved cave cells (not walkable rock floor: 0)
+PASS seed20260924.volume_stats - WorldGen.volumeStats {"columns":true,"solid":42941,"open":0,"carved":48,"ramps":183,"groundReplaced":40163,"waterSuppressed":2785,"sitePiecesSkipped":0}; grid: solid 42941, carved 48, ramps 183
+PASS seed20260924.natural_wall_cells - expected 950 exposed SOLID cells, listed 950: missing 0, extra 0, wrong mask 0, wrong material 0
+PASS seed20260924.natural_wall_spec - spec 48x96, cap 48 px #0a0a10 (edge #121218); allowed #08080C..#121218
+PASS seed20260924.natural_wall_frame - frame 48x96; fills #0a0a10@y0+48, #121218@y0+2; face blits 4 at y 48/48/72/72
+PASS seed20260924.ground_connectors - 199 listed of 199 ground ramps/stairs (ramps 183, stairs down 16); looks ramp_up, stair_down
+PASS seed20260924.sprite_z0 - view (0,0,0); window x 86..105, y 109..125: 21 wall frames for 21 natural wall cells (edge (95,116) drawn 48x96), 1 connector frames for 1 ramps/stairs; generator 3: 0 sprites
+PASS seed20260924.path_never_solid - valley (160,77) -> (168,77) across a 7-cell hill: 12 steps on levels 0,1; steps on solid/open 0, through the hill's run 0
+PASS seed20260924.unit_refused_hill - sent accepted from (95,117) to hill cell (95,116); after 800 frames at (95,117,0), frames on a solid/open cell 0, reached the hill cell false
+PASS seed20260924.unit_walks_legal_route - walker (160,77) -> (168,77) (planned 12 steps): arrived after 190 frames; frames on a solid/open cell 0
+PASS seed20260924.dig_repaint - dig (95,116): setShape floor true, ground rock, walkable true, layer2 0, region 0, still a wall false, cell north now exposed true; fresh build differs on 0 of 27 tiles; fill: setShape solid true, tiles restored true, blocked true
+PASS seed20260924.site_pieces_skipped - site "chest_wood" pieces: valley (95,119) -> type 72 (want 72), hill (95,113) -> type 0 (want 0); sitePiecesSkipped 1
+PASS seed20260924.no_errors - none (0 warning(s))
+TIME 85.3 s
+RESULT: 34 passed, 0 failed (exit 0)
+== stderr ==
+

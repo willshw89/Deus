@@ -1,0 +1,41 @@
+# tools/test_survival_regressions.js  category=PASS  exit=0  ms=22107  decided by exit_0 (-)
+== stdout ==
+=== DEUS Survival Regression Gates & Defect Prevention Suite ===
+  [VM] DEUS_History: world age 0, 72 living citizens, 0 ancestors
+
+--- Testing GATE 1: Encumbered Survival ---
+PASS regr.gate1.encumbered_status - Weight: 64.3 lbs, capacity: 50 lbs, status: encumbered
+PASS regr.gate1.movement_penalty_applied - Encumbrance speed penalty: 0.3 ft
+PASS regr.gate1.move_job_created - Move job created for encumbered unit
+PASS regr.gate1.move_job_completed_without_encumbrance_failure - Move job state: done (failedReason: none)
+PASS regr.gate1.eat_job_completed - Eat job state: done (reason: none)
+PASS regr.gate1.unload_weight_removes_encumbrance - Weight dropped to 4.3 lbs (status: unencumbered)
+
+--- Testing GATE 2: Cross-Midnight Long Rest ---
+PASS regr.gate2.rest_initiated_at_2200 - Long rest initiated at 22:00 with exhaustion=1
+PASS regr.gate2.yesterday_intake_preserved_at_midnight - foodYesterday=1.2, waterYesterday=1
+PASS regr.gate2.exhaustion_reduced_at_wake_0600 - Exhaustion reduced from 1 to 0 at 06:00
+
+--- Testing GATE 3: No Double-Credit Exploit ---
+PASS regr.gate3.rest1_reduces_exhaustion_to_1 - Rest 1 completed: exhaustion=1
+PASS regr.gate3.rest1_clears_latched_intake - foodYesterday=0, waterYesterday=0
+PASS regr.gate3.rest2_denied_exhaustion_reduction - Exhaustion after unfed rest 2: 3 (reduction denied; hunger/thirst applied without long rest credit)
+
+--- Testing GATE 4: Shared Pond Bank Access ---
+PASS regr.gate4.colonist1_finds_water - Colonist 1 found water at (127, 110)
+PASS regr.gate4.job1_created - Job 1 stand at (127, 111)
+PASS regr.gate4.colonist2_finds_water_simultaneously - Colonist 2 found water at (127, 110) while colonist 1 is drinking
+PASS regr.gate4.distinct_bank_stands_assigned - Job 1 stand: (127, 111) vs Job 2 stand: (126, 110)
+PASS regr.gate4.shared_pond_simultaneous_access - Both colonists drink concurrently: job1=travel, job2=travel, distinct=true
+
+--- Testing GATE 5: WorldGen Starting Pond Valley Datum ---
+PASS regr.gate5.starting_valley_datum_s0 - Checked 2821 cells within r<=30: 0 elevation violations (want 0)
+PASS regr.gate5.starting_pond_located_within_25_tiles - Starting pond found at (129, 103)
+PASS regr.gate5.starting_pond_has_unburied_walkable_banks - Pond at (129, 103) has 4 walkable z=0 bank neighbors (want >= 2)
+
+======================================================
+REGRESSION SUITE SUMMARY: 20 passed, 0 failed
+======================================================
+RESULT: ALL 5 SURVIVAL REGRESSION GATES PASSED (exit 0)
+== stderr ==
+

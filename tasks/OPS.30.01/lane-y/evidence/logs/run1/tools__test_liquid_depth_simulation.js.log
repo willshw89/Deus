@@ -1,0 +1,40 @@
+# tools/test_liquid_depth_simulation.js  category=PASS  exit=0  ms=468  decided by exit_0 (-)
+== stdout ==
+=== DEUS Liquid Depth Simulation Suite (DEUS-TSK-GEMINI-08) ===
+PASS conservation_water_initial - Initial water volume: 14 (want 14)
+PASS conservation_water_volume_conserved - Water volume after 100 ticks: 14 (want 14); max adjacent gradient: 1 (want <= 1)
+PASS conservation_lava_volume_conserved - Lava volume after 100 ticks: 10 (want 10)
+PASS vertical_downward_gravity - Vertical drain: z=0 has 0 (want 0), z=-1 has 7 (want 7)
+PASS multi_z_cascade - Cascade from Z=1 to Z=-2: Z1=0, Z0=0, Z-1=0, Z-2=7 (want 0,0,0,7)
+PASS lateral_equalization_gradient - Equalized pool: center=1, north=1, east=1, gradient diff <= 1: true
+PASS wall_blocks_flow - East of wall depth: 0 (want 0, wall blocked water)
+PASS closed_door_blocks_flow - Behind closed door depth: 0 (want 0)
+PASS open_door_releases_flow - Behind opened door depth: 1 (want > 0, water flowed through)
+PASS terrain_dig_wakeup - Mined cell received fluid via event: depth=3 (want > 0)
+PASS vertical_channel_wakeup - Channel drained fluid to Z=-1: depth=7 (want > 0)
+PASS quiescence_zero_cost - Quiescent state: activeQueue=0 (want 0), processed=0 (want 0), 50 ticks elapsed=0ms
+PASS bounded_budget_throttling - Budget throttled: processed=15 (want <= 15)
+PASS save_clears_on_reset - Total water after reset: 0
+PASS sparse_save_load_resumption - Restored volume: 7 (want 7), re-enqueued flowing cells: 32 (want > 0)
+PASS save_load_flow_completed - Final settled volume after save/load: 7
+PASS determinism_identical_runs - Deterministic runs match bit-for-bit: true
+PASS type_isolation_no_mixing - Liquid types preserved: (30,30)=water, (31,30)=lava (want water, lava)
+PASS boundary_handling_no_throw - Boundary cells handled safely without exceptions
+PASS movement_classes_and_walkability - Movement classes: dry=dry, shallow=shallow, wading=wading, deep=deep, sub=submerged, lava=lethal; deep non-swimmer blocked: true, swimmer allowed: true
+PASS legacy_flooding_compatibility - Levels.describeCell reflects fluid depth: "Flooded (Fresh water)"
+
+RESULT: 21 passed, 0 failed
+
+=== Running Rule 4 Failure Mutation Checks ===
+PASS mutant_duplicate_volume: successfully detected and exited 1.
+PASS mutant_delete_volume: successfully detected and exited 1.
+PASS mutant_no_gravity: successfully detected and exited 1.
+PASS mutant_ignore_walls: successfully detected and exited 1.
+PASS mutant_type_corrupt: successfully detected and exited 1.
+PASS mutant_ignore_depth_walk: successfully detected and exited 1.
+PASS mutant_save_corruption: successfully detected and exited 1.
+
+MUTANT VERIFICATION: 7/7 mutants detected.
+ALL 17 LIQUID DEPTH CHECKS AND ALL 7 MUTANTS PASSED!
+== stderr ==
+

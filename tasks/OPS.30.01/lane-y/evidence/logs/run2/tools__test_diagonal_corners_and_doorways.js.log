@@ -1,0 +1,12 @@
+# tools/test_diagonal_corners_and_doorways.js  category=FAIL_API_DRIFT  exit=1  ms=62  decided by api_drift (stderr)
+== stdout ==
+
+Results: 0 passed, 7 failed
+== stderr ==
+FAIL diagonal_geometry.corner_cut_rejected_around_obstacle: unit.canPassDiagonally is not a function
+FAIL diagonal_geometry.pinch_point_between_diagonal_walls_rejected: unit.canPassDiagonally is not a function
+FAIL diagonal_geometry.doorway_blocked_by_creatures_allows_diagonal_entry_and_exit: Cannot read properties of undefined (reading 'hasOppositeWallsAt')
+FAIL diagonal_geometry.vertical_doorway_blocked_by_creatures_allows_diagonal_navigation: Cannot read properties of undefined (reading 'hasOppositeWallsAt')
+FAIL diagonal_geometry.wall_adjacent_creature_can_slip_diagonally_past_blocker: Cannot read properties of undefined (reading 'wallCountAt')
+FAIL diagonal_geometry.wall_adjacent_with_both_flanks_blocked_by_creatures_allows_diagonal: walker.canPassDiagonally is not a function
+FAIL diagonal_geometry.open_field_allows_diagonal_past_single_blocker: walker.canPassDiagonally is not a function

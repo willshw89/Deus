@@ -1,0 +1,48 @@
+# same clone C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gatetests at e5f1dafc42defd88590a703f45393607b4a868c5, cwd = clone
+$ node tools/ops/run_gate.js
+run_gate: gate mode, 9 suites from C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gatetests\tools\ops\gate_tests.json, root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gatetests, HEAD e5f1dafc42defd88590a703f45393607b4a868c5, timeout 600 s each, one at a time
+GATE tools/check_deus_syntax.js EXIT=0 2867ms
+GATE tools/test_palette.js EXIT=0 41ms
+GATE tools/governance/test_check_claims.js EXIT=0 135315ms
+GATE tools/test_strata_cuts_and_caves.js EXIT=2 167148ms FAIL_OTHER
+    | decided by other: RESULT: 18 passed, 0 failed (exit 2)
+    | PASS cave_free_terrain - 18: cave columns 2058 (3.14 %), massif 691 (1.05 %); 3: cave columns 1531 (2.34 %), massif 290 (0.44 %); 21: cave columns 1927 (2.94 %), massif 262 (0.40 %); 4: cave columns 1686 (2.57 %), massif 1006 (1.54 %) (limits 5 % and 3 %)
+    | PASS traversable_terrain - 18: standable 125240/124320 (100.7 %), ground 24408/23939 (102.0 %), largest ground region 14148/14537 (97.3 %), start valley untouched true; 3: standable 128150/127194 (100.8 %), ground 39962/39468 (101.3 %), largest ground region 39557/39320 (100.6 %), start valley untouched true; 21: standable 127618/126036 (101.3 %), ground 12686/11478 (110.5 %), largest ground region 3348/3348 (100.0 %), start valley untouched true; 4: standable 123812/123627 (100.1 %), ground 15315/14346 (106.8 %), largest ground region 4442/4457 (99.7 %), start valley untouched true
+    | PASS cave_overburden - seed 18: 2128 roofed generated cave floors (hasOpaqueOverburden true and continuousAirHeight = the air run of the strata), 2989 sky-open cut floors (no overburden, Infinity); wrong 0; network chambers roofed at their centres 47/48 (want >= 90 %: a mouth or a cut can open a few): #7 (22,201) floor 10: open to the sky
+    | PASS cave_void_minimum - roofed generated cave voids over 4 seeds by height (ft): {"3":852,"4":1995,"5":2130,"6":1071,"7":1047,"8":301,"9":77,"10":20,"11":5,"12":8,"13":3,"14":2}; under 3 ft 0
+    | PASS roof_breach - cave (167,31,0) under 1 ft of roof: before {"ob":true,"cl":"5","shape":"floor"}, dug 1 strata (want 1) -> {"ob":false,"cl":"Infinity","shape":"floor"}, restored {"ob":true,"cl":"5","records":0}; +2 cave (136,176,2) under a stone cap 10 ft: overburden true -> breached (true, levels:capBreached 1) false, clearance 4 -> Infinity; saved and loaded: overburden false, cap gone, saved record true; restored: overburden true, clearance 4, record kept false
+    | PASS clearance_4_5_more - fixture column (64,30): 1 solid + 4 air under solid 4 ft (derived shape floor: the compatibility view; the clearance is the data), 5 air on -2's S4 5, across -1 and the ground 6 (airRunAt 6), up to +1 9, open sky Infinity, a 2 ft slot 2 (shape solid), solid 0, no floor -1; restored records 0; generated floors: 4 ft (176,39,0), 5 ft (167,31,0), > 5 ft 7 ft (175,46,0); 1,000,000 queries 1403 ns each, heap growth 105840 B (checksum 6075000)
+    | PASS clearance_stops_at_fluid - fixture column (64,30): -1 stone + 4 water, ground solid: continuousAirHeight 0 (want 0), airRunAt(6) 0 (want 0); -1 stone + 2 air + 2 water: continuousAirHeight 2 (want 2), airRunAt(6) 2 (want 2); -1 stone + water + 3 air (from the floor): continuousAirHeight 0 (want 0), airRunAt(6) 0 (want 0); the same, air run from S2: continuousAirHeight 0 (want 0), airRunAt(7) 3 (want 3); -2 stone + 4 lava, -1 solid: continuousAirHeight 0 (want 0), airRunAt(1) 0 (want 0); -2 stone + 4 air, -1 solid (control): continuousAirHeight 4 (want 4), airRunAt(1) 4 (want 4); restored records 0
+    | PASS multi_z_connectivity - 3 networks flagged multi-Z in seed 18; #6 from (202,50) floor 10 ft: 658 air strata (roofed), floors on levels [-1,0]; natural ramp connectors added 294, e.g. (71,24,-1) derived ramp
+    | HARNESS shafts_keep_fluid: the shaft loop to instrument is missing
+    | RESULT: 18 passed, 0 failed (exit 2)
+GATE tools/test_new_game_year0.js EXIT=1 2560ms FAIL_OTHER
+    | decided by other: Error: Override anchor found 0 times in DEUS_FactionMenus.js: this._factionIndex = 0;
+    |     at createMenusEnv (<root>\tools\test_new_game_year0.js:131:17)
+    |     at runSectionA (<root>\tools\test_new_game_year0.js:153:17)
+    |     at main (<root>\tools\test_new_game_year0.js:452:35)
+    |     at Object.<anonymous> (<root>\tools\test_new_game_year0.js:490:1)
+    |     at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    |     at Object..js (node:internal/modules/cjs/loader:2003:10)
+    |     at Module.load (node:internal/modules/cjs/loader:1594:32)
+    |     at Module._load (node:internal/modules/cjs/loader:1396:12)
+    |     at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    | Node.js v24.19.0
+GATE tools/test_history_materialization_and_world_age.js EXIT=0 92289ms
+GATE tools/test_historical_carrying_capacity.js EXIT=1 365ms FAIL_OTHER
+    | decided by other: FAIL: Error: CANDIDATE_MISMATCH: working plugin differs from frozen candidate
+    |     at assert (<root>\tools\test_historical_carrying_capacity.js:51:50)
+    |     at sourceBundle (<root>\tools\test_historical_carrying_capacity.js:95:9)
+    |     at main (<root>\tools\test_historical_carrying_capacity.js:603:18)
+    |     at Object.<anonymous> (<root>\tools\test_historical_carrying_capacity.js:608:36)
+    |     at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    |     at Object..js (node:internal/modules/cjs/loader:2003:10)
+    |     at Module.load (node:internal/modules/cjs/loader:1594:32)
+    |     at Module._load (node:internal/modules/cjs/loader:1396:12)
+    |     at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    |     at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+GATE tools/test_geology_strata.js EXIT=0 17084ms
+GATE tools/test_strata_foundation.js EXIT=0 101044ms
+LEFTOVERS: none
+RESULT: 6 passed, 3 failed
+EXIT=1

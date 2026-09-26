@@ -1,0 +1,62 @@
+# tools/test_conditions_system.js  category=PASS  exit=0  ms=75  decided by exit_0 (-)
+== stdout ==
+=== DEUS SRD 5.1 Conditions System Headless Tests ===
+PASS: conditions_module_loaded
+PASS: all_15_conditions_defined
+PASS: initial_clean_conditions
+PASS: two_instances_added
+PASS: non_stacking_disadvantage
+PASS: remove_one_instance_leaves_other
+PASS: remove_second_instance_clears
+PASS: cancellation_blinded_vs_prone
+PASS: advantage_invisible_vs_restrained
+PASS: paralyzed_is_incapacitated
+PASS: paralyzed_cannot_act
+PASS: paralyzed_speed_zero
+PASS: paralyzed_cannot_speak
+PASS: unconscious_is_incapacitated
+PASS: unconscious_is_prone
+PASS: unconscious_cannot_act
+PASS: paralyzed_auto_fails_str_save
+PASS: paralyzed_auto_fails_dex_save
+PASS: paralyzed_rolls_con_save_normally
+PASS: blinded_auto_fails_sight_check
+PASS: deafened_auto_fails_hearing_check
+PASS: normal_speed_factor
+PASS: prone_speed_factor_crawl
+PASS: standing_up_clears_prone
+PASS: grappled_speed_zero
+PASS: restrained_speed_zero
+PASS: frightened_rejects_moving_closer
+PASS: frightened_allows_moving_away
+PASS: charmed_cannot_harm_charmer
+PASS: charmed_can_harm_others
+PASS: combat_refuses_attack_against_charmer
+PASS: prone_melee_grants_advantage
+PASS: prone_ranged_gives_disadvantage
+PASS: crit_within_5ft_paralyzed
+PASS: no_crit_beyond_5ft_paralyzed
+PASS: petrified_weight_x10
+PASS: petrified_damage_resistance_half
+PASS: combat_applies_half_damage_to_petrified
+PASS: unconscious_drops_held_items
+PASS: grapple_active_adjacent
+PASS: grapple_breaks_when_grappler_moves_away
+PASS: timed_condition_active_initially
+PASS: timed_condition_still_active_before_expiry
+PASS: timed_condition_expires_on_time
+PASS: save_load_preserves_conditions
+PASS: save_load_preserves_expiration
+PASS: sheet_uses_12_slots
+PASS: sheet_exact_12_slots_order
+PASS: sheet_model_has_12_equipment_slots
+PASS: alias_clothes_mapped_to_body
+PASS: alias_waist_mapped_to_belt
+PASS: alias_shoulders_mapped_to_cloak
+PASS: alias_arms_mapped_to_bracers
+PASS: rule4_mutant_test_able_to_fail
+PASS: invalid_condition_rejected
+
+RESULT: 55 passed, 0 failed (exit 0)
+== stderr ==
+

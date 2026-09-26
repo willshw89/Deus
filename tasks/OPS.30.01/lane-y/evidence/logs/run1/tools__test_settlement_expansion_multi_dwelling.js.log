@@ -1,0 +1,15 @@
+# tools/test_settlement_expansion_multi_dwelling.js  category=KILLED_TIMEOUT  exit=TIMEOUT  ms=180202  decided by timeout (runner)
+== stdout ==
+=== Settlement expansion to a second dwelling (DEUS_Projects.js + DEUS_Colonists.js) headless checks: 10 updates a minute, seed 20260924 ===
+PASS expansion.plugins_load - Projects structures/stockpileCellFor/tidyParcel, Colonists claimBed/allocateBeds/bedClaims; perShelter 8, 1 slot(s) a colonist, 1 a stockpile cell; 80 fruit trees, 60 berry bushes
+PASS expansion.founding_builds_shelter_and_stockpile - Communal shelter #1 at (20,21)-(25,26): done (20/20 walls and door, 11/11 beds, hearth true); Communal stockpile #2 at (39,26)-(41,28): done, 9/9 cells registered; after 0.22 days: shelter 1/1, storage 10/8; 0 assign calls, 0 orders
+PASS expansion.founders_claim_beds - 8 distinct claims, 8 on Shelter #1's bed cells: #1@22,23 #2@21,23 #3@23,22 #4@21,24 #5@24,22 #6@22,22 #7@21,22 #8@24,23
+PASS expansion.influx_deficits_recognised - 4 arrived (4 through spawnImmigrants): population 12; shelter 1/2 (deficit 1), beds 11/12 (deficit 1), storage 10/12 (deficit 2); brain: communal_shelter:3.50  communal_stockpile:0.17  bedding_expansion:0.13  food_cache:-
+PASS expansion.second_shelter_parcel_cleared_and_tidied - Communal shelter #3 at (27,20)-(32,25): phase 2/4 walls, 0/20 cells, 0 jobs open, 12 taken, waiting for log (predicted origin (27,20)); oak at (28,21) chopped by the project's job #1382, now clear; 3 tidy haul(s) [done to (39,26); done to (39,26); done to (39,26)]; walls phase began day 1 18:50 with 0 loose material on the parcel; 11 logs on Stockpile #1
+PASS expansion.expansion_completes - Communal shelter #1 at (20,21)-(25,26): done; Communal shelter #3 at (27,20)-(32,25): done | Communal stockpile #2 at (39,26)-(41,28): done; Communal stockpile #4 at (39,30)-(41,32): done; after 0.19 days: shelter 2/2, beds 22/12, storage 19/12
+PASS expansion.spatial_integrity - 4 structures (communal_shelter#1 at (20,21), communal_stockpile#2 at (39,26), communal_shelter#3 at (27,20), communal_stockpile#4 at (39,30)): 0 overlapping cells, smallest gap 2 (margin 1), 0 cells on the camp ring, inside it or on the larder; doors walled at the sides with free ground outside; siting over Shelter #1's east wall refused by (27,20) wall_wood, flush against it refused by (27,20) wall_wood
+PASS expansion.no_cannibalization - 0 clearing job(s) on standing buildings; 5 chop(s) of wild wood; Shelter #1 intact, camp ring 30/30 walls; materials actual wood 4, straw 0, stone 12, food 40 vs expected wood 4, straw 0, stone 12, food 40 (yields {"log":18,"fiber":4}, built {"log":21,"stone":4,"straw":22})
+PASS expansion.newcomers_bedded_without_displacement - founders keeping their bed 8/8, newcomers on Shelter #1's free beds 3/4 and Shelter #2's 1/4 (Garette@24,25 Jorine@22,25 Fenah@30,21 Perus@21,25); 12 distinct claims among 12, 12 standing
+  day 2 00:00: 12 alive (0 dead); shelter 2/2, beds 22/12, storage 19/12, food 3.333/3 days; communal_shelter#1:done communal_stockpile#2:done communal_shelter#3:done communal_stockpile#4:done
+== stderr ==
+

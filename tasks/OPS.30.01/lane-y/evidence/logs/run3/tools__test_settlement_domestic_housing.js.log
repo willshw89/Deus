@@ -1,0 +1,13 @@
+# tools/test_settlement_domestic_housing.js  category=KILLED_TIMEOUT  exit=TIMEOUT  ms=180161  decided by timeout (runner)
+== stdout ==
+=== Domestic housing progression (DEUS_Projects.js + UF_Households.js + DEUS_Fire.js) headless checks: 10 updates a minute, seed 20260924 ===
+PASS housing.plugins_load - Projects phase/households/hearthId, Colonists claimBedAt, Households assignHome/isHoused, Fire sourceInfoAt/setContained; shelter hearth resolves to kitchen_hearth (contained type true); cottage blueprint deficit housing
+PASS housing.blueprints_keep_fuel_off_the_hearth - shelter 6x6: hearth kitchen_hearth at (3,3), 4 clearance cells (walkway (3,4) free), 11 beds (none touching the hearth), door at (3,5), 20 wall cells; cottage for 2: 2 beds, 1 chest, 4 clearance
+PASS housing.founders_form_four_unhoused_households - 4 household records, 4 seen by the planner (household:1:1+2 household:3:3+4 household:5:5+6 household:7:7+8); phase camp; homes 0/4; emergency 0/8; cottage candidate phaseOk false, eligible false; brain chooses communal_shelter
+PASS housing.camp_raises_safe_communal_shelter - Communal shelter #1 at (20,21)-(25,26): done after 0.10 days: 20/20 walls and door (door_wood), hearth kitchen_hearth, 11/11 beds, 4/4 clearance cells free; hearth contained true, state normal, escape 0; 0 cottage(s) opened in the camp phase; 0 assign calls, 0 orders
+PASS housing.village_opens_cottage_for_unhoused_household - after 0.33 more days: phase village (shelter 1/1, storage 10/8, food 3 days); Cottage #3 at (24,39)-(28,43): phase 2/5 walls, 0/16 cells, 4 jobs open, 8 taken for household household:1 (size 2, 2 beds, capacity {"housing":1,"bed":2}); at most 1 cottage(s) active at once
+PASS housing.household_moves_into_finished_cottage - Cottage #3 at (24,39)-(28,43): done after 0.05 days: 16/16 walls, hearth kitchen_hearth, 2/2 beds, chest chest_wood, clearance 4/4; moved in 2 claimed; member beds 25,40 27,40 (cottage beds 25,40 27,40); household record homeBuildingId 3, shared false, housed true; homes 1/4; communal beds freed 2/2 (were 22,23 21,23)
+  day 2 00:00: village; 10 alive (0 dead); shelter 2/2, beds 13/10, storage 10/10, food 3.2/3 days, homes 1/6; fires 0; communal_shelter#1:done communal_stockpile#2:done household_cottage#3:done household_cottage#4:active/1
+PASS housing.second_household_housed_and_newcomers_take_communal_beds - 2 cottage(s) done for households household:1, household:3 after 1.00 more days; newcomers' beds 22,23 24,25 (2/2 in Shelter #1); homes 2/6; 0 bed(s) against a fire of 15
+== stderr ==
+

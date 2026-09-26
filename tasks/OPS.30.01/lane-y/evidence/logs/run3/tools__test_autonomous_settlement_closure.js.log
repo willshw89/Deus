@@ -1,0 +1,34 @@
+# tools/test_autonomous_settlement_closure.js  category=PASS  exit=0  ms=60572  decided by exit_0 (-)
+== stdout ==
+=== Autonomous settlement closure (DEUS_Projects.js + DEUS_Colonists.js) headless checks: 10 updates a minute, 600 an hour, seed 20260923 ===
+PASS closure.plugins_load - Projects, Jobs, Items, Colonists loaded; 60 fruit trees and 40 berry bushes within 28 cells; 8 founders with 3 rations each
+PASS closure.test_clock_hook - UF.Time.setForTest(8, 0, 1) -> {"hour":8,"minute":0,"day":1}, calendar not paused, minute timer reset; (30, -5) clamps to 23:0; refused (null) when UF.Test is inactive, clock untouched at 21:00
+PASS closure.carried_nutrition_counted - 24 rations in the founders' packs = 24 lb of nutrition (48 lb by weight), 3 colonist-days, deficit 0; communal 0 lb
+PASS closure.removal_raises_deficit - 3 rations taken from one pack: carried 21 lb, deficit 0.375 colonist-days (3 lb)
+PASS closure.deposit_moves_not_adds - 3 rations put in the larder: total 24 lb unchanged, carried 21 lb, communal 3 lb
+PASS closure.no_double_count - plugin total 24 lb, independent walk over every stack 24 lb
+PASS closure.shelter_first - communal_shelter:5.00  bedding_expansion:1.50  communal_stockpile:0.88  food_cache:-
+  day 2 00:00: 8 alive (8 asleep, worst exhaustion 0, 0 dead); food 2/3 days (carried 14 lb, stored 2 lb), shelter 1, beds 11/8, storage 1/8; projects {"communal_shelter:done":1}; 8 live jobs (0 project jobs, untaken {}); 2 survival interruptions; 99 wild food plants standing, 0 regrown
+PASS closure.shelter_completed_autonomously - Communal shelter #1 at (33,20)-(38,25): done after 0.52 days: 20/20 walls and door, 11/11 beds, hearth true; 153 project jobs done, 0 assign calls, 0 orders; jobs done {"eat":16,"drink":16,"move":165,"chop":2,"talk":4,"haul":79,"build":41,"sleep":8,"gather":40}
+PASS closure.stockpile_built_and_registered - Communal stockpile #2 at (24,23)-(26,25): done: 9/9 cells standing, 9 registered; storage 10/8 slots
+PASS closure.food_cache_restores_reserve - Food cache #3 on 0 cell(s) near (37,32): done; 40 gather jobs done, 16 lb eaten so far; reserve now 3.513/3 days (carried 7.4 lb, stored 20.7 lb)
+PASS closure.resources_conserved_founding - actual wood 23, straw 8, stone 16, food 28.1 vs expected wood 23, straw 8, stone 16, food 28.1: start wood 40, straw 30, stone 20, food 24 + yields {"log":4,"berries":36,"fruit":66} - built {"log":21,"stone":4,"straw":22} - eaten 16 lb
+PASS closure.no_unneeded_bedding - beds 11/8, bedding candidate unmet 0; bedding projects opened: 0
+  day 3 00:00: 8 alive (0 asleep, worst exhaustion 0, 0 dead); food 3.512/3 days (carried 7 lb, stored 20.9 lb), shelter 1, beds 11/8, storage 10/8; projects {"communal_shelter:done":1,"communal_stockpile:done":1,"food_cache:done":1}; 0 live jobs (0 project jobs, untaken {}); 3 survival interruptions; 58 wild food plants standing, 0 regrown
+PASS closure.save_load_roundtrip - 3848 bytes of project state identical after the round trip; 8/8 founders resolved by id; 8 more meals, drinks or project jobs done within 0.71 days after the reload
+  day 4 00:00: 8 alive (0 asleep, worst exhaustion 0, 0 dead); food 3.531/3 days (carried 0 lb, stored 25.8 lb), shelter 1, beds 11/8, storage 10/8; projects {"communal_shelter:done":1,"communal_stockpile:done":1,"food_cache:done":2}; 1 live jobs (0 project jobs, untaken {}); 3 survival interruptions; 46 wild food plants standing, 0 regrown
+  day 5 00:00: 8 alive (0 asleep, worst exhaustion 1, 0 dead); food 3.137/3 days (carried 0 lb, stored 22.65 lb), shelter 1, beds 11/8, storage 10/8; projects {"communal_shelter:done":1,"communal_stockpile:done":1,"food_cache:done":2}; 4 live jobs (0 project jobs, untaken {}); 3 survival interruptions; 64 wild food plants standing, 18 regrown
+PASS closure.maintenance_stable - 48 samples over 2 days: at most 1 project(s) active, 9 live jobs; 1 project(s) opened (food_cache:done); 8 alive, food 3.137 days, 40 meals and 27 long rests so far
+  day 6 00:00: 8 alive (1 asleep, worst exhaustion 3, 0 dead); food 2.269/3 days (carried 0 lb, stored 17.2 lb), shelter 1, beds 11/8, storage 10/8; projects {"communal_shelter:done":1,"communal_stockpile:done":1,"food_cache:done":3,"food_cache:active":1}; 8 live jobs (3 project jobs, untaken {"gather":3}); 7 survival interruptions; 35 wild food plants standing, 44 regrown
+PASS closure.food_disturbance_recovers - 28.6 lb of nutrition removed at day 5 21:00 -> food 0 days (critical true); 1 new food cache(s) (done); reserve 3.519 days with 8 alive after 0.65 days
+PASS closure.storage_disturbance_recovers - 9 stockpile cells removed -> storage 10 -> 1 of 8 slots; Communal stockpile #7 at (24,23)-(26,25): done after 0.20 days, 9 cells registered; storage 10 slots, one replacement project
+PASS closure.bedding_when_population_grows - population 13, bed deficit 2 -> 1 bedding project(s) capacity 2, done, 2 beds laid after 0.21 days; beds 13/13
+PASS closure.survival_interruptions_recovered - 8 project jobs cancelled for survival needs ({"survival: rest":7,"survival: thirst":1}; e.g. haul at day 1 20:30), 0 counted as cell failures; 8 projects, 0 builds still active, 0 food cache in flight
+PASS closure.long_rest_one_night - 34 long rests observed, the longest 8.1 calendar hours; the first 8: 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0 h (e.g. day 1 20:01 to day 2 04:01); the SRD long rest is 8 h
+PASS closure.nobody_died - all 13 colonists alive after 5.1 calendar days
+PASS closure.resources_conserved_end - actual wood 23, straw 4, stone 16, food 39.3 vs expected wood 23, straw 4, stone 16, food 39.3 (baseline wood 23, straw 8, stone 16, food 44.3 + yields {} - built {"straw":4} - eaten 5 lb); start of run wood 40, straw 30, stone 20, food 24
+PASS closure.no_errors - no console errors during 73744 updates (5.1 calendar days)
+
+RESULT: 22 passed, 0 failed (exit 0)
+== stderr ==
+

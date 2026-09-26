@@ -1,0 +1,52 @@
+# tools/test_cooperative_building_and_offspring_pairbonding.js  category=FAIL_MISSING_REFERENCE  exit=1  ms=68  decided by enoent (stderr)
+== stdout ==
+
+===========================================
+TOTAL PASSES: 0
+TOTAL FAILS:  4
+===========================================
+== stderr ==
+FAIL coop_pairbond.founder_1to1_pairbonding_at_creation: Error: ENOENT: no such file or directory, open 'C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\js\plugins\UF_CultureGrowth.js'
+    at Object.readFileSync (node:fs:484:20)
+    at readPlugin (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:16:31)
+    at createHarness (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:264:20)
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:278:23
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:44:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:277:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+FAIL coop_pairbond.cooperative_sequential_focal_pacing: Error: ENOENT: no such file or directory, open 'C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\js\plugins\UF_CultureGrowth.js'
+    at Object.readFileSync (node:fs:484:20)
+    at readPlugin (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:16:31)
+    at createHarness (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:264:20)
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:321:26
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:44:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:320:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+FAIL coop_pairbond.cooperative_job_scoring_priority: Error: ENOENT: no such file or directory, open 'C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\js\plugins\UF_CultureGrowth.js'
+    at Object.readFileSync (node:fs:484:20)
+    at readPlugin (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:16:31)
+    at createHarness (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:264:20)
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:379:23
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:44:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:378:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+FAIL coop_pairbond.adult_offspring_nonkin_pairbonding: Error: ENOENT: no such file or directory, open 'C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\js\plugins\UF_CultureGrowth.js'
+    at Object.readFileSync (node:fs:484:20)
+    at readPlugin (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:16:31)
+    at createHarness (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:264:20)
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:416:23
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:44:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_cooperative_building_and_offspring_pairbonding.js:415:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)

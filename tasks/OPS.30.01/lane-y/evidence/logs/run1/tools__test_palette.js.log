@@ -1,0 +1,5 @@
+# tools/test_palette.js  category=PASS  exit=0  ms=49  decided by exit_0 (-)
+== stdout ==
+Palette loaded successfully
+== stderr ==
+

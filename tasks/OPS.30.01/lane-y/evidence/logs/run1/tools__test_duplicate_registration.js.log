@@ -1,0 +1,21 @@
+# tools/test_duplicate_registration.js  category=PASS  exit=0  ms=62  decided by exit_0 (-)
+== stdout ==
+PASS duplicate_reg.catalogs_valid_json - Both UF_WorldCatalog.json and DEUS_WorldCatalog.json parse cleanly
+PASS duplicate_reg.catalogs_in_sync - UF items=61, DEUS items=61
+PASS duplicate_reg.no_duplicate_catalog_ids - All 61 catalog item IDs are unique
+PASS duplicate_reg.common_clothes_in_catalog - name="Common clothes", weight=3, stack=1
+PASS duplicate_reg.pouch_in_catalog - name="Pouch", weight=1, capacity=50
+PASS duplicate_reg.gold_coin_in_catalog - name="Gold piece", weight=0.02, value=1
+PASS duplicate_reg.runtime_types_no_duplicates - 63 types registered with 0 duplicates
+PASS duplicate_reg.authoritative_clothes_weight - weight=3 (expected 3)
+PASS duplicate_reg.authoritative_pouch_weight - weight=1 (expected 1)
+PASS duplicate_reg.authoritative_coin_weight - weight=0.02 (expected 0.02)
+PASS duplicate_reg.alias_clothes_identity - I.type('clothes') === I.type('common_clothes')
+PASS duplicate_reg.alias_gp_identity - I.type('gp') === I.type('gold_coin')
+PASS duplicate_reg.kit_issuance_idempotent_inventory - first=3, second=3 items in inventory
+PASS duplicate_reg.kit_issuance_idempotent_weight - first=4.3 lb, second=4.3 lb (expected 4.3 lb)
+PASS duplicate_reg.kit_issuance_idempotent_clothes - clothes item id remained 1
+
+Duplicate Registration Results: 15 passed, 0 failed
+== stderr ==
+

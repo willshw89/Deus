@@ -1,0 +1,25 @@
+# tools/test_conditions_native_closure.js  category=PASS  exit=0  ms=1923  decided by exit_0 (-)
+== stdout ==
+=== SRD 5.1 condition closure (DEUS_Conditions.js) headless checks ===
+PASS conditions.plugins_load - Conditions with isStable/onUnitMoved/releaseGrapples/lineOfSight/socialCheckModifiers/fearSourceVisible; drops held: unconscious, petrified; Combat loaded, Dnd5e loaded
+PASS conditions.unconscious_drops_held_items - axe #33 and club #34 on (31,29): true; slots {"mainHand":null,"offHand":null}; 1 drop event(s) with 2 items; cannot act, prone
+PASS conditions.petrified_drops_held_items - axe #35 on (33,29): true; mainHand null; incapacitated, half damage
+PASS conditions.incapacitated_stunned_paralyzed_keep_grip - incapacitated: grip held, cannot act or react; stunned: grip held, cannot act or react; paralyzed: grip held, cannot act or react
+PASS conditions.downed_at_zero_hp_drops_items - after combat:downed the axe lies on (35,32): true; unconscious by the 0-hit-point rule: true
+PASS conditions.grapple_ends_when_grappler_incapacitated - incapacitated: held -> ended at once; stunned: held -> ended at once; paralyzed: held -> ended at once; unconscious: held -> ended at once; petrified: held -> ended at once; poisoned grappler keeps it: true
+PASS conditions.grapple_ends_when_grappler_dies_or_leaves - grappler dead -> released: true; second grappler removed from the world -> its hold released, the other kept: true
+PASS conditions.grapple_ends_when_grappler_moves_away - onUnitMoved(grappler 3 cells away) ended 1; victim free: true; tick() after another move frees too: true
+PASS conditions.frightened_cannot_approach_visible_or_hidden_source - source at (16,50), creature at (10,50): closer refused true, away true, sideways (same distance) true; behind a wall: closer still refused true, away true
+PASS conditions.frightened_disadvantage_suspended_without_line_of_sight - in sight: attack disadvantage true, check disadvantage true; walls at x=13: seen false, attack false (none), check false; opts.fearSourceVisible forces true; walls gone: seen true
+PASS conditions.charmer_social_advantage - charmer vs charmed: persuasion advantage true (option_advantage,charmer_social), deception true; vs a stranger false; another talker vs the charmed false; athletics false
+PASS conditions.charmed_refuses_harm_to_charmer - charmed -> charmer refused true, charmed -> stranger allowed true, charmer -> charmed allowed true; DEUS_Combat.resolveAttack: on the charmer refused (null), on a stranger resolved
+PASS conditions.stable_dying_skips_death_saves - stable patient after 5 rounds: saves 0/0 (was 0/0), hp 0, unconscious true, isStable true, reflected {"source":"zero_hp","dying":true,"stable":true}; the unstable control rolled: 0/0
+PASS conditions.stable_stays_unconscious_until_revived - woke after 600 updates (1.0 h): hp 1, unconscious false, can act true
+PASS conditions.multi_instance_non_stacking_and_isolated_removal - two poisons -> one disadvantage (poisoned); removed the bite -> the cloud remains (true); t+150 still poisoned true; t+301 expired true (expiry events 1); ids cond_poisoned_1, cond_poisoned_2
+PASS conditions.save_load_round_trip - 1091 bytes, no Infinity/undefined: true; identical after the round trip: true; poison expires at 3031 (set at 2731+300), metadata {"potency":2,"tags":["needle","blue"]}, fear source #21 indefinite (null), charm DC 13 wis; the copy behaves (frightened, charmed, grappled): true; expiry at t+299/t+300: true/false; a new instance id cond_poisoned_5 is unique: true
+PASS conditions.timers_tagged_action - 2 instances, domains action/action
+PASS conditions.no_errors - no console errors during 2731 updates
+
+RESULT: 18 passed, 0 failed (exit 0)
+== stderr ==
+

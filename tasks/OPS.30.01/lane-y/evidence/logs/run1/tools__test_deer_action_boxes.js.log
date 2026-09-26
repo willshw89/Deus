@@ -1,0 +1,37 @@
+# tools/test_deer_action_boxes.js  category=PASS  exit=0  ms=155  decided by exit_0 (-)
+== stdout ==
+
+=== pro_deer_eat.png ===
+  South L: 142x234 @ (48, 13)
+  South C: 142x234 @ (282, 13)
+  South R: 199x129 @ (714, 119)
+  East L: 200x129 @ (12, 375)
+  East C: 165x228 @ (270, 276)
+  East R: 202x128 @ (479, 376)
+  North L: 191x128 @ (37, 626)
+  North C: 91x229 @ (310, 530)
+  North R: 191x128 @ (479, 626)
+
+=== pro_deer_attack.png ===
+  South L: 137x167 @ (50, 81)
+  South C: 137x175 @ (284, 60)
+  South R: 170x238 @ (731, 10)
+  East L: 151x247 @ (45, 260)
+  East C: 193x172 @ (258, 334)
+  East R: 191x228 @ (490, 276)
+  North L: 177x224 @ (36, 530)
+  North C: 91x229 @ (310, 530)
+  North R: 178x223 @ (493, 530)
+
+=== pro_deer_sleep.png ===
+  South L: 166x231 @ (36, 14)
+  South C: 167x231 @ (269, 14)
+  South R: 166x232 @ (505, 13)
+  East L: 178x228 @ (33, 273)
+  East C: 178x219 @ (267, 282)
+  East R: 178x228 @ (502, 273)
+  North L: 177x217 @ (36, 530)
+  North C: 86x229 @ (310, 530)
+  North R: 177x217 @ (494, 530)
+== stderr ==
+

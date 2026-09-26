@@ -1,0 +1,21 @@
+# tools/test_var2_suite.js  category=FAIL_OTHER  exit=1  ms=663  decided by other (stderr)
+== stdout ==
+=== Checking Adult Male Human Variation 2 Suite ===
+
+Walk    : 144x192, 31 colors (<=31), alpha OK, U7 Orig: FAIL
+Haul    : 144x192, 31 colors (<=31), alpha OK, U7 Orig: FAIL
+Attack  : 144x192, 31 colors (<=31), alpha OK, U7 Orig: FAIL
+Bow     : 144x192, 31 colors (<=31), alpha OK, U7 Orig: FAIL
+Magic   : 144x192, 31 colors (<=31), alpha OK, U7 Orig: FAIL
+Work    : 144x192, 31 colors (<=31), alpha OK, U7 Orig: FAIL
+Downed  : 144x192, 31 colors (<=31), alpha OK, U7 Orig: FAIL
+
+Result: FAIL
+== stderr ==
+no index at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\reference\u7_originality_index.json: run with --build-index first
+no index at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\reference\u7_originality_index.json: run with --build-index first
+no index at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\reference\u7_originality_index.json: run with --build-index first
+no index at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\reference\u7_originality_index.json: run with --build-index first
+no index at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\reference\u7_originality_index.json: run with --build-index first
+no index at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\reference\u7_originality_index.json: run with --build-index first
+no index at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census2\reference\u7_originality_index.json: run with --build-index first

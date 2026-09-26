@@ -1,0 +1,103 @@
+# tools/test_z_fire.js  category=FAIL_API_DRIFT  exit=1  ms=47  decided by api_drift (stderr)
+== stdout ==
+RESULT: 0 passed, 9 failed
+== stderr ==
+FAIL z_fire.legacy_refuses_levels_without_mutation: TypeError: Cannot read properties of undefined (reading 'ignite')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:82:26
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:10:11)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:79:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL z_fire.damage_spread_wetness_and_events_are_isolated: TypeError: Cannot read properties of undefined (reading 'ignite')
+    at isolation (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:97:22)
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:112:62
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:10:11)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:112:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+FAIL z_fire.view_switch_does_not_pause_any_stored_level: TypeError: Cannot read properties of undefined (reading 'ignite')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:115:87
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:10:11)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:113:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL z_fire.seam_invalid_levels_never_alias_ground: TypeError: Cannot read properties of undefined (reading 'ignite')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:122:44
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:10:11)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:121:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL z_fire.view_sources_and_level_change_events: TypeError: Cannot read properties of undefined (reading 'sourceCells')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:137:22
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:10:11)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:132:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL z_fire.burnout_items_ground_and_save_roundtrip: TypeError: Cannot read properties of undefined (reading 'ignite')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:147:9
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:10:11)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:144:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL z_fire.douse_records_and_worker_level: TypeError: Cannot read properties of undefined (reading 'ignite')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:158:45
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:10:11)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:157:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL z_fire.legacy_load_keeps_level_fires_inert: TypeError: Cannot read properties of undefined (reading 'step')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:172:23
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:10:11)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:169:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL z_fire.real_z_dropping_mutation_is_detected: AssertionError [ERR_ASSERTION]: mutation site exists
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:177:12
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:10:11)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_fire.js:175:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47

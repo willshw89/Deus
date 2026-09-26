@@ -1,0 +1,771 @@
+# tools/test_all_object_charsets.js  category=FAIL_OTHER  exit=1  ms=19070  decided by other (stderr)
+== stdout ==
+Validating all 67 World Object Character Sets & Master Icons...
+====================================================
+Character Sheets Art Check:   61/67 PASS, 26 FAIL
+Master Icons Art Check:       0/67 PASS, 87 FAIL
+Originality Check (vs U7):    0/67 PASS, 87 FAIL
+====================================================
+== stderr ==
+Icon Art Check FAIL on oak (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\oak_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\oak_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar oak_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 504 opaque, 520 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 27 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\oak_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar oak_icon.json, 27 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on oak (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Oak.png):
+
+Icon Art Check FAIL on birch (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\birch_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\birch_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar birch_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 250 opaque, 774 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 24 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\birch_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar birch_icon.json, 24 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on birch (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Birch.png):
+
+Icon Art Check FAIL on pine (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\pine_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\pine_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar pine_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 269 opaque, 755 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 27 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\pine_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar pine_icon.json, 27 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on pine (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Pine.png):
+
+Icon Art Check FAIL on fir_snow (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\fir_snow_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\fir_snow_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar fir_snow_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 323 opaque, 701 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 29 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\fir_snow_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar fir_snow_icon.json, 29 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on fir_snow (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Fir_Snow.png):
+
+Icon Art Check FAIL on fruit_tree (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\fruit_tree_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\fruit_tree_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar fruit_tree_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 405 opaque, 619 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 31 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\fruit_tree_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar fruit_tree_icon.json, 31 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on fruit_tree (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Fruit_Tree.png):
+
+Icon Art Check FAIL on fruit_tree_bare (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\fruit_tree_bare_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\fruit_tree_bare_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar fruit_tree_bare_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 405 opaque, 619 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 21 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\fruit_tree_bare_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar fruit_tree_bare_icon.json, 21 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on fruit_tree_bare (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Fruit_Tree_Bare.png):
+
+Icon Art Check FAIL on tree_savanna (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\tree_savanna_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\tree_savanna_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar tree_savanna_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 260 opaque, 764 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 28 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\tree_savanna_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar tree_savanna_icon.json, 28 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on tree_savanna (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Tree_Savanna.png):
+
+Icon Art Check FAIL on tree_swamp (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\tree_swamp_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\tree_swamp_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar tree_swamp_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 412 opaque, 612 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 30 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\tree_swamp_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar tree_swamp_icon.json, 30 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on tree_swamp (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Tree_Swamp.png):
+
+Sheet Art Check FAIL on mangrove (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Mangrove.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Mangrove.png (288x384, object, 3x4 frames of 96x96, sidecar !$UF_Mangrove.json)
+PASS alpha: every pixel is alpha 0 or 255 (110592 px: 39384 opaque, 71208 transparent)
+FAIL grid: prohibited legacy 3x block art: 100% of 3x3 blocks (4376/4376) are uniform single colors; original DEUS art must be authored at native 1:1 pixel density, not 16px enlarged 3x
+PASS palette: 18 opaque colours (limit 32)
+WARN size: 288x384: a multiple of 48; 3x4 frames of 96x96 (sidecar), not the 48x48 frame of ART_STANDARD F3
+PASS sidecar: !$UF_Mangrove.json: frame 96x96 (3x4), anchor [48,95], facings SWEN, animations stand,sway (highest index 2 of 3 columns); layer absent, species absent, stage absent
+SKIP lean: only for character sheets (this is an object sheet)
+SKIP margin: only for character sheets (this is an object sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Mangrove.png: 288x384, object, 3x4 frames of 96x96, sidecar !$UF_Mangrove.json, 18 colours; 3/5 checks pass; failed: grid; warn: size; 2 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Icon Art Check FAIL on mangrove (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\mangrove_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\mangrove_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar mangrove_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 352 opaque, 672 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 17 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\mangrove_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar mangrove_icon.json, 17 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on mangrove (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Mangrove.png):
+
+Sheet Art Check FAIL on tree_tropical (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Tree_Tropical.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Tree_Tropical.png (288x384, object, 3x4 frames of 96x96, sidecar !$UF_Tree_Tropical.json)
+PASS alpha: every pixel is alpha 0 or 255 (110592 px: 49860 opaque, 60732 transparent)
+FAIL grid: prohibited legacy 3x block art: 100% of 3x3 blocks (5540/5540) are uniform single colors; original DEUS art must be authored at native 1:1 pixel density, not 16px enlarged 3x
+PASS palette: 17 opaque colours (limit 32)
+WARN size: 288x384: a multiple of 48; 3x4 frames of 96x96 (sidecar), not the 48x48 frame of ART_STANDARD F3
+PASS sidecar: !$UF_Tree_Tropical.json: frame 96x96 (3x4), anchor [48,95], facings SWEN, animations stand,sway (highest index 2 of 3 columns); layer absent, species absent, stage absent
+SKIP lean: only for character sheets (this is an object sheet)
+SKIP margin: only for character sheets (this is an object sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Tree_Tropical.png: 288x384, object, 3x4 frames of 96x96, sidecar !$UF_Tree_Tropical.json, 17 colours; 3/5 checks pass; failed: grid; warn: size; 2 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Icon Art Check FAIL on tree_tropical (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\tree_tropical_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\tree_tropical_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar tree_tropical_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 380 opaque, 644 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 16 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\tree_tropical_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar tree_tropical_icon.json, 16 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on tree_tropical (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Tree_Tropical.png):
+
+Icon Art Check FAIL on palm (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\palm_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\palm_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar palm_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 215 opaque, 809 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 17 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\palm_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar palm_icon.json, 17 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on palm (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Palm.png):
+
+Sheet Art Check FAIL on dead_tree (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Tree_Dead.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Tree_Dead.png (288x384, object, 3x4 frames of 96x96, sidecar !$UF_Tree_Dead.json)
+PASS alpha: every pixel is alpha 0 or 255 (110592 px: 20880 opaque, 89712 transparent)
+FAIL grid: prohibited legacy 3x block art: 100% of 3x3 blocks (2320/2320) are uniform single colors; original DEUS art must be authored at native 1:1 pixel density, not 16px enlarged 3x
+PASS palette: 10 opaque colours (limit 32)
+WARN size: 288x384: a multiple of 48; 3x4 frames of 96x96 (sidecar), not the 48x48 frame of ART_STANDARD F3
+PASS sidecar: !$UF_Tree_Dead.json: frame 96x96 (3x4), anchor [48,95], facings SWEN, animations stand,sway (highest index 2 of 3 columns); layer absent, species absent, stage absent
+SKIP lean: only for character sheets (this is an object sheet)
+SKIP margin: only for character sheets (this is an object sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Tree_Dead.png: 288x384, object, 3x4 frames of 96x96, sidecar !$UF_Tree_Dead.json, 10 colours; 3/5 checks pass; failed: grid; warn: size; 2 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Icon Art Check FAIL on dead_tree (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\dead_tree_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\dead_tree_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar dead_tree_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 162 opaque, 862 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 10 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\dead_tree_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar dead_tree_icon.json, 10 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on dead_tree (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Tree_Dead.png):
+
+Sheet Art Check FAIL on tree_cursed (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Tree_Cursed.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Tree_Cursed.png (288x384, object, 3x4 frames of 96x96, sidecar !$UF_Tree_Cursed.json)
+PASS alpha: every pixel is alpha 0 or 255 (110592 px: 22428 opaque, 88164 transparent)
+FAIL grid: prohibited legacy 3x block art: 100% of 3x3 blocks (2492/2492) are uniform single colors; original DEUS art must be authored at native 1:1 pixel density, not 16px enlarged 3x
+PASS palette: 14 opaque colours (limit 32)
+WARN size: 288x384: a multiple of 48; 3x4 frames of 96x96 (sidecar), not the 48x48 frame of ART_STANDARD F3
+PASS sidecar: !$UF_Tree_Cursed.json: frame 96x96 (3x4), anchor [48,95], facings SWEN, animations stand,sway (highest index 2 of 3 columns); layer absent, species absent, stage absent
+SKIP lean: only for character sheets (this is an object sheet)
+SKIP margin: only for character sheets (this is an object sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Tree_Cursed.png: 288x384, object, 3x4 frames of 96x96, sidecar !$UF_Tree_Cursed.json, 14 colours; 3/5 checks pass; failed: grid; warn: size; 2 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Icon Art Check FAIL on tree_cursed (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\tree_cursed_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\tree_cursed_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar tree_cursed_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 167 opaque, 857 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 14 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\tree_cursed_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar tree_cursed_icon.json, 14 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on tree_cursed (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Tree_Cursed.png):
+
+Icon Art Check FAIL on stump (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\stump_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\stump_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar stump_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 434 opaque, 590 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 6 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\stump_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar stump_icon.json, 6 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on stump (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Stump.png):
+
+Icon Art Check FAIL on berry_bush (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\berry_bush_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\berry_bush_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar berry_bush_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 542 opaque, 482 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 32 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\berry_bush_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar berry_bush_icon.json, 32 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on berry_bush (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_BerryBush.png):
+
+Icon Art Check FAIL on berry_bush_bare (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\berry_bush_bare_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\berry_bush_bare_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar berry_bush_bare_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 542 opaque, 482 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 28 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\berry_bush_bare_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar berry_bush_bare_icon.json, 28 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on berry_bush_bare (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_BerryBush_Bare.png):
+
+Icon Art Check FAIL on bush (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\bush_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\bush_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar bush_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 595 opaque, 429 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 30 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\bush_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar bush_icon.json, 30 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on bush (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Bush.png):
+
+Icon Art Check FAIL on desert_shrub (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\desert_shrub_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\desert_shrub_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar desert_shrub_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 423 opaque, 601 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 25 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\desert_shrub_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar desert_shrub_icon.json, 25 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on desert_shrub (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_DesertShrub.png):
+
+Icon Art Check FAIL on snow_bush (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\snow_bush_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\snow_bush_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar snow_bush_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 598 opaque, 426 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 25 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\snow_bush_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar snow_bush_icon.json, 25 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on snow_bush (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_SnowBush.png):
+
+Icon Art Check FAIL on cactus (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\cactus_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\cactus_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar cactus_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 401 opaque, 623 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 11 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\cactus_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar cactus_icon.json, 11 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on cactus (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Cactus.png):
+
+Icon Art Check FAIL on cactus_tall (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\cactus_tall_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\cactus_tall_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar cactus_tall_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 232 opaque, 792 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 6 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\cactus_tall_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar cactus_tall_icon.json, 6 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on cactus_tall (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_CactusTall.png):
+
+Icon Art Check FAIL on grass_tuft (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\grass_tuft_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\grass_tuft_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar grass_tuft_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 160 opaque, 864 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 3 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\grass_tuft_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar grass_tuft_icon.json, 3 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on grass_tuft (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_GrassTuft.png):
+
+Icon Art Check FAIL on reeds (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\reeds_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\reeds_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar reeds_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 218 opaque, 806 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 6 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\reeds_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar reeds_icon.json, 6 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on reeds (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Reeds.png):
+
+Icon Art Check FAIL on flowers (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\flowers_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\flowers_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar flowers_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 414 opaque, 610 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 7 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\flowers_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar flowers_icon.json, 7 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on flowers (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Wildflowers.png):
+
+Icon Art Check FAIL on flowers_purple (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\flowers_purple_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\flowers_purple_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar flowers_purple_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 423 opaque, 601 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 4 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\flowers_purple_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar flowers_purple_icon.json, 4 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on flowers_purple (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Flowers_Purple.png):
+
+Icon Art Check FAIL on flowers_blue (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\flowers_blue_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\flowers_blue_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar flowers_blue_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 423 opaque, 601 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 4 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\flowers_blue_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar flowers_blue_icon.json, 4 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on flowers_blue (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Flowers_Blue.png):
+
+Icon Art Check FAIL on flowers_white (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\flowers_white_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\flowers_white_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar flowers_white_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 405 opaque, 619 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 4 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\flowers_white_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar flowers_white_icon.json, 4 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on flowers_white (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Flowers_White.png):
+
+Icon Art Check FAIL on fern (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\fern_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\fern_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar fern_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 312 opaque, 712 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 13 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\fern_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar fern_icon.json, 13 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on fern (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Fern.png):
+
+Sheet Art Check FAIL on lichen (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Lichen.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Lichen.png (144x192, object, 3x4 frames of 48x48, sidecar !$UF_Lichen.json)
+PASS alpha: every pixel is alpha 0 or 255 (27648 px: 4428 opaque, 23220 transparent)
+FAIL grid: prohibited legacy 3x block art: 100% of 3x3 blocks (492/492) are uniform single colors; original DEUS art must be authored at native 1:1 pixel density, not 16px enlarged 3x
+PASS palette: 3 opaque colours (limit 32)
+PASS size: 144x192: a multiple of 48 both ways; 3x4 frames of 48x48 (sidecar)
+PASS sidecar: !$UF_Lichen.json: frame 48x48 (3x4), anchor [24,47], facings SWEN, animations stand (highest index 0 of 3 columns); layer absent, species absent, stage absent
+SKIP lean: only for character sheets (this is an object sheet)
+SKIP margin: only for character sheets (this is an object sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Lichen.png: 144x192, object, 3x4 frames of 48x48, sidecar !$UF_Lichen.json, 3 colours; 4/5 checks pass; failed: grid; 2 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Icon Art Check FAIL on lichen (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\lichen_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\lichen_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar lichen_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 369 opaque, 655 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 3 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\lichen_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar lichen_icon.json, 3 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on lichen (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Lichen.png):
+
+Icon Art Check FAIL on wild_grain (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\wild_grain_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\wild_grain_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar wild_grain_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 214 opaque, 810 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 4 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\wild_grain_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar wild_grain_icon.json, 4 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on wild_grain (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Wild_Grain.png):
+
+Icon Art Check FAIL on wheat_wild (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\wheat_wild_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\wheat_wild_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar wheat_wild_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 347 opaque, 677 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 4 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\wheat_wild_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar wheat_wild_icon.json, 4 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on wheat_wild (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Wheat_Wild.png):
+
+Icon Art Check FAIL on lily_pad (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\lily_pad_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\lily_pad_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar lily_pad_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 279 opaque, 745 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 5 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\lily_pad_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar lily_pad_icon.json, 5 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on lily_pad (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Lily_Pad.png):
+
+Icon Art Check FAIL on rocks_small (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\rocks_small_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\rocks_small_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar rocks_small_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 193 opaque, 831 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 4 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\rocks_small_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar rocks_small_icon.json, 4 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on rocks_small (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_LooseStones.png):
+
+Icon Art Check FAIL on gravel (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\gravel_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\gravel_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar gravel_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 193 opaque, 831 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 4 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\gravel_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar gravel_icon.json, 4 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on gravel (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Gravel.png):
+
+Icon Art Check FAIL on granite_boulder (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\granite_boulder_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\granite_boulder_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar granite_boulder_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 532 opaque, 492 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 6 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\granite_boulder_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar granite_boulder_icon.json, 6 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on granite_boulder (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_GraniteBoulder.png):
+
+Icon Art Check FAIL on ironstone (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\ironstone_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\ironstone_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar ironstone_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 532 opaque, 492 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 4 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\ironstone_icon.png: 32x32, icon, 1x1 frames of 32x32, sidecar ironstone_icon.json, 4 colours; 2/3 checks pass; failed: size; 4 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on ironstone (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_IronstoneDeposit.png):
+
+Icon Art Check FAIL on copper_outcrop (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\copper_outcrop_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\copper_outcrop_icon.png (32x32, icon, 1x1 frames of 32x32, sidecar copper_outcrop_icon.json)
+PASS alpha: every pixel is alpha 0 or 255 (1024 px: 532 opaque, 492 transparent)
+SKIP grid: 32-px icons (AR-800) are not on the tile grid: icon sheet rules apply
+PASS palette: 5 opaque colours (limit 32)
+FAIL size: 32x32: an icon sheet must be 512 wide with a height that is a multiple of 32 (32-px icons)
+SKIP sidecar: icon sheets have no sidecar in ART_STANDARD §3
+SKIP lean: only for character sheets (this is an icon sheet)
+SKIP margin: only for character sheets (this is an icon sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\maste
+... [56282 bytes not shown by run_gate.js] ...
+or character sheets (this is an object sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Dining_Bench.png: 144x192, object, 3x4 frames of 48x48, sidecar !$UF_Dining_Bench.json, 30 colours; 4/5 checks pass; failed: sidecar; 2 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Icon Art Check FAIL on dining_bench (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\dining_bench_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\dining_bench_icon.png (0x0, unreadable)
+FAIL read: file not found
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\dining_bench_icon.png: 0x0, unreadable; 0/1 checks pass; failed: read
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on dining_bench (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Dining_Bench.png):
+
+Sheet Art Check FAIL on kitchen_counter (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Kitchen_Counter.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Kitchen_Counter.png (144x192, object, 3x4 frames of 48x48, sidecar !$UF_Kitchen_Counter.json)
+PASS alpha: every pixel is alpha 0 or 255 (27648 px: 9624 opaque, 18024 transparent)
+PASS grid: native 48px resolution: 1:1 pixel art on 48x48 grid (3x4 tiles)
+PASS palette: 30 opaque colours (limit 32)
+PASS size: 144x192: a multiple of 48 both ways; 3x4 frames of 48x48 (RMMZ $ sheet, 3x4 frames)
+FAIL sidecar: !$UF_Kitchen_Counter.json: frameWidth undefined is not a positive integer; frameHeight undefined is not a positive integer; anchor undefined is not [x, y] of two integers; facings undefined is not a non-empty array; animations.frameMs 200 is not a non-empty array of integers
+SKIP lean: only for character sheets (this is an object sheet)
+SKIP margin: only for character sheets (this is an object sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Kitchen_Counter.png: 144x192, object, 3x4 frames of 48x48, sidecar !$UF_Kitchen_Counter.json, 30 colours; 4/5 checks pass; failed: sidecar; 2 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Icon Art Check FAIL on kitchen_counter (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\kitchen_counter_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\kitchen_counter_icon.png (0x0, unreadable)
+FAIL read: file not found
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\kitchen_counter_icon.png: 0x0, unreadable; 0/1 checks pass; failed: read
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on kitchen_counter (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Kitchen_Counter.png):
+
+Sheet Art Check FAIL on kitchen_pantry (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Kitchen_Pantry.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Kitchen_Pantry.png (144x192, object, 3x4 frames of 48x48, sidecar !$UF_Kitchen_Pantry.json)
+PASS alpha: every pixel is alpha 0 or 255 (27648 px: 18252 opaque, 9396 transparent)
+PASS grid: native 48px resolution: 1:1 pixel art on 48x48 grid (3x4 tiles)
+PASS palette: 31 opaque colours (limit 32)
+PASS size: 144x192: a multiple of 48 both ways; 3x4 frames of 48x48 (RMMZ $ sheet, 3x4 frames)
+FAIL sidecar: !$UF_Kitchen_Pantry.json: frameWidth undefined is not a positive integer; frameHeight undefined is not a positive integer; anchor undefined is not [x, y] of two integers; facings undefined is not a non-empty array; animations.frameMs 200 is not a non-empty array of integers
+SKIP lean: only for character sheets (this is an object sheet)
+SKIP margin: only for character sheets (this is an object sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Kitchen_Pantry.png: 144x192, object, 3x4 frames of 48x48, sidecar !$UF_Kitchen_Pantry.json, 31 colours; 4/5 checks pass; failed: sidecar; 2 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Icon Art Check FAIL on kitchen_pantry (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\kitchen_pantry_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\kitchen_pantry_icon.png (0x0, unreadable)
+FAIL read: file not found
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\kitchen_pantry_icon.png: 0x0, unreadable; 0/1 checks pass; failed: read
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on kitchen_pantry (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Kitchen_Pantry.png):
+
+Sheet Art Check FAIL on kitchen_hearth (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Kitchen_Hearth.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Kitchen_Hearth.png (144x192, object, 3x4 frames of 48x48, sidecar !$UF_Kitchen_Hearth.json)
+PASS alpha: every pixel is alpha 0 or 255 (27648 px: 20976 opaque, 6672 transparent)
+PASS grid: native 48px resolution: 1:1 pixel art on 48x48 grid (3x4 tiles)
+PASS palette: 31 opaque colours (limit 32)
+PASS size: 144x192: a multiple of 48 both ways; 3x4 frames of 48x48 (RMMZ $ sheet, 3x4 frames)
+FAIL sidecar: !$UF_Kitchen_Hearth.json: frameWidth undefined is not a positive integer; frameHeight undefined is not a positive integer; anchor undefined is not [x, y] of two integers; facings undefined is not a non-empty array; animations.frameMs 130 is not a non-empty array of integers
+SKIP lean: only for character sheets (this is an object sheet)
+SKIP margin: only for character sheets (this is an object sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Kitchen_Hearth.png: 144x192, object, 3x4 frames of 48x48, sidecar !$UF_Kitchen_Hearth.json, 31 colours; 4/5 checks pass; failed: sidecar; 2 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Icon Art Check FAIL on kitchen_hearth (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\kitchen_hearth_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\kitchen_hearth_icon.png (0x0, unreadable)
+FAIL read: file not found
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\kitchen_hearth_icon.png: 0x0, unreadable; 0/1 checks pass; failed: read
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on kitchen_hearth (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Kitchen_Hearth.png):
+
+Sheet Art Check FAIL on shop_counter (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Shop_Counter.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Shop_Counter.png (144x192, object, 3x4 frames of 48x48, sidecar !$UF_Shop_Counter.json)
+PASS alpha: every pixel is alpha 0 or 255 (27648 px: 9960 opaque, 17688 transparent)
+PASS grid: native 48px resolution: 1:1 pixel art on 48x48 grid (3x4 tiles)
+PASS palette: 30 opaque colours (limit 32)
+PASS size: 144x192: a multiple of 48 both ways; 3x4 frames of 48x48 (RMMZ $ sheet, 3x4 frames)
+FAIL sidecar: !$UF_Shop_Counter.json: frameWidth undefined is not a positive integer; frameHeight undefined is not a positive integer; anchor undefined is not [x, y] of two integers; facings undefined is not a non-empty array; animations.frameMs 200 is not a non-empty array of integers
+SKIP lean: only for character sheets (this is an object sheet)
+SKIP margin: only for character sheets (this is an object sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Shop_Counter.png: 144x192, object, 3x4 frames of 48x48, sidecar !$UF_Shop_Counter.json, 30 colours; 4/5 checks pass; failed: sidecar; 2 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Icon Art Check FAIL on shop_counter (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\shop_counter_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\shop_counter_icon.png (0x0, unreadable)
+FAIL read: file not found
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\shop_counter_icon.png: 0x0, unreadable; 0/1 checks pass; failed: read
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on shop_counter (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Shop_Counter.png):
+
+Sheet Art Check FAIL on apothecary_bench (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Apothecary_Bench.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Apothecary_Bench.png (144x192, object, 3x4 frames of 48x48, sidecar !$UF_Apothecary_Bench.json)
+PASS alpha: every pixel is alpha 0 or 255 (27648 px: 10416 opaque, 17232 transparent)
+PASS grid: native 48px resolution: 1:1 pixel art on 48x48 grid (3x4 tiles)
+PASS palette: 30 opaque colours (limit 32)
+PASS size: 144x192: a multiple of 48 both ways; 3x4 frames of 48x48 (RMMZ $ sheet, 3x4 frames)
+FAIL sidecar: !$UF_Apothecary_Bench.json: frameWidth undefined is not a positive integer; frameHeight undefined is not a positive integer; anchor undefined is not [x, y] of two integers; facings undefined is not a non-empty array; animations.frameMs 200 is not a non-empty array of integers
+SKIP lean: only for character sheets (this is an object sheet)
+SKIP margin: only for character sheets (this is an object sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Apothecary_Bench.png: 144x192, object, 3x4 frames of 48x48, sidecar !$UF_Apothecary_Bench.json, 30 colours; 4/5 checks pass; failed: sidecar; 2 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Icon Art Check FAIL on apothecary_bench (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\apothecary_bench_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\apothecary_bench_icon.png (0x0, unreadable)
+FAIL read: file not found
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\apothecary_bench_icon.png: 0x0, unreadable; 0/1 checks pass; failed: read
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on apothecary_bench (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Apothecary_Bench.png):
+
+Sheet Art Check FAIL on skeleton (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Skeleton.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Skeleton.png (144x192, object, 3x4 frames of 48x48, sidecar !$UF_Skeleton.json)
+PASS alpha: every pixel is alpha 0 or 255 (27648 px: 4932 opaque, 22716 transparent)
+PASS grid: native 48px resolution: 1:1 pixel art on 48x48 grid (3x4 tiles)
+PASS palette: 31 opaque colours (limit 32)
+PASS size: 144x192: a multiple of 48 both ways; 3x4 frames of 48x48 (sidecar)
+FAIL sidecar: !$UF_Skeleton.json: facings undefined is not a non-empty array; animations is not a non-empty object
+SKIP lean: only for character sheets (this is an object sheet)
+SKIP margin: only for character sheets (this is an object sheet)
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Skeleton.png: 144x192, object, 3x4 frames of 48x48, sidecar !$UF_Skeleton.json, 31 colours; 4/5 checks pass; failed: sidecar; 2 skipped
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Icon Art Check FAIL on skeleton (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\skeleton_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\skeleton_icon.png (0x0, unreadable)
+FAIL read: file not found
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\skeleton_icon.png: 0x0, unreadable; 0/1 checks pass; failed: read
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on skeleton (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Skeleton.png):
+
+Icon Art Check FAIL on clay_deposit (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\clay_deposit_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\clay_deposit_icon.png (0x0, unreadable)
+FAIL read: file not found
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\clay_deposit_icon.png: 0x0, unreadable; 0/1 checks pass; failed: read
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on clay_deposit (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Gravel.png):
+
+Icon Art Check FAIL on sand_deposit (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\sand_deposit_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\sand_deposit_icon.png (0x0, unreadable)
+FAIL read: file not found
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\sand_deposit_icon.png: 0x0, unreadable; 0/1 checks pass; failed: read
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on sand_deposit (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Gravel.png):
+
+Icon Art Check FAIL on pottery_kiln (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\pottery_kiln_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\pottery_kiln_icon.png (0x0, unreadable)
+FAIL read: file not found
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\pottery_kiln_icon.png: 0x0, unreadable; 0/1 checks pass; failed: read
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on pottery_kiln (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Furnace.png):
+
+Icon Art Check FAIL on mason_bench (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\mason_bench_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\mason_bench_icon.png (0x0, unreadable)
+FAIL read: file not found
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\mason_bench_icon.png: 0x0, unreadable; 0/1 checks pass; failed: read
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on mason_bench (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$UF_Workbench.png):
+
+Icon Art Check FAIL on wall_timber_frame (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\wall_timber_frame_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\wall_timber_frame_icon.png (0x0, unreadable)
+FAIL read: file not found
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\wall_timber_frame_icon.png: 0x0, unreadable; 0/1 checks pass; failed: read
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on wall_timber_frame (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$WallWood_Set.png):
+
+Icon Art Check FAIL on wall_brick (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\wall_brick_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\wall_brick_icon.png (0x0, unreadable)
+FAIL read: file not found
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\wall_brick_icon.png: 0x0, unreadable; 0/1 checks pass; failed: read
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on wall_brick (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$WallStone_Set.png):
+
+Icon Art Check FAIL on wall_ashlar (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\wall_ashlar_icon.png):
+== C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\wall_ashlar_icon.png (0x0, unreadable)
+FAIL read: file not found
+FILE FAIL C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\art\masters\wall_ashlar_icon.png: 0x0, unreadable; 0/1 checks pass; failed: read
+RESULT FAIL 0/1 files without a FAIL (art_check)
+
+Originality Check FAIL on wall_ashlar (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\game\img\characters\!$WallStone_Set.png):

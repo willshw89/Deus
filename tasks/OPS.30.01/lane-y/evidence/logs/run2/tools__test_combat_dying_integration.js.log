@@ -1,0 +1,65 @@
+# tools/test_combat_dying_integration.js  category=PASS  exit=0  ms=100  decided by exit_0 (-)
+== stdout ==
+=== DEUS Combat, Dying, Exhaustion & Food Integration Checks (Mutant: none) ===
+
+[Test 1] 0 HP Enters Dying System
+PASS founder_unconscious_at_zero - founder HP=0, dead=undefined, killed=false
+PASS founder_entered_dying_state - dying record: {"successes":0,"failures":0,"stable":false,"since":0,"nextRoundAt":360,"wakeAt":null}
+PASS combat_downed_event_emitted - combat:downed event was emitted for founder
+PASS unconscious_cannot_attack - unconscious founder at 0 HP cannot resolve an attack
+PASS gcd_blocks_action - hostileAttacker is on 6-second GCD and cannot attack again before GCD expires
+
+[Test 2] Damage at 0 HP & Death Save Failures
+PASS attack_on_unconscious_has_advantage - advantage=true
+PASS adjacent_hit_on_unconscious_is_crit - critical=true
+PASS crit_at_zero_adds_two_failures - failures=2 (expected 2)
+PASS third_failure_causes_death - founder dead=true
+
+[Test 3] Massive Damage Instant Death
+PASS massive_damage_instant_death - killed=true, dead=true
+
+[Test 4] Non-Colonist Instant Death at 0 HP
+PASS non_colonist_dies_instantly_at_zero - wolf killed=true, dead=true
+
+[Test 5] Combat.heal Restores Consciousness
+PASS founder3_downed - founder3 hp=0, dying=true
+PASS heal_restores_hp - healed=5, hp=5
+PASS heal_clears_dying_state - dying=undefined
+
+[Test 6] Skill Proficiencies & Medicine Stabilization
+PASS dnd_class_has_chosen_skills - skills: ["Persuasion","Religion"]
+PASS dnd_class_has_lowercase_proficiencies - proficiencies: ["persuasion","religion"]
+PASS proficient_medicine_check_has_bonus - doctor roll=10 + mod=3 + pb=2 = total=15
+PASS untrained_medicine_check_lacks_bonus - layman roll=10 + mod=3 + pb=0 = total=13
+PASS patient_stabilized - stabilize ok=true, stable=true
+PASS stable_patient_remains_at_zero_hp - patient hp=0
+
+[Test 7] Exhaustion Consumers Ladder
+PASS exhaustion_lvl1_check_disadvantage - lvl 1 disadvantage=true
+PASS exhaustion_lvl2_speed_halved - lvl 2 speed=3 (expected 3)
+PASS exhaustion_lvl3_save_disadvantage - lvl 3 save disadvantage=true
+PASS exhaustion_lvl4_hp_max_halved - lvl 4 maxHp=5 (expected 5)
+PASS exhaustion_recovery_restores_max_hp - restored maxHp=10 (expected 10)
+PASS exhaustion_lvl5_speed_zero - lvl 5 speed=0
+PASS exhaustion_lvl5_sendUnit_refused - sendUnit refused=true
+
+[Test 8] Save / Restart Persistence
+PASS save_dying_progress_preserved - u101 dying failures=1, successes=1
+PASS save_stable_state_preserved - u102 stable=true, hp=0
+PASS save_exhaustion_and_needs_preserved - u103 exhaustion=3, foodLb=0.5
+
+Results: 30 passed, 0 failed
+All integration checks PASSED (100%).
+== stderr ==
+UF_Colonists: the player's faction has no home site; no colonists made
+UF_Colonists: the player's faction has no home site; no colonists made
+UF_Colonists: the player's faction has no home site; no colonists made
+UF_Colonists: the player's faction has no home site; no colonists made
+UF_Colonists: the player's faction has no home site; no colonists made
+UF_Colonists: the player's faction has no home site; no colonists made
+UF_Colonists: the player's faction has no home site; no colonists made
+UF_Colonists: the player's faction has no home site; no colonists made
+UF_Colonists: the player's faction has no home site; no colonists made
+UF_Colonists: the player's faction has no home site; no colonists made
+UF_Colonists: the player's faction has no home site; no colonists made
+UF_Colonists: the player's faction has no home site; no colonists made

@@ -1,0 +1,84 @@
+# tools/test_z_flora.js  category=FAIL_API_DRIFT  exit=1  ms=61  decided by api_drift (stderr)
+== stdout ==
+RESULT: 0 passed, 7 failed
+== stderr ==
+FAIL z_flora.depth_specific_natural_and_kit: TypeError: generators.get(...) is not a function
+    at Object.build (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:47:51)
+    at assertFlora (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:53:19)
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:63:21
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:10:11)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:60:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+FAIL z_flora.starter_resource_coverage: TypeError: Cannot read properties of undefined (reading 'undergroundKitConfig')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:84:23
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:10:11)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:81:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL z_flora.finite_mineral_baseline_preserved: TypeError: generators.get(...) is not a function
+    at Object.build (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:47:51)
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:94:23
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:10:11)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:90:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+FAIL z_flora.determinism_view_and_seed: TypeError: generators.get(...) is not a function
+    at Object.build (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:47:51)
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:106:51
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:10:11)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:105:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+FAIL z_flora.regrowth_yields_and_saved_levels: TypeError: Cannot read properties of undefined (reading 'undergroundKitConfig')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:113:50
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:10:11)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:110:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL z_flora.missing_or_surface_config_refused: AssertionError [ERR_ASSERTION]: The input did not match the regular expression /Missing underground flora/. Input:
+
+'TypeError: generators.get(...) is not a function'
+
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:138:12
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:10:11)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:135:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL z_flora.surface_kit_mutation_is_detected: AssertionError [ERR_ASSERTION]: mutation target disappeared
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:144:12
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:10:11)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_z_flora.js:142:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47

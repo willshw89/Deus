@@ -1,0 +1,20 @@
+# tools/test_z_ownership.js  category=FAIL_API_DRIFT  exit=1  ms=51  decided by api_drift (stderr)
+== stdout ==
+RESULT: 0 passed, 16 failed
+== stderr ==
+FAIL ownership_z.legacy_ground_key: Cannot read properties of undefined (reading 'keyOf')
+FAIL ownership_z.legacy_explicit_zero: Cannot read properties of undefined (reading 'keyOf')
+FAIL ownership_z.legacy_bed_shape: Cannot read properties of undefined (reading 'assignBed')
+FAIL ownership_z.legacy_nonzero_refused: Cannot read properties of undefined (reading 'claim')
+FAIL ownership_z.legacy_save_roundtrip: Cannot read properties of undefined (reading 'reconcile')
+FAIL ownership_z.keys_separate_levels: Cannot read properties of undefined (reading 'keyOf')
+FAIL ownership_z.record_z_wins: Cannot read properties of undefined (reading 'keyOf')
+FAIL ownership_z.invalid_levels_refused: Cannot read properties of undefined (reading 'claim')
+FAIL ownership_z.reconcile_each_level: Cannot read properties of undefined (reading 'reconcile')
+FAIL ownership_z.sleep_preserves_target_z: Cannot read properties of undefined (reading 'scheduleSleep')
+FAIL ownership_z.cross_level_sleep_refused: Cannot read properties of undefined (reading 'scheduleSleep')
+FAIL ownership_z.view_owner_uses_level: Cannot read properties of undefined (reading '_decorateLines')
+FAIL ownership_z.seam_save_roundtrip: Cannot read properties of undefined (reading 'reconcile')
+FAIL ownership_z.lower_destruction_isolated: Cannot read properties of undefined (reading 'ownerOf')
+FAIL ownership_z.unit_added_uses_record_z: Cannot read properties of undefined (reading 'bedOf')
+FAIL ownership_z.all_five_levels_simulate_offscreen: Cannot read properties of undefined (reading 'reconcile')

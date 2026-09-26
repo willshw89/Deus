@@ -1,0 +1,5 @@
+# tools/test_resize_face.js  category=PASS  exit=0  ms=375  decided by exit_0 (-)
+== stdout ==
+Saved 144x144 test crops
+== stderr ==
+

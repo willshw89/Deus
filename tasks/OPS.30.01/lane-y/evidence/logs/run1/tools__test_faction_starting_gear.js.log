@@ -1,0 +1,32 @@
+# tools/test_faction_starting_gear.js  category=FAIL_MISSING_REFERENCE  exit=1  ms=68  decided by missing_plugin (stderr)
+== stdout ==
+PASS starting_gear.clothes_type_defined - common_clothes defined: weight=3
+PASS starting_gear.pouch_type_defined - pouch defined: weight=1
+PASS starting_gear.gold_coin_type_defined - gold_coin defined: weight=0.02
+PASS starting_gear.alias_gp - I.type('gp') resolves to gold_coin
+PASS starting_gear.alias_clothes - I.type('clothes') resolves to common_clothes
+PASS starting_gear.alias_clothes_common - I.type('clothes_common') resolves to common_clothes
+PASS starting_gear.test_unit_has_clothes_equipped - Clothes equipped: slot clothes=1, torso=1
+PASS starting_gear.test_unit_has_pouch - Pouch in inventory: yes (id=2)
+PASS starting_gear.test_unit_has_15_gp - Gold coins in inventory: count=15 (expected 15)
+PASS starting_gear.coins_inside_pouch - Coins contained in pouch: coins.container=2, pouch.contents=[3]
+PASS starting_gear.carried_weight_exact_4_3_lbs - Carried weight: 4.3 lbs (expected 3.0 clothes + 1.0 pouch + 0.3 gp = 4.3 lbs)
+PASS starting_gear.wild_creature_no_kit - Wild creature has 0 items and no starting kit: inv length=0
+Generating history and verifying 72 founders across 9 factions...
+== stderr ==
+DEUS_History.js:384
+        if (!D || !Callings || !Dnd) throw new Error("History: HistoricalDemographics, Callings and Dnd5e must be loaded before New Game");
+                                     ^
+
+Error: History: HistoricalDemographics, Callings and Dnd5e must be loaded before New Game
+    at History.generate (DEUS_History.js:384:44)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census1\tools\test_faction_starting_gear.js:250:3)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.19.0

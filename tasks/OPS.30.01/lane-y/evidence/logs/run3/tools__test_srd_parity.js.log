@@ -1,0 +1,107 @@
+# tools/test_srd_parity.js  category=PASS  exit=0  ms=60  decided by exit_0 (-)
+== stdout ==
+--- Running SRD 5.1 Parity Proof Suite (Mutant: false) ---
+PASS: Data file exists: abilities.json
+PASS: Data file exists: skills.json
+PASS: Data file exists: tools.json
+PASS: Data file exists: weapons.json
+PASS: Data file exists: weapon_properties.json
+PASS: Data file exists: armor.json
+PASS: Data file exists: damage_types.json
+PASS: Data file exists: conditions.json
+PASS: Data file exists: combat_actions.json
+PASS: Data file exists: spells.json
+PASS: Data file exists: rules_reference.json
+PASS: Data file exists: classes_reference.json
+PASS: Data file exists: species_reference.json
+PASS: Data file exists: monsters_reference.json
+PASS: Data file exists: magic_items_reference.json
+PASS: abilities.json has valid sourceDocument: SRD 5.1
+PASS: abilities.json has valid license: CC-BY-4.0
+PASS: abilities.json has required CC-BY-4.0 attribution notice
+PASS: skills.json has valid sourceDocument: SRD 5.1
+PASS: skills.json has valid license: CC-BY-4.0
+PASS: skills.json has required CC-BY-4.0 attribution notice
+PASS: tools.json has valid sourceDocument: SRD 5.1
+PASS: tools.json has valid license: CC-BY-4.0
+PASS: tools.json has required CC-BY-4.0 attribution notice
+PASS: weapons.json has valid sourceDocument: SRD 5.1
+PASS: weapons.json has valid license: CC-BY-4.0
+PASS: weapons.json has required CC-BY-4.0 attribution notice
+PASS: weapon_properties.json has valid sourceDocument: SRD 5.1
+PASS: weapon_properties.json has valid license: CC-BY-4.0
+PASS: weapon_properties.json has required CC-BY-4.0 attribution notice
+PASS: armor.json has valid sourceDocument: SRD 5.1
+PASS: armor.json has valid license: CC-BY-4.0
+PASS: armor.json has required CC-BY-4.0 attribution notice
+PASS: damage_types.json has valid sourceDocument: SRD 5.1
+PASS: damage_types.json has valid license: CC-BY-4.0
+PASS: damage_types.json has required CC-BY-4.0 attribution notice
+PASS: conditions.json has valid sourceDocument: SRD 5.1
+PASS: conditions.json has valid license: CC-BY-4.0
+PASS: conditions.json has required CC-BY-4.0 attribution notice
+PASS: combat_actions.json has valid sourceDocument: SRD 5.1
+PASS: combat_actions.json has valid license: CC-BY-4.0
+PASS: combat_actions.json has required CC-BY-4.0 attribution notice
+PASS: spells.json has valid sourceDocument: SRD 5.1
+PASS: spells.json has valid license: CC-BY-4.0
+PASS: spells.json has required CC-BY-4.0 attribution notice
+PASS: rules_reference.json has valid sourceDocument: SRD 5.1
+PASS: rules_reference.json has valid license: CC-BY-4.0
+PASS: rules_reference.json has required CC-BY-4.0 attribution notice
+PASS: classes_reference.json has valid sourceDocument: SRD 5.1
+PASS: classes_reference.json has valid license: CC-BY-4.0
+PASS: classes_reference.json has required CC-BY-4.0 attribution notice
+PASS: species_reference.json has valid sourceDocument: SRD 5.1
+PASS: species_reference.json has valid license: CC-BY-4.0
+PASS: species_reference.json has required CC-BY-4.0 attribution notice
+PASS: monsters_reference.json has valid sourceDocument: SRD 5.1
+PASS: monsters_reference.json has valid license: CC-BY-4.0
+PASS: monsters_reference.json has required CC-BY-4.0 attribution notice
+PASS: magic_items_reference.json has valid sourceDocument: SRD 5.1
+PASS: magic_items_reference.json has valid license: CC-BY-4.0
+PASS: magic_items_reference.json has required CC-BY-4.0 attribution notice
+PASS: Abilities count is exactly 6 (got 6)
+PASS: Six abilities are STR, DEX, CON, INT, WIS, CHA
+PASS: Ability modifier formula is floor((score - 10) / 2)
+PASS: Standard DC ladder has 6 tiers
+PASS: Skills count is exactly 18 (got 18)
+PASS: All 18 skills have unique IDs
+PASS: Core SRD skills present
+PASS: Tools count is exactly 36 (got 36)
+PASS: Artisan's tools count is exactly 17 (got 17)
+PASS: Damage types count is exactly 13 (got 13)
+PASS: Standard physical & supernatural damage types verified
+PASS: Weapon properties count is exactly 11 (got 11)
+PASS: Standard weapon properties verified
+PASS: Weapons count is exactly 37 (got 37)
+PASS: Simple melee weapons count is 10 (got 10)
+PASS: Simple ranged weapons count is 4 (got 4)
+PASS: Martial melee weapons count is 18 (got 18)
+PASS: Martial ranged weapons count is 5 (got 5)
+PASS: All weapons reference valid damage types and properties
+PASS: Armor & shields count is exactly 13 (got 13)
+PASS: Light armor count is 3 (got 3)
+PASS: Medium armor count is 5 (got 5)
+PASS: Heavy armor count is 4 (got 4)
+PASS: Shield count is 1 (got 1)
+PASS: Conditions count is exactly 15 (got 15)
+PASS: Key conditions present
+PASS: Exhaustion condition has exactly 6 levels
+PASS: Combat actions count is exactly 10 (got 10)
+PASS: Standard combat actions verified
+PASS: Spells count is exactly 319 (got 319)
+PASS: All 319 spells have unique slug IDs
+PASS: All 319 spells have valid level (0-9), valid school, concentration boolean, and duration domain
+PASS: Classes count is exactly 12 (got 12)
+PASS: Base species count is exactly 9 (got 9)
+PASS: Monsters/creatures count is exactly 313 (got 313)
+PASS: Magic items count is exactly 243 (got 243)
+PASS: Spatial invariant gridCellFeetXY is 5
+PASS: Spatial invariant stepFeetZ is 5
+PASS: Combat policy is same_z_only
+PASS: Action seconds per round is 6
+Results: 100 passed, 0 failed
+SRD Parity Proof Suite PASSED (100%).
+== stderr ==
+

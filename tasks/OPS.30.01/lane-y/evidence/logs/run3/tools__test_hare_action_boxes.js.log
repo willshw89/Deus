@@ -1,0 +1,58 @@
+# tools/test_hare_action_boxes.js  category=PASS  exit=0  ms=167  decided by exit_0 (-)
+== stdout ==
+
+=== pro_hare_eat.png (1408x768) ===
+Row 0: 3 clusters:
+  C0: [440..543] (104px wide), Y [30..191] (162px tall)
+  C1: [663..744] (82px wide), Y [30..191] (162px tall)
+  C2: [869..966] (98px wide), Y [30..191] (162px tall)
+Row 1: 3 clusters:
+  C0: [388..572] (185px wide), Y [192..362] (171px tall)
+  C1: [628..772] (145px wide), Y [192..368] (177px tall)
+  C2: [845..1030] (186px wide), Y [192..362] (171px tall)
+Row 2: 3 clusters:
+  C0: [388..573] (186px wide), Y [411..575] (165px tall)
+  C1: [635..779] (145px wide), Y [388..575] (188px tall)
+  C2: [846..1013] (168px wide), Y [400..575] (176px tall)
+Row 3: 3 clusters:
+  C0: [406..574] (169px wide), Y [576..725] (150px tall)
+  C1: [652..755] (104px wide), Y [576..731] (156px tall)
+  C2: [833..1001] (169px wide), Y [576..725] (150px tall)
+
+=== pro_hare_attack.png (1408x768) ===
+Row 0: 3 clusters:
+  C0: [440..520] (81px wide), Y [36..191] (156px tall)
+  C1: [664..743] (80px wide), Y [36..191] (156px tall)
+  C2: [857..983] (127px wide), Y [36..191] (156px tall)
+Row 1: 3 clusters:
+  C0: [388..585] (198px wide), Y [192..368] (177px tall)
+  C1: [617..772] (156px wide), Y [192..368] (177px tall)
+  C2: [857..1001] (145px wide), Y [192..368] (177px tall)
+Row 2: 3 clusters:
+  C0: [364..561] (198px wide), Y [394..575] (182px tall)
+  C1: [634..790] (157px wide), Y [388..575] (188px tall)
+  C2: [846..1025] (180px wide), Y [394..575] (182px tall)
+Row 3: 3 clusters:
+  C0: [423..556] (134px wide), Y [576..731] (156px tall)
+  C1: [652..755] (104px wide), Y [576..731] (156px tall)
+  C2: [857..1013] (157px wide), Y [576..731] (156px tall)
+
+=== pro_hare_sleep.png (1408x768) ===
+Row 0: 3 clusters:
+  C0: [394..555] (162px wide), Y [59..180] (122px tall)
+  C1: [640..767] (128px wide), Y [54..180] (127px tall)
+  C2: [852..1013] (162px wide), Y [59..180] (122px tall)
+Row 1: 3 clusters:
+  C0: [388..567] (180px wide), Y [235..350] (116px tall)
+  C1: [623..790] (168px wide), Y [235..356] (122px tall)
+  C2: [840..1019] (180px wide), Y [235..350] (116px tall)
+Row 2: 3 clusters:
+  C0: [388..561] (174px wide), Y [411..532] (122px tall)
+  C1: [622..790] (169px wide), Y [411..538] (128px tall)
+  C2: [846..1019] (174px wide), Y [411..532] (122px tall)
+Row 3: 3 clusters:
+  C0: [411..538] (128px wide), Y [599..720] (122px tall)
+  C1: [640..767] (128px wide), Y [599..720] (122px tall)
+  C2: [869..996] (128px wide), Y [599..720] (122px tall)
+== stderr ==
+

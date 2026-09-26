@@ -1,0 +1,19 @@
+# tools/test_z_doors.js  category=FAIL_API_DRIFT  exit=1  ms=62  decided by api_drift (stderr)
+== stdout ==
+PASS z_doors.cellfree_forwards_z
+RESULT: 1 passed, 8 failed
+== stderr ==
+FAIL z_doors.legacy_refuses_level_aliasing: Cannot read properties of undefined (reading 'at')
+FAIL z_doors.invalid_levels_fail_closed: Cannot read properties of undefined (reading 'cellKey')
+FAIL z_doors.keys_and_save_roundtrip: Cannot read properties of undefined (reading 'at')
+FAIL z_doors.occupancy_and_offscreen_tiles: The expression evaluated to a falsy value:
+
+  assert(f.calls.some(c => c[0] === "peek" && c[1] === -1))
+
+FAIL z_doors.movement_respects_view_and_terrain: Expected values to be strictly equal:
+
+false !== true
+
+FAIL z_doors.events_damage_and_sprites_isolate_levels: Cannot read properties of undefined (reading 'toggleHeld')
+FAIL z_doors.pending_placement_preserves_level: Cannot read properties of undefined (reading 'store')
+FAIL z_doors.offscreen_pending_and_timers_continue: Cannot read properties of undefined (reading 'store')

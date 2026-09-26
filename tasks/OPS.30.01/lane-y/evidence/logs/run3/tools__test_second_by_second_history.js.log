@@ -1,0 +1,163 @@
+# tools/test_second_by_second_history.js  category=FAIL_API_DRIFT  exit=1  ms=74  decided by api_drift (stderr)
+== stdout ==
+PASS second_by_second.home_requires_communal_living_and_bedroom
+
+===========================================
+TOTAL PASSES: 1
+TOTAL FAILS:  14
+===========================================
+== stderr ==
+FAIL second_by_second.universal_year_1_founding: TypeError: Cannot read properties of undefined (reading 'generate')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:342:26
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:73:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:334:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL second_by_second.second_by_second_50_year_simulation: TypeError: Cannot read properties of undefined (reading 'generate')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:364:16
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:73:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:356:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL second_by_second.focal_homesteads_with_indoor_hearth_and_bed: TypeError: Cannot read properties of undefined (reading 'generate')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:393:16
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:73:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:385:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL second_by_second.multi_generational_offspring_adulthood_pairbonding: TypeError: Cannot read properties of undefined (reading 'generate')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:447:16
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:73:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:439:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL second_by_second.chronicle_records_authentic_second_by_second_events: TypeError: Cannot read properties of undefined (reading 'generate')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:473:16
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:73:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:465:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL second_by_second.home_required_before_children_and_room_per_child: TypeError: Cannot read properties of undefined (reading 'generate')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:498:16
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:73:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:490:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL second_by_second.distributed_habitation_no_campfire_huddling: TypeError: Cannot read properties of undefined (reading 'generate')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:565:16
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:73:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:557:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL second_by_second.shared_structure_built_first_for_8_founders: TypeError: Cannot read properties of undefined (reading 'generate')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:597:16
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:73:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:589:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL second_by_second.subsequent_structures_at_least_1_square_separated: TypeError: Cannot read properties of undefined (reading 'generate')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:670:16
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:73:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:662:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL second_by_second.colony_homes_connected_by_road_network: TypeError: Cannot read properties of undefined (reading 'generate')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:700:16
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:73:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:692:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL second_by_second.total_world_iteration_actions_and_skills: TypeError: Cannot read properties of undefined (reading 'generate')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:730:16
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:73:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:722:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL second_by_second.total_world_iteration_combat_damage_and_wounds: TypeError: Cannot read properties of undefined (reading 'generate')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:764:16
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:73:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:756:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL second_by_second.roofed_spaces_and_upper_z_deck_walkable_surface: TypeError: Cannot read properties of undefined (reading 'generate')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:796:16
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:73:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:788:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+FAIL second_by_second.founder_lifecycle_shared_lodge_to_homestead_and_focal_fire: TypeError: Cannot read properties of undefined (reading 'generate')
+    at C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:853:16
+    at check (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:73:9)
+    at Object.<anonymous> (C:\Users\snewt\AppData\Local\Temp\deus-lane-y-census3\tools\test_second_by_second_history.js:845:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47

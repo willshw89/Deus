@@ -1,0 +1,10 @@
+# tools/test_facing_detection.js  category=PASS  exit=0  ms=65  decided by exit_0 (-)
+== stdout ==
+Row 1 Cell 0: RIGHT
+Row 1 Cell 1: RIGHT
+Row 1 Cell 2: RIGHT
+Mirrored Cell 0: LEFT
+Mirrored Cell 1: LEFT
+Mirrored Cell 2: LEFT
+== stderr ==
+
