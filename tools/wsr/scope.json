@@ -1,0 +1,67 @@
+{
+  "schema": "deus-wsr-scope/1",
+  "about": "WG.33.01 scope parameters for tools/verify_world_state_registry.js (written 2026-09-26, Lane X). The World-State Registry (docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md) covers natural-world systems only, so WSR-04 ('every atlas slot traces to a stateId') is applied to NATURAL_WORLD classes, and a NON_WORLD_STATE class must name the declared source class that accounts for it (tasks/WG.33.01/lane-x/BRIEF.md, WSR-04). Classes are <catalogue family>:<catalogue category> of art/catalogue/catalogue.json; a slot of an undeclared class is a WSR-04 violation, so a new class cannot slip through. Changing a scope here changes what the gate measures: it needs the Coordinator's agreement and a line in the WG.33.x report.",
+  "artRequiredClasses": ["VISUAL_REQUIRED", "VFX_REQUIRED"],
+  "artRequiredClassesWhy": "Spec WSR-02 names VISUAL_REQUIRED; the WG.33.01 brief adds VFX_REQUIRED (vfx states also need an asset family and a slot). VISUAL_OPTIONAL, AUDIO_REQUIRED and UI_ONLY states are not required to have art; if they name a visual state it still traces slots for WSR-04.",
+  "composedExemptSystems": ["LANDMARKS_HISTORY"],
+  "composedWhy": "Registry rows whose family is '*Compositional Assembly*' and visual state '*None (Composed)*' are landmarks assembled from catalogue pieces (WG.63.02; DEUS_NATURAL_WORLD_SYSTEMS.md section 8 item 4). The brief declares them an exemption class for landmarks only, so the exemption is limited to the LANDMARKS_HISTORY system.",
+  "sourceClasses": {
+    "ADDENDUM_FAMILIES": {
+      "kinds": ["addendum"],
+      "why": "Owner addendum families (TOP, EDGE, SHADE, RAMP, RAMPSIDE, CONNECTOR, DECAY, WALLFACE, RIMSHADOW, HANGING, LIGHT, FRAMECLASS; docs/art/catalogue/SCHEMA.md section 8). The brief lists addendum families as a declared non-world-state source class."
+    },
+    "CHARACTERS": {
+      "kinds": ["catalog", "assetIndex", "brief", "ar", "manifest"],
+      "why": "People and body sheets from WorldCatalog people/skins, the SEG-11 briefs and AR rows (brief: characters)."
+    },
+    "CREATURES": {
+      "kinds": ["catalog", "assetIndex", "brief", "ar", "manifest"],
+      "why": "Wildlife and monster sprites from WorldCatalog wildlife.species, briefs and AR rows (brief: creatures). The registry's CREATURE_ECOLOGY rows are density and habitat states, not sprites."
+    },
+    "EFFECTS": {
+      "kinds": ["catalog", "assetIndex", "brief", "ar", "manifest"],
+      "why": "Combat and spell effect sprites (arrow, blood, cast, hit) from the SEG-17 brief and AR rows. Not named in the brief's list; declared here explicitly because none of them displays a natural-world state. Registry VFX states (flame, smoke, steam) have no catalogue entry today and are reported under WSR-03."
+    },
+    "ITEMS": {
+      "kinds": ["catalog", "assetIndex", "brief", "ar", "manifest"],
+      "why": "Item icons and equipment layers from WorldCatalog items.types, the SEG-17 briefs and AR rows (brief: items)."
+    },
+    "PROPS": {
+      "kinds": ["catalog", "assetIndex", "brief", "ar", "manifest"],
+      "why": "Furniture, workshops and built structures from WorldCatalog objects, briefs, AR rows and the asset manifest (brief: props sourced from WorldCatalog/briefs/AR rows). manifest is allowed because 7 structure entries cite only asset-manifest rows."
+    },
+    "UI": {
+      "kinds": ["catalog", "assetIndex", "brief", "ar", "manifest"],
+      "why": "Face/portrait sheets shown in windows, from WorldCatalog faces and AR rows (brief: UI)."
+    }
+  },
+  "classes": {
+    "SOURCE:TERRAIN": { "scope": "NATURAL_WORLD", "why": "Ground autotiles from WorldCatalog groundKinds and undergroundBiomes: the soil, rock, snow, mud and ash surfaces the registry's soil, succession, snow, erosion and wildfire systems change. Built floors (deck, floor, road) are in this class too and are kept in scope rather than exempted." },
+    "SOURCE:WATER": { "scope": "NATURAL_WORLD", "why": "Water surfaces (hydrology systems)." },
+    "SOURCE:TREE": { "scope": "NATURAL_WORLD", "why": "Trees, stumps and dead trees (succession and wildfire systems)." },
+    "SOURCE:FLORA": { "scope": "NATURAL_WORLD", "why": "Wild plants, moss and fungi (succession system)." },
+    "SOURCE:STONE": { "scope": "NATURAL_WORLD", "why": "Boulders, outcrops, crystals and deposits (geology and erosion systems)." },
+    "SOURCE:VEIN": { "scope": "NATURAL_WORLD", "why": "Ore vein overlays (geology system: STATE_GEOL_ORE_VEIN_EXPOSED)." },
+    "SOURCE:REMAINS": { "scope": "NATURAL_WORLD", "why": "Rubble and bones left in the world (reclamation system: STATE_RECL_RUBBLE_MOSS; creature ecology). Kept in scope rather than exempted as props." },
+    "SOURCE:CHARACTER": { "scope": "NON_WORLD_STATE", "sourceClass": "CHARACTERS", "why": "People sprites." },
+    "SOURCE:CREATURE": { "scope": "NON_WORLD_STATE", "sourceClass": "CREATURES", "why": "Creature sprites." },
+    "SOURCE:EQUIPMENT": { "scope": "NON_WORLD_STATE", "sourceClass": "ITEMS", "why": "Paper-doll equipment layers of items." },
+    "SOURCE:ITEM": { "scope": "NON_WORLD_STATE", "sourceClass": "ITEMS", "why": "Item icons." },
+    "SOURCE:FACE": { "scope": "NON_WORLD_STATE", "sourceClass": "UI", "why": "Faces shown in windows." },
+    "SOURCE:EFFECT": { "scope": "NON_WORLD_STATE", "sourceClass": "EFFECTS", "why": "Combat effect sprites." },
+    "SOURCE:FURNITURE": { "scope": "NON_WORLD_STATE", "sourceClass": "PROPS", "why": "Furniture props." },
+    "SOURCE:WORKSHOP": { "scope": "NON_WORLD_STATE", "sourceClass": "PROPS", "why": "Workshop props." },
+    "SOURCE:STRUCTURE": { "scope": "NON_WORLD_STATE", "sourceClass": "PROPS", "why": "Built walls, doors, bridges, wells, farm plots, stockpiles and campfires." },
+    "TOP:TOP": { "scope": "NON_WORLD_STATE", "sourceClass": "ADDENDUM_FAMILIES", "why": "Addendum TOP family (per-terrain top tiles). Brief: addendum families are declared." },
+    "EDGE:EDGE": { "scope": "NON_WORLD_STATE", "sourceClass": "ADDENDUM_FAMILIES", "why": "Addendum EDGE family (per-terrain edge strips)." },
+    "RAMP:RAMP": { "scope": "NON_WORLD_STATE", "sourceClass": "ADDENDUM_FAMILIES", "why": "Addendum RAMP family." },
+    "RAMPSIDE:RAMPSIDE": { "scope": "NON_WORLD_STATE", "sourceClass": "ADDENDUM_FAMILIES", "why": "Addendum RAMPSIDE family." },
+    "SHADE:SHADE": { "scope": "NON_WORLD_STATE", "sourceClass": "ADDENDUM_FAMILIES", "why": "Addendum height-shading overlays (a depth cue, not a world state)." },
+    "RIMSHADOW:RIMSHADOW": { "scope": "NON_WORLD_STATE", "sourceClass": "ADDENDUM_FAMILIES", "why": "Addendum rim shadows (a depth cue, not a world state)." },
+    "WALLFACE:WALLFACE": { "scope": "NON_WORLD_STATE", "sourceClass": "ADDENDUM_FAMILIES", "why": "Addendum opening wall faces (a depth cue, not a world state)." },
+    "CONNECTOR:CONNECTOR": { "scope": "NON_WORLD_STATE", "sourceClass": "ADDENDUM_FAMILIES", "why": "Addendum stairs, ramps and ladders (construction pieces)." },
+    "DECAY:DECAY": { "scope": "NON_WORLD_STATE", "sourceClass": "ADDENDUM_FAMILIES", "why": "Addendum decay overlays. They depict reclamation stages (registry CIVILIZATION_RECLAMATION states), but the brief declares addendum families; whether they move into NATURAL_WORLD scope is a Coordinator question in tasks/WG.33.01/lane-x/REPORT.md." },
+    "HANGING:HANGING": { "scope": "NON_WORLD_STATE", "sourceClass": "ADDENDUM_FAMILIES", "why": "Addendum hanging props (roots, vines, stalactites, waterfall, dust, light shaft). Natural features with no registry state; same Coordinator question as DECAY." },
+    "FRAMECLASS:CREATURE": { "scope": "NON_WORLD_STATE", "sourceClass": "ADDENDUM_FAMILIES", "why": "Addendum generic creature frame slots per band." }
+  }
+}

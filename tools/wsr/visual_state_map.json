@@ -1,0 +1,19 @@
+{
+  "schema": "deus-wsr-map/1",
+  "about": "WG.33.01 explicit visualStateId -> catalogue mapping for tools/verify_world_state_registry.js (Lane X, 2026-09-26). Only ACCEPTED rows resolve a registry visual state (WSR-03) and trace catalogue slots (WSR-04). PROPOSED rows are candidates shown next to the gap in the report and change nothing. Every row below is PROPOSED by Lane X on a literal basis only (the visual state and the catalogue source share a word); none is a ruling. Accepting a row (status ACCEPTED) is a Coordinator/Owner decision; the stale-baseline check then forces the matching known_gaps.json entries out. A target is {\"entryId\": <catalogue entry id>} or {\"sourceId\": <a source id cited in entries[].sourceIds>} (every entry citing it).",
+  "visualStates": [
+    { "visualStateId": "cave_pool", "target": { "entryId": "ALL_SHARED_WATER_POOL-UNDERGROUND_A1_DEFAULT" }, "status": "PROPOSED", "reason": "Literal basis: registry 'Negative-Z floor + standing fluid' vs the catalogue's underground pool water tile." },
+    { "visualStateId": "floodplain_mud", "target": { "sourceId": "groundKinds:mud" }, "status": "PROPOSED", "reason": "Literal basis: shares 'mud' with the WorldCatalog ground kind mud (its TERRAIN, TOP, EDGE, RAMP and RAMPSIDE pieces)." },
+    { "visualStateId": "gravel_scree", "target": { "sourceId": "groundKinds:scree" }, "status": "PROPOSED", "reason": "Literal basis: shares 'scree' with the WorldCatalog ground kind scree." },
+    { "visualStateId": "ground_ash_soot", "target": { "sourceId": "groundKinds:ash" }, "status": "PROPOSED", "reason": "Literal basis: shares 'ash' with the WorldCatalog ground kind ash." },
+    { "visualStateId": "ore_vein_exposed", "target": { "entryId": "ALL_SHARED_VEIN_VEIN-COPPER_OVERLAY_DEFAULT" }, "status": "PROPOSED", "reason": "Literal basis: shares 'vein' with the catalogue VEIN overlays (copper)." },
+    { "visualStateId": "ore_vein_exposed", "target": { "entryId": "ALL_SHARED_VEIN_VEIN-GEMS_OVERLAY_DEFAULT" }, "status": "PROPOSED", "reason": "Literal basis: shares 'vein' with the catalogue VEIN overlays (gems)." },
+    { "visualStateId": "ore_vein_exposed", "target": { "entryId": "ALL_SHARED_VEIN_VEIN-GOLD_OVERLAY_DEFAULT" }, "status": "PROPOSED", "reason": "Literal basis: shares 'vein' with the catalogue VEIN overlays (gold)." },
+    { "visualStateId": "ore_vein_exposed", "target": { "entryId": "ALL_SHARED_VEIN_VEIN-IRON_OVERLAY_DEFAULT" }, "status": "PROPOSED", "reason": "Literal basis: shares 'vein' with the catalogue VEIN overlays (iron)." },
+    { "visualStateId": "rubble_mossy", "target": { "sourceId": "objects:rubble" }, "status": "PROPOSED", "reason": "Literal basis: shares 'rubble' with the WorldCatalog object rubble (REMAINS)." },
+    { "visualStateId": "snow_deep_stratum", "target": { "sourceId": "groundKinds:snow" }, "status": "PROPOSED", "reason": "Literal basis: shares 'snow' with the WorldCatalog ground kind snow. Snow is forbidden by game/data/DEUS_BiomeRegistry.json (catalogue conflicts.md question Q-SNOW)." },
+    { "visualStateId": "soil_saturated_mud", "target": { "sourceId": "groundKinds:mud" }, "status": "PROPOSED", "reason": "Literal basis: shares 'mud' with the WorldCatalog ground kind mud." },
+    { "visualStateId": "water_frozen_ice", "target": { "sourceId": "groundKinds:ice" }, "status": "PROPOSED", "reason": "Literal basis: shares 'ice' with the WorldCatalog ground kind ice. Ice is forbidden by game/data/DEUS_BiomeRegistry.json (catalogue conflicts.md question Q-SNOW)." }
+  ],
+  "assetFamilies": []
+}
