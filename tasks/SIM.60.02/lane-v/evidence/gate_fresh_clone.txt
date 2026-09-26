@@ -1,0 +1,138 @@
+$ git clone (default system config: core.autocrlf=true) <worktree> C:\Users\snewt\AppData\Local\Temp/lanev/clone_080253
+EXIT=0
+$ git checkout --detach 357df39ca5c9f909bec0a65a1cd1ba24dc89b5cc
+EXIT=0
+$ git rev-parse HEAD
+357df39ca5c9f909bec0a65a1cd1ba24dc89b5cc
+EXIT=0
+$ git config --get core.autocrlf
+true
+$ git ls-files --eol docs/schemas/spells tools/spells/validate_spell_effects.js | head
+i/lf    w/crlf  attr/                 	docs/schemas/spells/.gitattributes
+i/lf    w/lf    attr/text eol=lf      	docs/schemas/spells/README.md
+i/lf    w/lf    attr/text eol=lf      	docs/schemas/spells/effects.json
+i/lf    w/lf    attr/text eol=lf      	docs/schemas/spells/primitives.json
+i/lf    w/lf    attr/text eol=lf      	docs/schemas/spells/spell_effect.schema.json
+i/lf    w/lf    attr/text eol=lf      	docs/schemas/spells/srd_baseline.json
+i/lf    w/lf    attr/text eol=lf      	docs/schemas/spells/tuning.json
+i/lf    w/crlf  attr/                 	tools/spells/validate_spell_effects.js
+
+$ node tools/spells/test_spell_effects.js
+PASS clean_data_passes
+PASS fixture_baseline_tampered
+PASS fixture_catalogue_systems_changed
+PASS fixture_catalogue_unmapped
+PASS fixture_coverage_duplicate_record
+PASS fixture_coverage_missing_record
+PASS fixture_coverage_none_record
+PASS fixture_coverage_unknown_spell
+PASS fixture_effect_key_duplicate
+PASS fixture_effect_script_hook
+PASS fixture_finite_family_source
+PASS fixture_ledger_cause_other_spell
+PASS fixture_ledger_class_unknown
+PASS fixture_ledger_downstream_unknown
+PASS fixture_ledger_gap_unlisted
+PASS fixture_ledger_mode_wrong
+PASS fixture_ledger_row_unknown
+PASS fixture_ledger_sink_name_unknown
+PASS fixture_ledger_source_no_cause
+PASS fixture_ore_output_source
+PASS fixture_ore_output_transform
+PASS fixture_owner_open_answered_in_data
+PASS fixture_owner_open_unknown
+PASS fixture_primitive_audit_missing
+PASS fixture_primitive_unknown
+PASS fixture_primitive_wrong_system
+PASS fixture_q1_case_unknown
+PASS fixture_q1_policy_decided
+PASS fixture_record_script_hook
+PASS fixture_schema_keyword_unsupported
+PASS fixture_schema_missing_magical
+PASS fixture_seconds_per_tick_set
+PASS fixture_srd_field_literal
+PASS fixture_srd_number_in_text
+PASS fixture_srd_number_literal
+PASS fixture_srd_quote_ellipsis
+PASS fixture_srd_quote_inexact
+PASS fixture_srdref_other_spell
+PASS fixture_srdref_unresolved
+PASS fixture_srdref_wrong_kind
+PASS fixture_srdref_wrong_unit
+PASS fixture_systems_mismatch
+PASS fixture_tick_count_field
+PASS fixture_tick_text
+PASS fixture_tick_trigger
+PASS fixture_time_domain_wrong
+PASS fixture_tuning_ref_unknown
+PASS fixture_variant_unknown
+PASS fixture_count_at_least_30
+PASS every_rule_has_a_negative_fixture
+PASS cli_fixture_exits_1_with_named_error
+PASS cli_clean_exits_0
+PASS check_rebuild_run1_exit0
+PASS check_rebuild_run2_exit0
+PASS check_rebuild_sha256_equal_twice
+PASS check_rebuild_equals_committed_file
+PASS in_memory_rebuild_equals_committed_file
+PASS mutant_rule_schema_off_killed - by fixture_effect_script_hook
+PASS mutant_rule_coverage_off_killed - by fixture_coverage_duplicate_record
+PASS mutant_rule_systems_off_killed - by fixture_systems_mismatch
+PASS mutant_rule_primitiveKnown_off_killed - by fixture_primitive_unknown
+PASS mutant_rule_primitiveSystem_off_killed - by fixture_primitive_wrong_system
+PASS mutant_rule_primitiveCoverage_off_killed - by fixture_primitive_audit_missing
+PASS mutant_rule_keys_off_killed - by fixture_effect_key_duplicate
+PASS mutant_rule_variants_off_killed - by fixture_variant_unknown
+PASS mutant_rule_srdQuotes_off_killed - by fixture_srd_quote_ellipsis
+PASS mutant_rule_srdRefs_off_killed - by fixture_srdref_other_spell
+PASS mutant_rule_srdNumberCopied_off_killed - by fixture_srd_number_in_text
+PASS mutant_rule_srdFieldLiteral_off_killed - by fixture_srd_field_literal
+PASS mutant_rule_noTickLiterals_off_killed - by fixture_tick_count_field
+PASS mutant_rule_secondsPerTickOpen_off_killed - by fixture_seconds_per_tick_set
+PASS mutant_rule_timeDomain_off_killed - by fixture_time_domain_wrong
+PASS mutant_rule_ledgerCause_off_killed - by fixture_ledger_cause_other_spell
+PASS mutant_rule_ledgerNames_off_killed - by fixture_ledger_downstream_unknown
+PASS mutant_rule_ledgerClasses_off_killed - by fixture_ledger_class_unknown
+PASS mutant_rule_ledgerRows_off_killed - by fixture_ledger_gap_unlisted
+PASS mutant_rule_noOre_off_killed - by fixture_ore_output_source
+PASS mutant_rule_sourceScope_off_killed - by fixture_finite_family_source
+PASS mutant_rule_ledgerMode_off_killed - by fixture_ledger_mode_wrong
+PASS mutant_rule_tuningRefs_off_killed - by fixture_tuning_ref_unknown
+PASS mutant_rule_ownerOpen_off_killed - by fixture_owner_open_answered_in_data
+PASS mutant_rule_catalogue_off_killed - by fixture_catalogue_systems_changed
+PASS mutant_rule_baselineFresh_off_killed - by fixture_baseline_tampered
+PASS mutant_schema_ignores_additionalProperties_killed - by fixture_effect_script_hook
+PASS mutant_schema_ignores_required_killed - by clean_data_passes
+PASS mutant_schema_ignores_const_killed - by clean_data_passes
+PASS mutant_schema_ignores_unknown_keywords_killed - by fixture_schema_keyword_unsupported
+PASS mutant_srd_numbers_skip_text_killed - by fixture_srd_number_in_text
+PASS mutant_srd_numbers_skip_literals_killed - by fixture_srd_number_literal
+PASS mutant_srdref_allows_other_spell_killed - by fixture_srdref_other_spell
+PASS mutant_srdref_ignores_unit_killed - by fixture_srdref_wrong_unit
+PASS mutant_cause_allows_other_spell_killed - by fixture_ledger_cause_other_spell
+PASS mutant_ore_check_transforms_only_killed - by fixture_ore_output_source
+PASS mutant_seconds_per_tick_accepts_value_killed - by fixture_seconds_per_tick_set
+PASS mutant_tick_text_patterns_off_killed - by fixture_tick_text
+PASS mutant_baseline_minute_seconds_changed_killed - by clean_data_passes
+PASS mutant_baseline_drops_dice_measures_killed - by clean_data_passes
+PASS validator_file_unchanged_by_mutation_run
+RESULT: 98 passed, 0 failed
+EXIT=0
+
+$ node tools/spells/validate_spell_effects.js
+validated committed data: 121 effect records, 257 primitive instances, 26 rule groups
+by basis {"srd":202,"deus":55}; by ledger mode {"policy":24,"none":169,"transform":30,"source":26,"relocate":7,"sink":1}
+errors 0
+EXIT=0
+
+$ node tools/spells/validate_spell_effects.js --check
+rebuilt docs/schemas/spells/srd_baseline.json from docs/audits/srd_spell_effect_audit.json + game/data/srd51/spells.json + game/data/srd51/rules.json
+rebuilt sha256 d84c51d293950786a1d931f208644a0dd5bec6b94a50bbd1d242b7a6457b5702 bytes 499530
+committed sha256 d84c51d293950786a1d931f208644a0dd5bec6b94a50bbd1d242b7a6457b5702 bytes 499530
+bytes identical: true
+baseline spells 319, measures 1683, audit/spells.json fields compared 2972, mismatches 0, quotes checked 391, quote misses 0
+EXIT=0
+
+$ node tools/check_deus_syntax.js
+Checked 52 DEUS plugin files. Errors: 0
+EXIT=0
