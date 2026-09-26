@@ -71,3 +71,8 @@ Commit messages start `[claude] OPS.30.01`.
 | Z | OPS.70.02 secrets scanner and dependency checker | Claude writer | `tools/security/**`, `tasks/OPS.70.02/**` |
 | E | WG.00.09a attack plan | PAUSED (do not touch) | `docs/systems/UF_Depth_Attack_Plan.md`, `tasks/DEUS-TSK-FABLE-19C/*` |
 
+
+## PM ruling on escalation.md (CRLF), 2026-09-26 10:40 CT
+- The repo-wide `.gitattributes` does not change, and the three suites (`tools/test_strata_cuts_and_caves.js`, `tools/test_new_game_year0.js`, `tools/test_historical_carrying_capacity.js`) are not weakened or made line-ending-tolerant in this lane.
+- If the independent Grok review of `d07396bc` passes, the PM merges Lane Y **by hand**. Before merging, the PM runs those three gate suites (and `node tools/ops/run_gate.js`) on an **LF checkout** (`git clone -c core.autocrlf=false`, detached at the merge candidate) and records the raw EXIT lines in the merge commit note as proof.
+- Follow-up (queued for the next ops lane under the WBS, not this lane): make `tools/governance/merge_gate.js` clone with `-c core.autocrlf=false`.
