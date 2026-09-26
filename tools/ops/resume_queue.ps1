@@ -215,6 +215,9 @@ foreach ($l in $launches) {
     try {
         $proc = Start-Process -FilePath (Join-Path $PSHOME 'powershell.exe') -ArgumentList $argLine -WindowStyle Hidden -PassThru `
             -RedirectStandardOutput (Join-Path $outDir "resume_$stamp.launcher.out.log") -RedirectStandardError (Join-Path $outDir "resume_$stamp.launcher.err.log")
+        # Hold the process handle now: without it Start-Process's Process object reports a null ExitCode
+        # once the process has exited.
+        $null = $proc.Handle
     } catch { $err = $_.Exception.Message }
 
     # The launch counts once the launcher has registered a run under its own PID.

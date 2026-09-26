@@ -52,12 +52,15 @@ function Initialize-TestHarness([string]$Prefix) {
     New-Item -ItemType Directory -Force -Path $root | Out-Null
     $script:TestRoot = $root
     $script:SavedEnv = @{}
-    foreach ($k in @('GIT_CONFIG_GLOBAL', 'GIT_CONFIG_NOSYSTEM', 'DEUS_INTEGRATOR')) { $script:SavedEnv[$k] = [Environment]::GetEnvironmentVariable($k) }
+    # A session started by launch_worker.ps1 already carries GIT_AUTHOR_NAME=deus-<provider>; left in place, the
+    # identity checks would pass even if the launcher stopped setting it.
+    $cleared = @('DEUS_INTEGRATOR', 'DEUS_RUN_ID', 'GIT_AUTHOR_NAME', 'GIT_COMMITTER_NAME', 'GIT_AUTHOR_EMAIL', 'GIT_COMMITTER_EMAIL')
+    foreach ($k in @('GIT_CONFIG_GLOBAL', 'GIT_CONFIG_NOSYSTEM') + $cleared) { $script:SavedEnv[$k] = [Environment]::GetEnvironmentVariable($k) }
     $gc = Join-Path $root 'gitconfig_global'
     [IO.File]::WriteAllText($gc, "[user]`n`tname = deus-test`n`temail = deus-test@example.invalid`n[init]`n`tdefaultBranch = main`n[core]`n`tautocrlf = false`n")
     $env:GIT_CONFIG_GLOBAL = $gc
     $env:GIT_CONFIG_NOSYSTEM = '1'
-    Remove-Item Env:DEUS_INTEGRATOR -ErrorAction SilentlyContinue
+    foreach ($k in $cleared) { [Environment]::SetEnvironmentVariable($k, $null) }
     return $root
 }
 
@@ -191,7 +194,7 @@ switch ($Mode) {
     'hang' { Start-Sleeper 120; 'worker: hanging'; Start-Sleep -Seconds 120; exit 0 }
     'orphan' { Save-Commit 'src/allowed/b.txt' "b`n"; Start-Sleeper 60; 'worker: leaving a child behind'; exit 0 }
     'dirty' { Write-File 'src/allowed/c.txt' "c`n"; 'worker: left changes without committing'; exit 0 }
-    'scope' { Save-Commit 'src/forbidden/x.txt' "x`n"; Write-File 'stray.txt' "s`n"; Write-File 'src/allowed/ok.txt' "ok`n"; 'worker: wrote files'; exit 0 }
+    'scope' { Save-Commit 'src/allowed/y.txt' "y`n"; Save-Commit 'src/forbidden/x.txt' "x`n"; Write-File 'stray.txt' "s`n"; Write-File 'src/allowed/ok.txt' "ok`n"; 'worker: wrote files'; exit 0 }
     'usage-claude' {
         '{"type":"system","subtype":"init","session_id":"s1"}'
         '{"type":"result","subtype":"success","is_error":true,"result":"Claude AI usage limit reached|1790500000"}'
@@ -392,9 +395,12 @@ $Tests = @(
         $oos = @($e['outOfScope'] | Sort-Object)
         Check 'exit_2' ($r.Code -eq 2) "exit $($r.Code)"
         Check 'state_out_of_scope' ($e -and $e['state'] -eq 'OUT-OF-SCOPE') "state $($e['state']) flags $($e['flags'] -join ',')"
+        # Two commits (one allowed, one not): a nested committed list would hide the forbidden file.
+        Check 'entries_are_paths' (@($oos | Where-Object { $_ -isnot [string] }).Count -eq 0) (($oos | ForEach-Object { $_.GetType().Name }) -join ',')
         Check 'committed_outside_listed' ($oos -contains 'src/forbidden/x.txt') ($oos -join ',')
         Check 'uncommitted_outside_listed' ($oos -contains 'stray.txt') ($oos -join ',')
         Check 'allowed_not_listed' ($oos -notcontains 'src/allowed/ok.txt') ($oos -join ',')
+        Check 'committed_allowed_not_listed' ($oos -notcontains 'src/allowed/y.txt') ($oos -join ',')
         Check 'exactly_two' ($oos.Count -eq 2) ($oos -join ',')
     } }
     @{ Name = 'empty_log'; Body = {
@@ -484,7 +490,9 @@ $Tests = @(
         $r = Invoke-Launch $Fx -Mode 'commit'
         Check 'exit_1' ($r.Code -eq 1) "exit $($r.Code)"
         Check 'says_live_worker' ($r.Err -match 'live worker') $r.Err
-        Check 'no_new_entry' (@(Read-DeusJsonFile $Fx.Reg $null).Count -eq 1)
+        # Read-DeusJsonFile returns its list wrapped (', $list'); the parentheses unwrap it so entries are counted.
+        $entries = @((Read-DeusJsonFile $Fx.Reg $null))
+        Check 'no_new_entry' ($entries.Count -eq 1) "$($entries.Count) entries"
     } }
     @{ Name = 'stale_entry_marked_lost'; Body = {
         Reset-Lane $Fx
@@ -495,8 +503,8 @@ $Tests = @(
         Write-DeusJsonFile $Fx.Reg $seed
         $r = Invoke-Launch $Fx -Mode 'commit'
         Check 'exit_0' ($r.Code -eq 0) "exit $($r.Code) $($r.Err)"
-        $old = @(Read-DeusJsonFile $Fx.Reg $null | Where-Object { $_['runId'] -eq 'seed-dead' })
-        Check 'stale_marked_lost' ($old.Count -eq 1 -and $old[0]['state'] -eq 'LOST') "state $($old[0]['state'])"
+        $old = @((Read-DeusJsonFile $Fx.Reg $null) | Where-Object { $_['runId'] -eq 'seed-dead' })
+        Check 'stale_marked_lost' ($old.Count -eq 1 -and $old[0]['state'] -eq 'LOST') "$($old.Count) matching entries; state $(if ($old.Count) { $old[0]['state'] })"
     } }
     @{ Name = 'family_refusal'; Body = {
         Reset-Lane $Fx
@@ -633,6 +641,10 @@ $MutantDefs = @(
        Find = "if (`$newCommits -eq 0 -and @(`$changes.Uncommitted).Count -gt 0) { `$flags.Add('EXITED-NO-COMMIT') }"; Replace = '' }
     @{ Name = 'no_scope_check'; File = 'launch_worker.ps1'; Tests = 'scope_check'
        Find = '-not (Test-DeusPathAllowed $_ $allowed)'; Replace = '$false' }
+    @{ Name = 'git_lines_nested'; File = 'launch_worker.ps1'; Tests = 'scope_check'
+       Find = 'return @($text.Split([char]0)'; Replace = 'return , @($text.Split([char]0)' }
+    @{ Name = 'stale_not_marked'; File = 'launch_worker.ps1'; Tests = 'stale_entry_marked_lost'
+       Find = "`$e['state'] = 'LOST'"; Replace = '$null = $e' }
     @{ Name = 'usage_scans_all_json'; File = 'launch_worker.ps1'; Tests = 'usage_no_false_positive'
        Find = 'if ($t -notmatch $prefilter) { continue }'; Replace = 'if ($t -notmatch $prefilter) { $out.Add($t); continue }' }
     @{ Name = 'no_usage_detect'; File = 'launch_worker.ps1'; Tests = 'usage_claude_epoch,usage_codex_relative'

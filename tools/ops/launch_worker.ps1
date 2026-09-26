@@ -394,11 +394,13 @@ function Test-DeusPathAllowed([string]$Path, [string[]]$Globs) {
 }
 
 function Get-DeusGitLines([string]$Worktree, [string[]]$GitArgs) {
-    # Runs git with -z output and returns the NUL-separated records.
+    # Runs git with -z output and streams the NUL-separated records. Callers collect them with @(); a
+    # ', @(...)' return here would nest the list, and a nested list stringifies to one space-joined "path"
+    # that an allowed glob can swallow (the scope check then misses committed files).
     $out = & git -C $Worktree -c core.quotepath=off @GitArgs 2>$null
-    if ($LASTEXITCODE -ne 0) { return , @() }
+    if ($LASTEXITCODE -ne 0) { return @() }
     $text = ($out -join "`n")
-    return , @($text.Split([char]0) | Where-Object { $_ -ne '' -and $_ -ne "`n" } | ForEach-Object { $_.TrimStart("`n") })
+    return @($text.Split([char]0) | Where-Object { $_ -ne '' -and $_ -ne "`n" } | ForEach-Object { $_.TrimStart("`n") })
 }
 
 function Get-DeusChangedFiles([string]$Worktree, [string]$BaseCommit) {

@@ -1,0 +1,38 @@
+# gate_tests.json seed verification, 2026-09-26, lane-j worktree (task/lane-j = main 6ecd66c2 + tools/ops edits), node v24, one suite at a time
+== check_deus_syntax : last 3 lines ==
+Checked 52 DEUS plugin files. Errors: 0
+== test_palette : last 3 lines ==
+Palette loaded successfully
+== test_check_claims : last 3 lines ==
+PASS mutant_backfill_window_inclusive_killed
+PASS mutant_hook_fails_open_without_checker_killed
+RESULT: 88 passed, 0 failed
+== test_strata_cuts_and_caves : last 3 lines ==
+  10. multi-Z cave network: seed 18 network #6 (level 0, sloped passage), from (202,50) floor 10 ft one air volume of 658 strata holding floors on levels [-1,0]
+TIME 234.3 s
+RESULT: 28 passed, 0 failed (exit 0)
+== test_new_game_year0 : last 3 lines ==
+SETUP CONTRACT PASSED: 30 gating checks, 15 mutants caught (ATK-YEAR0-001 closure criterion).
+INV-SIM-01 END-TO-END MET: clock, save and constructor all at year 0.
+==================================================
+== test_history_materialization_and_world_age : last 3 lines ==
+PASS ERA seed=20260919 year=500: 1093 living, 4224 ancestors, 12363.6 ms
+RESULT: 29 passed, 0 failed
+{"task":"DEUS-TSK-ASTRA-15","status":"PASS","sourceSha256":{"game/js/plugins.js":"3848e5856491dc97731f7ea99c5114dab99b6c6f19d70c8eb1533a452bbbd714","game/data/UF_WorldCatalog.json":"4bbdbf73e01ab1d749edd70d51233f22cabc2b6550e493dd91380fd9f6a5402e","game/data/Tilesets.json":"d19d389b9d8eec826acb50157...
+== test_historical_carrying_capacity : last 3 lines ==
+  "mutantsPassed": 8,
+  "mutantsFailed": 0
+}
+== test_geology_strata : last 3 lines ==
+PASS geology.levels_cell_at_contains_stratum - Levels.cellAt(64,64,-1) includes stratum: stone 'limestone'
+
+RESULT: 9 passed, 0 failed (exit 0)
+== test_strata_foundation : last 3 lines ==
+PASS no_errors - none beyond the 3 the diagnostic check provoked
+TIME 98.2 s
+RESULT: 26 passed, 0 failed (exit 0)
+== test_generated_z2_cut_proof : last 3 lines ==
+======================================================================
+VERIFICATION RESULT: FAILURE DETECTED (EXIT 1)
+======================================================================
+Exit codes (captured per suite in the run loop): check_deus_syntax 0, test_palette 0, test_check_claims 0, test_strata_cuts_and_caves 0, test_new_game_year0 0, test_history_materialization_and_world_age 0, test_historical_carrying_capacity 0, test_geology_strata 0, test_strata_foundation 0, test_generated_z2_cut_proof 1

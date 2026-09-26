@@ -346,7 +346,7 @@ $Tests = @(
         Check 'resumed_verified' ($q['state'] -eq 'RESUMED' -and $q['resumeVerified'] -eq $true) "$($q['state']) $($q['resumeVerified'])"
         $lp = [int]$q['resumeLauncherPid']
         if ($lp) { $lpProc = Get-Process -Id $lp -ErrorAction SilentlyContinue; if ($lpProc) { [void]$lpProc.WaitForExit(90000) } }
-        $e = @(Read-DeusJsonFile $Fx.Reg $null | Where-Object { $_['runId'] -eq $q['resumeRunId'] })[0]
+        $e = @((Read-DeusJsonFile $Fx.Reg $null) | Where-Object { $_['runId'] -eq $q['resumeRunId'] })[0]
         Check 'run_completed' ($e -and $e['state'] -eq 'COMPLETED') "state $($e['state']) flags $($e['flags'] -join ',')"
         $first = ("$(Get-TextFile $e['launchPromptPath'])" -split "`n")[0]
         Check 'resume_prompt' ($first -ceq "resume from HEAD $head; re-read BRIEF and the uncommitted diff first") $first
@@ -382,6 +382,8 @@ $MutantDefs = @(
        Find = 'foreach ($p in (Get-DeusKnownProviders)) {'; Replace = "foreach (`$p in @('claude', 'grok')) {" }
     @{ Name = 'no_launch_verify'; File = 'resume_queue.ps1'; Tests = 'launch_failure_requeues'
        Find = '$ok = [bool]$registered -or ($proc -and -not $err -and -not $proc.HasExited)'; Replace = '$ok = $true' }
+    @{ Name = 'exit_code_lost'; File = 'resume_queue.ps1'; Tests = 'launch_failure_requeues'
+       Find = '$null = $proc.Handle'; Replace = '$null = $proc' }
     @{ Name = 'dry_run_writes'; File = 'resume_queue.ps1'; Tests = 'dry_run_writes_nothing'
        Find = 'if (-not $DryRun) { Write-DeusJsonFile $statusPath $s }'; Replace = 'Write-DeusJsonFile $statusPath $s' }
 )
