@@ -1,3 +1,200 @@
+# OPS.30.01 lane-y: GATE suite runner and measured quarantine census (REPORT)
+
+**Writer:** claude (Claude Code, Opus 5.5) | **Branch:** task/lane-y | **Base:** `425b594c146d5f353c10faa11f4b5d47f499b45f` | **Date:** 2026-09-26
+**Reviewer:** grok (independent review, launched later by the PM). Nothing here is self-certified: the tool's own
+`PASS <check>` lines are test output, not a verdict on this lane.
+
+No art was generated, requested or integrated (DEC-007). See "DEC-007 note" for what the census suites wrote inside
+their throwaway clones.
+
+## What changed
+
+| Path | What |
+|---|---|
+| `tools/ops/run_gate.js` | New. Gate runner (default mode), `--census`, `--check-lists`, `--merge-census`, `--screen`. No npm dependencies. |
+| `tools/ops/test_run_gate.js` | New. 97 checks, 11 of them mutants (in-memory copies of run_gate.js run with `node -`). |
+| `tools/ops/fixtures/run_gate/**` | New. 18 synthetic suites, 5 helpers, 19 list files, README. |
+| `tools/ops/quarantine.json` | New. The measured census of `425b594c` (3 runs) plus `tools/ops/test_run_gate.js` (3 runs on this branch). |
+| `tasks/OPS.30.01/lane-y/REPORT.md` | This report. |
+| `tasks/OPS.30.01/lane-y/evidence/**` | Raw logs and census files of every run below; per-suite logs of census runs 1-3 (`evidence/logs/run<k>/`). |
+| `tasks/OPS.30.01/lane-y/analysis/report_tables.js` | Builds the census tables of this report from the evidence (runs nothing). |
+| `tasks/OPS.30.01/lane-y/leftover_check.js`, `wait_for_exit.js` | Evidence helpers: list processes naming a path; wait in the foreground for a job's `EXIT=` line. |
+
+`tools/ops/gate_tests.json`, every test file, `tools/classify_tests.js`, `tools/run_tests.js`, `tools/governance/**`
+and everything else outside allowedPaths are unchanged (scope diff at the end).
+
+**Name substitution (brief):** the WBS row (`docs/worldgen/DEUS_WORLDGEN_WBS.md:428` at the base) names
+`tools/ops/gate_suites.json`. No such file was created: the gate list is the `gate` array of the existing
+`tools/ops/gate_tests.json` (Lane J), which `tools/governance/merge_gate.js:54` (`QUARANTINE_FILE`) and
+`merge_gate.js:587-603` (`quarantineList`) read. run_gate.js reads the same array.
+
+## How run_gate.js decides (the rules, also in the tool's header)
+
+**Gate mode** (`node tools/ops/run_gate.js [--root <dir>]`): runs every entry of `gate_tests.json` `gate`, one at a
+time, as `node <suite>` (no shell, cwd = root), prints `GATE <suite> EXIT=<n> <ms>ms` and `RESULT: <n> passed, <m>
+failed`; exit 0 only if every suite exits 0, 1 otherwise, 2 on a usage or list error (missing/invalid/empty list,
+duplicate, missing suite file) or when a listed or `--suite`-named suite is NEEDS_NWJS (then nothing runs).
+
+**Categories** (each suite exactly one; the deciding line is stored):
+
+| Category | Rule |
+|---|---|
+| NEEDS_NWJS | The static screen finds the NW.js harness (below): the suite is never run; deciding line = the screen evidence. Also given if the runtime guard blocked a harness launch (none at the base). |
+| KILLED_TIMEOUT | Still running at the timeout (census default 180 s): killed with its whole process tree. |
+| PASS | Exit code 0. |
+| otherwise | The deciding line is the first candidate line of **stderr** that matches a rule, in print order; stdout is used only when stderr has no candidate line at all. First matching rule, in this order: |
+| FAIL_MISSING_REFERENCE | `Cannot find module '<...>/js/plugins/<...>'` (a missing plugin) |
+| FAIL_MISSING_DEPENDENCY | `Cannot find module`, `MODULE_NOT_FOUND`, `ERR_MODULE_NOT_FOUND`; `spawn <program> ENOENT` |
+| FAIL_MISSING_REFERENCE | `ENOENT`, `no such file or directory`, .NET `FileNotFoundException` / `DirectoryNotFoundException` / `Could not find file|a part of the path`; `plugin ... missing|not found|not registered`, `missing plugin`, `unknown plugin`, `must be loaded` |
+| FAIL_API_DRIFT | `TypeError`, `is not a function`, `is not a constructor`, `Cannot read/set properties of undefined/null`, `is not iterable` (the census cannot tell whether the undefined value came from a project module or the suite's own code) |
+| FAIL_OTHER | No rule matched: first candidate stderr line, else first stdout line with FAIL/error, else last stdout line. Flaky suites (runs disagree) are FAIL_OTHER with `flaky: true` and `runCategories`. |
+
+Candidate lines leave out blank lines, stack frames, node's error-location header (file:line, source line, caret),
+`(node:<pid>)` warnings, the `Node.js v<n>` footer and lines starting with PASS/ok. Paths of the root and of the
+run's scratch folder are written `<root>` / `<tmp>`.
+
+**NEEDS_NWJS static screen** (before anything is spawned). Harness names: `nw.exe`, `nwjs`, `run_tests`,
+`test_snapshot`, `Game.exe` (case-insensitive, not preceded by a letter/digit/underscore, so `NEEDS_NWJS` and
+`Utils.isNwjs` do not count). Followed transitively from the suite: literal `require()`/`import()` of relative or
+absolute paths (from every file), and path-like tokens ending in `.js/.cjs/.mjs/.bat/.cmd/.ps1/.sh` matched by file
+name against every tracked script (from the suite, files under `tools/`, shell scripts and any file using
+`child_process`). A suite is NEEDS_NWJS when a harness name appears in its own path or text, in the path or text of
+a reached file under `tools/` or a reached shell script, or in the text of any other reached file that also uses
+`child_process` (no `game/` file does at the base; the plugins name the harness only in comments, see
+`game/js/plugins/DEUS_Levels.js:143`, `DEUS_Test.js:12`). Not followed: `tools/ops/run_gate.js` itself and
+`tools/ops/fixtures/run_gate/` (their text names the harness on purpose; the fixtures are screened again as suites
+inside the synthetic repos). The screen agrees with a plain `git grep -i -E "nw\.exe|nwjs|run_tests|test_snapshot"`
+over the 187 base suites except `tools/test_d20_equipment_slots.js`, whose only hit is an `isNwjs: () => false` stub
+(line 117); no suite at the base reaches the harness only through a helper.
+
+**Runtime guard** (second line, for paths built at run time): every suite runs with `NODE_OPTIONS=--require <guard>`,
+a preload that wraps `child_process` spawn/spawnSync/exec/execSync/execFile/execFileSync/fork and throws instead of
+starting a process whose command or arguments name the harness (git commands excepted). It blocked nothing at the
+base; the fixture `guard_evasion.js` shows it working.
+
+**Environment and processes:** each suite gets the runner's environment minus GIT_DIR-style variables, `NODE_PATH`
+and `NODE_OPTIONS` (this session had a NODE_PATH into a Grok Bot `app.asar`), plus its own fresh `TEMP/TMP/TMPDIR`
+(removed afterwards) and the guard. Timeouts kill the whole tree (`taskkill /T /F`). After every invocation the
+runner lists processes and kills leftovers it started (children of a suite created while it ran, their descendants,
+anything naming the scratch folder) and reports processes that only name the root. At most 3 suites at once.
+
+### Deviations from the brief's wording, and why
+
+1. **spawn, not spawnSync, in gate mode.** On Windows `spawnSync`'s timeout ends only the direct child; the brief's
+   rule 3 asks for the whole tree to be killed. Gate mode still runs one suite at a time, with no shell.
+2. **Gate-mode default timeout 600 s** (`merge_gate.js:53` `DEFAULT_TIMEOUT_SEC = 600`), census default 180 s. The
+   gate suite `tools/test_strata_cuts_and_caves.js` took 217.6 s alone in a used clone
+   (`evidence/strata_cuts_standalone.log`), 177.5 s and 167.7 s in the gate runs below, and was killed at 180 s in
+   census runs 1 and 2. A 180 s gate default would fail a healthy gate suite.
+3. **Extra modes** `--merge-census` (builds quarantine.json from census files and reports agreement) and `--screen`
+   (static verdicts only). `--census` also has `--budget-sec` and resumes a partial census: the shell tool here stops
+   foreground commands at 10 minutes, and a full census takes about 18 minutes.
+4. **Commands longer than 10 minutes** (the gate runs, the lane.json gate run, two chunks of the supplementary run)
+   ran as a job whose output and `EXIT=` line go to a log file, while this session waited on it in the foreground
+   with `wait_for_exit.js` (repeated until the `EXIT=` line appeared). The turn never ended with a job running.
+5. **quarantine.json details:** NEEDS_NWJS entries store the screen evidence as `firstErrorLine` with
+   `exitCode: null, ms: null`; KILLED_TIMEOUT has `exitCode: null`; `passingNotGated` entries are objects
+   `{path, ms[, measuredOn]}` (`ms` = longest of the runs); optional top-level `runs: 3`.
+6. **Rules changed once.** A first census run (runner `5acd3a50`) showed two rule gaps: PowerShell reports a
+   missing image as `FileNotFoundException` on a later stderr line, and DEUS_History reports missing plugins as
+   "must be loaded before New Game". Both rules were added (with fixtures) before the three counted runs, which all
+   used runner `33357307`. The earlier run is kept in `evidence/superseded/`; under the new rules 4 of its suites
+   change from FAIL_OTHER to FAIL_MISSING_REFERENCE, and `test_merge_gate.js` passed there in 178 s but was killed at
+   180 s in all three counted runs.
+
+## Commands and raw results
+
+All census and gate runs used throwaway clones under `%TEMP%` made with
+`git clone -c core.autocrlf=false <worktree> <clone>`, `git -C <clone> checkout --detach 425b594c...` and a disabled
+push URL (`git remote set-url --push origin DISABLED-lane-y-census-no-push`), each deleted after its leftover check.
+
+### Gate run on a fresh clone of main (`evidence/gate_fresh_clone.log`, runner `33357307`)
+
+```
+run_gate: gate mode, 9 suites from C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gate\tools\ops\gate_tests.json, root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gate, HEAD 425b594c146d5f353c10faa11f4b5d47f499b45f, timeout 600 s each, one at a time
+GATE tools/check_deus_syntax.js EXIT=0 4055ms
+GATE tools/test_palette.js EXIT=0 58ms
+GATE tools/governance/test_check_claims.js EXIT=0 139032ms
+GATE tools/test_strata_cuts_and_caves.js EXIT=0 177523ms
+GATE tools/test_new_game_year0.js EXIT=0 18208ms
+GATE tools/test_history_materialization_and_world_age.js EXIT=0 106214ms
+GATE tools/test_historical_carrying_capacity.js EXIT=0 20218ms
+GATE tools/test_geology_strata.js EXIT=0 17936ms
+GATE tools/test_strata_foundation.js EXIT=0 93123ms
+LEFTOVERS: none
+RESULT: 9 passed, 0 failed
+EXIT=0
+```
+
+### Gate run with one suite deliberately broken (`evidence/gate_broken_suite.log`)
+
+Same clone after the run above; the break, then the run:
+
+```
+diff --git a/tools/test_palette.js b/tools/test_palette.js
++console.error("OPS.30.01 deliberate break"); process.exit(1);
+...
+GATE tools/check_deus_syntax.js EXIT=0 2989ms
+GATE tools/test_palette.js EXIT=1 38ms FAIL_OTHER
+GATE tools/governance/test_check_claims.js EXIT=0 130924ms
+GATE tools/test_strata_cuts_and_caves.js EXIT=0 167730ms
+GATE tools/test_new_game_year0.js EXIT=0 13677ms
+GATE tools/test_history_materialization_and_world_age.js EXIT=0 94146ms
+GATE tools/test_historical_carrying_capacity.js EXIT=0 17291ms
+GATE tools/test_geology_strata.js EXIT=0 15343ms
+GATE tools/test_strata_foundation.js EXIT=0 85222ms
+LEFTOVERS: none
+RESULT: 8 passed, 1 failed
+EXIT=1
+```
+
+### Census runs (timeout 180 s, 3 at once, 188 suites each)
+
+Each run is 3 resumed chunks of `node tools/ops/run_gate.js --census --root <fresh clone> --out
+evidence/census_run<k>.json --log-dir <tmp> --budget-sec 360` (full output with every suite line and every
+chunk's `EXIT=` in `evidence/census_run<k>.log`; chunks exit 3 = partial, the last exits 0):
+
+```
+run 1: CENSUS COUNTS PASS=70 FAIL_MISSING_DEPENDENCY=0 FAIL_API_DRIFT=19 FAIL_MISSING_REFERENCE=35 FAIL_OTHER=13 KILLED_TIMEOUT=9 NEEDS_NWJS=42
+       CENSUS COMPLETE: 188/188 measured   EXIT=0   LEFTOVERS: none (every chunk)
+run 2: CENSUS COUNTS PASS=70 FAIL_MISSING_DEPENDENCY=0 FAIL_API_DRIFT=19 FAIL_MISSING_REFERENCE=35 FAIL_OTHER=13 KILLED_TIMEOUT=9 NEEDS_NWJS=42
+       CENSUS COMPLETE: 188/188 measured   EXIT=0   LEFTOVERS: none (every chunk)
+run 3: CENSUS COUNTS PASS=72 FAIL_MISSING_DEPENDENCY=0 FAIL_API_DRIFT=19 FAIL_MISSING_REFERENCE=35 FAIL_OTHER=13 KILLED_TIMEOUT=7 NEEDS_NWJS=42
+       CENSUS COMPLETE: 188/188 measured   EXIT=0   LEFTOVERS: none (every chunk)
+```
+
+`tools/ops/test_run_gate.js` did not exist at the base; it was measured the same way three times, each in a fresh
+clone of this branch at `2d9f513c` (`evidence/census_tip_run<k>.log`): PASS 3/3, `EXIT=0`, `LEFTOVERS: none`.
+`git diff 2d9f513c HEAD -- tools/ops/run_gate.js tools/ops/test_run_gate.js tools/ops/fixtures` is empty at the
+commit these results were pasted on.
+
+Leftover checks after every clone (`node tasks/OPS.30.01/lane-y/leftover_check.js <clone>`, which leaves out its
+own process chain): `LEFTOVER CHECK: 0 process(es)` for census clones 1-3, the gate clone, the three tip clones and
+the supplementary clone.
+
+### Merge into quarantine.json (`evidence/merge.log`)
+
+```
+MERGE suites=189 agree=187 disagree=2 gate=9 quarantine=117 passingNotGated=63
+MERGE COUNTS (non-gate) PASS=63 FAIL_MISSING_DEPENDENCY=0 FAIL_API_DRIFT=19 FAIL_MISSING_REFERENCE=35 FAIL_OTHER=14 KILLED_TIMEOUT=7 NEEDS_NWJS=42
+FLAKY tools/test_strata_fluid_reconciliation.js KILLED_TIMEOUT / KILLED_TIMEOUT / PASS
+GATE tools/test_strata_cuts_and_caves.js KILLED_TIMEOUT / KILLED_TIMEOUT / PASS
+(the other 8 gate suites PASS / PASS / PASS)
+WROTE C:\Users\snewt\.deus_worktrees\lane-y\tools\ops\quarantine.json
+EXIT=0
+```
+
+### Flaky suites
+
+- `tools/test_strata_fluid_reconciliation.js` (quarantine, `flaky: true`): KILLED_TIMEOUT, KILLED_TIMEOUT, PASS
+  (145 s in run 3); PASS in 163 s in the supplementary 580 s run. Slow, not hung.
+- `tools/test_strata_cuts_and_caves.js` (gate list, so not in quarantine.json): KILLED_TIMEOUT, KILLED_TIMEOUT, PASS
+  (169 s) in the census; PASS in both gate-mode runs (177.5 s, 167.7 s) and alone (217.6 s).
+- `tools/governance/test_merge_gate.js`: KILLED_TIMEOUT in all three counted runs, PASS in 178 s in the superseded
+  run and in 195 s in the supplementary run. Recorded KILLED_TIMEOUT (the three counted runs agree).
+
+## Census results
+
 <!-- generated by tasks/OPS.30.01/lane-y/analysis/report_tables.js from the committed evidence; do not edit by hand -->
 
 ### Counts per category
@@ -287,3 +484,240 @@ NEEDS_NWJS suites labelled HEADLESS_AUTOMATED:
 - `tools/test_walls_ingame.js`
 - `tools/test_water_ingame.js`
 
+### NEEDS_NWJS (never run by this lane)
+
+| # | Suite | static screen evidence (file:line, harness name) |
+|---|---|---|
+| 1 | `tools/test_all_animated_objects_live.js` | tools/test_all_animated_objects_live.js:112 "nwjs" |
+| 2 | `tools/test_all_faction_menus.js` | tools/test_all_faction_menus.js:35 "run_tests" |
+| 3 | `tools/test_ally_movement_exclusive_action_square.js` | tools/test_ally_movement_exclusive_action_square.js:211 "run_tests" |
+| 4 | `tools/test_building_variety_live.js` | tools/test_building_variety_live.js:209 "run_tests" |
+| 5 | `tools/test_callings_and_clearing_live.js` | tools/test_callings_and_clearing_live.js:257 "run_tests" |
+| 6 | `tools/test_chest_left_click_info.js` | tools/test_chest_left_click_info.js:12 "nwjs" |
+| 7 | `tools/test_container_item_interactions.js` | tools/test_container_item_interactions.js:12 "nwjs" |
+| 8 | `tools/test_continuous_frontier_progression.js` | tools/test_continuous_frontier_progression.js:168 "run_tests" |
+| 9 | `tools/test_cooperative_homestead_construction.js` | tools/test_cooperative_homestead_construction.js:201 "run_tests" |
+| 10 | `tools/test_creatures_ingame.js` | tools/test_creatures_ingame.js:84 "run_tests" |
+| 11 | `tools/test_culling_native.js` | tools/test_culling_native.js:20 "nwjs" |
+| 12 | `tools/test_dwarves_ingame.js` | tools/test_dwarves_ingame.js:163 "run_tests" |
+| 13 | `tools/test_elves_ingame.js` | tools/test_elves_ingame.js:165 "run_tests" |
+| 14 | `tools/test_faction_menus_clean.js` | tools/test_faction_menus_clean.js:14 "run_tests" |
+| 15 | `tools/test_factions_live.js` | tools/test_factions_live.js:71 "run_tests" |
+| 16 | `tools/test_fog_z_level_live.js` | tools/test_fog_z_level_live.js:124 "run_tests" |
+| 17 | `tools/test_golden_art_review_live.js` | tools/test_golden_art_review_live.js:240 "run_tests" |
+| 18 | `tools/test_greater_z_roof_live.js` | tools/test_greater_z_roof_live.js:153 "run_tests" |
+| 19 | `tools/test_human_dwarf_8d_live.js` | tools/test_human_dwarf_8d_live.js:163 "run_tests" |
+| 20 | `tools/test_human_female_variations_live.js` | tools/test_human_female_variations_live.js:150 "run_tests" |
+| 21 | `tools/test_human_male_live_ingame.js` | tools/test_human_male_live_ingame.js:137 "run_tests" |
+| 22 | `tools/test_human_male_variations_live.js` | tools/test_human_male_variations_live.js:145 "run_tests" |
+| 23 | `tools/test_layer_switch_inplace.js` | tools/test_layer_switch_inplace.js:438 "run_tests" |
+| 24 | `tools/test_light_wall_occlusion_live.js` | tools/test_light_wall_occlusion_live.js:157 "run_tests" |
+| 25 | `tools/test_live_town_center_progression.js` | tools/test_live_town_center_progression.js:165 "run_tests" |
+| 26 | `tools/test_ludeon_planning.js` | tools/test_ludeon_planning.js:189 "run_tests" |
+| 27 | `tools/test_menu_ingame.js` | tools/test_menu_ingame.js:47 "run_tests" |
+| 28 | `tools/test_perf_benchmark.js` | tools/test_perf_benchmark.js:12 "nwjs" |
+| 29 | `tools/test_post_town_hall_progression.js` | tools/test_post_town_hall_progression.js:155 "run_tests" |
+| 30 | `tools/test_round_world_live.js` | tools/test_round_world_live.js:117 "run_tests" |
+| 31 | `tools/test_seamless_seam_live.js` | tools/test_seamless_seam_live.js:83 "run_tests" |
+| 32 | `tools/test_snapshot.js` | tools/test_snapshot.js "test_snapshot" |
+| 33 | `tools/test_standard_4d_ingame.js` | tools/test_standard_4d_ingame.js:145 "run_tests" |
+| 34 | `tools/test_standard_8d_ingame.js` | tools/test_standard_8d_ingame.js:238 "run_tests" |
+| 35 | `tools/test_temperate_arid_transition_live.js` | tools/test_temperate_arid_transition_live.js:311 "run_tests" |
+| 36 | `tools/test_tilesets_live.js` | tools/test_tilesets_live.js:75 "run_tests" |
+| 37 | `tools/test_title_menu.js` | tools/test_title_menu.js:48 "nw.exe" |
+| 38 | `tools/test_town_hall_ai_live.js` | tools/test_town_hall_ai_live.js:214 "run_tests" |
+| 39 | `tools/test_underground_room.js` | tools/test_underground_room.js:47 "run_tests" |
+| 40 | `tools/test_unpartnered_shelter_progression.js` | tools/test_unpartnered_shelter_progression.js:206 "run_tests" |
+| 41 | `tools/test_walls_ingame.js` | tools/test_walls_ingame.js:140 "run_tests" |
+| 42 | `tools/test_water_ingame.js` | tools/test_water_ingame.js:44 "run_tests" |
+
+### Quarantine by failure group (OPS.30.04 work items)
+
+- **FAIL_API_DRIFT** (19): `test_19b_performance_determinism.js`, `test_diagonal_corners_and_doorways.js`, `test_dynamic_armor_reflection.js`, `test_ecology.js`, `test_faction_construction_and_homes.js`, `test_material_recipes.js`, `test_material_substitution.js`, `test_natural_connections.js`, `test_population_growth_and_immigration.js`, `test_regrowth_construction_guard.js`, `test_resource_node_materials.js`, `test_second_by_second_history.js`, `test_upper_elevation_terrain.js`, `test_z_doors.js`, `test_z_fire.js`, `test_z_floors.js`, `test_z_flora.js`, `test_z_ownership.js`, `test_z_walls.js`
+- **FAIL_MISSING_REFERENCE: a file outside the repo (U7 install, an agent's brain folder)** (4): `test_adam_res.js`, `test_adam_scales.js`, `test_process_human_12.js`, `test_slice_human.js`
+- **FAIL_MISSING_REFERENCE: a plugin the suite loads is gone (UF_* names) or not loaded** (23): `test_agriculture.js`, `test_callings_system.js`, `test_cooperative_building_and_offspring_pairbonding.js`, `test_culture_growth.js`, `test_d20_equipment_slots.js`, `test_extraction_difficulty.js`, `test_faction_founder_pairbonding.js`, `test_faction_reproduction.js`, `test_faction_starting_gear.js`, `test_family_integration.js`, `test_farm_view.js`, `test_fire_safety.js`, `test_goals.js`, `test_hist_metadata_contracts.js`, `test_material_refining_and_tech_pacing.js`, `test_physical_inventory_proof.js`, `test_profile_tabs.js`, `test_sanitation_system.js`, `test_settlement_pillars.js`, `test_srd_combat_proof.js`, `test_srd_equipment_proof.js`, `test_srd_rules_proof.js`, `test_unified_capability_proof.js`
+- **FAIL_MISSING_REFERENCE: an input another tool writes (game/test_output/, scratch/) is missing** (8): `test_all_walk_cycles.js`, `test_clean_u7_composites.js`, `test_eye_variations.js`, `test_female_u7_composites.js`, `test_ff5_candidates.js`, `test_ff5_proportions_and_footsteps.js`, `test_fixed_cycle.js`, `test_portrait_clothing_offsets.js`
+- **FAIL_OTHER** (13): `art/test_catalogue.js`, `test_all_object_charsets.js`, `test_birth_rate_halved.js`, `test_fix_facings.js`, `test_native_survival_soak.js`, `test_object_art.js`, `test_object_originality.js`, `test_production_history_demographics.js`, `test_round_world.js`, `test_seamless_map_edges.js`, `test_var2_suite.js`, `test_var_suite.js`, `test_vertical_worldgen_proof.js`
+- **FAIL_OTHER (flaky)** (1): `test_strata_fluid_reconciliation.js`
+- **KILLED_TIMEOUT** (7): `governance/test_merge_gate.js`, `test_autonomous_project_dispatch.js`, `test_autonomous_work_recovery.js`, `test_project_construction_loop.js`, `test_settlement_domestic_housing.js`, `test_settlement_expansion_multi_dwelling.js`, `test_survival_needs_loop.js`
+
+### Supplementary: the timed-out and flaky suites with a 580 s timeout (not used for quarantine.json)
+
+One run, fresh clone of `425b594c`, up to 3 at once, timeout 580 s (evidence/census_slow_580s*.log).
+
+| Suite | 180 s census (3 runs) | 580 s run | ms | deciding line |
+|---|---|---|---|---|
+| `tools/governance/test_merge_gate.js` | KILLED_TIMEOUT / KILLED_TIMEOUT / KILLED_TIMEOUT | PASS | 195212 |  |
+| `tools/test_autonomous_project_dispatch.js` | KILLED_TIMEOUT / KILLED_TIMEOUT / KILLED_TIMEOUT | PASS | 500640 |  |
+| `tools/test_autonomous_work_recovery.js` | KILLED_TIMEOUT / KILLED_TIMEOUT / KILLED_TIMEOUT | FAIL_OTHER | 504790 | FAIL recovery.forage_target_gone_or_unreachable - gather at 34,20 found its plant picked -> done (null) after 9 updat... |
+| `tools/test_project_construction_loop.js` | KILLED_TIMEOUT / KILLED_TIMEOUT / KILLED_TIMEOUT | KILLED_TIMEOUT | 580245 | killed after 580 s (timeout) with its whole process tree |
+| `tools/test_settlement_domestic_housing.js` | KILLED_TIMEOUT / KILLED_TIMEOUT / KILLED_TIMEOUT | KILLED_TIMEOUT | 580366 | killed after 580 s (timeout) with its whole process tree |
+| `tools/test_settlement_expansion_multi_dwelling.js` | KILLED_TIMEOUT / KILLED_TIMEOUT / KILLED_TIMEOUT | KILLED_TIMEOUT | 580365 | killed after 580 s (timeout) with its whole process tree |
+| `tools/test_strata_fluid_reconciliation.js` | KILLED_TIMEOUT / KILLED_TIMEOUT / PASS | PASS | 163496 |  |
+| `tools/test_survival_needs_loop.js` | KILLED_TIMEOUT / KILLED_TIMEOUT / KILLED_TIMEOUT | KILLED_TIMEOUT | 580143 | killed after 580 s (timeout) with its whole process tree |
+
+### Passing in every run, not in the gate list (gate candidates)
+
+| # | Suite | longest run ms |
+|---|---|---|
+| 1 | `tools/art/test_blank_templates.js` | 45592 |
+| 2 | `tools/art/test_place_art.js` | 8640 |
+| 3 | `tools/ops/test_run_gate.js` (measured on `2d9f513c`) | 61954 |
+| 4 | `tools/sim/test_ledger.js` | 16035 |
+| 5 | `tools/sim/test_ledger_longrun.js` | 24016 |
+| 6 | `tools/test_aging_and_lifespan.js` | 60 |
+| 7 | `tools/test_autonomous_settlement_closure.js` | 69468 |
+| 8 | `tools/test_biome_standard.js` | 739 |
+| 9 | `tools/test_clean_attack_sheet.js` | 211 |
+| 10 | `tools/test_clean_bow_sheet.js` | 228 |
+| 11 | `tools/test_clean_downed_sheet.js` | 179 |
+| 12 | `tools/test_clean_haul_sheet.js` | 198 |
+| 13 | `tools/test_clean_magic_sheet.js` | 224 |
+| 14 | `tools/test_clean_walk_sheet.js` | 203 |
+| 15 | `tools/test_clean_walk_sheet2.js` | 188 |
+| 16 | `tools/test_clean_walk_sheet3.js` | 185 |
+| 17 | `tools/test_clean_work_sheet.js` | 181 |
+| 18 | `tools/test_column_landforms.js` | 578 |
+| 19 | `tools/test_combat_dying_integration.js` | 100 |
+| 20 | `tools/test_conditions_native_closure.js` | 1923 |
+| 21 | `tools/test_conditions_system.js` | 75 |
+| 22 | `tools/test_deer_action_boxes.js` | 208 |
+| 23 | `tools/test_duplicate_registration.js` | 80 |
+| 24 | `tools/test_facing_detection.js` | 74 |
+| 25 | `tools/test_family_compounds_and_shops.js` | 84 |
+| 26 | `tools/test_fixed_walk_playback.js` | 131 |
+| 27 | `tools/test_foliage_sprite_animations.js` | 328 |
+| 28 | `tools/test_gen3_metrics.js` | 197 |
+| 29 | `tools/test_generated_z2_cut_proof.js` | 50727 |
+| 30 | `tools/test_generator_combinations.js` | 371 |
+| 31 | `tools/test_ground_shades_prototype.js` | 57 |
+| 32 | `tools/test_hare_action_boxes.js` | 234 |
+| 33 | `tools/test_haul_builder.js` | 100 |
+| 34 | `tools/test_hazard_reflex.js` | 738 |
+| 35 | `tools/test_hazard_torture_live.js` | 4670 |
+| 36 | `tools/test_hearth_containment_and_provenance.js` | 150 |
+| 37 | `tools/test_households.js` | 378 |
+| 38 | `tools/test_human_inheritance.js` | 60 |
+| 39 | `tools/test_liquid_depth_simulation.js` | 640 |
+| 40 | `tools/test_minimap.js` | 70 |
+| 41 | `tools/test_multi_deficit_settlement.js` | 956 |
+| 42 | `tools/test_native_resolution_standard.js` | 94 |
+| 43 | `tools/test_palette_standard.js` | 319 |
+| 44 | `tools/test_r4c2_foreshorten.js` | 72 |
+| 45 | `tools/test_resize_face.js` | 375 |
+| 46 | `tools/test_resource_economy_standard.js` | 55 |
+| 47 | `tools/test_scale_standard.js` | 219 |
+| 48 | `tools/test_settlement_projects.js` | 2989 |
+| 49 | `tools/test_sheep_action_boxes.js` | 332 |
+| 50 | `tools/test_side_combos.js` | 171 |
+| 51 | `tools/test_srd_character_presentation.js` | 151 |
+| 52 | `tools/test_srd_parity.js` | 100 |
+| 53 | `tools/test_stabilization.js` | 1136 |
+| 54 | `tools/test_starter_kit_and_stockpile.js` | 57314 |
+| 55 | `tools/test_stockpiles_designation.js` | 104 |
+| 56 | `tools/test_survival_regressions.js` | 26037 |
+| 57 | `tools/test_time_domains_proof.js` | 62 |
+| 58 | `tools/test_u7_modular_composition.js` | 209 |
+| 59 | `tools/test_v2_clean_u7_composites.js` | 115 |
+| 60 | `tools/test_volumetric_terrain_column.js` | 85382 |
+| 61 | `tools/test_walk_triplets.js` | 154 |
+| 62 | `tools/test_wolf_cleanup.js` | 112 |
+| 63 | `tools/test_z_cavern_gen.js` | 138 |
+
+## run_gate test suite
+
+`node tools/ops/test_run_gate.js` (raw output under "lane.json gateTests" below): 97 checks, of which 11 are
+mutants, each applied to an in-memory copy of run_gate.js and run with `node -`; every mutant's check set first
+passes on the unmutated source run the same way (`stdin_baseline_*`). Required by the brief: gate ignores a failing
+exit, timeout removed, NEEDS_NWJS screen removed, missing-module rule swapped, `--check-lists` duplicate check
+removed. Extra: tree kill removed, transitive screen removed, gate-mode NEEDS_NWJS refusal removed, runtime guard
+removed, leftover sweep removed, `--check-lists` unlisted check removed.
+
+The tree-kill mutant first survived: on Windows libuv puts a node process's ordinary children in a kill-on-close
+job, so killing the hang fixture already ended its child. The fixture now detaches its child (as a leaked helper
+would); the mutant is then caught by `census_timeout_tree_killed_before_sweep`.
+
+The NEEDS_NWJS proof: every fixture suite writes `<name>.ran` when it runs; after the census of the 19-suite fixture
+repo the four static NEEDS_NWJS fixtures have no marker and the other 15 all have one
+(`census_needs_nwjs_never_spawned`, `census_every_other_suite_ran`). The NEEDS_NWJS fixtures never start anything
+even if run: they only print or write their marker.
+
+## PROPOSED follow-ups (the PM decides; nothing here was applied)
+
+- **PROPOSED-Y-01 (gate list):** 63 suites passed in every run and are not gated (table "Passing in every run" above),
+  all candidates for `gate_tests.json` `gate`. Two cautions: (a) `test_clean_attack_sheet.js`,
+  `test_clean_bow_sheet.js`, `test_clean_downed_sheet.js`, `test_clean_haul_sheet.js`, `test_clean_magic_sheet.js`,
+  `test_clean_work_sheet.js`, `test_fixed_walk_playback.js` and `test_r4c2_foreshorten.js` rewrite tracked PNGs
+  under `art/review/` when run (8 files modified in the first census clone; each file name appears in exactly one of
+  these suites' source; which run wrote which file was not traced). Under DEC-007 the PM/Owner may not want a gate
+  that regenerates review art. (b) Three take over a minute: `test_volumetric_terrain_column.js` 85 s,
+  `test_autonomous_settlement_closure.js` 69 s, `tools/ops/test_run_gate.js` 62 s.
+- **PROPOSED-Y-02 (stale quarantine entry):** `gate_tests.json` quarantines `tools/test_generated_z2_cut_proof.js`
+  ("Exits 1 on main; Lane H rework in progress"). It passed in all three runs (33-51 s).
+  Remove it from the `quarantine` array; the WBS row puts it in GATE "once WG.00.08 lands". `--check-lists` prints
+  this as a NOTE, not a violation.
+- **PROPOSED-Y-03 (gate timing):** the whole gate takes about 576 s of suite time one at a time (run above), with
+  `test_strata_cuts_and_caves.js` at 168-218 s. Any runner of the gate (merge gate: 600 s per test; lane.json here:
+  1800 s; a future CI, OPS.30.02) needs at least 600 s for that suite and well over 10 minutes for the list.
+- **PROPOSED-Y-04 (gate list):** add `tools/ops/test_run_gate.js` (3/3 PASS, 62 s), and have the merge gate or every
+  lane.json run `node tools/ops/run_gate.js --check-lists` (it is a command, not a suite file, so it cannot go in
+  the `gate` array as is).
+- **PROPOSED-Y-05 (process):** `--check-lists` reports UNLISTED for any tracked `test_*.js` in no list. Every lane that
+  adds a suite (live lanes X and Z write under `tools/`) must add it to the gate list or to `quarantine.json`
+  (`passingNotGated` with `measuredOn`, or `suites`), so `tools/ops/quarantine.json` needs to be in those lanes'
+  allowedPaths, or the census re-run after merges.
+- **PROPOSED-Y-06 (OPS.30.04 work items):** the groups in "Quarantine by failure group": 19 API drift, 23 missing
+  or unloaded plugins (UF_* names that no longer exist, or plugins the suite does not load), 8 missing generated
+  inputs (`game/test_output/`, `scratch/`), 4 files outside the repo (U7 install, an agent's brain folder), 13 other
+  failures, 1 flaky, 7 KILLED_TIMEOUT. `test_var_suite.js` and `test_var2_suite.js` fail because the local-only
+  `reference/u7_originality_index.json` is absent (FAIL_OTHER by the rules; a missing reference in substance).
+- **PROPOSED-Y-07 (KILLED_TIMEOUT is not "hung"):** with 580 s, 3 of the 8 timed-out or flaky suites pass
+  (`test_merge_gate.js` 195 s, `test_autonomous_project_dispatch.js` 501 s, `test_strata_fluid_reconciliation.js`
+  163 s), `test_autonomous_work_recovery.js` fails after 505 s, and 4 are still running at 580 s. OPS.30.04 should
+  measure these alone before calling them broken.
+- **PROPOSED-Y-08 (NW.js baseline):** the 42 NEEDS_NWJS suites are the input list for OPS.30.05 (quiet window).
+  `tools/test_snapshot.js` is itself the harness.
+- **PROPOSED-Y-09 (docs):** `docs/TEST_CLASSIFICATION.md` (generated 2026-09-21 by `tools/classify_tests.js`, 605
+  scripts) is stale, and at the base the heuristic mislabels 98 suites on runnability (table above). Retire it or
+  point it at `tools/ops/quarantine.json` (docs/ is outside this lane).
+- **PROPOSED-Y-10 (scope):** the census covers `*.js` suites only, as briefed; `tools/ops/test_launch_worker.ps1`
+  and `tools/ops/test_resume_queue.ps1` are not in it.
+- **PROPOSED-Y-11 (WBS figures):** the row's "9 gate / 68 failing / 9 killed" came from an older audit. Measured at
+  `425b594c`: 9 gate (all pass in gate mode), 68 FAIL_* outside the gate (19 + 35 + 14), 7 KILLED_TIMEOUT plus the
+  gate suite killed in 2 of 3 runs, 42 NEEDS_NWJS, 63 passing outside the gate.
+
+## DEC-007 note
+
+Art-pipeline suites in the census (for example `test_clean_*_sheet.js`) re-render review images when they run. They
+did so only inside the throwaway clones: the first census clone showed 8 tracked PNGs under `art/review/` modified.
+Nothing was copied out of any clone, every clone was deleted, and this branch adds no image file
+(`git diff --name-only 425b594c..HEAD` has no .png/.jpg/.gif/.bmp/.webp path). Suites that read an agent's image
+folder (`test_process_human_12.js`, `test_slice_human.js`, `test_ff5_proportions_and_footsteps.js`) failed before
+writing anything: their source folders do not exist on this machine.
+
+## Not done / known problems
+
+- The screen is text-based. It follows literal requires and path tokens; a path assembled at run time is only caught
+  by the runtime guard, and only while the suite keeps `NODE_OPTIONS` for its node children. A suite that merely
+  names the harness in a comment is NEEDS_NWJS (deliberately conservative).
+- The guard blocks any spawn whose arguments name the harness, including harmless ones such as `node --check
+  tools/run_tests.js`; such a suite would show as NEEDS_NWJS (runtime). None did at the base.
+- Leftover attribution uses parent PID plus creation time; an orphan whose parent was an intermediate process that
+  already exited is only found if its command line names the scratch folder. The census found no leftovers.
+- KILLED_TIMEOUT mixes slow and hung suites (PROPOSED-Y-07). All durations were measured on a machine shared with
+  other lanes (Lane K's reviewer runs NW.js here), so they vary (for example `test_strata_foundation.js` 88-149 s).
+- FAIL_API_DRIFT cannot tell whether the undefined value came from a project module or the suite itself.
+  `ReferenceError` is FAIL_OTHER (`test_fix_facings.js`: the suite's own variable; `test_round_world.js`,
+  `test_seamless_map_edges.js`: the RMMZ global `Scene_Map`).
+- `--check-lists` on main will report UNLISTED as soon as another lane merges a new suite (PROPOSED-Y-05).
+- The POSIX code paths (process groups, `ps`) were not run; everything ran on Windows 11 with node v24.19.0.
+- The whole gate cannot run as one foreground command within this environment's 10-minute shell limit; see
+  deviation 4.
+
+## lane.json gateTests (run before the final commit)
+
+<!-- GATETESTS -->
+
+## Scope
+
+<!-- SCOPE -->

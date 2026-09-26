@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 "use strict";
 // OPS.30.01 lane-y: builds the census tables of REPORT.md from the committed evidence (no suite is run).
-// Usage: node tasks/OPS.30.01/lane-y/analysis/report_tables.js > tasks/OPS.30.01/lane-y/census_tables.md
+// Usage: node tasks/OPS.30.01/lane-y/analysis/report_tables.js   (its output is the "Census results" section of REPORT.md)
 // Inputs: evidence/census_run{1,2,3}.json, evidence/census_tip_run{1,2,3}.json, tools/ops/quarantine.json,
 // tools/ops/gate_tests.json, evidence/classify_tests_output_at_425b594c.md (tools/classify_tests.js run at the base).
 const fs = require("fs");
@@ -146,5 +146,65 @@ w("");
 w("NEEDS_NWJS suites labelled HEADLESS_AUTOMATED:");
 w("");
 for (const p of tab.HEADLESS_AUTOMATED.NEEDS_NWJS) w(`- \`${p}\``);
+w("");
+
+// NEEDS_NWJS evidence.
+w("### NEEDS_NWJS (never run by this lane)");
+w("");
+w("| # | Suite | static screen evidence (file:line, harness name) |");
+w("|---|---|---|");
+n = 0;
+for (const s of q.suites.filter(x => x.category === "NEEDS_NWJS")) {
+    const m = /^static screen: (.*?) names "([^"]+)"/.exec(s.firstErrorLine) || [];
+    w(`| ${++n} | \`${s.path}\` | ${cell(m[1] || "")} "${cell(m[2] || "")}" |`);
+}
+w("");
+
+// OPS.30.04 work items.
+const group = s => {
+    const l = s.firstErrorLine;
+    if (s.category !== "FAIL_MISSING_REFERENCE") return s.category + (s.flaky ? " (flaky)" : "");
+    if (/js[\\/]plugins[\\/]|must be loaded/.test(l)) return "FAIL_MISSING_REFERENCE: a plugin the suite loads is gone (UF_* names) or not loaded";
+    if (/test_output|[\\/]scratch[\\/]/.test(l)) return "FAIL_MISSING_REFERENCE: an input another tool writes (game/test_output/, scratch/) is missing";
+    if (/Ultima 7|FileNotFound|\.gemini/.test(l)) return "FAIL_MISSING_REFERENCE: a file outside the repo (U7 install, an agent's brain folder)";
+    return "FAIL_MISSING_REFERENCE: other";
+};
+const groups = new Map();
+for (const s of q.suites.filter(x => x.category !== "NEEDS_NWJS")) {
+    const k = group(s);
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(s);
+}
+w("### Quarantine by failure group (OPS.30.04 work items)");
+w("");
+for (const [k, list] of [...groups.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
+    w(`- **${k}** (${list.length}): ${list.map(s => `\`${s.path.replace(/^tools\//, "")}\``).join(", ")}`);
+}
+w("");
+
+// Supplementary 580 s run.
+const slowFile = path.join(EV, "census_slow_580s.json");
+if (fs.existsSync(slowFile)) {
+    const slow = read(slowFile);
+    w("### Supplementary: the timed-out and flaky suites with a 580 s timeout (not used for quarantine.json)");
+    w("");
+    w(`One run, fresh clone of \`${slow.head.slice(0, 8)}\`, up to 3 at once, timeout ${slow.timeoutSec} s (evidence/census_slow_580s*.log).`);
+    w("");
+    w("| Suite | 180 s census (3 runs) | 580 s run | ms | deciding line |");
+    w("|---|---|---|---|---|");
+    for (const s of slow.suites) {
+        const rs = per.get(s.path) || [];
+        w(`| \`${s.path}\` | ${rs.map(x => x.category).join(" / ")} | ${s.category} | ${s.ms} | ${cell(cut(s.firstErrorLine || "", 120))} |`);
+    }
+    w("");
+}
+
+// Passing, not gated.
+w("### Passing in every run, not in the gate list (gate candidates)");
+w("");
+w("| # | Suite | longest run ms |");
+w("|---|---|---|");
+n = 0;
+for (const s of q.passingNotGated) w(`| ${++n} | \`${s.path}\`${s.measuredOn ? ` (measured on \`${s.measuredOn.slice(0, 8)}\`)` : ""} | ${s.ms} |`);
 w("");
 process.stdout.write(out.join("\n") + "\n");
