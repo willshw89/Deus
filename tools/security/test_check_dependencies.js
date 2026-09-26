@@ -44,8 +44,11 @@ const NOT_CODE = [
     "const r2 = /[\"'`]/g.test(s1) ? 1 : 2;",
     "const o = { import: 1, require: 2 }; o.require(\"left-pad\"); obj?.require(\"left-pad\");",
     "function require2() {} function localRequire(x) { return x; } localRequire(\"left-pad\");",
+    "function require(name) { return name; }",
+    "const o2 = { require: 1 }; const tr = typeof require; const rr = require.resolve(\"left-pad\"); require.cache[tr] = 1; if (require.main === module) {}",
     "const u = import.meta && 0;"
 ].join("\n");
+const BS = String.fromCharCode(92);
 
 function writeLibs(dir, files) {
     F.write(dir, files);
@@ -100,9 +103,12 @@ function setup() {
             "const idx = require('./lib');",
             "const pkg = require('./pkg');",
             "const data = require('./data.json');",
+            "const idx2 = require('./lib/');",
+            "const data2 = require('./data');",
             "const cp = require('child_process'), c = require('crypto'), v8 = require('v8'), ph = require('perf_hooks');",
             "const vm = require('vm');"
         ].join("\n") + "\n",
+        "tools/lib2.js": "module.exports = 5;\n",
         "tools/esm.js": "import { a } from \"./lib/u.js\";\nimport \"./lib/index.js\";\nexport * from \"./lib/u.js\";\nexport { b } from './lib/u.js';\nconst m = await import(\"./lib/u.js\");\nconst d = await import(someName);\n",
         "tools/lib/u.js": "module.exports = 2;\n",
         "tools/lib/index.js": "module.exports = 3;\n",
@@ -119,13 +125,19 @@ function setup() {
     F.commit(X.bad, {
         "game/package.json": JSON.stringify({ name: "rmmz-game", main: "index.html", dependencies: { "left-pad": "1.3.0" } }, null, 2),
         "game/package-lock.json": "{}\n",
+        "game/sub/package.json": "{ not json\n",
         "game/node_modules/left-pad/index.js": "module.exports = 0;\n",
         "game/js/plugins/npm.js": "const pad = require(\"left-pad\");\nconst sub = require(\"@TEST_scope/pkg/sub\");\n",
         "tools/missing.js": "const path = require('path');\nconst a = require('./nope.js');\nconst b = require(path.join(__dirname, 'nope2.js'));\n",
         "tools/abs.js": "const a = require('C:/TEST_outside/x.js');\n",
         "tools/nw.js": "const gui = require('nw.gui');\n",
-        "tools/esm_bad.js": "import pad from \"left-pad\";\n"
+        "tools/esm_bad.js": "import pad from \"left-pad\";\nimport far from \"file:///C:/TEST_outside/y.js\";\n",
+        "tools/lib2.js": "module.exports = 5;\n",
+        "tools/slash.js": "const l2 = require('./lib2/');\n"
     }, "TEST_ bad dependency fixture");
+    X.mismatchBaseline = depBaselineFile("dep_mismatch.json", [
+        { path: "tools/missing.js", kind: "NPM_REQUIRE", spec: "./nope.js", reason: "TEST_ right path and spec, wrong kind" },
+        { path: "tools/other.js", kind: "MISSING_RELATIVE", spec: "./nope.js", reason: "TEST_ right kind and spec, wrong path" }]);
     X.badBaseline = depBaselineFile("dep_bad_known.json", [{ path: "tools/missing.js", kind: "MISSING_RELATIVE", spec: "./nope.js", reason: "TEST_ known pre-existing defect" }]);
     X.staleBaseline = depBaselineFile("dep_stale.json", [{ path: "tools/gone.js", kind: "MISSING_RELATIVE", spec: "./x.js", reason: "TEST_ entry that matches nothing" }]);
     X.libsKindBaseline = depBaselineFile("dep_libs_kind.json", [{ path: "game/js/libs/pixi.js", kind: "LIBS_CHANGED", spec: "x", reason: "TEST_ cannot hide a frozen lib" }]);
@@ -133,7 +145,7 @@ function setup() {
     // libs: a baseline commit, then a commit that changes, removes and adds, then working-tree edits.
     X.libs = F.repo("libs");
     writeLibs(X.libs, LIBS);
-    X.libsBase = F.commit(X.libs, { "game/package.json": "{\"name\": \"rmmz-game\"}\n" }, "TEST_ libs base");
+    X.libsBase = F.commit(X.libs, { "game/package.json": "{\"name\": \"rmmz-game\"}\n", ".gitignore": "*.tmp\n" }, "TEST_ libs base");
     X.libsFile = libsBaselineFile("libs_libs.json", Object.fromEntries(Object.entries(LIBS).map(([p, c]) => [p, sha(Buffer.from(c))])), X.libsBase);
     F.commit(X.libs, {
         "game/js/libs/pixi.js": LIBS["game/js/libs/pixi.js"] + "var TEST_patched = 2;\n",
@@ -142,11 +154,21 @@ function setup() {
     }, "TEST_ libs changed");
     F.write(X.libs, { "game/js/libs/localforage.min.js": "/* TEST_ edited in the working tree */\n", "game/js/libs/untracked.js": "/* TEST_ */\n" });
     F.git(X.libs, ["mv", "game/js/libs/extra.js", "game/js/libs/extra2.js"]);      // a staged rename: two status fields
+    F.git(X.libs, ["update-index", "--assume-unchanged", "game/js/libs/localforage.min.js"]);   // its edit is now hidden from git status
+    F.write(X.libs, { "game/js/libs/ignored.tmp": "/* TEST_ ignored by .gitignore */\n" });
 }
 
 // ---------------------------------------------------------------------------------------------
 
-function run(T, argv, cwd, env) { return H.capture(() => T.main(argv, cwd, env || {})); }
+// Each (tool, cwd, arguments, env) run happens once; the checks only read the result.
+const MEMO = new WeakMap();
+function run(T, argv, cwd, env) {
+    let m = MEMO.get(T);
+    if (!m) MEMO.set(T, m = new Map());
+    const key = cwd + "\0" + argv.join("\0") + "\0" + JSON.stringify(env || {});
+    if (!m.has(key)) m.set(key, H.capture(() => T.main(argv, cwd, env || {})));
+    return m.get(key);
+}
 function json(T, argv, cwd, env) {
     const r = run(T, argv.concat(["--json"]), cwd, env);
     let doc;
@@ -171,6 +193,63 @@ S.add("lexer_reads_every_import_form", T => {
     return expect(got === want, "got " + got);
 });
 
+// Builds a source from [text, expected reference] rows and the expected "kind:spec@line" list
+// (line = 1 + the newlines before the row).
+function rows(list) {
+    let src = "";
+    const want = [];
+    for (const [text, ref] of list) {
+        const line = 1 + (src.match(/\n/g) || []).length + (text.split(ref ? ref.at || "" : "")[0].match(/\n/g) || []).length;
+        if (ref) want.push(ref.kind + ":" + ref.spec + "@" + line);
+        src += text + "\n";
+    }
+    return { src, want: want.join(" ") };
+}
+const refsOf = (T, src) => T.extractImports(src).map(r => r.kind + ":" + (r.spec === null ? "null" : r.spec) + "@" + r.line).join(" ");
+
+S.add("lexer_call_shapes", T => {
+    const R = rows([
+        ["require(\"t1\",);", { kind: "require", spec: "t1" }],
+        ["require((\"p1\"));", { kind: "require", spec: "p1" }],
+        ["module.require(\"m1\");", { kind: "require", spec: "m1" }],
+        ["globalThis.require(\"g1\");", { kind: "require", spec: "g1" }],
+        ["window.require(\"x1\");", { kind: "require", spec: "x1" }],
+        ["require?.(\"o1\");", { kind: "require", spec: "o1" }],
+        ["requ" + BS + "u0069re(\"u1\");", { kind: "require", spec: "u1" }],
+        [BS + "u0072equire(\"u2\");", { kind: "require", spec: "u2" }],
+        [BS + "u{72}equire(\"u3\");", { kind: "require", spec: "u3" }],
+        ["require" + String.fromCharCode(0x3000) + "(\"w1\");", { kind: "require", spec: "w1" }]
+    ]);
+    const got = refsOf(T, R.src);
+    return expect(got === R.want, "got " + got);
+});
+
+S.add("lexer_regex_division_comments_and_lines", T => {
+    const R = rows([
+        ["let i = 0; i++ / 2; const d2 = require('d2'); const z = 4 / 2;", { kind: "require", spec: "d2" }],
+        ["function g(s) { return /'/.test(s) || require('l1'); }", { kind: "require", spec: "l1" }],
+        ["const half = 10 / 2; const q = require('l2'); const z2 = 4 / 2;", { kind: "require", spec: "l2" }],
+        ["// a comment ended by CR" + String.fromCharCode(13) + "const cr = require('c1');", { kind: "require", spec: "c1" }],
+        ["// a comment ended by a line separator" + String.fromCharCode(0x2028) + "const ls = require('c2');", { kind: "require", spec: "c2" }],
+        ["const t = `${ {a: `${ {b: 1}.b }`}.a }`; const n1 = require('n1');", { kind: "require", spec: "n1" }],
+        ["const t4 = `${ f({a: 1}, '`') }`; const n4 = require('n4');", { kind: "require", spec: "n4" }],
+        ["/*\n\n*/ const bc = require('bc1');", { kind: "require", spec: "bc1", at: "const bc" }],
+        ["const ml = 'a" + BS + "\nb'; const mlr = require('ml1');", { kind: "require", spec: "ml1", at: "; const mlr" }]
+    ]);
+    const got = refsOf(T, R.src);
+    return expect(got === R.want, "got " + got + " want " + R.want);
+});
+
+S.add("lexer_indirect_require_reported", T => {
+    const got = refsOf(T, "const r = require;\n(0, require)('x');\nrequire.call(null, 'y');\n");
+    return expect(got === "require:null@1 require:null@2 require:null@3", "got " + got);
+});
+
+S.add("export_default_reexports", T => {
+    const got = refsOf(T, "export { default } from 'x1';\nexport { default as y } from 'x2';\nexport { y as default } from 'x3';\nexport default function f() { return from; }\n");
+    return expect(got === "export:x1@1 export:x2@2 export:x3@3", "got " + got);
+});
+
 S.add("clean_repo_exit_0", T => {
     const d = json(T, ["--libs-baseline", X.cleanLibs], X.clean);
     return expect(d.code === 0 && d.findings.length === 0, "exit " + d.code + ": " + keys(d.findings).join(", "));
@@ -179,7 +258,7 @@ S.add("clean_repo_exit_0", T => {
 S.add("clean_repo_notes_reported_not_failed", T => {
     const d = json(T, ["--libs-baseline", X.cleanLibs], X.clean);
     const n = keys(d.notes).join(", ");
-    const want = ["BUILTIN_OUTSIDE_POLICY game/js/plugins/A.js:7", "BUILTIN_OUTSIDE_POLICY tools/opt/render.mjs:1", "BUILTIN_OUTSIDE_POLICY tools/t.js:9", "NPM_ARTIFACT package.json",
+    const want = ["BUILTIN_OUTSIDE_POLICY game/js/plugins/A.js:7", "BUILTIN_OUTSIDE_POLICY tools/opt/render.mjs:1", "BUILTIN_OUTSIDE_POLICY tools/t.js:11", "NPM_ARTIFACT package.json",
                   "NPM_REQUIRE tools/opt/render.mjs:3", "UNRESOLVED_DYNAMIC game/js/plugins/A.js:8", "UNRESOLVED_DYNAMIC tools/esm.js:6"].sort().join(", ");
     return expect(n === want, "notes: " + n);
 });
@@ -201,23 +280,25 @@ S.add("npm_require_detected", T => {
 S.add("missing_relative_detected_literal_and_folded", T => {
     const d = json(T, ["--libs-baseline", X.badLibs], X.bad);
     const f = keys(d.findings.filter(x => x.kind === "MISSING_RELATIVE")).join(", ");
-    return expect(f === "MISSING_RELATIVE tools/missing.js:2, MISSING_RELATIVE tools/missing.js:3", "MISSING_RELATIVE: " + f);
+    return expect(f === "MISSING_RELATIVE tools/missing.js:2, MISSING_RELATIVE tools/missing.js:3, MISSING_RELATIVE tools/slash.js:1", "MISSING_RELATIVE: " + f);
 });
 
 S.add("absolute_require_detected", T => {
     const d = json(T, ["--libs-baseline", X.badLibs], X.bad);
-    return expect(keys(d.findings.filter(x => x.kind === "ABSOLUTE_REQUIRE")).join(",") === "ABSOLUTE_REQUIRE tools/abs.js:1", "ABSOLUTE_REQUIRE missing");
+    const f = keys(d.findings.filter(x => x.kind === "ABSOLUTE_REQUIRE")).join(", ");
+    return expect(f === "ABSOLUTE_REQUIRE tools/abs.js:1, ABSOLUTE_REQUIRE tools/esm_bad.js:2", "ABSOLUTE_REQUIRE: " + f);
 });
 
 S.add("npm_artifacts_under_game_detected", T => {
     const d = json(T, ["--libs-baseline", X.badLibs], X.bad);
     const f = keys(d.findings.filter(x => x.kind === "NPM_ARTIFACT")).join(", ");
-    return expect(f === "NPM_ARTIFACT game/node_modules/left-pad/index.js, NPM_ARTIFACT game/package-lock.json, NPM_ARTIFACT game/package.json", "NPM_ARTIFACT: " + f);
+    return expect(f === "NPM_ARTIFACT game/node_modules/left-pad/index.js, NPM_ARTIFACT game/package-lock.json, NPM_ARTIFACT game/package.json, NPM_ARTIFACT game/sub/package.json",
+                  "NPM_ARTIFACT: " + f);
 });
 
 S.add("bad_repo_finding_total", T => {
     const d = json(T, ["--libs-baseline", X.badLibs], X.bad);
-    return expect(d.findings.length === 10, "findings " + d.findings.length + ": " + keys(d.findings).join(", "));
+    return expect(d.findings.length === 13, "findings " + d.findings.length + ": " + keys(d.findings).join(", "));
 });
 
 S.add("libs_changed_removed_added_detected", T => {
@@ -230,7 +311,8 @@ S.add("libs_changed_removed_added_detected", T => {
 S.add("libs_worktree_change_detected", T => {
     const d = json(T, ["--libs-baseline", X.libsFile], X.libs);
     const f = keys(d.findings.filter(x => x.kind === "LIBS_WORKTREE_CHANGED")).join(", ");
-    return expect(f === "LIBS_WORKTREE_CHANGED game/js/libs/extra2.js, LIBS_WORKTREE_CHANGED game/js/libs/localforage.min.js, LIBS_WORKTREE_CHANGED game/js/libs/untracked.js", "worktree: " + f);
+    return expect(f === "LIBS_WORKTREE_CHANGED game/js/libs/extra2.js, LIBS_WORKTREE_CHANGED game/js/libs/ignored.tmp, LIBS_WORKTREE_CHANGED game/js/libs/localforage.min.js, " +
+                  "LIBS_WORKTREE_CHANGED game/js/libs/untracked.js", "worktree: " + f);
 });
 
 S.add("make_libs_baseline_roundtrip", T => {
@@ -264,7 +346,13 @@ S.add("node_version_policy", T => {
 S.add("dep_baseline_hides_only_its_entry", T => {
     const d = json(T, ["--libs-baseline", X.badLibs, "--baseline", X.badBaseline], X.bad);
     expect(d.baselined.length === 1 && d.baselined[0].path === "tools/missing.js" && d.baselined[0].line === 2, "baselined " + keys(d.baselined).join(","));
-    return expect(d.code === 1 && d.findings.length === 9, "exit " + d.code + ", findings " + d.findings.length);
+    return expect(d.code === 1 && d.findings.length === 12, "exit " + d.code + ", findings " + d.findings.length);
+});
+
+S.add("dep_baseline_needs_path_and_kind", T => {
+    const d = json(T, ["--libs-baseline", X.badLibs, "--baseline", X.mismatchBaseline], X.bad);
+    return expect(d.baselined.length === 0 && d.findings.filter(f => f.kind === "STALE_BASELINE").length === 2 && d.findings.length === 15,
+                  "baselined " + d.baselined.length + ", findings " + keys(d.findings).join(", "));
 });
 
 S.add("dep_baseline_stale_entry_fails", T => {
@@ -298,7 +386,7 @@ S.add("usage_errors_exit_2", T => {
 S.add("text_output_result_line", T => {
     const r = run(T, ["--libs-baseline", X.badLibs], X.bad);
     expect(/^FINDING NPM_REQUIRE game\/js\/plugins\/npm\.js:1 left-pad /m.test(r.out), "no FINDING line");
-    return expect(/^RESULT: HEAD [0-9a-f]{12}, 8 script files, \d+ module references, 10 findings \(/m.test(r.out), "RESULT line: " + r.out.split("\n").filter(Boolean).pop());
+    return expect(/^RESULT: HEAD [0-9a-f]{12}, 10 script files, \d+ module references, 13 findings \(/m.test(r.out), "RESULT line: " + r.out.split("\n").filter(Boolean).pop());
 });
 
 S.add("cli_exit_codes", () => {
@@ -320,9 +408,35 @@ const MUTANTS = [
     { name: "npm_artifact_off", pairs: [["items.push(...checkNpmArtifacts(entries, blobText));", ""]], hints: ["npm_artifacts_under_game_detected"] },
     { name: "node_version_off", pairs: [["if (Number(m[1]) < MIN_NODE_MAJOR)", "if (false)"]], hints: ["node_version_policy"] },
     { name: "builtins_treated_as_npm", pairs: [["return isBuiltin ? bare.split(\"/\")[0] : null;", "return null;"]], hints: ["clean_repo_exit_0"] },
-    { name: "dynamic_not_reported", pairs: [["if (ref.spec === null) return { kind: \"UNRESOLVED_DYNAMIC\", severity: \"note\"", "if (ref.spec === null) return { kind: \"UNRESOLVED_DYNAMIC\", severity: \"ok\""]], hints: ["clean_repo_notes_reported_not_failed"] },
-    { name: "lexer_reads_comments", pairs: [["if (c === \"/\" && src[i + 1] === \"/\") { while (i < n && src[i] !== \"\\n\") i++; continue; }", ""]], hints: ["lexer_ignores_strings_comments_templates_regexes"] },
-    { name: "dirname_fold_off", pairs: [["const folded = arg ? foldDirname(toks, k + 2) : null;", "const folded = null;"]], hints: ["missing_relative_detected_literal_and_folded"] },
+    { name: "dynamic_not_reported", pairs: [["severity: \"note\", detail: ref.indirect", "severity: \"ok\", detail: ref.indirect"]], hints: ["clean_repo_notes_reported_not_failed"] },
+    { name: "lexer_reads_comments", pairs: [["if (c === \"/\" && src[i + 1] === \"/\") { while (i < n && !LINE_END.has(src.charCodeAt(i))) i++; continue; }", ""]], hints: ["lexer_ignores_strings_comments_templates_regexes"] },
+    { name: "line_comment_ends_only_at_lf", pairs: [["const LINE_END = new Set([0x0a, 0x0d, 0x2028, 0x2029]);", "const LINE_END = new Set([0x0a]);"]], hints: ["lexer_regex_division_comments_and_lines"] },
+    { name: "unicode_spaces_off", pairs: [["0x202f, 0x205f, 0x3000, ", "0x202f, 0x205f, "]], hints: ["lexer_call_shapes"] },
+    { name: "identifier_escape_start_off", pairs: [["if (isIdStart(c) || (c === \"\\\\\" && src[i + 1] === \"u\")) {", "if (isIdStart(c)) {"]], hints: ["lexer_call_shapes"] },
+    { name: "identifier_escapes_off", pairs: [["if (src[i] === \"\\\\\" && src[i + 1] === \"u\") {", "if (false) {"]], hints: ["lexer_call_shapes"] },
+    { name: "postfix_division_off", pairs: [["if ((p.v === \"+\" || p.v === \"-\") && q && q.t === \"p\" && q.v === p.v) return false;", ""]], hints: ["lexer_regex_division_comments_and_lines"] },
+    { name: "regex_after_keyword_off", pairs: [["if (p.t === \"id\") return REGEX_AFTER_WORD.has(p.v);", "if (p.t === \"id\") return false;"]], hints: ["lexer_regex_division_comments_and_lines"] },
+    { name: "regex_after_literal", pairs: [["if (p.t === \"num\" || p.t === \"str\" || p.t === \"tpl\" || p.t === \"re\") return false;", ""]], hints: ["lexer_regex_division_comments_and_lines"] },
+    { name: "template_brace_depth_off", pairs: [["if (c === \"{\") stack.push(\"{\");", "if (false) stack.push(\"{\");"]], hints: ["lexer_regex_division_comments_and_lines"] },
+    { name: "block_comment_line_count_off", pairs: [["for (let k = i; k < end; k++) if (src[k] === \"\\n\") line++;", ""]], hints: ["lexer_regex_division_comments_and_lines"] },
+    { name: "string_continuation_line_count_off", pairs: [["if (e === \"\\n\") { line++; i += 2; continue; }", "if (e === \"\\n\") { i += 2; continue; }"]], hints: ["lexer_regex_division_comments_and_lines"] },
+    { name: "optional_call_off", pairs: [["if (isP(toks[open], \"?.\")) open++;", ""]], hints: ["lexer_call_shapes"] },
+    { name: "global_member_require_off", pairs: [["if (!(isId(obj) && GLOBAL_OBJECTS.has(obj.v) && !isP(toks[k - 3], \".\") && !isP(toks[k - 3], \"?.\"))) return null;", "return null;"]], hints: ["lexer_call_shapes"] },
+    { name: "require_parens_off", pairs: [["while (isP(toks[a], \"(\")) { a++; depth++; }", ""]], hints: ["lexer_call_shapes"] },
+    { name: "trailing_comma_off", pairs: [["if (isP(toks[c], \",\")) c++;\n        return isP(toks[c], \")\");", "return isP(toks[c], \")\");"]], hints: ["lexer_call_shapes"] },
+    { name: "indirect_not_reported", pairs: [["return { line: tok.line, kind: \"require\", spec: null, indirect: true };", "return null;"]], hints: ["lexer_indirect_require_reported"] },
+    { name: "function_require_guard_off", pairs: [["/^(?:function|typeof|const|let|var|class)$/.test(before.v)", "/^(?:typeof|const|let|var|class)$/.test(before.v)"]], hints: ["lexer_ignores_strings_comments_templates_regexes"] },
+    { name: "export_default_breaks_scan", pairs: [["/^(?:function|class|const|let|var|async|export|import)$/", "/^(?:function|class|const|let|var|default|async|export|import)$/"]], hints: ["export_default_reexports"] },
+    { name: "dirname_fold_off", pairs: [["const folded = arg ? foldDirname(toks, a) : null;", "const folded = null;"]], hints: ["missing_relative_detected_literal_and_folded"] },
+    { name: "folder_only_off", pairs: [["if (!folderOnly) for (const ext of RESOLVE_EXTENSIONS)", "for (const ext of RESOLVE_EXTENSIONS)"]], hints: ["missing_relative_detected_literal_and_folded"] },
+    { name: "trailing_slash_kept", pairs: [["const rel = path.posix.normalize(path.posix.join(base, norm)).replace(/\\/+$/, \"\");", "const rel = path.posix.normalize(path.posix.join(base, norm));"]], hints: ["clean_repo_exit_0"] },
+    { name: "extension_resolution_js_only", pairs: [["const RESOLVE_EXTENSIONS = [\"\", \".js\", \".json\", \".mjs\", \".cjs\", \".node\"];", "const RESOLVE_EXTENSIONS = [\"\", \".js\"];"]], hints: ["clean_repo_exit_0"] },
+    { name: "file_url_not_absolute", pairs: [[" || norm.startsWith(\"file:\")", ""]], hints: ["absolute_require_detected"] },
+    { name: "package_json_parse_error_off", pairs: [["out.push({ kind: \"NPM_ARTIFACT\", severity: sev, path: e.path, line: 0, detail: \"package.json does not parse", "if (false) out.push({ kind: \"NPM_ARTIFACT\", severity: sev, path: e.path, line: 0, detail: \"package.json does not parse"]], hints: ["npm_artifacts_under_game_detected"] },
+    { name: "libs_flag_check_off", pairs: [["if (rec && (rec[0] === \"S\" || (rec[0] >= \"a\" && rec[0] <= \"z\"))) note(", "if (false) note("]], hints: ["libs_worktree_change_detected"] },
+    { name: "libs_ignored_files_off", pairs: [["if (p) note(p, \"untracked file (ignored or not)\");", ""]], hints: ["libs_worktree_change_detected"] },
+    { name: "dep_baseline_ignores_kind", pairs: [["e.path === it.path && e.kind === it.kind && e.spec === it.spec", "e.path === it.path && e.spec === it.spec"]], hints: ["dep_baseline_needs_path_and_kind"] },
+    { name: "dep_baseline_ignores_path", pairs: [["e.path === it.path && e.kind === it.kind && e.spec === it.spec", "e.kind === it.kind && e.spec === it.spec"]], hints: ["dep_baseline_needs_path_and_kind"] },
     { name: "nw_app_root_base_off", pairs: [["if (file.startsWith(GAME_DIR)) bases.push(GAME_DIR.slice(0, -1));", ""]], hints: ["clean_repo_exit_0"] },
     { name: "dep_baseline_off", pairs: [["const i = entries.findIndex(e => e.path === it.path && e.kind === it.kind && e.spec === it.spec);", "const i = -1;"]], hints: ["dep_baseline_hides_only_its_entry"] },
     { name: "dep_baseline_staleness_off", pairs: [["return entries.filter((e, i) => !used.has(i)).map(", "return [].filter((e, i) => !used.has(i)).map("]], hints: ["dep_baseline_stale_entry_fails"] }

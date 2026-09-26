@@ -113,15 +113,20 @@ function sha256(buf) {
 // It exists so that require( and import inside strings, comments and regexes are not read as code.
 // ---------------------------------------------------------------------------------------------
 
-// Space, tab, CR, form feed, vertical tab, no-break space, byte-order mark, line and paragraph
-// separators (by code, so this source stays ASCII).
-const WHITESPACE = new Set([0x20, 0x09, 0x0d, 0x0c, 0x0b, 0xa0, 0xfeff, 0x2028, 0x2029]);
+// JavaScript white space and line terminators (by code, so this source stays ASCII): space, tab,
+// CR, form feed, vertical tab, no-break space, byte-order mark, the Unicode space separators
+// (U+1680, U+2000..U+200A, U+202F, U+205F, U+3000), line and paragraph separators.
+const WHITESPACE = new Set([0x20, 0x09, 0x0d, 0x0c, 0x0b, 0xa0, 0xfeff, 0x1680, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005,
+                            0x2006, 0x2007, 0x2008, 0x2009, 0x200a, 0x202f, 0x205f, 0x3000, 0x2028, 0x2029]);
+// A line comment ends at LF, CR, or the line / paragraph separator.
+const LINE_END = new Set([0x0a, 0x0d, 0x2028, 0x2029]);
 
 const REGEX_AFTER_WORD = new Set(["return", "typeof", "instanceof", "in", "of", "new", "delete", "void", "throw",
                                   "case", "do", "else", "yield", "await"]);
 
-function isIdStart(c) { return /[A-Za-z_$]/.test(c) || c > "\x7f"; }
-function isIdPart(c) { return /[\w$]/.test(c) || c > "\x7f"; }
+// Non-ASCII characters count as identifier characters, except the white space above.
+function isIdStart(c) { return /[A-Za-z_$]/.test(c) || (c > "\x7f" && !WHITESPACE.has(c.charCodeAt(0))); }
+function isIdPart(c) { return /[\w$]/.test(c) || (c > "\x7f" && !WHITESPACE.has(c.charCodeAt(0))); }
 
 function lex(src) {
     const toks = [];
@@ -134,7 +139,26 @@ function lex(src) {
         if (!p) return true;
         if (p.t === "id") return REGEX_AFTER_WORD.has(p.v);
         if (p.t === "num" || p.t === "str" || p.t === "tpl" || p.t === "re") return false;
+        // "i++ / 2": a slash after a postfix ++ or -- divides.
+        const q = toks[toks.length - 2];
+        if ((p.v === "+" || p.v === "-") && q && q.t === "p" && q.v === p.v) return false;
         return !(p.v === ")" || p.v === "]");
+    };
+    // An identifier, with \uXXXX and \u{X} escapes decoded ("require" is require).
+    const readIdent = () => {
+        let v = "";
+        while (i < n) {
+            if (src[i] === "\\" && src[i + 1] === "u") {
+                const m = /^\\u(?:\{([0-9a-fA-F]{1,6})\}|([0-9a-fA-F]{4}))/.exec(src.substr(i, 12));
+                if (!m) break;
+                v += String.fromCodePoint(parseInt(m[1] || m[2], 16));
+                i += m[0].length;
+                continue;
+            }
+            if (!(v === "" ? isIdStart(src[i]) : isIdPart(src[i]))) break;
+            v += src[i++];
+        }
+        return v;
     };
     // Reads template text from i (just after ` or a substitution's closing }) to the closing ` or
     // the next ${. Returns true when it stopped at ${.
@@ -154,7 +178,7 @@ function lex(src) {
         const c = src[i];
         if (c === "\n") { line++; i++; continue; }
         if (WHITESPACE.has(c.charCodeAt(0))) { i++; continue; }
-        if (c === "/" && src[i + 1] === "/") { while (i < n && src[i] !== "\n") i++; continue; }
+        if (c === "/" && src[i + 1] === "/") { while (i < n && !LINE_END.has(src.charCodeAt(i))) i++; continue; }
         if (c === "/" && src[i + 1] === "*") {
             const e = src.indexOf("*/", i + 2);
             const end = e < 0 ? n : e + 2;
@@ -219,12 +243,11 @@ function lex(src) {
                 continue;
             }
         }
-        if (isIdStart(c)) {
-            let k = i + 1;
-            while (k < n && isIdPart(src[k])) k++;
-            toks.push({ t: "id", v: src.slice(i, k), line });
-            i = k;
-            continue;
+        if (isIdStart(c) || (c === "\\" && src[i + 1] === "u")) {
+            const at = i;
+            const v = readIdent();
+            if (v !== "") { toks.push({ t: "id", v, line }); continue; }
+            i = at;
         }
         if (/[0-9]/.test(c) || (c === "." && /[0-9]/.test(src[i + 1] || ""))) {
             let k = i + 1;
@@ -274,6 +297,47 @@ function foldDirname(toks, k) {
     return null;
 }
 
+// The objects whose .require is the module loader (NW.js exposes it on window / globalThis too).
+const GLOBAL_OBJECTS = new Set(["module", "window", "globalThis", "global", "self"]);
+// require.<these> read the loader's state; they load nothing.
+const REQUIRE_PROPS_SKIPPED = new Set(["resolve", "cache", "main", "extensions", "paths"]);
+
+// A require call starting at toks[k] (the identifier). Returns a reference, or null when this
+// "require" loads nothing (a declaration, typeof, require.resolve, another object's method).
+function requireRef(toks, k) {
+    const tok = toks[k], before = toks[k - 1];
+    if (isP(before, ".") || isP(before, "?.")) {
+        const obj = toks[k - 2];
+        if (!(isId(obj) && GLOBAL_OBJECTS.has(obj.v) && !isP(toks[k - 3], ".") && !isP(toks[k - 3], "?."))) return null;
+    } else if (isId(before) && /^(?:function|typeof|const|let|var|class)$/.test(before.v)) {
+        return null;
+    }
+    let open = k + 1;
+    if (isP(toks[open], "?.")) open++;
+    if (!isP(toks[open], "(")) {
+        const next = toks[k + 1];
+        if (isP(next, ":")) return null;                                            // { require: ... }
+        if (isP(next, ".") && isId(toks[k + 2]) && REQUIRE_PROPS_SKIPPED.has(toks[k + 2].v)) return null;
+        // r = require; (0, require)(...); require.call(...): the loader is used indirectly.
+        return { line: tok.line, kind: "require", spec: null, indirect: true };
+    }
+    // The argument: one literal, possibly inside extra parentheses, possibly with a trailing comma.
+    let a = open + 1, depth = 0;
+    while (isP(toks[a], "(")) { a++; depth++; }
+    const closeAt = from => {
+        let c = from, d = depth;
+        while (d > 0 && isP(toks[c], ")")) { c++; d--; }
+        if (d > 0) return false;
+        if (isP(toks[c], ",")) c++;
+        return isP(toks[c], ")");
+    };
+    const arg = toks[a];
+    if (staticStr(arg) && closeAt(a + 1)) return { line: tok.line, kind: "require", spec: arg.v };
+    const folded = arg ? foldDirname(toks, a) : null;
+    if (folded && closeAt(folded.end)) return { line: tok.line, kind: "require", spec: folded.spec, folded: true };
+    return { line: tok.line, kind: "require", spec: null };
+}
+
 // Every module reference in a file: [{ line, kind: "require"|"import"|"export"|"dynamic-import", spec | null }].
 function extractImports(src) {
     const toks = lex(src);
@@ -281,17 +345,13 @@ function extractImports(src) {
     for (let k = 0; k < toks.length; k++) {
         const tok = toks[k];
         if (tok.t !== "id") continue;
-        const before = toks[k - 1];
-        if (isP(before, ".") || isP(before, "?.")) continue;               // obj.require(...), import.meta
         if (tok.v === "require") {
-            if (isId(before, "function") || !isP(toks[k + 1], "(")) continue;
-            const arg = toks[k + 2];
-            if (staticStr(arg) && isP(toks[k + 3], ")")) { refs.push({ line: tok.line, kind: "require", spec: arg.v }); continue; }
-            const folded = arg ? foldDirname(toks, k + 2) : null;
-            if (folded && isP(toks[folded.end], ")")) { refs.push({ line: tok.line, kind: "require", spec: folded.spec, folded: true }); continue; }
-            refs.push({ line: tok.line, kind: "require", spec: null });
+            const ref = requireRef(toks, k);
+            if (ref) refs.push(ref);
             continue;
         }
+        const before = toks[k - 1];
+        if (isP(before, ".") || isP(before, "?.")) continue;               // obj.import, import.meta
         if (tok.v === "import") {
             if (isP(toks[k + 1], ":")) continue;                             // { import: ... }
             if (isP(toks[k + 1], "(")) {
@@ -308,9 +368,10 @@ function extractImports(src) {
             continue;
         }
         if (tok.v === "export") {
+            if (isId(toks[k + 1], "default")) continue;                    // export default ...: not a re-export
             for (let j = k + 1; j < Math.min(toks.length, k + 400); j++) {
                 const t = toks[j];
-                if (isP(t, ";") || isP(t, "=") || isP(t, "(") || (t.t === "id" && /^(?:function|class|const|let|var|default|async|export|import)$/.test(t.v))) break;
+                if (isP(t, ";") || isP(t, "=") || isP(t, "(") || (t.t === "id" && /^(?:function|class|const|let|var|async|export|import)$/.test(t.v))) break;
                 if (isId(t, "from") && staticStr(toks[j + 1])) { refs.push({ line: tok.line, kind: "export", spec: toks[j + 1].v }); break; }
             }
         }
@@ -329,10 +390,11 @@ function builtinName(spec) {
 }
 
 // Does `rel` (a normalised repository-relative posix path) name a tracked file the way Node would
-// load it (exact, with an extension, or as a folder with index.* or package.json main)?
-function resolvesTracked(rel, tracked, blobText) {
+// load it (exact, with an extension, or as a folder with index.* or package.json main)? A spec
+// ending in "/" names a folder only.
+function resolvesTracked(rel, tracked, blobText, folderOnly) {
     if (rel === "" || rel.startsWith("../") || rel === "..") return false;
-    for (const ext of RESOLVE_EXTENSIONS) if (tracked.has(rel + ext)) return true;
+    if (!folderOnly) for (const ext of RESOLVE_EXTENSIONS) if (tracked.has(rel + ext)) return true;
     const pkg = rel + "/package.json";
     if (tracked.has(pkg)) {
         try {
@@ -346,7 +408,9 @@ function resolvesTracked(rel, tracked, blobText) {
 
 // Classifies one reference. Returns { kind, severity: "finding"|"note"|"ok", detail }.
 function classify(ref, file, tracked, blobText) {
-    if (ref.spec === null) return { kind: "UNRESOLVED_DYNAMIC", severity: "note", detail: ref.kind + " with a computed argument (not guessed)" };
+    if (ref.spec === null) {
+        return { kind: "UNRESOLVED_DYNAMIC", severity: "note", detail: ref.indirect ? "require used as a value, not called (the module cannot be known)" : ref.kind + " with a computed argument (not guessed)" };
+    }
     const spec = ref.spec;
     const b = builtinName(spec);
     if (b !== null) {
@@ -363,9 +427,10 @@ function classify(ref, file, tracked, blobText) {
         // a page script's relative require against the app root game/ (where index.html is).
         const bases = [path.posix.dirname(file)];
         if (file.startsWith(GAME_DIR)) bases.push(GAME_DIR.slice(0, -1));
+        const folderOnly = norm.endsWith("/");
         for (const base of bases) {
-            const rel = path.posix.normalize(path.posix.join(base, norm));
-            if (resolvesTracked(rel === "." ? "" : rel, tracked, blobText)) return { kind: "RELATIVE", severity: "ok", detail: rel };
+            const rel = path.posix.normalize(path.posix.join(base, norm)).replace(/\/+$/, "");
+            if (resolvesTracked(rel === "." ? "" : rel, tracked, blobText, folderOnly)) return { kind: "RELATIVE", severity: "ok", detail: rel };
         }
         return { kind: "MISSING_RELATIVE", severity: "finding", detail: spec + " (no tracked file at " + bases.map(b0 => path.posix.normalize(path.posix.join(b0, norm))).join(" or ") + ")" };
     }
@@ -503,14 +568,25 @@ function checkLibs(root, entries, blobs, baseline) {
         if (!(p in baseline.files)) out.push({ kind: "LIBS_CHANGED", severity: "finding", path: p, line: 0, detail: "file added to the frozen libs folder" });
     }
     // Uncommitted edits, deletions and new files in the frozen folder (git's own view, so line-ending
-    // conversion is not a change).
+    // conversion is not a change). One finding per path.
+    const worktree = new Map();
+    const note = (p, detail) => { if (!worktree.has(p)) worktree.set(p, detail); };
     const st = git(root, ["status", "--porcelain=v1", "-z", "--untracked-files=all", "--", LIBS_DIR]).toString("utf8").split("\0");
     for (let i = 0; i < st.length; i++) {
         const rec = st[i];
         if (!rec) continue;
-        out.push({ kind: "LIBS_WORKTREE_CHANGED", severity: "finding", path: rec.slice(3), line: 0, detail: "working tree differs from HEAD (git status " + JSON.stringify(rec.slice(0, 2)) + ")" });
+        note(rec.slice(3), "working tree differs from HEAD (git status " + JSON.stringify(rec.slice(0, 2)) + ")");
         if (rec[0] === "R" || rec[0] === "C") i++;                // a rename or copy record carries its source path next
     }
+    // git status does not show edits to a file marked assume-unchanged (lower-case tag) or
+    // skip-worktree (S), nor ignored new files: both are checked here.
+    for (const rec of git(root, ["ls-files", "-v", "-z", "--", LIBS_DIR]).toString("utf8").split("\0")) {
+        if (rec && (rec[0] === "S" || (rec[0] >= "a" && rec[0] <= "z"))) note(rec.slice(2), "assume-unchanged or skip-worktree is set, so git status hides its edits");
+    }
+    for (const p of git(root, ["ls-files", "--others", "-z", "--", LIBS_DIR]).toString("utf8").split("\0")) {
+        if (p) note(p, "untracked file (ignored or not)");
+    }
+    for (const [p, detail] of worktree) out.push({ kind: "LIBS_WORKTREE_CHANGED", severity: "finding", path: p, line: 0, detail });
     return { items: out, count: now.size };
 }
 
