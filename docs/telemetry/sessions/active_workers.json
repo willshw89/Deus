@@ -72,8 +72,10 @@
     "launchTimeCT": "2026-09-26 00:24:25 CT",
     "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\lane-n\\tasks\\SIM.00.00\\lane-n\\BRIEF.md",
     "launchPromptPath": "C:\\Users\\snewt\\.deus_worktrees\\run_lane_n.ps1",
-    "state": "running",
-    "tip": "b4f89753"
+    "state": "exited",
+    "exitCode": 0,
+    "tip": "2f2a1ff2",
+    "endedAtCT": "2026-09-26 01:49:33 CT"
   },
   {
     "lane": "Lane M",
