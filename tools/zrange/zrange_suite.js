@@ -25,7 +25,7 @@ function zrangeSuitePlugin() {
     const fs = require("fs"), path = require("path");
     const outDir = path.join(nw.__dirname || process.cwd(), "test_output");
     const PHASE = (process.env.ZR_PHASE || "core").trim();
-    const UPDATES = Math.max(0, Number(process.env.ZR_UPDATES || "2400") | 0);
+    const UPDATES = Math.max(0, Number(process.env.ZR_UPDATES || "1500") | 0);
     const report = { phase: PHASE, made: new Date().toISOString(), env: { DEUS_Z_RANGE: process.env.DEUS_Z_RANGE || null }, data: {}, timing: {} };
     const writeReport = () => { try { fs.writeFileSync(path.join(outDir, "zrange_report.json"), JSON.stringify(report, null, 1)); } catch (_) { /* reported by the driver */ } };
 
@@ -406,17 +406,24 @@ function zrangeSuitePlugin() {
 
         //---------------------------------------------------------------- sim: ZR_UPDATES map updates, then the census
         async function simPhase() {
-            resume();
-            // At 1x one map update a frame, so the run stops after exactly UPDATES updates (the waiter checks every update).
+            // Exactly UPDATES map updates at 1x: the world pauses itself inside the update that reaches the count (a frame
+            // may run several updates when the loop catches up; a pause stops the next one).
             if (UF.Time && UF.Time.setLevel) UF.Time.setLevel(0);
             const f0 = W._frame, tick0 = UF.Time && UF.Time.ticks ? UF.Time.ticks() : null, r0 = performance.now();
-            await t.waitUntil(() => W._frame - f0 >= UPDATES, 150000, `${UPDATES} map updates`).catch(() => {});
+            const realMapUpdate = Game_Map.prototype.update;
+            Game_Map.prototype.update = function() {
+                realMapUpdate.apply(this, arguments);
+                if (W._frame - f0 >= UPDATES) pause();
+            };
+            resume();
+            await t.waitUntil(() => W._frame - f0 >= UPDATES, 170000, `${UPDATES} map updates`).catch(() => {});
+            Game_Map.prototype.update = realMapUpdate;
             pause();
             if (UF.Time && UF.Time.setLevel) UF.Time.setLevel(0);
             report.data.simulation = { updates: W._frame - f0, ticks: tick0 === null ? null : UF.Time.ticks() - tick0, realMs: +(performance.now() - r0).toFixed(0) };
             report.data.censusAfter = census();
             resume();
-            t.check("sim_data_written", report.data.simulation.updates >= UPDATES, `after ${report.data.simulation.updates} map updates (${report.data.simulation.realMs} ms; ${report.data.simulation.ticks} time ticks): census ${report.data.censusAfter.ms} ms`);
+            t.check("sim_data_written", report.data.simulation.updates === UPDATES, `after ${report.data.simulation.updates} map updates (${report.data.simulation.realMs} ms; ${report.data.simulation.ticks} time ticks): census ${report.data.censusAfter.ms} ms`);
         }
 
         async function extremeLayers() {

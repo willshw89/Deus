@@ -2,7 +2,7 @@
  "base": "5255f1a58a9d95bb7bc08377ef055c366610e486",
  "seed": 18,
  "updates": 2400,
- "made": "2026-09-26T13:37:24.176Z",
+ "made": "2026-09-26T13:56:45.625Z",
  "by": "node tools/test_zrange.js --refresh-base",
  "core": {
   "checksums": {
@@ -138,7 +138,7 @@
   "capStrata": 5160,
   "capColumns": 691,
   "fluidStrata": 406,
-  "ms": 153
+  "ms": 213
  },
  "blast": {
   "block": {
@@ -265,7 +265,7 @@
   "zRange": 4,
   "fluid": 0,
   "fluidAlias": 0,
-  "total": 6608452
+  "total": 6608453
  },
  "censusAfter": {
   "strata": {
@@ -284,8 +284,8 @@
    "5": 4,
    "6": 1,
    "7": 69,
-   "15": 136,
-   "16": 37,
+   "15": 137,
+   "16": 36,
    "17": 139,
    "18": 26,
    "19": 69,
@@ -341,7 +341,7 @@
    "hide:0": 48,
    "bone:0": 66,
    "meat_raw:0": 56,
-   "berries:0": 5,
+   "berries:0": 4,
    "wool:0": 8,
    "fruit:0": 1
   },
@@ -382,22 +382,22 @@
   "capStrata": 5160,
   "capColumns": 691,
   "fluidStrata": 406,
-  "ms": 200
+  "ms": 172
  },
  "simulation": {
-  "updates": 2432,
-  "ticks": 2432,
-  "realMs": 117061
+  "updates": 2400,
+  "ticks": 2400,
+  "realMs": 127495
  },
  "timing": {
-  "setupNewGameMs": 16823.3,
-  "setupNewGameAtMs": 1080.2,
-  "firstMapStartMs": 20421.3
+  "setupNewGameMs": 20740.4,
+  "setupNewGameAtMs": 1164.6,
+  "firstMapStartMs": 25178.4
  },
  "heapAfterNewGame": {
   "gc": true,
   "usedJSHeapSize": 123000000,
-  "nodeHeapUsed": 32752964
+  "nodeHeapUsed": 32741924
  },
  "memoryBase": {
   "perLevel": {
@@ -440,7 +440,7 @@
  "repeat": {
   "coreSame": true,
   "censusSame": true,
-  "censusAfterSame": false,
+  "censusAfterSame": true,
   "censusAfterAgain": {
    "strata": {
     "1": 550959,
@@ -458,8 +458,8 @@
     "5": 4,
     "6": 1,
     "7": 69,
-    "15": 136,
-    "16": 37,
+    "15": 137,
+    "16": 36,
     "17": 139,
     "18": 26,
     "19": 69,
@@ -496,18 +496,18 @@
     "shovel:0": 9,
     "stone_pick:0": 9,
     "stone_axe:0": 9,
-    "common_clothes:0": 623,
-    "pouch:0": 623,
-    "gold_coin:0": 9345,
+    "common_clothes:0": 622,
+    "pouch:0": 622,
+    "gold_coin:0": 9330,
     "common_clothes:-1": 227,
     "pouch:-1": 227,
     "gold_coin:-1": 3405,
     "common_clothes:-2": 216,
     "pouch:-2": 216,
     "gold_coin:-2": 3240,
-    "common_clothes:1": 11,
-    "pouch:1": 11,
-    "gold_coin:1": 165,
+    "common_clothes:1": 12,
+    "pouch:1": 12,
+    "gold_coin:1": 180,
     "common_clothes:2": 1,
     "pouch:2": 1,
     "gold_coin:2": 15,
@@ -515,7 +515,7 @@
     "hide:0": 48,
     "bone:0": 66,
     "meat_raw:0": 56,
-    "berries:0": 5,
+    "berries:0": 4,
     "wool:0": 8,
     "fruit:0": 1
    },
@@ -527,9 +527,9 @@
     "halfling:0": 142,
     "tiefling:-2": 109,
     "dragonborn:-2": 107,
-    "human:0": 104,
+    "human:0": 103,
     "half-orc:0": 134,
-    "human:1": 11,
+    "human:1": 12,
     "human:-1": 1,
     "human:2": 1,
     "deer:0": 19,
@@ -558,9 +558,9 @@
    "fluidStrata": 406
   },
   "simulationAgain": {
-   "updates": 2432,
-   "ticks": 2432,
-   "realMs": 88389
+   "updates": 2401,
+   "ticks": 2401,
+   "realMs": 106401
   }
  }
 }

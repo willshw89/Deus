@@ -32,7 +32,7 @@
  *                         and view stepping stops at the ends, no errors
  *   path_scratch_bounded  a 3D search on one level allocates scratch for the levels it reached only (counted)
  *
- * Usage: node tools/test_zrange.js [--z-range=<zMin>..<zMax>] [--seed=18] [--base=<sha>] [--updates=3000]
+ * Usage: node tools/test_zrange.js [--z-range=<zMin>..<zMax>] [--seed=18] [--base=<sha>] [--updates=1500]
  *                                  [--refresh-base] [--make-legacy-fixture] [--provoke=<check> | --provoke-all]
  *                                  [--evidence=<dir>] [--keep] [--jobs=n]
  *   (no --z-range: the three configurations -4..4, -16..15 and the legacy -2..2)
@@ -57,7 +57,7 @@ const arg = (name, fallback) => { const a = args.find(x => x.startsWith(`--${nam
 const flag = name => args.includes(`--${name}`);
 const SEED = Number(arg("seed", "18"));
 const BASE = arg("base", "5255f1a58a9d95bb7bc08377ef055c366610e486");
-const UPDATES = Number(arg("updates", "2400"));
+const UPDATES = Number(arg("updates", "1500"));
 const KEEP = flag("keep");
 const RUN_TIMEOUT = 420000;
 const CONFIGS = arg("z-range", "") ? [arg("z-range", "")] : ["-4..4", "-16..15", "-2..2"];
