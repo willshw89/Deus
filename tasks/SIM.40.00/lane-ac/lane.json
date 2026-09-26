@@ -1,0 +1,39 @@
+{
+    "lane":  "lane-ac",
+    "taskId":  "SIM.40.00",
+    "branch":  "task/lane-ac",
+    "writer":  "grok",
+    "reviewer":  "claude",
+    "push":  true,
+    "allowedPaths":  [
+                         "game/data/sim/**",
+                         "game/js/sim/materials.js",
+                         "tools/sim/test_materials.js",
+                         "tools/sim/fixtures/materials/**",
+                         "docs/systems/DEUS_Materials.md",
+                         "tasks/SIM.40.00/**"
+                     ],
+    "gateTests":  [
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/sim/test_materials.js"
+                                   ],
+                          "timeoutSec":  900
+                      },
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/sim/test_ledger.js"
+                                   ],
+                          "timeoutSec":  900
+                      },
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/check_deus_syntax.js"
+                                   ],
+                          "timeoutSec":  600
+                      }
+                  ]
+}
