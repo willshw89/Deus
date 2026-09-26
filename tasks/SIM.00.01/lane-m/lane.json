@@ -1,0 +1,21 @@
+{
+  "lane": "lane-m",
+  "wbsId": "SIM.00.01",
+  "branch": "task/lane-m",
+  "worktree": "C:\\Users\\snewt\\.deus_worktrees\\lane-m",
+  "baseCommit": "ebeec892",
+  "allowedPaths": [
+    "docs/adr/ADR-003_sim_render_split_and_lod.md",
+    "docs/adr/README.md",
+    "tasks/SIM.00.01/lane-m/**"
+  ],
+  "forbiddenPaths": [
+    "game/**",
+    "tools/**",
+    "docs/worldgen/**",
+    "docs/art/**",
+    "docs/society/**"
+  ],
+  "gateTest": "node tools/check_deus_syntax.js",
+  "closureReviewer": "grok"
+}
