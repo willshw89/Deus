@@ -54,10 +54,10 @@ Band pages: [ALL](BAND_ALL.md), [LOWER2](BAND_LOWER2.md), [LOWER1](BAND_LOWER1.m
 
 | Family | Addendum | ordered by | LOWER2 | LOWER1 | SURFACE | UPPER1 | UPPER2 |
 |---|---|---|---|---|---|---|---|
-| EDGE | §15 | docs/OWNER_DECISIONS.md:278 | 696 | 696 | 696 | 696 | 696 |
-| SHADE | §15 | docs/OWNER_DECISIONS.md:278 | 5 | 5 | 5 | 5 | 5 |
-| TOP | §15 | docs/OWNER_DECISIONS.md:278 | 29 | 29 | 29 | 29 | 29 |
-| RAMP | §16 | docs/OWNER_DECISIONS.md:289 | 580 | 580 | 580 | 580 | 580 |
+| EDGE | §15 | docs/OWNER_DECISIONS.md:283 | 696 | 696 | 696 | 696 | 696 |
+| SHADE | §15 | docs/OWNER_DECISIONS.md:283 | 5 | 5 | 5 | 5 | 5 |
+| TOP | §15 | docs/OWNER_DECISIONS.md:283 | 29 | 29 | 29 | 29 | 29 |
+| RAMP | §16 | docs/OWNER_DECISIONS.md:294 | 580 | 580 | 580 | 580 | 580 |
 | RAMPSIDE | §16 | tasks/WG.20.02/lane-s/BRIEF.md:51 | 580 | 580 | 580 | 580 | 580 |
 | CONNECTOR | §16 | tasks/WG.20.02/lane-s/BRIEF.md:51 | 7 | 7 | 7 | 7 | 7 |
 | DECAY | §7 | docs/VISION.md:132 | 20 | 20 | 20 | 20 | 20 |
