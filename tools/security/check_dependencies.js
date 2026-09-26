@@ -120,6 +120,9 @@ const WHITESPACE = new Set([0x20, 0x09, 0x0d, 0x0c, 0x0b, 0xa0, 0xfeff, 0x1680, 
                             0x2006, 0x2007, 0x2008, 0x2009, 0x200a, 0x202f, 0x205f, 0x3000, 0x2028, 0x2029]);
 // A line comment ends at LF, CR, or the line / paragraph separator.
 const LINE_END = new Set([0x0a, 0x0d, 0x2028, 0x2029]);
+// A regular expression literal longer than this is not one (the slash divides). The cap keeps a
+// line full of "[/" from costing time that grows with the square of its length.
+const REGEX_MAX_LEN = 2000;
 
 const REGEX_AFTER_WORD = new Set(["return", "typeof", "instanceof", "in", "of", "new", "delete", "void", "throw",
                                   "case", "do", "else", "yield", "await"]);
@@ -139,9 +142,10 @@ function lex(src) {
         if (!p) return true;
         if (p.t === "id") return REGEX_AFTER_WORD.has(p.v);
         if (p.t === "num" || p.t === "str" || p.t === "tpl" || p.t === "re") return false;
-        // "i++ / 2": a slash after a postfix ++ or -- divides.
-        const q = toks[toks.length - 2];
-        if ((p.v === "+" || p.v === "-") && q && q.t === "p" && q.v === p.v) return false;
+        // "i++ / 2": a slash after a postfix ++ or -- (two touching signs after an operand) divides.
+        const q = toks[toks.length - 2], r = toks[toks.length - 3];
+        if ((p.v === "+" || p.v === "-") && q && q.t === "p" && q.v === p.v && q.at === p.at - 1 && r &&
+            ((r.t === "id" && !REGEX_AFTER_WORD.has(r.v)) || r.t === "num" || (r.t === "p" && (r.v === ")" || r.v === "]")))) return false;
         return !(p.v === ")" || p.v === "]");
     };
     // An identifier, with \uXXXX and \u{X} escapes decoded ("require" is require).
@@ -190,7 +194,7 @@ function lex(src) {
         if (c === "'" || c === '"') {
             const tok = { t: "str", v: "", line };
             i++;
-            while (i < n && src[i] !== c && src[i] !== "\n") {
+            while (i < n && src[i] !== c && src[i] !== "\n" && src[i] !== "\r") {
                 if (src[i] === "\\") {
                     const e = src[i + 1];
                     if (e === "\n") { line++; i += 2; continue; }
@@ -226,9 +230,9 @@ function lex(src) {
         if (c === "/" && regexAllowed()) {
             const start = i, startLine = line;
             let k = i + 1, inClass = false, ok = false;
-            while (k < n) {
+            while (k < n && k - i <= REGEX_MAX_LEN) {
                 const d = src[k];
-                if (d === "\n") break;
+                if (LINE_END.has(src.charCodeAt(k))) break;
                 if (d === "\\") { k += 2; continue; }
                 if (d === "[") inClass = true;
                 else if (d === "]") inClass = false;
@@ -260,7 +264,7 @@ function lex(src) {
         else if (c === "}") stack.pop();
         if (c === "." && src[i + 1] === "." && src[i + 2] === ".") { toks.push({ t: "p", v: "...", line }); i += 3; continue; }
         if (c === "?" && src[i + 1] === ".") { toks.push({ t: "p", v: "?.", line }); i += 2; continue; }
-        toks.push({ t: "p", v: c, line });
+        toks.push({ t: "p", v: c, line, at: i });
         i++;
     }
     return toks;
@@ -297,39 +301,42 @@ function foldDirname(toks, k) {
     return null;
 }
 
-// The objects whose .require is the module loader (NW.js exposes it on window / globalThis too).
-const GLOBAL_OBJECTS = new Set(["module", "window", "globalThis", "global", "self"]);
 // require.<these> read the loader's state; they load nothing.
 const REQUIRE_PROPS_SKIPPED = new Set(["resolve", "cache", "main", "extensions", "paths"]);
 
-// A require call starting at toks[k] (the identifier). Returns a reference, or null when this
-// "require" loads nothing (a declaration, typeof, require.resolve, another object's method).
+// A require call at toks[k]: the identifier require, or the string "require" in obj["require"].
+// Any member call counts (module.require, require.main.require, this.require, window.require,
+// obj["require"]): a method of that name that loads nothing is rare, and a missed loader is worse.
+// Returns a reference, or null when this "require" loads nothing (a declaration, typeof require,
+// require.resolve / .cache / .main, a member that is not called).
 function requireRef(toks, k) {
     const tok = toks[k], before = toks[k - 1];
-    if (isP(before, ".") || isP(before, "?.")) {
-        const obj = toks[k - 2];
-        if (!(isId(obj) && GLOBAL_OBJECTS.has(obj.v) && !isP(toks[k - 3], ".") && !isP(toks[k - 3], "?."))) return null;
-    } else if (isId(before) && /^(?:function|typeof|const|let|var|class)$/.test(before.v)) {
-        return null;
+    let member = false, open = k + 1;
+    if (tok.t === "str") {
+        if (!isP(before, "[") || !isP(toks[k + 1], "]")) return null;
+        member = true;
+        open = k + 2;
+    } else if (isP(before, ".") || isP(before, "?.")) {
+        member = true;
+    } else if (isId(before) && /^(?:function|const|let|var|class)$/.test(before.v)) {
+        return null;                                                                // declares a local "require"
     }
-    let open = k + 1;
     if (isP(toks[open], "?.")) open++;
     if (!isP(toks[open], "(")) {
         const next = toks[k + 1];
-        if (isP(next, ":")) return null;                                            // { require: ... }
+        if (member || isId(before, "typeof") || isP(next, ":")) return null;         // obj.require, typeof require, { require: ... }
         if (isP(next, ".") && isId(toks[k + 2]) && REQUIRE_PROPS_SKIPPED.has(toks[k + 2].v)) return null;
         // r = require; (0, require)(...); require.call(...): the loader is used indirectly.
         return { line: tok.line, kind: "require", spec: null, indirect: true };
     }
-    // The argument: one literal, possibly inside extra parentheses, possibly with a trailing comma.
+    // The first argument: one literal, possibly inside extra parentheses. Node ignores any later
+    // argument, so a comma after it is fine.
     let a = open + 1, depth = 0;
     while (isP(toks[a], "(")) { a++; depth++; }
     const closeAt = from => {
         let c = from, d = depth;
         while (d > 0 && isP(toks[c], ")")) { c++; d--; }
-        if (d > 0) return false;
-        if (isP(toks[c], ",")) c++;
-        return isP(toks[c], ")");
+        return d === 0 && (isP(toks[c], ",") || isP(toks[c], ")"));
     };
     const arg = toks[a];
     if (staticStr(arg) && closeAt(a + 1)) return { line: tok.line, kind: "require", spec: arg.v };
@@ -344,6 +351,11 @@ function extractImports(src) {
     const refs = [];
     for (let k = 0; k < toks.length; k++) {
         const tok = toks[k];
+        if (tok.t === "str" && tok.v === "require") {                         // obj["require"](...)
+            const ref = requireRef(toks, k);
+            if (ref) refs.push(ref);
+            continue;
+        }
         if (tok.t !== "id") continue;
         if (tok.v === "require") {
             const ref = requireRef(toks, k);
@@ -368,12 +380,18 @@ function extractImports(src) {
             continue;
         }
         if (tok.v === "export") {
-            if (isId(toks[k + 1], "default")) continue;                    // export default ...: not a re-export
-            for (let j = k + 1; j < Math.min(toks.length, k + 400); j++) {
-                const t = toks[j];
-                if (isP(t, ";") || isP(t, "=") || isP(t, "(") || (t.t === "id" && /^(?:function|class|const|let|var|async|export|import)$/.test(t.v))) break;
-                if (isId(t, "from") && staticStr(toks[j + 1])) { refs.push({ line: tok.line, kind: "export", spec: toks[j + 1].v }); break; }
+            // A re-export is "export * [as name] from" or "export { ... } from"; any other export
+            // declares something here. The names inside the braces can be any word (default, async).
+            let j = -1;
+            if (isP(toks[k + 1], "*")) {
+                j = k + 2;
+                if (isId(toks[j], "as")) j += 2;
+            } else if (isP(toks[k + 1], "{")) {
+                j = k + 2;
+                while (j < toks.length && j < k + 2000 && !isP(toks[j], "}")) j++;
+                j++;
             }
+            if (j > 0 && isId(toks[j], "from") && staticStr(toks[j + 1])) refs.push({ line: tok.line, kind: "export", spec: toks[j + 1].v });
         }
     }
     return refs;
@@ -399,7 +417,7 @@ function resolvesTracked(rel, tracked, blobText, folderOnly) {
     if (tracked.has(pkg)) {
         try {
             const main = JSON.parse(blobText(pkg)).main;
-            if (typeof main === "string" && main && resolvesTracked(path.posix.normalize(rel + "/" + main), tracked, blobText)) return true;
+            if (typeof main === "string" && main && resolvesTracked(path.posix.normalize(rel + "/" + main).replace(/\/+$/, ""), tracked, blobText, main.endsWith("/"))) return true;
         } catch (_) { /* unreadable package.json: fall through to index.* */ }
     }
     for (const ext of [".js", ".json", ".node"]) if (tracked.has(rel + "/index" + ext)) return true;

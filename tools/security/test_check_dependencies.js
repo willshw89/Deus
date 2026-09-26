@@ -42,7 +42,7 @@ const NOT_CODE = [
     "const s3 = `require(\"left-pad\") in a template ${1 + 1} and ${\"}\"} more`;",
     "const r1 = /require\\(\"left-pad\"\\)/;",
     "const r2 = /[\"'`]/g.test(s1) ? 1 : 2;",
-    "const o = { import: 1, require: 2 }; o.require(\"left-pad\"); obj?.require(\"left-pad\");",
+    "const o = { import: 1, require: 2 }; const m1 = o.require; require.extensions[\".x\"] = 1; const rp = require.paths;",
     "function require2() {} function localRequire(x) { return x; } localRequire(\"left-pad\");",
     "function require(name) { return name; }",
     "const o2 = { require: 1 }; const tr = typeof require; const rr = require.resolve(\"left-pad\"); require.cache[tr] = 1; if (require.main === module) {}",
@@ -102,6 +102,7 @@ function setup() {
             "const b = require('../game/js/plugins/B.js');",
             "const idx = require('./lib');",
             "const pkg = require('./pkg');",
+            "const pkg2 = require('./pkg2');",
             "const data = require('./data.json');",
             "const idx2 = require('./lib/');",
             "const data2 = require('./data');",
@@ -114,6 +115,8 @@ function setup() {
         "tools/lib/index.js": "module.exports = 3;\n",
         "tools/pkg/package.json": JSON.stringify({ name: "TEST_pkg", main: "main.js" }),
         "tools/pkg/main.js": "module.exports = 4;\n",
+        "tools/pkg2/package.json": JSON.stringify({ name: "TEST_pkg2", main: "lib/" }),
+        "tools/pkg2/lib/index.js": "module.exports = 6;\n",
         "tools/data.json": "{}\n",
         "tools/opt/render.mjs": "import { createRequire } from \"node:module\";\nconst require = createRequire(import.meta.url);\nconst canvas = require(\"TEST_canvas_pkg\");\n"
     }, "TEST_ clean dependency fixture");
@@ -155,6 +158,8 @@ function setup() {
     F.write(X.libs, { "game/js/libs/localforage.min.js": "/* TEST_ edited in the working tree */\n", "game/js/libs/untracked.js": "/* TEST_ */\n" });
     F.git(X.libs, ["mv", "game/js/libs/extra.js", "game/js/libs/extra2.js"]);      // a staged rename: two status fields
     F.git(X.libs, ["update-index", "--assume-unchanged", "game/js/libs/localforage.min.js"]);   // its edit is now hidden from git status
+    F.git(X.libs, ["update-index", "--skip-worktree", "game/js/libs/pixi.js"]);                  // the same, by skip-worktree
+    F.write(X.libs, { "game/js/libs/pixi.js": "/* TEST_ edited under skip-worktree */\n" });
     F.write(X.libs, { "game/js/libs/ignored.tmp": "/* TEST_ ignored by .gitignore */\n" });
 }
 
@@ -218,8 +223,18 @@ S.add("lexer_call_shapes", T => {
         ["requ" + BS + "u0069re(\"u1\");", { kind: "require", spec: "u1" }],
         [BS + "u0072equire(\"u2\");", { kind: "require", spec: "u2" }],
         [BS + "u{72}equire(\"u3\");", { kind: "require", spec: "u3" }],
-        ["require" + String.fromCharCode(0x3000) + "(\"w1\");", { kind: "require", spec: "w1" }]
-    ]);
+        ["self.require(\"s1\");", { kind: "require", spec: "s1" }],
+        ["global.require(\"gl1\");", { kind: "require", spec: "gl1" }],
+        ["this.require(\"th1\");", { kind: "require", spec: "th1" }],
+        ["require.main.require(\"rm1\");", { kind: "require", spec: "rm1" }],
+        ["module[\"require\"](\"br1\");", { kind: "require", spec: "br1" }],
+        ["(window).require(\"pw1\");", { kind: "require", spec: "pw1" }],
+        ["obj?.require(\"oq1\");", { kind: "require", spec: "oq1" }],
+        ["require(\"ea1\", 0);", { kind: "require", spec: "ea1" }],
+        ["const tr1 = typeof require(\"tr1\");", { kind: "require", spec: "tr1" }]
+    ].concat([0x20, 0x09, 0x0b, 0x0c, 0x0d, 0xa0, 0xfeff, 0x1680, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009,
+              0x200a, 0x202f, 0x205f, 0x3000, 0x2028, 0x2029].map(code => ["require" + String.fromCharCode(code) + "(\"ws" + code.toString(16) + "\");",
+                                                                           { kind: "require", spec: "ws" + code.toString(16) }])));
     const got = refsOf(T, R.src);
     return expect(got === R.want, "got " + got);
 });
@@ -227,6 +242,9 @@ S.add("lexer_call_shapes", T => {
 S.add("lexer_regex_division_comments_and_lines", T => {
     const R = rows([
         ["let i = 0; i++ / 2; const d2 = require('d2'); const z = 4 / 2;", { kind: "require", spec: "d2" }],
+        ["let j = 9; j-- / 2; const d3 = require('d3'); const z3 = 4 / 2;", { kind: "require", spec: "d3" }],
+        ["var pp0 = a + +/'/.source.length; const pp = require('pp1'); // '", { kind: "require", spec: "pp1" }],
+        ["var pq0 = i++ + /'/.source.length; const pq = require('pq1'); // '", { kind: "require", spec: "pq1" }],
         ["function g(s) { return /'/.test(s) || require('l1'); }", { kind: "require", spec: "l1" }],
         ["const half = 10 / 2; const q = require('l2'); const z2 = 4 / 2;", { kind: "require", spec: "l2" }],
         ["// a comment ended by CR" + String.fromCharCode(13) + "const cr = require('c1');", { kind: "require", spec: "c1" }],
@@ -246,8 +264,16 @@ S.add("lexer_indirect_require_reported", T => {
 });
 
 S.add("export_default_reexports", T => {
-    const got = refsOf(T, "export { default } from 'x1';\nexport { default as y } from 'x2';\nexport { y as default } from 'x3';\nexport default function f() { return from; }\n");
-    return expect(got === "export:x1@1 export:x2@2 export:x3@3", "got " + got);
+    const got = refsOf(T, "export { default } from 'x1';\nexport { default as y } from 'x2';\nexport { y as default } from 'x3';\nexport default function f() { return from; }\n" +
+                          "export { async } from 'x5';\nexport { function as fn } from 'x6';\nexport * as ns from 'x7';\nexport * from 'x8';\nexport const k = 1;\n");
+    return expect(got === "export:x1@1 export:x2@2 export:x3@3 export:x5@5 export:x6@6 export:x7@7 export:x8@8", "got " + got);
+});
+
+S.add("lexer_time_linear_on_slash_lines", T => {
+    const t0 = Date.now();
+    T.extractImports("x = " + "[/".repeat(30000));
+    const ms = Date.now() - t0;
+    return expect(ms < 2000, "a 60 KB line of \"[/\" took " + ms + " ms");
 });
 
 S.add("clean_repo_exit_0", T => {
@@ -258,7 +284,7 @@ S.add("clean_repo_exit_0", T => {
 S.add("clean_repo_notes_reported_not_failed", T => {
     const d = json(T, ["--libs-baseline", X.cleanLibs], X.clean);
     const n = keys(d.notes).join(", ");
-    const want = ["BUILTIN_OUTSIDE_POLICY game/js/plugins/A.js:7", "BUILTIN_OUTSIDE_POLICY tools/opt/render.mjs:1", "BUILTIN_OUTSIDE_POLICY tools/t.js:11", "NPM_ARTIFACT package.json",
+    const want = ["BUILTIN_OUTSIDE_POLICY game/js/plugins/A.js:7", "BUILTIN_OUTSIDE_POLICY tools/opt/render.mjs:1", "BUILTIN_OUTSIDE_POLICY tools/t.js:12", "NPM_ARTIFACT package.json",
                   "NPM_REQUIRE tools/opt/render.mjs:3", "UNRESOLVED_DYNAMIC game/js/plugins/A.js:8", "UNRESOLVED_DYNAMIC tools/esm.js:6"].sort().join(", ");
     return expect(n === want, "notes: " + n);
 });
@@ -312,7 +338,7 @@ S.add("libs_worktree_change_detected", T => {
     const d = json(T, ["--libs-baseline", X.libsFile], X.libs);
     const f = keys(d.findings.filter(x => x.kind === "LIBS_WORKTREE_CHANGED")).join(", ");
     return expect(f === "LIBS_WORKTREE_CHANGED game/js/libs/extra2.js, LIBS_WORKTREE_CHANGED game/js/libs/ignored.tmp, LIBS_WORKTREE_CHANGED game/js/libs/localforage.min.js, " +
-                  "LIBS_WORKTREE_CHANGED game/js/libs/untracked.js", "worktree: " + f);
+                  "LIBS_WORKTREE_CHANGED game/js/libs/pixi.js, LIBS_WORKTREE_CHANGED game/js/libs/untracked.js", "worktree: " + f);
 });
 
 S.add("make_libs_baseline_roundtrip", T => {
@@ -414,19 +440,28 @@ const MUTANTS = [
     { name: "unicode_spaces_off", pairs: [["0x202f, 0x205f, 0x3000, ", "0x202f, 0x205f, "]], hints: ["lexer_call_shapes"] },
     { name: "identifier_escape_start_off", pairs: [["if (isIdStart(c) || (c === \"\\\\\" && src[i + 1] === \"u\")) {", "if (isIdStart(c)) {"]], hints: ["lexer_call_shapes"] },
     { name: "identifier_escapes_off", pairs: [["if (src[i] === \"\\\\\" && src[i + 1] === \"u\") {", "if (false) {"]], hints: ["lexer_call_shapes"] },
-    { name: "postfix_division_off", pairs: [["if ((p.v === \"+\" || p.v === \"-\") && q && q.t === \"p\" && q.v === p.v) return false;", ""]], hints: ["lexer_regex_division_comments_and_lines"] },
+    { name: "postfix_division_off", pairs: [["if ((p.v === \"+\" || p.v === \"-\") && q && q.t === \"p\" && q.v === p.v && q.at === p.at - 1 && r &&", "if (false && q && q.t === \"p\" && q.v === p.v && q.at === p.at - 1 && r &&"]], hints: ["lexer_regex_division_comments_and_lines"] },
     { name: "regex_after_keyword_off", pairs: [["if (p.t === \"id\") return REGEX_AFTER_WORD.has(p.v);", "if (p.t === \"id\") return false;"]], hints: ["lexer_regex_division_comments_and_lines"] },
     { name: "regex_after_literal", pairs: [["if (p.t === \"num\" || p.t === \"str\" || p.t === \"tpl\" || p.t === \"re\") return false;", ""]], hints: ["lexer_regex_division_comments_and_lines"] },
     { name: "template_brace_depth_off", pairs: [["if (c === \"{\") stack.push(\"{\");", "if (false) stack.push(\"{\");"]], hints: ["lexer_regex_division_comments_and_lines"] },
     { name: "block_comment_line_count_off", pairs: [["for (let k = i; k < end; k++) if (src[k] === \"\\n\") line++;", ""]], hints: ["lexer_regex_division_comments_and_lines"] },
     { name: "string_continuation_line_count_off", pairs: [["if (e === \"\\n\") { line++; i += 2; continue; }", "if (e === \"\\n\") { i += 2; continue; }"]], hints: ["lexer_regex_division_comments_and_lines"] },
     { name: "optional_call_off", pairs: [["if (isP(toks[open], \"?.\")) open++;", ""]], hints: ["lexer_call_shapes"] },
-    { name: "global_member_require_off", pairs: [["if (!(isId(obj) && GLOBAL_OBJECTS.has(obj.v) && !isP(toks[k - 3], \".\") && !isP(toks[k - 3], \"?.\"))) return null;", "return null;"]], hints: ["lexer_call_shapes"] },
+    { name: "member_require_off", pairs: [["} else if (isP(before, \".\") || isP(before, \"?.\")) {\n        member = true;", "} else if (isP(before, \".\") || isP(before, \"?.\")) {\n        return null;"]], hints: ["lexer_call_shapes"] },
+    { name: "bracket_require_off", pairs: [["if (tok.t === \"str\" && tok.v === \"require\") {", "if (false) {"]], hints: ["lexer_call_shapes"] },
+    { name: "typeof_skips_calls_too", pairs: [["const next = toks[k + 1];\n        if (member || isId(before, \"typeof\") || isP(next, \":\")) return null;", "const next = toks[k + 1];\n        if (member || isP(next, \":\")) return null;"], ["} else if (isId(before) && /^(?:function|const|let|var|class)$/.test(before.v)) {", "} else if (isId(before) && /^(?:function|typeof|const|let|var|class)$/.test(before.v)) {"]], hints: ["lexer_call_shapes"] },
+    { name: "typeof_require_reported", pairs: [["if (member || isId(before, \"typeof\") || isP(next, \":\")) return null;", "if (member || isP(next, \":\")) return null;"]], hints: ["lexer_ignores_strings_comments_templates_regexes"] },
+    { name: "postfix_minus_off", pairs: [["if ((p.v === \"+\" || p.v === \"-\") && q && q.t === \"p\" && q.v === p.v", "if ((p.v === \"+\") && q && q.t === \"p\" && q.v === p.v"]], hints: ["lexer_regex_division_comments_and_lines"] },
+    { name: "postfix_adjacency_off", pairs: [["q.v === p.v && q.at === p.at - 1 && r &&", "q.v === p.v && r &&"]], hints: ["lexer_regex_division_comments_and_lines"] },
+    { name: "regex_length_uncapped", pairs: [["const REGEX_MAX_LEN = 2000;", "const REGEX_MAX_LEN = 1e9;"]], hints: ["lexer_time_linear_on_slash_lines"] },
+    { name: "export_brace_scan_off", pairs: [["} else if (isP(toks[k + 1], \"{\")) {", "} else if (false) {"]], hints: ["export_default_reexports"] },
+    { name: "export_star_as_off", pairs: [["if (isId(toks[j], \"as\")) j += 2;", ""]], hints: ["export_default_reexports"] },
+    { name: "package_main_trailing_slash_kept", pairs: [["resolvesTracked(path.posix.normalize(rel + \"/\" + main).replace(/\\/+$/, \"\"), tracked, blobText, main.endsWith(\"/\"))", "resolvesTracked(path.posix.normalize(rel + \"/\" + main), tracked, blobText, main.endsWith(\"/\"))"]], hints: ["clean_repo_exit_0"] },
+    { name: "skip_worktree_tag_off", pairs: [["if (rec && (rec[0] === \"S\" || (rec[0] >= \"a\" && rec[0] <= \"z\"))) note(", "if (rec && ((rec[0] >= \"a\" && rec[0] <= \"z\"))) note("]], hints: ["libs_worktree_change_detected"] },
     { name: "require_parens_off", pairs: [["while (isP(toks[a], \"(\")) { a++; depth++; }", ""]], hints: ["lexer_call_shapes"] },
-    { name: "trailing_comma_off", pairs: [["if (isP(toks[c], \",\")) c++;\n        return isP(toks[c], \")\");", "return isP(toks[c], \")\");"]], hints: ["lexer_call_shapes"] },
+    { name: "extra_arguments_off", pairs: [["return d === 0 && (isP(toks[c], \",\") || isP(toks[c], \")\"));", "return d === 0 && isP(toks[c], \")\");"]], hints: ["lexer_call_shapes"] },
     { name: "indirect_not_reported", pairs: [["return { line: tok.line, kind: \"require\", spec: null, indirect: true };", "return null;"]], hints: ["lexer_indirect_require_reported"] },
-    { name: "function_require_guard_off", pairs: [["/^(?:function|typeof|const|let|var|class)$/.test(before.v)", "/^(?:typeof|const|let|var|class)$/.test(before.v)"]], hints: ["lexer_ignores_strings_comments_templates_regexes"] },
-    { name: "export_default_breaks_scan", pairs: [["/^(?:function|class|const|let|var|async|export|import)$/", "/^(?:function|class|const|let|var|default|async|export|import)$/"]], hints: ["export_default_reexports"] },
+    { name: "function_require_guard_off", pairs: [["/^(?:function|const|let|var|class)$/.test(before.v)", "/^(?:const|let|var|class)$/.test(before.v)"]], hints: ["lexer_ignores_strings_comments_templates_regexes"] },
     { name: "dirname_fold_off", pairs: [["const folded = arg ? foldDirname(toks, a) : null;", "const folded = null;"]], hints: ["missing_relative_detected_literal_and_folded"] },
     { name: "folder_only_off", pairs: [["if (!folderOnly) for (const ext of RESOLVE_EXTENSIONS)", "for (const ext of RESOLVE_EXTENSIONS)"]], hints: ["missing_relative_detected_literal_and_folded"] },
     { name: "trailing_slash_kept", pairs: [["const rel = path.posix.normalize(path.posix.join(base, norm)).replace(/\\/+$/, \"\");", "const rel = path.posix.normalize(path.posix.join(base, norm));"]], hints: ["clean_repo_exit_0"] },

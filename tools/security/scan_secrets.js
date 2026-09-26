@@ -30,16 +30,18 @@
  *            --baseline <file>    default tools/security/secrets_baseline.json (same rule when missing):
  *                                 known historical values, applied in --range scans only (see below)
  *
- * Files with a listed binary extension are skipped unread and counted. A file with NUL bytes (UTF-16
- * text, an unlisted binary) is scanned with its NUL bytes removed and listed as NUL_FILE. Every file
- * name is checked too (credential file names, and values used as path segments; line 0).
+ * A file with a listed binary extension is skipped and counted, unless it is at most
+ * EXT_SNIFF_MAX_BYTES and holds no NUL byte (then it is text: BINARY_EXTENSION_TEXT). A file with NUL
+ * bytes (UTF-16 text, an unlisted binary) is scanned with its NUL bytes removed and listed as
+ * NUL_FILE. Every file name is checked too, submodules included (credential file names, and values
+ * used as path segments; line 0), and a value in a path is redacted wherever the path is printed.
  * Allowlist entries are { path, rule, lineSha256, reason }; a finding that matches one is reported
  * as ALLOWED. An entry that matches nothing in a scan that read its whole file (default mode: every
  * entry except <commit-message> ones; --path: entries for that path) is STALE and fails the run.
- * A value shorter than REDACT_MIN_LEN_FOR_PREFIX characters is shown by its length only, and its
- * line sha256 is left out of the output.
- * Baseline entries (section "Baseline" below) turn a finding into BASELINED only in the history
- * before the commit that removed the value.
+ * A value shorter than REDACT_MIN_LEN_FOR_PREFIX characters, or one a person may have chosen (a
+ * password), is shown by its length only, and the sha256 of its line is left out of the output.
+ * Baseline entries (section "Baseline" below) turn a finding into BASELINED only in the commits that
+ * added the value, all in the history before the commit that removed it, and only in --range.
  *
  * Exit: 0 clean, 1 findings or stale allowlist / baseline entries, 2 usage or git error.
  */
@@ -89,16 +91,24 @@ const ENTROPY_CONTEXT = /(?:secret|passw(?:or)?d|pwd|token|api[_-]?key|apikey|ac
 
 // Credential-named assignment (runs after the entropy detector, on spans nothing else took): a
 // value of ASSIGN_MIN_LEN+ characters with letters and digits and at least ASSIGN_MIN_BITS, given
-// to a name such as password / api_key / client_secret / GEMINI_KEY. This catches the lowercase or
-// short generated values the entropy detector cannot see. "author..." is not "auth"; a bare
-// "<X>_KEY" name counts only in upper case (GEMINI_KEY, not cache_key).
+// with = : := or => to a name such as password / api_key / client_secret / GEMINI_KEY. A quoted
+// value may hold any character but white space; an unquoted one is a run of key characters. This
+// catches the lowercase or short generated values the entropy detector cannot see. "author..." is
+// not "auth" ("authorization" is); a bare "<X>_KEY" name counts only in upper case (GEMINI_KEY,
+// GEMINI_KEY_2, not cache_key). Every quantifier is bounded, so a long line costs linear time.
 const ASSIGN_MIN_LEN = 16;
 const ASSIGN_MIN_BITS = 3.0;
-const ASSIGN_RE = /(secret|passw(?:or)?d|passwd|pwd|token|api[_-]?key|apikey|access[_-]?key|private[_-]?key|credential|auth(?!or)|[a-z0-9]_key\b)[\w.-]*["']?\s*[:=]\s*["']?([A-Za-z0-9+\/_.=~-]+)/dgi;
+const ASSIGN_RE = /(secret|passw(?:or)?d|passwd|pwd|token|api[_-]?key|apikey|access[_-]?key|private[_-]?key|credential|auth(?!or(?!i[sz]))|[a-z0-9]_key(?![a-z]))[\w.-]{0,40}["']?\s{0,8}(?::=|=>|[:=])\s{0,8}(?:(["'`])((?:(?!\2)[^\\\s]|\\.){1,200})\2|([A-Za-z0-9+\/_.=~-]{1,400}))/dgi;
 
-// Redaction: a value shorter than REDACT_MIN_LEN_FOR_PREFIX shows no characters at all, and its
-// line's sha256 is withheld from the output (a short value could be recovered from a known line).
+// Redaction: a value shorter than REDACT_MIN_LEN_FOR_PREFIX, or a value a person may have chosen
+// (HUMAN_VALUE_RULES: a password is guessable from a prefix and a line hash), shows no characters,
+// and the sha256 of its line is withheld from the output, for every finding on that line.
 const REDACT_MIN_LEN_FOR_PREFIX = 16;
+const HUMAN_VALUE_RULES = new Set(["NETRC_PASSWORD", "CREDENTIAL_ASSIGNMENT"]);
+
+// A file with a listed binary extension of at most EXT_SNIFF_MAX_BYTES is read anyway: with no NUL
+// byte it is text (a text file named *.pdf) and is scanned. Larger ones are skipped unread.
+const EXT_SNIFF_MAX_BYTES = 65536;
 
 // Skipped without reading (their bytes are image, audio, font, archive or engine binary formats).
 const BINARY_EXTENSIONS = new Set([
@@ -162,7 +172,7 @@ const RULES = [
     },
     {
         id: "SESSION_COOKIE", source: "docs/SECURITY_AND_SECRETS.md:24 (session cookies)",
-        re: /\b(?:set-)?cookie\s*[:=]\s*["']?[^\r\n]*?\b[\w.-]*(?:sess|sid|token|auth|jwt|login)[\w.-]*=([A-Za-z0-9%._~+\/-]{16,})/dgi, group: 1,
+        re: /\b(?:set-)?cookie\s{0,8}[:=]\s{0,8}["']?[^\r\n]{0,400}?\b[\w.-]{0,40}(?:sess|sid|token|auth|jwt|login)[\w.-]{0,40}=([A-Za-z0-9%._~+\/-]{16,})/dgi, group: 1,
         ok: v => hasDigit(v) && hasLetter(v)
     },
     {
@@ -246,8 +256,9 @@ function assignmentHits(line, taken) {
     let m;
     while ((m = ASSIGN_RE.exec(line)) !== null) {
         if (/^[a-z0-9]_key$/i.test(m[1]) && !/^[A-Z0-9]_KEY$/.test(m[1])) continue;
-        const [start, end] = m.indices[2];
-        const value = m[2];
+        const g = m[3] !== undefined ? 3 : 4;
+        const [start, end] = m.indices[g];
+        const value = m[g];
         if (value.length < ASSIGN_MIN_LEN || !hasLetter(value) || !hasDigit(value)) continue;
         if (overlaps(taken, start, end) || hasSequentialRun(value, ENTROPY_SEQ_RUN) || shannonBits(value) < ASSIGN_MIN_BITS) continue;
         hits.push({ rule: ASSIGN_RULE.id, start, end, value });
@@ -281,23 +292,31 @@ function scanLine(line) {
 // A path that holds a value (a value used as a file or folder name) is printed with that value
 // redacted, like any other match: "keys/[Ab12... (40 chars)].txt".
 function displayPath(p, hits) {
-    if (hits.length === 0) return p;
     let out = "", at = 0;
     for (const h of hits.slice().sort((a, b) => a.start - b.start)) {
         if (h.start < at) continue;
-        out += p.slice(at, h.start) + "[" + redact(h.value) + "]";
+        out += printable(p.slice(at, h.start)) + "[" + redact(h.value, h.rule) + "]";
         at = h.end;
     }
-    return out + p.slice(at);
+    return out + printable(p.slice(at));
 }
 
 function credentialFileHit(p) {
     return CREDENTIAL_FILE_RE.test(p.split("/").pop());
 }
 
-function redact(value) {
-    if (value.length < REDACT_MIN_LEN_FOR_PREFIX) return "... (" + value.length + " chars)";
+function hidesPrefix(value, rule) {
+    return value.length < REDACT_MIN_LEN_FOR_PREFIX || HUMAN_VALUE_RULES.has(rule);
+}
+
+function redact(value, rule) {
+    if (hidesPrefix(value, rule)) return "... (" + value.length + " chars)";
     return value.slice(0, REDACT_KEEP) + "... (" + value.length + " chars)";
+}
+
+// Control characters in a path are printed as \xNN, so a file name cannot forge an output line.
+function printable(p) {
+    return p.replace(/[\x00-\x1f\x7f]/g, c => "\\x" + c.charCodeAt(0).toString(16).padStart(2, "0"));
 }
 
 function sha256(s) {
@@ -332,13 +351,13 @@ function repoRoot(cwd) {
 
 // Entries of the HEAD tree: [{ mode, type, sha, path }].
 function headTree(root, rev = "HEAD") {
-    const out = git(root, ["ls-tree", "-r", "-z", "--full-tree", "--end-of-options", rev]).toString("utf8");
+    const out = git(root, ["ls-tree", "-r", "-z", "-l", "--full-tree", "--end-of-options", rev]).toString("utf8");
     const entries = [];
     for (const rec of out.split("\0")) {
         if (!rec) continue;
         const tab = rec.indexOf("\t");
-        const [mode, type, sha] = rec.slice(0, tab).split(" ");
-        entries.push({ mode, type, sha, path: rec.slice(tab + 1) });
+        const [mode, type, sha, size] = rec.slice(0, tab).split(/ +/);
+        entries.push({ mode, type, sha, size: Number(size), path: rec.slice(tab + 1) });
     }
     return entries;
 }
@@ -468,15 +487,26 @@ function textUnit(base, buf) {
     return Object.assign(base, { binary: "nul", lines: splitLines(text.replace(/\0/g, "")) });
 }
 
+// A listed-extension file read as text is marked binary "extension-text"; one with NUL bytes, or
+// larger than EXT_SNIFF_MAX_BYTES, is skipped.
+function extensionUnit(base, buf) {
+    if (buf === null || buf.includes(0)) return Object.assign(base, { binary: "extension", lines: null });
+    return Object.assign(base, { binary: "extension-text", lines: splitLines(buf.toString("latin1")) });
+}
+
 function collectHead(root, rev = "HEAD") {
-    const entries = headTree(root, rev).filter(e => e.type === "blob");
+    const all = headTree(root, rev);
+    const entries = all.filter(e => e.type === "blob");
     const units = [];
-    const wanted = entries.filter(e => !isBinaryPath(e.path));
+    const sniff = e => isBinaryPath(e.path) && e.size <= EXT_SNIFF_MAX_BYTES;
+    const wanted = entries.filter(e => !isBinaryPath(e.path) || sniff(e));
     const blobs = readBlobs(root, [...new Set(wanted.map(e => e.sha))]);
     for (const e of entries) {
-        if (isBinaryPath(e.path)) { units.push({ path: e.path, binary: "extension", lines: null }); continue; }
+        if (isBinaryPath(e.path)) { units.push(extensionUnit({ path: e.path }, sniff(e) ? blobs.get(e.sha) : null)); continue; }
         units.push(textUnit({ path: e.path }, blobs.get(e.sha)));
     }
+    // A submodule (gitlink) has no content here, but its name is still checked.
+    for (const e of all) if (e.type === "commit") units.push({ path: e.path, binary: "gitlink", lines: null });
     return { units, full: "all" };
 }
 
@@ -487,7 +517,11 @@ function unitsFromPatch(files) {
     const units = [];
     for (const f of files) {
         if (f.deleted) continue;
-        if (isBinaryPath(f.path)) units.push({ commit: f.commit, path: f.path, binary: "extension", lines: null });
+        if (isBinaryPath(f.path)) {
+            // The patch already holds the added lines: with no NUL byte the file is text.
+            units.push(f.nul ? { commit: f.commit, path: f.path, binary: "extension", lines: null }
+                             : { commit: f.commit, path: f.path, binary: "extension-text", lines: f.added });
+        }
         else if (f.nul) units.push({ commit: f.commit, path: f.path, binary: "nul", lines: f.added.map(l => ({ no: l.no, text: l.text.replace(/\0/g, "") })) });
         else units.push({ commit: f.commit, path: f.path, binary: null, lines: f.added });
     }
@@ -517,8 +551,8 @@ function collectRange(root, range) {
             const msgs = git(root, ["log", "--no-walk=unsorted", "-z", "--format=%H%n%B", "--end-of-options"].concat(batch, ["--"])).toString("latin1");
             for (const rec of msgs.split("\0")) {
                 const nl = rec.indexOf("\n");
-                if (nl !== 40) continue;
-                yield { commit: rec.slice(0, 40), path: COMMIT_MESSAGE_PATH, binary: null, lines: splitLines(rec.slice(nl + 1)) };
+                if (!/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(rec.slice(0, nl))) continue;
+                yield { commit: rec.slice(0, nl), path: COMMIT_MESSAGE_PATH, binary: null, lines: splitLines(rec.slice(nl + 1)) };
             }
         }
     }
@@ -536,7 +570,10 @@ function collectPath(root, cwd, p) {
     const tracked = git(root, ["ls-files", "-z", "--full-name", "--", ":(literal)" + relPosix]).toString("utf8").split("\0").filter(Boolean);
     if (!tracked.includes(relPosix)) throw new UsageError("--path: " + relPosix + " is not tracked by git");
     if (!fs.statSync(real).isFile()) throw new UsageError("--path: " + relPosix + " is not a file");
-    if (isBinaryPath(relPosix)) return { units: [{ path: relPosix, binary: "extension", lines: null }], full: [relPosix] };
+    if (isBinaryPath(relPosix)) {
+        const sniff = fs.statSync(real).size <= EXT_SNIFF_MAX_BYTES;
+        return { units: [extensionUnit({ path: relPosix }, sniff ? fs.readFileSync(real) : null)], full: [relPosix] };
+    }
     return { units: [textUnit({ path: relPosix }, fs.readFileSync(real))], full: [relPosix] };
 }
 
@@ -576,11 +613,12 @@ function loadAllowlist(file, explicit) {
 //
 // Entries are { fingerprint, rule, incident, onlyInHistoryBefore, addedIn, reason }. `fingerprint`
 // is the sha256 of the matched value (never the value). A finding with that fingerprint and rule is
-// BASELINED only in a --range scan and only in a commit that is a strict ancestor of
-// `onlyInHistoryBefore` (the commit that removed the value). Anywhere else (HEAD, --staged, --path, a
-// commit that is not such an ancestor) it stays a finding: a revoked value added again is new.
-// `addedIn` lists the commits that added the value. A range scan that includes one of them must
-// baseline the entry there; if it does not, the entry is STALE and fails the run.
+// BASELINED only in a --range scan and only in a commit listed in `addedIn` (the commits that added
+// the value), each of which must be a strict ancestor of `onlyInHistoryBefore` (the commit that
+// removed the value). Anywhere else (HEAD, --staged, --path, any other commit, even one between an
+// addedIn commit and the fix) it stays a finding: a revoked value added again is new. A range scan
+// that includes an addedIn commit must baseline the entry there; if it does not, the entry is STALE
+// and fails the run.
 // ---------------------------------------------------------------------------------------------
 
 function loadBaseline(file, explicit) {
@@ -594,7 +632,7 @@ function loadBaseline(file, explicit) {
         throw new UsageError("baseline " + file + ": expected { \"schema\": \"" + BASELINE_SCHEMA + "\", \"entries\": [...] }");
     }
     const seen = new Set();
-    const isSha = v => typeof v === "string" && /^[0-9a-f]{40}$/.test(v);
+    const isSha = v => typeof v === "string" && /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(v);
     doc.entries.forEach((e, i) => {
         const where = "baseline entry " + i + ": ";
         if (!e || typeof e !== "object" || Array.isArray(e)) throw new UsageError(where + "not an object");
@@ -605,7 +643,7 @@ function loadBaseline(file, explicit) {
         if (typeof e.fingerprint !== "string" || !/^[0-9a-f]{64}$/.test(e.fingerprint)) throw new UsageError(where + "fingerprint must be 64 lowercase hex characters (sha256 of the value)");
         if (!RULE_IDS.has(e.rule)) throw new UsageError(where + "unknown rule " + JSON.stringify(e.rule));
         if (typeof e.incident !== "string" || !e.incident.trim()) throw new UsageError(where + "incident must name the incident record");
-        if (!isSha(e.onlyInHistoryBefore)) throw new UsageError(where + "onlyInHistoryBefore must be a full 40-character commit sha");
+        if (!isSha(e.onlyInHistoryBefore)) throw new UsageError(where + "onlyInHistoryBefore must be a full commit sha");
         if (!Array.isArray(e.addedIn) || e.addedIn.length === 0 || !e.addedIn.every(isSha) || new Set(e.addedIn).size !== e.addedIn.length) {
             throw new UsageError(where + "addedIn must be a non-empty list of distinct full commit shas");
         }
@@ -665,7 +703,7 @@ function checkBaselineCommits(root, entries, isBefore) {
                     const e = wanted.find(x => x.fingerprint === fp && x.rule === h.rule);
                     if (e) {
                         throw new UsageError("baseline entry " + entries.indexOf(e) + ": the tree of onlyInHistoryBefore " + fix.slice(0, 12) +
-                                             " still holds the value (" + u.path + ":" + ln.no + "), so that commit did not remove it");
+                                             " still holds the value (" + displayPath(u.path, scanLine(u.path)) + ":" + ln.no + "), so that commit did not remove it");
                     }
                 }
             }
@@ -697,7 +735,7 @@ function parseArgs(argv) {
 
 // `baseline` is { entries, isBefore } in range mode and null in every other mode (no baseline there).
 function scan(collected, allowEntries, baseline) {
-    const findings = [], allowed = [], baselined = [], skipped = [], nulFiles = [];
+    const findings = [], allowed = [], baselined = [], skipped = [], nulFiles = [], extText = [];
     const baseEntries = baseline ? baseline.entries : [];
     let scanned = 0;
     for (const u of collected.units) {
@@ -714,24 +752,29 @@ function scan(collected, allowEntries, baseline) {
         else {
             scanned++;
             if (u.binary === "nul") nulFiles.push({ path: shown, commit: u.commit || null });
+            if (u.binary === "extension-text") extText.push({ path: shown, commit: u.commit || null });
             for (const ln of u.lines) {
                 for (const h of scanLine(ln.text)) {
                     hits.push({ line: ln.no, rule: h.rule, value: h.value, bits: h.bits, lineSha256: sha256(ln.text) });
                 }
             }
         }
+        // A line holding a value that hides its prefix gets no line sha256 in the output, on any of
+        // its findings (another finding on the same line must not carry the same hash).
+        const hiddenLines = new Set(hits.filter(h => h.value !== null && hidesPrefix(h.value, h.rule)).map(h => h.line));
         for (const h of hits) {
-            const short = h.value !== null && h.value.length < REDACT_MIN_LEN_FOR_PREFIX;
             const rec = {
                 commit: u.commit || null, path: shown, line: h.line, rule: h.rule,
-                redacted: h.value === null ? "(tracked credential file name)" : redact(h.value),
-                length: h.value === null ? 0 : h.value.length, lineSha256: short ? null : h.lineSha256
+                redacted: h.value === null ? "(tracked credential file name)" : redact(h.value, h.rule),
+                length: h.value === null ? 0 : h.value.length, lineSha256: hiddenLines.has(h.line) ? null : h.lineSha256
             };
             if (h.bits !== undefined) rec.bits = h.bits;
-            // The baseline is checked first: it is scoped to history, the allowlist is not.
+            // The baseline is checked first: it is scoped to history, the allowlist is not. It
+            // applies only in the commits that added the value (addedIn), all of which are in the
+            // history before onlyInHistoryBefore (checked when the baseline is loaded).
             const fp = h.value === null ? null : sha256(h.value);
             const base = fp === null ? undefined : baseEntries.find(e => e.fingerprint === fp && e.rule === rec.rule);
-            if (base && baseline.isBefore(rec.commit, base.onlyInHistoryBefore)) {
+            if (base && base.addedIn.includes(rec.commit) && baseline.isBefore(rec.commit, base.onlyInHistoryBefore)) {
                 base.matchedIn.add(rec.commit);
                 Object.assign(rec, { fingerprint: fp, incident: base.incident, reason: base.reason });
                 baselined.push(rec);
@@ -759,7 +802,7 @@ function scan(collected, allowEntries, baseline) {
     }
     const order = (a, b) => (a.commit || "").localeCompare(b.commit || "") || a.path.localeCompare(b.path) || a.line - b.line || a.rule.localeCompare(b.rule);
     findings.sort(order); allowed.sort(order); baselined.sort(order);
-    return { scanned, skipped, nulFiles, findings, allowed, baselined, stale, staleBaseline };
+    return { scanned, skipped, nulFiles, extText, findings, allowed, baselined, stale, staleBaseline };
 }
 
 function where(r) {
@@ -793,7 +836,7 @@ function main(argv, cwd = process.cwd()) {
         if (o.json) {
             out(JSON.stringify({
                 tool: "scan_secrets", schema: "deus.scan_secrets.v1", mode: o.mode, range: o.range, filesScanned: r.scanned,
-                binarySkipped: r.skipped.length, skipped: r.skipped, nulFiles: r.nulFiles, findings: r.findings, allowed: r.allowed,
+                binarySkipped: r.skipped.length, skipped: r.skipped, nulFiles: r.nulFiles, binaryExtensionText: r.extText, findings: r.findings, allowed: r.allowed,
                 baselined: r.baselined, staleAllowlist: r.stale, staleBaseline: r.staleBaseline,
                 baselineInactive: inactive.map(e => ({ fingerprint: e.fingerprint, rule: e.rule, incident: e.incident, missing: e.missing })), exitCode: code
             }, null, 2));
@@ -816,7 +859,9 @@ function main(argv, cwd = process.cwd()) {
                 " (commit " + e.missing.map(c => c.slice(0, 12)).join(", ") + " not in this clone: the value is not baselined here)");
         }
         for (const s of r.nulFiles) out("NUL_FILE " + (s.commit ? s.commit.slice(0, 12) + " " : "") + s.path + " (NUL bytes removed before scanning)");
-        out("RESULT: " + r.scanned + " files scanned (" + r.nulFiles.length + " with NUL bytes), " + r.skipped.length + " binary skipped, " +
+        for (const s of r.extText) out("BINARY_EXTENSION_TEXT " + (s.commit ? s.commit.slice(0, 12) + " " : "") + s.path + " (listed binary extension, no NUL byte: scanned as text)");
+        out("RESULT: " + r.scanned + " files scanned (" + r.nulFiles.length + " with NUL bytes, " + r.extText.length + " text with a binary extension), " +
+            r.skipped.length + " binary skipped, " +
             r.findings.length + " findings, " + r.allowed.length + " allowed, " + r.baselined.length + " baselined, " +
             r.stale.length + " stale allowlist entries, " + r.staleBaseline.length + " stale baseline entries");
         return code;

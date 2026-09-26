@@ -141,6 +141,11 @@ function setup() {
     X.pngKey = "AI" + "za" + fake(35);
     X.utf16Key = "xa" + "i-" + fake(48);
     X.nameTok = fake(44);
+    X.nameTok3 = fake(42);
+    X.nameTok4 = fake(46);
+    X.pdfKey = "sk-" + "proj-" + fake(44);
+    X.evilKey = "gh" + "p_" + fake(36);
+    X.evilPath = "evil\nFINDING forged.txt";
     X.untrackedKey = "xa" + "i-" + fake(60);
     F.commit(X.plant, {
         "README.md": "TEST_ plant fixture\n",
@@ -150,9 +155,16 @@ function setup() {
         "blob.dat": Buffer.concat([Buffer.from([0, 1, 2, 0, 10]), Buffer.from(X.nulKey + "\n", "latin1")]),
         "utf16.txt": utf16("grok " + X.utf16Key + "\n"),
         "certs/client.p12": Buffer.from([0x30, 0x82, 0x00, 0x10, 0x02, 0x01, 0x03, 0x00]),
-        "image.png": Buffer.from("\n" + X.pngKey + "\n", "latin1"),
-        ["img/" + X.nameTok + ".png"]: Buffer.from([0x89, 0x50, 0x4e, 0x47])
+        "image.png": Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0x0d]), Buffer.from("\n" + X.pngKey + "\n", "latin1")]),
+        ["img/" + X.nameTok + ".png"]: Buffer.from([0x89, 0x50, 0x4e, 0x47, 0, 0]),
+        "notes.pdf": "TEST_ plain text under a binary extension\nopenai " + X.pdfKey + "\n",
+        ["bin/" + X.nameTok3 + ".dat"]: Buffer.from([1, 0, 2, 0])
     }, "TEST_ plant");
+    // A submodule entry and a path with a newline exist only in the index (never on disk).
+    const evilBlob = F.git(X.plant, ["hash-object", "-w", "--stdin"], "remote " + X.evilKey + "\n");
+    F.git(X.plant, ["update-index", "--add", "--cacheinfo", "160000," + crypto.createHash("sha1").update("TEST_ gitlink").digest("hex") + ",vendor/" + X.nameTok4]);
+    F.git(X.plant, ["-c", "core.protectNTFS=false", "update-index", "--add", "--cacheinfo", "100644," + evilBlob + "," + X.evilPath]);
+    F.git(X.plant, ["-c", "core.protectNTFS=false", "commit", "-q", "-m", "TEST_ gitlink and a path with a newline"]);
     F.write(X.plant, { "untracked.txt": "grok " + X.untrackedKey + "\n" });
     X.outside = path.join(F.root, "outside.txt");
     fs.writeFileSync(X.outside, "outside the fixture repository\n");
@@ -161,7 +173,10 @@ function setup() {
     X.short = F.repo("short");
     X.p4 = fake(4);
     X.p6 = fake(6);
-    F.commit(X.short, { "netrc.txt": "machine a.example.invalid login TEST_user password " + X.p4 + "\nmachine b.example.invalid login TEST_user password " + X.p6 + "\n" }, "TEST_ short");
+    X.p8 = fake(8);
+    X.loginTok = fake(40);
+    F.commit(X.short, { "netrc.txt": "machine a.example.invalid login TEST_user password " + X.p4 + "\nmachine b.example.invalid login TEST_user password " + X.p6 +
+                                     "\nmachine c.example.invalid login " + X.loginTok + " password " + X.p8 + "\n" }, "TEST_ short");
 
     // clean: the real policy texts plus look-alikes that must not be findings.
     X.clean = F.repo("clean");
@@ -218,7 +233,7 @@ function setup() {
     X.rk = { k1: "AI" + "za" + fake(35), k2: "gl" + "pat-" + fake(24), k3: "xa" + "i-" + fake(48), k4: "sk-" + "proj-" + fake(48),
              k5: "ey" + "J" + fake(16) + "." + "ey" + "J" + fake(24) + "." + fake(40), k6: "gh" + "s_" + fake(36), k8: "gl" + "pat-" + fake(22),
              k9: "gl" + "pat-" + fake(26), k10: "gh" + "u_" + fake(36), k11: "sk-" + "proj-" + fake(40), k12: "AI" + "za" + fake(35),
-             k13: "xa" + "i-" + fake(40), k14: "xa" + "i-" + fake(44), name: fake(40) };
+             k13: "xa" + "i-" + fake(40), k14: "xa" + "i-" + fake(44), k15: "AI" + "za" + fake(35), name: fake(40) };
     X.quoted = "sp ace/" + String.fromCharCode(0xfc) + "n" + String.fromCharCode(0xef) + ".txt";
     X.bslash = "x b/y b/z.txt";
     X.r.r0 = F.commit(X.range, { "README.md": "TEST_ range fixture\n", "both.txt": "a\nb\nc\nd\n" }, "TEST_ r0");
@@ -239,7 +254,8 @@ function setup() {
         "nonl.txt": "first\nsecond " + X.rk.k9 + "\n",
         "crlfr.txt": "x\r\nremote " + X.rk.k10 + "\r\n",
         [X.bslash]: "openai " + X.rk.k11 + "\n",
-        "pic.png": Buffer.from("\n" + X.rk.k12 + "\n", "latin1"),
+        "pic.png": Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0, 0]), Buffer.from("\n" + X.rk.k12 + "\n", "latin1")]),
+        "doc.pdf": "text " + X.rk.k15 + "\n",
         ["keys/" + X.rk.name + ".txt"]: "clean\n",
         "utf16r.txt": utf16("grok " + X.rk.k13 + "\n")
     }, "TEST_ r4 " + CTRL + " control byte\n\nafter the control byte " + X.rk.k14 + "\n");
@@ -281,6 +297,18 @@ function setup() {
     X.missingSha = crypto.createHash("sha1").update("TEST_ no such commit").digest("hex");
     X.baseMissing = bcfg("base_missing.json", [bentry(X.T, [X.b.e1], X.missingSha)]);
     X.allowBase = allowCfg("allow_base.json", [allowEntry("f.txt", "HIGH_ENTROPY", "token " + X.T, "TEST_ also allowlisted")]);
+
+    // base2: added, removed, added again, removed again. A baseline whose fix is the last removal
+    // must still fail the second addition (it is not in addedIn).
+    X.base2 = F.repo("base2");
+    X.T2 = fake(48);
+    X.c = {};
+    X.c.f0 = F.commit(X.base2, { "README.md": "TEST_ baseline scope fixture\n" }, "TEST_ f0");
+    X.c.f1 = F.commit(X.base2, { "f.txt": "token " + X.T2 + "\n" }, "TEST_ f1 adds");
+    X.c.f2 = F.commit(X.base2, { "f.txt": null }, "TEST_ f2 removes");
+    X.c.f3 = F.commit(X.base2, { "h.txt": "again " + X.T2 + "\n" }, "TEST_ f3 adds again");
+    X.c.f4 = F.commit(X.base2, { "h.txt": null }, "TEST_ f4 removes again");
+    X.base2Cfg = bcfg("base2.json", [{ fingerprint: sha(X.T2), rule: "HIGH_ENTROPY", incident: "TEST_INCIDENT2", onlyInHistoryBefore: X.c.f4, addedIn: [X.c.f1], reason: "TEST_ first addition only" }]);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -326,7 +354,11 @@ function leaks(output, values) {
 // ---------------------------------------------------------------------------------------------
 
 const S = new H.Suite();
-const PLANT_FINDINGS = PLANT.length + 6;      // + .env, crlf.txt, blob.dat, utf16.txt, certs/client.p12, img/<value>.png
+// + .env, crlf.txt, blob.dat, utf16.txt, certs/client.p12, img/<value>.png, notes.pdf, bin/<value>.dat,
+//   vendor/<value> (a submodule), and the path with a newline.
+const PLANT_FINDINGS = PLANT.length + 10;
+const HUMAN = new Set(["NETRC_PASSWORD", "CREDENTIAL_ASSIGNMENT"]);
+const shownName = v => "[" + v.slice(0, 4) + "... (" + v.length + " chars)]";
 
 S.add("fixture_values_built_at_run_time", () => expect(PLANT.length === CONTENT_RULES.length && CONTENT_RULES.every(r => PLANT.some(p => p.rule === r)),
     "PLANT covers " + PLANT.length + " of " + CONTENT_RULES.length + " content rules"));
@@ -350,8 +382,6 @@ S.add("credential_file_binary_p12_detected", T => {
     const d = json(T, [], X.plant);
     return expect(d.findings.some(f => f.path === "certs/client.p12" && f.rule === "CREDENTIAL_FILE"), "a binary .p12 file was not reported");
 });
-
-const shownName = v => "[" + v.slice(0, 4) + "... (" + v.length + " chars)]";
 
 S.add("file_name_scanned_even_when_unread", T => {
     const d = json(T, [], X.plant);
@@ -385,18 +415,36 @@ S.add("nul_files_scanned_without_nul_bytes", T => {
     expect(blob && blob.rule === "OPENAI_KEY" && blob.line === 2, "blob.dat value missed");
     expect(u16 && u16.rule === "XAI_KEY" && u16.line === 1 && u16.length === X.utf16Key.length, "UTF-16 value missed");
     const nul = d.nulFiles.map(s => s.path).sort().join(",");
-    return expect(nul === "blob.dat,certs/client.p12,utf16.txt", "NUL files " + nul);
+    return expect(nul === "bin/" + shownName(X.nameTok3) + ".dat,blob.dat,certs/client.p12,utf16.txt", "NUL files " + nul);
 });
 
 S.add("binary_extension_skipped_and_counted", T => {
     const d = json(T, [], X.plant);
     expect(!d.findings.some(f => f.path === "image.png"), "image.png content was scanned");
     const reasons = d.skipped.map(s => s.path + ":" + s.reason).sort().join(",");
-    expect(reasons === "image.png:extension,img/" + shownName(X.nameTok) + ".png:extension", "skipped " + reasons);
+    expect(reasons === "image.png:extension,img/" + shownName(X.nameTok) + ".png:extension,vendor/" + shownName(X.nameTok4) + ":gitlink", "skipped " + reasons);
     const t = run(T, [], X.plant);
     expect(/^NUL_FILE utf16\.txt \(NUL bytes removed before scanning\)$/m.test(t.out), "no NUL_FILE line");
-    return expect(new RegExp("RESULT: 7 files scanned \\(3 with NUL bytes\\), 2 binary skipped, " + PLANT_FINDINGS + " findings, 0 allowed, 0 baselined").test(t.out),
+    return expect(new RegExp("RESULT: 10 files scanned \\(4 with NUL bytes, 1 text with a binary extension\\), 3 binary skipped, " + PLANT_FINDINGS + " findings, 0 allowed, 0 baselined").test(t.out),
                   "RESULT line: " + t.out.split("\n").filter(Boolean).pop());
+});
+
+S.add("binary_extension_text_scanned", T => {
+    const d = json(T, [], X.plant);
+    const t = run(T, [], X.plant);
+    expect(d.findings.some(f => f.path === "notes.pdf" && f.rule === "OPENAI_KEY" && f.line === 2), "text in notes.pdf missed");
+    return expect(d.binaryExtensionText.some(s => s.path === "notes.pdf") && /^BINARY_EXTENSION_TEXT notes\.pdf /m.test(t.out), "notes.pdf not listed as text");
+});
+
+S.add("gitlink_name_checked", T => {
+    const d = json(T, [], X.plant);
+    return expect(d.findings.some(f => f.path === "vendor/" + shownName(X.nameTok4) && f.line === 0 && f.rule === "HIGH_ENTROPY"), "a value as a submodule name was missed");
+});
+
+S.add("control_chars_in_paths_escaped", T => {
+    const r = run(T, [], X.plant);
+    expect(!/^FINDING forged\.txt/m.test(r.out), "a file name forged an output line");
+    return expect(r.out.includes("FINDING evil\\x0aFINDING forged.txt:1 GITHUB_TOKEN "), "the path with a newline is not shown escaped");
 });
 
 S.add("head_ignores_untracked_files", T => {
@@ -404,12 +452,14 @@ S.add("head_ignores_untracked_files", T => {
     return expect(!d.findings.some(f => f.path === "untracked.txt") && !leaks(d.text, [X.untrackedKey]), "untracked file was read");
 });
 
+const PLANT_EXTRA_VALUES = () => [X.crlfToken, X.nulKey, X.utf16Key, X.nameTok, X.nameTok3, X.nameTok4, X.pdfKey, X.evilKey];
+
 S.add("redaction_text_output_keeps_4_chars", T => {
     const r = run(T, [], X.plant);
-    const why = leaks(r.out + r.err, PLANT.map(p => p.value).concat([X.crlfToken, X.nulKey, X.utf16Key, X.nameTok]));
+    const why = leaks(r.out + r.err, PLANT.map(p => p.value).concat(PLANT_EXTRA_VALUES()));
     if (why) return why;
     for (const p of PLANT) {
-        const want = p.value.slice(0, 4) + "... (" + p.value.length + " chars)";
+        const want = (HUMAN.has(p.rule) ? "" : p.value.slice(0, 4)) + "... (" + p.value.length + " chars)";
         if (!r.out.includes(" " + p.rule + " " + want)) return "no redacted line for " + p.rule;
     }
     return true;
@@ -417,30 +467,32 @@ S.add("redaction_text_output_keeps_4_chars", T => {
 
 S.add("redaction_json_output_keeps_4_chars", T => {
     const d = json(T, [], X.plant);
-    const why = leaks(d.text, PLANT.map(p => p.value).concat([X.crlfToken, X.nulKey, X.utf16Key, X.nameTok]));
+    const why = leaks(d.text, PLANT.map(p => p.value).concat(PLANT_EXTRA_VALUES()));
     if (why) return why;
-    return expect(d.findings.every(f => f.lineSha256 && /^[0-9a-f]{64}$/.test(f.lineSha256) && f.fingerprint === undefined), "a finding lacks lineSha256 or carries a fingerprint");
+    expect(d.findings.every(f => f.fingerprint === undefined), "a finding carries a fingerprint");
+    const bad = d.findings.filter(f => (f.lineSha256 === null) !== HUMAN.has(f.rule) || (f.lineSha256 !== null && !/^[0-9a-f]{64}$/.test(f.lineSha256)));
+    return expect(bad.length === 0, "line sha256 shown or withheld wrongly for " + list(bad));
 });
 
-S.add("redaction_short_values_show_length_only", T => {
+S.add("redaction_short_and_human_values_show_length_only", T => {
     const d = json(T, [], X.short);
     const r = run(T, [], X.short);
-    expect(d.findings.length === 2 && d.findings.every(f => f.rule === "NETRC_PASSWORD"), "findings " + list(d.findings));
-    expect(d.findings.map(f => f.redacted).join(",") === "... (4 chars),... (6 chars)", "redacted " + d.findings.map(f => f.redacted).join(","));
-    expect(d.findings.every(f => f.lineSha256 === null), "the line sha256 of a short value is in the output");
-    return expect(!r.out.includes(X.p4) && !r.out.includes(X.p6) && !d.text.includes(X.p4) && !d.text.includes(X.p6), "a short value is in the output");
+    const net = d.findings.filter(f => f.rule === "NETRC_PASSWORD").map(f => f.redacted).join(",");
+    expect(d.findings.length === 4 && net === "... (4 chars),... (6 chars),... (8 chars)", "findings " + list(d.findings) + " / " + net);
+    expect(d.findings.every(f => f.lineSha256 === null), "a line sha256 is in the output for a line with a password (on some finding of that line)");
+    return expect(![X.p4, X.p6, X.p8].some(p => r.out.includes(p) || d.text.includes(p)), "a password is in the output");
 });
 
 S.add("redact_function_contract", T => {
     const long = "abcdefghijklmnopq", short = "abcdefgh";
-    return expect(T.redact(long) === "abcd... (17 chars)" && T.redact(short) === "... (8 chars)" && T.REDACT_KEEP === 4 && T.REDACT_MIN_LEN_FOR_PREFIX === 16,
-                  "redact() " + T.redact(long) + " / " + T.redact(short));
+    return expect(T.redact(long) === "abcd... (17 chars)" && T.redact(short) === "... (8 chars)" && T.redact(long, "CREDENTIAL_ASSIGNMENT") === "... (17 chars)" &&
+                  T.REDACT_KEEP === 4 && T.REDACT_MIN_LEN_FOR_PREFIX === 16, "redact() " + T.redact(long) + " / " + T.redact(short));
 });
 
 S.add("clean_tree_exit_0", T => {
     const r = run(T, [], X.clean);
     expect(r.code === 0, "exit " + r.code + ": " + r.out.split("\n").filter(l => l.startsWith("FINDING")).length + " findings");
-    return expect(/RESULT: 5 files scanned \(0 with NUL bytes\), 0 binary skipped, 0 findings/.test(r.out), "RESULT line");
+    return expect(/RESULT: 5 files scanned \(0 with NUL bytes, 0 text with a binary extension\), 0 binary skipped, 0 findings/.test(r.out), "RESULT line");
 });
 
 S.add("policy_text_is_not_a_finding", T => {
@@ -502,7 +554,9 @@ const BOUNDARY = (() => {
         short32: pick(() => { const s = raw(32, ALNUM); return mixed(s) ? s : "x"; }, 4.25, 4.45),                  // alnum only: short threshold 4.2
         under33: pick(() => { const s = raw(16, small) + "_" + raw(16, small); return mixed(s) ? s : "x"; }, 4.25, 4.45), // has "_": needs 4.5
         mid48: pick(() => { const s = raw(48, small); return mixed(s) ? s : "x"; }, 4.55, 4.7),                        // between 4.5 and 4.75
-        at31: fake(31), at32: fake(32)
+        at31: fake(31), at32: fake(32),
+        short47: pick(() => { const s = raw(47, small); return mixed(s) ? s : "x"; }, 4.25, 4.45),                     // alnum 47: still short
+        long48: pick(() => { const s = raw(48, small); return mixed(s) ? s : "x"; }, 4.25, 4.45)                       // alnum 48: needs 4.5
     };
 })();
 
@@ -512,13 +566,33 @@ S.add("entropy_thresholds_at_the_boundaries", T => {
     expect(hit(B.short32), "32-char alnum value at " + bitsOf(B.short32).toFixed(2) + " bits missed");
     expect(!hit(B.under33), "33-char value with \"_\" at " + bitsOf(B.under33).toFixed(2) + " bits used the short threshold");
     expect(hit(B.mid48), "48-char value at " + bitsOf(B.mid48).toFixed(2) + " bits missed");
+    expect(hit(B.short47) && !hit(B.long48), "short-run length boundary: 47 " + hit(B.short47) + ", 48 " + hit(B.long48));
     return expect(hit(B.at32) && !hit(B.at31), "length boundary: 32 " + hit(B.at32) + ", 31 " + hit(B.at31));
+});
+
+S.add("credential_assignment_thresholds", T => {
+    const flagged = l => T.scanLine(l).some(h => h.rule === "CREDENTIAL_ASSIGNMENT");
+    const v15 = fake(15, LOWER + DIGIT), v16 = fake(16, LOWER + DIGIT);
+    const low = "aaaaaaaaaa" + "1111111111";
+    const seq = "abcdef" + "1234567890xyz";
+    expect(flagged("db_password = \"" + v16 + "\"") && !flagged("db_password = \"" + v15 + "\""), "length boundary 16");
+    expect(!flagged("db_password = \"" + low + "\""), "a 20-character value at 1 bit was flagged");
+    return expect(!flagged("db_password = \"" + seq + "\""), "a value with an ascending run was flagged");
+});
+
+S.add("scan_time_linear_on_long_lines", T => {
+    const time = s => { const t0 = Date.now(); T.scanLine(s); return Date.now() - t0; };
+    const a = time("token".repeat(40000)), b = time("cookie=".repeat(15000));
+    return expect(a < 1000 && b < 1000, "200 KB lines took " + a + " ms and " + b + " ms");
 });
 
 S.add("credential_assignment_names", T => {
     const v = fake(20, LOWER + DIGIT);
-    const yes = ["api_key = \"" + v + "\"", "GEMINI_KEY=" + v, "\"client_secret\": \"" + v + "\"", "export ACCESS_TOKEN=" + v, "db_password: '" + v + "'"];
-    const no = ["cache_key: \"" + v + "\"", "author: \"" + v + "\"", "password: <PASSWORD>", "api_key = process.env.TEST_KEY", "token_count: 123456789012345678"];
+    const sym = fake(8) + "@:#!" + fake(8);
+    const yes = ["api_key = \"" + v + "\"", "GEMINI_KEY=" + v, "\"client_secret\": \"" + v + "\"", "export ACCESS_TOKEN=" + v, "db_password: '" + v + "'",
+                 "apiKey := \"" + v + "\"", "'api_key' => '" + v + "'", "authorization = \"" + v + "\"", "GEMINI_KEY_2=" + v, "password = \"" + sym + "\""];
+    const no = ["cache_key: \"" + v + "\"", "author: \"" + v + "\"", "authors = \"" + v + "\"", "password: <PASSWORD>", "api_key = process.env.TEST_KEY",
+                "token_count: 123456789012345678", "password: \"Password must be at least 8 characters\""];
     const bad = yes.filter(l => !T.scanLine(l).some(h => h.rule === "CREDENTIAL_ASSIGNMENT")).map(l => "missed: " + l.split(/[=:]/)[0])
         .concat(no.filter(l => T.scanLine(l).length > 0).map(l => "flagged: " + l.split(/[=:]/)[0]));
     return expect(bad.length === 0, bad.join("; "));
@@ -563,7 +637,7 @@ S.add("range_merge_lines_new_against_every_parent_only", T => {
 S.add("range_odd_cases_all_found", T => {
     const d = json(T, ["--range", X.r.r4a + ".." + X.r.r4], X.range);
     const got = d.findings.map(f => f.path + ":" + f.line + " " + f.rule).sort().join(", ");
-    const want = ["<commit-message>:3 XAI_KEY", "crlfr.txt:2 GITHUB_TOKEN", "keys/" + shownName(X.rk.name) + ".txt:0 HIGH_ENTROPY", "nonl.txt:2 GITLAB_TOKEN",
+    const want = ["<commit-message>:3 XAI_KEY", "crlfr.txt:2 GITHUB_TOKEN", "doc.pdf:1 GOOGLE_API_KEY", "keys/" + shownName(X.rk.name) + ".txt:0 HIGH_ENTROPY", "nonl.txt:2 GITLAB_TOKEN",
                   "utf16r.txt:1 XAI_KEY", X.bslash + ":1 OPENAI_KEY"].sort().join(", ");
     return expect(got === want, "findings: " + got);
 });
@@ -759,6 +833,13 @@ S.add("baseline_file_has_no_rule_match", T => {
     return expect(hits.length === 0, "hits: " + hits.join(", "));
 });
 
+S.add("baseline_only_in_addedIn_commits", T => {
+    const first = json(T, ["--range", X.c.f0 + ".." + X.c.f1, "--baseline", X.base2Cfg], X.base2);
+    const again = json(T, ["--range", X.c.f2 + ".." + X.c.f3, "--baseline", X.base2Cfg], X.base2);
+    expect(first.code === 0 && first.baselined.length === 1, "first addition: exit " + first.code);
+    return expect(again.code === 1 && again.findings.length === 1 && again.baselined.length === 0, "second addition (before the later fix, not in addedIn) was baselined");
+});
+
 S.add("baseline_real_history_224b1b36_baselined", T => {
     const d = json(T, ["--range", "224b1b36^..224b1b36"], REPO);
     return expect(d.code === 0 && d.findings.length === 0 && d.baselined.length === 2 &&
@@ -795,14 +876,30 @@ MUTANTS.push(
     { name: "entropy_off", pairs: [["for (const h of entropyHits(line, taken))", "for (const h of [])"]], hints: ["detects_HIGH_ENTROPY"] },
     { name: "rule_CREDENTIAL_ASSIGNMENT_off", pairs: [["for (const h of assignmentHits(line, taken))", "for (const h of [])"]], hints: ["detects_CREDENTIAL_ASSIGNMENT"] },
     { name: "assignment_key_case_off", pairs: [["if (/^[a-z0-9]_key$/i.test(m[1]) && !/^[A-Z0-9]_KEY$/.test(m[1])) continue;", ""]], hints: ["credential_assignment_names"] },
-    { name: "assignment_author_excluded_off", pairs: [["auth(?!or)|[a-z0-9]_key", "auth|[a-z0-9]_key"]], hints: ["credential_assignment_names"] },
+    { name: "assignment_author_excluded_off", pairs: [["auth(?!or(?!i[sz]))|[a-z0-9]_key", "auth|[a-z0-9]_key"]], hints: ["credential_assignment_names"] },
+    { name: "assignment_operators_basic_only", pairs: [["(?::=|=>|[:=])", "[:=]"]], hints: ["credential_assignment_names"] },
+    { name: "assignment_quoted_values_ignored", pairs: [["const g = m[3] !== undefined ? 3 : 4;", "const g = 4; if (m[4] === undefined) continue;"]], hints: ["credential_assignment_names"] },
+    { name: "assignment_key_suffix_word_boundary", pairs: [["[a-z0-9]_key(?![a-z])", "[a-z0-9]_key\\b"]], hints: ["credential_assignment_names"] },
+    { name: "assignment_min_bits_zero", pairs: [["const ASSIGN_MIN_BITS = 3.0;", "const ASSIGN_MIN_BITS = 0;"]], hints: ["credential_assignment_thresholds"] },
+    { name: "assignment_min_len_lowered", pairs: [["const ASSIGN_MIN_LEN = 16;", "const ASSIGN_MIN_LEN = 8;"]], hints: ["credential_assignment_thresholds"] },
+    { name: "assignment_sequence_skip_off", pairs: [["if (overlaps(taken, start, end) || hasSequentialRun(value, ENTROPY_SEQ_RUN) || shannonBits(value) < ASSIGN_MIN_BITS) continue;", "if (overlaps(taken, start, end) || shannonBits(value) < ASSIGN_MIN_BITS) continue;"]], hints: ["credential_assignment_thresholds"] },
+    { name: "assign_regex_unbounded", pairs: [["[\\w.-]{0,40}[\"']?\\s{0,8}(?::=|=>|[:=])", "[\\w.-]*[\"']?\\s{0,8}(?::=|=>|[:=])"]], hints: ["scan_time_linear_on_long_lines"] },
+    { name: "cookie_regex_unbounded", pairs: [["[^\\r\\n]{0,400}?\\b[\\w.-]{0,40}(?:sess|sid|token|auth|jwt|login)[\\w.-]{0,40}=", "[^\\r\\n]*?\\b[\\w.-]*(?:sess|sid|token|auth|jwt|login)[\\w.-]*="]], hints: ["scan_time_linear_on_long_lines"] },
+    { name: "entropy_short_max_len_raised", pairs: [["const ENTROPY_SHORT_MAX_LEN = 47;", "const ENTROPY_SHORT_MAX_LEN = 200;"]], hints: ["entropy_thresholds_at_the_boundaries"] },
+    { name: "ext_text_sniff_off", pairs: [["const sniff = e => isBinaryPath(e.path) && e.size <= EXT_SNIFF_MAX_BYTES;", "const sniff = e => false;"]], hints: ["binary_extension_text_scanned"] },
+    { name: "range_ext_text_off", pairs: [[": { commit: f.commit, path: f.path, binary: \"extension-text\", lines: f.added });", ": { commit: f.commit, path: f.path, binary: \"extension\", lines: null });"]], hints: ["range_odd_cases_all_found"] },
+    { name: "gitlink_names_off", pairs: [["for (const e of all) if (e.type === \"commit\") units.push(", "for (const e of []) if (e.type === \"commit\") units.push("]], hints: ["gitlink_name_checked"] },
+    { name: "printable_paths_off", pairs: [["return p.replace(/[\\x00-\\x1f\\x7f]/g,", "return p; p.replace(/[\\x00-\\x1f\\x7f]/g,"]], hints: ["control_chars_in_paths_escaped"] },
+    { name: "nul_file_path_unredacted", pairs: [["nulFiles.push({ path: shown", "nulFiles.push({ path: u.path"]], hints: ["redaction_text_output_keeps_4_chars"] },
     { name: "credential_file_off", pairs: [["return CREDENTIAL_FILE_RE.test(p.split(\"/\").pop());", "return false;"]], hints: ["detects_CREDENTIAL_FILE_tracked_env"] },
     { name: "name_checks_skip_unread_files", pairs: [["if (u.path !== COMMIT_MESSAGE_PATH) {", "if (u.path !== COMMIT_MESSAGE_PATH && u.lines !== null) {"]], hints: ["file_name_scanned_even_when_unread"] },
     { name: "file_names_off", pairs: [["for (const h of nameHits) hits.push(", "for (const h of []) hits.push("]], hints: ["file_name_scanned_even_when_unread"] },
     { name: "display_path_off", pairs: [["const shown = displayPath(u.path, nameHits);", "const shown = u.path;"]], hints: ["redaction_text_output_keeps_4_chars"] },
     { name: "redaction_off", pairs: [["return value.slice(0, REDACT_KEEP) + \"... (\"", "return value + \"... (\""]], hints: ["redaction_text_output_keeps_4_chars"] },
-    { name: "short_value_prefix_shown", pairs: [["if (value.length < REDACT_MIN_LEN_FOR_PREFIX) return \"... (\" + value.length + \" chars)\";", ""]], hints: ["redaction_short_values_show_length_only"] },
-    { name: "short_value_line_sha_shown", pairs: [["lineSha256: short ? null : h.lineSha256", "lineSha256: h.lineSha256"]], hints: ["redaction_short_values_show_length_only"] },
+    { name: "short_value_prefix_shown", pairs: [["if (hidesPrefix(value, rule)) return \"... (\" + value.length + \" chars)\";", ""]], hints: ["redaction_short_and_human_values_show_length_only"] },
+    { name: "human_values_show_prefix", pairs: [["return value.length < REDACT_MIN_LEN_FOR_PREFIX || HUMAN_VALUE_RULES.has(rule);", "return value.length < REDACT_MIN_LEN_FOR_PREFIX;"]], hints: ["redaction_text_output_keeps_4_chars"] },
+    { name: "short_value_line_sha_shown", pairs: [["lineSha256: hiddenLines.has(h.line) ? null : h.lineSha256", "lineSha256: h.lineSha256"]], hints: ["redaction_short_and_human_values_show_length_only"] },
+    { name: "line_sha_withheld_per_finding_only", pairs: [["lineSha256: hiddenLines.has(h.line) ? null : h.lineSha256", "lineSha256: (h.value !== null && hidesPrefix(h.value, h.rule)) ? null : h.lineSha256"]], hints: ["redaction_short_and_human_values_show_length_only"] },
     { name: "allowlist_staleness_off", pairs: [["const stale = allowEntries.filter(e => !e.used && ", "const stale = [].filter(e => !e.used && "]], hints: ["allowlist_stale_entry_fails"] },
     { name: "allowlist_off", pairs: [["const entry = allowEntries.find(", "const entry = undefined && allowEntries.find("]], hints: ["allowlist_matching_entries_allowed"] },
     { name: "allowlist_ignores_path", pairs: [["e.path === u.path && e.rule === rec.rule && e.lineSha256 === h.lineSha256", "e.rule === rec.rule && e.lineSha256 === h.lineSha256"]], hints: ["allowlist_entry_needs_the_right_path"] },
@@ -810,11 +907,12 @@ MUTANTS.push(
     { name: "path_mode_staleness_off", pairs: [["return { units: [textUnit({ path: relPosix }, fs.readFileSync(real))], full: [relPosix] };", "return { units: [textUnit({ path: relPosix }, fs.readFileSync(real))], full: [] };"]], hints: ["allowlist_stale_in_path_mode_for_that_file"] },
     {
         name: "baseline_ignores_scope",
-        pairs: [["if (base && baseline.isBefore(rec.commit, base.onlyInHistoryBefore)) {", "if (base) {"],
+        pairs: [["if (base && base.addedIn.includes(rec.commit) && baseline.isBefore(rec.commit, base.onlyInHistoryBefore)) {", "if (base) {"],
                 ["let baseline = null, inactive = [];\n        if (o.mode === \"range\") {", "let baseline = null, inactive = [];\n        if (true) {"]],
         hints: ["baseline_readded_later_commit_fails", "baseline_head_occurrence_fails"]
     },
-    { name: "baseline_ignores_ancestry", pairs: [["if (base && baseline.isBefore(rec.commit, base.onlyInHistoryBefore)) {", "if (base) {"]], hints: ["baseline_readded_later_commit_fails"] },
+    { name: "baseline_ignores_ancestry", pairs: [["if (base && base.addedIn.includes(rec.commit) && baseline.isBefore(rec.commit, base.onlyInHistoryBefore)) {", "if (base) {"]], hints: ["baseline_readded_later_commit_fails"] },
+    { name: "baseline_scope_not_limited_to_addedIn", pairs: [["if (base && base.addedIn.includes(rec.commit) && baseline.isBefore(", "if (base && baseline.isBefore("]], hints: ["baseline_only_in_addedIn_commits"] },
     { name: "baseline_off", pairs: [["const base = fp === null ? undefined : baseEntries.find(", "const base = undefined && baseEntries.find("]], hints: ["baseline_historical_finding_passes"] },
     { name: "baseline_staleness_off", pairs: [["if (missed.length) staleBaseline.push(", "if (false) staleBaseline.push("]], hints: ["baseline_stale_entry_fails"] },
     { name: "baseline_fix_tree_check_off", pairs: [["for (const u of collectHead(root, fix).units) {", "for (const u of []) {"]], hints: ["baseline_fix_commit_must_remove_the_value"] },
@@ -834,8 +932,8 @@ MUTANTS.push(
     { name: "no_newline_marker_ends_hunk", pairs: [["if (!raw.startsWith(\"\\\\\")) hunk = null;", "hunk = null;"]], hints: ["range_line_after_no_newline_marker"] },
     { name: "header_symmetric_split_off", pairs: [["if (Number.isInteger(half) && rest.startsWith(\"a/\") && rest.slice(2 + half, 5 + half) === \" b/\") return rest.slice(5 + half);", ""]], hints: ["range_name_with_space_b_slash"] },
     { name: "patch_cr_not_stripped", pairs: [["const text = raw.slice(hunk.parents).replace(/\\r$/, \"\");", "const text = raw.slice(hunk.parents);"]], hints: ["range_crlf_line_sha_matches_head_form"] },
-    { name: "range_extension_skip_off", pairs: [["if (isBinaryPath(f.path)) units.push({ commit: f.commit, path: f.path, binary: \"extension\", lines: null });", "if (false) units.push({ commit: f.commit, path: f.path, binary: \"extension\", lines: null });"]], hints: ["range_binary_extension_skipped"] },
-    { name: "range_messages_off", pairs: [["yield { commit: rec.slice(0, 40), path: COMMIT_MESSAGE_PATH", "if (false) yield { commit: rec.slice(0, 40), path: COMMIT_MESSAGE_PATH"]], hints: ["range_commit_message_scanned"] },
+    { name: "range_extension_skip_off", pairs: [["units.push(f.nul ? { commit: f.commit, path: f.path, binary: \"extension\", lines: null }", "units.push(f.nul ? { commit: f.commit, path: f.path, binary: \"nul\", lines: f.added }"]], hints: ["range_binary_extension_skipped"] },
+    { name: "range_messages_off", pairs: [["yield { commit: rec.slice(0, nl), path: COMMIT_MESSAGE_PATH", "if (false) yield { commit: rec.slice(0, nl), path: COMMIT_MESSAGE_PATH"]], hints: ["range_commit_message_scanned"] },
     { name: "message_control_byte_separator", pairs: [["for (const rec of msgs.split(\"\\0\")) {", "for (const rec of msgs.split(\"\\0\").map(x => x.split(\"\\x03\")[0])) {"]], hints: ["range_message_control_byte_not_a_separator"] }
 );
 
