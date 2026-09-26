@@ -137,7 +137,7 @@ Voxel mass = catalogue density × 1,415.84 kg per t/m³. Spans are `spanBase[t]`
 | 37 | sandstone | 2,973 (`:4736`, 2.1) | 17 | 105 | 10 | 1,2,2,3,4,6,9 | 20 × kg | null | 3 | 0 | 45 | rubble |
 | 2 (exists) | soil | 2,265 (1.6 t/m³, extrapolated; no catalogue density) | 10 (extrapolated) | 40 (today `DEUS_Levels.js:1006`) | 0 | 0,0,0,0,1,1,2 | 2 × kg | 35,000 | 3 | 0 | none (erosion is SIM.50.03) | loose_fill |
 | 3 (exists) | wood (natural, e.g. a giant trunk) | 1,062 (oak 0.75, `:4611`) | 15 | 60 (today) | 5 | 1,1,2,2,3,3,3 | 5 × kg | 40,000 | 4 | 3 | rotResistance (oak 75, `:4616`) | broken_timber |
-| 10 (new) | ice | 1,298 (0.917 t/m³) | 13 | 15 | 0 | 2,3,3,4,6,9,12 | floating: 3.5 × h_cm² (§4.3) | null | 0 | 0 | melts (SIM.50.06) | ice rubble = loose ice, then melt |
+| 10 (new) | ice | 1,011 (1 fluid depth unit of water held as ice with voids; solid ice would be 1,298 at 0.917 t/m³; §9.1) | 13 | 15 | 0 | 2,3,3,4,6,9,12 | floating: 3.5 × h_cm² (§4.3) | null | 0 | 0 | melts (SIM.50.06) | ice rubble = loose ice, then melt |
 | 4, 5 (exist) | water, lava | fluid (§9.1) | — | 0 | — | — | — | — | — | lava ignites | — | — |
 
 - **HP.** SRD Wall of Stone gives "30 hit points per inch of thickness" for a 10 ft × 10 ft panel (`spells.json:17309`). That is 30 HP per 8.33 ft³, or 3.6 HP per ft³, so a 50 ft³ voxel of stone is **180 HP** whichever face is struck (5 × 2 ft face × 60 in, or 5 × 5 ft face × 24 in, both give 180). Per rock, 180 is scaled by the catalogue `fractureResistance` over 60 (granite 85 gives 255, sandstone 35 gives 105); **extrapolated**. Limestone's 120 equals today's diagnostic stone `maxHP` (`DEUS_Levels.js:1005`).
@@ -161,7 +161,7 @@ Loose materials are matter that bears weight but never spans or gives lateral su
 | 13 | broken_timber | organic | 354 (0.25 t/m³) | 2 | 5 | 4 | destroyed timber assemblies (DURABILITY DU8 name) | soil (rot) |
 | 14 | dust | the source's family and composition | 1,416 (1.0 t/m³) | 1 | 4 | 0 | SRD Disintegrate's "pile of fine gray dust" (`spells.json:5855`) | sediment |
 | 15 | snow (reserved) | water | reserved for SIM.50.06 | — | — | — | — | — |
-| 10 | ice (loose form: `iceRubble` flag on the loose record) | water | 0.6 × 1,298 | 2 | 5 | 0 | broken ice | melts |
+| 10 | ice (loose form: `iceRubble` flag on the loose record) | water | 0.6 × 1,011 | 2 | 5 | 0 | broken ice | melts |
 
 Loose voxels carry `repose` for talus (§6.4), `bearingKg` 30,000 (rubble, scrap), 20,000 (loose_fill, sediment, dust, ash), and no span.
 
@@ -541,5 +541,268 @@ Calendar scale D-1 (audit §9) is open. This design never picks an option. Actio
 | 100 years | 240,000 × Y ticks | 240,000 ticks (6.7 h) |
 
 For illustration only, not a choice: Y = 20 is the archived clock's year (`archive/plugins/DEUS_Time.js:314`, "Spring (days 1-5) ... Winter (16-20)"), and Y = 336 is the 12 × 28-day year in the regrowth counter (`DEUS_Objects.js:162`). A roof that Lane R rates to reach its first band in 5 years falls in after 12,000 ticks (20 real minutes at 1x) under (b), and after 240,000 ticks (Y = 20) or 4,032,000 ticks (Y = 336) under (a). V123 itself is at `docs/VISION.md:338-340`.
+
+## Blasts across layers
+
+### 8.1 What exists (SUP-5)
+
+| Citation | Code | Finding |
+|---|---|---|
+| `DEUS_Levels.js:1795` | `function applyVolumeDamage(a, minX, minY, minZ, minS, maxX, maxY, maxZ, maxS, damage, damageType = "impact", opts = {}) {` | Box and sphere damage across levels. |
+| `DEUS_Levels.js:5732` | `const sum = applyVolumeDamage(a1, fx.x, fx.y + 1, -1, 1, fx.x, fx.y + 4, -1, 4, provoked("dig_tunnel") ? 0 : 100000, "dig", { source: "TEST_strata_tunnel" });` | The only caller is a self-test (the audit's `:5682` at `75cf2ff3`). |
+| `DEUS_Levels.js:1764` | `const FALLOFF = { constant: t => 1, linear: t => 1 - t, quadratic: t => (1 - t) * (1 - t) };` | Distance falloff only; nothing between the centre and a target attenuates it. |
+| `DEUS_Levels.js:1791` | `is within the radius (a cell is 5 ft across, a stratum 1 ft high). It crosses levels the same way.` | Vertical distance counts 1 ft per stratum. |
+| `DEUS_Levels.js:1805` | `const e0 = Math.max(0, (minZ + 2) * STRATA + minS), e1 = Math.min(24, (maxZ + 2) * STRATA + maxS);` | The 0..24 cap (also `:1835`). |
+| `DEUS_Levels.js:1702` | `rec[REC_M + s] = M_AIR;` | A destroyed stratum becomes air; its debris is only a name in the event. |
+
+ADR-003 §18.2 (PROPOSED) replaces this with one core volume-damage system: the targets inside the radius are processed shell by shell outward, each target's energy is its parent's pass fraction times the distance falloff, and a stratum destroyed earlier in the same event counts as air for everything behind it. It leaves the numbers (the per-mille pass table and the ignition thresholds, its Q18) to SIM.40.01. This section adopts that rule and supplies the numbers.
+
+### 8.2 The rule, with 10-ft layers and 2-ft slices
+
+- **Event:** `{ centre: (area, x, y, z, s), radiusHf, energy, damageType, falloff, propagation, srdArea, source }`. `energy` is the damage the rules layer rolled from the SRD (DEC-018: the SRD number is the baseline and is not changed).
+- **Geometry in half-feet (A6):** a cell is 10 hf across, a stratum 4 hf high, a layer 20 hf. A Fireball's 20 ft radius is 40 hf: 4 cells sideways and 10 strata (2 layers) up and down. **[STALE-1FT:** today's sphere would reach 20 strata, 4 levels, for the same radius.**]**
+- **Per target voxel T** (ADR §18.2): `base(T) = energy × F[falloff][isqrt(d2) × 1024 / radiusHf] / 1024`; `pass(T) = pass(parent(T)) × passPm[material(parent)][type] / 1000`, 1000 at the centre and through air or destroyed voxels; `dmg(T) = base × pass / 1000`; `effective = dmg × resistPm[material(T)][type] / 1000`.
+- **Damage threshold:** if `effective < dt[material]` the voxel takes nothing (the SRD damage-threshold rule, `rules.json:7155`). Otherwise the voxel loses HP exactly as `damageStratum` does today: bytes lost = `ceil(effective × 255 / maxHP)` (`DEUS_Levels.js:1697`).
+- **Destroyed voxels** become their debris (§8.6) and count as air (pass 1000) for every later shell of the same event. That is what lets a blast through a floor and on into the layer below.
+- **Propagation.** `line` (ADR default): the parent of T is the voxel where the straight line to the centre enters the next inner shell. `aroundCorners`: for spells whose SRD text says the effect spreads around corners (Fireball, `spells.json:7539`; Meteor Swarm, `:11669`), the parent chain runs through air voxels by a breadth-first search whose path length in half-feet stays within the radius; solids adjacent to reached air take damage and pass on attenuated energy as in the line model. This is an addition to the PROPOSED ADR's straight-line rule and is OQ-Q-10.
+- **Bounds:** targets are clipped to `zMin..zMax` with no 0..24 cap; cells past an area edge are processed in the neighbouring area in the same event (ADR §18.2).
+
+### 8.3 The tables (ADR Q18)
+
+SRD damage types map to four physical classes: `fire` (fire, and lightning for ignition); `impact` (bludgeoning, force, thunder, acid, and today's `impact`, `dig` and `blast`); `cold`; `none` (poison and psychic, which objects are immune to, `rules.json:7155`; necrotic and radiant, on which the SRD is silent for objects). Acid and lightning are provisional pending Lane P's Q3. Piercing and slashing weapon attacks on structures use the V95 attack path (DURABILITY §9.1), not volume damage.
+
+Per mille passed through one voxel (`passPm`) and damage multiplier on the voxel (`resistPm`):
+
+| Material group | pass fire | pass impact | pass cold | resist fire | resist impact | ignitePts |
+|---|---|---|---|---|---|---|
+| air, destroyed voxel | 1000 | 1000 | 1000 | — | — | — |
+| water (fluid) | 0 | 900 | 1000 (it freezes, SIM.50.06) | 0 | 0 | — |
+| lava (fluid) | 1000 | 900 | 0 | 0 | 0 | it ignites what it touches |
+| natural rock (ids 1, 32-37) | 50 | 300 | 200 | 100 | 500 (today's stone impact 0.5, `DEUS_Levels.js:1005`) | — |
+| soil | 100 | 450 | 300 | 200 | 1000 | — |
+| natural wood | 150 | 600 | 500 | 2000 | 1000 | 5 |
+| ice | 0 (the heat melts it) | 500 | 1000 | 2000 (SRD Wall of Ice "vulnerable to fire damage") | 1000 | — |
+| rubble, loose fill, sediment, scrap, dust | 100 | 500 | 400 | 0 (loose takes no HP) | 0 | — |
+| ash | 300 | 700 | 600 | 0 | 0 | — |
+| broken timber (loose) | 400 | 700 | 600 | 0 | 0 | 3 |
+| masonry, brick, rammed earth | 60 | 400 | 300 | 100 | 1000 | — |
+| ashlar, stone vault, foundation | 50 | 350 | 250 | 100 | 800 | — |
+| timber floor, wall, frame, post, roof, bridge deck | 250 | 700 | 600 | 2000 | 1200 (today's wood blast 1.2, `:1007`) | 5 |
+| thatch roof | 700 | 900 | 800 | 2000 | 1500 | 1 |
+| iron grate | 800 | 800 | 800 | 0 | 500 | — |
+| conjured stone | 200 | 800 | 600 | 100 | 1000 | — |
+
+- **What the table gives.** A floor of k voxels of one material passes about `passPm^k`: one timber voxel passes 70 % of an impact and a full layer of rock (5 voxels) 0.24 %. Fire barely passes solids but hits combustibles twice as hard.
+- **Ignition.** A combustible voxel or object that receives `fire` dmg (before resist) of at least `ignitePts` becomes a Fire record (SIM.50.05). Inside the SRD area a Fireball "ignites flammable objects in the area that aren't being worn or carried" (`spells.json:7539`), so there every flammable voxel and object ignites whatever its threshold; the threshold applies only to the physical remainder outside the SRD area.
+- **Every value is extrapolated** except the three the SRD and today's code fix (ice's fire vulnerability, stone's impact 0.5 and wood's 1.2). The Owner approves the feel on the SIM.60.04 fixtures (ADR Q18).
+
+### 8.4 Units on both layers: SRD area and physical remainder
+
+- **The SRD area is unchanged.** "A spell's effect expands in straight lines from the point of origin. If no unblocked straight line extends from the point of origin to a location within the area of effect, that location isn't included in the spell's area. To block one of these imaginary lines, an obstruction must provide total cover" (`rules.json:5012`). A solid floor is total cover. Creatures in the SRD area make the SRD save and take the SRD damage from the rules layer, exactly as the SRD says; the physics adds no second helping of the same damage to them.
+- **Physical consequences on top (DEC-018).** For creatures in the area: they fall if their floor is destroyed (§6.5), are hit by debris (§6.5), and may be caught by fire that the blast started. For creatures outside the SRD area (beyond a floor that the same event breached): they take the physical remainder `dmg` at their voxel, of the event's damage type, with a Dexterity save for half (this save is **extrapolated**, mirroring the SRD form).
+- **Shielding.** A unit behind a stone wall is outside the SRD area if the wall gives total cover, and otherwise takes what the tables let through (ADR §18.8).
+
+### 8.5 Worked numbers (linear falloff)
+
+| Case | Floor voxel under the centre | The layer below | Result |
+|---|---|---|---|
+| Fireball, 8d6 fire (average 28), radius 40 hf, centred at S2 of layer z above a timber floor (S0 of z) | 8 hf away: base 22; fire × 2 = 44 ≥ DT 5, over 27 HP: **destroyed**; timber within about 10 ft of the centre (base ≥ 14) is destroyed | S2 of z-1 is 20 hf away: base 14 through the destroyed floor (pass 1000): 14 fire to units there (Dex half), and timber there ignites (14 ≥ 5) | Breaches one floor and sets the room below on fire |
+| The same Fireball above a natural limestone floor | 22 × 0.1 = 2 < DT 10: nothing | 14 × 50 ‰ = 0 | Nothing below (ADR §18.8: "close to nothing") |
+| Shatter, 3d8 thunder (average 13.5), radius 20 hf, above a timber floor | 8 hf: base 8; × 1.2 = 9 ≥ DT 5: 27 → 18 HP | — | Damaged, not breached; about three casts breach it |
+| An explosive of 60 impact, radius 40 hf, above two timber floors | 8 hf: 48 × 1.2 = 57: **destroyed** | the next floor (S0 of z-1) is 28 hf: base 18; × 1.2 = 21 < 27: damaged | One floor breached |
+| Meteor Swarm, 20d6 bludgeoning + 20d6 fire (average 70 each), radius 80 hf | 8 hf: 63 impact × 1.2 = 75: **destroyed** | 28 hf: 45 × 1.2 = 54: destroyed; the floor after, 48 hf: 28 × 1.2 = 33: destroyed | Breaches three timber floors |
+
+The two-floor fixture of §12 (T4) uses an impact energy between the "one floor" and the Meteor Swarm cases, chosen by the test from these formulas.
+
+### 8.6 Breaching into the layer below
+
+1. A destroyed floor voxel becomes its debris (loose). Loose over air is never supported (§4.2), so it falls in the same tick (cause `support-lost`, 0 ticks) and lands on the layer below, hitting units there (§6.5) and loading the floor it lands on (§6.6).
+2. The opening emits `levels:breach` (§11): fluid drains through it (SIM.50.02), the view mask updates (DEC-021), and paths are invalidated.
+3. Every member rooted through a destroyed voxel is enqueued (§5.1), so walls or roofs that the blown floor held may fail in later ticks.
+4. Units standing on destroyed voxels fall (§6.5).
+5. Ledger: `STRATUM_* → LOOSE` per destroyed voxel (§9.2).
+
+### 8.7 Coupling to GP.07.02, DEC-022 and SIM.60
+
+- **One system.** Spells (the SIM.60.03 runtime's `volumeDamage` primitive, Lane P), explosives, and area impacts at the end of a ballistic path (GP.07.02) all call `Volume.damage` (§11.2). DEC-022 item 4 ("Area-of-effect blasts ... hitting a floor propagate cross-layer volume damage downward", `docs/OWNER_DECISIONS.md:312`) is §8.2 and §8.6.
+- **Range and line of sight** use the same half-feet geometry and the same 3D DDA (ADR §18.5). A dropped object or falling projectile gains impact from its fall height by GP.07.02's numbers, as a collapse does (§6.5).
+- **Spell primitives** (Lane P's names, unreviewed):
+
+  | SRD spell | Primitive | What this design does |
+  |---|---|---|
+  | Fireball, Meteor Swarm, Shatter, Delayed Blast Fireball | `volumeDamage` (+ `ignite`) | §8.2-§8.6 |
+  | Earthquake | `volumeDamage`, `terrainEdit` | 50 bludgeoning to each constructed voxel of members bearing on natural ground in the 100 ft (20 cell) radius at cast and each round (`spells.json:6379`); 1d6 fissures 1d10 × 10 ft deep (1..10 layers), 10 ft (2 cells) wide: the fissure voxels' kg moves as loose fill or rubble onto the fissure rims (mass kept); "A fissure that opens beneath a structure causes it to automatically collapse": members over a fissure get `support-lost` |
+  | Disintegrate | `terrainEdit` (to dust) | A 10 ft cube of a Huge or larger target (`spells.json:5855`) is 2 × 2 cells × 5 strata = 20 voxels; each becomes `dust` of equal kg (the SRD's "pile of fine gray dust"): a transform, not a sink |
+  | Wall of Stone | `conjureMatter` | `conjured_stone` voxels; the SRD's "must merge with and be solidly supported by existing stone" (`spells.json:17309`) is checked with `Support.wouldSupport` before the wall appears; ledger source (§9.4) |
+  | Passwall | `terrainEdit`, supportNeutral | "The passage creates no instability" (`spells.json:12236`): the passage voxels go to the HELD form for the duration and the support system counts them as solid; at the end they return |
+  | Move Earth | `terrainEdit` | Soil, sand and clay only; "If the way you shape the terrain would make a structure unstable, it might collapse" (`spells.json:12101`): each 10-minute change is ordinary strata writes, rechecked by §5 |
+  | Stone Shape | `terrainEdit` | Reshapes at most 5 ft of stone (`spells.json:15745`): the moved kg stays in the cell or its neighbours |
+  | Wall of Force | `forceBarrier` | Whether it bears load is Lane P's Q4; if yes it is a bearing member of unlimited capacity for its duration, and if no it is ignored by support |
+
+### 8.8 Cost
+
+- **Voxels visited** per event: `(2⌈r/5⌉ + 1)² × (2⌈r/2⌉ + 1)` for a radius of r ft. Fireball (20 ft): 9 × 9 × 21 = 1,701. Meteor Swarm (40 ft, four spheres): 17 × 17 × 41 = 11,849 each, 47,396 in all. One visit each (ADR `blast.strata_visited`); the around-corners search visits the same box at most once.
+- **Memory:** transient, one 4-byte pass value per voxel in the box (Meteor Swarm: 190 KB), freed at the end of the event. Nothing per tick unless a blast happens.
+- **[STALE-1FT:** the vertical term doubles: a Fireball box would be 41 strata tall.**]**
+
+## Mass ledger
+
+### 9.1 Families, forms and units
+
+ADR-003 leaves the per-material mass tables to "SIM.40.01 with WG.65.15" (ADR §7.8). This design proposes:
+
+| Family | Unit | What it covers |
+|---|---|---|
+| `mineral` | kg | rock of every type, the mineral part of soil, rubble, loose fill, sediment, ash, dust, mortar, brick, conjured stone, lava |
+| `organic` | kg | wood and timber assemblies, thatch, broken timber, the organic part of soil, plants, food, bodies (Lane W) |
+| `metal:<element>` | kg | iron, copper, tin, silver, gold (lead and platinum reserved): metal items and assemblies, scrap, mineral_trace, and the metal part of ore rock |
+| `water` | fluid depth unit (du) | liquid water (Q-WATER, ADR §7.8), ice and snow. An ice voxel holds exactly 1 du, so its load is 1,011 kg, the water in one du (§2.3), not the 1,298 kg of a solid ice voxel. Lake ice uses a frozen flag on the fluid cell and changes nothing in the ledger |
+
+- **Composition.** A material with more than one family carries integer per-mille shares: soil mineral 950 / organic 50; timber organic 990 / mineral 10 (its ash); ore rock mineral plus `metal:<element>` by grade; bronze copper 880 / tin 120. Splits use `floor` for the first family and the remainder for the last, so they are exact.
+- **Rock type** (granite, limestone, ...) is a sub-total inside `mineral`, carried as the loose record's lineage, so a mined granite stone and its rubble stay granite.
+- **Lava.** Lava is `mineral` in du; its solidification into basalt (SIM.50.10) must use an exact integer ratio. Proposal: 3 du of lava become 2 basalt voxels, with the lava du defined as 2,738 kg and lava-born basalt as 4,107 kg per voxel (SIM.50.10 confirms).
+- **Forms:** `STRATUM_NATURAL`, `STRATUM_BUILT`, `LOOSE`, `ITEM`, `OBJECT`, `FLUID`, `HELD` (spell-held), `BODY` (Lane W). A ledger key is `(family, form)`, with rock type as a sub-key. ADR-003's Q-STRATA, Q-ITEM, Q-OBJ and Q-WATER are these forms (ADR §7.8).
+
+### 9.2 Entries for every path
+
+| # | Path | Code today (base) | Today's leak | Ledger entries | Notes |
+|---|---|---|---|---|---|
+| 1 | Build strata | `DEUS_Jobs.js:721-727` (places an object) | none today (objects are not in any ledger) | `ITEM → STRATUM_BUILT` (Σ voxel kg); `ITEM → LOOSE` (wasteKg at the cell) | Load-time check: Σ item kg = strata kg + wasteKg (§3.3) |
+| 2 | Build an object (furniture, workbench) | same | — | `ITEM → OBJECT` (Σ item kg) | Object types gain `kg` |
+| 3 | Mine or quarry natural rock | `DEUS_Jobs.js:457-459`: a solid cell becomes a floor, removing S1-S4 (`DEUS_Levels.js:1361`), for 2 stone, or 1 stone for soil | 4 voxels (about 13 t of limestone) become 2 stone; soil becomes stone | per voxel: `STRATUM_NATURAL → ITEM` (yield: n stone items of the rock's lineage, n × item kg ≤ voxel kg); `STRATUM_NATURAL → LOOSE` (the spoil, voxel kg − yield kg) at the work cell or the miner's stand cell (OQ-Q-07) | Soil yields `loose_fill` or soil items (mineral + organic), never stone |
+| 4 | Dig | `DEUS_Interact.js:162-167` drops a stone 1 time in 4; `:259` repaints the tile | stone from nothing | The dig removes the top soil voxel (2 ft): `STRATUM_NATURAL → LOOSE` (loose_fill spoil beside the cell); the tile is derived from strata | The 1-in-4 stone is removed |
+| 5 | Quarry or dismantle a built element | `wall_stone` quarry yields 2 stone and leaves `rubble` (`game/data/DEUS_WorldCatalog.json:2204-2206`), whose pick yields 2 more (`:2104`) | 2 stone in, 4 out | `STRATUM_BUILT → ITEM` (salvage: `floor(salvagePm × kg / 1000 / itemKg)` items); `STRATUM_BUILT → LOOSE` (the rest as rubble or broken timber) | Out ≤ in by construction; DURABILITY's 75 % return keeps its number and its missing 25 % becomes debris |
+| 6 | Collapse | none (no collapse exists) | — | `STRATUM_* → LOOSE` per voxel (§6.3); `OBJECT → OBJECT(remains) + LOOSE` | §6.3 |
+| 7 | Blast destroys a voxel | `DEUS_Levels.js:1702` (becomes air) | the voxel's mass disappears | `STRATUM_* → LOOSE` (debris at the cell, then it falls) | HP loss alone has no entry |
+| 8 | Clear rubble | `rubble` object pick yields 2 stone (`:2104`) | stone from a label | `LOOSE → ITEM` (`floor(kg / itemKg)` rubble-stone items; the remainder stays loose); hauling moves items (no entry); dumping is `ITEM → LOOSE` | |
+| 9 | Salvage a ruin | — | — | as row 5, for any owner's built strata; items lying there are moved | SET-4 |
+| 10 | Rebuild from rubble | — | — | `LOOSE (masonry lineage) → STRATUM_BUILT (masonry)`; mortar `ITEM → STRATUM_BUILT` | §3.4 |
+| 11 | Fire burns out a timber voxel (SIM.50.05) | `DEUS_Fire.js:348-351` ends a burning record; burnt objects become their `becomes` | no carbon or ash mass (audit FIR-3) | organic share: `sink(organic, kg, "combustion")`; mineral share: `STRATUM_BUILT → LOOSE (ash)` | Burning is a named sink (ADR §7.9) |
+| 12 | Conjured matter (Wall of Stone) | — | — | `source(mineral, kg, "conjured:wall-of-stone")` at creation; if concentration ends early, `sink(mineral, kg left, "conjured-end:wall-of-stone")` for exactly the provenance-tagged kg that remains, wherever it is | DEC-018 PM default; §9.4 |
+| 13 | Disintegrate | — | — | `STRATUM_* → LOOSE (dust)`; objects and items to dust the same way | The SRD's dust is matter |
+| 14 | Passwall | — | — | `STRATUM_* → HELD` for the duration; `HELD → STRATUM_*` at the end | |
+| 15 | Migration of old saves | — | — | one-time logged `source(…, "migration:legacyWall")` and `source(…, "migration:legacyRoofDeck")`, or loose debris when an object outweighs its new strata | §3.5 |
+| 16 | Roof decks from `isRoofed` | `DEUS_Floors.js:276` | strata from nothing | removed as a behaviour; roofs are built (row 1) | |
+| 17 | Rust and weathering (Lane R) | — | — | `ITEM or LOOSE (metal) → LOOSE (mineral_trace)`, family `metal:<element>` unchanged | Never ore (§9.6) |
+| 18 | Lava solidifies (SIM.50.10) | legacy flood only (`DEUS_Levels.js:3418`) | — | `FLUID (lava) → STRATUM_NATURAL (basalt)` at the exact ratio of §9.1 | |
+| 19 | Freeze and thaw (SIM.50.06) | — | — | frozen flag: none; ice voxels: `FLUID ↔ STRATUM_NATURAL (ice)`, 1 du each | |
+
+### 9.3 How the LAND-1 leaks close
+
+| Leak (audit LAND-1, F-04) | Where | Fix in this design | Mutant that the ledger test must catch (§12, T5) |
+|---|---|---|---|
+| Mining 4 strata yields 2 stone | `DEUS_Jobs.js:458-459` | Yield ≤ voxel kg, remainder as spoil (row 3) | "yield 2 stone and drop no spoil" |
+| Soil yields stone | `DEUS_Jobs.js:459` | Soil yields loose fill or soil items (row 3) | "soil voxel → stone item" (family and lineage mismatch) |
+| Dig makes stone from nothing | `DEUS_Interact.js:53`, `:167` | The dig is a real strata edit; no free stone (row 4) | "restore the 1-in-4 stone drop" (a source with no cause) |
+| Wall quarry: 2 in, 4 out | `game/data/DEUS_WorldCatalog.json:2225`, `:2204`, `:2104` | Walls are strata; quarry and dismantle give out ≤ in; rubble is loose kg (rows 5, 8) | "rubble pick yields 2 stone" |
+| Roof decks from nothing | `DEUS_Floors.js:276` | Removed; roofs are build jobs (rows 1, 16) | "restore the `isRoofed` side effect" (strata with no cause) |
+
+### 9.4 Conjured matter
+
+DEC-018's open sub-question (`docs/OWNER_DECISIONS.md:262`) has the PM default that conjured matter is a logged magical source or sink. ADR-003 (its Q19) and Lane P (its Q1) carry the same question. This design follows the default: row 12 above, with a per-voxel provenance tag (the spell instance) kept in the sparse provenance map that WG.65.16 describes, so the matching sink removes exactly what is left. If the Owner rules differently (for example that a Wall of Stone draws its stone from nearby rock), only the cause table changes. The question is the Owner's and is not answered here.
+
+### 9.5 Checks
+
+- **Per event (cheap, test mode and release):** a collapse, blast or build asserts that the kg it removed from one form equals the kg it added to others, per family.
+- **Interval:** for every family and form, `Δtotal = Σ sources − Σ sinks` (ADR §7.9).
+- **Recount:** in test mode a full recount after every collapse event and every 100 ticks (O(cells + records), test only); in release incremental counters with a recount on save.
+- **WG.65.15** is the verifier row (`docs/worldgen/DEUS_WORLDGEN_WBS.md:254`). The audit moves it earlier (§6 step 2); this design's code packages depend on it (§13).
+
+### 9.6 No ore is created (LIFE-002)
+
+- No transform may output an ore id (38-47) or an ore item unless its input is ore of the same element with at least that metal kg. Blasting a vein gives ore-lineage rubble (the ore was already there); rust gives `mineral_trace`; lithification gives sandstone or mudstone; none gives ore.
+- A load-time check fails any transform-table row whose output is ore from a non-ore input (§12, T12). The live ore sprouts (audit VEG-1, F-03, D-5 Owner ruling) are removed under audit §6 step 1, not here; the ledger test fails any ore source regardless.
+
+## Sparse storage and cost
+
+### 10.1 Data structures (memory and saves, D-3)
+
+| Structure | Holds | Sparse representation | Size | Saved |
+|---|---|---|---|---|
+| Strata, natural and constructed | material byte (id + constructed flag) per voxel | ADR chunks: UNIFORM chunks are 2 directory bytes; MIXED chunks hold arrays (A3). Constructed strata add no bytes: the assembly id and flag live in the existing material byte (`DEUS_Levels.js:995`) | MIXED chunk 7,680 B (ADR §15.4) | as diffs against the seed (today 11 bytes a changed cell, `DEUS_Levels.js:997`) |
+| Stratum HP | HP byte per voxel | allocated per MIXED chunk only once a voxel there is damaged | 5,120 B per such chunk (ADR §15.4) | in the diffs |
+| Loose records | lineage and exact kg per loose cell | per MIXED chunk, a sorted array made at the first loose voxel | 8 B per loose cell | yes (not derivable) |
+| Member records (support) | dist, rootDir, band, load band, Lsup, tributary, flags | per chunk open-addressing table, only for lateral members of touched chunks (§5.4) | 16 B each; 32 B at load factor 0.5 | no (derived, rebuilt lazily) |
+| Failing set | member key, cause, fail tick | array | 16 B each | yes |
+| `supportDirty`, `talusDirty` | member or cell keys | ring buffers, starting at 4,096 and 1,024 entries, doubling when full | 32 KB and 8 KB | yes (pending work) |
+| Lazy-init flag | chunk touched since load | one spare bit in the chunk directory byte | 0 | no |
+| Blast scratch | pass value per voxel in the box | transient, freed after the event | ≤ 190 KB (Meteor Swarm) | no |
+
+### 10.2 Memory per building, region and layer (arithmetic, not measured)
+
+- **A 6 × 6 two-storey timber house.** 20 perimeter wall columns are bearing members: no records. The upper floor (16 interior cells) and the roof (16) are lateral: 32 records × 32 B = 1 KB. Its strata sit in a surface chunk that is MIXED anyway; if it were not, the first write splits it once (7,680 B). Loose data: 0 until it collapses; fully collapsed, about 36 loose cells × 8 B = 288 B.
+- **A 12 × 12 stone keep of 6 storeys.** 100 interior vault cells × 6 = 600 records × 32 B = 19 KB.
+- **A town region** (32 × 32 cells × 2 layers, ADR §5.1) with 20 houses: 20 KB of records plus its two MIXED chunks (15 KB).
+- **Per layer of one 256 × 256 area at 32 layers:**
+  - a sky layer (+4..+15, UNIFORM air): 64 chunks × 2 B = 128 B, and no records;
+  - a deep rock layer without caves (UNIFORM solid): 128 B, no records (bearing members need none);
+  - a cave layer with 15 % cave cells: about 0.15 × 65,536 = 9,830 cave-ceiling members. Untouched chunks hold none. A mine touching 4 chunks holds about 4 × 1,024 × 0.15 × 32 B ≈ 20 KB. The worst case, every chunk of the layer touched, is 9,830 × 32 B ≈ 315 KB.
+- **Per area, worst case:** 16 cave layers all fully touched is about 5 MB of records, on top of the ADR's chunk worst case (27 MiB, ADR §9.1). **Typical:** a colony and one mine, under 100 KB.
+- Support memory follows touched overhangs and buildings. It never grows with 32 × area: sky and solid rock hold no records at any layer count (ADR `sim.heap_mib` rule, §9.1).
+
+### 10.3 Save size
+
+- A building is its changed cells: the 6 × 6 house is about 40 wall cell-layers plus 32 floor and roof cells = 72 changed cells × 11 B = 792 B (1,584 characters as today's 22-hex records).
+- Loose data: 8 B per loose cell. Support: only the failing set and the queues, usually empty.
+- An unchanged 32-layer world saves 0 bytes of support or loose data, the same as a 9-layer one (ADR `save.bytes`).
+
+### 10.4 CPU per tick
+
+- **At rest:** 0 (V133, NAT-003).
+- **Position in the tick** (A2, ADR §3.8): after step 13 (timers) and before step 14 (LOD): 13a support recheck (SUPPORT_BUDGET 256 evaluations), 13b due collapses (COLLAPSE_CHAIN_BUDGET 64 members), 13c talus (TALUS_BUDGET 128 steps). Commands, fire, jobs, combat and spells earlier in the tick enqueue; the same tick processes them.
+- **Worst tick:** support 16,384 reads (§5.5); collapse 64 members × about 10 voxels × about 40 reads (landing walk and writes) = 25,600; talus 128 × 10 = 1,280. About 43,000 simple operations: order 0.1-0.5 ms (not measured). The CPU class is O(work), capped per tick by the three budgets.
+- **Population (DEC-014).** Units are not load by default, and a unit is touched only if a collapse reaches its cell, so the cost does not depend on how many units exist. If the Owner picks "units are load" (OQ-Q-05), unit steps onto lateral members become load events throttled by the load band.
+
+### 10.5 LOD regions and deep-history collapse
+
+- **No summary state for support.** Geometry is resident at every LOD level (ADR §6) and support is a function of it. Only the victims differ: L2 buckets per ADR §16.5.
+- **Region summary counters** (SIM.30.01's schema): `support.lateralMembers`, `support.failing` and `loose.kgByFamily` per region, for observability and for SIM.30.03's conservation check on promotion and demotion.
+- **Deep history** (SIM.40.08, ADR §14): event bubbles run the same code. For a site no bubble touches during a long jump, a batched ruin reduction: take Lane R's closed-form HP for every voxel at the jump's end day, then apply the collapse path once per failing member in canonical order (lowest elevation first, then cell index), with talus. O(site voxels) once per jump per site, never per simulated day, and deterministic.
+
+## Hooks and events
+
+### 11.1 Events
+
+Consumed events are listed in §5.1. Emitted events, in the order they occur within a tick:
+
+| # | Event | Payload | When | Consumers |
+|---|---|---|---|---|
+| 1 | `support:changed` | `{ memberKey, ref, from: { dist, band, loadBand }, to: { … } }` | 13a, when a record changes | UF_Look and UF_Sheet (Rule 14 "why"), SIM.40.03 |
+| 2 | `support:failing` | `{ memberKey, cells: [ref], cause, detectedTick, failTick, siteId }` | 13a, on entering the failing set | SIM.40.03 (flee, prop), Lane R (stage), presentation (`support_failing` slot) |
+| 3 | `support:rescued` | `{ memberKey }` | 13a | SIM.40.03, presentation |
+| 4 | `collapse:begin` | `{ collapseId, memberKeys, cause, tick }` | 13b, before any write | all below |
+| 5 | `levels:strataChanged` (existing, `DEUS_Levels.js:1558`) | `(ref, { before, after, cause })`, cause `collapse:fall`, `collapse:land`, `talus`, `blast:<type>`, `build:<typeId>`, `decay:<reason>` | each write | fluid (existing hook), support (§5.1), the ledger |
+| 6 | `collapse:impact` | `{ collapseId, target: "unit" \| "object", id, dice, save: "dex", damage, buried }` | 13b | the rules layer rolls; Combat applies; Lane W (bodies) |
+| 7 | `collapse:landed` | `{ collapseId, cells: [{ ref, s, material, lineage, kg }] }` | 13b | Lane R, provenance (WG.65.16) |
+| 8 | `levels:breach` | `{ ref, fromZ, toZ, cause }` | when a floor opening appears between two layers | SIM.50.02 (drain), view mask (DEC-021), paths |
+| 9 | `collapse:end` | `{ collapseId, kgByFamily, ticks }` | 13c, when its talus settles | Lane R, SIM.40.04 |
+| 10 | `ledger:transform` (the ADR's `LEDGER` feed record) | `{ fromForm, toForm, family, kg, cause }` | each transform | WG.65.15 |
+| 11 | `blast:resolved` | `{ blastId, strataVisited, destroyed, breaches, unitsHit }` | end of `Volume.damage` | GP.07.02, SIM.60.03, SIM.40.04 |
+
+Before the core exists the same names go through `UF.Events`. Inside a phase, events follow queue order, so the sequence is deterministic.
+
+### 11.2 APIs
+
+| API | Returns or does | Cost |
+|---|---|---|
+| `Support.query(ref)` | `{ member: { e0, e1, t }, bearing, dist, spanEff, band, Lsup, cap, loadBand, failing, cause, rootDir }` | O(1) with records; no allocation per frame |
+| `Support.wouldSupport(voxels)` | `{ ok, failing, reason }` for a planned build, by virtual evaluation | bounded as §5.5 |
+| `Support.digRisk(ref)` | `{ members, kg, cells }` that would fail if the voxel were removed | bounded as §5.5 |
+| `Support.enqueue(ref, cause)` | for load changes made outside the writers (aggregated fluid load) | O(1) |
+| `Collapse.trigger(memberKeys, cause)` | forced collapse (sinkholes, earthquake fissures) | as §6 |
+| `Volume.damage(event)` | §8.2 | §8.8 |
+| `Loose.deposit(ref, lineage, kg, cause)`, `Loose.take(ref, kg, cause)`, `Loose.at(ref)` | loose matter | O(log n) in the chunk's array |
+| `Ledger.transform / source / sink` | WG.65.15 (A5) | O(1) |
+
+### 11.3 By consumer
+
+- **SIM.40.02 collapse** implements §6 with these events and APIs.
+- **SIM.40.03 colonists.** On `support:failing` they leave the member's cells and the cells below. A "prop" job builds a `timber_post` (S1-S4) under a failing or marginal member; a post whose top touches the member's bottom makes it bearing. Miners call `Support.digRisk` first and refuse a dig with risk unless ordered ("avoid unsafe digging unless overridden", the SIM.40.03 row). Build designations call `Support.wouldSupport`.
+- **SIM.40.04 QA** reads the counters `support.work_per_tick`, `support.reads`, `support.records`, `collapse.voxels`, `talus.steps`, `blast.strata_visited`, and the per-event ledger check.
+- **SIM.50.10 earthquakes and sinkholes.** A quake is `Volume.damage` (impact) on constructed voxels in contact with the ground within its radius, plus `Support.enqueue` for the member records in the chunks that overlap the radius (never the world). A sinkhole is a karst cave ceiling whose rock HP bands fall (dissolution, Lane R and SIM.50.03) or a scheduled `Collapse.trigger` on that ceiling member: the surface above falls in. An eruption adds lava as a fluid source and solidifies it by §9.2 row 18.
+- **SIM.50.02 water.** Fluid is load on floors (enqueued on load-band changes). `levels:breach` drains a pool through a breached floor. Each material's `perm` class (§2.2) sets seepage through floors and walls. Floating ice bears on water (§4.3). This depends on D-4 (DEUS_Fluid as the single water authority, a PM decision the Owner may still overturn): if the Owner keeps a different authority, these hooks move to it unchanged.
+- **SIM.50.05 fire.** Fire lowers timber HP through the strata writer (cause `fire`); band crossings wake support; a burnt-out voxel becomes ash plus a combustion sink (§9.2 row 11); blasts ignite by §8.3.
+- **SIM.60 spells** use §8.7's mapping. **GP.07.02** uses `Volume.damage` for area impacts and §6.5's fall rule for dropped objects.
+- **Lane W (SIM.40.10).** Units killed in a collapse become bodies by Lane W's transform (`BODY`); buried bodies stay where they are.
 
 <!-- CONTINUES -->
