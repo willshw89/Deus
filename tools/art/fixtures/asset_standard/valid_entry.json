@@ -1,0 +1,15 @@
+{
+  "id": "ALL_SHARED_CREATURE_WOLF_V1_DEFAULT",
+  "category": "CREATURE",
+  "band": "ALL",
+  "biome": "SHARED",
+  "sizeClass": "Small",
+  "frameClass": "SMALL",
+  "status": "MISSING",
+  "frames": { "cols": 3, "rows": 4, "facings": ["S", "W", "E", "N"], "rate": "150ms" },
+  "slot": { "sheetId": "ATLAS_ALL_SHARED_CHARACTER_00", "slotId": "ATLAS_ALL_SHARED_CHARACTER_00:0000", "x": 0, "y": 0, "w": 144, "h": 192 },
+  "framePx": [48, 48],
+  "paperDoll": null,
+  "declaredRows": ["idle", "walk", "attack", "hurt", "death"],
+  "runtime": { "kind": "NONE", "file": null }
+}

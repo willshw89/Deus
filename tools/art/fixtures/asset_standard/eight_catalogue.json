@@ -1,0 +1,17 @@
+{
+  "entries": [
+    {
+      "id": "ALL_SHARED_CREATURE_BEAR_V1_DEFAULT",
+      "category": "CREATURE",
+      "band": "ALL",
+      "biome": "SHARED",
+      "sizeClass": "Medium",
+      "frameClass": "MEDIUM",
+      "status": "EXISTING_UNAPPROVED",
+      "frames": { "cols": 3, "rows": 8, "facings": ["S", "SW", "W", "NW", "N", "NE", "E", "SE"], "rate": "150ms" },
+      "framePx": [48, 48],
+      "declaredRows": ["idle", "walk", "attack", "hurt", "death"],
+      "runtime": { "kind": "RMMZ_CHARACTER", "file": "img/characters/$UF_Bear_8D.png" }
+    }
+  ]
+}

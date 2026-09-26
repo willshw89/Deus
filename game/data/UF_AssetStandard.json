@@ -1,0 +1,5400 @@
+{
+  "schemaVersion": "deus-asset-standard/1.0.0",
+  "documentId": "DEUS-ASSET-STANDARD-01",
+  "authority": "Owner rulings DEC-007, DEC-011, DEC-013, DEC-016, DEC-027, DEC-030, and 2026-09-26 12:38, 12:39, 12:41, 12:42, 12:43, 12:46, 12:49, 12:52 CT. Lane brief WG.20.01.",
+  "artGeneration": "forbidden",
+  "rules": {
+    "AS-GLOBAL-001": {
+      "norm": "Every world, character, creature, item and effect cell is a multiple of the 48 px grid. 1 cell = 5 ft.",
+      "check": "grid"
+    },
+    "AS-GLOBAL-002": {
+      "norm": "DEC-011: every layer renders at 1 source pixel = 1 screen pixel. No blur, bloom, glow shader, ColorMatrix, parallax, or alpha fade.",
+      "check": null
+    },
+    "AS-GLOBAL-003": {
+      "norm": "Alpha is binary: 0 or 255. Brightness comes from drawn frames and palette ramps.",
+      "check": null
+    },
+    "AS-GLOBAL-004": {
+      "norm": "Ramp ids are the colour vocabulary. uf.hex is the runtime canonical palette now (ADR-002). deus_master_world_palette_v1.hex is the approved target. Assets name ramps. They do not invent hex.",
+      "check": null
+    },
+    "AS-GLOBAL-005": {
+      "norm": "One light direction: top-left, 315 degree azimuth, 45 degree elevation, baked into the frames. Highlights on top and left. Shadows on bottom and right.",
+      "check": null
+    },
+    "AS-GLOBAL-006": {
+      "norm": "Selout is a 1 px outline on the outer silhouette only, using the darkest step of the local ramp, darker on the bottom and right. No universal black. Ground fills have no outline.",
+      "check": null
+    },
+    "AS-GLOBAL-007": {
+      "norm": "Contact shadow is a drawn ellipse at the shadow anchor. Seamless ground tiles carry no baked cast shadow. No drop-shadow filter.",
+      "check": null
+    },
+    "AS-GLOBAL-008": {
+      "norm": "Draw order back to front: ground, strata faces and ramps, objects, unit body, equipment, effects, UI.",
+      "check": null
+    },
+    "AS-GLOBAL-009": {
+      "norm": "Equipment draws in DEUS_Anim slot order: feet, legs, waist, armor, torso, neck, shoulders, arms, hands, ring1, ring2, head, eyes, back, offHand, shield, mainHand, weapon.",
+      "check": null
+    },
+    "AS-GLOBAL-010": {
+      "norm": "Catalogue id is BAND_BIOME_CATEGORY_TYPE_VARIANT_STATE: six fields, letters and digits, hyphen inside a field.",
+      "check": "id-shape"
+    },
+    "AS-GLOBAL-011": {
+      "norm": "A leading $ is one character on the sheet. A leading ! is an object with no foot offset. Eight characters per sheet when the $ is absent: 4 by 2 blocks.",
+      "check": null
+    },
+    "AS-GLOBAL-012": {
+      "norm": "A character or layer sheet has a sidecar of the same basename with frameWidth, frameHeight, anchor, footprint, facings, animations, frameMs.",
+      "check": null
+    },
+    "AS-GLOBAL-013": {
+      "norm": "An RMMZ charset block is 3 columns by 4 rows. Walk playback is stand, left, stand, right. The walk block is never given a fifth facing row.",
+      "check": null
+    },
+    "AS-GLOBAL-014": {
+      "norm": "A face sheet is 576 by 288, eight 144 by 144 cells, 4 columns by 2 rows.",
+      "check": "face-sheet"
+    },
+    "AS-GLOBAL-015": {
+      "norm": "SV battlers (9 by 6 motions of 64 by 64, sheet 576 by 384) are required for humanoids and for creatures Medium or larger. Tiny and Small critters have none. SV does not replace map rows.",
+      "check": null
+    },
+    "AS-GLOBAL-016": {
+      "norm": "Large frames are 48 by 96 (tall) and 96 by 48 (long). Extra action rows are further $ sheets or sidecar rows. They do not break the 3 by 4 walk read.",
+      "check": null
+    },
+    "AS-GLOBAL-017": {
+      "norm": "Runtime scale, rotation, flip-as-a-substitute, and tint are not a substitute for a drawn frame. Weapon angles are chosen from pre-drawn cels.",
+      "check": null
+    },
+    "AS-GLOBAL-018": {
+      "norm": "DEC-013 geometry: 32 layers, 1 cell = 5 ft, 1 layer = 10 ft, 5 strata of 2 ft, nine races. Home-layer assignment stays open.",
+      "check": null
+    },
+    "AS-GLOBAL-019": {
+      "norm": "DEC-030 bands and biomes are the vocabulary. Legacy catalogue band and biome tokens are not yet mapped and are unknown, not a pass.",
+      "check": "band-vocab"
+    },
+    "AS-GLOBAL-020": {
+      "norm": "SRD 5.1 is the rules authority. V64 is retired. Presentation follows SRD conditions, damage types, sizes and spells.",
+      "check": null
+    },
+    "AS-GLOBAL-021": {
+      "norm": "DEC-016: the scale chart governs drawn size. Numeric source game/data/DEUS_ScaleRegistry.json. Picture art/reference/DEUS_HUMAN_SCALE_STRIP_V1.png. Catalogue copy art/catalogue/scale_chart.json.",
+      "check": null
+    },
+    "AS-GLOBAL-022": {
+      "norm": "Characters and creatures use four directions, row order South, West, East, North.",
+      "check": "directions"
+    },
+    "AS-GLOBAL-023": {
+      "norm": "A sheet that declares SW, NW, NE or SE is a legacy 8-way source. Mine S, W, E, N only. The diagonals are not standard.",
+      "check": "eight-dir"
+    },
+    "AS-CRIT-001": {
+      "norm": "Tiny and Small creatures require idle, walk, attack, hurt and death, each in four directions.",
+      "check": "critter-rows"
+    },
+    "AS-CRIT-002": {
+      "norm": "Fly and swim rows are optional. When declared they use the same four directions.",
+      "check": null
+    },
+    "AS-CRIT-003": {
+      "norm": "A critter has a corpse sprite and a harvest icon. It has no face.",
+      "check": null
+    },
+    "AS-CRIT-004": {
+      "norm": "Frame size follows the frame class. Tiny, Small and Medium are 48 by 48. Tall Large is 48 by 96. Long Large is 96 by 48.",
+      "check": "frame-size"
+    },
+    "AS-BEAST-001": {
+      "norm": "Medium and larger creatures include the critter rows plus one attack row per declared natural attack.",
+      "check": "beast-attacks"
+    },
+    "AS-BEAST-002": {
+      "norm": "Medium and larger creatures use the same 15 condition treatments as humanoids.",
+      "check": null
+    },
+    "AS-BEAST-003": {
+      "norm": "Medium and larger creatures have an SV battler.",
+      "check": null
+    },
+    "AS-BEAST-004": {
+      "norm": "Large uses the tall or long frame. Huge and Gargantuan frames are integer multiples of 48. The exact multiple is open.",
+      "check": null
+    },
+    "AS-HUM-001": {
+      "norm": "Each of the nine races has a male and a female body template. Today only HUMAN male T0 and HUMAN female T0 exist in the catalogue.",
+      "check": null
+    },
+    "AS-HUM-002": {
+      "norm": "Socket ids are fixed. The human 48 px stand-down baseline is recorded. Other frames store their own coordinates under the same ids.",
+      "check": null
+    },
+    "AS-HUM-003": {
+      "norm": "Part layers: body, eyes, hair front, hair back, beard, and racial ears, horns, tail, scales where that race has them.",
+      "check": null
+    },
+    "AS-HUM-004": {
+      "norm": "Paper-doll z-order is legs 1, torso 2, clothes 2, head 3, back 4, shield 5, held 6, fx 7.",
+      "check": "paperdoll-z"
+    },
+    "AS-HUM-005": {
+      "norm": "The face shows the same worn armour and helmet as the charset.",
+      "check": null
+    },
+    "AS-HUM-006": {
+      "norm": "Age is a visible axis. Child, adult and a stooped working elder are required. Further steps, including a teen stage, are an open Owner question.",
+      "check": null
+    },
+    "AS-HUM-007": {
+      "norm": "Hair greying is a ramp: natural, salt-and-pepper, grey, white. Balding is a visible locus that masks hair. The mask count is open.",
+      "check": null
+    },
+    "AS-HUM-008": {
+      "norm": "Visible genetic loci and the parts they select are defined here. Inheritance math stays in the sim.",
+      "check": null
+    },
+    "AS-HUM-009": {
+      "norm": "Humanoid action rows cover the charter families and the lane list, four directions each.",
+      "check": "humanoid-rows"
+    },
+    "AS-HUM-010": {
+      "norm": "Pose families F01 through F14 map onto those rows. F14 frames for sleep, prone, unconscious and dead must be distinguishable. Whether they share one family id is open.",
+      "check": null
+    },
+    "AS-HUM-011": {
+      "norm": "Emotes use the RMMZ balloon sheet: 384 by 720, 8 frames by 15 rows of 48 px.",
+      "check": null
+    },
+    "AS-HUM-012": {
+      "norm": "All 15 SRD conditions have a DEC-011 treatment: pose, frame-freeze, drawn ramp, decal or icon. Invisible is a drawn contour, not a filter.",
+      "check": null
+    },
+    "AS-HUM-013": {
+      "norm": "Pregnancy is a presentation hook with stages 0, 1, 2 and 3: a torso decal per race rig, not a new combat sheet.",
+      "check": null
+    },
+    "AS-HUM-014": {
+      "norm": "dominantHand is right or left. Grips are ONE_HANDED, OFF_HAND, TWO_HANDED, VERSATILE. Asymmetrical gear is not mirrored.",
+      "check": null
+    },
+    "AS-HUM-015": {
+      "norm": "Nine races times 15 outfits (12 classes plus light, medium and heavy armour) is 135 art variants of race-neutral outfit ids.",
+      "check": "outfit-matrix"
+    },
+    "AS-HUM-016": {
+      "norm": "PM-proposed, Owner may amend: body poses are drawn once. Garb layers match that grid. Weapons and shields pick a pre-drawn angle at a per-frame anchor. No runtime rotation.",
+      "check": "pose-grid"
+    },
+    "AS-HUM-017": {
+      "norm": "Capes, long robes, large shields and bows mid-draw have their own frames for every pose. They are not a single angled cel.",
+      "check": "deforming"
+    },
+    "AS-HUM-018": {
+      "norm": "Visible body loci: height and build inside the scale-chart envelope, horns, tail, ears, and a dragonborn scale-colour ramp family.",
+      "check": null
+    },
+    "AS-HUM-019": {
+      "norm": "A child body template and a stooped elder template both carry the work and action rows.",
+      "check": "life-templates"
+    },
+    "AS-FACE-001": {
+      "norm": "Each race has a faceset background keyed by that race ramp and motif.",
+      "check": "face-background"
+    },
+    "AS-FACE-002": {
+      "norm": "Face layers bottom to top: background, optional faction trim, body base, face, hair, worn gear, overlays.",
+      "check": "face-layers"
+    },
+    "AS-FACE-003": {
+      "norm": "Eight expressions in index order: neutral, happy, angry, sad, surprised, hurt, determined, afraid.",
+      "check": "face-expressions"
+    },
+    "AS-FACE-004": {
+      "norm": "Face anchors on the 144 px cell: neck base, collar line, chin, eye line, crown.",
+      "check": "face-anchors"
+    },
+    "AS-BIOME-001": {
+      "norm": "Six biomes times five depth bands is 30 sets, plus 15 pairwise transitions and a reserved open-air band.",
+      "check": null
+    },
+    "AS-BIOME-002": {
+      "norm": "Each biome-depth set has ground autotiles, cliffs, ramps (one 10 ft layer over 5 squares), water, vegetation, props, season frames and a ramp id.",
+      "check": null
+    },
+    "AS-BIOME-003": {
+      "norm": "TEMP, WET, ARID and VOLC keep the WG.00.04 physical identities under the DEC-030 ids. COLD and WILD ids are required. Their look is open. HIGH is not a biome.",
+      "check": null
+    },
+    "AS-BIOME-004": {
+      "norm": "Four season states are drawn frame indices. They are not a colour LUT or a ColorMatrix.",
+      "check": null
+    },
+    "AS-BLDG-001": {
+      "norm": "Every faction style uses the same piece ids: foundation, wall, wall top, roof edge, roof fill, door, window, floor, pillar, connector, furniture, workstation, plus ruined and charred states.",
+      "check": null
+    },
+    "AS-BLDG-002": {
+      "norm": "The six style profiles are human_frontier, dwarf_stonehold, elf_glade, halfling_homestead, dragonborn_citadel and goblin_salvage.",
+      "check": null
+    },
+    "AS-BLDG-003": {
+      "norm": "Race, culture and profile gaps are listed and not filled with new lore.",
+      "check": null
+    },
+    "AS-BLDG-004": {
+      "norm": "Function, grammar and style stay separate. The 12 universal building classes are the functional catalog.",
+      "check": null
+    },
+    "AS-ICON-001": {
+      "norm": "One icon grid: 32 by 32 px, 16 columns, row-major index, sheet width 512.",
+      "check": "icon-size"
+    },
+    "AS-ICON-002": {
+      "norm": "One icon slot for every SRD weapon, armour, shield, material, tool, spell school, condition, status, resource and job.",
+      "check": null
+    },
+    "AS-ICON-003": {
+      "norm": "Rarity and quality are a border or corner mark. They are not a second drawing of the icon.",
+      "check": "icon-rarity"
+    },
+    "AS-ICON-004": {
+      "norm": "Icons share the top-left light, the 1 px selout and the palette ramps.",
+      "check": null
+    },
+    "AS-ITEM-001": {
+      "norm": "An item id is race-neutral. One Plate Armor, one item id, one stat block. No Elven Plate Armor.",
+      "check": "item-id"
+    },
+    "AS-ITEM-002": {
+      "norm": "Layer art key is itemId + __ + race. Missing race variant falls back to __human, then to nothing. No tint and no other race.",
+      "check": "art-key"
+    },
+    "AS-NODE-001": {
+      "norm": "A resource node has full, partly harvested, depleted and regrowing states, a harvest animation, a drop sprite, and one variant per biome.",
+      "check": "resource-node"
+    },
+    "AS-ANIM-001": {
+      "norm": "Animation is the default. A static asset names an exception on the closed list. The clock is 150 ms.",
+      "check": "animation"
+    },
+    "AS-FX-001": {
+      "norm": "A spell is cast pose, delivery shape, damage-type impact and a sim effect. No per-spell animation.",
+      "check": null
+    },
+    "AS-FX-002": {
+      "norm": "Each delivery shape is one animation with a fixed frame count on the 48 px grid.",
+      "check": null
+    },
+    "AS-FX-003": {
+      "norm": "The 13 SRD damage types each have an impact animation and a ramp id. An unknown type is rejected.",
+      "check": "spell-damage"
+    },
+    "AS-FX-004": {
+      "norm": "Lingering sim effects and concentration, buff, curse and ward auras are data on the spell row.",
+      "check": null
+    },
+    "AS-FX-005": {
+      "norm": "Spell rows validate against UF_SpellVisualTable.schema.json, draft 2020-12. customPiece is a hook and is null in the examples.",
+      "check": null
+    },
+    "AS-FX-006": {
+      "norm": "An effect on another Z layer is drawn in that layer at 1:1, with no blur, tint or scale. Looking down shows it.",
+      "check": null
+    },
+    "AS-FX-007": {
+      "norm": "World effects cover projectile, impact, fire, water and weather, with the frame counts in the animation table.",
+      "check": null
+    },
+    "AS-UI-001": {
+      "norm": "Balloons, selection rings, HP bars, lower-layer overlays and the six faction window skins are drawn frames.",
+      "check": null
+    },
+    "AS-UI-002": {
+      "norm": "Multi-layer selection draws the same ring on each selected unit own layer at 1:1.",
+      "check": null
+    },
+    "AS-UI-003": {
+      "norm": "HP, team and status are readable without colour alone. The smallest UI glyph is 16 px. Icons stay 32 px.",
+      "check": "ui-min"
+    },
+    "AS-SUMMON-001": {
+      "norm": "Every derived conjure, summon, animate or create-entity spell has a slot in the summon table.",
+      "check": "summon-map"
+    },
+    "AS-SUMMON-002": {
+      "norm": "Each summon slot has summon-in, dismiss and a controller marker. Creatures also follow the size standard.",
+      "check": "summon-parts"
+    },
+    "AS-REMAIN-001": {
+      "norm": "Remains cover race and creature bodies, skeletons, blood, scorch, rubble, debris, and burned, frozen and flooded tile and building variants.",
+      "check": "remains"
+    },
+    "AS-HAUL-001": {
+      "norm": "Carry is drawn. Carts exist. Stockpiles have fill levels. The old carry-not-drawn rule does not apply.",
+      "check": "carry"
+    },
+    "AS-VEH-001": {
+      "norm": "Carts, wagons, boats and siege engines exist, plus a riding pose per race in four directions.",
+      "check": "vehicles"
+    },
+    "AS-LIGHT-001": {
+      "norm": "Night is a precomputed ramp plus drawn lights, torch glow, window glow and lit buildings. Optional crisp tint is per-pixel or per-tile, blur stays off, and the hook defaults to off.",
+      "check": "night"
+    },
+    "AS-MAP-001": {
+      "norm": "World map, minimap, markers and one banner per style profile are specified. No art is produced here.",
+      "check": "map"
+    },
+    "AS-PROP-001": {
+      "norm": "Shop signs, gravestones, statues and notice boards are readable props and a named static exception.",
+      "check": "props"
+    },
+    "AS-STYLE-001": {
+      "norm": "File names follow the class patterns. The style-bible sheet is a spec only.",
+      "check": "filename"
+    }
+  },
+  "directions": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "diagonalFacings": [
+    "SW",
+    "NW",
+    "NE",
+    "SE"
+  ],
+  "legacyBands": [
+    "LOWER2",
+    "LOWER1",
+    "SURFACE",
+    "UPPER1",
+    "UPPER2"
+  ],
+  "legacyBiomes": [
+    "TEMP",
+    "HIGH",
+    "VOLC"
+  ],
+  "bands": [
+    {
+      "id": "DEEP",
+      "name": "Deep Earth",
+      "zMin": -16,
+      "zMax": -11
+    },
+    {
+      "id": "CAVERN",
+      "name": "Caverns",
+      "zMin": -10,
+      "zMax": -5
+    },
+    {
+      "id": "LOWLAND",
+      "name": "Lowlands",
+      "zMin": -4,
+      "zMax": 1
+    },
+    {
+      "id": "UPLAND",
+      "name": "Uplands",
+      "zMin": 2,
+      "zMax": 6
+    },
+    {
+      "id": "HIGHLAND",
+      "name": "Highlands",
+      "zMin": 7,
+      "zMax": 11
+    },
+    {
+      "id": "AIR",
+      "name": "Open air",
+      "zMin": 12,
+      "zMax": 15,
+      "naturalTerrain": false
+    }
+  ],
+  "biomes": [
+    "VOLCANIC",
+    "WET",
+    "ARID",
+    "TEMPERATE",
+    "COLD",
+    "WILD"
+  ],
+  "transitions": [
+    "VOLCANIC-WET",
+    "VOLCANIC-ARID",
+    "VOLCANIC-TEMPERATE",
+    "VOLCANIC-COLD",
+    "VOLCANIC-WILD",
+    "WET-ARID",
+    "WET-TEMPERATE",
+    "WET-COLD",
+    "WET-WILD",
+    "ARID-TEMPERATE",
+    "ARID-COLD",
+    "ARID-WILD",
+    "TEMPERATE-COLD",
+    "TEMPERATE-WILD",
+    "COLD-WILD"
+  ],
+  "sharedTokens": {
+    "band": [
+      "ALL"
+    ],
+    "biome": [
+      "SHARED"
+    ]
+  },
+  "gridPx": 48,
+  "frameClockMs": 150,
+  "frameClassPx": {
+    "TINY": [
+      48,
+      48
+    ],
+    "SMALL": [
+      48,
+      48
+    ],
+    "MEDIUM": [
+      48,
+      48
+    ],
+    "LARGE_TALL": [
+      48,
+      96
+    ],
+    "LARGE_LONG": [
+      96,
+      48
+    ],
+    "HUGE": null,
+    "GARGANTUAN": null
+  },
+  "paperDollZ": {
+    "legs": 1,
+    "torso": 2,
+    "clothes": 2,
+    "head": 3,
+    "back": 4,
+    "shield": 5,
+    "held": 6,
+    "fx": 7
+  },
+  "slots": [
+    "feet",
+    "legs",
+    "waist",
+    "armor",
+    "torso",
+    "neck",
+    "shoulders",
+    "arms",
+    "hands",
+    "ring1",
+    "ring2",
+    "head",
+    "eyes",
+    "back",
+    "offHand",
+    "shield",
+    "mainHand",
+    "weapon"
+  ],
+  "damageTypes": [
+    "acid",
+    "bludgeoning",
+    "cold",
+    "fire",
+    "force",
+    "lightning",
+    "necrotic",
+    "piercing",
+    "poison",
+    "psychic",
+    "radiant",
+    "slashing",
+    "thunder"
+  ],
+  "schools": [
+    "abjuration",
+    "conjuration",
+    "divination",
+    "enchantment",
+    "evocation",
+    "illusion",
+    "necromancy",
+    "transmutation"
+  ],
+  "castPoses": [
+    "one-hand",
+    "two-hand",
+    "focus-raise",
+    "channel"
+  ],
+  "deliveryShapes": [
+    "projectile",
+    "beam",
+    "cone",
+    "line",
+    "sphere",
+    "cylinder",
+    "self-aura",
+    "touch",
+    "instant-at-target"
+  ],
+  "angles": [
+    "A0",
+    "A45",
+    "A90",
+    "A135",
+    "A180",
+    "A225",
+    "A270",
+    "A315"
+  ],
+  "poseGrid": [
+    {
+      "id": "swing",
+      "frames": 4
+    },
+    {
+      "id": "thrust",
+      "frames": 4
+    },
+    {
+      "id": "bow-draw",
+      "frames": 4
+    },
+    {
+      "id": "bow-loose",
+      "frames": 3
+    },
+    {
+      "id": "cast",
+      "frames": 4
+    },
+    {
+      "id": "hit",
+      "frames": 3
+    },
+    {
+      "id": "flinch",
+      "frames": 3
+    },
+    {
+      "id": "dodge",
+      "frames": 3
+    },
+    {
+      "id": "parry",
+      "frames": 3
+    },
+    {
+      "id": "death",
+      "frames": 4
+    }
+  ],
+  "poseGridStatus": "PM-proposed, Owner may amend",
+  "deformingPieces": [
+    "cape",
+    "long-robe",
+    "large-shield",
+    "bow-draw"
+  ],
+  "conditions": [
+    "blinded",
+    "charmed",
+    "deafened",
+    "exhaustion",
+    "frightened",
+    "grappled",
+    "incapacitated",
+    "invisible",
+    "paralyzed",
+    "petrified",
+    "poisoned",
+    "prone",
+    "restrained",
+    "stunned",
+    "unconscious"
+  ],
+  "expressions": [
+    "neutral",
+    "happy",
+    "angry",
+    "sad",
+    "surprised",
+    "hurt",
+    "determined",
+    "afraid"
+  ],
+  "faceLayers": [
+    "background",
+    "faction-trim",
+    "body-base",
+    "face",
+    "hair",
+    "gear",
+    "overlay"
+  ],
+  "faceAnchors": {
+    "neckBase": [
+      72,
+      120
+    ],
+    "collarLine": [
+      72,
+      108
+    ],
+    "chin": [
+      72,
+      86
+    ],
+    "eyeLine": [
+      72,
+      62
+    ],
+    "crown": [
+      72,
+      36
+    ]
+  },
+  "faceCell": [
+    144,
+    144
+  ],
+  "faceSheet": [
+    576,
+    288
+  ],
+  "icon": {
+    "cell": [
+      32,
+      32
+    ],
+    "columns": 16,
+    "sheetWidth": 512
+  },
+  "uiMinPx": 16,
+  "races": [
+    "human",
+    "elf",
+    "halfling",
+    "dwarf",
+    "gnome",
+    "dragonborn",
+    "half-elf",
+    "half-orc",
+    "tiefling"
+  ],
+  "classes": [
+    "barbarian",
+    "bard",
+    "cleric",
+    "druid",
+    "fighter",
+    "monk",
+    "paladin",
+    "ranger",
+    "rogue",
+    "sorcerer",
+    "warlock",
+    "wizard"
+  ],
+  "armorWeights": [
+    "light",
+    "medium",
+    "heavy"
+  ],
+  "outfits": [
+    {
+      "outfitId": "outfit_class_barbarian",
+      "kind": "class",
+      "classId": "barbarian",
+      "armorWeight": null,
+      "silhouette": "light",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_BARBARIAN",
+      "note": "Race-neutral class garb. Race selects the art variant only."
+    },
+    {
+      "outfitId": "outfit_class_bard",
+      "kind": "class",
+      "classId": "bard",
+      "armorWeight": null,
+      "silhouette": "light",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_BARD",
+      "note": "Race-neutral class garb. Race selects the art variant only."
+    },
+    {
+      "outfitId": "outfit_class_cleric",
+      "kind": "class",
+      "classId": "cleric",
+      "armorWeight": null,
+      "silhouette": "medium",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_CLERIC",
+      "note": "Race-neutral class garb. Race selects the art variant only."
+    },
+    {
+      "outfitId": "outfit_class_druid",
+      "kind": "class",
+      "classId": "druid",
+      "armorWeight": null,
+      "silhouette": "light",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_DRUID",
+      "note": "Race-neutral class garb. Race selects the art variant only."
+    },
+    {
+      "outfitId": "outfit_class_fighter",
+      "kind": "class",
+      "classId": "fighter",
+      "armorWeight": null,
+      "silhouette": "medium",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_FIGHTER",
+      "note": "Race-neutral class garb. Race selects the art variant only."
+    },
+    {
+      "outfitId": "outfit_class_monk",
+      "kind": "class",
+      "classId": "monk",
+      "armorWeight": null,
+      "silhouette": "light",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_MONK",
+      "note": "Race-neutral class garb. Race selects the art variant only."
+    },
+    {
+      "outfitId": "outfit_class_paladin",
+      "kind": "class",
+      "classId": "paladin",
+      "armorWeight": null,
+      "silhouette": "medium",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_PALADIN",
+      "note": "Race-neutral class garb. Race selects the art variant only."
+    },
+    {
+      "outfitId": "outfit_class_ranger",
+      "kind": "class",
+      "classId": "ranger",
+      "armorWeight": null,
+      "silhouette": "light",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_RANGER",
+      "note": "Race-neutral class garb. Race selects the art variant only."
+    },
+    {
+      "outfitId": "outfit_class_rogue",
+      "kind": "class",
+      "classId": "rogue",
+      "armorWeight": null,
+      "silhouette": "light",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_ROGUE",
+      "note": "Race-neutral class garb. Race selects the art variant only."
+    },
+    {
+      "outfitId": "outfit_class_sorcerer",
+      "kind": "class",
+      "classId": "sorcerer",
+      "armorWeight": null,
+      "silhouette": "light",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_SORCERER",
+      "note": "Race-neutral class garb. Race selects the art variant only."
+    },
+    {
+      "outfitId": "outfit_class_warlock",
+      "kind": "class",
+      "classId": "warlock",
+      "armorWeight": null,
+      "silhouette": "light",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_WARLOCK",
+      "note": "Race-neutral class garb. Race selects the art variant only."
+    },
+    {
+      "outfitId": "outfit_class_wizard",
+      "kind": "class",
+      "classId": "wizard",
+      "armorWeight": null,
+      "silhouette": "light",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_WIZARD",
+      "note": "Race-neutral class garb. Race selects the art variant only."
+    },
+    {
+      "outfitId": "outfit_armor_light",
+      "kind": "armor",
+      "classId": null,
+      "armorWeight": "light",
+      "silhouette": "light",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_LIGHT",
+      "note": "Shared silhouette for this armour weight. The same slots and layers on every race."
+    },
+    {
+      "outfitId": "outfit_armor_medium",
+      "kind": "armor",
+      "classId": null,
+      "armorWeight": "medium",
+      "silhouette": "medium",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_MEDIUM",
+      "note": "Shared silhouette for this armour weight. The same slots and layers on every race."
+    },
+    {
+      "outfitId": "outfit_armor_heavy",
+      "kind": "armor",
+      "classId": null,
+      "armorWeight": "heavy",
+      "silhouette": "heavy",
+      "slots": [
+        "feet",
+        "legs",
+        "waist",
+        "torso",
+        "arms",
+        "shoulders",
+        "hands",
+        "head"
+      ],
+      "layers": [
+        "legs",
+        "torso",
+        "head"
+      ],
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_HEAVY",
+      "note": "Shared silhouette for this armour weight. The same slots and layers on every race."
+    }
+  ],
+  "outfitMatrix": [
+    {
+      "outfitId": "outfit_class_barbarian",
+      "race": "human",
+      "artKey": "outfit_class_barbarian__human",
+      "fallbackArtKey": "outfit_class_barbarian__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_BARBARIAN",
+      "rampId": "RAMP_RACE_HUMAN",
+      "raceMotifId": "MOTIF_RACE_HUMAN"
+    },
+    {
+      "outfitId": "outfit_class_barbarian",
+      "race": "elf",
+      "artKey": "outfit_class_barbarian__elf",
+      "fallbackArtKey": "outfit_class_barbarian__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_BARBARIAN",
+      "rampId": "RAMP_RACE_ELF",
+      "raceMotifId": "MOTIF_RACE_ELF"
+    },
+    {
+      "outfitId": "outfit_class_barbarian",
+      "race": "halfling",
+      "artKey": "outfit_class_barbarian__halfling",
+      "fallbackArtKey": "outfit_class_barbarian__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_BARBARIAN",
+      "rampId": "RAMP_RACE_HALFLING",
+      "raceMotifId": "MOTIF_RACE_HALFLING"
+    },
+    {
+      "outfitId": "outfit_class_barbarian",
+      "race": "dwarf",
+      "artKey": "outfit_class_barbarian__dwarf",
+      "fallbackArtKey": "outfit_class_barbarian__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_BARBARIAN",
+      "rampId": "RAMP_RACE_DWARF",
+      "raceMotifId": "MOTIF_RACE_DWARF"
+    },
+    {
+      "outfitId": "outfit_class_barbarian",
+      "race": "gnome",
+      "artKey": "outfit_class_barbarian__gnome",
+      "fallbackArtKey": "outfit_class_barbarian__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_BARBARIAN",
+      "rampId": "RAMP_RACE_GNOME",
+      "raceMotifId": "MOTIF_RACE_GNOME"
+    },
+    {
+      "outfitId": "outfit_class_barbarian",
+      "race": "dragonborn",
+      "artKey": "outfit_class_barbarian__dragonborn",
+      "fallbackArtKey": "outfit_class_barbarian__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_BARBARIAN",
+      "rampId": "RAMP_RACE_DRAGONBORN",
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+    },
+    {
+      "outfitId": "outfit_class_barbarian",
+      "race": "half-elf",
+      "artKey": "outfit_class_barbarian__half-elf",
+      "fallbackArtKey": "outfit_class_barbarian__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_BARBARIAN",
+      "rampId": "RAMP_RACE_HALF_ELF",
+      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+    },
+    {
+      "outfitId": "outfit_class_barbarian",
+      "race": "half-orc",
+      "artKey": "outfit_class_barbarian__half-orc",
+      "fallbackArtKey": "outfit_class_barbarian__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_BARBARIAN",
+      "rampId": "RAMP_RACE_HALF_ORC",
+      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+    },
+    {
+      "outfitId": "outfit_class_barbarian",
+      "race": "tiefling",
+      "artKey": "outfit_class_barbarian__tiefling",
+      "fallbackArtKey": "outfit_class_barbarian__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_BARBARIAN",
+      "rampId": "RAMP_RACE_TIEFLING",
+      "raceMotifId": "MOTIF_RACE_TIEFLING"
+    },
+    {
+      "outfitId": "outfit_class_bard",
+      "race": "human",
+      "artKey": "outfit_class_bard__human",
+      "fallbackArtKey": "outfit_class_bard__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_BARD",
+      "rampId": "RAMP_RACE_HUMAN",
+      "raceMotifId": "MOTIF_RACE_HUMAN"
+    },
+    {
+      "outfitId": "outfit_class_bard",
+      "race": "elf",
+      "artKey": "outfit_class_bard__elf",
+      "fallbackArtKey": "outfit_class_bard__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_BARD",
+      "rampId": "RAMP_RACE_ELF",
+      "raceMotifId": "MOTIF_RACE_ELF"
+    },
+    {
+      "outfitId": "outfit_class_bard",
+      "race": "halfling",
+      "artKey": "outfit_class_bard__halfling",
+      "fallbackArtKey": "outfit_class_bard__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_BARD",
+      "rampId": "RAMP_RACE_HALFLING",
+      "raceMotifId": "MOTIF_RACE_HALFLING"
+    },
+    {
+      "outfitId": "outfit_class_bard",
+      "race": "dwarf",
+      "artKey": "outfit_class_bard__dwarf",
+      "fallbackArtKey": "outfit_class_bard__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_BARD",
+      "rampId": "RAMP_RACE_DWARF",
+      "raceMotifId": "MOTIF_RACE_DWARF"
+    },
+    {
+      "outfitId": "outfit_class_bard",
+      "race": "gnome",
+      "artKey": "outfit_class_bard__gnome",
+      "fallbackArtKey": "outfit_class_bard__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_BARD",
+      "rampId": "RAMP_RACE_GNOME",
+      "raceMotifId": "MOTIF_RACE_GNOME"
+    },
+    {
+      "outfitId": "outfit_class_bard",
+      "race": "dragonborn",
+      "artKey": "outfit_class_bard__dragonborn",
+      "fallbackArtKey": "outfit_class_bard__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_BARD",
+      "rampId": "RAMP_RACE_DRAGONBORN",
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+    },
+    {
+      "outfitId": "outfit_class_bard",
+      "race": "half-elf",
+      "artKey": "outfit_class_bard__half-elf",
+      "fallbackArtKey": "outfit_class_bard__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_BARD",
+      "rampId": "RAMP_RACE_HALF_ELF",
+      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+    },
+    {
+      "outfitId": "outfit_class_bard",
+      "race": "half-orc",
+      "artKey": "outfit_class_bard__half-orc",
+      "fallbackArtKey": "outfit_class_bard__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_BARD",
+      "rampId": "RAMP_RACE_HALF_ORC",
+      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+    },
+    {
+      "outfitId": "outfit_class_bard",
+      "race": "tiefling",
+      "artKey": "outfit_class_bard__tiefling",
+      "fallbackArtKey": "outfit_class_bard__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_BARD",
+      "rampId": "RAMP_RACE_TIEFLING",
+      "raceMotifId": "MOTIF_RACE_TIEFLING"
+    },
+    {
+      "outfitId": "outfit_class_cleric",
+      "race": "human",
+      "artKey": "outfit_class_cleric__human",
+      "fallbackArtKey": "outfit_class_cleric__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_CLERIC",
+      "rampId": "RAMP_RACE_HUMAN",
+      "raceMotifId": "MOTIF_RACE_HUMAN"
+    },
+    {
+      "outfitId": "outfit_class_cleric",
+      "race": "elf",
+      "artKey": "outfit_class_cleric__elf",
+      "fallbackArtKey": "outfit_class_cleric__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_CLERIC",
+      "rampId": "RAMP_RACE_ELF",
+      "raceMotifId": "MOTIF_RACE_ELF"
+    },
+    {
+      "outfitId": "outfit_class_cleric",
+      "race": "halfling",
+      "artKey": "outfit_class_cleric__halfling",
+      "fallbackArtKey": "outfit_class_cleric__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_CLERIC",
+      "rampId": "RAMP_RACE_HALFLING",
+      "raceMotifId": "MOTIF_RACE_HALFLING"
+    },
+    {
+      "outfitId": "outfit_class_cleric",
+      "race": "dwarf",
+      "artKey": "outfit_class_cleric__dwarf",
+      "fallbackArtKey": "outfit_class_cleric__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_CLERIC",
+      "rampId": "RAMP_RACE_DWARF",
+      "raceMotifId": "MOTIF_RACE_DWARF"
+    },
+    {
+      "outfitId": "outfit_class_cleric",
+      "race": "gnome",
+      "artKey": "outfit_class_cleric__gnome",
+      "fallbackArtKey": "outfit_class_cleric__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_CLERIC",
+      "rampId": "RAMP_RACE_GNOME",
+      "raceMotifId": "MOTIF_RACE_GNOME"
+    },
+    {
+      "outfitId": "outfit_class_cleric",
+      "race": "dragonborn",
+      "artKey": "outfit_class_cleric__dragonborn",
+      "fallbackArtKey": "outfit_class_cleric__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_CLERIC",
+      "rampId": "RAMP_RACE_DRAGONBORN",
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+    },
+    {
+      "outfitId": "outfit_class_cleric",
+      "race": "half-elf",
+      "artKey": "outfit_class_cleric__half-elf",
+      "fallbackArtKey": "outfit_class_cleric__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_CLERIC",
+      "rampId": "RAMP_RACE_HALF_ELF",
+      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+    },
+    {
+      "outfitId": "outfit_class_cleric",
+      "race": "half-orc",
+      "artKey": "outfit_class_cleric__half-orc",
+      "fallbackArtKey": "outfit_class_cleric__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_CLERIC",
+      "rampId": "RAMP_RACE_HALF_ORC",
+      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+    },
+    {
+      "outfitId": "outfit_class_cleric",
+      "race": "tiefling",
+      "artKey": "outfit_class_cleric__tiefling",
+      "fallbackArtKey": "outfit_class_cleric__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_CLERIC",
+      "rampId": "RAMP_RACE_TIEFLING",
+      "raceMotifId": "MOTIF_RACE_TIEFLING"
+    },
+    {
+      "outfitId": "outfit_class_druid",
+      "race": "human",
+      "artKey": "outfit_class_druid__human",
+      "fallbackArtKey": "outfit_class_druid__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_DRUID",
+      "rampId": "RAMP_RACE_HUMAN",
+      "raceMotifId": "MOTIF_RACE_HUMAN"
+    },
+    {
+      "outfitId": "outfit_class_druid",
+      "race": "elf",
+      "artKey": "outfit_class_druid__elf",
+      "fallbackArtKey": "outfit_class_druid__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_DRUID",
+      "rampId": "RAMP_RACE_ELF",
+      "raceMotifId": "MOTIF_RACE_ELF"
+    },
+    {
+      "outfitId": "outfit_class_druid",
+      "race": "halfling",
+      "artKey": "outfit_class_druid__halfling",
+      "fallbackArtKey": "outfit_class_druid__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_DRUID",
+      "rampId": "RAMP_RACE_HALFLING",
+      "raceMotifId": "MOTIF_RACE_HALFLING"
+    },
+    {
+      "outfitId": "outfit_class_druid",
+      "race": "dwarf",
+      "artKey": "outfit_class_druid__dwarf",
+      "fallbackArtKey": "outfit_class_druid__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_DRUID",
+      "rampId": "RAMP_RACE_DWARF",
+      "raceMotifId": "MOTIF_RACE_DWARF"
+    },
+    {
+      "outfitId": "outfit_class_druid",
+      "race": "gnome",
+      "artKey": "outfit_class_druid__gnome",
+      "fallbackArtKey": "outfit_class_druid__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_DRUID",
+      "rampId": "RAMP_RACE_GNOME",
+      "raceMotifId": "MOTIF_RACE_GNOME"
+    },
+    {
+      "outfitId": "outfit_class_druid",
+      "race": "dragonborn",
+      "artKey": "outfit_class_druid__dragonborn",
+      "fallbackArtKey": "outfit_class_druid__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_DRUID",
+      "rampId": "RAMP_RACE_DRAGONBORN",
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+    },
+    {
+      "outfitId": "outfit_class_druid",
+      "race": "half-elf",
+      "artKey": "outfit_class_druid__half-elf",
+      "fallbackArtKey": "outfit_class_druid__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_DRUID",
+      "rampId": "RAMP_RACE_HALF_ELF",
+      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+    },
+    {
+      "outfitId": "outfit_class_druid",
+      "race": "half-orc",
+      "artKey": "outfit_class_druid__half-orc",
+      "fallbackArtKey": "outfit_class_druid__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_DRUID",
+      "rampId": "RAMP_RACE_HALF_ORC",
+      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+    },
+    {
+      "outfitId": "outfit_class_druid",
+      "race": "tiefling",
+      "artKey": "outfit_class_druid__tiefling",
+      "fallbackArtKey": "outfit_class_druid__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_DRUID",
+      "rampId": "RAMP_RACE_TIEFLING",
+      "raceMotifId": "MOTIF_RACE_TIEFLING"
+    },
+    {
+      "outfitId": "outfit_class_fighter",
+      "race": "human",
+      "artKey": "outfit_class_fighter__human",
+      "fallbackArtKey": "outfit_class_fighter__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_FIGHTER",
+      "rampId": "RAMP_RACE_HUMAN",
+      "raceMotifId": "MOTIF_RACE_HUMAN"
+    },
+    {
+      "outfitId": "outfit_class_fighter",
+      "race": "elf",
+      "artKey": "outfit_class_fighter__elf",
+      "fallbackArtKey": "outfit_class_fighter__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_FIGHTER",
+      "rampId": "RAMP_RACE_ELF",
+      "raceMotifId": "MOTIF_RACE_ELF"
+    },
+    {
+      "outfitId": "outfit_class_fighter",
+      "race": "halfling",
+      "artKey": "outfit_class_fighter__halfling",
+      "fallbackArtKey": "outfit_class_fighter__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_FIGHTER",
+      "rampId": "RAMP_RACE_HALFLING",
+      "raceMotifId": "MOTIF_RACE_HALFLING"
+    },
+    {
+      "outfitId": "outfit_class_fighter",
+      "race": "dwarf",
+      "artKey": "outfit_class_fighter__dwarf",
+      "fallbackArtKey": "outfit_class_fighter__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_FIGHTER",
+      "rampId": "RAMP_RACE_DWARF",
+      "raceMotifId": "MOTIF_RACE_DWARF"
+    },
+    {
+      "outfitId": "outfit_class_fighter",
+      "race": "gnome",
+      "artKey": "outfit_class_fighter__gnome",
+      "fallbackArtKey": "outfit_class_fighter__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_FIGHTER",
+      "rampId": "RAMP_RACE_GNOME",
+      "raceMotifId": "MOTIF_RACE_GNOME"
+    },
+    {
+      "outfitId": "outfit_class_fighter",
+      "race": "dragonborn",
+      "artKey": "outfit_class_fighter__dragonborn",
+      "fallbackArtKey": "outfit_class_fighter__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_FIGHTER",
+      "rampId": "RAMP_RACE_DRAGONBORN",
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+    },
+    {
+      "outfitId": "outfit_class_fighter",
+      "race": "half-elf",
+      "artKey": "outfit_class_fighter__half-elf",
+      "fallbackArtKey": "outfit_class_fighter__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_FIGHTER",
+      "rampId": "RAMP_RACE_HALF_ELF",
+      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+    },
+    {
+      "outfitId": "outfit_class_fighter",
+      "race": "half-orc",
+      "artKey": "outfit_class_fighter__half-orc",
+      "fallbackArtKey": "outfit_class_fighter__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_FIGHTER",
+      "rampId": "RAMP_RACE_HALF_ORC",
+      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+    },
+    {
+      "outfitId": "outfit_class_fighter",
+      "race": "tiefling",
+      "artKey": "outfit_class_fighter__tiefling",
+      "fallbackArtKey": "outfit_class_fighter__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_FIGHTER",
+      "rampId": "RAMP_RACE_TIEFLING",
+      "raceMotifId": "MOTIF_RACE_TIEFLING"
+    },
+    {
+      "outfitId": "outfit_class_monk",
+      "race": "human",
+      "artKey": "outfit_class_monk__human",
+      "fallbackArtKey": "outfit_class_monk__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_MONK",
+      "rampId": "RAMP_RACE_HUMAN",
+      "raceMotifId": "MOTIF_RACE_HUMAN"
+    },
+    {
+      "outfitId": "outfit_class_monk",
+      "race": "elf",
+      "artKey": "outfit_class_monk__elf",
+      "fallbackArtKey": "outfit_class_monk__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_MONK",
+      "rampId": "RAMP_RACE_ELF",
+      "raceMotifId": "MOTIF_RACE_ELF"
+    },
+    {
+      "outfitId": "outfit_class_monk",
+      "race": "halfling",
+      "artKey": "outfit_class_monk__halfling",
+      "fallbackArtKey": "outfit_class_monk__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_MONK",
+      "rampId": "RAMP_RACE_HALFLING",
+      "raceMotifId": "MOTIF_RACE_HALFLING"
+    },
+    {
+      "outfitId": "outfit_class_monk",
+      "race": "dwarf",
+      "artKey": "outfit_class_monk__dwarf",
+      "fallbackArtKey": "outfit_class_monk__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_MONK",
+      "rampId": "RAMP_RACE_DWARF",
+      "raceMotifId": "MOTIF_RACE_DWARF"
+    },
+    {
+      "outfitId": "outfit_class_monk",
+      "race": "gnome",
+      "artKey": "outfit_class_monk__gnome",
+      "fallbackArtKey": "outfit_class_monk__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_MONK",
+      "rampId": "RAMP_RACE_GNOME",
+      "raceMotifId": "MOTIF_RACE_GNOME"
+    },
+    {
+      "outfitId": "outfit_class_monk",
+      "race": "dragonborn",
+      "artKey": "outfit_class_monk__dragonborn",
+      "fallbackArtKey": "outfit_class_monk__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_MONK",
+      "rampId": "RAMP_RACE_DRAGONBORN",
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+    },
+    {
+      "outfitId": "outfit_class_monk",
+      "race": "half-elf",
+      "artKey": "outfit_class_monk__half-elf",
+      "fallbackArtKey": "outfit_class_monk__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_MONK",
+      "rampId": "RAMP_RACE_HALF_ELF",
+      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+    },
+    {
+      "outfitId": "outfit_class_monk",
+      "race": "half-orc",
+      "artKey": "outfit_class_monk__half-orc",
+      "fallbackArtKey": "outfit_class_monk__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_MONK",
+      "rampId": "RAMP_RACE_HALF_ORC",
+      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+    },
+    {
+      "outfitId": "outfit_class_monk",
+      "race": "tiefling",
+      "artKey": "outfit_class_monk__tiefling",
+      "fallbackArtKey": "outfit_class_monk__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_MONK",
+      "rampId": "RAMP_RACE_TIEFLING",
+      "raceMotifId": "MOTIF_RACE_TIEFLING"
+    },
+    {
+      "outfitId": "outfit_class_paladin",
+      "race": "human",
+      "artKey": "outfit_class_paladin__human",
+      "fallbackArtKey": "outfit_class_paladin__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_PALADIN",
+      "rampId": "RAMP_RACE_HUMAN",
+      "raceMotifId": "MOTIF_RACE_HUMAN"
+    },
+    {
+      "outfitId": "outfit_class_paladin",
+      "race": "elf",
+      "artKey": "outfit_class_paladin__elf",
+      "fallbackArtKey": "outfit_class_paladin__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_PALADIN",
+      "rampId": "RAMP_RACE_ELF",
+      "raceMotifId": "MOTIF_RACE_ELF"
+    },
+    {
+      "outfitId": "outfit_class_paladin",
+      "race": "halfling",
+      "artKey": "outfit_class_paladin__halfling",
+      "fallbackArtKey": "outfit_class_paladin__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_PALADIN",
+      "rampId": "RAMP_RACE_HALFLING",
+      "raceMotifId": "MOTIF_RACE_HALFLING"
+    },
+    {
+      "outfitId": "outfit_class_paladin",
+      "race": "dwarf",
+      "artKey": "outfit_class_paladin__dwarf",
+      "fallbackArtKey": "outfit_class_paladin__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_PALADIN",
+      "rampId": "RAMP_RACE_DWARF",
+      "raceMotifId": "MOTIF_RACE_DWARF"
+    },
+    {
+      "outfitId": "outfit_class_paladin",
+      "race": "gnome",
+      "artKey": "outfit_class_paladin__gnome",
+      "fallbackArtKey": "outfit_class_paladin__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_PALADIN",
+      "rampId": "RAMP_RACE_GNOME",
+      "raceMotifId": "MOTIF_RACE_GNOME"
+    },
+    {
+      "outfitId": "outfit_class_paladin",
+      "race": "dragonborn",
+      "artKey": "outfit_class_paladin__dragonborn",
+      "fallbackArtKey": "outfit_class_paladin__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_PALADIN",
+      "rampId": "RAMP_RACE_DRAGONBORN",
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+    },
+    {
+      "outfitId": "outfit_class_paladin",
+      "race": "half-elf",
+      "artKey": "outfit_class_paladin__half-elf",
+      "fallbackArtKey": "outfit_class_paladin__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_PALADIN",
+      "rampId": "RAMP_RACE_HALF_ELF",
+      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+    },
+    {
+      "outfitId": "outfit_class_paladin",
+      "race": "half-orc",
+      "artKey": "outfit_class_paladin__half-orc",
+      "fallbackArtKey": "outfit_class_paladin__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_PALADIN",
+      "rampId": "RAMP_RACE_HALF_ORC",
+      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+    },
+    {
+      "outfitId": "outfit_class_paladin",
+      "race": "tiefling",
+      "artKey": "outfit_class_paladin__tiefling",
+      "fallbackArtKey": "outfit_class_paladin__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_PALADIN",
+      "rampId": "RAMP_RACE_TIEFLING",
+      "raceMotifId": "MOTIF_RACE_TIEFLING"
+    },
+    {
+      "outfitId": "outfit_class_ranger",
+      "race": "human",
+      "artKey": "outfit_class_ranger__human",
+      "fallbackArtKey": "outfit_class_ranger__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_RANGER",
+      "rampId": "RAMP_RACE_HUMAN",
+      "raceMotifId": "MOTIF_RACE_HUMAN"
+    },
+    {
+      "outfitId": "outfit_class_ranger",
+      "race": "elf",
+      "artKey": "outfit_class_ranger__elf",
+      "fallbackArtKey": "outfit_class_ranger__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_RANGER",
+      "rampId": "RAMP_RACE_ELF",
+      "raceMotifId": "MOTIF_RACE_ELF"
+    },
+    {
+      "outfitId": "outfit_class_ranger",
+      "race": "halfling",
+      "artKey": "outfit_class_ranger__halfling",
+      "fallbackArtKey": "outfit_class_ranger__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_RANGER",
+      "rampId": "RAMP_RACE_HALFLING",
+      "raceMotifId": "MOTIF_RACE_HALFLING"
+    },
+    {
+      "outfitId": "outfit_class_ranger",
+      "race": "dwarf",
+      "artKey": "outfit_class_ranger__dwarf",
+      "fallbackArtKey": "outfit_class_ranger__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_RANGER",
+      "rampId": "RAMP_RACE_DWARF",
+      "raceMotifId": "MOTIF_RACE_DWARF"
+    },
+    {
+      "outfitId": "outfit_class_ranger",
+      "race": "gnome",
+      "artKey": "outfit_class_ranger__gnome",
+      "fallbackArtKey": "outfit_class_ranger__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_RANGER",
+      "rampId": "RAMP_RACE_GNOME",
+      "raceMotifId": "MOTIF_RACE_GNOME"
+    },
+    {
+      "outfitId": "outfit_class_ranger",
+      "race": "dragonborn",
+      "artKey": "outfit_class_ranger__dragonborn",
+      "fallbackArtKey": "outfit_class_ranger__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_RANGER",
+      "rampId": "RAMP_RACE_DRAGONBORN",
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+    },
+    {
+      "outfitId": "outfit_class_ranger",
+      "race": "half-elf",
+      "artKey": "outfit_class_ranger__half-elf",
+      "fallbackArtKey": "outfit_class_ranger__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_RANGER",
+      "rampId": "RAMP_RACE_HALF_ELF",
+      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+    },
+    {
+      "outfitId": "outfit_class_ranger",
+      "race": "half-orc",
+      "artKey": "outfit_class_ranger__half-orc",
+      "fallbackArtKey": "outfit_class_ranger__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_RANGER",
+      "rampId": "RAMP_RACE_HALF_ORC",
+      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+    },
+    {
+      "outfitId": "outfit_class_ranger",
+      "race": "tiefling",
+      "artKey": "outfit_class_ranger__tiefling",
+      "fallbackArtKey": "outfit_class_ranger__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_RANGER",
+      "rampId": "RAMP_RACE_TIEFLING",
+      "raceMotifId": "MOTIF_RACE_TIEFLING"
+    },
+    {
+      "outfitId": "outfit_class_rogue",
+      "race": "human",
+      "artKey": "outfit_class_rogue__human",
+      "fallbackArtKey": "outfit_class_rogue__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_ROGUE",
+      "rampId": "RAMP_RACE_HUMAN",
+      "raceMotifId": "MOTIF_RACE_HUMAN"
+    },
+    {
+      "outfitId": "outfit_class_rogue",
+      "race": "elf",
+      "artKey": "outfit_class_rogue__elf",
+      "fallbackArtKey": "outfit_class_rogue__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_ROGUE",
+      "rampId": "RAMP_RACE_ELF",
+      "raceMotifId": "MOTIF_RACE_ELF"
+    },
+    {
+      "outfitId": "outfit_class_rogue",
+      "race": "halfling",
+      "artKey": "outfit_class_rogue__halfling",
+      "fallbackArtKey": "outfit_class_rogue__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_ROGUE",
+      "rampId": "RAMP_RACE_HALFLING",
+      "raceMotifId": "MOTIF_RACE_HALFLING"
+    },
+    {
+      "outfitId": "outfit_class_rogue",
+      "race": "dwarf",
+      "artKey": "outfit_class_rogue__dwarf",
+      "fallbackArtKey": "outfit_class_rogue__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_ROGUE",
+      "rampId": "RAMP_RACE_DWARF",
+      "raceMotifId": "MOTIF_RACE_DWARF"
+    },
+    {
+      "outfitId": "outfit_class_rogue",
+      "race": "gnome",
+      "artKey": "outfit_class_rogue__gnome",
+      "fallbackArtKey": "outfit_class_rogue__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_ROGUE",
+      "rampId": "RAMP_RACE_GNOME",
+      "raceMotifId": "MOTIF_RACE_GNOME"
+    },
+    {
+      "outfitId": "outfit_class_rogue",
+      "race": "dragonborn",
+      "artKey": "outfit_class_rogue__dragonborn",
+      "fallbackArtKey": "outfit_class_rogue__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_ROGUE",
+      "rampId": "RAMP_RACE_DRAGONBORN",
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+    },
+    {
+      "outfitId": "outfit_class_rogue",
+      "race": "half-elf",
+      "artKey": "outfit_class_rogue__half-elf",
+      "fallbackArtKey": "outfit_class_rogue__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_ROGUE",
+      "rampId": "RAMP_RACE_HALF_ELF",
+      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+    },
+    {
+      "outfitId": "outfit_class_rogue",
+      "race": "half-orc",
+      "artKey": "outfit_class_rogue__half-orc",
+      "fallbackArtKey": "outfit_class_rogue__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_ROGUE",
+      "rampId": "RAMP_RACE_HALF_ORC",
+      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+    },
+    {
+      "outfitId": "outfit_class_rogue",
+      "race": "tiefling",
+      "artKey": "outfit_class_rogue__tiefling",
+      "fallbackArtKey": "outfit_class_rogue__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_CLASS_ROGUE",
+      "rampId": "RAMP_RACE_TIEFLING",
+      "raceMotifId": "MOTIF_RACE_TIEFLING"
+    },
+    {
+      "outfitId": "outfit_class_sorcerer",
+      "race": "human",
+      "artKey": "outfit_class_sorcerer__human",
+      "fallbackArtKey": "outfit_class_sorcerer__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_SORCERER",
+      "rampId": "RAMP_RACE_HUMAN",
+      "raceMotifId": "MOTIF_RACE_HUMAN"
+    },
+    {
+      "outfitId": "outfit_class_sorcerer",
+      "race": "elf",
+      "artKey": "outfit_class_sorcerer__elf",
+      "fallbackArtKey": "outfit_class_sorcerer__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_SORCERER",
+      "rampId": "RAMP_RACE_ELF",
+      "raceMotifId": "MOTIF_RACE_ELF"
+    },
+    {
+      "outfitId": "outfit_class_sorcerer",
+      "race": "halfling",
+      "artKey": "outfit_class_sorcerer__halfling",
+      "fallbackArtKey": "outfit_class_sorcerer__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_SORCERER",
+      "rampId": "RAMP_RACE_HALFLING",
+      "raceMotifId": "MOTIF_RACE_HALFLING"
+    },
+    {
+      "outfitId": "outfit_class_sorcerer",
+      "race": "dwarf",
+      "artKey": "outfit_class_sorcerer__dwarf",
+      "fallbackArtKey": "outfit_class_sorcerer__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_SORCERER",
+      "rampId": "RAMP_RACE_DWARF",
+      "raceMotifId": "MOTIF_RACE_DWARF"
+    },
+    {
+      "outfitId": "outfit_class_sorcerer",
+      "race": "gnome",
+      "artKey": "outfit_class_sorcerer__gnome",
+      "fallbackArtKey": "outfit_class_sorcerer__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_SORCERER",
+      "rampId": "RAMP_RACE_GNOME",
+      "raceMotifId": "MOTIF_RACE_GNOME"
+    },
+    {
+      "outfitId": "outfit_class_sorcerer",
+      "race": "dragonborn",
+      "artKey": "outfit_class_sorcerer__dragonborn",
+      "fallbackArtKey": "outfit_class_sorcerer__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_SORCERER",
+      "rampId": "RAMP_RACE_DRAGONBORN",
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+    },
+    {
+      "outfitId": "outfit_class_sorcerer",
+      "race": "half-elf",
+      "artKey": "outfit_class_sorcerer__half-elf",
+      "fallbackArtKey": "outfit_class_sorcerer__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_SORCERER",
+      "rampId": "RAMP_RACE_HALF_ELF",
+      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+    },
+    {
+      "outfitId": "outfit_class_sorcerer",
+      "race": "half-orc",
+      "artKey": "outfit_class_sorcerer__half-orc",
+      "fallbackArtKey": "outfit_class_sorcerer__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_SORCERER",
+      "rampId": "RAMP_RACE_HALF_ORC",
+      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+    },
+    {
+      "outfitId": "outfit_class_sorcerer",
+      "race": "tiefling",
+      "artKey": "outfit_class_sorcerer__tiefling",
+      "fallbackArtKey": "outfit_class_sorcerer__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_SORCERER",
+      "rampId": "RAMP_RACE_TIEFLING",
+      "raceMotifId": "MOTIF_RACE_TIEFLING"
+    },
+    {
+      "outfitId": "outfit_class_warlock",
+      "race": "human",
+      "artKey": "outfit_class_warlock__human",
+      "fallbackArtKey": "outfit_class_warlock__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_WARLOCK",
+      "rampId": "RAMP_RACE_HUMAN",
+      "raceMotifId": "MOTIF_RACE_HUMAN"
+    },
+    {
+      "outfitId": "outfit_class_warlock",
+      "race": "elf",
+      "artKey": "outfit_class_warlock__elf",
+      "fallbackArtKey": "outfit_class_warlock__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_WARLOCK",
+      "rampId": "RAMP_RACE_ELF",
+      "raceMotifId": "MOTIF_RACE_ELF"
+    },
+    {
+      "outfitId": "outfit_class_warlock",
+      "race": "halfling",
+      "artKey": "outfit_class_warlock__halfling",
+      "fallbackArtKey": "outfit_class_warlock__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_WARLOCK",
+      "rampId": "RAMP_RACE_HALFLING",
+      "raceMotifId": "MOTIF_RACE_HALFLING"
+    },
+    {
+      "outfitId": "outfit_class_warlock",
+      "race": "dwarf",
+      "artKey": "outfit_class_warlock__dwarf",
+      "fallbackArtKey": "outfit_class_warlock__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_WARLOCK",
+      "rampId": "RAMP_RACE_DWARF",
+      "raceMotifId": "MOTIF_RACE_DWARF"
+    },
+    {
+      "outfitId": "outfit_class_warlock",
+      "race": "gnome",
+      "artKey": "outfit_class_warlock__gnome",
+      "fallbackArtKey": "outfit_class_warlock__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_WARLOCK",
+      "rampId": "RAMP_RACE_GNOME",
+      "raceMotifId": "MOTIF_RACE_GNOME"
+    },
+    {
+      "outfitId": "outfit_class_warlock",
+      "race": "dragonborn",
+      "artKey": "outfit_class_warlock__dragonborn",
+      "fallbackArtKey": "outfit_class_warlock__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_WARLOCK",
+      "rampId": "RAMP_RACE_DRAGONBORN",
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+    },
+    {
+      "outfitId": "outfit_class_warlock",
+      "race": "half-elf",
+      "artKey": "outfit_class_warlock__half-elf",
+      "fallbackArtKey": "outfit_class_warlock__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_WARLOCK",
+      "rampId": "RAMP_RACE_HALF_ELF",
+      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+    },
+    {
+      "outfitId": "outfit_class_warlock",
+      "race": "half-orc",
+      "artKey": "outfit_class_warlock__half-orc",
+      "fallbackArtKey": "outfit_class_warlock__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_WARLOCK",
+      "rampId": "RAMP_RACE_HALF_ORC",
+      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+    },
+    {
+      "outfitId": "outfit_class_warlock",
+      "race": "tiefling",
+      "artKey": "outfit_class_warlock__tiefling",
+      "fallbackArtKey": "outfit_class_warlock__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "cape"
+      ],
+      "motifId": "MOTIF_CLASS_WARLOCK",
+      "rampId": "RAMP_RACE_TIEFLING",
+      "raceMotifId": "MOTIF_RACE_TIEFLING"
+    },
+    {
+      "outfitId": "outfit_class_wizard",
+      "race": "human",
+      "artKey": "outfit_class_wizard__human",
+      "fallbackArtKey": "outfit_class_wizard__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_WIZARD",
+      "rampId": "RAMP_RACE_HUMAN",
+      "raceMotifId": "MOTIF_RACE_HUMAN"
+    },
+    {
+      "outfitId": "outfit_class_wizard",
+      "race": "elf",
+      "artKey": "outfit_class_wizard__elf",
+      "fallbackArtKey": "outfit_class_wizard__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_WIZARD",
+      "rampId": "RAMP_RACE_ELF",
+      "raceMotifId": "MOTIF_RACE_ELF"
+    },
+    {
+      "outfitId": "outfit_class_wizard",
+      "race": "halfling",
+      "artKey": "outfit_class_wizard__halfling",
+      "fallbackArtKey": "outfit_class_wizard__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_WIZARD",
+      "rampId": "RAMP_RACE_HALFLING",
+      "raceMotifId": "MOTIF_RACE_HALFLING"
+    },
+    {
+      "outfitId": "outfit_class_wizard",
+      "race": "dwarf",
+      "artKey": "outfit_class_wizard__dwarf",
+      "fallbackArtKey": "outfit_class_wizard__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_WIZARD",
+      "rampId": "RAMP_RACE_DWARF",
+      "raceMotifId": "MOTIF_RACE_DWARF"
+    },
+    {
+      "outfitId": "outfit_class_wizard",
+      "race": "gnome",
+      "artKey": "outfit_class_wizard__gnome",
+      "fallbackArtKey": "outfit_class_wizard__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_WIZARD",
+      "rampId": "RAMP_RACE_GNOME",
+      "raceMotifId": "MOTIF_RACE_GNOME"
+    },
+    {
+      "outfitId": "outfit_class_wizard",
+      "race": "dragonborn",
+      "artKey": "outfit_class_wizard__dragonborn",
+      "fallbackArtKey": "outfit_class_wizard__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_WIZARD",
+      "rampId": "RAMP_RACE_DRAGONBORN",
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+    },
+    {
+      "outfitId": "outfit_class_wizard",
+      "race": "half-elf",
+      "artKey": "outfit_class_wizard__half-elf",
+      "fallbackArtKey": "outfit_class_wizard__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_WIZARD",
+      "rampId": "RAMP_RACE_HALF_ELF",
+      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+    },
+    {
+      "outfitId": "outfit_class_wizard",
+      "race": "half-orc",
+      "artKey": "outfit_class_wizard__half-orc",
+      "fallbackArtKey": "outfit_class_wizard__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_WIZARD",
+      "rampId": "RAMP_RACE_HALF_ORC",
+      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+    },
+    {
+      "outfitId": "outfit_class_wizard",
+      "race": "tiefling",
+      "artKey": "outfit_class_wizard__tiefling",
+      "fallbackArtKey": "outfit_class_wizard__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [
+        "long-robe"
+      ],
+      "motifId": "MOTIF_CLASS_WIZARD",
+      "rampId": "RAMP_RACE_TIEFLING",
+      "raceMotifId": "MOTIF_RACE_TIEFLING"
+    },
+    {
+      "outfitId": "outfit_armor_light",
+      "race": "human",
+      "artKey": "outfit_armor_light__human",
+      "fallbackArtKey": "outfit_armor_light__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_LIGHT",
+      "rampId": "RAMP_RACE_HUMAN",
+      "raceMotifId": "MOTIF_RACE_HUMAN"
+    },
+    {
+      "outfitId": "outfit_armor_light",
+      "race": "elf",
+      "artKey": "outfit_armor_light__elf",
+      "fallbackArtKey": "outfit_armor_light__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_LIGHT",
+      "rampId": "RAMP_RACE_ELF",
+      "raceMotifId": "MOTIF_RACE_ELF"
+    },
+    {
+      "outfitId": "outfit_armor_light",
+      "race": "halfling",
+      "artKey": "outfit_armor_light__halfling",
+      "fallbackArtKey": "outfit_armor_light__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_LIGHT",
+      "rampId": "RAMP_RACE_HALFLING",
+      "raceMotifId": "MOTIF_RACE_HALFLING"
+    },
+    {
+      "outfitId": "outfit_armor_light",
+      "race": "dwarf",
+      "artKey": "outfit_armor_light__dwarf",
+      "fallbackArtKey": "outfit_armor_light__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_LIGHT",
+      "rampId": "RAMP_RACE_DWARF",
+      "raceMotifId": "MOTIF_RACE_DWARF"
+    },
+    {
+      "outfitId": "outfit_armor_light",
+      "race": "gnome",
+      "artKey": "outfit_armor_light__gnome",
+      "fallbackArtKey": "outfit_armor_light__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_LIGHT",
+      "rampId": "RAMP_RACE_GNOME",
+      "raceMotifId": "MOTIF_RACE_GNOME"
+    },
+    {
+      "outfitId": "outfit_armor_light",
+      "race": "dragonborn",
+      "artKey": "outfit_armor_light__dragonborn",
+      "fallbackArtKey": "outfit_armor_light__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_LIGHT",
+      "rampId": "RAMP_RACE_DRAGONBORN",
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+    },
+    {
+      "outfitId": "outfit_armor_light",
+      "race": "half-elf",
+      "artKey": "outfit_armor_light__half-elf",
+      "fallbackArtKey": "outfit_armor_light__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_LIGHT",
+      "rampId": "RAMP_RACE_HALF_ELF",
+      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+    },
+    {
+      "outfitId": "outfit_armor_light",
+      "race": "half-orc",
+      "artKey": "outfit_armor_light__half-orc",
+      "fallbackArtKey": "outfit_armor_light__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_LIGHT",
+      "rampId": "RAMP_RACE_HALF_ORC",
+      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+    },
+    {
+      "outfitId": "outfit_armor_light",
+      "race": "tiefling",
+      "artKey": "outfit_armor_light__tiefling",
+      "fallbackArtKey": "outfit_armor_light__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "light",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_LIGHT",
+      "rampId": "RAMP_RACE_TIEFLING",
+      "raceMotifId": "MOTIF_RACE_TIEFLING"
+    },
+    {
+      "outfitId": "outfit_armor_medium",
+      "race": "human",
+      "artKey": "outfit_armor_medium__human",
+      "fallbackArtKey": "outfit_armor_medium__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_MEDIUM",
+      "rampId": "RAMP_RACE_HUMAN",
+      "raceMotifId": "MOTIF_RACE_HUMAN"
+    },
+    {
+      "outfitId": "outfit_armor_medium",
+      "race": "elf",
+      "artKey": "outfit_armor_medium__elf",
+      "fallbackArtKey": "outfit_armor_medium__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_MEDIUM",
+      "rampId": "RAMP_RACE_ELF",
+      "raceMotifId": "MOTIF_RACE_ELF"
+    },
+    {
+      "outfitId": "outfit_armor_medium",
+      "race": "halfling",
+      "artKey": "outfit_armor_medium__halfling",
+      "fallbackArtKey": "outfit_armor_medium__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_MEDIUM",
+      "rampId": "RAMP_RACE_HALFLING",
+      "raceMotifId": "MOTIF_RACE_HALFLING"
+    },
+    {
+      "outfitId": "outfit_armor_medium",
+      "race": "dwarf",
+      "artKey": "outfit_armor_medium__dwarf",
+      "fallbackArtKey": "outfit_armor_medium__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_MEDIUM",
+      "rampId": "RAMP_RACE_DWARF",
+      "raceMotifId": "MOTIF_RACE_DWARF"
+    },
+    {
+      "outfitId": "outfit_armor_medium",
+      "race": "gnome",
+      "artKey": "outfit_armor_medium__gnome",
+      "fallbackArtKey": "outfit_armor_medium__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_MEDIUM",
+      "rampId": "RAMP_RACE_GNOME",
+      "raceMotifId": "MOTIF_RACE_GNOME"
+    },
+    {
+      "outfitId": "outfit_armor_medium",
+      "race": "dragonborn",
+      "artKey": "outfit_armor_medium__dragonborn",
+      "fallbackArtKey": "outfit_armor_medium__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_MEDIUM",
+      "rampId": "RAMP_RACE_DRAGONBORN",
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+    },
+    {
+      "outfitId": "outfit_armor_medium",
+      "race": "half-elf",
+      "artKey": "outfit_armor_medium__half-elf",
+      "fallbackArtKey": "outfit_armor_medium__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_MEDIUM",
+      "rampId": "RAMP_RACE_HALF_ELF",
+      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+    },
+    {
+      "outfitId": "outfit_armor_medium",
+      "race": "half-orc",
+      "artKey": "outfit_armor_medium__half-orc",
+      "fallbackArtKey": "outfit_armor_medium__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_MEDIUM",
+      "rampId": "RAMP_RACE_HALF_ORC",
+      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+    },
+    {
+      "outfitId": "outfit_armor_medium",
+      "race": "tiefling",
+      "artKey": "outfit_armor_medium__tiefling",
+      "fallbackArtKey": "outfit_armor_medium__human",
+      "slots": [
+        "feet",
+        "legs",
+        "torso",
+        "arms",
+        "shoulders"
+      ],
+      "layers": [
+        "legs",
+        "torso"
+      ],
+      "silhouette": "medium",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_MEDIUM",
+      "rampId": "RAMP_RACE_TIEFLING",
+      "raceMotifId": "MOTIF_RACE_TIEFLING"
+    },
+    {
+      "outfitId": "outfit_armor_heavy",
+      "race": "human",
+      "artKey": "outfit_armor_heavy__human",
+      "fallbackArtKey": "outfit_armor_heavy__human",
+      "slots": [
+        "feet",
+        "legs",
+        "waist",
+        "torso",
+        "arms",
+        "shoulders",
+        "hands",
+        "head"
+      ],
+      "layers": [
+        "legs",
+        "torso",
+        "head"
+      ],
+      "silhouette": "heavy",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_HEAVY",
+      "rampId": "RAMP_RACE_HUMAN",
+      "raceMotifId": "MOTIF_RACE_HUMAN"
+    },
+    {
+      "outfitId": "outfit_armor_heavy",
+      "race": "elf",
+      "artKey": "outfit_armor_heavy__elf",
+      "fallbackArtKey": "outfit_armor_heavy__human",
+      "slots": [
+        "feet",
+        "legs",
+        "waist",
+        "torso",
+        "arms",
+        "shoulders",
+        "hands",
+        "head"
+      ],
+      "layers": [
+        "legs",
+        "torso",
+        "head"
+      ],
+      "silhouette": "heavy",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_HEAVY",
+      "rampId": "RAMP_RACE_ELF",
+      "raceMotifId": "MOTIF_RACE_ELF"
+    },
+    {
+      "outfitId": "outfit_armor_heavy",
+      "race": "halfling",
+      "artKey": "outfit_armor_heavy__halfling",
+      "fallbackArtKey": "outfit_armor_heavy__human",
+      "slots": [
+        "feet",
+        "legs",
+        "waist",
+        "torso",
+        "arms",
+        "shoulders",
+        "hands",
+        "head"
+      ],
+      "layers": [
+        "legs",
+        "torso",
+        "head"
+      ],
+      "silhouette": "heavy",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_HEAVY",
+      "rampId": "RAMP_RACE_HALFLING",
+      "raceMotifId": "MOTIF_RACE_HALFLING"
+    },
+    {
+      "outfitId": "outfit_armor_heavy",
+      "race": "dwarf",
+      "artKey": "outfit_armor_heavy__dwarf",
+      "fallbackArtKey": "outfit_armor_heavy__human",
+      "slots": [
+        "feet",
+        "legs",
+        "waist",
+        "torso",
+        "arms",
+        "shoulders",
+        "hands",
+        "head"
+      ],
+      "layers": [
+        "legs",
+        "torso",
+        "head"
+      ],
+      "silhouette": "heavy",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_HEAVY",
+      "rampId": "RAMP_RACE_DWARF",
+      "raceMotifId": "MOTIF_RACE_DWARF"
+    },
+    {
+      "outfitId": "outfit_armor_heavy",
+      "race": "gnome",
+      "artKey": "outfit_armor_heavy__gnome",
+      "fallbackArtKey": "outfit_armor_heavy__human",
+      "slots": [
+        "feet",
+        "legs",
+        "waist",
+        "torso",
+        "arms",
+        "shoulders",
+        "hands",
+        "head"
+      ],
+      "layers": [
+        "legs",
+        "torso",
+        "head"
+      ],
+      "silhouette": "heavy",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_HEAVY",
+      "rampId": "RAMP_RACE_GNOME",
+      "raceMotifId": "MOTIF_RACE_GNOME"
+    },
+    {
+      "outfitId": "outfit_armor_heavy",
+      "race": "dragonborn",
+      "artKey": "outfit_armor_heavy__dragonborn",
+      "fallbackArtKey": "outfit_armor_heavy__human",
+      "slots": [
+        "feet",
+        "legs",
+        "waist",
+        "torso",
+        "arms",
+        "shoulders",
+        "hands",
+        "head"
+      ],
+      "layers": [
+        "legs",
+        "torso",
+        "head"
+      ],
+      "silhouette": "heavy",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_HEAVY",
+      "rampId": "RAMP_RACE_DRAGONBORN",
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+    },
+    {
+      "outfitId": "outfit_armor_heavy",
+      "race": "half-elf",
+      "artKey": "outfit_armor_heavy__half-elf",
+      "fallbackArtKey": "outfit_armor_heavy__human",
+      "slots": [
+        "feet",
+        "legs",
+        "waist",
+        "torso",
+        "arms",
+        "shoulders",
+        "hands",
+        "head"
+      ],
+      "layers": [
+        "legs",
+        "torso",
+        "head"
+      ],
+      "silhouette": "heavy",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_HEAVY",
+      "rampId": "RAMP_RACE_HALF_ELF",
+      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+    },
+    {
+      "outfitId": "outfit_armor_heavy",
+      "race": "half-orc",
+      "artKey": "outfit_armor_heavy__half-orc",
+      "fallbackArtKey": "outfit_armor_heavy__human",
+      "slots": [
+        "feet",
+        "legs",
+        "waist",
+        "torso",
+        "arms",
+        "shoulders",
+        "hands",
+        "head"
+      ],
+      "layers": [
+        "legs",
+        "torso",
+        "head"
+      ],
+      "silhouette": "heavy",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_HEAVY",
+      "rampId": "RAMP_RACE_HALF_ORC",
+      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+    },
+    {
+      "outfitId": "outfit_armor_heavy",
+      "race": "tiefling",
+      "artKey": "outfit_armor_heavy__tiefling",
+      "fallbackArtKey": "outfit_armor_heavy__human",
+      "slots": [
+        "feet",
+        "legs",
+        "waist",
+        "torso",
+        "arms",
+        "shoulders",
+        "hands",
+        "head"
+      ],
+      "layers": [
+        "legs",
+        "torso",
+        "head"
+      ],
+      "silhouette": "heavy",
+      "deforming": [],
+      "motifId": "MOTIF_ARMOR_HEAVY",
+      "rampId": "RAMP_RACE_TIEFLING",
+      "raceMotifId": "MOTIF_RACE_TIEFLING"
+    }
+  ],
+  "artKeyFallback": "__human",
+  "humanoidRows": [
+    "idle",
+    "walk",
+    "melee-swing",
+    "thrust",
+    "bow-draw",
+    "bow-loose",
+    "xbow-aim",
+    "xbow-fire",
+    "xbow-reload",
+    "thrown",
+    "cast-one-hand",
+    "cast-two-hand",
+    "cast-focus",
+    "hammer",
+    "saw",
+    "chop",
+    "dig",
+    "stir",
+    "carry",
+    "kneel",
+    "hurt",
+    "dodge",
+    "parry",
+    "death",
+    "sneak",
+    "climb"
+  ],
+  "critterRows": [
+    "idle",
+    "walk",
+    "attack",
+    "hurt",
+    "death"
+  ],
+  "critterOptionalRows": [
+    "fly",
+    "swim"
+  ],
+  "bodyTemplates": {
+    "child": {
+      "id": "body:child",
+      "frameClass": "SMALL",
+      "stooped": false,
+      "workRows": true,
+      "requiredRows": [
+        "idle",
+        "walk",
+        "melee-swing",
+        "thrust",
+        "bow-draw",
+        "bow-loose",
+        "xbow-aim",
+        "xbow-fire",
+        "xbow-reload",
+        "thrown",
+        "cast-one-hand",
+        "cast-two-hand",
+        "cast-focus",
+        "hammer",
+        "saw",
+        "chop",
+        "dig",
+        "stir",
+        "carry",
+        "kneel",
+        "hurt",
+        "dodge",
+        "parry",
+        "death",
+        "sneak",
+        "climb"
+      ]
+    },
+    "adult": {
+      "id": "body:adult",
+      "frameClass": "MEDIUM",
+      "stooped": false,
+      "workRows": true,
+      "requiredRows": [
+        "idle",
+        "walk",
+        "melee-swing",
+        "thrust",
+        "bow-draw",
+        "bow-loose",
+        "xbow-aim",
+        "xbow-fire",
+        "xbow-reload",
+        "thrown",
+        "cast-one-hand",
+        "cast-two-hand",
+        "cast-focus",
+        "hammer",
+        "saw",
+        "chop",
+        "dig",
+        "stir",
+        "carry",
+        "kneel",
+        "hurt",
+        "dodge",
+        "parry",
+        "death",
+        "sneak",
+        "climb"
+      ]
+    },
+    "elder": {
+      "id": "body:elder",
+      "frameClass": "MEDIUM",
+      "stooped": true,
+      "workRows": true,
+      "requiredRows": [
+        "idle",
+        "walk",
+        "melee-swing",
+        "thrust",
+        "bow-draw",
+        "bow-loose",
+        "xbow-aim",
+        "xbow-fire",
+        "xbow-reload",
+        "thrown",
+        "cast-one-hand",
+        "cast-two-hand",
+        "cast-focus",
+        "hammer",
+        "saw",
+        "chop",
+        "dig",
+        "stir",
+        "carry",
+        "kneel",
+        "hurt",
+        "dodge",
+        "parry",
+        "death",
+        "sneak",
+        "climb"
+      ]
+    }
+  },
+  "geneticsLoci": {
+    "skinTone": {
+      "values": [
+        1,
+        2,
+        3
+      ],
+      "part": "body",
+      "ramp": "RAMP_SKIN"
+    },
+    "hairStyle": {
+      "values": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "part": "hair-front"
+    },
+    "hairColor": {
+      "values": [
+        "brown",
+        "blonde",
+        "black",
+        "red"
+      ],
+      "part": "hair-front",
+      "ramp": "RAMP_HAIR"
+    },
+    "greying": {
+      "values": [
+        "natural",
+        "salt-and-pepper",
+        "grey",
+        "white"
+      ],
+      "part": "hair-front",
+      "ramp": "RAMP_HAIR_GREY"
+    },
+    "beard": {
+      "values": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "labels": [
+        "none",
+        "goatee",
+        "full",
+        "braided"
+      ],
+      "part": "beard"
+    },
+    "clothing": {
+      "values": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "part": "cloth"
+    },
+    "balding": {
+      "values": "OPEN",
+      "part": "hair-front",
+      "mask": true
+    },
+    "height": {
+      "values": [
+        "low",
+        "mid",
+        "high"
+      ],
+      "part": "body",
+      "limit": "scale-chart envelope"
+    },
+    "build": {
+      "values": [
+        "slight",
+        "average",
+        "broad"
+      ],
+      "part": "body",
+      "limit": "scale-chart envelope"
+    },
+    "horns": {
+      "values": [
+        0,
+        1,
+        2
+      ],
+      "part": "horns"
+    },
+    "tail": {
+      "values": [
+        0,
+        1
+      ],
+      "part": "tail"
+    },
+    "ears": {
+      "values": "race-part",
+      "part": "ears"
+    },
+    "scaleColor": {
+      "values": "RAMP_SCALE family, step count OPEN",
+      "part": "scales"
+    },
+    "dominantHand": {
+      "values": [
+        "right",
+        "left"
+      ],
+      "part": "sockets"
+    }
+  },
+  "buildingPieces": [
+    "foundation",
+    "wall",
+    "wall-top",
+    "roof-edge",
+    "roof-fill",
+    "door",
+    "window",
+    "floor",
+    "pillar",
+    "connector",
+    "furniture",
+    "workstation"
+  ],
+  "buildingStates": [
+    "intact",
+    "ruined",
+    "charred"
+  ],
+  "universalBuildingClasses": [
+    "dwelling_small",
+    "dwelling_medium",
+    "communal_hall",
+    "workshop_general",
+    "workshop_specialized",
+    "storehouse",
+    "shrine",
+    "watchtower",
+    "wall_gate",
+    "farm_outbuilding",
+    "stockpile_border",
+    "quarry_mine_support"
+  ],
+  "styleProfiles": [
+    "human_frontier",
+    "dwarf_stonehold",
+    "elf_glade",
+    "halfling_homestead",
+    "dragonborn_citadel",
+    "goblin_salvage"
+  ],
+  "banners": [
+    "banner:human_frontier",
+    "banner:dwarf_stonehold",
+    "banner:elf_glade",
+    "banner:halfling_homestead",
+    "banner:dragonborn_citadel",
+    "banner:goblin_salvage"
+  ],
+  "readableProps": [
+    "shop-sign",
+    "gravestone",
+    "statue",
+    "notice-board"
+  ],
+  "staticExceptions": [
+    "ground-fill",
+    "icon",
+    "decal-rest",
+    "remains-rest",
+    "readable-prop",
+    "map-marker"
+  ],
+  "animations": [
+    {
+      "id": "water",
+      "frames": 3,
+      "clockMul": 2
+    },
+    {
+      "id": "lava",
+      "frames": 3,
+      "clockMul": 1
+    },
+    {
+      "id": "fire",
+      "frames": 4,
+      "clockMul": 1
+    },
+    {
+      "id": "smoke",
+      "frames": 4,
+      "clockMul": 1
+    },
+    {
+      "id": "torch",
+      "frames": 4,
+      "clockMul": 1
+    },
+    {
+      "id": "forge",
+      "frames": 4,
+      "clockMul": 1
+    },
+    {
+      "id": "vegetation-sway",
+      "frames": 3,
+      "clockMul": 2
+    },
+    {
+      "id": "season",
+      "frames": 4,
+      "clockMul": 0,
+      "note": "Four states, not a loop: spring, summer, autumn, winter."
+    },
+    {
+      "id": "weather-rain",
+      "frames": 4,
+      "clockMul": 1
+    },
+    {
+      "id": "weather-snow",
+      "frames": 4,
+      "clockMul": 1
+    },
+    {
+      "id": "weather-fog",
+      "frames": 4,
+      "clockMul": 2,
+      "note": "Drawn dither. Binary alpha. Not a blur."
+    },
+    {
+      "id": "weather-lightning",
+      "frames": 3,
+      "clockMul": 1
+    },
+    {
+      "id": "door",
+      "frames": 3,
+      "clockMul": 1
+    },
+    {
+      "id": "workstation",
+      "frames": 3,
+      "clockMul": 1
+    },
+    {
+      "id": "construction",
+      "frames": 4,
+      "clockMul": 1
+    },
+    {
+      "id": "tree-fall",
+      "frames": 4,
+      "clockMul": 1
+    },
+    {
+      "id": "rock-collapse",
+      "frames": 4,
+      "clockMul": 1
+    },
+    {
+      "id": "idle-breath",
+      "frames": 2,
+      "clockMul": 4
+    },
+    {
+      "id": "ui-pulse",
+      "frames": 2,
+      "clockMul": 2
+    },
+    {
+      "id": "summon-in",
+      "frames": 4,
+      "clockMul": 1
+    },
+    {
+      "id": "summon-dismiss",
+      "frames": 4,
+      "clockMul": 1
+    }
+  ],
+  "deliveryFrames": {
+    "projectile": {
+      "frames": 3,
+      "cell": [
+        48,
+        48
+      ],
+      "directions": 4
+    },
+    "beam": {
+      "frames": 4,
+      "cell": [
+        48,
+        48
+      ],
+      "directions": 4
+    },
+    "cone": {
+      "frames": 4,
+      "cell": [
+        96,
+        96
+      ],
+      "directions": 4
+    },
+    "line": {
+      "frames": 4,
+      "cell": [
+        48,
+        48
+      ],
+      "directions": 4
+    },
+    "sphere": {
+      "frames": 4,
+      "cell": [
+        48,
+        48
+      ],
+      "directions": 1
+    },
+    "cylinder": {
+      "frames": 4,
+      "cell": [
+        48,
+        48
+      ],
+      "directions": 1
+    },
+    "self-aura": {
+      "frames": 4,
+      "cell": [
+        48,
+        48
+      ],
+      "directions": 4
+    },
+    "touch": {
+      "frames": 3,
+      "cell": [
+        48,
+        48
+      ],
+      "directions": 1
+    },
+    "instant-at-target": {
+      "frames": 4,
+      "cell": [
+        48,
+        48
+      ],
+      "directions": 1
+    }
+  },
+  "impactFrames": {
+    "frames": 4,
+    "cell": [
+      48,
+      48
+    ]
+  },
+  "resourceKinds": [
+    "tree",
+    "ore",
+    "stone",
+    "clay",
+    "herb",
+    "crop",
+    "water",
+    "animal-spawn"
+  ],
+  "resourceStates": [
+    "full",
+    "partly-harvested",
+    "depleted",
+    "regrowing"
+  ],
+  "stockpileFills": [
+    "empty",
+    "quarter",
+    "half",
+    "three-quarter",
+    "full"
+  ],
+  "vehicles": [
+    "cart",
+    "wagon",
+    "boat",
+    "siege"
+  ],
+  "remains": {
+    "bodies": true,
+    "skeleton": true,
+    "blood": true,
+    "scorch": true,
+    "rubble": true,
+    "debris": true,
+    "tileVariants": [
+      "burned",
+      "frozen",
+      "flooded"
+    ],
+    "buildingVariants": [
+      "burned",
+      "frozen",
+      "flooded"
+    ]
+  },
+  "night": {
+    "palette": "RAMP_NIGHT",
+    "drawnLights": true,
+    "torchGlow": "drawn",
+    "windowGlow": "drawn",
+    "litBuilding": true,
+    "dynamicLight": {
+      "mode": "off",
+      "allowedModes": [
+        "off",
+        "per-pixel",
+        "per-tile"
+      ],
+      "blur": false
+    }
+  },
+  "worldMap": {
+    "grid": [
+      3,
+      3
+    ],
+    "areaTiles": [
+      256,
+      256
+    ],
+    "overviewPx": [
+      768,
+      768
+    ],
+    "minimapPx": [
+      256,
+      256
+    ],
+    "markerPx": [
+      16,
+      16
+    ],
+    "flagPx": [
+      48,
+      48
+    ],
+    "flagFrames": 3,
+    "bannerPx": [
+      48,
+      96
+    ]
+  },
+  "knownJobIds": [
+    "build",
+    "chop",
+    "craft",
+    "gather",
+    "hunt",
+    "mine",
+    "pick",
+    "quarry"
+  ],
+  "summonDerivation": {
+    "source": "game/data/srd51/spells.json",
+    "creatureSource": "game/data/srd51/creatures.json",
+    "kind": "spell",
+    "fields": [
+      "name",
+      "data.description",
+      "data.atHigherLevels"
+    ],
+    "namePrefixes": [
+      "Conjure ",
+      "Animate ",
+      "Wall of "
+    ],
+    "named": [
+      "Create Undead",
+      "Find Familiar",
+      "Find Steed",
+      "Mage Hand",
+      "Spiritual Weapon",
+      "Phantom Steed",
+      "Arcane Hand",
+      "Unseen Servant",
+      "Guardian of Faith",
+      "Faithful Hound",
+      "Simulacrum",
+      "Flaming Sphere",
+      "Floating Disk",
+      "Forcecage",
+      "Planar Ally",
+      "Spirit Guardians"
+    ],
+    "descriptionPatterns": [
+      "\\byou conjure\\b",
+      "\\byou summon\\b"
+    ],
+    "exclude": {
+      "Gate": "Text: \"You conjure a portal\". A portal is a travel opening, not a creature or a field token.",
+      "Magnificent Mansion": "Text: \"You conjure an extradimensional dwelling\". A place, not a creature or a field token.",
+      "Web": "Text: \"You conjure a mass of thick, sticky webbing\" that fills a cube. Area delivery, not an entity slot."
+    },
+    "count": 29,
+    "method": "Include a kind:spell entry when its name starts with Conjure, Animate or Wall of, or its name is in the named list, or its description matches \"you conjure\" or \"you summon\", unless the name is in the exclude map. Exclusions are spells whose own text creates a portal, a dwelling or a cube of webbing."
+  },
+  "summons": [
+    {
+      "spellId": "srd:spell:animate-dead",
+      "name": "Animate Dead",
+      "slotId": "entity:spell:animate-dead",
+      "entityKind": "stat-blocks",
+      "creatureRefs": [
+        "srd:creature:skeleton",
+        "srd:creature:zombie"
+      ],
+      "categories": [],
+      "sizeClass": null,
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Bones become a skeleton. A corpse becomes a zombie. Text of the spell."
+    },
+    {
+      "spellId": "srd:spell:animate-objects",
+      "name": "Animate Objects",
+      "slotId": "entity:spell:animate-objects",
+      "entityKind": "spell-defined",
+      "creatureRefs": [],
+      "categories": [],
+      "sizeClass": null,
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Spell-defined object. Size is the animated object, Tiny through Huge. Text forbids anything larger than Huge."
+    },
+    {
+      "spellId": "srd:spell:arcane-hand",
+      "name": "Arcane Hand",
+      "slotId": "entity:spell:arcane-hand",
+      "entityKind": "spell-defined",
+      "creatureRefs": [],
+      "categories": [],
+      "sizeClass": "Large",
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: a Large hand of force. Spell-defined object, AC 20."
+    },
+    {
+      "spellId": "srd:spell:conjure-animals",
+      "name": "Conjure Animals",
+      "slotId": "entity:spell:conjure-animals",
+      "entityKind": "category",
+      "creatureRefs": [],
+      "categories": [
+        "beast"
+      ],
+      "sizeClass": null,
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: fey spirits that take the form of beasts. The sim picks a beast stat block at cast. No single creature id."
+    },
+    {
+      "spellId": "srd:spell:conjure-celestial",
+      "name": "Conjure Celestial",
+      "slotId": "entity:spell:conjure-celestial",
+      "entityKind": "category",
+      "creatureRefs": [],
+      "categories": [
+        "celestial"
+      ],
+      "sizeClass": null,
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: a celestial of challenge rating 4 or lower."
+    },
+    {
+      "spellId": "srd:spell:conjure-elemental",
+      "name": "Conjure Elemental",
+      "slotId": "entity:spell:conjure-elemental",
+      "entityKind": "category",
+      "creatureRefs": [
+        "srd:creature:air-elemental",
+        "srd:creature:earth-elemental",
+        "srd:creature:fire-elemental",
+        "srd:creature:water-elemental"
+      ],
+      "categories": [
+        "elemental"
+      ],
+      "sizeClass": null,
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text example: an elemental appropriate to air, earth, fire, or water. CR 5 or lower."
+    },
+    {
+      "spellId": "srd:spell:conjure-fey",
+      "name": "Conjure Fey",
+      "slotId": "entity:spell:conjure-fey",
+      "entityKind": "category",
+      "creatureRefs": [],
+      "categories": [
+        "fey",
+        "beast"
+      ],
+      "sizeClass": null,
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: a fey creature of CR 6 or lower, or a fey spirit in the form of a beast of CR 6 or lower."
+    },
+    {
+      "spellId": "srd:spell:conjure-minor-elementals",
+      "name": "Conjure Minor Elementals",
+      "slotId": "entity:spell:conjure-minor-elementals",
+      "entityKind": "category",
+      "creatureRefs": [],
+      "categories": [
+        "elemental"
+      ],
+      "sizeClass": null,
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: elementals in the listed CR options."
+    },
+    {
+      "spellId": "srd:spell:conjure-woodland-beings",
+      "name": "Conjure Woodland Beings",
+      "slotId": "entity:spell:conjure-woodland-beings",
+      "entityKind": "category",
+      "creatureRefs": [],
+      "categories": [
+        "fey"
+      ],
+      "sizeClass": null,
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: fey creatures in the listed CR options."
+    },
+    {
+      "spellId": "srd:spell:create-undead",
+      "name": "Create Undead",
+      "slotId": "entity:spell:create-undead",
+      "entityKind": "stat-blocks",
+      "creatureRefs": [
+        "srd:creature:ghoul",
+        "srd:creature:ghast",
+        "srd:creature:wight",
+        "srd:creature:mummy"
+      ],
+      "categories": [],
+      "sizeClass": null,
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Base text: each corpse becomes a ghoul. Higher slots name ghasts, wights, and mummies."
+    },
+    {
+      "spellId": "srd:spell:faithful-hound",
+      "name": "Faithful Hound",
+      "slotId": "entity:spell:faithful-hound",
+      "entityKind": "spell-defined",
+      "creatureRefs": [],
+      "categories": [],
+      "sizeClass": null,
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: a phantom watchdog. Invisible to all but the caster. Drawn for the caster with the Invisible contour rule. No sprite for others. Not an alpha filter."
+    },
+    {
+      "spellId": "srd:spell:find-familiar",
+      "name": "Find Familiar",
+      "slotId": "entity:spell:find-familiar",
+      "entityKind": "stat-blocks",
+      "creatureRefs": [
+        "srd:creature:bat",
+        "srd:creature:cat",
+        "srd:creature:crab",
+        "srd:creature:frog",
+        "srd:creature:hawk",
+        "srd:creature:lizard",
+        "srd:creature:octopus",
+        "srd:creature:owl",
+        "srd:creature:poisonous-snake",
+        "srd:creature:quipper",
+        "srd:creature:rat",
+        "srd:creature:raven",
+        "srd:creature:sea-horse",
+        "srd:creature:spider",
+        "srd:creature:weasel"
+      ],
+      "categories": [],
+      "sizeClass": null,
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text lists the forms. Frog (toad) uses the frog stat block. Fish (quipper) uses the quipper stat block."
+    },
+    {
+      "spellId": "srd:spell:find-steed",
+      "name": "Find Steed",
+      "slotId": "entity:spell:find-steed",
+      "entityKind": "stat-blocks",
+      "creatureRefs": [
+        "srd:creature:warhorse",
+        "srd:creature:pony",
+        "srd:creature:camel",
+        "srd:creature:elk",
+        "srd:creature:mastiff"
+      ],
+      "categories": [],
+      "sizeClass": null,
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text lists warhorse, pony, camel, elk, mastiff."
+    },
+    {
+      "spellId": "srd:spell:flaming-sphere",
+      "name": "Flaming Sphere",
+      "slotId": "entity:spell:flaming-sphere",
+      "entityKind": "spell-defined",
+      "creatureRefs": [],
+      "categories": [],
+      "sizeClass": "Medium",
+      "directional": false,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: a 5-foot-diameter sphere of fire in an unoccupied space."
+    },
+    {
+      "spellId": "srd:spell:floating-disk",
+      "name": "Floating Disk",
+      "slotId": "entity:spell:floating-disk",
+      "entityKind": "spell-defined",
+      "creatureRefs": [],
+      "categories": [],
+      "sizeClass": null,
+      "directional": false,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: a circular horizontal plane of force, 3 feet in diameter."
+    },
+    {
+      "spellId": "srd:spell:forcecage",
+      "name": "Forcecage",
+      "slotId": "entity:spell:forcecage",
+      "entityKind": "spell-defined",
+      "creatureRefs": [],
+      "categories": [],
+      "sizeClass": null,
+      "directional": false,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: an immobile cube-shaped prison of force, cage or box."
+    },
+    {
+      "spellId": "srd:spell:guardian-of-faith",
+      "name": "Guardian of Faith",
+      "slotId": "entity:spell:guardian-of-faith",
+      "entityKind": "spell-defined",
+      "creatureRefs": [],
+      "categories": [],
+      "sizeClass": "Large",
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: a Large spectral guardian."
+    },
+    {
+      "spellId": "srd:spell:mage-hand",
+      "name": "Mage Hand",
+      "slotId": "entity:spell:mage-hand",
+      "entityKind": "spell-defined",
+      "creatureRefs": [],
+      "categories": [],
+      "sizeClass": null,
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: a spectral, floating hand. No size word in the text. Frame is one 48 px cell."
+    },
+    {
+      "spellId": "srd:spell:phantom-steed",
+      "name": "Phantom Steed",
+      "slotId": "entity:spell:phantom-steed",
+      "entityKind": "spell-defined",
+      "creatureRefs": [],
+      "categories": [],
+      "sizeClass": "Large",
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: a Large quasi-real horselike creature."
+    },
+    {
+      "spellId": "srd:spell:planar-ally",
+      "name": "Planar Ally",
+      "slotId": "entity:spell:planar-ally",
+      "entityKind": "category",
+      "creatureRefs": [],
+      "categories": [
+        "celestial",
+        "elemental",
+        "fiend"
+      ],
+      "sizeClass": null,
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: the entity sends a celestial, an elemental, or a fiend, and the creature appears."
+    },
+    {
+      "spellId": "srd:spell:simulacrum",
+      "name": "Simulacrum",
+      "slotId": "entity:spell:simulacrum",
+      "entityKind": "copies-source",
+      "creatureRefs": [],
+      "categories": [],
+      "sizeClass": null,
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: a duplicate that is a creature, formed from ice or snow, using the original statistics at half hit points. Sprite is the source creature plus the summon marker."
+    },
+    {
+      "spellId": "srd:spell:spirit-guardians",
+      "name": "Spirit Guardians",
+      "slotId": "entity:spell:spirit-guardians",
+      "entityKind": "spell-defined",
+      "creatureRefs": [],
+      "categories": [],
+      "sizeClass": null,
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: spirits flit around the caster to 15 feet. Aura entity on the caster, not a separate stat block."
+    },
+    {
+      "spellId": "srd:spell:spiritual-weapon",
+      "name": "Spiritual Weapon",
+      "slotId": "entity:spell:spiritual-weapon",
+      "entityKind": "spell-defined",
+      "creatureRefs": [],
+      "categories": [],
+      "sizeClass": null,
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: a floating spectral weapon."
+    },
+    {
+      "spellId": "srd:spell:unseen-servant",
+      "name": "Unseen Servant",
+      "slotId": "entity:spell:unseen-servant",
+      "entityKind": "spell-defined",
+      "creatureRefs": [],
+      "categories": [],
+      "sizeClass": null,
+      "directional": true,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: an invisible, mindless, shapeless force. Controller sees the Invisible contour. Others see no sprite."
+    },
+    {
+      "spellId": "srd:spell:wall-of-fire",
+      "name": "Wall of Fire",
+      "slotId": "entity:spell:wall-of-fire",
+      "entityKind": "spell-defined",
+      "creatureRefs": [],
+      "categories": [],
+      "sizeClass": null,
+      "directional": false,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: a wall of fire on a solid surface."
+    },
+    {
+      "spellId": "srd:spell:wall-of-force",
+      "name": "Wall of Force",
+      "slotId": "entity:spell:wall-of-force",
+      "entityKind": "spell-defined",
+      "creatureRefs": [],
+      "categories": [],
+      "sizeClass": null,
+      "directional": false,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: an invisible wall of force. Drawn as opaque force-ramp panels, not an alpha filter. The SRD word invisible is the rules text. The pixels are the force ramp."
+    },
+    {
+      "spellId": "srd:spell:wall-of-ice",
+      "name": "Wall of Ice",
+      "slotId": "entity:spell:wall-of-ice",
+      "entityKind": "spell-defined",
+      "creatureRefs": [],
+      "categories": [],
+      "sizeClass": null,
+      "directional": false,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: a wall of ice, dome, sphere, or panels."
+    },
+    {
+      "spellId": "srd:spell:wall-of-stone",
+      "name": "Wall of Stone",
+      "slotId": "entity:spell:wall-of-stone",
+      "entityKind": "spell-defined",
+      "creatureRefs": [],
+      "categories": [],
+      "sizeClass": null,
+      "directional": false,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: a nonmagical wall of solid stone."
+    },
+    {
+      "spellId": "srd:spell:wall-of-thorns",
+      "name": "Wall of Thorns",
+      "slotId": "entity:spell:wall-of-thorns",
+      "entityKind": "spell-defined",
+      "creatureRefs": [],
+      "categories": [],
+      "sizeClass": null,
+      "directional": false,
+      "summonIn": "fx:summon-in",
+      "dismiss": "fx:summon-dismiss",
+      "controllerMarker": "ui:controller-marker",
+      "note": "Text: a wall of tangled brush."
+    }
+  ],
+  "fileNames": {
+    "character": "^\\$[A-Za-z0-9_]+\\.png$",
+    "object": "^![A-Za-z0-9_]+\\.png$",
+    "layer": "^\\$UF_Layer_[a-z0-9_]+__[a-z]+(?:-[a-z]+)*\\.png$",
+    "face": "^UF_Faces_[a-z0-9-]+_\\d+\\.png$",
+    "legacyLayer": "^\\$UF_Layer_[A-Za-z0-9_]+\\.png$"
+  },
+  "categories": {
+    "critter": {
+      "sizeClasses": [
+        "Tiny",
+        "Small"
+      ],
+      "requiredRows": [
+        "idle",
+        "walk",
+        "attack",
+        "hurt",
+        "death"
+      ],
+      "optionalRows": [
+        "fly",
+        "swim"
+      ],
+      "face": false,
+      "sv": false,
+      "corpse": true,
+      "harvestIcon": true
+    },
+    "beast": {
+      "sizeClasses": [
+        "Medium",
+        "Large",
+        "Huge",
+        "Gargantuan"
+      ],
+      "requiredRows": [
+        "idle",
+        "walk",
+        "attack",
+        "hurt",
+        "death"
+      ],
+      "attacks": true,
+      "conditions": true,
+      "sv": true
+    },
+    "humanoid": {
+      "races": [
+        "human",
+        "elf",
+        "halfling",
+        "dwarf",
+        "gnome",
+        "dragonborn",
+        "half-elf",
+        "half-orc",
+        "tiefling"
+      ],
+      "requiredRows": [
+        "idle",
+        "walk",
+        "melee-swing",
+        "thrust",
+        "bow-draw",
+        "bow-loose",
+        "xbow-aim",
+        "xbow-fire",
+        "xbow-reload",
+        "thrown",
+        "cast-one-hand",
+        "cast-two-hand",
+        "cast-focus",
+        "hammer",
+        "saw",
+        "chop",
+        "dig",
+        "stir",
+        "carry",
+        "kneel",
+        "hurt",
+        "dodge",
+        "parry",
+        "death",
+        "sneak",
+        "climb"
+      ],
+      "outfits": 135,
+      "faces": true,
+      "sv": true
+    },
+    "biome": {
+      "biomes": [
+        "VOLCANIC",
+        "WET",
+        "ARID",
+        "TEMPERATE",
+        "COLD",
+        "WILD"
+      ],
+      "bands": [
+        "DEEP",
+        "CAVERN",
+        "LOWLAND",
+        "UPLAND",
+        "HIGHLAND",
+        "AIR"
+      ],
+      "transitions": 15
+    },
+    "building": {
+      "pieces": [
+        "foundation",
+        "wall",
+        "wall-top",
+        "roof-edge",
+        "roof-fill",
+        "door",
+        "window",
+        "floor",
+        "pillar",
+        "connector",
+        "furniture",
+        "workstation"
+      ],
+      "profiles": [
+        "human_frontier",
+        "dwarf_stonehold",
+        "elf_glade",
+        "halfling_homestead",
+        "dragonborn_citadel",
+        "goblin_salvage"
+      ],
+      "classes": [
+        "dwelling_small",
+        "dwelling_medium",
+        "communal_hall",
+        "workshop_general",
+        "workshop_specialized",
+        "storehouse",
+        "shrine",
+        "watchtower",
+        "wall_gate",
+        "farm_outbuilding",
+        "stockpile_border",
+        "quarry_mine_support"
+      ]
+    },
+    "item": {
+      "raceNeutral": true,
+      "artKey": "<itemId>__<race>",
+      "fallback": "__human"
+    },
+    "icon": {
+      "cell": [
+        32,
+        32
+      ],
+      "columns": 16
+    },
+    "effect": {
+      "phases": [
+        "cast",
+        "delivery",
+        "impact",
+        "sim"
+      ],
+      "delivery": [
+        "projectile",
+        "beam",
+        "cone",
+        "line",
+        "sphere",
+        "cylinder",
+        "self-aura",
+        "touch",
+        "instant-at-target"
+      ],
+      "damageTypes": [
+        "acid",
+        "bludgeoning",
+        "cold",
+        "fire",
+        "force",
+        "lightning",
+        "necrotic",
+        "piercing",
+        "poison",
+        "psychic",
+        "radiant",
+        "slashing",
+        "thunder"
+      ]
+    },
+    "ui": {
+      "minPx": 16,
+      "factionSkins": [
+        "human_frontier",
+        "dwarf_stonehold",
+        "elf_glade",
+        "halfling_homestead",
+        "dragonborn_citadel",
+        "goblin_salvage"
+      ]
+    },
+    "summon": {
+      "count": 29
+    },
+    "remains": {
+      "tileVariants": [
+        "burned",
+        "frozen",
+        "flooded"
+      ]
+    },
+    "vehicle": {
+      "kinds": [
+        "cart",
+        "wagon",
+        "boat",
+        "siege"
+      ]
+    },
+    "map": {
+      "banners": 6
+    }
+  }
+}

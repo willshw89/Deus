@@ -1,0 +1,17 @@
+{
+  "entries": [
+    {
+      "id": "ALL_SHARED_CREATURE_WOLF_V1_DEFAULT",
+      "category": "CREATURE",
+      "band": "ALL",
+      "biome": "SHARED",
+      "sizeClass": "Small",
+      "frameClass": "SMALL",
+      "status": "MISSING",
+      "frames": { "cols": 3, "rows": 4, "facings": ["S", "W", "E", "N"], "rate": "150ms" },
+      "framePx": [48, 48],
+      "declaredRows": ["idle", "walk", "attack", "hurt", "death"],
+      "runtime": { "kind": "NONE", "file": null }
+    }
+  ]
+}

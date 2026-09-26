@@ -1,0 +1,80 @@
+{
+  "layer": {
+    "pose": "swing",
+    "frameCount": 4,
+    "framePx": [48, 48],
+    "bodyFramePx": [48, 48],
+    "deforming": false,
+    "frames": [
+      { "anchor": { "x": 14, "y": 30, "angle": "A45" } },
+      { "anchor": { "x": 16, "y": 28, "angle": "A90" } },
+      { "anchor": { "x": 20, "y": 26, "angle": "A135" } },
+      { "anchor": { "x": 18, "y": 30, "angle": "A45" } }
+    ]
+  },
+  "face": {
+    "race": "human",
+    "rampId": "RAMP_RACE_HUMAN",
+    "cell": [144, 144],
+    "cols": 4,
+    "rows": 2,
+    "expressions": ["neutral", "happy", "angry", "sad", "surprised", "hurt", "determined", "afraid"],
+    "layers": ["background", "faction-trim", "body-base", "face", "hair", "gear", "overlay"],
+    "anchors": {
+      "neckBase": [72, 120],
+      "collarLine": [72, 108],
+      "chin": [72, 86],
+      "eyeLine": [72, 62],
+      "crown": [72, 36]
+    }
+  },
+  "item": { "id": "armor_plate", "artKey": "armor_plate__dwarf" },
+  "icon": { "id": "icon:item:longsword", "w": 32, "h": 32, "rarity": "overlay" },
+  "node": {
+    "kind": "tree",
+    "states": ["full", "partly-harvested", "depleted", "regrowing"],
+    "variants": ["VOLCANIC", "WET", "ARID", "TEMPERATE", "COLD", "WILD"],
+    "harvestFrames": 4,
+    "drop": "drop:wood"
+  },
+  "asset": { "id": "water:temperate", "animation": { "frames": 3 }, "exception": null },
+  "staticAsset": { "id": "icon:item:longsword", "animation": null, "exception": "icon" },
+  "remains": {
+    "bodies": true,
+    "skeleton": true,
+    "blood": true,
+    "scorch": true,
+    "rubble": true,
+    "debris": true,
+    "tileVariants": ["burned", "frozen", "flooded"],
+    "buildingVariants": ["burned", "frozen", "flooded"]
+  },
+  "haul": { "carry": "drawn", "cart": true, "fills": ["empty", "quarter", "half", "three-quarter", "full"] },
+  "vehicle": { "kinds": ["cart", "wagon", "boat", "siege"], "directions": ["S", "W", "E", "N"], "ridingRaces": 9 },
+  "night": {
+    "palette": "RAMP_NIGHT",
+    "drawnLights": true,
+    "torchGlow": "drawn",
+    "windowGlow": "drawn",
+    "litBuilding": true,
+    "dynamicLight": { "mode": "off", "allowedModes": ["off", "per-pixel", "per-tile"], "blur": false }
+  },
+  "name": { "category": "EQUIPMENT", "runtimeFile": "img/characters/$UF_Layer_longsword__human.png" },
+  "miniCatalogue": {
+    "entries": [
+      {
+        "id": "ALL_SHARED_CREATURE_WOLF_V1_DEFAULT",
+        "category": "CREATURE",
+        "band": "ALL",
+        "biome": "SHARED",
+        "sizeClass": "Small",
+        "frameClass": "SMALL",
+        "status": "MISSING",
+        "frames": { "cols": 3, "rows": 4, "facings": ["S", "W", "E", "N"], "rate": "150ms" },
+        "framePx": [48, 48],
+        "declaredRows": ["idle", "walk", "attack", "hurt", "death"],
+        "runtime": { "kind": "NONE", "file": null }
+      }
+    ]
+  }
+}
