@@ -1,0 +1,12 @@
+{
+  "id": "ALL_SHARED_EQUIPMENT_LONGSWORD_LAYER_DEFAULT",
+  "category": "EQUIPMENT",
+  "band": "ALL",
+  "biome": "SHARED",
+  "frameClass": "MEDIUM",
+  "status": "EXISTING_UNAPPROVED",
+  "frames": { "cols": 3, "rows": 4, "facings": ["S", "W", "E", "N"], "rate": "150ms" },
+  "framePx": [48, 48],
+  "paperDoll": { "bodyType": "ALL_SHARED_CHARACTER_HUMAN_MALE-T0_DEFAULT", "layer": "held", "zOrder": 1 },
+  "runtime": { "kind": "RMMZ_CHARACTER", "file": "img/characters/$UF_Layer_longsword__human.png" }
+}

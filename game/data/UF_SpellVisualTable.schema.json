@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "deus-spell-visual/1.0.0",
+  "title": "DEUS spell visual table",
+  "description": "Draft 2020-12 schema for spell rows composed from cast pose, delivery shape, damage-type impact and a sim effect. The examples are six worked rows, not the 319-spell table. customPiece is a hook for a later iconic piece and is null in every example.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "rows"],
+  "properties": {
+    "schemaVersion": { "const": "deus-spell-visual/1.0.0" },
+    "rows": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/row" }
+    }
+  },
+  "$defs": {
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spellId", "name", "school", "castPose", "deliveryShape", "travel", "damageTypes", "impact", "simEffect", "aura", "concentration", "handGlowRamp", "customPiece"],
+      "properties": {
+        "spellId": { "type": "string", "pattern": "^srd:spell:[a-z0-9-]+$" },
+        "name": { "type": "string", "minLength": 1 },
+        "level": { "type": "integer", "minimum": 0 },
+        "school": {
+          "enum": ["abjuration", "conjuration", "divination", "enchantment", "evocation", "illusion", "necromancy", "transmutation"]
+        },
+        "castPose": { "enum": ["one-hand", "two-hand", "focus-raise", "channel"] },
+        "deliveryShape": {
+          "enum": ["projectile", "beam", "cone", "line", "sphere", "cylinder", "self-aura", "touch", "instant-at-target"]
+        },
+        "travel": { "enum": ["none", "projectile", "beam"] },
+        "damageTypes": {
+          "type": "array",
+          "items": {
+            "enum": ["acid", "bludgeoning", "cold", "fire", "force", "lightning", "necrotic", "piercing", "poison", "psychic", "radiant", "slashing", "thunder"]
+          }
+        },
+        "impact": {
+          "type": ["string", "null"],
+          "enum": [null, "acid", "bludgeoning", "cold", "fire", "force", "lightning", "necrotic", "piercing", "poison", "psychic", "radiant", "slashing", "thunder"]
+        },
+        "simEffect": { "$ref": "#/$defs/simEffect" },
+        "aura": { "enum": ["none", "concentration", "buff", "curse", "ward"] },
+        "concentration": { "type": "boolean" },
+        "handGlowRamp": { "type": "string", "pattern": "^RAMP_SCHOOL_[A-Z]+$" },
+        "healRamp": { "type": ["string", "null"] },
+        "customPiece": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["id"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "note": { "type": "string" }
+          }
+        }
+      }
+    },
+    "simEffect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "crossesZ"],
+      "properties": {
+        "kind": {
+          "enum": ["none", "fire-tiles-spread", "cold-freezes", "force-damages-structures", "thunder-damages-structures", "sphere-cross-z", "ignite-unattended", "heal", "summon", "transform", "utility-none"]
+        },
+        "crossesZ": { "type": "boolean" }
+      }
+    }
+  },
+  "examples": [
+    {
+      "schemaVersion": "deus-spell-visual/1.0.0",
+      "rows": [
+        {
+          "spellId": "srd:spell:fire-bolt",
+          "name": "Fire Bolt",
+          "level": 0,
+          "school": "evocation",
+          "castPose": "one-hand",
+          "deliveryShape": "projectile",
+          "travel": "projectile",
+          "damageTypes": ["fire"],
+          "impact": "fire",
+          "simEffect": { "kind": "ignite-unattended", "crossesZ": false },
+          "aura": "none",
+          "concentration": false,
+          "handGlowRamp": "RAMP_SCHOOL_EVOCATION",
+          "healRamp": null,
+          "customPiece": null
+        },
+        {
+          "spellId": "srd:spell:fireball",
+          "name": "Fireball",
+          "level": 3,
+          "school": "evocation",
+          "castPose": "one-hand",
+          "deliveryShape": "sphere",
+          "travel": "projectile",
+          "damageTypes": ["fire"],
+          "impact": "fire",
+          "simEffect": { "kind": "fire-tiles-spread", "crossesZ": true },
+          "aura": "none",
+          "concentration": false,
+          "handGlowRamp": "RAMP_SCHOOL_EVOCATION",
+          "healRamp": null,
+          "customPiece": null
+        },
+        {
+          "spellId": "srd:spell:cone-of-cold",
+          "name": "Cone of Cold",
+          "level": 5,
+          "school": "evocation",
+          "castPose": "two-hand",
+          "deliveryShape": "cone",
+          "travel": "none",
+          "damageTypes": ["cold"],
+          "impact": "cold",
+          "simEffect": { "kind": "cold-freezes", "crossesZ": false },
+          "aura": "none",
+          "concentration": false,
+          "handGlowRamp": "RAMP_SCHOOL_EVOCATION",
+          "healRamp": null,
+          "customPiece": null
+        },
+        {
+          "spellId": "srd:spell:lightning-bolt",
+          "name": "Lightning Bolt",
+          "level": 3,
+          "school": "evocation",
+          "castPose": "focus-raise",
+          "deliveryShape": "line",
+          "travel": "none",
+          "damageTypes": ["lightning"],
+          "impact": "lightning",
+          "simEffect": { "kind": "ignite-unattended", "crossesZ": false },
+          "aura": "none",
+          "concentration": false,
+          "handGlowRamp": "RAMP_SCHOOL_EVOCATION",
+          "healRamp": null,
+          "customPiece": null
+        },
+        {
+          "spellId": "srd:spell:shield",
+          "name": "Shield",
+          "level": 1,
+          "school": "abjuration",
+          "castPose": "one-hand",
+          "deliveryShape": "self-aura",
+          "travel": "none",
+          "damageTypes": [],
+          "impact": null,
+          "simEffect": { "kind": "none", "crossesZ": false },
+          "aura": "ward",
+          "concentration": false,
+          "handGlowRamp": "RAMP_SCHOOL_ABJURATION",
+          "healRamp": null,
+          "customPiece": null
+        },
+        {
+          "spellId": "srd:spell:cure-wounds",
+          "name": "Cure Wounds",
+          "level": 1,
+          "school": "evocation",
+          "castPose": "one-hand",
+          "deliveryShape": "touch",
+          "travel": "none",
+          "damageTypes": [],
+          "impact": null,
+          "simEffect": { "kind": "heal", "crossesZ": false },
+          "aura": "none",
+          "concentration": false,
+          "handGlowRamp": "RAMP_SCHOOL_EVOCATION",
+          "healRamp": "RAMP_DMG_RADIANT",
+          "customPiece": null
+        }
+      ]
+    }
+  ]
+}

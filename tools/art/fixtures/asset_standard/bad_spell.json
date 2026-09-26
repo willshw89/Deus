@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "deus-spell-visual/1.0.0",
+  "rows": [
+    {
+      "spellId": "srd:spell:fire-bolt",
+      "name": "Fire Bolt",
+      "level": 0,
+      "school": "evocation",
+      "castPose": "one-hand",
+      "deliveryShape": "projectile",
+      "travel": "projectile",
+      "damageTypes": ["void"],
+      "impact": "fire",
+      "simEffect": { "kind": "ignite-unattended", "crossesZ": false },
+      "aura": "none",
+      "concentration": false,
+      "handGlowRamp": "RAMP_SCHOOL_EVOCATION",
+      "healRamp": null,
+      "customPiece": null
+    }
+  ]
+}
