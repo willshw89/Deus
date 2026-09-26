@@ -29,7 +29,8 @@ Every decision item recorded in this log must provide:
   2. Owner must personally launch RMMZ editor (F5) and observe a Z-2 cut on Seed 18 before closure.
 - **Recommended Default:** Option 1 (Automated NW.js test + rendered map proof) for automated gate closure, with Option 2 performed as part of Slice 1 overall review.
 - **What Happens If Unanswered:** Remains in `REVIEW`; WG.00.08 cannot transition to `DONE`.
-- **Status:** `OPEN`
+- **Status:** `DECIDED`
+- **Owner Ruling & Date:** 2026-09-25 (Decider: Owner): Option 1. The automated headless proof + rendered PNG (`game/test_output/z2_cut_proof_seed18_194_89.png`) satisfies criterion 2.2d, CONDITIONAL on Grok/PM review of that PNG and `tools/test_generated_z2_cut_proof.js`. The interactive F5 check moves to the Slice 1 milestone review.
 
 ---
 
@@ -77,6 +78,21 @@ Every decision item recorded in this log must provide:
   2. External physical drive / USB drive mount (e.g. `D:\`, `E:\`), running `tools/backup_project.ps1` via robocopy to mirror the repo off-disk.
   3. Both private git remote and external physical drive mirror.
 - **Recommended Default:** Option 1 (Private git remote) + test clone and run.
-- **What Happens If Unanswered:** Migration to `C:\Dev\DEUS` remains strictly frozen; `WG.00.12` external backup milestone remains NOT DONE.
-- **Status:** `OPEN`
+- **Status:** `DECIDED`
+- **Owner Ruling & Date:** 2026-09-25 (Decider: Owner): Option 1. Private GitHub remote `https://github.com/willshw89/Deus.git` (private remote). Verified live, 10,259 tracked files pushed (`game/img` whitelisted, `game/data/df_*.json` tracked). Pre-migration backup requirement complete.
+
+---
+
+### Decision `DEC-006` / `R1`: WG.00.09 Depth Shading Rule vs Palette Reality
+- **Date Logged:** 2026-09-25
+- **Question:** How should multi-Z lower levels darken under WG.00.09 depth rendering given current tile art palette?
+- **Options:**
+  - Option A: Plan's 2-step rule (~33% darker at depth 1, ~67% darker at depth 3).
+  - Option B: One darkening step at depths 3–4 only.
+  - Option C: Fixed dither pattern between neighbouring palette colors.
+  - Option D: Scale-only depth separation, no color darkening, until tile art is migrated to the master palette. Revisit shading after migration.
+- **Recommended Default:** Option D.
+- **What Happens If Unanswered:** WG.00.09 DEFINE stays BLOCKED.
+- **Status:** `DECIDED`
+- **Owner Ruling & Date:** 2026-09-25 (Decider: Owner): Option D. Scale-only depth separation, no colour darkening, until tile art is migrated to the master palette. Revisit shading after migration. Fold R1=D plus items R2–R11 into the depth attack plan.
 
