@@ -30,10 +30,14 @@
  *            --baseline <file>    default tools/security/secrets_baseline.json (same rule when missing):
  *                                 known historical values, applied in --range scans only (see below)
  *
- * Binary files (extension list, or a NUL byte in the first NUL_SNIFF_BYTES bytes or in an added
- * line) are skipped and counted. Allowlist entries are { path, rule, lineSha256, reason }; a finding
- * that matches one is reported as ALLOWED. An entry that matches nothing in a scan that read its
- * whole file (default mode: every entry; --path: entries for that path) is STALE and fails the run.
+ * Files with a listed binary extension are skipped unread and counted. A file with NUL bytes (UTF-16
+ * text, an unlisted binary) is scanned with its NUL bytes removed and listed as NUL_FILE. Every file
+ * name is checked too (credential file names, and values used as path segments; line 0).
+ * Allowlist entries are { path, rule, lineSha256, reason }; a finding that matches one is reported
+ * as ALLOWED. An entry that matches nothing in a scan that read its whole file (default mode: every
+ * entry except <commit-message> ones; --path: entries for that path) is STALE and fails the run.
+ * A value shorter than REDACT_MIN_LEN_FOR_PREFIX characters is shown by its length only, and its
+ * line sha256 is left out of the output.
  * Baseline entries (section "Baseline" below) turn a finding into BASELINED only in the history
  * before the commit that removed the value.
  *
@@ -50,7 +54,6 @@ const ALLOWLIST_SCHEMA = "deus.secrets_allowlist.v1";
 const DEFAULT_BASELINE = "tools/security/secrets_baseline.json";
 const BASELINE_SCHEMA = "deus.secrets_baseline.v1";
 const REDACT_KEEP = 4;
-const NUL_SNIFF_BYTES = 8000;           // git's own "is this binary" window
 const MAX_BUFFER = 1024 * 1024 * 1024;
 const COMMIT_MESSAGE_PATH = "<commit-message>";
 
@@ -67,14 +70,35 @@ const COMMIT_MESSAGE_PATH = "<commit-message>";
 //     padding) or when it is the value of a credential-named assignment.
 //   - A run holding ENTROPY_SEQ_RUN or more consecutive ascending characters ("ABCDEF", "012345")
 //     is an alphabet or lookup table, not a generated value.
+//   - A run longer than ENTROPY_MAX_LEN (before any "/" split) is a data blob, such as an inline
+//     base64 image, and is skipped whole.
+// A short run (ENTROPY_MIN_LEN..ENTROPY_SHORT_MAX_LEN) of letters and digits only, the common
+// API-key shape, needs ENTROPY_SHORT_MIN_BITS: at 32 characters even random text rarely reaches
+// 4.5 bits. Identifiers of that length carry "_" or "-" and keep the 4.5 threshold. (Measured on
+// HEAD and all history: no new hit.)
 const ENTROPY_MIN_LEN = 32;
 const ENTROPY_MAX_LEN = 256;
 const ENTROPY_MIN_BITS = 4.5;
+const ENTROPY_SHORT_MAX_LEN = 47;
+const ENTROPY_SHORT_MIN_BITS = 4.2;
 const ENTROPY_HEX_MIN_BITS = 3.0;
 const ENTROPY_SEQ_RUN = 6;
 const ENTROPY_CONTEXT_WINDOW = 60;
 const ENTROPY_TOKEN_RE = new RegExp("[A-Za-z0-9+/_-]{" + ENTROPY_MIN_LEN + ",}={0,2}", "g");
 const ENTROPY_CONTEXT = /(?:secret|passw(?:or)?d|pwd|token|api[_-]?key|apikey|access[_-]?key|private[_-]?key|credential|auth)[\w.-]*["']?\s*[:=]\s*["']?$/i;
+
+// Credential-named assignment (runs after the entropy detector, on spans nothing else took): a
+// value of ASSIGN_MIN_LEN+ characters with letters and digits and at least ASSIGN_MIN_BITS, given
+// to a name such as password / api_key / client_secret / GEMINI_KEY. This catches the lowercase or
+// short generated values the entropy detector cannot see. "author..." is not "auth"; a bare
+// "<X>_KEY" name counts only in upper case (GEMINI_KEY, not cache_key).
+const ASSIGN_MIN_LEN = 16;
+const ASSIGN_MIN_BITS = 3.0;
+const ASSIGN_RE = /(secret|passw(?:or)?d|passwd|pwd|token|api[_-]?key|apikey|access[_-]?key|private[_-]?key|credential|auth(?!or)|[a-z0-9]_key\b)[\w.-]*["']?\s*[:=]\s*["']?([A-Za-z0-9+\/_.=~-]+)/dgi;
+
+// Redaction: a value shorter than REDACT_MIN_LEN_FOR_PREFIX shows no characters at all, and its
+// line's sha256 is withheld from the output (a short value could be recovered from a known line).
+const REDACT_MIN_LEN_FOR_PREFIX = 16;
 
 // Skipped without reading (their bytes are image, audio, font, archive or engine binary formats).
 const BINARY_EXTENSIONS = new Set([
@@ -148,10 +172,11 @@ const RULES = [
     }
 ];
 const ENTROPY_RULE = { id: "HIGH_ENTROPY", source: "docs/SECURITY_AND_SECRETS.md:52 (high-entropy strings)" };
+const ASSIGN_RULE = { id: "CREDENTIAL_ASSIGNMENT", source: "docs/SECURITY_AND_SECRETS.md:12,52 (passwords and private credentials; high-entropy strings)" };
 const CREDENTIAL_FILE_RULE = { id: "CREDENTIAL_FILE", source: "docs/SECURITY_AND_SECRETS.md:36,54 (.env and credential files stay untracked)" };
 // Tracked file names that hold credentials (basename, case-insensitive).
 const CREDENTIAL_FILE_RE = /^(?:\.env(?:\..+)?|.+\.pem|id_(?:rsa|dsa|ecdsa|ed25519)(?:[._-].*)?|[._]netrc|credentials\.json|\.claude\.json|\.git-credentials|oauth_creds\.json|.+\.p12|.+\.pfx)$/i;
-const RULE_IDS = new Set(RULES.map(r => r.id).concat([ENTROPY_RULE.id, CREDENTIAL_FILE_RULE.id]));
+const RULE_IDS = new Set(RULES.map(r => r.id).concat([ENTROPY_RULE.id, ASSIGN_RULE.id, CREDENTIAL_FILE_RULE.id]));
 
 class UsageError extends Error {}
 
@@ -188,6 +213,7 @@ function entropyHits(line, taken) {
     while ((m = ENTROPY_TOKEN_RE.exec(line)) !== null) {
         const padded = m[0].endsWith("=");
         const tok = m[0].replace(/=+$/, "");
+        if (tok.length > ENTROPY_MAX_LEN) continue;
         const context = ENTROPY_CONTEXT.test(line.slice(Math.max(0, m.index - ENTROPY_CONTEXT_WINDOW), m.index));
         const candidates = [];
         if (!tok.includes("/") || padded || tok.includes("+") || context) candidates.push([m.index, tok]);
@@ -203,11 +229,28 @@ function entropyHits(line, taken) {
             const bits = shannonBits(value);
             if (/^[0-9a-fA-F]+$/.test(value)) {
                 if (bits < ENTROPY_HEX_MIN_BITS || !context) continue;
-            } else if (!(hasUpper(value) && hasLower(value) && hasDigit(value)) || bits < ENTROPY_MIN_BITS) {
-                continue;
+            } else {
+                if (!(hasUpper(value) && hasLower(value) && hasDigit(value))) continue;
+                const short = value.length <= ENTROPY_SHORT_MAX_LEN && /^[A-Za-z0-9]+$/.test(value);
+                if (bits < (short ? ENTROPY_SHORT_MIN_BITS : ENTROPY_MIN_BITS)) continue;
             }
             hits.push({ rule: ENTROPY_RULE.id, start, end, value, bits: Math.round(bits * 100) / 100 });
         }
+    }
+    return hits;
+}
+
+function assignmentHits(line, taken) {
+    const hits = [];
+    ASSIGN_RE.lastIndex = 0;
+    let m;
+    while ((m = ASSIGN_RE.exec(line)) !== null) {
+        if (/^[a-z0-9]_key$/i.test(m[1]) && !/^[A-Z0-9]_KEY$/.test(m[1])) continue;
+        const [start, end] = m.indices[2];
+        const value = m[2];
+        if (value.length < ASSIGN_MIN_LEN || !hasLetter(value) || !hasDigit(value)) continue;
+        if (overlaps(taken, start, end) || hasSequentialRun(value, ENTROPY_SEQ_RUN) || shannonBits(value) < ASSIGN_MIN_BITS) continue;
+        hits.push({ rule: ASSIGN_RULE.id, start, end, value });
     }
     return hits;
 }
@@ -231,7 +274,21 @@ function scanLine(line) {
         }
     }
     for (const h of entropyHits(line, taken)) { taken.push([h.start, h.end]); hits.push(h); }
+    for (const h of assignmentHits(line, taken)) { taken.push([h.start, h.end]); hits.push(h); }
     return hits;
+}
+
+// A path that holds a value (a value used as a file or folder name) is printed with that value
+// redacted, like any other match: "keys/[Ab12... (40 chars)].txt".
+function displayPath(p, hits) {
+    if (hits.length === 0) return p;
+    let out = "", at = 0;
+    for (const h of hits.slice().sort((a, b) => a.start - b.start)) {
+        if (h.start < at) continue;
+        out += p.slice(at, h.start) + "[" + redact(h.value) + "]";
+        at = h.end;
+    }
+    return out + p.slice(at);
 }
 
 function credentialFileHit(p) {
@@ -239,6 +296,7 @@ function credentialFileHit(p) {
 }
 
 function redact(value) {
+    if (value.length < REDACT_MIN_LEN_FOR_PREFIX) return "... (" + value.length + " chars)";
     return value.slice(0, REDACT_KEEP) + "... (" + value.length + " chars)";
 }
 
@@ -250,10 +308,6 @@ function isBinaryPath(p) {
     const base = p.split("/").pop();
     const dot = base.lastIndexOf(".");
     return dot > 0 && BINARY_EXTENSIONS.has(base.slice(dot + 1).toLowerCase());
-}
-
-function hasNul(buf) {
-    return buf.subarray(0, NUL_SNIFF_BYTES).includes(0);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -277,8 +331,8 @@ function repoRoot(cwd) {
 }
 
 // Entries of the HEAD tree: [{ mode, type, sha, path }].
-function headTree(root) {
-    const out = git(root, ["ls-tree", "-r", "-z", "--full-tree", "HEAD"]).toString("utf8");
+function headTree(root, rev = "HEAD") {
+    const out = git(root, ["ls-tree", "-r", "-z", "--full-tree", "--end-of-options", rev]).toString("utf8");
     const entries = [];
     for (const rec of out.split("\0")) {
         if (!rec) continue;
@@ -405,16 +459,23 @@ function splitLines(text) {
     return text.split("\n").map((t, i) => ({ no: i + 1, text: t.replace(/\r$/, "") }));
 }
 
-function collectHead(root) {
-    const entries = headTree(root).filter(e => e.type === "blob");
+// A file with NUL bytes (UTF-16 text, or a binary without a listed extension) is still read: its NUL
+// bytes are removed and the rest is scanned, so a value inside it is not hidden. It is counted as a
+// NUL file. Files with a listed binary extension are skipped unread.
+function textUnit(base, buf) {
+    const text = buf.toString("latin1");
+    if (!text.includes("\0")) return Object.assign(base, { binary: null, lines: splitLines(text) });
+    return Object.assign(base, { binary: "nul", lines: splitLines(text.replace(/\0/g, "")) });
+}
+
+function collectHead(root, rev = "HEAD") {
+    const entries = headTree(root, rev).filter(e => e.type === "blob");
     const units = [];
     const wanted = entries.filter(e => !isBinaryPath(e.path));
     const blobs = readBlobs(root, [...new Set(wanted.map(e => e.sha))]);
     for (const e of entries) {
         if (isBinaryPath(e.path)) { units.push({ path: e.path, binary: "extension", lines: null }); continue; }
-        const buf = blobs.get(e.sha);
-        if (hasNul(buf)) { units.push({ path: e.path, binary: "nul", lines: null }); continue; }
-        units.push({ path: e.path, binary: null, lines: splitLines(buf.toString("latin1")) });
+        units.push(textUnit({ path: e.path }, blobs.get(e.sha)));
     }
     return { units, full: "all" };
 }
@@ -427,7 +488,7 @@ function unitsFromPatch(files) {
     for (const f of files) {
         if (f.deleted) continue;
         if (isBinaryPath(f.path)) units.push({ commit: f.commit, path: f.path, binary: "extension", lines: null });
-        else if (f.nul) units.push({ commit: f.commit, path: f.path, binary: "nul", lines: null });
+        else if (f.nul) units.push({ commit: f.commit, path: f.path, binary: "nul", lines: f.added.map(l => ({ no: l.no, text: l.text.replace(/\0/g, "") })) });
         else units.push({ commit: f.commit, path: f.path, binary: null, lines: f.added });
     }
     return units;
@@ -451,12 +512,13 @@ function collectRange(root, range) {
             const batch = commits.slice(i, i + RANGE_BATCH);
             const patch = git(root, ["log", "--no-walk=unsorted", "--root", "-p", "--cc", "--format=%x01%H"].concat(DIFF_FLAGS, ["--end-of-options"], batch, ["--"]));
             yield* unitsFromPatch(parsePatch(patch));
-            // Commit messages are history too (policy section 1): scan them as a pseudo-file per commit.
-            const msgs = git(root, ["log", "--no-walk=unsorted", "--format=%x01%H%x02%B%x03", "--end-of-options"].concat(batch, ["--"])).toString("latin1");
-            for (const rec of msgs.split("\x03")) {
-                const s = rec.indexOf("\x01"), t = rec.indexOf("\x02");
-                if (s < 0 || t < 0) continue;
-                yield { commit: rec.slice(s + 1, t), path: COMMIT_MESSAGE_PATH, binary: null, lines: splitLines(rec.slice(t + 1)) };
+            // Commit messages are history too (policy section 1): scan them as a pseudo-file per
+            // commit. -z ends each record with a NUL byte, which a commit message cannot contain.
+            const msgs = git(root, ["log", "--no-walk=unsorted", "-z", "--format=%H%n%B", "--end-of-options"].concat(batch, ["--"])).toString("latin1");
+            for (const rec of msgs.split("\0")) {
+                const nl = rec.indexOf("\n");
+                if (nl !== 40) continue;
+                yield { commit: rec.slice(0, 40), path: COMMIT_MESSAGE_PATH, binary: null, lines: splitLines(rec.slice(nl + 1)) };
             }
         }
     }
@@ -475,9 +537,7 @@ function collectPath(root, cwd, p) {
     if (!tracked.includes(relPosix)) throw new UsageError("--path: " + relPosix + " is not tracked by git");
     if (!fs.statSync(real).isFile()) throw new UsageError("--path: " + relPosix + " is not a file");
     if (isBinaryPath(relPosix)) return { units: [{ path: relPosix, binary: "extension", lines: null }], full: [relPosix] };
-    const buf = fs.readFileSync(real);
-    if (hasNul(buf)) return { units: [{ path: relPosix, binary: "nul", lines: null }], full: [relPosix] };
-    return { units: [{ path: relPosix, binary: null, lines: splitLines(buf.toString("latin1")) }], full: [relPosix] };
+    return { units: [textUnit({ path: relPosix }, fs.readFileSync(real))], full: [relPosix] };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -576,20 +636,42 @@ function ancestryChecker(root) {
     };
 }
 
-// Range mode only: every baseline commit must exist and every addedIn commit must be in the history
-// before onlyInHistoryBefore. A baseline that cannot be checked fails the run (exit 2).
+// Range mode only. Returns { active, inactive }.
+//   - An entry whose commits are not all in this clone (a shallow clone) is inactive: it baselines
+//     nothing, so every occurrence of its value fails, and unrelated scans still run.
+//   - Every addedIn commit must be in the history before onlyInHistoryBefore, and the tree of
+//     onlyInHistoryBefore must no longer hold the value (it is the commit that removed it; a wrong
+//     sha there would widen the scope). Otherwise the baseline is wrong: exit 2.
 function checkBaselineCommits(root, entries, isBefore) {
+    const active = [], inactive = [];
     entries.forEach((e, i) => {
-        for (const c of [e.onlyInHistoryBefore].concat(e.addedIn)) {
-            const r = spawnSync("git", ["cat-file", "-e", c + "^{commit}"], { cwd: root, windowsHide: true });
-            if (r.status !== 0) throw new UsageError("baseline entry " + i + ": commit " + c.slice(0, 12) + " is not in this repository");
-        }
+        const missing = [e.onlyInHistoryBefore].concat(e.addedIn).filter(c =>
+            spawnSync("git", ["cat-file", "-e", c + "^{commit}"], { cwd: root, windowsHide: true }).status !== 0);
+        if (missing.length) { inactive.push(Object.assign(e, { missing })); return; }
         for (const c of e.addedIn) {
             if (!isBefore(c, e.onlyInHistoryBefore)) {
                 throw new UsageError("baseline entry " + i + ": addedIn " + c.slice(0, 12) + " is not in the history before " + e.onlyInHistoryBefore.slice(0, 12));
             }
         }
+        active.push(e);
     });
+    for (const fix of new Set(active.map(e => e.onlyInHistoryBefore))) {
+        const wanted = active.filter(e => e.onlyInHistoryBefore === fix);
+        for (const u of collectHead(root, fix).units) {
+            if (u.lines === null) continue;
+            for (const ln of u.lines) {
+                for (const h of scanLine(ln.text)) {
+                    const fp = sha256(h.value);
+                    const e = wanted.find(x => x.fingerprint === fp && x.rule === h.rule);
+                    if (e) {
+                        throw new UsageError("baseline entry " + entries.indexOf(e) + ": the tree of onlyInHistoryBefore " + fix.slice(0, 12) +
+                                             " still holds the value (" + u.path + ":" + ln.no + "), so that commit did not remove it");
+                    }
+                }
+            }
+        }
+    }
+    return { active, inactive };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -615,30 +697,38 @@ function parseArgs(argv) {
 
 // `baseline` is { entries, isBefore } in range mode and null in every other mode (no baseline there).
 function scan(collected, allowEntries, baseline) {
-    const findings = [], allowed = [], baselined = [], skipped = [];
+    const findings = [], allowed = [], baselined = [], skipped = [], nulFiles = [];
     const baseEntries = baseline ? baseline.entries : [];
     let scanned = 0;
     for (const u of collected.units) {
-        if (u.lines === null) { skipped.push({ path: u.path, commit: u.commit || null, reason: u.binary }); continue; }
-        scanned++;
         const hits = [];
-        if (u.path !== COMMIT_MESSAGE_PATH && credentialFileHit(u.path)) {
-            hits.push({ line: 0, rule: CREDENTIAL_FILE_RULE.id, value: null, lineSha256: sha256(u.path) });
+        // The file name is checked whether or not the content is read: a credential file name
+        // (binary .p12 / .pfx included) and a value used as a path segment are findings (line 0).
+        const nameHits = u.path === COMMIT_MESSAGE_PATH ? [] : scanLine(u.path);
+        const shown = displayPath(u.path, nameHits);
+        if (u.path !== COMMIT_MESSAGE_PATH) {
+            if (credentialFileHit(u.path)) hits.push({ line: 0, rule: CREDENTIAL_FILE_RULE.id, value: null, lineSha256: sha256(u.path) });
+            for (const h of nameHits) hits.push({ line: 0, rule: h.rule, value: h.value, bits: h.bits, lineSha256: sha256(u.path) });
         }
-        for (const ln of u.lines) {
-            for (const h of scanLine(ln.text)) {
-                hits.push({ line: ln.no, rule: h.rule, value: h.value, bits: h.bits, lineSha256: sha256(ln.text) });
+        if (u.lines === null) skipped.push({ path: shown, commit: u.commit || null, reason: u.binary });
+        else {
+            scanned++;
+            if (u.binary === "nul") nulFiles.push({ path: shown, commit: u.commit || null });
+            for (const ln of u.lines) {
+                for (const h of scanLine(ln.text)) {
+                    hits.push({ line: ln.no, rule: h.rule, value: h.value, bits: h.bits, lineSha256: sha256(ln.text) });
+                }
             }
         }
         for (const h of hits) {
+            const short = h.value !== null && h.value.length < REDACT_MIN_LEN_FOR_PREFIX;
             const rec = {
-                commit: u.commit || null, path: u.path, line: h.line, rule: h.rule,
+                commit: u.commit || null, path: shown, line: h.line, rule: h.rule,
                 redacted: h.value === null ? "(tracked credential file name)" : redact(h.value),
-                length: h.value === null ? 0 : h.value.length, lineSha256: h.lineSha256
+                length: h.value === null ? 0 : h.value.length, lineSha256: short ? null : h.lineSha256
             };
             if (h.bits !== undefined) rec.bits = h.bits;
-            const entry = allowEntries.find(e => e.path === rec.path && e.rule === rec.rule && e.lineSha256 === rec.lineSha256);
-            if (entry) { entry.used = true; rec.reason = entry.reason; allowed.push(rec); continue; }
+            // The baseline is checked first: it is scoped to history, the allowlist is not.
             const fp = h.value === null ? null : sha256(h.value);
             const base = fp === null ? undefined : baseEntries.find(e => e.fingerprint === fp && e.rule === rec.rule);
             if (base && baseline.isBefore(rec.commit, base.onlyInHistoryBefore)) {
@@ -647,14 +737,18 @@ function scan(collected, allowEntries, baseline) {
                 baselined.push(rec);
                 continue;
             }
+            const entry = allowEntries.find(e => e.path === u.path && e.rule === rec.rule && e.lineSha256 === h.lineSha256);
+            if (entry) { entry.used = true; rec.reason = entry.reason; allowed.push(rec); continue; }
             // Out of scope: say so, so a re-added revoked value is recognisable. A fingerprint is only
             // ever printed for a value the baseline already names.
             if (base) Object.assign(rec, { fingerprint: fp, baselineOutOfScope: base.incident, onlyInHistoryBefore: base.onlyInHistoryBefore });
             findings.push(rec);
         }
     }
+    // Staleness is judged only for entries whose file the scan read in full. A HEAD scan reads no
+    // commit messages, so it never judges <commit-message> entries.
     const fullSet = collected.full === "all" ? null : new Set(collected.full);
-    const stale = allowEntries.filter(e => !e.used && (fullSet === null || fullSet.has(e.path)))
+    const stale = allowEntries.filter(e => !e.used && (fullSet === null ? e.path !== COMMIT_MESSAGE_PATH : fullSet.has(e.path)))
         .map(e => ({ path: e.path, rule: e.rule, lineSha256: e.lineSha256, reason: e.reason }));
     // A range scan that includes an addedIn commit must have baselined the entry in that commit.
     const scannedCommits = new Set(collected.commits || []);
@@ -665,7 +759,7 @@ function scan(collected, allowEntries, baseline) {
     }
     const order = (a, b) => (a.commit || "").localeCompare(b.commit || "") || a.path.localeCompare(b.path) || a.line - b.line || a.rule.localeCompare(b.rule);
     findings.sort(order); allowed.sort(order); baselined.sort(order);
-    return { scanned, skipped, findings, allowed, baselined, stale, staleBaseline };
+    return { scanned, skipped, nulFiles, findings, allowed, baselined, stale, staleBaseline };
 }
 
 function where(r) {
@@ -683,10 +777,12 @@ function main(argv, cwd = process.cwd()) {
         const entries = loadAllowlist(allowFile, !!o.allowlist).map(e => Object.assign({}, e, { used: false }));
         const baseFile = o.baseline ? path.resolve(cwd, o.baseline) : path.join(root, DEFAULT_BASELINE);
         const baseEntries = loadBaseline(baseFile, !!o.baseline).map(e => Object.assign({}, e, { matchedIn: new Set() }));
-        let baseline = null;
+        let baseline = null, inactive = [];
         if (o.mode === "range") {
-            baseline = { entries: baseEntries, isBefore: ancestryChecker(root) };
-            checkBaselineCommits(root, baseEntries, baseline.isBefore);
+            const isBefore = ancestryChecker(root);
+            const checked = checkBaselineCommits(root, baseEntries, isBefore);
+            baseline = { entries: checked.active, isBefore };
+            inactive = checked.inactive;
         }
         const collected = o.mode === "staged" ? collectStaged(root)
             : o.mode === "range" ? collectRange(root, o.range)
@@ -697,8 +793,9 @@ function main(argv, cwd = process.cwd()) {
         if (o.json) {
             out(JSON.stringify({
                 tool: "scan_secrets", schema: "deus.scan_secrets.v1", mode: o.mode, range: o.range, filesScanned: r.scanned,
-                binarySkipped: r.skipped.length, skipped: r.skipped, findings: r.findings, allowed: r.allowed,
-                baselined: r.baselined, staleAllowlist: r.stale, staleBaseline: r.staleBaseline, exitCode: code
+                binarySkipped: r.skipped.length, skipped: r.skipped, nulFiles: r.nulFiles, findings: r.findings, allowed: r.allowed,
+                baselined: r.baselined, staleAllowlist: r.stale, staleBaseline: r.staleBaseline,
+                baselineInactive: inactive.map(e => ({ fingerprint: e.fingerprint, rule: e.rule, incident: e.incident, missing: e.missing })), exitCode: code
             }, null, 2));
             return code;
         }
@@ -714,10 +811,14 @@ function main(argv, cwd = process.cwd()) {
             out("STALE_BASELINE fingerprint=" + s.fingerprint.slice(0, 12) + " " + s.rule + " incident: " + s.incident +
                 " (not found in addedIn commit " + s.missedIn.map(c => c.slice(0, 12)).join(", ") + ")");
         }
-        for (const s of r.skipped) if (s.reason === "nul") out("SKIPPED_BINARY " + (s.commit ? s.commit.slice(0, 12) + " " : "") + s.path + " (NUL byte)");
-        out("RESULT: " + r.scanned + " files scanned, " + r.skipped.length + " binary skipped, " + r.findings.length + " findings, " +
-            r.allowed.length + " allowed, " + r.baselined.length + " baselined, " + r.stale.length + " stale allowlist entries, " +
-            r.staleBaseline.length + " stale baseline entries");
+        for (const e of inactive) {
+            out("BASELINE_INACTIVE fingerprint=" + e.fingerprint.slice(0, 12) + " " + e.rule + " incident: " + e.incident +
+                " (commit " + e.missing.map(c => c.slice(0, 12)).join(", ") + " not in this clone: the value is not baselined here)");
+        }
+        for (const s of r.nulFiles) out("NUL_FILE " + (s.commit ? s.commit.slice(0, 12) + " " : "") + s.path + " (NUL bytes removed before scanning)");
+        out("RESULT: " + r.scanned + " files scanned (" + r.nulFiles.length + " with NUL bytes), " + r.skipped.length + " binary skipped, " +
+            r.findings.length + " findings, " + r.allowed.length + " allowed, " + r.baselined.length + " baselined, " +
+            r.stale.length + " stale allowlist entries, " + r.staleBaseline.length + " stale baseline entries");
         return code;
     } catch (e) {
         if (!(e instanceof UsageError)) throw e;
@@ -727,8 +828,9 @@ function main(argv, cwd = process.cwd()) {
     }
 }
 
-module.exports = { main, scanLine, shannonBits, redact, credentialFileHit, isBinaryPath, parsePatch, sha256, RULES, ENTROPY_RULE, CREDENTIAL_FILE_RULE,
-                   ENTROPY_MIN_LEN, ENTROPY_MAX_LEN, ENTROPY_MIN_BITS, ENTROPY_HEX_MIN_BITS, ENTROPY_SEQ_RUN, REDACT_KEEP };
+module.exports = { main, scanLine, shannonBits, redact, credentialFileHit, isBinaryPath, parsePatch, sha256, RULES, ENTROPY_RULE, ASSIGN_RULE, CREDENTIAL_FILE_RULE,
+                   ENTROPY_MIN_LEN, ENTROPY_MAX_LEN, ENTROPY_MIN_BITS, ENTROPY_SHORT_MAX_LEN, ENTROPY_SHORT_MIN_BITS, ENTROPY_HEX_MIN_BITS, ENTROPY_SEQ_RUN,
+                   ASSIGN_MIN_LEN, REDACT_KEEP, REDACT_MIN_LEN_FOR_PREFIX };
 
 if (require.main === module) {
     try { process.exitCode = main(process.argv.slice(2)); } catch (e) { process.stderr.write("scan_secrets: internal error: " + (e && e.stack || e) + "\n"); process.exitCode = 2; }
