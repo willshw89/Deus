@@ -70,7 +70,7 @@ function makeRepo(name, layout) {
 }
 
 const SUITES = ["pass", "fail", "hang", "leak", "missing_module", "missing_plugin", "enoent", "type_error", "stdout_only",
-    "stderr_decides", "nw_binary_ref", "harness_runner_ref", "via_helper", "via_spawned_script", "plugin_comment", "guard_evasion"];
+    "stderr_decides", "nw_binary_ref", "harness_runner_ref", "via_helper", "via_spawned_script", "plugin_comment", "guard_evasion", "dotnet_missing_file", "plugin_not_loaded"];
 const sp = n => `tools/test_${n}.js`;
 const NESTED = "tools/sub/test_pass_nested.js";
 const HELPERS = {
@@ -92,7 +92,7 @@ const EXPECT = {
     [sp("enoent")]: "FAIL_MISSING_REFERENCE", [sp("type_error")]: "FAIL_API_DRIFT", [sp("stdout_only")]: "FAIL_MISSING_REFERENCE",
     [sp("stderr_decides")]: "FAIL_OTHER", [sp("nw_binary_ref")]: "NEEDS_NWJS", [sp("harness_runner_ref")]: "NEEDS_NWJS",
     [sp("via_helper")]: "NEEDS_NWJS", [sp("via_spawned_script")]: "NEEDS_NWJS", [sp("plugin_comment")]: "PASS",
-    [sp("guard_evasion")]: "NEEDS_NWJS"
+    [sp("guard_evasion")]: "NEEDS_NWJS", [sp("dotnet_missing_file")]: "FAIL_MISSING_REFERENCE", [sp("plugin_not_loaded")]: "FAIL_MISSING_REFERENCE"
 };
 const STATIC_NW = ["nw_binary_ref", "harness_runner_ref", "via_helper", "via_spawned_script"];
 
@@ -295,7 +295,7 @@ async function censusChecks() {
     const r = await runRunner(["--census", "--root", FULL, "--timeout", "3", "--out", out, "--log-dir", logDir]);
     const doc = readJson(out) || {};
     const rows = new Map((doc.suites || []).map(x => [x.path, x]));
-    check("census_complete_exit_0", r.code === 0 && doc.partial === false && /^CENSUS COMPLETE: 17\/17 measured/m.test(r.out), r.text);
+    check("census_complete_exit_0", r.code === 0 && doc.partial === false && /^CENSUS COMPLETE: 19\/19 measured/m.test(r.out), r.text);
     check("census_rows_are_the_tracked_suites", [...rows.keys()].sort().join(",") === Object.keys(EXPECT).sort().join(","), [...rows.keys()].join(","));
     for (const [p, cat] of Object.entries(EXPECT)) {
         const row = rows.get(p) || {};
@@ -327,15 +327,17 @@ async function censusChecks() {
         && /api\.renamedFunction is not a function/.test(line(sp("type_error")))
         && /^FAIL loads the world: ENOENT/.test(line(sp("stdout_only"))) && stream(sp("stdout_only")) === "stdout"
         && /^Error: assertion failed: expected 4 rooms, got 3$/.test(line(sp("stderr_decides"))) && stream(sp("stderr_decides")) === "stderr"
-        && line(sp("fail")) === "FAIL second_check: expected 2, got 3", JSON.stringify([...rows.values()].map(x => [x.path, x.errorStream, x.firstErrorLine])));
+        && line(sp("fail")) === "FAIL second_check: expected 2, got 3"
+        && /FullyQualifiedErrorId : FileNotFoundException$/.test(line(sp("dotnet_missing_file")))
+        && /must be loaded before New Game$/.test(line(sp("plugin_not_loaded"))),JSON.stringify([...rows.values()].map(x => [x.path, x.errorStream, x.firstErrorLine])));
     const bad = [...rows.values()].filter(x => !("exitCode" in x) || !("ms" in x) || (x.category === "PASS") !== (x.firstErrorLine === null));
-    check("census_row_fields", rows.size === 17 && bad.length === 0, JSON.stringify(bad));
+    check("census_row_fields", rows.size === 19 && bad.length === 0, JSON.stringify(bad));
     check("census_gate_flag", [...rows.values()].every(x => x.gate === (x.path === sp("pass") || x.path === NESTED)), "");
     check("census_lines_hide_root_path", ![...rows.values()].some(x => x.firstErrorLine && x.firstErrorLine.toLowerCase().includes(FULL.toLowerCase()))
         && /<root>/.test(line(sp("enoent"))), line(sp("enoent")));
     let logs = [];
     try { logs = fs.readdirSync(logDir); } catch (_) { /* none */ }
-    check("census_log_dir_one_log_per_run_suite", logs.length === 17 - STATIC_NW.length && logs.includes("tools__test_fail.js.log"), logs.join(","));
+    check("census_log_dir_one_log_per_run_suite", logs.length === 19 - STATIC_NW.length && logs.includes("tools__test_fail.js.log"), logs.join(","));
 
     const outDefault = outFile("defaults");
     const rd = await runRunner(["--census", "--root", FULL, "--suite", sp("pass"), "--out", outDefault]);

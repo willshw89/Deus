@@ -43,8 +43,11 @@
  *   FAIL_MISSING_REFERENCE   "Cannot find module '<...>/js/plugins/<...>'" (a missing plugin)
  *   FAIL_MISSING_DEPENDENCY  "Cannot find module", MODULE_NOT_FOUND, ERR_MODULE_NOT_FOUND (a module or local file the
  *                            suite requires); "spawn <program> ENOENT" (a missing program)
- *   FAIL_MISSING_REFERENCE   ENOENT or "no such file or directory" (a data, fixture or asset path); "plugin ...
- *                            missing / not found / not registered", "missing plugin", "unknown plugin"
+ *   FAIL_MISSING_REFERENCE   ENOENT, "no such file or directory", .NET FileNotFoundException /
+ *                            DirectoryNotFoundException / "Could not find file|a part of the path" (a data, fixture or
+ *                            asset path, also when a suite loads it through PowerShell); "plugin ... missing / not
+ *                            found / not registered", "missing plugin", "unknown plugin", "must be loaded" (a plugin
+ *                            reports that plugins it needs were not loaded)
  *   FAIL_API_DRIFT           TypeError, "is not a function", "is not a constructor", "Cannot read/set properties of
  *                            undefined/null", "is not iterable". The census cannot tell whether the undefined value
  *                            came from a project module or from the suite's own code; OPS.30.04 triage decides.
@@ -132,8 +135,8 @@ const RULES = [
     { id: "missing_plugin_module", category: "FAIL_MISSING_REFERENCE", re: /Cannot find module ['"][^'"]*[\\/]js[\\/]plugins[\\/]/i },
     { id: "module_not_found", category: "FAIL_MISSING_DEPENDENCY", re: /\bCannot find module\b|\bMODULE_NOT_FOUND\b|\bERR_MODULE_NOT_FOUND\b/ },
     { id: "missing_program", category: "FAIL_MISSING_DEPENDENCY", re: /\bspawn(?:Sync)? \S+ ENOENT\b/ },
-    { id: "enoent", category: "FAIL_MISSING_REFERENCE", re: /\bENOENT\b|no such file or directory/i },
-    { id: "missing_plugin", category: "FAIL_MISSING_REFERENCE", re: /\bplugin\b[^.]{0,80}\b(?:missing|not found|not registered)\b|\b(?:missing|unknown) plugin\b/i },
+    { id: "enoent", category: "FAIL_MISSING_REFERENCE", re: /\bENOENT\b|no such file or directory|\b(?:FileNotFound|DirectoryNotFound)Exception\b|\bCould not find (?:file|a part of the path)\b/i },
+    { id: "missing_plugin", category: "FAIL_MISSING_REFERENCE", re: /\bplugin\b[^.]{0,80}\b(?:missing|not found|not registered)\b|\b(?:missing|unknown) plugin\b|\bmust be loaded\b/i },
     { id: "api_drift", category: "FAIL_API_DRIFT", re: /\bTypeError\b|\bis not a function\b|\bis not a constructor\b|\bCannot (?:read|set) propert(?:y|ies) of (?:undefined|null)\b|\bis not iterable\b/ }
 ];
 

@@ -1,0 +1,14 @@
+$ node tools/ops/run_gate.js --root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gate   (runner at 7c38950effd94977b4b3f7bc6ddd2d471460a319)
+run_gate: gate mode, 9 suites from C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gate\tools\ops\gate_tests.json, root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gate, HEAD 425b594c146d5f353c10faa11f4b5d47f499b45f, timeout 600 s each, one at a time
+GATE tools/check_deus_syntax.js EXIT=0 4055ms
+GATE tools/test_palette.js EXIT=0 58ms
+GATE tools/governance/test_check_claims.js EXIT=0 139032ms
+GATE tools/test_strata_cuts_and_caves.js EXIT=0 177523ms
+GATE tools/test_new_game_year0.js EXIT=0 18208ms
+GATE tools/test_history_materialization_and_world_age.js EXIT=0 106214ms
+GATE tools/test_historical_carrying_capacity.js EXIT=0 20218ms
+GATE tools/test_geology_strata.js EXIT=0 17936ms
+GATE tools/test_strata_foundation.js EXIT=0 93123ms
+LEFTOVERS: none
+RESULT: 9 passed, 0 failed
+EXIT=0
