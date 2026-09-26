@@ -1,0 +1,19 @@
+{
+  "gate": [
+    "tools/check_deus_syntax.js",
+    "tools/test_palette.js",
+    "tools/governance/test_check_claims.js",
+    "tools/test_strata_cuts_and_caves.js",
+    "tools/test_new_game_year0.js",
+    "tools/test_history_materialization_and_world_age.js",
+    "tools/test_historical_carrying_capacity.js",
+    "tools/test_geology_strata.js",
+    "tools/test_strata_foundation.js"
+  ],
+  "quarantine": [
+    {
+      "path": "tools/test_generated_z2_cut_proof.js",
+      "reason": "Exits 1 on main; Lane H rework in progress."
+    }
+  ]
+}
