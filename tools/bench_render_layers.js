@@ -43,7 +43,11 @@ if (dirty && !rev && !args.includes("--allow-dirty")) {
 }
 const outDir = path.join(root, "tasks", "WG.00.09b", "lane-k", "perf");
 fs.mkdirSync(outDir, { recursive: true });
-const outFile = path.join(outDir, `${scenario === "stress" ? "stress_baseline" : "baseline"}_${sha8}${dirty && !rev ? "_dirty" : ""}.json`);
+// An existing result is never overwritten (a diagnostic run once replaced a two-run baseline): the next free _<n> suffix is
+// used instead, unless --force.
+const outBase = path.join(outDir, `${scenario === "stress" ? "stress_baseline" : "baseline"}_${sha8}${dirty && !rev ? "_dirty" : ""}`);
+let outFile = `${outBase}.json`;
+for (let n = 2; fs.existsSync(outFile) && !args.includes("--force"); n++) outFile = `${outBase}_${n}.json`;
 
 //-----------------------------------------------------------------------------
 // The in-engine plugin (written into the snapshot copy only).
@@ -163,6 +167,14 @@ const PLUGIN = String.raw`//====================================================
             tryWrap(P, "render", "render.depth");
             const plane = r.planes && r.planes[0];
             if (plane && plane._tilemap) tryWrap(Object.getPrototypeOf(plane._tilemap), "_addAllSpots", "paint.depth_planes");
+            // The parts of the depth root's frame (names that do not exist in an older revision are skipped).
+            for (const n of ["scanUnits", "updateMask", "updateUnits"]) tryWrap(P, n, "depth.root." + n);
+            if (plane) {
+                const PP = Object.getPrototypeOf(plane);
+                for (const n of ["updatePlane", "updateEntities", "placeEntities", "placeUnits", "sortEntities", "rebuildItems", "rebuildWalls", "rebuildUnits"]) tryWrap(PP, n, "depth.plane." + n);
+                if (plane._objectLayer) tryWrap(Object.getPrototypeOf(plane._objectLayer), "update", "depth.plane.objectLayer");
+                if (plane._tilemap) { const TP = Object.getPrototypeOf(plane._tilemap); tryWrap(TP, "updateTransform", "depth.plane.tilemapTransform"); }
+            }
         }
         const mm = scene && scene._deusMinimap;
         if (mm) {

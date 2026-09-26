@@ -81,6 +81,7 @@ class MockSprite {
         this.y = 0;
     }
     addChild(c) { this.children.push(c); }
+    update() {}
 }
 global.Sprite = MockSprite;
 
@@ -270,6 +271,28 @@ check("tab_samples_its_own_level", same(onZ0, STONE_WALL) && !!onZm1 && !same(on
     `(60,60): Z0 tab ${onZ0 ? onZ0.join(",") : "not drawn"} (want the wall ${STONE_WALL.join(",")}); -1 tab ${onZm1 ? onZm1.join(",") : "not drawn"} (want the -1 rock ${SOLID_WALL.join(",")}, never Z0's wall)`);
 UF.Objects.atIn = atInBefore;
 MockContext.prototype.putImageData = putBefore;
+
+// Scenario J (WG.00.09b K4): the overlay (every unit of the world and a texture upload) is redrawn at most every 4 updates
+// while the view is still, and at once when the camera moves (the old sprite redrew it on every update).
+const hudScene = new MockScene_Map();
+hudScene.addChild = () => {};
+hudScene.createDeusMinimap();
+const hud = hudScene._deusMinimap;
+let redraws = 0;
+const redrawInner = hud.updateOverlay;
+hud.updateOverlay = function() { redraws++; return redrawInner.call(this); };
+$gameMap.displayX = () => 40;
+$gameMap.displayY = () => 40;
+hud.update();
+redraws = 0;
+for (let i = 0; i < 12; i++) hud.update();
+const stillRedraws = redraws;
+redraws = 0;
+$gameMap.displayX = () => 41;
+hud.update();
+const moveRedraws = redraws;
+check("overlay_throttled", stillRedraws >= 2 && stillRedraws <= 3 && moveRedraws === 1,
+    `12 updates with a still camera redrew the overlay ${stillRedraws} time(s) (want 2-3, every 4th update); a camera move redrew it ${moveRedraws} time(s) in that update (want 1)`);
 
 // Test negative / mutant fixtures
 Minimap.invalidate(-10, -50, 0);

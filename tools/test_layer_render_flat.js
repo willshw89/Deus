@@ -27,8 +27,8 @@ const only = (opt("--only", "") || "").split(",").map(s => s.trim()).filter(Bool
 // The checks each suite must pass, and the ones that have a provocation (UF_TEST_PROVOKE=depth.<name>) in DEUS_Depth.js.
 const SUITES = {
     layers_flat: {
-        required: ["preconditions", "fixtures", "flat_position", "flat_crisp", "unit_step_same_frame", "every_view_sees_through", "flat_no_filters", "switch_same_frame", "screenshots_written", "no_errors"],
-        provocable: ["flat_no_filters", "flat_position", "flat_crisp", "switch_same_frame", "unit_step_same_frame", "every_view_sees_through"]
+        required: ["preconditions", "fixtures", "flat_position", "flat_crisp", "unit_step_same_frame", "scan_candidates_only", "item_change_scoped", "every_view_sees_through", "flat_no_filters", "switch_same_frame", "screenshots_written", "no_errors"],
+        provocable: ["flat_no_filters", "flat_position", "flat_crisp", "switch_same_frame", "unit_step_same_frame", "every_view_sees_through", "scan_candidates_only", "item_change_scoped"]
     },
     depth: {
         required: ["preconditions", "proof_scene", "planes_present", "repaint_cost", "projection_origin", "exposure_by_upper_geometry", "mask_order",

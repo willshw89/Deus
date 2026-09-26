@@ -113,8 +113,10 @@
 
     const stats = {
         rebuilds: 0, paints: 0, lastPaintMs: 0, peeks: 0, lastPeekMs: 0, layersAlive: 0, canvasesMade: 0, canvasesDestroyed: 0,
-        updates: 0, lastUpdateMs: 0, unitSteps: 0, preloads: 0, mainRepaints: 0
+        updates: 0, lastUpdateMs: 0, unitSteps: 0, preloads: 0, mainRepaints: 0,
+        unitsScanned: 0, candidateRebuilds: 0, entityRebuilds: 0, itemRebuilds: 0, itemDirties: 0, objectDirties: 0
     };
+    let unitPlaceStamp = 0; // moves when a unit changes level or area (world:unitLevelChanged / world:unitAreaChanged)
 
     //-------------------------------------------------------------------------
     // The planes' canvases outlive a spriteset (K2 d). A level switch is a map transfer: the old Scene_Map is terminated
@@ -620,8 +622,14 @@
             this._winDx = win.dx;
             this._winDy = win.dy;
             this._entityDirty = false;
+            this._itemsDirty = false;
             this.rebuildItems(win);
             this.rebuildWalls(Levels(), win);
+            stats.entityRebuilds++;
+        } else if (this._itemsDirty) { // an item of this level changed: its item sprites only (K4: never the walls or the objects)
+            this._itemsDirty = false;
+            this.rebuildItems(win);
+            stats.itemRebuilds++;
         }
         if (this._objectLayer) this._objectLayer.update();
         this.placeEntities();
@@ -844,6 +852,11 @@
         this._win = {};
         this._frames = 0;
         this._released = false;
+        this._lateSeen = false;    // Scene_Map runs lateUpdate: the spriteset's update leaves the units to it
+        this._cands = [];          // the units on the bound planes' levels (K4), made from this._candsOf
+        this._candsOf = null;
+        this._candsStamp = -1;
+        this._candsFrame = -Infinity;
         this.rebuild();
     };
     Sprite_DepthRoot.prototype.destroy = function() {
@@ -870,6 +883,7 @@
         this.seeThrough = false;
         this._viewCells = null;
         this._maskX = NaN; // the mask is rebuilt on the next frame
+        this._candsOf = null; // and the unit candidates
         if (v && L && W.state && config.enabled && config.maxDepth >= 1 && !this._released && !provoked("planes_present")) {
             const cells = openCells(v.x, v.y, v.z);
             if (config.exposes(v.z) && cells.open > 0) {
@@ -927,7 +941,7 @@
             p.visible = true;
             p.updatePlane(viewOx, viewOy, win, simNow);
         }
-        if (withUnits) this.updateUnits(W, win, simNow);
+        if (withUnits && !this._lateSeen) this.updateUnits(W, win, simNow); // once a frame: lateUpdate does it in Scene_Map (K4)
         stats.updates++;
         stats.lastUpdateMs = performance.now() - t0;
     };
@@ -936,6 +950,7 @@
      *  this frame were placed with, so a scroll in the map update cannot shift them off their cells. */
     Sprite_DepthRoot.prototype.lateUpdate = function() {
         if (this._released || !this.seeThrough || !this._camSet || !window.$gameMap) return;
+        this._lateSeen = true;
         const t0 = performance.now();
         const W = World();
         this.updateUnits(W, this._win, W._frame | 0);
@@ -987,17 +1002,41 @@
         if (a) a.beginScan();
         if (b) b.beginScan();
         if (config.entities.units && W.units && !provoked("entities_drawn")) {
-            const all = W.units(), size = W.state.size;
-            for (let i = 0; i < all.length; i++) {
-                const u = all[i];
+            const cands = this.unitCandidates(W, a, b), size = W.state.size;
+            for (let i = 0; i < cands.length; i++) {
+                const u = cands[i];
                 if (!u || !u.area || (u.data && (u.data.dead || u.data.hidden))) continue;
                 const uz = u.z !== undefined ? u.z : 0;
                 if (a && uz === a.level.z && u.area.x === a.level.x && u.area.y === a.level.y) a.seeUnit(u, win, size, simNow);
                 else if (b && uz === b.level.z && u.area.x === b.level.x && u.area.y === b.level.y) b.seeUnit(u, win, size, simNow);
             }
+            stats.unitsScanned = cands.length;
         }
         if (a) a.endScan();
         if (b) b.endScan();
+    };
+    /** The units that can be on a bound plane (K4): made from the world's list when that list changes (a unit added or
+     *  removed makes a new array), when a unit changes level or area, when the planes are bound again, and at least once a
+     *  second as a safety net. Each frame then tests these units only, not every unit of the world. */
+    const CANDIDATE_REFRESH_FRAMES = 60;
+    Sprite_DepthRoot.prototype.unitCandidates = function(W, a, b) {
+        const all = W.units();
+        if (provoked("scan_candidates_only")) return all; // the provocation: every unit of the world, every frame
+        if (all !== this._candsOf || this._candsStamp !== unitPlaceStamp || this._frames - this._candsFrame >= CANDIDATE_REFRESH_FRAMES) {
+            const c = this._cands;
+            c.length = 0;
+            for (let i = 0; i < all.length; i++) {
+                const u = all[i];
+                if (!u || !u.area) continue;
+                const uz = u.z !== undefined ? u.z : 0;
+                if ((a && uz === a.level.z && u.area.x === a.level.x && u.area.y === a.level.y) || (b && uz === b.level.z && u.area.x === b.level.x && u.area.y === b.level.y)) c.push(u);
+            }
+            this._candsOf = all;
+            this._candsStamp = unitPlaceStamp;
+            this._candsFrame = this._frames;
+            stats.candidateRebuilds++;
+        }
+        return this._cands;
     };
     /** A level's tiles changed: repaint its plane. If the peek cache evicted the plane's build meanwhile (the change
      *  went into a newer build), read the level again first. Never per frame: a re-read can be a synchronous build. */
@@ -1011,9 +1050,22 @@
             p.refresh();
         }
     };
-    /** A level's objects or items changed: its plane re-reads its entities on the next frame. */
-    Sprite_DepthRoot.prototype.dirtyEntities = function(z) {
-        for (const p of this.planes) if (p.level && (z === undefined || p.level.z === z)) { p._entityDirty = true; if (p._objectLayer) p._objectLayer.markDirty(false); }
+    /** A level's objects changed: its plane's object layer rebuilds on the next frame. */
+    Sprite_DepthRoot.prototype.dirtyObjects = function(z) {
+        for (const p of this.planes) if (p.level && (z === undefined || p.level.z === z) && p._objectLayer) { p._objectLayer.markDirty(false); stats.objectDirties++; }
+    };
+    /** An item changed (UF_Items items:changed): only the item sprites of a plane re-read, and only when the item is on the
+     *  ground of that plane's level or was drawn there. A held or contained item (an arrow shot, a meal eaten) touches no
+     *  plane. K4: combat fired this for every arrow and rebuilt every plane's walls and objects each frame. */
+    Sprite_DepthRoot.prototype.itemChanged = function(item) {
+        if (this._released) return;
+        const onGround = !!item && !!item.area && (item.holder === null || item.holder === undefined) && (item.container === null || item.container === undefined);
+        for (const p of this.planes) {
+            if (!p.level) continue;
+            if (provoked("item_change_scoped")) { p._entityDirty = true; if (p._objectLayer) p._objectLayer.markDirty(false); continue; } // the old storm
+            const here = onGround && item.area.x === p.level.x && item.area.y === p.level.y && (item.z || 0) === p.level.z;
+            if (here || (item && p._items.has(item.id))) { p._itemsDirty = true; stats.itemDirties++; }
+        }
     };
     /** A cell's shape changed: the plane of its level repaints (its open cells changed), and so does the map on screen when
      *  the cell is on the viewed level (the cells it leaves unpainted changed). */
@@ -1058,7 +1110,7 @@
     const _Spriteset_Map_updateTilemap = Spriteset_Map.prototype.updateTilemap;
     Spriteset_Map.prototype.updateTilemap = function() {
         _Spriteset_Map_updateTilemap.call(this);
-        if (this._ufDepth) this._ufDepth.update(!(SceneManager._scene instanceof Scene_Map && SceneManager._scene._spriteset === this));
+        if (this._ufDepth) this._ufDepth.update(); // the units wait for lateUpdate once Scene_Map has run one
     };
     // RMMZ updates the spriteset before the map (Scene_Map.update), so the units of the lower levels are updated again after it.
     const _Scene_Map_update = Scene_Map.prototype.update;
@@ -1094,9 +1146,13 @@
         E.on("world:areaBuilt", () => { const r = rootOf(); if (r) r.rebuild(); });
         E.on("world:created", () => { shapesReset(); sheets.clear(); });
         // The lower levels' objects (per level or the ground) and items. Units need no event: they are checked every frame.
-        E.on("objects:levelChanged", lv => { const r = rootOf(); if (r) r.dirtyEntities(lv && lv.z); });
-        E.on("objects:changed", () => { const r = rootOf(); if (r) r.dirtyEntities(0); });
-        E.on("items:changed", () => { const r = rootOf(); if (r) r.dirtyEntities(); });
+        E.on("objects:levelChanged", lv => { const r = rootOf(); if (r) r.dirtyObjects(lv && lv.z); });
+        E.on("objects:changed", () => { const r = rootOf(); if (r) r.dirtyObjects(0); });
+        E.on("items:changed", item => { const r = rootOf(); if (r) r.itemChanged(item); });
+        // A unit that changes level or area may join or leave a plane's level: the unit candidates are made again (K4).
+        const moved = u => { unitPlaceStamp++; preloadSheet(u && u.image); };
+        E.on("world:unitLevelChanged", moved);
+        E.on("world:unitAreaChanged", moved);
         // A new unit's sheet starts loading at once, wherever it is (K2 c).
         E.on("world:unitAdded", u => preloadSheet(u && u.image));
         E.on("world:unitImageChanged", u => preloadSheet(u && u.image));
@@ -1131,6 +1187,7 @@
                 rebuilds: stats.rebuilds, paints: stats.paints, lastPaintMs: stats.lastPaintMs, peeks: stats.peeks, lastPeekMs: stats.lastPeekMs,
                 layersAlive: stats.layersAlive, canvasesMade: stats.canvasesMade, canvasesDestroyed: stats.canvasesDestroyed, pooled: canvasPool.length,
                 updates: stats.updates, lastUpdateMs: stats.lastUpdateMs, unitSteps: stats.unitSteps, preloads: stats.preloads, mainRepaints: stats.mainRepaints,
+                unitsScanned: stats.unitsScanned, candidateRebuilds: stats.candidateRebuilds, entityRebuilds: stats.entityRebuilds, itemRebuilds: stats.itemRebuilds, itemDirties: stats.itemDirties, objectDirties: stats.objectDirties,
                 planes: r ? r.planes.map(p => ({
                     depth: p.depth, z: p.level ? p.level.z : null, visible: p.visible, scale: p.scale.x, x: p.x, y: p.y, alpha: p.alpha,
                     paints: p._tilemap ? p._tilemap.paints : 0, water: p._tilemap ? p._tilemap.hasWater() : false,
@@ -1826,6 +1883,32 @@
             UF.Events.off("world:unitMoved", onMoved);
             W.stopUnit(unitE.id);
             t.check("unit_step_same_frame", stepOk && enterOk, `${stepDetail}; unit E ${outside ? "outside the window" : "ALREADY TRACKED"} at x ${wrapCell(win.x1 + 1, size)}, stepped to (${mE.x},${mE.y}) in frame ${mE.frame}: sprite ${sE ? `made in frame ${sE._ufTargetFrame}` : "NOT made"}`);
+
+            // K4: the per-frame unit check tests only the units on the planes' levels (a candidate list), not every unit of the world.
+            await t.waitFrames(2);
+            const rootK4 = D.root(), sK4 = D.stats(), allUnits = W.units();
+            const onPlanes = allUnits.filter(u => u && u.area && rootK4.planes.some(p => p.level && (u.z || 0) === p.level.z && u.area.x === p.level.x && u.area.y === p.level.y)).length;
+            t.check("scan_candidates_only", sK4.unitsScanned === onPlanes && (allUnits.length === onPlanes || sK4.unitsScanned < allUnits.length),
+                `${sK4.unitsScanned} unit(s) tested per frame; ${onPlanes} on the planes' levels, ${allUnits.length} in the world; candidate lists made ${sK4.candidateRebuilds} time(s) since boot`);
+            // K4: an item change touches only the item sprites of the plane whose level holds the item; a held item touches nothing
+            // (combat used to rebuild every plane's walls and objects for every arrow shot).
+            const Items = window.UF.Items;
+            const itemType = ["stone", "oak_log", "log", "wood", "berries", "rations"].find(id => Items && Items.type && Items.type(id) && Items.type(id).image) || null;
+            const flagsOf = () => D.root().planes.map(p => ({ items: !!p._itemsDirty, all: !!p._entityDirty, objects: !!(p._objectLayer && p._objectLayer._dirty) }));
+            let heldOk = false, groundOk = false, detailIC = "no item type or unit A";
+            if (Items && itemType && unitA && D.root().planes[0].level) {
+                const f0 = flagsOf();
+                const given = Items.give(itemType, 1, unitA.id);
+                const f1 = flagsOf();
+                heldOk = !!given && JSON.stringify(f1) === JSON.stringify(f0);
+                const lvA = { x: area.x, y: area.y, z: D.root().planes[0].level.z };
+                const made = Items.create(itemType, 1, { area: lvA, x: unitA.x, y: unitA.y });
+                const f2 = flagsOf();
+                groundOk = !!made && f2[0].items && f2[0].all === f0[0].all && f2[0].objects === f0[0].objects && f2[1].items === f0[1].items && f2[1].all === f0[1].all && f2[1].objects === f0[1].objects;
+                detailIC = `before ${JSON.stringify(f0)}; a ${itemType} given to unit A (held): ${JSON.stringify(f1)}; a ${itemType} on the ground of level ${lvA.z} at (${unitA.x},${unitA.y}): ${JSON.stringify(f2)}`;
+                await t.waitFrames(2);
+            }
+            t.check("item_change_scoped", heldOk && groundOk, detailIC);
 
             // Every view sees through its open cells (Owner 2026-09-25 23:52 CT): on +2, +1, the ground and -1, an open cell of the
             // viewed level is not painted by the map on screen (the tile render there equals the planes' own render), and a cell

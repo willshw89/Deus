@@ -58,6 +58,7 @@
     const TOTAL_CHUNKS = 256;
     const Z_LEVELS = [2, 1, 0, -1, -2];
     const Z_COUNT = 5;
+    const OVERLAY_FRAMES = 4; // the unit/project/connector overlay is redrawn at most every 4 updates (15 Hz) unless the view changed
 
     // Categorical Information-Graphic Palette (Hex to RGBA)
     const PALETTE = {
@@ -630,8 +631,18 @@
                 this._baseSprite.bitmap = baseBmp;
             }
 
-            // Update dynamic overlay
-            this.updateOverlay();
+            // Update dynamic overlay: at most every OVERLAY_FRAMES updates, and at once when the view rectangle, the tab or the
+            // panel state changed (WG.00.09b K4: every frame it walked every unit of the world and uploaded its texture).
+            this._overlayAge = (this._overlayAge || 0) + 1;
+            const vx = window.$gameMap ? Math.floor($gameMap.displayX() * 2) : 0, vy = window.$gameMap ? Math.floor($gameMap.displayY() * 2) : 0;
+            if (this._overlayAge >= OVERLAY_FRAMES || vx !== this._overlayVx || vy !== this._overlayVy || Minimap.activeZ !== this._overlayZ || Minimap.expanded !== this._overlayOpen) {
+                this._overlayAge = 0;
+                this._overlayVx = vx;
+                this._overlayVy = vy;
+                this._overlayZ = Minimap.activeZ;
+                this._overlayOpen = Minimap.expanded;
+                this.updateOverlay();
+            }
 
             // Process touch / click navigation
             this.handleInput();
