@@ -1,0 +1,71 @@
+$ node tasks/WG.00.09b/lane-k/perf/rank_k4.js baseline_eb446e06.json stress_baseline_eb446e06.json   (run in perf/)
+Profiled windows:
+  normal#1:steady_+2: 90 updates, 3635.2 ms wall, 7354 samples
+  normal#1:steady_+1: 90 updates, 3231.4 ms wall, 6501 samples
+  normal#1:steady_Ground: 90 updates, 5288.4 ms wall, 10706 samples
+  normal#1:steady_-1: 90 updates, 5335 ms wall, 10821 samples
+  normal#2:steady_+2: 91 updates, 3059.2 ms wall, 6103 samples
+  normal#2:steady_+1: 90 updates, 3631.7 ms wall, 7139 samples
+  normal#2:steady_Ground: 90 updates, 4435.2 ms wall, 8800 samples
+  normal#2:steady_-1: 90 updates, 4616.3 ms wall, 9551 samples
+  stress#1:stress_day: 120 updates, 7164.9 ms wall, 14637 samples
+  stress#1:stress_night: 120 updates, 7385.7 ms wall, 14874 samples
+  stress#2:stress_day: 120 updates, 8918.1 ms wall, 17990 samples
+  stress#2:stress_night: 120 updates, 7723.8 ms wall, 15222 samples
+
+A. CPU ms per simulation update (V8 sampling profile, 500 us), ranked by the worst window. 'n/a': below the stored top-60 inclusive list.
+    47.56 worst   27.79 mean (12 windows)  Environment wetness/thermal -> Floors.isRoofed/roomAt/computeRoom -> Objects.atIn  [DEUS_Environment + DEUS_Floors + DEUS_Objects (forbidden)]
+    44.45 worst   28.37 mean (12 windows)  DEUS_Objects.js self  [DEUS_Objects (forbidden)]
+    17.95 worst    9.64 mean (12 windows)  DEUS_World.js self  [DEUS_World (forbidden)]
+    15.14 worst    9.49 mean (7 windows)  Colonists scan/decide  [DEUS_Colonists (forbidden)]
+    11.20 worst   11.20 mean (1 windows)    of which hazard reflex -> Jobs.safeCellNear -> standableIn -> World.walkable  [DEUS_Colonists + DEUS_Jobs + DEUS_World (forbidden)]
+     4.97 worst    2.81 mean (12 windows)  DEUS_Floors.js self  [DEUS_Floors (forbidden)]
+     4.56 worst    2.31 mean (12 windows)  Garbage collector  [(engine)]
+     3.03 worst    1.45 mean (12 windows)  Synchronous log writes (fs open/write/close: DEUS_Core UF.Events.emit, one line per world:* listener)  [DEUS_Core (forbidden)]
+     2.72 worst    0.86 mean (12 windows)  Effekseer (wasm)  [RMMZ libs (read-only)]
+     2.33 worst    1.23 mean (12 windows)  DEUS_Jobs.js self  [DEUS_Jobs (forbidden)]
+     1.64 worst    0.72 mean (12 windows)  pixi.js self  [PIXI (read-only)]
+     0.45 worst    0.27 mean (12 windows)  DEUS_Depth.js self  [DEUS_Depth (lane K)]
+     0.07 worst    0.02 mean (12 windows)  DEUS_Minimap.js self  [DEUS_Minimap (lane K)]
+    (n/a) worst   (n/a) mean (0 windows)  World.update (unit stepping, paths)  [DEUS_World (forbidden)]
+     0.00 worst    0.00 mean (12 windows)  DEUS_Fog.js self  [DEUS_Fog (lane K, only if ranked)]
+     0.00 worst    0.00 mean (12 windows)  DEUS_DayNight.js self  [DEUS_DayNight (lane K, only if ranked)]
+
+B. Wrapped parts, median ms per engine tick in each steady/stress window, ranked by the worst window:
+    99.790 worst   62.317 mean  update
+    89.330 worst   57.145 mean  update.map
+     8.890 worst    5.086 mean  update.map.world
+     5.230 worst    2.575 mean  events
+     4.755 worst    2.250 mean  render
+     4.165 worst    1.912 mean  update.spriteset
+     0.910 worst    0.788 mean  bench.driver
+     0.730 worst    0.400 mean  update.depth_late  [lane K]
+     0.720 worst    0.392 mean  depth.root.updateUnits
+     0.590 worst    0.174 mean  render.characters
+     0.585 worst    0.393 mean  update.spriteset.tilemap.depth  [lane K]
+     0.555 worst    0.212 mean  update.characters
+     0.540 worst    0.369 mean  depth.plane.updatePlane
+     0.465 worst    0.320 mean  depth.plane.updateEntities
+     0.455 worst    0.150 mean  update.minimap  [lane K]
+     0.425 worst    0.111 mean  update.minimap.overlay  [lane K]
+     0.420 worst    0.248 mean  depth.root.scanUnits
+     0.345 worst    0.246 mean  depth.plane.objectLayer
+     0.255 worst    0.151 mean  update.spriteset.tilemap
+     0.225 worst    0.169 mean  render.tilemap_layers
+     0.200 worst    0.142 mean  render.depth  [lane K]
+     0.190 worst    0.064 mean  depth.plane.placeUnits
+     0.105 worst    0.065 mean  depth.plane.sortEntities
+     0.100 worst    0.058 mean  depth.plane.placeEntities
+     0.040 worst    0.027 mean  depth.plane.tilemapTransform
+     0.010 worst    0.005 mean  depth.root.updateMask
+     0.010 worst    0.009 mean  update.minimap.chunks  [lane K]
+     0.005 worst    0.005 mean  render.minimap  [lane K]
+     0.005 worst    0.002 mean  update.daynight_glow  [lane K]
+     0.005 worst    0.003 mean  update.fog  [lane K]
+     0.000 worst    0.000 mean  depth.plane.rebuildItems
+     0.000 worst    0.000 mean  depth.plane.rebuildWalls
+     0.000 worst    0.000 mean  paint.tilemaps
+     0.000 worst    0.000 mean  render.daynight_glow  [lane K]
+     0.000 worst    0.000 mean  render.fog  [lane K]
+     0.000 worst    0.000 mean  update.fog.refresh  [lane K]
+EXIT=0

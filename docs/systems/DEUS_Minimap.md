@@ -2,6 +2,7 @@
 
 **Plugin:** `game/js/plugins/DEUS_Minimap.js`  
 **Compatibility Shim:** `game/js/plugins/UF_Minimap.js`  
+**Loaded by:** `DEUS_Camera.js` (`PluginManager.loadScript("DEUS_Minimap")`); it is not listed in `plugins.js`.  
 **Automated Tests:** `tools/test_minimap.js`, in-engine suite `minimap` (`tools/run_tests.js minimap`)  
 **Active Milestone:** TASK UI-MAP-01 (Command, Combat, and Incarnate modes across all 5 Z-levels)  
 
@@ -79,7 +80,7 @@ The minimap base terrain is **not** redrawn every frame. It uses a **two-tier re
                            │ Only dirty chunks rebuilt
                            ▼
 ┌────────────────────────────────────────────────────────┐
-│  Tier 2: Dynamic Marker Overlay (Updated per Frame)    │
+│  Tier 2: Dynamic Marker Overlay (every 4th update)     │
 │  - Friendly unit pips                                  │
 │  - Spotted hostile markers                             │
 │  - Active project outlines                             │
@@ -94,6 +95,27 @@ The minimap base terrain is **not** redrawn every frame. It uses a **two-tier re
 - Rebuilding 1 chunk takes $< 0.05\text{ ms}$ (updating 256 pixels of `ImageData`).
 - During live gameplay without structural changes, **0 chunks are dirty**, resulting in exactly **0.000 ms** base redraw cost.
 - Camera panning, tree swaying, unit movement, and cosmetic VFX never dirty the base terrain cache.
+
+### One base bitmap per Z; tab switches (WG.00.09b K2, 2026-09-26)
+- Each Z tab keeps its own base bitmap and dirty set (`mapKey(z)`, keyed by area and Z). The first visit of a tab builds it: `ensureBaseBitmap` dirties all 256 chunks once, and `processDirty(8)` repaints 8 chunks a frame.
+- Switching back to a tab that is already built re-dirties nothing. Cell changes made while another tab was shown have already dirtied only their own chunks on that tab. Before K2 the `activeZ` setter dirtied all 256 chunks on every switch, which meant 32 frames of repainting each time.
+- `sampleCell(x, y, z)` reads the tab's own level (`{ x, y, z }` of the area on screen):
+  - Objects come from `UF.Objects.atIn` on level z.
+  - A level other than the ground shows solid rock as `SOLID_WALL`, open air on +1/+2 as `UNKNOWN` (nothing there), and any other cell as a stone floor (`ROCK`).
+  - The ground's kinds are read for Z0 only.
+  - Before K2 every tab read the objects and ground of the level on screen, so a non-current tab could show that level's walls.
+- Tier 2 (`updateOverlay`) walks every unit of the world, draws the markers and uploads the overlay texture. Since WG.00.09b K4 it runs at most every 4th update (`OVERLAY_FRAMES`, 15 Hz), and at once when the view rectangle (in half cells), the tab or the panel state changes.
+- Measured by `tools/bench_render_layers.js`, median of per-tick means over 2 runs each: Ground view 1.14 → 0.31 ms per tick, stress 0.47 → 0.13–0.14 ms (`tasks/WG.00.09b/lane-k/perf/`).
+- Checks in `tools/test_minimap.js` (headless). Each was run against the previous plugin and failed there:
+
+  | Check | Proves |
+  |---|---|
+  | `z_switch_back_no_full_redirty` | The first visit dirties 256 chunks; going back to the built Z0 tab dirties 0 |
+  | `z_switch_keeps_offtab_changes` | A Z0 cell changed while the −1 tab was shown dirties exactly 1 chunk on return |
+  | `tab_samples_its_own_level` | The mock wall on Z0 is drawn on the Z0 tab, and the −1 tab draws −1's rock instead |
+  | `overlay_throttled` | 12 still updates give 3 redraws; a camera move gives 1 redraw in that update |
+
+- Pre-existing, not changed: `negative_coords_safe` checks `true`, so it can never fail. It stays, as the brief asks, and is flagged in `tasks/WG.00.09b/lane-k/test_changes.md`.
 
 ---
 

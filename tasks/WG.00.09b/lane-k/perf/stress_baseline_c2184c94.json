@@ -1,0 +1,5721 @@
+{
+ "task": "WG.00.09b",
+ "lane": "lane-k",
+ "scenario": "stress",
+ "measuredSha": "c2184c949650765a4fe8237eccc09c9106537e86",
+ "headSha": "c2184c949650765a4fe8237eccc09c9106537e86",
+ "dirty": false,
+ "machine": {
+  "host": "MSI",
+  "cpus": 16,
+  "cpu": "AMD Ryzen 7 8845HS w/ Radeon 780M Graphics",
+  "totalMemGb": 31.3
+ },
+ "method": "nw.exe harness (DEUS_Test, --deus-test=bench_layers, background throttling off, the same flags as tools/run_tests.js) on a snapshot copy of game/. Per engine tick (Graphics._onTick): the frame interval (tick start to tick start), the tick duration (update + render submission), wrapped update and render parts (ms per tick; 'update' can run 0, 1 or 2 times per tick: RMMZ's fixed 60 Hz step), WebGL draw calls. Medians and p95 over the ticks of a phase. CPU profiles: V8 sampling profiler over the DevTools protocol, 500 us interval; ms per update = sampled ms / simulation updates in the profiled window. Machine load: runs[].machineLoad (Fix 1, P3).",
+ "runs": [
+  {
+   "scenario": "stress",
+   "startedAt": "2026-09-26T11:40:28.735Z",
+   "phases": [
+    {
+     "phase": "stress_day_30s",
+     "frames": 371,
+     "wallStart": 1790422865586,
+     "wallEnd": 1790422895639,
+     "frameMs": {
+      "median": 63.03,
+      "p95": 190.27,
+      "worst": 311.125
+     },
+     "fps": {
+      "atMedian": 15.865,
+      "atP95": 5.256,
+      "atWorst": 3.214
+     },
+     "over16_7": 371,
+     "over33_4": 323,
+     "over50": 234,
+     "tickMs": {
+      "median": 61.25,
+      "p95": 186.825,
+      "worst": 309.245
+     },
+     "drawCalls": {
+      "median": 182,
+      "p95": 192,
+      "max": 199
+     },
+     "parts": {
+      "bench.driver": {
+       "median": 0.75,
+       "p95": 1.34,
+       "max": 2.44,
+       "mean": 0.816
+      },
+      "depth.plane.objectLayer": {
+       "median": 0.29,
+       "p95": 0.665,
+       "max": 3.105,
+       "mean": 0.34
+      },
+      "depth.plane.placeEntities": {
+       "median": 0.04,
+       "p95": 0.06,
+       "max": 0.305,
+       "mean": 0.041
+      },
+      "depth.plane.placeUnits": {
+       "median": 0.175,
+       "p95": 0.31,
+       "max": 3.2,
+       "mean": 0.212
+      },
+      "depth.plane.rebuildItems": {
+       "median": 0,
+       "p95": 0.025,
+       "max": 0.49,
+       "mean": 0.004
+      },
+      "depth.plane.rebuildWalls": {
+       "median": 0,
+       "p95": 0,
+       "max": 3.13,
+       "mean": 0.036
+      },
+      "depth.plane.sortEntities": {
+       "median": 0.09,
+       "p95": 0.235,
+       "max": 0.48,
+       "mean": 0.101
+      },
+      "depth.plane.tilemapTransform": {
+       "median": 0.035,
+       "p95": 0.05,
+       "max": 0.07,
+       "mean": 0.034
+      },
+      "depth.plane.updateEntities": {
+       "median": 0.35,
+       "p95": 0.805,
+       "max": 3.68,
+       "mean": 0.44
+      },
+      "depth.plane.updatePlane": {
+       "median": 0.405,
+       "p95": 0.89,
+       "max": 3.755,
+       "mean": 0.5
+      },
+      "depth.root.scanUnits": {
+       "median": 0.39,
+       "p95": 0.675,
+       "max": 2.86,
+       "mean": 0.429
+      },
+      "depth.root.updateMask": {
+       "median": 0.005,
+       "p95": 0.015,
+       "max": 0.765,
+       "mean": 0.009
+      },
+      "depth.root.updateUnits": {
+       "median": 0.675,
+       "p95": 1.15,
+       "max": 4.14,
+       "mean": 0.756
+      },
+      "events": {
+       "median": 4.7,
+       "p95": 13.735,
+       "max": 40.05,
+       "mean": 5.824
+      },
+      "paint.tilemaps": {
+       "median": 0,
+       "p95": 0.26,
+       "max": 1.46,
+       "mean": 0.035
+      },
+      "render": {
+       "median": 4.305,
+       "p95": 5.55,
+       "max": 6.76,
+       "mean": 4.459
+      },
+      "render.characters": {
+       "median": 0.525,
+       "p95": 0.725,
+       "max": 1.625,
+       "mean": 0.558
+      },
+      "render.daynight_glow": {
+       "median": 0,
+       "p95": 0.005,
+       "max": 0.005,
+       "mean": 0
+      },
+      "render.depth": {
+       "median": 0.175,
+       "p95": 0.23,
+       "max": 0.585,
+       "mean": 0.182
+      },
+      "render.fog": {
+       "median": 0,
+       "p95": 0.005,
+       "max": 0.005,
+       "mean": 0
+      },
+      "render.minimap": {
+       "median": 0.005,
+       "p95": 0.01,
+       "max": 0.665,
+       "mean": 0.006
+      },
+      "render.tilemap_layers": {
+       "median": 0.17,
+       "p95": 0.23,
+       "max": 0.915,
+       "mean": 0.18
+      },
+      "update": {
+       "median": 56.955,
+       "p95": 182.045,
+       "max": 304.67,
+       "mean": 73.274
+      },
+      "update.characters": {
+       "median": 0.52,
+       "p95": 0.655,
+       "max": 1.225,
+       "mean": 0.535
+      },
+      "update.daynight_glow": {
+       "median": 0,
+       "p95": 0.01,
+       "max": 0.01,
+       "mean": 0.003
+      },
+      "update.depth_late": {
+       "median": 0.68,
+       "p95": 1.17,
+       "max": 4.145,
+       "mean": 0.763
+      },
+      "update.fog": {
+       "median": 0.005,
+       "p95": 0.01,
+       "max": 0.015,
+       "mean": 0.004
+      },
+      "update.fog.refresh": {
+       "median": 0,
+       "p95": 0,
+       "max": 0.005,
+       "mean": 0
+      },
+      "update.map": {
+       "median": 46.805,
+       "p95": 172.535,
+       "max": 293.495,
+       "mean": 62.674
+      },
+      "update.map.world": {
+       "median": 7.76,
+       "p95": 17.13,
+       "max": 42.015,
+       "mean": 8.675
+      },
+      "update.minimap": {
+       "median": 0.1,
+       "p95": 0.175,
+       "max": 1.865,
+       "mean": 0.096
+      },
+      "update.minimap.chunks": {
+       "median": 0.01,
+       "p95": 0.015,
+       "max": 0.02,
+       "mean": 0.008
+      },
+      "update.minimap.overlay": {
+       "median": 0.085,
+       "p95": 0.145,
+       "max": 1.83,
+       "mean": 0.07
+      },
+      "update.spriteset": {
+       "median": 3.695,
+       "p95": 7.08,
+       "max": 8.675,
+       "mean": 4.008
+      },
+      "update.spriteset.tilemap": {
+       "median": 0.185,
+       "p95": 0.285,
+       "max": 3.505,
+       "mean": 0.24
+      },
+      "update.spriteset.tilemap.depth": {
+       "median": 0.43,
+       "p95": 0.95,
+       "max": 3.775,
+       "mean": 0.531
+      }
+     },
+     "peak": {
+      "unitsOnScreenLevel": 65,
+      "unitsOnLowerPlanes": 166,
+      "lowerPlaneSprites": 326,
+      "projectilesAlive": 64,
+      "rmmzAnimationsAlive": 51,
+      "placeholderImpactsAlive": 34,
+      "effectSpritesAlive": 130,
+      "unitsDrawn": 231
+     },
+     "worldEventsPerFrame": {
+      "median": 50,
+      "p95": 117,
+      "max": 128,
+      "listenerCallsMedian": 29,
+      "listenerCallsMax": 106
+     },
+     "wallMs": 30087.7,
+     "hour": 12,
+     "cpuPercent": {
+      "samples": 31,
+      "min": 11.8,
+      "median": 15.3,
+      "max": 27
+     }
+    },
+    {
+     "phase": "stress_night_30s",
+     "frames": 364,
+     "wallStart": 1790422902476,
+     "wallEnd": 1790422932457,
+     "frameMs": {
+      "median": 71.635,
+      "p95": 180.825,
+      "worst": 344.78
+     },
+     "fps": {
+      "atMedian": 13.96,
+      "atP95": 5.53,
+      "atWorst": 2.9
+     },
+     "over16_7": 364,
+     "over33_4": 359,
+     "over50": 247,
+     "tickMs": {
+      "median": 67.075,
+      "p95": 178.545,
+      "worst": 341.6
+     },
+     "drawCalls": {
+      "median": 174,
+      "p95": 179,
+      "max": 182
+     },
+     "parts": {
+      "bench.driver": {
+       "median": 0.61,
+       "p95": 1.14,
+       "max": 1.635,
+       "mean": 0.659
+      },
+      "depth.plane.objectLayer": {
+       "median": 0.27,
+       "p95": 0.505,
+       "max": 1.11,
+       "mean": 0.299
+      },
+      "depth.plane.placeEntities": {
+       "median": 0.065,
+       "p95": 0.23,
+       "max": 3.28,
+       "mean": 0.133
+      },
+      "depth.plane.placeUnits": {
+       "median": 0.175,
+       "p95": 0.265,
+       "max": 2.255,
+       "mean": 0.205
+      },
+      "depth.plane.rebuildItems": {
+       "median": 0,
+       "p95": 0.04,
+       "max": 0.345,
+       "mean": 0.008
+      },
+      "depth.plane.rebuildWalls": {
+       "median": 0,
+       "p95": 0,
+       "max": 2.49,
+       "mean": 0.027
+      },
+      "depth.plane.sortEntities": {
+       "median": 0.1,
+       "p95": 0.23,
+       "max": 0.595,
+       "mean": 0.11
+      },
+      "depth.plane.tilemapTransform": {
+       "median": 0.03,
+       "p95": 0.045,
+       "max": 0.16,
+       "mean": 0.032
+      },
+      "depth.plane.updateEntities": {
+       "median": 0.355,
+       "p95": 0.935,
+       "max": 3.825,
+       "mean": 0.478
+      },
+      "depth.plane.updatePlane": {
+       "median": 0.405,
+       "p95": 0.995,
+       "max": 3.87,
+       "mean": 0.526
+      },
+      "depth.root.scanUnits": {
+       "median": 0.37,
+       "p95": 0.535,
+       "max": 1.805,
+       "mean": 0.388
+      },
+      "depth.root.updateMask": {
+       "median": 0.005,
+       "p95": 0.01,
+       "max": 0.015,
+       "mean": 0.004
+      },
+      "depth.root.updateUnits": {
+       "median": 0.655,
+       "p95": 1.1,
+       "max": 2.885,
+       "mean": 0.717
+      },
+      "events": {
+       "median": 4.925,
+       "p95": 14.19,
+       "max": 51.09,
+       "mean": 5.981
+      },
+      "paint.tilemaps": {
+       "median": 0,
+       "p95": 0.095,
+       "max": 0.96,
+       "mean": 0.012
+      },
+      "render": {
+       "median": 4.15,
+       "p95": 4.935,
+       "max": 7.37,
+       "mean": 4.243
+      },
+      "render.characters": {
+       "median": 0.51,
+       "p95": 0.58,
+       "max": 1.5,
+       "mean": 0.52
+      },
+      "render.daynight_glow": {
+       "median": 0,
+       "p95": 0.005,
+       "max": 0.005,
+       "mean": 0
+      },
+      "render.depth": {
+       "median": 0.175,
+       "p95": 0.225,
+       "max": 0.755,
+       "mean": 0.183
+      },
+      "render.fog": {
+       "median": 0,
+       "p95": 0.005,
+       "max": 0.005,
+       "mean": 0
+      },
+      "render.minimap": {
+       "median": 0.005,
+       "p95": 0.01,
+       "max": 0.01,
+       "mean": 0.004
+      },
+      "render.tilemap_layers": {
+       "median": 0.155,
+       "p95": 0.19,
+       "max": 0.475,
+       "mean": 0.159
+      },
+      "update": {
+       "median": 62.755,
+       "p95": 174.23,
+       "max": 337.3,
+       "mean": 74.862
+      },
+      "update.characters": {
+       "median": 0.49,
+       "p95": 0.575,
+       "max": 1.035,
+       "mean": 0.499
+      },
+      "update.daynight_glow": {
+       "median": 0.005,
+       "p95": 0.01,
+       "max": 0.015,
+       "mean": 0.003
+      },
+      "update.depth_late": {
+       "median": 0.665,
+       "p95": 1.115,
+       "max": 2.89,
+       "mean": 0.725
+      },
+      "update.fog": {
+       "median": 0.005,
+       "p95": 0.01,
+       "max": 0.01,
+       "mean": 0.003
+      },
+      "update.fog.refresh": {
+       "median": 0,
+       "p95": 0,
+       "max": 0.005,
+       "mean": 0
+      },
+      "update.map": {
+       "median": 53.035,
+       "p95": 164.46,
+       "max": 326.865,
+       "mean": 65.024
+      },
+      "update.map.world": {
+       "median": 8.76,
+       "p95": 18.04,
+       "max": 24.875,
+       "mean": 9.667
+      },
+      "update.minimap": {
+       "median": 0.1,
+       "p95": 0.155,
+       "max": 0.59,
+       "mean": 0.082
+      },
+      "update.minimap.chunks": {
+       "median": 0.005,
+       "p95": 0.015,
+       "max": 0.02,
+       "mean": 0.007
+      },
+      "update.minimap.overlay": {
+       "median": 0.075,
+       "p95": 0.13,
+       "max": 0.565,
+       "mean": 0.058
+      },
+      "update.spriteset": {
+       "median": 3.37,
+       "p95": 5.92,
+       "max": 9.405,
+       "mean": 3.624
+      },
+      "update.spriteset.tilemap": {
+       "median": 0.175,
+       "p95": 0.335,
+       "max": 2.82,
+       "mean": 0.234
+      },
+      "update.spriteset.tilemap.depth": {
+       "median": 0.42,
+       "p95": 1.015,
+       "max": 3.9,
+       "mean": 0.544
+      }
+     },
+     "peak": {
+      "unitsOnScreenLevel": 65,
+      "unitsOnLowerPlanes": 169,
+      "lowerPlaneSprites": 321,
+      "projectilesAlive": 52,
+      "rmmzAnimationsAlive": 51,
+      "placeholderImpactsAlive": 31,
+      "effectSpritesAlive": 120,
+      "unitsDrawn": 234
+     },
+     "worldEventsPerFrame": {
+      "median": 53,
+      "p95": 121,
+      "max": 129,
+      "listenerCallsMedian": 31,
+      "listenerCallsMax": 104
+     },
+     "wallMs": 30044.5,
+     "hour": 22,
+     "cpuPercent": {
+      "samples": 31,
+      "min": 10.9,
+      "median": 13.7,
+      "max": 19.2
+     }
+    }
+   ],
+   "switches": [],
+   "notes": [],
+   "environment": {
+    "screen": "816x624",
+    "depth": "2 level(s) below, drawn 1:1 (DEC-011), void #08080c",
+    "depthApi": [
+     "PAD",
+     "config",
+     "describe",
+     "edgeShift",
+     "isOpen",
+     "planes",
+     "preloadsPending",
+     "project",
+     "rebuild",
+     "refresh",
+     "root",
+     "setEnabled",
+     "stats",
+     "touch"
+    ],
+    "units": 1309,
+    "wraps": [
+     "update",
+     "update.map",
+     "update.spriteset",
+     "update.spriteset.tilemap",
+     "update.characters",
+     "paint.tilemaps",
+     "render.tilemap_layers",
+     "render.characters",
+     "update.map.world",
+     "events",
+     "update.fog",
+     "update.fog.refresh",
+     "update.daynight_glow",
+     "update.minimap.chunks",
+     "render",
+     "update.spriteset.tilemap.depth",
+     "update.depth_late",
+     "render.depth",
+     "paint.depth_planes",
+     "depth.root.scanUnits",
+     "depth.root.updateMask",
+     "depth.root.updateUnits",
+     "depth.plane.updatePlane",
+     "depth.plane.updateEntities",
+     "depth.plane.placeEntities",
+     "depth.plane.placeUnits",
+     "depth.plane.sortEntities",
+     "depth.plane.rebuildItems",
+     "depth.plane.rebuildWalls",
+     "depth.plane.objectLayer",
+     "depth.plane.tilemapTransform",
+     "update.minimap",
+     "update.minimap.overlay",
+     "update.minimap.chrome",
+     "render.minimap",
+     "render.fog",
+     "render.daynight_glow"
+    ],
+    "gl": "ANGLE (NVIDIA GeForce RTX 4060 Laptop GPU Direct3D11 vs_5_0 ps_5_0)"
+   },
+   "stress": {
+    "cells": 221,
+    "units": 221,
+    "byLevel": {
+     "0": 71,
+     "+2": 65,
+     "+1": 85
+    },
+    "roles": {
+     "melee": 74,
+     "archers": 74,
+     "casters": 73
+    },
+    "window": {
+     "x": 97,
+     "y": 147,
+     "cols": 17,
+     "rows": 13
+    },
+    "seed": "0x5eed0019",
+    "zoom": 1,
+    "effectPaths": {
+     "walk": "UF.World.sendUnit ping-pong (one cell east and back): viewed level through RMMZ event movement and DEUS_Anim walk frames; lower levels through the DEUS_Depth walk tween and walk frames",
+     "melee": "UF.Combat.resolveAttack (bypassGcd) with sword_short: DEUS_Anim attack/hurt one-shots from the AR-600 sheets, DEUS_Combat hitsplats and action bars (viewed level only); plus RMMZ animation 6 Slash Physical (Effekseer; its flash timing flashes the target) on the viewed level",
+     "arrows": "UF.Combat.resolveAttack with bow_short and arrows (attack one-shot on the viewed level); the arrow in flight is a placeholder (see placeholders); impact: RMMZ animation 11 Pierce Physical on the viewed level, the placeholder impact on lower levels",
+     "spells": "data.casting = { targetId } (DEUS_Anim cast frames, viewed level only); a placeholder spell orb in flight; on arrival UF.Combat.resolveAttack({ spell: true }) and RMMZ animation 66 Fire One 1 (impact; its flash timings are the hit flash) on the viewed level, the placeholder impact on lower levels",
+     "lowerLevels": "DEUS_Depth draws only the walk and stand frames of lower-level units; their attacks resolve in the simulation, but the game draws no attack frames, splats, bars or RMMZ animations off the viewed level (the bench adds only its placeholders there)"
+    },
+    "placeholders": {
+     "arrow": {
+      "size": "12x4 px",
+      "color": "#8b5a2b",
+      "note": "arrow in flight: no arrow or projectile sprite exists in the game (no asset)"
+     },
+     "spellOrb": {
+      "size": "10x10 px",
+      "color": "#ff7a1a",
+      "note": "spell projectile in flight: no spell projectile exists in the game (no asset)"
+     },
+     "impactLower": {
+      "size": "24x24 px, 18 frames",
+      "color": "#ffd24a",
+      "note": "impact on a lower-level target: RMMZ animations need a Game_Event, which only the viewed level has"
+     }
+    },
+    "deaths": 0,
+    "attacks": 6016,
+    "animations": 1763,
+    "glowLayer": {
+     "visible": false,
+     "children": 0
+    }
+   },
+   "profiles": {
+    "stress_day": {
+     "updates": 120,
+     "wallMs": 4765.4,
+     "sampledMs": 4969.6,
+     "samples": 9616,
+     "topSelf": [
+      {
+       "fn": "(anonymous) DEUS_Objects.js:82",
+       "ms": 1308.2,
+       "msPerUpdate": 10.902
+      },
+      {
+       "fn": "World.walkable DEUS_World.js:2747",
+       "ms": 445.6,
+       "msPerUpdate": 3.714
+      },
+      {
+       "fn": "table DEUS_Objects.js:80",
+       "ms": 411.1,
+       "msPerUpdate": 3.426
+      },
+      {
+       "fn": "(garbage collector) (garbage collector):0",
+       "ms": 186.5,
+       "msPerUpdate": 1.554
+      },
+      {
+       "fn": "open open:0",
+       "ms": 175.5,
+       "msPerUpdate": 1.462
+      },
+      {
+       "fn": "Game_Map.events rmmz_objects.js:6236",
+       "ms": 154.8,
+       "msPerUpdate": 1.29
+      },
+      {
+       "fn": "typeOf DEUS_Objects.js:101",
+       "ms": 148.4,
+       "msPerUpdate": 1.237
+      },
+      {
+       "fn": "atIn DEUS_Objects.js:968",
+       "ms": 125.4,
+       "msPerUpdate": 1.045
+      },
+      {
+       "fn": "(idle) (idle):0",
+       "ms": 106.1,
+       "msPerUpdate": 0.884
+      },
+      {
+       "fn": "close close:0",
+       "ms": 89.4,
+       "msPerUpdate": 0.745
+      },
+      {
+       "fn": "(program) (program):0",
+       "ms": 88.1,
+       "msPerUpdate": 0.734
+      },
+      {
+       "fn": "tintOf DEUS_Objects.js:62",
+       "ms": 87.1,
+       "msPerUpdate": 0.726
+      },
+      {
+       "fn": "stepOpen DEUS_World.js:2588",
+       "ms": 80.6,
+       "msPerUpdate": 0.672
+      },
+      {
+       "fn": "writeBuffer writeBuffer:0",
+       "ms": 54.3,
+       "msPerUpdate": 0.453
+      },
+      {
+       "fn": "standerAt DEUS_World.js:1169",
+       "ms": 45.6,
+       "msPerUpdate": 0.38
+      },
+      {
+       "fn": "occupiedIn DEUS_Jobs.js:217",
+       "ms": 41.2,
+       "msPerUpdate": 0.344
+      },
+      {
+       "fn": "gridOf DEUS_World.js:1926",
+       "ms": 39.9,
+       "msPerUpdate": 0.333
+      },
+      {
+       "fn": "offscreenOccupancy DEUS_World.js:1601",
+       "ms": 38.7,
+       "msPerUpdate": 0.323
+      },
+      {
+       "fn": "wasm-function[524] wasm :0",
+       "ms": 35.1,
+       "msPerUpdate": 0.292
+      },
+      {
+       "fn": "levelKey DEUS_World.js:160",
+       "ms": 31.4,
+       "msPerUpdate": 0.262
+      },
+      {
+       "fn": "now DEUS_BenchRender.js:14",
+       "ms": 26,
+       "msPerUpdate": 0.217
+      },
+      {
+       "fn": "update DEUS_Combat.js:1814",
+       "ms": 24.8,
+       "msPerUpdate": 0.207
+      },
+      {
+       "fn": "fetch fetch:0",
+       "ms": 23.9,
+       "msPerUpdate": 0.199
+      },
+      {
+       "fn": "layout DEUS_Combat.js:1915",
+       "ms": 23.3,
+       "msPerUpdate": 0.194
+      },
+      {
+       "fn": "wasm-function[541] wasm :0",
+       "ms": 23.2,
+       "msPerUpdate": 0.194
+      },
+      {
+       "fn": "set pixi.js:7594",
+       "ms": 22.3,
+       "msPerUpdate": 0.186
+      },
+      {
+       "fn": "emit DEUS_Core.js:257",
+       "ms": 18.3,
+       "msPerUpdate": 0.152
+      },
+      {
+       "fn": "wasm-function[472] wasm :0",
+       "ms": 17,
+       "msPerUpdate": 0.142
+      },
+      {
+       "fn": "World.update DEUS_World.js:1787",
+       "ms": 16.2,
+       "msPerUpdate": 0.135
+      },
+      {
+       "fn": "Container.updateTransform pixi.js:8157",
+       "ms": 16,
+       "msPerUpdate": 0.133
+      },
+      {
+       "fn": "texSubImage2D texSubImage2D:0",
+       "ms": 15.5,
+       "msPerUpdate": 0.129
+      },
+      {
+       "fn": "step DEUS_Jobs.js:1635",
+       "ms": 15.5,
+       "msPerUpdate": 0.129
+      },
+      {
+       "fn": "wasm-function[565] wasm :0",
+       "ms": 15.5,
+       "msPerUpdate": 0.129
+      },
+      {
+       "fn": "Sprite_DepthRoot.scanUnits DEUS_Depth.js:1055",
+       "ms": 15.4,
+       "msPerUpdate": 0.129
+      },
+      {
+       "fn": "wasm-function[586] wasm :0",
+       "ms": 13.6,
+       "msPerUpdate": 0.113
+      },
+      {
+       "fn": "wasm-function[535] wasm :0",
+       "ms": 13.4,
+       "msPerUpdate": 0.112
+      },
+      {
+       "fn": "typeFlags DEUS_World.js:1874",
+       "ms": 12.9,
+       "msPerUpdate": 0.108
+      },
+      {
+       "fn": "wasm-function[588] wasm :0",
+       "ms": 12.9,
+       "msPerUpdate": 0.108
+      },
+      {
+       "fn": "busyWindowIn DEUS_Levels.js:4293",
+       "ms": 12.9,
+       "msPerUpdate": 0.107
+      },
+      {
+       "fn": "Container.render pixi.js:8235",
+       "ms": 12.4,
+       "msPerUpdate": 0.103
+      }
+     ],
+     "topInclusive": [
+      {
+       "fn": "(root) (root):0",
+       "ms": 4969.6,
+       "msPerUpdate": 41.413
+      },
+      {
+       "fn": "Ticker._tick pixi.js:9294",
+       "ms": 4562.1,
+       "msPerUpdate": 38.017
+      },
+      {
+       "fn": "Ticker.update pixi.js:9505",
+       "ms": 4561,
+       "msPerUpdate": 38.009
+      },
+      {
+       "fn": "TickerListener.emit pixi.js:9090",
+       "ms": 4560,
+       "msPerUpdate": 38
+      },
+      {
+       "fn": "Graphics._onTick DEUS_BenchRender.js:65",
+       "ms": 4558.9,
+       "msPerUpdate": 37.991
+      },
+      {
+       "fn": "Graphics._onTick rmmz_core.js:808",
+       "ms": 4557.4,
+       "msPerUpdate": 37.978
+      },
+      {
+       "fn": "now DEUS_BenchRender.js:14",
+       "ms": 4556.9,
+       "msPerUpdate": 37.974
+      },
+      {
+       "fn": "f DEUS_BenchRender.js:25",
+       "ms": 4556.3,
+       "msPerUpdate": 37.969
+      },
+      {
+       "fn": "SceneManager.updateMain DEUS_Test.js:119",
+       "ms": 4267.4,
+       "msPerUpdate": 35.561
+      },
+      {
+       "fn": "SceneManager.update DEUS_TimeSpeed.js:159",
+       "ms": 4267.4,
+       "msPerUpdate": 35.561
+      },
+      {
+       "fn": "SceneManager.updateMain rmmz_managers.js:2102",
+       "ms": 4266.3,
+       "msPerUpdate": 35.553
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Containers.js:1323",
+       "ms": 4084.2,
+       "msPerUpdate": 34.035
+      },
+      {
+       "fn": "SceneManager.updateScene rmmz_managers.js:2143",
+       "ms": 4084.2,
+       "msPerUpdate": 34.035
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Select.js:2289",
+       "ms": 4083.7,
+       "msPerUpdate": 34.031
+      },
+      {
+       "fn": "Scene_Map.update DEUS_BenchRender.js:142",
+       "ms": 4080.1,
+       "msPerUpdate": 34.001
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Depth.js:1174",
+       "ms": 4038.1,
+       "msPerUpdate": 33.651
+      },
+      {
+       "fn": "Scene_Map.update DEUS_NaturalConnections.js:508",
+       "ms": 3993.8,
+       "msPerUpdate": 33.281
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Levels.js:4334",
+       "ms": 3990.7,
+       "msPerUpdate": 33.256
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Talk.js:1938",
+       "ms": 3958.8,
+       "msPerUpdate": 32.99
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Factions.js:1156",
+       "ms": 3957.7,
+       "msPerUpdate": 32.981
+      },
+      {
+       "fn": "Scene_Map.update DEUS_History.js:3662",
+       "ms": 3957.7,
+       "msPerUpdate": 32.981
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Combat.js:1479",
+       "ms": 3957.7,
+       "msPerUpdate": 32.981
+      },
+      {
+       "fn": "Scene_Map.update DEUS_TimeSpeed.js:232",
+       "ms": 3957.7,
+       "msPerUpdate": 32.981
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Sheet.js:2252",
+       "ms": 3957.7,
+       "msPerUpdate": 32.981
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Core.js:505",
+       "ms": 3956.2,
+       "msPerUpdate": 32.968
+      },
+      {
+       "fn": "Scene_Map.update DEUS_ColonyOverseer.js:196",
+       "ms": 3956.2,
+       "msPerUpdate": 32.968
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Factions.js:751",
+       "ms": 3956.2,
+       "msPerUpdate": 32.968
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Core.js:175",
+       "ms": 3955.7,
+       "msPerUpdate": 32.964
+      },
+      {
+       "fn": "Scene_Map.update rmmz_scenes.js:819",
+       "ms": 3955.1,
+       "msPerUpdate": 32.96
+      },
+      {
+       "fn": "Scene_Map.updateMainMultiply rmmz_scenes.js:833",
+       "ms": 3633.1,
+       "msPerUpdate": 30.276
+      },
+      {
+       "fn": "Scene_Map.updateMain DEUS_TimeSpeed.js:210",
+       "ms": 3616.5,
+       "msPerUpdate": 30.138
+      },
+      {
+       "fn": "Scene_Map.updateMain rmmz_scenes.js:841",
+       "ms": 3616,
+       "msPerUpdate": 30.133
+      },
+      {
+       "fn": "Game_Map.update DEUS_Environment.js:796",
+       "ms": 3556.4,
+       "msPerUpdate": 29.637
+      },
+      {
+       "fn": "atIn DEUS_Objects.js:968",
+       "ms": 1938.5,
+       "msPerUpdate": 16.154
+      },
+      {
+       "fn": "Game_Map.update DEUS_Ownership.js:613",
+       "ms": 1886,
+       "msPerUpdate": 15.717
+      },
+      {
+       "fn": "Game_Map.update DEUS_Fire.js:617",
+       "ms": 1885.5,
+       "msPerUpdate": 15.712
+      },
+      {
+       "fn": "Game_Map.update DEUS_TimeSpeed.js:189",
+       "ms": 1884.2,
+       "msPerUpdate": 15.701
+      },
+      {
+       "fn": "Game_Map.update DEUS_Anim.js:1506",
+       "ms": 1883.1,
+       "msPerUpdate": 15.693
+      },
+      {
+       "fn": "Game_Map.update DEUS_Fog.js:638",
+       "ms": 1883.1,
+       "msPerUpdate": 15.693
+      },
+      {
+       "fn": "Game_Map.update DEUS_Combat.js:1414",
+       "ms": 1879,
+       "msPerUpdate": 15.658
+      },
+      {
+       "fn": "Game_Map.update DEUS_Ecology.js:992",
+       "ms": 1877.4,
+       "msPerUpdate": 15.645
+      },
+      {
+       "fn": "Game_Map.update DEUS_Projects.js:1596",
+       "ms": 1872.2,
+       "msPerUpdate": 15.602
+      },
+      {
+       "fn": "Game_Map.update DEUS_Wildlife.js:1195",
+       "ms": 1872.2,
+       "msPerUpdate": 15.602
+      },
+      {
+       "fn": "Game_Map.update DEUS_Colonists.js:5748",
+       "ms": 1869.6,
+       "msPerUpdate": 15.58
+      },
+      {
+       "fn": "updateEnvironment DEUS_Environment.js:720",
+       "ms": 1670.4,
+       "msPerUpdate": 13.92
+      },
+      {
+       "fn": "stepUnitThermal DEUS_Environment.js:559",
+       "ms": 1661.1,
+       "msPerUpdate": 13.842
+      },
+      {
+       "fn": "updateWetness DEUS_Environment.js:418",
+       "ms": 1645.6,
+       "msPerUpdate": 13.713
+      },
+      {
+       "fn": "isRoofed DEUS_Floors.js:198",
+       "ms": 1638.6,
+       "msPerUpdate": 13.655
+      },
+      {
+       "fn": "roomAt DEUS_Floors.js:152",
+       "ms": 1634.5,
+       "msPerUpdate": 13.621
+      },
+      {
+       "fn": "computeRoom DEUS_Floors.js:127",
+       "ms": 1628.8,
+       "msPerUpdate": 13.573
+      },
+      {
+       "fn": "Game_Map.update DEUS_Jobs.js:1777",
+       "ms": 1456.4,
+       "msPerUpdate": 12.136
+      },
+      {
+       "fn": "(anonymous) DEUS_Objects.js:82",
+       "ms": 1393.2,
+       "msPerUpdate": 11.61
+      },
+      {
+       "fn": "isBarrier DEUS_Floors.js:91",
+       "ms": 1317.7,
+       "msPerUpdate": 10.981
+      },
+      {
+       "fn": "typeOf DEUS_Objects.js:101",
+       "ms": 926.4,
+       "msPerUpdate": 7.72
+      },
+      {
+       "fn": "isGap DEUS_Floors.js:101",
+       "ms": 786.5,
+       "msPerUpdate": 6.554
+      },
+      {
+       "fn": "update DEUS_Jobs.js:1715",
+       "ms": 756.2,
+       "msPerUpdate": 6.302
+      },
+      {
+       "fn": "step DEUS_Jobs.js:1635",
+       "ms": 751,
+       "msPerUpdate": 6.259
+      },
+      {
+       "fn": "Game_Map.update DEUS_Factions.js:657",
+       "ms": 697.6,
+       "msPerUpdate": 5.813
+      },
+      {
+       "fn": "Game_Map.update DEUS_World.js:3169",
+       "ms": 694,
+       "msPerUpdate": 5.783
+      },
+      {
+       "fn": "(anonymous) DEUS_Culling.js:300",
+       "ms": 644.3,
+       "msPerUpdate": 5.369
+      }
+     ],
+     "selfByScript": [
+      {
+       "fn": "DEUS_Objects.js",
+       "ms": 2090,
+       "msPerUpdate": 17.417
+      },
+      {
+       "fn": "DEUS_World.js",
+       "ms": 797.4,
+       "msPerUpdate": 6.645
+      },
+      {
+       "fn": "wasm ",
+       "ms": 287.4,
+       "msPerUpdate": 2.395
+      },
+      {
+       "fn": "(garbage collector)",
+       "ms": 186.5,
+       "msPerUpdate": 1.554
+      },
+      {
+       "fn": "rmmz_objects.js",
+       "ms": 178,
+       "msPerUpdate": 1.483
+      },
+      {
+       "fn": "open",
+       "ms": 175.5,
+       "msPerUpdate": 1.462
+      },
+      {
+       "fn": "pixi.js",
+       "ms": 137.4,
+       "msPerUpdate": 1.145
+      },
+      {
+       "fn": "(idle)",
+       "ms": 106.1,
+       "msPerUpdate": 0.884
+      },
+      {
+       "fn": "close",
+       "ms": 89.4,
+       "msPerUpdate": 0.745
+      },
+      {
+       "fn": "(program)",
+       "ms": 88.1,
+       "msPerUpdate": 0.734
+      },
+      {
+       "fn": "DEUS_Jobs.js",
+       "ms": 86.7,
+       "msPerUpdate": 0.723
+      },
+      {
+       "fn": "DEUS_Combat.js",
+       "ms": 71.4,
+       "msPerUpdate": 0.595
+      },
+      {
+       "fn": "rmmz_core.js",
+       "ms": 61.5,
+       "msPerUpdate": 0.512
+      },
+      {
+       "fn": "writeBuffer",
+       "ms": 54.3,
+       "msPerUpdate": 0.453
+      },
+      {
+       "fn": "DEUS_Colonists.js",
+       "ms": 53.8,
+       "msPerUpdate": 0.448
+      },
+      {
+       "fn": "DEUS_BenchRender.js",
+       "ms": 39,
+       "msPerUpdate": 0.325
+      },
+      {
+       "fn": "DEUS_Depth.js",
+       "ms": 38.2,
+       "msPerUpdate": 0.318
+      },
+      {
+       "fn": "DEUS_Levels.js",
+       "ms": 35.6,
+       "msPerUpdate": 0.297
+      },
+      {
+       "fn": "DEUS_Anim.js",
+       "ms": 34.7,
+       "msPerUpdate": 0.289
+      },
+      {
+       "fn": "DEUS_Floors.js",
+       "ms": 25.7,
+       "msPerUpdate": 0.214
+      },
+      {
+       "fn": "DEUS_Environment.js",
+       "ms": 25.1,
+       "msPerUpdate": 0.209
+      },
+      {
+       "fn": "fetch",
+       "ms": 23.9,
+       "msPerUpdate": 0.199
+      },
+      {
+       "fn": "DEUS_Core.js",
+       "ms": 19.3,
+       "msPerUpdate": 0.161
+      },
+      {
+       "fn": "rmmz_sprites.js",
+       "ms": 18.1,
+       "msPerUpdate": 0.151
+      },
+      {
+       "fn": "DEUS_Culling.js",
+       "ms": 16.1,
+       "msPerUpdate": 0.134
+      },
+      {
+       "fn": "texSubImage2D",
+       "ms": 15.5,
+       "msPerUpdate": 0.129
+      },
+      {
+       "fn": "DEUS_Items.js",
+       "ms": 13,
+       "msPerUpdate": 0.109
+      },
+      {
+       "fn": "now",
+       "ms": 9.9,
+       "msPerUpdate": 0.082
+      },
+      {
+       "fn": "fs.js",
+       "ms": 9.4,
+       "msPerUpdate": 0.078
+      },
+      {
+       "fn": "loader.js",
+       "ms": 7.9,
+       "msPerUpdate": 0.066
+      }
+     ],
+     "inclusiveByScript": [
+      {
+       "fn": "(root)",
+       "ms": 4969.6,
+       "msPerUpdate": 41.413
+      },
+      {
+       "fn": "rmmz_core.js",
+       "ms": 4583.2,
+       "msPerUpdate": 38.193
+      },
+      {
+       "fn": "pixi.js",
+       "ms": 4562.1,
+       "msPerUpdate": 38.017
+      },
+      {
+       "fn": "DEUS_BenchRender.js",
+       "ms": 4558.9,
+       "msPerUpdate": 37.991
+      },
+      {
+       "fn": "DEUS_TimeSpeed.js",
+       "ms": 4267.4,
+       "msPerUpdate": 35.561
+      },
+      {
+       "fn": "DEUS_Test.js",
+       "ms": 4267.4,
+       "msPerUpdate": 35.561
+      },
+      {
+       "fn": "rmmz_managers.js",
+       "ms": 4266.3,
+       "msPerUpdate": 35.553
+      },
+      {
+       "fn": "DEUS_Containers.js",
+       "ms": 4084.2,
+       "msPerUpdate": 34.035
+      },
+      {
+       "fn": "DEUS_Select.js",
+       "ms": 4083.7,
+       "msPerUpdate": 34.031
+      },
+      {
+       "fn": "DEUS_Depth.js",
+       "ms": 4039.6,
+       "msPerUpdate": 33.664
+      },
+      {
+       "fn": "DEUS_NaturalConnections.js",
+       "ms": 3993.8,
+       "msPerUpdate": 33.281
+      },
+      {
+       "fn": "DEUS_Levels.js",
+       "ms": 3991.2,
+       "msPerUpdate": 33.26
+      },
+      {
+       "fn": "DEUS_Combat.js",
+       "ms": 3985.2,
+       "msPerUpdate": 33.21
+      },
+      {
+       "fn": "DEUS_Talk.js",
+       "ms": 3958.8,
+       "msPerUpdate": 32.99
+      },
+      {
+       "fn": "DEUS_Factions.js",
+       "ms": 3957.7,
+       "msPerUpdate": 32.981
+      },
+      {
+       "fn": "DEUS_History.js",
+       "ms": 3957.7,
+       "msPerUpdate": 32.981
+      },
+      {
+       "fn": "DEUS_Sheet.js",
+       "ms": 3957.7,
+       "msPerUpdate": 32.981
+      },
+      {
+       "fn": "DEUS_Core.js",
+       "ms": 3956.7,
+       "msPerUpdate": 32.973
+      },
+      {
+       "fn": "DEUS_ColonyOverseer.js",
+       "ms": 3956.2,
+       "msPerUpdate": 32.968
+      },
+      {
+       "fn": "rmmz_scenes.js",
+       "ms": 3955.1,
+       "msPerUpdate": 32.96
+      },
+      {
+       "fn": "DEUS_Environment.js",
+       "ms": 3556.4,
+       "msPerUpdate": 29.637
+      },
+      {
+       "fn": "DEUS_Anim.js",
+       "ms": 2137.5,
+       "msPerUpdate": 17.813
+      },
+      {
+       "fn": "DEUS_Objects.js",
+       "ms": 2119.9,
+       "msPerUpdate": 17.666
+      },
+      {
+       "fn": "DEUS_Wildlife.js",
+       "ms": 1900.7,
+       "msPerUpdate": 15.84
+      },
+      {
+       "fn": "DEUS_Ownership.js",
+       "ms": 1886.5,
+       "msPerUpdate": 15.721
+      },
+      {
+       "fn": "DEUS_Fire.js",
+       "ms": 1886,
+       "msPerUpdate": 15.717
+      },
+      {
+       "fn": "DEUS_Fog.js",
+       "ms": 1884.2,
+       "msPerUpdate": 15.701
+      },
+      {
+       "fn": "DEUS_Ecology.js",
+       "ms": 1877.4,
+       "msPerUpdate": 15.645
+      },
+      {
+       "fn": "DEUS_Projects.js",
+       "ms": 1872.2,
+       "msPerUpdate": 15.602
+      },
+      {
+       "fn": "DEUS_Colonists.js",
+       "ms": 1870.2,
+       "msPerUpdate": 15.585
+      }
+     ]
+    },
+    "stress_night": {
+     "updates": 120,
+     "wallMs": 5458.7,
+     "sampledMs": 5612.2,
+     "samples": 10877,
+     "topSelf": [
+      {
+       "fn": "(anonymous) DEUS_Objects.js:82",
+       "ms": 1172.6,
+       "msPerUpdate": 9.771
+      },
+      {
+       "fn": "gridOf DEUS_World.js:1926",
+       "ms": 725.8,
+       "msPerUpdate": 6.048
+      },
+      {
+       "fn": "World.walkable DEUS_World.js:2747",
+       "ms": 549.2,
+       "msPerUpdate": 4.576
+      },
+      {
+       "fn": "table DEUS_Objects.js:80",
+       "ms": 355,
+       "msPerUpdate": 2.958
+      },
+      {
+       "fn": "(garbage collector) (garbage collector):0",
+       "ms": 334.3,
+       "msPerUpdate": 2.786
+      },
+      {
+       "fn": "Game_Map.events rmmz_objects.js:6236",
+       "ms": 182.5,
+       "msPerUpdate": 1.521
+      },
+      {
+       "fn": "open open:0",
+       "ms": 152.5,
+       "msPerUpdate": 1.271
+      },
+      {
+       "fn": "typeOf DEUS_Objects.js:101",
+       "ms": 122,
+       "msPerUpdate": 1.016
+      },
+      {
+       "fn": "(idle) (idle):0",
+       "ms": 99.9,
+       "msPerUpdate": 0.833
+      },
+      {
+       "fn": "atIn DEUS_Objects.js:968",
+       "ms": 88,
+       "msPerUpdate": 0.733
+      },
+      {
+       "fn": "(program) (program):0",
+       "ms": 85,
+       "msPerUpdate": 0.708
+      },
+      {
+       "fn": "close close:0",
+       "ms": 82.7,
+       "msPerUpdate": 0.689
+      },
+      {
+       "fn": "tintOf DEUS_Objects.js:62",
+       "ms": 77.7,
+       "msPerUpdate": 0.648
+      },
+      {
+       "fn": "stepOpen DEUS_World.js:2588",
+       "ms": 74.7,
+       "msPerUpdate": 0.622
+      },
+      {
+       "fn": "writeBuffer writeBuffer:0",
+       "ms": 62.4,
+       "msPerUpdate": 0.52
+      },
+      {
+       "fn": "standerAt DEUS_World.js:1169",
+       "ms": 55.2,
+       "msPerUpdate": 0.46
+      },
+      {
+       "fn": "occupiedIn DEUS_Jobs.js:217",
+       "ms": 52.1,
+       "msPerUpdate": 0.434
+      },
+      {
+       "fn": "wasm-function[524] wasm :0",
+       "ms": 50.1,
+       "msPerUpdate": 0.418
+      },
+      {
+       "fn": "now DEUS_BenchRender.js:14",
+       "ms": 34.2,
+       "msPerUpdate": 0.285
+      },
+      {
+       "fn": "offscreenOccupancy DEUS_World.js:1601",
+       "ms": 29.7,
+       "msPerUpdate": 0.247
+      },
+      {
+       "fn": "fetch fetch:0",
+       "ms": 28.5,
+       "msPerUpdate": 0.238
+      },
+      {
+       "fn": "typeFlags DEUS_World.js:1874",
+       "ms": 25.8,
+       "msPerUpdate": 0.215
+      },
+      {
+       "fn": "wasm-function[541] wasm :0",
+       "ms": 25.3,
+       "msPerUpdate": 0.211
+      },
+      {
+       "fn": "levelKey DEUS_World.js:160",
+       "ms": 22.1,
+       "msPerUpdate": 0.184
+      },
+      {
+       "fn": "set pixi.js:7594",
+       "ms": 20.7,
+       "msPerUpdate": 0.173
+      },
+      {
+       "fn": "Container.updateTransform pixi.js:8157",
+       "ms": 20,
+       "msPerUpdate": 0.167
+      },
+      {
+       "fn": "World.update DEUS_World.js:1787",
+       "ms": 19.8,
+       "msPerUpdate": 0.165
+      },
+      {
+       "fn": "findIn DEUS_Objects.js:421",
+       "ms": 18.8,
+       "msPerUpdate": 0.157
+      },
+      {
+       "fn": "wasm-function[565] wasm :0",
+       "ms": 16.5,
+       "msPerUpdate": 0.137
+      },
+      {
+       "fn": "emit DEUS_Core.js:257",
+       "ms": 15.2,
+       "msPerUpdate": 0.126
+      },
+      {
+       "fn": "wasm-function[586] wasm :0",
+       "ms": 15,
+       "msPerUpdate": 0.125
+      },
+      {
+       "fn": "planPath DEUS_World.js:2047",
+       "ms": 15,
+       "msPerUpdate": 0.125
+      },
+      {
+       "fn": "wasm-function[472] wasm :0",
+       "ms": 14.9,
+       "msPerUpdate": 0.124
+      },
+      {
+       "fn": "Sprite_DepthRoot.scanUnits DEUS_Depth.js:1055",
+       "ms": 13.9,
+       "msPerUpdate": 0.116
+      },
+      {
+       "fn": "texSubImage2D texSubImage2D:0",
+       "ms": 13.5,
+       "msPerUpdate": 0.112
+      },
+      {
+       "fn": "standableIn DEUS_Jobs.js:245",
+       "ms": 13.4,
+       "msPerUpdate": 0.112
+      },
+      {
+       "fn": "Container.calculateBounds pixi.js:8176",
+       "ms": 12.9,
+       "msPerUpdate": 0.107
+      },
+      {
+       "fn": "World.unitsInArea DEUS_World.js:1304",
+       "ms": 12.4,
+       "msPerUpdate": 0.103
+      },
+      {
+       "fn": "layout DEUS_Combat.js:1915",
+       "ms": 11.4,
+       "msPerUpdate": 0.095
+      },
+      {
+       "fn": "Container.render pixi.js:8235",
+       "ms": 11.3,
+       "msPerUpdate": 0.095
+      }
+     ],
+     "topInclusive": [
+      {
+       "fn": "(root) (root):0",
+       "ms": 5612.2,
+       "msPerUpdate": 46.768
+      },
+      {
+       "fn": "Ticker._tick pixi.js:9294",
+       "ms": 5066.6,
+       "msPerUpdate": 42.222
+      },
+      {
+       "fn": "Ticker.update pixi.js:9505",
+       "ms": 5063,
+       "msPerUpdate": 42.191
+      },
+      {
+       "fn": "TickerListener.emit pixi.js:9090",
+       "ms": 5061.9,
+       "msPerUpdate": 42.183
+      },
+      {
+       "fn": "Graphics._onTick DEUS_BenchRender.js:65",
+       "ms": 5059.9,
+       "msPerUpdate": 42.166
+      },
+      {
+       "fn": "now DEUS_BenchRender.js:14",
+       "ms": 5057.8,
+       "msPerUpdate": 42.148
+      },
+      {
+       "fn": "Graphics._onTick rmmz_core.js:808",
+       "ms": 5057.8,
+       "msPerUpdate": 42.148
+      },
+      {
+       "fn": "f DEUS_BenchRender.js:25",
+       "ms": 5056.8,
+       "msPerUpdate": 42.14
+      },
+      {
+       "fn": "SceneManager.update DEUS_TimeSpeed.js:159",
+       "ms": 4774.3,
+       "msPerUpdate": 39.786
+      },
+      {
+       "fn": "SceneManager.updateMain DEUS_Test.js:119",
+       "ms": 4773.8,
+       "msPerUpdate": 39.782
+      },
+      {
+       "fn": "SceneManager.updateMain rmmz_managers.js:2102",
+       "ms": 4773.3,
+       "msPerUpdate": 39.778
+      },
+      {
+       "fn": "SceneManager.updateScene rmmz_managers.js:2143",
+       "ms": 4596.4,
+       "msPerUpdate": 38.304
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Select.js:2289",
+       "ms": 4595.9,
+       "msPerUpdate": 38.299
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Containers.js:1323",
+       "ms": 4595.9,
+       "msPerUpdate": 38.299
+      },
+      {
+       "fn": "Scene_Map.update DEUS_BenchRender.js:142",
+       "ms": 4594.9,
+       "msPerUpdate": 38.291
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Depth.js:1174",
+       "ms": 4556.5,
+       "msPerUpdate": 37.971
+      },
+      {
+       "fn": "Scene_Map.update DEUS_NaturalConnections.js:508",
+       "ms": 4510.7,
+       "msPerUpdate": 37.59
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Levels.js:4334",
+       "ms": 4506.6,
+       "msPerUpdate": 37.555
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Talk.js:1938",
+       "ms": 4477.3,
+       "msPerUpdate": 37.311
+      },
+      {
+       "fn": "Scene_Map.update DEUS_TimeSpeed.js:232",
+       "ms": 4475.8,
+       "msPerUpdate": 37.298
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Sheet.js:2252",
+       "ms": 4475.8,
+       "msPerUpdate": 37.298
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Factions.js:1156",
+       "ms": 4474.7,
+       "msPerUpdate": 37.289
+      },
+      {
+       "fn": "Scene_Map.update DEUS_History.js:3662",
+       "ms": 4474.7,
+       "msPerUpdate": 37.289
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Combat.js:1479",
+       "ms": 4474.7,
+       "msPerUpdate": 37.289
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Factions.js:751",
+       "ms": 4474.2,
+       "msPerUpdate": 37.285
+      },
+      {
+       "fn": "Scene_Map.update DEUS_ColonyOverseer.js:196",
+       "ms": 4473.2,
+       "msPerUpdate": 37.277
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Core.js:505",
+       "ms": 4472.2,
+       "msPerUpdate": 37.268
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Core.js:175",
+       "ms": 4471.6,
+       "msPerUpdate": 37.264
+      },
+      {
+       "fn": "Scene_Map.update rmmz_scenes.js:819",
+       "ms": 4471.1,
+       "msPerUpdate": 37.259
+      },
+      {
+       "fn": "Scene_Map.updateMainMultiply rmmz_scenes.js:833",
+       "ms": 4199.1,
+       "msPerUpdate": 34.992
+      },
+      {
+       "fn": "Scene_Map.updateMain rmmz_scenes.js:841",
+       "ms": 4181,
+       "msPerUpdate": 34.842
+      },
+      {
+       "fn": "Scene_Map.updateMain DEUS_TimeSpeed.js:210",
+       "ms": 4181,
+       "msPerUpdate": 34.842
+      },
+      {
+       "fn": "Game_Map.update DEUS_Environment.js:796",
+       "ms": 4120.4,
+       "msPerUpdate": 34.337
+      },
+      {
+       "fn": "Game_Map.update DEUS_Fire.js:617",
+       "ms": 2971.5,
+       "msPerUpdate": 24.763
+      },
+      {
+       "fn": "Game_Map.update DEUS_Ownership.js:613",
+       "ms": 2971.5,
+       "msPerUpdate": 24.763
+      },
+      {
+       "fn": "Game_Map.update DEUS_Fog.js:638",
+       "ms": 2970.5,
+       "msPerUpdate": 24.754
+      },
+      {
+       "fn": "Game_Map.update DEUS_TimeSpeed.js:189",
+       "ms": 2970.5,
+       "msPerUpdate": 24.754
+      },
+      {
+       "fn": "Game_Map.update DEUS_Anim.js:1506",
+       "ms": 2970,
+       "msPerUpdate": 24.75
+      },
+      {
+       "fn": "Game_Map.update DEUS_Combat.js:1414",
+       "ms": 2968.4,
+       "msPerUpdate": 24.737
+      },
+      {
+       "fn": "Game_Map.update DEUS_Ecology.js:992",
+       "ms": 2966.9,
+       "msPerUpdate": 24.724
+      },
+      {
+       "fn": "Game_Map.update DEUS_Projects.js:1596",
+       "ms": 2958.6,
+       "msPerUpdate": 24.655
+      },
+      {
+       "fn": "Game_Map.update DEUS_Wildlife.js:1195",
+       "ms": 2958.6,
+       "msPerUpdate": 24.655
+      },
+      {
+       "fn": "Game_Map.update DEUS_Colonists.js:5748",
+       "ms": 2957.6,
+       "msPerUpdate": 24.647
+      },
+      {
+       "fn": "World.walkable DEUS_World.js:2747",
+       "ms": 1604.3,
+       "msPerUpdate": 13.369
+      },
+      {
+       "fn": "Game_Map.update DEUS_Jobs.js:1777",
+       "ms": 1557.3,
+       "msPerUpdate": 12.978
+      },
+      {
+       "fn": "standableIn DEUS_Jobs.js:245",
+       "ms": 1513.2,
+       "msPerUpdate": 12.61
+      },
+      {
+       "fn": "atIn DEUS_Objects.js:968",
+       "ms": 1467.6,
+       "msPerUpdate": 12.23
+      },
+      {
+       "fn": "scan DEUS_Colonists.js:5250",
+       "ms": 1399.8,
+       "msPerUpdate": 11.665
+      },
+      {
+       "fn": "decide DEUS_Colonists.js:5169",
+       "ms": 1317.3,
+       "msPerUpdate": 10.977
+      },
+      {
+       "fn": "(anonymous) DEUS_Objects.js:82",
+       "ms": 1248.2,
+       "msPerUpdate": 10.402
+      },
+      {
+       "fn": "idleJob DEUS_Colonists.js:5030",
+       "ms": 1192.2,
+       "msPerUpdate": 9.935
+      },
+      {
+       "fn": "updateEnvironment DEUS_Environment.js:720",
+       "ms": 1147.9,
+       "msPerUpdate": 9.566
+      },
+      {
+       "fn": "stepUnitThermal DEUS_Environment.js:559",
+       "ms": 1139.6,
+       "msPerUpdate": 9.497
+      },
+      {
+       "fn": "updateWetness DEUS_Environment.js:418",
+       "ms": 1133.5,
+       "msPerUpdate": 9.445
+      },
+      {
+       "fn": "isRoofed DEUS_Floors.js:198",
+       "ms": 1129.3,
+       "msPerUpdate": 9.411
+      },
+      {
+       "fn": "roomAt DEUS_Floors.js:152",
+       "ms": 1126.3,
+       "msPerUpdate": 9.385
+      },
+      {
+       "fn": "computeRoom DEUS_Floors.js:127",
+       "ms": 1122.1,
+       "msPerUpdate": 9.351
+      },
+      {
+       "fn": "gridOf DEUS_World.js:1926",
+       "ms": 1101,
+       "msPerUpdate": 9.175
+      },
+      {
+       "fn": "freeCellNear DEUS_Colonists.js:1010",
+       "ms": 982.8,
+       "msPerUpdate": 8.19
+      },
+      {
+       "fn": "isBarrier DEUS_Floors.js:91",
+       "ms": 888,
+       "msPerUpdate": 7.4
+      }
+     ],
+     "selfByScript": [
+      {
+       "fn": "DEUS_Objects.js",
+       "ms": 1843.3,
+       "msPerUpdate": 15.361
+      },
+      {
+       "fn": "DEUS_World.js",
+       "ms": 1603.1,
+       "msPerUpdate": 13.359
+      },
+      {
+       "fn": "(garbage collector)",
+       "ms": 334.3,
+       "msPerUpdate": 2.786
+      },
+      {
+       "fn": "wasm ",
+       "ms": 287.2,
+       "msPerUpdate": 2.393
+      },
+      {
+       "fn": "rmmz_objects.js",
+       "ms": 204.7,
+       "msPerUpdate": 1.706
+      },
+      {
+       "fn": "open",
+       "ms": 152.5,
+       "msPerUpdate": 1.271
+      },
+      {
+       "fn": "pixi.js",
+       "ms": 150.6,
+       "msPerUpdate": 1.255
+      },
+      {
+       "fn": "DEUS_Jobs.js",
+       "ms": 104.7,
+       "msPerUpdate": 0.873
+      },
+      {
+       "fn": "(idle)",
+       "ms": 99.9,
+       "msPerUpdate": 0.833
+      },
+      {
+       "fn": "(program)",
+       "ms": 85,
+       "msPerUpdate": 0.708
+      },
+      {
+       "fn": "close",
+       "ms": 82.7,
+       "msPerUpdate": 0.689
+      },
+      {
+       "fn": "DEUS_Colonists.js",
+       "ms": 63.4,
+       "msPerUpdate": 0.528
+      },
+      {
+       "fn": "writeBuffer",
+       "ms": 62.4,
+       "msPerUpdate": 0.52
+      },
+      {
+       "fn": "DEUS_BenchRender.js",
+       "ms": 52.4,
+       "msPerUpdate": 0.436
+      },
+      {
+       "fn": "rmmz_core.js",
+       "ms": 50.6,
+       "msPerUpdate": 0.422
+      },
+      {
+       "fn": "DEUS_Depth.js",
+       "ms": 35,
+       "msPerUpdate": 0.292
+      },
+      {
+       "fn": "DEUS_Combat.js",
+       "ms": 33.7,
+       "msPerUpdate": 0.281
+      },
+      {
+       "fn": "fetch",
+       "ms": 28.5,
+       "msPerUpdate": 0.238
+      },
+      {
+       "fn": "DEUS_Levels.js",
+       "ms": 24.7,
+       "msPerUpdate": 0.206
+      },
+      {
+       "fn": "rmmz_sprites.js",
+       "ms": 22.2,
+       "msPerUpdate": 0.185
+      },
+      {
+       "fn": "DEUS_Anim.js",
+       "ms": 18.8,
+       "msPerUpdate": 0.156
+      },
+      {
+       "fn": "DEUS_Environment.js",
+       "ms": 17.5,
+       "msPerUpdate": 0.146
+      },
+      {
+       "fn": "DEUS_Core.js",
+       "ms": 16.2,
+       "msPerUpdate": 0.135
+      },
+      {
+       "fn": "DEUS_Floors.js",
+       "ms": 13.9,
+       "msPerUpdate": 0.116
+      },
+      {
+       "fn": "texSubImage2D",
+       "ms": 13.5,
+       "msPerUpdate": 0.112
+      },
+      {
+       "fn": "DEUS_Culling.js",
+       "ms": 12.4,
+       "msPerUpdate": 0.103
+      },
+      {
+       "fn": "fs.js",
+       "ms": 11.4,
+       "msPerUpdate": 0.095
+      },
+      {
+       "fn": "DEUS_Doors.js",
+       "ms": 8.8,
+       "msPerUpdate": 0.073
+      },
+      {
+       "fn": "DEUS_Items.js",
+       "ms": 8.3,
+       "msPerUpdate": 0.069
+      },
+      {
+       "fn": "loader.js",
+       "ms": 7.8,
+       "msPerUpdate": 0.065
+      }
+     ],
+     "inclusiveByScript": [
+      {
+       "fn": "(root)",
+       "ms": 5612.2,
+       "msPerUpdate": 46.768
+      },
+      {
+       "fn": "rmmz_core.js",
+       "ms": 5084.1,
+       "msPerUpdate": 42.368
+      },
+      {
+       "fn": "pixi.js",
+       "ms": 5066.6,
+       "msPerUpdate": 42.222
+      },
+      {
+       "fn": "DEUS_BenchRender.js",
+       "ms": 5059.9,
+       "msPerUpdate": 42.166
+      },
+      {
+       "fn": "DEUS_TimeSpeed.js",
+       "ms": 4774.3,
+       "msPerUpdate": 39.786
+      },
+      {
+       "fn": "DEUS_Test.js",
+       "ms": 4773.8,
+       "msPerUpdate": 39.782
+      },
+      {
+       "fn": "rmmz_managers.js",
+       "ms": 4773.3,
+       "msPerUpdate": 39.778
+      },
+      {
+       "fn": "DEUS_Select.js",
+       "ms": 4595.9,
+       "msPerUpdate": 38.299
+      },
+      {
+       "fn": "DEUS_Containers.js",
+       "ms": 4595.9,
+       "msPerUpdate": 38.299
+      },
+      {
+       "fn": "DEUS_Depth.js",
+       "ms": 4556.5,
+       "msPerUpdate": 37.971
+      },
+      {
+       "fn": "DEUS_NaturalConnections.js",
+       "ms": 4510.7,
+       "msPerUpdate": 37.59
+      },
+      {
+       "fn": "DEUS_Levels.js",
+       "ms": 4506.6,
+       "msPerUpdate": 37.555
+      },
+      {
+       "fn": "DEUS_Combat.js",
+       "ms": 4496.5,
+       "msPerUpdate": 37.471
+      },
+      {
+       "fn": "DEUS_Talk.js",
+       "ms": 4477.3,
+       "msPerUpdate": 37.311
+      },
+      {
+       "fn": "DEUS_Sheet.js",
+       "ms": 4475.8,
+       "msPerUpdate": 37.298
+      },
+      {
+       "fn": "DEUS_Factions.js",
+       "ms": 4474.7,
+       "msPerUpdate": 37.289
+      },
+      {
+       "fn": "DEUS_History.js",
+       "ms": 4474.7,
+       "msPerUpdate": 37.289
+      },
+      {
+       "fn": "DEUS_Core.js",
+       "ms": 4473.2,
+       "msPerUpdate": 37.277
+      },
+      {
+       "fn": "DEUS_ColonyOverseer.js",
+       "ms": 4473.2,
+       "msPerUpdate": 37.277
+      },
+      {
+       "fn": "rmmz_scenes.js",
+       "ms": 4471.1,
+       "msPerUpdate": 37.259
+      },
+      {
+       "fn": "DEUS_Environment.js",
+       "ms": 4120.4,
+       "msPerUpdate": 34.337
+      },
+      {
+       "fn": "DEUS_Anim.js",
+       "ms": 3175.6,
+       "msPerUpdate": 26.463
+      },
+      {
+       "fn": "DEUS_Wildlife.js",
+       "ms": 2984,
+       "msPerUpdate": 24.866
+      },
+      {
+       "fn": "DEUS_Fire.js",
+       "ms": 2972,
+       "msPerUpdate": 24.767
+      },
+      {
+       "fn": "DEUS_Ownership.js",
+       "ms": 2971.5,
+       "msPerUpdate": 24.763
+      },
+      {
+       "fn": "DEUS_Fog.js",
+       "ms": 2970.5,
+       "msPerUpdate": 24.754
+      },
+      {
+       "fn": "DEUS_Ecology.js",
+       "ms": 2966.9,
+       "msPerUpdate": 24.724
+      },
+      {
+       "fn": "DEUS_Colonists.js",
+       "ms": 2958.6,
+       "msPerUpdate": 24.655
+      },
+      {
+       "fn": "DEUS_Projects.js",
+       "ms": 2958.6,
+       "msPerUpdate": 24.655
+      },
+      {
+       "fn": "DEUS_Jobs.js",
+       "ms": 2883.2,
+       "msPerUpdate": 24.026
+      }
+     ]
+    }
+   },
+   "finishedAt": "2026-09-26T11:42:18.551Z",
+   "errors": [],
+   "run": 1,
+   "wallSeconds": 111.5,
+   "exit": 0,
+   "machineLoad": {
+    "label": "quiet",
+    "labelRule": "quiet: overall median CPU <= 25 % and no other nw.exe at the start, in any 15 s check or at the end; otherwise loaded (WG.00.09b Fix 1 section 3.3)",
+    "method": "CPU: os.cpus() idle/total time deltas over all logical CPUs, one sample a second from before nw.exe starts to after it exits (the same quantity as \\Processor(_Total)\\% Processor Time); a sample counts for a phase when its second overlaps the phase's wall span. aiWorkers: PowerShell CIM, claude.exe with ' -p ', grok.exe, node.exe running codex.js exec (the PM's filter); the session running this bench counts as 1. otherNwExe: nw.exe processes that are not this run's own (own: the command line names this run's profile folder, or the parent chain reaches the nw.exe the tool started); otherNw lists them with their command lines.",
+    "startedAt": "2026-09-26T11:40:27.442Z",
+    "finishedAt": "2026-09-26T11:42:18.919Z",
+    "start": {
+     "aiWorkers": 1,
+     "otherNwExe": 0,
+     "otherNw": []
+    },
+    "end": {
+     "aiWorkers": 1,
+     "otherNwExe": 0,
+     "otherNw": []
+    },
+    "during": [
+     {
+      "at": "2026-09-26T11:40:42.777Z",
+      "aiWorkers": 1,
+      "otherNwExe": 0,
+      "otherNw": []
+     },
+     {
+      "at": "2026-09-26T11:40:57.786Z",
+      "aiWorkers": 1,
+      "otherNwExe": 0,
+      "otherNw": []
+     },
+     {
+      "at": "2026-09-26T11:41:12.792Z",
+      "aiWorkers": 1,
+      "otherNwExe": 0,
+      "otherNw": []
+     },
+     {
+      "at": "2026-09-26T11:41:27.793Z",
+      "aiWorkers": 1,
+      "otherNwExe": 0,
+      "otherNw": []
+     },
+     {
+      "at": "2026-09-26T11:41:42.808Z",
+      "aiWorkers": 1,
+      "otherNwExe": 0,
+      "otherNw": []
+     },
+     {
+      "at": "2026-09-26T11:41:57.809Z",
+      "aiWorkers": 1,
+      "otherNwExe": 0,
+      "otherNw": []
+     },
+     {
+      "at": "2026-09-26T11:42:12.810Z",
+      "aiWorkers": 1,
+      "otherNwExe": 0,
+      "otherNw": []
+     }
+    ],
+    "otherNwExeMax": 0,
+    "cpu": {
+     "intervalMs": 1000,
+     "overall": {
+      "samples": 110,
+      "min": 10.3,
+      "median": 17.9,
+      "max": 43.4
+     },
+     "byPhase": {
+      "stress_day_30s": {
+       "samples": 31,
+       "min": 11.8,
+       "median": 15.3,
+       "max": 27
+      },
+      "stress_night_30s": {
+       "samples": 31,
+       "min": 10.9,
+       "median": 13.7,
+       "max": 19.2
+      }
+     },
+     "samples": [
+      {
+       "t": 1790422828784,
+       "cpu": 30.3
+      },
+      {
+       "t": 1790422829792,
+       "cpu": 20.2
+      },
+      {
+       "t": 1790422830802,
+       "cpu": 18.9
+      },
+      {
+       "t": 1790422831802,
+       "cpu": 22.9
+      },
+      {
+       "t": 1790422832807,
+       "cpu": 25.6
+      },
+      {
+       "t": 1790422833808,
+       "cpu": 26.5
+      },
+      {
+       "t": 1790422834812,
+       "cpu": 18.2
+      },
+      {
+       "t": 1790422835819,
+       "cpu": 21.7
+      },
+      {
+       "t": 1790422836822,
+       "cpu": 23.3
+      },
+      {
+       "t": 1790422837827,
+       "cpu": 25.2
+      },
+      {
+       "t": 1790422838827,
+       "cpu": 21.9
+      },
+      {
+       "t": 1790422839833,
+       "cpu": 19.9
+      },
+      {
+       "t": 1790422840834,
+       "cpu": 24.7
+      },
+      {
+       "t": 1790422841836,
+       "cpu": 28.7
+      },
+      {
+       "t": 1790422842840,
+       "cpu": 31.8
+      },
+      {
+       "t": 1790422843853,
+       "cpu": 43.4
+      },
+      {
+       "t": 1790422844858,
+       "cpu": 20.3
+      },
+      {
+       "t": 1790422845862,
+       "cpu": 10.3
+      },
+      {
+       "t": 1790422846868,
+       "cpu": 16.7
+      },
+      {
+       "t": 1790422847874,
+       "cpu": 22.7
+      },
+      {
+       "t": 1790422848876,
+       "cpu": 21.5
+      },
+      {
+       "t": 1790422849882,
+       "cpu": 22.7
+      },
+      {
+       "t": 1790422850886,
+       "cpu": 25.4
+      },
+      {
+       "t": 1790422851890,
+       "cpu": 26.5
+      },
+      {
+       "t": 1790422852894,
+       "cpu": 21.9
+      },
+      {
+       "t": 1790422853900,
+       "cpu": 27.4
+      },
+      {
+       "t": 1790422854904,
+       "cpu": 28
+      },
+      {
+       "t": 1790422855912,
+       "cpu": 26.2
+      },
+      {
+       "t": 1790422856927,
+       "cpu": 23.4
+      },
+      {
+       "t": 1790422857928,
+       "cpu": 27.9
+      },
+      {
+       "t": 1790422858933,
+       "cpu": 33.1
+      },
+      {
+       "t": 1790422859936,
+       "cpu": 27.5
+      },
+      {
+       "t": 1790422860944,
+       "cpu": 22.5
+      },
+      {
+       "t": 1790422861950,
+       "cpu": 22.4
+      },
+      {
+       "t": 1790422862952,
+       "cpu": 25.8
+      },
+      {
+       "t": 1790422863955,
+       "cpu": 20.8
+      },
+      {
+       "t": 1790422864961,
+       "cpu": 24
+      },
+      {
+       "t": 1790422865962,
+       "cpu": 25.6
+      },
+      {
+       "t": 1790422866966,
+       "cpu": 27
+      },
+      {
+       "t": 1790422867968,
+       "cpu": 26.1
+      },
+      {
+       "t": 1790422868983,
+       "cpu": 22.8
+      },
+      {
+       "t": 1790422869991,
+       "cpu": 26.6
+      },
+      {
+       "t": 1790422871001,
+       "cpu": 23
+      },
+      {
+       "t": 1790422872007,
+       "cpu": 20.4
+      },
+      {
+       "t": 1790422873013,
+       "cpu": 20
+      },
+      {
+       "t": 1790422874029,
+       "cpu": 25.1
+      },
+      {
+       "t": 1790422875036,
+       "cpu": 12.9
+      },
+      {
+       "t": 1790422876038,
+       "cpu": 13.1
+      },
+      {
+       "t": 1790422877042,
+       "cpu": 15.3
+      },
+      {
+       "t": 1790422878047,
+       "cpu": 15.6
+      },
+      {
+       "t": 1790422879055,
+       "cpu": 12.3
+      },
+      {
+       "t": 1790422880061,
+       "cpu": 14.6
+      },
+      {
+       "t": 1790422881064,
+       "cpu": 15.1
+      },
+      {
+       "t": 1790422882069,
+       "cpu": 12.1
+      },
+      {
+       "t": 1790422883076,
+       "cpu": 13
+      },
+      {
+       "t": 1790422884078,
+       "cpu": 11.8
+      },
+      {
+       "t": 1790422885086,
+       "cpu": 12.3
+      },
+      {
+       "t": 1790422886101,
+       "cpu": 14.5
+      },
+      {
+       "t": 1790422887108,
+       "cpu": 14.7
+      },
+      {
+       "t": 1790422888121,
+       "cpu": 17.4
+      },
+      {
+       "t": 1790422889136,
+       "cpu": 17.9
+      },
+      {
+       "t": 1790422890142,
+       "cpu": 12.6
+      },
+      {
+       "t": 1790422891142,
+       "cpu": 12.7
+      },
+      {
+       "t": 1790422892146,
+       "cpu": 13.5
+      },
+      {
+       "t": 1790422893149,
+       "cpu": 17.1
+      },
+      {
+       "t": 1790422894153,
+       "cpu": 16.5
+      },
+      {
+       "t": 1790422895163,
+       "cpu": 14.2
+      },
+      {
+       "t": 1790422896170,
+       "cpu": 17.9
+      },
+      {
+       "t": 1790422897171,
+       "cpu": 18.8
+      },
+      {
+       "t": 1790422898182,
+       "cpu": 20
+      },
+      {
+       "t": 1790422899188,
+       "cpu": 17.7
+      },
+      {
+       "t": 1790422900189,
+       "cpu": 19.8
+      },
+      {
+       "t": 1790422901193,
+       "cpu": 17.4
+      },
+      {
+       "t": 1790422902195,
+       "cpu": 14
+      },
+      {
+       "t": 1790422903203,
+       "cpu": 17.5
+      },
+      {
+       "t": 1790422904207,
+       "cpu": 14.2
+      },
+      {
+       "t": 1790422905211,
+       "cpu": 13.3
+      },
+      {
+       "t": 1790422906214,
+       "cpu": 15.8
+      },
+      {
+       "t": 1790422907221,
+       "cpu": 11
+      },
+      {
+       "t": 1790422908226,
+       "cpu": 16.6
+      },
+      {
+       "t": 1790422909233,
+       "cpu": 18.3
+      },
+      {
+       "t": 1790422910235,
+       "cpu": 12
+      },
+      {
+       "t": 1790422911239,
+       "cpu": 13.1
+      },
+      {
+       "t": 1790422912243,
+       "cpu": 12.3
+      },
+      {
+       "t": 1790422913244,
+       "cpu": 17.8
+      },
+      {
+       "t": 1790422914246,
+       "cpu": 17.1
+      },
+      {
+       "t": 1790422915251,
+       "cpu": 17.4
+      },
+      {
+       "t": 1790422916254,
+       "cpu": 11.6
+      },
+      {
+       "t": 1790422917259,
+       "cpu": 16
+      },
+      {
+       "t": 1790422918263,
+       "cpu": 15.2
+      },
+      {
+       "t": 1790422919269,
+       "cpu": 13.1
+      },
+      {
+       "t": 1790422920271,
+       "cpu": 13.2
+      },
+      {
+       "t": 1790422921277,
+       "cpu": 12.7
+      },
+      {
+       "t": 1790422922280,
+       "cpu": 15.5
+      },
+      {
+       "t": 1790422923281,
+       "cpu": 12.9
+      },
+      {
+       "t": 1790422924285,
+       "cpu": 10.9
+      },
+      {
+       "t": 1790422925291,
+       "cpu": 14.5
+      },
+      {
+       "t": 1790422926296,
+       "cpu": 12
+      },
+      {
+       "t": 1790422927296,
+       "cpu": 12.7
+      },
+      {
+       "t": 1790422928301,
+       "cpu": 14.8
+      },
+      {
+       "t": 1790422929308,
+       "cpu": 13.8
+      },
+      {
+       "t": 1790422930309,
+       "cpu": 13.3
+      },
+      {
+       "t": 1790422931319,
+       "cpu": 13.7
+      },
+      {
+       "t": 1790422932329,
+       "cpu": 12.1
+      },
+      {
+       "t": 1790422933339,
+       "cpu": 19.2
+      },
+      {
+       "t": 1790422934351,
+       "cpu": 22.9
+      },
+      {
+       "t": 1790422935362,
+       "cpu": 20.3
+      },
+      {
+       "t": 1790422936376,
+       "cpu": 19.8
+      },
+      {
+       "t": 1790422937391,
+       "cpu": 18.2
+      },
+      {
+       "t": 1790422938403,
+       "cpu": 18.7
+      }
+     ]
+    },
+    "preRun": [
+     {
+      "at": "2026-09-26T11:39:56.288Z",
+      "probeSeconds": 30,
+      "cpu": {
+       "samples": 30,
+       "min": 2.1,
+       "median": 12.2,
+       "max": 16.7
+      },
+      "aiWorkers": [
+       1,
+       1
+      ],
+      "otherNwExe": [
+       0,
+       0
+      ],
+      "quiet": true,
+      "waitedSeconds": 31
+     }
+    ]
+   },
+   "toolNotes": []
+  },
+  {
+   "scenario": "stress",
+   "startedAt": "2026-09-26T11:42:55.567Z",
+   "phases": [
+    {
+     "phase": "stress_day_30s",
+     "frames": 353,
+     "wallStart": 1790423010413,
+     "wallEnd": 1790423040427,
+     "frameMs": {
+      "median": 67.21,
+      "p95": 204.98,
+      "worst": 511.975
+     },
+     "fps": {
+      "atMedian": 14.879,
+      "atP95": 4.879,
+      "atWorst": 1.953
+     },
+     "over16_7": 353,
+     "over33_4": 324,
+     "over50": 235,
+     "tickMs": {
+      "median": 64.23,
+      "p95": 203.01,
+      "worst": 506.09
+     },
+     "drawCalls": {
+      "median": 210,
+      "p95": 221,
+      "max": 228
+     },
+     "parts": {
+      "bench.driver": {
+       "median": 0.745,
+       "p95": 1.4,
+       "max": 2.67,
+       "mean": 0.814
+      },
+      "depth.plane.objectLayer": {
+       "median": 0.29,
+       "p95": 0.725,
+       "max": 1.82,
+       "mean": 0.335
+      },
+      "depth.plane.placeEntities": {
+       "median": 0.05,
+       "p95": 0.07,
+       "max": 0.375,
+       "mean": 0.051
+      },
+      "depth.plane.placeUnits": {
+       "median": 0.195,
+       "p95": 0.5,
+       "max": 3.14,
+       "mean": 0.238
+      },
+      "depth.plane.rebuildItems": {
+       "median": 0,
+       "p95": 0.02,
+       "max": 0.72,
+       "mean": 0.003
+      },
+      "depth.plane.rebuildWalls": {
+       "median": 0,
+       "p95": 0,
+       "max": 2.785,
+       "mean": 0.026
+      },
+      "depth.plane.sortEntities": {
+       "median": 0.105,
+       "p95": 0.225,
+       "max": 0.355,
+       "mean": 0.112
+      },
+      "depth.plane.tilemapTransform": {
+       "median": 0.035,
+       "p95": 0.05,
+       "max": 0.655,
+       "mean": 0.035
+      },
+      "depth.plane.updateEntities": {
+       "median": 0.355,
+       "p95": 0.825,
+       "max": 3.735,
+       "mean": 0.435
+      },
+      "depth.plane.updatePlane": {
+       "median": 0.415,
+       "p95": 0.885,
+       "max": 3.82,
+       "mean": 0.495
+      },
+      "depth.root.scanUnits": {
+       "median": 0.4,
+       "p95": 0.665,
+       "max": 3.06,
+       "mean": 0.439
+      },
+      "depth.root.updateMask": {
+       "median": 0.005,
+       "p95": 0.015,
+       "max": 0.675,
+       "mean": 0.009
+      },
+      "depth.root.updateUnits": {
+       "median": 0.715,
+       "p95": 1.17,
+       "max": 4.335,
+       "mean": 0.802
+      },
+      "events": {
+       "median": 4.38,
+       "p95": 14.975,
+       "max": 33.57,
+       "mean": 5.638
+      },
+      "paint.tilemaps": {
+       "median": 0,
+       "p95": 0.11,
+       "max": 1.565,
+       "mean": 0.016
+      },
+      "render": {
+       "median": 4.55,
+       "p95": 5.42,
+       "max": 8.175,
+       "mean": 4.67
+      },
+      "render.characters": {
+       "median": 0.595,
+       "p95": 0.795,
+       "max": 1.88,
+       "mean": 0.634
+      },
+      "render.daynight_glow": {
+       "median": 0,
+       "p95": 0,
+       "max": 0.005,
+       "mean": 0
+      },
+      "render.depth": {
+       "median": 0.195,
+       "p95": 0.23,
+       "max": 0.755,
+       "mean": 0.198
+      },
+      "render.fog": {
+       "median": 0,
+       "p95": 0.005,
+       "max": 0.005,
+       "mean": 0
+      },
+      "render.minimap": {
+       "median": 0.005,
+       "p95": 0.01,
+       "max": 0.06,
+       "mean": 0.004
+      },
+      "render.tilemap_layers": {
+       "median": 0.165,
+       "p95": 0.205,
+       "max": 0.975,
+       "mean": 0.173
+      },
+      "update": {
+       "median": 59.19,
+       "p95": 198.615,
+       "max": 501.46,
+       "mean": 77.198
+      },
+      "update.characters": {
+       "median": 0.57,
+       "p95": 0.675,
+       "max": 1.28,
+       "mean": 0.584
+      },
+      "update.daynight_glow": {
+       "median": 0.005,
+       "p95": 0.01,
+       "max": 0.03,
+       "mean": 0.004
+      },
+      "update.depth_late": {
+       "median": 0.725,
+       "p95": 1.18,
+       "max": 4.34,
+       "mean": 0.81
+      },
+      "update.fog": {
+       "median": 0.005,
+       "p95": 0.01,
+       "max": 0.015,
+       "mean": 0.003
+      },
+      "update.fog.refresh": {
+       "median": 0,
+       "p95": 0,
+       "max": 0.005,
+       "mean": 0
+      },
+      "update.map": {
+       "median": 48.995,
+       "p95": 187.59,
+       "max": 489.38,
+       "mean": 66.361
+      },
+      "update.map.world": {
+       "median": 7.13,
+       "p95": 22.01,
+       "max": 48.955,
+       "mean": 10.012
+      },
+      "update.minimap": {
+       "median": 0.1,
+       "p95": 0.16,
+       "max": 1.695,
+       "mean": 0.089
+      },
+      "update.minimap.chunks": {
+       "median": 0.01,
+       "p95": 0.015,
+       "max": 0.02,
+       "mean": 0.009
+      },
+      "update.minimap.overlay": {
+       "median": 0.08,
+       "p95": 0.13,
+       "max": 1.66,
+       "mean": 0.063
+      },
+      "update.spriteset": {
+       "median": 3.96,
+       "p95": 7.26,
+       "max": 11.42,
+       "mean": 4.251
+      },
+      "update.spriteset.tilemap": {
+       "median": 0.19,
+       "p95": 0.25,
+       "max": 3.595,
+       "mean": 0.225
+      },
+      "update.spriteset.tilemap.depth": {
+       "median": 0.44,
+       "p95": 0.98,
+       "max": 3.86,
+       "mean": 0.529
+      }
+     },
+     "peak": {
+      "unitsOnScreenLevel": 75,
+      "unitsOnLowerPlanes": 176,
+      "lowerPlaneSprites": 341,
+      "projectilesAlive": 65,
+      "rmmzAnimationsAlive": 61,
+      "placeholderImpactsAlive": 38,
+      "effectSpritesAlive": 133,
+      "unitsDrawn": 251
+     },
+     "worldEventsPerFrame": {
+      "median": 47,
+      "p95": 125,
+      "max": 139,
+      "listenerCallsMedian": 26,
+      "listenerCallsMax": 118
+     },
+     "wallMs": 30047.3,
+     "hour": 12,
+     "cpuPercent": {
+      "samples": 31,
+      "min": 10.9,
+      "median": 13.9,
+      "max": 22.8
+     }
+    },
+    {
+     "phase": "stress_night_30s",
+     "frames": 328,
+     "wallStart": 1790423048872,
+     "wallEnd": 1790423078743,
+     "frameMs": {
+      "median": 67.675,
+      "p95": 323.495,
+      "worst": 535.365
+     },
+     "fps": {
+      "atMedian": 14.777,
+      "atP95": 3.091,
+      "atWorst": 1.868
+     },
+     "over16_7": 328,
+     "over33_4": 310,
+     "over50": 212,
+     "tickMs": {
+      "median": 66.105,
+      "p95": 317.31,
+      "worst": 529.495
+     },
+     "drawCalls": {
+      "median": 203,
+      "p95": 208,
+      "max": 211
+     },
+     "parts": {
+      "bench.driver": {
+       "median": 0.645,
+       "p95": 1.04,
+       "max": 1.65,
+       "mean": 0.673
+      },
+      "depth.plane.objectLayer": {
+       "median": 0.285,
+       "p95": 0.72,
+       "max": 1.185,
+       "mean": 0.328
+      },
+      "depth.plane.placeEntities": {
+       "median": 0.095,
+       "p95": 0.23,
+       "max": 1.665,
+       "mean": 0.131
+      },
+      "depth.plane.placeUnits": {
+       "median": 0.205,
+       "p95": 0.29,
+       "max": 3.185,
+       "mean": 0.233
+      },
+      "depth.plane.rebuildItems": {
+       "median": 0,
+       "p95": 0.045,
+       "max": 0.185,
+       "mean": 0.008
+      },
+      "depth.plane.rebuildWalls": {
+       "median": 0,
+       "p95": 0,
+       "max": 2.785,
+       "mean": 0.028
+      },
+      "depth.plane.sortEntities": {
+       "median": 0.125,
+       "p95": 0.275,
+       "max": 0.66,
+       "mean": 0.138
+      },
+      "depth.plane.tilemapTransform": {
+       "median": 0.03,
+       "p95": 0.045,
+       "max": 0.06,
+       "mean": 0.033
+      },
+      "depth.plane.updateEntities": {
+       "median": 0.405,
+       "p95": 0.955,
+       "max": 4.13,
+       "mean": 0.507
+      },
+      "depth.plane.updatePlane": {
+       "median": 0.45,
+       "p95": 0.995,
+       "max": 4.185,
+       "mean": 0.557
+      },
+      "depth.root.scanUnits": {
+       "median": 0.41,
+       "p95": 0.56,
+       "max": 1.39,
+       "mean": 0.418
+      },
+      "depth.root.updateMask": {
+       "median": 0.005,
+       "p95": 0.01,
+       "max": 0.02,
+       "mean": 0.004
+      },
+      "depth.root.updateUnits": {
+       "median": 0.755,
+       "p95": 1.135,
+       "max": 3.755,
+       "mean": 0.805
+      },
+      "events": {
+       "median": 4.655,
+       "p95": 14.945,
+       "max": 17.61,
+       "mean": 5.844
+      },
+      "paint.tilemaps": {
+       "median": 0,
+       "p95": 0.085,
+       "max": 0.115,
+       "mean": 0.006
+      },
+      "render": {
+       "median": 4.445,
+       "p95": 5.185,
+       "max": 6.375,
+       "mean": 4.521
+      },
+      "render.characters": {
+       "median": 0.595,
+       "p95": 0.68,
+       "max": 0.915,
+       "mean": 0.605
+      },
+      "render.daynight_glow": {
+       "median": 0,
+       "p95": 0.005,
+       "max": 0.005,
+       "mean": 0
+      },
+      "render.depth": {
+       "median": 0.205,
+       "p95": 0.27,
+       "max": 0.865,
+       "mean": 0.215
+      },
+      "render.fog": {
+       "median": 0,
+       "p95": 0.005,
+       "max": 0.005,
+       "mean": 0
+      },
+      "render.minimap": {
+       "median": 0.005,
+       "p95": 0.01,
+       "max": 0.01,
+       "mean": 0.004
+      },
+      "render.tilemap_layers": {
+       "median": 0.155,
+       "p95": 0.2,
+       "max": 0.275,
+       "mean": 0.16
+      },
+      "update": {
+       "median": 61.29,
+       "p95": 311.545,
+       "max": 525.125,
+       "mean": 83.779
+      },
+      "update.characters": {
+       "median": 0.635,
+       "p95": 0.775,
+       "max": 1.445,
+       "mean": 0.655
+      },
+      "update.daynight_glow": {
+       "median": 0.005,
+       "p95": 0.01,
+       "max": 0.01,
+       "mean": 0.003
+      },
+      "update.depth_late": {
+       "median": 0.76,
+       "p95": 1.145,
+       "max": 3.775,
+       "mean": 0.813
+      },
+      "update.fog": {
+       "median": 0.005,
+       "p95": 0.01,
+       "max": 0.015,
+       "mean": 0.004
+      },
+      "update.fog.refresh": {
+       "median": 0,
+       "p95": 0,
+       "max": 0.005,
+       "mean": 0
+      },
+      "update.map": {
+       "median": 51.155,
+       "p95": 300.655,
+       "max": 513.995,
+       "mean": 72.955
+      },
+      "update.map.world": {
+       "median": 7.845,
+       "p95": 19.99,
+       "max": 88.125,
+       "mean": 10.164
+      },
+      "update.minimap": {
+       "median": 0.11,
+       "p95": 0.16,
+       "max": 0.245,
+       "mean": 0.084
+      },
+      "update.minimap.chunks": {
+       "median": 0.01,
+       "p95": 0.015,
+       "max": 0.02,
+       "mean": 0.008
+      },
+      "update.minimap.overlay": {
+       "median": 0.085,
+       "p95": 0.13,
+       "max": 0.21,
+       "mean": 0.059
+      },
+      "update.spriteset": {
+       "median": 4.13,
+       "p95": 7.26,
+       "max": 10.71,
+       "mean": 4.466
+      },
+      "update.spriteset.tilemap": {
+       "median": 0.195,
+       "p95": 0.37,
+       "max": 3.12,
+       "mean": 0.256
+      },
+      "update.spriteset.tilemap.depth": {
+       "median": 0.47,
+       "p95": 1.015,
+       "max": 4.205,
+       "mean": 0.575
+      }
+     },
+     "peak": {
+      "unitsOnScreenLevel": 84,
+      "unitsOnLowerPlanes": 175,
+      "lowerPlaneSprites": 339,
+      "projectilesAlive": 65,
+      "rmmzAnimationsAlive": 58,
+      "placeholderImpactsAlive": 29,
+      "effectSpritesAlive": 122,
+      "unitsDrawn": 253
+     },
+     "worldEventsPerFrame": {
+      "median": 50,
+      "p95": 127,
+      "max": 139,
+      "listenerCallsMedian": 29,
+      "listenerCallsMax": 116
+     },
+     "wallMs": 30060.1,
+     "hour": 22,
+     "cpuPercent": {
+      "samples": 31,
+      "min": 10.7,
+      "median": 14.2,
+      "max": 27.1
+     }
+    }
+   ],
+   "switches": [],
+   "notes": [],
+   "environment": {
+    "screen": "816x624",
+    "depth": "2 level(s) below, drawn 1:1 (DEC-011), void #08080c",
+    "depthApi": [
+     "PAD",
+     "config",
+     "describe",
+     "edgeShift",
+     "isOpen",
+     "planes",
+     "preloadsPending",
+     "project",
+     "rebuild",
+     "refresh",
+     "root",
+     "setEnabled",
+     "stats",
+     "touch"
+    ],
+    "units": 1163,
+    "wraps": [
+     "update",
+     "update.map",
+     "update.spriteset",
+     "update.spriteset.tilemap",
+     "update.characters",
+     "paint.tilemaps",
+     "render.tilemap_layers",
+     "render.characters",
+     "update.map.world",
+     "events",
+     "update.fog",
+     "update.fog.refresh",
+     "update.daynight_glow",
+     "update.minimap.chunks",
+     "render",
+     "update.spriteset.tilemap.depth",
+     "update.depth_late",
+     "render.depth",
+     "paint.depth_planes",
+     "depth.root.scanUnits",
+     "depth.root.updateMask",
+     "depth.root.updateUnits",
+     "depth.plane.updatePlane",
+     "depth.plane.updateEntities",
+     "depth.plane.placeEntities",
+     "depth.plane.placeUnits",
+     "depth.plane.sortEntities",
+     "depth.plane.rebuildItems",
+     "depth.plane.rebuildWalls",
+     "depth.plane.objectLayer",
+     "depth.plane.tilemapTransform",
+     "update.minimap",
+     "update.minimap.overlay",
+     "update.minimap.chrome",
+     "render.minimap",
+     "render.fog",
+     "render.daynight_glow"
+    ],
+    "gl": "ANGLE (NVIDIA GeForce RTX 4060 Laptop GPU Direct3D11 vs_5_0 ps_5_0)"
+   },
+   "stress": {
+    "cells": 219,
+    "units": 219,
+    "byLevel": {
+     "0": 83,
+     "+2": 75,
+     "+1": 61
+    },
+    "roles": {
+     "melee": 73,
+     "archers": 73,
+     "casters": 73
+    },
+    "window": {
+     "x": 153,
+     "y": 129,
+     "cols": 17,
+     "rows": 13
+    },
+    "seed": "0x5eed0019",
+    "zoom": 1,
+    "effectPaths": {
+     "walk": "UF.World.sendUnit ping-pong (one cell east and back): viewed level through RMMZ event movement and DEUS_Anim walk frames; lower levels through the DEUS_Depth walk tween and walk frames",
+     "melee": "UF.Combat.resolveAttack (bypassGcd) with sword_short: DEUS_Anim attack/hurt one-shots from the AR-600 sheets, DEUS_Combat hitsplats and action bars (viewed level only); plus RMMZ animation 6 Slash Physical (Effekseer; its flash timing flashes the target) on the viewed level",
+     "arrows": "UF.Combat.resolveAttack with bow_short and arrows (attack one-shot on the viewed level); the arrow in flight is a placeholder (see placeholders); impact: RMMZ animation 11 Pierce Physical on the viewed level, the placeholder impact on lower levels",
+     "spells": "data.casting = { targetId } (DEUS_Anim cast frames, viewed level only); a placeholder spell orb in flight; on arrival UF.Combat.resolveAttack({ spell: true }) and RMMZ animation 66 Fire One 1 (impact; its flash timings are the hit flash) on the viewed level, the placeholder impact on lower levels",
+     "lowerLevels": "DEUS_Depth draws only the walk and stand frames of lower-level units; their attacks resolve in the simulation, but the game draws no attack frames, splats, bars or RMMZ animations off the viewed level (the bench adds only its placeholders there)"
+    },
+    "placeholders": {
+     "arrow": {
+      "size": "12x4 px",
+      "color": "#8b5a2b",
+      "note": "arrow in flight: no arrow or projectile sprite exists in the game (no asset)"
+     },
+     "spellOrb": {
+      "size": "10x10 px",
+      "color": "#ff7a1a",
+      "note": "spell projectile in flight: no spell projectile exists in the game (no asset)"
+     },
+     "impactLower": {
+      "size": "24x24 px, 18 frames",
+      "color": "#ffd24a",
+      "note": "impact on a lower-level target: RMMZ animations need a Game_Event, which only the viewed level has"
+     }
+    },
+    "deaths": 0,
+    "attacks": 5618,
+    "animations": 1915,
+    "glowLayer": {
+     "visible": false,
+     "children": 0
+    }
+   },
+   "profiles": {
+    "stress_day": {
+     "updates": 120,
+     "wallMs": 5597,
+     "sampledMs": 6020.4,
+     "samples": 11685,
+     "topSelf": [
+      {
+       "fn": "(anonymous) DEUS_Objects.js:82",
+       "ms": 1887.7,
+       "msPerUpdate": 15.731
+      },
+      {
+       "fn": "table DEUS_Objects.js:80",
+       "ms": 520.3,
+       "msPerUpdate": 4.336
+      },
+      {
+       "fn": "World.walkable DEUS_World.js:2747",
+       "ms": 370.2,
+       "msPerUpdate": 3.085
+      },
+      {
+       "fn": "(garbage collector) (garbage collector):0",
+       "ms": 221.3,
+       "msPerUpdate": 1.845
+      },
+      {
+       "fn": "isBarrier DEUS_Floors.js:91",
+       "ms": 199.2,
+       "msPerUpdate": 1.66
+      },
+      {
+       "fn": "atIn DEUS_Objects.js:968",
+       "ms": 196.2,
+       "msPerUpdate": 1.635
+      },
+      {
+       "fn": "open open:0",
+       "ms": 181.2,
+       "msPerUpdate": 1.51
+      },
+      {
+       "fn": "Game_Map.events rmmz_objects.js:6236",
+       "ms": 161.2,
+       "msPerUpdate": 1.343
+      },
+      {
+       "fn": "tintOf DEUS_Objects.js:62",
+       "ms": 144.3,
+       "msPerUpdate": 1.203
+      },
+      {
+       "fn": "(program) (program):0",
+       "ms": 90,
+       "msPerUpdate": 0.75
+      },
+      {
+       "fn": "close close:0",
+       "ms": 77.2,
+       "msPerUpdate": 0.644
+      },
+      {
+       "fn": "stepOpen DEUS_World.js:2588",
+       "ms": 74.9,
+       "msPerUpdate": 0.624
+      },
+      {
+       "fn": "(idle) (idle):0",
+       "ms": 66.5,
+       "msPerUpdate": 0.554
+      },
+      {
+       "fn": "writeBuffer writeBuffer:0",
+       "ms": 54.6,
+       "msPerUpdate": 0.455
+      },
+      {
+       "fn": "occupiedIn DEUS_Jobs.js:217",
+       "ms": 49,
+       "msPerUpdate": 0.408
+      },
+      {
+       "fn": "standerAt DEUS_World.js:1169",
+       "ms": 46.4,
+       "msPerUpdate": 0.387
+      },
+      {
+       "fn": "wasm-function[524] wasm :0",
+       "ms": 43.3,
+       "msPerUpdate": 0.361
+      },
+      {
+       "fn": "cellWalkableForRoom DEUS_Floors.js:106",
+       "ms": 42.7,
+       "msPerUpdate": 0.356
+      },
+      {
+       "fn": "levelKey DEUS_World.js:160",
+       "ms": 39.6,
+       "msPerUpdate": 0.33
+      },
+      {
+       "fn": "lethalHazardAt DEUS_Jobs.js:964",
+       "ms": 37.1,
+       "msPerUpdate": 0.309
+      },
+      {
+       "fn": "fetch fetch:0",
+       "ms": 35.7,
+       "msPerUpdate": 0.298
+      },
+      {
+       "fn": "offscreenOccupancy DEUS_World.js:1601",
+       "ms": 30.2,
+       "msPerUpdate": 0.252
+      },
+      {
+       "fn": "now DEUS_BenchRender.js:14",
+       "ms": 26,
+       "msPerUpdate": 0.217
+      },
+      {
+       "fn": "gridOf DEUS_World.js:1926",
+       "ms": 25.9,
+       "msPerUpdate": 0.216
+      },
+      {
+       "fn": "enterable DEUS_World.js:2093",
+       "ms": 25.4,
+       "msPerUpdate": 0.212
+      },
+      {
+       "fn": "layout DEUS_Combat.js:1915",
+       "ms": 23.1,
+       "msPerUpdate": 0.193
+      },
+      {
+       "fn": "set pixi.js:7594",
+       "ms": 23,
+       "msPerUpdate": 0.192
+      },
+      {
+       "fn": "update DEUS_Combat.js:1814",
+       "ms": 22.3,
+       "msPerUpdate": 0.186
+      },
+      {
+       "fn": "Container.updateTransform pixi.js:8157",
+       "ms": 22.2,
+       "msPerUpdate": 0.185
+      },
+      {
+       "fn": "wasm-function[541] wasm :0",
+       "ms": 22.2,
+       "msPerUpdate": 0.185
+      },
+      {
+       "fn": "World.update DEUS_World.js:1787",
+       "ms": 22,
+       "msPerUpdate": 0.183
+      },
+      {
+       "fn": "planPath DEUS_World.js:2047",
+       "ms": 20.7,
+       "msPerUpdate": 0.172
+      },
+      {
+       "fn": "busyWindowIn DEUS_Levels.js:4293",
+       "ms": 19.6,
+       "msPerUpdate": 0.163
+      },
+      {
+       "fn": "wasm-function[472] wasm :0",
+       "ms": 19.1,
+       "msPerUpdate": 0.159
+      },
+      {
+       "fn": "cellQuery DEUS_Levels.js:1299",
+       "ms": 18.1,
+       "msPerUpdate": 0.151
+      },
+      {
+       "fn": "wasm-function[586] wasm :0",
+       "ms": 17.6,
+       "msPerUpdate": 0.147
+      },
+      {
+       "fn": "World.getTile DEUS_World.js:737",
+       "ms": 17.5,
+       "msPerUpdate": 0.146
+      },
+      {
+       "fn": "typeOf DEUS_Objects.js:101",
+       "ms": 16,
+       "msPerUpdate": 0.133
+      },
+      {
+       "fn": "Container.calculateBounds pixi.js:8176",
+       "ms": 16,
+       "msPerUpdate": 0.133
+      },
+      {
+       "fn": "Sprite_DepthRoot.scanUnits DEUS_Depth.js:1055",
+       "ms": 15.5,
+       "msPerUpdate": 0.129
+      }
+     ],
+     "topInclusive": [
+      {
+       "fn": "(root) (root):0",
+       "ms": 6020.4,
+       "msPerUpdate": 50.17
+      },
+      {
+       "fn": "Ticker._tick pixi.js:9294",
+       "ms": 5613.1,
+       "msPerUpdate": 46.776
+      },
+      {
+       "fn": "Ticker.update pixi.js:9505",
+       "ms": 5610.5,
+       "msPerUpdate": 46.754
+      },
+      {
+       "fn": "TickerListener.emit pixi.js:9090",
+       "ms": 5609.5,
+       "msPerUpdate": 46.746
+      },
+      {
+       "fn": "Graphics._onTick DEUS_BenchRender.js:65",
+       "ms": 5607.9,
+       "msPerUpdate": 46.733
+      },
+      {
+       "fn": "Graphics._onTick rmmz_core.js:808",
+       "ms": 5606.4,
+       "msPerUpdate": 46.72
+      },
+      {
+       "fn": "now DEUS_BenchRender.js:14",
+       "ms": 5605.3,
+       "msPerUpdate": 46.711
+      },
+      {
+       "fn": "f DEUS_BenchRender.js:25",
+       "ms": 5605.3,
+       "msPerUpdate": 46.711
+      },
+      {
+       "fn": "SceneManager.updateMain DEUS_Test.js:119",
+       "ms": 5291.2,
+       "msPerUpdate": 44.093
+      },
+      {
+       "fn": "SceneManager.update DEUS_TimeSpeed.js:159",
+       "ms": 5291.2,
+       "msPerUpdate": 44.093
+      },
+      {
+       "fn": "SceneManager.updateMain rmmz_managers.js:2102",
+       "ms": 5290.7,
+       "msPerUpdate": 44.089
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Select.js:2289",
+       "ms": 5105.8,
+       "msPerUpdate": 42.548
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Containers.js:1323",
+       "ms": 5105.8,
+       "msPerUpdate": 42.548
+      },
+      {
+       "fn": "SceneManager.updateScene rmmz_managers.js:2143",
+       "ms": 5105.8,
+       "msPerUpdate": 42.548
+      },
+      {
+       "fn": "Scene_Map.update DEUS_BenchRender.js:142",
+       "ms": 5104.2,
+       "msPerUpdate": 42.535
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Depth.js:1174",
+       "ms": 5061.4,
+       "msPerUpdate": 42.178
+      },
+      {
+       "fn": "Scene_Map.update DEUS_NaturalConnections.js:508",
+       "ms": 4998,
+       "msPerUpdate": 41.65
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Levels.js:4334",
+       "ms": 4993.9,
+       "msPerUpdate": 41.616
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Sheet.js:2252",
+       "ms": 4953.5,
+       "msPerUpdate": 41.279
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Talk.js:1938",
+       "ms": 4953.5,
+       "msPerUpdate": 41.279
+      },
+      {
+       "fn": "Scene_Map.update DEUS_History.js:3662",
+       "ms": 4953,
+       "msPerUpdate": 41.275
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Combat.js:1479",
+       "ms": 4953,
+       "msPerUpdate": 41.275
+      },
+      {
+       "fn": "Scene_Map.update DEUS_TimeSpeed.js:232",
+       "ms": 4953,
+       "msPerUpdate": 41.275
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Factions.js:1156",
+       "ms": 4952.5,
+       "msPerUpdate": 41.271
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Core.js:505",
+       "ms": 4949.9,
+       "msPerUpdate": 41.249
+      },
+      {
+       "fn": "Scene_Map.update DEUS_ColonyOverseer.js:196",
+       "ms": 4949.9,
+       "msPerUpdate": 41.249
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Factions.js:751",
+       "ms": 4949.9,
+       "msPerUpdate": 41.249
+      },
+      {
+       "fn": "Scene_Map.update rmmz_scenes.js:819",
+       "ms": 4949.4,
+       "msPerUpdate": 41.245
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Core.js:175",
+       "ms": 4949.4,
+       "msPerUpdate": 41.245
+      },
+      {
+       "fn": "Scene_Map.updateMainMultiply rmmz_scenes.js:833",
+       "ms": 4574.2,
+       "msPerUpdate": 38.119
+      },
+      {
+       "fn": "Scene_Map.updateMain rmmz_scenes.js:841",
+       "ms": 4557.2,
+       "msPerUpdate": 37.977
+      },
+      {
+       "fn": "Scene_Map.updateMain DEUS_TimeSpeed.js:210",
+       "ms": 4557.2,
+       "msPerUpdate": 37.977
+      },
+      {
+       "fn": "Game_Map.update DEUS_Environment.js:796",
+       "ms": 4492.5,
+       "msPerUpdate": 37.437
+      },
+      {
+       "fn": "updateEnvironment DEUS_Environment.js:720",
+       "ms": 2668.8,
+       "msPerUpdate": 22.24
+      },
+      {
+       "fn": "stepUnitThermal DEUS_Environment.js:559",
+       "ms": 2653.3,
+       "msPerUpdate": 22.111
+      },
+      {
+       "fn": "updateWetness DEUS_Environment.js:418",
+       "ms": 2639.6,
+       "msPerUpdate": 21.997
+      },
+      {
+       "fn": "isRoofed DEUS_Floors.js:198",
+       "ms": 2633.9,
+       "msPerUpdate": 21.949
+      },
+      {
+       "fn": "roomAt DEUS_Floors.js:152",
+       "ms": 2628.7,
+       "msPerUpdate": 21.906
+      },
+      {
+       "fn": "computeRoom DEUS_Floors.js:127",
+       "ms": 2622.6,
+       "msPerUpdate": 21.855
+      },
+      {
+       "fn": "isBarrier DEUS_Floors.js:91",
+       "ms": 2111.8,
+       "msPerUpdate": 17.598
+      },
+      {
+       "fn": "(anonymous) DEUS_Objects.js:82",
+       "ms": 2028.5,
+       "msPerUpdate": 16.904
+      },
+      {
+       "fn": "Game_Map.update DEUS_Ownership.js:613",
+       "ms": 1823.7,
+       "msPerUpdate": 15.197
+      },
+      {
+       "fn": "Game_Map.update DEUS_Fire.js:617",
+       "ms": 1821.6,
+       "msPerUpdate": 15.18
+      },
+      {
+       "fn": "Game_Map.update DEUS_TimeSpeed.js:189",
+       "ms": 1821.1,
+       "msPerUpdate": 15.176
+      },
+      {
+       "fn": "Game_Map.update DEUS_Anim.js:1506",
+       "ms": 1820.6,
+       "msPerUpdate": 15.172
+      },
+      {
+       "fn": "Game_Map.update DEUS_Fog.js:638",
+       "ms": 1820.6,
+       "msPerUpdate": 15.172
+      },
+      {
+       "fn": "Game_Map.update DEUS_Combat.js:1414",
+       "ms": 1819.1,
+       "msPerUpdate": 15.159
+      },
+      {
+       "fn": "Game_Map.update DEUS_Ecology.js:992",
+       "ms": 1818.5,
+       "msPerUpdate": 15.155
+      },
+      {
+       "fn": "Game_Map.update DEUS_Projects.js:1596",
+       "ms": 1811.3,
+       "msPerUpdate": 15.094
+      },
+      {
+       "fn": "Game_Map.update DEUS_Wildlife.js:1195",
+       "ms": 1811.3,
+       "msPerUpdate": 15.094
+      },
+      {
+       "fn": "Game_Map.update DEUS_Colonists.js:5748",
+       "ms": 1806.6,
+       "msPerUpdate": 15.055
+      },
+      {
+       "fn": "isGap DEUS_Floors.js:101",
+       "ms": 1313.1,
+       "msPerUpdate": 10.942
+      },
+      {
+       "fn": "Game_Map.update DEUS_Jobs.js:1777",
+       "ms": 1276.3,
+       "msPerUpdate": 10.636
+      },
+      {
+       "fn": "cellWalkableForRoom DEUS_Floors.js:106",
+       "ms": 900.5,
+       "msPerUpdate": 7.504
+      },
+      {
+       "fn": "atIn DEUS_Objects.js:968",
+       "ms": 765.7,
+       "msPerUpdate": 6.381
+      },
+      {
+       "fn": "Game_Map.update DEUS_Factions.js:657",
+       "ms": 762,
+       "msPerUpdate": 6.35
+      },
+      {
+       "fn": "Game_Map.update DEUS_World.js:3169",
+       "ms": 758.4,
+       "msPerUpdate": 6.32
+      },
+      {
+       "fn": "(anonymous) DEUS_Culling.js:300",
+       "ms": 706.1,
+       "msPerUpdate": 5.884
+      },
+      {
+       "fn": "withAllSprites DEUS_Culling.js:284",
+       "ms": 706.1,
+       "msPerUpdate": 5.884
+      },
+      {
+       "fn": "wrapped DEUS_Culling.js:298",
+       "ms": 706.1,
+       "msPerUpdate": 5.884
+      }
+     ],
+     "selfByScript": [
+      {
+       "fn": "DEUS_Objects.js",
+       "ms": 2787.8,
+       "msPerUpdate": 23.232
+      },
+      {
+       "fn": "DEUS_World.js",
+       "ms": 753.1,
+       "msPerUpdate": 6.276
+      },
+      {
+       "fn": "wasm ",
+       "ms": 290.5,
+       "msPerUpdate": 2.421
+      },
+      {
+       "fn": "DEUS_Floors.js",
+       "ms": 260.9,
+       "msPerUpdate": 2.174
+      },
+      {
+       "fn": "(garbage collector)",
+       "ms": 221.3,
+       "msPerUpdate": 1.845
+      },
+      {
+       "fn": "rmmz_objects.js",
+       "ms": 191.7,
+       "msPerUpdate": 1.597
+      },
+      {
+       "fn": "open",
+       "ms": 181.2,
+       "msPerUpdate": 1.51
+      },
+      {
+       "fn": "pixi.js",
+       "ms": 170,
+       "msPerUpdate": 1.417
+      },
+      {
+       "fn": "DEUS_Jobs.js",
+       "ms": 132.5,
+       "msPerUpdate": 1.104
+      },
+      {
+       "fn": "(program)",
+       "ms": 90,
+       "msPerUpdate": 0.75
+      },
+      {
+       "fn": "DEUS_Combat.js",
+       "ms": 77.4,
+       "msPerUpdate": 0.645
+      },
+      {
+       "fn": "close",
+       "ms": 77.2,
+       "msPerUpdate": 0.644
+      },
+      {
+       "fn": "(idle)",
+       "ms": 66.5,
+       "msPerUpdate": 0.554
+      },
+      {
+       "fn": "rmmz_core.js",
+       "ms": 65.1,
+       "msPerUpdate": 0.542
+      },
+      {
+       "fn": "DEUS_Levels.js",
+       "ms": 65,
+       "msPerUpdate": 0.542
+      },
+      {
+       "fn": "DEUS_Depth.js",
+       "ms": 60.2,
+       "msPerUpdate": 0.501
+      },
+      {
+       "fn": "writeBuffer",
+       "ms": 54.6,
+       "msPerUpdate": 0.455
+      },
+      {
+       "fn": "DEUS_Anim.js",
+       "ms": 51.8,
+       "msPerUpdate": 0.431
+      },
+      {
+       "fn": "DEUS_BenchRender.js",
+       "ms": 45.3,
+       "msPerUpdate": 0.377
+      },
+      {
+       "fn": "fetch",
+       "ms": 35.7,
+       "msPerUpdate": 0.298
+      },
+      {
+       "fn": "DEUS_Environment.js",
+       "ms": 30.3,
+       "msPerUpdate": 0.253
+      },
+      {
+       "fn": "rmmz_sprites.js",
+       "ms": 24,
+       "msPerUpdate": 0.2
+      },
+      {
+       "fn": "DEUS_Colonists.js",
+       "ms": 23.3,
+       "msPerUpdate": 0.194
+      },
+      {
+       "fn": "DEUS_Culling.js",
+       "ms": 18.1,
+       "msPerUpdate": 0.151
+      },
+      {
+       "fn": "loaders.js",
+       "ms": 13.6,
+       "msPerUpdate": 0.113
+      },
+      {
+       "fn": "DEUS_Fire.js",
+       "ms": 11.9,
+       "msPerUpdate": 0.099
+      },
+      {
+       "fn": "setExport",
+       "ms": 10.4,
+       "msPerUpdate": 0.087
+      },
+      {
+       "fn": "texSubImage2D",
+       "ms": 10.3,
+       "msPerUpdate": 0.086
+      },
+      {
+       "fn": "DEUS_Core.js",
+       "ms": 8.9,
+       "msPerUpdate": 0.074
+      },
+      {
+       "fn": "DEUS_Perspective25D.js",
+       "ms": 8.8,
+       "msPerUpdate": 0.073
+      }
+     ],
+     "inclusiveByScript": [
+      {
+       "fn": "(root)",
+       "ms": 6020.4,
+       "msPerUpdate": 50.17
+      },
+      {
+       "fn": "rmmz_core.js",
+       "ms": 5635.3,
+       "msPerUpdate": 46.961
+      },
+      {
+       "fn": "pixi.js",
+       "ms": 5613.1,
+       "msPerUpdate": 46.776
+      },
+      {
+       "fn": "DEUS_BenchRender.js",
+       "ms": 5608.5,
+       "msPerUpdate": 46.737
+      },
+      {
+       "fn": "DEUS_Test.js",
+       "ms": 5291.7,
+       "msPerUpdate": 44.098
+      },
+      {
+       "fn": "DEUS_TimeSpeed.js",
+       "ms": 5291.2,
+       "msPerUpdate": 44.093
+      },
+      {
+       "fn": "rmmz_managers.js",
+       "ms": 5290.7,
+       "msPerUpdate": 44.089
+      },
+      {
+       "fn": "DEUS_Select.js",
+       "ms": 5105.8,
+       "msPerUpdate": 42.548
+      },
+      {
+       "fn": "DEUS_Containers.js",
+       "ms": 5105.8,
+       "msPerUpdate": 42.548
+      },
+      {
+       "fn": "DEUS_Depth.js",
+       "ms": 5061.9,
+       "msPerUpdate": 42.182
+      },
+      {
+       "fn": "DEUS_NaturalConnections.js",
+       "ms": 4998,
+       "msPerUpdate": 41.65
+      },
+      {
+       "fn": "DEUS_Levels.js",
+       "ms": 4994.4,
+       "msPerUpdate": 41.62
+      },
+      {
+       "fn": "DEUS_Combat.js",
+       "ms": 4979.8,
+       "msPerUpdate": 41.498
+      },
+      {
+       "fn": "DEUS_Sheet.js",
+       "ms": 4953.5,
+       "msPerUpdate": 41.279
+      },
+      {
+       "fn": "DEUS_Talk.js",
+       "ms": 4953.5,
+       "msPerUpdate": 41.279
+      },
+      {
+       "fn": "DEUS_History.js",
+       "ms": 4953,
+       "msPerUpdate": 41.275
+      },
+      {
+       "fn": "DEUS_Factions.js",
+       "ms": 4952.5,
+       "msPerUpdate": 41.271
+      },
+      {
+       "fn": "DEUS_Core.js",
+       "ms": 4951.5,
+       "msPerUpdate": 41.262
+      },
+      {
+       "fn": "DEUS_ColonyOverseer.js",
+       "ms": 4949.9,
+       "msPerUpdate": 41.249
+      },
+      {
+       "fn": "rmmz_scenes.js",
+       "ms": 4949.4,
+       "msPerUpdate": 41.245
+      },
+      {
+       "fn": "DEUS_Environment.js",
+       "ms": 4492.5,
+       "msPerUpdate": 37.437
+      },
+      {
+       "fn": "DEUS_Objects.js",
+       "ms": 2837.9,
+       "msPerUpdate": 23.649
+      },
+      {
+       "fn": "DEUS_Floors.js",
+       "ms": 2633.9,
+       "msPerUpdate": 21.949
+      },
+      {
+       "fn": "DEUS_Anim.js",
+       "ms": 2136.2,
+       "msPerUpdate": 17.802
+      },
+      {
+       "fn": "DEUS_Wildlife.js",
+       "ms": 1845.7,
+       "msPerUpdate": 15.381
+      },
+      {
+       "fn": "DEUS_Ownership.js",
+       "ms": 1823.7,
+       "msPerUpdate": 15.197
+      },
+      {
+       "fn": "DEUS_Fire.js",
+       "ms": 1821.6,
+       "msPerUpdate": 15.18
+      },
+      {
+       "fn": "DEUS_Fog.js",
+       "ms": 1820.6,
+       "msPerUpdate": 15.172
+      },
+      {
+       "fn": "DEUS_Ecology.js",
+       "ms": 1818.5,
+       "msPerUpdate": 15.155
+      },
+      {
+       "fn": "DEUS_Projects.js",
+       "ms": 1811.3,
+       "msPerUpdate": 15.094
+      }
+     ]
+    },
+    "stress_night": {
+     "updates": 120,
+     "wallMs": 6419.4,
+     "sampledMs": 6634,
+     "samples": 12850,
+     "topSelf": [
+      {
+       "fn": "(anonymous) DEUS_Objects.js:82",
+       "ms": 1589.4,
+       "msPerUpdate": 13.245
+      },
+      {
+       "fn": "World.walkable DEUS_World.js:2747",
+       "ms": 1019.4,
+       "msPerUpdate": 8.495
+      },
+      {
+       "fn": "table DEUS_Objects.js:80",
+       "ms": 439.5,
+       "msPerUpdate": 3.663
+      },
+      {
+       "fn": "gridOf DEUS_World.js:1926",
+       "ms": 279.6,
+       "msPerUpdate": 2.33
+      },
+      {
+       "fn": "(garbage collector) (garbage collector):0",
+       "ms": 278.7,
+       "msPerUpdate": 2.322
+      },
+      {
+       "fn": "Game_Map.events rmmz_objects.js:6236",
+       "ms": 185.9,
+       "msPerUpdate": 1.549
+      },
+      {
+       "fn": "open open:0",
+       "ms": 162.8,
+       "msPerUpdate": 1.356
+      },
+      {
+       "fn": "atIn DEUS_Objects.js:968",
+       "ms": 151.9,
+       "msPerUpdate": 1.266
+      },
+      {
+       "fn": "isBarrier DEUS_Floors.js:91",
+       "ms": 142.5,
+       "msPerUpdate": 1.188
+      },
+      {
+       "fn": "occupiedIn DEUS_Jobs.js:217",
+       "ms": 131.3,
+       "msPerUpdate": 1.094
+      },
+      {
+       "fn": "tintOf DEUS_Objects.js:62",
+       "ms": 128.9,
+       "msPerUpdate": 1.074
+      },
+      {
+       "fn": "standerAt DEUS_World.js:1169",
+       "ms": 125.2,
+       "msPerUpdate": 1.044
+      },
+      {
+       "fn": "(program) (program):0",
+       "ms": 92.8,
+       "msPerUpdate": 0.774
+      },
+      {
+       "fn": "(idle) (idle):0",
+       "ms": 88,
+       "msPerUpdate": 0.733
+      },
+      {
+       "fn": "close close:0",
+       "ms": 79,
+       "msPerUpdate": 0.658
+      },
+      {
+       "fn": "writeBuffer writeBuffer:0",
+       "ms": 59.2,
+       "msPerUpdate": 0.494
+      },
+      {
+       "fn": "stepOpen DEUS_World.js:2588",
+       "ms": 55.4,
+       "msPerUpdate": 0.462
+      },
+      {
+       "fn": "wasm-function[524] wasm :0",
+       "ms": 49,
+       "msPerUpdate": 0.408
+      },
+      {
+       "fn": "levelKey DEUS_World.js:160",
+       "ms": 46.5,
+       "msPerUpdate": 0.387
+      },
+      {
+       "fn": "lethalHazardAt DEUS_Jobs.js:964",
+       "ms": 42.9,
+       "msPerUpdate": 0.358
+      },
+      {
+       "fn": "fetch fetch:0",
+       "ms": 36.8,
+       "msPerUpdate": 0.306
+      },
+      {
+       "fn": "cellWalkableForRoom DEUS_Floors.js:106",
+       "ms": 29.8,
+       "msPerUpdate": 0.249
+      },
+      {
+       "fn": "now DEUS_BenchRender.js:14",
+       "ms": 27.9,
+       "msPerUpdate": 0.233
+      },
+      {
+       "fn": "typeFlags DEUS_World.js:1874",
+       "ms": 25.7,
+       "msPerUpdate": 0.214
+      },
+      {
+       "fn": "offscreenOccupancy DEUS_World.js:1601",
+       "ms": 25.5,
+       "msPerUpdate": 0.213
+      },
+      {
+       "fn": "layout DEUS_Combat.js:1915",
+       "ms": 24.9,
+       "msPerUpdate": 0.207
+      },
+      {
+       "fn": "update DEUS_Combat.js:1814",
+       "ms": 24.3,
+       "msPerUpdate": 0.202
+      },
+      {
+       "fn": "World.getTile DEUS_World.js:737",
+       "ms": 22.6,
+       "msPerUpdate": 0.189
+      },
+      {
+       "fn": "wasm-function[541] wasm :0",
+       "ms": 22.1,
+       "msPerUpdate": 0.185
+      },
+      {
+       "fn": "World.update DEUS_World.js:1787",
+       "ms": 20.3,
+       "msPerUpdate": 0.169
+      },
+      {
+       "fn": "wasm-function[472] wasm :0",
+       "ms": 20.1,
+       "msPerUpdate": 0.168
+      },
+      {
+       "fn": "set pixi.js:7594",
+       "ms": 18.7,
+       "msPerUpdate": 0.156
+      },
+      {
+       "fn": "standableIn DEUS_Jobs.js:245",
+       "ms": 17.5,
+       "msPerUpdate": 0.146
+      },
+      {
+       "fn": "step DEUS_Jobs.js:1635",
+       "ms": 17.5,
+       "msPerUpdate": 0.146
+      },
+      {
+       "fn": "wasm-function[565] wasm :0",
+       "ms": 17,
+       "msPerUpdate": 0.142
+      },
+      {
+       "fn": "emit DEUS_Core.js:257",
+       "ms": 16.7,
+       "msPerUpdate": 0.14
+      },
+      {
+       "fn": "Container.updateTransform pixi.js:8157",
+       "ms": 16.5,
+       "msPerUpdate": 0.137
+      },
+      {
+       "fn": "enterable DEUS_World.js:2093",
+       "ms": 15.5,
+       "msPerUpdate": 0.129
+      },
+      {
+       "fn": "findIn DEUS_Objects.js:421",
+       "ms": 15,
+       "msPerUpdate": 0.125
+      },
+      {
+       "fn": "planPath DEUS_World.js:2047",
+       "ms": 14.4,
+       "msPerUpdate": 0.12
+      }
+     ],
+     "topInclusive": [
+      {
+       "fn": "(root) (root):0",
+       "ms": 6634,
+       "msPerUpdate": 55.283
+      },
+      {
+       "fn": "Ticker._tick pixi.js:9294",
+       "ms": 6146.1,
+       "msPerUpdate": 51.217
+      },
+      {
+       "fn": "Ticker.update pixi.js:9505",
+       "ms": 6145,
+       "msPerUpdate": 51.209
+      },
+      {
+       "fn": "TickerListener.emit pixi.js:9090",
+       "ms": 6144.5,
+       "msPerUpdate": 51.204
+      },
+      {
+       "fn": "Graphics._onTick DEUS_BenchRender.js:65",
+       "ms": 6142.4,
+       "msPerUpdate": 51.187
+      },
+      {
+       "fn": "f DEUS_BenchRender.js:25",
+       "ms": 6141.4,
+       "msPerUpdate": 51.178
+      },
+      {
+       "fn": "Graphics._onTick rmmz_core.js:808",
+       "ms": 6141.4,
+       "msPerUpdate": 51.178
+      },
+      {
+       "fn": "now DEUS_BenchRender.js:14",
+       "ms": 6140.4,
+       "msPerUpdate": 51.17
+      },
+      {
+       "fn": "SceneManager.update DEUS_TimeSpeed.js:159",
+       "ms": 5835.4,
+       "msPerUpdate": 48.628
+      },
+      {
+       "fn": "SceneManager.updateMain DEUS_Test.js:119",
+       "ms": 5834.9,
+       "msPerUpdate": 48.624
+      },
+      {
+       "fn": "SceneManager.updateMain rmmz_managers.js:2102",
+       "ms": 5833.8,
+       "msPerUpdate": 48.615
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Containers.js:1323",
+       "ms": 5644,
+       "msPerUpdate": 47.034
+      },
+      {
+       "fn": "SceneManager.updateScene rmmz_managers.js:2143",
+       "ms": 5644,
+       "msPerUpdate": 47.034
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Select.js:2289",
+       "ms": 5643,
+       "msPerUpdate": 47.025
+      },
+      {
+       "fn": "Scene_Map.update DEUS_BenchRender.js:142",
+       "ms": 5641.5,
+       "msPerUpdate": 47.012
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Depth.js:1174",
+       "ms": 5604.1,
+       "msPerUpdate": 46.701
+      },
+      {
+       "fn": "Scene_Map.update DEUS_NaturalConnections.js:508",
+       "ms": 5556.2,
+       "msPerUpdate": 46.302
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Levels.js:4334",
+       "ms": 5553.2,
+       "msPerUpdate": 46.276
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Talk.js:1938",
+       "ms": 5519.7,
+       "msPerUpdate": 45.997
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Sheet.js:2252",
+       "ms": 5519.2,
+       "msPerUpdate": 45.993
+      },
+      {
+       "fn": "Scene_Map.update DEUS_History.js:3662",
+       "ms": 5518.1,
+       "msPerUpdate": 45.984
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Combat.js:1479",
+       "ms": 5518.1,
+       "msPerUpdate": 45.984
+      },
+      {
+       "fn": "Scene_Map.update DEUS_TimeSpeed.js:232",
+       "ms": 5518.1,
+       "msPerUpdate": 45.984
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Factions.js:1156",
+       "ms": 5517.6,
+       "msPerUpdate": 45.98
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Factions.js:751",
+       "ms": 5517.1,
+       "msPerUpdate": 45.976
+      },
+      {
+       "fn": "Scene_Map.update DEUS_ColonyOverseer.js:196",
+       "ms": 5516.6,
+       "msPerUpdate": 45.971
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Core.js:505",
+       "ms": 5515,
+       "msPerUpdate": 45.959
+      },
+      {
+       "fn": "Scene_Map.update DEUS_Core.js:175",
+       "ms": 5514.7,
+       "msPerUpdate": 45.955
+      },
+      {
+       "fn": "Scene_Map.update rmmz_scenes.js:819",
+       "ms": 5513.6,
+       "msPerUpdate": 45.947
+      },
+      {
+       "fn": "Scene_Map.updateMainMultiply rmmz_scenes.js:833",
+       "ms": 5151.7,
+       "msPerUpdate": 42.931
+      },
+      {
+       "fn": "Scene_Map.updateMain rmmz_scenes.js:841",
+       "ms": 5133.6,
+       "msPerUpdate": 42.78
+      },
+      {
+       "fn": "Scene_Map.updateMain DEUS_TimeSpeed.js:210",
+       "ms": 5133.6,
+       "msPerUpdate": 42.78
+      },
+      {
+       "fn": "Game_Map.update DEUS_Environment.js:796",
+       "ms": 5065.2,
+       "msPerUpdate": 42.21
+      },
+      {
+       "fn": "Game_Map.update DEUS_Ownership.js:613",
+       "ms": 3180.9,
+       "msPerUpdate": 26.508
+      },
+      {
+       "fn": "Game_Map.update DEUS_Fire.js:617",
+       "ms": 3157.3,
+       "msPerUpdate": 26.31
+      },
+      {
+       "fn": "Game_Map.update DEUS_Fog.js:638",
+       "ms": 3156.7,
+       "msPerUpdate": 26.306
+      },
+      {
+       "fn": "Game_Map.update DEUS_TimeSpeed.js:189",
+       "ms": 3156.7,
+       "msPerUpdate": 26.306
+      },
+      {
+       "fn": "Game_Map.update DEUS_Anim.js:1506",
+       "ms": 3156.2,
+       "msPerUpdate": 26.302
+      },
+      {
+       "fn": "Game_Map.update DEUS_Combat.js:1414",
+       "ms": 3153.4,
+       "msPerUpdate": 26.279
+      },
+      {
+       "fn": "Game_Map.update DEUS_Ecology.js:992",
+       "ms": 3152.4,
+       "msPerUpdate": 26.27
+      },
+      {
+       "fn": "Game_Map.update DEUS_Projects.js:1596",
+       "ms": 3146.7,
+       "msPerUpdate": 26.222
+      },
+      {
+       "fn": "Game_Map.update DEUS_Wildlife.js:1195",
+       "ms": 3146.7,
+       "msPerUpdate": 26.222
+      },
+      {
+       "fn": "Game_Map.update DEUS_Colonists.js:5748",
+       "ms": 3138.1,
+       "msPerUpdate": 26.151
+      },
+      {
+       "fn": "updateEnvironment DEUS_Environment.js:720",
+       "ms": 1884.3,
+       "msPerUpdate": 15.703
+      },
+      {
+       "fn": "stepUnitThermal DEUS_Environment.js:559",
+       "ms": 1878.1,
+       "msPerUpdate": 15.651
+      },
+      {
+       "fn": "updateWetness DEUS_Environment.js:418",
+       "ms": 1872.5,
+       "msPerUpdate": 15.604
+      },
+      {
+       "fn": "isRoofed DEUS_Floors.js:198",
+       "ms": 1868.9,
+       "msPerUpdate": 15.574
+      },
+      {
+       "fn": "scan DEUS_Colonists.js:5250",
+       "ms": 1866.9,
+       "msPerUpdate": 15.557
+      },
+      {
+       "fn": "roomAt DEUS_Floors.js:152",
+       "ms": 1863.2,
+       "msPerUpdate": 15.527
+      },
+      {
+       "fn": "computeRoom DEUS_Floors.js:127",
+       "ms": 1857,
+       "msPerUpdate": 15.475
+      },
+      {
+       "fn": "standableIn DEUS_Jobs.js:245",
+       "ms": 1822.2,
+       "msPerUpdate": 15.185
+      },
+      {
+       "fn": "decide DEUS_Colonists.js:5169",
+       "ms": 1802.3,
+       "msPerUpdate": 15.019
+      },
+      {
+       "fn": "(anonymous) DEUS_Objects.js:82",
+       "ms": 1715.2,
+       "msPerUpdate": 14.293
+      },
+      {
+       "fn": "World.walkable DEUS_World.js:2747",
+       "ms": 1649.3,
+       "msPerUpdate": 13.744
+      },
+      {
+       "fn": "isBarrier DEUS_Floors.js:91",
+       "ms": 1501.4,
+       "msPerUpdate": 12.512
+      },
+      {
+       "fn": "Game_Map.update DEUS_Jobs.js:1777",
+       "ms": 1269.7,
+       "msPerUpdate": 10.581
+      },
+      {
+       "fn": "hazardReflexJob DEUS_Colonists.js:1719",
+       "ms": 945.1,
+       "msPerUpdate": 7.876
+      },
+      {
+       "fn": "safeCellNear DEUS_Jobs.js:1019",
+       "ms": 944.6,
+       "msPerUpdate": 7.871
+      },
+      {
+       "fn": "isGap DEUS_Floors.js:101",
+       "ms": 916.7,
+       "msPerUpdate": 7.639
+      },
+      {
+       "fn": "needJob DEUS_Colonists.js:2121",
+       "ms": 725.1,
+       "msPerUpdate": 6.043
+      }
+     ],
+     "selfByScript": [
+      {
+       "fn": "DEUS_Objects.js",
+       "ms": 2358.8,
+       "msPerUpdate": 19.657
+      },
+      {
+       "fn": "DEUS_World.js",
+       "ms": 1711.9,
+       "msPerUpdate": 14.266
+      },
+      {
+       "fn": "wasm ",
+       "ms": 301.6,
+       "msPerUpdate": 2.514
+      },
+      {
+       "fn": "(garbage collector)",
+       "ms": 278.7,
+       "msPerUpdate": 2.322
+      },
+      {
+       "fn": "DEUS_Jobs.js",
+       "ms": 238.8,
+       "msPerUpdate": 1.99
+      },
+      {
+       "fn": "rmmz_objects.js",
+       "ms": 208.2,
+       "msPerUpdate": 1.735
+      },
+      {
+       "fn": "DEUS_Floors.js",
+       "ms": 189.4,
+       "msPerUpdate": 1.578
+      },
+      {
+       "fn": "open",
+       "ms": 162.8,
+       "msPerUpdate": 1.356
+      },
+      {
+       "fn": "pixi.js",
+       "ms": 151.2,
+       "msPerUpdate": 1.26
+      },
+      {
+       "fn": "(program)",
+       "ms": 92.8,
+       "msPerUpdate": 0.774
+      },
+      {
+       "fn": "(idle)",
+       "ms": 88,
+       "msPerUpdate": 0.733
+      },
+      {
+       "fn": "close",
+       "ms": 79,
+       "msPerUpdate": 0.658
+      },
+      {
+       "fn": "DEUS_Combat.js",
+       "ms": 73,
+       "msPerUpdate": 0.608
+      },
+      {
+       "fn": "writeBuffer",
+       "ms": 59.2,
+       "msPerUpdate": 0.494
+      },
+      {
+       "fn": "rmmz_core.js",
+       "ms": 58.4,
+       "msPerUpdate": 0.487
+      },
+      {
+       "fn": "DEUS_Levels.js",
+       "ms": 45.3,
+       "msPerUpdate": 0.378
+      },
+      {
+       "fn": "DEUS_BenchRender.js",
+       "ms": 41.9,
+       "msPerUpdate": 0.349
+      },
+      {
+       "fn": "DEUS_Colonists.js",
+       "ms": 41.1,
+       "msPerUpdate": 0.342
+      },
+      {
+       "fn": "DEUS_Depth.js",
+       "ms": 39.9,
+       "msPerUpdate": 0.333
+      },
+      {
+       "fn": "DEUS_Anim.js",
+       "ms": 37.3,
+       "msPerUpdate": 0.311
+      },
+      {
+       "fn": "fetch",
+       "ms": 36.8,
+       "msPerUpdate": 0.306
+      },
+      {
+       "fn": "rmmz_sprites.js",
+       "ms": 20.3,
+       "msPerUpdate": 0.169
+      },
+      {
+       "fn": "DEUS_Culling.js",
+       "ms": 18.7,
+       "msPerUpdate": 0.155
+      },
+      {
+       "fn": "DEUS_Core.js",
+       "ms": 18.2,
+       "msPerUpdate": 0.151
+      },
+      {
+       "fn": "DEUS_Ownership.js",
+       "ms": 16.9,
+       "msPerUpdate": 0.141
+      },
+      {
+       "fn": "DEUS_Environment.js",
+       "ms": 13.9,
+       "msPerUpdate": 0.116
+      },
+      {
+       "fn": "setExport",
+       "ms": 12.5,
+       "msPerUpdate": 0.104
+      },
+      {
+       "fn": "texSubImage2D",
+       "ms": 12.4,
+       "msPerUpdate": 0.103
+      },
+      {
+       "fn": "DEUS_Doors.js",
+       "ms": 11.9,
+       "msPerUpdate": 0.099
+      },
+      {
+       "fn": "fs.js",
+       "ms": 10.9,
+       "msPerUpdate": 0.091
+      }
+     ],
+     "inclusiveByScript": [
+      {
+       "fn": "(root)",
+       "ms": 6634,
+       "msPerUpdate": 55.283
+      },
+      {
+       "fn": "rmmz_core.js",
+       "ms": 6167.8,
+       "msPerUpdate": 51.398
+      },
+      {
+       "fn": "pixi.js",
+       "ms": 6146.1,
+       "msPerUpdate": 51.217
+      },
+      {
+       "fn": "DEUS_BenchRender.js",
+       "ms": 6143,
+       "msPerUpdate": 51.191
+      },
+      {
+       "fn": "DEUS_TimeSpeed.js",
+       "ms": 5835.4,
+       "msPerUpdate": 48.628
+      },
+      {
+       "fn": "DEUS_Test.js",
+       "ms": 5834.9,
+       "msPerUpdate": 48.624
+      },
+      {
+       "fn": "rmmz_managers.js",
+       "ms": 5833.8,
+       "msPerUpdate": 48.615
+      },
+      {
+       "fn": "DEUS_Containers.js",
+       "ms": 5644,
+       "msPerUpdate": 47.034
+      },
+      {
+       "fn": "DEUS_Select.js",
+       "ms": 5643,
+       "msPerUpdate": 47.025
+      },
+      {
+       "fn": "DEUS_Depth.js",
+       "ms": 5605.2,
+       "msPerUpdate": 46.71
+      },
+      {
+       "fn": "DEUS_NaturalConnections.js",
+       "ms": 5556.2,
+       "msPerUpdate": 46.302
+      },
+      {
+       "fn": "DEUS_Levels.js",
+       "ms": 5554.2,
+       "msPerUpdate": 46.285
+      },
+      {
+       "fn": "DEUS_Combat.js",
+       "ms": 5538.9,
+       "msPerUpdate": 46.157
+      },
+      {
+       "fn": "DEUS_Talk.js",
+       "ms": 5519.7,
+       "msPerUpdate": 45.997
+      },
+      {
+       "fn": "DEUS_Sheet.js",
+       "ms": 5519.2,
+       "msPerUpdate": 45.993
+      },
+      {
+       "fn": "DEUS_History.js",
+       "ms": 5518.1,
+       "msPerUpdate": 45.984
+      },
+      {
+       "fn": "DEUS_Factions.js",
+       "ms": 5517.6,
+       "msPerUpdate": 45.98
+      },
+      {
+       "fn": "DEUS_ColonyOverseer.js",
+       "ms": 5516.6,
+       "msPerUpdate": 45.971
+      },
+      {
+       "fn": "DEUS_Core.js",
+       "ms": 5515,
+       "msPerUpdate": 45.959
+      },
+      {
+       "fn": "rmmz_scenes.js",
+       "ms": 5513.6,
+       "msPerUpdate": 45.947
+      },
+      {
+       "fn": "DEUS_Environment.js",
+       "ms": 5065.2,
+       "msPerUpdate": 42.21
+      },
+      {
+       "fn": "DEUS_Anim.js",
+       "ms": 3442.8,
+       "msPerUpdate": 28.69
+      },
+      {
+       "fn": "DEUS_Ownership.js",
+       "ms": 3181.4,
+       "msPerUpdate": 26.512
+      },
+      {
+       "fn": "DEUS_Wildlife.js",
+       "ms": 3179.9,
+       "msPerUpdate": 26.499
+      },
+      {
+       "fn": "DEUS_Fire.js",
+       "ms": 3159.3,
+       "msPerUpdate": 26.328
+      },
+      {
+       "fn": "DEUS_Fog.js",
+       "ms": 3157.3,
+       "msPerUpdate": 26.31
+      },
+      {
+       "fn": "DEUS_Ecology.js",
+       "ms": 3152.4,
+       "msPerUpdate": 26.27
+      },
+      {
+       "fn": "DEUS_Projects.js",
+       "ms": 3146.7,
+       "msPerUpdate": 26.222
+      },
+      {
+       "fn": "DEUS_Colonists.js",
+       "ms": 3138.6,
+       "msPerUpdate": 26.155
+      },
+      {
+       "fn": "DEUS_Jobs.js",
+       "ms": 3118.4,
+       "msPerUpdate": 25.987
+      }
+     ]
+    }
+   },
+   "finishedAt": "2026-09-26T11:44:45.719Z",
+   "errors": [],
+   "run": 2,
+   "wallSeconds": 111.8,
+   "exit": 0,
+   "machineLoad": {
+    "label": "quiet",
+    "labelRule": "quiet: overall median CPU <= 25 % and no other nw.exe at the start, in any 15 s check or at the end; otherwise loaded (WG.00.09b Fix 1 section 3.3)",
+    "method": "CPU: os.cpus() idle/total time deltas over all logical CPUs, one sample a second from before nw.exe starts to after it exits (the same quantity as \\Processor(_Total)\\% Processor Time); a sample counts for a phase when its second overlaps the phase's wall span. aiWorkers: PowerShell CIM, claude.exe with ' -p ', grok.exe, node.exe running codex.js exec (the PM's filter); the session running this bench counts as 1. otherNwExe: nw.exe processes that are not this run's own (own: the command line names this run's profile folder, or the parent chain reaches the nw.exe the tool started); otherNw lists them with their command lines.",
+    "startedAt": "2026-09-26T11:42:54.321Z",
+    "finishedAt": "2026-09-26T11:44:46.062Z",
+    "start": {
+     "aiWorkers": 1,
+     "otherNwExe": 0,
+     "otherNw": []
+    },
+    "end": {
+     "aiWorkers": 1,
+     "otherNwExe": 0,
+     "otherNw": []
+    },
+    "during": [
+     {
+      "at": "2026-09-26T11:43:09.663Z",
+      "aiWorkers": 1,
+      "otherNwExe": 0,
+      "otherNw": []
+     },
+     {
+      "at": "2026-09-26T11:43:24.677Z",
+      "aiWorkers": 1,
+      "otherNwExe": 0,
+      "otherNw": []
+     },
+     {
+      "at": "2026-09-26T11:43:39.678Z",
+      "aiWorkers": 1,
+      "otherNwExe": 0,
+      "otherNw": []
+     },
+     {
+      "at": "2026-09-26T11:43:54.682Z",
+      "aiWorkers": 1,
+      "otherNwExe": 0,
+      "otherNw": []
+     },
+     {
+      "at": "2026-09-26T11:44:09.684Z",
+      "aiWorkers": 1,
+      "otherNwExe": 0,
+      "otherNw": []
+     },
+     {
+      "at": "2026-09-26T11:44:24.686Z",
+      "aiWorkers": 1,
+      "otherNwExe": 0,
+      "otherNw": []
+     },
+     {
+      "at": "2026-09-26T11:44:39.694Z",
+      "aiWorkers": 1,
+      "otherNwExe": 0,
+      "otherNw": []
+     }
+    ],
+    "otherNwExeMax": 0,
+    "cpu": {
+     "intervalMs": 1000,
+     "overall": {
+      "samples": 110,
+      "min": 8.9,
+      "median": 14.6,
+      "max": 33.1
+     },
+     "byPhase": {
+      "stress_day_30s": {
+       "samples": 31,
+       "min": 10.9,
+       "median": 13.9,
+       "max": 22.8
+      },
+      "stress_night_30s": {
+       "samples": 31,
+       "min": 10.7,
+       "median": 14.2,
+       "max": 27.1
+      }
+     },
+     "samples": [
+      {
+       "t": 1790422975661,
+       "cpu": 31.3
+      },
+      {
+       "t": 1790422976662,
+       "cpu": 15.5
+      },
+      {
+       "t": 1790422977668,
+       "cpu": 15.6
+      },
+      {
+       "t": 1790422978674,
+       "cpu": 13.2
+      },
+      {
+       "t": 1790422979680,
+       "cpu": 13.3
+      },
+      {
+       "t": 1790422980681,
+       "cpu": 25.8
+      },
+      {
+       "t": 1790422981683,
+       "cpu": 18.2
+      },
+      {
+       "t": 1790422982689,
+       "cpu": 9.7
+      },
+      {
+       "t": 1790422983694,
+       "cpu": 11.7
+      },
+      {
+       "t": 1790422984698,
+       "cpu": 16.8
+      },
+      {
+       "t": 1790422985711,
+       "cpu": 16.5
+      },
+      {
+       "t": 1790422986720,
+       "cpu": 10.2
+      },
+      {
+       "t": 1790422987726,
+       "cpu": 14.4
+      },
+      {
+       "t": 1790422988728,
+       "cpu": 33.1
+      },
+      {
+       "t": 1790422989742,
+       "cpu": 26
+      },
+      {
+       "t": 1790422990744,
+       "cpu": 20.1
+      },
+      {
+       "t": 1790422991749,
+       "cpu": 12.6
+      },
+      {
+       "t": 1790422992756,
+       "cpu": 9.6
+      },
+      {
+       "t": 1790422993760,
+       "cpu": 17.9
+      },
+      {
+       "t": 1790422994767,
+       "cpu": 9.2
+      },
+      {
+       "t": 1790422995769,
+       "cpu": 8.9
+      },
+      {
+       "t": 1790422996773,
+       "cpu": 12.4
+      },
+      {
+       "t": 1790422997779,
+       "cpu": 13.5
+      },
+      {
+       "t": 1790422998790,
+       "cpu": 12
+      },
+      {
+       "t": 1790422999794,
+       "cpu": 13.5
+      },
+      {
+       "t": 1790423000802,
+       "cpu": 10.8
+      },
+      {
+       "t": 1790423001805,
+       "cpu": 14.4
+      },
+      {
+       "t": 1790423002809,
+       "cpu": 10.9
+      },
+      {
+       "t": 1790423003813,
+       "cpu": 14.6
+      },
+      {
+       "t": 1790423004818,
+       "cpu": 17.4
+      },
+      {
+       "t": 1790423005832,
+       "cpu": 14.7
+      },
+      {
+       "t": 1790423006835,
+       "cpu": 16.1
+      },
+      {
+       "t": 1790423007849,
+       "cpu": 14.2
+      },
+      {
+       "t": 1790423008858,
+       "cpu": 16
+      },
+      {
+       "t": 1790423009864,
+       "cpu": 16.5
+      },
+      {
+       "t": 1790423010865,
+       "cpu": 12.5
+      },
+      {
+       "t": 1790423011872,
+       "cpu": 15.9
+      },
+      {
+       "t": 1790423012881,
+       "cpu": 13.7
+      },
+      {
+       "t": 1790423013883,
+       "cpu": 16
+      },
+      {
+       "t": 1790423014889,
+       "cpu": 13.5
+      },
+      {
+       "t": 1790423015893,
+       "cpu": 13.1
+      },
+      {
+       "t": 1790423016900,
+       "cpu": 12.9
+      },
+      {
+       "t": 1790423017909,
+       "cpu": 13.9
+      },
+      {
+       "t": 1790423018912,
+       "cpu": 16.3
+      },
+      {
+       "t": 1790423019913,
+       "cpu": 17.4
+      },
+      {
+       "t": 1790423020918,
+       "cpu": 22.8
+      },
+      {
+       "t": 1790423021922,
+       "cpu": 13.3
+      },
+      {
+       "t": 1790423022930,
+       "cpu": 13.3
+      },
+      {
+       "t": 1790423023936,
+       "cpu": 14.9
+      },
+      {
+       "t": 1790423024940,
+       "cpu": 10.9
+      },
+      {
+       "t": 1790423025948,
+       "cpu": 14.8
+      },
+      {
+       "t": 1790423026955,
+       "cpu": 12.8
+      },
+      {
+       "t": 1790423027957,
+       "cpu": 11.5
+      },
+      {
+       "t": 1790423028960,
+       "cpu": 14.3
+      },
+      {
+       "t": 1790423029963,
+       "cpu": 16.4
+      },
+      {
+       "t": 1790423030970,
+       "cpu": 12.8
+      },
+      {
+       "t": 1790423031973,
+       "cpu": 11.9
+      },
+      {
+       "t": 1790423032988,
+       "cpu": 13.5
+      },
+      {
+       "t": 1790423033991,
+       "cpu": 13.4
+      },
+      {
+       "t": 1790423034997,
+       "cpu": 18.9
+      },
+      {
+       "t": 1790423036000,
+       "cpu": 14.6
+      },
+      {
+       "t": 1790423037003,
+       "cpu": 14.5
+      },
+      {
+       "t": 1790423038007,
+       "cpu": 13.1
+      },
+      {
+       "t": 1790423039010,
+       "cpu": 15.8
+      },
+      {
+       "t": 1790423040024,
+       "cpu": 15.4
+      },
+      {
+       "t": 1790423041026,
+       "cpu": 19.1
+      },
+      {
+       "t": 1790423042031,
+       "cpu": 20.3
+      },
+      {
+       "t": 1790423043045,
+       "cpu": 18.7
+      },
+      {
+       "t": 1790423044058,
+       "cpu": 18.6
+      },
+      {
+       "t": 1790423045073,
+       "cpu": 18.4
+      },
+      {
+       "t": 1790423046077,
+       "cpu": 22.1
+      },
+      {
+       "t": 1790423047077,
+       "cpu": 15
+      },
+      {
+       "t": 1790423048086,
+       "cpu": 12.2
+      },
+      {
+       "t": 1790423049089,
+       "cpu": 15
+      },
+      {
+       "t": 1790423050091,
+       "cpu": 16.6
+      },
+      {
+       "t": 1790423051097,
+       "cpu": 13.5
+      },
+      {
+       "t": 1790423052102,
+       "cpu": 14.9
+      },
+      {
+       "t": 1790423053107,
+       "cpu": 15.7
+      },
+      {
+       "t": 1790423054111,
+       "cpu": 11.2
+      },
+      {
+       "t": 1790423055115,
+       "cpu": 13
+      },
+      {
+       "t": 1790423056124,
+       "cpu": 14.9
+      },
+      {
+       "t": 1790423057132,
+       "cpu": 10.7
+      },
+      {
+       "t": 1790423058138,
+       "cpu": 17.3
+      },
+      {
+       "t": 1790423059144,
+       "cpu": 13.6
+      },
+      {
+       "t": 1790423060148,
+       "cpu": 13
+      },
+      {
+       "t": 1790423061150,
+       "cpu": 13.8
+      },
+      {
+       "t": 1790423062152,
+       "cpu": 14.9
+      },
+      {
+       "t": 1790423063154,
+       "cpu": 12.1
+      },
+      {
+       "t": 1790423064156,
+       "cpu": 14.2
+      },
+      {
+       "t": 1790423065156,
+       "cpu": 19.7
+      },
+      {
+       "t": 1790423066157,
+       "cpu": 11
+      },
+      {
+       "t": 1790423067162,
+       "cpu": 13
+      },
+      {
+       "t": 1790423068169,
+       "cpu": 14.6
+      },
+      {
+       "t": 1790423069176,
+       "cpu": 11.8
+      },
+      {
+       "t": 1790423070181,
+       "cpu": 14.8
+      },
+      {
+       "t": 1790423071183,
+       "cpu": 15.1
+      },
+      {
+       "t": 1790423072183,
+       "cpu": 27.1
+      },
+      {
+       "t": 1790423073187,
+       "cpu": 19.3
+      },
+      {
+       "t": 1790423074192,
+       "cpu": 13.7
+      },
+      {
+       "t": 1790423075196,
+       "cpu": 13.4
+      },
+      {
+       "t": 1790423076203,
+       "cpu": 12.1
+      },
+      {
+       "t": 1790423077208,
+       "cpu": 11.7
+      },
+      {
+       "t": 1790423078216,
+       "cpu": 15.6
+      },
+      {
+       "t": 1790423079225,
+       "cpu": 15.6
+      },
+      {
+       "t": 1790423080228,
+       "cpu": 23.1
+      },
+      {
+       "t": 1790423081243,
+       "cpu": 20.9
+      },
+      {
+       "t": 1790423082258,
+       "cpu": 19.2
+      },
+      {
+       "t": 1790423083258,
+       "cpu": 20.2
+      },
+      {
+       "t": 1790423084272,
+       "cpu": 20.1
+      },
+      {
+       "t": 1790423085288,
+       "cpu": 26.2
+      }
+     ]
+    },
+    "preRun": [
+     {
+      "at": "2026-09-26T11:42:23.203Z",
+      "probeSeconds": 30,
+      "cpu": {
+       "samples": 30,
+       "min": 1.1,
+       "median": 2.9,
+       "max": 9.1
+      },
+      "aiWorkers": [
+       1,
+       1
+      ],
+      "otherNwExe": [
+       0,
+       0
+      ],
+      "quiet": true,
+      "waitedSeconds": 31
+     }
+    ]
+   },
+   "toolNotes": []
+  }
+ ],
+ "writtenAt": "2026-09-26T11:44:46.449Z",
+ "firstWrittenAt": "2026-09-26T11:42:19.288Z"
+}

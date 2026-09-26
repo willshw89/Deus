@@ -1,0 +1,5 @@
+$ cd C:/Users/snewt/AppData/Local/Temp/lanek-fix2-c2184c94-g7  (fresh clone, git rev-parse HEAD: c2184c949650765a4fe8237eccc09c9106537e86)
+$ node tools/test_palette.js
+START 2026-09-26T11:32:32Z
+Palette loaded successfully
+EXIT=0 DURATION_MS=77

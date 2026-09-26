@@ -1,0 +1,26 @@
+{
+ "what": "one fs.appendFileSync of a 72-byte line, as DEUS_Core UF.Events.emit writes for each listener of each world:* event",
+ "appends": 2000,
+ "microseconds": {
+  "min": 86.4,
+  "median": 115.9,
+  "p95": 170,
+  "max": 14188.4,
+  "mean": 129.9
+ },
+ "machineLoad": {
+  "cpuPercentDuring": 28.7,
+  "aiWorkersBefore": 5,
+  "aiWorkersAfter": 5,
+  "nwExeBefore": 0,
+  "nwExeAfter": 0,
+  "note": "aiWorkers: the PM's filter (claude.exe -p, grok.exe, codex exec); the session running this script counts as 1"
+ },
+ "machine": {
+  "host": "MSI",
+  "cpus": 16,
+  "cpu": "AMD Ryzen 7 8845HS w/ Radeon 780M Graphics",
+  "node": "v24.19.0"
+ },
+ "measuredAt": "2026-09-26T09:29:15.462Z"
+}

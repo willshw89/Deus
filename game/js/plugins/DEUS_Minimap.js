@@ -58,6 +58,7 @@
     const TOTAL_CHUNKS = 256;
     const Z_LEVELS = [2, 1, 0, -1, -2];
     const Z_COUNT = 5;
+    const OVERLAY_FRAMES = 4; // the unit/project/connector overlay is redrawn at most every 4 updates (15 Hz) unless the view changed
 
     // Categorical Information-Graphic Palette (Hex to RGBA)
     const PALETTE = {
@@ -256,7 +257,10 @@
         if (!isDiscovered) return PALETTE.UNKNOWN;
 
         const W = window.UF && UF.World;
-        const area = W && typeof W.viewLevel === "function" ? W.viewLevel() : null;
+        const view = W && typeof W.viewLevel === "function" ? W.viewLevel() : null;
+        // The level of the tab being drawn (z), in the area on screen: never the level on screen, or a tab would show
+        // that level's objects and ground (WG.00.09b K2).
+        const area = view ? { x: view.x, y: view.y, z } : null;
 
         // 1. Check constructed walls, doors, floors, and objects
         const O = window.UF && UF.Objects;
@@ -285,14 +289,16 @@
             }
         }
 
-        // 2. Check Z-level underground shape
-        if (z < 0) {
+        // 2. Check the shape of a level other than the ground: solid rock, open air (nothing there: the void colour), else
+        //    a floor of stone (the ground's kinds below belong to the ground only).
+        if (z !== 0) {
             const L = window.UF && UF.Levels;
             if (L && typeof L.shapeAt === "function") {
                 const s = L.shapeAt({ area, x, y, z });
                 if (s === "solid" || s === 1) {
                     return isVis ? PALETTE.SOLID_WALL : PALETTE.SOLID_WALL_DIM;
                 }
+                if (z > 0 && (s === "open" || s === 3)) return PALETTE.UNKNOWN;
             }
         }
 
@@ -307,7 +313,8 @@
             }
         }
 
-        // 4. Check base terrain / ground kind
+        // 4. Check base terrain / ground kind (the ground only; another level's floor is stone)
+        if (z !== 0) return isVis ? PALETTE.ROCK : PALETTE.ROCK_DIM;
         let groundKind = "meadow";
         if (W && typeof W.groundAt === "function") {
             const g = W.groundAt(x, y);
@@ -413,7 +420,10 @@
             const z = Math.max(-2, Math.min(2, Math.round(Number(val) || 0)));
             if (_state.activeZ !== z) {
                 _state.activeZ = z;
-                markAllChunksDirty(z);
+                // One base bitmap per Z is kept (WG.00.09b K2): a tab already built keeps its chunks, and cell changes on it
+                // dirty only their own chunks, so switching back repaints nothing. A tab never built is filled by
+                // ensureBaseBitmap, which dirties all of its chunks once.
+                ensureBaseBitmap(z);
             }
         },
         get mode() { return _state.mode; },
@@ -621,8 +631,18 @@
                 this._baseSprite.bitmap = baseBmp;
             }
 
-            // Update dynamic overlay
-            this.updateOverlay();
+            // Update dynamic overlay: at most every OVERLAY_FRAMES updates, and at once when the view rectangle, the tab or the
+            // panel state changed (WG.00.09b K4: every frame it walked every unit of the world and uploaded its texture).
+            this._overlayAge = (this._overlayAge || 0) + 1;
+            const vx = window.$gameMap ? Math.floor($gameMap.displayX() * 2) : 0, vy = window.$gameMap ? Math.floor($gameMap.displayY() * 2) : 0;
+            if (this._overlayAge >= OVERLAY_FRAMES || vx !== this._overlayVx || vy !== this._overlayVy || Minimap.activeZ !== this._overlayZ || Minimap.expanded !== this._overlayOpen) {
+                this._overlayAge = 0;
+                this._overlayVx = vx;
+                this._overlayVy = vy;
+                this._overlayZ = Minimap.activeZ;
+                this._overlayOpen = Minimap.expanded;
+                this.updateOverlay();
+            }
 
             // Process touch / click navigation
             this.handleInput();
