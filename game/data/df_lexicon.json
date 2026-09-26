@@ -1,0 +1,6272 @@
+﻿[
+    {
+        "sylvic":  "sylv-lord",
+        "kitter":  "crisp-eat-lord",
+        "english":  "leaf lord",
+        "vorgash":  "fol-zen-lord",
+        "morvathic":  "wither-lord",
+        "key":  "LEAF_LORD",
+        "karadic":  "chaff-lord",
+        "valic":  "foli-lord"
+    },
+    {
+        "sylvic":  "radix-watcher",
+        "kitter":  "down-down-watcher",
+        "english":  "deep watcher",
+        "vorgash":  "khor-abyss-watcher",
+        "morvathic":  "abyss-watcher",
+        "key":  "DEEP_WATCHER",
+        "karadic":  "zul-watcher",
+        "valic":  "prof-watcher"
+    },
+    {
+        "sylvic":  "cairn-seeker",
+        "kitter":  "high-rock-seeker",
+        "english":  "mountain seeker",
+        "vorgash":  "zenith-crag-seeker",
+        "morvathic":  "trench-seeker",
+        "key":  "MOUNTAIN_SEEKER",
+        "karadic":  "vorn-seeker",
+        "valic":  "peak-seeker"
+    },
+    {
+        "sylvic":  "vein-weave-shaper",
+        "kitter":  "spark-track-shaper",
+        "english":  "circuit shaper",
+        "vorgash":  "form-trace-shaper",
+        "morvathic":  "barb-line-shaper",
+        "key":  "CIRCUIT_SHAPER",
+        "karadic":  "runic-wire-shaper",
+        "valic":  "conduit-shaper"
+    },
+    {
+        "sylvic":  "aureol-breaker",
+        "kitter":  "big-bright-breaker",
+        "english":  "sun breaker",
+        "vorgash":  "zen-light-breaker",
+        "morvathic":  "scorch-breaker",
+        "key":  "SUN_BREAKER",
+        "karadic":  "glare-breaker",
+        "valic":  "solaris-breaker"
+    },
+    {
+        "sylvic":  "song-tinker",
+        "kitter":  "thud-tap-tinker",
+        "english":  "hammer tinker",
+        "vorgash":  "tek-strike-tinker",
+        "morvathic":  "mash-tinker",
+        "key":  "HAMMER_TINKER",
+        "karadic":  "grond-tinker",
+        "valic":  "malle-tinker"
+    },
+    {
+        "sylvic":  "silv-watcher",
+        "kitter":  "shiny-white-watcher",
+        "english":  "silver watcher",
+        "vorgash":  "arg-tek-watcher",
+        "morvathic":  "pale-shine-watcher",
+        "key":  "SILVER_WATCHER",
+        "karadic":  "argen-watcher",
+        "valic":  "argent-watcher"
+    },
+    {
+        "sylvic":  "vein-weave-weaver",
+        "kitter":  "spark-track-weaver",
+        "english":  "circuit weaver",
+        "vorgash":  "form-trace-weaver",
+        "morvathic":  "barb-line-weaver",
+        "key":  "CIRCUIT_WEAVER",
+        "karadic":  "runic-wire-weaver",
+        "valic":  "conduit-weaver"
+    },
+    {
+        "sylvic":  "anima-delver",
+        "kitter":  "thump-thump-delver",
+        "english":  "heart delver",
+        "vorgash":  "will-core-delver",
+        "morvathic":  "pump-delver",
+        "key":  "HEART_DELVER",
+        "karadic":  "core-delver",
+        "valic":  "cordis-delver"
+    },
+    {
+        "sylvic":  "vein-weave-craft",
+        "kitter":  "spark-track-craft",
+        "english":  "circuit craft",
+        "vorgash":  "form-trace-craft",
+        "morvathic":  "barb-line-craft",
+        "key":  "CIRCUIT_CRAFT",
+        "karadic":  "runic-wire-craft",
+        "valic":  "conduit-craft"
+    },
+    {
+        "sylvic":  "ithil-shaper",
+        "kitter":  "glow-orb-shaper",
+        "english":  "moon shaper",
+        "vorgash":  "nox-zen-shaper",
+        "morvathic":  "night-eye-shaper",
+        "key":  "MOON_SHAPER",
+        "karadic":  "lun-shaper",
+        "valic":  "luna-shaper"
+    },
+    {
+        "sylvic":  "growth-seeker",
+        "kitter":  "make-shape-seeker",
+        "english":  "form seeker",
+        "vorgash":  "khor-form-seeker",
+        "morvathic":  "iron-cage-seeker",
+        "key":  "FORM_SEEKER",
+        "karadic":  "masonry-seeker",
+        "valic":  "structure-seeker"
+    },
+    {
+        "sylvic":  "wood-sentinel-binder",
+        "kitter":  "clik-walker-binder",
+        "english":  "automaton binder",
+        "vorgash":  "will-vessel-binder",
+        "morvathic":  "clock-fiend-binder",
+        "key":  "AUTOMATON_BINDER",
+        "karadic":  "iron-golem-binder",
+        "valic":  "mechanica-binder"
+    },
+    {
+        "sylvic":  "pith-binder",
+        "kitter":  "crunch-bone-binder",
+        "english":  "bone binder",
+        "vorgash":  "osse-form-binder",
+        "morvathic":  "skul-binder",
+        "key":  "BONE_BINDER",
+        "karadic":  "strut-binder",
+        "valic":  "ossa-binder"
+    },
+    {
+        "sylvic":  "eternal-root-tinker",
+        "kitter":  "run-far-tinker",
+        "english":  "endurance tinker",
+        "vorgash":  "basalt-stand-tinker",
+        "morvathic":  "tough-hide-tinker",
+        "key":  "ENDURANCE_TINKER",
+        "karadic":  "granite-will-tinker",
+        "valic":  "fortitude-tinker"
+    },
+    {
+        "sylvic":  "vein-weave-singer",
+        "kitter":  "spark-track-singer",
+        "english":  "circuit singer",
+        "vorgash":  "form-trace-singer",
+        "morvathic":  "barb-line-singer",
+        "key":  "CIRCUIT_SINGER",
+        "karadic":  "runic-wire-singer",
+        "valic":  "conduit-singer"
+    },
+    {
+        "sylvic":  "radix-striker",
+        "kitter":  "down-down-striker",
+        "english":  "deep striker",
+        "vorgash":  "khor-abyss-striker",
+        "morvathic":  "abyss-striker",
+        "key":  "DEEP_STRIKER",
+        "karadic":  "zul-striker",
+        "valic":  "prof-striker"
+    },
+    {
+        "sylvic":  "tellur-cleaver",
+        "kitter":  "dig-dirt-cleaver",
+        "english":  "earth cleaver",
+        "vorgash":  "sol-form-cleaver",
+        "morvathic":  "mire-cleaver",
+        "key":  "EARTH_CLEAVER",
+        "karadic":  "humus-cleaver",
+        "valic":  "terra-cleaver"
+    },
+    {
+        "sylvic":  "ithil-singer",
+        "kitter":  "glow-orb-singer",
+        "english":  "moon singer",
+        "vorgash":  "nox-zen-singer",
+        "morvathic":  "night-eye-singer",
+        "key":  "MOON_SINGER",
+        "karadic":  "lun-singer",
+        "valic":  "luna-singer"
+    },
+    {
+        "sylvic":  "song-lord",
+        "kitter":  "thud-tap-lord",
+        "english":  "hammer lord",
+        "vorgash":  "tek-strike-lord",
+        "morvathic":  "mash-lord",
+        "key":  "HAMMER_LORD",
+        "karadic":  "grond-lord",
+        "valic":  "malle-lord"
+    },
+    {
+        "sylvic":  "living-graft",
+        "kitter":  "gear-paw",
+        "english":  "bionic",
+        "vorgash":  "tek-frame",
+        "morvathic":  "spike-arm",
+        "key":  "BIONIC",
+        "karadic":  "iron-limb",
+        "valic":  "prosthetic"
+    },
+    {
+        "sylvic":  "harmony-ward",
+        "kitter":  "hold-tight-ward",
+        "english":  "control ward",
+        "vorgash":  "wis-grip-ward",
+        "morvathic":  "chain-ward",
+        "key":  "CONTROL_WARD",
+        "karadic":  "anchor-ward",
+        "valic":  "rule-ward"
+    },
+    {
+        "sylvic":  "patience-delver",
+        "kitter":  "fast-work-delver",
+        "english":  "diligence delver",
+        "vorgash":  "in-an-delver",
+        "morvathic":  "task-delver",
+        "key":  "DILIGENCE_DELVER",
+        "karadic":  "toil-delver",
+        "valic":  "duty-delver"
+    },
+    {
+        "sylvic":  "aureol-delver",
+        "kitter":  "big-bright-delver",
+        "english":  "sun delver",
+        "vorgash":  "zen-light-delver",
+        "morvathic":  "scorch-delver",
+        "key":  "SUN_DELVER",
+        "karadic":  "glare-delver",
+        "valic":  "solaris-delver"
+    },
+    {
+        "sylvic":  "sylv-watcher",
+        "kitter":  "crisp-eat-watcher",
+        "english":  "leaf watcher",
+        "vorgash":  "fol-zen-watcher",
+        "morvathic":  "wither-watcher",
+        "key":  "LEAF_WATCHER",
+        "karadic":  "chaff-watcher",
+        "valic":  "foli-watcher"
+    },
+    {
+        "sylvic":  "sylv",
+        "kitter":  "crisp-eat",
+        "english":  "leaf",
+        "vorgash":  "fol-zen",
+        "morvathic":  "wither",
+        "key":  "LEAF",
+        "karadic":  "chaff",
+        "valic":  "foli"
+    },
+    {
+        "sylvic":  "sleep-root-shaper",
+        "kitter":  "stop-box-shaper",
+        "english":  "stasis shaper",
+        "vorgash":  "form-quench-shaper",
+        "morvathic":  "cage-freeze-shaper",
+        "key":  "STASIS_SHAPER",
+        "karadic":  "ice-lock-shaper",
+        "valic":  "chronos-shaper"
+    },
+    {
+        "sylvic":  "spirit-craft",
+        "kitter":  "want-grab-craft",
+        "english":  "will craft",
+        "vorgash":  "xan-will-craft",
+        "morvathic":  "force-craft",
+        "key":  "WILL_CRAFT",
+        "karadic":  "resolve-craft",
+        "valic":  "intent-craft"
+    },
+    {
+        "sylvic":  "radix-weaver",
+        "kitter":  "down-down-weaver",
+        "english":  "deep weaver",
+        "vorgash":  "khor-abyss-weaver",
+        "morvathic":  "abyss-weaver",
+        "key":  "DEEP_WEAVER",
+        "karadic":  "zul-weaver",
+        "valic":  "prof-weaver"
+    },
+    {
+        "sylvic":  "ithil-ward",
+        "kitter":  "glow-orb-ward",
+        "english":  "moon ward",
+        "vorgash":  "nox-zen-ward",
+        "morvathic":  "night-eye-ward",
+        "key":  "MOON_WARD",
+        "karadic":  "lun-ward",
+        "valic":  "luna-ward"
+    },
+    {
+        "sylvic":  "spirit-slater",
+        "kitter":  "want-grab-slater",
+        "english":  "will slater",
+        "vorgash":  "xan-will-slater",
+        "morvathic":  "force-slater",
+        "key":  "WILL_SLATER",
+        "karadic":  "resolve-slater",
+        "valic":  "intent-slater"
+    },
+    {
+        "sylvic":  "silv-tinker",
+        "kitter":  "shiny-white-tinker",
+        "english":  "silver tinker",
+        "vorgash":  "arg-tek-tinker",
+        "morvathic":  "pale-shine-tinker",
+        "key":  "SILVER_TINKER",
+        "karadic":  "argen-tinker",
+        "valic":  "argent-tinker"
+    },
+    {
+        "sylvic":  "sol-walker",
+        "kitter":  "ouch-hot-walker",
+        "english":  "fire walker",
+        "vorgash":  "flam-will-walker",
+        "morvathic":  "blaze-walker",
+        "key":  "FIRE_WALKER",
+        "karadic":  "ember-walker",
+        "valic":  "pyre-walker"
+    },
+    {
+        "sylvic":  "eternal-root-walker",
+        "kitter":  "run-far-walker",
+        "english":  "endurance walker",
+        "vorgash":  "basalt-stand-walker",
+        "morvathic":  "tough-hide-walker",
+        "key":  "ENDURANCE_WALKER",
+        "karadic":  "granite-will-walker",
+        "valic":  "fortitude-walker"
+    },
+    {
+        "sylvic":  "sol-plasma-shield",
+        "kitter":  "blue-burn-shield",
+        "english":  "plasma shield",
+        "vorgash":  "plas-will-shield",
+        "morvathic":  "scorch-gas-shield",
+        "key":  "PLASMA_SHIELD",
+        "karadic":  "vul-fire-shield",
+        "valic":  "ion-flux-shield"
+    },
+    {
+        "sylvic":  "lith-cleaver",
+        "kitter":  "tik-stak-cleaver",
+        "english":  "stone cleaver",
+        "vorgash":  "basalt-cleaver",
+        "morvathic":  "krog-cleaver",
+        "key":  "STONE_CLEAVER",
+        "karadic":  "krag-cleaver",
+        "valic":  "dor-cleaver"
+    },
+    {
+        "sylvic":  "living-graft-ward",
+        "kitter":  "gear-paw-ward",
+        "english":  "bionic ward",
+        "vorgash":  "tek-frame-ward",
+        "morvathic":  "spike-arm-ward",
+        "key":  "BIONIC_WARD",
+        "karadic":  "iron-limb-ward",
+        "valic":  "prosthetic-ward"
+    },
+    {
+        "sylvic":  "tellur-binder",
+        "kitter":  "dig-dirt-binder",
+        "english":  "earth binder",
+        "vorgash":  "sol-form-binder",
+        "morvathic":  "mire-binder",
+        "key":  "EARTH_BINDER",
+        "karadic":  "humus-binder",
+        "valic":  "terra-binder"
+    },
+    {
+        "sylvic":  "song-striker",
+        "kitter":  "thud-tap-striker",
+        "english":  "hammer striker",
+        "vorgash":  "tek-strike-striker",
+        "morvathic":  "mash-striker",
+        "key":  "HAMMER_STRIKER",
+        "karadic":  "grond-striker",
+        "valic":  "malle-striker"
+    },
+    {
+        "sylvic":  "lith-slater",
+        "kitter":  "tik-stak-slater",
+        "english":  "stone slater",
+        "vorgash":  "basalt-slater",
+        "morvathic":  "krog-slater",
+        "key":  "STONE_SLATER",
+        "karadic":  "krag-slater",
+        "valic":  "dor-slater"
+    },
+    {
+        "sylvic":  "llyr-watcher",
+        "kitter":  "drip-pool-watcher",
+        "english":  "water watcher",
+        "vorgash":  "hyd-flow-watcher",
+        "morvathic":  "bilge-watcher",
+        "key":  "WATER_WATCHER",
+        "karadic":  "spring-watcher",
+        "valic":  "aqua-watcher"
+    },
+    {
+        "sylvic":  "sylv-weaver",
+        "kitter":  "crisp-eat-weaver",
+        "english":  "leaf weaver",
+        "vorgash":  "fol-zen-weaver",
+        "morvathic":  "wither-weaver",
+        "key":  "LEAF_WEAVER",
+        "karadic":  "chaff-weaver",
+        "valic":  "foli-weaver"
+    },
+    {
+        "sylvic":  "aureol-ward",
+        "kitter":  "big-bright-ward",
+        "english":  "sun ward",
+        "vorgash":  "zen-light-ward",
+        "morvathic":  "scorch-ward",
+        "key":  "SUN_WARD",
+        "karadic":  "glare-ward",
+        "valic":  "solaris-ward"
+    },
+    {
+        "sylvic":  "eluned-cleaver",
+        "kitter":  "high-glint-cleaver",
+        "english":  "star cleaver",
+        "vorgash":  "ast-point-cleaver",
+        "morvathic":  "glint-cleaver",
+        "key":  "STAR_CLEAVER",
+        "karadic":  "spark-cleaver",
+        "valic":  "astral-cleaver"
+    },
+    {
+        "sylvic":  "bark-delver",
+        "kitter":  "hide-shell-delver",
+        "english":  "shield delver",
+        "vorgash":  "form-sanct-delver",
+        "morvathic":  "ward-delver",
+        "key":  "SHIELD_DELVER",
+        "karadic":  "korgan-delver",
+        "valic":  "aegis-delver"
+    },
+    {
+        "sylvic":  "cairn-delver",
+        "kitter":  "high-rock-delver",
+        "english":  "mountain delver",
+        "vorgash":  "zenith-crag-delver",
+        "morvathic":  "trench-delver",
+        "key":  "MOUNTAIN_DELVER",
+        "karadic":  "vorn-delver",
+        "valic":  "peak-delver"
+    },
+    {
+        "sylvic":  "sleep-root-tinker",
+        "kitter":  "stop-box-tinker",
+        "english":  "stasis tinker",
+        "vorgash":  "form-quench-tinker",
+        "morvathic":  "cage-freeze-tinker",
+        "key":  "STASIS_TINKER",
+        "karadic":  "ice-lock-tinker",
+        "valic":  "chronos-tinker"
+    },
+    {
+        "sylvic":  "heart-song-lord",
+        "kitter":  "hyper-bounce-lord",
+        "english":  "passion lord",
+        "vorgash":  "flam-zeal-lord",
+        "morvathic":  "rage-lord",
+        "key":  "PASSION_LORD",
+        "karadic":  "hearth-fire-lord",
+        "valic":  "zeal-lord"
+    },
+    {
+        "sylvic":  "harmony-breaker",
+        "kitter":  "hold-tight-breaker",
+        "english":  "control breaker",
+        "vorgash":  "wis-grip-breaker",
+        "morvathic":  "chain-breaker",
+        "key":  "CONTROL_BREAKER",
+        "karadic":  "anchor-breaker",
+        "valic":  "rule-breaker"
+    },
+    {
+        "sylvic":  "wood-sentinel-striker",
+        "kitter":  "clik-walker-striker",
+        "english":  "automaton striker",
+        "vorgash":  "will-vessel-striker",
+        "morvathic":  "clock-fiend-striker",
+        "key":  "AUTOMATON_STRIKER",
+        "karadic":  "iron-golem-striker",
+        "valic":  "mechanica-striker"
+    },
+    {
+        "sylvic":  "arbor-striker",
+        "kitter":  "spark-tin-striker",
+        "english":  "forge striker",
+        "vorgash":  "flam-khor-striker",
+        "morvathic":  "slak-striker",
+        "key":  "FORGE_STRIKER",
+        "karadic":  "baruk-striker",
+        "valic":  "forn-striker"
+    },
+    {
+        "sylvic":  "bark-ward",
+        "kitter":  "hide-shell-ward",
+        "english":  "shield ward",
+        "vorgash":  "form-sanct-ward",
+        "morvathic":  "ward-ward",
+        "key":  "SHIELD_WARD",
+        "karadic":  "korgan-ward",
+        "valic":  "aegis-ward"
+    },
+    {
+        "sylvic":  "eternal-root-ward",
+        "kitter":  "run-far-ward",
+        "english":  "endurance ward",
+        "vorgash":  "basalt-stand-ward",
+        "morvathic":  "tough-hide-ward",
+        "key":  "ENDURANCE_WARD",
+        "karadic":  "granite-will-ward",
+        "valic":  "fortitude-ward"
+    },
+    {
+        "sylvic":  "vein-weave-watcher",
+        "kitter":  "spark-track-watcher",
+        "english":  "circuit watcher",
+        "vorgash":  "form-trace-watcher",
+        "morvathic":  "barb-line-watcher",
+        "key":  "CIRCUIT_WATCHER",
+        "karadic":  "runic-wire-watcher",
+        "valic":  "conduit-watcher"
+    },
+    {
+        "sylvic":  "sleep-root-walker",
+        "kitter":  "stop-box-walker",
+        "english":  "stasis walker",
+        "vorgash":  "form-quench-walker",
+        "morvathic":  "cage-freeze-walker",
+        "key":  "STASIS_WALKER",
+        "karadic":  "ice-lock-walker",
+        "valic":  "chronos-walker"
+    },
+    {
+        "sylvic":  "harmony-delver",
+        "kitter":  "hold-tight-delver",
+        "english":  "control delver",
+        "vorgash":  "wis-grip-delver",
+        "morvathic":  "chain-delver",
+        "key":  "CONTROL_DELVER",
+        "karadic":  "anchor-delver",
+        "valic":  "rule-delver"
+    },
+    {
+        "sylvic":  "arbor-seeker",
+        "kitter":  "spark-tin-seeker",
+        "english":  "forge seeker",
+        "vorgash":  "flam-khor-seeker",
+        "morvathic":  "slak-seeker",
+        "key":  "FORGE_SEEKER",
+        "karadic":  "baruk-seeker",
+        "valic":  "forn-seeker"
+    },
+    {
+        "sylvic":  "growth-striker",
+        "kitter":  "make-shape-striker",
+        "english":  "form striker",
+        "vorgash":  "khor-form-striker",
+        "morvathic":  "iron-cage-striker",
+        "key":  "FORM_STRIKER",
+        "karadic":  "masonry-striker",
+        "valic":  "structure-striker"
+    },
+    {
+        "sylvic":  "eluned-delver",
+        "kitter":  "high-glint-delver",
+        "english":  "star delver",
+        "vorgash":  "ast-point-delver",
+        "morvathic":  "glint-delver",
+        "key":  "STAR_DELVER",
+        "karadic":  "spark-delver",
+        "valic":  "astral-delver"
+    },
+    {
+        "sylvic":  "branch-lord",
+        "kitter":  "chop-bit-lord",
+        "english":  "axe lord",
+        "vorgash":  "cleave-tek-lord",
+        "morvathic":  "scourge-lord",
+        "key":  "AXE_LORD",
+        "karadic":  "vrak-lord",
+        "valic":  "secur-lord"
+    },
+    {
+        "sylvic":  "llyr-binder",
+        "kitter":  "drip-pool-binder",
+        "english":  "water binder",
+        "vorgash":  "hyd-flow-binder",
+        "morvathic":  "bilge-binder",
+        "key":  "WATER_BINDER",
+        "karadic":  "spring-binder",
+        "valic":  "aqua-binder"
+    },
+    {
+        "sylvic":  "growth",
+        "kitter":  "make-shape",
+        "english":  "form",
+        "vorgash":  "khor-form",
+        "morvathic":  "iron-cage",
+        "key":  "FORM",
+        "karadic":  "masonry",
+        "valic":  "structure"
+    },
+    {
+        "sylvic":  "song-delver",
+        "kitter":  "thud-tap-delver",
+        "english":  "hammer delver",
+        "vorgash":  "tek-strike-delver",
+        "morvathic":  "mash-delver",
+        "key":  "HAMMER_DELVER",
+        "karadic":  "grond-delver",
+        "valic":  "malle-delver"
+    },
+    {
+        "sylvic":  "living-graft-striker",
+        "kitter":  "gear-paw-striker",
+        "english":  "bionic striker",
+        "vorgash":  "tek-frame-striker",
+        "morvathic":  "spike-arm-striker",
+        "key":  "BIONIC_STRIKER",
+        "karadic":  "iron-limb-striker",
+        "valic":  "prosthetic-striker"
+    },
+    {
+        "sylvic":  "eluned-slater",
+        "kitter":  "high-glint-slater",
+        "english":  "star slater",
+        "vorgash":  "ast-point-slater",
+        "morvathic":  "glint-slater",
+        "key":  "STAR_SLATER",
+        "karadic":  "spark-slater",
+        "valic":  "astral-slater"
+    },
+    {
+        "sylvic":  "harmony-singer",
+        "kitter":  "hold-tight-singer",
+        "english":  "control singer",
+        "vorgash":  "wis-grip-singer",
+        "morvathic":  "chain-singer",
+        "key":  "CONTROL_SINGER",
+        "karadic":  "anchor-singer",
+        "valic":  "rule-singer"
+    },
+    {
+        "sylvic":  "llyr-weaver",
+        "kitter":  "drip-pool-weaver",
+        "english":  "water weaver",
+        "vorgash":  "hyd-flow-weaver",
+        "morvathic":  "bilge-weaver",
+        "key":  "WATER_WEAVER",
+        "karadic":  "spring-weaver",
+        "valic":  "aqua-weaver"
+    },
+    {
+        "sylvic":  "heart-song-cleaver",
+        "kitter":  "hyper-bounce-cleaver",
+        "english":  "passion cleaver",
+        "vorgash":  "flam-zeal-cleaver",
+        "morvathic":  "rage-cleaver",
+        "key":  "PASSION_CLEAVER",
+        "karadic":  "hearth-fire-cleaver",
+        "valic":  "zeal-cleaver"
+    },
+    {
+        "sylvic":  "eluned-shaper",
+        "kitter":  "high-glint-shaper",
+        "english":  "star shaper",
+        "vorgash":  "ast-point-shaper",
+        "morvathic":  "glint-shaper",
+        "key":  "STAR_SHAPER",
+        "karadic":  "spark-shaper",
+        "valic":  "astral-shaper"
+    },
+    {
+        "sylvic":  "heart-song-breaker",
+        "kitter":  "hyper-bounce-breaker",
+        "english":  "passion breaker",
+        "vorgash":  "flam-zeal-breaker",
+        "morvathic":  "rage-breaker",
+        "key":  "PASSION_BREAKER",
+        "karadic":  "hearth-fire-breaker",
+        "valic":  "zeal-breaker"
+    },
+    {
+        "sylvic":  "llyr-craft",
+        "kitter":  "drip-pool-craft",
+        "english":  "water craft",
+        "vorgash":  "hyd-flow-craft",
+        "morvathic":  "bilge-craft",
+        "key":  "WATER_CRAFT",
+        "karadic":  "spring-craft",
+        "valic":  "aqua-craft"
+    },
+    {
+        "sylvic":  "gilded-walker",
+        "kitter":  "shiny-yellow-walker",
+        "english":  "gold walker",
+        "vorgash":  "aur-tek-walker",
+        "morvathic":  "greed-walker",
+        "key":  "GOLD_WALKER",
+        "karadic":  "aur-walker",
+        "valic":  "aurum-walker"
+    },
+    {
+        "sylvic":  "anima-walker",
+        "kitter":  "thump-thump-walker",
+        "english":  "heart walker",
+        "vorgash":  "will-core-walker",
+        "morvathic":  "pump-walker",
+        "key":  "HEART_WALKER",
+        "karadic":  "core-walker",
+        "valic":  "cordis-walker"
+    },
+    {
+        "sylvic":  "lith-watcher",
+        "kitter":  "tik-stak-watcher",
+        "english":  "stone watcher",
+        "vorgash":  "basalt-watcher",
+        "morvathic":  "krog-watcher",
+        "key":  "STONE_WATCHER",
+        "karadic":  "krag-watcher",
+        "valic":  "dor-watcher"
+    },
+    {
+        "sylvic":  "llyr-tinker",
+        "kitter":  "drip-pool-tinker",
+        "english":  "water tinker",
+        "vorgash":  "hyd-flow-tinker",
+        "morvathic":  "bilge-tinker",
+        "key":  "WATER_TINKER",
+        "karadic":  "spring-tinker",
+        "valic":  "aqua-tinker"
+    },
+    {
+        "sylvic":  "tellur-striker",
+        "kitter":  "dig-dirt-striker",
+        "english":  "earth striker",
+        "vorgash":  "sol-form-striker",
+        "morvathic":  "mire-striker",
+        "key":  "EARTH_STRIKER",
+        "karadic":  "humus-striker",
+        "valic":  "terra-striker"
+    },
+    {
+        "sylvic":  "harmony-craft",
+        "kitter":  "hold-tight-craft",
+        "english":  "control craft",
+        "vorgash":  "wis-grip-craft",
+        "morvathic":  "chain-craft",
+        "key":  "CONTROL_CRAFT",
+        "karadic":  "anchor-craft",
+        "valic":  "rule-craft"
+    },
+    {
+        "sylvic":  "radix-walker",
+        "kitter":  "down-down-walker",
+        "english":  "deep walker",
+        "vorgash":  "khor-abyss-walker",
+        "morvathic":  "abyss-walker",
+        "key":  "DEEP_WALKER",
+        "karadic":  "zul-walker",
+        "valic":  "prof-walker"
+    },
+    {
+        "sylvic":  "lith-binder",
+        "kitter":  "tik-stak-binder",
+        "english":  "stone binder",
+        "vorgash":  "basalt-binder",
+        "morvathic":  "krog-binder",
+        "key":  "STONE_BINDER",
+        "karadic":  "krag-binder",
+        "valic":  "dor-binder"
+    },
+    {
+        "sylvic":  "wood-sentinel-slater",
+        "kitter":  "clik-walker-slater",
+        "english":  "automaton slater",
+        "vorgash":  "will-vessel-slater",
+        "morvathic":  "clock-fiend-slater",
+        "key":  "AUTOMATON_SLATER",
+        "karadic":  "iron-golem-slater",
+        "valic":  "mechanica-slater"
+    },
+    {
+        "sylvic":  "living-graft-binder",
+        "kitter":  "gear-paw-binder",
+        "english":  "bionic binder",
+        "vorgash":  "tek-frame-binder",
+        "morvathic":  "spike-arm-binder",
+        "key":  "BIONIC_BINDER",
+        "karadic":  "iron-limb-binder",
+        "valic":  "prosthetic-binder"
+    },
+    {
+        "sylvic":  "vital-walker",
+        "kitter":  "red-leak-walker",
+        "english":  "blood walker",
+        "vorgash":  "cruor-flam-walker",
+        "morvathic":  "gorg-walker",
+        "key":  "BLOOD_WALKER",
+        "karadic":  "vein-walker",
+        "valic":  "sanguis-walker"
+    },
+    {
+        "sylvic":  "zephyr",
+        "kitter":  "whiff-air",
+        "english":  "wind",
+        "vorgash":  "hur-stream",
+        "morvathic":  "howl",
+        "key":  "WIND",
+        "karadic":  "draft",
+        "valic":  "aura"
+    },
+    {
+        "sylvic":  "alath-watcher",
+        "kitter":  "clik-iron-watcher",
+        "english":  "iron watcher",
+        "vorgash":  "fer-tek-watcher",
+        "morvathic":  "skal-watcher",
+        "key":  "IRON_WATCHER",
+        "karadic":  "tharn-watcher",
+        "valic":  "ferr-watcher"
+    },
+    {
+        "sylvic":  "sol-delver",
+        "kitter":  "ouch-hot-delver",
+        "english":  "fire delver",
+        "vorgash":  "flam-will-delver",
+        "morvathic":  "blaze-delver",
+        "key":  "FIRE_DELVER",
+        "karadic":  "ember-delver",
+        "valic":  "pyre-delver"
+    },
+    {
+        "sylvic":  "branch-tinker",
+        "kitter":  "chop-bit-tinker",
+        "english":  "axe tinker",
+        "vorgash":  "cleave-tek-tinker",
+        "morvathic":  "scourge-tinker",
+        "key":  "AXE_TINKER",
+        "karadic":  "vrak-tinker",
+        "valic":  "secur-tinker"
+    },
+    {
+        "sylvic":  "patience-craft",
+        "kitter":  "fast-work-craft",
+        "english":  "diligence craft",
+        "vorgash":  "in-an-craft",
+        "morvathic":  "task-craft",
+        "key":  "DILIGENCE_CRAFT",
+        "karadic":  "toil-craft",
+        "valic":  "duty-craft"
+    },
+    {
+        "sylvic":  "sol-seeker",
+        "kitter":  "ouch-hot-seeker",
+        "english":  "fire seeker",
+        "vorgash":  "flam-will-seeker",
+        "morvathic":  "blaze-seeker",
+        "key":  "FIRE_SEEKER",
+        "karadic":  "ember-seeker",
+        "valic":  "pyre-seeker"
+    },
+    {
+        "sylvic":  "patience-tinker",
+        "kitter":  "fast-work-tinker",
+        "english":  "diligence tinker",
+        "vorgash":  "in-an-tinker",
+        "morvathic":  "task-tinker",
+        "key":  "DILIGENCE_TINKER",
+        "karadic":  "toil-tinker",
+        "valic":  "duty-tinker"
+    },
+    {
+        "sylvic":  "sylv-walker",
+        "kitter":  "crisp-eat-walker",
+        "english":  "leaf walker",
+        "vorgash":  "fol-zen-walker",
+        "morvathic":  "wither-walker",
+        "key":  "LEAF_WALKER",
+        "karadic":  "chaff-walker",
+        "valic":  "foli-walker"
+    },
+    {
+        "sylvic":  "alath-striker",
+        "kitter":  "clik-iron-striker",
+        "english":  "iron striker",
+        "vorgash":  "fer-tek-striker",
+        "morvathic":  "skal-striker",
+        "key":  "IRON_STRIKER",
+        "karadic":  "tharn-striker",
+        "valic":  "ferr-striker"
+    },
+    {
+        "sylvic":  "sol-plasma",
+        "kitter":  "blue-burn",
+        "english":  "plasma",
+        "vorgash":  "plas-will",
+        "morvathic":  "scorch-gas",
+        "key":  "PLASMA",
+        "karadic":  "vul-fire",
+        "valic":  "ion-flux"
+    },
+    {
+        "sylvic":  "wood-sentinel-watcher",
+        "kitter":  "clik-walker-watcher",
+        "english":  "automaton watcher",
+        "vorgash":  "will-vessel-watcher",
+        "morvathic":  "clock-fiend-watcher",
+        "key":  "AUTOMATON_WATCHER",
+        "karadic":  "iron-golem-watcher",
+        "valic":  "mechanica-watcher"
+    },
+    {
+        "sylvic":  "alath-craft",
+        "kitter":  "clik-iron-craft",
+        "english":  "iron craft",
+        "vorgash":  "fer-tek-craft",
+        "morvathic":  "skal-craft",
+        "key":  "IRON_CRAFT",
+        "karadic":  "tharn-craft",
+        "valic":  "ferr-craft"
+    },
+    {
+        "sylvic":  "arbor-lord",
+        "kitter":  "spark-tin-lord",
+        "english":  "forge lord",
+        "vorgash":  "flam-khor-lord",
+        "morvathic":  "slak-lord",
+        "key":  "FORGE_LORD",
+        "karadic":  "baruk-lord",
+        "valic":  "forn-lord"
+    },
+    {
+        "sylvic":  "ithil-tinker",
+        "kitter":  "glow-orb-tinker",
+        "english":  "moon tinker",
+        "vorgash":  "nox-zen-tinker",
+        "morvathic":  "night-eye-tinker",
+        "key":  "MOON_TINKER",
+        "karadic":  "lun-tinker",
+        "valic":  "luna-tinker"
+    },
+    {
+        "sylvic":  "bark-singer",
+        "kitter":  "hide-shell-singer",
+        "english":  "shield singer",
+        "vorgash":  "form-sanct-singer",
+        "morvathic":  "ward-singer",
+        "key":  "SHIELD_SINGER",
+        "karadic":  "korgan-singer",
+        "valic":  "aegis-singer"
+    },
+    {
+        "sylvic":  "sylv-slater",
+        "kitter":  "crisp-eat-slater",
+        "english":  "leaf slater",
+        "vorgash":  "fol-zen-slater",
+        "morvathic":  "wither-slater",
+        "key":  "LEAF_SLATER",
+        "karadic":  "chaff-slater",
+        "valic":  "foli-slater"
+    },
+    {
+        "sylvic":  "living-graft-breaker",
+        "kitter":  "gear-paw-breaker",
+        "english":  "bionic breaker",
+        "vorgash":  "tek-frame-breaker",
+        "morvathic":  "spike-arm-breaker",
+        "key":  "BIONIC_BREAKER",
+        "karadic":  "iron-limb-breaker",
+        "valic":  "prosthetic-breaker"
+    },
+    {
+        "sylvic":  "radix",
+        "kitter":  "down-down",
+        "english":  "deep",
+        "vorgash":  "khor-abyss",
+        "morvathic":  "abyss",
+        "key":  "DEEP",
+        "karadic":  "zul",
+        "valic":  "prof"
+    },
+    {
+        "sylvic":  "spirit-delver",
+        "kitter":  "want-grab-delver",
+        "english":  "will delver",
+        "vorgash":  "xan-will-delver",
+        "morvathic":  "force-delver",
+        "key":  "WILL_DELVER",
+        "karadic":  "resolve-delver",
+        "valic":  "intent-delver"
+    },
+    {
+        "sylvic":  "anima-striker",
+        "kitter":  "thump-thump-striker",
+        "english":  "heart striker",
+        "vorgash":  "will-core-striker",
+        "morvathic":  "pump-striker",
+        "key":  "HEART_STRIKER",
+        "karadic":  "core-striker",
+        "valic":  "cordis-striker"
+    },
+    {
+        "sylvic":  "alath-breaker",
+        "kitter":  "clik-iron-breaker",
+        "english":  "iron breaker",
+        "vorgash":  "fer-tek-breaker",
+        "morvathic":  "skal-breaker",
+        "key":  "IRON_BREAKER",
+        "karadic":  "tharn-breaker",
+        "valic":  "ferr-breaker"
+    },
+    {
+        "sylvic":  "ithil-watcher",
+        "kitter":  "glow-orb-watcher",
+        "english":  "moon watcher",
+        "vorgash":  "nox-zen-watcher",
+        "morvathic":  "night-eye-watcher",
+        "key":  "MOON_WATCHER",
+        "karadic":  "lun-watcher",
+        "valic":  "luna-watcher"
+    },
+    {
+        "sylvic":  "sol-plasma-watcher",
+        "kitter":  "blue-burn-watcher",
+        "english":  "plasma watcher",
+        "vorgash":  "plas-will-watcher",
+        "morvathic":  "scorch-gas-watcher",
+        "key":  "PLASMA_WATCHER",
+        "karadic":  "vul-fire-watcher",
+        "valic":  "ion-flux-watcher"
+    },
+    {
+        "sylvic":  "pith-breaker",
+        "kitter":  "crunch-bone-breaker",
+        "english":  "bone breaker",
+        "vorgash":  "osse-form-breaker",
+        "morvathic":  "skul-breaker",
+        "key":  "BONE_BREAKER",
+        "karadic":  "strut-breaker",
+        "valic":  "ossa-breaker"
+    },
+    {
+        "sylvic":  "llyr-striker",
+        "kitter":  "drip-pool-striker",
+        "english":  "water striker",
+        "vorgash":  "hyd-flow-striker",
+        "morvathic":  "bilge-striker",
+        "key":  "WATER_STRIKER",
+        "karadic":  "spring-striker",
+        "valic":  "aqua-striker"
+    },
+    {
+        "sylvic":  "llyr-delver",
+        "kitter":  "drip-pool-delver",
+        "english":  "water delver",
+        "vorgash":  "hyd-flow-delver",
+        "morvathic":  "bilge-delver",
+        "key":  "WATER_DELVER",
+        "karadic":  "spring-delver",
+        "valic":  "aqua-delver"
+    },
+    {
+        "sylvic":  "sol-watcher",
+        "kitter":  "ouch-hot-watcher",
+        "english":  "fire watcher",
+        "vorgash":  "flam-will-watcher",
+        "morvathic":  "blaze-watcher",
+        "key":  "FIRE_WATCHER",
+        "karadic":  "ember-watcher",
+        "valic":  "pyre-watcher"
+    },
+    {
+        "sylvic":  "cairn-smith",
+        "kitter":  "high-rock-smith",
+        "english":  "mountain smith",
+        "vorgash":  "zenith-crag-smith",
+        "morvathic":  "trench-smith",
+        "key":  "MOUNTAIN_SMITH",
+        "karadic":  "vorn-smith",
+        "valic":  "peak-smith"
+    },
+    {
+        "sylvic":  "radix-cleaver",
+        "kitter":  "down-down-cleaver",
+        "english":  "deep cleaver",
+        "vorgash":  "khor-abyss-cleaver",
+        "morvathic":  "abyss-cleaver",
+        "key":  "DEEP_CLEAVER",
+        "karadic":  "zul-cleaver",
+        "valic":  "prof-cleaver"
+    },
+    {
+        "sylvic":  "sol-plasma-singer",
+        "kitter":  "blue-burn-singer",
+        "english":  "plasma singer",
+        "vorgash":  "plas-will-singer",
+        "morvathic":  "scorch-gas-singer",
+        "key":  "PLASMA_SINGER",
+        "karadic":  "vul-fire-singer",
+        "valic":  "ion-flux-singer"
+    },
+    {
+        "sylvic":  "living-graft-cleaver",
+        "kitter":  "gear-paw-cleaver",
+        "english":  "bionic cleaver",
+        "vorgash":  "tek-frame-cleaver",
+        "morvathic":  "spike-arm-cleaver",
+        "key":  "BIONIC_CLEAVER",
+        "karadic":  "iron-limb-cleaver",
+        "valic":  "prosthetic-cleaver"
+    },
+    {
+        "sylvic":  "eluned-seeker",
+        "kitter":  "high-glint-seeker",
+        "english":  "star seeker",
+        "vorgash":  "ast-point-seeker",
+        "morvathic":  "glint-seeker",
+        "key":  "STAR_SEEKER",
+        "karadic":  "spark-seeker",
+        "valic":  "astral-seeker"
+    },
+    {
+        "sylvic":  "spirit-lord",
+        "kitter":  "want-grab-lord",
+        "english":  "will lord",
+        "vorgash":  "xan-will-lord",
+        "morvathic":  "force-lord",
+        "key":  "WILL_LORD",
+        "karadic":  "resolve-lord",
+        "valic":  "intent-lord"
+    },
+    {
+        "sylvic":  "ithil-walker",
+        "kitter":  "glow-orb-walker",
+        "english":  "moon walker",
+        "vorgash":  "nox-zen-walker",
+        "morvathic":  "night-eye-walker",
+        "key":  "MOON_WALKER",
+        "karadic":  "lun-walker",
+        "valic":  "luna-walker"
+    },
+    {
+        "sylvic":  "arbor-craft",
+        "kitter":  "tall-stick-craft",
+        "english":  "tree craft",
+        "vorgash":  "lign-form-craft",
+        "morvathic":  "rot-stem-craft",
+        "key":  "TREE_CRAFT",
+        "karadic":  "timber-craft",
+        "valic":  "silva-craft"
+    },
+    {
+        "sylvic":  "sylv-craft",
+        "kitter":  "crisp-eat-craft",
+        "english":  "leaf craft",
+        "vorgash":  "fol-zen-craft",
+        "morvathic":  "wither-craft",
+        "key":  "LEAF_CRAFT",
+        "karadic":  "chaff-craft",
+        "valic":  "foli-craft"
+    },
+    {
+        "sylvic":  "pith-shaper",
+        "kitter":  "crunch-bone-shaper",
+        "english":  "bone shaper",
+        "vorgash":  "osse-form-shaper",
+        "morvathic":  "skul-shaper",
+        "key":  "BONE_SHAPER",
+        "karadic":  "strut-shaper",
+        "valic":  "ossa-shaper"
+    },
+    {
+        "sylvic":  "spirit-binder",
+        "kitter":  "want-grab-binder",
+        "english":  "will binder",
+        "vorgash":  "xan-will-binder",
+        "morvathic":  "force-binder",
+        "key":  "WILL_BINDER",
+        "karadic":  "resolve-binder",
+        "valic":  "intent-binder"
+    },
+    {
+        "sylvic":  "song-smith",
+        "kitter":  "thud-tap-smith",
+        "english":  "hammer smith",
+        "vorgash":  "tek-strike-smith",
+        "morvathic":  "mash-smith",
+        "key":  "HAMMER_SMITH",
+        "karadic":  "grond-smith",
+        "valic":  "malle-smith"
+    },
+    {
+        "sylvic":  "sol-breaker",
+        "kitter":  "ouch-hot-breaker",
+        "english":  "fire breaker",
+        "vorgash":  "flam-will-breaker",
+        "morvathic":  "blaze-breaker",
+        "key":  "FIRE_BREAKER",
+        "karadic":  "ember-breaker",
+        "valic":  "pyre-breaker"
+    },
+    {
+        "sylvic":  "aureol",
+        "kitter":  "big-bright",
+        "english":  "sun",
+        "vorgash":  "zen-light",
+        "morvathic":  "scorch",
+        "key":  "SUN",
+        "karadic":  "glare",
+        "valic":  "solaris"
+    },
+    {
+        "sylvic":  "spirit-striker",
+        "kitter":  "want-grab-striker",
+        "english":  "will striker",
+        "vorgash":  "xan-will-striker",
+        "morvathic":  "force-striker",
+        "key":  "WILL_STRIKER",
+        "karadic":  "resolve-striker",
+        "valic":  "intent-striker"
+    },
+    {
+        "sylvic":  "anima-smith",
+        "kitter":  "thump-thump-smith",
+        "english":  "heart smith",
+        "vorgash":  "will-core-smith",
+        "morvathic":  "pump-smith",
+        "key":  "HEART_SMITH",
+        "karadic":  "core-smith",
+        "valic":  "cordis-smith"
+    },
+    {
+        "sylvic":  "anima-slater",
+        "kitter":  "thump-thump-slater",
+        "english":  "heart slater",
+        "vorgash":  "will-core-slater",
+        "morvathic":  "pump-slater",
+        "key":  "HEART_SLATER",
+        "karadic":  "core-slater",
+        "valic":  "cordis-slater"
+    },
+    {
+        "sylvic":  "harmony-slater",
+        "kitter":  "hold-tight-slater",
+        "english":  "control slater",
+        "vorgash":  "wis-grip-slater",
+        "morvathic":  "chain-slater",
+        "key":  "CONTROL_SLATER",
+        "karadic":  "anchor-slater",
+        "valic":  "rule-slater"
+    },
+    {
+        "sylvic":  "sol-ward",
+        "kitter":  "ouch-hot-ward",
+        "english":  "fire ward",
+        "vorgash":  "flam-will-ward",
+        "morvathic":  "blaze-ward",
+        "key":  "FIRE_WARD",
+        "karadic":  "ember-ward",
+        "valic":  "pyre-ward"
+    },
+    {
+        "sylvic":  "wood-sentinel-tinker",
+        "kitter":  "clik-walker-tinker",
+        "english":  "automaton tinker",
+        "vorgash":  "will-vessel-tinker",
+        "morvathic":  "clock-fiend-tinker",
+        "key":  "AUTOMATON_TINKER",
+        "karadic":  "iron-golem-tinker",
+        "valic":  "mechanica-tinker"
+    },
+    {
+        "sylvic":  "growth-tinker",
+        "kitter":  "make-shape-tinker",
+        "english":  "form tinker",
+        "vorgash":  "khor-form-tinker",
+        "morvathic":  "iron-cage-tinker",
+        "key":  "FORM_TINKER",
+        "karadic":  "masonry-tinker",
+        "valic":  "structure-tinker"
+    },
+    {
+        "sylvic":  "bark-cleaver",
+        "kitter":  "hide-shell-cleaver",
+        "english":  "shield cleaver",
+        "vorgash":  "form-sanct-cleaver",
+        "morvathic":  "ward-cleaver",
+        "key":  "SHIELD_CLEAVER",
+        "karadic":  "korgan-cleaver",
+        "valic":  "aegis-cleaver"
+    },
+    {
+        "sylvic":  "alath-seeker",
+        "kitter":  "clik-iron-seeker",
+        "english":  "iron seeker",
+        "vorgash":  "fer-tek-seeker",
+        "morvathic":  "skal-seeker",
+        "key":  "IRON_SEEKER",
+        "karadic":  "tharn-seeker",
+        "valic":  "ferr-seeker"
+    },
+    {
+        "sylvic":  "alath-lord",
+        "kitter":  "clik-iron-lord",
+        "english":  "iron lord",
+        "vorgash":  "fer-tek-lord",
+        "morvathic":  "skal-lord",
+        "key":  "IRON_LORD",
+        "karadic":  "tharn-lord",
+        "valic":  "ferr-lord"
+    },
+    {
+        "sylvic":  "vein-weave-seeker",
+        "kitter":  "spark-track-seeker",
+        "english":  "circuit seeker",
+        "vorgash":  "form-trace-seeker",
+        "morvathic":  "barb-line-seeker",
+        "key":  "CIRCUIT_SEEKER",
+        "karadic":  "runic-wire-seeker",
+        "valic":  "conduit-seeker"
+    },
+    {
+        "sylvic":  "vital-breaker",
+        "kitter":  "red-leak-breaker",
+        "english":  "blood breaker",
+        "vorgash":  "cruor-flam-breaker",
+        "morvathic":  "gorg-breaker",
+        "key":  "BLOOD_BREAKER",
+        "karadic":  "vein-breaker",
+        "valic":  "sanguis-breaker"
+    },
+    {
+        "sylvic":  "pith-cleaver",
+        "kitter":  "crunch-bone-cleaver",
+        "english":  "bone cleaver",
+        "vorgash":  "osse-form-cleaver",
+        "morvathic":  "skul-cleaver",
+        "key":  "BONE_CLEAVER",
+        "karadic":  "strut-cleaver",
+        "valic":  "ossa-cleaver"
+    },
+    {
+        "sylvic":  "vein-weave-delver",
+        "kitter":  "spark-track-delver",
+        "english":  "circuit delver",
+        "vorgash":  "form-trace-delver",
+        "morvathic":  "barb-line-delver",
+        "key":  "CIRCUIT_DELVER",
+        "karadic":  "runic-wire-delver",
+        "valic":  "conduit-delver"
+    },
+    {
+        "sylvic":  "harmony",
+        "kitter":  "hold-tight",
+        "english":  "control",
+        "vorgash":  "wis-grip",
+        "morvathic":  "chain",
+        "key":  "CONTROL",
+        "karadic":  "anchor",
+        "valic":  "rule"
+    },
+    {
+        "sylvic":  "silv-shaper",
+        "kitter":  "shiny-white-shaper",
+        "english":  "silver shaper",
+        "vorgash":  "arg-tek-shaper",
+        "morvathic":  "pale-shine-shaper",
+        "key":  "SILVER_SHAPER",
+        "karadic":  "argen-shaper",
+        "valic":  "argent-shaper"
+    },
+    {
+        "sylvic":  "radix-delver",
+        "kitter":  "down-down-delver",
+        "english":  "deep delver",
+        "vorgash":  "khor-abyss-delver",
+        "morvathic":  "abyss-delver",
+        "key":  "DEEP_DELVER",
+        "karadic":  "zul-delver",
+        "valic":  "prof-delver"
+    },
+    {
+        "sylvic":  "bark-lord",
+        "kitter":  "hide-shell-lord",
+        "english":  "shield lord",
+        "vorgash":  "form-sanct-lord",
+        "morvathic":  "ward-lord",
+        "key":  "SHIELD_LORD",
+        "karadic":  "korgan-lord",
+        "valic":  "aegis-lord"
+    },
+    {
+        "sylvic":  "bark-weaver",
+        "kitter":  "hide-shell-weaver",
+        "english":  "shield weaver",
+        "vorgash":  "form-sanct-weaver",
+        "morvathic":  "ward-weaver",
+        "key":  "SHIELD_WEAVER",
+        "karadic":  "korgan-weaver",
+        "valic":  "aegis-weaver"
+    },
+    {
+        "sylvic":  "growth-cleaver",
+        "kitter":  "make-shape-cleaver",
+        "english":  "form cleaver",
+        "vorgash":  "khor-form-cleaver",
+        "morvathic":  "iron-cage-cleaver",
+        "key":  "FORM_CLEAVER",
+        "karadic":  "masonry-cleaver",
+        "valic":  "structure-cleaver"
+    },
+    {
+        "sylvic":  "sleep-root-striker",
+        "kitter":  "stop-box-striker",
+        "english":  "stasis striker",
+        "vorgash":  "form-quench-striker",
+        "morvathic":  "cage-freeze-striker",
+        "key":  "STASIS_STRIKER",
+        "karadic":  "ice-lock-striker",
+        "valic":  "chronos-striker"
+    },
+    {
+        "sylvic":  "arbor-breaker",
+        "kitter":  "spark-tin-breaker",
+        "english":  "forge breaker",
+        "vorgash":  "flam-khor-breaker",
+        "morvathic":  "slak-breaker",
+        "key":  "FORGE_BREAKER",
+        "karadic":  "baruk-breaker",
+        "valic":  "forn-breaker"
+    },
+    {
+        "sylvic":  "wood-sentinel-craft",
+        "kitter":  "clik-walker-craft",
+        "english":  "automaton craft",
+        "vorgash":  "will-vessel-craft",
+        "morvathic":  "clock-fiend-craft",
+        "key":  "AUTOMATON_CRAFT",
+        "karadic":  "iron-golem-craft",
+        "valic":  "mechanica-craft"
+    },
+    {
+        "sylvic":  "song-singer",
+        "kitter":  "thud-tap-singer",
+        "english":  "hammer singer",
+        "vorgash":  "tek-strike-singer",
+        "morvathic":  "mash-singer",
+        "key":  "HAMMER_SINGER",
+        "karadic":  "grond-singer",
+        "valic":  "malle-singer"
+    },
+    {
+        "sylvic":  "anima-seeker",
+        "kitter":  "thump-thump-seeker",
+        "english":  "heart seeker",
+        "vorgash":  "will-core-seeker",
+        "morvathic":  "pump-seeker",
+        "key":  "HEART_SEEKER",
+        "karadic":  "core-seeker",
+        "valic":  "cordis-seeker"
+    },
+    {
+        "sylvic":  "sleep-root",
+        "kitter":  "stop-box",
+        "english":  "stasis",
+        "vorgash":  "form-quench",
+        "morvathic":  "cage-freeze",
+        "key":  "STASIS",
+        "karadic":  "ice-lock",
+        "valic":  "chronos"
+    },
+    {
+        "sylvic":  "sylv-striker",
+        "kitter":  "crisp-eat-striker",
+        "english":  "leaf striker",
+        "vorgash":  "fol-zen-striker",
+        "morvathic":  "wither-striker",
+        "key":  "LEAF_STRIKER",
+        "karadic":  "chaff-striker",
+        "valic":  "foli-striker"
+    },
+    {
+        "sylvic":  "vital-weaver",
+        "kitter":  "red-leak-weaver",
+        "english":  "blood weaver",
+        "vorgash":  "cruor-flam-weaver",
+        "morvathic":  "gorg-weaver",
+        "key":  "BLOOD_WEAVER",
+        "karadic":  "vein-weaver",
+        "valic":  "sanguis-weaver"
+    },
+    {
+        "sylvic":  "alath-ward",
+        "kitter":  "clik-iron-ward",
+        "english":  "iron ward",
+        "vorgash":  "fer-tek-ward",
+        "morvathic":  "skal-ward",
+        "key":  "IRON_WARD",
+        "karadic":  "tharn-ward",
+        "valic":  "ferr-ward"
+    },
+    {
+        "sylvic":  "patience-binder",
+        "kitter":  "fast-work-binder",
+        "english":  "diligence binder",
+        "vorgash":  "in-an-binder",
+        "morvathic":  "task-binder",
+        "key":  "DILIGENCE_BINDER",
+        "karadic":  "toil-binder",
+        "valic":  "duty-binder"
+    },
+    {
+        "sylvic":  "growth-shaper",
+        "kitter":  "make-shape-shaper",
+        "english":  "form shaper",
+        "vorgash":  "khor-form-shaper",
+        "morvathic":  "iron-cage-shaper",
+        "key":  "FORM_SHAPER",
+        "karadic":  "masonry-shaper",
+        "valic":  "structure-shaper"
+    },
+    {
+        "sylvic":  "zephyr-breaker",
+        "kitter":  "whiff-air-breaker",
+        "english":  "wind breaker",
+        "vorgash":  "hur-stream-breaker",
+        "morvathic":  "howl-breaker",
+        "key":  "WIND_BREAKER",
+        "karadic":  "draft-breaker",
+        "valic":  "aura-breaker"
+    },
+    {
+        "sylvic":  "branch-watcher",
+        "kitter":  "chop-bit-watcher",
+        "english":  "axe watcher",
+        "vorgash":  "cleave-tek-watcher",
+        "morvathic":  "scourge-watcher",
+        "key":  "AXE_WATCHER",
+        "karadic":  "vrak-watcher",
+        "valic":  "secur-watcher"
+    },
+    {
+        "sylvic":  "sol-slater",
+        "kitter":  "ouch-hot-slater",
+        "english":  "fire slater",
+        "vorgash":  "flam-will-slater",
+        "morvathic":  "blaze-slater",
+        "key":  "FIRE_SLATER",
+        "karadic":  "ember-slater",
+        "valic":  "pyre-slater"
+    },
+    {
+        "sylvic":  "sylv-breaker",
+        "kitter":  "crisp-eat-breaker",
+        "english":  "leaf breaker",
+        "vorgash":  "fol-zen-breaker",
+        "morvathic":  "wither-breaker",
+        "key":  "LEAF_BREAKER",
+        "karadic":  "chaff-breaker",
+        "valic":  "foli-breaker"
+    },
+    {
+        "sylvic":  "harmony-weaver",
+        "kitter":  "hold-tight-weaver",
+        "english":  "control weaver",
+        "vorgash":  "wis-grip-weaver",
+        "morvathic":  "chain-weaver",
+        "key":  "CONTROL_WEAVER",
+        "karadic":  "anchor-weaver",
+        "valic":  "rule-weaver"
+    },
+    {
+        "sylvic":  "zephyr-cleaver",
+        "kitter":  "whiff-air-cleaver",
+        "english":  "wind cleaver",
+        "vorgash":  "hur-stream-cleaver",
+        "morvathic":  "howl-cleaver",
+        "key":  "WIND_CLEAVER",
+        "karadic":  "draft-cleaver",
+        "valic":  "aura-cleaver"
+    },
+    {
+        "sylvic":  "alath-shaper",
+        "kitter":  "clik-iron-shaper",
+        "english":  "iron shaper",
+        "vorgash":  "fer-tek-shaper",
+        "morvathic":  "skal-shaper",
+        "key":  "IRON_SHAPER",
+        "karadic":  "tharn-shaper",
+        "valic":  "ferr-shaper"
+    },
+    {
+        "sylvic":  "arbor-singer",
+        "kitter":  "spark-tin-singer",
+        "english":  "forge singer",
+        "vorgash":  "flam-khor-singer",
+        "morvathic":  "slak-singer",
+        "key":  "FORGE_SINGER",
+        "karadic":  "baruk-singer",
+        "valic":  "forn-singer"
+    },
+    {
+        "sylvic":  "eluned",
+        "kitter":  "high-glint",
+        "english":  "star",
+        "vorgash":  "ast-point",
+        "morvathic":  "glint",
+        "key":  "STAR",
+        "karadic":  "spark",
+        "valic":  "astral"
+    },
+    {
+        "sylvic":  "arbor-breaker",
+        "kitter":  "tall-stick-breaker",
+        "english":  "tree breaker",
+        "vorgash":  "lign-form-breaker",
+        "morvathic":  "rot-stem-breaker",
+        "key":  "TREE_BREAKER",
+        "karadic":  "timber-breaker",
+        "valic":  "silva-breaker"
+    },
+    {
+        "sylvic":  "sol",
+        "kitter":  "ouch-hot",
+        "english":  "fire",
+        "vorgash":  "flam-will",
+        "morvathic":  "blaze",
+        "key":  "FIRE",
+        "karadic":  "ember",
+        "valic":  "pyre"
+    },
+    {
+        "sylvic":  "living-graft-smith",
+        "kitter":  "gear-paw-smith",
+        "english":  "bionic smith",
+        "vorgash":  "tek-frame-smith",
+        "morvathic":  "spike-arm-smith",
+        "key":  "BIONIC_SMITH",
+        "karadic":  "iron-limb-smith",
+        "valic":  "prosthetic-smith"
+    },
+    {
+        "sylvic":  "silv-delver",
+        "kitter":  "shiny-white-delver",
+        "english":  "silver delver",
+        "vorgash":  "arg-tek-delver",
+        "morvathic":  "pale-shine-delver",
+        "key":  "SILVER_DELVER",
+        "karadic":  "argen-delver",
+        "valic":  "argent-delver"
+    },
+    {
+        "sylvic":  "vital-craft",
+        "kitter":  "red-leak-craft",
+        "english":  "blood craft",
+        "vorgash":  "cruor-flam-craft",
+        "morvathic":  "gorg-craft",
+        "key":  "BLOOD_CRAFT",
+        "karadic":  "vein-craft",
+        "valic":  "sanguis-craft"
+    },
+    {
+        "sylvic":  "aureol-walker",
+        "kitter":  "big-bright-walker",
+        "english":  "sun walker",
+        "vorgash":  "zen-light-walker",
+        "morvathic":  "scorch-walker",
+        "key":  "SUN_WALKER",
+        "karadic":  "glare-walker",
+        "valic":  "solaris-walker"
+    },
+    {
+        "sylvic":  "sylv-binder",
+        "kitter":  "crisp-eat-binder",
+        "english":  "leaf binder",
+        "vorgash":  "fol-zen-binder",
+        "morvathic":  "wither-binder",
+        "key":  "LEAF_BINDER",
+        "karadic":  "chaff-binder",
+        "valic":  "foli-binder"
+    },
+    {
+        "sylvic":  "aureol-shaper",
+        "kitter":  "big-bright-shaper",
+        "english":  "sun shaper",
+        "vorgash":  "zen-light-shaper",
+        "morvathic":  "scorch-shaper",
+        "key":  "SUN_SHAPER",
+        "karadic":  "glare-shaper",
+        "valic":  "solaris-shaper"
+    },
+    {
+        "sylvic":  "living-graft-seeker",
+        "kitter":  "gear-paw-seeker",
+        "english":  "bionic seeker",
+        "vorgash":  "tek-frame-seeker",
+        "morvathic":  "spike-arm-seeker",
+        "key":  "BIONIC_SEEKER",
+        "karadic":  "iron-limb-seeker",
+        "valic":  "prosthetic-seeker"
+    },
+    {
+        "sylvic":  "tellur-singer",
+        "kitter":  "dig-dirt-singer",
+        "english":  "earth singer",
+        "vorgash":  "sol-form-singer",
+        "morvathic":  "mire-singer",
+        "key":  "EARTH_SINGER",
+        "karadic":  "humus-singer",
+        "valic":  "terra-singer"
+    },
+    {
+        "sylvic":  "arbor-smith",
+        "kitter":  "spark-tin-smith",
+        "english":  "forge smith",
+        "vorgash":  "flam-khor-smith",
+        "morvathic":  "slak-smith",
+        "key":  "FORGE_SMITH",
+        "karadic":  "baruk-smith",
+        "valic":  "forn-smith"
+    },
+    {
+        "sylvic":  "arbor-tinker",
+        "kitter":  "spark-tin-tinker",
+        "english":  "forge tinker",
+        "vorgash":  "flam-khor-tinker",
+        "morvathic":  "slak-tinker",
+        "key":  "FORGE_TINKER",
+        "karadic":  "baruk-tinker",
+        "valic":  "forn-tinker"
+    },
+    {
+        "sylvic":  "anima-shaper",
+        "kitter":  "thump-thump-shaper",
+        "english":  "heart shaper",
+        "vorgash":  "will-core-shaper",
+        "morvathic":  "pump-shaper",
+        "key":  "HEART_SHAPER",
+        "karadic":  "core-shaper",
+        "valic":  "cordis-shaper"
+    },
+    {
+        "sylvic":  "ithil-smith",
+        "kitter":  "glow-orb-smith",
+        "english":  "moon smith",
+        "vorgash":  "nox-zen-smith",
+        "morvathic":  "night-eye-smith",
+        "key":  "MOON_SMITH",
+        "karadic":  "lun-smith",
+        "valic":  "luna-smith"
+    },
+    {
+        "sylvic":  "sleep-root-smith",
+        "kitter":  "stop-box-smith",
+        "english":  "stasis smith",
+        "vorgash":  "form-quench-smith",
+        "morvathic":  "cage-freeze-smith",
+        "key":  "STASIS_SMITH",
+        "karadic":  "ice-lock-smith",
+        "valic":  "chronos-smith"
+    },
+    {
+        "sylvic":  "silv-binder",
+        "kitter":  "shiny-white-binder",
+        "english":  "silver binder",
+        "vorgash":  "arg-tek-binder",
+        "morvathic":  "pale-shine-binder",
+        "key":  "SILVER_BINDER",
+        "karadic":  "argen-binder",
+        "valic":  "argent-binder"
+    },
+    {
+        "sylvic":  "vein-weave-walker",
+        "kitter":  "spark-track-walker",
+        "english":  "circuit walker",
+        "vorgash":  "form-trace-walker",
+        "morvathic":  "barb-line-walker",
+        "key":  "CIRCUIT_WALKER",
+        "karadic":  "runic-wire-walker",
+        "valic":  "conduit-walker"
+    },
+    {
+        "sylvic":  "vein-weave-slater",
+        "kitter":  "spark-track-slater",
+        "english":  "circuit slater",
+        "vorgash":  "form-trace-slater",
+        "morvathic":  "barb-line-slater",
+        "key":  "CIRCUIT_SLATER",
+        "karadic":  "runic-wire-slater",
+        "valic":  "conduit-slater"
+    },
+    {
+        "sylvic":  "alath-singer",
+        "kitter":  "clik-iron-singer",
+        "english":  "iron singer",
+        "vorgash":  "fer-tek-singer",
+        "morvathic":  "skal-singer",
+        "key":  "IRON_SINGER",
+        "karadic":  "tharn-singer",
+        "valic":  "ferr-singer"
+    },
+    {
+        "sylvic":  "aureol-binder",
+        "kitter":  "big-bright-binder",
+        "english":  "sun binder",
+        "vorgash":  "zen-light-binder",
+        "morvathic":  "scorch-binder",
+        "key":  "SUN_BINDER",
+        "karadic":  "glare-binder",
+        "valic":  "solaris-binder"
+    },
+    {
+        "sylvic":  "lith-breaker",
+        "kitter":  "tik-stak-breaker",
+        "english":  "stone breaker",
+        "vorgash":  "basalt-breaker",
+        "morvathic":  "krog-breaker",
+        "key":  "STONE_BREAKER",
+        "karadic":  "krag-breaker",
+        "valic":  "dor-breaker"
+    },
+    {
+        "sylvic":  "gilded-tinker",
+        "kitter":  "shiny-yellow-tinker",
+        "english":  "gold tinker",
+        "vorgash":  "aur-tek-tinker",
+        "morvathic":  "greed-tinker",
+        "key":  "GOLD_TINKER",
+        "karadic":  "aur-tinker",
+        "valic":  "aurum-tinker"
+    },
+    {
+        "sylvic":  "bark-striker",
+        "kitter":  "hide-shell-striker",
+        "english":  "shield striker",
+        "vorgash":  "form-sanct-striker",
+        "morvathic":  "ward-striker",
+        "key":  "SHIELD_STRIKER",
+        "karadic":  "korgan-striker",
+        "valic":  "aegis-striker"
+    },
+    {
+        "sylvic":  "silv",
+        "kitter":  "shiny-white",
+        "english":  "silver",
+        "vorgash":  "arg-tek",
+        "morvathic":  "pale-shine",
+        "key":  "SILVER",
+        "karadic":  "argen",
+        "valic":  "argent"
+    },
+    {
+        "sylvic":  "eluned-singer",
+        "kitter":  "high-glint-singer",
+        "english":  "star singer",
+        "vorgash":  "ast-point-singer",
+        "morvathic":  "glint-singer",
+        "key":  "STAR_SINGER",
+        "karadic":  "spark-singer",
+        "valic":  "astral-singer"
+    },
+    {
+        "sylvic":  "sol-plasma-striker",
+        "kitter":  "blue-burn-striker",
+        "english":  "plasma striker",
+        "vorgash":  "plas-will-striker",
+        "morvathic":  "scorch-gas-striker",
+        "key":  "PLASMA_STRIKER",
+        "karadic":  "vul-fire-striker",
+        "valic":  "ion-flux-striker"
+    },
+    {
+        "sylvic":  "gilded-lord",
+        "kitter":  "shiny-yellow-lord",
+        "english":  "gold lord",
+        "vorgash":  "aur-tek-lord",
+        "morvathic":  "greed-lord",
+        "key":  "GOLD_LORD",
+        "karadic":  "aur-lord",
+        "valic":  "aurum-lord"
+    },
+    {
+        "sylvic":  "sol-plasma-cleaver",
+        "kitter":  "blue-burn-cleaver",
+        "english":  "plasma cleaver",
+        "vorgash":  "plas-will-cleaver",
+        "morvathic":  "scorch-gas-cleaver",
+        "key":  "PLASMA_CLEAVER",
+        "karadic":  "vul-fire-cleaver",
+        "valic":  "ion-flux-cleaver"
+    },
+    {
+        "sylvic":  "harmony-striker",
+        "kitter":  "hold-tight-striker",
+        "english":  "control striker",
+        "vorgash":  "wis-grip-striker",
+        "morvathic":  "chain-striker",
+        "key":  "CONTROL_STRIKER",
+        "karadic":  "anchor-striker",
+        "valic":  "rule-striker"
+    },
+    {
+        "sylvic":  "cairn-breaker",
+        "kitter":  "high-rock-breaker",
+        "english":  "mountain breaker",
+        "vorgash":  "zenith-crag-breaker",
+        "morvathic":  "trench-breaker",
+        "key":  "MOUNTAIN_BREAKER",
+        "karadic":  "vorn-breaker",
+        "valic":  "peak-breaker"
+    },
+    {
+        "sylvic":  "sol-plasma-delver",
+        "kitter":  "blue-burn-delver",
+        "english":  "plasma delver",
+        "vorgash":  "plas-will-delver",
+        "morvathic":  "scorch-gas-delver",
+        "key":  "PLASMA_DELVER",
+        "karadic":  "vul-fire-delver",
+        "valic":  "ion-flux-delver"
+    },
+    {
+        "sylvic":  "alath-delver",
+        "kitter":  "clik-iron-delver",
+        "english":  "iron delver",
+        "vorgash":  "fer-tek-delver",
+        "morvathic":  "skal-delver",
+        "key":  "IRON_DELVER",
+        "karadic":  "tharn-delver",
+        "valic":  "ferr-delver"
+    },
+    {
+        "sylvic":  "song-breaker",
+        "kitter":  "thud-tap-breaker",
+        "english":  "hammer breaker",
+        "vorgash":  "tek-strike-breaker",
+        "morvathic":  "mash-breaker",
+        "key":  "HAMMER_BREAKER",
+        "karadic":  "grond-breaker",
+        "valic":  "malle-breaker"
+    },
+    {
+        "sylvic":  "growth-slater",
+        "kitter":  "make-shape-slater",
+        "english":  "form slater",
+        "vorgash":  "khor-form-slater",
+        "morvathic":  "iron-cage-slater",
+        "key":  "FORM_SLATER",
+        "karadic":  "masonry-slater",
+        "valic":  "structure-slater"
+    },
+    {
+        "sylvic":  "cairn-tinker",
+        "kitter":  "high-rock-tinker",
+        "english":  "mountain tinker",
+        "vorgash":  "zenith-crag-tinker",
+        "morvathic":  "trench-tinker",
+        "key":  "MOUNTAIN_TINKER",
+        "karadic":  "vorn-tinker",
+        "valic":  "peak-tinker"
+    },
+    {
+        "sylvic":  "tellur",
+        "kitter":  "dig-dirt",
+        "english":  "earth",
+        "vorgash":  "sol-form",
+        "morvathic":  "mire",
+        "key":  "EARTH",
+        "karadic":  "humus",
+        "valic":  "terra"
+    },
+    {
+        "sylvic":  "sylv-shaper",
+        "kitter":  "crisp-eat-shaper",
+        "english":  "leaf shaper",
+        "vorgash":  "fol-zen-shaper",
+        "morvathic":  "wither-shaper",
+        "key":  "LEAF_SHAPER",
+        "karadic":  "chaff-shaper",
+        "valic":  "foli-shaper"
+    },
+    {
+        "sylvic":  "pith-craft",
+        "kitter":  "crunch-bone-craft",
+        "english":  "bone craft",
+        "vorgash":  "osse-form-craft",
+        "morvathic":  "skul-craft",
+        "key":  "BONE_CRAFT",
+        "karadic":  "strut-craft",
+        "valic":  "ossa-craft"
+    },
+    {
+        "sylvic":  "arbor-smith",
+        "kitter":  "tall-stick-smith",
+        "english":  "tree smith",
+        "vorgash":  "lign-form-smith",
+        "morvathic":  "rot-stem-smith",
+        "key":  "TREE_SMITH",
+        "karadic":  "timber-smith",
+        "valic":  "silva-smith"
+    },
+    {
+        "sylvic":  "cairn-shield",
+        "kitter":  "high-rock-shield",
+        "english":  "mountain shield",
+        "vorgash":  "zenith-crag-shield",
+        "morvathic":  "trench-shield",
+        "key":  "MOUNTAIN_SHIELD",
+        "karadic":  "vorn-shield",
+        "valic":  "peak-shield"
+    },
+    {
+        "sylvic":  "living-graft-slater",
+        "kitter":  "gear-paw-slater",
+        "english":  "bionic slater",
+        "vorgash":  "tek-frame-slater",
+        "morvathic":  "spike-arm-slater",
+        "key":  "BIONIC_SLATER",
+        "karadic":  "iron-limb-slater",
+        "valic":  "prosthetic-slater"
+    },
+    {
+        "sylvic":  "anima",
+        "kitter":  "thump-thump",
+        "english":  "heart",
+        "vorgash":  "will-core",
+        "morvathic":  "pump",
+        "key":  "HEART",
+        "karadic":  "core",
+        "valic":  "cordis"
+    },
+    {
+        "sylvic":  "eluned-ward",
+        "kitter":  "high-glint-ward",
+        "english":  "star ward",
+        "vorgash":  "ast-point-ward",
+        "morvathic":  "glint-ward",
+        "key":  "STAR_WARD",
+        "karadic":  "spark-ward",
+        "valic":  "astral-ward"
+    },
+    {
+        "sylvic":  "tellur-slater",
+        "kitter":  "dig-dirt-slater",
+        "english":  "earth slater",
+        "vorgash":  "sol-form-slater",
+        "morvathic":  "mire-slater",
+        "key":  "EARTH_SLATER",
+        "karadic":  "humus-slater",
+        "valic":  "terra-slater"
+    },
+    {
+        "sylvic":  "wood-sentinel-shaper",
+        "kitter":  "clik-walker-shaper",
+        "english":  "automaton shaper",
+        "vorgash":  "will-vessel-shaper",
+        "morvathic":  "clock-fiend-shaper",
+        "key":  "AUTOMATON_SHAPER",
+        "karadic":  "iron-golem-shaper",
+        "valic":  "mechanica-shaper"
+    },
+    {
+        "sylvic":  "vein-weave",
+        "kitter":  "spark-track",
+        "english":  "circuit",
+        "vorgash":  "form-trace",
+        "morvathic":  "barb-line",
+        "key":  "CIRCUIT",
+        "karadic":  "runic-wire",
+        "valic":  "conduit"
+    },
+    {
+        "sylvic":  "arbor-shield",
+        "kitter":  "tall-stick-shield",
+        "english":  "tree shield",
+        "vorgash":  "lign-form-shield",
+        "morvathic":  "rot-stem-shield",
+        "key":  "TREE_SHIELD",
+        "karadic":  "timber-shield",
+        "valic":  "silva-shield"
+    },
+    {
+        "sylvic":  "living-graft-singer",
+        "kitter":  "gear-paw-singer",
+        "english":  "bionic singer",
+        "vorgash":  "tek-frame-singer",
+        "morvathic":  "spike-arm-singer",
+        "key":  "BIONIC_SINGER",
+        "karadic":  "iron-limb-singer",
+        "valic":  "prosthetic-singer"
+    },
+    {
+        "sylvic":  "eternal-root-watcher",
+        "kitter":  "run-far-watcher",
+        "english":  "endurance watcher",
+        "vorgash":  "basalt-stand-watcher",
+        "morvathic":  "tough-hide-watcher",
+        "key":  "ENDURANCE_WATCHER",
+        "karadic":  "granite-will-watcher",
+        "valic":  "fortitude-watcher"
+    },
+    {
+        "sylvic":  "gilded",
+        "kitter":  "shiny-yellow",
+        "english":  "gold",
+        "vorgash":  "aur-tek",
+        "morvathic":  "greed",
+        "key":  "GOLD",
+        "karadic":  "aur",
+        "valic":  "aurum"
+    },
+    {
+        "sylvic":  "patience-singer",
+        "kitter":  "fast-work-singer",
+        "english":  "diligence singer",
+        "vorgash":  "in-an-singer",
+        "morvathic":  "task-singer",
+        "key":  "DILIGENCE_SINGER",
+        "karadic":  "toil-singer",
+        "valic":  "duty-singer"
+    },
+    {
+        "sylvic":  "tellur-craft",
+        "kitter":  "dig-dirt-craft",
+        "english":  "earth craft",
+        "vorgash":  "sol-form-craft",
+        "morvathic":  "mire-craft",
+        "key":  "EARTH_CRAFT",
+        "karadic":  "humus-craft",
+        "valic":  "terra-craft"
+    },
+    {
+        "sylvic":  "vein-weave-shield",
+        "kitter":  "spark-track-shield",
+        "english":  "circuit shield",
+        "vorgash":  "form-trace-shield",
+        "morvathic":  "barb-line-shield",
+        "key":  "CIRCUIT_SHIELD",
+        "karadic":  "runic-wire-shield",
+        "valic":  "conduit-shield"
+    },
+    {
+        "sylvic":  "growth-weaver",
+        "kitter":  "make-shape-weaver",
+        "english":  "form weaver",
+        "vorgash":  "khor-form-weaver",
+        "morvathic":  "iron-cage-weaver",
+        "key":  "FORM_WEAVER",
+        "karadic":  "masonry-weaver",
+        "valic":  "structure-weaver"
+    },
+    {
+        "sylvic":  "arbor-shaper",
+        "kitter":  "spark-tin-shaper",
+        "english":  "forge shaper",
+        "vorgash":  "flam-khor-shaper",
+        "morvathic":  "slak-shaper",
+        "key":  "FORGE_SHAPER",
+        "karadic":  "baruk-shaper",
+        "valic":  "forn-shaper"
+    },
+    {
+        "sylvic":  "pith-tinker",
+        "kitter":  "crunch-bone-tinker",
+        "english":  "bone tinker",
+        "vorgash":  "osse-form-tinker",
+        "morvathic":  "skul-tinker",
+        "key":  "BONE_TINKER",
+        "karadic":  "strut-tinker",
+        "valic":  "ossa-tinker"
+    },
+    {
+        "sylvic":  "tellur-weaver",
+        "kitter":  "dig-dirt-weaver",
+        "english":  "earth weaver",
+        "vorgash":  "sol-form-weaver",
+        "morvathic":  "mire-weaver",
+        "key":  "EARTH_WEAVER",
+        "karadic":  "humus-weaver",
+        "valic":  "terra-weaver"
+    },
+    {
+        "sylvic":  "heart-song-seeker",
+        "kitter":  "hyper-bounce-seeker",
+        "english":  "passion seeker",
+        "vorgash":  "flam-zeal-seeker",
+        "morvathic":  "rage-seeker",
+        "key":  "PASSION_SEEKER",
+        "karadic":  "hearth-fire-seeker",
+        "valic":  "zeal-seeker"
+    },
+    {
+        "sylvic":  "growth-singer",
+        "kitter":  "make-shape-singer",
+        "english":  "form singer",
+        "vorgash":  "khor-form-singer",
+        "morvathic":  "iron-cage-singer",
+        "key":  "FORM_SINGER",
+        "karadic":  "masonry-singer",
+        "valic":  "structure-singer"
+    },
+    {
+        "sylvic":  "wood-sentinel-cleaver",
+        "kitter":  "clik-walker-cleaver",
+        "english":  "automaton cleaver",
+        "vorgash":  "will-vessel-cleaver",
+        "morvathic":  "clock-fiend-cleaver",
+        "key":  "AUTOMATON_CLEAVER",
+        "karadic":  "iron-golem-cleaver",
+        "valic":  "mechanica-cleaver"
+    },
+    {
+        "sylvic":  "gilded-striker",
+        "kitter":  "shiny-yellow-striker",
+        "english":  "gold striker",
+        "vorgash":  "aur-tek-striker",
+        "morvathic":  "greed-striker",
+        "key":  "GOLD_STRIKER",
+        "karadic":  "aur-striker",
+        "valic":  "aurum-striker"
+    },
+    {
+        "sylvic":  "wood-sentinel-weaver",
+        "kitter":  "clik-walker-weaver",
+        "english":  "automaton weaver",
+        "vorgash":  "will-vessel-weaver",
+        "morvathic":  "clock-fiend-weaver",
+        "key":  "AUTOMATON_WEAVER",
+        "karadic":  "iron-golem-weaver",
+        "valic":  "mechanica-weaver"
+    },
+    {
+        "sylvic":  "arbor-shield",
+        "kitter":  "spark-tin-shield",
+        "english":  "forge shield",
+        "vorgash":  "flam-khor-shield",
+        "morvathic":  "slak-shield",
+        "key":  "FORGE_SHIELD",
+        "karadic":  "baruk-shield",
+        "valic":  "forn-shield"
+    },
+    {
+        "sylvic":  "patience-shield",
+        "kitter":  "fast-work-shield",
+        "english":  "diligence shield",
+        "vorgash":  "in-an-shield",
+        "morvathic":  "task-shield",
+        "key":  "DILIGENCE_SHIELD",
+        "karadic":  "toil-shield",
+        "valic":  "duty-shield"
+    },
+    {
+        "sylvic":  "wood-sentinel-walker",
+        "kitter":  "clik-walker-walker",
+        "english":  "automaton walker",
+        "vorgash":  "will-vessel-walker",
+        "morvathic":  "clock-fiend-walker",
+        "key":  "AUTOMATON_WALKER",
+        "karadic":  "iron-golem-walker",
+        "valic":  "mechanica-walker"
+    },
+    {
+        "sylvic":  "ithil-lord",
+        "kitter":  "glow-orb-lord",
+        "english":  "moon lord",
+        "vorgash":  "nox-zen-lord",
+        "morvathic":  "night-eye-lord",
+        "key":  "MOON_LORD",
+        "karadic":  "lun-lord",
+        "valic":  "luna-lord"
+    },
+    {
+        "sylvic":  "cairn-walker",
+        "kitter":  "high-rock-walker",
+        "english":  "mountain walker",
+        "vorgash":  "zenith-crag-walker",
+        "morvathic":  "trench-walker",
+        "key":  "MOUNTAIN_WALKER",
+        "karadic":  "vorn-walker",
+        "valic":  "peak-walker"
+    },
+    {
+        "sylvic":  "eluned-striker",
+        "kitter":  "high-glint-striker",
+        "english":  "star striker",
+        "vorgash":  "ast-point-striker",
+        "morvathic":  "glint-striker",
+        "key":  "STAR_STRIKER",
+        "karadic":  "spark-striker",
+        "valic":  "astral-striker"
+    },
+    {
+        "sylvic":  "song-ward",
+        "kitter":  "thud-tap-ward",
+        "english":  "hammer ward",
+        "vorgash":  "tek-strike-ward",
+        "morvathic":  "mash-ward",
+        "key":  "HAMMER_WARD",
+        "karadic":  "grond-ward",
+        "valic":  "malle-ward"
+    },
+    {
+        "sylvic":  "song-shaper",
+        "kitter":  "thud-tap-shaper",
+        "english":  "hammer shaper",
+        "vorgash":  "tek-strike-shaper",
+        "morvathic":  "mash-shaper",
+        "key":  "HAMMER_SHAPER",
+        "karadic":  "grond-shaper",
+        "valic":  "malle-shaper"
+    },
+    {
+        "sylvic":  "pith-watcher",
+        "kitter":  "crunch-bone-watcher",
+        "english":  "bone watcher",
+        "vorgash":  "osse-form-watcher",
+        "morvathic":  "skul-watcher",
+        "key":  "BONE_WATCHER",
+        "karadic":  "strut-watcher",
+        "valic":  "ossa-watcher"
+    },
+    {
+        "sylvic":  "aureol-cleaver",
+        "kitter":  "big-bright-cleaver",
+        "english":  "sun cleaver",
+        "vorgash":  "zen-light-cleaver",
+        "morvathic":  "scorch-cleaver",
+        "key":  "SUN_CLEAVER",
+        "karadic":  "glare-cleaver",
+        "valic":  "solaris-cleaver"
+    },
+    {
+        "sylvic":  "alath-weaver",
+        "kitter":  "clik-iron-weaver",
+        "english":  "iron weaver",
+        "vorgash":  "fer-tek-weaver",
+        "morvathic":  "skal-weaver",
+        "key":  "IRON_WEAVER",
+        "karadic":  "tharn-weaver",
+        "valic":  "ferr-weaver"
+    },
+    {
+        "sylvic":  "sol-shield",
+        "kitter":  "ouch-hot-shield",
+        "english":  "fire shield",
+        "vorgash":  "flam-will-shield",
+        "morvathic":  "blaze-shield",
+        "key":  "FIRE_SHIELD",
+        "karadic":  "ember-shield",
+        "valic":  "pyre-shield"
+    },
+    {
+        "sylvic":  "ithil-delver",
+        "kitter":  "glow-orb-delver",
+        "english":  "moon delver",
+        "vorgash":  "nox-zen-delver",
+        "morvathic":  "night-eye-delver",
+        "key":  "MOON_DELVER",
+        "karadic":  "lun-delver",
+        "valic":  "luna-delver"
+    },
+    {
+        "sylvic":  "sol-tinker",
+        "kitter":  "ouch-hot-tinker",
+        "english":  "fire tinker",
+        "vorgash":  "flam-will-tinker",
+        "morvathic":  "blaze-tinker",
+        "key":  "FIRE_TINKER",
+        "karadic":  "ember-tinker",
+        "valic":  "pyre-tinker"
+    },
+    {
+        "sylvic":  "sol-lord",
+        "kitter":  "ouch-hot-lord",
+        "english":  "fire lord",
+        "vorgash":  "flam-will-lord",
+        "morvathic":  "blaze-lord",
+        "key":  "FIRE_LORD",
+        "karadic":  "ember-lord",
+        "valic":  "pyre-lord"
+    },
+    {
+        "sylvic":  "spirit-shaper",
+        "kitter":  "want-grab-shaper",
+        "english":  "will shaper",
+        "vorgash":  "xan-will-shaper",
+        "morvathic":  "force-shaper",
+        "key":  "WILL_SHAPER",
+        "karadic":  "resolve-shaper",
+        "valic":  "intent-shaper"
+    },
+    {
+        "sylvic":  "sol-plasma-lord",
+        "kitter":  "blue-burn-lord",
+        "english":  "plasma lord",
+        "vorgash":  "plas-will-lord",
+        "morvathic":  "scorch-gas-lord",
+        "key":  "PLASMA_LORD",
+        "karadic":  "vul-fire-lord",
+        "valic":  "ion-flux-lord"
+    },
+    {
+        "sylvic":  "song-shield",
+        "kitter":  "thud-tap-shield",
+        "english":  "hammer shield",
+        "vorgash":  "tek-strike-shield",
+        "morvathic":  "mash-shield",
+        "key":  "HAMMER_SHIELD",
+        "karadic":  "grond-shield",
+        "valic":  "malle-shield"
+    },
+    {
+        "sylvic":  "gilded-shaper",
+        "kitter":  "shiny-yellow-shaper",
+        "english":  "gold shaper",
+        "vorgash":  "aur-tek-shaper",
+        "morvathic":  "greed-shaper",
+        "key":  "GOLD_SHAPER",
+        "karadic":  "aur-shaper",
+        "valic":  "aurum-shaper"
+    },
+    {
+        "sylvic":  "bark",
+        "kitter":  "hide-shell",
+        "english":  "shield",
+        "vorgash":  "form-sanct",
+        "morvathic":  "ward",
+        "key":  "SHIELD",
+        "karadic":  "korgan",
+        "valic":  "aegis"
+    },
+    {
+        "sylvic":  "anima-tinker",
+        "kitter":  "thump-thump-tinker",
+        "english":  "heart tinker",
+        "vorgash":  "will-core-tinker",
+        "morvathic":  "pump-tinker",
+        "key":  "HEART_TINKER",
+        "karadic":  "core-tinker",
+        "valic":  "cordis-tinker"
+    },
+    {
+        "sylvic":  "sleep-root-ward",
+        "kitter":  "stop-box-ward",
+        "english":  "stasis ward",
+        "vorgash":  "form-quench-ward",
+        "morvathic":  "cage-freeze-ward",
+        "key":  "STASIS_WARD",
+        "karadic":  "ice-lock-ward",
+        "valic":  "chronos-ward"
+    },
+    {
+        "sylvic":  "arbor-ward",
+        "kitter":  "spark-tin-ward",
+        "english":  "forge ward",
+        "vorgash":  "flam-khor-ward",
+        "morvathic":  "slak-ward",
+        "key":  "FORGE_WARD",
+        "karadic":  "baruk-ward",
+        "valic":  "forn-ward"
+    },
+    {
+        "sylvic":  "arbor-cleaver",
+        "kitter":  "tall-stick-cleaver",
+        "english":  "tree cleaver",
+        "vorgash":  "lign-form-cleaver",
+        "morvathic":  "rot-stem-cleaver",
+        "key":  "TREE_CLEAVER",
+        "karadic":  "timber-cleaver",
+        "valic":  "silva-cleaver"
+    },
+    {
+        "sylvic":  "growth-binder",
+        "kitter":  "make-shape-binder",
+        "english":  "form binder",
+        "vorgash":  "khor-form-binder",
+        "morvathic":  "iron-cage-binder",
+        "key":  "FORM_BINDER",
+        "karadic":  "masonry-binder",
+        "valic":  "structure-binder"
+    },
+    {
+        "sylvic":  "living-graft-walker",
+        "kitter":  "gear-paw-walker",
+        "english":  "bionic walker",
+        "vorgash":  "tek-frame-walker",
+        "morvathic":  "spike-arm-walker",
+        "key":  "BIONIC_WALKER",
+        "karadic":  "iron-limb-walker",
+        "valic":  "prosthetic-walker"
+    },
+    {
+        "sylvic":  "sleep-root-seeker",
+        "kitter":  "stop-box-seeker",
+        "english":  "stasis seeker",
+        "vorgash":  "form-quench-seeker",
+        "morvathic":  "cage-freeze-seeker",
+        "key":  "STASIS_SEEKER",
+        "karadic":  "ice-lock-seeker",
+        "valic":  "chronos-seeker"
+    },
+    {
+        "sylvic":  "radix-craft",
+        "kitter":  "down-down-craft",
+        "english":  "deep craft",
+        "vorgash":  "khor-abyss-craft",
+        "morvathic":  "abyss-craft",
+        "key":  "DEEP_CRAFT",
+        "karadic":  "zul-craft",
+        "valic":  "prof-craft"
+    },
+    {
+        "sylvic":  "vital-slater",
+        "kitter":  "red-leak-slater",
+        "english":  "blood slater",
+        "vorgash":  "cruor-flam-slater",
+        "morvathic":  "gorg-slater",
+        "key":  "BLOOD_SLATER",
+        "karadic":  "vein-slater",
+        "valic":  "sanguis-slater"
+    },
+    {
+        "sylvic":  "gilded-seeker",
+        "kitter":  "shiny-yellow-seeker",
+        "english":  "gold seeker",
+        "vorgash":  "aur-tek-seeker",
+        "morvathic":  "greed-seeker",
+        "key":  "GOLD_SEEKER",
+        "karadic":  "aur-seeker",
+        "valic":  "aurum-seeker"
+    },
+    {
+        "sylvic":  "radix-ward",
+        "kitter":  "down-down-ward",
+        "english":  "deep ward",
+        "vorgash":  "khor-abyss-ward",
+        "morvathic":  "abyss-ward",
+        "key":  "DEEP_WARD",
+        "karadic":  "zul-ward",
+        "valic":  "prof-ward"
+    },
+    {
+        "sylvic":  "llyr-shield",
+        "kitter":  "drip-pool-shield",
+        "english":  "water shield",
+        "vorgash":  "hyd-flow-shield",
+        "morvathic":  "bilge-shield",
+        "key":  "WATER_SHIELD",
+        "karadic":  "spring-shield",
+        "valic":  "aqua-shield"
+    },
+    {
+        "sylvic":  "song-craft",
+        "kitter":  "thud-tap-craft",
+        "english":  "hammer craft",
+        "vorgash":  "tek-strike-craft",
+        "morvathic":  "mash-craft",
+        "key":  "HAMMER_CRAFT",
+        "karadic":  "grond-craft",
+        "valic":  "malle-craft"
+    },
+    {
+        "sylvic":  "eternal-root-breaker",
+        "kitter":  "run-far-breaker",
+        "english":  "endurance breaker",
+        "vorgash":  "basalt-stand-breaker",
+        "morvathic":  "tough-hide-breaker",
+        "key":  "ENDURANCE_BREAKER",
+        "karadic":  "granite-will-breaker",
+        "valic":  "fortitude-breaker"
+    },
+    {
+        "sylvic":  "sylv-shield",
+        "kitter":  "crisp-eat-shield",
+        "english":  "leaf shield",
+        "vorgash":  "fol-zen-shield",
+        "morvathic":  "wither-shield",
+        "key":  "LEAF_SHIELD",
+        "karadic":  "chaff-shield",
+        "valic":  "foli-shield"
+    },
+    {
+        "sylvic":  "vital-lord",
+        "kitter":  "red-leak-lord",
+        "english":  "blood lord",
+        "vorgash":  "cruor-flam-lord",
+        "morvathic":  "gorg-lord",
+        "key":  "BLOOD_LORD",
+        "karadic":  "vein-lord",
+        "valic":  "sanguis-lord"
+    },
+    {
+        "sylvic":  "alath-tinker",
+        "kitter":  "clik-iron-tinker",
+        "english":  "iron tinker",
+        "vorgash":  "fer-tek-tinker",
+        "morvathic":  "skal-tinker",
+        "key":  "IRON_TINKER",
+        "karadic":  "tharn-tinker",
+        "valic":  "ferr-tinker"
+    },
+    {
+        "sylvic":  "vein-weave-tinker",
+        "kitter":  "spark-track-tinker",
+        "english":  "circuit tinker",
+        "vorgash":  "form-trace-tinker",
+        "morvathic":  "barb-line-tinker",
+        "key":  "CIRCUIT_TINKER",
+        "karadic":  "runic-wire-tinker",
+        "valic":  "conduit-tinker"
+    },
+    {
+        "sylvic":  "eluned-watcher",
+        "kitter":  "high-glint-watcher",
+        "english":  "star watcher",
+        "vorgash":  "ast-point-watcher",
+        "morvathic":  "glint-watcher",
+        "key":  "STAR_WATCHER",
+        "karadic":  "spark-watcher",
+        "valic":  "astral-watcher"
+    },
+    {
+        "sylvic":  "heart-song-walker",
+        "kitter":  "hyper-bounce-walker",
+        "english":  "passion walker",
+        "vorgash":  "flam-zeal-walker",
+        "morvathic":  "rage-walker",
+        "key":  "PASSION_WALKER",
+        "karadic":  "hearth-fire-walker",
+        "valic":  "zeal-walker"
+    },
+    {
+        "sylvic":  "radix-singer",
+        "kitter":  "down-down-singer",
+        "english":  "deep singer",
+        "vorgash":  "khor-abyss-singer",
+        "morvathic":  "abyss-singer",
+        "key":  "DEEP_SINGER",
+        "karadic":  "zul-singer",
+        "valic":  "prof-singer"
+    },
+    {
+        "sylvic":  "lith-shaper",
+        "kitter":  "tik-stak-shaper",
+        "english":  "stone shaper",
+        "vorgash":  "basalt-shaper",
+        "morvathic":  "krog-shaper",
+        "key":  "STONE_SHAPER",
+        "karadic":  "krag-shaper",
+        "valic":  "dor-shaper"
+    },
+    {
+        "sylvic":  "spirit-seeker",
+        "kitter":  "want-grab-seeker",
+        "english":  "will seeker",
+        "vorgash":  "xan-will-seeker",
+        "morvathic":  "force-seeker",
+        "key":  "WILL_SEEKER",
+        "karadic":  "resolve-seeker",
+        "valic":  "intent-seeker"
+    },
+    {
+        "sylvic":  "gilded-shield",
+        "kitter":  "shiny-yellow-shield",
+        "english":  "gold shield",
+        "vorgash":  "aur-tek-shield",
+        "morvathic":  "greed-shield",
+        "key":  "GOLD_SHIELD",
+        "karadic":  "aur-shield",
+        "valic":  "aurum-shield"
+    },
+    {
+        "sylvic":  "gilded-craft",
+        "kitter":  "shiny-yellow-craft",
+        "english":  "gold craft",
+        "vorgash":  "aur-tek-craft",
+        "morvathic":  "greed-craft",
+        "key":  "GOLD_CRAFT",
+        "karadic":  "aur-craft",
+        "valic":  "aurum-craft"
+    },
+    {
+        "sylvic":  "vital-tinker",
+        "kitter":  "red-leak-tinker",
+        "english":  "blood tinker",
+        "vorgash":  "cruor-flam-tinker",
+        "morvathic":  "gorg-tinker",
+        "key":  "BLOOD_TINKER",
+        "karadic":  "vein-tinker",
+        "valic":  "sanguis-tinker"
+    },
+    {
+        "sylvic":  "arbor-weaver",
+        "kitter":  "tall-stick-weaver",
+        "english":  "tree weaver",
+        "vorgash":  "lign-form-weaver",
+        "morvathic":  "rot-stem-weaver",
+        "key":  "TREE_WEAVER",
+        "karadic":  "timber-weaver",
+        "valic":  "silva-weaver"
+    },
+    {
+        "sylvic":  "llyr-walker",
+        "kitter":  "drip-pool-walker",
+        "english":  "water walker",
+        "vorgash":  "hyd-flow-walker",
+        "morvathic":  "bilge-walker",
+        "key":  "WATER_WALKER",
+        "karadic":  "spring-walker",
+        "valic":  "aqua-walker"
+    },
+    {
+        "sylvic":  "lith-striker",
+        "kitter":  "tik-stak-striker",
+        "english":  "stone striker",
+        "vorgash":  "basalt-striker",
+        "morvathic":  "krog-striker",
+        "key":  "STONE_STRIKER",
+        "karadic":  "krag-striker",
+        "valic":  "dor-striker"
+    },
+    {
+        "sylvic":  "song-walker",
+        "kitter":  "thud-tap-walker",
+        "english":  "hammer walker",
+        "vorgash":  "tek-strike-walker",
+        "morvathic":  "mash-walker",
+        "key":  "HAMMER_WALKER",
+        "karadic":  "grond-walker",
+        "valic":  "malle-walker"
+    },
+    {
+        "sylvic":  "living-graft-craft",
+        "kitter":  "gear-paw-craft",
+        "english":  "bionic craft",
+        "vorgash":  "tek-frame-craft",
+        "morvathic":  "spike-arm-craft",
+        "key":  "BIONIC_CRAFT",
+        "karadic":  "iron-limb-craft",
+        "valic":  "prosthetic-craft"
+    },
+    {
+        "sylvic":  "llyr-singer",
+        "kitter":  "drip-pool-singer",
+        "english":  "water singer",
+        "vorgash":  "hyd-flow-singer",
+        "morvathic":  "bilge-singer",
+        "key":  "WATER_SINGER",
+        "karadic":  "spring-singer",
+        "valic":  "aqua-singer"
+    },
+    {
+        "sylvic":  "arbor-walker",
+        "kitter":  "spark-tin-walker",
+        "english":  "forge walker",
+        "vorgash":  "flam-khor-walker",
+        "morvathic":  "slak-walker",
+        "key":  "FORGE_WALKER",
+        "karadic":  "baruk-walker",
+        "valic":  "forn-walker"
+    },
+    {
+        "sylvic":  "aureol-seeker",
+        "kitter":  "big-bright-seeker",
+        "english":  "sun seeker",
+        "vorgash":  "zen-light-seeker",
+        "morvathic":  "scorch-seeker",
+        "key":  "SUN_SEEKER",
+        "karadic":  "glare-seeker",
+        "valic":  "solaris-seeker"
+    },
+    {
+        "sylvic":  "growth-breaker",
+        "kitter":  "make-shape-breaker",
+        "english":  "form breaker",
+        "vorgash":  "khor-form-breaker",
+        "morvathic":  "iron-cage-breaker",
+        "key":  "FORM_BREAKER",
+        "karadic":  "masonry-breaker",
+        "valic":  "structure-breaker"
+    },
+    {
+        "sylvic":  "sylv-delver",
+        "kitter":  "crisp-eat-delver",
+        "english":  "leaf delver",
+        "vorgash":  "fol-zen-delver",
+        "morvathic":  "wither-delver",
+        "key":  "LEAF_DELVER",
+        "karadic":  "chaff-delver",
+        "valic":  "foli-delver"
+    },
+    {
+        "sylvic":  "cairn-lord",
+        "kitter":  "high-rock-lord",
+        "english":  "mountain lord",
+        "vorgash":  "zenith-crag-lord",
+        "morvathic":  "trench-lord",
+        "key":  "MOUNTAIN_LORD",
+        "karadic":  "vorn-lord",
+        "valic":  "peak-lord"
+    },
+    {
+        "sylvic":  "vital-shaper",
+        "kitter":  "red-leak-shaper",
+        "english":  "blood shaper",
+        "vorgash":  "cruor-flam-shaper",
+        "morvathic":  "gorg-shaper",
+        "key":  "BLOOD_SHAPER",
+        "karadic":  "vein-shaper",
+        "valic":  "sanguis-shaper"
+    },
+    {
+        "sylvic":  "llyr-seeker",
+        "kitter":  "drip-pool-seeker",
+        "english":  "water seeker",
+        "vorgash":  "hyd-flow-seeker",
+        "morvathic":  "bilge-seeker",
+        "key":  "WATER_SEEKER",
+        "karadic":  "spring-seeker",
+        "valic":  "aqua-seeker"
+    },
+    {
+        "sylvic":  "heart-song",
+        "kitter":  "hyper-bounce",
+        "english":  "passion",
+        "vorgash":  "flam-zeal",
+        "morvathic":  "rage",
+        "key":  "PASSION",
+        "karadic":  "hearth-fire",
+        "valic":  "zeal"
+    },
+    {
+        "sylvic":  "vein-weave-ward",
+        "kitter":  "spark-track-ward",
+        "english":  "circuit ward",
+        "vorgash":  "form-trace-ward",
+        "morvathic":  "barb-line-ward",
+        "key":  "CIRCUIT_WARD",
+        "karadic":  "runic-wire-ward",
+        "valic":  "conduit-ward"
+    },
+    {
+        "sylvic":  "growth-walker",
+        "kitter":  "make-shape-walker",
+        "english":  "form walker",
+        "vorgash":  "khor-form-walker",
+        "morvathic":  "iron-cage-walker",
+        "key":  "FORM_WALKER",
+        "karadic":  "masonry-walker",
+        "valic":  "structure-walker"
+    },
+    {
+        "sylvic":  "sol-plasma-breaker",
+        "kitter":  "blue-burn-breaker",
+        "english":  "plasma breaker",
+        "vorgash":  "plas-will-breaker",
+        "morvathic":  "scorch-gas-breaker",
+        "key":  "PLASMA_BREAKER",
+        "karadic":  "vul-fire-breaker",
+        "valic":  "ion-flux-breaker"
+    },
+    {
+        "sylvic":  "arbor-seeker",
+        "kitter":  "tall-stick-seeker",
+        "english":  "tree seeker",
+        "vorgash":  "lign-form-seeker",
+        "morvathic":  "rot-stem-seeker",
+        "key":  "TREE_SEEKER",
+        "karadic":  "timber-seeker",
+        "valic":  "silva-seeker"
+    },
+    {
+        "sylvic":  "vital-striker",
+        "kitter":  "red-leak-striker",
+        "english":  "blood striker",
+        "vorgash":  "cruor-flam-striker",
+        "morvathic":  "gorg-striker",
+        "key":  "BLOOD_STRIKER",
+        "karadic":  "vein-striker",
+        "valic":  "sanguis-striker"
+    },
+    {
+        "sylvic":  "branch-seeker",
+        "kitter":  "chop-bit-seeker",
+        "english":  "axe seeker",
+        "vorgash":  "cleave-tek-seeker",
+        "morvathic":  "scourge-seeker",
+        "key":  "AXE_SEEKER",
+        "karadic":  "vrak-seeker",
+        "valic":  "secur-seeker"
+    },
+    {
+        "sylvic":  "zephyr-slater",
+        "kitter":  "whiff-air-slater",
+        "english":  "wind slater",
+        "vorgash":  "hur-stream-slater",
+        "morvathic":  "howl-slater",
+        "key":  "WIND_SLATER",
+        "karadic":  "draft-slater",
+        "valic":  "aura-slater"
+    },
+    {
+        "sylvic":  "bark-binder",
+        "kitter":  "hide-shell-binder",
+        "english":  "shield binder",
+        "vorgash":  "form-sanct-binder",
+        "morvathic":  "ward-binder",
+        "key":  "SHIELD_BINDER",
+        "karadic":  "korgan-binder",
+        "valic":  "aegis-binder"
+    },
+    {
+        "sylvic":  "heart-song-binder",
+        "kitter":  "hyper-bounce-binder",
+        "english":  "passion binder",
+        "vorgash":  "flam-zeal-binder",
+        "morvathic":  "rage-binder",
+        "key":  "PASSION_BINDER",
+        "karadic":  "hearth-fire-binder",
+        "valic":  "zeal-binder"
+    },
+    {
+        "sylvic":  "zephyr-seeker",
+        "kitter":  "whiff-air-seeker",
+        "english":  "wind seeker",
+        "vorgash":  "hur-stream-seeker",
+        "morvathic":  "howl-seeker",
+        "key":  "WIND_SEEKER",
+        "karadic":  "draft-seeker",
+        "valic":  "aura-seeker"
+    },
+    {
+        "sylvic":  "tellur-shield",
+        "kitter":  "dig-dirt-shield",
+        "english":  "earth shield",
+        "vorgash":  "sol-form-shield",
+        "morvathic":  "mire-shield",
+        "key":  "EARTH_SHIELD",
+        "karadic":  "humus-shield",
+        "valic":  "terra-shield"
+    },
+    {
+        "sylvic":  "eluned-binder",
+        "kitter":  "high-glint-binder",
+        "english":  "star binder",
+        "vorgash":  "ast-point-binder",
+        "morvathic":  "glint-binder",
+        "key":  "STAR_BINDER",
+        "karadic":  "spark-binder",
+        "valic":  "astral-binder"
+    },
+    {
+        "sylvic":  "eluned-weaver",
+        "kitter":  "high-glint-weaver",
+        "english":  "star weaver",
+        "vorgash":  "ast-point-weaver",
+        "morvathic":  "glint-weaver",
+        "key":  "STAR_WEAVER",
+        "karadic":  "spark-weaver",
+        "valic":  "astral-weaver"
+    },
+    {
+        "sylvic":  "heart-song-singer",
+        "kitter":  "hyper-bounce-singer",
+        "english":  "passion singer",
+        "vorgash":  "flam-zeal-singer",
+        "morvathic":  "rage-singer",
+        "key":  "PASSION_SINGER",
+        "karadic":  "hearth-fire-singer",
+        "valic":  "zeal-singer"
+    },
+    {
+        "sylvic":  "sleep-root-delver",
+        "kitter":  "stop-box-delver",
+        "english":  "stasis delver",
+        "vorgash":  "form-quench-delver",
+        "morvathic":  "cage-freeze-delver",
+        "key":  "STASIS_DELVER",
+        "karadic":  "ice-lock-delver",
+        "valic":  "chronos-delver"
+    },
+    {
+        "sylvic":  "patience-weaver",
+        "kitter":  "fast-work-weaver",
+        "english":  "diligence weaver",
+        "vorgash":  "in-an-weaver",
+        "morvathic":  "task-weaver",
+        "key":  "DILIGENCE_WEAVER",
+        "karadic":  "toil-weaver",
+        "valic":  "duty-weaver"
+    },
+    {
+        "sylvic":  "sylv-ward",
+        "kitter":  "crisp-eat-ward",
+        "english":  "leaf ward",
+        "vorgash":  "fol-zen-ward",
+        "morvathic":  "wither-ward",
+        "key":  "LEAF_WARD",
+        "karadic":  "chaff-ward",
+        "valic":  "foli-ward"
+    },
+    {
+        "sylvic":  "radix-smith",
+        "kitter":  "down-down-smith",
+        "english":  "deep smith",
+        "vorgash":  "khor-abyss-smith",
+        "morvathic":  "abyss-smith",
+        "key":  "DEEP_SMITH",
+        "karadic":  "zul-smith",
+        "valic":  "prof-smith"
+    },
+    {
+        "sylvic":  "pith",
+        "kitter":  "crunch-bone",
+        "english":  "bone",
+        "vorgash":  "osse-form",
+        "morvathic":  "skul",
+        "key":  "BONE",
+        "karadic":  "strut",
+        "valic":  "ossa"
+    },
+    {
+        "sylvic":  "llyr-cleaver",
+        "kitter":  "drip-pool-cleaver",
+        "english":  "water cleaver",
+        "vorgash":  "hyd-flow-cleaver",
+        "morvathic":  "bilge-cleaver",
+        "key":  "WATER_CLEAVER",
+        "karadic":  "spring-cleaver",
+        "valic":  "aqua-cleaver"
+    },
+    {
+        "sylvic":  "gilded-ward",
+        "kitter":  "shiny-yellow-ward",
+        "english":  "gold ward",
+        "vorgash":  "aur-tek-ward",
+        "morvathic":  "greed-ward",
+        "key":  "GOLD_WARD",
+        "karadic":  "aur-ward",
+        "valic":  "aurum-ward"
+    },
+    {
+        "sylvic":  "silv-smith",
+        "kitter":  "shiny-white-smith",
+        "english":  "silver smith",
+        "vorgash":  "arg-tek-smith",
+        "morvathic":  "pale-shine-smith",
+        "key":  "SILVER_SMITH",
+        "karadic":  "argen-smith",
+        "valic":  "argent-smith"
+    },
+    {
+        "sylvic":  "bark-breaker",
+        "kitter":  "hide-shell-breaker",
+        "english":  "shield breaker",
+        "vorgash":  "form-sanct-breaker",
+        "morvathic":  "ward-breaker",
+        "key":  "SHIELD_BREAKER",
+        "karadic":  "korgan-breaker",
+        "valic":  "aegis-breaker"
+    },
+    {
+        "sylvic":  "wood-sentinel-seeker",
+        "kitter":  "clik-walker-seeker",
+        "english":  "automaton seeker",
+        "vorgash":  "will-vessel-seeker",
+        "morvathic":  "clock-fiend-seeker",
+        "key":  "AUTOMATON_SEEKER",
+        "karadic":  "iron-golem-seeker",
+        "valic":  "mechanica-seeker"
+    },
+    {
+        "sylvic":  "aureol-weaver",
+        "kitter":  "big-bright-weaver",
+        "english":  "sun weaver",
+        "vorgash":  "zen-light-weaver",
+        "morvathic":  "scorch-weaver",
+        "key":  "SUN_WEAVER",
+        "karadic":  "glare-weaver",
+        "valic":  "solaris-weaver"
+    },
+    {
+        "sylvic":  "alath-slater",
+        "kitter":  "clik-iron-slater",
+        "english":  "iron slater",
+        "vorgash":  "fer-tek-slater",
+        "morvathic":  "skal-slater",
+        "key":  "IRON_SLATER",
+        "karadic":  "tharn-slater",
+        "valic":  "ferr-slater"
+    },
+    {
+        "sylvic":  "zephyr-delver",
+        "kitter":  "whiff-air-delver",
+        "english":  "wind delver",
+        "vorgash":  "hur-stream-delver",
+        "morvathic":  "howl-delver",
+        "key":  "WIND_DELVER",
+        "karadic":  "draft-delver",
+        "valic":  "aura-delver"
+    },
+    {
+        "sylvic":  "arbor",
+        "kitter":  "spark-tin",
+        "english":  "forge",
+        "vorgash":  "flam-khor",
+        "morvathic":  "slak",
+        "key":  "FORGE",
+        "karadic":  "baruk",
+        "valic":  "forn"
+    },
+    {
+        "sylvic":  "harmony-shaper",
+        "kitter":  "hold-tight-shaper",
+        "english":  "control shaper",
+        "vorgash":  "wis-grip-shaper",
+        "morvathic":  "chain-shaper",
+        "key":  "CONTROL_SHAPER",
+        "karadic":  "anchor-shaper",
+        "valic":  "rule-shaper"
+    },
+    {
+        "sylvic":  "pith-slater",
+        "kitter":  "crunch-bone-slater",
+        "english":  "bone slater",
+        "vorgash":  "osse-form-slater",
+        "morvathic":  "skul-slater",
+        "key":  "BONE_SLATER",
+        "karadic":  "strut-slater",
+        "valic":  "ossa-slater"
+    },
+    {
+        "sylvic":  "radix-seeker",
+        "kitter":  "down-down-seeker",
+        "english":  "deep seeker",
+        "vorgash":  "khor-abyss-seeker",
+        "morvathic":  "abyss-seeker",
+        "key":  "DEEP_SEEKER",
+        "karadic":  "zul-seeker",
+        "valic":  "prof-seeker"
+    },
+    {
+        "sylvic":  "llyr-slater",
+        "kitter":  "drip-pool-slater",
+        "english":  "water slater",
+        "vorgash":  "hyd-flow-slater",
+        "morvathic":  "bilge-slater",
+        "key":  "WATER_SLATER",
+        "karadic":  "spring-slater",
+        "valic":  "aqua-slater"
+    },
+    {
+        "sylvic":  "zephyr-shaper",
+        "kitter":  "whiff-air-shaper",
+        "english":  "wind shaper",
+        "vorgash":  "hur-stream-shaper",
+        "morvathic":  "howl-shaper",
+        "key":  "WIND_SHAPER",
+        "karadic":  "draft-shaper",
+        "valic":  "aura-shaper"
+    },
+    {
+        "sylvic":  "sol-craft",
+        "kitter":  "ouch-hot-craft",
+        "english":  "fire craft",
+        "vorgash":  "flam-will-craft",
+        "morvathic":  "blaze-craft",
+        "key":  "FIRE_CRAFT",
+        "karadic":  "ember-craft",
+        "valic":  "pyre-craft"
+    },
+    {
+        "sylvic":  "patience-watcher",
+        "kitter":  "fast-work-watcher",
+        "english":  "diligence watcher",
+        "vorgash":  "in-an-watcher",
+        "morvathic":  "task-watcher",
+        "key":  "DILIGENCE_WATCHER",
+        "karadic":  "toil-watcher",
+        "valic":  "duty-watcher"
+    },
+    {
+        "sylvic":  "vein-weave-lord",
+        "kitter":  "spark-track-lord",
+        "english":  "circuit lord",
+        "vorgash":  "form-trace-lord",
+        "morvathic":  "barb-line-lord",
+        "key":  "CIRCUIT_LORD",
+        "karadic":  "runic-wire-lord",
+        "valic":  "conduit-lord"
+    },
+    {
+        "sylvic":  "alath",
+        "kitter":  "clik-iron",
+        "english":  "iron",
+        "vorgash":  "fer-tek",
+        "morvathic":  "skal",
+        "key":  "IRON",
+        "karadic":  "tharn",
+        "valic":  "ferr"
+    },
+    {
+        "sylvic":  "zephyr-craft",
+        "kitter":  "whiff-air-craft",
+        "english":  "wind craft",
+        "vorgash":  "hur-stream-craft",
+        "morvathic":  "howl-craft",
+        "key":  "WIND_CRAFT",
+        "karadic":  "draft-craft",
+        "valic":  "aura-craft"
+    },
+    {
+        "sylvic":  "vital-ward",
+        "kitter":  "red-leak-ward",
+        "english":  "blood ward",
+        "vorgash":  "cruor-flam-ward",
+        "morvathic":  "gorg-ward",
+        "key":  "BLOOD_WARD",
+        "karadic":  "vein-ward",
+        "valic":  "sanguis-ward"
+    },
+    {
+        "sylvic":  "heart-song-shield",
+        "kitter":  "hyper-bounce-shield",
+        "english":  "passion shield",
+        "vorgash":  "flam-zeal-shield",
+        "morvathic":  "rage-shield",
+        "key":  "PASSION_SHIELD",
+        "karadic":  "hearth-fire-shield",
+        "valic":  "zeal-shield"
+    },
+    {
+        "sylvic":  "song",
+        "kitter":  "thud-tap",
+        "english":  "hammer",
+        "vorgash":  "tek-strike",
+        "morvathic":  "mash",
+        "key":  "HAMMER",
+        "karadic":  "grond",
+        "valic":  "malle"
+    },
+    {
+        "sylvic":  "eluned-breaker",
+        "kitter":  "high-glint-breaker",
+        "english":  "star breaker",
+        "vorgash":  "ast-point-breaker",
+        "morvathic":  "glint-breaker",
+        "key":  "STAR_BREAKER",
+        "karadic":  "spark-breaker",
+        "valic":  "astral-breaker"
+    },
+    {
+        "sylvic":  "ithil-cleaver",
+        "kitter":  "glow-orb-cleaver",
+        "english":  "moon cleaver",
+        "vorgash":  "nox-zen-cleaver",
+        "morvathic":  "night-eye-cleaver",
+        "key":  "MOON_CLEAVER",
+        "karadic":  "lun-cleaver",
+        "valic":  "luna-cleaver"
+    },
+    {
+        "sylvic":  "gilded-binder",
+        "kitter":  "shiny-yellow-binder",
+        "english":  "gold binder",
+        "vorgash":  "aur-tek-binder",
+        "morvathic":  "greed-binder",
+        "key":  "GOLD_BINDER",
+        "karadic":  "aur-binder",
+        "valic":  "aurum-binder"
+    },
+    {
+        "sylvic":  "arbor-craft",
+        "kitter":  "spark-tin-craft",
+        "english":  "forge craft",
+        "vorgash":  "flam-khor-craft",
+        "morvathic":  "slak-craft",
+        "key":  "FORGE_CRAFT",
+        "karadic":  "baruk-craft",
+        "valic":  "forn-craft"
+    },
+    {
+        "sylvic":  "anima-breaker",
+        "kitter":  "thump-thump-breaker",
+        "english":  "heart breaker",
+        "vorgash":  "will-core-breaker",
+        "morvathic":  "pump-breaker",
+        "key":  "HEART_BREAKER",
+        "karadic":  "core-breaker",
+        "valic":  "cordis-breaker"
+    },
+    {
+        "sylvic":  "lith-weaver",
+        "kitter":  "tik-stak-weaver",
+        "english":  "stone weaver",
+        "vorgash":  "basalt-weaver",
+        "morvathic":  "krog-weaver",
+        "key":  "STONE_WEAVER",
+        "karadic":  "krag-weaver",
+        "valic":  "dor-weaver"
+    },
+    {
+        "sylvic":  "eternal-root",
+        "kitter":  "run-far",
+        "english":  "endurance",
+        "vorgash":  "basalt-stand",
+        "morvathic":  "tough-hide",
+        "key":  "ENDURANCE",
+        "karadic":  "granite-will",
+        "valic":  "fortitude"
+    },
+    {
+        "sylvic":  "anima-binder",
+        "kitter":  "thump-thump-binder",
+        "english":  "heart binder",
+        "vorgash":  "will-core-binder",
+        "morvathic":  "pump-binder",
+        "key":  "HEART_BINDER",
+        "karadic":  "core-binder",
+        "valic":  "cordis-binder"
+    },
+    {
+        "sylvic":  "cairn-striker",
+        "kitter":  "high-rock-striker",
+        "english":  "mountain striker",
+        "vorgash":  "zenith-crag-striker",
+        "morvathic":  "trench-striker",
+        "key":  "MOUNTAIN_STRIKER",
+        "karadic":  "vorn-striker",
+        "valic":  "peak-striker"
+    },
+    {
+        "sylvic":  "branch-ward",
+        "kitter":  "chop-bit-ward",
+        "english":  "axe ward",
+        "vorgash":  "cleave-tek-ward",
+        "morvathic":  "scourge-ward",
+        "key":  "AXE_WARD",
+        "karadic":  "vrak-ward",
+        "valic":  "secur-ward"
+    },
+    {
+        "sylvic":  "lith-craft",
+        "kitter":  "tik-stak-craft",
+        "english":  "stone craft",
+        "vorgash":  "basalt-craft",
+        "morvathic":  "krog-craft",
+        "key":  "STONE_CRAFT",
+        "karadic":  "krag-craft",
+        "valic":  "dor-craft"
+    },
+    {
+        "sylvic":  "spirit-weaver",
+        "kitter":  "want-grab-weaver",
+        "english":  "will weaver",
+        "vorgash":  "xan-will-weaver",
+        "morvathic":  "force-weaver",
+        "key":  "WILL_WEAVER",
+        "karadic":  "resolve-weaver",
+        "valic":  "intent-weaver"
+    },
+    {
+        "sylvic":  "zephyr-singer",
+        "kitter":  "whiff-air-singer",
+        "english":  "wind singer",
+        "vorgash":  "hur-stream-singer",
+        "morvathic":  "howl-singer",
+        "key":  "WIND_SINGER",
+        "karadic":  "draft-singer",
+        "valic":  "aura-singer"
+    },
+    {
+        "sylvic":  "arbor-striker",
+        "kitter":  "tall-stick-striker",
+        "english":  "tree striker",
+        "vorgash":  "lign-form-striker",
+        "morvathic":  "rot-stem-striker",
+        "key":  "TREE_STRIKER",
+        "karadic":  "timber-striker",
+        "valic":  "silva-striker"
+    },
+    {
+        "sylvic":  "silv-breaker",
+        "kitter":  "shiny-white-breaker",
+        "english":  "silver breaker",
+        "vorgash":  "arg-tek-breaker",
+        "morvathic":  "pale-shine-breaker",
+        "key":  "SILVER_BREAKER",
+        "karadic":  "argen-breaker",
+        "valic":  "argent-breaker"
+    },
+    {
+        "sylvic":  "gilded-watcher",
+        "kitter":  "shiny-yellow-watcher",
+        "english":  "gold watcher",
+        "vorgash":  "aur-tek-watcher",
+        "morvathic":  "greed-watcher",
+        "key":  "GOLD_WATCHER",
+        "karadic":  "aur-watcher",
+        "valic":  "aurum-watcher"
+    },
+    {
+        "sylvic":  "spirit-walker",
+        "kitter":  "want-grab-walker",
+        "english":  "will walker",
+        "vorgash":  "xan-will-walker",
+        "morvathic":  "force-walker",
+        "key":  "WILL_WALKER",
+        "karadic":  "resolve-walker",
+        "valic":  "intent-walker"
+    },
+    {
+        "sylvic":  "spirit",
+        "kitter":  "want-grab",
+        "english":  "will",
+        "vorgash":  "xan-will",
+        "morvathic":  "force",
+        "key":  "WILL",
+        "karadic":  "resolve",
+        "valic":  "intent"
+    },
+    {
+        "sylvic":  "anima-singer",
+        "kitter":  "thump-thump-singer",
+        "english":  "heart singer",
+        "vorgash":  "will-core-singer",
+        "morvathic":  "pump-singer",
+        "key":  "HEART_SINGER",
+        "karadic":  "core-singer",
+        "valic":  "cordis-singer"
+    },
+    {
+        "sylvic":  "sleep-root-cleaver",
+        "kitter":  "stop-box-cleaver",
+        "english":  "stasis cleaver",
+        "vorgash":  "form-quench-cleaver",
+        "morvathic":  "cage-freeze-cleaver",
+        "key":  "STASIS_CLEAVER",
+        "karadic":  "ice-lock-cleaver",
+        "valic":  "chronos-cleaver"
+    },
+    {
+        "sylvic":  "lith-shield",
+        "kitter":  "tik-stak-shield",
+        "english":  "stone shield",
+        "vorgash":  "basalt-shield",
+        "morvathic":  "krog-shield",
+        "key":  "STONE_SHIELD",
+        "karadic":  "krag-shield",
+        "valic":  "dor-shield"
+    },
+    {
+        "sylvic":  "sol-striker",
+        "kitter":  "ouch-hot-striker",
+        "english":  "fire striker",
+        "vorgash":  "flam-will-striker",
+        "morvathic":  "blaze-striker",
+        "key":  "FIRE_STRIKER",
+        "karadic":  "ember-striker",
+        "valic":  "pyre-striker"
+    },
+    {
+        "sylvic":  "patience-ward",
+        "kitter":  "fast-work-ward",
+        "english":  "diligence ward",
+        "vorgash":  "in-an-ward",
+        "morvathic":  "task-ward",
+        "key":  "DILIGENCE_WARD",
+        "karadic":  "toil-ward",
+        "valic":  "duty-ward"
+    },
+    {
+        "sylvic":  "branch",
+        "kitter":  "chop-bit",
+        "english":  "axe",
+        "vorgash":  "cleave-tek",
+        "morvathic":  "scourge",
+        "key":  "AXE",
+        "karadic":  "vrak",
+        "valic":  "secur"
+    },
+    {
+        "sylvic":  "radix-slater",
+        "kitter":  "down-down-slater",
+        "english":  "deep slater",
+        "vorgash":  "khor-abyss-slater",
+        "morvathic":  "abyss-slater",
+        "key":  "DEEP_SLATER",
+        "karadic":  "zul-slater",
+        "valic":  "prof-slater"
+    },
+    {
+        "sylvic":  "silv-lord",
+        "kitter":  "shiny-white-lord",
+        "english":  "silver lord",
+        "vorgash":  "arg-tek-lord",
+        "morvathic":  "pale-shine-lord",
+        "key":  "SILVER_LORD",
+        "karadic":  "argen-lord",
+        "valic":  "argent-lord"
+    },
+    {
+        "sylvic":  "patience-walker",
+        "kitter":  "fast-work-walker",
+        "english":  "diligence walker",
+        "vorgash":  "in-an-walker",
+        "morvathic":  "task-walker",
+        "key":  "DILIGENCE_WALKER",
+        "karadic":  "toil-walker",
+        "valic":  "duty-walker"
+    },
+    {
+        "sylvic":  "arbor-weaver",
+        "kitter":  "spark-tin-weaver",
+        "english":  "forge weaver",
+        "vorgash":  "flam-khor-weaver",
+        "morvathic":  "slak-weaver",
+        "key":  "FORGE_WEAVER",
+        "karadic":  "baruk-weaver",
+        "valic":  "forn-weaver"
+    },
+    {
+        "sylvic":  "anima-watcher",
+        "kitter":  "thump-thump-watcher",
+        "english":  "heart watcher",
+        "vorgash":  "will-core-watcher",
+        "morvathic":  "pump-watcher",
+        "key":  "HEART_WATCHER",
+        "karadic":  "core-watcher",
+        "valic":  "cordis-watcher"
+    },
+    {
+        "sylvic":  "pith-shield",
+        "kitter":  "crunch-bone-shield",
+        "english":  "bone shield",
+        "vorgash":  "osse-form-shield",
+        "morvathic":  "skul-shield",
+        "key":  "BONE_SHIELD",
+        "karadic":  "strut-shield",
+        "valic":  "ossa-shield"
+    },
+    {
+        "sylvic":  "aureol-striker",
+        "kitter":  "big-bright-striker",
+        "english":  "sun striker",
+        "vorgash":  "zen-light-striker",
+        "morvathic":  "scorch-striker",
+        "key":  "SUN_STRIKER",
+        "karadic":  "glare-striker",
+        "valic":  "solaris-striker"
+    },
+    {
+        "sylvic":  "cairn",
+        "kitter":  "high-rock",
+        "english":  "mountain",
+        "vorgash":  "zenith-crag",
+        "morvathic":  "trench",
+        "key":  "MOUNTAIN",
+        "karadic":  "vorn",
+        "valic":  "peak"
+    },
+    {
+        "sylvic":  "aureol-singer",
+        "kitter":  "big-bright-singer",
+        "english":  "sun singer",
+        "vorgash":  "zen-light-singer",
+        "morvathic":  "scorch-singer",
+        "key":  "SUN_SINGER",
+        "karadic":  "glare-singer",
+        "valic":  "solaris-singer"
+    },
+    {
+        "sylvic":  "sol-plasma-binder",
+        "kitter":  "blue-burn-binder",
+        "english":  "plasma binder",
+        "vorgash":  "plas-will-binder",
+        "morvathic":  "scorch-gas-binder",
+        "key":  "PLASMA_BINDER",
+        "karadic":  "vul-fire-binder",
+        "valic":  "ion-flux-binder"
+    },
+    {
+        "sylvic":  "arbor-tinker",
+        "kitter":  "tall-stick-tinker",
+        "english":  "tree tinker",
+        "vorgash":  "lign-form-tinker",
+        "morvathic":  "rot-stem-tinker",
+        "key":  "TREE_TINKER",
+        "karadic":  "timber-tinker",
+        "valic":  "silva-tinker"
+    },
+    {
+        "sylvic":  "arbor-ward",
+        "kitter":  "tall-stick-ward",
+        "english":  "tree ward",
+        "vorgash":  "lign-form-ward",
+        "morvathic":  "rot-stem-ward",
+        "key":  "TREE_WARD",
+        "karadic":  "timber-ward",
+        "valic":  "silva-ward"
+    },
+    {
+        "sylvic":  "zephyr-walker",
+        "kitter":  "whiff-air-walker",
+        "english":  "wind walker",
+        "vorgash":  "hur-stream-walker",
+        "morvathic":  "howl-walker",
+        "key":  "WIND_WALKER",
+        "karadic":  "draft-walker",
+        "valic":  "aura-walker"
+    },
+    {
+        "sylvic":  "gilded-delver",
+        "kitter":  "shiny-yellow-delver",
+        "english":  "gold delver",
+        "vorgash":  "aur-tek-delver",
+        "morvathic":  "greed-delver",
+        "key":  "GOLD_DELVER",
+        "karadic":  "aur-delver",
+        "valic":  "aurum-delver"
+    },
+    {
+        "sylvic":  "sylv-smith",
+        "kitter":  "crisp-eat-smith",
+        "english":  "leaf smith",
+        "vorgash":  "fol-zen-smith",
+        "morvathic":  "wither-smith",
+        "key":  "LEAF_SMITH",
+        "karadic":  "chaff-smith",
+        "valic":  "foli-smith"
+    },
+    {
+        "sylvic":  "branch-striker",
+        "kitter":  "chop-bit-striker",
+        "english":  "axe striker",
+        "vorgash":  "cleave-tek-striker",
+        "morvathic":  "scourge-striker",
+        "key":  "AXE_STRIKER",
+        "karadic":  "vrak-striker",
+        "valic":  "secur-striker"
+    },
+    {
+        "sylvic":  "branch-shaper",
+        "kitter":  "chop-bit-shaper",
+        "english":  "axe shaper",
+        "vorgash":  "cleave-tek-shaper",
+        "morvathic":  "scourge-shaper",
+        "key":  "AXE_SHAPER",
+        "karadic":  "vrak-shaper",
+        "valic":  "secur-shaper"
+    },
+    {
+        "sylvic":  "eternal-root-shield",
+        "kitter":  "run-far-shield",
+        "english":  "endurance shield",
+        "vorgash":  "basalt-stand-shield",
+        "morvathic":  "tough-hide-shield",
+        "key":  "ENDURANCE_SHIELD",
+        "karadic":  "granite-will-shield",
+        "valic":  "fortitude-shield"
+    },
+    {
+        "sylvic":  "lith-seeker",
+        "kitter":  "tik-stak-seeker",
+        "english":  "stone seeker",
+        "vorgash":  "basalt-seeker",
+        "morvathic":  "krog-seeker",
+        "key":  "STONE_SEEKER",
+        "karadic":  "krag-seeker",
+        "valic":  "dor-seeker"
+    },
+    {
+        "sylvic":  "llyr-smith",
+        "kitter":  "drip-pool-smith",
+        "english":  "water smith",
+        "vorgash":  "hyd-flow-smith",
+        "morvathic":  "bilge-smith",
+        "key":  "WATER_SMITH",
+        "karadic":  "spring-smith",
+        "valic":  "aqua-smith"
+    },
+    {
+        "sylvic":  "silv-singer",
+        "kitter":  "shiny-white-singer",
+        "english":  "silver singer",
+        "vorgash":  "arg-tek-singer",
+        "morvathic":  "pale-shine-singer",
+        "key":  "SILVER_SINGER",
+        "karadic":  "argen-singer",
+        "valic":  "argent-singer"
+    },
+    {
+        "sylvic":  "silv-walker",
+        "kitter":  "shiny-white-walker",
+        "english":  "silver walker",
+        "vorgash":  "arg-tek-walker",
+        "morvathic":  "pale-shine-walker",
+        "key":  "SILVER_WALKER",
+        "karadic":  "argen-walker",
+        "valic":  "argent-walker"
+    },
+    {
+        "sylvic":  "pith-lord",
+        "kitter":  "crunch-bone-lord",
+        "english":  "bone lord",
+        "vorgash":  "osse-form-lord",
+        "morvathic":  "skul-lord",
+        "key":  "BONE_LORD",
+        "karadic":  "strut-lord",
+        "valic":  "ossa-lord"
+    },
+    {
+        "sylvic":  "heart-song-smith",
+        "kitter":  "hyper-bounce-smith",
+        "english":  "passion smith",
+        "vorgash":  "flam-zeal-smith",
+        "morvathic":  "rage-smith",
+        "key":  "PASSION_SMITH",
+        "karadic":  "hearth-fire-smith",
+        "valic":  "zeal-smith"
+    },
+    {
+        "sylvic":  "growth-ward",
+        "kitter":  "make-shape-ward",
+        "english":  "form ward",
+        "vorgash":  "khor-form-ward",
+        "morvathic":  "iron-cage-ward",
+        "key":  "FORM_WARD",
+        "karadic":  "masonry-ward",
+        "valic":  "structure-ward"
+    },
+    {
+        "sylvic":  "vital",
+        "kitter":  "red-leak",
+        "english":  "blood",
+        "vorgash":  "cruor-flam",
+        "morvathic":  "gorg",
+        "key":  "BLOOD",
+        "karadic":  "vein",
+        "valic":  "sanguis"
+    },
+    {
+        "sylvic":  "sol-plasma-tinker",
+        "kitter":  "blue-burn-tinker",
+        "english":  "plasma tinker",
+        "vorgash":  "plas-will-tinker",
+        "morvathic":  "scorch-gas-tinker",
+        "key":  "PLASMA_TINKER",
+        "karadic":  "vul-fire-tinker",
+        "valic":  "ion-flux-tinker"
+    },
+    {
+        "sylvic":  "lith",
+        "kitter":  "tik-stak",
+        "english":  "stone",
+        "vorgash":  "basalt",
+        "morvathic":  "krog",
+        "key":  "STONE",
+        "karadic":  "krag",
+        "valic":  "dor"
+    },
+    {
+        "sylvic":  "wood-sentinel-delver",
+        "kitter":  "clik-walker-delver",
+        "english":  "automaton delver",
+        "vorgash":  "will-vessel-delver",
+        "morvathic":  "clock-fiend-delver",
+        "key":  "AUTOMATON_DELVER",
+        "karadic":  "iron-golem-delver",
+        "valic":  "mechanica-delver"
+    },
+    {
+        "sylvic":  "bark-walker",
+        "kitter":  "hide-shell-walker",
+        "english":  "shield walker",
+        "vorgash":  "form-sanct-walker",
+        "morvathic":  "ward-walker",
+        "key":  "SHIELD_WALKER",
+        "karadic":  "korgan-walker",
+        "valic":  "aegis-walker"
+    },
+    {
+        "sylvic":  "llyr",
+        "kitter":  "drip-pool",
+        "english":  "water",
+        "vorgash":  "hyd-flow",
+        "morvathic":  "bilge",
+        "key":  "WATER",
+        "karadic":  "spring",
+        "valic":  "aqua"
+    },
+    {
+        "sylvic":  "cairn-binder",
+        "kitter":  "high-rock-binder",
+        "english":  "mountain binder",
+        "vorgash":  "zenith-crag-binder",
+        "morvathic":  "trench-binder",
+        "key":  "MOUNTAIN_BINDER",
+        "karadic":  "vorn-binder",
+        "valic":  "peak-binder"
+    },
+    {
+        "sylvic":  "sol-plasma-weaver",
+        "kitter":  "blue-burn-weaver",
+        "english":  "plasma weaver",
+        "vorgash":  "plas-will-weaver",
+        "morvathic":  "scorch-gas-weaver",
+        "key":  "PLASMA_WEAVER",
+        "karadic":  "vul-fire-weaver",
+        "valic":  "ion-flux-weaver"
+    },
+    {
+        "sylvic":  "branch-singer",
+        "kitter":  "chop-bit-singer",
+        "english":  "axe singer",
+        "vorgash":  "cleave-tek-singer",
+        "morvathic":  "scourge-singer",
+        "key":  "AXE_SINGER",
+        "karadic":  "vrak-singer",
+        "valic":  "secur-singer"
+    },
+    {
+        "sylvic":  "zephyr-tinker",
+        "kitter":  "whiff-air-tinker",
+        "english":  "wind tinker",
+        "vorgash":  "hur-stream-tinker",
+        "morvathic":  "howl-tinker",
+        "key":  "WIND_TINKER",
+        "karadic":  "draft-tinker",
+        "valic":  "aura-tinker"
+    },
+    {
+        "sylvic":  "wood-sentinel-smith",
+        "kitter":  "clik-walker-smith",
+        "english":  "automaton smith",
+        "vorgash":  "will-vessel-smith",
+        "morvathic":  "clock-fiend-smith",
+        "key":  "AUTOMATON_SMITH",
+        "karadic":  "iron-golem-smith",
+        "valic":  "mechanica-smith"
+    },
+    {
+        "sylvic":  "arbor-watcher",
+        "kitter":  "spark-tin-watcher",
+        "english":  "forge watcher",
+        "vorgash":  "flam-khor-watcher",
+        "morvathic":  "slak-watcher",
+        "key":  "FORGE_WATCHER",
+        "karadic":  "baruk-watcher",
+        "valic":  "forn-watcher"
+    },
+    {
+        "sylvic":  "living-graft-shield",
+        "kitter":  "gear-paw-shield",
+        "english":  "bionic shield",
+        "vorgash":  "tek-frame-shield",
+        "morvathic":  "spike-arm-shield",
+        "key":  "BIONIC_SHIELD",
+        "karadic":  "iron-limb-shield",
+        "valic":  "prosthetic-shield"
+    },
+    {
+        "sylvic":  "sleep-root-singer",
+        "kitter":  "stop-box-singer",
+        "english":  "stasis singer",
+        "vorgash":  "form-quench-singer",
+        "morvathic":  "cage-freeze-singer",
+        "key":  "STASIS_SINGER",
+        "karadic":  "ice-lock-singer",
+        "valic":  "chronos-singer"
+    },
+    {
+        "sylvic":  "zephyr-weaver",
+        "kitter":  "whiff-air-weaver",
+        "english":  "wind weaver",
+        "vorgash":  "hur-stream-weaver",
+        "morvathic":  "howl-weaver",
+        "key":  "WIND_WEAVER",
+        "karadic":  "draft-weaver",
+        "valic":  "aura-weaver"
+    },
+    {
+        "sylvic":  "sleep-root-watcher",
+        "kitter":  "stop-box-watcher",
+        "english":  "stasis watcher",
+        "vorgash":  "form-quench-watcher",
+        "morvathic":  "cage-freeze-watcher",
+        "key":  "STASIS_WATCHER",
+        "karadic":  "ice-lock-watcher",
+        "valic":  "chronos-watcher"
+    },
+    {
+        "sylvic":  "harmony-seeker",
+        "kitter":  "hold-tight-seeker",
+        "english":  "control seeker",
+        "vorgash":  "wis-grip-seeker",
+        "morvathic":  "chain-seeker",
+        "key":  "CONTROL_SEEKER",
+        "karadic":  "anchor-seeker",
+        "valic":  "rule-seeker"
+    },
+    {
+        "sylvic":  "cairn-cleaver",
+        "kitter":  "high-rock-cleaver",
+        "english":  "mountain cleaver",
+        "vorgash":  "zenith-crag-cleaver",
+        "morvathic":  "trench-cleaver",
+        "key":  "MOUNTAIN_CLEAVER",
+        "karadic":  "vorn-cleaver",
+        "valic":  "peak-cleaver"
+    },
+    {
+        "sylvic":  "zephyr-lord",
+        "kitter":  "whiff-air-lord",
+        "english":  "wind lord",
+        "vorgash":  "hur-stream-lord",
+        "morvathic":  "howl-lord",
+        "key":  "WIND_LORD",
+        "karadic":  "draft-lord",
+        "valic":  "aura-lord"
+    },
+    {
+        "sylvic":  "branch-binder",
+        "kitter":  "chop-bit-binder",
+        "english":  "axe binder",
+        "vorgash":  "cleave-tek-binder",
+        "morvathic":  "scourge-binder",
+        "key":  "AXE_BINDER",
+        "karadic":  "vrak-binder",
+        "valic":  "secur-binder"
+    },
+    {
+        "sylvic":  "wood-sentinel-lord",
+        "kitter":  "clik-walker-lord",
+        "english":  "automaton lord",
+        "vorgash":  "will-vessel-lord",
+        "morvathic":  "clock-fiend-lord",
+        "key":  "AUTOMATON_LORD",
+        "karadic":  "iron-golem-lord",
+        "valic":  "mechanica-lord"
+    },
+    {
+        "sylvic":  "tellur-smith",
+        "kitter":  "dig-dirt-smith",
+        "english":  "earth smith",
+        "vorgash":  "sol-form-smith",
+        "morvathic":  "mire-smith",
+        "key":  "EARTH_SMITH",
+        "karadic":  "humus-smith",
+        "valic":  "terra-smith"
+    },
+    {
+        "sylvic":  "pith-ward",
+        "kitter":  "crunch-bone-ward",
+        "english":  "bone ward",
+        "vorgash":  "osse-form-ward",
+        "morvathic":  "skul-ward",
+        "key":  "BONE_WARD",
+        "karadic":  "strut-ward",
+        "valic":  "ossa-ward"
+    },
+    {
+        "sylvic":  "tellur-watcher",
+        "kitter":  "dig-dirt-watcher",
+        "english":  "earth watcher",
+        "vorgash":  "sol-form-watcher",
+        "morvathic":  "mire-watcher",
+        "key":  "EARTH_WATCHER",
+        "karadic":  "humus-watcher",
+        "valic":  "terra-watcher"
+    },
+    {
+        "sylvic":  "sol-plasma-shaper",
+        "kitter":  "blue-burn-shaper",
+        "english":  "plasma shaper",
+        "vorgash":  "plas-will-shaper",
+        "morvathic":  "scorch-gas-shaper",
+        "key":  "PLASMA_SHAPER",
+        "karadic":  "vul-fire-shaper",
+        "valic":  "ion-flux-shaper"
+    },
+    {
+        "sylvic":  "song-seeker",
+        "kitter":  "thud-tap-seeker",
+        "english":  "hammer seeker",
+        "vorgash":  "tek-strike-seeker",
+        "morvathic":  "mash-seeker",
+        "key":  "HAMMER_SEEKER",
+        "karadic":  "grond-seeker",
+        "valic":  "malle-seeker"
+    },
+    {
+        "sylvic":  "arbor-shaper",
+        "kitter":  "tall-stick-shaper",
+        "english":  "tree shaper",
+        "vorgash":  "lign-form-shaper",
+        "morvathic":  "rot-stem-shaper",
+        "key":  "TREE_SHAPER",
+        "karadic":  "timber-shaper",
+        "valic":  "silva-shaper"
+    },
+    {
+        "sylvic":  "song-watcher",
+        "kitter":  "thud-tap-watcher",
+        "english":  "hammer watcher",
+        "vorgash":  "tek-strike-watcher",
+        "morvathic":  "mash-watcher",
+        "key":  "HAMMER_WATCHER",
+        "karadic":  "grond-watcher",
+        "valic":  "malle-watcher"
+    },
+    {
+        "sylvic":  "radix-breaker",
+        "kitter":  "down-down-breaker",
+        "english":  "deep breaker",
+        "vorgash":  "khor-abyss-breaker",
+        "morvathic":  "abyss-breaker",
+        "key":  "DEEP_BREAKER",
+        "karadic":  "zul-breaker",
+        "valic":  "prof-breaker"
+    },
+    {
+        "sylvic":  "harmony-walker",
+        "kitter":  "hold-tight-walker",
+        "english":  "control walker",
+        "vorgash":  "wis-grip-walker",
+        "morvathic":  "chain-walker",
+        "key":  "CONTROL_WALKER",
+        "karadic":  "anchor-walker",
+        "valic":  "rule-walker"
+    },
+    {
+        "sylvic":  "heart-song-ward",
+        "kitter":  "hyper-bounce-ward",
+        "english":  "passion ward",
+        "vorgash":  "flam-zeal-ward",
+        "morvathic":  "rage-ward",
+        "key":  "PASSION_WARD",
+        "karadic":  "hearth-fire-ward",
+        "valic":  "zeal-ward"
+    },
+    {
+        "sylvic":  "eluned-craft",
+        "kitter":  "high-glint-craft",
+        "english":  "star craft",
+        "vorgash":  "ast-point-craft",
+        "morvathic":  "glint-craft",
+        "key":  "STAR_CRAFT",
+        "karadic":  "spark-craft",
+        "valic":  "astral-craft"
+    },
+    {
+        "sylvic":  "living-graft-tinker",
+        "kitter":  "gear-paw-tinker",
+        "english":  "bionic tinker",
+        "vorgash":  "tek-frame-tinker",
+        "morvathic":  "spike-arm-tinker",
+        "key":  "BIONIC_TINKER",
+        "karadic":  "iron-limb-tinker",
+        "valic":  "prosthetic-tinker"
+    },
+    {
+        "sylvic":  "song-slater",
+        "kitter":  "thud-tap-slater",
+        "english":  "hammer slater",
+        "vorgash":  "tek-strike-slater",
+        "morvathic":  "mash-slater",
+        "key":  "HAMMER_SLATER",
+        "karadic":  "grond-slater",
+        "valic":  "malle-slater"
+    },
+    {
+        "sylvic":  "growth-lord",
+        "kitter":  "make-shape-lord",
+        "english":  "form lord",
+        "vorgash":  "khor-form-lord",
+        "morvathic":  "iron-cage-lord",
+        "key":  "FORM_LORD",
+        "karadic":  "masonry-lord",
+        "valic":  "structure-lord"
+    },
+    {
+        "sylvic":  "arbor-binder",
+        "kitter":  "tall-stick-binder",
+        "english":  "tree binder",
+        "vorgash":  "lign-form-binder",
+        "morvathic":  "rot-stem-binder",
+        "key":  "TREE_BINDER",
+        "karadic":  "timber-binder",
+        "valic":  "silva-binder"
+    },
+    {
+        "sylvic":  "sylv-singer",
+        "kitter":  "crisp-eat-singer",
+        "english":  "leaf singer",
+        "vorgash":  "fol-zen-singer",
+        "morvathic":  "wither-singer",
+        "key":  "LEAF_SINGER",
+        "karadic":  "chaff-singer",
+        "valic":  "foli-singer"
+    },
+    {
+        "sylvic":  "branch-walker",
+        "kitter":  "chop-bit-walker",
+        "english":  "axe walker",
+        "vorgash":  "cleave-tek-walker",
+        "morvathic":  "scourge-walker",
+        "key":  "AXE_WALKER",
+        "karadic":  "vrak-walker",
+        "valic":  "secur-walker"
+    },
+    {
+        "sylvic":  "gilded-singer",
+        "kitter":  "shiny-yellow-singer",
+        "english":  "gold singer",
+        "vorgash":  "aur-tek-singer",
+        "morvathic":  "greed-singer",
+        "key":  "GOLD_SINGER",
+        "karadic":  "aur-singer",
+        "valic":  "aurum-singer"
+    },
+    {
+        "sylvic":  "eternal-root-craft",
+        "kitter":  "run-far-craft",
+        "english":  "endurance craft",
+        "vorgash":  "basalt-stand-craft",
+        "morvathic":  "tough-hide-craft",
+        "key":  "ENDURANCE_CRAFT",
+        "karadic":  "granite-will-craft",
+        "valic":  "fortitude-craft"
+    },
+    {
+        "sylvic":  "sleep-root-shield",
+        "kitter":  "stop-box-shield",
+        "english":  "stasis shield",
+        "vorgash":  "form-quench-shield",
+        "morvathic":  "cage-freeze-shield",
+        "key":  "STASIS_SHIELD",
+        "karadic":  "ice-lock-shield",
+        "valic":  "chronos-shield"
+    },
+    {
+        "sylvic":  "sol-plasma-craft",
+        "kitter":  "blue-burn-craft",
+        "english":  "plasma craft",
+        "vorgash":  "plas-will-craft",
+        "morvathic":  "scorch-gas-craft",
+        "key":  "PLASMA_CRAFT",
+        "karadic":  "vul-fire-craft",
+        "valic":  "ion-flux-craft"
+    },
+    {
+        "sylvic":  "vein-weave-breaker",
+        "kitter":  "spark-track-breaker",
+        "english":  "circuit breaker",
+        "vorgash":  "form-trace-breaker",
+        "morvathic":  "barb-line-breaker",
+        "key":  "CIRCUIT_BREAKER",
+        "karadic":  "runic-wire-breaker",
+        "valic":  "conduit-breaker"
+    },
+    {
+        "sylvic":  "tellur-walker",
+        "kitter":  "dig-dirt-walker",
+        "english":  "earth walker",
+        "vorgash":  "sol-form-walker",
+        "morvathic":  "mire-walker",
+        "key":  "EARTH_WALKER",
+        "karadic":  "humus-walker",
+        "valic":  "terra-walker"
+    },
+    {
+        "sylvic":  "arbor-lord",
+        "kitter":  "tall-stick-lord",
+        "english":  "tree lord",
+        "vorgash":  "lign-form-lord",
+        "morvathic":  "rot-stem-lord",
+        "key":  "TREE_LORD",
+        "karadic":  "timber-lord",
+        "valic":  "silva-lord"
+    },
+    {
+        "sylvic":  "sol-plasma-smith",
+        "kitter":  "blue-burn-smith",
+        "english":  "plasma smith",
+        "vorgash":  "plas-will-smith",
+        "morvathic":  "scorch-gas-smith",
+        "key":  "PLASMA_SMITH",
+        "karadic":  "vul-fire-smith",
+        "valic":  "ion-flux-smith"
+    },
+    {
+        "sylvic":  "radix-binder",
+        "kitter":  "down-down-binder",
+        "english":  "deep binder",
+        "vorgash":  "khor-abyss-binder",
+        "morvathic":  "abyss-binder",
+        "key":  "DEEP_BINDER",
+        "karadic":  "zul-binder",
+        "valic":  "prof-binder"
+    },
+    {
+        "sylvic":  "aureol-smith",
+        "kitter":  "big-bright-smith",
+        "english":  "sun smith",
+        "vorgash":  "zen-light-smith",
+        "morvathic":  "scorch-smith",
+        "key":  "SUN_SMITH",
+        "karadic":  "glare-smith",
+        "valic":  "solaris-smith"
+    },
+    {
+        "sylvic":  "zephyr-watcher",
+        "kitter":  "whiff-air-watcher",
+        "english":  "wind watcher",
+        "vorgash":  "hur-stream-watcher",
+        "morvathic":  "howl-watcher",
+        "key":  "WIND_WATCHER",
+        "karadic":  "draft-watcher",
+        "valic":  "aura-watcher"
+    },
+    {
+        "sylvic":  "eluned-smith",
+        "kitter":  "high-glint-smith",
+        "english":  "star smith",
+        "vorgash":  "ast-point-smith",
+        "morvathic":  "glint-smith",
+        "key":  "STAR_SMITH",
+        "karadic":  "spark-smith",
+        "valic":  "astral-smith"
+    },
+    {
+        "sylvic":  "pith-weaver",
+        "kitter":  "crunch-bone-weaver",
+        "english":  "bone weaver",
+        "vorgash":  "osse-form-weaver",
+        "morvathic":  "skul-weaver",
+        "key":  "BONE_WEAVER",
+        "karadic":  "strut-weaver",
+        "valic":  "ossa-weaver"
+    },
+    {
+        "sylvic":  "cairn-slater",
+        "kitter":  "high-rock-slater",
+        "english":  "mountain slater",
+        "vorgash":  "zenith-crag-slater",
+        "morvathic":  "trench-slater",
+        "key":  "MOUNTAIN_SLATER",
+        "karadic":  "vorn-slater",
+        "valic":  "peak-slater"
+    },
+    {
+        "sylvic":  "ithil-craft",
+        "kitter":  "glow-orb-craft",
+        "english":  "moon craft",
+        "vorgash":  "nox-zen-craft",
+        "morvathic":  "night-eye-craft",
+        "key":  "MOON_CRAFT",
+        "karadic":  "lun-craft",
+        "valic":  "luna-craft"
+    },
+    {
+        "sylvic":  "branch-craft",
+        "kitter":  "chop-bit-craft",
+        "english":  "axe craft",
+        "vorgash":  "cleave-tek-craft",
+        "morvathic":  "scourge-craft",
+        "key":  "AXE_CRAFT",
+        "karadic":  "vrak-craft",
+        "valic":  "secur-craft"
+    },
+    {
+        "sylvic":  "sleep-root-lord",
+        "kitter":  "stop-box-lord",
+        "english":  "stasis lord",
+        "vorgash":  "form-quench-lord",
+        "morvathic":  "cage-freeze-lord",
+        "key":  "STASIS_LORD",
+        "karadic":  "ice-lock-lord",
+        "valic":  "chronos-lord"
+    },
+    {
+        "sylvic":  "sleep-root-craft",
+        "kitter":  "stop-box-craft",
+        "english":  "stasis craft",
+        "vorgash":  "form-quench-craft",
+        "morvathic":  "cage-freeze-craft",
+        "key":  "STASIS_CRAFT",
+        "karadic":  "ice-lock-craft",
+        "valic":  "chronos-craft"
+    },
+    {
+        "sylvic":  "sol-shaper",
+        "kitter":  "ouch-hot-shaper",
+        "english":  "fire shaper",
+        "vorgash":  "flam-will-shaper",
+        "morvathic":  "blaze-shaper",
+        "key":  "FIRE_SHAPER",
+        "karadic":  "ember-shaper",
+        "valic":  "pyre-shaper"
+    },
+    {
+        "sylvic":  "vital-shield",
+        "kitter":  "red-leak-shield",
+        "english":  "blood shield",
+        "vorgash":  "cruor-flam-shield",
+        "morvathic":  "gorg-shield",
+        "key":  "BLOOD_SHIELD",
+        "karadic":  "vein-shield",
+        "valic":  "sanguis-shield"
+    },
+    {
+        "sylvic":  "silv-striker",
+        "kitter":  "shiny-white-striker",
+        "english":  "silver striker",
+        "vorgash":  "arg-tek-striker",
+        "morvathic":  "pale-shine-striker",
+        "key":  "SILVER_STRIKER",
+        "karadic":  "argen-striker",
+        "valic":  "argent-striker"
+    },
+    {
+        "sylvic":  "heart-song-watcher",
+        "kitter":  "hyper-bounce-watcher",
+        "english":  "passion watcher",
+        "vorgash":  "flam-zeal-watcher",
+        "morvathic":  "rage-watcher",
+        "key":  "PASSION_WATCHER",
+        "karadic":  "hearth-fire-watcher",
+        "valic":  "zeal-watcher"
+    },
+    {
+        "sylvic":  "silv-cleaver",
+        "kitter":  "shiny-white-cleaver",
+        "english":  "silver cleaver",
+        "vorgash":  "arg-tek-cleaver",
+        "morvathic":  "pale-shine-cleaver",
+        "key":  "SILVER_CLEAVER",
+        "karadic":  "argen-cleaver",
+        "valic":  "argent-cleaver"
+    },
+    {
+        "sylvic":  "tellur-delver",
+        "kitter":  "dig-dirt-delver",
+        "english":  "earth delver",
+        "vorgash":  "sol-form-delver",
+        "morvathic":  "mire-delver",
+        "key":  "EARTH_DELVER",
+        "karadic":  "humus-delver",
+        "valic":  "terra-delver"
+    },
+    {
+        "sylvic":  "pith-walker",
+        "kitter":  "crunch-bone-walker",
+        "english":  "bone walker",
+        "vorgash":  "osse-form-walker",
+        "morvathic":  "skul-walker",
+        "key":  "BONE_WALKER",
+        "karadic":  "strut-walker",
+        "valic":  "ossa-walker"
+    },
+    {
+        "sylvic":  "bark-slater",
+        "kitter":  "hide-shell-slater",
+        "english":  "shield slater",
+        "vorgash":  "form-sanct-slater",
+        "morvathic":  "ward-slater",
+        "key":  "SHIELD_SLATER",
+        "karadic":  "korgan-slater",
+        "valic":  "aegis-slater"
+    },
+    {
+        "sylvic":  "patience-smith",
+        "kitter":  "fast-work-smith",
+        "english":  "diligence smith",
+        "vorgash":  "in-an-smith",
+        "morvathic":  "task-smith",
+        "key":  "DILIGENCE_SMITH",
+        "karadic":  "toil-smith",
+        "valic":  "duty-smith"
+    },
+    {
+        "sylvic":  "anima-shield",
+        "kitter":  "thump-thump-shield",
+        "english":  "heart shield",
+        "vorgash":  "will-core-shield",
+        "morvathic":  "pump-shield",
+        "key":  "HEART_SHIELD",
+        "karadic":  "core-shield",
+        "valic":  "cordis-shield"
+    },
+    {
+        "sylvic":  "ithil-breaker",
+        "kitter":  "glow-orb-breaker",
+        "english":  "moon breaker",
+        "vorgash":  "nox-zen-breaker",
+        "morvathic":  "night-eye-breaker",
+        "key":  "MOON_BREAKER",
+        "karadic":  "lun-breaker",
+        "valic":  "luna-breaker"
+    },
+    {
+        "sylvic":  "wood-sentinel-breaker",
+        "kitter":  "clik-walker-breaker",
+        "english":  "automaton breaker",
+        "vorgash":  "will-vessel-breaker",
+        "morvathic":  "clock-fiend-breaker",
+        "key":  "AUTOMATON_BREAKER",
+        "karadic":  "iron-golem-breaker",
+        "valic":  "mechanica-breaker"
+    },
+    {
+        "sylvic":  "vital-binder",
+        "kitter":  "red-leak-binder",
+        "english":  "blood binder",
+        "vorgash":  "cruor-flam-binder",
+        "morvathic":  "gorg-binder",
+        "key":  "BLOOD_BINDER",
+        "karadic":  "vein-binder",
+        "valic":  "sanguis-binder"
+    },
+    {
+        "sylvic":  "llyr-breaker",
+        "kitter":  "drip-pool-breaker",
+        "english":  "water breaker",
+        "vorgash":  "hyd-flow-breaker",
+        "morvathic":  "bilge-breaker",
+        "key":  "WATER_BREAKER",
+        "karadic":  "spring-breaker",
+        "valic":  "aqua-breaker"
+    },
+    {
+        "sylvic":  "anima-weaver",
+        "kitter":  "thump-thump-weaver",
+        "english":  "heart weaver",
+        "vorgash":  "will-core-weaver",
+        "morvathic":  "pump-weaver",
+        "key":  "HEART_WEAVER",
+        "karadic":  "core-weaver",
+        "valic":  "cordis-weaver"
+    },
+    {
+        "sylvic":  "aureol-lord",
+        "kitter":  "big-bright-lord",
+        "english":  "sun lord",
+        "vorgash":  "zen-light-lord",
+        "morvathic":  "scorch-lord",
+        "key":  "SUN_LORD",
+        "karadic":  "glare-lord",
+        "valic":  "solaris-lord"
+    },
+    {
+        "sylvic":  "silv-seeker",
+        "kitter":  "shiny-white-seeker",
+        "english":  "silver seeker",
+        "vorgash":  "arg-tek-seeker",
+        "morvathic":  "pale-shine-seeker",
+        "key":  "SILVER_SEEKER",
+        "karadic":  "argen-seeker",
+        "valic":  "argent-seeker"
+    },
+    {
+        "sylvic":  "eternal-root-weaver",
+        "kitter":  "run-far-weaver",
+        "english":  "endurance weaver",
+        "vorgash":  "basalt-stand-weaver",
+        "morvathic":  "tough-hide-weaver",
+        "key":  "ENDURANCE_WEAVER",
+        "karadic":  "granite-will-weaver",
+        "valic":  "fortitude-weaver"
+    },
+    {
+        "sylvic":  "radix-shield",
+        "kitter":  "down-down-shield",
+        "english":  "deep shield",
+        "vorgash":  "khor-abyss-shield",
+        "morvathic":  "abyss-shield",
+        "key":  "DEEP_SHIELD",
+        "karadic":  "zul-shield",
+        "valic":  "prof-shield"
+    },
+    {
+        "sylvic":  "arbor-delver",
+        "kitter":  "spark-tin-delver",
+        "english":  "forge delver",
+        "vorgash":  "flam-khor-delver",
+        "morvathic":  "slak-delver",
+        "key":  "FORGE_DELVER",
+        "karadic":  "baruk-delver",
+        "valic":  "forn-delver"
+    },
+    {
+        "sylvic":  "lith-ward",
+        "kitter":  "tik-stak-ward",
+        "english":  "stone ward",
+        "vorgash":  "basalt-ward",
+        "morvathic":  "krog-ward",
+        "key":  "STONE_WARD",
+        "karadic":  "krag-ward",
+        "valic":  "dor-ward"
+    },
+    {
+        "sylvic":  "song-binder",
+        "kitter":  "thud-tap-binder",
+        "english":  "hammer binder",
+        "vorgash":  "tek-strike-binder",
+        "morvathic":  "mash-binder",
+        "key":  "HAMMER_BINDER",
+        "karadic":  "grond-binder",
+        "valic":  "malle-binder"
+    },
+    {
+        "sylvic":  "arbor-walker",
+        "kitter":  "tall-stick-walker",
+        "english":  "tree walker",
+        "vorgash":  "lign-form-walker",
+        "morvathic":  "rot-stem-walker",
+        "key":  "TREE_WALKER",
+        "karadic":  "timber-walker",
+        "valic":  "silva-walker"
+    },
+    {
+        "sylvic":  "heart-song-weaver",
+        "kitter":  "hyper-bounce-weaver",
+        "english":  "passion weaver",
+        "vorgash":  "flam-zeal-weaver",
+        "morvathic":  "rage-weaver",
+        "key":  "PASSION_WEAVER",
+        "karadic":  "hearth-fire-weaver",
+        "valic":  "zeal-weaver"
+    },
+    {
+        "sylvic":  "arbor-watcher",
+        "kitter":  "tall-stick-watcher",
+        "english":  "tree watcher",
+        "vorgash":  "lign-form-watcher",
+        "morvathic":  "rot-stem-watcher",
+        "key":  "TREE_WATCHER",
+        "karadic":  "timber-watcher",
+        "valic":  "silva-watcher"
+    },
+    {
+        "sylvic":  "harmony-watcher",
+        "kitter":  "hold-tight-watcher",
+        "english":  "control watcher",
+        "vorgash":  "wis-grip-watcher",
+        "morvathic":  "chain-watcher",
+        "key":  "CONTROL_WATCHER",
+        "karadic":  "anchor-watcher",
+        "valic":  "rule-watcher"
+    },
+    {
+        "sylvic":  "branch-shield",
+        "kitter":  "chop-bit-shield",
+        "english":  "axe shield",
+        "vorgash":  "cleave-tek-shield",
+        "morvathic":  "scourge-shield",
+        "key":  "AXE_SHIELD",
+        "karadic":  "vrak-shield",
+        "valic":  "secur-shield"
+    },
+    {
+        "sylvic":  "growth-watcher",
+        "kitter":  "make-shape-watcher",
+        "english":  "form watcher",
+        "vorgash":  "khor-form-watcher",
+        "morvathic":  "iron-cage-watcher",
+        "key":  "FORM_WATCHER",
+        "karadic":  "masonry-watcher",
+        "valic":  "structure-watcher"
+    },
+    {
+        "sylvic":  "vein-weave-cleaver",
+        "kitter":  "spark-track-cleaver",
+        "english":  "circuit cleaver",
+        "vorgash":  "form-trace-cleaver",
+        "morvathic":  "barb-line-cleaver",
+        "key":  "CIRCUIT_CLEAVER",
+        "karadic":  "runic-wire-cleaver",
+        "valic":  "conduit-cleaver"
+    },
+    {
+        "sylvic":  "vein-weave-smith",
+        "kitter":  "spark-track-smith",
+        "english":  "circuit smith",
+        "vorgash":  "form-trace-smith",
+        "morvathic":  "barb-line-smith",
+        "key":  "CIRCUIT_SMITH",
+        "karadic":  "runic-wire-smith",
+        "valic":  "conduit-smith"
+    },
+    {
+        "sylvic":  "eternal-root-binder",
+        "kitter":  "run-far-binder",
+        "english":  "endurance binder",
+        "vorgash":  "basalt-stand-binder",
+        "morvathic":  "tough-hide-binder",
+        "key":  "ENDURANCE_BINDER",
+        "karadic":  "granite-will-binder",
+        "valic":  "fortitude-binder"
+    },
+    {
+        "sylvic":  "vein-weave-striker",
+        "kitter":  "spark-track-striker",
+        "english":  "circuit striker",
+        "vorgash":  "form-trace-striker",
+        "morvathic":  "barb-line-striker",
+        "key":  "CIRCUIT_STRIKER",
+        "karadic":  "runic-wire-striker",
+        "valic":  "conduit-striker"
+    },
+    {
+        "sylvic":  "harmony-shield",
+        "kitter":  "hold-tight-shield",
+        "english":  "control shield",
+        "vorgash":  "wis-grip-shield",
+        "morvathic":  "chain-shield",
+        "key":  "CONTROL_SHIELD",
+        "karadic":  "anchor-shield",
+        "valic":  "rule-shield"
+    },
+    {
+        "sylvic":  "branch-slater",
+        "kitter":  "chop-bit-slater",
+        "english":  "axe slater",
+        "vorgash":  "cleave-tek-slater",
+        "morvathic":  "scourge-slater",
+        "key":  "AXE_SLATER",
+        "karadic":  "vrak-slater",
+        "valic":  "secur-slater"
+    },
+    {
+        "sylvic":  "sol-binder",
+        "kitter":  "ouch-hot-binder",
+        "english":  "fire binder",
+        "vorgash":  "flam-will-binder",
+        "morvathic":  "blaze-binder",
+        "key":  "FIRE_BINDER",
+        "karadic":  "ember-binder",
+        "valic":  "pyre-binder"
+    },
+    {
+        "sylvic":  "growth-delver",
+        "kitter":  "make-shape-delver",
+        "english":  "form delver",
+        "vorgash":  "khor-form-delver",
+        "morvathic":  "iron-cage-delver",
+        "key":  "FORM_DELVER",
+        "karadic":  "masonry-delver",
+        "valic":  "structure-delver"
+    },
+    {
+        "sylvic":  "arbor",
+        "kitter":  "tall-stick",
+        "english":  "tree",
+        "vorgash":  "lign-form",
+        "morvathic":  "rot-stem",
+        "key":  "TREE",
+        "karadic":  "timber",
+        "valic":  "silva"
+    },
+    {
+        "sylvic":  "branch-breaker",
+        "kitter":  "chop-bit-breaker",
+        "english":  "axe breaker",
+        "vorgash":  "cleave-tek-breaker",
+        "morvathic":  "scourge-breaker",
+        "key":  "AXE_BREAKER",
+        "karadic":  "vrak-breaker",
+        "valic":  "secur-breaker"
+    },
+    {
+        "sylvic":  "living-graft-lord",
+        "kitter":  "gear-paw-lord",
+        "english":  "bionic lord",
+        "vorgash":  "tek-frame-lord",
+        "morvathic":  "spike-arm-lord",
+        "key":  "BIONIC_LORD",
+        "karadic":  "iron-limb-lord",
+        "valic":  "prosthetic-lord"
+    },
+    {
+        "sylvic":  "patience-shaper",
+        "kitter":  "fast-work-shaper",
+        "english":  "diligence shaper",
+        "vorgash":  "in-an-shaper",
+        "morvathic":  "task-shaper",
+        "key":  "DILIGENCE_SHAPER",
+        "karadic":  "toil-shaper",
+        "valic":  "duty-shaper"
+    },
+    {
+        "sylvic":  "vein-weave-binder",
+        "kitter":  "spark-track-binder",
+        "english":  "circuit binder",
+        "vorgash":  "form-trace-binder",
+        "morvathic":  "barb-line-binder",
+        "key":  "CIRCUIT_BINDER",
+        "karadic":  "runic-wire-binder",
+        "valic":  "conduit-binder"
+    },
+    {
+        "sylvic":  "anima-cleaver",
+        "kitter":  "thump-thump-cleaver",
+        "english":  "heart cleaver",
+        "vorgash":  "will-core-cleaver",
+        "morvathic":  "pump-cleaver",
+        "key":  "HEART_CLEAVER",
+        "karadic":  "core-cleaver",
+        "valic":  "cordis-cleaver"
+    },
+    {
+        "sylvic":  "lith-singer",
+        "kitter":  "tik-stak-singer",
+        "english":  "stone singer",
+        "vorgash":  "basalt-singer",
+        "morvathic":  "krog-singer",
+        "key":  "STONE_SINGER",
+        "karadic":  "krag-singer",
+        "valic":  "dor-singer"
+    },
+    {
+        "sylvic":  "silv-ward",
+        "kitter":  "shiny-white-ward",
+        "english":  "silver ward",
+        "vorgash":  "arg-tek-ward",
+        "morvathic":  "pale-shine-ward",
+        "key":  "SILVER_WARD",
+        "karadic":  "argen-ward",
+        "valic":  "argent-ward"
+    },
+    {
+        "sylvic":  "spirit-ward",
+        "kitter":  "want-grab-ward",
+        "english":  "will ward",
+        "vorgash":  "xan-will-ward",
+        "morvathic":  "force-ward",
+        "key":  "WILL_WARD",
+        "karadic":  "resolve-ward",
+        "valic":  "intent-ward"
+    },
+    {
+        "sylvic":  "silv-shield",
+        "kitter":  "shiny-white-shield",
+        "english":  "silver shield",
+        "vorgash":  "arg-tek-shield",
+        "morvathic":  "pale-shine-shield",
+        "key":  "SILVER_SHIELD",
+        "karadic":  "argen-shield",
+        "valic":  "argent-shield"
+    },
+    {
+        "sylvic":  "tellur-seeker",
+        "kitter":  "dig-dirt-seeker",
+        "english":  "earth seeker",
+        "vorgash":  "sol-form-seeker",
+        "morvathic":  "mire-seeker",
+        "key":  "EARTH_SEEKER",
+        "karadic":  "humus-seeker",
+        "valic":  "terra-seeker"
+    },
+    {
+        "sylvic":  "sol-plasma-seeker",
+        "kitter":  "blue-burn-seeker",
+        "english":  "plasma seeker",
+        "vorgash":  "plas-will-seeker",
+        "morvathic":  "scorch-gas-seeker",
+        "key":  "PLASMA_SEEKER",
+        "karadic":  "vul-fire-seeker",
+        "valic":  "ion-flux-seeker"
+    },
+    {
+        "sylvic":  "cairn-craft",
+        "kitter":  "high-rock-craft",
+        "english":  "mountain craft",
+        "vorgash":  "zenith-crag-craft",
+        "morvathic":  "trench-craft",
+        "key":  "MOUNTAIN_CRAFT",
+        "karadic":  "vorn-craft",
+        "valic":  "peak-craft"
+    },
+    {
+        "sylvic":  "harmony-smith",
+        "kitter":  "hold-tight-smith",
+        "english":  "control smith",
+        "vorgash":  "wis-grip-smith",
+        "morvathic":  "chain-smith",
+        "key":  "CONTROL_SMITH",
+        "karadic":  "anchor-smith",
+        "valic":  "rule-smith"
+    },
+    {
+        "sylvic":  "ithil",
+        "kitter":  "glow-orb",
+        "english":  "moon",
+        "vorgash":  "nox-zen",
+        "morvathic":  "night-eye",
+        "key":  "MOON",
+        "karadic":  "lun",
+        "valic":  "luna"
+    },
+    {
+        "sylvic":  "anima-ward",
+        "kitter":  "thump-thump-ward",
+        "english":  "heart ward",
+        "vorgash":  "will-core-ward",
+        "morvathic":  "pump-ward",
+        "key":  "HEART_WARD",
+        "karadic":  "core-ward",
+        "valic":  "cordis-ward"
+    },
+    {
+        "sylvic":  "lith-smith",
+        "kitter":  "tik-stak-smith",
+        "english":  "stone smith",
+        "vorgash":  "basalt-smith",
+        "morvathic":  "krog-smith",
+        "key":  "STONE_SMITH",
+        "karadic":  "krag-smith",
+        "valic":  "dor-smith"
+    },
+    {
+        "sylvic":  "cairn-singer",
+        "kitter":  "high-rock-singer",
+        "english":  "mountain singer",
+        "vorgash":  "zenith-crag-singer",
+        "morvathic":  "trench-singer",
+        "key":  "MOUNTAIN_SINGER",
+        "karadic":  "vorn-singer",
+        "valic":  "peak-singer"
+    },
+    {
+        "sylvic":  "ithil-seeker",
+        "kitter":  "glow-orb-seeker",
+        "english":  "moon seeker",
+        "vorgash":  "nox-zen-seeker",
+        "morvathic":  "night-eye-seeker",
+        "key":  "MOON_SEEKER",
+        "karadic":  "lun-seeker",
+        "valic":  "luna-seeker"
+    },
+    {
+        "sylvic":  "living-graft-watcher",
+        "kitter":  "gear-paw-watcher",
+        "english":  "bionic watcher",
+        "vorgash":  "tek-frame-watcher",
+        "morvathic":  "spike-arm-watcher",
+        "key":  "BIONIC_WATCHER",
+        "karadic":  "iron-limb-watcher",
+        "valic":  "prosthetic-watcher"
+    },
+    {
+        "sylvic":  "pith-smith",
+        "kitter":  "crunch-bone-smith",
+        "english":  "bone smith",
+        "vorgash":  "osse-form-smith",
+        "morvathic":  "skul-smith",
+        "key":  "BONE_SMITH",
+        "karadic":  "strut-smith",
+        "valic":  "ossa-smith"
+    },
+    {
+        "sylvic":  "eternal-root-delver",
+        "kitter":  "run-far-delver",
+        "english":  "endurance delver",
+        "vorgash":  "basalt-stand-delver",
+        "morvathic":  "tough-hide-delver",
+        "key":  "ENDURANCE_DELVER",
+        "karadic":  "granite-will-delver",
+        "valic":  "fortitude-delver"
+    },
+    {
+        "sylvic":  "radix-tinker",
+        "kitter":  "down-down-tinker",
+        "english":  "deep tinker",
+        "vorgash":  "khor-abyss-tinker",
+        "morvathic":  "abyss-tinker",
+        "key":  "DEEP_TINKER",
+        "karadic":  "zul-tinker",
+        "valic":  "prof-tinker"
+    },
+    {
+        "sylvic":  "wood-sentinel",
+        "kitter":  "clik-walker",
+        "english":  "automaton",
+        "vorgash":  "will-vessel",
+        "morvathic":  "clock-fiend",
+        "key":  "AUTOMATON",
+        "karadic":  "iron-golem",
+        "valic":  "mechanica"
+    },
+    {
+        "sylvic":  "eternal-root-shaper",
+        "kitter":  "run-far-shaper",
+        "english":  "endurance shaper",
+        "vorgash":  "basalt-stand-shaper",
+        "morvathic":  "tough-hide-shaper",
+        "key":  "ENDURANCE_SHAPER",
+        "karadic":  "granite-will-shaper",
+        "valic":  "fortitude-shaper"
+    },
+    {
+        "sylvic":  "sol-smith",
+        "kitter":  "ouch-hot-smith",
+        "english":  "fire smith",
+        "vorgash":  "flam-will-smith",
+        "morvathic":  "blaze-smith",
+        "key":  "FIRE_SMITH",
+        "karadic":  "ember-smith",
+        "valic":  "pyre-smith"
+    },
+    {
+        "sylvic":  "lith-walker",
+        "kitter":  "tik-stak-walker",
+        "english":  "stone walker",
+        "vorgash":  "basalt-walker",
+        "morvathic":  "krog-walker",
+        "key":  "STONE_WALKER",
+        "karadic":  "krag-walker",
+        "valic":  "dor-walker"
+    },
+    {
+        "sylvic":  "zephyr-ward",
+        "kitter":  "whiff-air-ward",
+        "english":  "wind ward",
+        "vorgash":  "hur-stream-ward",
+        "morvathic":  "howl-ward",
+        "key":  "WIND_WARD",
+        "karadic":  "draft-ward",
+        "valic":  "aura-ward"
+    },
+    {
+        "sylvic":  "zephyr-smith",
+        "kitter":  "whiff-air-smith",
+        "english":  "wind smith",
+        "vorgash":  "hur-stream-smith",
+        "morvathic":  "howl-smith",
+        "key":  "WIND_SMITH",
+        "karadic":  "draft-smith",
+        "valic":  "aura-smith"
+    },
+    {
+        "sylvic":  "anima-craft",
+        "kitter":  "thump-thump-craft",
+        "english":  "heart craft",
+        "vorgash":  "will-core-craft",
+        "morvathic":  "pump-craft",
+        "key":  "HEART_CRAFT",
+        "karadic":  "core-craft",
+        "valic":  "cordis-craft"
+    },
+    {
+        "sylvic":  "bark-watcher",
+        "kitter":  "hide-shell-watcher",
+        "english":  "shield watcher",
+        "vorgash":  "form-sanct-watcher",
+        "morvathic":  "ward-watcher",
+        "key":  "SHIELD_WATCHER",
+        "karadic":  "korgan-watcher",
+        "valic":  "aegis-watcher"
+    },
+    {
+        "sylvic":  "heart-song-craft",
+        "kitter":  "hyper-bounce-craft",
+        "english":  "passion craft",
+        "vorgash":  "flam-zeal-craft",
+        "morvathic":  "rage-craft",
+        "key":  "PASSION_CRAFT",
+        "karadic":  "hearth-fire-craft",
+        "valic":  "zeal-craft"
+    },
+    {
+        "sylvic":  "tellur-breaker",
+        "kitter":  "dig-dirt-breaker",
+        "english":  "earth breaker",
+        "vorgash":  "sol-form-breaker",
+        "morvathic":  "mire-breaker",
+        "key":  "EARTH_BREAKER",
+        "karadic":  "humus-breaker",
+        "valic":  "terra-breaker"
+    },
+    {
+        "sylvic":  "sol-plasma-walker",
+        "kitter":  "blue-burn-walker",
+        "english":  "plasma walker",
+        "vorgash":  "plas-will-walker",
+        "morvathic":  "scorch-gas-walker",
+        "key":  "PLASMA_WALKER",
+        "karadic":  "vul-fire-walker",
+        "valic":  "ion-flux-walker"
+    },
+    {
+        "sylvic":  "llyr-shaper",
+        "kitter":  "drip-pool-shaper",
+        "english":  "water shaper",
+        "vorgash":  "hyd-flow-shaper",
+        "morvathic":  "bilge-shaper",
+        "key":  "WATER_SHAPER",
+        "karadic":  "spring-shaper",
+        "valic":  "aqua-shaper"
+    },
+    {
+        "sylvic":  "heart-song-striker",
+        "kitter":  "hyper-bounce-striker",
+        "english":  "passion striker",
+        "vorgash":  "flam-zeal-striker",
+        "morvathic":  "rage-striker",
+        "key":  "PASSION_STRIKER",
+        "karadic":  "hearth-fire-striker",
+        "valic":  "zeal-striker"
+    },
+    {
+        "sylvic":  "heart-song-shaper",
+        "kitter":  "hyper-bounce-shaper",
+        "english":  "passion shaper",
+        "vorgash":  "flam-zeal-shaper",
+        "morvathic":  "rage-shaper",
+        "key":  "PASSION_SHAPER",
+        "karadic":  "hearth-fire-shaper",
+        "valic":  "zeal-shaper"
+    },
+    {
+        "sylvic":  "wood-sentinel-singer",
+        "kitter":  "clik-walker-singer",
+        "english":  "automaton singer",
+        "vorgash":  "will-vessel-singer",
+        "morvathic":  "clock-fiend-singer",
+        "key":  "AUTOMATON_SINGER",
+        "karadic":  "iron-golem-singer",
+        "valic":  "mechanica-singer"
+    },
+    {
+        "sylvic":  "gilded-cleaver",
+        "kitter":  "shiny-yellow-cleaver",
+        "english":  "gold cleaver",
+        "vorgash":  "aur-tek-cleaver",
+        "morvathic":  "greed-cleaver",
+        "key":  "GOLD_CLEAVER",
+        "karadic":  "aur-cleaver",
+        "valic":  "aurum-cleaver"
+    },
+    {
+        "sylvic":  "ithil-binder",
+        "kitter":  "glow-orb-binder",
+        "english":  "moon binder",
+        "vorgash":  "nox-zen-binder",
+        "morvathic":  "night-eye-binder",
+        "key":  "MOON_BINDER",
+        "karadic":  "lun-binder",
+        "valic":  "luna-binder"
+    },
+    {
+        "sylvic":  "aureol-tinker",
+        "kitter":  "big-bright-tinker",
+        "english":  "sun tinker",
+        "vorgash":  "zen-light-tinker",
+        "morvathic":  "scorch-tinker",
+        "key":  "SUN_TINKER",
+        "karadic":  "glare-tinker",
+        "valic":  "solaris-tinker"
+    },
+    {
+        "sylvic":  "tellur-shaper",
+        "kitter":  "dig-dirt-shaper",
+        "english":  "earth shaper",
+        "vorgash":  "sol-form-shaper",
+        "morvathic":  "mire-shaper",
+        "key":  "EARTH_SHAPER",
+        "karadic":  "humus-shaper",
+        "valic":  "terra-shaper"
+    },
+    {
+        "sylvic":  "living-graft-weaver",
+        "kitter":  "gear-paw-weaver",
+        "english":  "bionic weaver",
+        "vorgash":  "tek-frame-weaver",
+        "morvathic":  "spike-arm-weaver",
+        "key":  "BIONIC_WEAVER",
+        "karadic":  "iron-limb-weaver",
+        "valic":  "prosthetic-weaver"
+    },
+    {
+        "sylvic":  "arbor-slater",
+        "kitter":  "tall-stick-slater",
+        "english":  "tree slater",
+        "vorgash":  "lign-form-slater",
+        "morvathic":  "rot-stem-slater",
+        "key":  "TREE_SLATER",
+        "karadic":  "timber-slater",
+        "valic":  "silva-slater"
+    },
+    {
+        "sylvic":  "patience-lord",
+        "kitter":  "fast-work-lord",
+        "english":  "diligence lord",
+        "vorgash":  "in-an-lord",
+        "morvathic":  "task-lord",
+        "key":  "DILIGENCE_LORD",
+        "karadic":  "toil-lord",
+        "valic":  "duty-lord"
+    },
+    {
+        "sylvic":  "gilded-breaker",
+        "kitter":  "shiny-yellow-breaker",
+        "english":  "gold breaker",
+        "vorgash":  "aur-tek-breaker",
+        "morvathic":  "greed-breaker",
+        "key":  "GOLD_BREAKER",
+        "karadic":  "aur-breaker",
+        "valic":  "aurum-breaker"
+    },
+    {
+        "sylvic":  "eternal-root-singer",
+        "kitter":  "run-far-singer",
+        "english":  "endurance singer",
+        "vorgash":  "basalt-stand-singer",
+        "morvathic":  "tough-hide-singer",
+        "key":  "ENDURANCE_SINGER",
+        "karadic":  "granite-will-singer",
+        "valic":  "fortitude-singer"
+    },
+    {
+        "sylvic":  "spirit-breaker",
+        "kitter":  "want-grab-breaker",
+        "english":  "will breaker",
+        "vorgash":  "xan-will-breaker",
+        "morvathic":  "force-breaker",
+        "key":  "WILL_BREAKER",
+        "karadic":  "resolve-breaker",
+        "valic":  "intent-breaker"
+    },
+    {
+        "sylvic":  "patience",
+        "kitter":  "fast-work",
+        "english":  "diligence",
+        "vorgash":  "in-an",
+        "morvathic":  "task",
+        "key":  "DILIGENCE",
+        "karadic":  "toil",
+        "valic":  "duty"
+    },
+    {
+        "sylvic":  "harmony-lord",
+        "kitter":  "hold-tight-lord",
+        "english":  "control lord",
+        "vorgash":  "wis-grip-lord",
+        "morvathic":  "chain-lord",
+        "key":  "CONTROL_LORD",
+        "karadic":  "anchor-lord",
+        "valic":  "rule-lord"
+    },
+    {
+        "sylvic":  "sylv-seeker",
+        "kitter":  "crisp-eat-seeker",
+        "english":  "leaf seeker",
+        "vorgash":  "fol-zen-seeker",
+        "morvathic":  "wither-seeker",
+        "key":  "LEAF_SEEKER",
+        "karadic":  "chaff-seeker",
+        "valic":  "foli-seeker"
+    },
+    {
+        "sylvic":  "spirit-smith",
+        "kitter":  "want-grab-smith",
+        "english":  "will smith",
+        "vorgash":  "xan-will-smith",
+        "morvathic":  "force-smith",
+        "key":  "WILL_SMITH",
+        "karadic":  "resolve-smith",
+        "valic":  "intent-smith"
+    },
+    {
+        "sylvic":  "eternal-root-lord",
+        "kitter":  "run-far-lord",
+        "english":  "endurance lord",
+        "vorgash":  "basalt-stand-lord",
+        "morvathic":  "tough-hide-lord",
+        "key":  "ENDURANCE_LORD",
+        "karadic":  "granite-will-lord",
+        "valic":  "fortitude-lord"
+    },
+    {
+        "sylvic":  "bark-seeker",
+        "kitter":  "hide-shell-seeker",
+        "english":  "shield seeker",
+        "vorgash":  "form-sanct-seeker",
+        "morvathic":  "ward-seeker",
+        "key":  "SHIELD_SEEKER",
+        "karadic":  "korgan-seeker",
+        "valic":  "aegis-seeker"
+    },
+    {
+        "sylvic":  "eluned-shield",
+        "kitter":  "high-glint-shield",
+        "english":  "star shield",
+        "vorgash":  "ast-point-shield",
+        "morvathic":  "glint-shield",
+        "key":  "STAR_SHIELD",
+        "karadic":  "spark-shield",
+        "valic":  "astral-shield"
+    },
+    {
+        "sylvic":  "song-cleaver",
+        "kitter":  "thud-tap-cleaver",
+        "english":  "hammer cleaver",
+        "vorgash":  "tek-strike-cleaver",
+        "morvathic":  "mash-cleaver",
+        "key":  "HAMMER_CLEAVER",
+        "karadic":  "grond-cleaver",
+        "valic":  "malle-cleaver"
+    },
+    {
+        "sylvic":  "tellur-ward",
+        "kitter":  "dig-dirt-ward",
+        "english":  "earth ward",
+        "vorgash":  "sol-form-ward",
+        "morvathic":  "mire-ward",
+        "key":  "EARTH_WARD",
+        "karadic":  "humus-ward",
+        "valic":  "terra-ward"
+    },
+    {
+        "sylvic":  "bark-shield",
+        "kitter":  "hide-shell-shield",
+        "english":  "shield shield",
+        "vorgash":  "form-sanct-shield",
+        "morvathic":  "ward-shield",
+        "key":  "SHIELD_SHIELD",
+        "karadic":  "korgan-shield",
+        "valic":  "aegis-shield"
+    },
+    {
+        "sylvic":  "patience-striker",
+        "kitter":  "fast-work-striker",
+        "english":  "diligence striker",
+        "vorgash":  "in-an-striker",
+        "morvathic":  "task-striker",
+        "key":  "DILIGENCE_STRIKER",
+        "karadic":  "toil-striker",
+        "valic":  "duty-striker"
+    },
+    {
+        "sylvic":  "alath-smith",
+        "kitter":  "clik-iron-smith",
+        "english":  "iron smith",
+        "vorgash":  "fer-tek-smith",
+        "morvathic":  "skal-smith",
+        "key":  "IRON_SMITH",
+        "karadic":  "tharn-smith",
+        "valic":  "ferr-smith"
+    },
+    {
+        "sylvic":  "vital-delver",
+        "kitter":  "red-leak-delver",
+        "english":  "blood delver",
+        "vorgash":  "cruor-flam-delver",
+        "morvathic":  "gorg-delver",
+        "key":  "BLOOD_DELVER",
+        "karadic":  "vein-delver",
+        "valic":  "sanguis-delver"
+    },
+    {
+        "sylvic":  "spirit-shield",
+        "kitter":  "want-grab-shield",
+        "english":  "will shield",
+        "vorgash":  "xan-will-shield",
+        "morvathic":  "force-shield",
+        "key":  "WILL_SHIELD",
+        "karadic":  "resolve-shield",
+        "valic":  "intent-shield"
+    },
+    {
+        "sylvic":  "zephyr-striker",
+        "kitter":  "whiff-air-striker",
+        "english":  "wind striker",
+        "vorgash":  "hur-stream-striker",
+        "morvathic":  "howl-striker",
+        "key":  "WIND_STRIKER",
+        "karadic":  "draft-striker",
+        "valic":  "aura-striker"
+    },
+    {
+        "sylvic":  "silv-weaver",
+        "kitter":  "shiny-white-weaver",
+        "english":  "silver weaver",
+        "vorgash":  "arg-tek-weaver",
+        "morvathic":  "pale-shine-weaver",
+        "key":  "SILVER_WEAVER",
+        "karadic":  "argen-weaver",
+        "valic":  "argent-weaver"
+    },
+    {
+        "sylvic":  "arbor-cleaver",
+        "kitter":  "spark-tin-cleaver",
+        "english":  "forge cleaver",
+        "vorgash":  "flam-khor-cleaver",
+        "morvathic":  "slak-cleaver",
+        "key":  "FORGE_CLEAVER",
+        "karadic":  "baruk-cleaver",
+        "valic":  "forn-cleaver"
+    },
+    {
+        "sylvic":  "gilded-smith",
+        "kitter":  "shiny-yellow-smith",
+        "english":  "gold smith",
+        "vorgash":  "aur-tek-smith",
+        "morvathic":  "greed-smith",
+        "key":  "GOLD_SMITH",
+        "karadic":  "aur-smith",
+        "valic":  "aurum-smith"
+    },
+    {
+        "sylvic":  "sleep-root-breaker",
+        "kitter":  "stop-box-breaker",
+        "english":  "stasis breaker",
+        "vorgash":  "form-quench-breaker",
+        "morvathic":  "cage-freeze-breaker",
+        "key":  "STASIS_BREAKER",
+        "karadic":  "ice-lock-breaker",
+        "valic":  "chronos-breaker"
+    },
+    {
+        "sylvic":  "alath-cleaver",
+        "kitter":  "clik-iron-cleaver",
+        "english":  "iron cleaver",
+        "vorgash":  "fer-tek-cleaver",
+        "morvathic":  "skal-cleaver",
+        "key":  "IRON_CLEAVER",
+        "karadic":  "tharn-cleaver",
+        "valic":  "ferr-cleaver"
+    },
+    {
+        "sylvic":  "patience-cleaver",
+        "kitter":  "fast-work-cleaver",
+        "english":  "diligence cleaver",
+        "vorgash":  "in-an-cleaver",
+        "morvathic":  "task-cleaver",
+        "key":  "DILIGENCE_CLEAVER",
+        "karadic":  "toil-cleaver",
+        "valic":  "duty-cleaver"
+    },
+    {
+        "sylvic":  "radix-shaper",
+        "kitter":  "down-down-shaper",
+        "english":  "deep shaper",
+        "vorgash":  "khor-abyss-shaper",
+        "morvathic":  "abyss-shaper",
+        "key":  "DEEP_SHAPER",
+        "karadic":  "zul-shaper",
+        "valic":  "prof-shaper"
+    },
+    {
+        "sylvic":  "llyr-ward",
+        "kitter":  "drip-pool-ward",
+        "english":  "water ward",
+        "vorgash":  "hyd-flow-ward",
+        "morvathic":  "bilge-ward",
+        "key":  "WATER_WARD",
+        "karadic":  "spring-ward",
+        "valic":  "aqua-ward"
+    },
+    {
+        "sylvic":  "zephyr-shield",
+        "kitter":  "whiff-air-shield",
+        "english":  "wind shield",
+        "vorgash":  "hur-stream-shield",
+        "morvathic":  "howl-shield",
+        "key":  "WIND_SHIELD",
+        "karadic":  "draft-shield",
+        "valic":  "aura-shield"
+    },
+    {
+        "sylvic":  "bark-smith",
+        "kitter":  "hide-shell-smith",
+        "english":  "shield smith",
+        "vorgash":  "form-sanct-smith",
+        "morvathic":  "ward-smith",
+        "key":  "SHIELD_SMITH",
+        "karadic":  "korgan-smith",
+        "valic":  "aegis-smith"
+    },
+    {
+        "sylvic":  "cairn-watcher",
+        "kitter":  "high-rock-watcher",
+        "english":  "mountain watcher",
+        "vorgash":  "zenith-crag-watcher",
+        "morvathic":  "trench-watcher",
+        "key":  "MOUNTAIN_WATCHER",
+        "karadic":  "vorn-watcher",
+        "valic":  "peak-watcher"
+    },
+    {
+        "sylvic":  "arbor-slater",
+        "kitter":  "spark-tin-slater",
+        "english":  "forge slater",
+        "vorgash":  "flam-khor-slater",
+        "morvathic":  "slak-slater",
+        "key":  "FORGE_SLATER",
+        "karadic":  "baruk-slater",
+        "valic":  "forn-slater"
+    },
+    {
+        "sylvic":  "vital-singer",
+        "kitter":  "red-leak-singer",
+        "english":  "blood singer",
+        "vorgash":  "cruor-flam-singer",
+        "morvathic":  "gorg-singer",
+        "key":  "BLOOD_SINGER",
+        "karadic":  "vein-singer",
+        "valic":  "sanguis-singer"
+    },
+    {
+        "sylvic":  "pith-singer",
+        "kitter":  "crunch-bone-singer",
+        "english":  "bone singer",
+        "vorgash":  "osse-form-singer",
+        "morvathic":  "skul-singer",
+        "key":  "BONE_SINGER",
+        "karadic":  "strut-singer",
+        "valic":  "ossa-singer"
+    },
+    {
+        "sylvic":  "sol-plasma-slater",
+        "kitter":  "blue-burn-slater",
+        "english":  "plasma slater",
+        "vorgash":  "plas-will-slater",
+        "morvathic":  "scorch-gas-slater",
+        "key":  "PLASMA_SLATER",
+        "karadic":  "vul-fire-slater",
+        "valic":  "ion-flux-slater"
+    },
+    {
+        "sylvic":  "aureol-craft",
+        "kitter":  "big-bright-craft",
+        "english":  "sun craft",
+        "vorgash":  "zen-light-craft",
+        "morvathic":  "scorch-craft",
+        "key":  "SUN_CRAFT",
+        "karadic":  "glare-craft",
+        "valic":  "solaris-craft"
+    },
+    {
+        "sylvic":  "gilded-weaver",
+        "kitter":  "shiny-yellow-weaver",
+        "english":  "gold weaver",
+        "vorgash":  "aur-tek-weaver",
+        "morvathic":  "greed-weaver",
+        "key":  "GOLD_WEAVER",
+        "karadic":  "aur-weaver",
+        "valic":  "aurum-weaver"
+    },
+    {
+        "sylvic":  "bark-shaper",
+        "kitter":  "hide-shell-shaper",
+        "english":  "shield shaper",
+        "vorgash":  "form-sanct-shaper",
+        "morvathic":  "ward-shaper",
+        "key":  "SHIELD_SHAPER",
+        "karadic":  "korgan-shaper",
+        "valic":  "aegis-shaper"
+    },
+    {
+        "sylvic":  "sol-weaver",
+        "kitter":  "ouch-hot-weaver",
+        "english":  "fire weaver",
+        "vorgash":  "flam-will-weaver",
+        "morvathic":  "blaze-weaver",
+        "key":  "FIRE_WEAVER",
+        "karadic":  "ember-weaver",
+        "valic":  "pyre-weaver"
+    },
+    {
+        "sylvic":  "pith-striker",
+        "kitter":  "crunch-bone-striker",
+        "english":  "bone striker",
+        "vorgash":  "osse-form-striker",
+        "morvathic":  "skul-striker",
+        "key":  "BONE_STRIKER",
+        "karadic":  "strut-striker",
+        "valic":  "ossa-striker"
+    },
+    {
+        "sylvic":  "patience-seeker",
+        "kitter":  "fast-work-seeker",
+        "english":  "diligence seeker",
+        "vorgash":  "in-an-seeker",
+        "morvathic":  "task-seeker",
+        "key":  "DILIGENCE_SEEKER",
+        "karadic":  "toil-seeker",
+        "valic":  "duty-seeker"
+    },
+    {
+        "sylvic":  "sol-singer",
+        "kitter":  "ouch-hot-singer",
+        "english":  "fire singer",
+        "vorgash":  "flam-will-singer",
+        "morvathic":  "blaze-singer",
+        "key":  "FIRE_SINGER",
+        "karadic":  "ember-singer",
+        "valic":  "pyre-singer"
+    },
+    {
+        "sylvic":  "sleep-root-binder",
+        "kitter":  "stop-box-binder",
+        "english":  "stasis binder",
+        "vorgash":  "form-quench-binder",
+        "morvathic":  "cage-freeze-binder",
+        "key":  "STASIS_BINDER",
+        "karadic":  "ice-lock-binder",
+        "valic":  "chronos-binder"
+    },
+    {
+        "sylvic":  "sylv-cleaver",
+        "kitter":  "crisp-eat-cleaver",
+        "english":  "leaf cleaver",
+        "vorgash":  "fol-zen-cleaver",
+        "morvathic":  "wither-cleaver",
+        "key":  "LEAF_CLEAVER",
+        "karadic":  "chaff-cleaver",
+        "valic":  "foli-cleaver"
+    },
+    {
+        "sylvic":  "bark-craft",
+        "kitter":  "hide-shell-craft",
+        "english":  "shield craft",
+        "vorgash":  "form-sanct-craft",
+        "morvathic":  "ward-craft",
+        "key":  "SHIELD_CRAFT",
+        "karadic":  "korgan-craft",
+        "valic":  "aegis-craft"
+    },
+    {
+        "sylvic":  "branch-weaver",
+        "kitter":  "chop-bit-weaver",
+        "english":  "axe weaver",
+        "vorgash":  "cleave-tek-weaver",
+        "morvathic":  "scourge-weaver",
+        "key":  "AXE_WEAVER",
+        "karadic":  "vrak-weaver",
+        "valic":  "secur-weaver"
+    },
+    {
+        "sylvic":  "alath-shield",
+        "kitter":  "clik-iron-shield",
+        "english":  "iron shield",
+        "vorgash":  "fer-tek-shield",
+        "morvathic":  "skal-shield",
+        "key":  "IRON_SHIELD",
+        "karadic":  "tharn-shield",
+        "valic":  "ferr-shield"
+    },
+    {
+        "sylvic":  "patience-slater",
+        "kitter":  "fast-work-slater",
+        "english":  "diligence slater",
+        "vorgash":  "in-an-slater",
+        "morvathic":  "task-slater",
+        "key":  "DILIGENCE_SLATER",
+        "karadic":  "toil-slater",
+        "valic":  "duty-slater"
+    },
+    {
+        "sylvic":  "eternal-root-striker",
+        "kitter":  "run-far-striker",
+        "english":  "endurance striker",
+        "vorgash":  "basalt-stand-striker",
+        "morvathic":  "tough-hide-striker",
+        "key":  "ENDURANCE_STRIKER",
+        "karadic":  "granite-will-striker",
+        "valic":  "fortitude-striker"
+    },
+    {
+        "sylvic":  "spirit-cleaver",
+        "kitter":  "want-grab-cleaver",
+        "english":  "will cleaver",
+        "vorgash":  "xan-will-cleaver",
+        "morvathic":  "force-cleaver",
+        "key":  "WILL_CLEAVER",
+        "karadic":  "resolve-cleaver",
+        "valic":  "intent-cleaver"
+    },
+    {
+        "sylvic":  "sleep-root-slater",
+        "kitter":  "stop-box-slater",
+        "english":  "stasis slater",
+        "vorgash":  "form-quench-slater",
+        "morvathic":  "cage-freeze-slater",
+        "key":  "STASIS_SLATER",
+        "karadic":  "ice-lock-slater",
+        "valic":  "chronos-slater"
+    },
+    {
+        "sylvic":  "anima-lord",
+        "kitter":  "thump-thump-lord",
+        "english":  "heart lord",
+        "vorgash":  "will-core-lord",
+        "morvathic":  "pump-lord",
+        "key":  "HEART_LORD",
+        "karadic":  "core-lord",
+        "valic":  "cordis-lord"
+    },
+    {
+        "sylvic":  "song-weaver",
+        "kitter":  "thud-tap-weaver",
+        "english":  "hammer weaver",
+        "vorgash":  "tek-strike-weaver",
+        "morvathic":  "mash-weaver",
+        "key":  "HAMMER_WEAVER",
+        "karadic":  "grond-weaver",
+        "valic":  "malle-weaver"
+    },
+    {
+        "sylvic":  "eluned-walker",
+        "kitter":  "high-glint-walker",
+        "english":  "star walker",
+        "vorgash":  "ast-point-walker",
+        "morvathic":  "glint-walker",
+        "key":  "STAR_WALKER",
+        "karadic":  "spark-walker",
+        "valic":  "astral-walker"
+    },
+    {
+        "sylvic":  "silv-slater",
+        "kitter":  "shiny-white-slater",
+        "english":  "silver slater",
+        "vorgash":  "arg-tek-slater",
+        "morvathic":  "pale-shine-slater",
+        "key":  "SILVER_SLATER",
+        "karadic":  "argen-slater",
+        "valic":  "argent-slater"
+    },
+    {
+        "sylvic":  "wood-sentinel-ward",
+        "kitter":  "clik-walker-ward",
+        "english":  "automaton ward",
+        "vorgash":  "will-vessel-ward",
+        "morvathic":  "clock-fiend-ward",
+        "key":  "AUTOMATON_WARD",
+        "karadic":  "iron-golem-ward",
+        "valic":  "mechanica-ward"
+    },
+    {
+        "sylvic":  "arbor-delver",
+        "kitter":  "tall-stick-delver",
+        "english":  "tree delver",
+        "vorgash":  "lign-form-delver",
+        "morvathic":  "rot-stem-delver",
+        "key":  "TREE_DELVER",
+        "karadic":  "timber-delver",
+        "valic":  "silva-delver"
+    },
+    {
+        "sylvic":  "heart-song-delver",
+        "kitter":  "hyper-bounce-delver",
+        "english":  "passion delver",
+        "vorgash":  "flam-zeal-delver",
+        "morvathic":  "rage-delver",
+        "key":  "PASSION_DELVER",
+        "karadic":  "hearth-fire-delver",
+        "valic":  "zeal-delver"
+    },
+    {
+        "sylvic":  "eluned-lord",
+        "kitter":  "high-glint-lord",
+        "english":  "star lord",
+        "vorgash":  "ast-point-lord",
+        "morvathic":  "glint-lord",
+        "key":  "STAR_LORD",
+        "karadic":  "spark-lord",
+        "valic":  "astral-lord"
+    },
+    {
+        "sylvic":  "ithil-weaver",
+        "kitter":  "glow-orb-weaver",
+        "english":  "moon weaver",
+        "vorgash":  "nox-zen-weaver",
+        "morvathic":  "night-eye-weaver",
+        "key":  "MOON_WEAVER",
+        "karadic":  "lun-weaver",
+        "valic":  "luna-weaver"
+    },
+    {
+        "sylvic":  "vital-cleaver",
+        "kitter":  "red-leak-cleaver",
+        "english":  "blood cleaver",
+        "vorgash":  "cruor-flam-cleaver",
+        "morvathic":  "gorg-cleaver",
+        "key":  "BLOOD_CLEAVER",
+        "karadic":  "vein-cleaver",
+        "valic":  "sanguis-cleaver"
+    },
+    {
+        "sylvic":  "gilded-slater",
+        "kitter":  "shiny-yellow-slater",
+        "english":  "gold slater",
+        "vorgash":  "aur-tek-slater",
+        "morvathic":  "greed-slater",
+        "key":  "GOLD_SLATER",
+        "karadic":  "aur-slater",
+        "valic":  "aurum-slater"
+    },
+    {
+        "sylvic":  "llyr-lord",
+        "kitter":  "drip-pool-lord",
+        "english":  "water lord",
+        "vorgash":  "hyd-flow-lord",
+        "morvathic":  "bilge-lord",
+        "key":  "WATER_LORD",
+        "karadic":  "spring-lord",
+        "valic":  "aqua-lord"
+    },
+    {
+        "sylvic":  "vital-seeker",
+        "kitter":  "red-leak-seeker",
+        "english":  "blood seeker",
+        "vorgash":  "cruor-flam-seeker",
+        "morvathic":  "gorg-seeker",
+        "key":  "BLOOD_SEEKER",
+        "karadic":  "vein-seeker",
+        "valic":  "sanguis-seeker"
+    },
+    {
+        "sylvic":  "growth-shield",
+        "kitter":  "make-shape-shield",
+        "english":  "form shield",
+        "vorgash":  "khor-form-shield",
+        "morvathic":  "iron-cage-shield",
+        "key":  "FORM_SHIELD",
+        "karadic":  "masonry-shield",
+        "valic":  "structure-shield"
+    },
+    {
+        "sylvic":  "bark-tinker",
+        "kitter":  "hide-shell-tinker",
+        "english":  "shield tinker",
+        "vorgash":  "form-sanct-tinker",
+        "morvathic":  "ward-tinker",
+        "key":  "SHIELD_TINKER",
+        "karadic":  "korgan-tinker",
+        "valic":  "aegis-tinker"
+    },
+    {
+        "sylvic":  "harmony-cleaver",
+        "kitter":  "hold-tight-cleaver",
+        "english":  "control cleaver",
+        "vorgash":  "wis-grip-cleaver",
+        "morvathic":  "chain-cleaver",
+        "key":  "CONTROL_CLEAVER",
+        "karadic":  "anchor-cleaver",
+        "valic":  "rule-cleaver"
+    },
+    {
+        "sylvic":  "spirit-tinker",
+        "kitter":  "want-grab-tinker",
+        "english":  "will tinker",
+        "vorgash":  "xan-will-tinker",
+        "morvathic":  "force-tinker",
+        "key":  "WILL_TINKER",
+        "karadic":  "resolve-tinker",
+        "valic":  "intent-tinker"
+    },
+    {
+        "sylvic":  "ithil-striker",
+        "kitter":  "glow-orb-striker",
+        "english":  "moon striker",
+        "vorgash":  "nox-zen-striker",
+        "morvathic":  "night-eye-striker",
+        "key":  "MOON_STRIKER",
+        "karadic":  "lun-striker",
+        "valic":  "luna-striker"
+    },
+    {
+        "sylvic":  "branch-smith",
+        "kitter":  "chop-bit-smith",
+        "english":  "axe smith",
+        "vorgash":  "cleave-tek-smith",
+        "morvathic":  "scourge-smith",
+        "key":  "AXE_SMITH",
+        "karadic":  "vrak-smith",
+        "valic":  "secur-smith"
+    },
+    {
+        "sylvic":  "eternal-root-cleaver",
+        "kitter":  "run-far-cleaver",
+        "english":  "endurance cleaver",
+        "vorgash":  "basalt-stand-cleaver",
+        "morvathic":  "tough-hide-cleaver",
+        "key":  "ENDURANCE_CLEAVER",
+        "karadic":  "granite-will-cleaver",
+        "valic":  "fortitude-cleaver"
+    },
+    {
+        "sylvic":  "vital-watcher",
+        "kitter":  "red-leak-watcher",
+        "english":  "blood watcher",
+        "vorgash":  "cruor-flam-watcher",
+        "morvathic":  "gorg-watcher",
+        "key":  "BLOOD_WATCHER",
+        "karadic":  "vein-watcher",
+        "valic":  "sanguis-watcher"
+    },
+    {
+        "sylvic":  "aureol-slater",
+        "kitter":  "big-bright-slater",
+        "english":  "sun slater",
+        "vorgash":  "zen-light-slater",
+        "morvathic":  "scorch-slater",
+        "key":  "SUN_SLATER",
+        "karadic":  "glare-slater",
+        "valic":  "solaris-slater"
+    },
+    {
+        "sylvic":  "aureol-shield",
+        "kitter":  "big-bright-shield",
+        "english":  "sun shield",
+        "vorgash":  "zen-light-shield",
+        "morvathic":  "scorch-shield",
+        "key":  "SUN_SHIELD",
+        "karadic":  "glare-shield",
+        "valic":  "solaris-shield"
+    },
+    {
+        "sylvic":  "aureol-watcher",
+        "kitter":  "big-bright-watcher",
+        "english":  "sun watcher",
+        "vorgash":  "zen-light-watcher",
+        "morvathic":  "scorch-watcher",
+        "key":  "SUN_WATCHER",
+        "karadic":  "glare-watcher",
+        "valic":  "solaris-watcher"
+    },
+    {
+        "sylvic":  "branch-cleaver",
+        "kitter":  "chop-bit-cleaver",
+        "english":  "axe cleaver",
+        "vorgash":  "cleave-tek-cleaver",
+        "morvathic":  "scourge-cleaver",
+        "key":  "AXE_CLEAVER",
+        "karadic":  "vrak-cleaver",
+        "valic":  "secur-cleaver"
+    },
+    {
+        "sylvic":  "arbor-singer",
+        "kitter":  "tall-stick-singer",
+        "english":  "tree singer",
+        "vorgash":  "lign-form-singer",
+        "morvathic":  "rot-stem-singer",
+        "key":  "TREE_SINGER",
+        "karadic":  "timber-singer",
+        "valic":  "silva-singer"
+    },
+    {
+        "sylvic":  "lith-lord",
+        "kitter":  "tik-stak-lord",
+        "english":  "stone lord",
+        "vorgash":  "basalt-lord",
+        "morvathic":  "krog-lord",
+        "key":  "STONE_LORD",
+        "karadic":  "krag-lord",
+        "valic":  "dor-lord"
+    },
+    {
+        "sylvic":  "branch-delver",
+        "kitter":  "chop-bit-delver",
+        "english":  "axe delver",
+        "vorgash":  "cleave-tek-delver",
+        "morvathic":  "scourge-delver",
+        "key":  "AXE_DELVER",
+        "karadic":  "vrak-delver",
+        "valic":  "secur-delver"
+    },
+    {
+        "sylvic":  "lith-tinker",
+        "kitter":  "tik-stak-tinker",
+        "english":  "stone tinker",
+        "vorgash":  "basalt-tinker",
+        "morvathic":  "krog-tinker",
+        "key":  "STONE_TINKER",
+        "karadic":  "krag-tinker",
+        "valic":  "dor-tinker"
+    },
+    {
+        "sylvic":  "sylv-tinker",
+        "kitter":  "crisp-eat-tinker",
+        "english":  "leaf tinker",
+        "vorgash":  "fol-zen-tinker",
+        "morvathic":  "wither-tinker",
+        "key":  "LEAF_TINKER",
+        "karadic":  "chaff-tinker",
+        "valic":  "foli-tinker"
+    },
+    {
+        "sylvic":  "eternal-root-seeker",
+        "kitter":  "run-far-seeker",
+        "english":  "endurance seeker",
+        "vorgash":  "basalt-stand-seeker",
+        "morvathic":  "tough-hide-seeker",
+        "key":  "ENDURANCE_SEEKER",
+        "karadic":  "granite-will-seeker",
+        "valic":  "fortitude-seeker"
+    },
+    {
+        "sylvic":  "lith-delver",
+        "kitter":  "tik-stak-delver",
+        "english":  "stone delver",
+        "vorgash":  "basalt-delver",
+        "morvathic":  "krog-delver",
+        "key":  "STONE_DELVER",
+        "karadic":  "krag-delver",
+        "valic":  "dor-delver"
+    },
+    {
+        "sylvic":  "sleep-root-weaver",
+        "kitter":  "stop-box-weaver",
+        "english":  "stasis weaver",
+        "vorgash":  "form-quench-weaver",
+        "morvathic":  "cage-freeze-weaver",
+        "key":  "STASIS_WEAVER",
+        "karadic":  "ice-lock-weaver",
+        "valic":  "chronos-weaver"
+    },
+    {
+        "sylvic":  "heart-song-tinker",
+        "kitter":  "hyper-bounce-tinker",
+        "english":  "passion tinker",
+        "vorgash":  "flam-zeal-tinker",
+        "morvathic":  "rage-tinker",
+        "key":  "PASSION_TINKER",
+        "karadic":  "hearth-fire-tinker",
+        "valic":  "zeal-tinker"
+    },
+    {
+        "sylvic":  "vital-smith",
+        "kitter":  "red-leak-smith",
+        "english":  "blood smith",
+        "vorgash":  "cruor-flam-smith",
+        "morvathic":  "gorg-smith",
+        "key":  "BLOOD_SMITH",
+        "karadic":  "vein-smith",
+        "valic":  "sanguis-smith"
+    },
+    {
+        "sylvic":  "eluned-tinker",
+        "kitter":  "high-glint-tinker",
+        "english":  "star tinker",
+        "vorgash":  "ast-point-tinker",
+        "morvathic":  "glint-tinker",
+        "key":  "STAR_TINKER",
+        "karadic":  "spark-tinker",
+        "valic":  "astral-tinker"
+    },
+    {
+        "sylvic":  "eternal-root-smith",
+        "kitter":  "run-far-smith",
+        "english":  "endurance smith",
+        "vorgash":  "basalt-stand-smith",
+        "morvathic":  "tough-hide-smith",
+        "key":  "ENDURANCE_SMITH",
+        "karadic":  "granite-will-smith",
+        "valic":  "fortitude-smith"
+    },
+    {
+        "sylvic":  "ithil-shield",
+        "kitter":  "glow-orb-shield",
+        "english":  "moon shield",
+        "vorgash":  "nox-zen-shield",
+        "morvathic":  "night-eye-shield",
+        "key":  "MOON_SHIELD",
+        "karadic":  "lun-shield",
+        "valic":  "luna-shield"
+    },
+    {
+        "sylvic":  "tellur-lord",
+        "kitter":  "dig-dirt-lord",
+        "english":  "earth lord",
+        "vorgash":  "sol-form-lord",
+        "morvathic":  "mire-lord",
+        "key":  "EARTH_LORD",
+        "karadic":  "humus-lord",
+        "valic":  "terra-lord"
+    },
+    {
+        "sylvic":  "ithil-slater",
+        "kitter":  "glow-orb-slater",
+        "english":  "moon slater",
+        "vorgash":  "nox-zen-slater",
+        "morvathic":  "night-eye-slater",
+        "key":  "MOON_SLATER",
+        "karadic":  "lun-slater",
+        "valic":  "luna-slater"
+    },
+    {
+        "sylvic":  "tellur-tinker",
+        "kitter":  "dig-dirt-tinker",
+        "english":  "earth tinker",
+        "vorgash":  "sol-form-tinker",
+        "morvathic":  "mire-tinker",
+        "key":  "EARTH_TINKER",
+        "karadic":  "humus-tinker",
+        "valic":  "terra-tinker"
+    },
+    {
+        "sylvic":  "cairn-weaver",
+        "kitter":  "high-rock-weaver",
+        "english":  "mountain weaver",
+        "vorgash":  "zenith-crag-weaver",
+        "morvathic":  "trench-weaver",
+        "key":  "MOUNTAIN_WEAVER",
+        "karadic":  "vorn-weaver",
+        "valic":  "peak-weaver"
+    },
+    {
+        "sylvic":  "zephyr-binder",
+        "kitter":  "whiff-air-binder",
+        "english":  "wind binder",
+        "vorgash":  "hur-stream-binder",
+        "morvathic":  "howl-binder",
+        "key":  "WIND_BINDER",
+        "karadic":  "draft-binder",
+        "valic":  "aura-binder"
+    },
+    {
+        "sylvic":  "cairn-shaper",
+        "kitter":  "high-rock-shaper",
+        "english":  "mountain shaper",
+        "vorgash":  "zenith-crag-shaper",
+        "morvathic":  "trench-shaper",
+        "key":  "MOUNTAIN_SHAPER",
+        "karadic":  "vorn-shaper",
+        "valic":  "peak-shaper"
+    },
+    {
+        "sylvic":  "spirit-watcher",
+        "kitter":  "want-grab-watcher",
+        "english":  "will watcher",
+        "vorgash":  "xan-will-watcher",
+        "morvathic":  "force-watcher",
+        "key":  "WILL_WATCHER",
+        "karadic":  "resolve-watcher",
+        "valic":  "intent-watcher"
+    },
+    {
+        "sylvic":  "alath-walker",
+        "kitter":  "clik-iron-walker",
+        "english":  "iron walker",
+        "vorgash":  "fer-tek-walker",
+        "morvathic":  "skal-walker",
+        "key":  "IRON_WALKER",
+        "karadic":  "tharn-walker",
+        "valic":  "ferr-walker"
+    },
+    {
+        "sylvic":  "harmony-binder",
+        "kitter":  "hold-tight-binder",
+        "english":  "control binder",
+        "vorgash":  "wis-grip-binder",
+        "morvathic":  "chain-binder",
+        "key":  "CONTROL_BINDER",
+        "karadic":  "anchor-binder",
+        "valic":  "rule-binder"
+    },
+    {
+        "sylvic":  "heart-song-slater",
+        "kitter":  "hyper-bounce-slater",
+        "english":  "passion slater",
+        "vorgash":  "flam-zeal-slater",
+        "morvathic":  "rage-slater",
+        "key":  "PASSION_SLATER",
+        "karadic":  "hearth-fire-slater",
+        "valic":  "zeal-slater"
+    },
+    {
+        "sylvic":  "harmony-tinker",
+        "kitter":  "hold-tight-tinker",
+        "english":  "control tinker",
+        "vorgash":  "wis-grip-tinker",
+        "morvathic":  "chain-tinker",
+        "key":  "CONTROL_TINKER",
+        "karadic":  "anchor-tinker",
+        "valic":  "rule-tinker"
+    },
+    {
+        "sylvic":  "pith-seeker",
+        "kitter":  "crunch-bone-seeker",
+        "english":  "bone seeker",
+        "vorgash":  "osse-form-seeker",
+        "morvathic":  "skul-seeker",
+        "key":  "BONE_SEEKER",
+        "karadic":  "strut-seeker",
+        "valic":  "ossa-seeker"
+    },
+    {
+        "sylvic":  "silv-craft",
+        "kitter":  "shiny-white-craft",
+        "english":  "silver craft",
+        "vorgash":  "arg-tek-craft",
+        "morvathic":  "pale-shine-craft",
+        "key":  "SILVER_CRAFT",
+        "karadic":  "argen-craft",
+        "valic":  "argent-craft"
+    },
+    {
+        "sylvic":  "growth-smith",
+        "kitter":  "make-shape-smith",
+        "english":  "form smith",
+        "vorgash":  "khor-form-smith",
+        "morvathic":  "iron-cage-smith",
+        "key":  "FORM_SMITH",
+        "karadic":  "masonry-smith",
+        "valic":  "structure-smith"
+    },
+    {
+        "sylvic":  "arbor-binder",
+        "kitter":  "spark-tin-binder",
+        "english":  "forge binder",
+        "vorgash":  "flam-khor-binder",
+        "morvathic":  "slak-binder",
+        "key":  "FORGE_BINDER",
+        "karadic":  "baruk-binder",
+        "valic":  "forn-binder"
+    },
+    {
+        "sylvic":  "alath-binder",
+        "kitter":  "clik-iron-binder",
+        "english":  "iron binder",
+        "vorgash":  "fer-tek-binder",
+        "morvathic":  "skal-binder",
+        "key":  "IRON_BINDER",
+        "karadic":  "tharn-binder",
+        "valic":  "ferr-binder"
+    },
+    {
+        "sylvic":  "patience-breaker",
+        "kitter":  "fast-work-breaker",
+        "english":  "diligence breaker",
+        "vorgash":  "in-an-breaker",
+        "morvathic":  "task-breaker",
+        "key":  "DILIGENCE_BREAKER",
+        "karadic":  "toil-breaker",
+        "valic":  "duty-breaker"
+    },
+    {
+        "sylvic":  "pith-delver",
+        "kitter":  "crunch-bone-delver",
+        "english":  "bone delver",
+        "vorgash":  "osse-form-delver",
+        "morvathic":  "skul-delver",
+        "key":  "BONE_DELVER",
+        "karadic":  "strut-delver",
+        "valic":  "ossa-delver"
+    },
+    {
+        "sylvic":  "spirit-singer",
+        "kitter":  "want-grab-singer",
+        "english":  "will singer",
+        "vorgash":  "xan-will-singer",
+        "morvathic":  "force-singer",
+        "key":  "WILL_SINGER",
+        "karadic":  "resolve-singer",
+        "valic":  "intent-singer"
+    },
+    {
+        "sylvic":  "radix-lord",
+        "kitter":  "down-down-lord",
+        "english":  "deep lord",
+        "vorgash":  "khor-abyss-lord",
+        "morvathic":  "abyss-lord",
+        "key":  "DEEP_LORD",
+        "karadic":  "zul-lord",
+        "valic":  "prof-lord"
+    },
+    {
+        "sylvic":  "wood-sentinel-shield",
+        "kitter":  "clik-walker-shield",
+        "english":  "automaton shield",
+        "vorgash":  "will-vessel-shield",
+        "morvathic":  "clock-fiend-shield",
+        "key":  "AUTOMATON_SHIELD",
+        "karadic":  "iron-golem-shield",
+        "valic":  "mechanica-shield"
+    },
+    {
+        "sylvic":  "eternal-root-slater",
+        "kitter":  "run-far-slater",
+        "english":  "endurance slater",
+        "vorgash":  "basalt-stand-slater",
+        "morvathic":  "tough-hide-slater",
+        "key":  "ENDURANCE_SLATER",
+        "karadic":  "granite-will-slater",
+        "valic":  "fortitude-slater"
+    },
+    {
+        "sylvic":  "living-graft-shaper",
+        "kitter":  "gear-paw-shaper",
+        "english":  "bionic shaper",
+        "vorgash":  "tek-frame-shaper",
+        "morvathic":  "spike-arm-shaper",
+        "key":  "BIONIC_SHAPER",
+        "karadic":  "iron-limb-shaper",
+        "valic":  "prosthetic-shaper"
+    },
+    {
+        "sylvic":  "cairn-ward",
+        "kitter":  "high-rock-ward",
+        "english":  "mountain ward",
+        "vorgash":  "zenith-crag-ward",
+        "morvathic":  "trench-ward",
+        "key":  "MOUNTAIN_WARD",
+        "karadic":  "vorn-ward",
+        "valic":  "peak-ward"
+    },
+    {
+        "sylvic":  "living-graft-delver",
+        "kitter":  "gear-paw-delver",
+        "english":  "bionic delver",
+        "vorgash":  "tek-frame-delver",
+        "morvathic":  "spike-arm-delver",
+        "key":  "BIONIC_DELVER",
+        "karadic":  "iron-limb-delver",
+        "valic":  "prosthetic-delver"
+    },
+    {
+        "sylvic":  "sol-cleaver",
+        "kitter":  "ouch-hot-cleaver",
+        "english":  "fire cleaver",
+        "vorgash":  "flam-will-cleaver",
+        "morvathic":  "blaze-cleaver",
+        "key":  "FIRE_CLEAVER",
+        "karadic":  "ember-cleaver",
+        "valic":  "pyre-cleaver"
+    },
+    {
+        "sylvic":  "growth-craft",
+        "kitter":  "make-shape-craft",
+        "english":  "form craft",
+        "vorgash":  "khor-form-craft",
+        "morvathic":  "iron-cage-craft",
+        "key":  "FORM_CRAFT",
+        "karadic":  "masonry-craft",
+        "valic":  "structure-craft"
+    },
+    {
+        "sylvic":  "sol-plasma-ward",
+        "kitter":  "blue-burn-ward",
+        "english":  "plasma ward",
+        "vorgash":  "plas-will-ward",
+        "morvathic":  "scorch-gas-ward",
+        "key":  "PLASMA_WARD",
+        "karadic":  "vul-fire-ward",
+        "valic":  "ion-flux-ward"
+    }
+]

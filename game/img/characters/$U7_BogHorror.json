@@ -1,0 +1,50 @@
+{
+  "id": "bog_horror",
+  "name": "BogHorror",
+  "category": "monster",
+  "frameWidth": 192,
+  "frameHeight": 192,
+  "anchor": [
+    96,
+    192
+  ],
+  "footprint": [
+    2,
+    2
+  ],
+  "heightLifts": 4,
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "animations": {
+    "walk_S": [
+      0,
+      1,
+      2,
+      1
+    ],
+    "walk_W": [
+      3,
+      4,
+      5,
+      4
+    ],
+    "walk_E": [
+      6,
+      7,
+      8,
+      7
+    ],
+    "walk_N": [
+      9,
+      10,
+      11,
+      10
+    ]
+  },
+  "frameMs": 150,
+  "standInSource": "SHAPES.VGA shape 381 (3x integer nearest-neighbor, transposed facings)"
+}

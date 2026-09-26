@@ -282,10 +282,23 @@
             this.minute = startMinute;
             this.day = 1;
             this.monthIndex = 0; // Granite
-            this.year = (window.UF && UF.NewGameSetup && UF.NewGameSetup.year) || 1;
+            // INV-SIM-01: the New Game setup year, kept when it is 0; World Year 0 when no setup year is set.
+            const setupYear = window.UF && UF.NewGameSetup ? UF.NewGameSetup.year : undefined;
+            this.year = Number.isInteger(setupYear) && setupYear >= 0 ? setupYear : 0;
             this._timer = 0;
             this.isPaused = false;
             this.showHUD = defaultShowHUD;
+        }
+
+        /** New Game: the calendar back to its start at the setup year. Pause and HUD are left to their owners. */
+        resetCalendar() {
+            const fresh = new Game_UFTime();
+            this.hour = fresh.hour;
+            this.minute = fresh.minute;
+            this.day = fresh.day;
+            this.monthIndex = fresh.monthIndex;
+            this.year = fresh.year;
+            this._timer = 0;
         }
 
         update() {
@@ -474,6 +487,15 @@
             $ufTime.year = contents.ufTime.year;
             $ufTime.showHUD = contents.ufTime.showHUD;
         }
+    };
+
+    // The clock above is built once at boot, before any New Game setup exists. A New Game resets it to the setup year
+    // before Game_Player.setupForNewGame creates the world (UF_History then sets the year its history reached), so a
+    // New Game started after a Load doesn't keep that save's date.
+    const _DataManager_setupNewGame = DataManager.setupNewGame;
+    DataManager.setupNewGame = function() {
+        $ufTime.resetCalendar();
+        _DataManager_setupNewGame.call(this);
     };
 
     //-----------------------------------------------------------------------------

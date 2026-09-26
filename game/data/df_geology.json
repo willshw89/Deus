@@ -1,0 +1,163 @@
+﻿{
+    "minerals":  [
+                     {
+                         "id":  "IRONSTONE",
+                         "name":  "hematite ironstone",
+                         "color":  "RUST_RED",
+                         "metalOre":  "IRON",
+                         "density":  5000,
+                         "metalProb":  100
+                     },
+                     {
+                         "id":  "COPPER_VEIN",
+                         "name":  "malachite copper-vein",
+                         "color":  "GREEN",
+                         "metalOre":  "COPPER",
+                         "density":  4000,
+                         "metalProb":  100
+                     },
+                     {
+                         "id":  "AURUM_VEIN",
+                         "name":  "native aurum",
+                         "color":  "GOLD",
+                         "metalOre":  "GOLD",
+                         "density":  8000,
+                         "metalProb":  100
+                     },
+                     {
+                         "color":  "CRIMSON",
+                         "name":  "scarlet cinnabar",
+                         "id":  "CINNABAR_CRIST",
+                         "density":  3500
+                     },
+                     {
+                         "color":  "BLUE",
+                         "name":  "deep azure lapis",
+                         "id":  "AZURE_LAPIS",
+                         "density":  2900
+                     }
+                 ],
+    "gems":  [
+                 {
+                     "color":  "GREEN",
+                     "name":  "glow-emerald",
+                     "id":  "GLOW_EMERALD"
+                 },
+                 {
+                     "color":  "RED",
+                     "name":  "pyre-ruby",
+                     "id":  "PYRE_RUBY"
+                 },
+                 {
+                     "color":  "BLUE",
+                     "name":  "deep-sapphire",
+                     "id":  "DEEP_SAPPHIRE"
+                 },
+                 {
+                     "color":  "PURPLE",
+                     "name":  "shadow-amethyst",
+                     "id":  "SHADOW_AMETHYST"
+                 },
+                 {
+                     "color":  "PRISMATIC",
+                     "name":  "quantum photon crystal",
+                     "id":  "PHOTON_CRYSTAL"
+                 }
+             ],
+    "metals":  [
+                   {
+                       "color":  "GRAY",
+                       "name":  "refined iron",
+                       "id":  "IRON",
+                       "density":  7850
+                   },
+                   {
+                       "color":  "SILVER",
+                       "name":  "high-carbon steel",
+                       "id":  "STEEL",
+                       "density":  7900
+                   },
+                   {
+                       "color":  "STEEL_BLUE",
+                       "name":  "meteoric star-iron",
+                       "id":  "STAR_IRON",
+                       "density":  8500
+                   },
+                   {
+                       "color":  "DARK_BRONZE",
+                       "name":  "volcanic basalt-bronze",
+                       "id":  "BASALT_BRONZE",
+                       "density":  8200
+                   },
+                   {
+                       "color":  "LUMINOUS_WHITE",
+                       "name":  "luminescent void-silver",
+                       "id":  "VOID_SILVER",
+                       "density":  9200
+                   },
+                   {
+                       "color":  "CYAN",
+                       "name":  "salvaged precursor hull plating",
+                       "id":  "PRECURSOR_HULL",
+                       "density":  11500
+                   },
+                   {
+                       "color":  "NEON_BLUE",
+                       "name":  "charged aetheric power cell",
+                       "id":  "AETHER_CELL",
+                       "density":  4200
+                   }
+               ],
+    "layers":  [
+                   {
+                       "id":  "SILTSTONE",
+                       "name":  "sedimentary siltstone",
+                       "color":  "BROWN",
+                       "tags":  [
+                                    "SEDIMENTARY"
+                                ],
+                       "density":  2300,
+                       "category":  "layer_stone"
+                   },
+                   {
+                       "id":  "RUNED_SLATE",
+                       "name":  "runed dark slate",
+                       "color":  "DARK_GRAY",
+                       "tags":  [
+                                    "METAMORPHIC"
+                                ],
+                       "density":  2700,
+                       "category":  "layer_stone"
+                   },
+                   {
+                       "id":  "CLOUD_MARBLE",
+                       "name":  "cloud marble",
+                       "color":  "WHITE",
+                       "tags":  [
+                                    "METAMORPHIC"
+                                ],
+                       "density":  2600,
+                       "category":  "layer_stone"
+                   },
+                   {
+                       "id":  "BLACK_GRANITE",
+                       "name":  "volcanic black granite",
+                       "color":  "BLACK",
+                       "tags":  [
+                                    "IGNEOUS_INTRUSIVE"
+                                ],
+                       "density":  2800,
+                       "category":  "layer_stone"
+                   },
+                   {
+                       "id":  "BASALT_CRUST",
+                       "name":  "magma-hardened basalt",
+                       "color":  "DARK_RED",
+                       "tags":  [
+                                    "IGNEOUS_EXTRUSIVE"
+                                ],
+                       "density":  3000,
+                       "category":  "layer_stone"
+                   }
+               ]
+}

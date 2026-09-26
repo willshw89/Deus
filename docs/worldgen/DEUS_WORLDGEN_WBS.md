@@ -1,8 +1,8 @@
 # DEUS WorldGen Work Breakdown Structure
 
 **Namespace:** WG  
-**Rev:** 15  
-**IDs:** Stable. Next free in WG.00 is WG.00.13  
+**Rev:** 16  
+**IDs:** Stable. Next free in WG.00 is WG.00.14  
 **Canonical Authority:** Gemini / Antigravity  
 **Status:** CANONICAL ON MAIN  
 **Permanent Project-Control Anchor:** WBS IDs are immutable. Never silently renumber, merge, or reuse them. Once committed, a leaf changes only by status (`PLANNED` → `DONE`) or retirement via `SUPERSEDED`.
@@ -97,8 +97,10 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | **WG.00.10** | Startup & Load Performance Baseline | Gemini / Fable | 256x256x5 area memory budget (<3.5MB), tick budget (<0.2ms), load time benchmarks. | `QUEUED` |
 | **WG.00.11** | Incarnation & Command Layer | Fable / Gemini | Player avatar direct possession vs top-down RTS colonist command switching, input arbitration, camera follow. | `QUEUED` |
 | **WG.00.12** | Consolidation Without Moving Files | Codex / Claude Subagent | Non-moving consolidation tooling, boot/load census, RMMZ battle stack audit, tested external backup. | `IN_PROGRESS` (Lane C1) |
+| **WG.00.13** | Master Palette Engine Migration | Fable / Gemini | Planned engine, shader, and tooling migration from runtime uf.hex to deus_master_world_palette_v1.hex (226 colors); dedicated harness & tests. | `PLANNED` |
 
 ---
+
 
 ### WG.10 — Visual Topology & Animation Standards
 
@@ -357,6 +359,7 @@ SELECT NEXT UNBLOCKED LEAF
 
 | Rev | Date | Change |
 |:---:|:---:|:---|
+| 16 | 2026-09-25 | Add WG.00.13 (Consolidation, Machine Governance & Backup Infrastructure / Directive 001). |
 | 15 | 2026-09-25 | WG.00.08 returned to REVIEW per DEUS Directive 001; WG.00.07 strata range corrected to 0..4 (S0-S4); WG.00.12 added. |
 | 14 | 2026-09-25 | Add WG.00.11 (Incarnation & Command Layer). Adopt integer rev header and immutable ID governance. Next free in WG.00 is WG.00.12. |
 | 13 | 2026-09-25 | Add WG.63–WG.68 (Historical Landmarks, Karst/Geology, Reclamation, Hydrology, Soils, Living Ecology). |

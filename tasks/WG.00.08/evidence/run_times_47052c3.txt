@@ -1,0 +1,8 @@
+old-check run (mutant added, shafts_keep_fluid unchanged) started 2026-09-25T17:43:02-05:00 HEAD 9f320da2 test blob bb32c44f05b5bcb62895561927a51a5c656dc486
+--mutant=shaft_prescan_removed and --seed2=18 --no-suites (together) started 2026-09-25T17:48:15-05:00 HEAD 9f320da2 test blob 47052c301a9c98093343fc132110299907aa5285
+baseline started 2026-09-25T17:52:35-05:00 HEAD 9f320da2 test blob 47052c301a9c98093343fc132110299907aa5285
+sweep started 2026-09-25T17:56:26-05:00 HEAD 9f320da2 test blob 47052c301a9c98093343fc132110299907aa5285
+probe (seeds 18,3,21,4, blob eba1b580) started 2026-09-25T17:57:01-05:00, alongside the sweep, 356 s
+sweep ended 2026-09-25T18:15:32-05:00
+swiss_cheese mutant + diagnosis run after the sweep ended, alone
+probe census self-test (seed 18, blob eba1b580) run after the diagnosis, alone

@@ -23,13 +23,16 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-001`: Native Playtest Proof Requirement for A10-1 (WG.00.08)
 - **Date Logged:** 2026-09-25
-- **Question:** Does the Owner require an interactive human RMMZ editor Playtest (F5) inspection of a natural Z-2 ravine cut before WG.00.08 returns to `DONE`, or is the automated NW.js headless protocol plus the rendered 512×512 PNG proof (`game/test_output/z2_cut_proof_seed18_194_89.png`) sufficient?
+- **Question:** Does the Owner require an interactive human RMMZ editor Playtest (F5) inspection of a natural Z-2 ravine cut before WG.00.08 returns to `DONE`, or is the automated plain Node run with RMMZ stubs + real engine sources plus the rendered 512×512 PNG proof (`game/test_output/z2_cut_proof_seed18_194_89.png`) sufficient?
 - **Options:**
-  1. Automated headless NW.js run + rendered 2D visual map proof is sufficient for gate closure.
+  1. Automated plain Node run with RMMZ stubs + real engine sources + rendered 2D visual map proof is sufficient for gate closure.
   2. Owner must personally launch RMMZ editor (F5) and observe a Z-2 cut on Seed 18 before closure.
-- **Recommended Default:** Option 1 (Automated NW.js test + rendered map proof) for automated gate closure, with Option 2 performed as part of Slice 1 overall review.
+- **Recommended Default:** Option 1 (Automated plain Node run with RMMZ stubs + real engine sources + rendered map proof) for automated gate closure, with Option 2 performed as part of Slice 1 overall review.
 - **What Happens If Unanswered:** Remains in `REVIEW`; WG.00.08 cannot transition to `DONE`.
-- **Status:** `OPEN`
+- **Status:** Option 1 accepted in principle; SUSPENDED pending a passing proof
+- **Owner Ruling & Date:** 2026-09-25 (Decider: Owner / PM Grok Bot review): Option 1 accepted in principle; SUSPENDED pending a passing proof. PM review verdict = REJECT on initial proof (exits 1 on main with 44 fluid under-carve errors). Interactive F5 check moves to Slice 1 milestone review.
+- **Owner Ruling on Fluids over Voids (2026-09-25):** Fluid may sit above a void only with >=1 solid layer between; fluid directly on air is a defect; fluid on fluid is normal.
+- **WBS Impact:** `WG.00.08` stays in `REVIEW`. Fresh proof assigned to Lane H.
 
 ---
 
@@ -66,3 +69,32 @@ Every decision item recorded in this log must provide:
 - **Recommended Default:** Option 1 (Zero bypass without written Owner entry).
 - **What Happens If Unanswered:** Option 1 applies strictly.
 - **Status:** `OPEN`
+
+---
+
+### Decision `DEC-005`: External Off-Disk Backup Target Selection (WG.00.12)
+- **Date Logged:** 2026-09-25
+- **Question:** What is the authoritative off-disk backup target for the pre-migration backup of Project DEUS before any copy to `C:\Dev\DEUS`?
+- **Options:**
+  1. Private git remote (e.g. GitHub/GitLab), pushing all branches, then verifying by cloning into a temporary folder and executing full test suite.
+  2. External physical drive / USB drive mount (e.g. `D:\`, `E:\`), running `tools/backup_project.ps1` via robocopy to mirror the repo off-disk.
+  3. Both private git remote and external physical drive mirror.
+- **Recommended Default:** Option 1 (Private git remote) + test clone and run.
+- **Status:** `DECIDED`
+- **Owner Ruling & Date:** 2026-09-25 (Decider: Owner): Option 1. Private GitHub remote `https://github.com/willshw89/Deus.git` (private remote). Verified live, 10,259 tracked files pushed (`game/img` whitelisted, `game/data/df_*.json` tracked). Pre-migration backup requirement complete.
+
+---
+
+### Decision `DEC-006` / `R1`: WG.00.09 Depth Shading Rule vs Palette Reality
+- **Date Logged:** 2026-09-25
+- **Question:** How should multi-Z lower levels darken under WG.00.09 depth rendering given current tile art palette?
+- **Options:**
+  - Option A: Plan's 2-step rule (~33% darker at depth 1, ~67% darker at depth 3).
+  - Option B: One darkening step at depths 3–4 only.
+  - Option C: Fixed dither pattern between neighbouring palette colors.
+  - Option D: Scale-only depth separation, no color darkening, until tile art is migrated to the master palette. Revisit shading after migration.
+- **Recommended Default:** Option D.
+- **What Happens If Unanswered:** WG.00.09 DEFINE stays BLOCKED.
+- **Status:** `DECIDED`
+- **Owner Ruling & Date:** 2026-09-25 (Decider: Owner): Option D. Scale-only depth separation, no colour darkening, until tile art is migrated to the master palette. Revisit shading after migration. Fold R1=D plus items R2–R11 into the depth attack plan.
+

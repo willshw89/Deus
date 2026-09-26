@@ -1,0 +1,50 @@
+{
+  "id": "gnome",
+  "name": "Gnome",
+  "category": "faction",
+  "frameWidth": 48,
+  "frameHeight": 48,
+  "anchor": [
+    24,
+    48
+  ],
+  "footprint": [
+    1,
+    1
+  ],
+  "heightLifts": 1,
+  "facings": [
+    "S",
+    "W",
+    "E",
+    "N"
+  ],
+  "animations": {
+    "walk_S": [
+      0,
+      1,
+      2,
+      1
+    ],
+    "walk_W": [
+      3,
+      4,
+      5,
+      4
+    ],
+    "walk_E": [
+      6,
+      7,
+      8,
+      7
+    ],
+    "walk_N": [
+      9,
+      10,
+      11,
+      10
+    ]
+  },
+  "frameMs": 150,
+  "standInSource": "SHAPES.VGA shape 521 (3x integer nearest-neighbor, transposed facings)"
+}

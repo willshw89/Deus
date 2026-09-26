@@ -261,7 +261,8 @@
         }
     }
     function create(world, options = {}) {
-        check(world && integer(world.seed) && world.seed >= 0 && world.seed <= 0xffffffff && world.history && world.history.version === 5 && world.history.startYear === 1 && world.history.years === 0, "canonical Year-1 history v5 required");
+        check(world && integer(world.seed) && world.seed >= 0 && world.seed <= 0xffffffff && world.history && world.history.version === 5 && (world.history.startYear === 0 || world.history.startYear === 1) && world.history.years === 0, "canonical Year-0 or Year-1 history v5 required");
+        const startYear = world.history.startYear; // INV-SIM-01: 0 for a World Year 0 New Game; 1 for the frozen HIST-10 eras
         check(world.factions && Array.isArray(world.factions.list) && world.factions.list.length && Array.isArray(world.history.sites) && world.history.founders, "canonical faction/site/founder records required");
         check(integer(world.size) && world.size > 0 && integer(world.areasX) && world.areasX > 0 && integer(world.areasY) && world.areasY > 0, "world dimensions invalid");
         const species = [...new Set(world.factions.list.map(f => f.species))];
@@ -298,7 +299,7 @@
             profileId: isDefaultProfiles ? "v1" : null,
             profileVersion: isDefaultProfiles ? "1.0.0-provisional-astra08" : null,
             profileHash,
-            domain: "historical", seed: world.seed, yearsSimulated: 0, startYear: 1, currentYear: 1,
+            domain: "historical", seed: world.seed, yearsSimulated: 0, startYear, currentYear: startYear,
             dimensions: { size: world.size, areasX: world.areasX, areasY: world.areasY }, config,
             factions: {}, sites: [], people: [], dynasties: [], rulers: [], partnerships: [], events: [], nextEventId: 1, eventsDiscarded: 0 };
         const sourceSites = new Map(), initial = {};
@@ -307,7 +308,7 @@
             state.factions[f.id] = { id: f.id, culture: f.culture || f.species, species: f.species, homeSiteId: null, activeRulerId: null, lastRulerId: null, dynastyIds: [], siteIds: [], rulerTitle: "" };
         }
         for (const s of world.history.sites) {
-            check(integer(s.id) && !sourceSites.has(s.id) && own(state.factions, s.faction) && s.founded === 1 && s.ruined === null, "invalid canonical source site ID/faction/year");
+            check(integer(s.id) && !sourceSites.has(s.id) && own(state.factions, s.faction) && s.founded === startYear && s.ruined === null, "invalid canonical source site ID/faction/year");
             const zRange = s.zRange === undefined ? [s.z, s.z] : s.zRange.slice();
             const historicalCapacity = options.siteCapacity && options.siteCapacity[s.id] !== undefined
                 ? options.siteCapacity[s.id]
@@ -329,11 +330,11 @@
                 check(typeof plan.name === "string" && plan.name.length && ["male", "female"].includes(plan.gender) && integer(plan.age) && plan.age >= 0, "invalid founder identity/age");
                 const family = plan.familyId || `individual:${state.people.length}`;
                 if (!families.has(family)) {
-                    const dynasty = { id: state.dynasties.length, name: plan.surname || plan.name, factionId: f.id, founderId: state.people.length, foundedYear: 1 };
+                    const dynasty = { id: state.dynasties.length, name: plan.surname || plan.name, factionId: f.id, founderId: state.people.length, foundedYear: startYear };
                     state.dynasties.push(dynasty); families.set(family, dynasty.id); faction.dynastyIds.push(dynasty.id);
                 }
                 const person = { id: state.people.length, name: plan.name, gender: plan.gender, species: f.species, factionId: f.id, siteId,
-                    born: 1 - plan.age, died: null, causeOfDeath: null, deathDetail: null, parents: [], dynastyId: families.get(family), generation: 0,
+                    born: startYear - plan.age, died: null, causeOfDeath: null, deathDetail: null, parents: [], dynastyId: families.get(family), generation: 0,
                     title: null, isFounder: true, wasRuler: false, pedigreeAnchor: true, tier: "living", partnershipId: null,
                     sourceFamilyId: plan.familyId || null, lastBirthYear: null };
                 state.people.push(person); state.sites[siteId].population++;
@@ -382,7 +383,7 @@
         check(cm.id === state.capacityModelId, `capacityModel ID mismatch between root and config: ${state.capacityModelId} vs ${cm.id}`);
         check(cm.version === state.capacityModelVersion, "capacityModel version mismatch");
         check(integer(cm.version) && cm.version >= 1 && probability(cm.minimumScale) && integer(cm.defaultBaseline) && cm.defaultBaseline > 0 && integer(cm.minCapacity) && integer(cm.maxCapacity) && cm.minCapacity >= ABSOLUTE_MIN_CAPACITY && cm.maxCapacity <= ABSOLUTE_MAX_CAPACITY && cm.minCapacity <= cm.maxCapacity, "invalid capacityModel config");
-        check(state.startYear === 1 && integer(state.yearsSimulated) && state.yearsSimulated >= 0 && state.currentYear === state.startYear + state.yearsSimulated, "historical clock mismatch");
+        check((state.startYear === 0 || state.startYear === 1) && integer(state.yearsSimulated) && state.yearsSimulated >= 0 && state.currentYear === state.startYear + state.yearsSimulated, "historical clock mismatch");
         check(state.dimensions && ["size", "areasX", "areasY"].every(k => integer(state.dimensions[k]) && state.dimensions[k] > 0), "invalid world dimensions");
         check(state.config && integer(state.config.recentYears) && state.config.recentYears >= 0 && integer(state.config.eventLimit) && state.config.eventLimit >= 1 && ["maternal", "paternal"].includes(state.config.dynastyInheritance) && state.config.compression === "deferred", "invalid state retention/inheritance config");
         check(state.factions && typeof state.factions === "object" && !Array.isArray(state.factions) && Object.keys(state.factions).length, "invalid faction registry");
@@ -393,7 +394,7 @@
             const d = state.dimensions;
             check(s.id === i && own(state.factions, s.factionId) && s.area && integer(s.area.x) && integer(s.area.y) && s.area.x >= 0 && s.area.x < d.areasX && s.area.y >= 0 && s.area.y < d.areasY && integer(s.x) && integer(s.y) && s.x >= 0 && s.x < d.size && s.y >= 0 && s.y < d.size, "invalid site coordinate/ID");
             check(integer(s.z) && Array.isArray(s.zRange) && s.zRange.length === 2 && s.zRange.every(z => integer(z) && z >= -2 && z <= 2) && s.zRange[0] <= s.z && s.z <= s.zRange[1], "invalid site z/zRange");
-            check(integer(s.sourceSiteId) && !sourceSites.has(s.sourceSiteId) && s.foundedYear === 1 && typeof s.name === "string" && s.name.length && typeof s.kind === "string" && s.isRuined === false, "invalid imported site metadata"); sourceSites.add(s.sourceSiteId);
+            check(integer(s.sourceSiteId) && !sourceSites.has(s.sourceSiteId) && s.foundedYear === state.startYear && typeof s.name === "string" && s.name.length && typeof s.kind === "string" && s.isRuined === false, "invalid imported site metadata"); sourceSites.add(s.sourceSiteId);
             check(integer(s.population) && s.population >= 0 && s.peakPopulation >= s.population && (s.abandonedYear === null || (integer(s.abandonedYear) && s.abandonedYear <= state.currentYear && s.population === 0)), "invalid site population/abandonment");
             check(s.historicalCapacity >= ABSOLUTE_MIN_CAPACITY && s.historicalCapacity <= ABSOLUTE_MAX_CAPACITY, "historicalCapacity outside absolute envelope [60, 350]");
             check(integer(s.historicalCapacity) && s.historicalCapacity >= cm.minCapacity && s.historicalCapacity <= cm.maxCapacity, "invalid historicalCapacity");
@@ -425,9 +426,9 @@
         for (const [i, h] of state.partnerships.entries()) {
             const m = state.people[h.motherId], f = state.people[h.fatherId];
             check(h.id === i && integer(h.motherId) && integer(h.fatherId) && integer(h.siteId) && m && f && m.gender === "female" && f.gender === "male" && m.siteId === h.siteId && f.siteId === h.siteId && m.species === f.species && m.factionId === f.factionId && !kinshipRelated(state, m.id, f.id), "invalid partnership");
-            check(integer(h.fromYear) && h.fromYear >= 1 && h.fromYear <= state.currentYear && (h.toYear === null || integer(h.toYear) && h.toYear >= h.fromYear && h.toYear <= state.currentYear), "invalid partnership interval");
+            check(integer(h.fromYear) && h.fromYear >= state.startYear && h.fromYear <= state.currentYear && (h.toYear === null || integer(h.toYear) && h.toYear >= h.fromYear && h.toYear <= state.currentYear), "invalid partnership interval");
             check(typeof h.imported === "boolean" && [m, f].every(p => atBirth(p, h.fromYear)), "partnership predates life or follows death");
-            if (h.imported) check(h.fromYear === 1 && m.isFounder && f.isFounder && m.sourceFamilyId !== null && m.sourceFamilyId === f.sourceFamilyId, "invalid imported founder partnership");
+            if (h.imported) check(h.fromYear === state.startYear && m.isFounder && f.isFounder && m.sourceFamilyId !== null && m.sourceFamilyId === f.sourceFamilyId, "invalid imported founder partnership");
             else check([m, f].every(p => h.fromYear - p.born >= state.config.profiles[p.species].reproductiveAge[0] && h.fromYear - p.born <= state.config.profiles[p.species].reproductiveAge[1]), "ineligible person established partnership");
             const ended = [m.died, f.died].filter(year => year !== null);
             check(h.toYear === (ended.length ? Math.min(...ended) : null), "partnership end does not match partner death");
@@ -441,7 +442,7 @@
         for (const p of state.people) check(p.partnershipId === null || (state.partnerships[p.partnershipId] && state.partnerships[p.partnershipId].toYear === null && paired.has(p.id)), "stale partnership link");
         for (const [i, r] of state.rulers.entries()) {
             const p = state.people[r.personId];
-            check(r.id === i && integer(r.personId) && integer(r.siteId) && integer(r.dynastyId) && p && p.factionId === r.factionId && p.dynastyId === r.dynastyId && p.siteId === r.siteId && integer(r.fromYear) && r.fromYear >= 1 && r.fromYear <= state.currentYear, "invalid ruler record");
+            check(r.id === i && integer(r.personId) && integer(r.siteId) && integer(r.dynastyId) && p && p.factionId === r.factionId && p.dynastyId === r.dynastyId && p.siteId === r.siteId && integer(r.fromYear) && r.fromYear >= state.startYear && r.fromYear <= state.currentYear, "invalid ruler record");
             check(p.born <= r.fromYear && (p.died === null || p.died > r.fromYear), "ruler not alive at accession");
             check(r.toYear === null ? p.died === null : integer(r.toYear) && r.toYear >= r.fromYear && r.toYear <= state.currentYear && r.toYear === p.died, "invalid ruler end year");
         }
@@ -451,10 +452,10 @@
             check(f.id === key && integer(f.homeSiteId) && (f.activeRulerId === null || integer(f.activeRulerId)) && (f.lastRulerId === null || integer(f.lastRulerId)) && typeof f.culture === "string" && typeof f.rulerTitle === "string" && Array.isArray(f.siteIds) && new Set(f.siteIds).size === f.siteIds.length && f.siteIds.includes(f.homeSiteId) && f.siteIds.every(id => integer(id) && state.sites[id] && state.sites[id].factionId === f.id) && state.sites.filter(s => s.factionId === f.id).length === f.siteIds.length, "invalid faction sites/metadata");
             check(Array.isArray(f.dynastyIds) && new Set(f.dynastyIds).size === f.dynastyIds.length && f.dynastyIds.every(id => integer(id) && state.dynasties[id] && state.dynasties[id].factionId === f.id) && state.dynasties.filter(d => d.factionId === f.id).length === f.dynastyIds.length, "invalid faction dynasty registry");
             const reigns = state.rulers.filter(r => r.factionId === f.id);
-            check(reigns.length && f.lastRulerId === reigns[reigns.length - 1].id && new Set(reigns.map(r => r.personId)).size === reigns.length && reigns.every((r, i) => r.fromYear === (i ? reigns[i - 1].toYear : 1)), "invalid succession continuity");
+            check(reigns.length && f.lastRulerId === reigns[reigns.length - 1].id && new Set(reigns.map(r => r.personId)).size === reigns.length && reigns.every((r, i) => r.fromYear === (i ? reigns[i - 1].toYear : state.startYear)), "invalid succession continuity");
         }
         check(integer(state.nextEventId) && state.nextEventId >= 1 && integer(state.eventsDiscarded) && state.eventsDiscarded >= 0 && state.events.length + state.eventsDiscarded === state.nextEventId - 1 && state.events.length <= state.config.eventLimit, "event retention mismatch");
-        state.events.forEach((e, i) => check(e.id === state.eventsDiscarded + i + 1 && integer(e.year) && e.year >= 1 && e.year <= state.currentYear && own(state.factions, e.factionId) && integer(e.siteId) && state.sites[e.siteId] && Array.isArray(e.personIds) && e.personIds.every(id => integer(id) && state.people[id]) && typeof e.text === "string", "invalid chronicle event"));
+        state.events.forEach((e, i) => check(e.id === state.eventsDiscarded + i + 1 && integer(e.year) && e.year >= state.startYear && e.year <= state.currentYear && own(state.factions, e.factionId) && integer(e.siteId) && state.sites[e.siteId] && Array.isArray(e.personIds) && e.personIds.every(id => integer(id) && state.people[id]) && typeof e.text === "string", "invalid chronicle event"));
         return true;
     }
     function conditionsValid(state, conditions) {

@@ -40,7 +40,8 @@
  *                                    stone + 4 lava 0 ft, the air above a water stratum not counted; airRunAt agrees
  *   shafts_keep_fluid               an instrumented copy of the generator plants water in every shaft's and skylight's path
  *                                    before they are carved (generated worlds keep pools away from them): the water stays and
- *                                    no rock of those columns is carved (a shaft or skylight never cuts through a fluid)
+ *                                    no rock of those columns is carved (a shaft or skylight never cuts through a fluid);
+ *                                    needs rock under the water in at least one shaft and one skylight column
  *   multi_z_connectivity        [N] a generated multi-Z network: one continuous air volume holding floors on two levels
  *                                    (shaft or slope), and natural ramp connectors on slopes that step onto the next level
  *   no_floating_mass            [O] every solid stratum of every seed's five levels reaches bedrock or the area edge
@@ -115,6 +116,8 @@ const MUTANTS = {
     void_min_1: [[L_, "            if (C - F < 3) return 0;", "            if (C - F < 1) return 0; /* MUTANT */"]],
     shaft_through_fluid: [[L_, "                if (fluidIn(i, sh.from, hi)) return;\n                let changed = false;\n                for (let e = sh.from; e < hi; e++) if (SOLID_B[getE(i, e)] === 1) { setE(i, e, M_AIR); changed = true; }",
         "                let changed = false;\n                for (let e = sh.from; e < hi; e++) if (SOLID_B[getE(i, e)] === 1 || FLUID_B[getE(i, e)] === 1) { setE(i, e, M_AIR); changed = true; } /* MUTANT: the old shaft */"]],
+    shaft_prescan_removed: [[L_, "                if (fluidIn(i, sh.from, hi)) return;\n                let changed = false;\n                for (let e = sh.from; e < hi; e++) if (SOLID_B[getE(i, e)] === 1) { setE(i, e, M_AIR); changed = true; }",
+        "                /* MUTANT: shaft pre-scan removed */\n                let changed = false;\n                for (let e = sh.from; e < hi; e++) if (SOLID_B[getE(i, e)] === 1) { setE(i, e, M_AIR); changed = true; }"]],
     skylight_through_fluid: [[L_, "                if (!solidE(i, nd.F - 1) || fluidIn(i, nd.F, top[i])) return;\n                let changed = false;\n                for (let e = nd.F; e < top[i]; e++) if (SOLID_B[getE(i, e)] === 1) { setE(i, e, M_AIR); changed = true; }",
         "                if (!solidE(i, nd.F - 1)) return;\n                let changed = false;\n                for (let e = nd.F; e < top[i]; e++) if (getE(i, e) !== M_AIR) { if (FLUID_B[getE(i, e)] === 1) return; setE(i, e, M_AIR); changed = true; } /* MUTANT: the old skylight */"]],
     no_multi_z: [[L_, "multiZChance: 0.25,", "multiZChance: 0, /* MUTANT */"], [L_, "shaftChance: 0.4,", "shaftChance: 0,"],
@@ -954,7 +957,11 @@ guard("shafts_keep_fluid", () => {
         out.planted = [];
         for (const sh of out.shafts) disc(sh.x, sh.y, sh.r, i => {
             const hi = Math.min(sh.to, top[i] - CV.roofMin), e = hi - 1;
-            if (e >= sh.from && SOLID_B[getE(i, e)] === 1) { setE(i, e, M_WATER); out.planted.push({ kind: "shaft", x: i % size, y: (i / size) | 0, e, solid: [] }); }
+            if (e < sh.from || SOLID_B[getE(i, e)] !== 1) return;
+            const solid = [];   // the rock under the water, in columns the shaft carve visits (its own gate)
+            if (!((lock[i] & NO_CAVE) || wt[i] < 1)) for (let k = sh.from; k < e; k++) if (SOLID_B[getE(i, k)] === 1) solid.push(k);
+            setE(i, e, M_WATER);
+            out.planted.push({ kind: "shaft", x: i % size, y: (i / size) | 0, e, solid });
         });
         for (const net of networks) {
             if (!net.skylight) continue;
@@ -980,30 +987,33 @@ guard("shafts_keep_fluid", () => {
     // Test on SEED and SEED2 (seed 3 naturally has eligible skylights with 5-6 strata of rock overburden as well as vertical shafts).
     const seedsToTest = [SEED, SEED2];
     const bad = [];
-    let totalShafts = 0, totalSkylights = 0, totalRock = 0, totalWithRock = 0;
+    let totalShafts = 0, totalSkylights = 0, totalRock = 0, totalWithRock = 0, totalShaftWithRock = 0, carved = 0;
+    const rock = { shaft: 0, skylight: 0 };
     const summaries = [];
     for (const s of seedsToTest) {
         const envI = setup(inst, `inst-${s}`);
         newWorld(envI, s);
         const VI = volume(envI), stI = envI.UF.World.state, FI = envI.UF.Levels.naturalFeatures(stI.startArea.x, stI.startArea.y);
         const planted = FI.planted || [];
-        let sShafts = 0, sSkylights = 0, sWithRock = 0;
+        let sShafts = 0, sSkylights = 0, sWithRock = 0, sShaftWithRock = 0;
         for (const p of planted) {
             const i = p.y * size + p.x;
             if (p.kind === "shaft") sShafts++; else sSkylights++;
             if (VI.get(i, p.e) !== 4 && bad.length < 5) bad.push(`${p.kind} (${p.x},${p.y}) planted water at ${p.e} ft is now ${VI.get(i, p.e)}`);
             for (const k of p.solid) {
-                totalRock++;
-                if (!VI.solid(i, k) && bad.length < 8) bad.push(`skylight (${p.x},${p.y}) rock at ${k} ft carved below the water`);
+                totalRock++; rock[p.kind]++;
+                if (!VI.solid(i, k)) { carved++; if (bad.length < 8) bad.push(`${p.kind} (${p.x},${p.y}) rock at ${k} ft carved below the water`); }
             }
         }
         sWithRock = planted.filter(p => p.kind === "skylight" && p.solid.length).length;
-        totalShafts += sShafts; totalSkylights += sSkylights; totalWithRock += sWithRock;
-        summaries.push(`seed ${s}: ${sShafts} shafts, ${sSkylights} skylights (${sWithRock} with rock under water)`);
+        sShaftWithRock = planted.filter(p => p.kind === "shaft" && p.solid.length).length;
+        totalShafts += sShafts; totalSkylights += sSkylights; totalWithRock += sWithRock; totalShaftWithRock += sShaftWithRock;
+        summaries.push(`seed ${s}: ${sShafts} shafts (${sShaftWithRock} with rock under water), ${sSkylights} skylights (${sWithRock} with rock under water)`);
         envErrors.push(...envI.__errors);
     }
-    check("shafts_keep_fluid", totalShafts > 0 && totalWithRock > 0 && bad.length === 0,
-        `${summaries.join("; ")}; total rock strata under water: ${totalRock}; ` +
+    // Both halves need a fixture: rock under planted water in a shaft column and in a skylight column.
+    check("shafts_keep_fluid", totalShafts > 0 && totalShaftWithRock > 0 && totalWithRock > 0 && bad.length === 0,
+        `${summaries.join("; ")}; total rock strata under water: ${totalRock} (shafts ${rock.shaft}, skylights ${rock.skylight}), carved ${carved}; ` +
         `after the carve: ${bad.length ? bad.join("; ") : "every planted water stratum still water, no rock under it carved"}`);
 });
 

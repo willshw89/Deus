@@ -1,0 +1,35 @@
+d1fbeab84a9ca07fce905f65d5bbffc6148c566c
+2026-09-25T16:33:08-05:00
+MUTANT no_features: exit 1; failed: different_seeds_differ, carve_only_removes, partial_heights, z0_to_z1_exposure, z1_to_z2_exposure, feature_reaches_z2, shallow_more_common, caves_on_all_levels, cave_overburden, cave_void_minimum, roof_breach, clearance_4_5_more, multi_z_connectivity, shafts_keep_fluid, ground_holes, save_load
+MUTANT adds_mass: exit 1; failed: carve_only_removes
+MUTANT old_gen_cut: exit 1; failed: old_generator_unchanged, carve_only_removes
+MUTANT flat_cuts: exit 1; failed: partial_heights, z1_to_z2_exposure, feature_reaches_z2, multi_z_connectivity
+MUTANT seed_ignored: exit 1; failed: different_seeds_differ, feature_reaches_z2, multi_z_connectivity, shafts_keep_fluid
+MUTANT nondeterministic: exit 1; failed: deterministic_same_seed, cave_void_minimum, shafts_keep_fluid, save_load
+MUTANT no_exposure: exit 1; failed: z1_to_z2_exposure, feature_reaches_z2
+MUTANT underground_caves_only: exit 1; failed: caves_on_all_levels, roof_breach
+MUTANT z2_everywhere: exit 1; failed: shallow_more_common
+MUTANT cuts_in_start: exit 1; failed: traversable_terrain
+MUTANT swiss_cheese: exit 1; failed: cave_free_terrain
+MUTANT no_roof: exit 1; failed: shallow_more_common, cave_overburden, multi_z_connectivity, protections
+MUTANT cap_ignored: exit 1; failed: cave_overburden, roof_breach
+MUTANT clearance_off_by_one: exit 1; failed: cave_overburden, roof_breach, clearance_4_5_more, clearance_stops_at_fluid
+MUTANT air_through_fluid: exit 1; failed: clearance_stops_at_fluid
+MUTANT airrun_through_fluid: exit 1; failed: clearance_stops_at_fluid
+MUTANT shaft_through_fluid: exit 1; failed: shafts_keep_fluid
+MUTANT void_min_1: exit 1; failed: cave_void_minimum
+MUTANT skylight_through_fluid: exit 1; failed: shafts_keep_fluid
+MUTANT pockets_unprotected: exit 1; failed: cave_overburden, protections
+MUTANT keep_floating: exit 1; failed: different_seeds_differ, no_floating_mass
+MUTANT no_multi_z: exit 1; failed: multi_z_connectivity, shafts_keep_fluid
+MUTANT water_ignored: exit 1; failed: protections
+MUTANT open_ground_grass: exit 1; failed: ground_holes
+MUTANT plants_in_cuts: exit 1; failed: ground_holes
+MUTANT feature_grid_kept: exit 1; failed: no_parallel_authority
+MUTANT error_injected: exit 1; failed: no_errors
+MUTANTS: 27/27 caught by a named check (exit 1) (1387 s)
+
+real	23m6.862s
+user	0m0.015s
+sys	0m0.000s
+EXIT 0
