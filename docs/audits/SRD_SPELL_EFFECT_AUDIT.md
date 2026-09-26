@@ -70,7 +70,7 @@
    - `volumeDamage` implies `breaches-floor` unless the notes limit it to objects;
    - every double-quoted phrase in `physicalEffects` and `notes` is found in the SRD text and replaced by the exact source substring.
 
-   The first full run reported 16 problems (non-SRD phrases in double quotes, three system/primitive mismatches), which were fixed. This shows the checks can fail.
+   The first full run reported 16 problems, which were fixed: 11 double-quoted phrases that were not exact SRD text and 5 system/primitive mismatches. This shows the checks can fail.
 4. **Derived fields.** `wbsDeps` and `wbsGaps` are derived mechanically from `primitives`, `crossLayer` and `conservation` with the tables in `meta.primitiveWbs`, `meta.crossLayerWbs`, `meta.conservationWbs` and `meta.primitiveGaps` (§4.1), plus a few named per-record additions.
 
 ### 1.3 Field definitions
