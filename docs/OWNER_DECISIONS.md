@@ -154,6 +154,7 @@ Every decision item recorded in this log must provide:
 - **Owner Ruling:** Owner overrides R1/Option D. Every Z layer renders 1:1. That means no blur, no scale or zoom, no parallax or projection offset, and no ColorMatrix, alpha or tint depth shading or any other filter. The first goal is correct layer display. Visual depth effects will be revisited later, and only with the Owner.
 - **Engine Fact:** Option D was never implemented in the engine. `main` still ships `DEUS_Depth` with Preset `deus` (`game/js/plugins.js`, lines ~270-278: `"Preset": "deus"`, `"EyeHeightFt": "140"`). That preset gives camera-model scale 0.959/0.921 plus ColorMatrix plus BlurFilter 0.6/1.2 px (`DEUS_Depth.js` L121-124, L135, L203). R1 exists only in the Lane E plan doc and in WORK_QUEUE WB-007.
 - **Lane E Consequence:** WB-007's plan mandates "scale-only recession (DEC-006 / R1 = Option D)". Pause Lane E until the PM re-scopes it to DEC-011. Do not merge Lane E as written.
+- **DEC-011 Amendment Note (Owner Directive 0021-V Addendum §19, 01:28 CT):** Owner wants all nine depth cues eventually; 1:1 correctness first. Cues 1–6 (visible inner side walls of openings, rim shadows, darker baked tile palettes, height edges/ramps, hanging/falling props, deep light sources) are art/draw-order only and in scope under DEC-011. Cues 7–9 (depth parallax, code-applied haze/darkening, slight scale-down) amend DEC-011 and are approved in principle for an Owner-led review session after Lanes K and N land and 1:1 correctness is verified; each will be an independent toggle off by default with measured benchmark cost.
 
 ---
 
@@ -223,3 +224,53 @@ Every decision item recorded in this log must provide:
      - **Architectural Style:** Cultural building profiles linked to `docs/art/DEUS_RACIAL_BUILDING_BIBLE_TEMPLATE.md` adapted to the race's DEC-013 home-layer band.
      - **Expansion & Failure Modes:** Colonization distance/terrain rules and societal regression/collapse conditions.
   4. **Owner Separation:** Technical schema and structural template are engineering tasks; race-specific cultural lore, names, and values remain Owner-authored (TODO).
+
+---
+
+### Decision `DEC-016`: In-Layer Height (Strata) Presentation & Movement Rules
+- **Date Logged:** 2026-09-26
+- **Status:** `DECIDED` (Owner ruling 01:17–01:19 CT, directive 0021-V Addendum §15)
+- **Decider:** Owner
+- **Summary:**
+  1. **Visual Presentation:** Characters and objects are rendered raised by a fixed pixel offset per stratum of ground height (a straight vertical pixel shift, no scale/projection deformation; DEC-011 compliant).
+  2. **Movement Rules:**
+     - 1 stratum difference (2 ft): Normal step (traversable without penalty).
+     - 2 strata difference (4 ft): Climb or jump (reduced movement speed or skill check).
+     - Full layer difference (10 ft / 5 strata): Requires stairs, ladder, or ramp.
+  3. **3D Height Mechanics:** Falling damage, melee reach, and line-of-sight elevation advantage use real 3D vertical height differences.
+  4. **Art Preparation:** Catalogue requires one top-surface tile per terrain plus auto-placed edge/cliff-face strips per height difference (1 to 5 strata) and height shading; NOT a full tile set per height. Catalogue placeholders only; no art generation (DEC-007).
+
+---
+
+### Decision `DEC-017`: Seamless Inter-Layer Ramps and Camera-Follow Behavior
+- **Date Logged:** 2026-09-26
+- **Status:** `DECIDED` (Owner ruling 01:21 CT, directive 0021-V Addendum §16)
+- **Decider:** Owner
+- **Summary:**
+  1. **Seamless Transitions:** Ramps and slopes carry units continuously from one layer to the next. A ramp is a run of cells rising one stratum per cell (5 cells = one 10 ft layer). At the top stratum, the unit's Z becomes Z+1 with zero screen transfer, fade, or pause. Depends on Lane N (in-place layer switch) and DEC-016 stratum height offsets.
+  2. **Camera-Follow Default:** When the player unit crosses a ramp boundary between layers, the camera view automatically follows the player's current layer. Non-player units crossing simply transfer layer membership lists (Lane K per-frame membership refresh).
+  3. **Pathfinding & Construction:** Multi-Z pathfinding treats ramps, stairs, and ladders as traversable layer connectors. Colonists can build ramps. Art catalogue adds ramp/slope pieces per terrain (placeholders only; DEC-007).
+
+---
+
+### Decision `DEC-018`: Occlusion Rule for Layer Rendering (Zero-Cost Solid Cover)
+- **Date Logged:** 2026-09-26
+- **Status:** `DECIDED` (Owner ruling 01:24 CT, directive 0021-V Addendum §18)
+- **Decider:** Owner
+- **Summary:**
+  1. **Occlusion Culling Rule:** Any cell, entity, prop, or effect covered by an opaque upper layer is not drawn at all.
+  2. **Bounded Draw Cost:** Draw cost is strictly bounded by exposed visible screen area (VISION V133), NOT by total layer count. For each screen column/cell, rendering traverses only from the currently viewed layer downward to the first opaque surface; cells under solid cover cost zero.
+  3. **Benchmark Requirement:** Applied in Lane K follow-up, the 32-layer refactor, and future overlook view. Benchmark target: the stress scene with 32 layers must cost approximately the same frame time as with 5 layers when upper layers are solid.
+
+---
+
+### Decision `DEC-019`: Cross-Layer 3D Targeting, Ballistics, and Volume Damage
+- **Date Logged:** 2026-09-26
+- **Status:** `DECIDED` (Owner ruling 01:35 CT, directive 0021-V Addendum §20)
+- **Decider:** Owner
+- **Summary:**
+  1. **3D Targeting:** Spells, arrows, and thrown items can target cells and entities on lower (and upper) layers whenever there is an unobstructed 3D line of sight through openings (shafts, ravines, stairwells, overlooks).
+  2. **True 3D Geometry:** Range calculation uses true 3D Euclidean distance (5 ft grid cells, 10 ft layer height).
+  3. **Vertical Modifiers:** Falling projectiles and dropped objects gain velocity/impact damage based on height fallen; shooting upward incurs a range penalty.
+  4. **Volume Area Damage:** Area-of-effect blasts (fireball, explosive shells) hitting a floor propagate cross-layer volume damage downward per DEC-013 §12. Targeting UI allows selecting visible cells on lower layers viewed through openings.
+

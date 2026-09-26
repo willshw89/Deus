@@ -1,8 +1,8 @@
 # DEUS WorldGen Work Breakdown Structure
 
 **Namespace:** WG  
-**Rev:** 22  
-**IDs:** Stable. Next free in WG.00 is WG.00.19  
+**Rev:** 23  
+**IDs:** Stable. Next free in WG.00 is WG.00.24  
 **Canonical Authority:** the Owner approves; the Coordinator records; the PM signs off.  
 **Status:** CANONICAL ON MAIN  
 **Permanent Project-Control Anchor:** WBS IDs are immutable. Never silently renumber, merge, or reuse them. Once committed, a leaf changes only by status (`PLANNED` → `DONE`) or retirement via `SUPERSEDED`.
@@ -104,6 +104,11 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | **WG.00.16** | Depth-Shading Revisit After Palette Migration | Claude / Owner | Options memo with harness renders; Owner ruling recorded as update to DEC-006. | `PLANNED` | |
 | **WG.00.17** | Z-Range Configurable Setting & Expansion to 32 Layers | Claude | Make Z-range a single configurable setting in engine core, then expand to 32 layers (-16..+15: surface 0, 16 underground -1..-16, 15 upper +1..+15, 320 ft total height, 10 ft layers, 2 ft strata). Refactor hardcoded spots (DEUS_Levels.js L1137 fixed maps, L1805 +2 offset/slice cap 24, all +2/5/24 assumptions). Mandatory sparse storage: memory and save size scale with occupied cells, not 32 × area (empty sky and solid rock cost near zero). Must maintain support for running at 9 layers in automated tests. Depends on Lanes K and N merging; inputs: ADR-003. Do NOT open code lane yet. | `PLANNED` | |
 | **WG.00.18** | Layer-View Presentation (Owner-Led) | Owner / Claude | Depth presentation (lighting, fog, atmosphere, colour grading of lower layers, parallax or none) designed directly with Owner after Lanes K, N, and WG.00.17 land. Governed by visual goal "looking down layers must be beautiful and breathtaking". DEC-011 governs until opened with Owner. | `PLANNED` | |
+| **WG.00.19** | In-Layer Height Presentation & Multi-Strata Movement | Claude / Grok | Characters/objects drawn raised by fixed pixel offset per stratum of ground height (straight shift, no scale; DEC-011/DEC-016 compliant). Movement: 1 stratum (2 ft) normal step, 2 strata (4 ft) climb/jump, full layer (10 ft) requires stairs/ladder/ramp. Falling damage, melee reach, LOS use real height differences. | `PLANNED` | |
+| **WG.00.20** | Seamless Inter-Layer Ramps & Camera-Follow Connector | Claude / Grok | Run of cells rising one stratum per cell (5 cells = one 10 ft layer); unit's Z becomes Z+1 at top stratum with zero transfer/fade/pause. Camera follows player automatically (default Owner decision). Non-player units transfer layer memberships. Multi-Z pathfinding traversable connector. Colonist construction. (DEC-017; dep: Lane N, WG.00.19). | `PLANNED` | |
+| **WG.00.21** | Layer Occlusion Culling Rule & Exposed-Area Bound | Claude / Grok | Anything covered by opaque upper layer is not drawn (tiles, units, effects). Draw cost bounded by exposed visible screen area (V133). Traverses from viewed layer down to first opaque surface; cells under solid cover cost zero. Benchmark: 32-layer stress scene costs approx same as 5 layers when solid. (DEC-018; dep: Lane K follow-up, WG.00.17). | `PLANNED` | |
+| **WG.00.22** | Multi-Depth Presentation Catalogue Slots & Asset Placeholders | Gemini / Codex | Catalogue entries and blank tile/sprite slots for depth cues 1–6: visible inner side walls of openings, rim shadows cast onto lower layers, darker baked tile palettes, height edges and ramps, hanging/falling props (roots, vines, stalactites, waterfalls, dust, light shafts), deep light sources against darkness. Data manifests and blank slots only; zero art generation (DEC-007; DEC-011 amendment). | `PLANNED` | |
+| **WG.00.23** | Overlook Zoom-Out Multi-Layer View (Owner-Led Placeholder) | Owner / Claude | Future overlook zoom-out view where units on multiple layers are visibly moving. Sequenced post-K, post-N, post-32-layer refactor, and post-benchmark headroom proof. Simplified/low-detail sprites and capped animation rates at far zoom. DEC-011 1:1 scale lock governs now. | `PLANNED` | |
 
 
 ---
@@ -557,6 +562,7 @@ Rows are numbered in the SIM namespace. **SIM.10 is already history and populati
 | GP.05.01 | Slice 5: Construction and crafting | DRAFT | `docs/SLICES.md` §Slice 5 | GP.04.01, GP.10.01 decision | Claude → Grok; Owner approves | as GP.03.01 | L | **OWNER-GATED** (Owner slice approval) |
 | GP.06.01 | Slice 6: World generation (player-facing), reconciled with M1 | DRAFT (the slice text predates the WG WBS; Gap 2) | `docs/SLICES.md` §Slice 6 | dep: WG.90.01 | PM reconciles; Claude → Grok; Owner approves | Slice text maps onto the M1 leaves; Owner slice approval | M | **OWNER-GATED** (Owner slice approval) |
 | GP.07.01 | Slice 7: Creatures and combat (`DEUS_Combat.js`, Wildlife) | DRAFT | `docs/SLICES.md` §Slice 7 | GP.06.01, WG.68.07–14 | Claude → Grok; Owner approves | as GP.03.01 | L | **OWNER-GATED** (Owner slice approval) |
+| GP.07.02 | **Cross-layer 3D targeting, ballistics & volume damage** (spells, arrows, thrown items through multi-Z openings, true 3D Euclidean range, vertical impact bonus / upward range penalty, cross-layer volume blast damage) | PLANNED | Directive 0021-V Addendum §20; DEC-019; V148 | dep: WG.00.17, SIM.00.00 (Lane N), SIM.40.01 | Claude → Grok | Spells/ranged attacks target visible cells on lower/upper layers with clear 3D LOS. Range uses 3D Euclidean distance (5 ft squares, 10 ft layers). Impact damage increases with height fallen; shooting upward incurs range penalty. Area blast damage propagates downward through floor materials. Exits 0 | M | — |
 | GP.08.01 | Slice 8: Population and peoples (`DEUS_Factions.js`; diplomacy has no leaf, Gap 16) | DRAFT | `docs/SLICES.md` §Slice 8 | GP.07.01, WG.62.01, SOC.20–23 | Claude → Grok; Owner approves | as GP.03.01 | L | **OWNER-GATED** (Owner slice approval) |
 | GP.10.01 | SRD crafting (CRFT) branch integration | OPEN decision (DEC-003) | `docs/OWNER_DECISIONS.md` DEC-003 | OD-2; OPS.50.04 | Claude → Grok | Per the decision; if deferred, parked until after the migration | M | **OWNER-GATED** (DEC-003, OD-2) |
 
@@ -566,7 +572,7 @@ Rows are numbered in the SIM namespace. **SIM.10 is already history and populati
 
 The Owner clarified this on 2026-09-25 at 23:41 CT. **Art is a stream of its own, in exactly four stages. Only Stage 3 needs the Owner.** Stages 1, 2 and 4 are data and tooling. They produce no art, and workers can build them in parallel starting now.
 
-- **Stage 1 — ART CATALOGUE (not art; workers may build):** WG.20.01, WG.20.02, WG.21.01–03, WG.22.01–25, WG.23.01, WG.24.01–10, WG.25.01, WG.30.01, WG.30.02, WG.31.01, WG.68.15, DW.01.06 (defined in §3 tables above).
+- **Stage 1 — ART CATALOGUE (not art; workers may build):** WG.00.22, WG.20.01, WG.20.02, WG.21.01–03, WG.22.01–25, WG.23.01, WG.24.01–10, WG.25.01, WG.30.01, WG.30.02, WG.31.01, WG.68.15, DW.01.06 (defined in §3 tables above).
 - **Stage 2 — BLANK TILESETS (not art; workers may build):** WG.32.01, WG.32.02, WG.33.01 (defined in §3 tables above).
 - **Stage 3 — ART GENERATION (OWNER-GATED: requires Owner involvement):** ART-A, WG.50.01–03, WG.51.01–04, WG.52.01–10, WG.53.01–02, WG.54.01–02, WG.55.01, WG.56.01, WG.57.01, WG.60.01, DW.03.01–04, ART-B (defined in §3 tables above).
 - **Stage 4 — PLACEMENT & VALIDATION (not art; workers may build):** WG.41.01, WG.40.02, WG.80.01 (defined in §3 tables above).
@@ -592,13 +598,13 @@ The Owner clarified this on 2026-09-25 at 23:41 CT. **Art is a stream of its own
 | Milestone | Packages | of which OWNER-GATED | Notes |
 |---|---|---|---|
 | M0 Operations & Governance | 43 | 11 | 8 WG.00.12 sub-packages + 35 OPS |
-| M1 World Generation Foundation | 16 | 1 | includes new WG.00.14, WG.00.15, WG.00.17, WG.62.02, SIM.90.01 |
-| M2 Rendering & Depth | 17 | 4 | includes new WG.00.16, WG.00.18 |
+| M1 World Generation Foundation | 18 | 1 | includes new WG.00.14, WG.00.15, WG.00.17, WG.00.19, WG.00.20, WG.62.02, SIM.90.01 |
+| M2 Rendering & Depth | 19 | 5 | includes new WG.00.16, WG.00.18, WG.00.21, WG.00.23 |
 | M3 Simulation | 49 | 2 | band rows (e.g. WG.66.01–08) count as one package each; includes 11 SIM.00/SIM.30 rows, 10 SIM.40.01–.10 collapse/decay/reproduction rows, plus 10 new SIM.50.01–.10 living-world rows (*Owner-ordered 2026-09-26, Directive 0021-V §14*) |
-| M4 Civilization & Gameplay | 16 | 16 | every package waits on an Owner decision, playtest or approval |
-| M5 Content & Art (4 stages) | 32 | 15 | Stage 1: 12 (1 gated, a decision only) · Stage 2: 3 (0) · **Stage 3: 12 (all 12 "OWNER-GATED: requires Owner involvement")** · Stage 4: 5 (2 gated, Owner visual verification) |
+| M4 Civilization & Gameplay | 17 | 16 | includes new GP.07.02 cross-layer 3D targeting; every package waits on an Owner decision, playtest or approval |
+| M5 Content & Art (4 stages) | 33 | 15 | Stage 1: 13 (includes WG.00.22; 1 gated, a decision only) · Stage 2: 3 (0) · **Stage 3: 12 (all 12 "OWNER-GATED: requires Owner involvement")** · Stage 4: 5 (2 gated, Owner visual verification) |
 | M6 Release | 9 | 3 | all new REL IDs |
-| **Total** | **182** | **52** | Band rows stand for about 298 underlying WBS leaves |
+| **Total** | **188** | **53** | Band rows stand for about 298 underlying WBS leaves |
 
 A **package** here is one table row. Band rows (such as WG.22.01–25) keep their underlying leaf IDs and are split into leaf lanes when they start. The counts were produced by a script over this file's tables.
 
@@ -707,6 +713,7 @@ Notes:
 
 | Rev | Date | Change |
 |:---:|:---:|:---|
+| 23 | 2026-09-26 | Directive 0021-V Addendum (§§15–20): Added WG.00.19 (In-Layer Height Presentation & Multi-Strata Movement), WG.00.20 (Seamless Inter-Layer Ramps), WG.00.21 (Layer Occlusion Culling Rule), WG.00.22 (Multi-Depth Presentation Catalogue Slots), WG.00.23 (Overlook Zoom-Out Multi-Layer View), and GP.07.02 (Cross-Layer 3D Targeting, Ballistics & Volume Damage). Next free WG.00 is WG.00.24. |
 | 22 | 2026-09-26 | Directive 0021-V Addendum (§14): Added WG.00.18 (Layer-View presentation Owner-led placeholder), SIM.50.01 (Living World Gap Audit), and SIM.50.02–SIM.50.10 (Nine living-world physical simulation systems across 32 layers). Next free WG.00 is WG.00.19. |
 | 21 | 2026-09-26 | Directive 0021-V Addendum (§12–§13): DEC-013 amended (32 Z layers supersede 9, range -16..+15, 320 ft height, 10 ft layers, 2 ft strata); updated WG.00.17 (32-layer Z-range refactor with sparse storage and 9-layer test support), WG.62.02 (race home-layer ranges across 5 bands/32 layers), and SIM.40.01 (cross-layer blast propagation and material attenuation). |
 | 20 | 2026-09-26 | Directive 0021-V Addendum (§9–§10) / Directive 0023-X: Added SIM.40.10 (Shared reproduction and lifecycle system), DEC-014 (Population budget & crowd LOD), DEC-015 (Faction Development Plans), Vision V139–V141. |

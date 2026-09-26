@@ -59,7 +59,7 @@
     "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\lane-k\\tasks\\WG.00.09b\\lane-k\\BRIEF.md",
     "launchPromptPath": "C:\\Users\\snewt\\.deus_worktrees\\run_lane_k.ps1",
     "state": "running",
-    "tip": "983a9e46"
+    "tip": "5c6641e1"
   },
   {
     "lane": "Lane N",
@@ -92,6 +92,19 @@
     "exitCode": 0,
     "tip": "c456cb73",
     "endedAtCT": "2026-09-26 01:07:29 CT"
+  },
+  {
+    "lane": "Lane M",
+    "role": "reviewer",
+    "provider": "Grok / grok-1.0",
+    "taskId": "task-37472",
+    "pid": 8928,
+    "worktree": "C:\\Users\\snewt\\.deus_worktrees\\lane-m",
+    "branch": "task/lane-m",
+    "launchTimeCT": "2026-09-26 01:53:13 CT",
+    "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\run_review_lane_m.ps1",
+    "state": "running",
+    "tip": "c456cb73"
   },
   {
     "lane": "Lane I",
@@ -137,5 +150,19 @@
     "exitCode": 0,
     "tip": "5b0dbc7b",
     "endedAtCT": "2026-09-26 01:11:03 CT"
+  },
+  {
+    "lane": "Lane gap-audit",
+    "role": "writer",
+    "provider": "Claude / claude-opus-5-5",
+    "taskId": "task-37487",
+    "pid": 9900,
+    "worktree": "C:\\Users\\snewt\\.deus_worktrees\\gap-audit",
+    "branch": "task/gap-audit",
+    "launchTimeCT": "2026-09-26 01:53:49 CT",
+    "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\gap-audit\\tasks\\SIM.50.01\\gap-audit\\BRIEF.md",
+    "launchPromptPath": "C:\\Users\\snewt\\.deus_worktrees\\run_gap_audit.ps1",
+    "state": "running",
+    "tip": "75cf2ff3"
   }
 ]
