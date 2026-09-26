@@ -8,7 +8,9 @@
 | Base commit | `790387090083848959ce0b95bc560a395336fa3d` (origin/main at launch). `git rev-parse HEAD` when the audit started was `6c0a80083e52323f1e54660574137d76b177172e`. The branch adds only files under `tasks/SIM.50.11/` (the `git diff --name-only` output is in `REPORT.md`), so every `game/` and `docs/` line cited here reads the same at the base and at HEAD. The WBS at the base is already Rev 25 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:4`). |
 | Kind of work | Planning audit, docs only. No file in `game/`, `tools/` or `docs/` was changed. No art was requested, made or described as something to generate (DEC-007). |
 | Inputs read | `docs/worldgen/DEUS_WORLDGEN_WBS.md` (Rev 25), `docs/society/DEUS_SOCIETY_WBS.md` (Rev 3), `docs/art/DEUS_WORLD_WBS.md` (presentation rows only), `docs/WORK_QUEUE.md` (WB-002), `docs/SLICES.md`, `docs/OWNER_DECISIONS.md` (DEC-001..DEC-022), `docs/VISION.md` (V-rows, open questions, decision log V143..V151), `docs/INVARIANT_REGISTRY.md`, `docs/RISK_REGISTER.md`, `docs/PERFORMANCE_ARCHITECTURE.md`, `docs/adr/` (ADR-001, ADR-002; ADR-003 is not on the base, see Limits), `docs/society/DEUS_PERSON_AND_INSTITUTIONS.md`, `docs/design/` (PERSONALITY, EMERGENT_SOCIETY, CHAIN_OF_COMMAND, AUTONOMOUS_CIVILIZATION, DF_GAP_MAP, TECH_TREE, THEME, PEOPLES, VERTICAL_NATURAL_WORLD), `docs/worldgen/DEUS_CREATURE_ECOLOGY.md`, `docs/systems/` pages for the plugins below, `docs/SRD5_1_COVERAGE_MANIFEST.md`, the SRD 5.1 catalogue in `game/data/srd51/` (rules, creatures, character_options, spells, equipment), `docs/audits/LIVING_WORLD_GAP_AUDIT.md` and its review `tasks/SIM.50.01/gap-audit/review_grok_1953c0a5.md`. Code, read only: every plugin named in the brief plus `DEUS_Talk`, `DEUS_Sheet`, `DEUS_Stance`, `DEUS_Select`, `DEUS_Minimap`, `DEUS_Ownership`, `DEUS_Containers`, `DEUS_Stockpiles`, `DEUS_Jobs`, `DEUS_Items`, `DEUS_World`, `DEUS_Environment`, `DEUS_Ecology`, `DEUS_DayNight`, `DEUS_Fog`, `DEUS_Fire`, `DEUS_NaturalConnections`, `DEUS_Dnd5e`, `DEUS_Core`. |
-| Unreviewed inputs | Lane P's SRD spell-effect audit, read with `git show origin/task/lane-p:<path>` at `c9d1ed864cbd1ca0d6f5249e2607e2c833830f01` (unreviewed). Lane M's ADR-003 Rev 3 draft, read with `git show origin/task/lane-m:docs/adr/ADR-003_sim_render_split_and_lod.md` at `2e32f5968f7ed1178ca41602bf74550e4338fff5` (unreviewed, not on the base). Both are used only for assumptions and cross-references, and every use says so. |
+| Inputs not on the base | Lane P's SRD spell-effect audit, read with `git show origin/task/lane-p:<path>` at `c9d1ed864cbd1ca0d6f5249e2607e2c833830f01`. Lane M's ADR-003 Rev 3, read with `git show origin/task/lane-m:docs/adr/ADR-003_sim_render_split_and_lod.md` at `2e32f5968f7ed1178ca41602bf74550e4338fff5`. Both were unreviewed when first read. During this lane both received an independent Grok `VERDICT: PASS` (Lane P: `352d1983f006e8d1b58b28d7b62bfdd476824282`; Lane M: `9e0ef94d36ace947ea30426a107e0a80e434f3be`), and the PM merged both to main after this lane's base (`195f3f26aa78b5e366bfc5dba4d82973c11fba81`, `3b33faa5b1ce77ce2de52773064d865d017489cb`). `git diff --stat 2e32f596 origin/main -- docs/adr/ADR-003_sim_render_split_and_lod.md` is empty, so the merged ADR-003 is the text read here. Neither file exists at the base, so they are cited by section, never by `path:line`. They are used only for assumptions and cross-references, and every use says so. |
+| Method | Section 0 (rating and severity rules) and section 9 (how the evidence was gathered and checked). |
+| Limits | Section 9. |
 
 ## 0. How to read this audit
 
@@ -40,7 +42,7 @@
 | 9 | The player's role per mode | PARTLY PLANNED | WG.00.11, SOC.50.01, SIM.00.03, GP.07.01 (nominal) | PARTIAL | WG.00.11 is a one-line row and OD-16 / VISION Q4 are open; **Overlord mode is not mentioned in any repository document** (flagged, not designed) | 9 |
 | 10 | Underground life | PARTLY PLANNED | WG.64.01, WG.64.06, WG.66.01, WG.66.03, WG.68.07-.10, WG.62.02, SIM.50.02 | PARTIAL | No row for a simulation light field, darkvision, light fuel, cave flora succession or underground farming; darkness changes nothing in the simulation, and pools on the deepest level are always lava (`DEUS_Levels.js:1038`) | 3 |
 
-No area is FULLY PLANNED and none is MISSING under the rule in section 0. The ratings hide a large difference in depth. For individual minds, one of eleven sub-elements is covered by a row's own scope text; for government, five of twelve.
+No area is FULLY PLANNED and none is MISSING under the rule in section 0. The ratings hide a large difference in depth. For individual minds, one of eleven sub-elements is covered by a row's own scope text; for government, six of thirteen.
 
 ### 1.2 Counts
 
@@ -63,7 +65,7 @@ The per-area numbers are in the section of each area and in `people_gap_table.js
 | P-02 | BLOCKER | Every people-side process that should run during play (aging, pregnancy progress, grief, succession, disease deaths) lives in history code that runs only before play, and only when the New Game start year is above 1. The default start year is 0, so a default game runs none of it, and `time:year` has no listener. | 2.2 |
 | P-03 | BLOCKER | Relations between factions are rolled once and never change in play; NPC factions cannot fight each other because combat sides are measured against the player. V18 and DEC-014's anti-snowball pressures cannot happen. | 3.3 |
 | P-04 | MAJOR | DEC-014's anti-snowball pressures (rebellions, epidemics, logistical strain, succession crises) are an Owner decision with no WBS row for any of the four. | 3.2, 3.6, 3.7 |
-| P-05 | MAJOR | 208 of the 319 SRD spells in Lane P's unreviewed classification have no physical effect (`NONE`). 21 of those act on minds, 48 on conditions and stats, 8 heal and 6 communicate. SIM.60.02's schema covers physical primitives only, so these spells need the people-side models audited here, and no row links them. | 4.2 |
+| P-05 | MAJOR | 208 of the 319 SRD spells in Lane P's classification (SIM.60.01, Grok PASS, merged after this lane's base) have no physical effect (`NONE`). 21 of those act on minds, 48 on conditions and stats, 8 heal and 6 communicate. SIM.60.02's schema covers physical primitives only, so these spells need the people-side models audited here, and no row links them. | 4.2 |
 | P-06 | MAJOR | Four of the nine races start below the surface in code (dwarf and gnome on −1, tiefling and dragonborn on −2), but underground darkness changes nothing, there is no farming, and the only natural pools on −2 are lava. Year-0 viability for those factions (WG.90.01) is not planned for. | 3.10 |
 | P-07 | MAJOR | The crowd-LOD summary in SIM.30.01 holds population by species and age band only. DEC-014 adds the three identity axes and obligation. No summary field holds mood, relationships, health or knowledge, so promotion to a named individual would produce a blank mind. | 2.4 |
 
@@ -116,7 +118,7 @@ SIM.30.01's summary schema lists "population by species and age band, resources 
 | # | Assumption | Source |
 |---|---|---|
 | A-1 | One fixed tick at 10 Hz at 1x speed. | DEC-012 §1 (`docs/OWNER_DECISIONS.md:166`) |
-| A-2 | 1 tick = 36 game-seconds; 100 ticks = 1 game hour; 2,400 ticks = 1 game day. LOD levels: L0 full every tick, L1 near every 10 ticks, L2 summary every 100 ticks. Region = 32 × 32 cells × a 2-layer slab, so 16 slabs and 1,024 regions per 256 × 256 area at 32 layers. | ADR-003 Rev 3 draft §0 (unreviewed, `origin/task/lane-m` `2e32f596`) |
+| A-2 | 1 tick = 36 game-seconds; 100 ticks = 1 game hour; 2,400 ticks = 1 game day. LOD levels: L0 full every tick, L1 near every 10 ticks, L2 summary every 100 ticks. Region = 32 × 32 cells × a 2-layer slab, so 16 slabs and 1,024 regions per 256 × 256 area at 32 layers. | ADR-003 Rev 3 §0 and §5.1, read at `2e32f596` (Grok PASS; merged to main after the base) |
 | A-3 | Whole-simulation CPU budget: 4.50 ms per 16.67 ms frame, which is 270 ms of simulation CPU per real second. Per tick: 27 ms at 1x and 3.4 ms at 8x (80 ticks per second). This audit compares every estimate with the 8x figure, the tighter one. | `docs/PERFORMANCE_ARCHITECTURE.md:308` (frame budget §17) |
 | A-4 | Named individuals N = 1,000 (the "1,000+ creature" planning point), split L0 = 150, L1 = 350, L2 = 500. Crowd P = 100,000 anonymous people in S = 200 settlements, K = 40 cohorts per settlement (5 age bands × 8 craft groups). These are planning points, not targets; DEC-014 leaves the budget to benchmarks. Year 0 has 72 founders (SOC principle 3). | `docs/PERFORMANCE_ARCHITECTURE.md:360`; DEC-014 |
 | A-5 | Assumed, not measured: 1 µs for one simple per-entity update on typed arrays with no allocation; 2 µs for one event appraisal; 0.1 µs for one spatial-hash probe. SIM.30.04's benches replace these. | assumption |
@@ -206,6 +208,7 @@ Code today: **PARTIAL**. Survival needs drive behaviour. Mood is DORMANT, though
 | G1-6 | MINOR | Non-vital needs are dormant: the social need is written by talk jobs but has no field to change, and nature and comfort have no live job. | MIND-01, MIND-03 |
 | G1-7 | MAJOR | AGENTS.md rule 14 requires the simulation to explain itself through the sheet and look views; `describe()` hides facets (`DEUS_Colonists.js:5621`) and hardcodes mood. No row plans "why" panels for minds. | MIND-09 |
 | G1-8 | MINOR | Mental breaks have no row and are out of scope in the design (`docs/design/PERSONALITY.md:637`); the choice is the Owner's (OQ-02). | MIND-07 |
+| G1-9 | MAJOR | DEC-018 makes SRD spells act in the simulation, but no row links the 21 mind spells (charm, compulsion, fear, memory) and the mind-reading divinations to any mind state; SIM.60.02's schema holds physical primitives only (section 4.2, P-05). | MIND-10 |
 
 **Proposed packages.** Hard prerequisites for all of them: SIM.00.02 (headless core), SIM.00.03 (snapshot and command queue) and SIM.00.04 (units in the core). No people area has to come first (section 5).
 
@@ -253,7 +256,7 @@ Code today: **PARTIAL**. Survival needs drive behaviour. Mood is DORMANT, though
 
 - **PROPOSED-MIND-08 Minds at crowd LOD: summaries, promotion and demotion** (G1-5).
   - Scope: per-cohort mood histogram and need means as part of SIM.30.01's summary; deterministic promotion (a person's facets, values and first memories derived from the seed, settlement, cohort and index, plus the cohort's history counters); demotion folds the person into the cohort and keeps named relationships of persons who stay named.
-  - Depends on: SIM.30.01, SIM.30.02, SIM.30.03, MIND-01..05.
+  - Depends on: SIM.30.01, SIM.30.02, SIM.30.03, MIND-01..05; who is always kept as a named person is the Owner's (OQ-04).
   - Acceptance tests: (1) 1,000 random promote and demote cycles on 3 seeds keep cohort totals exact; (2) promoting the same slot twice from the same state is byte-identical; (3) a named person's relationships to other named persons survive the other's demotion and promotion. Mutant: unseeded randomness in promotion must fail test 2.
   - Tick cost: promotion about 50 µs per person; a focus move that promotes 100 people costs 5 ms, so it must be spread over prewarm ticks (at most 20 per tick, 1 ms); demotion about 10 µs per person. Memory: the cohort histogram is in MIND-01's per-settlement figure.
 
@@ -262,6 +265,12 @@ Code today: **PARTIAL**. Survival needs drive behaviour. Mood is DORMANT, though
   - Depends on: MIND-02..07, OPS.30.01.
   - Acceptance tests: (1) for a fixture person, the "why" entry lists exactly the three largest mood contributions; (2) the QA run's metrics fall inside their bands on 3 seeds. Mutant: appraisal switched off must push "relationship changes per 100 person-years" below its floor and fail test 2.
   - Tick cost: none in play (read on demand); the QA run is offline.
+
+- **PROPOSED-MIND-10 Mind-affecting and mind-reading spells** (G1-9).
+  - Scope: the entity-level half of the spell schema for Lane P's "creature mind" group (21 spells) and the mind-reading divinations, with SRD saves, ranges and durations unchanged (DEC-018). Charm and domination set a temporary override on MIND-04 attitude and MIND-07 duty choice; fear and Calm Emotions add or suppress MIND-03 mood terms; Modify Memory edits the target's memory ring but never the world event log (REC-01), so truth and belief stay separate; Detect Thoughts and Zone of Truth read MIND-01 state for GOV-03; when a charm ends, the target gains the memory the SRD gives it ("When the spell ends, the creature knows it was charmed by you", Charm Person, `game/data/srd51/spells.json:3415`).
+  - Depends on: SIM.60.02, MIND-01..04, MIND-07, PROPOSED-HEALTH-01 (charmed and frightened are conditions), PROPOSED-REC-01.
+  - Acceptance tests: (1) Charm Person on a failed save makes the target treat the caster as friendly for exactly the SRD duration; afterwards the target holds a memory of being charmed and a grievance toward the caster; (2) Modify Memory changes the target's memory of an event while the world event log still holds the original; (3) inside a Zone of Truth fixture, an accused person who failed the save cannot give a false alibi but may refuse to answer. Mutant: a Modify Memory that edits the world log must fail test 2.
+  - Tick cost: per cast event; expiries go through PROPOSED-HEALTH-01's timer wheel; negligible. Memory: about 16 B per active charm or compulsion override.
 
 ### 3.2 Government, law, crime and succession (priority 4)
 
@@ -282,7 +291,7 @@ Code today: **PARTIAL**. Survival needs drive behaviour. Mood is DORMANT, though
 | Vacancy, deputies, office succession | SOC.23.01, SOC.23.02 (`docs/society/DEUS_SOCIETY_WBS.md:76`) | yes |
 | Appointment, council, loyalty | SOC.23.03 | yes |
 | Policy decrees (Command mode) | SOC.50.01 | yes (area 9) |
-| Law codes and jurisdiction | none | no |
+| Law codes (which acts are offences, evidence, sentences) | none; SOC.20.01 stores an office's jurisdiction and authority scope (`docs/society/DEUS_SOCIETY_WBS.md:71`), not laws | no |
 | Crime (theft, assault, murder) | none | no |
 | Justice, punishment, detention | none | no |
 | Legitimacy, unrest, rebellion | none (DEC-014 §4 only) | no |
@@ -290,7 +299,7 @@ Code today: **PARTIAL**. Survival needs drive behaviour. Mood is DORMANT, though
 | V52 rank tree of threes | none | no |
 | Faction fission (V42) | none | no |
 
-Rating: **PARTLY PLANNED** (five of thirteen covered, all SOC rows, all gated by DEC-002, section 2.7).
+Rating: **PARTLY PLANNED** (six of thirteen covered, all by SOC rows, all gated by DEC-002, section 2.7).
 
 **What exists in code.**
 
@@ -330,7 +339,7 @@ Code today: **PARTIAL** (a leader flag and title at New Game; law, crime, justic
 
 - **PROPOSED-GOV-02 Crime as intentional acts, with witnesses** (G2-1).
   - Scope: theft, assault and murder as distinct actions chosen with motive (need, grievance, greed) and risk (watchers, light); ownership never silently changes (V71); witnesses form memories and beliefs through MIND-02; an undetected crime stays unknown.
-  - Depends on: MIND-02, MIND-06, GOV-01, SIM.00.04; the theft rules need Owner approval (V71).
+  - Depends on: MIND-02, MIND-06, GOV-01, SIM.00.04; the theft rules need Owner approval (V71, OQ-07).
   - Acceptance tests: (1) fixture: a starving person with low honesty next to an unwatched owned store takes food; a crime record exists, the item's owner is unchanged and it is flagged stolen; (2) with one witness in line of sight, the witness has a memory naming the thief; with the witness behind a wall, nobody does; (3) the hauling planner never takes an owned item without creating a crime record. Mutant: the planner taking the item silently must fail test 3.
   - Tick cost: a motive check added to duty decisions for persons with a motive, about 5 decisions per tick × 1 µs; crime events are rare. Memory: 32 B per open crime record.
 
@@ -342,13 +351,13 @@ Code today: **PARTIAL** (a leader flag and title at New Game; law, crime, justic
 
 - **PROPOSED-GOV-04 Legitimacy, unrest and rebellion** (G2-2).
   - Scope: per-settlement legitimacy and unrest computed from cohort mood (MIND-03), taxes (SOC.33.01), famine, grievances and the ruler's standing; above a threshold, organised rebellion (a new faction or a seceding site) through WAR-01..04.
-  - Depends on: MIND-03, MIND-08, GOV-01, SOC.23.03, SOC.33.01.
+  - Depends on: MIND-03, MIND-08, GOV-01, SOC.23.03, SOC.33.01; whether the player's own faction can rebel against the player is the Owner's (OQ-08).
   - Acceptance tests: (1) unrest is the documented deterministic function of its inputs; (2) famine alone raises unrest by the configured amount; (3) anti-snowball fixture: a dominant faction with high taxes and famine sees a rebellion within the configured window on 3 seeds. Mutant: unrest that ignores famine must fail test 2.
   - Tick cost: once per settlement per game day: 200 ÷ 2,400 ≈ 0.1 updates per tick × 20 µs. Memory: 32 B per settlement.
 
 - **PROPOSED-GOV-05 Succession, regency, succession crises and faction fission** (G2-3, G2-5).
   - Scope: on a ruler's or office holder's death, apply the culture's succession rule (SOC.23.02) in play; minors get regents; several strong claimants with supporters (MIND-04 ties) cause a crisis that can split the faction; V42 departures found new factions with their own relations.
-  - Depends on: SOC.23.02, MIND-04, MIND-06, PROPOSED-REC-01, PROPOSED-WAR-01.
+  - Depends on: SOC.23.02, MIND-04, MIND-06, PROPOSED-REC-01, PROPOSED-WAR-01; splits of the player's faction per OQ-08.
   - Acceptance tests: (1) a leader's death produces a successor within one game day by the culture's rule; (2) a minor heir gets a regent; (3) two claimants of equal support produce a crisis event and, past its threshold, a split with persons conserved. Mutant: no successor chosen (today's behaviour) must fail test 1.
   - Tick cost: event-driven on deaths of office holders; a claimant scan over kin and officers (at most 50) costs under 1 ms per event and is rare.
 
@@ -415,7 +424,7 @@ Code today: **PARTIAL** (static relations, contact and faction aid LIVE; diploma
 | G3-4 | MAJOR | Armies at crowd LOD and off-screen battles have no row, though DEC-014 §2 names soldiers in formed armies. | WAR-04 |
 | G3-5 | MAJOR | Raids and sieges (V19) and cross-layer assault (DEC-013 §6: tunnelling up or down, floor breaching via SIM.40.01 and GP.07.02) have no row. | WAR-05 |
 | G3-6 | MAJOR | The aftermath of war (conquest, occupation, captives, refugees) has no row; SIM.50.09 names only settlement contraction. | WAR-06 |
-| G3-7 | MINOR | Race attitudes are 13 catalog pairs; `docs/design/PEOPLES.md` holds a table for the older eleven peoples; nobody holds a personal attitude to another race. | WAR-01 |
+| G3-7 | MINOR | Race attitudes are 13 catalog pairs; `docs/design/PEOPLES.md` §5 "Relations defaults" (`docs/design/PEOPLES.md:351`) covers the older eleven peoples; nobody holds a personal attitude to another race. Which peoples exist (V87's eleven or DEC-013's nine) is OQ-25. | WAR-01 |
 
 **Proposed packages.**
 
@@ -531,7 +540,7 @@ Code today: **PARTIAL** for culture (static catalog priorities, ethos, names); *
 
 - **PROPOSED-CUL-04 Languages, comprehension and naming** (G4-3, G4-6).
   - Scope: languages known per person (SRD standard and exotic languages as data), comprehension checks for speech, trade and diplomacy, learning a language by contact, and one naming rule (catalog syllables or the lexicon) replacing the hardcoded pool.
-  - Depends on: MIND-01, WG.63.05, PROPOSED-KNOW-03.
+  - Depends on: MIND-01, WG.63.05, PROPOSED-KNOW-03; which languages and which naming source are the Owner's (OQ-11). The provenance of `game/data/df_lexicon.json` must be checked before any use (section 7, M-13).
   - Acceptance tests: (1) two persons with no shared language cannot complete a trade negotiation without an interpreter; (2) a year of contact teaches a language by the configured rule; (3) no generated name comes from a hardcoded list (validator). Mutant: comprehension check that always passes must fail test 1.
   - Tick cost: one comprehension lookup per conversation event (0.1 µs); negligible. Memory: 4 B per named person (a language bitset).
 
@@ -715,7 +724,7 @@ Code today: **PARTIAL**. SRD exhaustion, starvation, thirst, exposure, dying and
   - Tick cost: named: one infection check per contact event, about 4.5 × 1 µs per tick. Crowd: 200 settlements × up to 3 active diseases stepped every 100 ticks = 6 updates × 2 µs = 12 µs per tick; route transmission once per game day per edge, about 600 edges ÷ 2,400 = 0.25 per tick. Memory: 8 B per named person, 16 B per settlement per active disease.
 
 - **PROPOSED-HEALTH-04 Poison and venom** (G6-5).
-  - Scope: the 14 SRD poisons and creature venoms as data (delivery, save, effect), applied through HEALTH-01; antitoxin; poison crafting only if the Owner allows it.
+  - Scope: the 14 SRD poisons and creature venoms as data (delivery, save, effect), applied through HEALTH-01; antitoxin; poison crafting and deliberate poisoning only if the Owner allows them (OQ-15).
   - Depends on: HEALTH-01, WG.68.07, SOC.12.01.
   - Acceptance tests: (1) a venomous bite applies the stat block's poison and save; (2) antitoxin gives advantage by the SRD rule. Mutant: a failed save that does not apply the poisoned condition must fail test 1.
   - Tick cost: event-driven; negligible.
@@ -895,13 +904,14 @@ Code today: **PARTIAL** (a thin, capped text chronicle is LIVE; the typed ledger
 | G8-5 | MAJOR | Site histories and ruins: no site becomes a ruin, and no row ties a ruin to the events that made it (SIM.50.09 and SIM.40.08 cover the physical side). | REC-04 |
 | G8-6 | MAJOR | The history-born D&D character mode named in the brief is defined in no repository document; no row plans exporting a historical person as an SRD character. The mode itself is the Owner's (OQ-18). | REC-05 |
 | G8-7 | MINOR | Legends and genealogy queries: the API has no caller and the viewer (HIST-11) is not started. | REC-02 |
+| G8-8 | MINOR | SRD resurrection (Revivify within a minute, `game/data/srd51/spells.json:14115`; Raise Dead within 10 days, `game/data/srd51/spells.json:13455`) returns a dead person to life under DEC-018, and Lane P notes it revives a retired unit ID. No row says what happens to that person's records, office, heirs, ties and property once succession and inheritance have run. The rule is the Owner's (OQ-17). | REC-01 |
 
 **Proposed packages.**
 
-- **PROPOSED-REC-01 World event log and live history clock** (G8-1, G8-2).
-  - Scope: one append-only, typed event store with stable IDs (deaths, births, pairings, crimes, battles, offices, discoveries, foundings, abandonments), each with participants, place, layer and tick; subscribes to live events and to `time:day` / `time:year` so the historical ledger stays current in play; compaction keeps all deaths, births, battles and offices and trims low-significance events per person beyond a cap; saved; the chronicle and the death ledger become views of it.
+- **PROPOSED-REC-01 World event log and live history clock** (G8-1, G8-2, G8-8).
+  - Scope: one append-only, typed event store with stable IDs (deaths, births, pairings, crimes, battles, offices, discoveries, foundings, abandonments), each with participants, place, layer and tick; subscribes to live events and to `time:day` / `time:year` so the historical ledger stays current in play; compaction keeps all deaths, births, battles and offices and trims low-significance events per person beyond a cap; saved; the chronicle and the death ledger become views of it. A revival is its own event type that reopens the person's life record without deleting the death; what it does to offices, heirs and property follows the Owner's rule (OQ-17).
   - Depends on: MIND-01 (event record), SIM.00.02, SIM.00.06, SIM.40.10, SOC.51.01.
-  - Acceptance tests: (1) a death in play appears in the log, in the person's biography and in the historical ledger; (2) the log survives save and load byte-identical; (3) compaction never drops a death, birth or battle; (4) a 100-game-year run stays under the size cap. Mutant: a live death that never reaches the ledger (today's behaviour) must fail test 1.
+  - Acceptance tests: (1) a death in play appears in the log, in the person's biography and in the historical ledger; (2) the log survives save and load byte-identical; (3) compaction never drops a death, birth or battle; (4) a 100-game-year run stays under the size cap; (5) a revival fixture keeps both the death event and the revival event, and the person's ID is the same before and after. Mutant: a live death that never reaches the ledger (today's behaviour) must fail test 1; a revival that deletes the death event must fail test 5.
   - Tick cost: significant events are rare (A-7 puts about 0.2 per tick at N = 1,000); an append costs about 1 µs. Memory: 32 B per event plus references; with a cap of 64 events per named person and all vital events kept, about 2 MiB for 1,000 named persons; crowd events are aggregated per settlement per game day (about 64 B each).
 
 - **PROPOSED-REC-02 Renown, reputation, rumour and legends** (G8-3, G8-7).
@@ -991,7 +1001,7 @@ Code today: **PARTIAL** (Command in practice LIVE; Combat autonomous only; Incar
 
 - **PROPOSED-MODE-01 Mode framework and input arbitration** (G9-1).
   - Scope: a mode is a policy on which commands the player may send and what the view shows; every player intent enters the simulation through SIM.00.03's command queue; switching rules and precedence; V125's rule that the world runs the same with no input; the WG.00.11 ID collision recorded for the coordinator.
-  - Depends on: SIM.00.03, WG.00.11, OD-16.
+  - Depends on: SIM.00.03, WG.00.11, OD-16 (OQ-22).
   - Acceptance tests: (1) in every mode, a purity lint shows no mode writes simulation state except through the queue; (2) replaying a command log reproduces the state checksum; (3) a run with no input produces the same checksum whichever mode is active. Mutant: a mode that writes a unit's position directly must fail test 1.
   - Tick cost: per command only; no per-tick cost.
 
@@ -1009,7 +1019,7 @@ Code today: **PARTIAL** (Command in practice LIVE; Combat autonomous only; Incar
 
 - **PROPOSED-MODE-04 Incarnate mode: one person, their knowledge** (G9-4).
   - Scope: control of one person while the rest of the colony stays autonomous (V125); the view shows only what that person has seen or heard (MIND-02 beliefs, DEEP-02 vision, light from DEEP-01); release returns the person to autonomy.
-  - Depends on: MODE-01, OD-16, MIND-02, DEEP-01, DEEP-02, SIM.30.04 (focus follows the person).
+  - Depends on: MODE-01, OD-16 (OQ-22), MIND-02, DEEP-01, DEEP-02, SIM.30.04 (focus follows the person).
   - Acceptance tests: (1) the incarnate view never shows a unit the person has not perceived; (2) the rest of the faction keeps working (same duty counts as a no-input run); (3) releasing control resumes autonomous duty within one decision. Mutant: a view that shows all units must fail test 1.
   - Tick cost: the person's surroundings join the L0 focus (at most 9 regions); the perception filter reuses DEEP-02 queries.
 
@@ -1019,7 +1029,7 @@ Code today: **PARTIAL** (Command in practice LIVE; Combat autonomous only; Incar
 - DEC-013 (`docs/OWNER_DECISIONS.md:187`): layers −16..+15; below the surface, Lower-1 (−8..−1) and Lower-2 (−16..−9), 16 layers and 10 of the 25 biomes; races have home layer ranges (race-to-band mapping OPEN).
 - V132 (`docs/VISION.md:126`): tieflings and dragonborn found on the deepest level, dwarves and gnomes on the next; the code does the same (`DEUS_Factions.js:149`, `DEUS_Factions.js:150`).
 - V134 / WG.90.01: a viable living Year-0 world for all nine factions.
-- DEC-011: no tint, fog filter or shading overlay for layers; any presentation of darkness is out of scope here.
+- DEC-011: no tint, fog filter or shading overlay for layers; any presentation of darkness is out of scope here, and the live underground screen tone is recorded as a defect (section 8, D-6) and an Owner question (OQ-26).
 - Design only: `docs/worldgen/DEUS_CREATURE_ECOLOGY.md:217` (cave beetles, blind fish and bats feeding on subterranean fungi) and `:219` (torchlight and mining lower a cave predator's habitat); `docs/design/VERTICAL_NATURAL_WORLD.md:416` (cave homes need torches and lamps).
 - SRD (section 2.6): bright light, dim light and darkness (`game/data/srd51/rules.json:4403`); darkvision on six of the nine races, none on human, halfling and dragonborn (`game/data/srd51/character_options.json:82`); 175 of 317 creatures have darkvision, 7 have Sunlight Sensitivity (`game/data/srd51/creatures.json:16444`); torch 1 hour (`game/data/srd51/equipment.json:4134`), hooded lantern 6 hours per pint of oil (`game/data/srd51/equipment.json:3457`); Light, Daylight, Continual Flame and Darkness spells. No SRD creature has an environment or habitat field, and "Underdark" occurs 0 times.
 
@@ -1072,7 +1082,7 @@ Code today: **PARTIAL** (cave fungus, cave herds, pools and underground homes ex
 | ID | Severity | Gap | Package |
 |---|---|---|---|
 | G10-1 | BLOCKER | Year-0 viability of the four underground-starting races is not planned: no farming, no light, no water on the deepest level in code, and nothing in the WBS checks that an underground faction can feed and water itself (WG.90.01 needs a viable living Year-0 world). | DEEP-06 |
-| G10-2 | MAJOR | No row plans a simulation light field. Darkness changes nothing in play; work stops by the surface clock. Lane P's audit lists the same gap for 26 LIGHT spells (G-LIGHT, unreviewed). | DEEP-01 |
+| G10-2 | MAJOR | No row plans a simulation light field. Darkness changes nothing in play; work stops by the surface clock. Lane P's audit lists the same gap for 26 LIGHT spells (G-LIGHT, its §4.3). | DEEP-01 |
 | G10-3 | MAJOR | No row plans vision and darkvision rules; they exist only in the disabled fog, and sight is a fixed 8 cells. Three of nine races (including dragonborn, placed on the deepest level) have no darkvision. | DEEP-02 |
 | G10-4 | MAJOR | No row plans light sources and fuel; the only light never burns out, and the torch has no item. | DEEP-03 |
 | G10-5 | MAJOR | No row plans cave flora and fungus succession: WG.68.01-.02 cover the five surface biomes; code grows fungus by floor shape alone. | DEEP-04 |
