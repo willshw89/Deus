@@ -11,14 +11,17 @@
  *   (default)       node tools/ops/run_gate.js [--root <dir>] [--gate-list <file>] [--timeout <sec>] [--log-dir <dir>]
  *                   Runs every suite in the "gate" array of tools/ops/gate_tests.json (the gate list the merge
  *                   gate reads), one after another, as `node <suite>` with no shell, cwd = the root, each with its
- *                   own timeout. Prints "GATE <suite> EXIT=<n> <ms>ms" per suite, then "RESULT: <n> passed, <m> failed".
+ *                   own timeout (default 600 s, merge_gate.js's default per test: the gate suite
+ *                   test_strata_cuts_and_caves.js alone took 217.6 s at 425b594c). Prints "GATE <suite> EXIT=<n>
+ *                   <ms>ms" per suite, then "RESULT: <n> passed, <m> failed".
  *                   --suite <path> (repeatable) runs the named suites instead of the gate list.
  *   --census        node tools/ops/run_gate.js --census --out <file> [--root <dir>] [--timeout <sec>]
  *                   [--concurrency <1-3>] [--log-dir <dir>] [--budget-sec <sec>] [--suite <path> ...]
  *                   Measures every tracked suite (git ls-files: tools/test_*.js and test_*.js in any folder under
  *                   tools/, plus the gate entries) and writes one row per suite to --out (JSON): category, the line
- *                   that decided it, exit code, duration. With --budget-sec it starts no suite after that many
- *                   seconds and writes a partial census (exit 3); running the same command again resumes it.
+ *                   that decided it, exit code, duration. Defaults: timeout 180 s, 3 at once. With --budget-sec it
+ *                   starts no suite after that many seconds and writes a partial census (exit 3); running the same
+ *                   command again resumes it.
  *   --check-lists   node tools/ops/run_gate.js --check-lists [--root <dir>] [--gate-list <file>] [--quarantine <file>]
  *                   Runs no suite. Validates gate_tests.json and quarantine.json (schema, duplicates, paths, overlap,
  *                   every tracked suite listed exactly once, NEEDS_NWJS consistency); exit 1 on any violation.
@@ -113,7 +116,7 @@ const SYSROOT = process.env.SystemRoot || process.env.SYSTEMROOT || "C:\\Windows
 const GATE_LIST = "tools/ops/gate_tests.json";
 const QUARANTINE_LIST = "tools/ops/quarantine.json";
 const SUITE_PATHSPECS = [":(glob)tools/test_*.js", ":(glob)tools/**/test_*.js"];
-const DEFAULT_TIMEOUT_SEC = 180;
+const DEFAULT_TIMEOUT_SEC = { gate: 600, census: 180 };
 const MAX_CONCURRENCY = 3;
 const KILL_WAIT_MS = 15000;
 const READ_HEAD = 512 * 1024, READ_TAIL = 64 * 1024;   // how much of a stream the classifier reads
@@ -1124,7 +1127,7 @@ function screenMode(o) {
 
 function parseArgs(argv) {
     const o = {
-        mode: "gate", root: null, gateList: null, quarantine: null, suites: [], timeoutSec: DEFAULT_TIMEOUT_SEC, concurrency: MAX_CONCURRENCY,
+        mode: "gate", root: null, gateList: null, quarantine: null, suites: [], timeoutSec: null, concurrency: MAX_CONCURRENCY,
         out: null, logDir: null, budgetSec: null, mergeFiles: [], writeQuarantine: null, base: null, runs: 3, help: false
     };
     const modes = new Set();
@@ -1169,6 +1172,7 @@ function parseArgs(argv) {
     }
     if (modes.size > 1) throw new UsageError("choose one of --census, --check-lists, --merge-census, --screen");
     o.mode = [...modes][0] || "gate";
+    if (o.timeoutSec === null) o.timeoutSec = o.mode === "census" ? DEFAULT_TIMEOUT_SEC.census : DEFAULT_TIMEOUT_SEC.gate;
     o.root = path.resolve(o.root || path.join(__dirname, "..", ".."));
     return o;
 }

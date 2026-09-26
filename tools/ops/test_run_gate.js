@@ -256,6 +256,7 @@ async function gateChecks() {
     clearMarkers();
     let r = await runRunner(["--root", FULL]);
     check("gate_all_pass_exit_0", r.code === 0 && /^RESULT: 2 passed, 0 failed$/m.test(r.out) && ran(sp("pass")) && ran(NESTED), r.text);
+    check("gate_default_timeout_600", /timeout 600 s each, one at a time$/m.test(r.out), r.out.split("\n")[0]);
     const gateLines = r.out.split(/\r?\n/).filter(l => l.startsWith("GATE "));
     check("gate_line_format", gateLines.length === 2 && gateLines.every(l => /^GATE \S+ EXIT=0 \d+ms$/.test(l)), gateLines.join(" | "));
 
@@ -335,6 +336,11 @@ async function censusChecks() {
     let logs = [];
     try { logs = fs.readdirSync(logDir); } catch (_) { /* none */ }
     check("census_log_dir_one_log_per_run_suite", logs.length === 17 - STATIC_NW.length && logs.includes("tools__test_fail.js.log"), logs.join(","));
+
+    const outDefault = outFile("defaults");
+    const rd = await runRunner(["--census", "--root", FULL, "--suite", sp("pass"), "--out", outDefault]);
+    const dd = readJson(outDefault) || {};
+    check("census_defaults_180s_3_at_once", rd.code === 0 && dd.timeoutSec === 180 && dd.concurrency === 3 && /timeout 180 s, up to 3 at once/.test(rd.out), rd.text);
 
     // Budget and resume: one at a time, the hang (first in path order) outlasts the 1 s budget, so pass never starts.
     clearMarkers();
