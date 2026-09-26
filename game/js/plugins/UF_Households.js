@@ -21,6 +21,10 @@
 (() => {
     "use strict";
     const W = () => window.UF && UF.World;
+    // A level of the world's Z range (UF.World.isLevel, WG.00.17); a World without the range authority (an older World)
+    // has the legacy levels -2..+2.
+    const LEGACY_Z_RANGE = Object.freeze({ zMin: -2, zMax: 2 });
+    const levelOk = z => { const w = W(); return w && typeof w.isLevel === "function" ? w.isLevel(z) : z >= LEGACY_Z_RANGE.zMin && z <= LEGACY_Z_RANGE.zMax; };
     const C = () => window.UF && UF.Colonists;
     const O = () => window.UF && UF.Objects;
     const Own = () => window.UF && UF.Ownership;
@@ -55,7 +59,7 @@
         const d = u && u.data, c = C() && C().state(u), home = d && d.home;
         if (!d || !d.faction || d.site === undefined || d.site === null) return null;
         const a = c || (home && home.area ? home : u), z = zOf(a);
-        if (!a.area || !Number.isInteger(z) || z < -2 || z > 2) return null;
+        if (!a.area || !Number.isInteger(z) || !levelOk(z)) return null;
         return { faction: d.faction, siteId: d.site, area: { x: a.area.x, y: a.area.y }, z };
     }
     const fits = (h, c) => !!h && !!c && !h.mergedInto && h.faction === c.faction && h.siteId === c.siteId && samePlace(h, c);

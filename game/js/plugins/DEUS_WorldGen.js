@@ -712,7 +712,7 @@
         const m = compiled();
         const st = UF.World.state;
         if (!m || !st) return null;
-        if (!Number.isInteger(z) || z < -2 || z > 2) return null;
+        if (!Number.isInteger(z) || !UF.World.isLevel(z)) return null;   // the world's Z range (WG.00.17)
         const geology = WorldGen.geologyAt(gx, gy, z);
         if (z !== 0) {
             const L = window.UF.Levels;
@@ -767,7 +767,7 @@
      */
     WorldGen.kitCentres = function(ax, ay, z = 0) {
         const st = window.UF.World && UF.World.state;
-        if (!st || !Number.isInteger(z) || z < -2 || z > 2) return [];
+        if (!st || !Number.isInteger(z) || !window.UF.World.isLevel(z)) return [];   // the world's Z range (WG.00.17)
         const F = st.factions;
         const legacy = !!st.history && !st.history.founders;
         if (!legacy && F && Array.isArray(F.list) && F.list.length) {
@@ -1751,7 +1751,7 @@
             const log2 = kitSig(WorldGen.kitLog[`${a.x},${a.y}`]);
             let log3 = null, seed3 = st.seed + 1, oreKinds3 = "";
             if (window.UF.Factions && window.UF.History) {
-                const s3 = { seed: seed3, size: st.size, areasX: st.areasX, areasY: st.areasY, startArea: { x: a.x, y: a.y }, units: {}, nextUnitId: 1, diffs: {}, objectDiffs: {} };
+                const s3 = { zRange: st.zRange, seed: seed3, size: st.size, areasX: st.areasX, areasY: st.areasY, startArea: { x: a.x, y: a.y }, units: {}, nextUnitId: 1, diffs: {}, objectDiffs: {} };
                 const saved = W.state;
                 try {
                     W.state = s3;

@@ -4,7 +4,7 @@
 
 /*:
  * @target MZ
- * @plugindesc [DEUS Minimap] Strategic overview minimap reflecting character knowledge/discovery across all 5 Z-levels (-2 to +2).
+ * @plugindesc [DEUS Minimap] Strategic overview minimap reflecting character knowledge/discovery across the Z-levels of the world (its Z range).
  * @author DEUS Project
  * @orderAfter DEUS_World
  * @orderAfter DEUS_Levels
@@ -39,7 +39,8 @@
  * KNOWLEDGE / DISCOVERY rather than omniscient raw world truth.
  *
  * Key Features:
- * - 5 Physical Z-Levels: +2, +1, Z0, -1, -2 with independent discovery layers.
+ * - The physical Z-levels of the world's Z range (UF.World, WG.00.17) with independent discovery layers; a
+ *   level's discovery and base bitmap exist once its tab is shown. The tab row shows 5 levels round the active one.
  * - Modes: Command, Combat, and Incarnate mode filters.
  * - Zero Full-World Redraw: 16x16 chunk-cached static terrain base with dynamic overlay.
  * - High-speed 60 FPS performance compatible with 4x simulation.
@@ -56,8 +57,21 @@
     const CHUNK_SIZE = 16;
     const CHUNKS_PER_ROW = 16; // 256 / 16
     const TOTAL_CHUNKS = 256;
-    const Z_LEVELS = [2, 1, 0, -1, -2];
-    const Z_COUNT = 5;
+    // The Z range comes from UF.World, the one authority (WG.00.17); a World without it (an older World, the headless
+    // test's stand-in) has the legacy levels -2..+2. The tab row shows TAB_COUNT levels round the active one, top first.
+    const LEGACY_Z_RANGE = Object.freeze({ zMin: -2, zMax: 2 });
+    const TAB_COUNT = 5;
+    function zRange() {
+        const W = window.UF && UF.World;
+        return W && typeof W.zRange === "function" ? W.zRange() : LEGACY_Z_RANGE;
+    }
+    function tabLevels() {
+        const r = zRange(), n = Math.min(TAB_COUNT, r.zMax - r.zMin + 1);
+        const top = Math.min(r.zMax, Math.max(r.zMin + n - 1, _state.activeZ + (n >> 1)));
+        const out = [];
+        for (let k = 0; k < n; k++) out.push(top - k);
+        return out;
+    }
     const OVERLAY_FRAMES = 4; // the unit/project/connector overlay is redrawn at most every 4 updates (15 Hz) unless the view changed
 
     // Categorical Information-Graphic Palette (Hex to RGBA)
@@ -101,10 +115,10 @@
         DOOR_DIM:        [100, 116, 139, 255]
     };
 
-    // State storage across all 5 Z levels
+    // State storage across the Z levels of the world
     const _state = {
         mode: "command",        // "command" | "combat" | "incarnate"
-        activeZ: 0,             // Currently inspected minimap Z level (-2 to +2)
+        activeZ: 0,             // Currently inspected minimap Z level (a level of the Z range)
         followCameraZ: true,    // True: minimap automatically matches world camera Z
         incarnatedUnitId: null, // For incarnate mode
         expanded: true,         // Panel expanded/minimized
@@ -417,7 +431,7 @@
     const Minimap = {
         get activeZ() { return _state.activeZ; },
         set activeZ(val) {
-            const z = Math.max(-2, Math.min(2, Math.round(Number(val) || 0)));
+            const r = zRange(), z = Math.max(r.zMin, Math.min(r.zMax, Math.round(Number(val) || 0)));
             if (_state.activeZ !== z) {
                 _state.activeZ = z;
                 // One base bitmap per Z is kept (WG.00.09b K2): a tab already built keeps its chunks, and cell changes on it
@@ -584,9 +598,9 @@
             bmp.drawText("[ — ]", this._panelWidth - 34, 1, 28, 20, "center");
 
             // Z-Level Selector Tabs (Row 2, y = 23 to 42)
-            const tabW = 28, tabH = 18;
-            for (let i = 0; i < Z_LEVELS.length; i++) {
-                const zVal = Z_LEVELS[i];
+            const tabW = 28, tabH = 18, tabs = tabLevels();
+            for (let i = 0; i < tabs.length; i++) {
+                const zVal = tabs[i];
                 const tx = 6 + i * (tabW + 2);
                 const ty = 23;
                 const isSelected = (Minimap.activeZ === zVal);
@@ -791,12 +805,12 @@
 
             // 2. Z-Level Selector Tabs (localY 23 to 42)
             if (TouchInput.isTriggered() && localY >= 23 && localY <= 42) {
-                const tabW = 30;
-                for (let i = 0; i < Z_LEVELS.length; i++) {
+                const tabW = 30, tabs = tabLevels();
+                for (let i = 0; i < tabs.length; i++) {
                     const tabX = 6 + i * tabW;
                     if (localX >= tabX && localX <= tabX + tabW) {
                         Minimap.followCameraZ = false;
-                        Minimap.activeZ = Z_LEVELS[i];
+                        Minimap.activeZ = tabs[i];
                         this.drawChrome();
                         return;
                     }

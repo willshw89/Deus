@@ -66,8 +66,8 @@
     const itemLevel = item => levelArea(item.area, zOf(item));
     const validArea = area => {
         const W = World(), z = zOf(area);
-        return !!(W && W.state && area && Number.isInteger(z) && z >= -2 && z <= 2 &&
-            (z === 0 || (typeof W.viewLevel === "function" && typeof W.levelOfMapId === "function")) && W.inWorld(area.x, area.y, z));
+        return !!(W && W.state && area && Number.isInteger(z) &&
+            (z === 0 || (typeof W.viewLevel === "function" && typeof W.levelOfMapId === "function")) && W.inWorld(area.x, area.y, z));   // inWorld: the world's Z range (WG.00.17)
     };
     const sameArea = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y;
     const currentArea = () => {

@@ -65,8 +65,8 @@
     const levelArea = (area, z = zOf(area)) => ({ x: area.x, y: area.y, z });
     const validArea = area => {
         const W = World(), z = zOf(area);
-        return !!(W && W.state && area && Number.isInteger(z) && z >= -2 && z <= 2 &&
-            (z === 0 || (typeof W.viewLevel === "function" && typeof W.levelOfMapId === "function")) && W.inWorld(area.x, area.y, z));
+        return !!(W && W.state && area && Number.isInteger(z) &&
+            (z === 0 || (typeof W.viewLevel === "function" && typeof W.levelOfMapId === "function")) && W.inWorld(area.x, area.y, z));   // inWorld: the world's Z range (WG.00.17)
     };
     const onScreen = area => {
         const W = World(), view = W && (typeof W.viewLevel === "function" ? W.viewLevel() : W.currentArea());

@@ -21,6 +21,8 @@
  *    - Diurnal variation: night drop (-8°C to -12°C at 03:00), peak (+5°C to +8°C at 14:00).
  *    - Elevation / Z-level: z=0 surface, z=1 hills (-4°C), z=2 peaks (-10°C),
  *      z=-1 upper cavern (stable insulated 13°C), z=-2 deep cavern (16°C, hotter near magma).
+ *      WG.00.17: the layers beyond (below -2, above +2) take the nearest band's rule
+ *      (deep cavern, peaks) until the biome bands of DEC-013 are made (WG.62.02).
  *    - Shelter: enclosed rooms (UF.Floors.roomAt) dampen outdoor extremes by 75% toward 20°C.
  *    - Heat sources: active campfires, hearths, furnaces, and forges radiate heat up to radius 3.
  *      Burning cells (UF.Fire.isBurning) radiate intense heat up to radius 3.
@@ -179,7 +181,7 @@
         const a = { x: ax | 0, y: ay | 0 };
         const zLevel = Number.isInteger(z) ? z : (area && area.z !== undefined ? area.z : (lvl ? lvl.z : 0));
 
-        const cacheKey = ((zLevel + 2) << 20) | ((x & 0x3ff) << 10) | (y & 0x3ff);
+        const cacheKey = zLevel * 1048576 + (((x & 0x3ff) << 10) | (y & 0x3ff));   // one key per level and cell, for any level of the Z range (WG.00.17)
         const cached = _tempCache.get(cacheKey);
         if (cached && (frameCount - cached.frame < 120)) {
             return cached.temp;
@@ -190,8 +192,8 @@
             // Upper cavern: stable 13°C cool subterranean air
             return 13.0;
         }
-        if (zLevel === -2) {
-            // Deep cavern: base 16°C, but near magma/lava heats up significantly
+        if (zLevel <= -2) {
+            // Deep cavern (and every layer below it, WG.00.17): base 16°C, but near magma/lava heats up significantly
             let baseUnderground = 16.0;
             // Check for heat sources in radius
             baseUnderground += heatSourceRadiance(a, x, y, zLevel);
@@ -224,7 +226,7 @@
 
         // Elevation modifier on surface / above ground
         if (zLevel === 1) baseTemp -= 4.0; // High ground / hills
-        else if (zLevel === 2) baseTemp -= 10.0; // Mountain peaks / cold alpine
+        else if (zLevel >= 2) baseTemp -= 10.0; // Mountain peaks / cold alpine (and every layer above them, WG.00.17)
 
         // Diurnal (Day/Night) cycle
         const DN = DayNight();

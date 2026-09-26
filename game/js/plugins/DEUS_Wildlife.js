@@ -1730,7 +1730,7 @@
                 t.check("world_ready", false, "no world state");
                 return;
             }
-            const synthetic = seed => ({ seed, size: st.size, areasX: st.areasX, areasY: st.areasY, startArea: { x: st.startArea.x, y: st.startArea.y }, units: {}, nextUnitId: 1, diffs: {}, objectDiffs: {} });
+            const synthetic = seed => ({ zRange: st.zRange, seed, size: st.size, areasX: st.areasX, areasY: st.areasY, startArea: { x: st.startArea.x, y: st.startArea.y }, units: {}, nextUnitId: 1, diffs: {}, objectDiffs: {} });
             const K = herdScale();
             const rows = [];
             const t0 = now();

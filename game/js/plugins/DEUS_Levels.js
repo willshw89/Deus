@@ -3278,7 +3278,7 @@
         };
         if (!st || !st.levels) return refuse("no levels in this world");
         if (!schemaKnown(st)) return refuse(`this save's strata schema ${JSON.stringify(st.strataSchemaVersion)} is unknown: no changes are written`);
-        if (!isLevel(r.z) || r.z < -2 || r.z > 2 || !W.inWorld(r.ax, r.ay, r.z) || r.x < 0 || r.y < 0 || r.x >= st.size || r.y >= st.size) return refuse(`level ${ref && ref.z} or cell (${r.x},${r.y}) doesn't exist`);
+        if (!isLevel(r.z) || !W.inWorld(r.ax, r.ay, r.z) || r.x < 0 || r.y < 0 || r.x >= st.size || r.y >= st.size) return refuse(`level ${ref && ref.z} or cell (${r.x},${r.y}) doesn't exist`);
         if (!Number.isInteger(code) || !(code >= 1 && code <= 7)) return refuse(`unknown shape ${JSON.stringify(shape)}`);
         if (r.z === 0 && levelGen(st, 0) < 4) return refuse("the ground's shapes change with stairs and holes (vertical slice 2)");
         const from = packedAt(r.ax, r.ay, r.x, r.y, r.z);
@@ -5430,7 +5430,7 @@
             }) && W.levels().every(z => !!baseline(z));
             t.check("complete_at_start", allAllocated && stats.initializedBeforeCreated === st.seed &&
                 JSON.stringify(st.levels) === before && JSON.stringify(st.view) === viewBefore,
-                `all five ${size}x${size} baselines allocated; early initialization seed ${stats.initializedBeforeCreated}/${st.seed}; repeated initialization preserves saved edits/checksums/view ${JSON.stringify(st.levels) === before && JSON.stringify(st.view) === viewBefore}`);
+                `the core's ${size}x${size} baselines allocated with their checksums, every level of the range made (${W.levels().length}); early initialization seed ${stats.initializedBeforeCreated}/${st.seed}; repeated initialization preserves saved edits/checksums/view ${JSON.stringify(st.levels) === before && JSON.stringify(st.view) === viewBefore}`);
         }
 
         //---------------------------------------------------------------- fixtures for the view checks
@@ -5979,9 +5979,9 @@
         Levels.hasOpaqueOverburden = over;
         const frames = Graphics.frameCount - frames0, builds = stats.gridBuilds - builds0;
         const totReads = samples.reduce((s, x) => s + x.reads, 0), totDerives = samples.reduce((s, x) => s + x.derives, 0), totOver = samples.reduce((s, x) => s + x.over, 0);
-        // Cost per call here, on cells round the view on all five levels (warmed up first; the ref form is what most callers use).
+        // Cost per call here, on cells round the view on the five core levels (warmed up first; the ref form is what most callers use).
         const pts = [];
-        for (let k = 0; k < 4096; k++) pts.push({ x: Math.max(0, Math.min(size - 1, $gamePlayer.x + ((k * 37) % 65) - 32)), y: Math.max(0, Math.min(size - 1, $gamePlayer.y + ((k * 61) % 49) - 24)), z: (k % 5) - 2 });
+        for (let k = 0; k < 4096; k++) pts.push({ x: Math.max(0, Math.min(size - 1, $gamePlayer.x + ((k * 37) % 65) - 32)), y: Math.max(0, Math.min(size - 1, $gamePlayer.y + ((k * 61) % 49) - 24)), z: CORE_LEVELS[k % CORE_LEVELS.length] });
         const refs = pts.map(p => ({ area, x: p.x, y: p.y, z: p.z }));
         const bench = fn => {
             let acc = 0;
@@ -6003,7 +6003,7 @@
             `work the strata add a frame (derivations + overburden queries): mean ${addedMs.toFixed(4)} ms (budget ${budget} ms); one shape read ${cRead.ns.toFixed(0)} ns (bound ${READ_NS} ns). ` +
             `${frames} frames of normal play on level ${v.z} (${units.length} units in the area): a frame ${(totReads / Math.max(1, frames)).toFixed(1)} shape reads, ${(totDerives / Math.max(1, frames)).toFixed(1)} shape derivations (${builds} whole-level grid builds in the window), ${(totOver / Math.max(1, frames)).toFixed(2)} overburden queries ` +
             `(most in one sample: ${Math.max(...samples.map(s => s.reads))} / ${Math.max(...samples.map(s => s.derives))} / ${Math.max(...samples.map(s => s.over))}); cost here ${cRead.ns.toFixed(0)} ns per shapeCodeAt(ref), ${cDerive.ns.toFixed(0)} ns per derivation, ${cOver.ns.toFixed(0)} ns per hasOpaqueOverburden(ref) ` +
-            `(200,000 calls each on ${pts.length} cells round the view, all five levels); all adapter time a frame, reads included: mean ${meanMs.toFixed(4)} ms, 95th percentile ${p95.toFixed(4)} ms, worst sample ${worst.toFixed(4)} ms`);
+            `(200,000 calls each on ${pts.length} cells round the view, the five core levels); all adapter time a frame, reads included: mean ${meanMs.toFixed(4)} ms, 95th percentile ${p95.toFixed(4)} ms, worst sample ${worst.toFixed(4)} ms`);
 
         //---------------------------------------------------------------- dig_tunnel, tunnel_restored
         if (window.$colonyManager) $colonyManager.cameraFollowUnit = null;

@@ -28,7 +28,8 @@
  *      60 FPS at 4x simulation speed.
  *
  * 3. 3D Elevation Flow:
- *    - Operates across 5 Z-levels: [-2, -1, 0, 1, 2].
+ *    - Operates across the levels of the world's Z range (UF.World, WG.00.17;
+ *      -16..+15 for new worlds, -2..+2 for a save made before it).
  *    - Priority 1: Vertical gravity downward transfer into Z - 1.
  *    - Priority 2: Lateral equalization across orthogonal horizontal neighbors.
  *    - Strict conservation: Zero liquid volume duplication or deletion.
@@ -36,6 +37,9 @@
  * 4. Sparse Persistence:
  *    - Only non-zero depth cells are saved.
  *    - Dynamic state seamlessly resumes upon loading.
+ *    - Sparse memory (WG.00.17): a level's grid and flood cache are made on
+ *      the first write of fluid to it; the dirty flags are the set of queued
+ *      cells. A level without fluid costs nothing.
  */
 
 var Imported = Imported || {};
@@ -53,9 +57,14 @@ var UF = UF || {};
     const TYPE_LAVA = 2;
 
     const DEFAULT_BUDGET = 512;
-    const Z_MIN = -2;
-    const Z_MAX = 2;
-    const Z_LEVELS = 5; // -2, -1, 0, 1, 2
+    // The Z range comes from UF.World, the one authority (WG.00.17, docs/systems/DEUS_ZRange.md). Loaded without it (a
+    // node test of this file alone), the legacy range: the one a World without a range has.
+    const LEGACY_Z_RANGE = Object.freeze({ zMin: -2, zMax: 2 });
+    function zRange() {
+        const U = typeof window !== "undefined" ? window.UF : undefined, W = U && U.World;
+        return W && typeof W.zRange === "function" ? W.zRange() : LEGACY_Z_RANGE;
+    }
+    const inRange = z => { const r = zRange(); return z >= r.zMin && z <= r.zMax; };
 
     // Strata reconciliation constants (matching DEUS_Levels.js)
     const FLUID_TO_STRATA = Object.freeze([0, 1, 1, 2, 3, 4, 4, 5]);
@@ -163,67 +172,80 @@ var UF = UF || {};
         return 256;
     }
 
-    // Allocate or retrieve area fluid data
+    // Allocate or retrieve area fluid data. Sparse (WG.00.17): no level's grid exists until fluid is written to it
+    // (gridFor); the queued cells' flags are a Set. zMin: the origin of this area's queued cell ids.
     function getAreaData(ax, ay) {
         const key = areaKey(ax, ay);
         let data = areas.get(key);
         if (!data) {
             const size = getMapSize();
             const n = size * size;
-            const totalCells = Z_LEVELS * n;
             data = {
                 ax: ax | 0,
                 ay: ay | 0,
                 size: size,
                 n: n,
-                grids: new Map(),       // z -> Uint8Array(n)
-                floodGrids: new Map(),  // z -> Uint8Array(n) (legacy visual cache: 1=water, 2=lava)
-                queue: [],              // cell indices: (zIdx * n + idx)
+                zMin: zRange().zMin,
+                grids: new Map(),       // z -> Uint8Array(n), made on the first write of fluid to level z
+                floodGrids: new Map(),  // z -> Uint8Array(n) (legacy visual cache: 1=water, 2=lava), made with its grid
+                queue: [],              // cell ids: ((z - zMin) * n + idx)
                 head: 0,
-                inQueue: new Uint8Array(totalCells),
+                inQueue: new Set(),     // the cell ids in the queue
                 revision: 1
             };
-            // Pre-allocate 5 Z-levels
-            for (let z = Z_MIN; z <= Z_MAX; z++) {
-                data.grids.set(z, new Uint8Array(n));
-                data.floodGrids.set(z, new Uint8Array(n));
-            }
             areas.set(key, data);
         }
         return data;
     }
+    // The grid of level z of an area, made (with its flood cache) when absent.
+    function gridFor(data, z) {
+        let g = data.grids.get(z);
+        if (!g) {
+            g = new Uint8Array(data.n);
+            data.grids.set(z, g);
+            data.floodGrids.set(z, new Uint8Array(data.n));
+        }
+        return g;
+    }
+    // A read-only grid of zeros per size, for a level of the range that has no fluid (getFloodGrid's answer: shared, never written).
+    const zeroGrids = new Map();
+    function zeroGrid(n) {
+        let g = zeroGrids.get(n);
+        if (!g) { g = new Uint8Array(n); zeroGrids.set(n, g); }
+        return g;
+    }
 
-    function cellIdOf(size, x, y, z) {
-        const zIdx = (z - Z_MIN) | 0;
+    function cellIdOf(data, x, y, z) {
+        const size = data.size, zIdx = (z - data.zMin) | 0;
         return zIdx * (size * size) + ((y | 0) * size + (x | 0));
     }
 
     let coordX = 0, coordY = 0, coordZ = 0;
-    function decodeCellId(size, cellId) {
-        const n = size * size;
+    function decodeCellId(data, cellId) {
+        const size = data.size, n = size * size;
         const zIdx = Math.floor(cellId / n);
-        coordZ = zIdx + Z_MIN;
+        coordZ = zIdx + data.zMin;
         const rem = cellId - zIdx * n;
         coordX = rem % size;
         coordY = Math.floor(rem / size);
     }
 
-    function coordsOf(size, cellId) {
-        decodeCellId(size, cellId);
+    function coordsOf(data, cellId) {
+        decodeCellId(data, cellId);
         return { x: coordX, y: coordY, z: coordZ };
     }
 
     // --- Enqueueing & Wakeup ---
     function enqueueCell(ax, ay, x, y, z) {
-        if (z < Z_MIN || z > Z_MAX) return;
+        if (!inRange(z)) return;
         const data = getAreaData(ax, ay);
         const size = data.size;
         if (x < 0 || y < 0 || x >= size || y >= size) return;
 
-        const cellId = cellIdOf(size, x, y, z);
-        if (data.inQueue[cellId] === 1) return; // Already dirty and queued
+        const cellId = cellIdOf(data, x, y, z);
+        if (data.inQueue.has(cellId)) return; // Already dirty and queued
 
-        data.inQueue[cellId] = 1;
+        data.inQueue.add(cellId);
         data.queue.push(cellId);
     }
 
@@ -288,7 +310,7 @@ var UF = UF || {};
 
     function canDrainDown(ax, ay, x, y, z) {
         if (config._mutantNoGravity) return false;
-        if (z <= Z_MIN) return false; // Bottom of the world (-2)
+        if (z <= zRange().zMin) return false; // The bottom of the world (its lowest level)
 
         // Object barrier at destination
         if (isObjectBarrier(ax, ay, x, y, z - 1)) return false;
@@ -375,10 +397,10 @@ var UF = UF || {};
 
         while (data.head < limit) {
             const cellId = queue[data.head++];
-            data.inQueue[cellId] = 0;
+            data.inQueue.delete(cellId);
             processed++;
 
-            decodeCellId(size, cellId);
+            decodeCellId(data, cellId);
             const x = coordX, y = coordY, z = coordZ;
             const gridZ = data.grids.get(z);
             if (!gridZ) continue;
@@ -397,7 +419,7 @@ var UF = UF || {};
             // -----------------------------------------------------------------
             if (canDrainDown(ax, ay, x, y, z)) {
                 const belowZ = z - 1;
-                const gridBelow = data.grids.get(belowZ);
+                const gridBelow = gridFor(data, belowZ);
                 if (gridBelow) {
                     const belowVal = gridBelow[idx];
                     let belowDepth = getDepth(belowVal);
@@ -516,7 +538,7 @@ var UF = UF || {};
 
         fluidCapacityAt(a, b, c, d, e) {
             parseCoords(a, b, c, d, e);
-            if (qZ < Z_MIN || qZ > Z_MAX) return 0;
+            if (!inRange(qZ)) return 0;
 
             const L = window.UF && UF.Levels;
             if (L && typeof L.getStrataFluidPassage === "function") {
@@ -600,7 +622,7 @@ var UF = UF || {};
                 };
             }
 
-            if (coords.z < Z_MIN || coords.z > Z_MAX) return 0;
+            if (!inRange(coords.z)) return 0;
             const data = getAreaData(coords.ax, coords.ay);
             const size = data.size;
             if (coords.x < 0 || coords.y < 0 || coords.x >= size || coords.y >= size) return 0;
@@ -632,7 +654,7 @@ var UF = UF || {};
                 };
             }
 
-            if (coords.z < Z_MIN || coords.z > Z_MAX) return null;
+            if (!inRange(coords.z)) return null;
             const data = getAreaData(coords.ax, coords.ay);
             const size = data.size;
             if (coords.x < 0 || coords.y < 0 || coords.x >= size || coords.y >= size) return null;
@@ -659,15 +681,16 @@ var UF = UF || {};
 
             const data = getAreaData(ax, ay);
             const size = data.size;
-            if (x < 0 || y < 0 || x >= size || y >= size || z < Z_MIN || z > Z_MAX) return;
+            if (x < 0 || y < 0 || x >= size || y >= size || !inRange(z)) return;
 
-            const gridZ = data.grids.get(z | 0);
-            if (!gridZ) return;
-
+            // Clearing a cell of a level that has no fluid writes nothing (its grid isn't made for zeros, WG.00.17).
+            const gridZ = dClamped > 0 ? gridFor(data, z | 0) : data.grids.get(z | 0);
             const idx = (y | 0) * size + (x | 0);
-            const packed = dClamped > 0 ? packVal(tCode, dClamped) : 0;
-            gridZ[idx] = packed;
-            data.floodGrids.get(z | 0)[idx] = dClamped > 0 ? tCode : 0;
+            if (gridZ) {
+                const packed = dClamped > 0 ? packVal(tCode, dClamped) : 0;
+                gridZ[idx] = packed;
+                data.floodGrids.get(z | 0)[idx] = dClamped > 0 ? tCode : 0;
+            }
             data.revision++;
 
             wakeCellAndNeighbors(ax, ay, x, y, z);
@@ -720,7 +743,8 @@ var UF = UF || {};
         getFloodGrid(area, z) {
             const ax = area ? (area.x | 0) : 0, ay = area ? (area.y | 0) : 0;
             const data = getAreaData(ax, ay);
-            return data.floodGrids.get(z | 0) || null;
+            if (!inRange(z | 0)) return null;
+            return data.floodGrids.get(z | 0) || zeroGrid(data.n);   // a level without fluid: zeros (shared, read only)
         },
 
         step(area, budget) {
@@ -769,9 +793,8 @@ var UF = UF || {};
             if (ax !== undefined && ay !== undefined) {
                 const data = getAreaData(ax, ay);
                 activeQueueLen = Math.max(0, data.queue.length - data.head);
-                for (let z = Z_MIN; z <= Z_MAX; z++) {
-                    const g = data.grids.get(z);
-                    if (g) {
+                for (const g of data.grids.values()) {
+                    {
                         for (let i = 0; i < g.length; i++) {
                             const val = g[i];
                             const d = getDepth(val);
@@ -784,9 +807,8 @@ var UF = UF || {};
             } else {
                 for (const data of areas.values()) {
                     activeQueueLen += Math.max(0, data.queue.length - data.head);
-                    for (let z = Z_MIN; z <= Z_MAX; z++) {
-                        const g = data.grids.get(z);
-                        if (g) {
+                    for (const g of data.grids.values()) {
+                        {
                             for (let i = 0; i < g.length; i++) {
                                 const val = g[i];
                                 const d = getDepth(val);
@@ -799,7 +821,11 @@ var UF = UF || {};
                 }
             }
 
+            let gridsAllocated = 0, bytes = 0;
+            for (const data of areas.values()) { gridsAllocated += data.grids.size; bytes += data.grids.size * 2 * data.n + data.inQueue.size * 8; }
             return {
+                gridsAllocated,         // level grids made (each with its flood cache): only levels that had fluid (WG.00.17)
+                bytes,                  // their bytes, and 8 B per queued flag (an estimate of the Set's data)
                 areasCount: areas.size,
                 activeQueueLength: activeQueueLen,
                 cellsProcessedTotal: diag.cellsProcessedTotal,
@@ -822,7 +848,7 @@ var UF = UF || {};
             const records = [];
             for (const [key, data] of areas.entries()) {
                 const ax = data.ax, ay = data.ay, size = data.size;
-                for (let z = Z_MIN; z <= Z_MAX; z++) {
+                for (const z of Array.from(data.grids.keys()).sort((p, q) => p - q)) {   // lowest level first, as before WG.00.17
                     const g = data.grids.get(z);
                     if (!g) continue;
                     for (let i = 0; i < g.length; i++) {
@@ -852,8 +878,8 @@ var UF = UF || {};
                 const [ax, ay, z, x, y, t, d] = records[i];
                 const data = getAreaData(ax, ay);
                 const size = data.size;
-                if (z >= Z_MIN && z <= Z_MAX && x >= 0 && y >= 0 && x < size && y < size) {
-                    const gridZ = data.grids.get(z);
+                if (inRange(z) && x >= 0 && y >= 0 && x < size && y < size) {
+                    const gridZ = gridFor(data, z);
                     if (gridZ) {
                         const idx = y * size + x;
                         gridZ[idx] = packVal(t, d);
@@ -871,7 +897,7 @@ var UF = UF || {};
     };
 
     function reconcileCellWithStrata(ax, ay, x, y, z) {
-        if (z < Z_MIN || z > Z_MAX) return;
+        if (!inRange(z)) return;
         const data = getAreaData(ax, ay);
         const size = data.size;
         if (x < 0 || y < 0 || x >= size || y >= size) return;
@@ -895,7 +921,7 @@ var UF = UF || {};
 
             // Displace excess fluid into open neighbor or cell above to preserve mass conservation
             if (excess > 0) {
-                if (z < Z_MAX) {
+                if (z < zRange().zMax) {
                     const aboveCap = Fluid.fluidCapacityAt(ax, ay, x, y, z + 1);
                     const aboveDepth = Fluid.depthAt(ax, ay, x, y, z + 1);
                     const spaceAbove = aboveCap - aboveDepth;

@@ -3688,7 +3688,7 @@
     function registerChecks() {
         // Words from the reference games and product-identity creatures that must never reach the player (AGENTS.md).
         const BANNED = /\b(avatar|britannia|guardian|lord british|iolo|dupre|shamino|fellowship|moongate|urist|armok|strange mood|fey mood|dwarf fortress|ultima|beholder|mind flayer|illithid|displacer beast|githyanki)\b/i;
-        const syntheticState = (st, seed) => ({ seed, size: st.size, areasX: st.areasX, areasY: st.areasY, startArea: { x: st.startArea.x, y: st.startArea.y }, levels: st.levels, units: {}, nextUnitId: 1, diffs: {}, objectDiffs: {} });
+        const syntheticState = (st, seed) => ({ zRange: st.zRange, seed, size: st.size, areasX: st.areasX, areasY: st.areasY, startArea: { x: st.startArea.x, y: st.startArea.y }, levels: st.levels, units: {}, nextUnitId: 1, diffs: {}, objectDiffs: {} });
         const regenerate = (st, seed, opts) => {
             const s2 = syntheticState(st, seed);
             UF.Factions.generate(s2);
@@ -4057,7 +4057,7 @@
 
             // nothing_built: no camp has pieces, and a pristine build of every area with a camp holds no built object
             // (tags building or ruin) anywhere.
-            const withPieces = [-2, -1, 0, 1, 2].flatMap(z => History.sitesIn(st.startArea.x, st.startArea.y, z)).filter(s => s.pieces.length);
+            const withPieces = W.levels().flatMap(z => History.sitesIn(st.startArea.x, st.startArea.y, z)).filter(s => s.pieces.length);   // every level of the Z range (WG.00.17)
             let built = 0, firstBuilt = "";
             for (const [key, map] of areaBuilds) {
                 for (let i = 0; i < map.ufObjects.length; i++) {

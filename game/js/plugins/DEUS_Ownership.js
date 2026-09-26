@@ -76,8 +76,8 @@
     const supported = ref => {
         if (!ref) return false;
         const z = zOf(ref), W = World();
-        return Number.isInteger(z) && z >= -2 && z <= 2 && (z === 0 || !!(W &&
-            typeof W.viewLevel === "function" && typeof W.levelKey === "function" && typeof W.levelOfMapId === "function"));
+        return Number.isInteger(z) && (z === 0 || !!(W &&
+            typeof W.viewLevel === "function" && typeof W.levelKey === "function" && typeof W.levelOfMapId === "function" && typeof W.isLevel === "function" && W.isLevel(z)));   // the world's Z range (WG.00.17)
     };
     const sameArea = (a, b) => !!a && !!b && areaKey(a) === areaKey(b);
     const cellRecord = ref => {

@@ -28,6 +28,10 @@
     const own = (o, key) => Object.prototype.hasOwnProperty.call(o, key);
     const integer = n => Number.isSafeInteger(n);
     const probability = n => typeof n === "number" && Number.isFinite(n) && n >= 0 && n <= 1;
+    // The levels a site may span: the live world's Z range (UF.World.zRange, WG.00.17); a World without the range authority
+    // has the legacy levels -2..+2.
+    const LEGACY_Z_RANGE = Object.freeze({ zMin: -2, zMax: 2 });
+    const worldZRange = () => (typeof UF.World.zRange === "function" ? UF.World.zRange() : LEGACY_Z_RANGE);
     function jsonSafe(value, path = "state", seen = new Set()) {
         if (value === null || typeof value === "string" || typeof value === "boolean") return;
         if (typeof value === "number") { check(Number.isFinite(value), `${path} must be finite`); return; }
@@ -390,10 +394,11 @@
         namesValid(state.config.names); profilesValid(state.config.profiles, Object.values(state.factions).map(f => f.species));
         check(["sites", "people", "dynasties", "rulers", "partnerships", "events"].every(k => Array.isArray(state[k])), "registry arrays required");
         const residents = new Array(state.sites.length).fill(0), paired = new Set(), sourceSites = new Set(), intervals = new Map(), births = new Map();
+        const zr = worldZRange();
         for (const [i, s] of state.sites.entries()) {
             const d = state.dimensions;
             check(s.id === i && own(state.factions, s.factionId) && s.area && integer(s.area.x) && integer(s.area.y) && s.area.x >= 0 && s.area.x < d.areasX && s.area.y >= 0 && s.area.y < d.areasY && integer(s.x) && integer(s.y) && s.x >= 0 && s.x < d.size && s.y >= 0 && s.y < d.size, "invalid site coordinate/ID");
-            check(integer(s.z) && Array.isArray(s.zRange) && s.zRange.length === 2 && s.zRange.every(z => integer(z) && z >= -2 && z <= 2) && s.zRange[0] <= s.z && s.z <= s.zRange[1], "invalid site z/zRange");
+            check(integer(s.z) && Array.isArray(s.zRange) && s.zRange.length === 2 && s.zRange.every(z => integer(z) && z >= zr.zMin && z <= zr.zMax) && s.zRange[0] <= s.z && s.z <= s.zRange[1], "invalid site z/zRange");
             check(integer(s.sourceSiteId) && !sourceSites.has(s.sourceSiteId) && s.foundedYear === state.startYear && typeof s.name === "string" && s.name.length && typeof s.kind === "string" && s.isRuined === false, "invalid imported site metadata"); sourceSites.add(s.sourceSiteId);
             check(integer(s.population) && s.population >= 0 && s.peakPopulation >= s.population && (s.abandonedYear === null || (integer(s.abandonedYear) && s.abandonedYear <= state.currentYear && s.population === 0)), "invalid site population/abandonment");
             check(s.historicalCapacity >= ABSOLUTE_MIN_CAPACITY && s.historicalCapacity <= ABSOLUTE_MAX_CAPACITY, "historicalCapacity outside absolute envelope [60, 350]");

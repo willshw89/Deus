@@ -129,8 +129,9 @@
     const Space = () => (window.UF && UF.Space) || null;
     const zOf = r => (Space() ? Space().zOf(r) : (r && r.z !== undefined ? r.z : (r && r.area && r.area.z !== undefined ? r.area.z : 0)));
     const levelArea = r => { const a = r && (r.area || r); return a ? { x: a.x, y: a.y, z: zOf(r) } : null; };
-    const levelSupported = z => Number.isInteger(z) && z >= -2 && z <= 2 &&
-        (z === 0 || !!(World() && World().viewLevel && World().levelOfMapId));
+    // A level of the world's Z range (UF.World.isLevel, WG.00.17); only the ground without the levels API.
+    const levelSupported = z => Number.isInteger(z) &&
+        (z === 0 || !!(World() && World().viewLevel && World().levelOfMapId && World().isLevel && World().isLevel(z)));
     const sameLevel = (a, b) => !!a && !!b && (Space() ? Space().sameArea(a.area || a, b.area || b) : sameArea(a.area || a, b.area || b)) &&
         levelSupported(zOf(a)) && zOf(a) === zOf(b);
     const targetFor = (u, target) => {

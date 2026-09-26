@@ -61,7 +61,7 @@
     ];
 
     const lerp = (a, b, t) => a + (b - a) * t;
-    const underground = z => z === -1 || z === -2;
+    const underground = z => z < 0;   // every level below the ground (WG.00.17: the Z range's, not only -1 and -2)
 
     const DayNight = {
         /** The displayed world level, or null outside the world. Legacy World maps are Ground. */

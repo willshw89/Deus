@@ -89,8 +89,8 @@
     // Capability comes from the documented World seam, never function arity.
     const acceptsArea = a => {
         const W = World(), z = zOf(a);
-        return !!a && !!W && Number.isInteger(z) && z >= -2 && z <= 2 &&
-            (z === 0 || (hasLevels(W) && W.isLevel(z))) && W.inWorld(a.x, a.y, z);
+        return !!a && !!W && Number.isInteger(z) &&
+            (z === 0 || (hasLevels(W) && W.isLevel(z))) && W.inWorld(a.x, a.y, z);   // the world's Z range (WG.00.17)
     };
     const viewArea = () => { const W = World(); const a = W ? (hasLevels(W) ? W.viewLevel() : W.currentArea()) : null; return acceptsArea(a) ? a : null; };
     const sameArea = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y && zOf(a) === zOf(b);
@@ -251,8 +251,8 @@
         if (p) return p;
         const m = /^(-?\d+),(-?\d+)(?:,(-?\d+))?:(-?\d+),(-?\d+)$/.exec(key);
         if (!m) return null;
-        const z = m[3] === undefined ? 0 : Number(m[3]);
-        if (z < -2 || z > 2) return null;
+        const z = m[3] === undefined ? 0 : Number(m[3]), W = World();
+        if (z !== 0 && !(W && typeof W.isLevel === "function" && W.isLevel(z))) return null;   // outside the world's Z range (WG.00.17)
         p = { area: copyArea({ x: Number(m[1]), y: Number(m[2]), z }), x: Number(m[4]), y: Number(m[5]), z };
         if (parsedKeys.size > 50000) parsedKeys.clear();
         parsedKeys.set(key, p);

@@ -37,7 +37,7 @@
  * chop, pick, quarry, mine, haul, fetch, build, craft, equip, hunt, drink,
  * eat, sleep, talk. Nothing here is random.
  *
- * Levels (VISION V80): job.target and job.stand carry z (-2..+2; missing =
+ * Levels (VISION V80): job.target and job.stand carry z (a level of the world Z range; missing =
  * the ground; a target given without an area takes the level on screen). A
  * unit takes open jobs on its own level only until units can walk between
  * levels (vertical slice 2).
@@ -82,7 +82,7 @@
     const sameLevel = (a, b) => !!a && !!b && sameArea(a.area, b.area) && refZ(a) === refZ(b);
     const validLevel = ref => {
         const z = zOf(ref), W = World();
-        return Number.isInteger(z) && z >= -2 && z <= 2 && (z === 0 || !!(W && typeof W.isLevel === "function" && W.isLevel(z)));
+        return Number.isInteger(z) && (z === 0 || !!(W && typeof W.isLevel === "function" && W.isLevel(z)));   // the world's Z range (WG.00.17)
     };
     // Is this area's level the one on screen?
     const onScreen = area => {

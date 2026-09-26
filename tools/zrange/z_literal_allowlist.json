@@ -1,0 +1,659 @@
+{
+ "about": "WG.00.17 lane AA: every line of the 22 plugins that tools/zrange/scan_z_literals.js reports, with the reason it is not a Z-range literal to derive from UF.World (or is the authority's own data). A literal put back anywhere else, or a new one, is not in this list and fails single_authority. Classes: authority, fallback, doc, genCore, lava, pools, fixture, depthFixture, depthReach, content, bands, notZ, groundKey, provoke",
+ "entries": [
+  {
+   "file": "DEUS_World.js",
+   "match": "keeps -2..+2; docs/systems/DEUS_ZRange.md",
+   "class": "doc",
+   "reason": "doc-text: names the legacy range (-2..+2) that saves made before WG.00.17 keep and that every generator version fills; not a bound in code"
+  },
+  {
+   "file": "DEUS_World.js",
+   "match": "default: Object.freeze({ zMin: -16, zMax: 15 })",
+   "class": "authority",
+   "reason": "authority-data: the named Z ranges held as data in the one authority (DEUS_World Z_RANGES; DEC-013 default -16..+15, test -4..+4, legacy -2..+2)"
+  },
+  {
+   "file": "DEUS_World.js",
+   "match": "test: Object.freeze({ zMin: -4, zMax: 4 })",
+   "class": "authority",
+   "reason": "authority-data: the named Z ranges held as data in the one authority (DEUS_World Z_RANGES; DEC-013 default -16..+15, test -4..+4, legacy -2..+2)"
+  },
+  {
+   "file": "DEUS_World.js",
+   "match": "legacy: Object.freeze({ zMin: -2, zMax: 2 })",
+   "class": "authority",
+   "reason": "authority-data: the named Z ranges held as data in the one authority (DEUS_World Z_RANGES; DEC-013 default -16..+15, test -4..+4, legacy -2..+2)"
+  },
+  {
+   "file": "DEUS_World.js",
+   "match": "const zr = { state: undefined, range: null, zMin: 0, zMax: 0, levels: null };",
+   "class": "notZ",
+   "reason": "not a Z literal: this number is not a level (exhaustion level, a radius, a cell coordinate clamp, a mood value, a strata count, an initial value, or the 'not a level' index)"
+  },
+  {
+   "file": "DEUS_World.js",
+   "match": "return z >= L.zMin ? L.zMax - z : -2 * z;",
+   "class": "notZ",
+   "reason": "map id slot formula: -z takes slot 2z (a formula over every z, not a range bound)"
+  },
+  {
+   "file": "DEUS_World.js",
+   "match": "levelIndex: z => (isLevel(z) ? z - zr.zMin : -1)",
+   "class": "notZ",
+   "reason": "not a Z literal: this number is not a level (exhaustion level, a radius, a cell coordinate clamp, a mood value, a strata count, an initial value, or the 'not a level' index)"
+  },
+  {
+   "file": "DEUS_World.js",
+   "match": "const ringOf = v => [v.z - 1, v.z + 1, v.z - 2, v.z + 2]",
+   "class": "depthReach",
+   "reason": "relative reach, not a range bound: DEUS_Depth draws at most MaxDepth (2) levels below the view (DEC-011), the prewarm ring is z±1 and z±2 of the view"
+  },
+  {
+   "file": "DEUS_Fluid.js",
+   "match": "-16..+15 for new worlds, -2..+2 for a save made before it",
+   "class": "doc",
+   "reason": "doc-text: names the legacy range (-2..+2) that saves made before WG.00.17 keep and that every generator version fills; not a bound in code"
+  },
+  {
+   "file": "DEUS_Fluid.js",
+   "match": "const LEGACY_Z_RANGE = Object.freeze({ zMin: -2, zMax: 2 });",
+   "class": "fallback",
+   "reason": "legacy-fallback: the range of a World without the range authority (a pre-WG.00.17 World or a headless test's stand-in); in the game the range comes from UF.World.zRange()"
+  },
+  {
+   "file": "DEUS_WorldGen.js",
+   "match": "// Deep Earth (z === -2)",
+   "class": "content",
+   "reason": "content tied to a generated level (not a range bound): this system populates or describes the generated levels only; the band table (DEC-013 races/biomes per band) is OPEN for the Owner and WG.62.02's work"
+  },
+  {
+   "file": "DEUS_WorldGen.js",
+   "match": "if (z !== -1 && z !== -2) return null;",
+   "class": "content",
+   "reason": "content: the catalog's start.undergroundKit has rows for -1 and -2 only (undergroundKitConfig); other levels get none"
+  },
+  {
+   "file": "DEUS_WorldGen.js",
+   "match": "(ctx.z !== -1 && ctx.z !== -2)) return;",
+   "class": "content",
+   "reason": "content: the underground resources generator paints the generated cave levels -1 and -2 (registered with levels [-1, -2])"
+  },
+  {
+   "file": "DEUS_WorldGen.js",
+   "match": "ctx.z === -2 && roll < 0.032",
+   "class": "content",
+   "reason": "content: crystals only on the deep generated level -2"
+  },
+  {
+   "file": "DEUS_WorldGen.js",
+   "match": "generateUnderground, 20, { levels: [-1, -2] }",
+   "class": "content",
+   "reason": "content: the underground resources generator runs for the generated cave levels -1 and -2"
+  },
+  {
+   "file": "DEUS_Minimap.js",
+   "match": "The tab row shows 5 levels round the active one.",
+   "class": "notZ",
+   "reason": "not a Z literal: the tab row shows 5 tabs (TAB_COUNT), a window over the range"
+  },
+  {
+   "file": "DEUS_Minimap.js",
+   "match": "test's stand-in) has the legacy levels -2..+2.",
+   "class": "doc",
+   "reason": "doc-text: names the legacy range (-2..+2) that saves made before WG.00.17 keep and that every generator version fills; not a bound in code"
+  },
+  {
+   "file": "DEUS_Minimap.js",
+   "match": "const LEGACY_Z_RANGE = Object.freeze({ zMin: -2, zMax: 2 });",
+   "class": "fallback",
+   "reason": "legacy-fallback: the range of a World without the range authority (a pre-WG.00.17 World or a headless test's stand-in); in the game the range comes from UF.World.zRange()"
+  },
+  {
+   "file": "DEUS_Depth.js",
+   "match": "* On every view (+2, +1, Ground, -1, -2)",
+   "class": "doc",
+   "reason": "doc-text: names the legacy range (-2..+2) that saves made before WG.00.17 keep and that every generator version fills; not a bound in code"
+  },
+  {
+   "file": "DEUS_Depth.js",
+   "match": "this.bindPlane(this.planes[1], v, v.z - 2);",
+   "class": "depthReach",
+   "reason": "relative reach, not a range bound: DEUS_Depth draws at most MaxDepth (2) levels below the view (DEC-011), the prewarm ring is z±1 and z±2 of the view"
+  },
+  {
+   "file": "DEUS_Depth.js",
+   "match": "every cell a check judges is built here, on all five levels",
+   "class": "depthFixture",
+   "reason": "DEUS_Depth check code (read only by the BRIEF): the depth/layers_flat proof scene is built on the five core levels, valid at every range"
+  },
+  {
+   "file": "DEUS_Depth.js",
+   "match": "deckMid: [-1, -2],",
+   "class": "depthFixture",
+   "reason": "DEUS_Depth check code (read only by the BRIEF): the depth/layers_flat proof scene is built on the five core levels, valid at every range"
+  },
+  {
+   "file": "DEUS_Depth.js",
+   "match": "groundRef: [-2, -1],",
+   "class": "depthFixture",
+   "reason": "DEUS_Depth check code (read only by the BRIEF): the depth/layers_flat proof scene is built on the five core levels, valid at every range"
+  },
+  {
+   "file": "DEUS_Depth.js",
+   "match": "minus1Ref: [-2, -1],",
+   "class": "depthFixture",
+   "reason": "DEUS_Depth check code (read only by the BRIEF): the depth/layers_flat proof scene is built on the five core levels, valid at every range"
+  },
+  {
+   "file": "DEUS_Depth.js",
+   "match": "const SCENE_DECK = [[-2, -2], [-1, -2], [0, -2]];",
+   "class": "depthFixture",
+   "reason": "DEUS_Depth check code (read only by the BRIEF): the depth/layers_flat proof scene is built on the five core levels, valid at every range"
+  },
+  {
+   "file": "DEUS_Depth.js",
+   "match": "for (let z = -2; z <= 2; z++) for (let y = C.y + SCENE_ZONE.dy0;",
+   "class": "depthFixture",
+   "reason": "DEUS_Depth check code (read only by the BRIEF): the depth/layers_flat proof scene is built on the five core levels, valid at every range"
+  },
+  {
+   "file": "DEUS_Depth.js",
+   "match": "columns x 5 levels",
+   "class": "depthFixture",
+   "reason": "DEUS_Depth check code (read only by the BRIEF): the depth/layers_flat proof scene is built on the five core levels, valid at every range"
+  },
+  {
+   "file": "DEUS_Depth.js",
+   "match": "q1.level.z === -1 && q2.level.z === -2",
+   "class": "depthFixture",
+   "reason": "DEUS_Depth check code (read only by the BRIEF): the depth/layers_flat proof scene is built on the five core levels, valid at every range"
+  },
+  {
+   "file": "DEUS_Depth.js",
+   "match": "(depth 1 on z-1, depth 2 on z-2)",
+   "class": "depthReach",
+   "reason": "relative reach, not a range bound: DEUS_Depth draws at most MaxDepth (2) levels below the view (DEC-011), the prewarm ring is z±1 and z±2 of the view"
+  },
+  {
+   "file": "DEUS_Environment.js",
+   "match": "if (zLevel <= -2) {",
+   "class": "bands",
+   "reason": "content band rule (not a range bound): the nearest generated band's rule extends to the new layers (below -2 like -2, above +2 like +2) until the DEC-013 bands are made (WG.62.02, OPEN)"
+  },
+  {
+   "file": "DEUS_Environment.js",
+   "match": "else if (zLevel >= 2) baseTemp -= 10.0;",
+   "class": "bands",
+   "reason": "content band rule (not a range bound): the nearest generated band's rule extends to the new layers (below -2 like -2, above +2 like +2) until the DEC-013 bands are made (WG.62.02, OPEN)"
+  },
+  {
+   "file": "DEUS_DayNight.js",
+   "match": "if (z === -2 && Levels) {",
+   "class": "lava",
+   "reason": "content, OPEN Owner question: the lava-on--2 baseline rule (natural pools on -2 are lava; BRIEF P3 keeps it unchanged and lists it in REPORT.md)"
+  },
+  {
+   "file": "DEUS_DayNight.js",
+   "match": "t.check(\"underground_always_night\", [-1, -2]",
+   "class": "fixture",
+   "reason": "test fixture: an in-plugin suite builds its scene on specific generated levels (-1/-2), valid at every range (every range holds -2..+2)"
+  },
+  {
+   "file": "DEUS_DayNight.js",
+   "match": "for (const z of [-1, -2]) {",
+   "class": "fixture",
+   "reason": "test fixture: an in-plugin suite builds its scene on specific generated levels (-1/-2), valid at every range (every range holds -2..+2)"
+  },
+  {
+   "file": "DEUS_Ecology.js",
+   "match": "\"-2\": [",
+   "class": "content",
+   "reason": "content: the sprout table has rows for the generated levels 0, -1 and -2 (the ore sprouts are a known LIFE-002 breach, SIM.50.12, not this lane)"
+  },
+  {
+   "file": "DEUS_Ecology.js",
+   "match": "for (const z of [0, -1, -2]) {",
+   "class": "content",
+   "reason": "content: sprouts are spawned on the generated levels 0, -1 and -2 only (the new layers have no floors to sprout on)"
+  },
+  {
+   "file": "DEUS_Wildlife.js",
+   "match": "herds.push(...planUnderground(st, ax, ay, -2, report));",
+   "class": "content",
+   "reason": "content: cave herds are planned on the generated cave levels -1 and -2"
+  },
+  {
+   "file": "DEUS_History.js",
+   "match": "(f.species === \"tiefling\" || f.species === \"dragonborn\") ? -2 : -1",
+   "class": "content",
+   "reason": "content: the history suite checks the subterranean factions' assigned home levels (-1 dwarves/gnomes, -2 tieflings/dragonborn); race-to-band is OPEN for the Owner (DEC-013)"
+  },
+  {
+   "file": "DEUS_Colonists.js",
+   "match": "Math.max(2, Math.min(11, left))",
+   "class": "notZ",
+   "reason": "not a Z literal: this number is not a level (exhaustion level, a radius, a cell coordinate clamp, a mood value, a strata count, an initial value, or the 'not a level' index)"
+  },
+  {
+   "file": "DEUS_Colonists.js",
+   "match": "speedFactor: level >= 5 ? 0 : (level >= 2 ? 0.5 : 1)",
+   "class": "notZ",
+   "reason": "not a Z literal: this number is not a level (exhaustion level, a radius, a cell coordinate clamp, a mood value, a strata count, an initial value, or the 'not a level' index)"
+  },
+  {
+   "file": "DEUS_Colonists.js",
+   "match": "disadvantageOnAttacksAndSaves: level >= 3",
+   "class": "notZ",
+   "reason": "not a Z literal: this number is not a level (exhaustion level, a radius, a cell coordinate clamp, a mood value, a strata count, an initial value, or the 'not a level' index)"
+  },
+  {
+   "file": "DEUS_Colonists.js",
+   "match": "addThought(u, `Stood ground against",
+   "class": "notZ",
+   "reason": "not a Z literal: this number is not a level (exhaustion level, a radius, a cell coordinate clamp, a mood value, a strata count, an initial value, or the 'not a level' index)"
+  },
+  {
+   "file": "DEUS_Colonists.js",
+   "match": "Math.min(24, (c.radius || 8) + 12)",
+   "class": "notZ",
+   "reason": "not a Z literal: this number is not a level (exhaustion level, a radius, a cell coordinate clamp, a mood value, a strata count, an initial value, or the 'not a level' index)"
+  },
+  {
+   "file": "DEUS_Colonists.js",
+   "match": "addThought(u, \"Needs a bed and space to sleep.\", -2);",
+   "class": "notZ",
+   "reason": "not a Z literal: this number is not a level (exhaustion level, a radius, a cell coordinate clamp, a mood value, a strata count, an initial value, or the 'not a level' index)"
+  },
+  {
+   "file": "DEUS_Doors.js",
+   "match": "x: Math.max(2, Math.min(W.state.size - 3, $gamePlayer.x + 5))",
+   "class": "notZ",
+   "reason": "not a Z literal: this number is not a level (exhaustion level, a radius, a cell coordinate clamp, a mood value, a strata count, an initial value, or the 'not a level' index)"
+  },
+  {
+   "file": "UF_Households.js",
+   "match": "// has the legacy levels -2..+2.",
+   "class": "doc",
+   "reason": "doc-text: names the legacy range (-2..+2) that saves made before WG.00.17 keep and that every generator version fills; not a bound in code"
+  },
+  {
+   "file": "UF_Households.js",
+   "match": "const LEGACY_Z_RANGE = Object.freeze({ zMin: -2, zMax: 2 });",
+   "class": "fallback",
+   "reason": "legacy-fallback: the range of a World without the range authority (a pre-WG.00.17 World or a headless test's stand-in); in the game the range comes from UF.World.zRange()"
+  },
+  {
+   "file": "DEUS_HistoricalDemographics.js",
+   "match": "// has the legacy levels -2..+2.",
+   "class": "doc",
+   "reason": "doc-text: names the legacy range (-2..+2) that saves made before WG.00.17 keep and that every generator version fills; not a bound in code"
+  },
+  {
+   "file": "DEUS_HistoricalDemographics.js",
+   "match": "const LEGACY_Z_RANGE = Object.freeze({ zMin: -2, zMax: 2 });",
+   "class": "fallback",
+   "reason": "legacy-fallback: the range of a World without the range authority (a pre-WG.00.17 World or a headless test's stand-in); in the game the range comes from UF.World.zRange()"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "* before WG.00.17 -2..+2. -2, -1, Ground, +1, +2 are generated as before;",
+   "class": "doc",
+   "reason": "doc-text: names the legacy range (-2..+2) that saves made before WG.00.17 keep and that every generator version fills; not a bound in code"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "// Every generator version makes content for the core, the legacy range -2..+2",
+   "class": "doc",
+   "reason": "doc-text: names the legacy range (-2..+2) that saves made before WG.00.17 keep and that every generator version fills; not a bound in code"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "/** The generated core (the legacy range -2..+2)",
+   "class": "doc",
+   "reason": "doc-text: names the legacy range (-2..+2) that saves made before WG.00.17 keep and that every generator version fills; not a bound in code"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "0..24 at the legacy range",
+   "class": "doc",
+   "reason": "doc-text: names the legacy range (-2..+2) that saves made before WG.00.17 keep and that every generator version fills; not a bound in code"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "// breached): levels[\"2\"] at the legacy range.",
+   "class": "doc",
+   "reason": "doc-text: names the legacy range (-2..+2) that saves made before WG.00.17 keep and that every generator version fills; not a bound in code"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "/** All five strata solid. */",
+   "class": "notZ",
+   "reason": "not a Z literal: this number is not a level (exhaustion level, a radius, a cell coordinate clamp, a mood value, a strata count, an initial value, or the 'not a level' index)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "const ZR = { st: undefined, zMin: 0, zMax: 0, n: 0, levels: null };",
+   "class": "notZ",
+   "reason": "not a Z literal: this number is not a level (exhaustion level, a radius, a cell coordinate clamp, a mood value, a strata count, an initial value, or the 'not a level' index)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "const deltas = { st: null, levels: null, zMin: 0, errors: [] };",
+   "class": "notZ",
+   "reason": "not a Z literal: this number is not a level (exhaustion level, a radius, a cell coordinate clamp, a mood value, a strata count, an initial value, or the 'not a level' index)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "(st.levels[String(z)] || st.levels[\"0\"])",
+   "class": "groundKey",
+   "reason": "not a range literal: level 0 is the ground by definition (its entry exists in every world)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "if (!st || !st.levels || !st.levels[\"0\"]) return refuse(\"no levels in this world\");",
+   "class": "groundKey",
+   "reason": "not a range literal: level 0 is the ground by definition (its entry exists in every world)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "\"-2\": { caveScale: 30, caveThreshold: 0.74, soilScale: 0, soilThreshold: 1 }",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "A generator-5 area has its five levels generated together",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "// The generator works in its own frame, the core column -2..+2",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "// 0..24 (e = (z + 2) * 5 + s, core index z + 2)",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "const E_TOP = 25;",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "\"-2\": { chance: 0.2, floor: [1, 2], nodes: [3, 6]",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "* Carve the natural cuts and caves of an area into its five core baselines' strata",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "li <= ((e1 / STRATA) | 0) && li < 5; li++) CONN[li]",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "E_TOP",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "if (z === 2) return S[i] === 2 && interior[i] >= 5;",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "for (const z of [2, 1, 0, -1, -2]) {",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "const k = (z + 2) * 4096 + ly * lat + lx;",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "hostOk(z, tx, ty, F0, z === 2 ? 0 : hP) && (z !== 2 ||",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "const chamberFloor = i => z === 2 ? rint(LV.chamberFloor, 110, k, i) : F0;",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "hostOk(z, x, y, F, z === 2 ? 0 : h)",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "if (!hostOk(z, x, y, from.F, z === 2 ? 0 : hP)) continue;",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "if (z < 2 && z > -2 && rnd(126, k) < CV.multiZChance) {",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "if (z < 2 && rnd(129, k) < CV.skylightChance)",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "const LV2 = CV.levels[\"2\"];",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "if (net.z !== 2) continue;",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "const want = net.z === 2 ? S[i] === 2",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "exitTop = net.z === 2 ? 21 : top[",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "const zf = ((f / STRATA) | 0) - 2;",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "if (zf >= 2) continue;",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "connOf(CONN[zf + 2], i) !== 0",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "if (((g / STRATA) | 0) - 2 === zf + 1 && g - f === 1) ramp = true;",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "if (ramp) { CONN[zf + 2][i >> 1] |= RAMP",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "lv.add(((e / STRATA) | 0) - 2);",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "f.floorLevel = ((f.minFloor / STRATA) | 0) - 2;",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "f.hostLevel = ((f.hostTop - 1) / STRATA | 0) - 2;",
+   "class": "genCore",
+   "reason": "generator-core: generator 5's own frame, the five core levels -2..+2 generated and carved together (frozen: P3 requires -2..+2 to generate exactly as at base; the world's other levels are made around the core in volumeOf)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "const fluid = z === -2 ? M_LAVA : M_WATER;",
+   "class": "lava",
+   "reason": "content, OPEN Owner question: the lava-on--2 baseline rule (natural pools on -2 are lava; BRIEF P3 keeps it unchanged and lists it in REPORT.md)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "biomeInfo.lava !== undefined ? biomeInfo.lava : z === -2",
+   "class": "lava",
+   "reason": "content, OPEN Owner question: the lava-on--2 baseline rule (natural pools on -2 are lava; BRIEF P3 keeps it unchanged and lists it in REPORT.md)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "text = r.z === -2 ? \"Lava pool\" : \"Fresh water\";",
+   "class": "lava",
+   "reason": "content, OPEN Owner question: the lava-on--2 baseline rule (natural pools on -2 are lava; BRIEF P3 keeps it unchanged and lists it in REPORT.md)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "if (z !== -1 && z !== -2) return [];",
+   "class": "pools",
+   "reason": "content: the generated underground levels -1 and -2 hold the natural pockets and pools and the legacy flood model; the new layers below -2 are generated as uniform rock without them (BRIEF P3: no new caves/veins)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "pool2 = poolGrid(st, -2, ax, ay, 1);",
+   "class": "pools",
+   "reason": "content: the generated underground levels -1 and -2 hold the natural pockets and pools and the legacy flood model; the new layers below -2 are generated as uniform rock without them (BRIEF P3: no new caves/veins)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "const isWall2 = buildWallGrid(ax, ay, -2, size, st);",
+   "class": "pools",
+   "reason": "content: the generated underground levels -1 and -2 hold the natural pockets and pools and the legacy flood model; the new layers below -2 are generated as uniform rock without them (BRIEF P3: no new caves/veins)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "if (z !== -1 && z !== -2) return null;",
+   "class": "pools",
+   "reason": "content: the generated underground levels -1 and -2 hold the natural pockets and pools and the legacy flood model; the new layers below -2 are generated as uniform rock without them (BRIEF P3: no new caves/veins)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "if (z !== -1 && z !== -2) return DRY;",
+   "class": "pools",
+   "reason": "content: the generated underground levels -1 and -2 hold the natural pockets and pools and the legacy flood model; the new layers below -2 are generated as uniform rock without them (BRIEF P3: no new caves/veins)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "if (r.z !== -1 && r.z !== -2) return NOT_FLOODED;",
+   "class": "pools",
+   "reason": "content: the generated underground levels -1 and -2 hold the natural pockets and pools and the legacy flood model; the new layers below -2 are generated as uniform rock without them (BRIEF P3: no new caves/veins)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "(view.z !== -1 && view.z !== -2)",
+   "class": "pools",
+   "reason": "content: the generated underground levels -1 and -2 hold the natural pockets and pools and the legacy flood model; the new layers below -2 are generated as uniform rock without them (BRIEF P3: no new caves/veins)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "saveShape(cx + dx, cy + dy, -2);",
+   "class": "fixture",
+   "reason": "test fixture: an in-plugin suite builds its scene on specific generated levels (-1/-2), valid at every range (every range holds -2..+2)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "O.setIn({ x: area.x, y: area.y, z: -2 }, cx + dx, cy + dy, null);",
+   "class": "fixture",
+   "reason": "test fixture: an in-plugin suite builds its scene on specific generated levels (-1/-2), valid at every range (every range holds -2..+2)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "setShape({ area, x: cx + dx, y: cy + dy, z: -2 }",
+   "class": "fixture",
+   "reason": "test fixture: an in-plugin suite builds its scene on specific generated levels (-1/-2), valid at every range (every range holds -2..+2)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "Levels.isFlooded({ area, x: cx",
+   "class": "fixture",
+   "reason": "test fixture: an in-plugin suite builds its scene on specific generated levels (-1/-2), valid at every range (every range holds -2..+2)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "`cascade from -1 to -2 at (${cx},${cy},-2)",
+   "class": "fixture",
+   "reason": "test fixture: an in-plugin suite builds its scene on specific generated levels (-1/-2), valid at every range (every range holds -2..+2)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "setStrata({ area, x: cx + 8, y: cy, z: -2 }",
+   "class": "fixture",
+   "reason": "test fixture: an in-plugin suite builds its scene on specific generated levels (-1/-2), valid at every range (every range holds -2..+2)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "const descLava = Levels.describeCell({ area, x: cx + 8, y: cy, z: -2 });",
+   "class": "fixture",
+   "reason": "test fixture: an in-plugin suite builds its scene on specific generated levels (-1/-2), valid at every range (every range holds -2..+2)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "`floor cells in the baselines: -1 ${open(-1)}, -2 ${open(-2)}",
+   "class": "fixture",
+   "reason": "test fixture: an in-plugin suite builds its scene on specific generated levels (-1/-2), valid at every range (every range holds -2..+2)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "for (const z of [-1, -2]) {",
+   "class": "fixture",
+   "reason": "test fixture: an in-plugin suite builds its scene on specific generated levels (-1/-2), valid at every range (every range holds -2..+2)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "if (provoked(\"persistence\") && copy.ufWorld.levels[\"-1\"])",
+   "class": "provoke",
+   "reason": "test provocation of an in-plugin check (vertical.persistence): corrupts a generated level's saved strata on purpose"
+  }
+ ]
+}

@@ -46,8 +46,8 @@
     const sameArea = (a, b) => !!a && !!b && a.x === b.x && a.y === b.y && zOf(a) === zOf(b);
     function supportedArea(area) {
         const W = World(), z = zOf(area);
-        return !!area && Number.isInteger(z) && z >= -2 && z <= 2 &&
-            (z === 0 || !!(W && typeof W.viewLevel === "function" && typeof W.levelOfMapId === "function"));
+        return !!area && Number.isInteger(z) &&
+            (z === 0 || !!(W && typeof W.viewLevel === "function" && typeof W.levelOfMapId === "function" && typeof W.isLevel === "function" && W.isLevel(z)));   // the world's Z range (WG.00.17)
     }
     const viewArea = () => { const W = World(); return W && (typeof W.viewLevel === "function" ? W.viewLevel() : W.currentArea()); };
     const emit = (name, ...args) => { if (window.UF && UF.Events && UF.Events.emit) UF.Events.emit(name, ...args); };
@@ -223,8 +223,8 @@
         const L = window.UF && UF.Levels;
         if (!L || typeof L.setShape !== "function") return false;
         const z = zOf(area);
-        const targetZ = z + 1;
-        if (targetZ > 2) return false;
+        const targetZ = z + 1, W = World();
+        if (!W || typeof W.isLevel !== "function" || !W.isLevel(targetZ)) return false;   // above the world's top level (WG.00.17)
 
         let mat = material;
         if (!mat) {

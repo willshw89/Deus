@@ -36,7 +36,7 @@
     const World = () => (window.UF && UF.World) || null;
     const Objects = () => (window.UF && UF.Objects) || null;
     const zOf = a => a && a.z !== undefined ? a.z : 0;
-    const validZ = z => Number.isInteger(z) && z >= -2 && z <= 2;
+    const validZ = z => Number.isInteger(z) && (z === 0 || !!(World() && typeof World().isLevel === "function" && World().isLevel(z)));   // the world's Z range (WG.00.17)
     const levelCore = () => !!World() && typeof World().viewLevel === "function" && typeof World().levelOfMapId === "function";
     const supported = a => !!a && validZ(zOf(a)) && (zOf(a) === 0 || levelCore());
     const copyArea = a => zOf(a) === 0 ? { x: a.x, y: a.y } : { x: a.x, y: a.y, z: zOf(a) };
