@@ -176,3 +176,9 @@ None; aliases only: `Game_Map.prototype.update` (the loop), `Scene_Map.prototype
 - **Timing measured, not played.** The combat numbers (weapon and creature tables) are first-pass balance. The duels say a level-1 colonist loses to a wolf every time and a level-40 one in iron wins every time; nothing between has been tuned against play.
 - **Perf spikes.** The `perf` check's averages hold, but single updates spike (up to about 5 ms drawing, 3-5 ms for a tick of 100 fighters). The spikes are rare: the detail counts drawing updates over 1 ms, 3-5 in 360 frames. Probably garbage collection; not investigated further.
 - **Not run in the RMMZ editor's Playtest (F5).** Not checked at ×8 speed.
+
+## Tamed Party Creatures & SRD Combat Mechanics (DEC-033)
+- Governed by Owner ruling 2026-09-26 13:01 CT (Directive 0096-CS, DEC-033).
+- Tamed creatures fight in the player's party using only their basic SRD 5.1 stat blocks, hit points, Armor Class, and natural attacks and defenses.
+- There are NO creature armor or equipment slots, no barding, and no crafted creature gear.
+- Riding saddles are cosmetic/visual markers only with no equipment slot, no weight capacity modifier, and no mechanical stat adjustments.

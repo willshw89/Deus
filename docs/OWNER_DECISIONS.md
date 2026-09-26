@@ -292,6 +292,7 @@ Every decision item recorded in this log must provide:
   1. **Seamless Transitions:** Ramps and slopes carry units continuously from one layer to the next. A ramp is a run of cells rising one stratum per cell (5 cells = one 10 ft layer). At the top stratum, the unit's Z becomes Z+1 with zero screen transfer, fade, or pause. Depends on Lane N (in-place layer switch) and DEC-019 stratum height offsets.
   2. **Camera-Follow Default:** When the player unit crosses a ramp boundary between layers, the camera view automatically follows the player's current layer. Non-player units crossing simply transfer layer membership lists (Lane K per-frame membership refresh).
   3. **Pathfinding & Construction:** Multi-Z pathfinding treats ramps, stairs, and ladders as traversable layer connectors. Colonists can build ramps. Art catalogue adds ramp/slope pieces per terrain (placeholders only; DEC-007).
+- **DEC-020 Amendment Note (Owner requirement 2026-09-26 12:12 CT, Directive 0090-CM):** A hill can span several Z layers, and units walk straight up it with no stairs, no transfer, and no loading. Terrain rises continuously across layer boundaries (multi-layer hills, not only single 5-cell ramps) via slope and ramp tiles between Z layers. Pathfinding across Z treats walkable slopes as ordinary path edges between layers. The camera follows the controlled unit's layer while it walks across slopes (no fade, pause, or load). Selected units and group orders keep working while crossing layers on slopes (selection is not dropped at a layer change).
 
 ---
 
@@ -442,3 +443,14 @@ Every decision item recorded in this log must provide:
   8. **Multi-Agent:** On for every provider and role by default. The only exception is tiny routine or record-only jobs.
   9. **Reviews:** Never review your own provider's code.
   10. **Context:** Y and Z reviews that ran at high effort are being re-run at xhigh (launched 11:27 CT).
+
+---
+
+### Decision `DEC-033`: Recruitable Non-Core Humanoids, Capture/Domestication, and Tamed Party Creatures
+- **Date Logged:** 2026-09-26
+- **Status:** `DECIDED` (Owner rulings 12:59 CT and 13:01 CT, Directive 0096-CS)
+- **Decider:** Owner
+- **Summary:**
+  1. **Recruitable Non-Core Humanoids:** Non-core humanoids (11 extra face cultures beyond the 9 SRD races: goblin, orc, kobold, etc.) can be persuaded or recruited into the player's party. They receive full paper-doll bodies on shared body templates (same layer and anchor rules as the 9 SRD races). Monstrous types (undead, elementals, etc.) remain fixed-sprite (no paper-doll).
+  2. **Capture and Domestication:** Enemies and wildlife can be captured and tamed into pets, mounts, livestock, and work animals. Captured humanoids become prisoners or recruits.
+  3. **Tamed Creatures in the Party:** Tamed creatures fight in the party using only their basic SRD 5.1 stat blocks and natural attacks and defenses. There are NO creature armor or equipment slots, no barding, and no crafted creature gear (Owner 13:01 CT ruling supersedes equipment exploration). A riding saddle is a visual marker only (no equipment slot, no mechanical stats).

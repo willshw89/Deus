@@ -1,7 +1,7 @@
 # DEUS Society & Institutions Work Breakdown Structure
 
 **Namespace:** SOC  
-**Rev:** 3  
+**Rev:** 4  
 **IDs:** Stable. Next free in SOC.70 is SOC.70.02. Next free band is SOC.80  
 **Canonical Authority:** Gemini / Antigravity  
 **Status:** CANONICAL ON MAIN  
@@ -61,6 +61,7 @@ SOC.70 — Society & Economy Verification Test Suites
 | **SOC.11.01** | 2014 SRD Class Integration | Fable | Integrate canonical 2014 SRD classes, hit dice, proficiencies, spellcasting, and level 1..20 progression rules. | `PLANNED` |
 | **SOC.12.01** | Master Craft Catalogue | Gemini | Define economic professions linked to DEUS production chains, 2014 SRD item crafting, and apprentice-to-master progression. | `PLANNED` |
 | **SOC.13.01** | Central Duty Scheduler | Fable | Arbitrate competing operational priorities (vital needs, combat defense, mobilization, office duty, craft labor, rest). | `PLANNED` |
+| **SOC.10.04** | Recruitment & Persuasion of Non-Core Humanoids | Fable / Gemini | Non-core humanoids (11 extra face cultures beyond 9 SRD races: goblin, orc, kobold, etc.) can be persuaded or recruited into the faction/party; full paper-doll bodies on shared body templates; monstrous types remain fixed-sprite (no paper-doll); Owner 2026-09-26 12:59 CT; DEC-033. | `PLANNED` |
 
 ---
 
@@ -99,6 +100,7 @@ SOC.70 — Society & Economy Verification Test Suites
 | **SOC.40.02** | Threat-Driven Militia Mobilization Engine | Fable | Dynamic alarm system calling civilian workers to arms; assign combat defense duties at walls and gates. | `PLANNED` |
 | **SOC.41.01** | Guard Patrol & Garrison Defensive Routine | Fable | Routine peacetime sentry patrols, watchtower posts, and gate control handled by active guards. | `PLANNED` |
 | **SOC.42.01** | Military Economic Productivity Cost & Recovery | Fable | Track economic disruption from mobilized labor (unharvested crops, stopped forges); smooth demobilization back to crafts. | `PLANNED` |
+| **SOC.40.03** | Capture, Prisoners & Hostile Humanoid Subjugation | Fable / Gemini | Captured hostile humanoids become prisoners or prospective recruits; detention, internment logistics, ransoming, and rehabilitation workflows; Owner 2026-09-26 12:59 CT; DEC-033. | `PLANNED` |
 
 ---
 
@@ -125,6 +127,7 @@ SOC.70 — Society & Economy Verification Test Suites
 
 | Rev | Date | Change |
 |:---:|:---:|:---|
+| 4 | 2026-09-26 | Directive 0096-CS: Minted SOC.10.04 (Recruitment & persuasion of non-core humanoids; shared paper-doll templates) and SOC.40.03 (Capture, prisoners & hostile humanoid subjugation). Recorded DEC-033. |
 | 3 | 2026-09-26 | Directive 0021-V Addendum §10 / Directive 0023-X: Added SOC.10.02 (Faction Development Plan Specification & JSON Schema) and SOC.10.03 (Nine Race Development Plan Data Slots), DEC-015, Vision V141. |
 | 2 | 2026-09-25 | Adopt integer rev header and immutable ID governance. SOC.70.01 confirmed as society verification suite. Next free in SOC.70 is SOC.70.02; next free band is SOC.80. |
 | 1 | 2026-09-25 | Initial release of SOC.10 through SOC.70 (Person identity, offices, currency, duties). |

@@ -118,3 +118,8 @@ None, aliases only: `Game_Map.prototype.update` (AI ticks), `Sprite_Character.pr
 - The predator rule holds at placement: a wolf (`wander` 16) whose herd centre is 26 cells from a campfire can later walk to within 10 of it; nothing keeps predators away from camps in play yet.
 - Corpses: a kill (UF_Jobs `hunt`) removes the unit and drops items; there is no dead-animal image yet (AR-401 should include one per prey species).
 - No day/night behavior, no predator hunting of prey, no breeding; herds don't migrate between areas.
+
+## Capture, Domestication & Tamed Creatures (DEC-033)
+- Governed by Owner rulings 2026-09-26 12:59 CT and 13:01 CT (Directive 0096-CS, DEC-033).
+- Enemies and wildlife can be captured and tamed into four functional domestic categories: pets, mounts, livestock, and work animals.
+- Tamed creatures in the party fight using only their basic SRD 5.1 stat blocks and natural attacks and defenses. No creature armor or equipment slots, no barding, and no crafted creature gear. Riding saddles are visual/cosmetic markers only.
