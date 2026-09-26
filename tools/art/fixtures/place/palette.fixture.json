@@ -1,0 +1,4 @@
+{
+  "note": "TEST_ fixture. Twelve colours copied from art/palette/deus_master_world_palette_v1.hex. tools/art/test_place_art.js writes them as a .hex file into its temp folder; the test never reads art/.",
+  "colours": ["#060709", "#0C0D12", "#14161C", "#1C2126", "#333B45", "#525D6B", "#798797", "#A7B4C2", "#23211D", "#3D3833", "#3E6328", "#628C38"]
+}
