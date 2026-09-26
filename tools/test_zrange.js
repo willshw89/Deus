@@ -38,6 +38,7 @@
  *   (no --z-range: the three configurations -4..4, -16..15 and the legacy -2..2)
  *   --refresh-base          run the base commit (a temp clone) and rewrite tools/zrange/fixtures/base_<sha8>_seed<n>.json
  *   --make-legacy-fixture   run make_legacy on the base commit and write tools/zrange/fixtures/legacy_save_<sha8>_seed<n>.json.gz
+ *   --make-legacy-ref       the base commit loads that save: tools/zrange/fixtures/legacy_loaded_at_base_<sha8>_seed<n>.json
  *   --phase=<p> [--commit=<sha>]  run one phase (core, play, sim, legacy) on the configurations (default: this tree; with
  *                           --commit, a temp clone of that commit) and print the suite's lines and report (diagnostics)
  * Exit: 0 all checks passed (with --provoke: every provocation caught); 1 a check failed / a provocation not caught;
@@ -71,7 +72,8 @@ const { PROVOCATIONS } = require("./zrange/provocations.js");
 const log = (...a) => console.log(...a);
 const sha8 = s => String(s).slice(0, 8);
 const baseFixtureFile = () => path.join(FIX, `base_${sha8(BASE)}_seed${SEED}.json`);
-const legacyFiles = () => ({ save: path.join(FIX, `legacy_save_${sha8(BASE)}_seed${SEED}.json.gz`), fingerprint: path.join(FIX, `legacy_fingerprint_${sha8(BASE)}_seed${SEED}.json`) });
+const legacyFiles = () => ({ save: path.join(FIX, `legacy_save_${sha8(BASE)}_seed${SEED}.json.gz`), fingerprint: path.join(FIX, `legacy_fingerprint_${sha8(BASE)}_seed${SEED}.json`),
+    loaded: path.join(FIX, `legacy_loaded_at_base_${sha8(BASE)}_seed${SEED}.json`) });
 /** The legacy save fixture, gunzipped to a temp file for the game to read (ZR_SAVE). */
 function legacySaveFile() {
     const lf = legacyFiles();
@@ -213,8 +215,22 @@ async function makeLegacyFixture() {
     fp.base = BASE;
     fs.writeFileSync(lf.fingerprint, JSON.stringify(fp, null, 1) + "\n");
     log(`wrote ${lf.save} (${fs.statSync(lf.save).size} B) and ${lf.fingerprint}`);
+    await makeLegacyRef(clone);
     removeTree(tmp);
     if (!KEEP) require("./zrange/clone.js").removeTree(clone);
+}
+/** The base commit loads the legacy save: the reference for the units (its own load changes some). */
+async function makeLegacyRef(clone) {
+    const lf = legacyFiles(), save = legacySaveFile(), tmp2 = path.join(os.tmpdir(), "laneaa_zr_legacy_loaded");
+    removeTree(tmp2);
+    await runPhase(clone, "base_legacy_load", { ZR_PHASE: "legacy", DEUS_Z_RANGE: null, ZR_SAVE: save, ZR_FINGERPRINT: lf.fingerprint, ZR_OUT_DIR: tmp2 });
+    fs.rmSync(save, { force: true });
+    const loaded = JSON.parse(fs.readFileSync(path.join(tmp2, "legacy_loaded.json"), "utf8"));
+    loaded.base = BASE;
+    loaded.note = "the world as the base commit loads legacy_save (tools/test_zrange.js --make-legacy-fixture)";
+    fs.writeFileSync(lf.loaded, JSON.stringify(loaded, null, 1) + "\n");
+    log(`wrote ${lf.loaded}`);
+    removeTree(tmp2);
 }
 const strip = c => { if (!c) return c; const o = Object.assign({}, c); delete o.ms; return o; };
 
@@ -385,7 +401,7 @@ async function runAll(provocation) {
     if (!provocation || (provocation.phases || []).includes("legacy")) {
         const lf = legacyFiles();
         save = legacySaveFile();
-        if (save) tasks.push(async () => { results.__legacy = await runPhase(clone, `${provocation ? `p_${provocation.name}_` : ""}legacy`, { ZR_PHASE: "legacy", DEUS_Z_RANGE: null, ZR_SAVE: save, ZR_FINGERPRINT: lf.fingerprint }, edits); });
+        if (save) tasks.push(async () => { results.__legacy = await runPhase(clone, `${provocation ? `p_${provocation.name}_` : ""}legacy`, { ZR_PHASE: "legacy", DEUS_Z_RANGE: null, ZR_SAVE: save, ZR_FINGERPRINT: lf.fingerprint, ZR_LOADED_REF: lf.loaded }, edits); });
     }
     await pool(tasks);
     if (save) fs.rmSync(save, { force: true });
@@ -400,12 +416,13 @@ function loadBase() {
     try {
         if (flag("refresh-base")) { await refreshBase(); process.exit(0); }
         if (flag("make-legacy-fixture")) { await makeLegacyFixture(); process.exit(0); }
+        if (flag("make-legacy-ref")) { const clone = baseClone("legacyref"); await makeLegacyRef(clone); if (!KEEP) require("./zrange/clone.js").removeTree(clone); process.exit(0); }
         if (arg("phase", "")) {
             const ph = arg("phase", ""), commit = arg("commit", "");
             const clone = commit ? require("./zrange/clone.js").makeClone(commit, `phase_${sha8(commit)}`).dir : ROOT;
             let save = null;
             const env = { ZR_PHASE: ph };
-            if (ph === "legacy") { save = legacySaveFile(); Object.assign(env, { ZR_SAVE: save, ZR_FINGERPRINT: legacyFiles().fingerprint }); }
+            if (ph === "legacy") { save = legacySaveFile(); Object.assign(env, { ZR_SAVE: save, ZR_FINGERPRINT: legacyFiles().fingerprint, ZR_LOADED_REF: legacyFiles().loaded }); }
             const cfgs = ph === "legacy" || commit ? [null] : CONFIGS;
             const runs = await pool(cfgs.map(c => () => runPhase(clone, `${commit ? `c${sha8(commit)}_` : ""}${c || "own"}_${ph}`, Object.assign({}, env, { DEUS_Z_RANGE: c }))));
             for (const r of runs) {

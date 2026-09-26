@@ -365,9 +365,11 @@ function zrangeSuitePlugin() {
                 const blk = findBlock(1, 1, [zHi, zLo], 90, 90);
                 const cHi = saveCell(blk.x, blk.y, zHi), cLo = saveCell(blk.x, blk.y, zLo);
                 const lv0 = JSON.stringify(st.levels).length;
-                L.setStrata(ref(blk.x, blk.y, zHi), { m: ["wood", "air", "air", "air", "air"], connector: 0 }, { constructed: true, cause: "test" });
+                // Each change toggles the cell's S4 (stone <-> air), so it always differs from the cell as it was.
+                const flip = c => { const m = c.m.slice(), hp = c.hp.slice(); m[4] = m[4] ? 0 : 1; hp[4] = m[4] ? 255 : 0; return { m, hp, connector: c.connector }; };
+                L.setStrata(ref(blk.x, blk.y, zHi), flip(cHi), { cause: "test" });
                 const lv1 = JSON.stringify(st.levels).length;
-                L.setStrata(ref(blk.x, blk.y, zLo), { m: ["stone", "air", "air", "air", "air"], connector: 0 }, { cause: "test" });
+                L.setStrata(ref(blk.x, blk.y, zLo), flip(cLo), { cause: "test" });
                 const lv2 = JSON.stringify(st.levels).length;
                 const recHi = JSON.stringify(st.levels[String(zHi)]), recLo = JSON.stringify(st.levels[String(zLo)]);
                 const hiNow = L.strataAt(ref(blk.x, blk.y, zHi)), loNow = L.strataAt(ref(blk.x, blk.y, zLo));
@@ -391,7 +393,7 @@ function zrangeSuitePlugin() {
                 // Each change adds only its own record (and a level entry for a level outside the core): at most 80 B.
                 const addHi = lv1 - lv0, addLo = lv2 - lv1;
                 t.check("sparse_save_changes", addHi > 0 && addHi <= 80 && addLo > 0 && addLo <= 80 && roundOk,
-                    `a deck on ${zHi >= 0 ? "+" : ""}${zHi} and a dug stratum on ${zLo} at (${blk.x},${blk.y}): levels JSON ${lv0} -> ${lv1} (+${addHi} B: ${recHi}) -> ${lv2} (+${addLo} B: ${recLo}); save and load (${json.length} characters): range ${zr2.zMin}..${zr2.zMax}, both cells identical ${sameCell(hi2, hiNow) && sameCell(lo2, loNow)}, their chunks' kinds identical, ${timedOut ? "LOAD TIMED OUT" : "loaded"}`);
+                    `S4 toggled on ${zHi >= 0 ? "+" : ""}${zHi} and on ${zLo} at (${blk.x},${blk.y}): levels JSON ${lv0} -> ${lv1} (+${addHi} B: ${recHi}) -> ${lv2} (+${addLo} B: ${recLo}); save and load (${json.length} characters): range ${zr2.zMin}..${zr2.zMax}, both cells identical ${sameCell(hi2, hiNow) && sameCell(lo2, loNow)}, their chunks' kinds identical, ${timedOut ? "LOAD TIMED OUT" : "loaded"}`);
                 restoreCell(cHi); restoreCell(cLo);
                 report.data.saveAfterRevert = { levels: JSON.stringify(W.state.levels).length, entries: Object.keys(W.state.levels).map(Number).sort((p, q) => p - q) };
 
@@ -516,8 +518,12 @@ function zrangeSuitePlugin() {
             resume();
         }
         async function legacyLoad() {
-            const file = process.env.ZR_SAVE, fpFile = process.env.ZR_FINGERPRINT;
+            // want: the save's own fingerprint (made with it at the base commit); ref: the world as the base commit loads
+            // that save (its load drops the save's 5 TEST units and moves 4 colonists by one cell: base behaviour, so the
+            // units are judged against ref; cells and items against both).
+            const file = process.env.ZR_SAVE, fpFile = process.env.ZR_FINGERPRINT, refFile = process.env.ZR_LOADED_REF;
             const json = fs.readFileSync(file, "utf8"), want = JSON.parse(fs.readFileSync(fpFile, "utf8"));
+            const ref = refFile && fs.existsSync(refFile) ? JSON.parse(fs.readFileSync(refFile, "utf8")) : null;
             // Load a save into fresh game objects: the fingerprint is taken right after the state is read (before the map
             // starts, so nothing has moved), then the map is shown.
             const once = async text => {
@@ -537,7 +543,10 @@ function zrangeSuitePlugin() {
             const first = await once(json);
             const fpNow = first.cells;
             const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
-            const firstOk = !first.timedOut && first.fp.range.zMin === -2 && first.fp.range.zMax === 2 && same(fpNow.cells, want.cells) && same(fpNow.changed, want.changed) && same(fpNow.units, want.units) && same(fpNow.items, want.items);
+            if (process.env.ZR_OUT_DIR) { fs.mkdirSync(process.env.ZR_OUT_DIR, { recursive: true }); fs.writeFileSync(path.join(process.env.ZR_OUT_DIR, "legacy_loaded.json"), JSON.stringify(fpNow, null, 1)); }
+            const unitsOk = ref ? same(fpNow.units, ref.units) : same(fpNow.units, want.units);
+            const firstOk = !first.timedOut && first.fp.range.zMin === -2 && first.fp.range.zMax === 2 && same(fpNow.cells, want.cells) && same(fpNow.changed, want.changed) && unitsOk && same(fpNow.items, want.items) &&
+                (!ref || (same(fpNow.cells, ref.cells) && same(fpNow.items, ref.items)));
             const onlyIn = (a, b) => { const sb = new Set(b); return a.filter(x => !sb.has(x)); };
             report.data.legacyFirst = { load: first, cellsMatch: same(fpNow.cells, want.cells), changed: fpNow.changed, unitsMatch: same(fpNow.units, want.units), itemsMatch: same(fpNow.items, want.items),
                 unitsOnlyLoaded: onlyIn(fpNow.units, want.units).slice(0, 8), unitsOnlyBase: onlyIn(want.units, fpNow.units).slice(0, 8),
@@ -552,7 +561,8 @@ function zrangeSuitePlugin() {
             report.data.legacySecond = { load: { timedOut: second.timedOut, fp: second.fp, shown: second.shown }, cellsSame: same(fp2.cells, atSave.cells), unitsSame: same(fp2.units, atSave.units), itemsSame: same(fp2.items, atSave.items) };
             delete first.cells;
             t.check("legacy_save_loads", firstOk && secondOk,
-                `base save (${json.length} characters) loaded: range ${first.fp.range.zMin}..${first.fp.range.zMax} (${first.fp.levels} levels; saved zRange ${JSON.stringify(first.fp.stateRange)}), every cell of -2..+2 ${same(fpNow.cells, want.cells) ? "identical" : `DIFFERENT ${JSON.stringify(fpNow.cells)} vs ${JSON.stringify(want.cells)}`}, changed cells ${JSON.stringify(fpNow.changed)} (base ${JSON.stringify(want.changed)}), units ${same(fpNow.units, want.units) ? `identical (${fpNow.units.length})` : "DIFFERENT"}, items ${same(fpNow.items, want.items) ? `identical (${fpNow.items.length})` : "DIFFERENT"}; ` +
+                `base save (${json.length} characters) loaded: range ${first.fp.range.zMin}..${first.fp.range.zMax} (${first.fp.levels} levels; saved zRange ${JSON.stringify(first.fp.stateRange)}), every cell of -2..+2 ${same(fpNow.cells, want.cells) ? "identical to the save" : `DIFFERENT ${JSON.stringify(fpNow.cells)} vs ${JSON.stringify(want.cells)}`}, changed cells ${JSON.stringify(fpNow.changed)} (save ${JSON.stringify(want.changed)}), items ${same(fpNow.items, want.items) ? `identical to the save (${fpNow.items.length})` : "DIFFERENT"}, ` +
+                `units ${ref ? (same(fpNow.units, ref.units) ? `identical to the base commit's load of it (${fpNow.units.length}; the save holds ${want.units.length}: the base load drops or moves ${want.units.filter(u => !ref.units.includes(u)).length})` : "DIFFERENT from the base commit's load") : (same(fpNow.units, want.units) ? "identical to the save" : "DIFFERENT from the save (no base load reference)")}${ref ? `, cells and items identical to the base commit's load ${same(fpNow.cells, ref.cells) && same(fpNow.items, ref.items)}` : ""}; ` +
                 `after 30 frames of play saved and loaded again: range ${second.fp.range.zMin}..${second.fp.range.zMax}, saved zRange ${JSON.stringify(second.fp.stateRange)}, the world as saved ${same(fp2, atSave) ? "identical (cells, units, items)" : "DIFFERENT"}${first.timedOut || second.timedOut ? ", A LOAD TIMED OUT" : ""}`);
             resume();
         }
