@@ -1,0 +1,7 @@
+{
+  "gate": [
+    "tools/test_pass.js",
+    "tools/sub/test_pass_nested.js"
+  ],
+  "quarantine": []
+}

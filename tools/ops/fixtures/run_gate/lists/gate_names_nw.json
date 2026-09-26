@@ -1,0 +1,7 @@
+{
+  "gate": [
+    "tools/test_pass.js",
+    "tools/test_nw_binary_ref.js"
+  ],
+  "quarantine": []
+}

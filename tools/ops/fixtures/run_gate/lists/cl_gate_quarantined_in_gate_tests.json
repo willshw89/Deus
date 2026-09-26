@@ -1,0 +1,11 @@
+{
+  "gate": [
+    "tools/test_pass.js"
+  ],
+  "quarantine": [
+    {
+      "path": "tools/test_pass.js",
+      "reason": "fixture: listed in both"
+    }
+  ]
+}
