@@ -75,7 +75,7 @@ Each built element (a built stratum marked `M_BUILT`, `DEUS_Levels.js:995`, or a
   |---|---|---|---|---|
   | DPY 1 | 1,407 | 2,530 | 3,475 | 4,275 |
   | DPY 20 | 1,263 | 2,213 | 2,973 | 3,583 |
-  | life table | 1,397.3 | 2,523.0 | 3,479.9 | 4,293.2 |
+  | life table (R-01.2's clock) | 1,397.335 | 2,523.019 | 3,479.850 | 4,293.157 |
 
   These figures come from the writer's scratch calculation (REPORT.md), taking maxHP 120.
 - The per-day form inverts exactly only when `lifeYears × DPY` divides `1,000 × maxHP`. A 60-sy TIMBER roof at maxHP 120 qualifies: 2,000 milli-HP a day at DPY 1, 100 at DPY 20. That covers too few lives to keep the form for some classes and not others, so it is not used anywhere. It is replaced by the clock below. Proposed as an ADR-003 amendment (R-12.3).
@@ -264,13 +264,13 @@ This section answers R-02: the full chain from intact building to rock, per mate
 
 ADR-003 schedules per element (L1659-1661). A house of 10×10 squares with two-layer walls has about 36 perimeter squares × 2 layers × 5 slices = 360 wall strata plus 100 roof strata: about 460 elements. Scheduling each one separately costs 460 heap entries per house for no gain, because elements of one wall share material, exposure and maintenance.
 
-This design groups elements into **decay members**: a run of built strata of one structure with the same `dc`, the same `ex` and the same role (ROOF, WALL-UPPER, WALL-BASE, FLOOR, FOUNDATION, PROP, FITTING). A member holds at most 64 strata (a cap that bounds the support work one member event can cause). One heap entry per member, keyed `(nextDay, memberId)`. Each element's HP is still the closed-form ADR-003 value; the member just shares `d0`, `HP(d0)` and the rate. A member is split when its elements' exposure diverges (for example, rubble buries the lower slices of a wall): the split is local to that member.
+This design groups elements into **decay members**: a run of built strata of one structure with the same `dc`, the same `ex` and the same role (ROOF, WALL-UPPER, WALL-BASE, FLOOR, FOUNDATION, PROP, FITTING). A member holds at most 64 strata (a cap that bounds the support work one member event can cause). One heap entry per member, keyed `(dueYt, memberId)` (R-01.2, R-08.5). Each element's remaining life is R-01.2's closed form; the member just shares one clock (`t0`, `rem0`, `lifeYt`). A member is split when its elements' exposure diverges (for example, rubble buries the lower slices of a wall) or when external damage lowers some of its elements' HP: the split is local to that member, each part starts with a copy of the clock, and each part whose exposure or HP changed is then rebased at the instant of the cause (R-01.2).
 
 Roles are assigned when the structure is built (Lane Q's build path writes them into the member index, not into the strata). **WALL-BASE** is the lowest two slices (4 ft; stale: 2 ft) of every wall; **FOUNDATION** is any built stratum at or below the ground surface of its cell. **WALL-UPPER** members are horizontal **bands** at most 2 slices high, so a wall loses height from the top, one band at a time (R-01.4, R-01.6).
 
 ### R-02.3 The stages
 
-Stages are derived (ADR-003 L1666) per structure from member states, then per site as the stage reached by at least 50 % of the site's built mass. Thresholds use the member HP fraction `h = HP / maxHP`.
+Stages are derived (ADR-003 L1666) per structure from member states, then per site as the stage reached by at least 50 % of the site's built mass. Thresholds use the member life fraction `h = rem / R` (R-01.2), not the HP byte, so a stage transition has an exact instant (`cross(p)`) whatever `maxHP` and DPY are.
 
 | Stage | Entered when (structure level) | In the strata / object model | Ledger entries at entry | Catalogue slot (names only, DEC-011) |
 |---|---|---|---|---|
@@ -301,7 +301,7 @@ Stages are derived (ADR-003 L1666) per structure from member states, then per si
 | MUDBRICK | roof fails first (whatever its class); the top band melts within about 40-60 sy of roof loss (frost shortens it), the bands below faster, shedding 30 % of their mass as FINES around the base while they stand; the fines and slumped brick bury the wall bases (BURIED-AER, ∞) | a mound (tell) around standing wall stubs: S5 |
 | RUBBLESTONE | the top band fails about 400 sy after roof loss (less with frost); each band below follows at a shorter interval, because it has weathered under cover all along; fallen bands bury the bases | S4 then S5 as soil accumulates |
 | BRICK | the top band about 800 sy after roof loss (533 sy at FT 0.25), then the bands below at shorter intervals | S4 then S5 |
-| ASHLAR | the top band about 2,700 sy after roof loss, the last upper band near 8,500 sy (R-01.6 worked example); foundations never decay | S4 by about 8,500 sy on a stable site; S5 where soil or sediment accumulates |
+| ASHLAR | at wR 90 (R-01.6's worked example, roof lost at year 60) the top band fails at year 2,717.67, about 2,658 sy after the roof, and the last upper band at year 8,528.99. At limestone's wR 50 (FX-R-01's H1, R-09.3, roof lost at year 73) they fail at years 1,397.335 and 4,293.157; foundations never decay | S4 by about 8,530 sy (wR 90) or 4,300 sy (wR 50) on a stable site; S5 where soil or sediment accumulates |
 | Vaults (masonry below ground) | CAVE or SEALED: 20,000 sy or ∞ for ASHLAR; the risk is collapse, not decay (Lane Q) | standing voids (TR-2) |
 
 ### R-02.5 Catalogue slots and art needs (names only)
@@ -343,7 +343,7 @@ This section answers R-03: what happens to loose items, remains and metal. It co
 ### R-03.2 Which items decay
 
 - An item decays only while it is **unattended**: on the ground or in a container outside any maintained structure (R-01.7), or in an abandoned structure. Items carried by a unit, worn, or stored in a maintained structure get no decay state. Food spoilage in maintained stores belongs to the food and needs system; when it spoils, its mass goes through the rot transform below.
-- A decaying item gets a small record: `dc`, `ex`, `d0` (day it became unattended or last changed exposure), `cond0`, `nextDay`. It gets it on the event that makes it unattended (dropped, owner died, structure abandoned) and loses it when picked up.
+- A decaying item gets a small record: `dc`, `ex`, a corrosion-step counter, and a decay clock (`t0`, `rem0`, `lifeYt`; R-01.2). Its condition is `h = rem / R`. Its due instant lives only in the heap (R-08.5), not in the record. It gets the record on the event that makes it unattended (dropped, owner died, structure abandoned), with `t0` = the instant of that event, and loses it when picked up. A change of exposure (burial, flooding, a roof falling on it) rebases the clock (R-01.2).
 - **Composite items.** An item's catalog entry lists its components by family and class, for example a longsword as FE blade plus ORGANIC grip. Each component decays on its own schedule. When an organic component is gone the item becomes its stripped form (a blade, a spearhead) or SCRAP. This needs a `components` field in the item data (Lane Q's material table or the items owner); it is an interface assumption.
 
 ### R-03.3 Organics: rot to soil and nutrients
@@ -356,11 +356,13 @@ Default lives, sy, unattended (design defaults; real-world orders of magnitude):
 | LIGHTWOOD items (furniture, bows, bowls) | 150 | 60 | 25 | 10 | 15 | 500 | 20 |
 | FOOD (bread, meat, grain) | 1 | 0.5 | 0.1 | 0.05 | 0.5 | 50 | 0.2 |
 
+FOOD lives are shorter than a year. Under D-1 option (b) they are shorter than a game day: 0.05 sy is 120 yt, which is 120 ticks (1.2 game hours) at DPY 1. They are exact instants on the decay clock, and FOOD records drain every tick (the short heap, R-08.5), so they are not rounded to a day boundary (Fix 1, review MINOR-2).
+
 **Rot transform.** At the end of the life: `T(ITEM→SOIL-ORG, ORGANIC, floor(m × hf), "decay.rot")` and `sink(AIR, ORGANIC, m − floor(m × hf), "decay.rot.outgas")`. Humus fractions `hf`: TIMBER and LIGHTWOOD 0.20, THATCH 0.15, TEXTILE 0.10, FOOD 0.05. SOIL-ORG goes to the cell's residue record (section "Sparse storage and cost"). **That residue is the soil-nutrient field DEC-3 says does not exist**: decay writes it, SIM.50.04 reads it as fertility and draws it down as plant growth (`T(SOIL-ORG→BIOMASS)`, SIM.50.04's entry).
 
 ### R-03.4 Remains no longer vanish (DEC-3, V140, Lane W interface)
 
-**Every death makes a remains record**, on or off screen and at any LOD. Lane W owns the body: its brief lists "bodies and remains returning to soil via Lane R's decay chain" (`origin/task/lane-w:tasks/SIM.40.10/lane-w/BRIEF.md:46`). The hand-off:
+**Every death makes a remains record**, on or off screen and at any LOD. Lane W owns the body: its brief lists "bodies and remains returning to soil via Lane R's decay chain" (`origin/task/lane-w:tasks/SIM.40.10/lane-w/BRIEF.md:46`). Lane W's design has since been reviewed (Grok PASS at `bed949e839c4b9a06d467a6f36be50891fd70be5`) and merged to `origin/main` (`8997e238a97c7a4a2405d5e7249f587b4d8b298d`). It writes its own assumption of this hand-off: a call `decay.enqueueRemains(ref, {organicG, boneG}, cell, cause)`, in grams (IA-R1, `origin/main:tasks/SIM.40.10/lane-w/SIM.40.10_POPULATION_LIFECYCLE.md:277`). Fix 1 does not adopt it or change the hand-off below. The call names belong to PROPOSED-R-04; the mass unit (grams, kilograms or this design's mu) is the open question in Lane Q's escalation. The hand-off, as first written:
 - At death, Lane W books `T(BODY→REMAINS, ORGANIC, m_soft, "death")` and `T(BODY→REMAINS, BONE, m_bone, "death")`. Default bone fraction 0.15 of body mass (humans; per-species data).
 - In an L2 region, deaths of anonymous bucket members become aggregate remains per region cell cluster (ADR-003 L1607: "the bodies become mass forms"), with the same transforms.
 
@@ -378,8 +380,10 @@ Default lives, sy, unattended (design defaults; real-world orders of magnitude):
 
 **Time scale warning (D-1).** Under D-1 option (b) (DPY = 1), 0.25 sy is 6 game hours, which is 60 real seconds at 1x (ADR-003 §3.2: 1 game hour = 10 s). `docs/design/REMAINS.md:175` (24 h + 72 h) is 4 sy under (b), sixteen times slower than this table. The durations are data; which feel is wanted is **OQ-R-06**, and the calendar itself is D-1.
 
+**Sub-day stages (Fix 1, review MINOR-2).** A remains record has one decay clock (R-01.2). Each stage transition is that clock's `failYt`, and the next stage starts a fresh clock at that instant, with `rem0 = R` and the next stage's life at the current exposure. A SKY corpse becomes SKELETAL at `t0 + 600` yt (0.25 sy). That instant is exact whatever DPY is: it is tick `(t0 + 600) × DPY`, 600 ticks (6 game hours) after death at DPY 1 and 12,000 ticks (5 game days) at DPY 20. Remains records drain every tick (the short heap, R-08.5), so the stage lands on its own tick, not on the next day boundary.
+
 **SRD links.**
-- *Gentle repose*: "the target is protected from decay" for 10 days (`game/data/srd51/spells.json:8417`). It pauses the remains clock: `d0 += 10 game days`. Under D-1 (b) that is 10 sy; under (a) it is 10 / N sy.
+- *Gentle repose*: "the target is protected from decay" for 10 days (`game/data/srd51/spells.json:8417`). It pauses the remains clock. At the casting instant `t1` the clock is rebased to life ∞ (R-01.2). A resume entry at `t1 + ceilDiv(10 × 2,400, DPY)` yt then rebases it back to the life of its exposure. Under D-1 (b) that pause is 10 sy; under (a) it is 10 / N sy. It is the one decay duration authored in game days, because the SRD states it in days.
 - Time limits that assume a body persists: *raise dead* "dead no longer than 10 days" (`game/data/srd51/spells.json:13455`), *resurrection* "no more than a century" (`game/data/srd51/spells.json:14025`), *true resurrection* 200 years (`game/data/srd51/spells.json:16818`). The remains record keeps its `personId` **anchor** for at least `anchorYears` (default 200 sy) even after all its mass has become soil: a zero-mass record, so no matter is invented and the SRD windows still have a target (TR-6).
 - *Speak with dead* needs a corpse that "must still have a mouth" (`game/data/srd51/spells.json:15402`): true while the skull is present (stage FRESH or SKELETAL).
 - *Animate dead* uses bones or a corpse (`game/data/srd51/spells.json:1838`): it takes the REMAINS record's mass into a BODY (Lane W's transform); nothing is created.
@@ -404,7 +408,7 @@ Default lives, sy, from full metal to fully oxidised, for a reference section of
 
 Scaled by catalog `corrosionResistance` (iron 30 at `game/data/DEUS_WorldCatalog.json:4893`, gold 99 at `:4953`): life × cR / 30 for FERROUS, and relative to each class's reference metal otherwise.
 
-**Corrosion transform.** Over its life a metal component converts in `steps` equal parts (default 4): each step books `T(ITEM→OXIDE, FE, floor(m0 / 4), "decay.corrode")`, the last step takes the remainder and destroys the item. OXIDE goes to the cell's residue record and keeps its family and form forever. When the cell's floor becomes soil or sediment, the OXIDE stays OXIDE inside it: a rust stain, a green copper trace.
+**Corrosion transform.** Over its life a metal component converts in `steps` equal parts (default 4): each step books `T(ITEM→OXIDE, FE, floor(m0 / 4), "decay.corrode")`, the last step takes the remainder and destroys the item. The steps fall at the clock's crossings `cross(750,000)`, `cross(500,000)`, `cross(250,000)` and `cross(0)` (R-01.2). OXIDE goes to the cell's residue record and keeps its family and form forever. When the cell's floor becomes soil or sediment, the OXIDE stays OXIDE inside it: a rust stain, a green copper trace.
 
 **The ore guard.** Four rules, each with a test (AT-R-06):
 1. **No transform outputs ore.** The transform table has no entry whose output is an ore material (ADR-003 L950).
@@ -486,6 +490,7 @@ Source: real-world orders of magnitude (wood ash about 1 % of dry mass; charcoal
 | ASH | 5 sy | 50 sy | ∞ (a buried ash horizon, TR-7) | `T(ASH→SOIL-MIN, ORGANIC, m, "decay.ash_to_soil")`: nutrient-rich soil; SIM.50.04 reads it as a fertility boost |
 | CHARCOAL | 20 sy to fragment into soil | 200 sy | ∞ | `T(CHARCOAL→SOIL-CARBON, ORGANIC, m)`; then SOIL-CARBON oxidises only if exposed at the surface: `sink(AIR, ORGANIC, m, "decay.char_oxidise")` over 5,000 sy |
 
+- Each weathering residue field (exposed ASH or CHARCOAL, FINES, non-anchor RUBBLE) carries a decay clock (R-01.2). Burial rebases it to ∞ (TR-7); excavation rebases it back.
 - Exposed ash is the most erodible material on a burned slope. SIM.50.03 may move it before it weathers; that is its transfer, ledgered as a move of the same form.
 - **Charcoal never becomes coal.** Coal is a finite mineral; no transform outputs it (ore guard rule 4).
 
@@ -497,7 +502,7 @@ SIM.50.05 asks for "permanent ash beds (WG.63.04)" (`docs/worldgen/DEUS_WORLDGEN
 
 ## Decay-driven collapse
 
-This section answers R-05: how decay lowers member strength and hands off to SIM.40.01/.02 collapse, with localized support rechecks. It is an **interface contract with Lane Q**. Lane Q had not pushed a design when this was written (`origin/task/lane-q` at `9103799e` holds only its brief), so every Lane Q name below is **ASSUMED** and taken from ADR-003 §16 and the Lane Q brief. If Lane Q's reviewed design names things differently, the names change and the contract does not.
+This section answers R-05: how decay lowers member strength and hands off to SIM.40.01/.02 collapse, with localized support rechecks. It is an **interface contract with Lane Q**. It was written against the Lane Q brief (`9103799ecbbd1b389b427c15ddbe7f5c814c806a`), the Lane Q tip when the writer read it, so every Lane Q name below is **ASSUMED** and taken from ADR-003 §16 and that brief. The first version said Lane Q held only its brief. That was stale by the first final commit, because Lane Q had already pushed design sections (review MINOR-3). Fix 1 re-sampled the tips: see the header's "Limits" row. Lane Q's design (`origin/task/lane-q:tasks/SIM.40.01/lane-q/SIM.40.01_STRUCTURAL_SUPPORT.md`, at `9d5b40d32f96a38803b1f32f78287a902d2bead8`; Grok FAIL there, now in its own Fix 1) records every naming difference with this section in its §9.7. That covers the break path, the threshold list, the collapse events, the mass unit and the words "decay member" and "support member". **That reconciliation is Lane Q's.** Fix 1 of this lane does not copy Lane Q's names into the contract. Lane Q's §9.7 predates Fix 1, so three items are new for it: the decay clock (R-01.2), the causing instant `atYt` carried through a cascade (C-3), and the instant barrier (C-6). If Lane Q's reviewed design names things differently, the names change and the contract does not. R-05 stays PARTIAL.
 
 ### R-05.1 What exists
 
@@ -521,21 +526,34 @@ ADR-003 §16.3 feeds its `supportDirty` queue with "a decay failure (§17)" (ADR
 
 ### R-05.3 The contract
 
-- **C-1. Decay writes HP only at thresholds.** Decay computes HP lazily (closed form). It writes an element's HP byte, through the single strata writer (`writeCell`, `DEUS_Levels.js:1537`) with cause `"decay"`, only when the lazy HP crosses one of the capacity thresholds Lane Q publishes for that material (`capacityThresholdsHP[material]`, an ascending list of HP bytes; ASSUMED name). ADR-003 §16.3 already enqueues "a stratum ... damaged across a capacity threshold", so every such write reaches the support queue without a second call. A member's thresholds are its `steps` (R-02.3); default 4, so a member causes at most 4 HP writes plus 1 failure in its life.
-- **C-2. Decay never removes matter itself.** At an element's `failDay` (HP 0), decay calls Lane Q's single break path, `collapse.breakElement(ref, "decay")` (ASSUMED name), the same code path a blast or a pick uses at 0 HP. Lane Q books `T(BUILT→RUBBLE, family, m, "collapse.decay")` and puts the cells into `supportDirty`. There is one break-conversion owner (Lane Q), so decay can never disagree with collapse about where the mass went. This replaces today's 0-HP-to-air rule (`DEUS_Levels.js:1702`) on the decay path.
-- **C-3. Collapse tells decay what changed.** Lane Q's collapse emits one event per cascade step (the ADR-003 feed's `EFFECT(collapse)`, or `structure:collapsed`; ASSUMED) carrying the cells, the forms and the masses moved. Decay listens and: marks the failed members, re-derives stages, and recomputes exposure **only** for members whose cells or face neighbours are in the event (rubble burying a wall base, a roof hole opening a room to the sky).
+- **C-1. Decay writes HP only at thresholds.** Decay computes `rem` lazily (R-01.2), and the HP byte is derived from it. It writes an element's HP byte, through the single strata writer (`writeCell`, `DEUS_Levels.js:1537`) with cause `"decay"`, only when the derived byte falls to one of the capacity thresholds Lane Q publishes for that material (`capacityThresholdsHP[material]`, an ascending list of HP bytes; ASSUMED name). A threshold byte `k` is due at the instant `cross(floorDiv(k × R, maxHP))` (R-01.2). ADR-003 §16.3 already enqueues "a stratum ... damaged across a capacity threshold", so every such write reaches the support queue without a second call. A member's thresholds are its `steps` (R-02.3); default 4, so a member causes at most 4 HP writes plus 1 failure in its life.
+- **C-2. Decay never removes matter itself.** At an element's `failYt` (`rem` 0, so HP 0; R-01.2), decay calls Lane Q's single break path, `collapse.breakElement(ref, "decay")` (ASSUMED name), passing its `dueYt` as the cascade's `atYt` (C-3). It is the same code path a blast or a pick uses at 0 HP. Lane Q books `T(BUILT→RUBBLE, family, m, "collapse.decay")` and puts the cells into `supportDirty`. There is one break-conversion owner (Lane Q), so decay can never disagree with collapse about where the mass went. This replaces today's 0-HP-to-air rule (`DEUS_Levels.js:1702`) on the decay path.
+- **C-3. Collapse tells decay what changed.** Lane Q's collapse emits one event per cascade step (the ADR-003 feed's `EFFECT(collapse)`, or `structure:collapsed`; ASSUMED) carrying the cells, the forms and the masses moved, plus **`atYt`**, the instant of the cascade's cause (ASSUMED field, new in Fix 1). For a cascade that a decay failure started, `atYt` is that failure's `dueYt`, which decay passes in the break call (C-2). For other causes it is `ceilDiv(tick, DPY)` of the tick of the cause. Decay listens and:
+  - marks the failed members;
+  - re-derives stages;
+  - recomputes exposure **only** for members whose cells or face neighbours are in the event (rubble burying a wall base, a roof hole opening a room to the sky);
+  - rebases each member whose exposure changed at `t1 = atYt` (R-01.2), not at the tick or day on which the event is handled.
 - **C-4. Strength scaling is Lane Q's.** Capacity is `capacity[material]` scaled by `hp / maxHP` with integer thresholds (ADR-003 §16.3). Decay supplies the HP; it never computes load or support.
 - **C-5. Bounded work.** One decay event writes at most one member's strata (≤ 64, the member cap), so it enqueues at most 64 cells. ADR-003 §16.3 bounds one evaluation at O(span² × strata). With a span of 4 cells and 5 strata that is 16 × 5 = 80 strata reads per cell, ≤ 64 × 80 = 5,120 reads per decay event before the cascade, and the cascade only continues if something actually fails.
-- **C-6. Determinism.** Decay pops its heap in `(dueDay, memberId)` order; Lane Q processes `supportDirty` in its canonical order (FIFO by tick, then elevation, then cell index). No `Math.random` (ADR-003 §10).
+- **C-6. Determinism.**
+  - Decay pops its heaps in `(dueYt, id)` order (R-08.5). Lane Q processes `supportDirty` in its canonical order (FIFO by tick, then elevation, then cell index). No `Math.random` (ADR-003 §10).
+  - **Instant barrier (new in Fix 1).** After decay hands a failure at instant `t` to Lane Q, it pops no entry with a later instant until three things have been applied: the cascade that failure caused, its spill, and the resulting rebases at `t`. Lane Q must either settle a decay-caused cascade inside the break call, or report when it has settled (ASSUMED). In a day jump the cascade simply runs to completion before the next pop.
+  - Without the barrier, one day's batch at DPY 1 (a whole year of instants) could process a later event before an earlier failure's spill had buried it. At DPY 20 the same events would be 20 days apart. The two runs would then differ (AT-R-20).
 - **C-7. Ledger.** Decay's own entries are shedding (`BUILT→FINES`), rot and weathering of fallen rubble, and item and remains transforms. Lane Q's are the break (`BUILT→RUBBLE`) and falling. Every mass unit of a member ends in exactly one class; the long-run test checks the sum over both lanes.
 - **C-8. External loads act on decayed HP.** Snow load (SIM.50.06's annual maximum, R-01.5), blasts (DEC-013 §4, `applyVolumeDamage`) and the SRD *earthquake*, which "deals 50 bludgeoning damage to any structure in contact with the ground ... If a structure drops to 0 hit points, it collapses" (`game/data/srd51/spells.json:6391`), all act on the current, decayed HP. So old ruins fall first, without any special rule.
 
 ### R-05.4 Roof to wall to collapse, step by step
 
-1. Day `d0`: the site is abandoned; the house's members get schedules. The TIMBER roof (SKY, 60 sy) and the ASHLAR walls (SHELTERED) are separate members.
-2. Each time the roof's lazy HP crosses a threshold, decay writes the roof strata's HP (C-1); Lane Q re-checks those cells. Snow load in a cold region may make the roof fail at a threshold before HP 0; Lane Q breaks it.
-3. At the roof's `failDay` (or earlier, by overload), `collapse.breakElement` turns the roof into RUBBLE that falls onto the floor (Lane Q). The collapse event (C-3) tells decay: the walls' tops are now SKY; decay splits the wall members (upper slices SKY, lower slices unchanged) and reschedules them. The structure is S3.
-4. Centuries later the top wall band fails the same way; the band below becomes the top (C-3 again) and fails in turn, sooner, since it has weathered under cover all along. The rubble banks against the wall bases; decay reclassifies the covered slices as BURIED-AER (∞). When the last upper band has fallen the structure is S4, and its foundations survive.
+1. The site is abandoned; each member's clock starts at `t0` = the end of its abandonment grace (R-01.7). The TIMBER roof (SKY, 60 sy) and the ASHLAR walls (SHELTERED) are separate members.
+2. Each time the roof's derived HP byte reaches a threshold (at that threshold's `cross` instant, C-1), decay writes the roof strata's HP; Lane Q re-checks those cells. Snow load in a cold region may make the roof fail at a threshold before HP 0; Lane Q breaks it.
+3. At the roof's `failYt` (or earlier, by overload), `collapse.breakElement` turns the roof into RUBBLE that falls onto the floor (Lane Q). The collapse event (C-3) tells decay that the top band of each wall is now SKY, with `atYt` = the roof's `failYt`. Decay then does this for each top-band member (the lower bands stay SHELTERED and keep their clocks unchanged):
+   - `rem0 ← rem(atYt)`, from its SHELTERED segment;
+   - `t0 ← atYt`;
+   - `lifeYt ←` its SKY life (R-01.2);
+   - replace its heap entry with the new next event.
+
+   The structure is S3.
+4. Centuries later the top wall band fails the same way. The band below becomes the top (C-3 again, `atYt` = the upper band's `failYt`) and is rebased to SKY by the same assignment. It fails in turn, sooner, since it has weathered under cover all along (the band tables in R-01.6 and R-09.3). The rubble banks against the wall bases; decay reclassifies the covered slices as BURIED-AER (∞). When the last upper band has fallen the structure is S4, and its foundations survive.
 
 ### R-05.5 Underground props
 
@@ -576,7 +594,7 @@ This section answers R-06: vegetation invading abandoned cells, sediment burial,
 A ruin becomes a buried mound (S5) through four mass transfers, all local and all ledgered:
 1. **Its own rubble.** Fallen roofs and walls bury the wall bases (R-05.4). Lane Q's transform.
 2. **Mudbrick melt and masonry shedding.** FINES collect at the wall foot (R-02.3): `T(BUILT→FINES)`.
-3. **Litter to soil.** Plants on the footprint drop litter (SIM.50.04's `T(BIOMASS→SOIL-ORG)`). Litter build-up is uniform over a vegetated footprint, so it is held **per structure footprint** in closed form (a start day and a rate), not per cell: one heap entry per footprint gives the day the next full slice is due. On that day decay writes one SOIL stratum on every footprint cell and books exactly one slice of soil mass per cell (soil bulk about 80 lb/ft³ × 50 ft³ = 4,000 lb = **64,000 mu**; stale 32,000 mu). Default build-up: 0.25 mm per sy on a vegetated footprint, so one 2-ft slice (610 mm) takes about 2,400 sy (stale 1-ft slice: about 1,200 sy).
+3. **Litter to soil.** Plants on the footprint drop litter (SIM.50.04's `T(BIOMASS→SOIL-ORG)`). Litter build-up is uniform over a vegetated footprint, so it is held **per structure footprint** in closed form, not per cell: a start instant `litterStartYt` and a slice period `litterSliceYt` (2,440 sy × 2,400 yt at the default below). One heap entry per footprint gives the instant the next full slice is due (`litterStartYt + n × litterSliceYt`, R-01.2). At that instant decay writes one SOIL stratum on every footprint cell and books exactly one slice of soil mass per cell (soil bulk about 80 lb/ft³ × 50 ft³ = 4,000 lb = **64,000 mu**; stale 32,000 mu). Default build-up: 0.25 mm per sy on a vegetated footprint, so one 2-ft slice (610 mm) takes 2,440 sy (stale 1-ft slice: 1,220 sy).
 4. **Sediment from outside (SIM.50.03).** Slope wash and floods deposit SEDIMENT in low ruins (ADR-003 L1674: "Soil or rubble erodes at an exposed source cell in the same drainage (−k) and deposits at the low cell (+k)"). SIM.50.03 owns the rates. Decay only reacts to the strata-write events on its members' cells.
 
 Wind-blown dust (WG.65.06 names wind transport) is not modelled here.
@@ -648,15 +666,15 @@ The site record belongs to SIM.50.09. Decay adds these fields: `state`, `abandon
 | **TR-7** Burn horizons | buried ASH and CHARCOAL | Buried residue has life ∞ (R-04.4) | indefinitely | excavation, erosion |
 | **TR-8** Provenance and traces | WG.65.16 flags on changed cells (built, collapsed, robbed, naturalized); OXIDE, bone phosphate and SOIL-CARBON in residue records | They are ordinary sparse saved state | indefinitely | nothing; they move only with the soil they sit in |
 
-**What a visitor finds at a default stone hamlet** (limestone ASHLAR houses with TIMBER roofs, temperate, FT 0.25, no erosion; approximate, from R-01.6):
+**What a visitor finds at a default stone hamlet** (limestone ASHLAR houses, wR 50, with TIMBER roofs, temperate, FT 0.25, no erosion). The years come from FX-R-01's H1 timeline (R-09.3, the wR 50 table), counted from the site's abandonment at y11 and rounded. They do not come from R-01.6's worked example, which is ASHLAR at wR 90 and fails near years 2,718 and 8,529 (Fix 1, review MINOR-1). In H1 the roof crosses `h = 0.85` (S1) at y22, the first plant arrives at y23 (S2), the roof fails at y73, the top band at y1,397.335 and the last upper band at y4,293.157.
 
 | Years after abandonment | What is visible |
 |---|---|
-| 10 | weathered roofs, weeds in doorways (S1-S2) |
-| 100 | roofless houses with full-height walls, saplings inside (S3) |
+| 15 | weathered roofs, weeds in doorways (S1 from about 11 years, S2 from about 12) |
+| 100 | roofless houses with full-height walls, saplings inside (S3 from about 62 years) |
 | 1,000 | the same walls, cracked; shrubs and young woodland; an iron-stained floor; ceramic and glass in the leaf litter (S3) |
-| 2,000 | walls about 4 ft lower (the top band fell near 1,400), rubble banked against them (S3) |
-| 5,000 | wall stubs and rubble spreads (S4, from about 4,300); foundations complete |
+| 2,000 | walls about 4 ft lower (the top band fell about 1,386 years after abandonment; the next falls at about 2,512), rubble banked against them (S3) |
+| 5,000 | wall stubs and rubble spreads (S4, from about 4,282 years after abandonment); foundations complete |
 | 10,000 | low grassed or wooded mounds on the old plan (S5), foundations under them, relics and an ash line at the burned house under the soil |
 
 ### R-07.4 Salvage with conserved mass
