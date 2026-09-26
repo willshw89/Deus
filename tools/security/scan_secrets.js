@@ -12,7 +12,9 @@
  *
  * A matched value is never printed, logged or stored. Output shows file:line, the rule id, the first
  * REDACT_KEEP characters of the match and its length ("AIza... (39 chars)"). The allowlist and the
- * --json output carry a sha256 of the matched line, never the line.
+ * --json output carry a sha256 of the matched line, never the line (for a CREDENTIAL_FILE finding,
+ * the sha256 of the path). Only a value the baseline already names is shown by its fingerprint (the
+ * sha256 of the value).
  *
  * Usage:
  *   node tools/security/scan_secrets.js                   every file tracked at HEAD
@@ -25,13 +27,17 @@
  *   options: --json               one JSON document on stdout instead of text lines
  *            --allowlist <file>   default tools/security/secrets_allowlist.json under the repository
  *                                 root (a missing default file is an empty allowlist)
+ *            --baseline <file>    default tools/security/secrets_baseline.json (same rule when missing):
+ *                                 known historical values, applied in --range scans only (see below)
  *
  * Binary files (extension list, or a NUL byte in the first NUL_SNIFF_BYTES bytes or in an added
  * line) are skipped and counted. Allowlist entries are { path, rule, lineSha256, reason }; a finding
  * that matches one is reported as ALLOWED. An entry that matches nothing in a scan that read its
  * whole file (default mode: every entry; --path: entries for that path) is STALE and fails the run.
+ * Baseline entries (section "Baseline" below) turn a finding into BASELINED only in the history
+ * before the commit that removed the value.
  *
- * Exit: 0 clean, 1 findings or stale allowlist entries, 2 usage or git error.
+ * Exit: 0 clean, 1 findings or stale allowlist / baseline entries, 2 usage or git error.
  */
 
 const fs = require("fs");
@@ -56,8 +62,8 @@ const COMMIT_MESSAGE_PATH = "<commit-message>";
 // ENTROPY_CONTEXT_WINDOW characters before the run) and reach ENTROPY_HEX_MIN_BITS.
 // False-positive tuning (escalation.md: 176 of 184 first-run hits were file paths or URLs, 3 were
 // base64 alphabet tables):
-//   - "/" separates path and URL segments. A run containing "/" is judged per "/"-free segment. The
-//     whole run is judged too only when it shows a sign of base64 that paths lack ("+", or "="
+//   - "/" separates path and URL segments. A run containing "/" is judged per "/"-free segment,
+//     except that it is judged whole when it shows a sign of base64 that paths lack ("+", or "="
 //     padding) or when it is the value of a credential-named assignment.
 //   - A run holding ENTROPY_SEQ_RUN or more consecutive ascending characters ("ABCDEF", "012345")
 //     is an alphabet or lookup table, not a generated value.

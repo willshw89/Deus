@@ -141,6 +141,7 @@ function setup() {
         "game/js/libs/extra.js": "/* TEST_ new lib */\n"
     }, "TEST_ libs changed");
     F.write(X.libs, { "game/js/libs/localforage.min.js": "/* TEST_ edited in the working tree */\n", "game/js/libs/untracked.js": "/* TEST_ */\n" });
+    F.git(X.libs, ["mv", "game/js/libs/extra.js", "game/js/libs/extra2.js"]);      // a staged rename: two status fields
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -229,7 +230,7 @@ S.add("libs_changed_removed_added_detected", T => {
 S.add("libs_worktree_change_detected", T => {
     const d = json(T, ["--libs-baseline", X.libsFile], X.libs);
     const f = keys(d.findings.filter(x => x.kind === "LIBS_WORKTREE_CHANGED")).join(", ");
-    return expect(f === "LIBS_WORKTREE_CHANGED game/js/libs/localforage.min.js, LIBS_WORKTREE_CHANGED game/js/libs/untracked.js", "worktree: " + f);
+    return expect(f === "LIBS_WORKTREE_CHANGED game/js/libs/extra2.js, LIBS_WORKTREE_CHANGED game/js/libs/localforage.min.js, LIBS_WORKTREE_CHANGED game/js/libs/untracked.js", "worktree: " + f);
 });
 
 S.add("make_libs_baseline_roundtrip", T => {
@@ -314,7 +315,8 @@ const MUTANTS = [
     { name: "absolute_require_off", pairs: [["return { kind: \"ABSOLUTE_REQUIRE\", severity: \"finding\"", "return { kind: \"ABSOLUTE_REQUIRE\", severity: \"ok\""]], hints: ["absolute_require_detected"] },
     { name: "libs_baseline_off", pairs: [["items.push(...libs.items);", ""]], hints: ["libs_changed_removed_added_detected"] },
     { name: "libs_added_file_off", pairs: [["if (!(p in baseline.files)) out.push(", "if (false) out.push("]], hints: ["libs_changed_removed_added_detected"] },
-    { name: "libs_worktree_off", pairs: [["for (const rec of st) {", "for (const rec of []) {"]], hints: ["libs_worktree_change_detected"] },
+    { name: "libs_worktree_off", pairs: [["for (let i = 0; i < st.length; i++) {", "for (let i = st.length; i < st.length; i++) {"]], hints: ["libs_worktree_change_detected"] },
+    { name: "libs_status_rename_misread", pairs: [["if (rec[0] === \"R\" || rec[0] === \"C\") i++;", ""]], hints: ["libs_worktree_change_detected"] },
     { name: "npm_artifact_off", pairs: [["items.push(...checkNpmArtifacts(entries, blobText));", ""]], hints: ["npm_artifacts_under_game_detected"] },
     { name: "node_version_off", pairs: [["if (Number(m[1]) < MIN_NODE_MAJOR)", "if (false)"]], hints: ["node_version_policy"] },
     { name: "builtins_treated_as_npm", pairs: [["return isBuiltin ? bare.split(\"/\")[0] : null;", "return null;"]], hints: ["clean_repo_exit_0"] },

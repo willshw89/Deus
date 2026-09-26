@@ -504,9 +504,12 @@ function checkLibs(root, entries, blobs, baseline) {
     }
     // Uncommitted edits, deletions and new files in the frozen folder (git's own view, so line-ending
     // conversion is not a change).
-    const st = git(root, ["status", "--porcelain=v1", "-z", "--untracked-files=all", "--", LIBS_DIR]).toString("utf8").split("\0").filter(Boolean);
-    for (const rec of st) {
+    const st = git(root, ["status", "--porcelain=v1", "-z", "--untracked-files=all", "--", LIBS_DIR]).toString("utf8").split("\0");
+    for (let i = 0; i < st.length; i++) {
+        const rec = st[i];
+        if (!rec) continue;
         out.push({ kind: "LIBS_WORKTREE_CHANGED", severity: "finding", path: rec.slice(3), line: 0, detail: "working tree differs from HEAD (git status " + JSON.stringify(rec.slice(0, 2)) + ")" });
+        if (rec[0] === "R" || rec[0] === "C") i++;                // a rename or copy record carries its source path next
     }
     return { items: out, count: now.size };
 }
