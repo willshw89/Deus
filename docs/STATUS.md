@@ -1,9 +1,10 @@
 # STATUS: Project DEUS Current Operational State
 **Project Formal Name:** DEUS  
-**Last Updated:** 2026-09-25 (Directive 001-F)  
+**Last Updated:** 2026-09-25 23:45 CT (Directive 001-L)  
 **Coordinator & Integration Authority:** Gemini / Antigravity  
 **Reporting Policy:** Immediate notification on commits, failures, defects, crashes, or power events; routine pulse every 15 minutes.  
-**Historical Ledger:** All completed historical records prior to 2026-09-25 are archived in [`docs/archive/STATUS_LEDGER_20260925.md`](docs/archive/STATUS_LEDGER_20260925.md).
+**Historical Ledger:** All completed historical records prior to 2026-09-25 are archived in [`docs/archive/STATUS_LEDGER_20260925.md`](archive/STATUS_LEDGER_20260925.md).  
+**Canonical Defect Ledger:** `tasks/WG.00.08/defects.jsonl` (Note: `docs/telemetry/defects.jsonl` cited in protocol docs does not exist).
 
 ---
 
@@ -28,8 +29,8 @@
 - **Heavy Job Cap:** Formally **LIFTED** as of 2026-09-25 per Owner decision.
 - **Automatic Tripwire:** Any instant power loss automatically reinstates `MAX_SIMULTANEOUS_HEAVY_LOCAL_JOBS = 1` until explicitly lifted by the Owner. Any power event must be reported immediately.
 - **Remote Git Origin:** Formally configured and live per DEC-005: `origin = https://github.com/willshw89/Deus.git` (private remote). Verified clean clone with 10,259 tracked files, fsck clean, checks pass.
-- **Origin in Sync:** **YES** (`main` pushed to `origin/main` at `2d967d0d`).
-- **Backup State:** **COMPLETE** (Whitelisted `game/img` fully and tracked `game/data/df_*.json` per Directive 001-F sec 7; commit `258a2c60`).
+- **Origin in Sync:** **YES** (`main` and `origin/main` both at `eb93286c11282d8c5e529be5bdf04212d1cd51cc`).
+- **Backup State:** **COMPLETE (git); untracked-essentials zip awaiting Owner off-laptop copy** (`C:\Users\snewt\DEUS_backups\deus_untracked_2026-09-25.zip`, 89.5 MB, SHA256 D3A49004…C0CD1).
 - **Pre-Execution Checkpoint Discipline:** Before launching any heavy execution, workers must checkpoint in `tasks/<task-id>/state.md`, save all open files, verify git branch/worktree, and commit uncommitted work.
 - **Migration Freeze:** The physical copy to `C:\Dev\DEUS` is frozen until all active writers commit and pause at a synchronized freeze point.
 
@@ -39,10 +40,10 @@
 - **Incident Correction (Directive 001-H sec 6):** Coordinator output file overwrite at 17:13:55 logged as `DEF-COORD-INJECT-01`; `b1ua8l2oj.output` had real 29/0 EXIT=0 result confirmed by `task-34196.log:1084`; `bvwyow104.output` was hook-script SyntaxError (EXIT=1); coordinator ceased all worker temp file touches.
 - **Worker Relaunch (Directive 001-K §1):** Lane H original worker (Claude PID 6276, `task-35425`) exited at 23:18:50 with uncommitted work while background evidence runs were still executing. Reason: Claude CLI completed its single-prompt turn expecting an asynchronous callback notification ("I don't need a monitor here: the background evidence run will notify me when it finishes..."). Coordinator waited for all background node test runs to complete, then relaunched the worker via `resume_lane_h.ps1` as `task-35727` (PID 21660) at 23:25.
 - **Lane A (Claude / Fable):** WG.00.08 Merged into `main` (`0f7f26cd`), but WG.00.08 stays in `REVIEW` per Directive 001-H sec 2 until Grok verifier commits PASS, DEC-001 is recorded, and PM signs off.
-- **Lane B (Claude / Fable):** WG.00.11 Merged into `main` (`8c0c210c`). Hardening suite verified passing.
+- **Lane B (Claude / Fable):** WG.00.11 Merged into `main` (`8c0c210c`). Hardening suite verified passing (counts superseded by Lane G).
 - **Lane C1 (Claude CLI):** WG.00.12 Merged into `main` (`e07c86ea`). Backup infrastructure verified.
-- **Lane C2 (Claude CLI):** WG.00.12 Merged into `main` (`83bcc1a7`). Machine governance checker verified (88/88 checks pass, 22 mutants killed). Hook installation held until Lane E merges.
-- **Lane C3 (Claude CLI):** WG.00.12 Merged into `main` (`8db39b0b`). Revised ADR-002 (uf.hex canonical for runtime).
+- **Lane C2 (Claude CLI):** WG.00.12 Merged into `main` (`83bcc1a7`). Machine governance checker verified (88/88 checks pass, 22 mutants killed). Hook installation held until Grok passes Lane C2b AND Lane E merges, per Directive 001-I §C.
+- **Lane C3 (Claude CLI):** WG.00.12 Merged into `main` (`8db39b0b`). ADR-002 Rev 2 (uf.hex canonical for runtime) PROPOSED, awaiting Grok review; not yet accepted.
 - **Lane D (Grok PM):** Adversarial review delivered (verdicts recorded).
 - **Lane E (Grok Writer / Claude Reviewer):** WG.00.09 Follow-up: Grok revision (`5964f772`) diff-reviewed by Claude across full diff `710fa095..5964f772` (`6a71a4c4`). Verdict: **CHANGES REQUESTED** (0 blocker, 0 major, 2 minor: N5, N6). Findings N2, N4 resolved, N3 resolved as asked, N1 partly resolved (carried into N5). Grok writer to fold in N5 and N6.
 - **Lane F (Claude CLI):** WG.00.12 Merged into `main` (`d09a1295`). 8-test post-F suite all passed with EXIT=0. Pushed to `origin`.
@@ -56,12 +57,12 @@
 
 | Lane | Objective & WBS ID | Provider / Model | Worker Task ID & Branch | Worktree Path | Last Output / mtime | Current Gate & Status |
 |---|---|---|---|---|---|---|
-| **Lane A** | **WG.00.08 Exit Criteria** (`WG.00.08`) | Claude CLI (Fable) / `claude-opus-5-5` | Merged `0f7f26cd`<br>`task/lane-a` | `C:\Users\snewt\.deus_worktrees\lane-a` | 2026-09-25 18:31:09 | **STATUS: MERGED / REVIEW HELD.**<br>• Grok verifier PASS recorded (`16fec10`). PM rejected current proof (exit 1 on main). Proof assigned to Lane H. WG.00.08 stays in REVIEW. |
-| **Lane B** | **ATK-YEAR0-001 Hardening** (`WG.00.11`) | Claude CLI (Fable) / `claude-opus-5-5` | Merged `8c0c210c`<br>`task/lane-b` | `C:\Users\snewt\.deus_worktrees\lane-b` | 2026-09-25 16:52:25 | **STATUS: INTEGRATED TO MAIN.**<br>• 27 gating checks + 12 mutants pass. Merged to main and pushed to origin. |
+| **Lane A** | **WG.00.08 Exit Criteria** (`WG.00.08`) | Claude CLI (Fable) / `claude-opus-5-5` | Merged `0f7f26cd`<br>`task/lane-a` | `C:\Users\snewt\.deus_worktrees\lane-a` | 2026-09-25 18:31:09 | **STATUS: MERGED / REVIEW HELD.**<br>• Grok verifier PASS (`16fec107`) is on task/lane-a only, not on main, and covers the 28-mutant roster only. WG.00.08 stays in REVIEW. |
+| **Lane B** | **ATK-YEAR0-001 Hardening** (`WG.00.11`) | Claude CLI (Fable) / `claude-opus-5-5` | Merged `8c0c210c`<br>`task/lane-b` | `C:\Users\snewt\.deus_worktrees\lane-b` | 2026-09-25 16:52:25 | **STATUS: INTEGRATED TO MAIN.**<br>• Test counts superseded by Lane G (30 gating / 15 mutants). Merged to main and pushed to origin. |
 | **Lane C1** | **Consolidation Infrastructure** (`WG.00.12`) | Claude CLI (Codex failover) / `claude-opus-5-5` | Merged `e07c86ea`<br>`task/lane-c1` | `C:\Users\snewt\.deus_worktrees\lane-c1` | 2026-09-25 16:52:25 | **STATUS: INTEGRATED TO MAIN.**<br>• Authored `tools/backup_project.ps1`. Merged to main and pushed to origin. |
 | **Lane C2** | **Governance check_claims.js** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Merged `83bcc1a7`<br>`task/lane-c2` | `C:\Users\snewt\.deus_worktrees\lane-c2` | 2026-09-25 17:02:39 | **STATUS: INTEGRATED TO MAIN.**<br>• Hardening against PM attack assigned to Lane C2b. |
 | **Lane C2b** | **Governance Hardening** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | `task-35427` (PID 7264)<br>`task/lane-c2b` | `C:\Users\snewt\.deus_worktrees\lane-c2b` | Active | **STATUS: ACTIVE WRITER.**<br>• Hardening check_claims.js against PM attack per Directive 001-I sec C. |
-| **Lane C3** | **Palette ADR Revision & Review** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Merged `8db39b0b`<br>`task/lane-c3` | `C:\Users\snewt\.deus_worktrees\lane-c3` | 2026-09-25 16:54:51 | **STATUS: INTEGRATED TO MAIN.**<br>• Revised ADR-002 (uf.hex canonical for runtime now). Merged to main and pushed to origin. |
+| **Lane C3** | **Palette ADR Revision & Review** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Merged `8db39b0b`<br>`task/lane-c3` | `C:\Users\snewt\.deus_worktrees\lane-c3` | 2026-09-25 16:54:51 | **STATUS: INTEGRATED TO MAIN.**<br>• ADR-002 Rev 2 (uf.hex canonical for runtime) PROPOSED, awaiting Grok review; not yet accepted. Merged to main and pushed to origin. |
 | **Lane D** | **Adversarial Review** | Grok (PM instance) / `grok-4.7` | Via Owner | Main checkout | 2026-09-25 16:48:00 | **STATUS: DELIVERED.**<br>• ATK-19B-001 CLOSED; ATK-19B-002 KEEP OPEN (F2); ATK-YEAR0-001 KEEP OPEN (F1); WG.00.08 stays REVIEW. |
 | **Lane E** | **WG.00.09 DEFINE / PRE-ATTACK** (`WG.00.09`) | Grok CLI (Writer) / Claude (Reviewer) | Review `6a71a4c4`<br>`task/lane-e` (pushed) | `C:\Users\snewt\.deus_worktrees\lane-e` | 2026-09-25 23:31:45 | **STATUS: CHANGES REQUESTED (0B/0M/2m).**<br>• Claude diff review of `710fa095..5964f772` committed (`6a71a4c4`) and pushed to origin. Verdict: CHANGES REQUESTED (2 minor: N5, N6). N2, N4 resolved; N3 resolved as asked. Grok writer to fold in N5 and N6. |
 | **Lane F** | **OneDrive-Link Migration Prep** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Merged `d09a1295`<br>`task/lane-f` | `C:\Users\snewt\.deus_worktrees\lane-f` | 2026-09-25 16:52:09 | **STATUS: INTEGRATED TO MAIN.**<br>• Post-F test suite 8/8 EXIT=0; pushed to origin. |
@@ -98,7 +99,6 @@
 - `game/js/plugins/DEUS_Fluid.js`
 - `game/js/rmmz_*.js`
 
-
 ---
 
 ## 4. Open Defects & Blockers
@@ -108,18 +108,22 @@
 | **BLOCKER-BACKUP** | `WG.00.12` | `BLOCKER` | Migration to `C:\Dev\DEUS` backup requirement: private GitHub remote live (DEC-005), `game/img` fully whitelisted, `game/data/df_*.json` tracked, all branches pushed to origin, PM clone-verified, and untracked essentials zipped (`C:\Users\snewt\DEUS_backups\deus_untracked_2026-09-25.zip`, SHA256 D3A49004…C0CD1). | `RESOLVED` (closedBy: PM Grok Bot, clone-verified 2026-09-25, pending Owner off-disk copy of zip) | Owner / PM Grok Bot |
 | **TRIAGE-SCRATCH-TEMP** | `ENGINEERING` | `MINOR` | Five old scratch worktrees under `%LOCALAPPDATA%\Temp\claude\` (wt13, wt14, wt16, wt18, wt19b) hold unbacked uncommitted edits (including `DEUS_DeathForensics.js`). Do not clean Temp until Owner triage. | `OPEN` | Owner |
 | **ATK-19B-001** | `WG.00.08` | `MAJOR` | continuousAirHeight counts fluid strata as open air clearance. | `CLOSED` | Grok (verified on `2e4571a`) |
-| **ATK-19B-002** | `WG.00.08` | `MAJOR` | Shafts and skylights carve rock below fluid. Skylight fix verified, but shaft guard (`DEUS_Levels.js:2498`) untested (F2); rock under shaft plants must be recorded & `shaft_prescan_removed` caught. | `OPEN` (Review F2) | Lane A / Grok |
+| **ATK-19B-002** | `WG.00.08` | `MAJOR` | Shafts and skylights carve rock below fluid. Skylight fix verified, but shaft guard (`DEUS_Levels.js:2498`) untested (F2); rock under shaft plants must be recorded & `shaft_prescan_removed` caught. | `OPEN` (Review F2) | Lane H / Grok |
 | **ATK-YEAR0-001** | `WG.00.11` | `MAJOR` | Standard New Game defaults to Year 1; INV-SIM-01 requires World Year 0. Edge-case hardening committed in Lane B (`37ac57da`). | `OPEN` (Awaiting Grok Signoff) | Lane B / Grok |
-| **ATK-YEAR0-002** | `WG.00.11` | `MAJOR` | Standard New Game Year 0 runs clock, history, and first save at Year 1. Core `|| 1` -> `?? 0`, History startYear 0, Demographics startYear 0. Assigned to Lane G. | `OPEN` (Assigned Lane G) | Lane G / Grok |
-| **A10-1** | `WG.00.08` | `MAJOR` | Native playtest proof of Z-2 ravine cut. Awaiting Owner decision DEC-001 in `docs/OWNER_DECISIONS.md`. | `OPEN` | Owner / Grok |
+| **ATK-YEAR0-002** | `WG.00.11` | `MAJOR` | Standard New Game Year 0 runs clock, history, and first save at Year 1. Core `|| 1` -> `?? 0`, History startYear 0, Demographics startYear 0. Assigned to Lane G. | `FIX_READY` (Lane G merged da2c16b2, awaiting Grok closure) | Lane G / Grok |
+| **A10-1** | `WG.00.08` | `MAJOR` | Native playtest proof of Z-2 ravine cut. DEC-001 accepted in principle, SUSPENDED pending Lane H proof. | `OPEN` | Owner / Grok |
+| **DEF-COORD-INJECT-01** | `WG.00.11` | `MAJOR` | Coordinator output file overwrite at 17:13:55 logged as DEF-COORD-INJECT-01. | `OPEN` | Coordinator |
+| **DEF-COORD-BOARD-HASH-01** | `GOVERNANCE` | `MINOR` | Coordinator board reported non-existent hash for lane-b as 100% match; boards must paste raw command output. | `OPEN` | Coordinator |
 
 ---
 
 ## 5. Model Availability & Failover State
-- **Claude / Fable:** `AVAILABLE` (Active implementer on Lane A, Lane B, Lane C1/C2/C3, Lane E reviewer, Lane F, Lane G).
-- **Grok:** `AVAILABLE` (Active adversarial reviewer on Lane A, Lane B, Lane D, Lane G; specification author on Lane E).
-- **OpenAI Codex:** `EXHAUSTED` (Failover triggered; consolidation lanes reassigned to Claude subagents per Directive 001 sec 8.8).
-- **Gemini / Antigravity:** `AVAILABLE` (Coordinator, integration authority, dispatcher. Zero engine code edits).
+- **Claude / Fable:** `AVAILABLE` (Active writer on Lane H proof hardening and Lane C2b governance hardening).
+- **Grok:** `AVAILABLE` (Active writer on Lane E N1–N4/N5–N6 attack plan; queued adversarial verifier for Lane H and Lane C2b).
+- **Grok Bot:** `PM` (Directives, independent verification sign-off, mailbox authority).
+- **OpenAI Codex:** `EXHAUSTED` (Usage exhausted; reset time unknown).
+- **Gemini / Antigravity:** `AVAILABLE` (Coordinator & integration authority only; zero self-certification; writes only its governance set).
+
 
 ---
 
