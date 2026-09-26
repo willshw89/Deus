@@ -1,0 +1,113 @@
+CLI examples at 4132e8586e37e852aa268ae58b2a089bcbc8a927. <world> is a temp fixture world kept by "node tools/art/test_place_art.js --keep" (synthetic cells only); <tmp> is its temp folder.
+Test run for the world: RESULT: 135 passed, 0 failed
+
+$ node tools/art/validate_art.js <world>/neg/off_palette.png --entry SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED --catalogue <world>/art/catalogue/catalogue.json --approvals <world>/neg/off_palette.APPROVALS.md --root <world>
+REFUSE OFF_PALETTE: 1 non-transparent pixel(s) not in deus_master_world_palette_v1.hex; first at (25,41) #1C2127
+  pixels (1): (25,41)
+RESULT: REFUSED entry=SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED file=<world>\neg\off_palette.png sha256=a94d75a226566f2fca262f498c4fa1878301639fa0f0228074648b306b3dac4a reasons=OFF_PALETTE
+EXIT=1
+
+$ node tools/art/validate_art.js <world>/neg/alpha_128.png --entry SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED --catalogue <world>/art/catalogue/catalogue.json --approvals <world>/neg/alpha_128.APPROVALS.md --root <world>
+REFUSE ALPHA_NOT_BINARY: 1 pixel(s) with alpha other than 0 or 255; first at (24,40) alpha 128
+  pixels (1): (24,40)
+RESULT: REFUSED entry=SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED file=<world>\neg\alpha_128.png sha256=0d2fce45526bd981fe75d68349d4a17bb71bfd58844b9cdf342a1386b06460ee reasons=ALPHA_NOT_BINARY
+EXIT=1
+
+$ node tools/art/validate_art.js <world>/neg/grid_pixel.png --entry SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED --catalogue <world>/art/catalogue/catalogue.json --approvals <world>/neg/grid_pixel.APPROVALS.md --root <world>
+REFUSE OFF_PALETTE: 1 non-transparent pixel(s) not in deus_master_world_palette_v1.hex; first at (20,30) #00FFFF
+  pixels (1): (20,30)
+REFUSE TEMPLATE_RESIDUE: 1 non-transparent pixel(s) in a template colour of ATLAS_TEST_SURFACE_B1.json; first at (20,30) #00FFFF gridColour
+  pixels (1): (20,30)
+RESULT: REFUSED entry=SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED file=<world>\neg\grid_pixel.png sha256=8ba7f519e5aebcfd0d5483aef03df30c5493e111ec1f84270d7a9fb1493ed33a reasons=OFF_PALETTE,TEMPLATE_RESIDUE
+EXIT=1
+
+$ node tools/art/validate_art.js <world>/neg/tile_hole.png --entry SURFACE_B1_TERRAIN_TEST_SOIL_V1_BASE --catalogue <world>/art/catalogue/catalogue.json --approvals <world>/neg/tile_hole.APPROVALS.md --root <world>
+REFUSE TILE_NOT_OPAQUE: tile-class slot (GEOM_TILE) must be 100% opaque; 1 pixel(s) are not; first at (20,20) alpha 0
+  pixels (1): (20,20)
+NOT CHECKED anchor (CENTER anchors have no pixel rule)
+RESULT: REFUSED entry=SURFACE_B1_TERRAIN_TEST_SOIL_V1_BASE file=<world>\neg\tile_hole.png sha256=f67d3ebfc8ee94b857642876b1bc18bfe796cf8d685a2d8074d78804754cff63 reasons=TILE_NOT_OPAQUE
+EXIT=1
+
+$ node tools/art/validate_art.js <world>/neg/ground_high.png --entry SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED --catalogue <world>/art/catalogue/catalogue.json --approvals <world>/neg/ground_high.APPROVALS.md --root <world>
+REFUSE ANCHOR_GROUND: 1 frame(s) not standing on the baseline: frame 0: lowest drawn row 46, baseline is 47
+  pixels (1): (10,46)
+RESULT: REFUSED entry=SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED file=<world>\neg\ground_high.png sha256=2de66e967575c56b692647236e6665d2a46bf5f3d8662c458d13615f42cbd434 reasons=ANCHOR_GROUND
+EXIT=1
+
+$ node tools/art/validate_art.js <world>/neg/ceiling_low.png --entry SURFACE_B1_PROP_TEST_LANTERN_V1_HANGING --catalogue <world>/art/catalogue/catalogue.json --approvals <world>/neg/ceiling_low.APPROVALS.md --root <world>
+REFUSE ANCHOR_CEILING: 1 frame(s) not hanging from row 0: frame 0: highest drawn row 1, must be 0
+  pixels (1): (18,1)
+RESULT: REFUSED entry=SURFACE_B1_PROP_TEST_LANTERN_V1_HANGING file=<world>\neg\ceiling_low.png sha256=9d50d34099fad6735e6aae412d4dc629827d753956dc0759eb663cc7905a404e reasons=ANCHOR_CEILING
+EXIT=1
+
+$ node tools/art/validate_art.js <world>/neg/dims_47x48.png --entry SURFACE_B1_TERRAIN_TEST_SOIL_V1_BASE --catalogue <world>/art/catalogue/catalogue.json --approvals <world>/neg/dims_47x48.APPROVALS.md --root <world>
+REFUSE DIMS_MISMATCH: file is 47x48; slot ATLAS_TEST_SURFACE_B1:0004 is 48x48
+NOT CHECKED scale envelope and anchor (file size differs from the slot)
+RESULT: REFUSED entry=SURFACE_B1_TERRAIN_TEST_SOIL_V1_BASE file=<world>\neg\dims_47x48.png sha256=16c5ae4f9f32bccfa84cd37ce1f7ade0471bbe78a33015ceae4bc17a001b30ff reasons=DIMS_MISMATCH
+EXIT=1
+
+$ node tools/art/validate_art.js <world>/cells/SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED.png --entry SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED --catalogue ... --approvals <world>/neg/approval_missing.APPROVALS.md --root <world>   (ledger without this file's row)
+REFUSE APPROVAL_MISSING: no YEA ledger row approves sha256 3fb9f1d07648f8bdb765a1c423c7aa76e5c6c6aff9c0a3806d1c888a9cd2b131 for SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED / ATLAS_TEST_SURFACE_B1:0005
+RESULT: REFUSED entry=SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED file=<world>\cells\SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED.png sha256=3fb9f1d07648f8bdb765a1c423c7aa76e5c6c6aff9c0a3806d1c888a9cd2b131 reasons=APPROVAL_MISSING
+EXIT=1
+
+$ node tools/art/validate_art.js <world>/cells/SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED.png --entry SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED --catalogue ... --approvals <world>/art/APPROVALS.md --root <world>
+RESULT: ACCEPTED entry=SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED file=<world>\cells\SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED.png sha256=3fb9f1d07648f8bdb765a1c423c7aa76e5c6c6aff9c0a3806d1c888a9cd2b131
+EXIT=0
+
+$ node tools/art/place_art.js --catalogue ... --root <world> --out <tmp>/demo_out --approvals <world>/art/APPROVALS.md --in <tmp>/demo_in   (4 approved cells)
+PLACED ATLAS_TEST_SURFACE_B1:0002 <- SURFACE_B1_CREATURE_TEST_OGRE_V1_WALK.png (SURFACE_B1_CREATURE_TEST_OGRE_V1_WALK)
+PLACED ATLAS_TEST_SURFACE_B1:0005 <- SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED.png (SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED)
+PLACED ATLAS_TEST_SURFACE_B1:0006 <- SURFACE_B1_PROP_TEST_LANTERN_V1_HANGING.png (SURFACE_B1_PROP_TEST_LANTERN_V1_HANGING)
+PLACED TS_TEST_SURFACE_B1_A2:0001 <- SURFACE_B1_TERRAIN_TEST_GRASS_V1_AUTOTILE.png (SURFACE_B1_TERRAIN_TEST_GRASS_V1_AUTOTILE)
+DERIVED_PENDING SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED_FLIPH (from SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED)
+RESULT: PLACED filled=4/17 empty=13 unexpected=1 derivedPending=1 sheets=2 runtime=2
+EXIT=0
+
+$ node tools/art/place_art.js --catalogue ... --out <tmp>/demo_out --approvals <world>/neg/propB.APPROVALS.md --in <tmp>/demo_in2   (a different approved chest, no --replace)
+REFUSE SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED.png OVERWRITE_REFUSED: slot ATLAS_TEST_SURFACE_B1:0005 already holds SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED.png (sha256 3fb9f1d07648f8bdb765a1c423c7aa76e5c6c6aff9c0a3806d1c888a9cd2b131); pass --replace ATLAS_TEST_SURFACE_B1:0005 to overwrite it
+RESULT: REFUSED (1 refusal(s)); nothing under --out was changed
+EXIT=1
+
+$ node tools/art/place_art.js --catalogue ... --out <tmp>/demo_out --approvals <world>/neg/propB.APPROVALS.md --in <tmp>/demo_in2 --replace ATLAS_TEST_SURFACE_B1:0005
+REPLACED ATLAS_TEST_SURFACE_B1:0005 <- SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED.png (SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED)
+DERIVED_PENDING SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED_FLIPH (from SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED)
+RESULT: PLACED filled=4/17 empty=13 unexpected=1 derivedPending=1 sheets=2 runtime=2
+EXIT=0
+
+Files in <tmp>/demo_out:
+  coverage_report.json
+  coverage_report.md
+  placement_report.json
+  runtime/img/characters/$TEST_Ogre.png
+  runtime/img/tilesets/TEST_Surface_A2.png
+  sheets/ATLAS_TEST_SURFACE_B1.png
+  sheets/TS_TEST_SURFACE_B1_A2.png
+
+coverage_report.md:
+# Art placement coverage
+
+Written by tools/art/place_art.js for catalogue sha256 `9fd02671f0181583c5873de5ff92f986afe8a01462d95ca364546601eb9a2a63`.
+
+## Per sheet
+
+| Sheet | Kind | Slots | Filled | Empty | Unexpected | Not in template | Stray pixels | Template |
+| :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | :--- |
+| ATLAS_TEST_SURFACE_B1 | ATLAS | 14 | 3 | 11 | 1 | 0 | 0 | OK |
+| CHR_TEST_SURFACE_B1_RAT | RMMZ_CHARACTER | 1 | 0 | 1 | 0 | 0 | 0 | OK |
+| TS_TEST_SURFACE_B1_A2 | RMMZ_TILESET | 1 | 1 | 0 | 0 | 0 | 0 | OK |
+| TS_TEST_SURFACE_B1_B | RMMZ_TILESET | 1 | 0 | 1 | 0 | 0 | 0 | OK |
+
+## Per band
+
+| Band | In geometry | Slots | Filled | Empty | Derived pending | No slot | Unexpected |
+| :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| LOWER1 | yes | 1 | 0 | 1 | 0 | 0 | 0 |
+| SURFACE | yes | 15 | 4 | 11 | 1 | 1 | 0 |
+| TEST_NOBAND | no | 1 | 0 | 1 | 0 | 0 | 1 |
+
+## Unexpected
+
+- ATLAS_TEST_SURFACE_B1: template slots not in the catalogue: ATLAS_TEST_SURFACE_B1:0099
+- band TEST_NOBAND is not in geometry.bands: TEST_NOBAND_B1_PROP_TEST_STOOL_V1_BASE
+
