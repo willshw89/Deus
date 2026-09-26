@@ -1163,3 +1163,5 @@ EXIT=0
 `BRIEF.md`, `lane.json` and `launches/20260926_070955_prompt.txt` come from the `[pm]` commit `63e07276` and the `[ops]` launcher commit `7a02e1b5`; this lane did not edit them. `git diff --cached --name-only 425b594c -- tools/ops/gate_tests.json 'tools/test_*.js' tools/classify_tests.js tools/run_tests.js tools/governance docs game art` prints nothing (0 lines).
 
 Final `git rev-parse HEAD`: recorded in the next line by a follow-up commit (a commit cannot hold its own hash).
+
+Report commit (`git rev-parse HEAD` after committing this report): `20b8a5455f1065311ed760b29aefb1882894f524`. The branch tip adds only this line; its hash is the `FINAL SHA` of the session output.
