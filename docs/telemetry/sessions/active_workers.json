@@ -95,13 +95,14 @@
     "lane": "Lane I",
     "role": "reviewer",
     "provider": "Grok / grok-1.0",
-    "taskId": "task-37038",
-    "pid": 21316,
+    "taskId": "task-37171",
+    "pid": 22780,
     "worktree": "C:\\Users\\snewt\\.deus_worktrees\\lane-i",
     "branch": "task/lane-i",
-    "launchTimeCT": "2026-09-26 01:00:07 CT",
+    "launchTimeCT": "2026-09-26 01:08:38 CT",
     "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\run_review_lane_i.ps1",
-    "state": "running"
+    "state": "running",
+    "tip": "a0183d68ad21fab6daf7f9cfee8f8d5dbbf352f5"
   },
   {
     "lane": "Lane C2b",
