@@ -5,7 +5,8 @@
 - **Document under review:** `docs/systems/UF_Depth_Attack_Plan.md` at commit `c846fc7c` (Grok)
 - **Branch / worktree:** `task/lane-e` (`C:\Users\snewt\.deus_worktrees\lane-e`)
 - **Verdict:** **CHANGES REQUESTED** (1 BLOCKER, 8 MAJOR, 9 MINOR)
-- **Re-review of `37fc1473` (2026-09-25, Section 4 at the end of this file):** **CHANGES REQUESTED** (0 BLOCKER, 1 MAJOR, 10 MINOR). B1 is resolved.
+- **Re-review of `37fc1473` (2026-09-25, Section 4):** **CHANGES REQUESTED** (0 BLOCKER, 1 MAJOR, 10 MINOR). B1 is resolved.
+- **Re-review of `87c1e5b8` (2026-09-25, Section 5 at the end of this file):** **CHANGES REQUESTED** (0 BLOCKER, 0 MAJOR, 4 MINOR). R1 is closed by owner ruling DEC-006.
 
 The plan's depth math, its tables, and its rejection of the shape grid, the blur, and the colour matrix hold up against the code. It is not accepted because of one gap. The plan assumes the live tilemap is see-through exactly where the ray passes, and the live tilemap does not work that way. The live tilemap picks each cell's tile from the derived shape. On generated terrain the two disagree in both directions, and on the Ground and `-1` views they disagree on every exposed column. None of the plan's checks can see this. Most of the other findings are checks that can't fail on the mutant they are mapped to, or palette and performance rules that don't work on the real registry.
 
@@ -420,3 +421,176 @@ ALL 11741932 opaque 0.01% master
 ## 4.6 Overall verdict
 
 **CHANGES REQUESTED.** B1 and M2–M8 are resolved in the design, and the fixes hold up against both the code and the probe. M1 is resolved as a testing matter but not as a decision, and that decision belongs to the owner (R1). R2–R11 are text edits. Once the owner's answer on R1 is recorded and R2–R11 are edited, I expect to pass the plan on a diff review without new probes. This re-review claims no check result, mutant kill, screenshot or frame time; none of them exists yet.
+
+---
+
+# Section 5: Re-Review of `87c1e5b8`
+
+- **Reviewer:** Claude CLI session (Lane E, `REVIEW_BRIEF.md`, Directive 001-H)
+- **Date:** 2026-09-25
+- **Document under review:** `docs/systems/UF_Depth_Attack_Plan.md` at `87c1e5b8` (Grok, "owner ruling R1 = D and items R2–R11")
+- **Checked against:** Section 4 above, `docs/OWNER_DECISIONS.md` (the lane-e copy and `main`), and the code the new text cites
+- **Verdict:** **CHANGES REQUESTED** (0 BLOCKER, 0 MAJOR, 4 MINOR)
+
+R1 is closed. The owner's ruling is on record as DEC-006, and the plan implements it as written. R2, R3 and R5–R10 are resolved. R4 and R11 are folded in, but the new text contains two checks that a correct build can't pass or can't agree with (N1, N3). There is also an ordering gap in the live cutout that I missed in Section 4; it comes from the R5 placement I proposed (N2). N4 is citations. All four are text edits and none needs the owner. I expect to pass the next revision on a diff review.
+
+## 5.1 Item-by-item
+
+| Item | Verdict | Basis |
+|---|---|---|
+| **R1** shade rule | Resolved | **Record:** `docs/OWNER_DECISIONS.md` on `main` has DEC-006 / R1: Status DECIDED, "Decider: Owner", Option D, 2026-09-25. It landed in `eefd1f2c` at 22:43, five minutes before `87c1e5b8`. The lane-e copy stops at DEC-004 because lane-e is not rebased on `main`. **Plan:** it implements D as written. The table is identity at every depth (§5.2). `S-STEP` requires 0 changed slots, and `shade_stepped` must fail it. No shaded copies exist (§5.3; §6.5 lists 0 bytes). `deus` and `deus_scale` paint the same colours. §10 puts shading out of scope. The retired figures are quoted correctly from sections 3.2 and 4.4.2. Citation: N4. |
+| R2 `S-RELATIVE` | Resolved | It is now in the stub table and in the stub row of §8.1. The expected values are right: `z = 0` is `d = 1` and then `d = 2` (46, then 44); `z = +1` from `+2` and `z = −1` from `0` are both `d = 1` (46). A scale keyed on `z` returns the same value for both `z = 0` reads, so `absolute_z_scale` fails the check. See note 1. |
+| R3 labels | Resolved | B1 (lines 171, 785, 786), M2 (327, 790) and M8 (380, 798) now read "Plan decision (within handoff §9 authority)". `grep -i owner` finds only the R1 lines. |
+| R4 live repaint | Partly resolved | Line 194 now says a still camera repaints every 30 frames with 285 wrapper calls, which matches `rmmz_core.js:2327-2329` and `:2367-2389`. The wrapper runs inside `C-LIVE-ALLOC`, and the pan benchmark no longer exempts it. But the check now contains stock allocation that it can't separate from the wrapper, and its budget is below the measurement floor: N1. |
+| R5 mapping and seam | Resolved, see N2 | The summary is keyed on the depth-canvas start (live start − 2). It is rebuilt in `updateTilemap` after the origin is set (`rmmz_sprites.js:3484-3487`; the hook is `DEUS_Depth.js:825-828`). The wrapper indexes `(x + 2, y + 2)`, so the 19×15 spot grid sits inside the 23×19 summary. `wx` and `wy` are wrapped before `shapeCodeAt`. `P-CUTOUT` has the `r < 20` sample and the seam roof. What happens after a dig is N2. |
+| R6 roof look | Resolved | stone → `rock`, soil → `soil`, wood → `rock` is `looksOfPacked`'s own rule for solids (`DEUS_Levels.js:1457`), and `UF.Levels.tileOf` is exported (`:4620`). Plane-owned `open` cells use the same keys (line 196). `P-CUTOUT` and the picture gate (line 748) check "not `mined_stone`". |
+| R7 fixture, void target | Resolved | `tools/test_fixtures/depth_shade_master.png` is named for `S-PAL-CANVAS`, `S-PASS` and `S-SHADE-VIS`, and a missing file exits 2. The void-id exclusion is part of the deferred candidate (line 323). Under D the table is identity, so today no shaded pixel can equal the void. |
+| R8 harness labels, export | Resolved | The stub row of §8.1 lists `C-STILL`, `C-HP`, `C-ALLOC`, `C-ONE`, `S-PAD`, `S-RELATIVE`, `S-SCALE-INT` and `C-LIVE-ALLOC` (5.5.4). `UF.Depth.blockWord` is exported (line 547), and `C-DIG`, `C-WORLD` and `C-WRAP` read it. `O-ROOF-V` pins `V−1 S4` = air behind an exit-2 precondition. `C-WRAP` picks a row where `(size−1, y)` and `(size−1, y−1)` differ. |
+| R9 memory | Resolved | Recomputed: 1104 × 912 × 4 = 4,027,392 bytes per canvas, 32,219,136 for eight. Tileset 92 is 2,027,520 px × 4 = 8,110,080 bytes per copy: 32,440,320 for four copies, 16,220,160 for two. Under D there are no shaded copies. After migration, depths with equal columns share a copy, a sheet with no master texel gets none, and copies build at scene start. The §6.5 rows sum to 32,237,215 bytes. There is no total row, and I'm not asking for one again. |
+| R10 `off`, departure | Resolved | Under `off` the cutout and the roof fallback stay, and holes show `#0C0D12` (lines 63, 321, 800). `P-CUTOUT` asserts both under `off`. The handoff §10.1 departure is in §9 (line 794). |
+| R11 edge cases | (a) Resolved; (b) partly resolved | (a) The fill matches `deltaLevels`. An unknown `strataSchemaVersion` drops every saved record (`schemaKnown`, `DEUS_Levels.js:1133-1139`), and both treat a missing version as known. A record that fails `decodeRecord` or `validRecord` (`:1115-1128`) is skipped (`:1146-1150`). (b) The largest-rectangle crop rule is written down, but `entity_clip` expects a different answer and the rule has no tie-break: N3. |
+| m7 Rule 13 | Still open | Logged in §9 (line 801). ADR-002 Rev 2 on `main` adds to it: coordinator item 1. |
+
+## 5.2 New findings
+
+### MINOR
+
+**CR-19C-N1: `C-LIVE-ALLOC` can't pass on a correct build.**
+
+The R4 fold runs stock `Tilemap.prototype._addAllSpots` inside the check, and the stock layer allocates.
+
+- **Stock allocation.** `Tilemap.Layer.prototype.addRect` pushes a new 7-element array for every rect (`rmmz_core.js:2926-2928`). Both of the wrapper's drawing cases end there: case 2 calls `_addTile`, and case 3 calls the original `_addSpot`.
+  - Measured (5.5.1): eight rebuilds of the 19×15 grid, at one rect per spot, grow the heap by 311,544 bytes. That is about 1,298 bytes per frame over the check's 240 frames. The budget is under 1 byte per frame.
+- **The exemption has no boundary.** The sentence "Stock Tilemap allocations outside the wrapper are reported and are not this check's fail" doesn't help. The stock allocation happens while the wrapper is on the stack. "Heap sampled around the wrapper body" therefore includes it, and the harness has no boundary it can measure.
+- **The budget is below the measurement floor.** I measured an empty window the way `no_allocation_queries` measures (`global.gc()`, heap statistics before and after, a GC observer). With no work in it, the window grows by 616 bytes. Under 1 byte per frame over 240 frames is 240 bytes, so a build that allocates nothing still fails.
+  - `no_allocation_queries` avoids this by running 2,000,000 queries against a 2,000,000-byte limit and judging the least of three windows (`tools/test_strata_foundation.js:768-787`).
+- **The pan benchmark (line 760) has the same attribution problem in nw.js.** There the live layers are stock. A 120-frame pan rebuilds them about 19 times (15 start-tile changes and 4 animation ticks), so a GC can land while the wrapper is on the stack in a correct build.
+  - The per-flush clause ("a heap growth of 1 byte or more inside a depth-canvas flush fails") hits the same floor. That clause predates this revision, and I passed it in Section 4 (M3). That was a miss on my part.
+  - Part of this finding comes from my own R4 fix. It asked for stock `_addAllSpots` inside `C-LIVE-ALLOC` and didn't say how to handle the stock allocation.
+
+**Fix:**
+- **Stub layers.** In the stub, give the live tilemap two recording layers. Their `addRect` writes into a pooled typed array, and their `clear` resets a count. Everything above them stays stock: `_addAllSpots`, `_addSpot`, `_addSpotTile`, `_addTile`, `_addAutotile`, `_addShadow`, `_readMapData`. With such a layer, the same eight rebuilds grow the heap by 616 bytes, the empty-window figure.
+- **Measurement.** Measure the way `no_allocation_queries` does: three windows, each after `global.gc()`, zero GCs inside the windows, and the least window judged. Either run enough frames that the budget is at least 100 times the empty-window growth, or judge growth net of an empty window measured in the same run.
+- **Scope.** State that stock `addRect` allocation is outside the depth budget.
+- **nw pan benchmark.** Report GCs during live rebuilds; don't fail on them. The stub check is the wrapper's proof. Judge the per-flush heap figure net of an empty sample pair, or over many flushes.
+
+**CR-19C-N2: after a dig, the live cutout can stay stale for up to 30 frames.**
+
+Stock RMMZ updates the spriteset before it runs the simulation. `Scene_Map.update` calls `Scene_Message.prototype.update` first (`rmmz_scenes.js:819-820`), and that reaches `Spriteset_Map.updateTilemap` and the depth update. Only then does it call `updateMainMultiply`, which reaches `$gameMap.update` and the colonist job tick (`DEUS_Colonists.js:5748-5756`), where digging happens. Render comes after both.
+
+What happens on a dig:
+- **Frame N.** The dig lands after this frame's summary rebuild. Two things set `_needsRepaint` synchronously: the §6.3 `cellChanged` handler (line 421), and the painter's own tile write (`patchTile` → `_tilemap.refresh()`, `DEUS_World.js:700`, `rmmz_core.js:2360-2362`). The render then rebuilds the live spots from the pre-dig `dHit` and clears `_needsRepaint`.
+- **Frame N+1.** The depth update rebuilds the summary, but nothing sets `_needsRepaint` again.
+- **After that.** The live map keeps the stale decision until the next animation tick or start-tile change.
+
+What the player sees:
+- **Digging out a `+1` floor.** The cell derives `open` with a stale `dHit = 0`, so case 2 draws the solid `rock` fallback over the new hole for up to half a second.
+- **Building a floor over a hole.** The stale `dHit ≥ 1` skips the cell while the repainted plane no longer owns it, so the void shows.
+
+No check covers this. `C-DIG` stops at `blockWord` and "the next update has the new `dHit`", and `P-CUTOUT` samples a world that isn't changing. This follows from the R5 placement I proposed; in Section 4 I didn't consider that the simulation runs after the spriteset.
+
+**Fix:**
+- The handler only marks the block dirty. The depth update sets the live tilemap's `_needsRepaint` whenever it rebuilds the summary because of a dirty in-window block, or because `V` or `H` changed.
+- Add a stub check: apply a dig after the depth update and before `updateTransform`, in the order `Scene_Map.update` produces. By the next frame, the wrapper's decision for that cell must match the new `dHit`.
+- Add a mutant that leaves the repaint to the handler.
+
+**CR-19C-N3: `entity_clip` expects a different crop than §7's rule, and the rule has no tie-break.**
+
+- §7 (line 504) says the crop is "the largest axis-aligned rectangle that includes the foot cell and only cells whose `dHit` equals `d`".
+- `entity_clip` (line 646) expects "East/west mismatch: `setFrame` width is 48, the foot cell". That agrees with §7 only when both sides mismatch.
+  - Example: a 144×48 sprite centred on its foot cell, with only the east column different. The largest rectangle keeps the west column and the foot, which is 96 px wide. The check expects 48.
+- Ties happen. Example: a 96×96 sprite whose north-east and north-west cells differ. `{foot, north}` (48×96) and the full foot row (96×48) are both 4,608 px².
+
+**Fix:**
+- Pin a tie-break in §7.
+- Derive `entity_clip`'s expected frame from the rule. Cover a one-sided mismatch (the wider frame), a two-sided mismatch (48), and one tie case (the tie-break's answer).
+
+**CR-19C-N4: citations.**
+
+- **The ruling has no citation.** The header, §5.2 and §9 say "Owner ruling R1 = D recorded" but never say where. R1 was raised in the first place because an owner decision had no record.
+  - Fix: cite `docs/OWNER_DECISIONS.md` DEC-006 in the header, §5.2 and the §9 row. Until lane-e is rebased, that record lives on `main` at `eefd1f2c`.
+- **The `uf.hex` count is wrong.** Line 295 calls `art/palette/uf.hex` "the legacy 384-color list". The file has 256 lines and 250 distinct colours (`wc -l`, `sort -u`). The 384 was copied from ADR-002 Rev 1, line 11; Rev 2 on `main` corrects it.
+  - Fix: state the real count, or drop the number.
+
+### Notes (no change required)
+
+1. `S-RELATIVE` reads the scale of planes that must be bound, but a plane is updated only when its presence bit is set (§2, §6.2). The build should put columns with `dHit = 1` and `dHit = 2` in the window. If a plane it reads is unbound, the check should exit 2, as `O-ROOF-V` does with its precondition.
+2. The "recorded candidate" for the post-migration revisit (line 323) is DEC-006 Option A plus the void exclusion. DEC-006 says "revisit" and doesn't choose an option. The plan's word "candidate" leaves that choice with the owner.
+
+## 5.3 Coordinator items
+
+1. **ADR-002 Rev 2 and the void texel.**
+   - ADR-002 Rev 2 is PROPOSED and is on `main` (lane-c3 merge `8db39b0b`, authored in `70dad277`).
+   - It makes `uf.hex` canonical for runtime and requires new runtime colour sources to use `uf.hex` entries (§1.4). It also measures 0 colours shared between the two palettes (§2.1).
+   - The plan's void texel `#0C0D12` (`NEUT_VOID_CAP`) is a master colour and a new runtime colour source.
+   - If Rev 2 is accepted, the void hex and the expected hex in `void_palette` and `P-CUTOUT` must follow that decision. This widens m7. Grok can't settle it in the plan while Rev 2 is only proposed.
+2. **DEC-006 Option A figure.** Option A reads "~67 % darker at depth 3". The measurement in 4.4.2 is a median luminance ratio of 0.47 at depths 3–4, which is about 53 % darker. The ruling doesn't change.
+3. **Rebase.** Lane-e doesn't contain `eefd1f2c`, `d087b097` or the ADR-002 revision. Rebase or merge before the next revision so the plan's citations resolve inside the branch.
+4. **m7** is still open.
+
+## 5.4 Containment
+
+- `git show --name-status 87c1e5b8` → `docs/systems/UF_Depth_Attack_Plan.md` and `tasks/DEUS-TSK-FABLE-19C/state.md`.
+- `git diff --stat 87c1e5b8^ 87c1e5b8 -- game tools run_tests.bat` → empty.
+- `git diff --stat main...HEAD` → the plan, this review and `state.md` only.
+- This re-review edits `claude_review.md` and `state.md` only.
+
+## 5.5 Evidence (commands run in this session)
+
+### 5.5.1 Heap probe of the stock `addRect` (N1)
+
+- **Where it ran:** a script in the system temp folder, deleted after the run. Run with `node --expose-gc` on Node v24.19.0.
+- **What it contains:**
+  - `Tilemap.Layer.prototype.clear` and `addRect`, copied verbatim from `rmmz_core.js:2917-2928`;
+  - a recording layer that writes into a pooled `Int32Array`.
+- **What it does:** 400 rebuilds of warm-up, then 8 rebuilds of a 19×15 grid. It measures three windows the way `no_allocation_queries` does.
+
+Output, trimmed (per-frame suffixes kept only on the stock lines; one 800-rebuild line dropped):
+
+```text
+stock addRect          rects/spot 1 rebuilds 8: growth 319000 / 311544 / 311544 B, least 311544 B = 1298.1 B per frame over 240 frames; GCs in windows 0
+stock addRect          rects/spot 2 rebuilds 8: growth 638728 / 639248 / 638912 B, least 638728 B = 2661.4 B per frame over 240 frames; GCs in windows 0
+empty window           rects/spot 0 rebuilds 0: growth 616 / 616 / 616 B, least 616 B
+recording addRect      rects/spot 1 rebuilds 8: growth 616 / 616 / 616 B, least 616 B
+recording addRect      rects/spot 2 rebuilds 8: growth 616 / 616 / 616 B, least 616 B
+```
+
+The probe does not load the plugin and does not run a wrapper or a harness. It measures only the stock layer pair and the measurement floor.
+
+### 5.5.2 Owner-decision search (R1, N4)
+
+- Lane-e `docs/OWNER_DECISIONS.md` contains DEC-001 to DEC-004 only.
+- `git show main:docs/OWNER_DECISIONS.md` has DEC-006 / R1, Status DECIDED, and "Owner Ruling & Date: 2026-09-25 (Decider: Owner): Option D …".
+- Timing: `eefd1f2c` is 22:43:29 −0500 and `87c1e5b8` is 22:48:16. `git merge-base --is-ancestor eefd1f2c HEAD` shows it is not in lane-e.
+- `d087b097` (on `main`) adds to `docs/STATUS.md`: "Owner ruling DEC-006 / R1 = Option D recorded in `OWNER_DECISIONS.md`."
+
+### 5.5.3 Code read (N2, R5, R6, R11)
+
+- **Update order (N2, R5):**
+  - `rmmz_scenes.js:819-831` (`Scene_Map.update`: `Scene_Message.update` first, `updateMainMultiply` after) and `:841-846` (`updateMain` → `$gameMap.update`);
+  - `rmmz_sprites.js:3378-3387` (`Spriteset_Map.update` → `updateTilemap`) and `:3484-3487`;
+  - `DEUS_Colonists.js:5748-5756` (job tick in `Game_Map.update`).
+- **Live tilemap repaint path (N1, N2):**
+  - `DEUS_World.js:691-700` (`patchTile` → `_tilemap.refresh()`);
+  - `rmmz_core.js:2360-2362`, `:2367-2389`, `:2422-2461`, `:2917-2928` and `:3096-3105`.
+- **Levels (R6, R11):** `DEUS_Levels.js:1452-1462` (`looksOfPacked`), `:4620` (`tileOf`), and `:1115-1150` (`decodeRecord`, `validRecord`, `schemaKnown`, `deltaLevels`).
+
+### 5.5.4 Cross-check of the plan text (`node`)
+
+- §8.2 defines 49 check ids. §8.3 has 33 failure scenarios and §8.4 has 27 mutants.
+- §8.3 and §8.4 use 32 check names, and none is undefined. `shade_identity` has been replaced by `shade_stepped`.
+- All eight R8 checks appear in the stub row of §8.1.
+- `uf.hex`: `wc -l art/palette/uf.hex` gives 256, and `sort -u | wc -l` gives 250.
+
+**Not checked:** no harness, compositor, screenshot or frame time exists yet. Nothing in the plan was run.
+
+## 5.6 Overall verdict
+
+**CHANGES REQUESTED** (0 BLOCKER, 0 MAJOR, 4 MINOR).
+
+- **Resolved:** R1 is closed by the owner's DEC-006 ruling, and the plan implements it without drift. R2, R3 and R5–R10 are resolved.
+- **Open:** N1 and N3 are checks that a correct build can't pass as written. N2 is a gap in the live cutout that no check covers. N4 is citations.
+- **Nature of the fixes:** all four are text edits inside the plan, and none needs the owner. N1 and N2 partly come from fixes I proposed in Section 4.
+- **Next review:** I expect to pass the next revision on a diff review. I won't re-probe unless the cutout ordering or the allocation check changes shape.
+
+This re-review claims no check result, mutant kill, screenshot or frame time.
