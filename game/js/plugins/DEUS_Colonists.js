@@ -3184,6 +3184,85 @@
         }
     }
 
+    //-------------------------------------------------------------------------
+    // Bed claims (DEUS-TSK-FABLE-13). A colonist's bed is the one it claimed: data.bed (saved) is the single record;
+    // the claim holds while the bed stands and its holder lives, and lapses when the bed is gone. Newcomers take
+    // unclaimed beds only, so nobody is displaced from a bed it holds. Claims are indexed from the colonists once per
+    // map update; allocation runs at a sweep after a bed is built or someone arrives (bedsDirty), never per frame.
+    // A household's planned bed (UF_Households, built by makeBedJob) is a record too and is left alone until it stands.
+
+    const BED_SEARCH_RADIUS = 24;    // cells from the hearth a settlement bed may lie: a second shelter sits beyond the camp ring
+    const bedSearchRadius = c => Math.max(((c && c.radius) | 0) + 6, BED_SEARCH_RADIUS);
+    const isBedType = t => !!t && (t.id === "floor_straw" || t.id === "bed_wood" || hasTag(t, "bed"));
+    const bedKeyAt = (ref, x, y) => `${ref && ref.area ? ref.area.x : 0},${ref && ref.area ? ref.area.y : 0},${zOf(ref)}:${x},${y}`;
+    let _claimTick = -1, _claimIndex = null, bedsDirty = true;
+    /** bed key -> holder id for every living colonist's record; the earliest claimant keeps a contested key. */
+    function bedClaims() {
+        if (_claimIndex && _claimTick === localTicks) return _claimIndex;
+        const idx = new Map();
+        for (const o of colonists()) {
+            const b = o.data.bed;
+            if (o.data.dead || !b || typeof b !== "object" || !Number.isFinite(b.x)) continue;
+            const k = bedKeyAt(b, b.x, b.y);
+            if (!idx.has(k)) idx.set(k, o.id);
+        }
+        _claimTick = localTicks; _claimIndex = idx;
+        return idx;
+    }
+    const bedStands = (u, b) => { const O = Objects(); return !!(O && b && typeof b === "object" && sameLevel(b, u) && isBedType(O.atIn(levelArea(u), b.x, b.y))); };
+    // A record still worth keeping: the bed stands, or its square is free ground a household may still build on.
+    const bedRecordUsable = u => {
+        const b = u && u.data ? u.data.bed : null, O = Objects();
+        if (!b || typeof b !== "object" || !O || !sameLevel(b, u)) return false;
+        const here = O.atIn(levelArea(u), b.x, b.y);
+        return !here || isBedType(here);
+    };
+    /** The bed this colonist holds, or null: its record while the bed stands and nobody earlier holds it. */
+    function claimedBed(u) {
+        const b = u && u.data ? u.data.bed : null;
+        if (!b || typeof b !== "object" || !bedStands(u, b)) return null;
+        const holder = bedClaims().get(bedKeyAt(b, b.x, b.y));
+        return holder === undefined || holder === u.id ? b : null;
+    }
+    /** Claims the nearest unclaimed standing bed of the settlement for the colonist (kept when its record is usable). Returns the record or null. */
+    function claimBed(u) {
+        const O = Objects(), c = colonyState(u);
+        if (!O || !c || !u || !u.data || u.data.dead) return null;
+        if (bedRecordUsable(u)) {
+            const b = u.data.bed, holder = bedClaims().get(bedKeyAt(b, b.x, b.y));
+            if (holder === undefined || holder === u.id) return b;
+        }
+        const area = levelArea(u), claims = bedClaims(), Own = window.UF && UF.Ownership;
+        let best = null, bestD = Infinity;
+        for (const b of O.findIn(area, { near: { x: c.site.x, y: c.site.y }, radius: bedSearchRadius(c), tags: ["bed"], unsorted: true })) {
+            const holder = claims.get(bedKeyAt(u, b.x, b.y));
+            if (holder !== undefined && holder !== u.id) continue; // held by a living colonist: never displaced
+            if (Own && typeof Own.ownerOf === "function") {
+                const owner = Own.ownerOf({ kind: "object", area: copyArea(u.area), z: zOf(u), x: b.x, y: b.y });
+                if (owner && owner.kind === "unit" && owner.id !== u.id) continue;
+            }
+            const d = chebyshev(b.x, b.y, u.x, u.y);
+            if (d < bestD || (d === bestD && best && (b.y < best.y || (b.y === best.y && b.x < best.x)))) { best = b; bestD = d; }
+        }
+        if (!best) return null;
+        u.data.bed = { area: copyArea(u.area), x: best.x, y: best.y, z: zOf(u) };
+        if (Own && typeof Own.assignBed === "function") { try { Own.assignBed(u, { area: copyArea(u.area), z: zOf(u), x: best.x, y: best.y }); } catch (e) { console.error(e); } }
+        _claimTick = -1;
+        emit("colonists:bedClaimed", u, u.data.bed);
+        return u.data.bed;
+    }
+    // Who gets a new bed first: the most exhausted, then the eldest, then the earliest arrival (stable across runs).
+    const bedPriority = (a, b) => (exhaustionOf(b) - exhaustionOf(a)) || ((b.data.age | 0) - (a.data.age | 0)) || (a.id - b.id);
+    /** Gives every colonist without a usable bed record the nearest unclaimed bed, in priority order; returns how many were bedded. */
+    function allocateBeds() {
+        bedsDirty = false;
+        const unbedded = colonists().filter(o => !o.data.dead && !(bedRecordUsable(o) && claimBed(o))).sort(bedPriority);
+        let n = 0;
+        for (const o of unbedded) if (claimBed(o)) n++;
+        return n;
+    }
+    const markBedsDirty = () => { bedsDirty = true; };
+
     function myBedTarget(u) {
         if (!u || !u.data) return null;
         if (u.data.bed === null) return null;
@@ -3316,15 +3395,19 @@
         }
 
         const taken = new Set(activeJobs().filter(j => j.type === "sleep" && j.assigned !== u.id && j.target && sameLevel(j.target, u)).map(j => `${j.target.x},${j.target.y}`));
-        const beds = O ? O.findIn(levelArea(u), { near: { x: c ? c.site.x : u.x, y: c ? c.site.y : u.y }, radius: (c ? c.radius : 8) + 6, tags: ["bed"] }).filter(b => !taken.has(`${b.x},${b.y}`)) : [];
+        const beds = O ? O.findIn(levelArea(u), { near: { x: c ? c.site.x : u.x, y: c ? c.site.y : u.y }, radius: bedSearchRadius(c), tags: ["bed"] }).filter(b => !taken.has(`${b.x},${b.y}`)) : [];
         const owned = UF.Ownership && UF.Ownership.bedOf(u);
+        const claims = bedClaims();
         const permitted = beds.filter(b => {
+            const holder = claims.get(bedKeyAt(u, b.x, b.y));
+            if (holder !== undefined && holder !== u.id) return false; // another colonist's claimed bed (DEUS-TSK-FABLE-13)
             const owner = UF.Ownership && UF.Ownership.ownerOf({ kind: "object", area: copyArea(u.area), z: zOf(u), x: b.x, y: b.y });
             return !owner || owner.kind === "public" || owner.kind === "unit" && owner.id === u.id || owner.kind === "faction" && owner.id === u.data.faction;
         });
         const fire = nearestFire(u);
         const fireRef = fire ? { x: fire.x, y: fire.y } : null;
-        const myBed = (u.data && u.data.bed && sameLevel(u.data.bed, u)) ? u.data.bed : (owned && sameLevel(owned, u) ? owned : null);
+        const mine = claimBed(u); // the colonist's own claim first (a newcomer claims a free bed here when none was allocated yet)
+        const myBed = mine && bedStands(u, mine) ? mine : (owned && sameLevel(owned, u) ? owned : null);
         const spots = myBed && !taken.has(`${myBed.x},${myBed.y}`) ? [{ x: myBed.x, y: myBed.y, fire: fireRef }] : [];
 
         // Permitted unoccupied beds in the settlement take precedence over sleeping on the floor:
@@ -4987,6 +5070,7 @@
         // nearest ordinary worker off its job ("emergency: aid"), once per PREEMPT_EVERY per worker.
         if (sweep) {
             const all = colonists();
+            if (bedsDirty) allocateBeds(); // a bed was built or someone arrived: the unbedded claim beds (DEUS-TSK-FABLE-13)
             for (const u of all) {
                 if (unconscious(u) && !u.data.dead) startDying(u); // idle or busy, 0 hit points is dying
                 tickDying(u, t);
@@ -5366,6 +5450,7 @@
         get: colonist,
         isColonist,
         assess, hazardOf, threatOf, criticalNeed, onUnitMoved, PRIORITY,
+        claimBed, claimedBed, allocateBeds, bedClaims, bedSearchRadius,
         raiseAlarm, refugeFor, douseJob, burningPatientsFor, openJobs,
         state: colonyState,
         faction: () => (window.UF.Factions ? UF.Factions.get(factionId()) : null),
@@ -5420,7 +5505,7 @@
         spendCredits,
         stepMerchantCaravan,
         advanceTicks: (count = 60) => { localTicks += count; return localTicks; },
-        _internal: { preemptAt, lastIdleScan, IDLE_SCAN_INTERVAL, ALARM_RADIUS, REFUGE_RADIUS, advanceTicks: (count = 60) => { localTicks += count; return localTicks; }, progressAging, progressPregnancies, buildCells, foodJob, needJob, planJob, footprintClearingJob, tidyStockpileJob, constructionHaulingJob, colonistLedger, awardCredits, spendCredits, stepMerchantCaravan, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, allFactionPeople, stepFactionReproduction, attemptAdulthoodPairbond, conceptionChance, twinChance, postPartumCooldownSeconds, gestationSeconds, factionPopulation, immigrationWaveSize, immigrationChance, spawnImmigrants, stepImmigration, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }
+        _internal: { preemptAt, lastIdleScan, markBedsDirty, bedPriority, IDLE_SCAN_INTERVAL, ALARM_RADIUS, REFUGE_RADIUS, advanceTicks: (count = 60) => { localTicks += count; return localTicks; }, progressAging, progressPregnancies, buildCells, foodJob, needJob, planJob, footprintClearingJob, tidyStockpileJob, constructionHaulingJob, colonistLedger, awardCredits, spendCredits, stepMerchantCaravan, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, allFactionPeople, stepFactionReproduction, attemptAdulthoodPairbond, conceptionChance, twinChance, postPartumCooldownSeconds, gestationSeconds, factionPopulation, immigrationWaveSize, immigrationChance, spawnImmigrants, stepImmigration, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }
     };
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;
@@ -5458,6 +5543,10 @@
         UF.Events.on("combat:hit", ev => { try { noteThreat(ev); } catch (e) { console.error(e); } });
         UF.Events.on("world:unitMoved", (u, from, to) => { try { onUnitMoved(u, from, to); } catch (e) { console.error(e); } });
         UF.Events.on("objects:changed", clearObjectCaches);
+        UF.Events.on("objects:changed", (area, x, y, fromId, toId) => { const O = Objects(); if (O && (isBedType(O.type(toId)) || isBedType(O.type(fromId)))) markBedsDirty(); });
+        UF.Events.on("projects:done", markBedsDirty);
+        UF.Events.on("colonists:immigrated", markBedsDirty);
+        UF.Events.on("world:unitAdded", markBedsDirty);
         UF.Events.on("world:created", state => {
             try { setupColony(state); } catch (e) { console.error("UF_Colonists: setup failed", e); }
         });
