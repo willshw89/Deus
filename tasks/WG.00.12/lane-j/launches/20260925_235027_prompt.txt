@@ -1,0 +1,24 @@
+﻿You are the primary implementer for Lane J (Task WG.00.12).
+Read tasks/WG.00.12/lane-j/BRIEF.md carefully and follow all instructions within it.
+Your allowed paths are:
+- tools/ops/launch_worker.ps1
+- tools/ops/gate_tests.json
+- tools/ops/hooks/pre-push
+- tools/ops/install_lane_hooks.ps1
+- tools/ops/test_launch_worker.ps1
+- tools/ops/README.md
+- tools/ops/resume_queue.ps1
+- tools/ops/test_resume_queue.ps1
+- tasks/WG.00.12/lane-j/**
+
+Standing rules:
+1. NO ART (DEC-007). Never generate, request or integrate art, and never tell anyone to.
+2. Run tests in the FOREGROUND. Never end your turn while background jobs or child processes are running. Commit early (WIP commits allowed on your branch). Do not push. Do not merge. Write only inside allowedPaths. Keep write sets disjoint from Lane I.
+
+Deliverables:
+- tools/ops/launch_worker.ps1: standard worker launcher with PID tracking, timeout kill, headless-exit detection, and scope boundary checks.
+- tools/ops/gate_tests.json: seeded gate and quarantine test registries.
+- tools/ops/hooks/pre-push & install_lane_hooks.ps1: pre-push guardrail for lane worktrees.
+- tools/ops/resume_queue.ps1 & test_resume_queue.ps1: auto-resume and provider queue management.
+- tools/ops/test_launch_worker.ps1 & tools/ops/README.md: test suite and documentation.
+Ensure all tests run and pass in the foreground. Commit your work with commit messages starting with '[claude] WG.00.12'.
