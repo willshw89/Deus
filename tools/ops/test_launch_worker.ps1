@@ -489,8 +489,9 @@ $Tests = @(
     @{ Name = 'reviewer_prompt_never_reused_for_writer'; Body = {
         Reset-Lane $Fx
         $rev = New-PromptFile 'reviewer_prompt.txt' (Get-PmPromptText 'reviewer')
-        # A real reviewer launch (-NoCommitPrompt leaves its copy uncommitted in launches/) ...
-        $r0 = Invoke-Launch $Fx -Mode 'commit' -Params @{ Provider = 'grok'; PromptFile = $rev } -Switches @('NoCommitPrompt')
+        # A real reviewer launch (-NoCommitPrompt leaves its copy uncommitted in launches/; mode 'mention' commits
+        # another file than the writer run below, so that run still makes a commit) ...
+        $r0 = Invoke-Launch $Fx -Mode 'mention' -Params @{ Provider = 'grok'; PromptFile = $rev } -Switches @('NoCommitPrompt')
         Check 'reviewer_run_recorded' ($r0.Entry -and $r0.Entry['role'] -eq 'reviewer') "role $($r0.Entry['role']) $($r0.Err)"
         # ... a reviewer registry entry and a reviewer prompt committed under the launcher's subject, both for claude, so
         # only the role tells them apart; and a committed prompt whose subject names no role (the coordinator's format).
