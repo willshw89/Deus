@@ -175,6 +175,7 @@ $utf8 = New-Object Text.UTF8Encoding $false
 $stdin = [Console]::In.ReadToEnd()
 [IO.File]::WriteAllText((Join-Path $Out "stdin_$runId.txt"), $stdin, $utf8)
 [IO.File]::WriteAllText((Join-Path $Out "env_$runId.txt"), "author=$env:GIT_AUTHOR_NAME`ncommitter=$env:GIT_COMMITTER_NAME`nintegrator=[$env:DEUS_INTEGRATOR]`n", $utf8)
+[IO.File]::WriteAllText((Join-Path $Out "argv_$runId.txt"), [Environment]::CommandLine, $utf8)
 function Start-Sleeper([int]$Seconds) {
     $p = Start-Process -FilePath (Join-Path $PSHOME 'powershell.exe') -ArgumentList @('-NoProfile', '-Command', "Start-Sleep -Seconds $Seconds; # $Out") -WindowStyle Hidden -PassThru
     [IO.File]::WriteAllText((Join-Path $Out "child_$runId.txt"), "$($p.Id)")
@@ -297,6 +298,68 @@ function Save-LaunchFile($Fx, [string]$Stamp, [string]$Text, [string]$Subject) {
 }
 
 function Get-RunStdin($Fx, $Entry) { if (-not $Entry) { return $null }; return (Get-TextFile (Join-Path $Fx.Out "stdin_$($Entry['runId']).txt")) }
+
+function Compile-ArgvStub([string]$Path) {
+    # A tiny exe the effort tests use as -ProviderExe. It records argv and stdin and exits.
+    # It is not a provider CLI and it never starts one.
+    if (Test-Path -LiteralPath $Path) { return }
+    $code = @'
+using System;
+using System.IO;
+using System.Text;
+public static class DeusArgvStub {
+    public static int Main(string[] args) {
+        string dir = Environment.GetEnvironmentVariable("DEUS_ARGV_DIR");
+        string run = Environment.GetEnvironmentVariable("DEUS_RUN_ID");
+        if (string.IsNullOrEmpty(dir)) { dir = Path.GetTempPath(); }
+        if (string.IsNullOrEmpty(run)) { run = "norun"; }
+        string stdin;
+        using (StreamReader reader = new StreamReader(Console.OpenStandardInput(), new UTF8Encoding(false))) {
+            stdin = reader.ReadToEnd();
+        }
+        UTF8Encoding utf8 = new UTF8Encoding(false);
+        File.WriteAllText(Path.Combine(dir, "argv_" + run + ".txt"), string.Join("\n", args), utf8);
+        File.WriteAllText(Path.Combine(dir, "stdin_" + run + ".txt"), stdin ?? "", utf8);
+        string author = Environment.GetEnvironmentVariable("GIT_AUTHOR_NAME");
+        string integ = Environment.GetEnvironmentVariable("DEUS_INTEGRATOR");
+        File.WriteAllText(Path.Combine(dir, "env_" + run + ".txt"), "author=" + author + "\nintegrator=[" + integ + "]\n", utf8);
+        Console.Out.WriteLine("stub-ok");
+        return 0;
+    }
+}
+'@
+    Add-Type -TypeDefinition $code -OutputAssembly $Path -OutputType ConsoleApplication
+}
+
+function Invoke-LaunchBuilt {
+    # Like Invoke-Launch, but the executable is the argv stub and -ProviderArgs is not passed, so the
+    # launcher builds the provider command (including -Effort) itself. Nothing here is a real model CLI.
+    param($Fx, [hashtable]$Params = @{}, [string[]]$Switches = @(), [hashtable]$LaunchEnv = @{})
+    $p = [ordered]@{
+        Lane = $Fx.Lane; Provider = 'claude'; BriefPath = "tasks/T.01/$($Fx.Lane)/BRIEF.md"; TimeoutMinutes = '2'
+        Worktree = $Fx.Wt; RegistryPath = $Fx.Reg; ProviderStatusPath = $Fx.Status; LogRoot = $Fx.Logs
+        PollSeconds = '0.5'; OrphanGraceSeconds = '1'; ProviderExe = $script:ArgvStub
+    }
+    foreach ($k in $Params.Keys) { $p[$k] = $Params[$k] }
+    $argv = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $OpsDir 'launch_worker.ps1'))
+    foreach ($k in $p.Keys) { if ($null -ne $p[$k]) { $argv += "-$k"; $argv += [string]$p[$k] } }
+    $argv += '-Quiet'
+    foreach ($s in $Switches) { $argv += "-$s" }
+    $merged = @{ DEUS_ARGV_DIR = $Fx.Out }
+    foreach ($k in $LaunchEnv.Keys) { $merged[$k] = [string]$LaunchEnv[$k] }
+    $r = Invoke-Proc -Exe $PsExe -Argv $argv -Env $merged
+    $r.Entry = $null
+    $reg = Read-DeusJsonFile $Fx.Reg (New-Object System.Collections.ArrayList)
+    foreach ($e in $reg) { if ($e -is [System.Collections.IDictionary] -and $e['launcherPid'] -and $e['lane'] -eq $Fx.Lane) { $r.Entry = $e } }
+    return $r
+}
+
+function Get-StubArgs($Fx, $Entry) {
+    if (-not $Entry) { return @() }
+    $t = Get-TextFile (Join-Path $Fx.Out "argv_$($Entry['runId']).txt")
+    if ($null -eq $t) { return @() }
+    return @([regex]::Split($t, '\r?\n') | Where-Object { $_ -ne '' })
+}
 
 function Get-EntryField($Result, [string]$Name) { if (-not $Result.Entry) { return $null }; return $Result.Entry[$Name] }
 
@@ -807,6 +870,104 @@ $Tests = @(
         Check 'main_not_guarded' (-not (G $Fx.Main config --get core.hooksPath))
         Check 'global_not_set' ((Get-TextFile $env:GIT_CONFIG_GLOBAL) -notmatch 'hooksPath')
     } }
+    # --- effort mapping, the DEC-032 floor, gemini, and -ProviderArgs (OPS.20.06) ----------------
+    @{ Name = 'effort_maps_to_provider_flags'; Body = {
+        # Argument strings are built in process. The launches below run only the argv stub.
+        $claudeBase = (Get-DeusProviderSpec -Provider claude -PromptPath 'prompt.txt').Args
+        Check 'claude_flag_built' ((Add-DeusEffortArgument -Provider claude -ArgLine $claudeBase -Level 'xhigh') -eq ($claudeBase + ' --effort xhigh'))
+        $grokBase = (Get-DeusProviderSpec -Provider grok -PromptPath 'prompt.txt').Args
+        Check 'grok_flag_built' ((Add-DeusEffortArgument -Provider grok -ArgLine $grokBase -Level 'max') -eq ($grokBase + ' --reasoning-effort max'))
+        $codexBase = (Get-DeusProviderSpec -Provider codex -PromptPath 'prompt.txt').Args
+        $codexFlag = '-c ' + (ConvertTo-DeusArg 'model_reasoning_effort="ultra"')
+        Check 'codex_flag_built' ((Add-DeusEffortArgument -Provider codex -ArgLine $codexBase -Level 'ultra') -eq ($codexBase -replace ' exec ', " exec $codexFlag "))
+        Check 'gemini_line_unchanged' ((Add-DeusEffortArgument -Provider gemini -ArgLine 'gemini-args' -Level 'high') -eq 'gemini-args')
+        Reset-Lane $Fx
+        $r1 = Invoke-LaunchBuilt $Fx -Params @{ Provider = 'claude'; Effort = 'xhigh' }
+        $a1 = Get-StubArgs $Fx $r1.Entry
+        Check 'claude_exit' ($r1.Code -eq 0) "exit $($r1.Code) $($r1.Err)"
+        Check 'claude_argv' (($a1 -join '|') -eq '-p|--output-format|stream-json|--verbose|--dangerously-skip-permissions|--effort|xhigh') ($a1 -join '|')
+        Check 'claude_stdin' ((Get-RunStdin $Fx $r1.Entry) -ceq (Get-TextFile $r1.Entry['launchPromptPath']))
+        $r2 = Invoke-LaunchBuilt $Fx -Params @{ Provider = 'grok'; Effort = 'max' }
+        $a2 = Get-StubArgs $Fx $r2.Entry
+        Check 'grok_exit' ($r2.Code -eq 0) "exit $($r2.Code) $($r2.Err)"
+        Check 'grok_argv' ($a2.Count -eq 5 -and $a2[0] -eq '--always-approve' -and $a2[1] -eq '--prompt-file' -and $a2[3] -eq '--reasoning-effort' -and $a2[4] -eq 'max') ($a2 -join '|')
+        Check 'grok_prompt_path' ($a2[2] -eq $r2.Entry['launchPromptPath']) "got $($a2[2])"
+        Check 'grok_stdin_empty' ((Get-RunStdin $Fx $r2.Entry) -eq '')
+        $r3 = Invoke-LaunchBuilt $Fx -Params @{ Provider = 'codex'; Effort = 'ultra' }
+        $a3 = Get-StubArgs $Fx $r3.Entry
+        $tail = (@($a3 | Select-Object -Last 6) -join '|')
+        Check 'codex_exit' ($r3.Code -eq 0) "exit $($r3.Code) $($r3.Err)"
+        Check 'codex_argv' ($tail -eq 'exec|-c|model_reasoning_effort="ultra"|--dangerously-bypass-approvals-and-sandbox|--json|-') $tail
+        Check 'codex_stdin' ((Get-RunStdin $Fx $r3.Entry) -ceq (Get-TextFile $r3.Entry['launchPromptPath']))
+    } }
+    @{ Name = 'effort_floor_raises'; Body = {
+        Check 'grok_low_raised' ((Resolve-DeusLaunchEffort -Provider grok -Requested 'low' -WasBound).Level -eq 'xhigh')
+        Check 'grok_omitted' ((Resolve-DeusLaunchEffort -Provider grok).Level -eq 'xhigh')
+        Check 'claude_medium_raised' ((Resolve-DeusLaunchEffort -Provider claude -Requested 'medium' -WasBound).Level -eq 'high')
+        Check 'claude_high_stays' ((Resolve-DeusLaunchEffort -Provider claude -Requested 'high' -WasBound).Level -eq 'high')
+        Check 'claude_xhigh_stays' ((Resolve-DeusLaunchEffort -Provider claude -Requested 'xhigh' -WasBound).Level -eq 'xhigh')
+        Check 'claude_ultra_capped' ((Resolve-DeusLaunchEffort -Provider claude -Requested 'ultra' -WasBound).Level -eq 'max')
+        Check 'grok_max_stays' ((Resolve-DeusLaunchEffort -Provider grok -Requested 'max' -WasBound).Level -eq 'max')
+        Check 'grok_ultra_capped' ((Resolve-DeusLaunchEffort -Provider grok -Requested 'ultra' -WasBound).Level -eq 'max')
+        Check 'codex_high_raised' ((Resolve-DeusLaunchEffort -Provider codex -Requested 'high' -WasBound).Level -eq 'xhigh')
+        Check 'codex_ultra_stays' ((Resolve-DeusLaunchEffort -Provider codex -Requested 'ultra' -WasBound).Level -eq 'ultra')
+        Check 'gemini_low_raised' ((Resolve-DeusLaunchEffort -Provider gemini -Requested 'low' -WasBound).Level -eq 'high')
+        Check 'gemini_ultra_capped' ((Resolve-DeusLaunchEffort -Provider gemini -Requested 'ULTRA' -WasBound).Level -eq 'high')
+        Check 'bad_effort' ((Resolve-DeusLaunchEffort -Provider claude -Requested 'turbo' -WasBound).Error -match '-Effort must be one of')
+        Reset-Lane $Fx
+        $r = Invoke-LaunchBuilt $Fx -Params @{ Provider = 'grok'; Effort = 'low' }
+        $a = Get-StubArgs $Fx $r.Entry
+        Check 'grok_low_exit' ($r.Code -eq 0) "exit $($r.Code) $($r.Err)"
+        Check 'grok_low_argv' ($a.Count -ge 2 -and $a[-2] -eq '--reasoning-effort' -and $a[-1] -eq 'xhigh') ($a -join '|')
+        $r2 = Invoke-LaunchBuilt $Fx -Params @{ Provider = 'claude' }
+        $a2 = Get-StubArgs $Fx $r2.Entry
+        Check 'omitted_exit' ($r2.Code -eq 0) "exit $($r2.Code) $($r2.Err)"
+        Check 'omitted_is_floor' ($a2.Count -ge 2 -and $a2[-2] -eq '--effort' -and $a2[-1] -eq 'high') ($a2 -join '|')
+        Reset-Lane $Fx
+        $bad = Invoke-LaunchBuilt $Fx -Params @{ Effort = 'turbo' }
+        Check 'invalid_exit' ($bad.Code -eq 1) "exit $($bad.Code) $($bad.Err)"
+        Check 'invalid_says' ($bad.Err -match '-Effort must be one of: low, medium, high, xhigh, max, ultra') $bad.Err
+        Check 'invalid_no_registry' (-not (Test-Path $Fx.Reg))
+    } }
+    @{ Name = 'gemini_provider'; Body = {
+        Check 'known_provider' ((Get-DeusKnownProviders) -contains 'gemini')
+        Reset-Lane $Fx
+        $writer = Invoke-LaunchBuilt $Fx -Params @{ Provider = 'gemini'; Effort = 'ultra' }
+        $wcmd = @((Get-StubArgs $Fx $writer.Entry) | Where-Object { $_ -like 'gemini *' })
+        Check 'writer_exit' ($writer.Code -eq 0) "exit $($writer.Code) $($writer.Err)"
+        Check 'writer_role' ($writer.Entry['role'] -eq 'writer') $writer.Entry['role']
+        Check 'writer_command' ($wcmd.Count -eq 1 -and $wcmd[0] -eq 'gemini --model gemini-3.1-pro-preview --skip-trust --approval-mode yolo --output-format stream-json') ("[$($wcmd -join ' || ')] all=" + ((Get-StubArgs $Fx $writer.Entry) -join '|'))
+        Check 'writer_stdin' ((Get-RunStdin $Fx $writer.Entry) -ceq (Get-TextFile $writer.Entry['launchPromptPath']))
+        $wenv = Get-TextFile (Join-Path $Fx.Out "env_$($writer.Entry['runId']).txt")
+        Check 'writer_identity' ($wenv -match 'author=deus-gemini' -and $wenv -match 'integrator=\[\]') $wenv
+        Reset-Lane $Fx
+        Save-LaneFixture $Fx $null ([ordered]@{ reviewer = 'gemini' })
+        $rev = Invoke-LaunchBuilt $Fx -Params @{ Provider = 'gemini'; Effort = 'low' }
+        $rcmd = @((Get-StubArgs $Fx $rev.Entry) | Where-Object { $_ -like 'gemini *' })
+        Check 'reviewer_exit' ($rev.Code -eq 0) "exit $($rev.Code) $($rev.Err)"
+        Check 'reviewer_role' ($rev.Entry['role'] -eq 'reviewer') $rev.Entry['role']
+        Check 'reviewer_floor_keeps_high_model' ($rcmd.Count -eq 1 -and $rcmd[0] -eq 'gemini --model gemini-3.1-pro-preview --skip-trust --approval-mode yolo --output-format stream-json') ("[$($rcmd -join ' || ')] all=" + ((Get-StubArgs $Fx $rev.Entry) -join '|'))
+        Check 'reviewer_commit_names_role' ((G $Fx.Wt log --format=%s -1 $rev.Entry['baseCommit']) -match '\(reviewer gemini\)$') (G $Fx.Wt log --format=%s -1 $rev.Entry['baseCommit'])
+        $pats = @(Get-DeusUsagePatterns 'gemini')
+        Check 'resource_exhausted_pattern' (@($pats | Where-Object { 'RESOURCE_EXHAUSTED' -match $_ }).Count -ge 1)
+        Reset-Lane $Fx
+        Save-LaneFixture $Fx $null ([ordered]@{ writer = 'gemini'; reviewer = 'agy' })
+        $same = Invoke-LaunchBuilt $Fx -Params @{ Provider = 'gemini' }
+        Check 'same_family_refused' ($same.Code -eq 1 -and $same.Err -match 'famil') "exit $($same.Code) $($same.Err)"
+        Check 'same_family_no_run' (-not (Test-Path $Fx.Reg))
+    } }
+    @{ Name = 'provider_args_byte_identical'; Body = {
+        Reset-Lane $Fx
+        $r = Invoke-Launch $Fx -Mode 'commit'
+        $cmd = Get-TextFile (Join-Path $Fx.Out "argv_$($r.Entry['runId']).txt")
+        Check 'exit_0' ($r.Code -eq 0) "exit $($r.Code) $($r.Err)"
+        Check 'command_is_the_fake_worker' ($cmd -match [regex]::Escape("-Mode commit -Out $($Fx.Out)")) $cmd
+        Check 'no_effort_flag_added' ($cmd -and $cmd -notmatch '--effort' -and $cmd -notmatch '--reasoning-effort' -and $cmd -notmatch 'model_reasoning_effort' -and $cmd -notmatch 'gemini-3\.1-pro-preview') $cmd
+        $before = @((Read-DeusJsonFile $Fx.Reg $null)).Count
+        $r2 = Invoke-Launch $Fx -Mode 'commit' -Params @{ Effort = 'xhigh' }
+        Check 'combo_refused' ($r2.Code -eq 1 -and $r2.Err -match '-Effort cannot be combined with -ProviderArgs') "exit $($r2.Code) $($r2.Err)"
+        Check 'no_second_entry' (@((Read-DeusJsonFile $Fx.Reg $null)).Count -eq $before) "entries $(@((Read-DeusJsonFile $Fx.Reg $null)).Count)"
+    } }
     @{ Name = 'gate_registry'; Body = {
         $path = Join-Path $OpsDir 'gate_tests.json'
         $j = $null
@@ -950,6 +1111,16 @@ $MutantDefs = @(
        Find = 'return @{ Error = "lane.json ""push"" must be true or false, not ''$p''" }'; Replace = '$null = $p' }
     @{ Name = 'no_final_sha_line'; File = 'launch_worker.ps1'; Tests = 'push_rule_from_brief'
        Find = 'if ($Push) { $lines.Add(''Your final output line'; Replace = 'if ($false) { $lines.Add(''Your final output line' }
+    # effort, the floor, gemini, and explicit -ProviderArgs (OPS.20.06)
+    @{ Name = 'effort_flag_not_applied'; File = 'launch_worker.ps1'; Tests = 'effort_maps_to_provider_flags'
+       Find = '$spec.Args = Add-DeusEffortArgument -Provider $prov -ArgLine $spec.Args -Level $effort.Level'; Replace = '$spec.Args = $spec.Args' }
+    @{ Name = 'effort_floor_not_raised'; File = 'launch_worker.ps1'; Tests = 'effort_floor_raises'
+       Find = 'if ($rank -lt $floorRank) { $rank = $floorRank }'; Replace = 'if ($false) { $rank = $floorRank }' }
+    @{ Name = 'gemini_model_downgraded'; File = 'launch_worker.ps1'; Tests = 'gemini_provider'
+       Find = "return 'gemini-3.1-pro-preview'"; Replace = "return 'gemini-2.5-flash'" }
+    @{ Name = 'provider_args_gain_effort'; File = 'launch_worker.ps1'; Tests = 'provider_args_byte_identical'
+       Find = '$spec = @{ Exe = $ProviderExe; Args = "$ProviderArgs"; StdinPrompt = [bool]$ProviderStdinPrompt }'
+       Replace = '$spec = @{ Exe = $ProviderExe; Args = ("$ProviderArgs" + '' --effort high''); StdinPrompt = [bool]$ProviderStdinPrompt }' }
     @{ Name = 'hook_allows_push'; File = 'hooks\pre-push'; Tests = 'hooks_install_and_block'
        Find = 'exit 1'; Replace = 'exit 0' }
     @{ Name = 'hook_repo_wide'; File = 'install_lane_hooks.ps1'; Tests = 'hooks_install_and_block'
@@ -972,6 +1143,8 @@ $TestRoot = Initialize-TestHarness 'deus_lw_test'
 Write-Host "test_launch_worker: ops $OpsDir; temp $TestRoot"
 $Fx = New-TestRepo $TestRoot
 Write-FakeWorker $Fx.FakeWorker
+$script:ArgvStub = Join-Path $TestRoot 'argv_stub.exe'
+Compile-ArgvStub $script:ArgvStub
 $leftover = 0
 try {
     Invoke-TestList $Tests $Only

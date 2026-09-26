@@ -3,7 +3,7 @@
     Standard DEUS worker launcher (WG.00.12 Lane J).
 
 .DESCRIPTION
-    Starts one provider CLI session (claude, grok or codex) in a lane worktree and watches it to the end.
+    Starts one provider CLI session (claude, grok, codex or gemini) in a lane worktree and watches it to the end.
       - Refuses to start when the brief is missing or empty, the lane already has a live worker, the
         worktree is on the wrong branch, or the provider shares an AI family with the lane's other role.
       - Prompt: -PromptFile, else the lane's saved prompt for the same task, role and provider (never a prompt of the
@@ -48,7 +48,8 @@ param(
     [double]$DefaultResetMinutes = 60,
     [string]$ProviderExe,
     [string]$ProviderArgs,
-    [switch]$ProviderStdinPrompt
+    [switch]$ProviderStdinPrompt,
+    [string]$Effort
 )
 
 # ---------------------------------------------------------------------------------------------
@@ -65,7 +66,7 @@ function Get-DeusProviderFamily([string]$Provider) {
     return $null
 }
 
-function Get-DeusKnownProviders { return @('claude', 'grok', 'codex') }
+function Get-DeusKnownProviders { return @('claude', 'grok', 'codex', 'gemini') }
 
 function ConvertTo-DeusArg([string]$Value) {
     # Quote one argument for CommandLineToArgvW / the MSVC runtime.
@@ -75,9 +76,13 @@ function ConvertTo-DeusArg([string]$Value) {
     return '"' + $s + '"'
 }
 
+function Get-DeusGeminiModel { return 'gemini-3.1-pro-preview' }
+
 function Get-DeusProviderSpec {
     # Command line for a worker session (default) or a one-line probe (-Probe).
-    # Claude and Codex read the prompt from stdin; Grok reads it from the saved prompt file.
+    # Claude, Codex and Gemini read the prompt from stdin; Grok reads it from the saved prompt file.
+    # Effort flags are not included here (probes stay on the short command). Invoke-DeusLaunchMain adds them
+    # for a worker when -ProviderArgs is not set. See Resolve-DeusLaunchEffort.
     param([string]$Provider, [string]$PromptPath, [switch]$Probe)
     $npm = Join-Path $env:APPDATA 'npm'
     switch ($Provider) {
@@ -111,8 +116,68 @@ function Get-DeusProviderSpec {
             else { $a = (ConvertTo-DeusArg $js) + ' exec --dangerously-bypass-approvals-and-sandbox --json -' }
             return @{ Exe = $exe; Args = $a; StdinPrompt = $true }
         }
+        'gemini' {
+            # The default executable name is `gemini` on PATH. The npm shim is a .cmd, and ProcessStartInfo
+            # cannot start a .cmd, so cmd.exe runs that command. Nothing outside the repo is hard-coded:
+            # cmd.exe and gemini.cmd are resolved when the command is built. Gemini CLI 0.61.0 has no
+            # thinking-level flag. The built-in model alias from Get-DeusGeminiModel extends chat-base-3,
+            # whose thinkingLevel is HIGH, so the model argument is the thinking level (DEC-032).
+            $cmdExe = Get-Command cmd.exe -CommandType Application -ErrorAction SilentlyContinue
+            $gem = Get-Command gemini.cmd -CommandType Application -ErrorAction SilentlyContinue
+            $exe = $null
+            if ($cmdExe -and $gem) { $exe = $cmdExe.Source }
+            $inner = 'gemini --model ' + (Get-DeusGeminiModel) + ' --skip-trust --approval-mode yolo'
+            if (-not $Probe) { $inner += ' --output-format stream-json' }
+            $a = '/d /s /c ' + (ConvertTo-DeusArg $inner)
+            return @{ Exe = $exe; Args = $a; StdinPrompt = $true }
+        }
     }
     return $null
+}
+
+function Resolve-DeusLaunchEffort {
+    # The effort a worker launch may use. -WasBound with a value outside low|medium|high|xhigh|max|ultra
+    # is an error. Otherwise the value is raised to the DEC-032 floor and, above that, capped at the
+    # highest level this provider's CLI accepts (capping stays at or above the floor). Omitted -Effort
+    # uses the floor. Floors: claude high, grok xhigh, codex xhigh, gemini high (thinking HIGH).
+    param([string]$Provider, [string]$Requested, [switch]$WasBound)
+    $names = @('low', 'medium', 'high', 'xhigh', 'max', 'ultra')
+    $policy = @{
+        claude = @{ Floor = 'high'; Cap = 'max' }
+        grok   = @{ Floor = 'xhigh'; Cap = 'max' }
+        codex  = @{ Floor = 'xhigh'; Cap = 'ultra' }
+        gemini = @{ Floor = 'high'; Cap = 'high' }
+    }
+    $p = $policy[$Provider]
+    if (-not $p) { return @{ Error = "-Effort is not defined for provider $Provider" } }
+    if ($WasBound) {
+        $req = "$Requested".Trim().ToLowerInvariant()
+        if ([array]::IndexOf($names, $req) -lt 0) { return @{ Error = "-Effort must be one of: $($names -join ', ')" } }
+    } else { $req = $null }
+    if (-not $req) { $req = $p.Floor }
+    $rank = [array]::IndexOf($names, $req)
+    $floorRank = [array]::IndexOf($names, $p.Floor)
+    $capRank = [array]::IndexOf($names, $p.Cap)
+    if ($rank -lt $floorRank) { $rank = $floorRank }
+    if ($rank -gt $capRank) { $rank = $capRank }
+    return @{ Level = $names[$rank] }
+}
+
+function Add-DeusEffortArgument {
+    # Appends the provider's effort flag to a Get-DeusProviderSpec argument string. Gemini's thinking
+    # level is the model alias already in that string (Gemini CLI 0.61.0 has no thinking flag); $Level
+    # for gemini is always high after Resolve-DeusLaunchEffort.
+    param([string]$Provider, [string]$ArgLine, [string]$Level)
+    switch ($Provider) {
+        'claude' { return "$ArgLine --effort $Level" }
+        'grok'   { return "$ArgLine --reasoning-effort $Level" }
+        'codex'  {
+            $flag = '-c ' + (ConvertTo-DeusArg "model_reasoning_effort=`"$Level`"")
+            return ($ArgLine -replace ' exec ', " exec $flag ")
+        }
+        'gemini' { return $ArgLine }
+    }
+    return $ArgLine
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -440,6 +505,7 @@ function Get-DeusUsagePatterns([string]$Provider) {
         claude = @('(?i)Claude AI usage limit reached', '(?i)(?:5-hour|five-hour|opus|sonnet)\s+limit\s+reached', '(?i)credit balance is too low', '(?i)out of extra usage')
         grok   = @('(?i)(?:run|ran)\s+out\s+of\s+credits', '(?i)insufficient\s+(?:credits|balance)', '(?i)spending\s+limit\s+(?:reached|exceeded)', '(?i)resource[_ ]exhausted')
         codex  = @('(?i)exceeded retry limit, last status: 429', '(?i)rate limit reached for', '(?i)usage_limit_reached', '(?i)usage_not_included')
+        gemini = @('(?i)\bRESOURCE_EXHAUSTED\b')
     }
     $list = @()
     if ($specific.ContainsKey($Provider)) { $list += $specific[$Provider] }
@@ -1027,6 +1093,17 @@ function Invoke-DeusLaunchMain {
     if (-not $Lane) { Stop-DeusLaunch 'missing -Lane' }
     $prov = "$Provider".ToLowerInvariant()
     if ((Get-DeusKnownProviders) -notcontains $prov) { Stop-DeusLaunch "-Provider must be one of: $((Get-DeusKnownProviders) -join ', ')" }
+    if (-not $script:DeusBoundArgs) { $script:DeusBoundArgs = @{} }
+    $effortBound = [bool]$script:DeusBoundArgs.ContainsKey('Effort')
+    $providerArgsBound = [bool]$script:DeusBoundArgs.ContainsKey('ProviderArgs')
+    # -ProviderArgs is the caller's whole command line (PM wrappers, tests). It is not rewritten.
+    if ($ProviderExe -and $providerArgsBound -and $effortBound) {
+        Stop-DeusLaunch '-Effort cannot be combined with -ProviderArgs; -ProviderArgs is used exactly as given'
+    }
+    if ($effortBound -and -not ($ProviderExe -and $providerArgsBound)) {
+        $effortCheck = Resolve-DeusLaunchEffort -Provider $prov -Requested $Effort -WasBound
+        if ($effortCheck.Error) { Stop-DeusLaunch $effortCheck.Error }
+    }
     if (-not ($TimeoutMinutes -gt 0)) { Stop-DeusLaunch '-TimeoutMinutes must be greater than 0' }
     $wt = $Worktree
     if (-not $wt) { $wt = Join-Path $WorktreeRoot $Lane }
@@ -1105,10 +1182,20 @@ function Invoke-DeusLaunchMain {
     Set-DeusStaleLaneEntries -RegistryPath $reg -Lane $Lane
 
     # --- provider command -------------------------------------------------------------------
-    if ($ProviderExe) {
+    # -ProviderExe together with -ProviderArgs is the historical override (tests, PM wrappers): the
+    # argument string is used exactly as given, with no effort flag. Any other launch uses the built-in
+    # command and the DEC-032 effort (the floor when -Effort is omitted). -ProviderExe alone replaces
+    # the executable and still gets that built-in command, so a stub can stand in for the real CLI.
+    if ($ProviderExe -and $script:DeusBoundArgs.ContainsKey('ProviderArgs')) {
         $spec = @{ Exe = $ProviderExe; Args = "$ProviderArgs"; StdinPrompt = [bool]$ProviderStdinPrompt }
     } else {
         $spec = Get-DeusProviderSpec -Provider $prov -PromptPath '{promptFile}'
+        if ($spec) {
+            $effort = Resolve-DeusLaunchEffort -Provider $prov -Requested $(if ($script:DeusBoundArgs.ContainsKey('Effort')) { $Effort } else { $null }) -WasBound:([bool]$script:DeusBoundArgs.ContainsKey('Effort'))
+            if ($effort.Error) { Stop-DeusLaunch $effort.Error }
+            $spec.Args = Add-DeusEffortArgument -Provider $prov -ArgLine $spec.Args -Level $effort.Level
+            if ($ProviderExe) { $spec.Exe = $ProviderExe }
+        }
     }
     if (-not $spec -or -not $spec.Exe -or -not (Test-Path -LiteralPath $spec.Exe)) { Stop-DeusLaunch "no CLI found for provider $prov" }
 
@@ -1282,6 +1369,9 @@ function Invoke-DeusLaunchMain {
 $script:LaneLock = $null
 $script:WorkerPid = $null
 $script:RunCtx = $null
+# Captured here, in the script body: inside Invoke-DeusLaunchMain, $PSBoundParameters is that function's
+# own (empty) parameter list. Resume and the tests load functions only, so they never read this.
+$script:DeusBoundArgs = $PSBoundParameters
 try {
     Invoke-DeusLaunchMain
 } catch {
