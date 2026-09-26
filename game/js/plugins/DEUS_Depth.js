@@ -38,14 +38,17 @@
  * sampling) from the lower level's cached build (UF.World.peekArea), plus the level's objects, items,
  * units, cliff faces and ground ramps as pooled sprites between its tile layers. A unit that steps on
  * a lower level walks from its cell to the next over UnitStepFrames simulation ticks and plays its
- * sheet's walk frames (discrete sprite frames, rule 12); the simulation is not touched. The plane
- * canvases are pooled across level switches.
+ * sheet's walk frames (discrete sprite frames, rule 12); the simulation is not touched. A level
+ * switch happens in place (SIM.00.00: the spriteset is kept): the planes are bound to the new view's
+ * levels, painted, and their entities and units placed before levels:viewChanged fires. The plane
+ * canvases are pooled across map transfers (area edges, loads).
  *
  * The A1 water frames of a lower level step with the map on screen (a sprite-frame animation of the
  * tileset, rule 12); the plugin synthesizes no motion of its own.
  *
  * Replaced core methods: none. Aliases: Spriteset_Map.createCharacters, Spriteset_Map.updateTilemap,
- * Scene_Map.start, Scene_Map.terminate, Scene_Boot.start (checks). The map's own Tilemap instance gets
+ * Scene_Map.update, Scene_Map.start, Scene_Map.terminate, Scene_Boot.start (checks). Listens to
+ * world:levelBuilt / world:areaBuilt (a level went on screen, in place or loaded). The map's own Tilemap instance gets
  * an _addSpot of its own that skips the viewed level's open cells while the planes are on. Save data:
  * none.
  *
@@ -119,8 +122,9 @@
     let unitPlaceStamp = 0; // moves when a unit changes level or area (world:unitLevelChanged / world:unitAreaChanged)
 
     //-------------------------------------------------------------------------
-    // The planes' canvases outlive a spriteset (K2 d). A level switch is a map transfer: the old Scene_Map is terminated
-    // before the new spriteset is made, so its canvases go back to this pool at terminate and the new planes take them.
+    // The planes' canvases outlive a spriteset (K2 d). On a map transfer (an area edge, a load) the old Scene_Map is terminated
+    // before the new spriteset is made, so its canvases go back to this pool at terminate and the new planes take them. A level
+    // switch happens in place (SIM.00.00): the spriteset, its root and their canvases stay.
 
     const canvasPool = [];
     const POOL_MAX = 4; // two planes x two layers
@@ -888,6 +892,7 @@
         this._candsOf = null;
         this._candsStamp = -1;
         this._candsFrame = -Infinity;
+        this._unitsLate = false;
         this.rebuild();
     };
     Sprite_DepthRoot.prototype.destroy = function() {
@@ -927,6 +932,26 @@
             }
         }
         if (was !== this.seeThrough) this.repaintMain();
+    };
+    /** A level went on screen (world:levelBuilt / world:areaBuilt). A map load fires these before the new scene has a spriteset,
+     *  so no root hears them: the new root binds, paints and places everything when it is made (createCharacters). An in-place
+     *  switch (SIM.00.00) keeps the spriteset and this root: DEUS_Levels' finishSwitch calls UF.World.rebindSpriteset at the
+     *  start of the spriteset's update, which fires the event, and emits levels:viewChanged only after rebindSpriteset returns.
+     *  So the planes are bound AND painted, and their entities and units placed, here, before that event, whatever the order of
+     *  its listeners (Fix 2). The switch_same_frame provocation leaves it to the frame's own update and holds the units back
+     *  one more frame (a lag the check must see both at the event and in the first frame drawn). */
+    Sprite_DepthRoot.prototype.levelShown = function() {
+        this.rebuild();
+        if (this._released) return;
+        if (provoked("switch_same_frame")) { this._unitsLate = true; return; }
+        this.sync();
+    };
+    /** The work of one whole frame, now: the planes placed and painted, their entities placed, the units scanned and placed. */
+    Sprite_DepthRoot.prototype.sync = function() {
+        this.update(false);
+        if (this._released || !this.seeThrough || !this._camSet || !window.$gameMap) return;
+        const W = World();
+        this.updateUnits(W, this._win, W._frame | 0);
     };
     Sprite_DepthRoot.prototype.bindPlane = function(plane, v, z) {
         const W = World(), L = Levels();
@@ -982,6 +1007,7 @@
     Sprite_DepthRoot.prototype.lateUpdate = function() {
         if (this._released || !this.seeThrough || !this._camSet || !window.$gameMap) return;
         this._lateSeen = true;
+        if (this._unitsLate) { this._unitsLate = false; return; } // the switch_same_frame provocation only (levelShown)
         const t0 = performance.now();
         const W = World();
         this.updateUnits(W, this._win, W._frame | 0);
@@ -1134,8 +1160,8 @@
         this._ufDepth = new Sprite_DepthRoot(this._tilemap);
         installMainSkip(this._tilemap, this._ufDepth);
         this._tilemap.addChild(this._ufDepth);
-        // Bind, paint and place the planes now, so the first frame of a level switch already shows them (K2). The
-        // switch_same_frame provocation leaves it to the first update, one frame later.
+        // Bind, paint and place the planes now, so the first frame after a map transfer (an area edge, a load) already shows them
+        // (K2). An in-place level switch keeps this root (levelShown). The switch_same_frame provocation leaves it to the first update.
         if (!provoked("switch_same_frame") && window.$gameMap) this._ufDepth.update();
     };
     const _Spriteset_Map_updateTilemap = Spriteset_Map.prototype.updateTilemap;
@@ -1173,8 +1199,9 @@
         E.on("levels:cellChanged", onShape);
         E.on("world:levelTileChanged", lv => { const r = rootOf(); if (r) r.refreshLevel(lv && lv.z); });
         E.on("world:tileChanged", () => { const r = rootOf(); if (r) r.refreshLevel(0); });
-        E.on("world:levelBuilt", () => { const r = rootOf(); if (r) r.rebuild(); });
-        E.on("world:areaBuilt", () => { const r = rootOf(); if (r) r.rebuild(); });
+        // A level went on screen: in place (SIM.00.00) from inside UF.World.rebindSpriteset, before levels:viewChanged (levelShown).
+        E.on("world:levelBuilt", () => { const r = rootOf(); if (r) r.levelShown(); });
+        E.on("world:areaBuilt", () => { const r = rootOf(); if (r) r.levelShown(); });
         E.on("world:created", () => { shapesReset(); sheets.clear(); });
         // The lower levels' objects (per level or the ground) and items. Units need no event: they are checked every frame.
         E.on("objects:levelChanged", lv => { const r = rootOf(); if (r) r.dirtyObjects(lv && lv.z); });
