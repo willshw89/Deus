@@ -67,7 +67,7 @@
 | **Lane E** | **WG.00.09 DEFINE / PRE-ATTACK** (`WG.00.09`) | Grok CLI (Writer) / Claude (Reviewer) | `task-35960` (PID 25240)<br>`task/lane-e` (pushed `6a71a4c4`) | `C:\Users\snewt\.deus_worktrees\lane-e` | Active | **STATUS: ACTIVE WRITER.**<br>• Grok writer launched to fold in N5 and N6 review findings into attack plan per Directive 001-M §2. |
 | **Lane F** | **OneDrive-Link Migration Prep** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Merged `d09a1295`<br>`task/lane-f` | `C:\Users\snewt\.deus_worktrees\lane-f` | 2026-09-25 16:52:09 | **STATUS: INTEGRATED TO MAIN.**<br>• Post-F test suite 8/8 EXIT=0; pushed to origin. |
 | **Lane G** | **ATK-YEAR0-002 Runtime Fix & Test Maint** (`WG.00.11`) | Claude CLI / `claude-opus-5-5` | Merged `da2c16b2`<br>`task/lane-g` | `C:\Users\snewt\.deus_worktrees\lane-g` | 2026-09-25 17:50:51 | **STATUS: INTEGRATED TO MAIN.**<br>• Runtime Year 0 integrated. |
-| **Lane H** | **Z-2 Cut Proof & Fluid Hardening** (`WG.00.08`) | Claude CLI (Writer) / Grok (Verifier) | `task-35958` (PID 24140)<br>`task/lane-h` (pushed `c8694f01`) | `C:\Users\snewt\.deus_worktrees\lane-h` | Active | **STATUS: ACTIVE VERIFIER.**<br>• Claude proof hardening committed (`c8694f01`). Grok verifier launched per Directive 001-M §1. |
+| **Lane H** | **Z-2 Cut Proof & Fluid Hardening** (`WG.00.08`) | Claude CLI (Writer) / Grok (Verifier) | Merged `9acdee8a`<br>`task/lane-h` | `C:\Users\snewt\.deus_worktrees\lane-h` | 2026-09-26 00:00:58 | **STATUS: REVIEWED-PASS-WITH-MINORS / MERGED.**<br>• Merged into main per PM sign-off 0016-P (`9acdee8a`). Baseline 12/12 exits 0 on main. Grok verifier PID 24140 still active in background. |
 | **Lane I** | **Merge Gate CLI & Self-Tests** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | `task-36035` (PID 10576)<br>`task/lane-i` (pushed `4d731c6e`) | `C:\Users\snewt\.deus_worktrees\lane-i` | Active | **STATUS: ACTIVE WRITER.**<br>• Implementing `tools/governance/merge_gate.js`, `test_merge_gate.js`, `MERGE_GATE.md` per Directive 001-N §1. |
 | **Lane J** | **Standard Worker Launcher & Pre-Push Guard** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | `task-36037` (PID 2684)<br>`task/lane-j` (pushed `dac855a2`) | `C:\Users\snewt\.deus_worktrees\lane-j` | Active | **STATUS: ACTIVE WRITER.**<br>• Implementing `tools/ops/launch_worker.ps1`, `gate_tests.json`, `resume_queue.ps1` per Directive 001-N §2. |
 
@@ -79,7 +79,6 @@
 | Lane / Owner | Exclusive File Whitelist (Full Paths) | Access Policy |
 |---|---|---|
 | **Gemini (Coordinator)** | `docs/STATUS.md`<br>`docs/archive/STATUS_LEDGER_*.md`<br>`docs/WORK_QUEUE.md`<br>`docs/MODEL_AVAILABILITY.md`<br>`docs/telemetry/sessions/active_workers.json`<br>`docs/worldgen/DEUS_WORLDGEN_WBS.md`<br>`docs/art/DEUS_WORLD_WBS.md`<br>`docs/OWNER_DECISIONS.md` (entries only)<br>`tasks/WG.00.08/defects.jsonl` (append-only)<br>`C:\Users\snewt\.deus_pm\outbox\*` | **Exclusive Writer.** WBS coordination, integration authority, pulse reports, baseline records. Zero engine code. |
-| **Lane H (Claude / Fable)** | `tools/test_generated_z2_cut_proof.js`<br>`tasks/WG.00.08/*` (docs & evidence only) | **Exclusive Writer (Worktree lane-h).** Z-2 cut proof hardening per Directive 001-I sec B. NO engine edits. |
 | **Lane C2b (Claude)** | `tools/governance/check_claims.js`<br>`tools/governance/test_check_claims.js`<br>`tasks/WG.00.12/c2_governance_state.md` | **Exclusive Writer (Worktree lane-c2b).** Governance checker hardening per Directive 001-I sec C. |
 | **Lane E (Grok Writer / Claude Reviewer)** | `docs/systems/UF_Depth_Attack_Plan.md` (attack plan (Grok) — spec authority pending PM ruling)<br>`tasks/DEUS-TSK-FABLE-19C/*` | **Exclusive Writer (Worktree lane-e).** Depth renderer attack plan revision (Grok) and re-review (Claude). |
 | **Lane I (Claude Writer / Grok Reviewer)** | `tools/governance/merge_gate.js`<br>`tools/governance/test_merge_gate.js`<br>`tools/governance/MERGE_GATE.md`<br>`tasks/WG.00.12/lane-i/**` | **Exclusive Writer (Worktree lane-i).** Automated merge gate implementation per 001-N §1. |
@@ -94,6 +93,7 @@
 - **Lane D (Grok):** Delivered. Write access revoked.
 - **Lane F (Claude CLI):** Merged to `main` (`d09a1295`). Write access revoked.
 - **Lane G (Claude CLI):** Merged to `main` (`da2c16b2`). Write access revoked.
+- **Lane H (Claude / Fable):** Merged to `main` (`9acdee8a`). Write access revoked.
 
 ### Frozen / Read-Only Paths
 - `C:\Dev\DEUS`
@@ -115,7 +115,7 @@
 | **ATK-19B-002** | `WG.00.08` | `MAJOR` | Shafts and skylights carve rock below fluid. Skylight fix verified, but shaft guard (`DEUS_Levels.js:2498`) untested (F2); rock under shaft plants must be recorded & `shaft_prescan_removed` caught. | `OPEN` (Review F2) | Lane H / Grok |
 | **ATK-YEAR0-001** | `WG.00.11` | `MAJOR` | Standard New Game defaults to Year 1; INV-SIM-01 requires World Year 0. Edge-case hardening committed in Lane B (`37ac57da`). | `OPEN` (Awaiting Grok Signoff) | Lane B / Grok |
 | **ATK-YEAR0-002** | `WG.00.11` | `MAJOR` | Standard New Game Year 0 runs clock, history, and first save at Year 1. Core `|| 1` -> `?? 0`, History startYear 0, Demographics startYear 0. Assigned to Lane G. | `FIX_READY` (Lane G merged da2c16b2, awaiting Grok closure) | Lane G / Grok |
-| **A10-1** | `WG.00.08` | `MAJOR` | Native playtest proof of Z-2 ravine cut. DEC-001 accepted in principle, SUSPENDED pending Lane H proof. | `OPEN` | Owner / Grok |
+| **A10-1** | `WG.00.08` | `MAJOR` | Native playtest proof of Z-2 ravine cut. DEC-001 accepted in principle; merged into main per Directive 0016-P. | `REVIEWED-PASS-WITH-MINORS` | Owner / Grok |
 | **DEF-COORD-INJECT-01** | `WG.00.11` | `MAJOR` | Coordinator output file overwrite at 17:13:55 logged as DEF-COORD-INJECT-01. | `OPEN` | Coordinator |
 | **DEF-COORD-BOARD-HASH-01** | `GOVERNANCE` | `MINOR` | Coordinator board reported non-existent hash for lane-b as 100% match; boards must paste raw command output. | `OPEN` | Coordinator |
 | **DEF-COORD-EMPTY-BOARD-01** | `GOVERNANCE` | `MINOR` | Outbox boards 2307, 2317, 2325 created as 0-byte files; temp-write-then-move pattern enforced. | `OPEN` | Coordinator |
@@ -124,6 +124,11 @@
 | **DEF-COORD-EXIT-01** | `WG.00.12` | `MINOR` | Four 22:46 test runs captured $LASTEXITCODE inside powershell.exe -Command. | `OPEN` | PM / Coordinator |
 | **DEF-OPS-LOG-01** | `WG.00.12` | `MINOR` | Claude -p launches without redirect left task logs at 0 bytes (task-35425, task-35427); run_lane_a_grok.ps1, run_lane_c3.ps1, run_review_8d1c7c37.ps1 and lane-c3\BRIEF.md are 0 bytes. | `OPEN` | PM / Coordinator |
 | **DEF-COORD-BOARD-HASH-02** | `GOVERNANCE` | `MINOR` | Board 2026-09-25_2340 lists task/lane-c1 = 4f346b9a and task/lane-c2 = e99da6f2 in sync with origin (EXIT=128 on git cat-file); lists lane-c3 70dad277 as in sync while origin/task/lane-c3 = 048752c8. | `OPEN` | PM / Coordinator |
+| **DEF-Z2-PROOF-LEDGE-01** | `WG.00.08` | `MINOR` | no_floating_solids checks connectivity to bedrock/edge, not support; single stone ledge attached to wall passes. Queued as DEC-010. | `OPEN` | PM |
+| **DEF-Z2-PROOF-FLUIDPATH-01** | `WG.00.08` | `MINOR` | seed 18 ravine holds no natural fluid; fluid-skip path exercised only through 6 test-planted water columns. | `OPEN` | PM |
+| **DEF-Z2-PROOF-PLAN-01** | `WG.00.08` | `MINOR` | footprint compares carve to engine own plan; plan errors caught only by target-column and column-count checks. | `OPEN` | PM |
+| **DEF-Z2-PROOF-SEED-01** | `WG.00.08` | `INFO` | SEED/TX/TY hardcoded at test line 82; add --seed/--site option in a later pass. | `OPEN` | PM |
+| **DEF-COORD-WIPE-02** | `GOVERNANCE` | `MINOR` | PM temp clone at AppData\Local\Temp\verify_h emptied around 23:39 CT by unknown external process. | `OPEN` | Coordinator / PM |
 | **MACHINE-STABILITY** | `HARDWARE` | `MAJOR` | 7 unexpected shutdowns 2026-09-25; Event 6008 at 00:14, 09:17, 12:15, 13:48, 14:13, 14:32, 17:19; Owner investigating; post-crash tripwire active. | `OPEN` | Owner |
 | **SCRATCH-SALVAGE** | `OPERATIONS` | `INFO` | Uncommitted scratch worktrees salvaged to salvage/* branches on origin per Directive 001-N §4 (unreviewed). Temp worktrees removed. | `OPEN` | PM / Owner |
 | **DUAL-MAILBOX** | `GOVERNANCE` | `INFO` | docs/agents/mailboxes and tools/agents/bus.js are frozen; C:\Users\snewt\.deus_pm is authoritative. | `OPEN` | PM / Coordinator |

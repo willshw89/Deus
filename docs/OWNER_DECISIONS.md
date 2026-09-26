@@ -132,4 +132,18 @@ Every decision item recorded in this log must provide:
 - **What Happens If Unanswered:** Treated as release-blocking.
 - **Status:** `OPEN`
 
+---
+
+### Decision `DEC-010`: Rock Ledge Support vs. Lateral Edge Connectivity in Cuts/Caves
+- **Date Logged:** 2026-09-25
+- **Question:** In procedural cut and cave carving (WG.00.08), does a solid stone stratum require direct vertical support from below, or is horizontal/lateral connectivity to the rock wall / bedrock / area edge sufficient (e.g. natural rock overhangs or ledges over air, as found at (190,72))?
+- **Source:** Directive 0016-P / `DEF-Z2-PROOF-LEDGE-01`.
+- **Options:**
+  1. Lateral connectivity is sufficient: natural rock ledges and overhangs attached to solid cavern/ravine walls are structurally valid (matches the engine's cleanup rule).
+  2. Full vertical column support required: any stratum with air directly beneath it must be carved or eliminated, disallowing all natural stone overhangs.
+- **Recommended Default:** Option 1 (Lateral connectivity is sufficient; natural overhangs allowed if grounded to wall/edge).
+- **What Happens If Unanswered:** Treated as Option 1 default.
+- **Status:** `OPEN`
+
+
 

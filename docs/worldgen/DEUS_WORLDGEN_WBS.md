@@ -93,7 +93,7 @@ WG.90 — DEUS WORLDGEN v1 — COMPLETE
 | **WG.00.05** | Palette Architecture & Material Ramps | Gemini | Master Palette V1 (226 active, 30 reserve), 58 material ramps, 0 near-duplicates. | `DONE` (DW.01.05) |
 | **WG.00.06** | Five-Strata Geometry Foundation | Fable / Gemini | Strata storage (5x1ft/cell), derived cached shapes, damage API, native smoke gate. | `DONE` (FABLE-19A / edba004) |
 | **WG.00.07** | Fluid ↔ Strata Reconciliation | Gemini | Resolve fluid depth adapter (0..7) with physical strata (0..4, S0-S4), buoyancy, saturation. | `DONE` (2f47203) |
-| **WG.00.08** | Cuts + Caves on All Five Z | Fable / Gemini | Partial-height terrain, chasms, sinkholes, Z0→Z-1 & Z-1→Z-2 deep cuts, cave roofs. | `REVIEW` (DEUS Directive 001) |
+| **WG.00.08** | Cuts + Caves on All Five Z | Fable / Gemini | Partial-height terrain, chasms, sinkholes, Z0→Z-1 & Z-1→Z-2 deep cuts, cave roofs. | `REVIEWED-PASS-WITH-MINORS` (Merged 0016-P; pending minor defects disposition) |
 | **WG.00.09** | Global Five-Z Depth Renderer | Fable | Five-plane compositor, physical scale recession, no blur, chunk exposure cache. | `QUEUED` (FABLE-19C / DEFINE/PRE-ATTACK active in Lane E) |
 | **WG.00.10** | Startup & Load Performance Baseline | Gemini / Fable | 256x256x5 area memory budget (<3.5MB), tick budget (<0.2ms), load time benchmarks. | `QUEUED` |
 | **WG.00.11** | Incarnation & Command Layer | Fable / Gemini | Player avatar direct possession vs top-down RTS colonist command switching, input arbitration, camera follow. | `QUEUED` |

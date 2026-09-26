@@ -153,16 +153,16 @@ Every work block MUST declare:
 ### Block `WB-005`: WG.00.08 Native Z-2 Cut Proof Hardening (Lane H)
 - **Objective**: Harden automated Z-2 cut proof (`tools/test_generated_z2_cut_proof.js`) per DEC-001 fluid ruling with whole-footprint checks, ravine identity assertions, and 5 built-in mutants.
 - **Priority**: `CRITICAL`
-- **Status**: `VERIFY` (Committed `c8694f01` on `task/lane-h`, pushed to origin; Grok verification queued).
+- **Status**: `REVIEWED-PASS-WITH-MINORS` (Merged into `main` at `9acdee8a` per PM sign-off Directive 0016-P; pending minor defect disposition).
 - **Dependencies**: DEC-001 Owner Fluid Ruling.
 - **Allowed Paths**: `tools/test_generated_z2_cut_proof.js`, `tasks/WG.00.08/*` (docs & evidence only).
 - **Forbidden Paths**: All engine plugins (`game/js/plugins/*`) and game data.
-- **Owner Decisions Required**: Lift suspension on DEC-001 Option 1 upon passing independent verification.
-- **Assigned Worker**: Claude / Fable (Writer). Reviewer: Grok (Independent Verification).
+- **Owner Decisions Required**: Disposition DEC-010 (rock ledge support vs connectivity).
+- **Assigned Worker**: Claude / Fable (Writer). Reviewer: PM Grok Bot / Grok Verifier.
 - **Automated Acceptance Criteria**:
-  - Baseline `node tools/test_generated_z2_cut_proof.js` exits 0 (12/12 checks pass).
+  - Baseline `node tools/test_generated_z2_cut_proof.js` exits 0 (12/12 checks pass). Verified on main.
   - Mutants sweep `node tools/test_generated_z2_cut_proof.js --mutants` exits 1 (8/8 caught).
-- **Expected Handoff Destination**: Grok Independent Verification -> PM Sign-off -> Coordinator Integration.
+- **Expected Handoff Destination**: Merged into main. Minor follow-ups tracked under DEF-Z2-PROOF-*.
 
 ---
 
