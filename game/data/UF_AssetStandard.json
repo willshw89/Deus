@@ -1,7 +1,7 @@
 {
-  "schemaVersion": "deus-asset-standard/1.0.0",
+  "schemaVersion": "deus-asset-standard/1.1.0",
   "documentId": "DEUS-ASSET-STANDARD-01",
-  "authority": "Owner rulings DEC-007, DEC-011, DEC-013, DEC-016, DEC-027, DEC-030, and 2026-09-26 12:38, 12:39, 12:41, 12:42, 12:43, 12:46, 12:49, 12:52 CT. Lane brief WG.20.01.",
+  "authority": "Owner rulings DEC-007, DEC-011, DEC-013, DEC-016, DEC-027, DEC-030, and 2026-09-26 12:38 through 13:24 CT, including addenda A1-A9. PM decisions are marked on the rule. Lane brief WG.20.01.",
   "artGeneration": "forbidden",
   "rules": {
     "AS-GLOBAL-001": {
@@ -109,7 +109,7 @@
       "check": null
     },
     "AS-CRIT-004": {
-      "norm": "Frame size follows the frame class. Tiny, Small and Medium are 48 by 48. Tall Large is 48 by 96. Long Large is 96 by 48.",
+      "norm": "Frame size follows the frame class and AS-SIZE-001. Tiny, Small and Medium are 48 by 48. Tall Large is 48 by 96. Long Large is 96 by 48. Huge and Gargantuan use the square, tall and long classes in sizeFrames.",
       "check": "frame-size"
     },
     "AS-BEAST-001": {
@@ -125,7 +125,7 @@
       "check": null
     },
     "AS-BEAST-004": {
-      "norm": "Large uses the tall or long frame. Huge and Gargantuan frames are integer multiples of 48. The exact multiple is open.",
+      "norm": "Large, Huge and Gargantuan frames are the squares in AS-SIZE-001, authored at that size. They are not a runtime scale of a Medium frame.",
       "check": null
     },
     "AS-HUM-001": {
@@ -153,7 +153,7 @@
       "check": null
     },
     "AS-HUM-007": {
-      "norm": "Hair greying is a ramp: natural, salt-and-pepper, grey, white. Balding is a visible locus that masks hair. The mask count is open.",
+      "norm": "Hair greying is a four-step ramp: natural, salt-and-pepper, grey, white. Balding is three overlays (receding, crown, advanced) that sit on any hair style. PM decision 13:02 CT, Owner may amend.",
       "check": null
     },
     "AS-HUM-008": {
@@ -161,7 +161,7 @@
       "check": null
     },
     "AS-HUM-009": {
-      "norm": "Humanoid action rows cover the charter families and the lane list, four directions each.",
+      "norm": "Humanoid action rows cover the charter families, the lane list, and the A9 rows prone, unconscious, sleep and sit. Sneak and climb stay. Four directions each.",
       "check": "humanoid-rows"
     },
     "AS-HUM-010": {
@@ -181,11 +181,11 @@
       "check": null
     },
     "AS-HUM-014": {
-      "norm": "dominantHand is right or left. Grips are ONE_HANDED, OFF_HAND, TWO_HANDED, VERSATILE. Asymmetrical gear is not mirrored.",
+      "norm": "dominantHand is right or left. Grips are ONE_HANDED, OFF_HAND, TWO_HANDED, VERSATILE. A mirror exists only under AS-MIRROR-001.",
       "check": null
     },
     "AS-HUM-015": {
-      "norm": "Nine races times 15 outfits (12 classes plus light, medium and heavy armour) is 135 art variants of race-neutral outfit ids.",
+      "norm": "Nine races times 15 outfit ids is 135 art variants. The outfit id is race-neutral. Pixels are custom per race (Owner 13:14 CT). The silhouette name is the slot pattern, not a shared drawing. Weapons, tools and accessories are AS-GEAR-001.",
       "check": "outfit-matrix"
     },
     "AS-HUM-016": {
@@ -313,7 +313,7 @@
       "check": null
     },
     "AS-UI-001": {
-      "norm": "Balloons, selection rings, HP bars, lower-layer overlays and the six faction window skins are drawn frames.",
+      "norm": "Balloons, selection rings, HP bars and lower-layer overlays are drawn frames. Window skins are AS-UI-004, not one sheet per building profile.",
       "check": null
     },
     "AS-UI-002": {
@@ -359,6 +359,126 @@
     "AS-STYLE-001": {
       "norm": "File names follow the class patterns. The style-bible sheet is a spec only.",
       "check": "filename"
+    },
+    "AS-UI-004": {
+      "norm": "A signature Deus skin, a Deus Dark variant, and one window skin per race (11). RMMZ Window.png regions. Player-selectable. Opaque pixels.",
+      "check": "ui-skins"
+    },
+    "AS-REL-001": {
+      "norm": "Holy-symbol slot per deity, plus altar, shrine, drawn magic aura, spellbook and scroll. The deity roster is open. No invented pantheon.",
+      "check": "religion"
+    },
+    "AS-FARM-001": {
+      "norm": "Crop stages sown, growing, mature and harvested. Livestock young and adult. Pens. Tamed variants.",
+      "check": "farming"
+    },
+    "AS-FOOD-001": {
+      "norm": "Food has raw and cooked states, meal and ingredient classes, table and stockpile display, and an icon.",
+      "check": "food"
+    },
+    "AS-DUNG-001": {
+      "norm": "Underground kit: cave wall, mine support, tunnel, underground water, crystal, ruin.",
+      "check": "dungeon"
+    },
+    "AS-TRAP-001": {
+      "norm": "Traps and hazards: pit, spikes, pressure plate, locked door, broken door, poison gas, web, quicksand.",
+      "check": "traps"
+    },
+    "AS-LORE-001": {
+      "norm": "History visuals: historical portrait, era ruin, artifact, history-log illustration.",
+      "check": "lore"
+    },
+    "AS-SCENE-001": {
+      "norm": "Event scenes founding, coronation, disaster and war are an optional spec. They are not a required set.",
+      "check": "scenes"
+    },
+    "AS-ZONE-001": {
+      "norm": "Player designation overlays: dig, build, stockpile, route, blueprint ghost. Opaque drawn hatches.",
+      "check": "zones"
+    },
+    "AS-MKTG-001": {
+      "norm": "Marketing art (game icon, store banners, logo) is a later note. It is not a required set.",
+      "check": "marketing"
+    },
+    "AS-TAME-001": {
+      "norm": "Tamed variants, captured or bound poses, cages and pens. Collar, saddle and harness are visual markers only, and whether they are wanted is open.",
+      "check": "tame-art"
+    },
+    "AS-TAME-002": {
+      "norm": "Tamed creatures use the SRD stat block and natural attacks only. No creature armour slot, barding or crafted creature gear.",
+      "check": "tame-slots"
+    },
+    "AS-VAR-001": {
+      "norm": "PM decision, Owner may amend. Per-biome floors: 12 trees, 4 bushes, 6 scatter, 6 rocks, 2 ore, 3 water-edge, 2 landmarks. Per underground band: 4 cave formations, 2 fungi or crystals, 1 ore.",
+      "check": "variety"
+    },
+    "AS-VAR-002": {
+      "norm": "PM decision, Owner may amend. Variety seasons are palette-swap frames on precomputed season ramps. Flip is offline and only when shading is light-neutral.",
+      "check": "variety-season"
+    },
+    "AS-GENE-001": {
+      "norm": "PM decision, Owner may amend. Hair, balding, facial hair and face-gene counts per race and body type. The sim owns inheritance.",
+      "check": "genes"
+    },
+    "AS-PORT-001": {
+      "norm": "Every non-face entity has a 32 px icon and a 144 px portrait. Race-neutral items have one portrait per race art variant.",
+      "check": "portrait"
+    },
+    "AS-HEAD-001": {
+      "norm": "Hair, balding, beards and head race-features are 12 frames: 4 directions times 3 head states, on a per-frame head anchor. Long-hair extras only on death and dodge.",
+      "check": "head"
+    },
+    "AS-ELDER-001": {
+      "norm": "Only the stooped elder body is redrawn. Garb, gear and hair use the adult sheets plus a per-frame torso and head offset.",
+      "check": "elder"
+    },
+    "AS-GEAR-001": {
+      "norm": "Accessories, weapons and tools are one silhouette, a race ramp and a motif decal slot. The 135 outfits stay custom per race.",
+      "check": "gear"
+    },
+    "AS-MIRROR-001": {
+      "norm": "Mirroring is an offline W-to-E bake of a layer flagged symmetric with light-neutral shading. Asymmetric gear is never mirrored. No runtime flip.",
+      "check": "mirror"
+    },
+    "AS-POSE-001": {
+      "norm": "Pose rows prone, unconscious, sleep, sit, sneak and climb, four directions. Prone and unconscious map to those SRD conditions. The other four are activity rows.",
+      "check": "poses"
+    },
+    "AS-BIOME-005": {
+      "norm": "A declared canonical biome set must be the six DEC-030 biomes. Five-biome registries and the catalogue canonical list fail. Those files are not edited here.",
+      "check": "biome-set"
+    },
+    "AS-SIZE-001": {
+      "norm": "Creature frames in 48 px squares: Tiny, Small and Medium 1x1; Large 1x2 or 2x1; Huge 3x3, 2x3 or 3x2; Gargantuan 4x4, 3x4 or 4x3. Largest action row 768 by 768.",
+      "check": "size"
+    },
+    "AS-SLOT-001": {
+      "norm": "Source templates: charset 576x384, faces 576x288, tileset B-E 768x768, action-row strips 4 by 4 cells times the footprint. Runtime atlas 2048 with a 42 by 42 cell grid. 4096 only for terrain if benchmarked.",
+      "check": "slots"
+    },
+    "AS-PIPE-001": {
+      "norm": "No scaling. Off-size, off-palette or off-anchor output is rejected and regenerated. Crop only transparent margins. MISSING comes from empty slots.",
+      "check": "pipeline"
+    },
+    "AS-PROMPT-001": {
+      "norm": "Each asset category has a prompt-spec field template. Fields and sources only. No prompt is run and no image is made.",
+      "check": "prompt-fields"
+    },
+    "AS-GEN-001": {
+      "norm": "A generation log records prompt spec, generator and version, model, seed, settings, references, and pass or fail with reason codes.",
+      "check": "gen-log"
+    },
+    "AS-GEN-002": {
+      "norm": "Yield, cost and time per usable slot are tracked per generator, category and template, and trended over time.",
+      "check": "yield"
+    },
+    "AS-GEN-003": {
+      "norm": "Prompt templates are versioned. A version is promoted only when an A/B yield beats the current version.",
+      "check": "prompt-version"
+    },
+    "AS-GEN-004": {
+      "norm": "Generators, per-generator adapters from one shared spec, routing by yield per cost on a fixed golden test set, and cross-generator checks. Style tune is optional and later.",
+      "check": "generators"
     }
   },
   "directions": [
@@ -480,8 +600,30 @@
       96,
       48
     ],
-    "HUGE": null,
-    "GARGANTUAN": null
+    "HUGE": [
+      144,
+      144
+    ],
+    "GARGANTUAN": [
+      192,
+      192
+    ],
+    "HUGE_TALL": [
+      96,
+      144
+    ],
+    "HUGE_LONG": [
+      144,
+      96
+    ],
+    "GARGANTUAN_TALL": [
+      144,
+      192
+    ],
+    "GARGANTUAN_LONG": [
+      192,
+      144
+    ]
   },
   "paperDollZ": {
     "legs": 1,
@@ -604,6 +746,30 @@
     },
     {
       "id": "death",
+      "frames": 4
+    },
+    {
+      "id": "prone",
+      "frames": 4
+    },
+    {
+      "id": "unconscious",
+      "frames": 4
+    },
+    {
+      "id": "sleep",
+      "frames": 4
+    },
+    {
+      "id": "sit",
+      "frames": 4
+    },
+    {
+      "id": "sneak",
+      "frames": 4
+    },
+    {
+      "id": "climb",
       "frames": 4
     }
   ],
@@ -1060,7 +1226,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_BARBARIAN",
       "rampId": "RAMP_RACE_HUMAN",
-      "raceMotifId": "MOTIF_RACE_HUMAN"
+      "raceMotifId": "MOTIF_RACE_HUMAN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_barbarian",
@@ -1081,7 +1248,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_BARBARIAN",
       "rampId": "RAMP_RACE_ELF",
-      "raceMotifId": "MOTIF_RACE_ELF"
+      "raceMotifId": "MOTIF_RACE_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_barbarian",
@@ -1102,7 +1270,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_BARBARIAN",
       "rampId": "RAMP_RACE_HALFLING",
-      "raceMotifId": "MOTIF_RACE_HALFLING"
+      "raceMotifId": "MOTIF_RACE_HALFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_barbarian",
@@ -1123,7 +1292,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_BARBARIAN",
       "rampId": "RAMP_RACE_DWARF",
-      "raceMotifId": "MOTIF_RACE_DWARF"
+      "raceMotifId": "MOTIF_RACE_DWARF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_barbarian",
@@ -1144,7 +1314,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_BARBARIAN",
       "rampId": "RAMP_RACE_GNOME",
-      "raceMotifId": "MOTIF_RACE_GNOME"
+      "raceMotifId": "MOTIF_RACE_GNOME",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_barbarian",
@@ -1165,7 +1336,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_BARBARIAN",
       "rampId": "RAMP_RACE_DRAGONBORN",
-      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_barbarian",
@@ -1186,7 +1358,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_BARBARIAN",
       "rampId": "RAMP_RACE_HALF_ELF",
-      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+      "raceMotifId": "MOTIF_RACE_HALF_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_barbarian",
@@ -1207,7 +1380,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_BARBARIAN",
       "rampId": "RAMP_RACE_HALF_ORC",
-      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+      "raceMotifId": "MOTIF_RACE_HALF_ORC",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_barbarian",
@@ -1228,7 +1402,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_BARBARIAN",
       "rampId": "RAMP_RACE_TIEFLING",
-      "raceMotifId": "MOTIF_RACE_TIEFLING"
+      "raceMotifId": "MOTIF_RACE_TIEFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_bard",
@@ -1251,7 +1426,8 @@
       ],
       "motifId": "MOTIF_CLASS_BARD",
       "rampId": "RAMP_RACE_HUMAN",
-      "raceMotifId": "MOTIF_RACE_HUMAN"
+      "raceMotifId": "MOTIF_RACE_HUMAN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_bard",
@@ -1274,7 +1450,8 @@
       ],
       "motifId": "MOTIF_CLASS_BARD",
       "rampId": "RAMP_RACE_ELF",
-      "raceMotifId": "MOTIF_RACE_ELF"
+      "raceMotifId": "MOTIF_RACE_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_bard",
@@ -1297,7 +1474,8 @@
       ],
       "motifId": "MOTIF_CLASS_BARD",
       "rampId": "RAMP_RACE_HALFLING",
-      "raceMotifId": "MOTIF_RACE_HALFLING"
+      "raceMotifId": "MOTIF_RACE_HALFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_bard",
@@ -1320,7 +1498,8 @@
       ],
       "motifId": "MOTIF_CLASS_BARD",
       "rampId": "RAMP_RACE_DWARF",
-      "raceMotifId": "MOTIF_RACE_DWARF"
+      "raceMotifId": "MOTIF_RACE_DWARF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_bard",
@@ -1343,7 +1522,8 @@
       ],
       "motifId": "MOTIF_CLASS_BARD",
       "rampId": "RAMP_RACE_GNOME",
-      "raceMotifId": "MOTIF_RACE_GNOME"
+      "raceMotifId": "MOTIF_RACE_GNOME",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_bard",
@@ -1366,7 +1546,8 @@
       ],
       "motifId": "MOTIF_CLASS_BARD",
       "rampId": "RAMP_RACE_DRAGONBORN",
-      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_bard",
@@ -1389,7 +1570,8 @@
       ],
       "motifId": "MOTIF_CLASS_BARD",
       "rampId": "RAMP_RACE_HALF_ELF",
-      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+      "raceMotifId": "MOTIF_RACE_HALF_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_bard",
@@ -1412,7 +1594,8 @@
       ],
       "motifId": "MOTIF_CLASS_BARD",
       "rampId": "RAMP_RACE_HALF_ORC",
-      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+      "raceMotifId": "MOTIF_RACE_HALF_ORC",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_bard",
@@ -1435,7 +1618,8 @@
       ],
       "motifId": "MOTIF_CLASS_BARD",
       "rampId": "RAMP_RACE_TIEFLING",
-      "raceMotifId": "MOTIF_RACE_TIEFLING"
+      "raceMotifId": "MOTIF_RACE_TIEFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_cleric",
@@ -1459,7 +1643,8 @@
       ],
       "motifId": "MOTIF_CLASS_CLERIC",
       "rampId": "RAMP_RACE_HUMAN",
-      "raceMotifId": "MOTIF_RACE_HUMAN"
+      "raceMotifId": "MOTIF_RACE_HUMAN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_cleric",
@@ -1483,7 +1668,8 @@
       ],
       "motifId": "MOTIF_CLASS_CLERIC",
       "rampId": "RAMP_RACE_ELF",
-      "raceMotifId": "MOTIF_RACE_ELF"
+      "raceMotifId": "MOTIF_RACE_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_cleric",
@@ -1507,7 +1693,8 @@
       ],
       "motifId": "MOTIF_CLASS_CLERIC",
       "rampId": "RAMP_RACE_HALFLING",
-      "raceMotifId": "MOTIF_RACE_HALFLING"
+      "raceMotifId": "MOTIF_RACE_HALFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_cleric",
@@ -1531,7 +1718,8 @@
       ],
       "motifId": "MOTIF_CLASS_CLERIC",
       "rampId": "RAMP_RACE_DWARF",
-      "raceMotifId": "MOTIF_RACE_DWARF"
+      "raceMotifId": "MOTIF_RACE_DWARF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_cleric",
@@ -1555,7 +1743,8 @@
       ],
       "motifId": "MOTIF_CLASS_CLERIC",
       "rampId": "RAMP_RACE_GNOME",
-      "raceMotifId": "MOTIF_RACE_GNOME"
+      "raceMotifId": "MOTIF_RACE_GNOME",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_cleric",
@@ -1579,7 +1768,8 @@
       ],
       "motifId": "MOTIF_CLASS_CLERIC",
       "rampId": "RAMP_RACE_DRAGONBORN",
-      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_cleric",
@@ -1603,7 +1793,8 @@
       ],
       "motifId": "MOTIF_CLASS_CLERIC",
       "rampId": "RAMP_RACE_HALF_ELF",
-      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+      "raceMotifId": "MOTIF_RACE_HALF_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_cleric",
@@ -1627,7 +1818,8 @@
       ],
       "motifId": "MOTIF_CLASS_CLERIC",
       "rampId": "RAMP_RACE_HALF_ORC",
-      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+      "raceMotifId": "MOTIF_RACE_HALF_ORC",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_cleric",
@@ -1651,7 +1843,8 @@
       ],
       "motifId": "MOTIF_CLASS_CLERIC",
       "rampId": "RAMP_RACE_TIEFLING",
-      "raceMotifId": "MOTIF_RACE_TIEFLING"
+      "raceMotifId": "MOTIF_RACE_TIEFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_druid",
@@ -1672,7 +1865,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_DRUID",
       "rampId": "RAMP_RACE_HUMAN",
-      "raceMotifId": "MOTIF_RACE_HUMAN"
+      "raceMotifId": "MOTIF_RACE_HUMAN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_druid",
@@ -1693,7 +1887,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_DRUID",
       "rampId": "RAMP_RACE_ELF",
-      "raceMotifId": "MOTIF_RACE_ELF"
+      "raceMotifId": "MOTIF_RACE_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_druid",
@@ -1714,7 +1909,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_DRUID",
       "rampId": "RAMP_RACE_HALFLING",
-      "raceMotifId": "MOTIF_RACE_HALFLING"
+      "raceMotifId": "MOTIF_RACE_HALFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_druid",
@@ -1735,7 +1931,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_DRUID",
       "rampId": "RAMP_RACE_DWARF",
-      "raceMotifId": "MOTIF_RACE_DWARF"
+      "raceMotifId": "MOTIF_RACE_DWARF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_druid",
@@ -1756,7 +1953,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_DRUID",
       "rampId": "RAMP_RACE_GNOME",
-      "raceMotifId": "MOTIF_RACE_GNOME"
+      "raceMotifId": "MOTIF_RACE_GNOME",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_druid",
@@ -1777,7 +1975,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_DRUID",
       "rampId": "RAMP_RACE_DRAGONBORN",
-      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_druid",
@@ -1798,7 +1997,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_DRUID",
       "rampId": "RAMP_RACE_HALF_ELF",
-      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+      "raceMotifId": "MOTIF_RACE_HALF_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_druid",
@@ -1819,7 +2019,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_DRUID",
       "rampId": "RAMP_RACE_HALF_ORC",
-      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+      "raceMotifId": "MOTIF_RACE_HALF_ORC",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_druid",
@@ -1840,7 +2041,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_DRUID",
       "rampId": "RAMP_RACE_TIEFLING",
-      "raceMotifId": "MOTIF_RACE_TIEFLING"
+      "raceMotifId": "MOTIF_RACE_TIEFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_fighter",
@@ -1862,7 +2064,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_FIGHTER",
       "rampId": "RAMP_RACE_HUMAN",
-      "raceMotifId": "MOTIF_RACE_HUMAN"
+      "raceMotifId": "MOTIF_RACE_HUMAN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_fighter",
@@ -1884,7 +2087,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_FIGHTER",
       "rampId": "RAMP_RACE_ELF",
-      "raceMotifId": "MOTIF_RACE_ELF"
+      "raceMotifId": "MOTIF_RACE_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_fighter",
@@ -1906,7 +2110,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_FIGHTER",
       "rampId": "RAMP_RACE_HALFLING",
-      "raceMotifId": "MOTIF_RACE_HALFLING"
+      "raceMotifId": "MOTIF_RACE_HALFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_fighter",
@@ -1928,7 +2133,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_FIGHTER",
       "rampId": "RAMP_RACE_DWARF",
-      "raceMotifId": "MOTIF_RACE_DWARF"
+      "raceMotifId": "MOTIF_RACE_DWARF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_fighter",
@@ -1950,7 +2156,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_FIGHTER",
       "rampId": "RAMP_RACE_GNOME",
-      "raceMotifId": "MOTIF_RACE_GNOME"
+      "raceMotifId": "MOTIF_RACE_GNOME",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_fighter",
@@ -1972,7 +2179,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_FIGHTER",
       "rampId": "RAMP_RACE_DRAGONBORN",
-      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_fighter",
@@ -1994,7 +2202,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_FIGHTER",
       "rampId": "RAMP_RACE_HALF_ELF",
-      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+      "raceMotifId": "MOTIF_RACE_HALF_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_fighter",
@@ -2016,7 +2225,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_FIGHTER",
       "rampId": "RAMP_RACE_HALF_ORC",
-      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+      "raceMotifId": "MOTIF_RACE_HALF_ORC",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_fighter",
@@ -2038,7 +2248,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_FIGHTER",
       "rampId": "RAMP_RACE_TIEFLING",
-      "raceMotifId": "MOTIF_RACE_TIEFLING"
+      "raceMotifId": "MOTIF_RACE_TIEFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_monk",
@@ -2059,7 +2270,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_MONK",
       "rampId": "RAMP_RACE_HUMAN",
-      "raceMotifId": "MOTIF_RACE_HUMAN"
+      "raceMotifId": "MOTIF_RACE_HUMAN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_monk",
@@ -2080,7 +2292,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_MONK",
       "rampId": "RAMP_RACE_ELF",
-      "raceMotifId": "MOTIF_RACE_ELF"
+      "raceMotifId": "MOTIF_RACE_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_monk",
@@ -2101,7 +2314,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_MONK",
       "rampId": "RAMP_RACE_HALFLING",
-      "raceMotifId": "MOTIF_RACE_HALFLING"
+      "raceMotifId": "MOTIF_RACE_HALFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_monk",
@@ -2122,7 +2336,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_MONK",
       "rampId": "RAMP_RACE_DWARF",
-      "raceMotifId": "MOTIF_RACE_DWARF"
+      "raceMotifId": "MOTIF_RACE_DWARF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_monk",
@@ -2143,7 +2358,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_MONK",
       "rampId": "RAMP_RACE_GNOME",
-      "raceMotifId": "MOTIF_RACE_GNOME"
+      "raceMotifId": "MOTIF_RACE_GNOME",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_monk",
@@ -2164,7 +2380,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_MONK",
       "rampId": "RAMP_RACE_DRAGONBORN",
-      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_monk",
@@ -2185,7 +2402,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_MONK",
       "rampId": "RAMP_RACE_HALF_ELF",
-      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+      "raceMotifId": "MOTIF_RACE_HALF_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_monk",
@@ -2206,7 +2424,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_MONK",
       "rampId": "RAMP_RACE_HALF_ORC",
-      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+      "raceMotifId": "MOTIF_RACE_HALF_ORC",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_monk",
@@ -2227,7 +2446,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_MONK",
       "rampId": "RAMP_RACE_TIEFLING",
-      "raceMotifId": "MOTIF_RACE_TIEFLING"
+      "raceMotifId": "MOTIF_RACE_TIEFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_paladin",
@@ -2249,7 +2469,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_PALADIN",
       "rampId": "RAMP_RACE_HUMAN",
-      "raceMotifId": "MOTIF_RACE_HUMAN"
+      "raceMotifId": "MOTIF_RACE_HUMAN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_paladin",
@@ -2271,7 +2492,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_PALADIN",
       "rampId": "RAMP_RACE_ELF",
-      "raceMotifId": "MOTIF_RACE_ELF"
+      "raceMotifId": "MOTIF_RACE_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_paladin",
@@ -2293,7 +2515,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_PALADIN",
       "rampId": "RAMP_RACE_HALFLING",
-      "raceMotifId": "MOTIF_RACE_HALFLING"
+      "raceMotifId": "MOTIF_RACE_HALFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_paladin",
@@ -2315,7 +2538,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_PALADIN",
       "rampId": "RAMP_RACE_DWARF",
-      "raceMotifId": "MOTIF_RACE_DWARF"
+      "raceMotifId": "MOTIF_RACE_DWARF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_paladin",
@@ -2337,7 +2561,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_PALADIN",
       "rampId": "RAMP_RACE_GNOME",
-      "raceMotifId": "MOTIF_RACE_GNOME"
+      "raceMotifId": "MOTIF_RACE_GNOME",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_paladin",
@@ -2359,7 +2584,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_PALADIN",
       "rampId": "RAMP_RACE_DRAGONBORN",
-      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_paladin",
@@ -2381,7 +2607,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_PALADIN",
       "rampId": "RAMP_RACE_HALF_ELF",
-      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+      "raceMotifId": "MOTIF_RACE_HALF_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_paladin",
@@ -2403,7 +2630,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_PALADIN",
       "rampId": "RAMP_RACE_HALF_ORC",
-      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+      "raceMotifId": "MOTIF_RACE_HALF_ORC",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_paladin",
@@ -2425,7 +2653,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_PALADIN",
       "rampId": "RAMP_RACE_TIEFLING",
-      "raceMotifId": "MOTIF_RACE_TIEFLING"
+      "raceMotifId": "MOTIF_RACE_TIEFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_ranger",
@@ -2446,7 +2675,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_RANGER",
       "rampId": "RAMP_RACE_HUMAN",
-      "raceMotifId": "MOTIF_RACE_HUMAN"
+      "raceMotifId": "MOTIF_RACE_HUMAN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_ranger",
@@ -2467,7 +2697,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_RANGER",
       "rampId": "RAMP_RACE_ELF",
-      "raceMotifId": "MOTIF_RACE_ELF"
+      "raceMotifId": "MOTIF_RACE_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_ranger",
@@ -2488,7 +2719,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_RANGER",
       "rampId": "RAMP_RACE_HALFLING",
-      "raceMotifId": "MOTIF_RACE_HALFLING"
+      "raceMotifId": "MOTIF_RACE_HALFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_ranger",
@@ -2509,7 +2741,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_RANGER",
       "rampId": "RAMP_RACE_DWARF",
-      "raceMotifId": "MOTIF_RACE_DWARF"
+      "raceMotifId": "MOTIF_RACE_DWARF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_ranger",
@@ -2530,7 +2763,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_RANGER",
       "rampId": "RAMP_RACE_GNOME",
-      "raceMotifId": "MOTIF_RACE_GNOME"
+      "raceMotifId": "MOTIF_RACE_GNOME",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_ranger",
@@ -2551,7 +2785,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_RANGER",
       "rampId": "RAMP_RACE_DRAGONBORN",
-      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_ranger",
@@ -2572,7 +2807,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_RANGER",
       "rampId": "RAMP_RACE_HALF_ELF",
-      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+      "raceMotifId": "MOTIF_RACE_HALF_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_ranger",
@@ -2593,7 +2829,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_RANGER",
       "rampId": "RAMP_RACE_HALF_ORC",
-      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+      "raceMotifId": "MOTIF_RACE_HALF_ORC",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_ranger",
@@ -2614,7 +2851,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_RANGER",
       "rampId": "RAMP_RACE_TIEFLING",
-      "raceMotifId": "MOTIF_RACE_TIEFLING"
+      "raceMotifId": "MOTIF_RACE_TIEFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_rogue",
@@ -2635,7 +2873,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_ROGUE",
       "rampId": "RAMP_RACE_HUMAN",
-      "raceMotifId": "MOTIF_RACE_HUMAN"
+      "raceMotifId": "MOTIF_RACE_HUMAN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_rogue",
@@ -2656,7 +2895,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_ROGUE",
       "rampId": "RAMP_RACE_ELF",
-      "raceMotifId": "MOTIF_RACE_ELF"
+      "raceMotifId": "MOTIF_RACE_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_rogue",
@@ -2677,7 +2917,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_ROGUE",
       "rampId": "RAMP_RACE_HALFLING",
-      "raceMotifId": "MOTIF_RACE_HALFLING"
+      "raceMotifId": "MOTIF_RACE_HALFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_rogue",
@@ -2698,7 +2939,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_ROGUE",
       "rampId": "RAMP_RACE_DWARF",
-      "raceMotifId": "MOTIF_RACE_DWARF"
+      "raceMotifId": "MOTIF_RACE_DWARF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_rogue",
@@ -2719,7 +2961,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_ROGUE",
       "rampId": "RAMP_RACE_GNOME",
-      "raceMotifId": "MOTIF_RACE_GNOME"
+      "raceMotifId": "MOTIF_RACE_GNOME",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_rogue",
@@ -2740,7 +2983,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_ROGUE",
       "rampId": "RAMP_RACE_DRAGONBORN",
-      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_rogue",
@@ -2761,7 +3005,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_ROGUE",
       "rampId": "RAMP_RACE_HALF_ELF",
-      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+      "raceMotifId": "MOTIF_RACE_HALF_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_rogue",
@@ -2782,7 +3027,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_ROGUE",
       "rampId": "RAMP_RACE_HALF_ORC",
-      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+      "raceMotifId": "MOTIF_RACE_HALF_ORC",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_rogue",
@@ -2803,7 +3049,8 @@
       "deforming": [],
       "motifId": "MOTIF_CLASS_ROGUE",
       "rampId": "RAMP_RACE_TIEFLING",
-      "raceMotifId": "MOTIF_RACE_TIEFLING"
+      "raceMotifId": "MOTIF_RACE_TIEFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_sorcerer",
@@ -2826,7 +3073,8 @@
       ],
       "motifId": "MOTIF_CLASS_SORCERER",
       "rampId": "RAMP_RACE_HUMAN",
-      "raceMotifId": "MOTIF_RACE_HUMAN"
+      "raceMotifId": "MOTIF_RACE_HUMAN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_sorcerer",
@@ -2849,7 +3097,8 @@
       ],
       "motifId": "MOTIF_CLASS_SORCERER",
       "rampId": "RAMP_RACE_ELF",
-      "raceMotifId": "MOTIF_RACE_ELF"
+      "raceMotifId": "MOTIF_RACE_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_sorcerer",
@@ -2872,7 +3121,8 @@
       ],
       "motifId": "MOTIF_CLASS_SORCERER",
       "rampId": "RAMP_RACE_HALFLING",
-      "raceMotifId": "MOTIF_RACE_HALFLING"
+      "raceMotifId": "MOTIF_RACE_HALFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_sorcerer",
@@ -2895,7 +3145,8 @@
       ],
       "motifId": "MOTIF_CLASS_SORCERER",
       "rampId": "RAMP_RACE_DWARF",
-      "raceMotifId": "MOTIF_RACE_DWARF"
+      "raceMotifId": "MOTIF_RACE_DWARF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_sorcerer",
@@ -2918,7 +3169,8 @@
       ],
       "motifId": "MOTIF_CLASS_SORCERER",
       "rampId": "RAMP_RACE_GNOME",
-      "raceMotifId": "MOTIF_RACE_GNOME"
+      "raceMotifId": "MOTIF_RACE_GNOME",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_sorcerer",
@@ -2941,7 +3193,8 @@
       ],
       "motifId": "MOTIF_CLASS_SORCERER",
       "rampId": "RAMP_RACE_DRAGONBORN",
-      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_sorcerer",
@@ -2964,7 +3217,8 @@
       ],
       "motifId": "MOTIF_CLASS_SORCERER",
       "rampId": "RAMP_RACE_HALF_ELF",
-      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+      "raceMotifId": "MOTIF_RACE_HALF_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_sorcerer",
@@ -2987,7 +3241,8 @@
       ],
       "motifId": "MOTIF_CLASS_SORCERER",
       "rampId": "RAMP_RACE_HALF_ORC",
-      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+      "raceMotifId": "MOTIF_RACE_HALF_ORC",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_sorcerer",
@@ -3010,7 +3265,8 @@
       ],
       "motifId": "MOTIF_CLASS_SORCERER",
       "rampId": "RAMP_RACE_TIEFLING",
-      "raceMotifId": "MOTIF_RACE_TIEFLING"
+      "raceMotifId": "MOTIF_RACE_TIEFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_warlock",
@@ -3033,7 +3289,8 @@
       ],
       "motifId": "MOTIF_CLASS_WARLOCK",
       "rampId": "RAMP_RACE_HUMAN",
-      "raceMotifId": "MOTIF_RACE_HUMAN"
+      "raceMotifId": "MOTIF_RACE_HUMAN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_warlock",
@@ -3056,7 +3313,8 @@
       ],
       "motifId": "MOTIF_CLASS_WARLOCK",
       "rampId": "RAMP_RACE_ELF",
-      "raceMotifId": "MOTIF_RACE_ELF"
+      "raceMotifId": "MOTIF_RACE_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_warlock",
@@ -3079,7 +3337,8 @@
       ],
       "motifId": "MOTIF_CLASS_WARLOCK",
       "rampId": "RAMP_RACE_HALFLING",
-      "raceMotifId": "MOTIF_RACE_HALFLING"
+      "raceMotifId": "MOTIF_RACE_HALFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_warlock",
@@ -3102,7 +3361,8 @@
       ],
       "motifId": "MOTIF_CLASS_WARLOCK",
       "rampId": "RAMP_RACE_DWARF",
-      "raceMotifId": "MOTIF_RACE_DWARF"
+      "raceMotifId": "MOTIF_RACE_DWARF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_warlock",
@@ -3125,7 +3385,8 @@
       ],
       "motifId": "MOTIF_CLASS_WARLOCK",
       "rampId": "RAMP_RACE_GNOME",
-      "raceMotifId": "MOTIF_RACE_GNOME"
+      "raceMotifId": "MOTIF_RACE_GNOME",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_warlock",
@@ -3148,7 +3409,8 @@
       ],
       "motifId": "MOTIF_CLASS_WARLOCK",
       "rampId": "RAMP_RACE_DRAGONBORN",
-      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_warlock",
@@ -3171,7 +3433,8 @@
       ],
       "motifId": "MOTIF_CLASS_WARLOCK",
       "rampId": "RAMP_RACE_HALF_ELF",
-      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+      "raceMotifId": "MOTIF_RACE_HALF_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_warlock",
@@ -3194,7 +3457,8 @@
       ],
       "motifId": "MOTIF_CLASS_WARLOCK",
       "rampId": "RAMP_RACE_HALF_ORC",
-      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+      "raceMotifId": "MOTIF_RACE_HALF_ORC",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_warlock",
@@ -3217,7 +3481,8 @@
       ],
       "motifId": "MOTIF_CLASS_WARLOCK",
       "rampId": "RAMP_RACE_TIEFLING",
-      "raceMotifId": "MOTIF_RACE_TIEFLING"
+      "raceMotifId": "MOTIF_RACE_TIEFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_wizard",
@@ -3240,7 +3505,8 @@
       ],
       "motifId": "MOTIF_CLASS_WIZARD",
       "rampId": "RAMP_RACE_HUMAN",
-      "raceMotifId": "MOTIF_RACE_HUMAN"
+      "raceMotifId": "MOTIF_RACE_HUMAN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_wizard",
@@ -3263,7 +3529,8 @@
       ],
       "motifId": "MOTIF_CLASS_WIZARD",
       "rampId": "RAMP_RACE_ELF",
-      "raceMotifId": "MOTIF_RACE_ELF"
+      "raceMotifId": "MOTIF_RACE_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_wizard",
@@ -3286,7 +3553,8 @@
       ],
       "motifId": "MOTIF_CLASS_WIZARD",
       "rampId": "RAMP_RACE_HALFLING",
-      "raceMotifId": "MOTIF_RACE_HALFLING"
+      "raceMotifId": "MOTIF_RACE_HALFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_wizard",
@@ -3309,7 +3577,8 @@
       ],
       "motifId": "MOTIF_CLASS_WIZARD",
       "rampId": "RAMP_RACE_DWARF",
-      "raceMotifId": "MOTIF_RACE_DWARF"
+      "raceMotifId": "MOTIF_RACE_DWARF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_wizard",
@@ -3332,7 +3601,8 @@
       ],
       "motifId": "MOTIF_CLASS_WIZARD",
       "rampId": "RAMP_RACE_GNOME",
-      "raceMotifId": "MOTIF_RACE_GNOME"
+      "raceMotifId": "MOTIF_RACE_GNOME",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_wizard",
@@ -3355,7 +3625,8 @@
       ],
       "motifId": "MOTIF_CLASS_WIZARD",
       "rampId": "RAMP_RACE_DRAGONBORN",
-      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_wizard",
@@ -3378,7 +3649,8 @@
       ],
       "motifId": "MOTIF_CLASS_WIZARD",
       "rampId": "RAMP_RACE_HALF_ELF",
-      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+      "raceMotifId": "MOTIF_RACE_HALF_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_wizard",
@@ -3401,7 +3673,8 @@
       ],
       "motifId": "MOTIF_CLASS_WIZARD",
       "rampId": "RAMP_RACE_HALF_ORC",
-      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+      "raceMotifId": "MOTIF_RACE_HALF_ORC",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_class_wizard",
@@ -3424,7 +3697,8 @@
       ],
       "motifId": "MOTIF_CLASS_WIZARD",
       "rampId": "RAMP_RACE_TIEFLING",
-      "raceMotifId": "MOTIF_RACE_TIEFLING"
+      "raceMotifId": "MOTIF_RACE_TIEFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_light",
@@ -3445,7 +3719,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_LIGHT",
       "rampId": "RAMP_RACE_HUMAN",
-      "raceMotifId": "MOTIF_RACE_HUMAN"
+      "raceMotifId": "MOTIF_RACE_HUMAN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_light",
@@ -3466,7 +3741,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_LIGHT",
       "rampId": "RAMP_RACE_ELF",
-      "raceMotifId": "MOTIF_RACE_ELF"
+      "raceMotifId": "MOTIF_RACE_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_light",
@@ -3487,7 +3763,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_LIGHT",
       "rampId": "RAMP_RACE_HALFLING",
-      "raceMotifId": "MOTIF_RACE_HALFLING"
+      "raceMotifId": "MOTIF_RACE_HALFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_light",
@@ -3508,7 +3785,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_LIGHT",
       "rampId": "RAMP_RACE_DWARF",
-      "raceMotifId": "MOTIF_RACE_DWARF"
+      "raceMotifId": "MOTIF_RACE_DWARF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_light",
@@ -3529,7 +3807,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_LIGHT",
       "rampId": "RAMP_RACE_GNOME",
-      "raceMotifId": "MOTIF_RACE_GNOME"
+      "raceMotifId": "MOTIF_RACE_GNOME",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_light",
@@ -3550,7 +3829,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_LIGHT",
       "rampId": "RAMP_RACE_DRAGONBORN",
-      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_light",
@@ -3571,7 +3851,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_LIGHT",
       "rampId": "RAMP_RACE_HALF_ELF",
-      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+      "raceMotifId": "MOTIF_RACE_HALF_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_light",
@@ -3592,7 +3873,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_LIGHT",
       "rampId": "RAMP_RACE_HALF_ORC",
-      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+      "raceMotifId": "MOTIF_RACE_HALF_ORC",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_light",
@@ -3613,7 +3895,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_LIGHT",
       "rampId": "RAMP_RACE_TIEFLING",
-      "raceMotifId": "MOTIF_RACE_TIEFLING"
+      "raceMotifId": "MOTIF_RACE_TIEFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_medium",
@@ -3635,7 +3918,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_MEDIUM",
       "rampId": "RAMP_RACE_HUMAN",
-      "raceMotifId": "MOTIF_RACE_HUMAN"
+      "raceMotifId": "MOTIF_RACE_HUMAN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_medium",
@@ -3657,7 +3941,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_MEDIUM",
       "rampId": "RAMP_RACE_ELF",
-      "raceMotifId": "MOTIF_RACE_ELF"
+      "raceMotifId": "MOTIF_RACE_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_medium",
@@ -3679,7 +3964,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_MEDIUM",
       "rampId": "RAMP_RACE_HALFLING",
-      "raceMotifId": "MOTIF_RACE_HALFLING"
+      "raceMotifId": "MOTIF_RACE_HALFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_medium",
@@ -3701,7 +3987,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_MEDIUM",
       "rampId": "RAMP_RACE_DWARF",
-      "raceMotifId": "MOTIF_RACE_DWARF"
+      "raceMotifId": "MOTIF_RACE_DWARF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_medium",
@@ -3723,7 +4010,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_MEDIUM",
       "rampId": "RAMP_RACE_GNOME",
-      "raceMotifId": "MOTIF_RACE_GNOME"
+      "raceMotifId": "MOTIF_RACE_GNOME",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_medium",
@@ -3745,7 +4033,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_MEDIUM",
       "rampId": "RAMP_RACE_DRAGONBORN",
-      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_medium",
@@ -3767,7 +4056,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_MEDIUM",
       "rampId": "RAMP_RACE_HALF_ELF",
-      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+      "raceMotifId": "MOTIF_RACE_HALF_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_medium",
@@ -3789,7 +4079,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_MEDIUM",
       "rampId": "RAMP_RACE_HALF_ORC",
-      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+      "raceMotifId": "MOTIF_RACE_HALF_ORC",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_medium",
@@ -3811,7 +4102,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_MEDIUM",
       "rampId": "RAMP_RACE_TIEFLING",
-      "raceMotifId": "MOTIF_RACE_TIEFLING"
+      "raceMotifId": "MOTIF_RACE_TIEFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_heavy",
@@ -3837,7 +4129,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_HEAVY",
       "rampId": "RAMP_RACE_HUMAN",
-      "raceMotifId": "MOTIF_RACE_HUMAN"
+      "raceMotifId": "MOTIF_RACE_HUMAN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_heavy",
@@ -3863,7 +4156,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_HEAVY",
       "rampId": "RAMP_RACE_ELF",
-      "raceMotifId": "MOTIF_RACE_ELF"
+      "raceMotifId": "MOTIF_RACE_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_heavy",
@@ -3889,7 +4183,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_HEAVY",
       "rampId": "RAMP_RACE_HALFLING",
-      "raceMotifId": "MOTIF_RACE_HALFLING"
+      "raceMotifId": "MOTIF_RACE_HALFLING",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_heavy",
@@ -3915,7 +4210,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_HEAVY",
       "rampId": "RAMP_RACE_DWARF",
-      "raceMotifId": "MOTIF_RACE_DWARF"
+      "raceMotifId": "MOTIF_RACE_DWARF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_heavy",
@@ -3941,7 +4237,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_HEAVY",
       "rampId": "RAMP_RACE_GNOME",
-      "raceMotifId": "MOTIF_RACE_GNOME"
+      "raceMotifId": "MOTIF_RACE_GNOME",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_heavy",
@@ -3967,7 +4264,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_HEAVY",
       "rampId": "RAMP_RACE_DRAGONBORN",
-      "raceMotifId": "MOTIF_RACE_DRAGONBORN"
+      "raceMotifId": "MOTIF_RACE_DRAGONBORN",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_heavy",
@@ -3993,7 +4291,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_HEAVY",
       "rampId": "RAMP_RACE_HALF_ELF",
-      "raceMotifId": "MOTIF_RACE_HALF_ELF"
+      "raceMotifId": "MOTIF_RACE_HALF_ELF",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_heavy",
@@ -4019,7 +4318,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_HEAVY",
       "rampId": "RAMP_RACE_HALF_ORC",
-      "raceMotifId": "MOTIF_RACE_HALF_ORC"
+      "raceMotifId": "MOTIF_RACE_HALF_ORC",
+      "pixels": "custom-per-race"
     },
     {
       "outfitId": "outfit_armor_heavy",
@@ -4045,7 +4345,8 @@
       "deforming": [],
       "motifId": "MOTIF_ARMOR_HEAVY",
       "rampId": "RAMP_RACE_TIEFLING",
-      "raceMotifId": "MOTIF_RACE_TIEFLING"
+      "raceMotifId": "MOTIF_RACE_TIEFLING",
+      "pixels": "custom-per-race"
     }
   ],
   "artKeyFallback": "__human",
@@ -4075,7 +4376,11 @@
     "parry",
     "death",
     "sneak",
-    "climb"
+    "climb",
+    "prone",
+    "unconscious",
+    "sleep",
+    "sit"
   ],
   "critterRows": [
     "idle",
@@ -4120,7 +4425,11 @@
         "parry",
         "death",
         "sneak",
-        "climb"
+        "climb",
+        "prone",
+        "unconscious",
+        "sleep",
+        "sit"
       ]
     },
     "adult": {
@@ -4154,7 +4463,11 @@
         "parry",
         "death",
         "sneak",
-        "climb"
+        "climb",
+        "prone",
+        "unconscious",
+        "sleep",
+        "sit"
       ]
     },
     "elder": {
@@ -4188,7 +4501,11 @@
         "parry",
         "death",
         "sneak",
-        "climb"
+        "climb",
+        "prone",
+        "unconscious",
+        "sleep",
+        "sit"
       ]
     }
   },
@@ -4209,7 +4526,8 @@
         3,
         4
       ],
-      "part": "hair-front"
+      "part": "hair-front",
+      "note": "Legacy bake has 4 styles. AS-GENE-001 requires 12 per body type."
     },
     "hairColor": {
       "values": [
@@ -4256,9 +4574,14 @@
       "part": "cloth"
     },
     "balding": {
-      "values": "OPEN",
+      "values": [
+        "receding",
+        "crown",
+        "advanced"
+      ],
       "part": "hair-front",
-      "mask": true
+      "mask": true,
+      "status": "PM decision 13:02 CT, Owner may amend"
     },
     "height": {
       "values": [
@@ -5175,7 +5498,7265 @@
     "object": "^![A-Za-z0-9_]+\\.png$",
     "layer": "^\\$UF_Layer_[a-z0-9_]+__[a-z]+(?:-[a-z]+)*\\.png$",
     "face": "^UF_Faces_[a-z0-9-]+_\\d+\\.png$",
-    "legacyLayer": "^\\$UF_Layer_[A-Za-z0-9_]+\\.png$"
+    "legacyLayer": "^\\$UF_Layer_[A-Za-z0-9_]+\\.png$",
+    "portrait": "^UF_Portrait_[a-z0-9_]+(?:__[a-z]+(?:-[a-z]+)*)?\\.png$"
+  },
+  "sizeFrames": [
+    {
+      "size": "Tiny",
+      "shape": "square",
+      "squares": [
+        1,
+        1
+      ],
+      "px": [
+        48,
+        48
+      ],
+      "frameClass": "TINY"
+    },
+    {
+      "size": "Small",
+      "shape": "square",
+      "squares": [
+        1,
+        1
+      ],
+      "px": [
+        48,
+        48
+      ],
+      "frameClass": "SMALL"
+    },
+    {
+      "size": "Medium",
+      "shape": "square",
+      "squares": [
+        1,
+        1
+      ],
+      "px": [
+        48,
+        48
+      ],
+      "frameClass": "MEDIUM"
+    },
+    {
+      "size": "Large",
+      "shape": "tall",
+      "squares": [
+        1,
+        2
+      ],
+      "px": [
+        48,
+        96
+      ],
+      "frameClass": "LARGE_TALL"
+    },
+    {
+      "size": "Large",
+      "shape": "long",
+      "squares": [
+        2,
+        1
+      ],
+      "px": [
+        96,
+        48
+      ],
+      "frameClass": "LARGE_LONG"
+    },
+    {
+      "size": "Huge",
+      "shape": "square",
+      "squares": [
+        3,
+        3
+      ],
+      "px": [
+        144,
+        144
+      ],
+      "frameClass": "HUGE"
+    },
+    {
+      "size": "Huge",
+      "shape": "tall",
+      "squares": [
+        2,
+        3
+      ],
+      "px": [
+        96,
+        144
+      ],
+      "frameClass": "HUGE_TALL"
+    },
+    {
+      "size": "Huge",
+      "shape": "long",
+      "squares": [
+        3,
+        2
+      ],
+      "px": [
+        144,
+        96
+      ],
+      "frameClass": "HUGE_LONG"
+    },
+    {
+      "size": "Gargantuan",
+      "shape": "square",
+      "squares": [
+        4,
+        4
+      ],
+      "px": [
+        192,
+        192
+      ],
+      "frameClass": "GARGANTUAN"
+    },
+    {
+      "size": "Gargantuan",
+      "shape": "tall",
+      "squares": [
+        3,
+        4
+      ],
+      "px": [
+        144,
+        192
+      ],
+      "frameClass": "GARGANTUAN_TALL"
+    },
+    {
+      "size": "Gargantuan",
+      "shape": "long",
+      "squares": [
+        4,
+        3
+      ],
+      "px": [
+        192,
+        144
+      ],
+      "frameClass": "GARGANTUAN_LONG"
+    }
+  ],
+  "largestActionSheet": {
+    "squares": [
+      16,
+      16
+    ],
+    "px": [
+      768,
+      768
+    ],
+    "note": "one Gargantuan 4x4 action row, 4 frames by 4 directions"
+  },
+  "genes": {
+    "status": "PM decision 13:02 CT, Owner may amend",
+    "inheritance": {
+      "owner": "sim",
+      "mix": "parents",
+      "mutation": "rare",
+      "ageLayersPreserveIdentity": true,
+      "ageLayers": [
+        "child",
+        "adult",
+        "elder"
+      ]
+    },
+    "hairStylesPerBodyType": 12,
+    "raceDistinctive": {
+      "min": 3,
+      "max": 4
+    },
+    "balding": [
+      "receding",
+      "crown",
+      "advanced"
+    ],
+    "facialHair": [
+      "stubble",
+      "short",
+      "full",
+      "long",
+      "braided",
+      "mustache",
+      "goatee",
+      "forked"
+    ],
+    "dwarfExtra": [
+      "dwarf-plait"
+    ],
+    "beardlessRaces": [],
+    "hairRamp": "RAMP_HAIR",
+    "hairNaturalSteps": [
+      "black",
+      "brown",
+      "blonde",
+      "red",
+      "step-05",
+      "step-06",
+      "step-07",
+      "step-08",
+      "step-09",
+      "step-10",
+      "step-11",
+      "step-12"
+    ],
+    "raceHairColours": {},
+    "greying": [
+      "natural",
+      "salt-and-pepper",
+      "grey",
+      "white"
+    ],
+    "faceShape": [
+      "oval",
+      "round",
+      "square",
+      "long"
+    ],
+    "eyes": [
+      "almond",
+      "round",
+      "narrow",
+      "wide",
+      "hooded"
+    ],
+    "eyeColorRamp": "RAMP_EYE",
+    "brows": [
+      "straight",
+      "arched",
+      "thick",
+      "thin"
+    ],
+    "nose": [
+      "straight",
+      "broad",
+      "aquiline",
+      "button",
+      "flat"
+    ],
+    "mouth": [
+      "thin",
+      "full",
+      "wide",
+      "small"
+    ],
+    "jaw": [
+      "narrow",
+      "average",
+      "heavy"
+    ],
+    "skinRamp": "RAMP_SKIN",
+    "skinSteps": [
+      1,
+      2,
+      3
+    ],
+    "markings": [
+      "freckles",
+      "moles",
+      "birthmark",
+      "patch"
+    ],
+    "earsPerRace": 3,
+    "raceFeaturesPerRace": {
+      "min": 3,
+      "max": 4
+    },
+    "headStates": [
+      0,
+      1,
+      2
+    ],
+    "perRace": {
+      "human": {
+        "ears": [
+          "human-ear-1",
+          "human-ear-2",
+          "human-ear-3"
+        ],
+        "raceFeatures": [
+          "rf1",
+          "rf2",
+          "rf3"
+        ],
+        "bodyTypes": {
+          "male": {
+            "styles": [
+              {
+                "id": "human-male-hair-01",
+                "raceDistinctive": true
+              },
+              {
+                "id": "human-male-hair-02",
+                "raceDistinctive": true
+              },
+              {
+                "id": "human-male-hair-03",
+                "raceDistinctive": true
+              },
+              {
+                "id": "human-male-hair-04",
+                "raceDistinctive": false
+              },
+              {
+                "id": "human-male-hair-05",
+                "raceDistinctive": false
+              },
+              {
+                "id": "human-male-hair-06",
+                "raceDistinctive": false
+              },
+              {
+                "id": "human-male-hair-07",
+                "raceDistinctive": false
+              },
+              {
+                "id": "human-male-hair-08",
+                "raceDistinctive": false
+              },
+              {
+                "id": "human-male-hair-09",
+                "raceDistinctive": false
+              },
+              {
+                "id": "human-male-hair-10",
+                "raceDistinctive": false
+              },
+              {
+                "id": "human-male-hair-11",
+                "raceDistinctive": false
+              },
+              {
+                "id": "human-male-hair-12",
+                "raceDistinctive": false
+              }
+            ],
+            "facialHair": [
+              "stubble",
+              "short",
+              "full",
+              "long",
+              "braided",
+              "mustache",
+              "goatee",
+              "forked"
+            ]
+          },
+          "female": {
+            "styles": [
+              {
+                "id": "human-female-hair-01",
+                "raceDistinctive": true
+              },
+              {
+                "id": "human-female-hair-02",
+                "raceDistinctive": true
+              },
+              {
+                "id": "human-female-hair-03",
+                "raceDistinctive": true
+              },
+              {
+                "id": "human-female-hair-04",
+                "raceDistinctive": false
+              },
+              {
+                "id": "human-female-hair-05",
+                "raceDistinctive": false
+              },
+              {
+                "id": "human-female-hair-06",
+                "raceDistinctive": false
+              },
+              {
+                "id": "human-female-hair-07",
+                "raceDistinctive": false
+              },
+              {
+                "id": "human-female-hair-08",
+                "raceDistinctive": false
+              },
+              {
+                "id": "human-female-hair-09",
+                "raceDistinctive": false
+              },
+              {
+                "id": "human-female-hair-10",
+                "raceDistinctive": false
+              },
+              {
+                "id": "human-female-hair-11",
+                "raceDistinctive": false
+              },
+              {
+                "id": "human-female-hair-12",
+                "raceDistinctive": false
+              }
+            ],
+            "facialHair": [
+              "stubble",
+              "short",
+              "full",
+              "long",
+              "braided",
+              "mustache",
+              "goatee",
+              "forked"
+            ]
+          }
+        }
+      },
+      "elf": {
+        "ears": [
+          "elf-ear-1",
+          "elf-ear-2",
+          "elf-ear-3"
+        ],
+        "raceFeatures": [
+          "rf1",
+          "rf2",
+          "rf3"
+        ],
+        "bodyTypes": {
+          "male": {
+            "styles": [
+              {
+                "id": "elf-male-hair-01",
+                "raceDistinctive": true
+              },
+              {
+                "id": "elf-male-hair-02",
+                "raceDistinctive": true
+              },
+              {
+                "id": "elf-male-hair-03",
+                "raceDistinctive": true
+              },
+              {
+                "id": "elf-male-hair-04",
+                "raceDistinctive": false
+              },
+              {
+                "id": "elf-male-hair-05",
+                "raceDistinctive": false
+              },
+              {
+                "id": "elf-male-hair-06",
+                "raceDistinctive": false
+              },
+              {
+                "id": "elf-male-hair-07",
+                "raceDistinctive": false
+              },
+              {
+                "id": "elf-male-hair-08",
+                "raceDistinctive": false
+              },
+              {
+                "id": "elf-male-hair-09",
+                "raceDistinctive": false
+              },
+              {
+                "id": "elf-male-hair-10",
+                "raceDistinctive": false
+              },
+              {
+                "id": "elf-male-hair-11",
+                "raceDistinctive": false
+              },
+              {
+                "id": "elf-male-hair-12",
+                "raceDistinctive": false
+              }
+            ],
+            "facialHair": [
+              "stubble",
+              "short",
+              "full",
+              "long",
+              "braided",
+              "mustache",
+              "goatee",
+              "forked"
+            ]
+          },
+          "female": {
+            "styles": [
+              {
+                "id": "elf-female-hair-01",
+                "raceDistinctive": true
+              },
+              {
+                "id": "elf-female-hair-02",
+                "raceDistinctive": true
+              },
+              {
+                "id": "elf-female-hair-03",
+                "raceDistinctive": true
+              },
+              {
+                "id": "elf-female-hair-04",
+                "raceDistinctive": false
+              },
+              {
+                "id": "elf-female-hair-05",
+                "raceDistinctive": false
+              },
+              {
+                "id": "elf-female-hair-06",
+                "raceDistinctive": false
+              },
+              {
+                "id": "elf-female-hair-07",
+                "raceDistinctive": false
+              },
+              {
+                "id": "elf-female-hair-08",
+                "raceDistinctive": false
+              },
+              {
+                "id": "elf-female-hair-09",
+                "raceDistinctive": false
+              },
+              {
+                "id": "elf-female-hair-10",
+                "raceDistinctive": false
+              },
+              {
+                "id": "elf-female-hair-11",
+                "raceDistinctive": false
+              },
+              {
+                "id": "elf-female-hair-12",
+                "raceDistinctive": false
+              }
+            ],
+            "facialHair": [
+              "stubble",
+              "short",
+              "full",
+              "long",
+              "braided",
+              "mustache",
+              "goatee",
+              "forked"
+            ]
+          }
+        }
+      },
+      "halfling": {
+        "ears": [
+          "halfling-ear-1",
+          "halfling-ear-2",
+          "halfling-ear-3"
+        ],
+        "raceFeatures": [
+          "rf1",
+          "rf2",
+          "rf3"
+        ],
+        "bodyTypes": {
+          "male": {
+            "styles": [
+              {
+                "id": "halfling-male-hair-01",
+                "raceDistinctive": true
+              },
+              {
+                "id": "halfling-male-hair-02",
+                "raceDistinctive": true
+              },
+              {
+                "id": "halfling-male-hair-03",
+                "raceDistinctive": true
+              },
+              {
+                "id": "halfling-male-hair-04",
+                "raceDistinctive": false
+              },
+              {
+                "id": "halfling-male-hair-05",
+                "raceDistinctive": false
+              },
+              {
+                "id": "halfling-male-hair-06",
+                "raceDistinctive": false
+              },
+              {
+                "id": "halfling-male-hair-07",
+                "raceDistinctive": false
+              },
+              {
+                "id": "halfling-male-hair-08",
+                "raceDistinctive": false
+              },
+              {
+                "id": "halfling-male-hair-09",
+                "raceDistinctive": false
+              },
+              {
+                "id": "halfling-male-hair-10",
+                "raceDistinctive": false
+              },
+              {
+                "id": "halfling-male-hair-11",
+                "raceDistinctive": false
+              },
+              {
+                "id": "halfling-male-hair-12",
+                "raceDistinctive": false
+              }
+            ],
+            "facialHair": [
+              "stubble",
+              "short",
+              "full",
+              "long",
+              "braided",
+              "mustache",
+              "goatee",
+              "forked"
+            ]
+          },
+          "female": {
+            "styles": [
+              {
+                "id": "halfling-female-hair-01",
+                "raceDistinctive": true
+              },
+              {
+                "id": "halfling-female-hair-02",
+                "raceDistinctive": true
+              },
+              {
+                "id": "halfling-female-hair-03",
+                "raceDistinctive": true
+              },
+              {
+                "id": "halfling-female-hair-04",
+                "raceDistinctive": false
+              },
+              {
+                "id": "halfling-female-hair-05",
+                "raceDistinctive": false
+              },
+              {
+                "id": "halfling-female-hair-06",
+                "raceDistinctive": false
+              },
+              {
+                "id": "halfling-female-hair-07",
+                "raceDistinctive": false
+              },
+              {
+                "id": "halfling-female-hair-08",
+                "raceDistinctive": false
+              },
+              {
+                "id": "halfling-female-hair-09",
+                "raceDistinctive": false
+              },
+              {
+                "id": "halfling-female-hair-10",
+                "raceDistinctive": false
+              },
+              {
+                "id": "halfling-female-hair-11",
+                "raceDistinctive": false
+              },
+              {
+                "id": "halfling-female-hair-12",
+                "raceDistinctive": false
+              }
+            ],
+            "facialHair": [
+              "stubble",
+              "short",
+              "full",
+              "long",
+              "braided",
+              "mustache",
+              "goatee",
+              "forked"
+            ]
+          }
+        }
+      },
+      "dwarf": {
+        "ears": [
+          "dwarf-ear-1",
+          "dwarf-ear-2",
+          "dwarf-ear-3"
+        ],
+        "raceFeatures": [
+          "rf1",
+          "rf2",
+          "rf3"
+        ],
+        "bodyTypes": {
+          "male": {
+            "styles": [
+              {
+                "id": "dwarf-male-hair-01",
+                "raceDistinctive": true
+              },
+              {
+                "id": "dwarf-male-hair-02",
+                "raceDistinctive": true
+              },
+              {
+                "id": "dwarf-male-hair-03",
+                "raceDistinctive": true
+              },
+              {
+                "id": "dwarf-male-hair-04",
+                "raceDistinctive": true
+              },
+              {
+                "id": "dwarf-male-hair-05",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dwarf-male-hair-06",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dwarf-male-hair-07",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dwarf-male-hair-08",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dwarf-male-hair-09",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dwarf-male-hair-10",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dwarf-male-hair-11",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dwarf-male-hair-12",
+                "raceDistinctive": false
+              }
+            ],
+            "facialHair": [
+              "stubble",
+              "short",
+              "full",
+              "long",
+              "braided",
+              "mustache",
+              "goatee",
+              "forked",
+              "dwarf-plait"
+            ]
+          },
+          "female": {
+            "styles": [
+              {
+                "id": "dwarf-female-hair-01",
+                "raceDistinctive": true
+              },
+              {
+                "id": "dwarf-female-hair-02",
+                "raceDistinctive": true
+              },
+              {
+                "id": "dwarf-female-hair-03",
+                "raceDistinctive": true
+              },
+              {
+                "id": "dwarf-female-hair-04",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dwarf-female-hair-05",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dwarf-female-hair-06",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dwarf-female-hair-07",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dwarf-female-hair-08",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dwarf-female-hair-09",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dwarf-female-hair-10",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dwarf-female-hair-11",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dwarf-female-hair-12",
+                "raceDistinctive": false
+              }
+            ],
+            "facialHair": [
+              "stubble",
+              "short",
+              "full",
+              "long",
+              "braided",
+              "mustache",
+              "goatee",
+              "forked",
+              "dwarf-plait"
+            ]
+          }
+        }
+      },
+      "gnome": {
+        "ears": [
+          "gnome-ear-1",
+          "gnome-ear-2",
+          "gnome-ear-3"
+        ],
+        "raceFeatures": [
+          "rf1",
+          "rf2",
+          "rf3"
+        ],
+        "bodyTypes": {
+          "male": {
+            "styles": [
+              {
+                "id": "gnome-male-hair-01",
+                "raceDistinctive": true
+              },
+              {
+                "id": "gnome-male-hair-02",
+                "raceDistinctive": true
+              },
+              {
+                "id": "gnome-male-hair-03",
+                "raceDistinctive": true
+              },
+              {
+                "id": "gnome-male-hair-04",
+                "raceDistinctive": false
+              },
+              {
+                "id": "gnome-male-hair-05",
+                "raceDistinctive": false
+              },
+              {
+                "id": "gnome-male-hair-06",
+                "raceDistinctive": false
+              },
+              {
+                "id": "gnome-male-hair-07",
+                "raceDistinctive": false
+              },
+              {
+                "id": "gnome-male-hair-08",
+                "raceDistinctive": false
+              },
+              {
+                "id": "gnome-male-hair-09",
+                "raceDistinctive": false
+              },
+              {
+                "id": "gnome-male-hair-10",
+                "raceDistinctive": false
+              },
+              {
+                "id": "gnome-male-hair-11",
+                "raceDistinctive": false
+              },
+              {
+                "id": "gnome-male-hair-12",
+                "raceDistinctive": false
+              }
+            ],
+            "facialHair": [
+              "stubble",
+              "short",
+              "full",
+              "long",
+              "braided",
+              "mustache",
+              "goatee",
+              "forked"
+            ]
+          },
+          "female": {
+            "styles": [
+              {
+                "id": "gnome-female-hair-01",
+                "raceDistinctive": true
+              },
+              {
+                "id": "gnome-female-hair-02",
+                "raceDistinctive": true
+              },
+              {
+                "id": "gnome-female-hair-03",
+                "raceDistinctive": true
+              },
+              {
+                "id": "gnome-female-hair-04",
+                "raceDistinctive": false
+              },
+              {
+                "id": "gnome-female-hair-05",
+                "raceDistinctive": false
+              },
+              {
+                "id": "gnome-female-hair-06",
+                "raceDistinctive": false
+              },
+              {
+                "id": "gnome-female-hair-07",
+                "raceDistinctive": false
+              },
+              {
+                "id": "gnome-female-hair-08",
+                "raceDistinctive": false
+              },
+              {
+                "id": "gnome-female-hair-09",
+                "raceDistinctive": false
+              },
+              {
+                "id": "gnome-female-hair-10",
+                "raceDistinctive": false
+              },
+              {
+                "id": "gnome-female-hair-11",
+                "raceDistinctive": false
+              },
+              {
+                "id": "gnome-female-hair-12",
+                "raceDistinctive": false
+              }
+            ],
+            "facialHair": [
+              "stubble",
+              "short",
+              "full",
+              "long",
+              "braided",
+              "mustache",
+              "goatee",
+              "forked"
+            ]
+          }
+        }
+      },
+      "dragonborn": {
+        "ears": [
+          "dragonborn-ear-1",
+          "dragonborn-ear-2",
+          "dragonborn-ear-3"
+        ],
+        "raceFeatures": [
+          "rf1",
+          "rf2",
+          "rf3"
+        ],
+        "bodyTypes": {
+          "male": {
+            "styles": [
+              {
+                "id": "dragonborn-male-hair-01",
+                "raceDistinctive": true
+              },
+              {
+                "id": "dragonborn-male-hair-02",
+                "raceDistinctive": true
+              },
+              {
+                "id": "dragonborn-male-hair-03",
+                "raceDistinctive": true
+              },
+              {
+                "id": "dragonborn-male-hair-04",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dragonborn-male-hair-05",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dragonborn-male-hair-06",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dragonborn-male-hair-07",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dragonborn-male-hair-08",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dragonborn-male-hair-09",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dragonborn-male-hair-10",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dragonborn-male-hair-11",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dragonborn-male-hair-12",
+                "raceDistinctive": false
+              }
+            ],
+            "facialHair": [
+              "stubble",
+              "short",
+              "full",
+              "long",
+              "braided",
+              "mustache",
+              "goatee",
+              "forked"
+            ]
+          },
+          "female": {
+            "styles": [
+              {
+                "id": "dragonborn-female-hair-01",
+                "raceDistinctive": true
+              },
+              {
+                "id": "dragonborn-female-hair-02",
+                "raceDistinctive": true
+              },
+              {
+                "id": "dragonborn-female-hair-03",
+                "raceDistinctive": true
+              },
+              {
+                "id": "dragonborn-female-hair-04",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dragonborn-female-hair-05",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dragonborn-female-hair-06",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dragonborn-female-hair-07",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dragonborn-female-hair-08",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dragonborn-female-hair-09",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dragonborn-female-hair-10",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dragonborn-female-hair-11",
+                "raceDistinctive": false
+              },
+              {
+                "id": "dragonborn-female-hair-12",
+                "raceDistinctive": false
+              }
+            ],
+            "facialHair": [
+              "stubble",
+              "short",
+              "full",
+              "long",
+              "braided",
+              "mustache",
+              "goatee",
+              "forked"
+            ]
+          }
+        }
+      },
+      "half-elf": {
+        "ears": [
+          "half-elf-ear-1",
+          "half-elf-ear-2",
+          "half-elf-ear-3"
+        ],
+        "raceFeatures": [
+          "rf1",
+          "rf2",
+          "rf3"
+        ],
+        "bodyTypes": {
+          "male": {
+            "styles": [
+              {
+                "id": "half-elf-male-hair-01",
+                "raceDistinctive": true
+              },
+              {
+                "id": "half-elf-male-hair-02",
+                "raceDistinctive": true
+              },
+              {
+                "id": "half-elf-male-hair-03",
+                "raceDistinctive": true
+              },
+              {
+                "id": "half-elf-male-hair-04",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-elf-male-hair-05",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-elf-male-hair-06",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-elf-male-hair-07",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-elf-male-hair-08",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-elf-male-hair-09",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-elf-male-hair-10",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-elf-male-hair-11",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-elf-male-hair-12",
+                "raceDistinctive": false
+              }
+            ],
+            "facialHair": [
+              "stubble",
+              "short",
+              "full",
+              "long",
+              "braided",
+              "mustache",
+              "goatee",
+              "forked"
+            ]
+          },
+          "female": {
+            "styles": [
+              {
+                "id": "half-elf-female-hair-01",
+                "raceDistinctive": true
+              },
+              {
+                "id": "half-elf-female-hair-02",
+                "raceDistinctive": true
+              },
+              {
+                "id": "half-elf-female-hair-03",
+                "raceDistinctive": true
+              },
+              {
+                "id": "half-elf-female-hair-04",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-elf-female-hair-05",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-elf-female-hair-06",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-elf-female-hair-07",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-elf-female-hair-08",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-elf-female-hair-09",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-elf-female-hair-10",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-elf-female-hair-11",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-elf-female-hair-12",
+                "raceDistinctive": false
+              }
+            ],
+            "facialHair": [
+              "stubble",
+              "short",
+              "full",
+              "long",
+              "braided",
+              "mustache",
+              "goatee",
+              "forked"
+            ]
+          }
+        }
+      },
+      "half-orc": {
+        "ears": [
+          "half-orc-ear-1",
+          "half-orc-ear-2",
+          "half-orc-ear-3"
+        ],
+        "raceFeatures": [
+          "rf1",
+          "rf2",
+          "rf3"
+        ],
+        "bodyTypes": {
+          "male": {
+            "styles": [
+              {
+                "id": "half-orc-male-hair-01",
+                "raceDistinctive": true
+              },
+              {
+                "id": "half-orc-male-hair-02",
+                "raceDistinctive": true
+              },
+              {
+                "id": "half-orc-male-hair-03",
+                "raceDistinctive": true
+              },
+              {
+                "id": "half-orc-male-hair-04",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-orc-male-hair-05",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-orc-male-hair-06",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-orc-male-hair-07",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-orc-male-hair-08",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-orc-male-hair-09",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-orc-male-hair-10",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-orc-male-hair-11",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-orc-male-hair-12",
+                "raceDistinctive": false
+              }
+            ],
+            "facialHair": [
+              "stubble",
+              "short",
+              "full",
+              "long",
+              "braided",
+              "mustache",
+              "goatee",
+              "forked"
+            ]
+          },
+          "female": {
+            "styles": [
+              {
+                "id": "half-orc-female-hair-01",
+                "raceDistinctive": true
+              },
+              {
+                "id": "half-orc-female-hair-02",
+                "raceDistinctive": true
+              },
+              {
+                "id": "half-orc-female-hair-03",
+                "raceDistinctive": true
+              },
+              {
+                "id": "half-orc-female-hair-04",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-orc-female-hair-05",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-orc-female-hair-06",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-orc-female-hair-07",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-orc-female-hair-08",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-orc-female-hair-09",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-orc-female-hair-10",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-orc-female-hair-11",
+                "raceDistinctive": false
+              },
+              {
+                "id": "half-orc-female-hair-12",
+                "raceDistinctive": false
+              }
+            ],
+            "facialHair": [
+              "stubble",
+              "short",
+              "full",
+              "long",
+              "braided",
+              "mustache",
+              "goatee",
+              "forked"
+            ]
+          }
+        }
+      },
+      "tiefling": {
+        "ears": [
+          "tiefling-ear-1",
+          "tiefling-ear-2",
+          "tiefling-ear-3"
+        ],
+        "raceFeatures": [
+          "rf1",
+          "rf2",
+          "rf3"
+        ],
+        "bodyTypes": {
+          "male": {
+            "styles": [
+              {
+                "id": "tiefling-male-hair-01",
+                "raceDistinctive": true
+              },
+              {
+                "id": "tiefling-male-hair-02",
+                "raceDistinctive": true
+              },
+              {
+                "id": "tiefling-male-hair-03",
+                "raceDistinctive": true
+              },
+              {
+                "id": "tiefling-male-hair-04",
+                "raceDistinctive": false
+              },
+              {
+                "id": "tiefling-male-hair-05",
+                "raceDistinctive": false
+              },
+              {
+                "id": "tiefling-male-hair-06",
+                "raceDistinctive": false
+              },
+              {
+                "id": "tiefling-male-hair-07",
+                "raceDistinctive": false
+              },
+              {
+                "id": "tiefling-male-hair-08",
+                "raceDistinctive": false
+              },
+              {
+                "id": "tiefling-male-hair-09",
+                "raceDistinctive": false
+              },
+              {
+                "id": "tiefling-male-hair-10",
+                "raceDistinctive": false
+              },
+              {
+                "id": "tiefling-male-hair-11",
+                "raceDistinctive": false
+              },
+              {
+                "id": "tiefling-male-hair-12",
+                "raceDistinctive": false
+              }
+            ],
+            "facialHair": [
+              "stubble",
+              "short",
+              "full",
+              "long",
+              "braided",
+              "mustache",
+              "goatee",
+              "forked"
+            ]
+          },
+          "female": {
+            "styles": [
+              {
+                "id": "tiefling-female-hair-01",
+                "raceDistinctive": true
+              },
+              {
+                "id": "tiefling-female-hair-02",
+                "raceDistinctive": true
+              },
+              {
+                "id": "tiefling-female-hair-03",
+                "raceDistinctive": true
+              },
+              {
+                "id": "tiefling-female-hair-04",
+                "raceDistinctive": false
+              },
+              {
+                "id": "tiefling-female-hair-05",
+                "raceDistinctive": false
+              },
+              {
+                "id": "tiefling-female-hair-06",
+                "raceDistinctive": false
+              },
+              {
+                "id": "tiefling-female-hair-07",
+                "raceDistinctive": false
+              },
+              {
+                "id": "tiefling-female-hair-08",
+                "raceDistinctive": false
+              },
+              {
+                "id": "tiefling-female-hair-09",
+                "raceDistinctive": false
+              },
+              {
+                "id": "tiefling-female-hair-10",
+                "raceDistinctive": false
+              },
+              {
+                "id": "tiefling-female-hair-11",
+                "raceDistinctive": false
+              },
+              {
+                "id": "tiefling-female-hair-12",
+                "raceDistinctive": false
+              }
+            ],
+            "facialHair": [
+              "stubble",
+              "short",
+              "full",
+              "long",
+              "braided",
+              "mustache",
+              "goatee",
+              "forked"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "headGrid": {
+    "kinds": [
+      "hair",
+      "balding",
+      "beard",
+      "race-feature"
+    ],
+    "framesPerGrid": 12,
+    "longHairPoses": [
+      "death",
+      "dodge"
+    ],
+    "sample": {
+      "kind": "hair",
+      "longHair": false,
+      "frames": [
+        {
+          "dir": "S",
+          "headState": 0,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "S",
+          "headState": 1,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "S",
+          "headState": 2,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "W",
+          "headState": 0,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "W",
+          "headState": 1,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "W",
+          "headState": 2,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "E",
+          "headState": 0,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "E",
+          "headState": 1,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "E",
+          "headState": 2,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "N",
+          "headState": 0,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "N",
+          "headState": 1,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "N",
+          "headState": 2,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        }
+      ],
+      "extras": []
+    },
+    "longHairSample": {
+      "kind": "hair",
+      "longHair": true,
+      "frames": [
+        {
+          "dir": "S",
+          "headState": 0,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "S",
+          "headState": 1,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "S",
+          "headState": 2,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "W",
+          "headState": 0,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "W",
+          "headState": 1,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "W",
+          "headState": 2,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "E",
+          "headState": 0,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "E",
+          "headState": 1,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "E",
+          "headState": 2,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "N",
+          "headState": 0,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "N",
+          "headState": 1,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        },
+        {
+          "dir": "N",
+          "headState": 2,
+          "anchor": {
+            "x": 24,
+            "y": 8
+          }
+        }
+      ],
+      "extras": [
+        {
+          "pose": "death",
+          "dir": "S"
+        },
+        {
+          "pose": "dodge",
+          "dir": "W"
+        }
+      ]
+    }
+  },
+  "elderReuse": {
+    "body": "redraw-stooped",
+    "garbSheet": "adult",
+    "gearSheet": "adult",
+    "hairSheet": "adult",
+    "offsetStatus": "baseline-stoop",
+    "frameCount": 236,
+    "frames": [
+      {
+        "frame": 0,
+        "pose": "swing",
+        "dir": "S",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 1,
+        "pose": "swing",
+        "dir": "S",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 2,
+        "pose": "swing",
+        "dir": "S",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 3,
+        "pose": "swing",
+        "dir": "S",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 4,
+        "pose": "swing",
+        "dir": "W",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 5,
+        "pose": "swing",
+        "dir": "W",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 6,
+        "pose": "swing",
+        "dir": "W",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 7,
+        "pose": "swing",
+        "dir": "W",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 8,
+        "pose": "swing",
+        "dir": "E",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 9,
+        "pose": "swing",
+        "dir": "E",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 10,
+        "pose": "swing",
+        "dir": "E",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 11,
+        "pose": "swing",
+        "dir": "E",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 12,
+        "pose": "swing",
+        "dir": "N",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 13,
+        "pose": "swing",
+        "dir": "N",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 14,
+        "pose": "swing",
+        "dir": "N",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 15,
+        "pose": "swing",
+        "dir": "N",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 16,
+        "pose": "thrust",
+        "dir": "S",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 17,
+        "pose": "thrust",
+        "dir": "S",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 18,
+        "pose": "thrust",
+        "dir": "S",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 19,
+        "pose": "thrust",
+        "dir": "S",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 20,
+        "pose": "thrust",
+        "dir": "W",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 21,
+        "pose": "thrust",
+        "dir": "W",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 22,
+        "pose": "thrust",
+        "dir": "W",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 23,
+        "pose": "thrust",
+        "dir": "W",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 24,
+        "pose": "thrust",
+        "dir": "E",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 25,
+        "pose": "thrust",
+        "dir": "E",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 26,
+        "pose": "thrust",
+        "dir": "E",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 27,
+        "pose": "thrust",
+        "dir": "E",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 28,
+        "pose": "thrust",
+        "dir": "N",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 29,
+        "pose": "thrust",
+        "dir": "N",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 30,
+        "pose": "thrust",
+        "dir": "N",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 31,
+        "pose": "thrust",
+        "dir": "N",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 32,
+        "pose": "bow-draw",
+        "dir": "S",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 33,
+        "pose": "bow-draw",
+        "dir": "S",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 34,
+        "pose": "bow-draw",
+        "dir": "S",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 35,
+        "pose": "bow-draw",
+        "dir": "S",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 36,
+        "pose": "bow-draw",
+        "dir": "W",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 37,
+        "pose": "bow-draw",
+        "dir": "W",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 38,
+        "pose": "bow-draw",
+        "dir": "W",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 39,
+        "pose": "bow-draw",
+        "dir": "W",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 40,
+        "pose": "bow-draw",
+        "dir": "E",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 41,
+        "pose": "bow-draw",
+        "dir": "E",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 42,
+        "pose": "bow-draw",
+        "dir": "E",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 43,
+        "pose": "bow-draw",
+        "dir": "E",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 44,
+        "pose": "bow-draw",
+        "dir": "N",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 45,
+        "pose": "bow-draw",
+        "dir": "N",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 46,
+        "pose": "bow-draw",
+        "dir": "N",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 47,
+        "pose": "bow-draw",
+        "dir": "N",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 48,
+        "pose": "bow-loose",
+        "dir": "S",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 49,
+        "pose": "bow-loose",
+        "dir": "S",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 50,
+        "pose": "bow-loose",
+        "dir": "S",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 51,
+        "pose": "bow-loose",
+        "dir": "W",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 52,
+        "pose": "bow-loose",
+        "dir": "W",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 53,
+        "pose": "bow-loose",
+        "dir": "W",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 54,
+        "pose": "bow-loose",
+        "dir": "E",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 55,
+        "pose": "bow-loose",
+        "dir": "E",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 56,
+        "pose": "bow-loose",
+        "dir": "E",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 57,
+        "pose": "bow-loose",
+        "dir": "N",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 58,
+        "pose": "bow-loose",
+        "dir": "N",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 59,
+        "pose": "bow-loose",
+        "dir": "N",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 60,
+        "pose": "cast",
+        "dir": "S",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 61,
+        "pose": "cast",
+        "dir": "S",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 62,
+        "pose": "cast",
+        "dir": "S",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 63,
+        "pose": "cast",
+        "dir": "S",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 64,
+        "pose": "cast",
+        "dir": "W",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 65,
+        "pose": "cast",
+        "dir": "W",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 66,
+        "pose": "cast",
+        "dir": "W",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 67,
+        "pose": "cast",
+        "dir": "W",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 68,
+        "pose": "cast",
+        "dir": "E",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 69,
+        "pose": "cast",
+        "dir": "E",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 70,
+        "pose": "cast",
+        "dir": "E",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 71,
+        "pose": "cast",
+        "dir": "E",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 72,
+        "pose": "cast",
+        "dir": "N",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 73,
+        "pose": "cast",
+        "dir": "N",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 74,
+        "pose": "cast",
+        "dir": "N",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 75,
+        "pose": "cast",
+        "dir": "N",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 76,
+        "pose": "hit",
+        "dir": "S",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 77,
+        "pose": "hit",
+        "dir": "S",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 78,
+        "pose": "hit",
+        "dir": "S",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 79,
+        "pose": "hit",
+        "dir": "W",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 80,
+        "pose": "hit",
+        "dir": "W",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 81,
+        "pose": "hit",
+        "dir": "W",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 82,
+        "pose": "hit",
+        "dir": "E",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 83,
+        "pose": "hit",
+        "dir": "E",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 84,
+        "pose": "hit",
+        "dir": "E",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 85,
+        "pose": "hit",
+        "dir": "N",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 86,
+        "pose": "hit",
+        "dir": "N",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 87,
+        "pose": "hit",
+        "dir": "N",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 88,
+        "pose": "flinch",
+        "dir": "S",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 89,
+        "pose": "flinch",
+        "dir": "S",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 90,
+        "pose": "flinch",
+        "dir": "S",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 91,
+        "pose": "flinch",
+        "dir": "W",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 92,
+        "pose": "flinch",
+        "dir": "W",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 93,
+        "pose": "flinch",
+        "dir": "W",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 94,
+        "pose": "flinch",
+        "dir": "E",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 95,
+        "pose": "flinch",
+        "dir": "E",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 96,
+        "pose": "flinch",
+        "dir": "E",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 97,
+        "pose": "flinch",
+        "dir": "N",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 98,
+        "pose": "flinch",
+        "dir": "N",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 99,
+        "pose": "flinch",
+        "dir": "N",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 100,
+        "pose": "dodge",
+        "dir": "S",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 101,
+        "pose": "dodge",
+        "dir": "S",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 102,
+        "pose": "dodge",
+        "dir": "S",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 103,
+        "pose": "dodge",
+        "dir": "W",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 104,
+        "pose": "dodge",
+        "dir": "W",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 105,
+        "pose": "dodge",
+        "dir": "W",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 106,
+        "pose": "dodge",
+        "dir": "E",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 107,
+        "pose": "dodge",
+        "dir": "E",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 108,
+        "pose": "dodge",
+        "dir": "E",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 109,
+        "pose": "dodge",
+        "dir": "N",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 110,
+        "pose": "dodge",
+        "dir": "N",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 111,
+        "pose": "dodge",
+        "dir": "N",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 112,
+        "pose": "parry",
+        "dir": "S",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 113,
+        "pose": "parry",
+        "dir": "S",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 114,
+        "pose": "parry",
+        "dir": "S",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 115,
+        "pose": "parry",
+        "dir": "W",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 116,
+        "pose": "parry",
+        "dir": "W",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 117,
+        "pose": "parry",
+        "dir": "W",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 118,
+        "pose": "parry",
+        "dir": "E",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 119,
+        "pose": "parry",
+        "dir": "E",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 120,
+        "pose": "parry",
+        "dir": "E",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 121,
+        "pose": "parry",
+        "dir": "N",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 122,
+        "pose": "parry",
+        "dir": "N",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 123,
+        "pose": "parry",
+        "dir": "N",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 124,
+        "pose": "death",
+        "dir": "S",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 125,
+        "pose": "death",
+        "dir": "S",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 126,
+        "pose": "death",
+        "dir": "S",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 127,
+        "pose": "death",
+        "dir": "S",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 128,
+        "pose": "death",
+        "dir": "W",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 129,
+        "pose": "death",
+        "dir": "W",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 130,
+        "pose": "death",
+        "dir": "W",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 131,
+        "pose": "death",
+        "dir": "W",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 132,
+        "pose": "death",
+        "dir": "E",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 133,
+        "pose": "death",
+        "dir": "E",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 134,
+        "pose": "death",
+        "dir": "E",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 135,
+        "pose": "death",
+        "dir": "E",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 136,
+        "pose": "death",
+        "dir": "N",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 137,
+        "pose": "death",
+        "dir": "N",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 138,
+        "pose": "death",
+        "dir": "N",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 139,
+        "pose": "death",
+        "dir": "N",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 140,
+        "pose": "prone",
+        "dir": "S",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 141,
+        "pose": "prone",
+        "dir": "S",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 142,
+        "pose": "prone",
+        "dir": "S",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 143,
+        "pose": "prone",
+        "dir": "S",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 144,
+        "pose": "prone",
+        "dir": "W",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 145,
+        "pose": "prone",
+        "dir": "W",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 146,
+        "pose": "prone",
+        "dir": "W",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 147,
+        "pose": "prone",
+        "dir": "W",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 148,
+        "pose": "prone",
+        "dir": "E",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 149,
+        "pose": "prone",
+        "dir": "E",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 150,
+        "pose": "prone",
+        "dir": "E",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 151,
+        "pose": "prone",
+        "dir": "E",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 152,
+        "pose": "prone",
+        "dir": "N",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 153,
+        "pose": "prone",
+        "dir": "N",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 154,
+        "pose": "prone",
+        "dir": "N",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 155,
+        "pose": "prone",
+        "dir": "N",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 156,
+        "pose": "unconscious",
+        "dir": "S",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 157,
+        "pose": "unconscious",
+        "dir": "S",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 158,
+        "pose": "unconscious",
+        "dir": "S",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 159,
+        "pose": "unconscious",
+        "dir": "S",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 160,
+        "pose": "unconscious",
+        "dir": "W",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 161,
+        "pose": "unconscious",
+        "dir": "W",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 162,
+        "pose": "unconscious",
+        "dir": "W",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 163,
+        "pose": "unconscious",
+        "dir": "W",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 164,
+        "pose": "unconscious",
+        "dir": "E",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 165,
+        "pose": "unconscious",
+        "dir": "E",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 166,
+        "pose": "unconscious",
+        "dir": "E",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 167,
+        "pose": "unconscious",
+        "dir": "E",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 168,
+        "pose": "unconscious",
+        "dir": "N",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 169,
+        "pose": "unconscious",
+        "dir": "N",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 170,
+        "pose": "unconscious",
+        "dir": "N",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 171,
+        "pose": "unconscious",
+        "dir": "N",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 172,
+        "pose": "sleep",
+        "dir": "S",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 173,
+        "pose": "sleep",
+        "dir": "S",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 174,
+        "pose": "sleep",
+        "dir": "S",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 175,
+        "pose": "sleep",
+        "dir": "S",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 176,
+        "pose": "sleep",
+        "dir": "W",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 177,
+        "pose": "sleep",
+        "dir": "W",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 178,
+        "pose": "sleep",
+        "dir": "W",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 179,
+        "pose": "sleep",
+        "dir": "W",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 180,
+        "pose": "sleep",
+        "dir": "E",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 181,
+        "pose": "sleep",
+        "dir": "E",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 182,
+        "pose": "sleep",
+        "dir": "E",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 183,
+        "pose": "sleep",
+        "dir": "E",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 184,
+        "pose": "sleep",
+        "dir": "N",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 185,
+        "pose": "sleep",
+        "dir": "N",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 186,
+        "pose": "sleep",
+        "dir": "N",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 187,
+        "pose": "sleep",
+        "dir": "N",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 188,
+        "pose": "sit",
+        "dir": "S",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 189,
+        "pose": "sit",
+        "dir": "S",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 190,
+        "pose": "sit",
+        "dir": "S",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 191,
+        "pose": "sit",
+        "dir": "S",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 192,
+        "pose": "sit",
+        "dir": "W",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 193,
+        "pose": "sit",
+        "dir": "W",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 194,
+        "pose": "sit",
+        "dir": "W",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 195,
+        "pose": "sit",
+        "dir": "W",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 196,
+        "pose": "sit",
+        "dir": "E",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 197,
+        "pose": "sit",
+        "dir": "E",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 198,
+        "pose": "sit",
+        "dir": "E",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 199,
+        "pose": "sit",
+        "dir": "E",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 200,
+        "pose": "sit",
+        "dir": "N",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 201,
+        "pose": "sit",
+        "dir": "N",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 202,
+        "pose": "sit",
+        "dir": "N",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 203,
+        "pose": "sit",
+        "dir": "N",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 204,
+        "pose": "sneak",
+        "dir": "S",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 205,
+        "pose": "sneak",
+        "dir": "S",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 206,
+        "pose": "sneak",
+        "dir": "S",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 207,
+        "pose": "sneak",
+        "dir": "S",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 208,
+        "pose": "sneak",
+        "dir": "W",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 209,
+        "pose": "sneak",
+        "dir": "W",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 210,
+        "pose": "sneak",
+        "dir": "W",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 211,
+        "pose": "sneak",
+        "dir": "W",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 212,
+        "pose": "sneak",
+        "dir": "E",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 213,
+        "pose": "sneak",
+        "dir": "E",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 214,
+        "pose": "sneak",
+        "dir": "E",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 215,
+        "pose": "sneak",
+        "dir": "E",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 216,
+        "pose": "sneak",
+        "dir": "N",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 217,
+        "pose": "sneak",
+        "dir": "N",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 218,
+        "pose": "sneak",
+        "dir": "N",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 219,
+        "pose": "sneak",
+        "dir": "N",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 220,
+        "pose": "climb",
+        "dir": "S",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 221,
+        "pose": "climb",
+        "dir": "S",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 222,
+        "pose": "climb",
+        "dir": "S",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 223,
+        "pose": "climb",
+        "dir": "S",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 224,
+        "pose": "climb",
+        "dir": "W",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 225,
+        "pose": "climb",
+        "dir": "W",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 226,
+        "pose": "climb",
+        "dir": "W",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 227,
+        "pose": "climb",
+        "dir": "W",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 228,
+        "pose": "climb",
+        "dir": "E",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 229,
+        "pose": "climb",
+        "dir": "E",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 230,
+        "pose": "climb",
+        "dir": "E",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 231,
+        "pose": "climb",
+        "dir": "E",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 232,
+        "pose": "climb",
+        "dir": "N",
+        "index": 0,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      },
+      {
+        "frame": 233,
+        "pose": "climb",
+        "dir": "N",
+        "index": 1,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 1
+      },
+      {
+        "frame": 234,
+        "pose": "climb",
+        "dir": "N",
+        "index": 2,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 2
+      },
+      {
+        "frame": 235,
+        "pose": "climb",
+        "dir": "N",
+        "index": 3,
+        "torso": [
+          0,
+          2
+        ],
+        "head": [
+          0,
+          4
+        ],
+        "headAnchor": [
+          24,
+          8
+        ],
+        "headState": 0
+      }
+    ]
+  },
+  "poseConditions": {
+    "prone": {
+      "kind": "condition",
+      "id": "prone"
+    },
+    "unconscious": {
+      "kind": "condition",
+      "id": "unconscious"
+    },
+    "sleep": {
+      "kind": "activity"
+    },
+    "sit": {
+      "kind": "activity"
+    },
+    "sneak": {
+      "kind": "activity"
+    },
+    "climb": {
+      "kind": "activity"
+    }
+  },
+  "gearPolicy": {
+    "oneSilhouetteKinds": [
+      "weapon",
+      "tool",
+      "accessory"
+    ],
+    "customKinds": [
+      "outfit"
+    ],
+    "rows": [
+      {
+        "itemId": "weapon_longsword",
+        "kind": "weapon",
+        "race": "human",
+        "silhouetteId": "sil:longsword",
+        "rampId": "RAMP_RACE_HUMAN",
+        "decalSlot": {
+          "x": 8,
+          "y": 4,
+          "angle": "A0"
+        },
+        "perRaceSilhouette": false
+      },
+      {
+        "itemId": "weapon_longsword",
+        "kind": "weapon",
+        "race": "elf",
+        "silhouetteId": "sil:longsword",
+        "rampId": "RAMP_RACE_ELF",
+        "decalSlot": {
+          "x": 8,
+          "y": 4,
+          "angle": "A45"
+        },
+        "perRaceSilhouette": false
+      },
+      {
+        "itemId": "tool_hammer",
+        "kind": "tool",
+        "race": "dwarf",
+        "silhouetteId": "sil:hammer",
+        "rampId": "RAMP_RACE_DWARF",
+        "decalSlot": {
+          "x": 6,
+          "y": 3,
+          "angle": "A90"
+        },
+        "perRaceSilhouette": false
+      },
+      {
+        "itemId": "outfit_class_wizard",
+        "kind": "outfit",
+        "race": "elf",
+        "custom": true,
+        "silhouetteId": "custom:outfit_class_wizard__elf"
+      }
+    ]
+  },
+  "uiSkins": {
+    "playerSelectable": true,
+    "minCount": 11,
+    "sheet": [
+      192,
+      192
+    ],
+    "opacity": "opaque",
+    "layout": {
+      "background": [
+        0,
+        0,
+        96,
+        96
+      ],
+      "pattern": [
+        0,
+        96,
+        96,
+        96
+      ],
+      "frame": [
+        96,
+        0,
+        96,
+        96
+      ],
+      "cursor": [
+        96,
+        96,
+        48,
+        48
+      ],
+      "pause": [
+        144,
+        96,
+        48,
+        48
+      ],
+      "textColours": [
+        96,
+        144,
+        96,
+        48
+      ]
+    },
+    "frameSlice": 24,
+    "cursorSlice": 4,
+    "fonts": [
+      "font:deus",
+      "font:deus-dark"
+    ],
+    "fontRendering": "bitmap",
+    "buttons": [
+      "normal",
+      "hover",
+      "pressed"
+    ],
+    "cursors": [
+      "default",
+      "hover",
+      "disabled"
+    ],
+    "screens": [
+      "title",
+      "loading"
+    ],
+    "skins": [
+      {
+        "id": "deus",
+        "role": "signature",
+        "palette": "RAMP_UI_DEUS"
+      },
+      {
+        "id": "deus-dark",
+        "role": "variant",
+        "variantOf": "deus",
+        "palette": "RAMP_UI_DEUS_DARK"
+      },
+      {
+        "id": "race-human",
+        "role": "race",
+        "race": "human",
+        "palette": "RAMP_RACE_HUMAN",
+        "motif": "MOTIF_RACE_HUMAN"
+      },
+      {
+        "id": "race-elf",
+        "role": "race",
+        "race": "elf",
+        "palette": "RAMP_RACE_ELF",
+        "motif": "MOTIF_RACE_ELF"
+      },
+      {
+        "id": "race-halfling",
+        "role": "race",
+        "race": "halfling",
+        "palette": "RAMP_RACE_HALFLING",
+        "motif": "MOTIF_RACE_HALFLING"
+      },
+      {
+        "id": "race-dwarf",
+        "role": "race",
+        "race": "dwarf",
+        "palette": "RAMP_RACE_DWARF",
+        "motif": "MOTIF_RACE_DWARF"
+      },
+      {
+        "id": "race-gnome",
+        "role": "race",
+        "race": "gnome",
+        "palette": "RAMP_RACE_GNOME",
+        "motif": "MOTIF_RACE_GNOME"
+      },
+      {
+        "id": "race-dragonborn",
+        "role": "race",
+        "race": "dragonborn",
+        "palette": "RAMP_RACE_DRAGONBORN",
+        "motif": "MOTIF_RACE_DRAGONBORN"
+      },
+      {
+        "id": "race-half-elf",
+        "role": "race",
+        "race": "half-elf",
+        "palette": "RAMP_RACE_HALF_ELF",
+        "motif": "MOTIF_RACE_HALF_ELF"
+      },
+      {
+        "id": "race-half-orc",
+        "role": "race",
+        "race": "half-orc",
+        "palette": "RAMP_RACE_HALF_ORC",
+        "motif": "MOTIF_RACE_HALF_ORC"
+      },
+      {
+        "id": "race-tiefling",
+        "role": "race",
+        "race": "tiefling",
+        "palette": "RAMP_RACE_TIEFLING",
+        "motif": "MOTIF_RACE_TIEFLING"
+      }
+    ]
+  },
+  "religion": {
+    "deityList": "open",
+    "deities": [],
+    "pieces": [
+      "holy-symbol",
+      "altar",
+      "shrine",
+      "aura",
+      "spellbook",
+      "scroll"
+    ],
+    "aura": "drawn-frames",
+    "auraRamp": "RAMP_MAGIC_AURA",
+    "mundaneDistinct": true
+  },
+  "farming": {
+    "stages": [
+      "sown",
+      "growing",
+      "mature",
+      "harvested"
+    ],
+    "livestock": [
+      "young",
+      "adult"
+    ],
+    "pens": true,
+    "tamedVariants": true
+  },
+  "food": {
+    "states": [
+      "raw",
+      "cooked"
+    ],
+    "classes": [
+      "meal",
+      "ingredient"
+    ],
+    "displays": [
+      "table",
+      "stockpile"
+    ],
+    "icon": true
+  },
+  "dungeonKit": [
+    "cave-wall",
+    "mine-support",
+    "tunnel",
+    "underground-water",
+    "crystal",
+    "ruin"
+  ],
+  "traps": [
+    "pit",
+    "spikes",
+    "pressure-plate",
+    "door-locked",
+    "door-broken",
+    "poison-gas",
+    "web",
+    "quicksand"
+  ],
+  "loreVisuals": [
+    "historical-portrait",
+    "era-ruin",
+    "artifact",
+    "history-log"
+  ],
+  "eventScenes": {
+    "required": false,
+    "ids": [
+      "founding",
+      "coronation",
+      "disaster",
+      "war"
+    ]
+  },
+  "designations": [
+    "dig",
+    "build",
+    "stockpile",
+    "route",
+    "blueprint-ghost"
+  ],
+  "marketing": {
+    "required": false,
+    "pieces": [],
+    "later": [
+      "game-icon",
+      "store-banner",
+      "logo"
+    ]
+  },
+  "domestication": {
+    "outcomes": [
+      "pet",
+      "mount",
+      "livestock",
+      "work-animal",
+      "prisoner",
+      "recruit"
+    ],
+    "art": [
+      "tamed-variant",
+      "captured-bound-pose",
+      "cage",
+      "pen"
+    ],
+    "visualMarkers": [
+      "collar",
+      "saddle",
+      "harness"
+    ],
+    "visualMarkersHaveSlot": false,
+    "visualMarkersHaveStats": false,
+    "creatureEquipmentSlots": [],
+    "barding": false,
+    "craftedCreatureGear": false
+  },
+  "variety": {
+    "status": "PM decision 13:01 CT, Owner may amend",
+    "floors": {
+      "trees": 12,
+      "bushes": 4,
+      "harvestableBushes": 1,
+      "scatter": 6,
+      "rocks": 6,
+      "ore": 2,
+      "waterEdge": 3,
+      "landmarks": 2,
+      "caveFormations": 4,
+      "fungiOrCrystals": 2,
+      "undergroundOre": 1
+    },
+    "undergroundBands": [
+      "DEEP",
+      "CAVERN"
+    ],
+    "seasonRamps": [
+      "RAMP_SEASON_SPRING",
+      "RAMP_SEASON_SUMMER",
+      "RAMP_SEASON_AUTUMN",
+      "RAMP_SEASON_WINTER"
+    ],
+    "surface": {
+      "VOLCANIC": {
+        "trees": 12,
+        "treeSpecies": 4,
+        "treeVariants": [
+          "young",
+          "mature",
+          "old"
+        ],
+        "harvestStates": true,
+        "bushes": 4,
+        "harvestableBushes": 2,
+        "scatter": 6,
+        "rocks": 6,
+        "rockSizes": 3,
+        "rockVariants": 2,
+        "ore": 2,
+        "waterEdge": 3,
+        "landmarks": 2,
+        "seasons": "palette-swap",
+        "directionalLighting": true,
+        "flip": false
+      },
+      "WET": {
+        "trees": 12,
+        "treeSpecies": 4,
+        "treeVariants": [
+          "young",
+          "mature",
+          "old"
+        ],
+        "harvestStates": true,
+        "bushes": 4,
+        "harvestableBushes": 2,
+        "scatter": 6,
+        "rocks": 6,
+        "rockSizes": 3,
+        "rockVariants": 2,
+        "ore": 2,
+        "waterEdge": 3,
+        "landmarks": 2,
+        "seasons": "palette-swap",
+        "directionalLighting": true,
+        "flip": false
+      },
+      "ARID": {
+        "trees": 12,
+        "treeSpecies": 4,
+        "treeVariants": [
+          "young",
+          "mature",
+          "old"
+        ],
+        "harvestStates": true,
+        "bushes": 4,
+        "harvestableBushes": 2,
+        "scatter": 6,
+        "rocks": 6,
+        "rockSizes": 3,
+        "rockVariants": 2,
+        "ore": 2,
+        "waterEdge": 3,
+        "landmarks": 2,
+        "seasons": "palette-swap",
+        "directionalLighting": true,
+        "flip": false
+      },
+      "TEMPERATE": {
+        "trees": 12,
+        "treeSpecies": 4,
+        "treeVariants": [
+          "young",
+          "mature",
+          "old"
+        ],
+        "harvestStates": true,
+        "bushes": 4,
+        "harvestableBushes": 2,
+        "scatter": 6,
+        "rocks": 6,
+        "rockSizes": 3,
+        "rockVariants": 2,
+        "ore": 2,
+        "waterEdge": 3,
+        "landmarks": 2,
+        "seasons": "palette-swap",
+        "directionalLighting": true,
+        "flip": false
+      },
+      "COLD": {
+        "trees": 12,
+        "treeSpecies": 4,
+        "treeVariants": [
+          "young",
+          "mature",
+          "old"
+        ],
+        "harvestStates": true,
+        "bushes": 4,
+        "harvestableBushes": 2,
+        "scatter": 6,
+        "rocks": 6,
+        "rockSizes": 3,
+        "rockVariants": 2,
+        "ore": 2,
+        "waterEdge": 3,
+        "landmarks": 2,
+        "seasons": "palette-swap",
+        "directionalLighting": true,
+        "flip": false
+      },
+      "WILD": {
+        "trees": 12,
+        "treeSpecies": 4,
+        "treeVariants": [
+          "young",
+          "mature",
+          "old"
+        ],
+        "harvestStates": true,
+        "bushes": 4,
+        "harvestableBushes": 2,
+        "scatter": 6,
+        "rocks": 6,
+        "rockSizes": 3,
+        "rockVariants": 2,
+        "ore": 2,
+        "waterEdge": 3,
+        "landmarks": 2,
+        "seasons": "palette-swap",
+        "directionalLighting": true,
+        "flip": false
+      }
+    },
+    "underground": {
+      "DEEP": {
+        "caveFormations": 4,
+        "fungiOrCrystals": 2,
+        "ore": 1
+      },
+      "CAVERN": {
+        "caveFormations": 4,
+        "fungiOrCrystals": 2,
+        "ore": 2
+      }
+    }
+  },
+  "portraitPolicy": {
+    "cell": [
+      144,
+      144
+    ],
+    "iconCell": [
+      32,
+      32
+    ],
+    "categories": [
+      "item",
+      "creature",
+      "resource",
+      "building",
+      "workstation",
+      "spell"
+    ],
+    "background": "per-category",
+    "raceStyledBackground": "per-race",
+    "rarity": "overlay",
+    "filePattern": "UF_Portrait_<id>[__<race>].png"
+  },
+  "portraitSample": {
+    "category": "item",
+    "raceNeutral": true,
+    "icon": {
+      "w": 32,
+      "h": 32,
+      "rarity": "overlay",
+      "file": "icon:item:armor_plate"
+    },
+    "portrait": {
+      "w": 144,
+      "h": 144,
+      "background": "per-race",
+      "rarity": "overlay",
+      "file": "UF_Portrait_armor_plate__human.png"
+    },
+    "portraitsByRace": {
+      "human": {
+        "w": 144,
+        "h": 144,
+        "background": "race:human",
+        "rarity": "overlay"
+      },
+      "elf": {
+        "w": 144,
+        "h": 144,
+        "background": "race:elf",
+        "rarity": "overlay"
+      },
+      "halfling": {
+        "w": 144,
+        "h": 144,
+        "background": "race:halfling",
+        "rarity": "overlay"
+      },
+      "dwarf": {
+        "w": 144,
+        "h": 144,
+        "background": "race:dwarf",
+        "rarity": "overlay"
+      },
+      "gnome": {
+        "w": 144,
+        "h": 144,
+        "background": "race:gnome",
+        "rarity": "overlay"
+      },
+      "dragonborn": {
+        "w": 144,
+        "h": 144,
+        "background": "race:dragonborn",
+        "rarity": "overlay"
+      },
+      "half-elf": {
+        "w": 144,
+        "h": 144,
+        "background": "race:half-elf",
+        "rarity": "overlay"
+      },
+      "half-orc": {
+        "w": 144,
+        "h": 144,
+        "background": "race:half-orc",
+        "rarity": "overlay"
+      },
+      "tiefling": {
+        "w": 144,
+        "h": 144,
+        "background": "race:tiefling",
+        "rarity": "overlay"
+      }
+    }
+  },
+  "slotTemplates": {
+    "charset": {
+      "w": 576,
+      "h": 384,
+      "cell": [
+        48,
+        48
+      ],
+      "cols": 12,
+      "rows": 8,
+      "anchor": {
+        "x": 24,
+        "y": 45
+      }
+    },
+    "faces": {
+      "w": 576,
+      "h": 288,
+      "cell": [
+        144,
+        144
+      ],
+      "cols": 4,
+      "rows": 2,
+      "anchor": "faceAnchors"
+    },
+    "tileset-b-e": {
+      "w": 768,
+      "h": 768,
+      "cell": [
+        48,
+        48
+      ],
+      "cols": 16,
+      "rows": 16,
+      "anchor": {
+        "x": 24,
+        "y": 24
+      }
+    },
+    "action-row": {
+      "frames": 4,
+      "directions": 4,
+      "cell": 48
+    }
+  },
+  "runtimeAtlas": {
+    "size": 2048,
+    "squares": [
+      42,
+      42
+    ],
+    "cell": 48,
+    "contentPx": 2016,
+    "paddingPx": [
+      1,
+      2
+    ],
+    "gridSnapped": true,
+    "terrainSizeIfBenchmarked": 4096,
+    "lookupFile": "game/data/UF_AtlasLookup.json",
+    "lookupFields": [
+      "atlasId",
+      "x",
+      "y",
+      "w",
+      "h",
+      "catalogueId",
+      "sheetId",
+      "col",
+      "row"
+    ]
+  },
+  "sheetSample": {
+    "template": "charset",
+    "w": 576,
+    "h": 384
+  },
+  "actionRowSample": {
+    "template": "action-row",
+    "footprint": [
+      1,
+      1
+    ],
+    "w": 192,
+    "h": 192,
+    "scaled": false
+  },
+  "pipeline": {
+    "noScaling": true,
+    "reject": [
+      "off-size",
+      "off-palette",
+      "off-anchor"
+    ],
+    "crop": "transparent-margins-only",
+    "missingFrom": "empty-slots",
+    "multiSlot": {
+      "target": "strip-or-region",
+      "perSlotValidation": true,
+      "exactSize": true,
+      "scaling": false
+    },
+    "manifestFields": [
+      "catalogueId",
+      "gridSquares",
+      "frameCount",
+      "anchor",
+      "templateId",
+      "paletteRamp",
+      "layerRole"
+    ],
+    "slotMapFields": [
+      "sheetId",
+      "col",
+      "row",
+      "catalogueId",
+      "facing",
+      "frameIndex",
+      "anchor",
+      "pixelSize"
+    ]
+  },
+  "pipelineSample": {
+    "scaled": false,
+    "resized": false,
+    "offSize": false,
+    "offPalette": false,
+    "offAnchor": false,
+    "accepted": true,
+    "crop": "transparent-margins-only",
+    "missingFrom": "empty-slots"
+  },
+  "promptSpecTemplates": {
+    "policy": "field-list-only",
+    "prosePrompt": null,
+    "categories": {
+      "humanoid-layer": {
+        "fields": {
+          "pixelSize": "slot-map",
+          "frameGrid": "template",
+          "facing": "slot-map",
+          "poseFrameIndex": "slot-map",
+          "anchor": "slot-map",
+          "paletteRampHex": "palette-ramp",
+          "outlineRules": "rule:AS-GLOBAL-006",
+          "shadingRules": "rule:AS-GLOBAL-005",
+          "lightDirection": "rule:AS-GLOBAL-005",
+          "layerRole": "slot-map",
+          "catalogueId": "slot-map",
+          "referenceImages": "golden-library",
+          "negativeConstraints": "rejection-notes"
+        }
+      },
+      "face-layer": {
+        "fields": {
+          "pixelSize": "slot-map",
+          "frameGrid": "template",
+          "facing": "slot-map",
+          "poseFrameIndex": "slot-map",
+          "anchor": "slot-map",
+          "paletteRampHex": "palette-ramp",
+          "outlineRules": "rule:AS-GLOBAL-006",
+          "shadingRules": "rule:AS-GLOBAL-005",
+          "lightDirection": "rule:AS-GLOBAL-005",
+          "layerRole": "slot-map",
+          "catalogueId": "slot-map",
+          "referenceImages": "golden-library",
+          "negativeConstraints": "rejection-notes"
+        }
+      },
+      "creature": {
+        "fields": {
+          "pixelSize": "slot-map",
+          "frameGrid": "template",
+          "facing": "slot-map",
+          "poseFrameIndex": "slot-map",
+          "anchor": "slot-map",
+          "paletteRampHex": "palette-ramp",
+          "outlineRules": "rule:AS-GLOBAL-006",
+          "shadingRules": "rule:AS-GLOBAL-005",
+          "lightDirection": "rule:AS-GLOBAL-005",
+          "layerRole": "slot-map",
+          "catalogueId": "slot-map",
+          "referenceImages": "golden-library",
+          "negativeConstraints": "rejection-notes"
+        }
+      },
+      "terrain-tile": {
+        "fields": {
+          "pixelSize": "slot-map",
+          "frameGrid": "template",
+          "facing": "slot-map",
+          "poseFrameIndex": "slot-map",
+          "anchor": "slot-map",
+          "paletteRampHex": "palette-ramp",
+          "outlineRules": "rule:AS-GLOBAL-006",
+          "shadingRules": "rule:AS-GLOBAL-005",
+          "lightDirection": "rule:AS-GLOBAL-005",
+          "layerRole": "slot-map",
+          "catalogueId": "slot-map",
+          "referenceImages": "golden-library",
+          "negativeConstraints": "rejection-notes"
+        }
+      },
+      "building-piece": {
+        "fields": {
+          "pixelSize": "slot-map",
+          "frameGrid": "template",
+          "facing": "slot-map",
+          "poseFrameIndex": "slot-map",
+          "anchor": "slot-map",
+          "paletteRampHex": "palette-ramp",
+          "outlineRules": "rule:AS-GLOBAL-006",
+          "shadingRules": "rule:AS-GLOBAL-005",
+          "lightDirection": "rule:AS-GLOBAL-005",
+          "layerRole": "slot-map",
+          "catalogueId": "slot-map",
+          "referenceImages": "golden-library",
+          "negativeConstraints": "rejection-notes"
+        }
+      },
+      "item-icon": {
+        "fields": {
+          "pixelSize": "slot-map",
+          "frameGrid": "template",
+          "facing": "slot-map",
+          "poseFrameIndex": "slot-map",
+          "anchor": "slot-map",
+          "paletteRampHex": "palette-ramp",
+          "outlineRules": "rule:AS-GLOBAL-006",
+          "shadingRules": "rule:AS-GLOBAL-005",
+          "lightDirection": "rule:AS-GLOBAL-005",
+          "layerRole": "slot-map",
+          "catalogueId": "slot-map",
+          "referenceImages": "golden-library",
+          "negativeConstraints": "rejection-notes"
+        }
+      },
+      "portrait": {
+        "fields": {
+          "pixelSize": "slot-map",
+          "frameGrid": "template",
+          "facing": "slot-map",
+          "poseFrameIndex": "slot-map",
+          "anchor": "slot-map",
+          "paletteRampHex": "palette-ramp",
+          "outlineRules": "rule:AS-GLOBAL-006",
+          "shadingRules": "rule:AS-GLOBAL-005",
+          "lightDirection": "rule:AS-GLOBAL-005",
+          "layerRole": "slot-map",
+          "catalogueId": "slot-map",
+          "referenceImages": "golden-library",
+          "negativeConstraints": "rejection-notes"
+        }
+      },
+      "effect": {
+        "fields": {
+          "pixelSize": "slot-map",
+          "frameGrid": "template",
+          "facing": "slot-map",
+          "poseFrameIndex": "slot-map",
+          "anchor": "slot-map",
+          "paletteRampHex": "palette-ramp",
+          "outlineRules": "rule:AS-GLOBAL-006",
+          "shadingRules": "rule:AS-GLOBAL-005",
+          "lightDirection": "rule:AS-GLOBAL-005",
+          "layerRole": "slot-map",
+          "catalogueId": "slot-map",
+          "referenceImages": "golden-library",
+          "negativeConstraints": "rejection-notes"
+        }
+      },
+      "ui": {
+        "fields": {
+          "pixelSize": "slot-map",
+          "frameGrid": "template",
+          "facing": "slot-map",
+          "poseFrameIndex": "slot-map",
+          "anchor": "slot-map",
+          "paletteRampHex": "palette-ramp",
+          "outlineRules": "rule:AS-GLOBAL-006",
+          "shadingRules": "rule:AS-GLOBAL-005",
+          "lightDirection": "rule:AS-GLOBAL-005",
+          "layerRole": "slot-map",
+          "catalogueId": "slot-map",
+          "referenceImages": "golden-library",
+          "negativeConstraints": "rejection-notes"
+        }
+      }
+    }
+  },
+  "generationLog": {
+    "requiredFields": [
+      "slotId",
+      "promptSpecId",
+      "promptTemplateVersion",
+      "generator",
+      "generatorVersion",
+      "model",
+      "seed",
+      "settings",
+      "references",
+      "outcome",
+      "reasons"
+    ],
+    "outcomes": [
+      "pass",
+      "fail"
+    ],
+    "reasonCodes": [
+      "size",
+      "palette",
+      "anchor",
+      "outline",
+      "style"
+    ]
+  },
+  "generationLogSample": {
+    "slotId": "slot:sample:0",
+    "promptSpecId": "prompt-spec:sample",
+    "promptTemplateVersion": "1",
+    "generator": "unassigned",
+    "generatorVersion": "0",
+    "model": "unspecified",
+    "seed": 1,
+    "settings": {
+      "exactSize": true
+    },
+    "references": [],
+    "outcome": "pass",
+    "reasons": []
+  },
+  "yieldMetrics": {
+    "dimensions": [
+      "generator",
+      "category",
+      "template"
+    ],
+    "measures": [
+      "firstPassAcceptance",
+      "usableSlotsPerGeneration",
+      "regenerationsPerSlot",
+      "yieldPerCost",
+      "costPerUsableSlot",
+      "timePerUsableSlot"
+    ],
+    "trend": "over-time"
+  },
+  "yieldSample": {
+    "generator": "unassigned",
+    "category": "creature",
+    "template": "creature",
+    "firstPassAcceptance": 0,
+    "usableSlotsPerGeneration": 0,
+    "regenerationsPerSlot": 0,
+    "yieldPerCost": 0,
+    "costPerUsableSlot": 0,
+    "timePerUsableSlot": 0
+  },
+  "promptTemplateVersions": {
+    "promotion": "ab-beats-current",
+    "sharedSpec": true
+  },
+  "promptVersionSample": {
+    "id": "creature",
+    "version": "1",
+    "status": "promoted",
+    "abYieldBeatsCurrent": true
+  },
+  "generators": {
+    "status": "unassigned",
+    "fields": [
+      "id",
+      "version"
+    ],
+    "entries": []
+  },
+  "generatorAdapters": {
+    "from": "shared-prompt-spec",
+    "perGenerator": true,
+    "adapters": []
+  },
+  "routingPolicy": {
+    "objective": "best-yield-per-cost",
+    "rebenchmark": "periodic",
+    "testSet": "goldenTestSet",
+    "assignments": []
+  },
+  "goldenTestSet": {
+    "fixed": true,
+    "checks": [
+      "palette",
+      "outline",
+      "anchor",
+      "style"
+    ],
+    "ids": []
+  },
+  "styleTune": {
+    "status": "optional-later",
+    "requiresOwnerDecision": true
   },
   "categories": {
     "critter": {
@@ -5255,11 +12836,37 @@
         "parry",
         "death",
         "sneak",
-        "climb"
+        "climb",
+        "prone",
+        "unconscious",
+        "sleep",
+        "sit"
       ],
       "outfits": 135,
       "faces": true,
-      "sv": true
+      "sv": true,
+      "poses": {
+        "prone": {
+          "kind": "condition",
+          "id": "prone"
+        },
+        "unconscious": {
+          "kind": "condition",
+          "id": "unconscious"
+        },
+        "sleep": {
+          "kind": "activity"
+        },
+        "sit": {
+          "kind": "activity"
+        },
+        "sneak": {
+          "kind": "activity"
+        },
+        "climb": {
+          "kind": "activity"
+        }
+      }
     },
     "biome": {
       "biomes": [
@@ -5373,7 +12980,8 @@
         "halfling_homestead",
         "dragonborn_citadel",
         "goblin_salvage"
-      ]
+      ],
+      "skins": 11
     },
     "summon": {
       "count": 29
@@ -5395,6 +13003,23 @@
     },
     "map": {
       "banners": 6
+    },
+    "portrait": {
+      "cell": [
+        144,
+        144
+      ],
+      "withIcon": true
+    },
+    "variety": {
+      "biomes": 6,
+      "undergroundBands": [
+        "DEEP",
+        "CAVERN"
+      ]
+    },
+    "pipeline": {
+      "scaling": false
     }
   }
 }

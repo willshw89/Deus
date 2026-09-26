@@ -60,6 +60,12 @@
     "dynamicLight": { "mode": "off", "allowedModes": ["off", "per-pixel", "per-tile"], "blur": false }
   },
   "name": { "category": "EQUIPMENT", "runtimeFile": "img/characters/$UF_Layer_longsword__human.png" },
+  "mirror": {
+    "symmetric": true,
+    "directionalLighting": false,
+    "mirrorBake": "offline-w-to-e",
+    "frames": [{ "mirrored": true }]
+  },
   "miniCatalogue": {
     "entries": [
       {

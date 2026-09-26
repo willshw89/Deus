@@ -9,6 +9,7 @@
  *
  *   node tools/art/validate_asset_standard.js [--json] [--category CAT] [--strict]
  *        [--catalogue path] [--standard path] [--spell-schema path] [--spells path]
+ *        [--biome-registry path]   (repeatable; default is the two DEUS biome registries, read only)
  *
  * Default exit is 0 when the files parse. --strict exits 1 when any rule result is a violation.
  * Exit 2 is a usage or read error.
@@ -27,6 +28,8 @@ const FACE_FILE_RE = /^UF_Faces_[a-z0-9-]+_\d+\.png$/;
 const RACE_WORDS = ['elven', 'dwarven', 'orcish', 'gnomish'];
 const DIR_CATS = { CHARACTER: 1, CREATURE: 1, EQUIPMENT: 1 };
 const FRAME_CATS = { CHARACTER: 1, CREATURE: 1, EQUIPMENT: 1 };
+const PORTRAIT_CATS = { ITEM: 1, EQUIPMENT: 1, CREATURE: 1, TREE: 1, VEIN: 1, FLORA: 1, STONE: 1, STRUCTURE: 1, FURNITURE: 1, WORKSHOP: 1 };
+const PORTRAIT_FILE_RE = /^UF_Portrait_[a-z0-9_]+(?:__[a-z]+(?:-[a-z]+)*)?\.png$/;
 
 function readJson(file) {
     const text = fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '');
@@ -198,7 +201,30 @@ function checkEntry(entry, standard) {
     if (Object.prototype.hasOwnProperty.call(entry, 'animation') || Object.prototype.hasOwnProperty.call(entry, 'exception')) {
         out.push(animationResult(entry, standard));
     }
+    if (PORTRAIT_CATS[entry.category]) {
+        if (entry.icon || entry.portrait) out.push.apply(out, checkPortrait(entry, standard));
+        else out.push(result('AS-PORT-001', 'unknown', 'icon and portrait are not on the catalogue entry'));
+    }
+    if (entry.category === 'CREATURE' || entry.category === 'CHARACTER') out.push(sizeResult(entry, standard));
     return { id: id || '', category: entry.category || '', results: out };
+}
+
+function sizeResult(entry, standard) {
+    const size = entry.sizeClass;
+    if (!size) return result('AS-SIZE-001', 'unknown', 'size class is not on the entry');
+    let shape = entry.bodyShape;
+    if (!shape) {
+        if (size === 'Tiny' || size === 'Small' || size === 'Medium') shape = 'square';
+        else return result('AS-SIZE-001', 'unknown', 'body shape is not declared');
+    }
+    const row = (standard.sizeFrames || []).find(r => r.size === size && r.shape === shape);
+    if (!row) return result('AS-SIZE-001', 'violate', size + ' ' + shape + ' has no frame');
+    const actual = frameOf(entry);
+    if (!actual) return result('AS-SIZE-001', 'unknown', 'frame size cannot be derived');
+    if (actual[0] !== row.px[0] || actual[1] !== row.px[1]) {
+        return result('AS-SIZE-001', 'violate', 'frame ' + actual.join('x') + ' is not ' + row.px.join('x') + ' for ' + size + ' ' + shape);
+    }
+    return result('AS-SIZE-001', 'pass', row.squares[0] + 'x' + row.squares[1]);
 }
 
 function animationResult(asset, standard) {
@@ -413,6 +439,9 @@ function checkMatrix(matrix, standard) {
         if (row.fallbackArtKey !== row.outfitId + '__human') {
             return [result('AS-HUM-015', 'violate', 'fallback is not __human')];
         }
+        if (row.pixels !== 'custom-per-race') {
+            return [result('AS-HUM-015', 'violate', row.artKey + ' pixels are not custom per race')];
+        }
     }
     return [result('AS-HUM-015', 'pass', expect + ' outfit variants')];
 }
@@ -530,6 +559,446 @@ function summarize(perEntry, globals) {
     return { totals, byCategory, rules, globals: globals || [], globalViolations: globalViolations.length };
 }
 
+function checkSkins(ui, standard) {
+    if (!ui || ui.playerSelectable !== true || ui.opacity !== 'opaque' || !ui.sheet) {
+        return [result('AS-UI-004', 'violate', 'skins are not player-selectable opaque sheets')];
+    }
+    const skins = ui.skins || [];
+    if (skins.length < (ui.minCount || 11)) return [result('AS-UI-004', 'violate', 'skin count ' + skins.length)];
+    const ids = skins.map(sk => sk.id);
+    if (ids.indexOf('deus') === -1 || ids.indexOf('deus-dark') === -1) {
+        return [result('AS-UI-004', 'violate', 'Deus or Deus Dark is missing')];
+    }
+    for (const race of standard.races) {
+        if (ids.indexOf('race-' + race) === -1) return [result('AS-UI-004', 'violate', 'missing race skin ' + race)];
+    }
+    const layout = ui.layout || {};
+    const regions = ['background', 'pattern', 'frame', 'cursor', 'pause', 'textColours'];
+    for (const name of regions) {
+        if (!Array.isArray(layout[name]) || layout[name].length !== 4) return [result('AS-UI-004', 'violate', 'layout ' + name)];
+    }
+    if (ui.sheet[0] !== 192 || ui.sheet[1] !== 192) return [result('AS-UI-004', 'violate', 'window sheet is not 192 by 192')];
+    const fonts = ui.fonts || [];
+    const buttons = ui.buttons || [];
+    const screens = ui.screens || [];
+    if (fonts.length < 2 || buttons.length < 3 || screens.indexOf('title') === -1 || screens.indexOf('loading') === -1) {
+        return [result('AS-UI-004', 'violate', 'fonts, buttons or screens')];
+    }
+    return [result('AS-UI-004', 'pass', skins.length + ' skins')];
+}
+
+function checkReligion(rel) {
+    const need = ['holy-symbol', 'altar', 'shrine', 'aura', 'spellbook', 'scroll'];
+    if (!rel || !sameSet(rel.pieces, need) || rel.aura !== 'drawn-frames' || rel.mundaneDistinct !== true) {
+        return [result('AS-REL-001', 'violate', 'religion pieces or aura')];
+    }
+    for (const deity of rel.deities || []) {
+        if (!deity.holySymbolId) return [result('AS-REL-001', 'violate', 'deity ' + (deity.id || '') + ' has no holy symbol')];
+    }
+    return [result('AS-REL-001', 'pass', 'religion pieces')];
+}
+
+function checkFarm(farm) {
+    if (!farm || !sameSet(farm.stages, ['sown', 'growing', 'mature', 'harvested']) || !sameSet(farm.livestock, ['young', 'adult']) || farm.pens !== true || farm.tamedVariants !== true) {
+        return [result('AS-FARM-001', 'violate', 'farming set')];
+    }
+    return [result('AS-FARM-001', 'pass', 'farming')];
+}
+
+function checkFood(food) {
+    if (!food || !sameSet(food.states, ['raw', 'cooked']) || !sameSet(food.classes, ['meal', 'ingredient']) || !sameSet(food.displays, ['table', 'stockpile']) || food.icon !== true) {
+        return [result('AS-FOOD-001', 'violate', 'food set')];
+    }
+    return [result('AS-FOOD-001', 'pass', 'food')];
+}
+
+function checkClosed(ruleId, have, need, label) {
+    if (!sameSet(have, need)) return [result(ruleId, 'violate', label)];
+    return [result(ruleId, 'pass', label)];
+}
+
+function checkScenes(scenes) {
+    if (!scenes || scenes.required !== false || !sameSet(scenes.ids, ['founding', 'coronation', 'disaster', 'war'])) {
+        return [result('AS-SCENE-001', 'violate', 'event scenes are a required set or the ids changed')];
+    }
+    return [result('AS-SCENE-001', 'pass', 'optional event scenes')];
+}
+
+function checkMarketing(marketing) {
+    if (!marketing || marketing.required !== false || (marketing.pieces && marketing.pieces.length)) {
+        return [result('AS-MKTG-001', 'violate', 'marketing is a required set')];
+    }
+    return [result('AS-MKTG-001', 'pass', 'marketing is later')];
+}
+
+function checkTame(rec) {
+    const out = [];
+    const artOk = rec && sameSet(rec.art, ['tamed-variant', 'captured-bound-pose', 'cage', 'pen'])
+        && sameSet(rec.outcomes, ['pet', 'mount', 'livestock', 'work-animal', 'prisoner', 'recruit'])
+        && sameSet(rec.visualMarkers, ['collar', 'saddle', 'harness']);
+    out.push(result('AS-TAME-001', artOk ? 'pass' : 'violate', artOk ? 'tamed, bound, cage, pen' : 'domestication art set'));
+    const slots = rec && rec.creatureEquipmentSlots;
+    const gearOk = rec && (!slots || slots.length === 0) && rec.barding === false && rec.craftedCreatureGear === false
+        && rec.visualMarkersHaveSlot === false && rec.visualMarkersHaveStats === false;
+    out.push(result('AS-TAME-002', gearOk ? 'pass' : 'violate', gearOk ? 'no creature equipment' : 'creature equipment slot, barding or gear stats'));
+    return out;
+}
+
+function checkVariety(variety, standard) {
+    const out = [];
+    if (!variety || !variety.surface || !variety.floors || !variety.underground) {
+        return [result('AS-VAR-001', 'violate', 'variety block'), result('AS-VAR-002', 'violate', 'variety block')];
+    }
+    const floors = variety.floors;
+    let countBad = '';
+    let seasonBad = '';
+    for (const biome of standard.biomes) {
+        const row = variety.surface[biome];
+        if (!row || row.trees < floors.trees || row.bushes < floors.bushes || row.harvestableBushes < floors.harvestableBushes
+            || row.scatter < floors.scatter || row.rocks < floors.rocks || row.ore < floors.ore
+            || row.waterEdge < floors.waterEdge || row.landmarks < floors.landmarks || row.harvestStates !== true) {
+            countBad = biome;
+            break;
+        }
+        if (row.seasons !== 'palette-swap') seasonBad = biome + ' seasons';
+        else if (row.flip && row.directionalLighting) seasonBad = biome + ' flips a lit piece';
+    }
+    const bands = variety.undergroundBands || [];
+    if (!countBad) {
+        for (const band of bands) {
+            const row = variety.underground[band];
+            if (!row || row.caveFormations < floors.caveFormations || row.fungiOrCrystals < floors.fungiOrCrystals || row.ore < floors.undergroundOre) {
+                countBad = band;
+                break;
+            }
+        }
+    }
+    out.push(result('AS-VAR-001', countBad ? 'violate' : 'pass', countBad ? countBad + ' is under the floor' : 'variety floors'));
+    out.push(result('AS-VAR-002', seasonBad ? 'violate' : 'pass', seasonBad || 'palette-swap seasons'));
+    return out;
+}
+
+function checkGenes(genes, standard) {
+    if (!genes || !genes.inheritance || genes.inheritance.owner !== 'sim' || genes.inheritance.ageLayersPreserveIdentity !== true) {
+        return [result('AS-GENE-001', 'violate', 'inheritance is not the sim, or age layers do not keep identity')];
+    }
+    if (!genes.hairNaturalSteps || genes.hairNaturalSteps.length !== 12 || !genes.greying || genes.greying.length !== 4 || !genes.balding || genes.balding.length !== 3) {
+        return [result('AS-GENE-001', 'violate', 'hair ramp, greying or balding count')];
+    }
+    if (genes.faceShape.length !== 4 || genes.eyes.length !== 5 || genes.brows.length !== 4 || genes.nose.length !== 5
+        || genes.mouth.length !== 4 || genes.jaw.length !== 3 || genes.markings.length !== 4) {
+        return [result('AS-GENE-001', 'violate', 'face-gene counts')];
+    }
+    for (const race of standard.races) {
+        const block = genes.perRace && genes.perRace[race];
+        if (!block || !block.ears || block.ears.length !== 3) return [result('AS-GENE-001', 'violate', race + ' ears')];
+        const features = block.raceFeatures ? block.raceFeatures.length : 0;
+        if (features < 3 || features > 4) return [result('AS-GENE-001', 'violate', race + ' race features')];
+        const skip = (genes.beardlessRaces || []).indexOf(race) !== -1;
+        const bodies = block.bodyTypes || {};
+        for (const bodyType of ['male', 'female']) {
+            const body = bodies[bodyType];
+            if (!body || !body.styles || body.styles.length !== 12) return [result('AS-GENE-001', 'violate', race + ' ' + bodyType + ' hair styles')];
+            const distinctive = body.styles.filter(style => style.raceDistinctive).length;
+            if (distinctive < 3 || distinctive > 4) return [result('AS-GENE-001', 'violate', race + ' ' + bodyType + ' distinctive hair')];
+            const facial = body.facialHair || [];
+            if (skip) {
+                if (facial.length !== 0) return [result('AS-GENE-001', 'violate', race + ' should skip facial hair')];
+            } else if (race === 'dwarf') {
+                const base = genes.facialHair.every(name => facial.indexOf(name) !== -1);
+                const extra = (genes.dwarfExtra || []).every(name => facial.indexOf(name) !== -1);
+                if (!base || !extra || !(genes.dwarfExtra || []).length) return [result('AS-GENE-001', 'violate', 'dwarf facial hair')];
+            } else if (!sameSet(facial, genes.facialHair)) {
+                return [result('AS-GENE-001', 'violate', race + ' facial hair')];
+            }
+        }
+    }
+    return [result('AS-GENE-001', 'pass', 'gene counts')];
+}
+
+function checkPortrait(entity, standard) {
+    const out = [];
+    const icon = entity && entity.icon;
+    const portrait = entity && entity.portrait;
+    let ok = !!(icon && icon.w === 32 && icon.h === 32 && icon.rarity !== 'redraw'
+        && portrait && portrait.w === 144 && portrait.h === 144 && portrait.background && portrait.rarity !== 'redraw');
+    if (ok && entity.raceNeutral) {
+        const byRace = entity.portraitsByRace || {};
+        ok = standard.races.every(race => byRace[race] && byRace[race].w === 144 && byRace[race].h === 144 && byRace[race].rarity !== 'redraw');
+    }
+    out.push(result('AS-PORT-001', ok ? 'pass' : 'violate', ok ? 'icon and portrait' : 'icon and portrait are both required'));
+    const file = portrait && portrait.file;
+    if (file) {
+        const base = path.basename(String(file));
+        if (PORTRAIT_FILE_RE.test(base)) out.push(result('AS-STYLE-001', 'pass', base));
+        else out.push(result('AS-STYLE-001', 'violate', base + ' is not a portrait file name'));
+    }
+    return out;
+}
+
+function checkHeadLayer(layer) {
+    const frames = (layer && layer.frames) || [];
+    const dirs = ['S', 'W', 'E', 'N'];
+    const seen = {};
+    let bad = frames.length === 12 ? '' : 'frame count ' + frames.length;
+    for (const frame of frames) {
+        const key = frame && (frame.dir + ':' + frame.headState);
+        if (!frame || dirs.indexOf(frame.dir) === -1 || [0, 1, 2].indexOf(frame.headState) === -1) bad = bad || 'frame dir or head state';
+        else if (seen[key]) bad = bad || 'duplicate ' + key;
+        else if (!frame.anchor || !Number.isInteger(frame.anchor.x) || !Number.isInteger(frame.anchor.y)) bad = bad || 'anchor';
+        else seen[key] = true;
+    }
+    if (!bad) {
+        for (const dir of dirs) {
+            for (const state of [0, 1, 2]) {
+                if (!seen[dir + ':' + state]) bad = 'missing ' + dir + ':' + state;
+            }
+        }
+    }
+    const extras = (layer && layer.extras) || [];
+    if (layer && !layer.longHair && extras.length) bad = bad || 'extras on a short-hair grid';
+    for (const extra of extras) {
+        if (!extra || (extra.pose !== 'death' && extra.pose !== 'dodge')) bad = bad || 'extra pose ' + (extra && extra.pose);
+    }
+    if (bad) return [result('AS-HEAD-001', 'violate', bad)];
+    return [result('AS-HEAD-001', 'pass', '12 head frames')];
+}
+
+function expectedBodyFrames(standard) {
+    let n = 0;
+    for (const pose of standard.poseGrid) n += pose.frames * standard.directions.length;
+    return n;
+}
+
+function checkBodyAnchors(frames, standard) {
+    const expect = expectedBodyFrames(standard);
+    if (!Array.isArray(frames) || frames.length !== expect) {
+        return [result('AS-HEAD-001', 'violate', 'body frames ' + (frames ? frames.length : 0) + ' is not ' + expect)];
+    }
+    for (let i = 0; i < frames.length; i++) {
+        const frame = frames[i];
+        const anchor = frame && frame.headAnchor;
+        if (!Array.isArray(anchor) || anchor.length !== 2 || !Number.isInteger(anchor[0]) || !Number.isInteger(anchor[1])) {
+            return [result('AS-HEAD-001', 'violate', 'frame ' + i + ' has no head anchor')];
+        }
+        if ([0, 1, 2].indexOf(frame.headState) === -1) return [result('AS-HEAD-001', 'violate', 'frame ' + i + ' head state')];
+    }
+    return [result('AS-HEAD-001', 'pass', expect + ' head anchors')];
+}
+
+function checkElder(rec, standard) {
+    if (!rec || rec.body !== 'redraw-stooped' || rec.garbSheet !== 'adult' || rec.gearSheet !== 'adult' || rec.hairSheet !== 'adult') {
+        return [result('AS-ELDER-001', 'violate', 'elder garb, gear or hair is not the adult sheet')];
+    }
+    const frames = rec.frames || [];
+    const expect = expectedBodyFrames(standard);
+    if (rec.frameCount !== expect || frames.length !== expect) {
+        return [result('AS-ELDER-001', 'violate', 'offset table ' + frames.length + ' is not ' + expect)];
+    }
+    const seen = new Set();
+    for (const frame of frames) {
+        if (!Array.isArray(frame.torso) || frame.torso.length !== 2 || !Array.isArray(frame.head) || frame.head.length !== 2) {
+            return [result('AS-ELDER-001', 'violate', 'frame ' + frame.frame + ' offset')];
+        }
+        if (seen.has(frame.frame)) return [result('AS-ELDER-001', 'violate', 'duplicate offset ' + frame.frame)];
+        seen.add(frame.frame);
+    }
+    for (let i = 0; i < expect; i++) {
+        if (!seen.has(i)) return [result('AS-ELDER-001', 'violate', 'missing offset ' + i)];
+    }
+    return [result('AS-ELDER-001', 'pass', 'adult layers on elder offsets')];
+}
+
+function checkGear(rows) {
+    if (!Array.isArray(rows) || !rows.length) return [result('AS-GEAR-001', 'violate', 'no gear rows')];
+    const silhouettes = {};
+    for (const row of rows) {
+        if (row.kind === 'outfit') {
+            if (row.custom !== true) return [result('AS-GEAR-001', 'violate', row.itemId + ' outfit is not custom per race')];
+            continue;
+        }
+        if (['weapon', 'tool', 'accessory'].indexOf(row.kind) === -1) return [result('AS-GEAR-001', 'violate', 'kind ' + row.kind)];
+        if (row.perRaceSilhouette) return [result('AS-GEAR-001', 'violate', row.itemId + ' has a per-race silhouette')];
+        if (!row.rampId || !row.decalSlot || !Number.isInteger(row.decalSlot.x) || !Number.isInteger(row.decalSlot.y)) {
+            return [result('AS-GEAR-001', 'violate', row.itemId + ' ramp or decal slot')];
+        }
+        if (!silhouettes[row.itemId]) silhouettes[row.itemId] = row.silhouetteId;
+        else if (silhouettes[row.itemId] !== row.silhouetteId) return [result('AS-GEAR-001', 'violate', row.itemId + ' silhouette split')];
+    }
+    return [result('AS-GEAR-001', 'pass', 'one silhouette plus custom outfits')];
+}
+
+function checkMirror(layer) {
+    const frames = (layer && layer.frames) || [];
+    const mirrored = frames.some(frame => frame && frame.mirrored);
+    if (layer && layer.mirrorBake === 'runtime') return [result('AS-MIRROR-001', 'violate', 'runtime flip')];
+    if (mirrored && !layer.symmetric) return [result('AS-MIRROR-001', 'violate', 'mirrored frame on a layer that is not symmetric')];
+    if (layer && layer.symmetric && layer.directionalLighting) return [result('AS-MIRROR-001', 'violate', 'symmetric layer has directional lighting')];
+    if (layer && layer.symmetric && layer.mirrorBake !== 'offline-w-to-e') {
+        return [result('AS-MIRROR-001', 'violate', 'symmetric mirror is not an offline W to E bake')];
+    }
+    return [result('AS-MIRROR-001', 'pass', layer && layer.symmetric ? 'offline symmetric bake' : 'not mirrored')];
+}
+
+function checkPoses(standard) {
+    const need = ['prone', 'unconscious', 'sleep', 'sit', 'sneak', 'climb'];
+    const rows = standard.humanoidRows || [];
+    const grid = (standard.poseGrid || []).map(pose => pose.id);
+    const missingRows = need.filter(id => rows.indexOf(id) === -1);
+    const missingGrid = need.filter(id => grid.indexOf(id) === -1);
+    const map = standard.poseConditions || {};
+    let mapBad = '';
+    if (!map.prone || map.prone.kind !== 'condition' || map.prone.id !== 'prone') mapBad = 'prone';
+    if (!map.unconscious || map.unconscious.kind !== 'condition' || map.unconscious.id !== 'unconscious') mapBad = mapBad || 'unconscious';
+    for (const id of ['sleep', 'sit', 'sneak', 'climb']) {
+        if (!map[id] || map[id].kind !== 'activity') mapBad = mapBad || id;
+    }
+    if (missingRows.length || missingGrid.length || mapBad) {
+        return [result('AS-POSE-001', 'violate', 'rows ' + missingRows.join(',') + ' grid ' + missingGrid.join(',') + ' map ' + mapBad)];
+    }
+    return [result('AS-POSE-001', 'pass', 'six pose rows')];
+}
+
+function checkBiomeRegistry(doc, standard, label) {
+    const list = doc && doc.canonicalBiomes;
+    const norm = String(label || 'registry').replace(/\\/g, '/');
+    const name = norm.indexOf('/docs/') !== -1 ? 'docs/art/DEUS_BiomeRegistry.json'
+        : norm.indexOf('/game/') !== -1 ? 'game/data/DEUS_BiomeRegistry.json'
+        : path.basename(norm);
+    if (!Array.isArray(list) || !sameSet(list, standard.biomes)) {
+        return [result('AS-BIOME-005', 'violate', name + ' canonical ' + (Array.isArray(list) ? list.join(',') : 'missing'))];
+    }
+    return [result('AS-BIOME-005', 'pass', name)];
+}
+
+function checkCatalogueBiomes(catalogue, standard) {
+    if (!catalogue || !catalogue.biomes || !catalogue.biomes.canonical) {
+        return [result('AS-BIOME-005', 'pass', 'catalogue has no canonical biome list')];
+    }
+    const list = catalogue.biomes.canonical;
+    if (!sameSet(list, standard.biomes)) return [result('AS-BIOME-005', 'violate', 'catalogue canonical ' + list.join(','))];
+    return [result('AS-BIOME-005', 'pass', 'catalogue canonical set')];
+}
+
+function stripPx(footprint, standard) {
+    const template = standard.slotTemplates['action-row'];
+    const footprintW = footprint && footprint[0] ? footprint[0] : 1;
+    const footprintH = footprint && footprint[1] ? footprint[1] : 1;
+    return [template.frames * footprintW * template.cell, template.directions * footprintH * template.cell];
+}
+
+function checkSheet(sheet, standard) {
+    if (!sheet || !standard.slotTemplates[sheet.template]) return [result('AS-SLOT-001', 'violate', 'unknown template')];
+    if (sheet.template === 'action-row') {
+        const expect = stripPx(sheet.footprint, standard);
+        if (sheet.scaled || sheet.w !== expect[0] || sheet.h !== expect[1]) {
+            return [result('AS-SLOT-001', 'violate', 'action row ' + sheet.w + 'x' + sheet.h)];
+        }
+        return [result('AS-SLOT-001', 'pass', expect.join('x'))];
+    }
+    const template = standard.slotTemplates[sheet.template];
+    if (sheet.w !== template.w || sheet.h !== template.h) {
+        return [result('AS-SLOT-001', 'violate', sheet.template + ' ' + sheet.w + 'x' + sheet.h)];
+    }
+    return [result('AS-SLOT-001', 'pass', sheet.template)];
+}
+
+function checkAtlas(atlas) {
+    if (!atlas || atlas.size !== 2048 || !atlas.squares || atlas.squares[0] !== 42 || atlas.squares[1] !== 42 || atlas.cell !== 48) {
+        return [result('AS-SLOT-001', 'violate', 'atlas grid')];
+    }
+    if (atlas.squares[0] * atlas.cell !== 2016) return [result('AS-SLOT-001', 'violate', 'atlas content px')];
+    if (!atlas.paddingPx || atlas.paddingPx[0] !== 1 || atlas.paddingPx[1] !== 2 || atlas.gridSnapped !== true) {
+        return [result('AS-SLOT-001', 'violate', 'padding')];
+    }
+    if (atlas.terrainSizeIfBenchmarked !== 4096 || !atlas.lookupFile) return [result('AS-SLOT-001', 'violate', 'terrain atlas or lookup')];
+    return [result('AS-SLOT-001', 'pass', '2048 atlas, 42 by 42')];
+}
+
+function checkPipeline(rec) {
+    if (!rec || rec.scaled || rec.resized || (rec.accepted && (rec.offSize || rec.offPalette || rec.offAnchor))) {
+        return [result('AS-PIPE-001', 'violate', 'scaled or accepted off-size output')];
+    }
+    if (rec.crop !== 'transparent-margins-only' || rec.missingFrom !== 'empty-slots') {
+        return [result('AS-PIPE-001', 'violate', 'crop or MISSING rule')];
+    }
+    return [result('AS-PIPE-001', 'pass', 'exact size, no scaling')];
+}
+
+function checkPromptTemplates(block) {
+    const cats = ['humanoid-layer', 'face-layer', 'creature', 'terrain-tile', 'building-piece', 'item-icon', 'portrait', 'effect', 'ui'];
+    const fields = ['pixelSize', 'frameGrid', 'facing', 'poseFrameIndex', 'anchor', 'paletteRampHex', 'outlineRules', 'shadingRules', 'lightDirection', 'layerRole', 'catalogueId', 'referenceImages', 'negativeConstraints'];
+    if (!block || block.policy !== 'field-list-only' || block.prosePrompt) {
+        return [result('AS-PROMPT-001', 'violate', 'template is a runnable prompt')];
+    }
+    const have = block.categories || {};
+    for (const cat of cats) {
+        const row = have[cat];
+        if (!row || !row.fields) return [result('AS-PROMPT-001', 'violate', 'missing ' + cat)];
+        if (row.promptText) return [result('AS-PROMPT-001', 'violate', cat + ' has prompt text')];
+        for (const field of fields) {
+            if (!row.fields[field]) return [result('AS-PROMPT-001', 'violate', cat + ' missing ' + field)];
+        }
+    }
+    return [result('AS-PROMPT-001', 'pass', 'field templates')];
+}
+
+function checkGenerationLog(row, schema) {
+    const need = (schema && schema.requiredFields) || [];
+    for (const key of need) {
+        if (!row || row[key] === undefined || row[key] === null || row[key] === '') {
+            return [result('AS-GEN-001', 'violate', 'missing ' + key)];
+        }
+    }
+    if (!schema || schema.outcomes.indexOf(row.outcome) === -1) return [result('AS-GEN-001', 'violate', 'outcome')];
+    if (row.outcome === 'fail' && (!row.reasons || !row.reasons.length)) return [result('AS-GEN-001', 'violate', 'fail without reasons')];
+    for (const reason of row.reasons || []) {
+        if (schema.reasonCodes.indexOf(reason) === -1) return [result('AS-GEN-001', 'violate', 'reason ' + reason)];
+    }
+    return [result('AS-GEN-001', 'pass', row.outcome)];
+}
+
+function checkYield(row) {
+    const need = ['generator', 'category', 'template', 'firstPassAcceptance', 'usableSlotsPerGeneration', 'regenerationsPerSlot', 'costPerUsableSlot', 'timePerUsableSlot'];
+    for (const key of need) {
+        if (!row || row[key] === undefined || row[key] === null) return [result('AS-GEN-002', 'violate', 'missing ' + key)];
+    }
+    return [result('AS-GEN-002', 'pass', row.generator + ' ' + row.category)];
+}
+
+function checkPromptVersion(row) {
+    if (!row || !row.version) return [result('AS-GEN-003', 'violate', 'no version')];
+    if (row.status === 'promoted' && row.abYieldBeatsCurrent !== true) {
+        return [result('AS-GEN-003', 'violate', 'promoted without a better yield')];
+    }
+    return [result('AS-GEN-003', 'pass', row.status || 'version')];
+}
+
+function checkGenerators(standard) {
+    const generators = standard.generators || {};
+    const adapters = standard.generatorAdapters || {};
+    const routing = standard.routingPolicy || {};
+    const golden = standard.goldenTestSet || {};
+    const tune = standard.styleTune || {};
+    const fields = generators.fields || [];
+    if (fields.indexOf('id') === -1 || fields.indexOf('version') === -1) return [result('AS-GEN-004', 'violate', 'generator fields')];
+    if (adapters.from !== 'shared-prompt-spec' || adapters.perGenerator !== true) return [result('AS-GEN-004', 'violate', 'adapters')];
+    if (routing.objective !== 'best-yield-per-cost' || routing.rebenchmark !== 'periodic' || routing.testSet !== 'goldenTestSet') {
+        return [result('AS-GEN-004', 'violate', 'routing')];
+    }
+    if (golden.fixed !== true || !sameSet(golden.checks, ['palette', 'outline', 'anchor', 'style'])) {
+        return [result('AS-GEN-004', 'violate', 'golden test set')];
+    }
+    if (tune.status !== 'optional-later' || tune.requiresOwnerDecision !== true) {
+        return [result('AS-GEN-004', 'violate', 'style tune is not optional')];
+    }
+    const ids = new Set((generators.entries || []).map(entry => entry.id));
+    for (const assignment of routing.assignments || []) {
+        if (!ids.has(assignment.generator)) return [result('AS-GEN-004', 'violate', 'routing names an unknown generator')];
+    }
+    return [result('AS-GEN-004', 'pass', 'generator policy')];
+}
+
 function collectGlobals(standard, spells, schema) {
     const out = [];
     out.push.apply(out, checkMatrix(standard.outfitMatrix, standard));
@@ -542,6 +1011,35 @@ function collectGlobals(standard, spells, schema) {
     out.push.apply(out, checkProps(standard.readableProps, standard));
     out.push.apply(out, checkNight(standard.night));
     out.push.apply(out, checkRemains(standard.remains, standard));
+    out.push.apply(out, checkSkins(standard.uiSkins, standard));
+    out.push.apply(out, checkReligion(standard.religion));
+    out.push.apply(out, checkFarm(standard.farming));
+    out.push.apply(out, checkFood(standard.food));
+    out.push.apply(out, checkClosed('AS-DUNG-001', standard.dungeonKit, ['cave-wall', 'mine-support', 'tunnel', 'underground-water', 'crystal', 'ruin'], 'dungeon kit'));
+    out.push.apply(out, checkClosed('AS-TRAP-001', standard.traps, ['pit', 'spikes', 'pressure-plate', 'door-locked', 'door-broken', 'poison-gas', 'web', 'quicksand'], 'traps'));
+    out.push.apply(out, checkClosed('AS-LORE-001', standard.loreVisuals, ['historical-portrait', 'era-ruin', 'artifact', 'history-log'], 'lore'));
+    out.push.apply(out, checkClosed('AS-ZONE-001', standard.designations, ['dig', 'build', 'stockpile', 'route', 'blueprint-ghost'], 'designations'));
+    out.push.apply(out, checkScenes(standard.eventScenes));
+    out.push.apply(out, checkMarketing(standard.marketing));
+    out.push.apply(out, checkTame(standard.domestication));
+    out.push.apply(out, checkVariety(standard.variety, standard));
+    out.push.apply(out, checkGenes(standard.genes, standard));
+    out.push.apply(out, checkPortrait(standard.portraitSample, standard));
+    out.push.apply(out, checkHeadLayer(standard.headGrid.sample));
+    out.push.apply(out, checkHeadLayer(standard.headGrid.longHairSample));
+    out.push.apply(out, checkBodyAnchors(standard.elderReuse.frames, standard));
+    out.push.apply(out, checkElder(standard.elderReuse, standard));
+    out.push.apply(out, checkGear(standard.gearPolicy.rows));
+    out.push.apply(out, checkPoses(standard));
+    out.push.apply(out, checkSheet(standard.sheetSample, standard));
+    out.push.apply(out, checkSheet(standard.actionRowSample, standard));
+    out.push.apply(out, checkAtlas(standard.runtimeAtlas));
+    out.push.apply(out, checkPipeline(standard.pipelineSample));
+    out.push.apply(out, checkPromptTemplates(standard.promptSpecTemplates));
+    out.push.apply(out, checkGenerationLog(standard.generationLogSample, standard.generationLog));
+    out.push.apply(out, checkYield(standard.yieldSample));
+    out.push.apply(out, checkPromptVersion(standard.promptVersionSample));
+    out.push.apply(out, checkGenerators(standard));
     return out;
 }
 
@@ -554,6 +1052,17 @@ function run(opts) {
     if (opts.category) entries = entries.filter(e => e.category === opts.category);
     const perEntry = entries.map(e => checkEntry(e, standard));
     const globals = collectGlobals(standard, spells, schema);
+    const registryPaths = opts.biomeRegistries && opts.biomeRegistries.length ? opts.biomeRegistries : [
+        path.join(ROOT, 'game', 'data', 'DEUS_BiomeRegistry.json'),
+        path.join(ROOT, 'docs', 'art', 'DEUS_BiomeRegistry.json')
+    ];
+    for (let i = 0; i < registryPaths.length; i++) {
+        let doc = null;
+        try { doc = readJson(registryPaths[i]); }
+        catch (e) { doc = null; }
+        globals.push.apply(globals, checkBiomeRegistry(doc, standard, registryPaths[i]));
+    }
+    globals.push.apply(globals, checkCatalogueBiomes(catalogue, standard));
     const summary = summarize(perEntry, globals);
     const violations = summary.totals.violate + summary.globalViolations;
     return { summary, perEntry, violations };
@@ -567,7 +1076,8 @@ function parseArgs(argv) {
         standard: path.join(ROOT, 'game', 'data', 'UF_AssetStandard.json'),
         catalogue: path.join(ROOT, 'art', 'catalogue', 'catalogue.json'),
         spellSchema: path.join(ROOT, 'game', 'data', 'UF_SpellVisualTable.schema.json'),
-        spells: path.join(ROOT, 'game', 'data', 'srd51', 'spells.json')
+        spells: path.join(ROOT, 'game', 'data', 'srd51', 'spells.json'),
+        biomeRegistries: []
     };
     for (let i = 0; i < argv.length; i++) {
         const a = argv[i];
@@ -578,6 +1088,7 @@ function parseArgs(argv) {
         else if (a === '--catalogue') opts.catalogue = argv[++i];
         else if (a === '--spell-schema') opts.spellSchema = argv[++i];
         else if (a === '--spells') opts.spells = argv[++i];
+        else if (a === '--biome-registry') opts.biomeRegistries.push(argv[++i]);
         else throw new Error('unknown argument ' + a);
     }
     return opts;
@@ -632,7 +1143,12 @@ module.exports = {
     checkEntry, checkLayer, checkFace, checkItem, checkIcon, checkNode, checkRemains,
     checkHaul, checkVehicles, checkNight, checkName, checkUi, checkMap, checkProps,
     checkSummons, checkMatrix, checkLife, checkSpellTable, schemaErrors, spellMatches,
-    animationResult, collectGlobals, run, main, readJson, clone, entryStatus
+    animationResult, collectGlobals, run, main, readJson, clone, entryStatus,
+    checkSkins, checkReligion, checkFarm, checkFood, checkClosed, checkScenes, checkMarketing,
+    checkTame, checkVariety, checkGenes, checkPortrait, checkHeadLayer, checkBodyAnchors,
+    checkElder, checkGear, checkMirror, checkPoses, checkBiomeRegistry, checkCatalogueBiomes,
+    checkSheet, checkAtlas, checkPipeline, checkPromptTemplates, checkGenerationLog, checkYield,
+    checkPromptVersion, checkGenerators, sizeResult
 };
 
 if (require.main === module) main(process.argv.slice(2));

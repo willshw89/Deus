@@ -10,7 +10,7 @@ This standard is the required set for every DEUS asset: what must exist, what it
 
 Owner rulings win over older art docs. The conflicts and the winning line are in Appendix A. Questions this document does not answer are in Appendix B. How today's files sit against the standard is in Appendix C.
 
-The pose grid in **AS-HUM-016** is the standard's default and is marked **PM-proposed, Owner may amend**.
+The pose grid in **AS-HUM-016** is the standard's default and is marked **PM-proposed, Owner may amend**. Addenda A7 through A9 (Owner 12:56 CT through 13:24 CT, and the PM decisions marked on those rules) are §§2.13–2.16.
 
 ## 1. Global rules
 
@@ -79,6 +79,7 @@ Natural terrain stops at +11. `AIR` has no natural terrain. Biome ids are `VOLCA
 | Object sheet | `!` + letters, digits, underscores + `.png` |
 | Equipment layer | `$UF_Layer_<itemId>__<race>.png` |
 | Face sheet | `UF_Faces_<race>_<n>.png` |
+| Entity portrait | `UF_Portrait_<id>.png` or `UF_Portrait_<id>__<race>.png` |
 
 `<race>` is one of the nine race ids (`half-elf`, `half-orc` keep the hyphen). A legacy `$UF_Layer_<itemId>.png` with no race suffix fails this rule. The style-bible reference sheet is a spec only, in **AS-STYLE-001**'s companion note at the end of §2.12. Nobody draws it in this lane.
 
@@ -102,7 +103,7 @@ Natural terrain stops at +11. `AIR` has no natural terrain. Biome ids are `VOLCA
 
 **AS-BEAST-003.** An SV battler is required (**AS-GLOBAL-015**).
 
-**AS-BEAST-004.** Large uses `LARGE_TALL` (48 by 96) or `LARGE_LONG` (96 by 48) as the body plan requires. Huge and Gargantuan frames MUST be integer multiples of 48 on both axes, authored at that size. The exact multiple is open (Appendix B). They are not a runtime scale of a Medium frame. The 13 rig families in the crosswalk (`HUMANOID` through `MONSTROUS_SPECIAL`) choose which frame class and which sockets apply. They do not each invent a sheet layout.
+**AS-BEAST-004.** Large, Huge and Gargantuan frames are the squares in **AS-SIZE-001**, authored at that size. They are not a runtime scale of a Medium frame. The 13 rig families in the crosswalk (`HUMANOID` through `MONSTROUS_SPECIAL`) choose which frame class and which sockets apply. They do not each invent a sheet layout.
 
 Creature sockets beyond the humanoid set, taken from the charter: quadruped `MOUNT_SADDLE`, `HEAD_HORN`, `MOUTH_BITE`, `GROUND_ORIGIN`; winged `WING_L`, `WING_R`, `TALONS`.
 
@@ -131,7 +132,7 @@ The nine races each get a body template per sex. Catalogue body ids today are on
 
 Also required, from the crosswalk, and stored the same way: `ROOT_PELVIS`, `PALM_PRIMARY`, `PALM_SECONDARY`, `FOOT_LEFT`, `FOOT_RIGHT`, `EFFECT_HEAD`, `EFFECT_CHEST`, `EFFECT_FEET`, `CARRY_CENTER`, `CARRY_LEFT`, `CARRY_RIGHT`. Item-local sockets (`GRIP_PRIMARY`, `TIP`, `BLADE_EDGE`, `IMPACT_POINT`, `STRING_GRIP`, `PROJECTILE_ORIGIN`, `STAFF_TIP`, `WAND_TIP`, and the rest of the crosswalk §3.2) live on the item, not on the body.
 
-**AS-HUM-014.** `dominantHand` is `right` or `left` (charter: 88% right, 12% left). `HAND_PRIMARY` binds to the dominant hand. Grips: `ONE_HANDED`, `OFF_HAND`, `TWO_HANDED`, `VERSATILE`. Presentation states: `HELD`, `HIP`, `BACK`, `SLUNG`, `HIDDEN`. The engine does not mirror a heraldic shield, an eye patch, or any other asymmetrical piece.
+**AS-HUM-014.** `dominantHand` is `right` or `left` (charter: 88% right, 12% left). `HAND_PRIMARY` binds to the dominant hand. Grips: `ONE_HANDED`, `OFF_HAND`, `TWO_HANDED`, `VERSATILE`. Presentation states: `HELD`, `HIP`, `BACK`, `SLUNG`, `HIDDEN`. A heraldic shield, an eye patch, or any other asymmetrical piece is drawn for the facing it needs. The only mirror is **AS-MIRROR-001**.
 
 **AS-HUM-003.** Part layers, back to front where they overlap the body: hair back (behind the body), body/skin, eyes, racial ears, horns, tail, scales, hair front, beard. Racial parts exist on the races that have them (elf and gnome and halfling ears, tiefling and dragonborn horns, tiefling tail, dragonborn scales). They are parts, not extra character sheets.
 
@@ -147,7 +148,7 @@ Also required, from the crosswalk, and stored the same way: `ROOT_PELVIS`, `PALM
 | `greying` | natural, salt-and-pepper, grey, white | `RAMP_HAIR_GREY` on the hair parts |
 | `beard` | 0 none, 1 goatee, 2 full, 3 braided | beard part, same hair ramp |
 | `clothing` | 1, 2, 3, 4 | cloth part (today's bake only) |
-| `balding` | mask id, count open | omits regions of `hair-front` |
+| `balding` | `receding`, `crown`, `advanced` | three overlays on any hair style (**AS-GENE-001**) |
 | `height` | low, mid, high | drawn height inside the scale-chart min/target/max |
 | `build` | slight, average, broad | drawn width inside the scale-chart min/target/max |
 | `horns` | 0, 1, 2 | `horns` part |
@@ -158,7 +159,7 @@ Also required, from the crosswalk, and stored the same way: `ROOT_PELVIS`, `PALM
 
 **AS-HUM-018.** Height, build, horns, tail, ears and dragonborn scale colour are the body-variety loci in the table above. They do not change the frame class.
 
-**AS-HUM-007.** Greying is the four-step ramp in that table, not a tint. The current baker's elder colour is a single silver ramp. Silver is the legacy bake of the white end (Appendix C), not a fifth step. Balding masks are required and their count is open (Appendix B).
+**AS-HUM-007.** Greying is the four-step ramp in that table, not a tint. The current baker's elder colour is a single silver ramp. Silver is the legacy bake of the white end (Appendix C), not a fifth step. Balding is the three overlays in **AS-GENE-001** (PM decision 13:02 CT, Owner may amend). They sit on any hair style.
 
 **AS-HUM-006.** The age axis is required. This standard requires three templates and does not freeze any further step.
 
@@ -166,7 +167,7 @@ Also required, from the crosswalk, and stored the same way: `ROOT_PELVIS`, `PALM
 
 **AS-HUM-013.** Pregnancy is `pregnancyStage` 0, 1, 2 or 3: a torso decal on that race's rig. It does not multiply armour sheets. One universal pixel offset for every race is not assumed.
 
-**AS-HUM-009.** Required action rows, four directions each: `idle`, `walk`, `melee-swing`, `thrust`, `bow-draw`, `bow-loose`, `xbow-aim`, `xbow-fire`, `xbow-reload`, `thrown`, `cast-one-hand`, `cast-two-hand`, `cast-focus`, `hammer`, `saw`, `chop`, `dig`, `stir`, `carry`, `kneel`, `hurt`, `dodge`, `parry`, `death`, `sneak`, `climb`.
+**AS-HUM-009.** Required action rows, four directions each: `idle`, `walk`, `melee-swing`, `thrust`, `bow-draw`, `bow-loose`, `xbow-aim`, `xbow-fire`, `xbow-reload`, `thrown`, `cast-one-hand`, `cast-two-hand`, `cast-focus`, `hammer`, `saw`, `chop`, `dig`, `stir`, `carry`, `kneel`, `hurt`, `dodge`, `parry`, `death`, `sneak`, `climb`, `prone`, `unconscious`, `sleep`, `sit`. The last four are **AS-POSE-001**.
 
 **AS-HUM-010.** Charter families map onto those rows. The charter §2 names 58 logical-action tokens in 15 domains. The lane brief's "45" is the subset that also appears on the F01–F14 map. The rows above are the required set. The map:
 
@@ -183,9 +184,9 @@ Also required, from the crosswalk, and stored the same way: `ROOT_PELVIS`, `PALM
 | F09 `WORK_BENCH` | `saw`, `stir` |
 | F10 `INTERACT_LOW` | `dig` |
 | F11 `STEALTH_SNEAK` | `sneak` |
-| F12 `REST_SIT` | `kneel` |
+| F12 `REST_SIT` | `kneel`, `sit` |
 | F13 `VERTICAL_CLIMB` | `climb` |
-| F14 `DOWNED_STATE` | `hurt`, `death`, and the prone / unconscious / sleep poses in **AS-HUM-012** |
+| F14 `DOWNED_STATE` | `hurt`, `death`, `prone`, `unconscious`, `sleep` |
 
 `dodge` has no charter family. It is a required row of its own (a committed sidestep and a return to guard, three frames). Sleep, prone, unconscious and dead MUST be distinguishable from each other. Whether they share the family id F14 is open (Appendix B). They MUST NOT be the same frame.
 
@@ -203,15 +204,15 @@ Also required, from the crosswalk, and stored the same way: `ROOT_PELVIS`, `PALM
 | stunned | Frame-freeze plus the stunned icon |
 | petrified | Frame-freeze plus a drawn swap to `RAMP_CONDITION_PETRIFIED` |
 | poisoned | Drawn swap to `RAMP_CONDITION_POISONED`, plus the poisoned icon |
-| prone | Pose `prone`, eyes open, weapon in the dirt |
-| unconscious | Pose `unconscious`, distinct from prone and from death |
+| prone | Row `prone` (**AS-POSE-001**), eyes open, weapon in the dirt |
+| unconscious | Row `unconscious`, distinct from prone and from death |
 | invisible | The body is replaced by a 1 px selout contour in `RAMP_CONDITION_INVISIBLE` (opaque pixels) for viewers who can perceive the creature, plus the condition icon. Everyone else gets no sprite. There is no alpha and no shimmer shader |
 
 **AS-HUM-005.** The face shows the armour, cloak and helmet the charset is wearing. Gear is face layer 6 (**AS-FACE-002**).
 
 **AS-HUM-015.** Each of the nine races has a default garb for each of the 12 SRD classes (barbarian, bard, cleric, druid, fighter, monk, paladin, ranger, rogue, sorcerer, warlock, wizard) and a light, medium and heavy armour set. That is 15 outfit ids and 135 art variants. The outfit id is race-neutral (`outfit_class_wizard`, `outfit_armor_heavy`). The art key is `outfitId__race` (**AS-ITEM-002**).
 
-Silhouettes are shared across races. Race changes the ramp `RAMP_RACE_<RACE>` and the motif `MOTIF_RACE_<RACE>` only.
+Owner 13:14 CT: these 135 outfits are fully custom drawings per race. The silhouette name below is the slot pattern, not a shared drawing. Ramp `RAMP_RACE_<RACE>` and motif `MOTIF_RACE_<RACE>` still apply. Weapons, tools and accessories are not in this custom set (**AS-GEAR-001**).
 
 | Silhouette | Runtime slots | Paper-doll layers |
 |---|---|---|
@@ -229,6 +230,7 @@ Default pose grid (four directions each):
 |---|---|
 | swing, thrust, bow-draw, cast, death | 4 |
 | bow-loose, hit, flinch, dodge, parry | 3 |
+| prone, unconscious, sleep, sit, sneak, climb | 4 |
 
 Walk stays the RMMZ 3-column cycle (**AS-GLOBAL-013**).
 
@@ -262,7 +264,7 @@ Walk stays the RMMZ 3-column cycle (**AS-GLOBAL-013**).
 
 **AS-BIOME-003.** `TEMPERATE`, `WET`, `ARID` and `VOLCANIC` keep the physical identities in `DEUS_BIOME_IDENTITY_STANDARD.md` (there TEMP, WET, ARID, VOLC). `COLD` and `WILD` are required ids. What they look like is open (Appendix B). `HIGH` / Highland is not a sixth biome. Existing `HIGH_*` ramps stay in the registry until an Owner maps them.
 
-**AS-BIOME-004.** Seasons are four drawn states: spring, summer, autumn, winter. They are frame indices or separate drawn frames. They are not a colour LUT and not a ColorMatrix. Weather snow (**AS-ANIM-001**) is a drawn overlay. It does not turn `COLD` into a snow biome, and it does not delete the weather.
+**AS-BIOME-004.** Seasons are four named states: spring, summer, autumn, winter. They are not a runtime colour LUT and not a ColorMatrix. Weather snow (**AS-ANIM-001**) is a drawn overlay. It does not turn `COLD` into a snow biome, and it does not delete the weather. Variety pieces use the palette-swap frames in **AS-VAR-002** (PM decision, Owner may amend). The four names stay.
 
 ### 2.6 Buildings
 
@@ -287,7 +289,7 @@ Walk stays the RMMZ 3-column cycle (**AS-GLOBAL-013**).
 
 **AS-ITEM-001.** Items are race-neutral SRD items. There is one Plate Armor, one item id, one stat block. There is no Elven Plate Armor, no Dwarven Longsword, and no race token inside the item id. This covers armour, weapons, shields and the class garb in **AS-HUM-015**. The 135 outfits are art variants of 15 outfit ids, not 135 items.
 
-**AS-ITEM-002.** The layer key is `<itemId>__<race>`, for example `outfit_class_wizard__elf` and `armor_plate__dwarf`. Lookup order: the race key, then `<itemId>__human`, then nothing. A missing variant is not tinted and is not replaced with another race's art. The runtime file is `$UF_Layer_<itemId>__<race>.png`.
+**AS-ITEM-002.** The layer key is `<itemId>__<race>`, for example `outfit_class_wizard__elf` and `armor_plate__dwarf`. Lookup order: the race key, then `<itemId>__human`, then nothing. A missing variant is not tinted and is not replaced with another race's art. The runtime file is `$UF_Layer_<itemId>__<race>.png`. For weapons, tools and accessories the race key selects the ramp and the decal (**AS-GEAR-001**), not a second silhouette. Class garb and armour weights stay custom drawings.
 
 Weapon presentation still uses the crosswalk's 17 families (`BLADE_ONE_HAND` through `UNARMED`). The closed SRD weapon list counted in the presentation data is 37. Armour plus shield is 13: padded, leather, studded leather, hide, chain shirt, scale mail, breastplate, half plate, ring mail, chain mail, splint, plate, shield. The material heading says 18 and the list names 20 (`IRON`, `STEEL`, `BRONZE`, `COPPER`, `SILVER`, `GOLD`, `ADAMANTINE`, `MITHRAL`, `WOOD_LIGHT`, `WOOD_DARK`, `LEATHER`, `HIDE`, `BONE`, `HORN`, `LINEN`, `WOOL`, `SILK`, `STONE`, `GLASS`, `CRYSTAL`). Icon slots cover the 20 names. The count mismatch is in Appendix A.
 
@@ -336,7 +338,7 @@ Cast-profile aliases: `CAST_QUICK`, `CAST_STANDARD` and `CAST_PROJECT` choose `o
 
 **AS-FX-007.** World effects use the animation table in **AS-ANIM-001**: projectile, impact, fire, water, weather. Frame counts are those rows. Damage-type colour is the impact ramp, not a tint.
 
-**AS-UI-001.** Balloons (**AS-HUM-011**). Selection rings are four drawn sprites, not tints: friendly circle, neutral diamond, hostile spiked, selected with corner pips. The selected ring is a 2-frame drawn loop. HP bars are 48 by 4 px, five drawn fill frames (empty, quarter, half, three-quarter, full), anchored above `HEAD_TOP`. Faction window skins are alternate drawn `Window.png` sheets (192 by 192) for the six profiles. The information architecture does not change.
+**AS-UI-001.** Balloons (**AS-HUM-011**). Selection rings are four drawn sprites, not tints: friendly circle, neutral diamond, hostile spiked, selected with corner pips. The selected ring is a 2-frame drawn loop. HP bars are 48 by 4 px, five drawn fill frames (empty, quarter, half, three-quarter, full), anchored above `HEAD_TOP`. Window skins are **AS-UI-004**. The six building profiles keep their banners (**AS-MAP-001**). The information architecture does not change.
 
 **AS-UI-002.** A unit selected on a lower layer gets the same ring, drawn on that layer, at 1:1.
 
@@ -398,6 +400,126 @@ Fog is a drawn dither with binary alpha. UI pulse is two drawn frames, not a tin
 
 **Style bible spec (no image).** One reference sheet, if it is ever drawn under a later leaf, shows: the 48 px grid, the top-left light vector, a 1 px selout sample, a 42 px human inside a 48 px cell, the letters S W E N, six biome ramp-id labels, one 32 px icon cell, and the contact shadow at y = 47. This lane does not draw it.
 
+### 2.13 UI skin, faith, farm, food, underground, traps, lore (A7)
+
+**AS-UI-004.** Owner 12:57 CT. The player picks one window skin. The minimum set is 11: signature `deus`, variant `deus-dark`, and `race-<race>` for each of the nine races, using that race's ramp and motif from **AS-HUM-015**. Each skin is one 192 by 192 sheet in the RMMZ `Window.png` regions: background `[0,0,96,96]`, pattern `[0,96,96,96]`, frame `[96,0,96,96]` (9-slice, 24 px corners), cursor `[96,96,48,48]` (9-slice, 4 px corners), pause `[144,96,48,48]`, text colours `[96,144,96,48]`. Pixels are opaque. Buttons are drawn `normal`, `hover` and `pressed`. Cursors are drawn `default`, `hover` and `disabled`. Title and loading screens belong to the Deus skin. Fonts are bitmap: `font:deus` and `font:deus-dark`. The smallest glyph stays 16 px (**AS-UI-003**).
+
+**AS-REL-001.** Required pieces: `holy-symbol`, `altar`, `shrine`, `aura`, `spellbook`, `scroll`. A deity row, when one exists, has a `holySymbolId`. The deity list is empty. No DEUS pantheon is on file, and this standard does not copy the SRD historical pantheons or invent gods (Appendix B). The aura is drawn frames on `RAMP_MAGIC_AURA`, distinct from a mundane icon. Rarity on the icon stays the overlay in **AS-ICON-003**. Spellbook and scroll are race-neutral item ids (**AS-ITEM-001**) with an icon and a portrait (**AS-PORT-001**).
+
+**AS-FARM-001.** A crop has stages `sown`, `growing`, `mature`, `harvested`. Livestock has `young` and `adult`. Pens exist. A tamed variant exists (**AS-TAME-001**).
+
+**AS-FOOD-001.** Food has states `raw` and `cooked`, classes `meal` and `ingredient`, displays `table` and `stockpile`, and an icon.
+
+**AS-DUNG-001.** The underground kit is `cave-wall`, `mine-support`, `tunnel`, `underground-water`, `crystal`, `ruin`. Counts per depth band are **AS-VAR-001**.
+
+**AS-TRAP-001.** Required hazards: `pit`, `spikes`, `pressure-plate`, `door-locked`, `door-broken`, `poison-gas`, `web`, `quicksand`.
+
+**AS-LORE-001.** Required history visuals: `historical-portrait`, `era-ruin`, `artifact`, `history-log`.
+
+**AS-SCENE-001.** Event scenes `founding`, `coronation`, `disaster` and `war` are an optional class. `required` is false. This is a spec. No scene art is produced here.
+
+**AS-ZONE-001.** Player designations are drawn overlays: `dig`, `build`, `stockpile`, `route`, `blueprint-ghost`. The blueprint is an opaque hatch. It is not a translucent ghost.
+
+**AS-MKTG-001.** Game icon, store banners and logo are a later note. `required` is false. There is no marketing required set in this standard.
+
+### 2.14 Capture, variety, genes, portraits (A8)
+
+**AS-TAME-001.** Owner 12:59 CT. Art covers pets, mounts, livestock, work animals, prisoners and recruits: a tamed variant, a captured or bound pose, a cage and a pen. `collar`, `saddle` and `harness` may be drawn as visual markers. They have no slot and no stats. Whether the markers are wanted at all, after the 13:01 correction, is Appendix B.
+
+**AS-TAME-002.** Owner 13:01 CT. A tamed creature fights with its SRD 5.1 stat block and its natural attacks and defences. There is no creature armour slot, no equipment slot, no barding and no crafted creature gear. The checker flags a creature equipment-slot list, barding, or marker stats.
+
+**AS-VAR-001.** PM decision 13:01 CT, Owner may amend. These are floors. More pieces may be added. For each of the six biomes: trees 4 species by 3 variants (`young`, `mature`, `old`) = 12, each with harvest states and the season treatment in **AS-VAR-002**; bushes 4, of which at least 1 is harvestable; ground scatter 6; rocks 3 sizes by 2 variants = 6; ore at least 2; water-edge 3; landmarks 2. Underground bands for this floor are `DEEP` and `CAVERN` (the bands whose Z is entirely below 0). Each of those has at least 4 cave formations, 2 fungi or crystals, and 1 ore node. Whether `LOWLAND`'s negative layers count is Appendix B.
+
+**AS-VAR-002.** PM decision 13:01 CT, Owner may amend. Season states on those pieces are palette-swap frames of the base drawing, on `RAMP_SEASON_SPRING`, `RAMP_SEASON_SUMMER`, `RAMP_SEASON_AUTUMN` and `RAMP_SEASON_WINTER`. That swap is precomputed ramp data. It is not a runtime ColorMatrix. A horizontal flip is an offline bake, and only for a piece whose shading is light-neutral. A piece drawn with the top-left light is not flipped.
+
+**AS-GENE-001.** PM decision 13:02 CT, Owner may amend. Counts, per race and per adult body type `male` and `female`:
+
+| Locus | Count |
+|---|---|
+| Hair styles | 12, of which 3 or 4 are race-distinctive |
+| Balding overlays | 3: `receding`, `crown`, `advanced`, on any style |
+| Facial hair | 8: `stubble`, `short`, `full`, `long`, `braided`, `mustache`, `goatee`, `forked` |
+| Dwarf facial hair | those 8 plus at least `dwarf-plait` |
+| Face shape | 4: `oval`, `round`, `square`, `long` |
+| Eyes | 5 shapes; colour from `RAMP_EYE` |
+| Brows | 4 |
+| Nose | 5 |
+| Mouth | 4 |
+| Ears | 3 ids per race |
+| Jaw | 3 |
+| Skin | ramp `RAMP_SKIN`, steps 1, 2, 3 |
+| Markings | 4 overlays: `freckles`, `moles`, `birthmark`, `patch` |
+| Race features | 3 or 4 option ids per race |
+
+Hair colour is one ramp, `RAMP_HAIR`, with 12 steps. The legacy names `black`, `brown`, `blonde` and `red` are four of the steps. The other eight ids are `step-05` through `step-12` until the Owner names them. Race-specific hair colours are an empty list until named (Appendix B). Greying stays the four steps in **AS-HUM-007**. No step gets its own drawing. The sim mixes the parents' genes and may apply a rare mutation. Age layers `child`, `adult` and `elder` sit on the same gene ids so the face stays recognisable. Races in `beardlessRaces` get no facial-hair parts. That list is empty until the Owner names a race (Appendix B). Option pictures for `rf1`–`rf3` are not named here.
+
+**AS-PORT-001.** Owner 13:03 CT. Every non-face entity (item, creature, resource, building, workstation, spell) has a 32 by 32 icon and a 144 by 144 portrait for the inspect, tooltip and crafting view. The portrait uses a per-category background, the same palette and selout as the icon, and the rarity overlay from **AS-ICON-003**. A race-styled item uses that race's background. A race-neutral item has one portrait per race art variant. The file name is in **AS-STYLE-001**. A catalogue row that does not yet carry the fields is `unknown`. A row that has one of the two and not the other fails.
+
+### 2.15 Head layers, elders, gear, mirrors, poses, biome files (A9)
+
+**AS-HEAD-001.** Owner 13:14 CT. Hair, balding, beards and head-only race features are a grid of 12 frames: directions S, W, E, N, and head-state indices 0, 1 and 2, one frame each, each with an anchor. The gestures those indices draw are not named (Appendix B). Every body-template frame stores `headAnchor` `[x, y]` and `headState` in `0..2`. Long hair may add frames on `death` and `dodge` only. No other extra row is allowed. Placement is the anchor. There is no runtime transform.
+
+**AS-ELDER-001.** Only the stooped elder body is a new sheet (**AS-HUM-019**). Garb, gear and hair use the adult sheets. Each body frame has a torso offset and a head offset, in pixels, that move those adult layers onto the elder body. The checker flags an elder-specific garb, gear or hair sheet, and any frame index with no offset. The numbers shipped here are a baseline stoop (`torso [0, 2]`, `head [0, 4]`) so the table is complete; authored frames replace the pair.
+
+**AS-GEAR-001.** An accessory, a weapon or a tool has one silhouette. Race selects `RAMP_RACE_<RACE>` and a motif decal whose anchor is stored per frame and per angle. A second silhouette for the same item id fails. The 135 class and armour outfits stay custom per race (`pixels: custom-per-race` on `outfitMatrix`).
+
+**AS-MIRROR-001.** A layer may be mirrored only when it is flagged `symmetric` and its shading is light-neutral. The mirror is an offline bake from W to E. The E frame is then stored. The runtime does not flip. A mirrored frame on any other layer fails. Asymmetric gear, including shields with a device, is drawn for each facing.
+
+**AS-POSE-001.** Rows, four directions each, also on the pose grid at 4 frames: `prone`, `unconscious`, `sleep`, `sit`, `sneak`, `climb`. Mapping: SRD Prone uses row `prone`; SRD Unconscious uses row `unconscious`; `sleep`, `sit`, `sneak` and `climb` are activity rows. `sneak` and `climb` were already action rows; they are now on the pose grid too, so garb layers follow them.
+
+**AS-BIOME-005.** The Owner's biome set is the six ids in **AS-BIOME-001**. The checker reads, and does not write, `game/data/DEUS_BiomeRegistry.json`, `docs/art/DEUS_BiomeRegistry.json`, and `art/catalogue/catalogue.json` when that file has `biomes.canonical`. A `canonicalBiomes` list other than the six fails. Today's files are the five-id set in Appendix A. The data fix is another lane.
+
+### 2.16 Frame squares, slot templates, pipeline, field templates, generation log (A9)
+
+**AS-SIZE-001.** Owner 13:16–13:20 CT. Frame size is size class plus body shape, in 48 px squares:
+
+| Size | Shape | Squares | Pixels | Frame class |
+|---|---|---|---|---|
+| Tiny, Small, Medium | square | 1 by 1 | 48 by 48 | `TINY`, `SMALL`, `MEDIUM` |
+| Large | tall | 1 by 2 | 48 by 96 | `LARGE_TALL` |
+| Large | long | 2 by 1 | 96 by 48 | `LARGE_LONG` |
+| Huge | square | 3 by 3 | 144 by 144 | `HUGE` |
+| Huge | tall | 2 by 3 | 96 by 144 | `HUGE_TALL` |
+| Huge | long | 3 by 2 | 144 by 96 | `HUGE_LONG` |
+| Gargantuan | square | 4 by 4 | 192 by 192 | `GARGANTUAN` |
+| Gargantuan | tall | 3 by 4 | 144 by 192 | `GARGANTUAN_TALL` |
+| Gargantuan | long | 4 by 3 | 192 by 144 | `GARGANTUAN_LONG` |
+
+One Gargantuan square action row is 4 frames by 4 directions of 4-square cells: 16 by 16 squares, 768 by 768. That is the largest sheet.
+
+**AS-SLOT-001.** Source templates, rows = directions, columns = frames, one anchor in every cell:
+
+| Template | Pixels | Grid |
+|---|---|---|
+| `charset` | 576 by 384 | 12 by 8 cells of 48, anchor `[24, 45]` |
+| `faces` | 576 by 288 | 4 by 2 cells of 144, anchors in **AS-FACE-004** |
+| `tileset-b-e` | 768 by 768 | 16 by 16 cells of 48, anchor `[24, 24]` |
+| `action-row` | 4 frames by 4 directions, times the footprint | a 1 by 1 footprint is 192 by 192; a 4 by 4 footprint is 768 by 768 |
+
+The runtime packs 2048 by 2048 atlases. The cell grid is 42 by 42 squares of 48 px (2016 px). The remaining 32 px is the padding budget, 1 or 2 px, and origins stay on the 48 px grid. A 4096 atlas is allowed for terrain only after a benchmark. The packer writes a lookup (`atlasId`, `x`, `y`, `w`, `h`, `catalogueId`, `sheetId`, `col`, `row`). That file is not created in this lane.
+
+**AS-PIPE-001.** Owner 13:16–13:21 CT. The manifest records `catalogueId`, grid squares, frame count, anchor, `templateId`, palette ramp and layer role. The slot map records `sheetId`, column, row, `catalogueId`, facing, frame index, anchor and pixel size. Output must already be the final pixel size, on the grid, in the palette, on the anchor. Off-size, off-palette or off-anchor output is rejected and generated again. It is not resized. Cropping removes transparent margins only. `MISSING` is derived from an empty slot. One generation may target a whole strip; each slot is validated on its own, still at exact size. The tools are another lane. This lane generates no art.
+
+**AS-PROMPT-001.** Owner 13:21 CT. `promptSpecTemplates` has one field template for each of: `humanoid-layer`, `face-layer`, `creature`, `terrain-tile`, `building-piece`, `item-icon`, `portrait`, `effect`, `ui`. Each template lists the same fields and the place the value comes from. There is no prose prompt. Nothing in this block is sent to a generator.
+
+| Field | Source |
+|---|---|
+| `pixelSize`, `facing`, `poseFrameIndex`, `anchor`, `layerRole`, `catalogueId` | slot map |
+| `frameGrid` | slot template |
+| `paletteRampHex` | palette ramp (hex resolved from the ramp id when a tool runs) |
+| `outlineRules` | **AS-GLOBAL-006** |
+| `shadingRules`, `lightDirection` | **AS-GLOBAL-005** |
+| `referenceImages` | golden reference library |
+| `negativeConstraints` | rejection notes |
+
+**AS-GEN-001.** Owner 13:22 CT and 13:24 CT. A generation log row has `slotId`, `promptSpecId`, `promptTemplateVersion`, `generator`, `generatorVersion`, `model`, `seed`, `settings`, `references`, `outcome` (`pass` or `fail`) and `reasons`. Reason codes are `size`, `palette`, `anchor`, `outline`, `style`. A fail with no reason is a violation.
+
+**AS-GEN-002.** Yield is tracked over time per generator, per category and per template: first-pass acceptance, usable slots per generation, regenerations per slot, yield per cost, cost per usable slot, and time per usable slot.
+
+**AS-GEN-003.** A prompt-template version is promoted only when an A/B comparison beats the current version's yield. Candidates stay candidates until then. Adapters for each generator are built from the one shared field template, not from a second spec.
+
+**AS-GEN-004.** Generator records have `id` and `version`. No generator is assigned in this standard (`status: unassigned`). Routing sends a category to the generator with the best current yield per cost, and that choice is re-benchmarked on the fixed golden test set. The golden checks are palette, outline, anchor and style, against the shared reference library. A style LoRA or fine-tune is `optional-later` and needs an Owner decision after approved art exists. It is not a required set. No art is generated here.
+
 ## 3. Worked spell rows
 
 The schema examples are the normative samples. In short: Fire Bolt is evocation, one-hand, projectile, fire, `ignite-unattended`. Fireball is evocation, one-hand, sphere with projectile travel, fire, `fire-tiles-spread` and `crossesZ` true (the burst is also stamped on lower layers when the sim says the volume crosses Z). Cone of Cold is evocation, two-hand, cone, cold, `cold-freezes`. Lightning Bolt is evocation, focus-raise, line, lightning, `ignite-unattended`. Shield is abjuration, one-hand, self-aura, no damage, aura `ward`, drawn with the force ramp (the rules text says an invisible barrier; the pixels are opaque). Cure Wounds is evocation, one-hand, touch, sim `heal`, heal ramp `RAMP_DMG_RADIANT`. `customPiece` is null on all six.
@@ -430,6 +552,15 @@ Owner rulings win. The source line is the conflict. The resolution is the ruling
 22. **Snow.** Identity standard line 42: there is no frozen/snow biome, and the catalogue forbids biome ids FROZEN, SNOW, GLACIER, ICE, TUNDRA_SNOW. **AS-ANIM-001** still requires a drawn snow weather overlay, because the 12:46 ruling names snow. Weather snow is not a biome. What the `COLD` biome looks like remains open.
 23. **Child labour.** Charter §8: a child is ineligible for heavy labour. **AS-HUM-019** still requires the work rows on the child template.
 24. **WG.00.01–.05**, for the record, not all of them conflict: WG.00.01 visual charter (flat 3/4, chibi 3.0–3.2 heads); WG.00.02 native 48 px, 1:1, binary alpha; WG.00.03 human scale, 42 px adult; WG.00.04 five biomes and 10 transitions (superseded); WG.00.05 master palette and 58 ramps (still the target architecture).
+25. **Registry canonical set is five.** `game/data/DEUS_BiomeRegistry.json` `canonicalBiomes` (lines 9–15) is `TEMP`, `WET`, `ARID`, `HIGH`, `VOLC`. The same array is `docs/art/DEUS_BiomeRegistry.json` lines 7–13. The game file also keys `biomes`, `materialTaxonomy.signatureMaterials` and `horizontalTransitions` (10 keys, lines 562–653) with that five. `art/catalogue/catalogue.json` `biomes.canonical` (lines 110–116) is the same five, and all 10,089 entry biome tokens are `SHARED`. **AS-BIOME-005** flags a declared canonical set that is not the six DEC-030 ids. Those three files are not edited here.
+26. **Shared outfit silhouette vs custom 135.** A1 said armour-weight silhouettes are shared and only the ramp and motif change. Owner 13:14 CT says the 135 class and armour outfits stay fully custom per race. **AS-HUM-015** and **AS-GEAR-001** follow 13:14. The silhouette field remains the slot pattern.
+27. **Season frames vs palette swaps.** **AS-BIOME-004** names four season states and rejects a runtime LUT. PM 13:01 CT (**AS-VAR-002**, Owner may amend) builds variety-piece seasons as palette-swap frames on precomputed season ramps. That is not a ColorMatrix. The four names stay.
+28. **Six profile window skins vs eleven selectable skins.** **AS-UI-001** had named a window sheet per building profile. Owner 12:57 CT (**AS-UI-004**) requires Deus, Deus Dark and one skin per race. The six profiles remain building styles and banners.
+29. **Legal mirror.** Item 12 stands. **AS-MIRROR-001** is the only added path: an offline W-to-E bake of a layer flagged `symmetric` with light-neutral shading.
+30. **Huge and Gargantuan multiples.** They were open. Owner 13:16–13:20 CT sets them in **AS-SIZE-001**. `geometry.json` still has nulls and was not edited.
+31. **Creature equipment.** Owner 13:01 CT supersedes any creature-gear slot. **AS-TAME-002**. No barding.
+32. **Window background opacity.** A generator handoff describes the RMMZ window background at 75% opacity. **AS-UI-004** keeps the rectangles and requires opaque pixels.
+33. **Separate elder bakes.** The generator pool bakes elder keys as their own charsets. **AS-ELDER-001**: only the stooped body is a new sheet. Garb, gear and hair are the adult sheets plus the offset table.
 
 ## Appendix B. Open questions
 
@@ -441,16 +572,24 @@ These are not answered here.
 4. **Other calls.**
    - What `COLD` looks like, given WG.00.04 forbids a snow biome, and where the existing `HIGH_*` ramps go.
    - What `WILD` looks like. No WG.00.04 entry describes it.
-   - The exact frame size for Huge and for Gargantuan (multiples of 48; the multiple is unset). `geometry.json` leaves both frames null.
-   - How many balding masks.
    - How many dragonborn scale-colour steps in `RAMP_SCALE`.
+   - Eight of the twelve hair-ramp steps are still unnamed (`step-05` through `step-12`). Race-specific hair colours are unnamed.
+   - The fourth marking id is `patch`. The Owner renames it if that is the wrong mark.
+   - Race-feature option pictures (`rf1`, `rf2`, `rf3`) are unnamed. Ears, horns, tail and scales stay their own parts.
+   - Do `DEEP` and `CAVERN` exhaust "underground depth band", or does `LOWLAND`'s negative Z count too?
+   - Head-state indices 0, 1 and 2 are not named gestures.
    - DEC-016's open sentence: if "the scale chart" means a file other than the registry plus the strip, the Owner names it.
    - Which race's home layer is which (DEC-013). The catalogue's z 0 / −1 / −2 seating is not that answer.
    - `TALL_MEDIUM` (48 by 64) and the gnome/halfling readability floor stay off, as in `geometry.json`. Turning them on is an Owner call.
    - Whether sleep, prone, unconscious and dead share the family id F14, given that their frames must already be distinguishable.
    - How a remembered fog-of-war view is drawn without a desaturation filter. The prohibition is in force. The replacement method is not specified.
 
-The four-direction rule is decided (12:38 CT). It is not in this appendix.
+5. **Deity roster.** No DEUS pantheon is on file. `docs/design/EMERGENT_SOCIETY.md` says not to add unapproved named gods. The SRD historical-pantheon appendix is not this roster. Which deities, if any, get a holy symbol?
+6. **Collar, saddle, harness.** After the 13:01 correction these are not slots and not stats. Are the visual markers wanted at all?
+7. **Biome code mapping.** This lane does not map `HIGH` to `COLD` and does not invent a source token for `WILD`. `TEMP`, `WET`, `ARID` and `VOLC` already have identity-standard counterparts named in **AS-BIOME-003**. The Owner decides the migration, including `HIGH` and `WILD`.
+8. **Beards.** Which of the nine races skip the eight facial-hair parts? `beardlessRaces` stays empty until that answer. Dwarf has the eight plus at least `dwarf-plait`. How many further dwarf extras?
+
+The four-direction rule is decided (12:38 CT). It is not in this appendix. Huge and Gargantuan frame squares are decided (13:16–13:20 CT). Balding overlays are three (PM 13:02 CT, Owner may amend). Those are not open questions.
 
 ## Appendix C. Existing assets
 
@@ -506,14 +645,14 @@ The JSON `rules` object carries the same ids. The sentence here is the short for
 - **AS-BEAST-001.** Natural-attack rows for Medium+.
 - **AS-BEAST-002.** Condition treatments on Medium+ creatures.
 - **AS-BEAST-003.** SV battler for Medium+.
-- **AS-BEAST-004.** Large frames, and multiples of 48 for Huge and Gargantuan.
+- **AS-BEAST-004.** Large, Huge and Gargantuan squares from **AS-SIZE-001**.
 - **AS-HUM-001.** Nine races, male and female templates.
 - **AS-HUM-002.** Fixed socket ids, per-frame coordinates, human baseline.
 - **AS-HUM-003.** Body, eyes, hair front/back, beard, racial parts.
 - **AS-HUM-004.** Paper-doll z-order legs 1 through fx 7.
 - **AS-HUM-005.** Face matches worn charset gear.
 - **AS-HUM-006.** Age axis. Further steps open.
-- **AS-HUM-007.** Greying ramp and balding masks.
+- **AS-HUM-007.** Greying ramp and three balding overlays.
 - **AS-HUM-008.** Visible genetic loci and their parts.
 - **AS-HUM-009.** Humanoid action rows.
 - **AS-HUM-010.** F01–F14 mapped onto those rows.
@@ -521,7 +660,7 @@ The JSON `rules` object carries the same ids. The sentence here is the short for
 - **AS-HUM-012.** Fifteen conditions, DEC-011 treatments, Invisible as a contour.
 - **AS-HUM-013.** Pregnancy stages 0–3 as a torso decal.
 - **AS-HUM-014.** Handedness and grips. No blind mirror.
-- **AS-HUM-015.** 9 × 15 outfit matrix, shared silhouettes, race ramps.
+- **AS-HUM-015.** 9 × 15 outfit matrix. Pixels are custom per race. Slot pattern stays named.
 - **AS-HUM-016.** Pose grid and pre-drawn weapon angles. PM-proposed, Owner may amend.
 - **AS-HUM-017.** Deforming pieces have per-pose frames.
 - **AS-HUM-018.** Height, build, horns, tail, ears, scale colour.
@@ -553,7 +692,7 @@ The JSON `rules` object carries the same ids. The sentence here is the short for
 - **AS-FX-005.** Draft 2020-12 spell-visual schema.
 - **AS-FX-006.** Other Z layers show effects at 1:1.
 - **AS-FX-007.** Projectile, impact, fire, water, weather.
-- **AS-UI-001.** Balloons, rings, HP bars, faction window skins.
+- **AS-UI-001.** Balloons, rings, HP bars. Window skins are **AS-UI-004**.
 - **AS-UI-002.** Selection rings on every selected layer.
 - **AS-UI-003.** Colour is not the only channel. Minimum glyph 16 px.
 - **AS-SUMMON-001.** 29 derived entity spells, each with a slot.
@@ -564,4 +703,34 @@ The JSON `rules` object carries the same ids. The sentence here is the short for
 - **AS-LIGHT-001.** Drawn night and lights. Optional crisp tint, no blur, default off.
 - **AS-MAP-001.** World map, minimap, markers, six banners.
 - **AS-PROP-001.** Signs, gravestones, statues, notice boards.
-- **AS-STYLE-001.** File-name patterns and the style-bible spec.
+- **AS-STYLE-001.** File-name patterns, including portraits, and the style-bible spec.
+- **AS-UI-004.** Deus, Deus Dark, and one window skin per race. Player-selectable. Opaque RMMZ layout.
+- **AS-REL-001.** Holy-symbol slot, altar, shrine, drawn aura, spellbook, scroll. Deity roster open.
+- **AS-FARM-001.** Crop stages, livestock young and adult, pens, tamed variants.
+- **AS-FOOD-001.** Raw and cooked, meals, ingredients, table, stockpile, icon.
+- **AS-DUNG-001.** Cave wall, mine support, tunnel, underground water, crystal, ruin.
+- **AS-TRAP-001.** Pit, spikes, pressure plate, locked and broken doors, poison gas, web, quicksand.
+- **AS-LORE-001.** Historical portrait, era ruin, artifact, history log.
+- **AS-SCENE-001.** Founding, coronation, disaster, war. Optional. Not a required set.
+- **AS-ZONE-001.** Dig, build, stockpile, route, blueprint hatch.
+- **AS-MKTG-001.** Marketing art is later. No required set.
+- **AS-TAME-001.** Tamed variant, bound pose, cage, pen. Markers have no slot and no stats.
+- **AS-TAME-002.** No creature armour, barding or crafted creature gear.
+- **AS-VAR-001.** Per-biome and per-underground-band piece floors. PM decision, Owner may amend.
+- **AS-VAR-002.** Variety seasons are palette swaps. Flip only when light-neutral.
+- **AS-GENE-001.** Hair, balding, facial hair and face-gene counts. PM decision, Owner may amend.
+- **AS-PORT-001.** Icon and 144 px portrait for every non-face entity.
+- **AS-HEAD-001.** 12-frame head grid and a head anchor on every body frame.
+- **AS-ELDER-001.** Elder reuses adult garb, gear and hair via per-frame offsets.
+- **AS-GEAR-001.** One silhouette for weapons, tools and accessories, plus ramp and decal.
+- **AS-MIRROR-001.** Offline W-to-E bake only, symmetric and light-neutral.
+- **AS-POSE-001.** Prone, unconscious, sleep, sit, sneak, climb, with the condition map.
+- **AS-BIOME-005.** Declared canonical biome sets must be the six DEC-030 ids.
+- **AS-SIZE-001.** Creature frames in 48 px squares, from Tiny 1×1 through Gargantuan 4×4.
+- **AS-SLOT-001.** Charset, face, tileset and action-row templates. 2048 atlas, 42×42.
+- **AS-PIPE-001.** Exact size. No scaling. Crop transparent margins only. MISSING from empty slots.
+- **AS-PROMPT-001.** Field templates per category. No prompt is run.
+- **AS-GEN-001.** Generation log: generator, version, seed, outcome, reason codes.
+- **AS-GEN-002.** Yield, cost and time per usable slot, per generator, category and template.
+- **AS-GEN-003.** Template versions promote only when A/B yield wins.
+- **AS-GEN-004.** Adapters, routing, golden test set. Style tune is optional and later.
