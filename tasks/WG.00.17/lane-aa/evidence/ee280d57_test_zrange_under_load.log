@@ -1,0 +1,37 @@
+=== WG.00.17 zrange: configurations -4..4, -16..15, -2..2, seed 18, base 5255f1a5, 1500 updates, 3 run(s) at a time ===
+  run -16..15_sim: RESULT: 0 passed, 0 failed (exit 2) in 57 s (run_tests exit 2); snapshot C:\Users\snewt\AppData\Local\Temp\laneaa_zr_snap\-16..15_sim_3296_1790433373359 (deleted)
+    HARNESS timed out after 11000 ms waiting for 60 frames
+    HARNESS current scene: Scene_Map
+  run -4..4_sim: RESULT: 0 passed, 0 failed (exit 2) in 57 s (run_tests exit 2); snapshot C:\Users\snewt\AppData\Local\Temp\laneaa_zr_snap\-4..4_sim_3296_1790433373117 (deleted)
+    HARNESS timed out after 11000 ms waiting for 60 frames
+    HARNESS current scene: Scene_Map
+  run -2..2_sim: RESULT: 0 passed, 0 failed (exit 2) in 58 s (run_tests exit 2); snapshot C:\Users\snewt\AppData\Local\Temp\laneaa_zr_snap\-2..2_sim_3296_1790433373477 (deleted)
+    HARNESS timed out after 11000 ms waiting for 60 frames
+    HARNESS current scene: Scene_Map
+  run -2..2_play: RESULT: 0 passed, 0 failed (exit 2) in 79 s (run_tests exit 2); snapshot C:\Users\snewt\AppData\Local\Temp\laneaa_zr_snap\-2..2_play_3296_1790433431877 (deleted)
+    HARNESS timed out after 11000 ms waiting for 60 frames
+    HARNESS current scene: Scene_Map
+  run -16..15_play: RESULT: 0 passed, 0 failed (exit 2) in 82 s (run_tests exit 2); snapshot C:\Users\snewt\AppData\Local\Temp\laneaa_zr_snap\-16..15_play_3296_1790433430440 (deleted)
+    HARNESS timed out after 11000 ms waiting for 60 frames
+    HARNESS current scene: Scene_Map
+  run -4..4_play: RESULT: 0 passed, 0 failed (exit 2) in 83 s (run_tests exit 2); snapshot C:\Users\snewt\AppData\Local\Temp\laneaa_zr_snap\-4..4_play_3296_1790433430249 (deleted)
+    HARNESS timed out after 11000 ms waiting for 60 frames
+    HARNESS current scene: Scene_Map
+  run -2..2_core: RESULT: 8 passed, 0 failed (exit 0) in 47 s (run_tests exit 0); snapshot C:\Users\snewt\AppData\Local\Temp\laneaa_zr_snap\-2..2_core_3296_1790433513260 (deleted)
+  run -4..4_core: RESULT: 8 passed, 0 failed (exit 0) in 56 s (run_tests exit 0); snapshot C:\Users\snewt\AppData\Local\Temp\laneaa_zr_snap\-4..4_core_3296_1790433511034 (deleted)
+  run -16..15_core: RESULT: 8 passed, 0 failed (exit 0) in 57 s (run_tests exit 0); snapshot C:\Users\snewt\AppData\Local\Temp\laneaa_zr_snap\-16..15_core_3296_1790433513085 (deleted)
+  run legacy: RESULT: 1 passed, 1 failed (exit 1) in 36 s (run_tests exit 1); snapshot C:\Users\snewt\AppData\Local\Temp\laneaa_zr_snap\legacy_3296_1790433560313 (deleted)
+    FAIL zrange.legacy_save_loads - base save (6611410 characters) loaded: range -2..2 (5 levels; saved zRange "absent"), every cell of -2..+2 identical to the save, changed cells {"0":1,"1":170,"2":1,"-2":0,"-1":1} (save {"0":1,"1":170,"2":1,"-2":0,"-1":1}), items identical to the save (3302), units DIFFERENT from the base commit's load, cells and items identical to the base commit's load true; after
+FAIL single_authority - static scan: 133 lines with a Z pattern, 130 allowed (109 entries), 3 not allowed (DEUS_Levels.js:162 const ZR = { st: {}, zMin: 0, zMax: 0, n: 0, levels: null, k | DEUS_Levels.js:1296 const L = st.levels && (st.levels[ZR.keys[li]] || st.levels[ | DEUS_World.js:198 const zr = { state: {}, range: null, zMin: 0, zMax: 0, level), 2 stale; in-game: -4..4 PASS, -16..15 PASS, -2..2 PASS
+PASS elevation_math - -4..4: e = (z - -4) * 5 + s on cell (12,40) of levels -4, -3, -2, -1, 0, 1, 2, 3, 4: worldStrataElevationAt, airRunAt at e (0) and e + 1 (air above), a one-stratum box damage at e destroys exactly (z, s); highest elevation 44 ( || -16..15: e = (z - -16) * 5 + s on cell (12,40) of levels -16, -15, -2, -1, 0, 1, 2, 14, 15: worldStrataElevationAt, airRunAt at e (0) and e + 1 (air above), a one-stratum box damage at e destroys exactly (z, s); highest elevation || -2..2: e = (z - -2) * 5 + s on cell (12,40) of levels -2, -1, 0, 1, 2: worldStrataElevationAt, airRunAt at e (0) and e + 1 (air above), a one-stratum box damage at e destroys exactly (z, s); highest elevation 24 (the top S4: 24
+PASS feet_2ft_10ft - -4..4: constants ok, blast = 2 ft table (r3 3, r5 9, r7 27); -16..15: constants ok, blast = 2 ft table (r3 3, r5 9, r7 27); -2..2: constants ok, blast = 2 ft table (r3 3, r5 9, r7 27); base 5255f1a5: = 1 ft table (r3 7, r5 15, r7 51); tables: 2 ft r3 3, r5 9, r7 27, 1 ft r3 7, r5 15, r7 51 strata
+PASS sparse_memory - -4..4: outer UNIFORM, split one chunk, -16..15: outer UNIFORM, split one chunk, -2..2: outer UNIFORM, split one chunk; baseline store (directories, MIXED arrays, caps) -16..+15 1693592 B, -2..+2 1622552 B: difference 71040 B, bound 71040 B ((32 - 5 levels) x 64 chunks x 2 B = 3456 B of directory + 12 MIXED chunks outside the core (the mountain rock above +2) x 5632 B = 67584 B); shape grids cached 589824 / 327680 B; JS heap after New Game (forced GC true): 109000000 vs 103000000 B (difference 6000000 B, reported, not judged)
+FAIL sparse_save - -4..4: changes WRONG, -16..15: changes WRONG, -2..2: changes WRONG; no save numbers
+FAIL legacy_save_loads - base save (6611410 characters) loaded: range -2..2 (5 levels; saved zRange "absent"), every cell of -2..+2 identical to the save, changed cells {"0":1,"1":170,"2":1,"-2":0,"-1":1} (save {"0":1,"1":170,"2":1,"-2":0,"-1":1}), items identical to the save (3302), units DIFFERENT from the base commit's load, cells and items identical to the base commit's load true; after 30 frames of play saved and loaded again: range -2..2, saved zRange "absent", the world as saved identical (cells, units, items)
+PASS old_layers_identical - base 5255f1a5 seed 18: -4..4: identical (checksums 34c59783 eaf389b9 9998ffb2 dcfbb91b 433f2728); -16..15: identical (checksums 34c59783 eaf389b9 9998ffb2 dcfbb91b 433f2728); -2..2: identical (checksums 34c59783 eaf389b9 9998ffb2 dcfbb91b 433f2728)
+FAIL matter_unchanged - base 5255f1a5 seed 18 (base repeat: census true, after play true): -4..4: no census; -16..15: no census; -2..2: no census
+FAIL extreme_layers_work - -4..4: FAIL the check extreme_layers_work did not run (RESULT: 0 passed, 0 failed (exit 2)); errors core none, play SOME || -16..15: FAIL the check extreme_layers_work did not run (RESULT: 0 passed, 0 failed (exit 2)); errors core none, play SOME || -2..2: FAIL the check extreme_layers_work did not run (RESULT: 0 passed, 0 failed (exit 2)); errors core none, play SOME
+PASS path_scratch_bounded - -4..4: a 3D search on the ground from (78,4) to (98,4): path 20 cells; its scratch reached level(s) [0] of 9; layers with scratch arrays since boot 1 (1310720 B each), heap 262152 entries || -16..15: a 3D search on the ground from (78,4) to (98,4): path 20 cells; its scratch reached level(s) [0] of 32; layers with scratch arrays since boot 1 (1310720 B each), heap 262152 entries || -2..2: a 3D search on the ground from (78,4) to (98,4): path 20 cells; its scratch reached level(s) [0] of 5; layers with scratch arrays since boot 1 (1310720 B each), heap 262152 entries
+reports: C:\Users\snewt\AppData\Local\Temp\laneaa_zr_results_3296.json
+RESULT: 5 passed, 5 failed (exit 1)
+EXIT=1
