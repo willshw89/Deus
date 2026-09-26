@@ -318,44 +318,64 @@ assert(defender.data.dead === true, "Target marked dead");
 assert(killEmitted === true, "combat:kill event was emitted");
 
 // -----------------------------------------------------------------------------
-// Proof 8: No second combat law
+// Proof 8: Commoner default, and an unknown species still fails loudly
 // -----------------------------------------------------------------------------
-console.log("\n[Proof 8] Unmapped units fail loudly");
+console.log("\n[Proof 8] Commoner default and unmapped species");
 
-// combatLevels alone are not an SRD stat block. DEC-027 retired the old formula,
-// so this attack must fail instead of inventing a hit.
-const legacyAttacker = {
+// combatLevels alone is how the render bench builds a unit. It is a humanoid
+// with no ability scores, so the SRD Commoner stat block applies.
+const benchAttacker = {
     id: 20,
     area: { x: 0, y: 0, z: 0 },
     x: 0, y: 0, z: 0,
     data: {
-        hp: 20, maxHp: 20,
+        hp: 20, maxHp: 20, kind: "test",
         combatLevels: { attack: 60, strength: 60, defence: 60, hitpoints: 20 },
         equipment: { weapon: "sword_long" },
         combat: { mode: "manual", style: "aggressive" }
     }
 };
-const legacyDefender = {
+const benchDefender = {
     id: 21,
     area: { x: 0, y: 0, z: 0 },
     x: 0, y: 1, z: 0,
     data: {
-        hp: 20, maxHp: 20,
+        hp: 20, maxHp: 20, kind: "test",
         combatLevels: { attack: 1, strength: 1, defence: 1, hitpoints: 20 },
         equipment: {},
         combat: { mode: "manual" }
     }
 };
-UF.World.addUnit(legacyAttacker);
-UF.World.addUnit(legacyDefender);
+UF.World.addUnit(benchAttacker);
+UF.World.addUnit(benchDefender);
 
+let benchCode = "";
+let benchRes = null;
+try {
+    benchRes = UF.Combat.resolveAttack(benchAttacker, benchDefender, { bypassGcd: true, rng: () => 0.999999 });
+} catch (e) {
+    benchCode = e && e.code ? e.code : (e && e.message) || "throw";
+}
+assert(benchCode === "" && benchRes && benchRes.hit === true, "A combatLevels-only unit resolves as a Commoner (" + benchCode + ")");
+assert(UF.Combat.maxHp(benchDefender) === 4, "Commoner hit points are 4, not the combatLevels pool (" + UF.Combat.maxHp(benchDefender) + ")");
+
+const unknownAttacker = {
+    id: 22,
+    area: { x: 0, y: 0, z: 0 },
+    x: 0, y: 2, z: 0,
+    data: { hp: 20, maxHp: 20, species: "not_a_creature", combat: { mode: "manual" } }
+};
+UF.World.addUnit(unknownAttacker);
+benchDefender.data.hp = 4;
+benchDefender.data.dead = false;
+delete benchDefender.data._isDying;
 let unmappedCode = "";
 try {
-    UF.Combat.resolveAttack(legacyAttacker, legacyDefender, { bypassGcd: true, rng: () => 0.999999 });
+    UF.Combat.resolveAttack(unknownAttacker, benchDefender, { bypassGcd: true, rng: () => 0.999999 });
 } catch (e) {
     unmappedCode = e && e.code ? e.code : "";
 }
-assert(unmappedCode === "NO_SRD_MAPPING", "A unit with only combat levels and no SRD mapping fails loudly (" + unmappedCode + ")");
+assert(unmappedCode === "NO_SRD_MAPPING", "A species with no SRD creature fails loudly (" + unmappedCode + ")");
 
 // -----------------------------------------------------------------------------
 // Summary

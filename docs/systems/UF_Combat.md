@@ -18,16 +18,7 @@ The `perf` average varies between runs from 0.23 to 0.44 ms per frame against th
 ## The model
 **Ticks.** One combat tick = `combat.tickFrames` map updates (36 = 0.6 s at ×1). The loop runs from a `Game_Map.update` alias, so it stops while paused and speeds up with the speed keys (UF_TimeSpeed plays more map updates per frame). The counters are `UF.World.state.combat.updates` and `.tick`. Nothing reads `Graphics.frameCount` for simulation.
 
-**Levels.** Skill ids are `attack`, `strength`, `defence`, `ranged`, `magic` and `hitpoints`. `level(unit, id)` works down this list:
-1. A creature (a unit whose `data.species` has a `wildlife.species[].combat` block) uses the block, and never levels up.
-2. Everyone else gets `UF.Skills.level(unit, id)` when UF_Skills exists and it answers ≥ 1.
-3. Else `unit.data.combatLevels[id]`.
-4. Else the catalog's `combat.people` defaults (all 1, hitpoints 10).
-5. Else 1.
-
-The 10-hitpoint default in step 4 is ours. The contract says "else 1", but 1 would make a person without UF_Skills die to one punch. UF_Skills itself never gives hitpoints below 10.
-
-**Hitpoints.** The maximum is the creature block's `hitpoints`, or the person's hitpoints level. The current value is `unit.data.hp`. `data.maxHp` is a cache of the maximum, written whenever UF_Combat reads hitpoints. Hitpoints are set up on first use (an attack, `calcAC`, `hp()`). A unit at 0 dies (`onUnitDeath`). **Regeneration:** every `combat.regen.everyTicks` ticks (100 = 60 s at ×1 = one game hour on the clock), every living unit that has `data.hp` and is below its maximum gains `regen.hp` (1).
+**Hit points and rank.** A mapped creature's maximum is `UF.Rules.hitPoints` on its SRD stat block, the printed average (wolf 11, deer 4, jackal 3, boar 11, giant spider 26, troll 84). The catalog `combat` block is not read for hit points, attack, defence, or level. A humanoid with no ability scores uses the SRD Commoner (4 hit points). A character uses `data.dnd.hpMax` or `data.maxHp`. The current value is `unit.data.hp`. "Strongest" target order is the creature's challenge rating, or the character's level. The chronicle names that rank. The old skill ladder (`attack`, `strength`, `defence`, `ranged`, `magic`, `hitpoints`, and the fighting-level formula) is the retired V64 model. **Regeneration:** every `combat.regen.everyTicks` ticks (100 = 60 s at ×1 = one game hour on the clock), every living unit that has `data.hp` and is below its maximum gains `regen.hp` (1).
 
 **One attack** (`resolveAttack`), retired V64 numbers. The live path is `UF.Rules` (see the top of this file and `docs/systems/DEUS_Rules.md`). The effective level was `level + style bonus + combat.levelOffset (8)`.
 - **A** (max attack roll) = effective attack × (the equipment's attack bonus for the attack type + 64). Ranged attacks use ranged instead of attack; magic uses magic.

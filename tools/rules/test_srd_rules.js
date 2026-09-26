@@ -38,6 +38,7 @@ const srd = {
 const sources = {
     dice: fs.readFileSync(path.join(RULES_DIR, "dice.js"), "utf8"),
     index: fs.readFileSync(path.join(RULES_DIR, "srd_index.js"), "utf8"),
+    species: fs.readFileSync(path.join(RULES_DIR, "species_map.js"), "utf8"),
     rules: fs.readFileSync(path.join(RULES_DIR, "rules.js"), "utf8")
 };
 
@@ -46,6 +47,7 @@ function loadEngine(src) {
     function localRequire(name) {
         if (name === "./dice" || name === "./dice.js") return modules.dice;
         if (name === "./srd_index" || name === "./srd_index.js") return modules.index;
+        if (name === "./species_map" || name === "./species_map.js") return modules.species;
         throw new Error("unexpected require " + name);
     }
     function run(key, code) {
@@ -55,6 +57,7 @@ function loadEngine(src) {
         modules[key] = module.exports;
     }
     run("dice", src.dice);
+    run("species", src.species);
     run("index", src.index);
     run("rules", src.rules);
     return modules.rules;
@@ -279,7 +282,7 @@ function purityHits(text) {
     for (let i = 0; i < FORBIDDEN.length; i++) if (FORBIDDEN[i].re.test(text)) hits.push(FORBIDDEN[i].name);
     return hits;
 }
-const purityClean = purityHits(sources.dice + "\n" + sources.index + "\n" + sources.rules);
+const purityClean = purityHits(sources.dice + "\n" + sources.index + "\n" + sources.species + "\n" + sources.rules);
 const purityDirty = purityHits(sources.dice + "\nwindow.Math.random();");
 check("purity_scan_clean", purityClean.length === 0);
 check("purity_scan_catches_mutant", purityDirty.indexOf("window") >= 0 && purityDirty.indexOf("Math.random") >= 0);
@@ -287,7 +290,7 @@ check("purity_scan_catches_mutant", purityDirty.indexOf("window") >= 0 && purity
 // In-memory mutants. Each one must disagree with the real engine.
 function mutantEngine(file, from, to) {
     if (sources[file].indexOf(from) < 0 || sources[file].split(from).length - 1 !== 1) return null;
-    const copy = { dice: sources.dice, index: sources.index, rules: sources.rules };
+    const copy = { dice: sources.dice, index: sources.index, species: sources.species, rules: sources.rules };
     copy[file] = sources[file].replace(from, to);
     return loadEngine(copy).createRules(srd);
 }
@@ -370,13 +373,314 @@ check("loader_require_does_not_publish", typeof plain.createRules === "function"
 
 // Retired formula path: the plugin source must not carry it.
 const combatText = fs.readFileSync(COMBAT, "utf8");
-const osrs = [];
-if (combatText.indexOf("hitChance") >= 0) osrs.push("hitChance");
-if (combatText.indexOf("maxHitFor") >= 0) osrs.push("maxHitFor");
-if (combatText.indexOf("maxHitOf") >= 0) osrs.push("maxHitOf");
-if (combatText.indexOf("OSRS") >= 0) osrs.push("OSRS");
+const retiredNames = ["hitChance", "maxHitFor", "maxHitOf", "OSRS", "combatLevel", "levelOffset", "magicDefence", "bonusesOf", "fighting level"];
+const osrs = retiredNames.filter(function (name) {
+    if (name === "combatLevel") return /\bcombatLevel\b/.test(combatText);
+    return combatText.indexOf(name) >= 0;
+});
 if (/\blegacy\b/.test(combatText) || /useRules/.test(combatText) || /o\.legacy/.test(combatText)) osrs.push("legacy-branch");
 check("zero_retired_formula_in_deus_combat", osrs.length === 0);
+
+// FIX1. Runtime HP, species map, armor, printed saves, riders, resistance order.
+const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, "game", "data", "UF_WorldCatalog.json"), "utf8"));
+const speciesList = catalog.wildlife.species;
+const namedHp = { wolf: 11, deer: 4, jackal: 3, boar: 11, giant_spider: 26, troll: 84 };
+
+function loadCombat(source) {
+    const context = {
+        console: console,
+        require: require,
+        process: process,
+        performance: { now: function () { return 0; } }
+    };
+    context.window = context;
+    function Sprite() {}
+    Sprite.prototype.addChild = function () { return this; };
+    Sprite.prototype.removeChild = function () { return this; };
+    context.Sprite = Sprite;
+    function Bitmap() {}
+    context.Bitmap = Bitmap;
+    function Spriteset_Map() {}
+    Spriteset_Map.prototype.createCharacters = function () {};
+    context.Spriteset_Map = Spriteset_Map;
+    function Scene_Boot() {}
+    Scene_Boot.prototype.start = function () {};
+    context.Scene_Boot = Scene_Boot;
+    context.SceneManager = { _scene: null };
+    vm.createContext(context);
+    vm.runInContext(source, context, { filename: COMBAT });
+    return context;
+}
+
+const combatVm = loadCombat(combatText);
+combatVm.$ufWorldCatalog = catalog;
+const liveRules = combatVm.UF && combatVm.UF.Rules;
+const liveCombat = combatVm.UF && combatVm.UF.Combat;
+let hpMatch = speciesList.length === 23 && !!liveCombat;
+const hpBad = [];
+for (let i = 0; hpMatch && i < speciesList.length; i++) {
+    const species = speciesList[i];
+    const unit = { id: species.id, data: { species: species.id } };
+    const got = liveCombat.maxHp(unit);
+    const block = liveRules.creatureOf(unit);
+    const want = block ? liveRules.hitPoints(block).hp : null;
+    if (got !== want || (namedHp[species.id] !== undefined && got !== namedHp[species.id])) {
+        hpMatch = false;
+        hpBad.push(species.id + "=" + got + " want " + want);
+    }
+}
+check("catalog_species_maxhp_is_srd_average", hpMatch && hpBad.length === 0);
+
+const hpMutantSrc = combatText.replace(
+    "base = Rules.hitPoints(creature).hp;",
+    "base = (speciesOf(unit) && speciesOf(unit).combat && speciesOf(unit).combat.hitpoints) || Rules.hitPoints(creature).hp;"
+);
+let catalogHpKilled = false;
+if (hpMutantSrc !== combatText) {
+    const hpMutant = loadCombat(hpMutantSrc);
+    hpMutant.$ufWorldCatalog = catalog;
+    const wolfUnit = { id: "wolf", data: { species: "wolf" } };
+    catalogHpKilled = hpMutant.UF.Combat.maxHp(wolfUnit) === 24;
+}
+check("mutant_catalog_hitpoints_killed", catalogHpKilled);
+
+const mapRows = rules.speciesMap;
+const mapIds = {};
+let mapOk = mapRows.length === 23;
+for (let i = 0; i < mapRows.length; i++) {
+    const row = mapRows[i];
+    mapIds[row.species] = row;
+    if (!row.srdId || (row.kind !== "direct" && row.kind !== "proxy") || !row.reason) mapOk = false;
+    if (!rules.index.creature(row.srdId)) mapOk = false;
+}
+for (let i = 0; i < speciesList.length; i++) if (!mapIds[speciesList[i].id]) mapOk = false;
+const human = { id: "human", data: { species: "human" } };
+const bench = { id: "bench", data: { kind: "test", combatLevels: { attack: 60, hitpoints: 99 } } };
+const humanCreature = rules.creatureOf(human);
+const benchCreature = rules.creatureOf(bench);
+check("species_map_covers_23_and_commoner_default",
+    mapOk && humanCreature && humanCreature.id === "srd:creature:commoner" && rules.hitPoints(humanCreature).hp === 4 &&
+    benchCreature && benchCreature.id === "srd:creature:commoner");
+
+let pairOk = true;
+let pairErr = "";
+const itemTypes = catalog.items.types;
+const weaponItems = itemTypes.filter(function (t) { return t && t.weapon; });
+const armorItems = itemTypes.filter(function (t) {
+    if (!t) return false;
+    if (t.shield) return true;
+    const slot = t.armor && t.armor.slot;
+    return slot === "armor" || slot === "shield" || slot === "torso" || slot === "clothes";
+});
+function naturalKey(species) {
+    const type = species.combat && species.combat.attackType;
+    return liveCombat.resolveWeaponKey({ natural: true, types: [type || "crush"] });
+}
+for (let a = 0; pairOk && a < speciesList.length; a++) {
+    const attacker = { id: "a" + a, x: 0, y: 0, z: 0, data: { species: speciesList[a].id } };
+    const key = naturalKey(speciesList[a]);
+    for (let b = 0; pairOk && b < speciesList.length; b++) {
+        const target = { id: "b" + b, x: 1, y: 0, z: 0, data: { species: speciesList[b].id } };
+        try {
+            const att = rules.attack(attacker, target, key, { roll: 12, rng: seq([0.2]) });
+            rules.damage(attacker, target, att, { rng: seq([0.2, 0.4]), saveRoll: 10 });
+        } catch (e) {
+            pairOk = false;
+            pairErr = speciesList[a].id + "->" + speciesList[b].id + " " + key + " " + (e.code || e.message);
+        }
+    }
+}
+for (let w = 0; pairOk && w < weaponItems.length; w++) {
+    const item = weaponItems[w];
+    const key = liveCombat.resolveWeaponKey({ name: item.name, itemType: item.id });
+    const attacker = { id: "w" + w, x: 0, y: 0, z: 0, data: { species: "wolf", equipment: { weapon: item.id } } };
+    const target = { id: "wt", x: 1, y: 0, z: 0, data: { species: "deer" } };
+    try {
+        const att = rules.attack(attacker, target, key, { roll: 12, rng: seq([0.2]) });
+        rules.damage(attacker, target, att, { rng: seq([0.2]), saveRoll: 10 });
+    } catch (e) {
+        pairOk = false;
+        pairErr = "weapon " + item.id + " key " + key + " " + (e.code || e.message);
+    }
+}
+for (let n = 0; pairOk && n < armorItems.length; n++) {
+    const item = armorItems[n];
+    const slot = item.shield ? "shield" : "torso";
+    const equipment = {};
+    equipment[slot] = item.id;
+    const target = { id: "ar" + n, x: 1, y: 0, z: 0, data: { species: "wolf", equipment: equipment } };
+    const attacker = { id: "ara", x: 0, y: 0, z: 0, data: { species: "boar" } };
+    try {
+        const att = rules.attack(attacker, target, "bite", { roll: 12, rng: seq([0.2]) });
+        rules.damage(attacker, target, att, { rng: seq([0.2]), saveRoll: 10 });
+    } catch (e) {
+        pairOk = false;
+        pairErr = "armor " + item.id + " " + (e.code || e.message);
+    }
+}
+if (!pairOk) console.log("PAIR " + pairErr);
+if (hpBad.length) console.log("HP " + hpBad.join(", "));
+check("catalog_species_weapons_and_armor_resolve", pairOk && weaponItems.length > 0 && armorItems.length > 0);
+
+const armorBad = [];
+for (let i = 0; i < armorItems.length; i++) {
+    const item = armorItems[i];
+    const resolved = rules.index.armor(item.id);
+    const listed = rules.index.isNonArmor(item.id);
+    if (!resolved && !listed) armorBad.push(item.id);
+    if (resolved && listed) armorBad.push(item.id + ":both");
+}
+const leatherWearer = { data: { stats: { str: 10, dex: 14, con: 10, int: 10, wis: 10, cha: 10 }, equipment: { torso: "armor_leather" } } };
+const leatherAc = rules.armorClass(leatherWearer);
+if (armorBad.length) console.log("ARMOR " + armorBad.join(", "));
+check("catalog_armor_slots_resolve_or_are_listed_non_armor",
+    armorBad.length === 0 && leatherAc.ac === 13 && rules.index.armor("armor_leather") && rules.index.armor("armor_leather").key === "leather");
+const armorMutant = mutantEngine("index", "    armor_leather: \"leather\",\n", "");
+let armorAliasKilled = false;
+if (armorMutant) {
+    const worn = { data: { stats: { str: 10, dex: 14, con: 10, int: 10, wis: 10, cha: 10 }, equipment: { torso: "armor_leather" } } };
+    try { armorMutant.armorClass(worn); } catch (e) { armorAliasKilled = e.code === "UNKNOWN_ARMOR"; }
+}
+check("mutant_armor_leather_alias_dropped_killed", !!armorMutant && armorAliasKilled);
+
+let saveChecked = 0;
+let saveMatched = 0;
+let saveBad = "";
+for (let i = 0; i < rules.index.creatures.length; i++) {
+    const creature = rules.index.creatures[i];
+    const saves = creature.savingThrows || {};
+    const keys = Object.keys(saves);
+    for (let k = 0; k < keys.length; k++) {
+        saveChecked++;
+        const unit = { id: creature.id, data: { srdId: creature.id } };
+        const result = rules.savingThrow(unit, keys[k], 10, { roll: 10 });
+        if (result.total === 10 + saves[keys[k]]) saveMatched++;
+        else saveBad = creature.id + " " + keys[k] + " total " + result.total + " printed " + saves[keys[k]];
+    }
+}
+const dragon = { data: { srdId: "srd:creature:adult-red-dragon" } };
+const dragonCon = rules.savingThrow(dragon, "con", 20, { roll: 10 });
+if (saveBad) console.log("SAVE " + saveBad);
+check("printed_saves_315_equal_10_plus_bonus", saveChecked === 315 && saveMatched === 315 && !saveBad && dragonCon.total === 23);
+const saveMutant = mutantEngine("rules",
+    "if (typeof printed === \"number\" && Number.isFinite(printed)) printedSave = printed;",
+    "if (false) printedSave = printed;");
+let saveKilled = false;
+if (saveMutant) saveKilled = saveMutant.savingThrow(dragon, "con", 20, { roll: 10 }).total !== 23;
+check("mutant_printed_saves_ignored_killed", !!saveMutant && saveKilled);
+
+const bothTraits = { data: { stats: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }, damageResistances: ["fire"], damageVulnerabilities: ["fire"] } };
+const bothDmg = rules.damage(fighter, bothTraits, { hit: true, critical: false, damageFlat: 25, damageType: "fire", damageExpr: null, fromStatBlock: true, abilityMod: 0 }, {});
+check("resistance_then_vulnerability_srd_rule_combat_damage_and_healing", bothDmg.damage === 24 && bothDmg.relation === "resistance_then_vulnerability");
+const resistOrderMutant = mutantEngine("rules",
+    "if (vulnerable) {\n            amount = amount * 2;\n            relation = relation ? \"resistance_then_vulnerability\" : \"vulnerability\";\n        }",
+    "if (vulnerable && !resist) {\n            amount = amount * 2;\n            relation = \"vulnerability\";\n        }");
+let resistOrderKilled = false;
+if (resistOrderMutant) {
+    const d = resistOrderMutant.damage(fighter, bothTraits, { hit: true, critical: false, damageFlat: 25, damageType: "fire", damageExpr: null, fromStatBlock: true, abilityMod: 0 }, {});
+    resistOrderKilled = d.damage !== 24;
+}
+check("mutant_resistance_and_vulnerability_cancel_killed", !!resistOrderMutant && resistOrderKilled);
+
+const spider = { id: "spider", data: { species: "giant_spider" } };
+const saveVictim = { id: "victim", data: { stats: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 } } };
+const spiderAtt = rules.attack(spider, saveVictim, "bite", { roll: 18 });
+const spiderFail = rules.damage(spider, saveVictim, spiderAtt, { rng: seq([0, 0, 0]), saveRoll: 1 });
+const spiderSave = rules.damage(spider, saveVictim, spiderAtt, { rng: seq([0, 0, 0]), saveRoll: 15 });
+const dragonAtt = rules.attack(dragon, saveVictim, "bite", { roll: 18 });
+const dragonDmg = rules.damage(dragon, saveVictim, dragonAtt, { rng: seq([0.999, 0.999, 0.999, 0.999]) });
+const riderReport = rules.index.riderReport;
+check("unconditional_and_save_riders_apply",
+    spiderFail.riders.length === 1 && spiderFail.riders[0].type === "poison" && spiderFail.riders[0].damage === 2 && spiderFail.damage === 6 &&
+    spiderSave.riders[0].damage === 1 &&
+    dragonDmg.damage === 40 && dragonDmg.riders.length === 1 && dragonDmg.riders[0].type === "fire" && dragonDmg.riders[0].damage === 12 &&
+    riderReport.unconditional === 63 && riderReport.save === 19 && riderReport.gaps.length > 0);
+const riderMutant = mutantEngine("rules", "for (let i = 0; i < riders.length; i++) {", "for (let i = 0; i < 0; i++) {");
+let riderKilled = false;
+if (riderMutant) {
+    const att = riderMutant.attack(dragon, saveVictim, "bite", { roll: 18 });
+    const d = riderMutant.damage(dragon, saveVictim, att, { rng: seq([0.999, 0.999, 0.999, 0.999]) });
+    riderKilled = d.damage === 28 && (!d.riders || d.riders.length === 0);
+}
+check("mutant_riders_dropped_killed", !!riderMutant && riderKilled);
+console.log("RIDER_APPLIED unconditional " + riderReport.unconditional);
+console.log("RIDER_APPLIED save " + riderReport.save);
+console.log("RIDER_GAPS " + riderReport.gaps.length);
+for (let i = 0; i < riderReport.gaps.length; i++) {
+    const gap = riderReport.gaps[i];
+    console.log("RIDER_GAP " + gap.id + " " + gap.action + " | " + gap.reason);
+}
+
+const nonmagical = { data: { stats: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }, damageResistances: ["bludgeoning from nonmagical attacks"] } };
+const flatHit = { hit: true, critical: false, damageFlat: 10, damageType: "bludgeoning", damageExpr: null, fromStatBlock: true, abilityMod: 0 };
+const plainResist = rules.damage(fighter, nonmagical, flatHit, {});
+const magicBypass = rules.damage(fighter, nonmagical, flatHit, { magical: true });
+check("magical_bypasses_nonmagical_resistance", plainResist.damage === 5 && magicBypass.damage === 10);
+const magicMutant = mutantEngine("rules", "if (trait.nonmagical && magical) return false;", "if (trait.nonmagical && false) return false;");
+let magicKilled = false;
+if (magicMutant) magicKilled = magicMutant.damage(fighter, nonmagical, flatHit, { magical: true }).damage === 5;
+check("mutant_magical_bypass_ignored_killed", !!magicMutant && magicKilled);
+
+const monkShield = { data: { stats: { str: 10, dex: 16, con: 14, int: 10, wis: 16, cha: 10 }, unarmoredDefense: "monk", equipment: { shield: "shield" } } };
+const monkBare = { data: { stats: { str: 10, dex: 16, con: 14, int: 10, wis: 16, cha: 10 }, unarmoredDefense: "monk" } };
+const barbShield = { data: { stats: { str: 10, dex: 14, con: 16, int: 10, wis: 10, cha: 10 }, unarmoredDefense: "barbarian", equipment: { shield: "shield" } } };
+check("monk_unarmored_defense_forbids_shield",
+    rules.armorClass(monkBare).ac === 16 && rules.armorClass(monkShield).ac === 15 && rules.armorClass(barbShield).ac === 17 &&
+    rules.index.unarmoredDefense.monk.forbidsShield === true && rules.index.deathSaves.successOn === 10 && rules.index.longJump.usesStrengthScore === true);
+
+check("plugin_publishes_window_uf_rules", !!(liveRules && typeof liveRules.attack === "function" && combatVm.window.UF.Rules === liveRules));
+const attachMutantSrc = combatText.replace("mod.attach(window, rules);", "/* attach removed */;");
+let attachKilled = false;
+if (attachMutantSrc !== combatText) {
+    const dropped = loadCombat(attachMutantSrc);
+    attachKilled = !(dropped.UF && dropped.UF.Rules);
+}
+check("mutant_plugin_attach_removed_killed", attachKilled);
+
+const rngStart = combatText.indexOf("function attackRng");
+const rngEnd = combatText.indexOf("function modeOf");
+const rngBody = combatText.slice(rngStart, rngEnd);
+check("plugin_default_rng_is_seeded", rngBody.indexOf("mulberry32") >= 0 && rngBody.indexOf("Math.random") < 0);
+const rngMutantSrc = combatText.replace(
+    "return w.mulberry32(w.hash32(seed, SALT.attack, attacker.id >>> 0, target.id >>> 0, st.tick >>> 0, st.seq));",
+    "return function () { return Math.random(); };"
+);
+const rngMutantBody = rngMutantSrc.slice(rngMutantSrc.indexOf("function attackRng"), rngMutantSrc.indexOf("function modeOf"));
+check("mutant_plugin_unseeded_rng_killed", rngMutantSrc !== combatText && rngMutantBody.indexOf("Math.random") >= 0);
+
+let seededSame = false;
+let randomCalls = 0;
+const realRandom = Math.random;
+Math.random = function () { randomCalls++; return 0.5; };
+try {
+    combatVm.UF.World = {
+        state: { seed: 5, combat: { updates: 0, tick: 0, seq: 0, spawns: 0 } },
+        hash32: function () { return 4242; },
+        mulberry32: function (seed) {
+            let a = seed >>> 0;
+            return function () {
+                a = (a + 0x6D2B79F5) >>> 0;
+                return (a % 997) / 997;
+            };
+        },
+        unit: function () { return null; },
+        isDisplayed: function () { return false; }
+    };
+    const striker = { id: 7, area: { x: 0, y: 0 }, x: 0, y: 0, z: 0, data: { species: "wolf", hp: 11, combat: { mode: "manual" } } };
+    const post = { id: 8, area: { x: 0, y: 0 }, x: 1, y: 0, z: 0, data: { stats: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }, level: 1, hp: 30, maxHp: 30, combat: { mode: "manual" } } };
+    combatVm.UF.World.state.combat.seq = 0;
+    const first = liveCombat.resolveAttack(striker, post, { bypassGcd: true });
+    combatVm.UF.World.state.combat.seq = 0;
+    post.data.hp = 30;
+    const second = liveCombat.resolveAttack(striker, post, { bypassGcd: true });
+    seededSame = !!first && !!second && first.attackRoll === second.attackRoll && first.damage === second.damage && randomCalls === 0;
+    if (!seededSame) console.log("RNGDBG rolls " + (first && first.attackRoll) + "/" + (second && second.attackRoll) + " dmg " + (first && first.damage) + "/" + (second && second.damage) + " random " + randomCalls + " null " + !first + "/" + !second);
+} catch (e) {
+    seededSame = false;
+    console.log("RNGDBG throw " + (e && (e.stack || e.message)));
+}
+Math.random = realRandom;
+check("plugin_default_rng_repeats_for_the_same_seed", seededSame);
 
 if (rules.disagreements.length) {
     console.log("DISAGREEMENTS " + rules.disagreements.length);

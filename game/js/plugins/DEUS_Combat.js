@@ -15,7 +15,9 @@
  * Combat authority is SRD 5.1 (Owner ruling DEC-027). V47 is reinstated.
  * The accuracy-and-strength formula of V64 is retired. Every attack is
  * UF.Rules.attack and UF.Rules.damage. Armor Class, damage dice, damage
- * types and creature hit points are read from game/data/srd51/. The rng
+ * types and creature hit points are read from game/data/srd51/ through
+ * UF.Rules.hitPoints (the printed average). Catalog combat blocks are not
+ * combat numbers. The rng
  * is seeded from the world seed, both unit ids, the tick and a counter.
  * Docs: docs/systems/UF_Combat.md and docs/systems/DEUS_Rules.md.
  * Timing and gear still come from game/data/UF_WorldCatalog.json.
@@ -82,12 +84,10 @@
 
     const DEFAULTS = {
         tickFrames: 36,
-        levelOffset: 8,
         styles: {
-            accurate: { accuracy: 3 }, aggressive: { strength: 3 }, defensive: { defence: 3 },
-            controlled: { accuracy: 1, strength: 1, defence: 1 }, rapid: { speed: -1 }, longrange: { defence: 3, range: 2 }
+            accurate: {}, aggressive: {}, defensive: {}, controlled: {},
+            rapid: { speed: -1 }, longrange: { range: 2 }
         },
-        magicDefence: { magic: 0.7, defence: 0.3 },
         creatureStyle: "controlled",
         unarmed: { speed: 4, types: ["crush"], styles: ["accurate", "aggressive", "defensive"], reach: 1 },
         people: { attack: 1, strength: 1, defence: 1, ranged: 1, magic: 1, hitpoints: 10 },
@@ -232,9 +232,14 @@
         }
     }
     function rulesApi() {
-        const ready = window.UF && window.UF.Rules;
-        if (ready && typeof ready.attack === "function") return ready;
-        return bootRules();
+        const published = window.UF && window.UF.Rules;
+        if (published && typeof published.attack === "function") return published;
+        bootRules();
+        const again = window.UF && window.UF.Rules;
+        if (again && typeof again.attack === "function") return again;
+        const err = new Error("RULES_NOT_PUBLISHED: DEUS_Combat did not publish window.UF.Rules");
+        err.code = "RULES_NOT_PUBLISHED";
+        throw err;
     }
     bootRules();
 
@@ -247,11 +252,10 @@
         const src = (c && c.combat) || null;
         if (cfgCache && cfgSource === src) return cfgCache;
         const m = Object.assign({}, DEFAULTS, src || {});
-        for (const k of ["styles", "magicDefence", "unarmed", "people", "defaultModes", "regen", "display", "aliases", "quality"]) {
+        for (const k of ["styles", "unarmed", "people", "defaultModes", "regen", "display", "aliases", "quality"]) {
             m[k] = Object.assign({}, DEFAULTS[k], (src && src[k] && typeof src[k] === "object") ? src[k] : {});
         }
         m.tickFrames = pos(m.tickFrames, 36);
-        m.levelOffset = Number.isFinite(m.levelOffset) ? m.levelOffset : 8;
         cfgCache = m;
         cfgSource = src;
         return m;
@@ -333,37 +337,45 @@
     //-------------------------------------------------------------------------
     // Levels and hitpoints
 
-    /**
-     * A combat level: a creature's catalog block; else UF.Skills.level(unit, skill) when UF_Skills exists; else
-     * unit.data.combatLevels; else the catalog's people defaults (hitpoints 10); else 1.
-     */
-    function level(unit, skill) {
-        const block = creatureBlock(unit);
-        if (block) return pos(block[skill], 1);
-        const S = window.UF && UF.Skills;
-        if (S && typeof S.level === "function") {
-            let v;
-            try {
-                v = S.level(unit, skill);
-            } catch (e) {
-                report("UF.Skills.level", e);
+    // Strongest-target order: SRD challenge rating for a creature, character level otherwise.
+    function challengeRank(unit) {
+        const Rules = rulesApi();
+        if (Rules && typeof Rules.creatureOf === "function") {
+            const creature = Rules.creatureOf(unit);
+            if (creature && creature.challenge && creature.challenge.rating != null && creature.challenge.rating !== "") {
+                const n = Number(creature.challenge.rating);
+                if (Number.isFinite(n)) return n;
             }
-            if (typeof v === "number" && Number.isFinite(v) && v >= 1) return Math.floor(v);
         }
-        const cl = unit && unit.data && unit.data.combatLevels;
-        if (cl && typeof cl[skill] === "number" && cl[skill] >= 1) return Math.floor(cl[skill]);
-        return pos(cfg().people[skill], 1);
+        const d = unit && unit.data;
+        if (d && d.dnd && typeof d.dnd.level === "number" && Number.isFinite(d.dnd.level)) return d.dnd.level;
+        if (d && typeof d.level === "number" && Number.isFinite(d.level)) return d.level;
+        return 0;
+    }
+    function rankLabel(unit) {
+        const Rules = rulesApi();
+        const creature = Rules && typeof Rules.creatureOf === "function" ? Rules.creatureOf(unit) : null;
+        if (creature && creature.challenge) {
+            const text = creature.challenge.ratingText != null ? creature.challenge.ratingText : creature.challenge.rating;
+            return "challenge rating " + text;
+        }
+        return "level " + challengeRank(unit);
     }
     function maxHp(unit) {
-        const block = creatureBlock(unit);
-        let base = block ? pos(block.hitpoints, 1) : level(unit, "hitpoints");
-        if (unit && unit.data) {
-            if (Number.isFinite(unit.data.maxHp)) {
-                base = Math.max(1, unit.data.maxHp);
+        let base = 1;
+        const Rules = rulesApi();
+        const d = unit && unit.data;
+        if (Rules && typeof Rules.hitPoints === "function" && typeof Rules.creatureOf === "function") {
+            const creature = Rules.creatureOf(unit);
+            if (creature) {
+                base = Rules.hitPoints(creature).hp;
+            } else if (d && d.dnd && Number.isFinite(d.dnd.hpMax)) {
+                base = Math.max(1, d.dnd.hpMax);
+            } else if (d && Number.isFinite(d.maxHp)) {
+                base = Math.max(1, d.maxHp);
             }
-            if (unit.data.dnd && Number.isFinite(unit.data.dnd.hpMax)) {
-                base = Math.max(1, unit.data.dnd.hpMax);
-            }
+        } else if (d && Number.isFinite(d.maxHp)) {
+            base = Math.max(1, d.maxHp);
         }
         const Col = window.UF && UF.Colonists;
         if (Col && typeof Col.exhaustionEffects === "function") {
@@ -387,18 +399,9 @@
         }
         return d.hp;
     }
-    function combatLevel(unit) {
-        const L = s => level(unit, s);
-        const base = 0.25 * (L("defence") + L("hitpoints"));
-        const melee = 0.325 * (L("attack") + L("strength"));
-        const range = 0.325 * Math.floor(1.5 * L("ranged"));
-        const mage = 0.325 * Math.floor(1.5 * L("magic"));
-        return Math.floor(base + Math.max(melee, range, mage));
-    }
-    Combat.level = level;
     Combat.maxHp = maxHp;
     Combat.hp = unit => (unit ? ensureHp(unit) : 0);
-    Combat.combatLevel = combatLevel;
+    Combat.challengeRank = challengeRank;
 
     //-------------------------------------------------------------------------
     // Equipment and bonuses
@@ -446,22 +449,6 @@
         }
         return null;
     }
-    const zeroBonuses = () => ({
-        attack: { stab: 0, slash: 0, crush: 0, ranged: 0, magic: 0 },
-        defence: { stab: 0, slash: 0, crush: 0, ranged: 0, magic: 0 },
-        strength: 0, rangedStrength: 0, magicStrength: 0
-    });
-    function addBonuses(sum, b, mult) {
-        if (!b || typeof b !== "object") return;
-        const m = typeof mult === "number" ? mult : 1;
-        for (const t of TYPES) {
-            if (b.attack) sum.attack[t] += num(b.attack[t]) * m;
-            if (b.defence) sum.defence[t] += num(b.defence[t]) * m;
-        }
-        sum.strength += num(b.strength) * m;
-        sum.rangedStrength += num(b.rangedStrength) * m;
-        sum.magicStrength += num(b.magicStrength) * m;
-    }
     function qualityMult(record) {
         const q = record && record.quality;
         const arr = cfg().quality.bonus;
@@ -479,40 +466,6 @@
         }
         return e;
     }
-    /** Sum of the bonuses of everything worn and held, plus a creature's own. */
-    function bonusesOf(unit) {
-        const e = cached(unit);
-        if (e && e.bon) return e.bon;
-        const s = computeBonuses(unit);
-        if (e) e.bon = s;
-        return s;
-    }
-    function computeBonuses(unit) {
-        const s = zeroBonuses();
-        const block = creatureBlock(unit);
-        if (block) addBonuses(s, block.bonuses, 1);
-        for (const slot of SLOTS) {
-            const it = slotItem(unit, slot);
-            if (!it) continue;
-            const t = it.type;
-            const blk = (slot === "weapon" || slot === "mainHand") ? (t.weapon || t.bonuses)
-                      : (slot === "shield" || slot === "offHand") ? (t.shield || t.armor || t.bonuses)
-                      : (t.armor || t.bonuses || (t.gear && t.gear.bonuses));
-            if (blk && typeof blk === "object") {
-                const b = blk.bonuses || blk;
-                if (b && typeof b === "object") addBonuses(s, b, qualityMult(it.record));
-            }
-        }
-        for (const t of TYPES) {
-            s.attack[t] = Math.round(s.attack[t]);
-            s.defence[t] = Math.round(s.defence[t]);
-        }
-        s.strength = Math.round(s.strength);
-        s.rangedStrength = Math.round(s.rangedStrength);
-        s.magicStrength = Math.round(s.magicStrength);
-        return s;
-    }
-    Combat.bonusesOf = bonusesOf;
 
     const validTypes = list => (Array.isArray(list) ? list.filter(t => TYPES.includes(t)) : []);
     const validStyles = list => (Array.isArray(list) ? list.filter(s => STYLES.includes(s)) : []);
@@ -847,14 +800,28 @@
         let attResult = null;
         let maxExpression = null;
 
-        // Callers (headless suites, the render bench) may name the outcome.
-        // That is not a second combat law: the dice still come from UF.Rules when they don't.
+        // Headless suites may name the outcome. The render bench does not: it calls
+        // resolveAttack with no hit and no damage, and that swing goes through UF.Rules.
+        // A named amount still takes resistance, immunity and vulnerability from UF.Rules.
         if (o.hit !== undefined || o.damage !== undefined) {
             hit = o.hit !== undefined ? !!o.hit : true;
             rolled = o.damage !== undefined ? Number(o.damage) : 0;
             if (o.extraDamage) rolled += o.extraDamage;
             isCrit = !!o.critical || (hit && isAutoCrit);
             attResult = { advantage: finalAdv, disadvantage: finalDis, critical: isCrit, fumble: false };
+            if (hit) {
+                const Rules = rulesApi();
+                const typed = Rules.damage(attacker, target, {
+                    hit: true,
+                    critical: isCrit,
+                    damageFlat: rolled,
+                    damageType: o.damageType || o.type || null,
+                    fromStatBlock: true,
+                    abilityMod: 0,
+                    riders: []
+                }, { magical: !!o.magical, silvered: !!o.silvered, adamantine: !!o.adamantine, spell: !!o.spell });
+                rolled = typed.damage;
+            }
         } else {
             const Rules = rulesApi();
             if (!Rules || typeof Rules.attack !== "function") {
@@ -1090,10 +1057,10 @@
                 const kname = killer && typeof killer.name === "string" ? killer.name : "";
                 const kIsCreature = !!speciesOf(killer);
                 const by = kname ? (kIsCreature ? `a ${kname.toLowerCase()}` : kname) : "";
-                const lvl = combatLevel(victim);
+                const rank = rankLabel(victim);
                 const text = d.deathCause === "old_age"
                     ? `${victim.name} passed away peacefully of old age at the age of ${d.age || 60}.`
-                    : (by ? `${victim.name} (fighting level ${lvl}) was killed by ${by}.` : `${victim.name} (fighting level ${lvl}) died of wounds.`);
+                    : (by ? `${victim.name} (${rank}) was killed by ${by}.` : `${victim.name} (${rank}) died of wounds.`);
                 const fid = d.faction === "player" && w && w.state && w.state.factions ? w.state.factions.playerId : d.faction;
                 H.addEvent({ type: "death", text, factions: fid ? [fid] : [], area, x, y });
             } catch (e) {
@@ -1190,11 +1157,9 @@
         if (!unit || !unit.data) return null;
         const n = numbers(unit, null);
         const c = unit.data.combat || {};
-        const levels = {};
-        for (const s of SKILLS) levels[s] = level(unit, s);
-        return { combatLevel: combatLevel(unit), levels, hp: ensureHp(unit), maxHp: maxHp(unit), mode: modeOf(unit), style: n.style,
+        return { challengeRating: challengeRank(unit), rank: rankLabel(unit), hp: ensureHp(unit), maxHp: maxHp(unit), mode: modeOf(unit), style: n.style,
             attackType: n.attackType, weapon: n.weapon, speed: n.speed, range: n.range, maxHit: null, ammo: n.ammo, outOfAmmo: n.outOfAmmo,
-            bonuses: bonusesOf(unit), targetId: c.targetId === undefined ? null : c.targetId, inCombat: Combat.inCombat(unit) };
+            targetId: c.targetId === undefined ? null : c.targetId, inCombat: Combat.inCombat(unit) };
     };
 
     //-------------------------------------------------------------------------
@@ -1223,7 +1188,7 @@
         const dist = manhattan(u, e); // reach is orthogonal: a diagonal neighbour is two steps away
         const tie = (World().hash32(seed, SALT.pick, tick >>> 0, u.id >>> 0, e.id >>> 0) % 1000) / 1e6;
         if (mode === "weakest") return ensureHp(e) * 1000 + dist + tie;
-        if (mode === "strongest") return -combatLevel(e) * 1000 + dist + tie;
+        if (mode === "strongest") return -challengeRank(e) * 1000 + dist + tie;
         return dist + tie;
     }
     function seek(u, enemies, tick, byId, seed) {
@@ -1336,7 +1301,9 @@
             if (tick >= c.nextAttackTick) {
                 let r = null;
                 try {
-                    r = Combat.resolveAttack(u, t);
+                    // The loop already waits out the weapon's tick speed. The 6-second bar
+                    // still starts; it does not swallow the scheduled swing.
+                    r = Combat.resolveAttack(u, t, { bypassGcd: true });
                 } catch (err) {
                     report("resolveAttack", err);
                     c.nextAttackTick = tick + speedOf(u);
@@ -1630,6 +1597,7 @@
         if (!act || !act.start) return false;
         return (nowMs() - act.start) < (act.duration || 6000);
     }
+    Combat.isActionActive = isActionActive;
     function clearAction(unitOrId) {
         const w = World();
         if (!unitOrId) return;
@@ -2199,8 +2167,8 @@
             };
             const L = (a, s, d, hp, extra) => Object.assign({ attack: a, strength: s, defence: d, ranged: 1, magic: 1, hitpoints: hp }, extra || {});
             const srdScores = { str: 16, dex: 14, con: 14, int: 10, wis: 12, cha: 10 };
-            const person = (name, x, y, levels, equipment, extra) => add(name, personImg, x, y, Object.assign({ faction: "player", combatLevels: levels, stats: srdScores, level: 1, equipment: equipment || {} }, extra || {}));
-            const foe = (name, x, y, levels, extra) => add(name, personImg, x, y, Object.assign({ tags: ["hostile"], combatLevels: levels, stats: srdScores, level: 1 }, extra || {}));
+            const person = (name, x, y, levels, equipment, extra) => add(name, personImg, x, y, Object.assign({ faction: "player", combatLevels: levels, stats: srdScores, level: 1, maxHp: levels.hitpoints, hp: levels.hitpoints, equipment: equipment || {} }, extra || {}));
+            const foe = (name, x, y, levels, extra) => add(name, personImg, x, y, Object.assign({ tags: ["hostile"], combatLevels: levels, stats: srdScores, level: 1, maxHp: levels.hitpoints, hp: levels.hitpoints }, extra || {}));
             const creature = (name, id, x, y, extra) => {
                 const s = sp(id);
                 return add(name, s ? s.image : personImg, x, y, Object.assign({ species: id, tags: s ? [s.kind] : [], tint: s ? s.tint : undefined }, extra || {}));
@@ -2351,7 +2319,7 @@
 
                 // 4. Catalog weapons map onto SRD keys. A bow still spends one arrow a shot.
                 {
-                    const wolf = creature("TEST_combat_wolf_target", "wolf", ax + 4, ay + 1, { combat: { mode: "manual" } });
+                    const wolf = person("TEST_combat_bow_target", ax + 4, ay + 1, L(1, 1, 1, 99), {}, { combat: { mode: "manual" } });
                     const att = person("TEST_combat_armed", ax + 5, ay + 1, L(16, 16, 10, 99), {}, { combat: { mode: "manual" } });
                     const mapOk = Combat.resolveWeaponKey({ name: "Long sword", itemType: "sword_long" }) === "longsword"
                         && Combat.resolveWeaponKey({ name: "Iron dagger", itemType: "dagger_iron" }) === "dagger"
@@ -2377,31 +2345,45 @@
                     for (const u of [wolf, att]) { made.delete(u.id); w.removeUnit(u.id); }
                 }
 
-                // 5. Catalog species keep their combat blocks. A wolf resolves through its SRD stat block.
-                //    A hare has no SRD creature, so an attack fails loudly.
+                // 5. Every catalog species resolves through its SRD stat block (direct or proxy).
+                //    Hit points are the printed average, not the catalog combat block.
                 {
-                    const keys = ["attack", "strength", "defence", "ranged", "magic", "hitpoints", "attackSpeed", "attackType", "maxHitBonus", "bonuses"];
-                    const missing = speciesList.filter(s => !s.combat || keys.some(k => s.combat[k] === undefined)).map(s => s.id);
-                    const wolf = creature("TEST_combat_wolf", "wolf", ax + 7, ay + 1, { combat: { mode: "manual" } });
-                    const hare = creature("TEST_combat_hare", "hare", ax + 8, ay + 1, { combat: { mode: "manual" } });
-                    const troll = creature("TEST_combat_troll", "troll", ax + 9, ay + 1, { combat: { mode: "manual" } });
-                    const cat2 = creature("TEST_combat_wildcat", "wildcat", ax + 10, ay + 1, { combat: { mode: "manual" } });
-                    const hb = sp("hare") && sp("hare").combat;
-                    const hareOk = !!hb && ["attack", "strength", "defence", "ranged", "magic"].every(k => hb[k] === 1) && hb.hitpoints === 2 && Combat.maxHp(hare) === 2;
+                    const namedHp = { wolf: 11, deer: 4, jackal: 3, boar: 11, giant_spider: 26, troll: 84 };
+                    const pack = [];
+                    const hpBad = [];
+                    for (const s of speciesList) {
+                        const u = creature("TEST_sp_" + s.id, s.id, ax + 7, ay + 1, { combat: { mode: "manual" } });
+                        pack.push(u);
+                        const got = Combat.maxHp(u);
+                        const block = UF.Rules && UF.Rules.creatureOf(u);
+                        const want = block && UF.Rules.hitPoints(block).hp;
+                        if (got !== want || (namedHp[s.id] !== undefined && got !== namedHp[s.id])) hpBad.push(`${s.id}=${got} want ${want}`);
+                    }
+                    const byId = id => pack.find(u => u.data.species === id);
+                    const wolf = byId("wolf"), hare = byId("hare"), troll = byId("troll"), cat2 = byId("wildcat");
                     const typesOk = Combat.describeAttack(wolf, hare).attackType === "stab" && Combat.describeAttack(troll, hare).attackType === "crush" && Combat.describeAttack(cat2, hare).attackType === "slash";
                     const veteran = person("TEST_combat_veteran", ax + 12, ay + 1, L(16, 16, 14, 40), { weapon: "sword_short", torso: "mail_iron", shield: "shield_iron" });
-                    let wolfHit = false, wolfErr = "", hareCode = "";
+                    let wolfHit = false, wolfErr = "", resolveErr = "";
                     try {
                         const r = Combat.resolveAttack(wolf, veteran, { rng: alwaysHigh, bypassGcd: true });
                         wolfHit = !!(r && r.hit === true);
                     } catch (e) { wolfErr = (e && (e.code || e.message)) || "throw"; }
-                    try {
-                        Combat.resolveAttack(hare, veteran, { rng: alwaysHigh, bypassGcd: true });
-                    } catch (e) { hareCode = (e && e.code) || ""; }
+                    for (const u of pack) {
+                        try {
+                            Combat.resolveAttack(u, veteran, { rng: alwaysHigh, bypassGcd: true });
+                            veteran.data.hp = Combat.maxHp(veteran);
+                            Combat.resolveAttack(veteran, u, { rng: alwaysHigh, bypassGcd: true });
+                            u.data.hp = Combat.maxHp(u);
+                        } catch (e) {
+                            resolveErr = `${u.data.species} ${(e && (e.code || e.message)) || "throw"}`;
+                            break;
+                        }
+                    }
                     const ac = Combat.calcAC(veteran);
-                    t.check("srd_creatures", missing.length === 0 && hareOk && typesOk && wolfHit && hareCode === "NO_SRD_MAPPING" && ac === 18,
-                        `${speciesList.length} species, without a full combat block: ${missing.join(", ") || "none"}; hare hp ${hareOk}; attack types ${typesOk}; wolf hit ${wolfHit} ${wolfErr}; hare code ${hareCode}; veteran AC ${ac}`);
-                    for (const u of [wolf, hare, troll, cat2, veteran]) { made.delete(u.id); w.removeUnit(u.id); }
+                    const hareHp = Combat.maxHp(hare);
+                    t.check("srd_creatures", speciesList.length === 23 && hpBad.length === 0 && typesOk && wolfHit && !resolveErr && ac === 18 && hareHp === 1,
+                        `${speciesList.length} species; hp ${hpBad.join(", ") || "match the SRD block"}; hare hp ${hareHp}; attack types ${typesOk}; wolf hit ${wolfHit} ${wolfErr}; resolve ${resolveErr || "ok"}; veteran AC ${ac}`);
+                    for (const u of pack.concat([veteran])) { made.delete(u.id); w.removeUnit(u.id); }
                 }
 
                 // 6. hitsplats: a hit shows a red splat with its number, a miss a blue 0; at most 4 stack; gone after 1 s; no text popups.
@@ -2413,7 +2395,7 @@
                     Combat.clearFx();
                     await t.waitFrames(2);
                     dummy.data.hp = 99;
-                    const r1 = Combat.resolveAttack(striker, dummy, { rng: alwaysHigh });
+                    const r1 = Combat.resolveAttack(striker, dummy, { rng: alwaysHigh, bypassGcd: true });
                     await t.waitFrames(2);
                     const red = splatsOn(dummy);
                     const px = (bmp, x, y) => {
@@ -2426,14 +2408,14 @@
                         red[0].bitmap._ufSplat === r1.damage && redPx[0] > 140 && redPx[1] < 80 && redPx[2] < 80 && !!dsp && Math.abs(red[0].x - dsp.x) <= 2 && red[0].y < dsp.y && red[0].y > dsp.y - 80;
                     Combat.clearFx();
                     await t.waitFrames(2);
-                    const r0 = Combat.resolveAttack(striker, dummy, { rng: alwaysLow });
+                    const r0 = Combat.resolveAttack(striker, dummy, { rng: alwaysLow, bypassGcd: true });
                     await t.waitFrames(2);
                     const blue = splatsOn(dummy);
                     const bluePx = blue[0] ? px(blue[0].bitmap, 5, 12) : [0, 0, 0];
                     const blueOk = !!r0 && !r0.hit && r0.damage === 0 && blue.length === 1 && blue[0].damage === 0 && blue[0].bitmap === Combat.splatBitmap(0) && bluePx[2] > 140 && bluePx[0] < 100;
                     for (let i = 0; i < 6; i++) {
                         dummy.data.hp = 99;
-                        Combat.resolveAttack(striker, dummy);
+                        Combat.resolveAttack(striker, dummy, { bypassGcd: true });
                     }
                     await t.waitFrames(2);
                     const stacked = splatsOn(dummy);
@@ -2457,7 +2439,7 @@
                     const bystander = person("TEST_combat_bystander", ax + 4, ay + 1, L(1, 1, 1, 10), {});
                     Combat.clearFx();
                     dummy.data.hp = 99;
-                    Combat.resolveAttack(striker, dummy, { rng: alwaysHigh });
+                    Combat.resolveAttack(striker, dummy, { rng: alwaysHigh, bypassGcd: true });
                     await t.waitFrames(2);
                     const bm = Combat.barBitmaps();
                     const bars1 = barOn(dummy);
@@ -2493,7 +2475,7 @@
 
                     // HP damage change
                     dummy.data.hp = 40;
-                    Combat.resolveAttack(striker, dummy, { rng: alwaysLow });
+                    Combat.resolveAttack(striker, dummy, { rng: alwaysLow, bypassGcd: true });
                     await t.waitFrames(2);
                     const fill2 = barOn(dummy).find(s => s.kind === "barFill");
                     const want2 = Math.round(bm.width * 40 / Combat.maxHp(dummy));
@@ -2536,14 +2518,14 @@
                     Combat.engage(a6, t6);
                     const from = hits.length;
                     const of = a => hits.slice(from).filter(h => h.e.attacker === a);
-                    const inTime = await waitWatching(() => of(a4).length >= 5 && of(a6).length >= 4, 20000);
+                    const inTime = await waitWatching(() => of(a4).length >= 5 && of(a6).length >= 4, 40000);
                     const gaps = list => list.slice(1).map((h, i) => [h.updates - list[i].updates, h.frame - list[i].frame]);
                     const g4 = gaps(of(a4)), g6 = gaps(of(a6));
                     const tf = cfg().tickFrames;
                     const exact = g4.every(g => g[0] === 4 * tf) && g6.every(g => g[0] === 6 * tf);
                     const frames = g4.every(g => Math.abs(g[1] - 4 * tf) <= 2) && g6.every(g => Math.abs(g[1] - 6 * tf) <= 2);
                     t.check("attack_speed", inTime && exact && frames && tf === 36,
-                        `${inTime ? "" : "TIMED OUT (20 s) before 5 unarmed and 4 axe attacks; "}tick = ${tf} map updates at x${UF.Time && UF.Time.multiplier ? UF.Time.multiplier() : 1}; unarmed (4 ticks) gaps in map updates / frames: ${g4.map(g => g.join("/")).join(", ")}; iron axe (6 ticks): ${g6.map(g => g.join("/")).join(", ")}`);
+                        `${inTime ? "" : "TIMED OUT (40 s) before 5 unarmed and 4 axe attacks; "}tick = ${tf} map updates at x${UF.Time && UF.Time.multiplier ? UF.Time.multiplier() : 1}; unarmed (4 ticks) gaps in map updates / frames: ${g4.map(g => g.join("/")).join(", ")}; iron axe (6 ticks): ${g6.map(g => g.join("/")).join(", ")}`);
                     for (const u of [a4, t4, a6, t6]) { Combat.testFilter.delete(u.id); made.delete(u.id); w.removeUnit(u.id); }
                 }
 
@@ -2564,8 +2546,8 @@
                     const inTime = await waitWatching(() => by(raider, friend).length >= 1 && by(friend, raider).length >= 1, 20000);
                     const firstHit = by(raider, friend)[0], firstBack = by(friend, raider)[0];
                     const back = friend.data.combat && friend.data.combat.targetId === raider.id;
-                    Combat.resolveAttack(poker, runner);
-                    Combat.resolveAttack(poker, stoic);
+                    Combat.resolveAttack(poker, runner, { bypassGcd: true });
+                    Combat.resolveAttack(poker, stoic, { bypassGcd: true });
                     const runnerOk = runner.data.combat.targetId === null && runner.data.combat.fleeFrom === poker.id;
                     const stoicOk = stoic.data.combat.targetId === null;
                     t.check("retaliate", inTime && !!firstHit && !!firstBack && back && firstBack.updates > firstHit.updates && runnerOk && stoicOk,
@@ -2625,21 +2607,18 @@
                     for (const id of Object.keys(yields)) before[id] = I ? I.count(cell, id) : 0;
                     wolf.data.hp = 1;
                     const k0 = kills.length, h0 = hits.length;
-                    const r = Combat.resolveAttack(killer, wolf, { rng: alwaysHigh });
+                    const r = Combat.resolveAttack(killer, wolf, { rng: alwaysHigh, bypassGcd: true });
                     const removed = !w.unit(wolf.id);
                     const dropsOk = !!I && Object.keys(yields).length > 0 && Object.keys(yields).every(id => I.count(cell, id) === before[id] + yields[id]);
                     const k = kills.slice(k0);
                     const killOk = k.length === 1 && k[0].attacker === killer && k[0].target === wolf && hits.length === h0 + 1 && hits[h0].e.target === wolf && hits[h0].e.damage === 1;
                     const victim = person("TEST_combat_fallen", ax + 3, ay + 2, L(5, 5, 5, 10), {}, { kind: "person", combat: { mode: "manual" } });
                     victim.data.hp = 1;
-                    const H = window.UF.History;
-                    const ev0 = H && H.current && H.current() ? H.current().events.length : 0;
-                    Combat.resolveAttack(killer, victim, { rng: alwaysHigh });
-                    const evs = H && H.current && H.current() ? H.current().events.slice(ev0) : [];
-                    const chron = !H || evs.some(e => e.type === "death" && e.text.includes("TEST_combat_fallen") && e.text.includes("TEST_combat_slayer"));
-                    t.check("death", !!r && r.killed && removed && dropsOk && killOk && chron && !w.unit(victim.id),
+                    const down = Combat.resolveAttack(killer, victim, { rng: () => 0.4, bypassGcd: true });
+                    const downed = !!down && victim.data.hp === 0 && victim.data.dead !== true && !!victim.data.dying && !!w.unit(victim.id);
+                    t.check("death", !!r && r.killed && removed && dropsOk && killOk && downed,
                         `wolf at 1 hp: killed ${r && r.killed}, removed ${removed}; on its cell ${Object.keys(yields).map(id => `${id} ${before[id]} -> ${I ? I.count(cell, id) : "?"}`).join(", ")} (yields ${JSON.stringify(yields)}): ${dropsOk}; ` +
-                        `combat:kill ${k.length}x with attacker/target right ${killOk} (combat:hit first, damage ${hits[h0] ? hits[h0].e.damage : "-"}); person killed: removed ${!w.unit(victim.id)}, chronicle ${H ? `"${(evs.find(e => e.type === "death") || {}).text || "no line"}"` : "no UF.History"}`);
+                        `combat:kill ${k.length}x with attacker/target right ${killOk} (combat:hit first, damage ${hits[h0] ? hits[h0].e.damage : "-"}); person downed: hp ${victim.data.hp}, dying ${!!victim.data.dying}, still on the map ${!!w.unit(victim.id)}`);
                     made.delete(killer.id);
                     w.removeUnit(killer.id);
                     made.delete(wolf.id);

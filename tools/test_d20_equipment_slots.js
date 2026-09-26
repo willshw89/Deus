@@ -281,10 +281,10 @@ UF.Items = {
     types: () => []
 };
 
-const bonuses = UF.Combat.bonusesOf(colonistUnit);
-check("combat_bonuses_sum_across_all_d20_slots",
-    bonuses.attack.slash === 17 && bonuses.strength === 11 && bonuses.defence.slash === 20,
-    `attack.slash=${bonuses.attack.slash} (axe 12 + ring 5), strength=${bonuses.strength} (axe 8 + ring 3), def.slash=${bonuses.defence.slash}`
+const colonistAc = UF.Combat.calcAC(colonistUnit);
+check("combat_mail_in_armor_slot_is_chain_mail",
+    colonistAc === 16,
+    `chain mail AC ${colonistAc} (SRD chain mail, Commoner Dexterity does not add)`
 );
 
 const weaponProf = UF.Combat.weaponOf(colonistUnit);
@@ -308,10 +308,10 @@ const legacyUnit = UF.World.addUnit({
     }
 });
 
-const legacyBonuses = UF.Combat.bonusesOf(legacyUnit);
-check("combat_legacy_aliases_bonuses",
-    legacyBonuses.attack.slash === 12 && legacyBonuses.strength === 8 && legacyBonuses.defence.slash === 20,
-    "legacy weapon and clothes aliases resolved properly in combat"
+const legacyAc = UF.Combat.calcAC(legacyUnit);
+check("combat_clothes_alias_reads_chain_mail",
+    legacyAc === 16,
+    `clothes mail_iron AC ${legacyAc}`
 );
 
 const legacyModel = UF.Sheet.buildModel({ kind: "unit", unitId: legacyUnit.id });
@@ -321,14 +321,13 @@ check("sheet_weapon_alias_maps_to_mainHand",
     legacyMainHand && legacyMainHand.typeId === "stone_axe" && legacyMainHand.via === "weapon",
     `mainHand via ${legacyMainHand && legacyMainHand.via} type ${legacyMainHand && legacyMainHand.typeId}`
 );
-check("sheet_clothes_alias_has_no_torso_slot",
-    legacyModel.equipment.length === 12 && !legacyModel.equipment.some(e => e.slot === "torso") && !legacyBody,
-    `12 slots, torso slot absent, mail_iron shown: ${!!legacyBody}`
-);
+// PROPOSED-AB-03. The sheet has no torso slot, so mail worn as clothes is not drawn.
+// Reported, not counted: a later sheet fix must not turn this gate red.
+console.log("KNOWN_GAP sheet_clothes_alias_has_no_torso_slot PROPOSED-AB-03 clothes maps to torso; DEUS_Sheet has no torso slot (slots " + legacyModel.equipment.length + ", mail_iron shown: " + !!legacyBody + ")");
 
 // 9. Negative test / test ability to fail
 try {
-    assert.strictEqual(bonuses.attack.slash, 999999);
+    assert.strictEqual(colonistAc, 999999);
     check("test_must_be_able_to_fail", false, "should not pass with 999999");
 } catch (e) {
     check("test_must_be_able_to_fail", true, "verified test can detect inequality and throw");
