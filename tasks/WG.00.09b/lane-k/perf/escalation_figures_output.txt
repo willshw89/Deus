@@ -1,0 +1,608 @@
+
+=== fix1: Fix 1 final code eb446e06, machine load recorded (runs[].machineLoad) ===
+fix1.normal.runs               2 run(s); units in the world 1182, 1192
+                               <- baseline_eb446e06.json: runs[].environment.units
+fix1.normal.machine            {"host":"MSI","cpus":16,"cpu":"AMD Ryzen 7 8845HS w/ Radeon 780M Graphics","totalMemGb":31.3}
+                               <- baseline_eb446e06.json: machine
+fix1.normal.gl                 ANGLE (NVIDIA GeForce RTX 4060 Laptop GPU Direct3D11 vs_5_0 ps_5_0)
+                               <- baseline_eb446e06.json: runs[].environment.gl
+fix1.normal.r1.load            quiet; CPU min/median/max 3.8/16.6/34.8 % (104 1-s samples); AI workers 4 start, 4 end; other nw.exe 0 start, max 0, 0 end; 2026-09-26T09:39:04.711Z to 2026-09-26T09:40:50.228Z; pre-run probe: 4.5 % median over 30 s, other nw.exe 0/0, quiet
+                               <- baseline_eb446e06.json: runs[0].machineLoad (label, cpu.overall, start, end, otherNwExeMax, startedAt, finishedAt, preRun)
+fix1.normal.r2.load            quiet; CPU min/median/max 1.8/14.7/38.3 % (95 1-s samples); AI workers 4 start, 5 end; other nw.exe 0 start, max 0, 0 end; 2026-09-26T09:41:21.911Z to 2026-09-26T09:42:58.722Z; pre-run probe: 3.9 % median over 29 s, other nw.exe 0/0, quiet
+                               <- baseline_eb446e06.json: runs[1].machineLoad (label, cpu.overall, start, end, otherNwExeMax, startedAt, finishedAt, preRun)
+fix1.stress.runs               2 run(s); units in the world 1243, 1241
+                               <- stress_baseline_eb446e06.json: runs[].environment.units
+fix1.stress.machine            {"host":"MSI","cpus":16,"cpu":"AMD Ryzen 7 8845HS w/ Radeon 780M Graphics","totalMemGb":31.3}
+                               <- stress_baseline_eb446e06.json: machine
+fix1.stress.gl                 ANGLE (NVIDIA GeForce RTX 4060 Laptop GPU Direct3D11 vs_5_0 ps_5_0)
+                               <- stress_baseline_eb446e06.json: runs[].environment.gl
+fix1.stress.r1.load            quiet; CPU min/median/max 9.6/15.6/31.1 % (102 1-s samples); AI workers 5 start, 5 end; other nw.exe 0 start, max 0, 0 end; 2026-09-26T09:43:37.054Z to 2026-09-26T09:45:20.336Z; pre-run probe: 3 % median over 30 s, other nw.exe 0/0, quiet
+                               <- stress_baseline_eb446e06.json: runs[0].machineLoad (label, cpu.overall, start, end, otherNwExeMax, startedAt, finishedAt, preRun)
+fix1.stress.r2.load            loaded; CPU min/median/max 10.4/26.8/45 % (107 1-s samples); AI workers 5 start, 5 end; other nw.exe 0 start, max 0, 0 end; 2026-09-26T09:45:51.983Z to 2026-09-26T09:47:40.783Z; pre-run probe: 3.4 % median over 30 s, other nw.exe 0/0, quiet
+                               <- stress_baseline_eb446e06.json: runs[1].machineLoad (label, cpu.overall, start, end, otherNwExeMax, startedAt, finishedAt, preRun)
+fix1.windows                   12 profiled windows: normal#1:steady_+2, normal#1:steady_+1, normal#1:steady_Ground, normal#1:steady_-1, normal#2:steady_+2, normal#2:steady_+1, normal#2:steady_Ground, normal#2:steady_-1, stress#1:stress_day, stress#1:stress_night, stress#2:stress_day, stress#2:stress_night
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].profiles
+fix1.A.env                     mean 27.79 / worst 47.56 ms per update over 12 window(s); worst in stress#2:stress_day (2 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].profiles[*].topInclusive[fn ~ /^updateEnvironment DEUS_Environment\.js/].msPerUpdate
+fix1.A.colonists               mean 9.49 / worst 15.14 ms per update over 7 window(s); worst in stress#1:stress_night (2 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].profiles[*].topInclusive[fn ~ /^scan DEUS_Colonists\.js/].msPerUpdate
+fix1.A.hazard                  mean 11.20 / worst 11.20 ms per update over 1 window(s); worst in normal#1:steady_Ground; per window: normal#1:steady_Ground 11.20 (2 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].profiles[*].topInclusive[fn ~ /^hazardReflexJob DEUS_Colonists\.js/].msPerUpdate
+fix1.A.worldUpdate             mean n/a / worst n/a ms per update over 0 window(s) (2 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].profiles[*].topInclusive[fn ~ /^World\.update DEUS_World\.js/].msPerUpdate
+fix1.A.log                     mean 1.45 / worst 3.03 ms per update over 12 window(s); worst in stress#2:stress_day (2 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].profiles[*].selfByScript[fn in ["open","close","writeBuffer","writeString","fsync"]].msPerUpdate
+fix1.A.effekseer               mean 0.86 / worst 2.72 ms per update over 12 window(s); worst in stress#2:stress_day (2 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].profiles[*].selfByScript[fn in ["wasm "]].msPerUpdate
+fix1.A.gc                      mean 2.31 / worst 4.56 ms per update over 12 window(s); worst in stress#1:stress_night (2 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].profiles[*].selfByScript[fn in ["(garbage collector)"]].msPerUpdate
+fix1.A.objectsSelf             mean 28.37 / worst 44.45 ms per update over 12 window(s); worst in stress#2:stress_day (2 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Objects.js"]].msPerUpdate
+fix1.A.worldSelf               mean 9.64 / worst 17.95 ms per update over 12 window(s); worst in stress#1:stress_night (2 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].profiles[*].selfByScript[fn in ["DEUS_World.js"]].msPerUpdate
+fix1.A.floorsSelf              mean 2.81 / worst 4.97 ms per update over 12 window(s); worst in stress#2:stress_day (2 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Floors.js"]].msPerUpdate
+fix1.A.jobsSelf                mean 1.23 / worst 2.33 ms per update over 12 window(s); worst in normal#1:steady_Ground (2 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Jobs.js"]].msPerUpdate
+fix1.A.depthSelf               mean 0.27 / worst 0.45 ms per update over 12 window(s); worst in stress#1:stress_night (2 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Depth.js"]].msPerUpdate
+fix1.A.minimapSelf             mean 0.02 / worst 0.07 ms per update over 12 window(s); worst in normal#2:steady_Ground (2 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Minimap.js"]].msPerUpdate
+fix1.A.fogSelf                 mean 0.00 / worst 0.00 ms per update over 12 window(s); worst in normal#1:steady_+2 (2 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Fog.js"]].msPerUpdate
+fix1.A.dayNightSelf            mean 0.00 / worst 0.00 ms per update over 12 window(s); worst in normal#1:steady_+2 (2 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].profiles[*].selfByScript[fn in ["DEUS_DayNight.js"]].msPerUpdate
+fix1.A.envShareOfUpdateMain    40.9-80.3 % over 12 window(s) (1 decimal)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].profiles[*]: topInclusive 'updateEnvironment DEUS_Environment.js' / the largest topInclusive 'Scene_Map.updateMain *'
+fix1.A.envShareOfBusy          33.1-73.0 % over 12 window(s) (1 decimal)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].profiles[*]: topInclusive 'updateEnvironment DEUS_Environment.js' / (sampledMs / updates - selfByScript '(idle)')
+fix1.B.update                  mean 62.317 / worst 99.790 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].phases[steady_*|stress_*].parts["update"].median
+fix1.B.update.map              mean 57.145 / worst 89.330 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].phases[steady_*|stress_*].parts["update.map"].median
+fix1.B.update.map.world        mean 5.086 / worst 8.890 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].phases[steady_*|stress_*].parts["update.map.world"].median
+fix1.B.events                  mean 2.575 / worst 5.230 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].phases[steady_*|stress_*].parts["events"].median
+fix1.B.render                  mean 2.250 / worst 4.755 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].phases[steady_*|stress_*].parts["render"].median
+fix1.B.update.spriteset.tilemap.depth mean 0.393 / worst 0.585 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].phases[steady_*|stress_*].parts["update.spriteset.tilemap.depth"].median
+fix1.B.update.depth_late       mean 0.400 / worst 0.730 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].phases[steady_*|stress_*].parts["update.depth_late"].median
+fix1.B.render.depth            mean 0.142 / worst 0.200 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].phases[steady_*|stress_*].parts["render.depth"].median
+fix1.B.update.minimap          mean 0.150 / worst 0.455 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].phases[steady_*|stress_*].parts["update.minimap"].median
+fix1.B.depth.plane.rebuildItems.max largest 0.7 ms in one tick; median of the phases' largest 0.105 ms over 28 phase(s)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].phases[].parts["depth.plane.rebuildItems"].max
+fix1.B.depth.plane.rebuildWalls.max largest 6.18 ms in one tick; median of the phases' largest 1.455 ms over 28 phase(s)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].phases[].parts["depth.plane.rebuildWalls"].max
+fix1.frames.paused             frame median 15.495-15.67 ms over 8 phase(s): normal#1:paused_+2_planes_on_r1 15.67 (CPU 14.9 %), normal#1:paused_+2_planes_off_r1 15.525 (CPU 8.8 %), normal#1:paused_+2_planes_on_r2 15.615 (CPU 3.8 %), normal#1:paused_+2_planes_off_r2 15.57 (CPU 8.5 %), normal#2:paused_+2_planes_on_r1 15.595 (CPU 1.8 %), normal#2:paused_+2_planes_off_r1 15.6 (CPU 8 %), normal#2:paused_+2_planes_on_r2 15.55 (CPU 9.7 %), normal#2:paused_+2_planes_off_r2 15.495 (CPU 9.7 %)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].phases[/^paused_/].frameMs.median, .cpuPercent.median
+fix1.ticks.paused              tick median 1.53-2.365 ms over 8 phase(s): normal#1:paused_+2_planes_on_r1 2.365, normal#1:paused_+2_planes_off_r1 1.67, normal#1:paused_+2_planes_on_r2 2.09, normal#1:paused_+2_planes_off_r2 1.56, normal#2:paused_+2_planes_on_r1 2.275, normal#2:paused_+2_planes_off_r1 1.615, normal#2:paused_+2_planes_on_r2 2.065, normal#2:paused_+2_planes_off_r2 1.53
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].phases[/^paused_/].tickMs.median
+fix1.frames.steady             frame median 16.105-94.975 ms over 8 phase(s): normal#1:steady_+2 16.105 (CPU 10.6 %), normal#1:steady_+1 52.77 (CPU 13 %), normal#1:steady_Ground 75.49 (CPU 22.4 %), normal#1:steady_-1 94.975 (CPU 22.5 %), normal#2:steady_+2 16.16 (CPU 11.8 %), normal#2:steady_+1 47.555 (CPU 16.1 %), normal#2:steady_Ground 58.025 (CPU 10.4 %), normal#2:steady_-1 90.975 (CPU 14.3 %)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].phases[/^steady_/].frameMs.median, .cpuPercent.median
+fix1.ticks.steady              tick median 12.665-92.725 ms over 8 phase(s): normal#1:steady_+2 14.17, normal#1:steady_+1 50, normal#1:steady_Ground 70.37, normal#1:steady_-1 92.725, normal#2:steady_+2 12.665, normal#2:steady_+1 48.06, normal#2:steady_Ground 52.83, normal#2:steady_-1 82.68
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].phases[/^steady_/].tickMs.median
+fix1.frames.stress             frame median 72.375-108.7 ms over 4 phase(s): stress#1:stress_day_30s 72.375 (CPU 15.5 %), stress#1:stress_night_30s 93.215 (CPU 13.4 %), stress#2:stress_day_30s 92.63 (CPU 27 %), stress#2:stress_night_30s 108.7 (CPU 26.9 %)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].phases[/^stress_/].frameMs.median, .cpuPercent.median
+fix1.ticks.stress              tick median 68.735-104.205 ms over 4 phase(s): stress#1:stress_day_30s 68.735, stress#1:stress_night_30s 89.595, stress#2:stress_day_30s 87.72, stress#2:stress_night_30s 104.205
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].phases[/^stress_/].tickMs.median
+fix1.events.stress             stress#1:stress_day_30s: 55 world:* events a frame (median), max 123; listener calls median 29, max 95; stress#1:stress_night_30s: 59 world:* events a frame (median), max 126; listener calls median 33, max 97; stress#2:stress_day_30s: 51 world:* events a frame (median), max 136; listener calls median 26, max 107; stress#2:stress_night_30s: 51 world:* events a frame (median), max 137; listener calls median 28, max 110
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].phases[stress_*].worldEventsPerFrame
+fix1.switch.requestToStarted   105.0-515.0 ms over 12 switch(es) (1 decimal)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].switches[].requestToStartedMs
+fix1.switch.lastSwitchMs       86.7-493.6 ms over 12 switch(es) (1 decimal)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].switches[].levelsLastSwitch.ms
+fix1.switch.depth              lastPeekMs 0.000-0.010, lastPaintMs 1.585-2.590 ms (3 decimals); canvasesMade 4
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].switches[].depth.lastPeekMs, .lastPaintMs, .canvasesMade
+fix1.switch.slowest            2 -> 1: request to started 515 ms, levelsLastSwitch.ms 493.6 (1 decimal), depth lastPeekMs 0.005, lastPaintMs 1.655
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].switches[] with the largest requestToStartedMs
+fix1.switch.worstFrame         139.3-658.8 ms worst frame in the 30 frames after a switch (1 decimal)
+                               <- baseline_eb446e06.json + stress_baseline_eb446e06.json: runs[].switches[].worstFrameMs
+
+=== fix1a: Fix 1 intermediate code e3896d76 (items found by one cell lookup per window cell), machine load recorded ===
+fix1a.normal.runs              2 run(s); units in the world 1115, 1250
+                               <- baseline_e3896d76.json: runs[].environment.units
+fix1a.normal.machine           {"host":"MSI","cpus":16,"cpu":"AMD Ryzen 7 8845HS w/ Radeon 780M Graphics","totalMemGb":31.3}
+                               <- baseline_e3896d76.json: machine
+fix1a.normal.gl                ANGLE (NVIDIA GeForce RTX 4060 Laptop GPU Direct3D11 vs_5_0 ps_5_0)
+                               <- baseline_e3896d76.json: runs[].environment.gl
+fix1a.normal.r1.load           loaded; CPU min/median/max 5.7/17.7/36.4 % (92 1-s samples); AI workers 4 start, 4 end; other nw.exe 0 start, max 1, 0 end; 2026-09-26T09:19:26.211Z to 2026-09-26T09:20:59.721Z; pre-run probe: 4 % median over 30 s, other nw.exe 0/0, quiet
+                               <- baseline_e3896d76.json: runs[0].machineLoad (label, cpu.overall, start, end, otherNwExeMax, startedAt, finishedAt, preRun)
+fix1a.normal.r2.load           quiet; CPU min/median/max 6/14.3/33.7 % (84 1-s samples); AI workers 4 start, 5 end; other nw.exe 0 start, max 0, 0 end; 2026-09-26T09:21:50.301Z to 2026-09-26T09:23:15.371Z; pre-run probe: 3.2 % median over 29 s, other nw.exe 0/0, quiet
+                               <- baseline_e3896d76.json: runs[1].machineLoad (label, cpu.overall, start, end, otherNwExeMax, startedAt, finishedAt, preRun)
+fix1a.stress.runs              2 run(s); units in the world 1170, 1149
+                               <- stress_baseline_e3896d76.json: runs[].environment.units
+fix1a.stress.machine           {"host":"MSI","cpus":16,"cpu":"AMD Ryzen 7 8845HS w/ Radeon 780M Graphics","totalMemGb":31.3}
+                               <- stress_baseline_e3896d76.json: machine
+fix1a.stress.gl                ANGLE (NVIDIA GeForce RTX 4060 Laptop GPU Direct3D11 vs_5_0 ps_5_0)
+                               <- stress_baseline_e3896d76.json: runs[].environment.gl
+fix1a.stress.r1.load           quiet; CPU min/median/max 9.2/18.9/46.4 % (100 1-s samples); AI workers 5 start, 5 end; other nw.exe 0 start, max 0, 0 end; 2026-09-26T09:23:50.854Z to 2026-09-26T09:25:32.583Z; pre-run probe: 5.2 % median over 29 s, other nw.exe 0/0, quiet
+                               <- stress_baseline_e3896d76.json: runs[0].machineLoad (label, cpu.overall, start, end, otherNwExeMax, startedAt, finishedAt, preRun)
+fix1a.stress.r2.load           quiet; CPU min/median/max 8.7/17.4/38.2 % (111 1-s samples); AI workers 5 start, 3 end; other nw.exe 0 start, max 0, 0 end; 2026-09-26T09:26:07.993Z to 2026-09-26T09:28:00.982Z; pre-run probe: 3.8 % median over 30 s, other nw.exe 0/0, quiet
+                               <- stress_baseline_e3896d76.json: runs[1].machineLoad (label, cpu.overall, start, end, otherNwExeMax, startedAt, finishedAt, preRun)
+fix1a.windows                  12 profiled windows: normal#1:steady_+2, normal#1:steady_+1, normal#1:steady_Ground, normal#1:steady_-1, normal#2:steady_+2, normal#2:steady_+1, normal#2:steady_Ground, normal#2:steady_-1, stress#1:stress_day, stress#1:stress_night, stress#2:stress_day, stress#2:stress_night
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].profiles
+fix1a.A.env                    mean 20.25 / worst 32.43 ms per update over 12 window(s); worst in normal#1:steady_Ground (2 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].profiles[*].topInclusive[fn ~ /^updateEnvironment DEUS_Environment\.js/].msPerUpdate
+fix1a.A.colonists              mean 14.31 / worst 33.62 ms per update over 6 window(s); worst in stress#2:stress_night (2 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].profiles[*].topInclusive[fn ~ /^scan DEUS_Colonists\.js/].msPerUpdate
+fix1a.A.hazard                 mean 20.54 / worst 21.68 ms per update over 2 window(s); worst in stress#2:stress_night; per window: stress#2:stress_day 19.41, stress#2:stress_night 21.68 (2 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].profiles[*].topInclusive[fn ~ /^hazardReflexJob DEUS_Colonists\.js/].msPerUpdate
+fix1a.A.worldUpdate            mean 9.62 / worst 10.92 ms per update over 2 window(s); worst in stress#1:stress_night (2 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].profiles[*].topInclusive[fn ~ /^World\.update DEUS_World\.js/].msPerUpdate
+fix1a.A.log                    mean 1.45 / worst 2.84 ms per update over 12 window(s); worst in stress#1:stress_day (2 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].profiles[*].selfByScript[fn in ["open","close","writeBuffer","writeString","fsync"]].msPerUpdate
+fix1a.A.effekseer              mean 0.85 / worst 2.59 ms per update over 12 window(s); worst in stress#1:stress_night (2 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].profiles[*].selfByScript[fn in ["wasm "]].msPerUpdate
+fix1a.A.gc                     mean 1.75 / worst 2.56 ms per update over 12 window(s); worst in stress#2:stress_night (2 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].profiles[*].selfByScript[fn in ["(garbage collector)"]].msPerUpdate
+fix1a.A.objectsSelf            mean 21.66 / worst 31.36 ms per update over 12 window(s); worst in normal#1:steady_Ground (2 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Objects.js"]].msPerUpdate
+fix1a.A.worldSelf              mean 9.93 / worst 25.50 ms per update over 12 window(s); worst in stress#2:stress_night (2 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].profiles[*].selfByScript[fn in ["DEUS_World.js"]].msPerUpdate
+fix1a.A.floorsSelf             mean 2.13 / worst 3.51 ms per update over 12 window(s); worst in normal#1:steady_Ground (2 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Floors.js"]].msPerUpdate
+fix1a.A.jobsSelf               mean 1.47 / worst 3.35 ms per update over 12 window(s); worst in stress#2:stress_day (2 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Jobs.js"]].msPerUpdate
+fix1a.A.depthSelf              mean 0.26 / worst 0.47 ms per update over 12 window(s); worst in normal#2:steady_+1 (2 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Depth.js"]].msPerUpdate
+fix1a.A.minimapSelf            mean 0.02 / worst 0.09 ms per update over 12 window(s); worst in normal#2:steady_Ground (2 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Minimap.js"]].msPerUpdate
+fix1a.A.fogSelf                mean 0.00 / worst 0.00 ms per update over 12 window(s); worst in normal#1:steady_+2 (2 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Fog.js"]].msPerUpdate
+fix1a.A.dayNightSelf           mean 0.00 / worst 0.00 ms per update over 12 window(s); worst in normal#1:steady_+2 (2 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].profiles[*].selfByScript[fn in ["DEUS_DayNight.js"]].msPerUpdate
+fix1a.A.envShareOfUpdateMain   20.4-78.1 % over 12 window(s) (1 decimal)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].profiles[*]: topInclusive 'updateEnvironment DEUS_Environment.js' / the largest topInclusive 'Scene_Map.updateMain *'
+fix1a.A.envShareOfBusy         16.8-71.2 % over 12 window(s) (1 decimal)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].profiles[*]: topInclusive 'updateEnvironment DEUS_Environment.js' / (sampledMs / updates - selfByScript '(idle)')
+fix1a.B.update                 mean 57.700 / worst 83.160 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].phases[steady_*|stress_*].parts["update"].median
+fix1a.B.update.map             mean 52.202 / worst 79.770 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].phases[steady_*|stress_*].parts["update.map"].median
+fix1a.B.update.map.world       mean 5.230 / worst 10.850 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].phases[steady_*|stress_*].parts["update.map.world"].median
+fix1a.B.events                 mean 2.497 / worst 5.080 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].phases[steady_*|stress_*].parts["events"].median
+fix1a.B.render                 mean 2.333 / worst 4.705 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].phases[steady_*|stress_*].parts["render"].median
+fix1a.B.update.spriteset.tilemap.depth mean 0.411 / worst 0.495 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].phases[steady_*|stress_*].parts["update.spriteset.tilemap.depth"].median
+fix1a.B.update.depth_late      mean 0.395 / worst 0.625 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].phases[steady_*|stress_*].parts["update.depth_late"].median
+fix1a.B.render.depth           mean 0.150 / worst 0.185 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].phases[steady_*|stress_*].parts["render.depth"].median
+fix1a.B.update.minimap         mean 0.158 / worst 0.485 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].phases[steady_*|stress_*].parts["update.minimap"].median
+fix1a.B.depth.plane.rebuildItems.max largest 4.56 ms in one tick; median of the phases' largest 0.3 ms over 28 phase(s)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].phases[].parts["depth.plane.rebuildItems"].max
+fix1a.B.depth.plane.rebuildWalls.max largest 3.62 ms in one tick; median of the phases' largest 1.405 ms over 28 phase(s)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].phases[].parts["depth.plane.rebuildWalls"].max
+fix1a.frames.paused            frame median 15.55-15.64 ms over 8 phase(s): normal#1:paused_+2_planes_on_r1 15.55 (CPU 10.5 %), normal#1:paused_+2_planes_off_r1 15.58 (CPU 10.5 %), normal#1:paused_+2_planes_on_r2 15.605 (CPU 6.1 %), normal#1:paused_+2_planes_off_r2 15.575 (CPU 6.1 %), normal#2:paused_+2_planes_on_r1 15.64 (CPU 6 %), normal#2:paused_+2_planes_off_r1 15.58 (CPU 6 %), normal#2:paused_+2_planes_on_r2 15.57 (CPU 8 %), normal#2:paused_+2_planes_off_r2 15.59 (CPU 14.8 %)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].phases[/^paused_/].frameMs.median, .cpuPercent.median
+fix1a.ticks.paused             tick median 1.62-2.315 ms over 8 phase(s): normal#1:paused_+2_planes_on_r1 2.275, normal#1:paused_+2_planes_off_r1 1.73, normal#1:paused_+2_planes_on_r2 2.075, normal#1:paused_+2_planes_off_r2 1.62, normal#2:paused_+2_planes_on_r1 2.315, normal#2:paused_+2_planes_off_r1 1.655, normal#2:paused_+2_planes_on_r2 2.155, normal#2:paused_+2_planes_off_r2 1.65
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].phases[/^paused_/].tickMs.median
+fix1a.frames.steady            frame median 15.995-85.83 ms over 8 phase(s): normal#1:steady_+2 45.96 (CPU 13.8 %), normal#1:steady_+1 62.14 (CPU 19.3 %), normal#1:steady_Ground 77.5 (CPU 18.9 %), normal#1:steady_-1 85.83 (CPU 12.6 %), normal#2:steady_+2 15.995 (CPU 12.4 %), normal#2:steady_+1 50.19 (CPU 13.1 %), normal#2:steady_Ground 48.015 (CPU 12.6 %), normal#2:steady_-1 70.67 (CPU 15 %)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].phases[/^steady_/].frameMs.median, .cpuPercent.median
+fix1a.ticks.steady             tick median 7.905-84.32 ms over 8 phase(s): normal#1:steady_+2 41.425, normal#1:steady_+1 58.905, normal#1:steady_Ground 72.485, normal#1:steady_-1 84.32, normal#2:steady_+2 7.905, normal#2:steady_+1 48.165, normal#2:steady_Ground 47.245, normal#2:steady_-1 68.95
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].phases[/^steady_/].tickMs.median
+fix1a.frames.stress            frame median 67.19-83.715 ms over 4 phase(s): stress#1:stress_day_30s 78.35 (CPU 17.7 %), stress#1:stress_night_30s 76.48 (CPU 17.2 %), stress#2:stress_day_30s 67.19 (CPU 16.5 %), stress#2:stress_night_30s 83.715 (CPU 12.9 %)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].phases[/^stress_/].frameMs.median, .cpuPercent.median
+fix1a.ticks.stress             tick median 65.13-81.73 ms over 4 phase(s): stress#1:stress_day_30s 74.16, stress#1:stress_night_30s 71.02, stress#2:stress_day_30s 65.13, stress#2:stress_night_30s 81.73
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].phases[/^stress_/].tickMs.median
+fix1a.events.stress            stress#1:stress_day_30s: 47 world:* events a frame (median), max 140; listener calls median 26, max 115; stress#1:stress_night_30s: 51 world:* events a frame (median), max 140; listener calls median 30, max 114; stress#2:stress_day_30s: 42 world:* events a frame (median), max 142; listener calls median 24, max 120; stress#2:stress_night_30s: 43 world:* events a frame (median), max 142; listener calls median 25, max 121
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].phases[stress_*].worldEventsPerFrame
+fix1a.switch.requestToStarted  82.8-382.7 ms over 12 switch(es) (1 decimal)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].switches[].requestToStartedMs
+fix1a.switch.lastSwitchMs      68.0-344.7 ms over 12 switch(es) (1 decimal)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].switches[].levelsLastSwitch.ms
+fix1a.switch.depth             lastPeekMs 0.000-0.010, lastPaintMs 1.635-2.655 ms (3 decimals); canvasesMade 4
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].switches[].depth.lastPeekMs, .lastPaintMs, .canvasesMade
+fix1a.switch.slowest           -1 -> 0: request to started 382.7 ms, levelsLastSwitch.ms 344.7 (1 decimal), depth lastPeekMs 0.01, lastPaintMs 1.83
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].switches[] with the largest requestToStartedMs
+fix1a.switch.worstFrame        187.8-410.5 ms worst frame in the 30 frames after a switch (1 decimal)
+                               <- baseline_e3896d76.json + stress_baseline_e3896d76.json: runs[].switches[].worstFrameMs
+
+=== fix1b: Fix 1 intermediate code 8dbd0bdc (normal only; the bench tool before the nw.exe process-tree rule), machine load recorded ===
+fix1b.normal.runs              2 run(s); units in the world 1311, 1221
+                               <- baseline_8dbd0bdc.json: runs[].environment.units
+fix1b.normal.machine           {"host":"MSI","cpus":16,"cpu":"AMD Ryzen 7 8845HS w/ Radeon 780M Graphics","totalMemGb":31.3}
+                               <- baseline_8dbd0bdc.json: machine
+fix1b.normal.gl                ANGLE (NVIDIA GeForce RTX 4060 Laptop GPU Direct3D11 vs_5_0 ps_5_0)
+                               <- baseline_8dbd0bdc.json: runs[].environment.gl
+fix1b.normal.r1.load           loaded; CPU min/median/max 2.4/13.5/41.4 % (98 1-s samples); AI workers 4 start, 4 end; other nw.exe 0 start, max 1, 0 end; 2026-09-26T09:33:25.443Z to 2026-09-26T09:35:04.708Z; pre-run probe: 3.5 % median over 29 s, other nw.exe 0/0, quiet
+                               <- baseline_8dbd0bdc.json: runs[0].machineLoad (label, cpu.overall, start, end, otherNwExeMax, startedAt, finishedAt, preRun)
+fix1b.normal.r2.load           quiet; CPU min/median/max 7.1/14/44.1 % (93 1-s samples); AI workers 4 start, 5 end; other nw.exe 0 start, max 0, 0 end; 2026-09-26T09:35:36.338Z to 2026-09-26T09:37:10.885Z; pre-run probe: 3.6 % median over 29 s, other nw.exe 0/0, quiet
+                               <- baseline_8dbd0bdc.json: runs[1].machineLoad (label, cpu.overall, start, end, otherNwExeMax, startedAt, finishedAt, preRun)
+fix1b.windows                  8 profiled windows: normal#1:steady_+2, normal#1:steady_+1, normal#1:steady_Ground, normal#1:steady_-1, normal#2:steady_+2, normal#2:steady_+1, normal#2:steady_Ground, normal#2:steady_-1
+                               <- baseline_8dbd0bdc.json: runs[].profiles
+fix1b.A.env                    mean 21.74 / worst 26.98 ms per update over 8 window(s); worst in normal#1:steady_-1 (2 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].profiles[*].topInclusive[fn ~ /^updateEnvironment DEUS_Environment\.js/].msPerUpdate
+fix1b.A.colonists              mean 5.43 / worst 6.49 ms per update over 2 window(s); worst in normal#1:steady_-1 (2 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].profiles[*].topInclusive[fn ~ /^scan DEUS_Colonists\.js/].msPerUpdate
+fix1b.A.hazard                 mean n/a / worst n/a ms per update over 0 window(s); per window: none (2 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].profiles[*].topInclusive[fn ~ /^hazardReflexJob DEUS_Colonists\.js/].msPerUpdate
+fix1b.A.worldUpdate            mean 5.15 / worst 5.15 ms per update over 1 window(s); worst in normal#2:steady_Ground (2 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].profiles[*].topInclusive[fn ~ /^World\.update DEUS_World\.js/].msPerUpdate
+fix1b.A.log                    mean 0.77 / worst 1.18 ms per update over 8 window(s); worst in normal#2:steady_-1 (2 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].profiles[*].selfByScript[fn in ["open","close","writeBuffer","writeString","fsync"]].msPerUpdate
+fix1b.A.effekseer              mean 0.00 / worst 0.00 ms per update over 8 window(s); worst in normal#1:steady_+2 (2 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].profiles[*].selfByScript[fn in ["wasm "]].msPerUpdate
+fix1b.A.gc                     mean 1.52 / worst 2.01 ms per update over 8 window(s); worst in normal#2:steady_-1 (2 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].profiles[*].selfByScript[fn in ["(garbage collector)"]].msPerUpdate
+fix1b.A.objectsSelf            mean 22.58 / worst 28.65 ms per update over 8 window(s); worst in normal#1:steady_-1 (2 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Objects.js"]].msPerUpdate
+fix1b.A.worldSelf              mean 5.10 / worst 8.30 ms per update over 8 window(s); worst in normal#2:steady_-1 (2 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].profiles[*].selfByScript[fn in ["DEUS_World.js"]].msPerUpdate
+fix1b.A.floorsSelf             mean 1.35 / worst 2.35 ms per update over 8 window(s); worst in normal#2:steady_Ground (2 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Floors.js"]].msPerUpdate
+fix1b.A.jobsSelf               mean 0.92 / worst 1.43 ms per update over 8 window(s); worst in normal#2:steady_-1 (2 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Jobs.js"]].msPerUpdate
+fix1b.A.depthSelf              mean 0.19 / worst 0.29 ms per update over 8 window(s); worst in normal#1:steady_+1 (2 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Depth.js"]].msPerUpdate
+fix1b.A.minimapSelf            mean 0.04 / worst 0.08 ms per update over 8 window(s); worst in normal#1:steady_Ground (2 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Minimap.js"]].msPerUpdate
+fix1b.A.fogSelf                mean 0.00 / worst 0.00 ms per update over 8 window(s); worst in normal#1:steady_+2 (2 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Fog.js"]].msPerUpdate
+fix1b.A.dayNightSelf           mean 0.00 / worst 0.00 ms per update over 8 window(s); worst in normal#1:steady_+2 (2 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].profiles[*].selfByScript[fn in ["DEUS_DayNight.js"]].msPerUpdate
+fix1b.A.envShareOfUpdateMain   56.3-74.0 % over 8 window(s) (1 decimal)
+                               <- baseline_8dbd0bdc.json: runs[].profiles[*]: topInclusive 'updateEnvironment DEUS_Environment.js' / the largest topInclusive 'Scene_Map.updateMain *'
+fix1b.A.envShareOfBusy         50.3-67.0 % over 8 window(s) (1 decimal)
+                               <- baseline_8dbd0bdc.json: runs[].profiles[*]: topInclusive 'updateEnvironment DEUS_Environment.js' / (sampledMs / updates - selfByScript '(idle)')
+fix1b.B.update                 mean 49.816 / worst 84.320 ms per tick over 8 phase(s) (3 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].phases[steady_*|stress_*].parts["update"].median
+fix1b.B.update.map             mean 47.296 / worst 80.660 ms per tick over 8 phase(s) (3 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].phases[steady_*|stress_*].parts["update.map"].median
+fix1b.B.update.map.world       mean 3.735 / worst 5.815 ms per tick over 8 phase(s) (3 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].phases[steady_*|stress_*].parts["update.map.world"].median
+fix1b.B.events                 mean 1.406 / worst 2.430 ms per tick over 8 phase(s) (3 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].phases[steady_*|stress_*].parts["events"].median
+fix1b.B.render                 mean 1.080 / worst 1.370 ms per tick over 8 phase(s) (3 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].phases[steady_*|stress_*].parts["render"].median
+fix1b.B.update.spriteset.tilemap.depth mean 0.338 / worst 0.425 ms per tick over 8 phase(s) (3 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].phases[steady_*|stress_*].parts["update.spriteset.tilemap.depth"].median
+fix1b.B.update.depth_late      mean 0.257 / worst 0.470 ms per tick over 8 phase(s) (3 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].phases[steady_*|stress_*].parts["update.depth_late"].median
+fix1b.B.render.depth           mean 0.121 / worst 0.165 ms per tick over 8 phase(s) (3 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].phases[steady_*|stress_*].parts["render.depth"].median
+fix1b.B.update.minimap         mean 0.178 / worst 0.425 ms per tick over 8 phase(s) (3 decimals)
+                               <- baseline_8dbd0bdc.json: runs[].phases[steady_*|stress_*].parts["update.minimap"].median
+fix1b.B.depth.plane.rebuildItems.max largest 0.695 ms in one tick; median of the phases' largest 0.08 ms over 24 phase(s)
+                               <- baseline_8dbd0bdc.json: runs[].phases[].parts["depth.plane.rebuildItems"].max
+fix1b.B.depth.plane.rebuildWalls.max largest 4.94 ms in one tick; median of the phases' largest 1.215 ms over 24 phase(s)
+                               <- baseline_8dbd0bdc.json: runs[].phases[].parts["depth.plane.rebuildWalls"].max
+fix1b.frames.paused            frame median 15.545-15.785 ms over 8 phase(s): normal#1:paused_+2_planes_on_r1 15.71 (CPU 2.4 %), normal#1:paused_+2_planes_off_r1 15.565 (CPU 2.9 %), normal#1:paused_+2_planes_on_r2 15.545 (CPU 7.5 %), normal#1:paused_+2_planes_off_r2 15.565 (CPU 7.5 %), normal#2:paused_+2_planes_on_r1 15.635 (CPU 7.1 %), normal#2:paused_+2_planes_off_r1 15.735 (CPU 8.7 %), normal#2:paused_+2_planes_on_r2 15.75 (CPU 8.7 %), normal#2:paused_+2_planes_off_r2 15.785 (CPU 8.7 %)
+                               <- baseline_8dbd0bdc.json: runs[].phases[/^paused_/].frameMs.median, .cpuPercent.median
+fix1b.ticks.paused             tick median 1.555-2.275 ms over 8 phase(s): normal#1:paused_+2_planes_on_r1 2.275, normal#1:paused_+2_planes_off_r1 1.56, normal#1:paused_+2_planes_on_r2 2.02, normal#1:paused_+2_planes_off_r2 1.555, normal#2:paused_+2_planes_on_r1 2.255, normal#2:paused_+2_planes_off_r1 1.71, normal#2:paused_+2_planes_on_r2 2.105, normal#2:paused_+2_planes_off_r2 1.57
+                               <- baseline_8dbd0bdc.json: runs[].phases[/^paused_/].tickMs.median
+fix1b.frames.steady            frame median 16.005-93.75 ms over 8 phase(s): normal#1:steady_+2 23.13 (CPU 17.3 %), normal#1:steady_+1 51.965 (CPU 12 %), normal#1:steady_Ground 79.945 (CPU 13.2 %), normal#1:steady_-1 93.75 (CPU 14.1 %), normal#2:steady_+2 16.005 (CPU 10.4 %), normal#2:steady_+1 41.625 (CPU 14 %), normal#2:steady_Ground 61.985 (CPU 12.1 %), normal#2:steady_-1 74.785 (CPU 12.8 %)
+                               <- baseline_8dbd0bdc.json: runs[].phases[/^steady_/].frameMs.median, .cpuPercent.median
+fix1b.ticks.steady             tick median 13.53-85.385 ms over 8 phase(s): normal#1:steady_+2 20.1, normal#1:steady_+1 51.295, normal#1:steady_Ground 76.805, normal#1:steady_-1 85.385, normal#2:steady_+2 13.53, normal#2:steady_+1 40.045, normal#2:steady_Ground 52.265, normal#2:steady_-1 69.27
+                               <- baseline_8dbd0bdc.json: runs[].phases[/^steady_/].tickMs.median
+fix1b.switch.requestToStarted  89.9-240.1 ms over 12 switch(es) (1 decimal)
+                               <- baseline_8dbd0bdc.json: runs[].switches[].requestToStartedMs
+fix1b.switch.lastSwitchMs      72.7-210.1 ms over 12 switch(es) (1 decimal)
+                               <- baseline_8dbd0bdc.json: runs[].switches[].levelsLastSwitch.ms
+fix1b.switch.depth             lastPeekMs 0.000-0.010, lastPaintMs 1.580-2.770 ms (3 decimals); canvasesMade 4
+                               <- baseline_8dbd0bdc.json: runs[].switches[].depth.lastPeekMs, .lastPaintMs, .canvasesMade
+fix1b.switch.slowest           -1 -> 0: request to started 240.1 ms, levelsLastSwitch.ms 210.1 (1 decimal), depth lastPeekMs 0.005, lastPaintMs 1.71
+                               <- baseline_8dbd0bdc.json: runs[].switches[] with the largest requestToStartedMs
+fix1b.switch.worstFrame        145.8-552.1 ms worst frame in the 30 frames after a switch (1 decimal)
+                               <- baseline_8dbd0bdc.json: runs[].switches[].worstFrameMs
+
+=== postK4: post-K4 f19b23bf (pre-Fix 1: taken under contention, load not recorded) ===
+postK4.normal.runs             2 run(s); units in the world 1191, 1264
+                               <- baseline_f19b23bf.json: runs[].environment.units
+postK4.normal.machine          {"host":"MSI","cpus":16,"cpu":"AMD Ryzen 7 8845HS w/ Radeon 780M Graphics","totalMemGb":31.3}
+                               <- baseline_f19b23bf.json: machine
+postK4.normal.gl               ANGLE (NVIDIA GeForce RTX 4060 Laptop GPU Direct3D11 vs_5_0 ps_5_0)
+                               <- baseline_f19b23bf.json: runs[].environment.gl
+postK4.normal.r1.load          no machineLoad (not recorded)
+                               <- baseline_f19b23bf.json: runs[0]
+postK4.normal.r2.load          no machineLoad (not recorded)
+                               <- baseline_f19b23bf.json: runs[1]
+postK4.stress.runs             2 run(s); units in the world 1262, 1199
+                               <- stress_baseline_f19b23bf.json: runs[].environment.units
+postK4.stress.machine          {"host":"MSI","cpus":16,"cpu":"AMD Ryzen 7 8845HS w/ Radeon 780M Graphics","totalMemGb":31.3}
+                               <- stress_baseline_f19b23bf.json: machine
+postK4.stress.gl               ANGLE (NVIDIA GeForce RTX 4060 Laptop GPU Direct3D11 vs_5_0 ps_5_0)
+                               <- stress_baseline_f19b23bf.json: runs[].environment.gl
+postK4.stress.r1.load          no machineLoad (not recorded)
+                               <- stress_baseline_f19b23bf.json: runs[0]
+postK4.stress.r2.load          no machineLoad (not recorded)
+                               <- stress_baseline_f19b23bf.json: runs[1]
+postK4.windows                 12 profiled windows: normal#1:steady_+2, normal#1:steady_+1, normal#1:steady_Ground, normal#1:steady_-1, normal#2:steady_+2, normal#2:steady_+1, normal#2:steady_Ground, normal#2:steady_-1, stress#1:stress_day, stress#1:stress_night, stress#2:stress_day, stress#2:stress_night
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].profiles
+postK4.A.env                   mean 36.62 / worst 60.60 ms per update over 12 window(s); worst in stress#1:stress_night (2 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].profiles[*].topInclusive[fn ~ /^updateEnvironment DEUS_Environment\.js/].msPerUpdate
+postK4.A.colonists             mean 8.69 / worst 9.93 ms per update over 2 window(s); worst in stress#2:stress_day (2 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].profiles[*].topInclusive[fn ~ /^scan DEUS_Colonists\.js/].msPerUpdate
+postK4.A.hazard                mean n/a / worst n/a ms per update over 0 window(s); per window: none (2 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].profiles[*].topInclusive[fn ~ /^hazardReflexJob DEUS_Colonists\.js/].msPerUpdate
+postK4.A.worldUpdate           mean 6.55 / worst 6.55 ms per update over 1 window(s); worst in stress#2:stress_night (2 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].profiles[*].topInclusive[fn ~ /^World\.update DEUS_World\.js/].msPerUpdate
+postK4.A.log                   mean 1.81 / worst 4.24 ms per update over 12 window(s); worst in stress#2:stress_day (2 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].profiles[*].selfByScript[fn in ["open","close","writeBuffer","writeString","fsync"]].msPerUpdate
+postK4.A.effekseer             mean 1.21 / worst 4.36 ms per update over 12 window(s); worst in stress#1:stress_night (2 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].profiles[*].selfByScript[fn in ["wasm "]].msPerUpdate
+postK4.A.gc                    mean 2.32 / worst 3.69 ms per update over 12 window(s); worst in stress#1:stress_night (2 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].profiles[*].selfByScript[fn in ["(garbage collector)"]].msPerUpdate
+postK4.A.objectsSelf           mean 36.27 / worst 57.60 ms per update over 12 window(s); worst in stress#1:stress_night (2 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Objects.js"]].msPerUpdate
+postK4.A.worldSelf             mean 7.90 / worst 15.60 ms per update over 12 window(s); worst in stress#1:stress_night (2 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].profiles[*].selfByScript[fn in ["DEUS_World.js"]].msPerUpdate
+postK4.A.floorsSelf            mean 3.06 / worst 6.93 ms per update over 12 window(s); worst in stress#1:stress_night (2 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Floors.js"]].msPerUpdate
+postK4.A.jobsSelf              mean 1.29 / worst 2.10 ms per update over 12 window(s); worst in stress#1:stress_night (2 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Jobs.js"]].msPerUpdate
+postK4.A.depthSelf             mean 0.36 / worst 0.65 ms per update over 12 window(s); worst in stress#1:stress_night (2 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Depth.js"]].msPerUpdate
+postK4.A.minimapSelf           mean 0.03 / worst 0.09 ms per update over 12 window(s); worst in normal#2:steady_Ground (2 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Minimap.js"]].msPerUpdate
+postK4.A.fogSelf               mean 0.00 / worst 0.00 ms per update over 12 window(s); worst in normal#1:steady_+2 (2 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Fog.js"]].msPerUpdate
+postK4.A.dayNightSelf          mean 0.00 / worst 0.00 ms per update over 12 window(s); worst in normal#1:steady_+2 (2 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].profiles[*].selfByScript[fn in ["DEUS_DayNight.js"]].msPerUpdate
+postK4.A.envShareOfUpdateMain  62.6-74.4 % over 12 window(s) (1 decimal)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].profiles[*]: topInclusive 'updateEnvironment DEUS_Environment.js' / the largest topInclusive 'Scene_Map.updateMain *'
+postK4.A.envShareOfBusy        48.0-66.9 % over 12 window(s) (1 decimal)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].profiles[*]: topInclusive 'updateEnvironment DEUS_Environment.js' / (sampledMs / updates - selfByScript '(idle)')
+postK4.B.update                mean 68.647 / worst 129.150 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].phases[steady_*|stress_*].parts["update"].median
+postK4.B.update.map            mean 61.204 / worst 111.300 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].phases[steady_*|stress_*].parts["update.map"].median
+postK4.B.update.map.world      mean 6.267 / worst 16.230 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].phases[steady_*|stress_*].parts["update.map.world"].median
+postK4.B.events                mean 2.726 / worst 6.150 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].phases[steady_*|stress_*].parts["events"].median
+postK4.B.render                mean 3.217 / worst 7.660 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].phases[steady_*|stress_*].parts["render"].median
+postK4.B.update.spriteset.tilemap.depth mean 0.524 / worst 1.050 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].phases[steady_*|stress_*].parts["update.spriteset.tilemap.depth"].median
+postK4.B.update.depth_late     mean 0.502 / worst 1.110 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].phases[steady_*|stress_*].parts["update.depth_late"].median
+postK4.B.render.depth          mean 0.202 / worst 0.425 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].phases[steady_*|stress_*].parts["render.depth"].median
+postK4.B.update.minimap        mean 0.187 / worst 0.565 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].phases[steady_*|stress_*].parts["update.minimap"].median
+postK4.B.depth.plane.rebuildItems.max largest 0.6 ms in one tick; median of the phases' largest 0.105 ms over 28 phase(s)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].phases[].parts["depth.plane.rebuildItems"].max
+postK4.B.depth.plane.rebuildWalls.max largest 6.8 ms in one tick; median of the phases' largest 1.59 ms over 28 phase(s)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].phases[].parts["depth.plane.rebuildWalls"].max
+postK4.frames.paused           frame median 6.94-6.95 ms over 8 phase(s): normal#1:paused_+2_planes_on_r1 6.95, normal#1:paused_+2_planes_off_r1 6.945, normal#1:paused_+2_planes_on_r2 6.945, normal#1:paused_+2_planes_off_r2 6.94, normal#2:paused_+2_planes_on_r1 6.945, normal#2:paused_+2_planes_off_r1 6.94, normal#2:paused_+2_planes_on_r2 6.945, normal#2:paused_+2_planes_off_r2 6.945
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].phases[/^paused_/].frameMs.median
+postK4.ticks.paused            tick median 0.825-1.46 ms over 8 phase(s): normal#1:paused_+2_planes_on_r1 1.46, normal#1:paused_+2_planes_off_r1 1.13, normal#1:paused_+2_planes_on_r2 1.215, normal#1:paused_+2_planes_off_r2 0.87, normal#2:paused_+2_planes_on_r1 1.44, normal#2:paused_+2_planes_off_r1 0.94, normal#2:paused_+2_planes_on_r2 1.09, normal#2:paused_+2_planes_off_r2 0.825
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].phases[/^paused_/].tickMs.median
+postK4.frames.steady           frame median 7.14-92.02 ms over 8 phase(s): normal#1:steady_+2 8.55, normal#1:steady_+1 50.955, normal#1:steady_Ground 56.715, normal#1:steady_-1 92.02, normal#2:steady_+2 7.14, normal#2:steady_+1 31.715, normal#2:steady_Ground 65.845, normal#2:steady_-1 84.975
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].phases[/^steady_/].frameMs.median
+postK4.ticks.steady            tick median 6.06-91.565 ms over 8 phase(s): normal#1:steady_+2 8.065, normal#1:steady_+1 50.215, normal#1:steady_Ground 55.965, normal#1:steady_-1 91.565, normal#2:steady_+2 6.06, normal#2:steady_+1 30.8, normal#2:steady_Ground 66.115, normal#2:steady_-1 83.8
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].phases[/^steady_/].tickMs.median
+postK4.frames.stress           frame median 108.075-139.87 ms over 4 phase(s): stress#1:stress_day_30s 121.095, stress#1:stress_night_30s 139.87, stress#2:stress_day_30s 114.465, stress#2:stress_night_30s 108.075
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].phases[/^stress_/].frameMs.median
+postK4.ticks.stress            tick median 104.88-135.945 ms over 4 phase(s): stress#1:stress_day_30s 119.47, stress#1:stress_night_30s 135.945, stress#2:stress_day_30s 111.65, stress#2:stress_night_30s 104.88
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].phases[/^stress_/].tickMs.median
+postK4.events.stress           stress#1:stress_day_30s: 32 world:* events a frame (median), max 112; listener calls median 19, max 97; stress#1:stress_night_30s: 31 world:* events a frame (median), max 111; listener calls median 18, max 97; stress#2:stress_day_30s: 46 world:* events a frame (median), max 154; listener calls median 24, max 128; stress#2:stress_night_30s: 46 world:* events a frame (median), max 158; listener calls median 26, max 130
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].phases[stress_*].worldEventsPerFrame
+postK4.switch.requestToStarted 89.8-168.5 ms over 12 switch(es) (1 decimal)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].switches[].requestToStartedMs
+postK4.switch.lastSwitchMs     69.8-145.2 ms over 12 switch(es) (1 decimal)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].switches[].levelsLastSwitch.ms
+postK4.switch.depth            lastPeekMs 0.000-0.015, lastPaintMs 1.675-2.905 ms (3 decimals); canvasesMade 4
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].switches[].depth.lastPeekMs, .lastPaintMs, .canvasesMade
+postK4.switch.slowest          2 -> 1: request to started 168.5 ms, levelsLastSwitch.ms 145.2 (1 decimal), depth lastPeekMs 0, lastPaintMs 1.675
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].switches[] with the largest requestToStartedMs
+postK4.switch.worstFrame       118.4-259.8 ms worst frame in the 30 frames after a switch (1 decimal)
+                               <- baseline_f19b23bf.json + stress_baseline_f19b23bf.json: runs[].switches[].worstFrameMs
+
+=== preK4: pre-K4 5c6641e1 (pre-Fix 1: taken under contention, load not recorded) ===
+preK4.normal.runs              2 run(s); units in the world 1243, 1251
+                               <- baseline_5c6641e1.json: runs[].environment.units
+preK4.normal.machine           {"host":"MSI","cpus":16,"cpu":"AMD Ryzen 7 8845HS w/ Radeon 780M Graphics","totalMemGb":31.3}
+                               <- baseline_5c6641e1.json: machine
+preK4.normal.gl                ANGLE (NVIDIA GeForce RTX 4060 Laptop GPU Direct3D11 vs_5_0 ps_5_0)
+                               <- baseline_5c6641e1.json: runs[].environment.gl
+preK4.normal.r1.load           no machineLoad (not recorded)
+                               <- baseline_5c6641e1.json: runs[0]
+preK4.normal.r2.load           no machineLoad (not recorded)
+                               <- baseline_5c6641e1.json: runs[1]
+preK4.stress.runs              2 run(s); units in the world 1233, 1094
+                               <- stress_baseline_5c6641e1.json: runs[].environment.units
+preK4.stress.machine           {"host":"MSI","cpus":16,"cpu":"AMD Ryzen 7 8845HS w/ Radeon 780M Graphics","totalMemGb":31.3}
+                               <- stress_baseline_5c6641e1.json: machine
+preK4.stress.gl                ANGLE (NVIDIA GeForce RTX 4060 Laptop GPU Direct3D11 vs_5_0 ps_5_0)
+                               <- stress_baseline_5c6641e1.json: runs[].environment.gl
+preK4.stress.r1.load           no machineLoad (not recorded)
+                               <- stress_baseline_5c6641e1.json: runs[0]
+preK4.stress.r2.load           no machineLoad (not recorded)
+                               <- stress_baseline_5c6641e1.json: runs[1]
+preK4.windows                  12 profiled windows: normal#1:steady_+2, normal#1:steady_+1, normal#1:steady_Ground, normal#1:steady_-1, normal#2:steady_+2, normal#2:steady_+1, normal#2:steady_Ground, normal#2:steady_-1, stress#1:stress_day, stress#1:stress_night, stress#2:stress_day, stress#2:stress_night
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].profiles
+preK4.A.env                    mean 27.41 / worst 41.93 ms per update over 12 window(s); worst in stress#1:stress_day (2 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].profiles[*].topInclusive[fn ~ /^updateEnvironment DEUS_Environment\.js/].msPerUpdate
+preK4.A.colonists              mean 13.10 / worst 29.99 ms per update over 8 window(s); worst in normal#1:steady_-1 (2 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].profiles[*].topInclusive[fn ~ /^scan DEUS_Colonists\.js/].msPerUpdate
+preK4.A.hazard                 mean 19.49 / worst 25.58 ms per update over 3 window(s); worst in normal#1:steady_-1; per window: normal#1:steady_Ground 18.90, normal#1:steady_-1 25.58, stress#1:stress_night 13.99 (2 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].profiles[*].topInclusive[fn ~ /^hazardReflexJob DEUS_Colonists\.js/].msPerUpdate
+preK4.A.worldUpdate            mean n/a / worst n/a ms per update over 0 window(s) (2 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].profiles[*].topInclusive[fn ~ /^World\.update DEUS_World\.js/].msPerUpdate
+preK4.A.log                    mean 2.20 / worst 5.22 ms per update over 12 window(s); worst in stress#1:stress_day (2 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].profiles[*].selfByScript[fn in ["open","close","writeBuffer","writeString","fsync"]].msPerUpdate
+preK4.A.effekseer              mean 1.35 / worst 4.30 ms per update over 12 window(s); worst in stress#2:stress_day (2 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].profiles[*].selfByScript[fn in ["wasm "]].msPerUpdate
+preK4.A.gc                     mean 2.31 / worst 3.23 ms per update over 12 window(s); worst in stress#1:stress_day (2 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].profiles[*].selfByScript[fn in ["(garbage collector)"]].msPerUpdate
+preK4.A.objectsSelf            mean 29.60 / worst 45.20 ms per update over 12 window(s); worst in stress#1:stress_day (2 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Objects.js"]].msPerUpdate
+preK4.A.worldSelf              mean 10.86 / worst 23.24 ms per update over 12 window(s); worst in normal#1:steady_Ground (2 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].profiles[*].selfByScript[fn in ["DEUS_World.js"]].msPerUpdate
+preK4.A.floorsSelf             mean 2.28 / worst 3.31 ms per update over 12 window(s); worst in normal#1:steady_Ground (2 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Floors.js"]].msPerUpdate
+preK4.A.jobsSelf               mean 2.20 / worst 4.74 ms per update over 12 window(s); worst in stress#1:stress_night (2 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Jobs.js"]].msPerUpdate
+preK4.A.depthSelf              mean 0.76 / worst 1.32 ms per update over 12 window(s); worst in stress#1:stress_night (2 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Depth.js"]].msPerUpdate
+preK4.A.minimapSelf            mean 0.14 / worst 0.31 ms per update over 12 window(s); worst in normal#2:steady_Ground (2 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Minimap.js"]].msPerUpdate
+preK4.A.fogSelf                mean 0.00 / worst 0.00 ms per update over 12 window(s); worst in normal#1:steady_+2 (2 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Fog.js"]].msPerUpdate
+preK4.A.dayNightSelf           mean 0.00 / worst 0.00 ms per update over 12 window(s); worst in normal#1:steady_+2 (2 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].profiles[*].selfByScript[fn in ["DEUS_DayNight.js"]].msPerUpdate
+preK4.A.envShareOfUpdateMain   38.7-76.3 % over 12 window(s) (1 decimal)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].profiles[*]: topInclusive 'updateEnvironment DEUS_Environment.js' / the largest topInclusive 'Scene_Map.updateMain *'
+preK4.A.envShareOfBusy         31.7-67.1 % over 12 window(s) (1 decimal)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].profiles[*]: topInclusive 'updateEnvironment DEUS_Environment.js' / (sampledMs / updates - selfByScript '(idle)')
+preK4.B.update                 mean 73.203 / worst 135.765 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].phases[steady_*|stress_*].parts["update"].median
+preK4.B.update.map             mean 63.196 / worst 110.775 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].phases[steady_*|stress_*].parts["update.map"].median
+preK4.B.update.map.world       mean 8.145 / worst 16.815 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].phases[steady_*|stress_*].parts["update.map.world"].median
+preK4.B.events                 mean 3.238 / worst 7.725 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].phases[steady_*|stress_*].parts["events"].median
+preK4.B.render                 mean 3.728 / worst 8.740 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].phases[steady_*|stress_*].parts["render"].median
+preK4.B.update.spriteset.tilemap.depth mean 1.665 / worst 3.750 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].phases[steady_*|stress_*].parts["update.spriteset.tilemap.depth"].median
+preK4.B.update.depth_late      mean 0.650 / worst 1.160 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].phases[steady_*|stress_*].parts["update.depth_late"].median
+preK4.B.render.depth           mean 0.210 / worst 0.395 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].phases[steady_*|stress_*].parts["render.depth"].median
+preK4.B.update.minimap         mean 0.457 / worst 1.140 ms per tick over 12 phase(s) (3 decimals)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].phases[steady_*|stress_*].parts["update.minimap"].median
+preK4.B.depth.plane.rebuildItems.max largest 1.32 ms in one tick; median of the phases' largest 0.09 ms over 28 phase(s)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].phases[].parts["depth.plane.rebuildItems"].max
+preK4.B.depth.plane.rebuildWalls.max largest 7.03 ms in one tick; median of the phases' largest 1.775 ms over 28 phase(s)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].phases[].parts["depth.plane.rebuildWalls"].max
+preK4.frames.paused            frame median 6.94-6.96 ms over 8 phase(s): normal#1:paused_+2_planes_on_r1 6.96, normal#1:paused_+2_planes_off_r1 6.95, normal#1:paused_+2_planes_on_r2 6.945, normal#1:paused_+2_planes_off_r2 6.94, normal#2:paused_+2_planes_on_r1 6.945, normal#2:paused_+2_planes_off_r1 6.945, normal#2:paused_+2_planes_on_r2 6.945, normal#2:paused_+2_planes_off_r2 6.94
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].phases[/^paused_/].frameMs.median
+preK4.ticks.paused             tick median 0.8-1.565 ms over 8 phase(s): normal#1:paused_+2_planes_on_r1 1.565, normal#1:paused_+2_planes_off_r1 1.105, normal#1:paused_+2_planes_on_r2 1.32, normal#1:paused_+2_planes_off_r2 0.91, normal#2:paused_+2_planes_on_r1 1.43, normal#2:paused_+2_planes_off_r1 0.975, normal#2:paused_+2_planes_on_r2 1.27, normal#2:paused_+2_planes_off_r2 0.8
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].phases[/^paused_/].tickMs.median
+preK4.frames.steady            frame median 6.965-94.065 ms over 8 phase(s): normal#1:steady_+2 49.88, normal#1:steady_+1 74.72, normal#1:steady_Ground 82.525, normal#1:steady_-1 94.065, normal#2:steady_+2 6.965, normal#2:steady_+1 54.22, normal#2:steady_Ground 59.76, normal#2:steady_-1 60.435
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].phases[/^steady_/].frameMs.median
+preK4.ticks.steady             tick median 4.22-93.33 ms over 8 phase(s): normal#1:steady_+2 49.245, normal#1:steady_+1 74.08, normal#1:steady_Ground 82.015, normal#1:steady_-1 93.33, normal#2:steady_+2 4.22, normal#2:steady_+1 53.745, normal#2:steady_Ground 59.05, normal#2:steady_-1 59.97
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].phases[/^steady_/].tickMs.median
+preK4.frames.stress            frame median 89.22-146.265 ms over 4 phase(s): stress#1:stress_day_30s 108.885, stress#1:stress_night_30s 146.265, stress#2:stress_day_30s 89.22, stress#2:stress_night_30s 117.52
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].phases[/^stress_/].frameMs.median
+preK4.ticks.stress             tick median 87.67-143.725 ms over 4 phase(s): stress#1:stress_day_30s 104.98, stress#1:stress_night_30s 143.725, stress#2:stress_day_30s 87.67, stress#2:stress_night_30s 114.19
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].phases[/^stress_/].tickMs.median
+preK4.events.stress            stress#1:stress_day_30s: 36 world:* events a frame (median), max 151; listener calls median 21, max 130; stress#1:stress_night_30s: 41 world:* events a frame (median), max 156; listener calls median 26, max 136; stress#2:stress_day_30s: 43 world:* events a frame (median), max 146; listener calls median 23, max 121; stress#2:stress_night_30s: 50 world:* events a frame (median), max 147; listener calls median 27, max 126
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].phases[stress_*].worldEventsPerFrame
+preK4.switch.requestToStarted  90.4-208.0 ms over 12 switch(es) (1 decimal)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].switches[].requestToStartedMs
+preK4.switch.lastSwitchMs      70.5-183.6 ms over 12 switch(es) (1 decimal)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].switches[].levelsLastSwitch.ms
+preK4.switch.depth             lastPeekMs 0.000-0.010, lastPaintMs 1.780-3.410 ms (3 decimals); canvasesMade 4
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].switches[].depth.lastPeekMs, .lastPaintMs, .canvasesMade
+preK4.switch.slowest           2 -> 1: request to started 208 ms, levelsLastSwitch.ms 182.9 (1 decimal), depth lastPeekMs 0.005, lastPaintMs 2.35
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].switches[] with the largest requestToStartedMs
+preK4.switch.worstFrame        142.1-1211.1 ms worst frame in the 30 frames after a switch (1 decimal)
+                               <- baseline_5c6641e1.json + stress_baseline_5c6641e1.json: runs[].switches[].worstFrameMs
+
+=== base: branch base 8592b07a (pre-Fix 1: taken under contention, load not recorded) ===
+base.normal.runs               1 run(s); units in the world 1212
+                               <- baseline_8592b07a.json: runs[].environment.units
+base.normal.machine            {"host":"MSI","cpus":16,"cpu":"AMD Ryzen 7 8845HS w/ Radeon 780M Graphics","totalMemGb":31.3}
+                               <- baseline_8592b07a.json: machine
+base.normal.gl                 ANGLE (NVIDIA GeForce RTX 4060 Laptop GPU Direct3D11 vs_5_0 ps_5_0)
+                               <- baseline_8592b07a.json: runs[].environment.gl
+base.normal.r1.load            no machineLoad (not recorded)
+                               <- baseline_8592b07a.json: runs[0]
+base.stress.runs               1 run(s); units in the world 1177
+                               <- stress_baseline_8592b07a.json: runs[].environment.units
+base.stress.machine            {"host":"MSI","cpus":16,"cpu":"AMD Ryzen 7 8845HS w/ Radeon 780M Graphics","totalMemGb":31.3}
+                               <- stress_baseline_8592b07a.json: machine
+base.stress.gl                 ANGLE (NVIDIA GeForce RTX 4060 Laptop GPU Direct3D11 vs_5_0 ps_5_0)
+                               <- stress_baseline_8592b07a.json: runs[].environment.gl
+base.stress.r1.load            no machineLoad (not recorded)
+                               <- stress_baseline_8592b07a.json: runs[0]
+base.windows                   6 profiled windows: normal#1:steady_+2, normal#1:steady_+1, normal#1:steady_Ground, normal#1:steady_-1, stress#1:stress_day, stress#1:stress_night
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].profiles
+base.A.env                     mean 27.85 / worst 35.91 ms per update over 6 window(s); worst in normal#1:steady_-1 (2 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].profiles[*].topInclusive[fn ~ /^updateEnvironment DEUS_Environment\.js/].msPerUpdate
+base.A.colonists               mean 13.29 / worst 23.86 ms per update over 5 window(s); worst in stress#1:stress_day (2 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].profiles[*].topInclusive[fn ~ /^scan DEUS_Colonists\.js/].msPerUpdate
+base.A.hazard                  mean 20.97 / worst 21.86 ms per update over 2 window(s); worst in stress#1:stress_day; per window: stress#1:stress_day 21.86, stress#1:stress_night 20.09 (2 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].profiles[*].topInclusive[fn ~ /^hazardReflexJob DEUS_Colonists\.js/].msPerUpdate
+base.A.worldUpdate             mean n/a / worst n/a ms per update over 0 window(s) (2 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].profiles[*].topInclusive[fn ~ /^World\.update DEUS_World\.js/].msPerUpdate
+base.A.log                     mean 1.44 / worst 2.65 ms per update over 6 window(s); worst in stress#1:stress_day (2 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].profiles[*].selfByScript[fn in ["open","close","writeBuffer","writeString","fsync"]].msPerUpdate
+base.A.effekseer               mean 0.87 / worst 2.64 ms per update over 6 window(s); worst in stress#1:stress_day (2 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].profiles[*].selfByScript[fn in ["wasm "]].msPerUpdate
+base.A.gc                      mean 2.14 / worst 2.60 ms per update over 6 window(s); worst in stress#1:stress_day (2 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].profiles[*].selfByScript[fn in ["(garbage collector)"]].msPerUpdate
+base.A.objectsSelf             mean 29.06 / worst 35.01 ms per update over 6 window(s); worst in normal#1:steady_-1 (2 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Objects.js"]].msPerUpdate
+base.A.worldSelf               mean 10.70 / worst 19.68 ms per update over 6 window(s); worst in stress#1:stress_day (2 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].profiles[*].selfByScript[fn in ["DEUS_World.js"]].msPerUpdate
+base.A.floorsSelf              mean 2.83 / worst 4.24 ms per update over 6 window(s); worst in normal#1:steady_-1 (2 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Floors.js"]].msPerUpdate
+base.A.jobsSelf                mean 1.95 / worst 3.54 ms per update over 6 window(s); worst in stress#1:stress_day (2 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Jobs.js"]].msPerUpdate
+base.A.depthSelf               mean 0.22 / worst 0.67 ms per update over 6 window(s); worst in stress#1:stress_day (2 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Depth.js"]].msPerUpdate
+base.A.minimapSelf             mean 0.14 / worst 0.38 ms per update over 6 window(s); worst in normal#1:steady_Ground (2 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Minimap.js"]].msPerUpdate
+base.A.fogSelf                 mean 0.00 / worst 0.00 ms per update over 6 window(s); worst in normal#1:steady_+2 (2 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].profiles[*].selfByScript[fn in ["DEUS_Fog.js"]].msPerUpdate
+base.A.dayNightSelf            mean 0.00 / worst 0.00 ms per update over 6 window(s); worst in normal#1:steady_+2 (2 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].profiles[*].selfByScript[fn in ["DEUS_DayNight.js"]].msPerUpdate
+base.A.envShareOfUpdateMain    38.3-70.4 % over 6 window(s) (1 decimal)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].profiles[*]: topInclusive 'updateEnvironment DEUS_Environment.js' / the largest topInclusive 'Scene_Map.updateMain *'
+base.A.envShareOfBusy          30.8-64.2 % over 6 window(s) (1 decimal)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].profiles[*]: topInclusive 'updateEnvironment DEUS_Environment.js' / (sampledMs / updates - selfByScript '(idle)')
+base.B.update                  mean 50.638 / worst 73.310 ms per tick over 6 phase(s) (3 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].phases[steady_*|stress_*].parts["update"].median
+base.B.update.map              mean 44.943 / worst 68.475 ms per tick over 6 phase(s) (3 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].phases[steady_*|stress_*].parts["update.map"].median
+base.B.update.map.world        mean 4.817 / worst 7.245 ms per tick over 6 phase(s) (3 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].phases[steady_*|stress_*].parts["update.map.world"].median
+base.B.events                  mean 2.482 / worst 4.445 ms per tick over 6 phase(s) (3 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].phases[steady_*|stress_*].parts["events"].median
+base.B.render                  mean 2.525 / worst 5.190 ms per tick over 6 phase(s) (3 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].phases[steady_*|stress_*].parts["render"].median
+base.B.update.spriteset.tilemap.depth mean 1.097 / worst 3.065 ms per tick over 6 phase(s) (3 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].phases[steady_*|stress_*].parts["update.spriteset.tilemap.depth"].median
+base.B.update.depth_late       mean n/a / worst n/a ms per tick over 0 phase(s) (3 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].phases[steady_*|stress_*].parts["update.depth_late"].median
+base.B.render.depth            mean 0.133 / worst 0.280 ms per tick over 6 phase(s) (3 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].phases[steady_*|stress_*].parts["render.depth"].median
+base.B.update.minimap          mean 0.403 / worst 1.145 ms per tick over 6 phase(s) (3 decimals)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].phases[steady_*|stress_*].parts["update.minimap"].median
+base.B.depth.plane.rebuildItems.max not measured
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].phases[].parts["depth.plane.rebuildItems"].max
+base.B.depth.plane.rebuildWalls.max not measured
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].phases[].parts["depth.plane.rebuildWalls"].max
+base.frames.paused             frame median 6.945-6.95 ms over 4 phase(s): normal#1:paused_+2_planes_on_r1 6.945, normal#1:paused_+2_planes_off_r1 6.945, normal#1:paused_+2_planes_on_r2 6.945, normal#1:paused_+2_planes_off_r2 6.95
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].phases[/^paused_/].frameMs.median
+base.ticks.paused              tick median 0.765-1.32 ms over 4 phase(s): normal#1:paused_+2_planes_on_r1 1.32, normal#1:paused_+2_planes_off_r1 0.85, normal#1:paused_+2_planes_on_r2 1, normal#1:paused_+2_planes_off_r2 0.765
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].phases[/^paused_/].tickMs.median
+base.frames.steady             frame median 8.535-73.525 ms over 4 phase(s): normal#1:steady_+2 8.535, normal#1:steady_+1 38.015, normal#1:steady_Ground 59.105, normal#1:steady_-1 73.525
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].phases[/^steady_/].frameMs.median
+base.ticks.steady              tick median 8.085-72.875 ms over 4 phase(s): normal#1:steady_+2 8.085, normal#1:steady_+1 37.765, normal#1:steady_Ground 53.615, normal#1:steady_-1 72.875
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].phases[/^steady_/].tickMs.median
+base.frames.stress             frame median 70.795-81 ms over 2 phase(s): stress#1:stress_day_30s 70.795, stress#1:stress_night_30s 81
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].phases[/^stress_/].frameMs.median
+base.ticks.stress              tick median 68.53-78.64 ms over 2 phase(s): stress#1:stress_day_30s 68.53, stress#1:stress_night_30s 78.64
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].phases[/^stress_/].tickMs.median
+base.events.stress             stress#1:stress_day_30s: 46 world:* events a frame (median), max 126; listener calls median 26, max 115; stress#1:stress_night_30s: 48 world:* events a frame (median), max 126; listener calls median 25, max 104
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].phases[stress_*].worldEventsPerFrame
+base.switch.requestToStarted   103.4-290.4 ms over 6 switch(es) (1 decimal)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].switches[].requestToStartedMs
+base.switch.lastSwitchMs       85.8-266.9 ms over 6 switch(es) (1 decimal)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].switches[].levelsLastSwitch.ms
+base.switch.depth              lastPeekMs 0.000-0.005, lastPaintMs 3.305-5.830 ms (3 decimals); canvasesMade 
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].switches[].depth.lastPeekMs, .lastPaintMs, .canvasesMade
+base.switch.slowest            2 -> 1: request to started 290.4 ms, levelsLastSwitch.ms 266.9 (1 decimal), depth lastPeekMs 0, lastPaintMs 3.305
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].switches[] with the largest requestToStartedMs
+base.switch.worstFrame         299.2-476.9 ms worst frame in the 30 frames after a switch (1 decimal)
+                               <- baseline_8592b07a.json + stress_baseline_8592b07a.json: runs[].switches[].worstFrameMs
+
+=== append_cost.json ===
+append.us                      2000 appends: median 115.9, p95 170, min 86.4, max 14188.4 us; CPU 28.7 % during, AI workers 5/5, nw.exe 0/0; 2026-09-26T09:29:15.462Z
+                               <- append_cost.json: microseconds, machineLoad, measuredAt

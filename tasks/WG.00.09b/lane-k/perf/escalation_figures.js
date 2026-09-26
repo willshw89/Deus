@@ -1,7 +1,8 @@
 // escalation_figures.js - WG.00.09b Lane K (Fix 1, M2): every figure escalation.md quotes, computed from the committed bench
 // JSON files in this folder. Each line: an ID (the one escalation.md cites), the value, and where it comes from (file, field,
 // phase/run). Rounding is stated on each line; escalation.md quotes the printed value.
-//   Sets: fix1 = baseline_e3896d76.json + stress_baseline_e3896d76.json (the Fix 1 code, machine load recorded);
+//   Sets: fix1 = baseline_eb446e06.json + stress_baseline_eb446e06.json (the final Fix 1 code, machine load recorded);
+//         fix1a = *_e3896d76.json, fix1b = baseline_8dbd0bdc.json (intermediate Fix 1 code, machine load recorded);
 //         postK4 = *_f19b23bf.json, preK4 = *_5c6641e1.json, base = *_8592b07a.json (pre-Fix 1: taken under contention, load
 //         not recorded). append_cost.json: the log-append cost.
 //   The A rows are computed exactly as rank_k4.js computes them (same keys, same matchers).
@@ -13,7 +14,9 @@ const dir = __dirname;
 const read = f => JSON.parse(fs.readFileSync(path.join(dir, f), "utf8"));
 
 const SETS = [
-    { id: "fix1", label: "Fix 1 code e3896d76, machine load recorded (runs[].machineLoad)", files: ["baseline_e3896d76.json", "stress_baseline_e3896d76.json"] },
+    { id: "fix1", label: "Fix 1 final code eb446e06, machine load recorded (runs[].machineLoad)", files: ["baseline_eb446e06.json", "stress_baseline_eb446e06.json"] },
+    { id: "fix1a", label: "Fix 1 intermediate code e3896d76 (items found by one cell lookup per window cell), machine load recorded", files: ["baseline_e3896d76.json", "stress_baseline_e3896d76.json"] },
+    { id: "fix1b", label: "Fix 1 intermediate code 8dbd0bdc (normal only; the bench tool before the nw.exe process-tree rule), machine load recorded", files: ["baseline_8dbd0bdc.json"] },
     { id: "postK4", label: "post-K4 f19b23bf (pre-Fix 1: taken under contention, load not recorded)", files: ["baseline_f19b23bf.json", "stress_baseline_f19b23bf.json"] },
     { id: "preK4", label: "pre-K4 5c6641e1 (pre-Fix 1: taken under contention, load not recorded)", files: ["baseline_5c6641e1.json", "stress_baseline_5c6641e1.json"] },
     { id: "base", label: "branch base 8592b07a (pre-Fix 1: taken under contention, load not recorded)", files: ["baseline_8592b07a.json", "stress_baseline_8592b07a.json"] }
@@ -53,6 +56,7 @@ for (const set of SETS) {
     // Runs, units, GL, machine load.
     for (const { f, r } of docs) {
         fig(`${set.id}.${r.scenario}.runs`, `${r.runs.length} run(s); units in the world ${r.runs.map(x => x.environment.units).join(", ")}`, `${f}: runs[].environment.units`);
+        fig(`${set.id}.${r.scenario}.machine`, JSON.stringify(r.machine), `${f}: machine`);
         fig(`${set.id}.${r.scenario}.gl`, [...new Set(r.runs.map(x => x.environment.gl))].join(" | "), `${f}: runs[].environment.gl`);
         for (const run of r.runs) {
             const ml = run.machineLoad;
@@ -93,6 +97,13 @@ for (const set of SETS) {
         const mean = v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
         fig(`${set.id}.B.${part}`, `mean ${mean === null ? "n/a" : mean.toFixed(3)} / worst ${v.length ? Math.max(...v).toFixed(3) : "n/a"} ms per tick over ${v.length} phase(s) (3 decimals)`, `${src}: runs[].phases[steady_*|stress_*].parts["${part}"].median`);
     }
+    // The lane's item and wall re-reads: the largest per-tick time in any phase (the wrapped parts carry a max per phase).
+    for (const part of ["depth.plane.rebuildItems", "depth.plane.rebuildWalls"]) {
+        const mx = [];
+        for (const { r } of docs) for (const run of r.runs) for (const p of run.phases) if (p.parts[part]) mx.push(p.parts[part].max);
+        const s2 = mx.slice().sort((x, y) => x - y);
+        fig(`${set.id}.B.${part}.max`, mx.length ? `largest ${Math.max(...mx)} ms in one tick; median of the phases' largest ${s2[Math.floor((s2.length - 1) / 2)]} ms over ${mx.length} phase(s)` : "not measured", `${src}: runs[].phases[].parts["${part}"].max`);
+    }
     // Frame and tick medians by phase kind.
     const byKind = { paused: /^paused_/, steady: /^steady_/, stress: /^stress_/ };
     for (const [kind, re] of Object.entries(byKind)) {
@@ -115,6 +126,8 @@ for (const set of SETS) {
         fig(`${set.id}.switch.lastSwitchMs`, `${range(ls, f1)} ms over ${ls.length} switch(es) (1 decimal)`, `${src}: runs[].switches[].levelsLastSwitch.ms`);
         const peek = sw.map(s => s.depth && s.depth.lastPeekMs).filter(Number.isFinite), paint = sw.map(s => s.depth && s.depth.lastPaintMs).filter(Number.isFinite), made = sw.map(s => s.depth && s.depth.canvasesMade).filter(Number.isFinite);
         fig(`${set.id}.switch.depth`, `lastPeekMs ${range(peek, v => v.toFixed(3))}, lastPaintMs ${range(paint, v => v.toFixed(3))} ms (3 decimals); canvasesMade ${[...new Set(made)].join("/")}`, `${src}: runs[].switches[].depth.lastPeekMs, .lastPaintMs, .canvasesMade`);
+        const slow = sw.reduce((x, y) => (y.requestToStartedMs > x.requestToStartedMs ? y : x));
+        fig(`${set.id}.switch.slowest`, `${slow.from} -> ${slow.to}: request to started ${slow.requestToStartedMs} ms, levelsLastSwitch.ms ${slow.levelsLastSwitch ? slow.levelsLastSwitch.ms.toFixed(1) : "n/a"} (1 decimal), depth lastPeekMs ${slow.depth ? slow.depth.lastPeekMs : "n/a"}, lastPaintMs ${slow.depth ? slow.depth.lastPaintMs : "n/a"}`, `${src}: runs[].switches[] with the largest requestToStartedMs`);
         fig(`${set.id}.switch.worstFrame`, `${range(sw.map(s => s.worstFrameMs), f1)} ms worst frame in the 30 frames after a switch (1 decimal)`, `${src}: runs[].switches[].worstFrameMs`);
     }
 }
