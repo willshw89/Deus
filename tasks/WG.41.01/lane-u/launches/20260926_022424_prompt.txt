@@ -1,0 +1,9 @@
+You are the primary writer (Claude) for lane-u (Task WG.41.01: Art Placement + Validator).
+Read tasks/WG.41.01/lane-u/BRIEF.md carefully and follow every instruction in it. The BRIEF is the authority: its allowedPaths, deliverables, acceptance criteria and standing rules govern this run.
+Key rules (from the BRIEF):
+1. NO ART GENERATION BY ANYONE (DEC-007). Never generate, draw, edit, request or integrate art.
+2. Write only inside the BRIEF's allowedPaths.
+3. Run tests in the FOREGROUND. Never end your turn while background jobs or child processes are running. Commit early (WIP commits allowed on your branch).
+4. When finished, commit and push only your own branch (git push origin task/lane-u). Never push any other branch, never force, never set DEUS_INTEGRATOR. If the push is refused, say so in your REPORT and stop.
+5. Do not merge. Do not self-certify; an independent Grok review decides.
+Commit messages start with '[claude] WG.41.01'.
