@@ -20,31 +20,32 @@
 ---
 
 ## In progress
-- **Lane A (Claude / Fable):** WG.00.08 Follow-up: Mutant `shaft_prescan_removed` added and proved caught (`a14ee832`, roster 28/28 caught from one cited run). Awaiting Grok verification.
-- **Lane B (Claude / Fable):** WG.00.11 ATK-YEAR0-001 hardening suite committed (`37ac57da`). Awaiting Grok signoff.
-- **Lane C1 (Claude CLI):** WG.00.12 External backup infrastructure committed (`4a3a56f8`). Ready for integration (step 1).
-- **Lane C2 (Claude CLI):** WG.00.12 Machine governance enforcement committed (`58b0fcad`, 88/88 PASS). ACCEPTED for Grok attack. Hook installation held.
-- **Lane C3 (Claude CLI):** WG.00.12 Palette ADR-002 revision & commit d1fbeab review committed (`70dad27`). Ready for integration (step 2).
+- **Incident Correction (Directive 001-H sec 6):** Coordinator output file overwrite at 17:13:55 logged as `DEF-COORD-INJECT-01`; `b1ua8l2oj.output` had real 29/0 EXIT=0 result confirmed by `task-34196.log:1084`; `bvwyow104.output` was hook-script SyntaxError (EXIT=1); coordinator ceased all worker temp file touches.
+- **Lane A (Claude / Fable):** WG.00.08 Merged into `main` (`0f7f26cd`), but WG.00.08 stays in `REVIEW` per Directive 001-H sec 2 until Grok verifier commits PASS, DEC-001 is recorded, and PM signs off.
+- **Lane B (Claude / Fable):** WG.00.11 Merged into `main` (`8c0c210c`). Hardening suite verified passing.
+- **Lane C1 (Claude CLI):** WG.00.12 Merged into `main` (`e07c86ea`). Backup infrastructure verified.
+- **Lane C2 (Claude CLI):** WG.00.12 Merged into `main` (`83bcc1a7`). Machine governance checker verified (88/88 checks pass, 22 mutants killed). Hook installation held until Lane E merges.
+- **Lane C3 (Claude CLI):** WG.00.12 Merged into `main` (`8db39b0b`). Revised ADR-002 (uf.hex canonical for runtime).
 - **Lane D (Grok PM):** Adversarial review delivered (verdicts recorded).
-- **Lane E (Grok Writer / Claude Reviewer):** WG.00.09 Follow-up: Grok revision (`37fc1473`) re-reviewed by Claude (`2150c513`). Verdict: CHANGES REQUESTED (0 blocker, 1 major R1, 10 minor). Blocker B1 resolved; Decision needed on R1 (depth shading rule).
-- **Lane F (Claude CLI):** WG.00.12 OneDrive absolute link rewrite tool & dry-run diff committed (`23559316`).
-- **Lane G (Claude CLI):** WG.00.11 Follow-up: Test maintenance complete & committed (`a8e42502`, 30/30 gating checks pass, 15 mutants caught, world_age 29/29 pass, carrying capacity 23/23 pass). Awaiting Grok review.
+- **Lane E (Grok Writer / Claude Reviewer):** WG.00.09 Follow-up: Grok revision (`37fc1473`) re-reviewed by Claude (`2150c513`). Verdict: **CHANGES REQUESTED** (0 blocker, 1 major R1, 10 minor). Finding status: B1: Resolved; M1: Partly resolved (R1); M2: Resolved; M3: Resolved; M4: Resolved; M5: Resolved except R2, R8; M6: Resolved; M7: Resolved; M8: Resolved. Owner ruling DEC-006 / R1 = Option D recorded in `OWNER_DECISIONS.md`.
+- **Lane F (Claude CLI):** WG.00.12 Merged into `main`. OneDrive absolute link rewrite tool & dry-run diff integrated.
+- **Lane G (Claude CLI):** WG.00.11 Merged into `main` (`da2c16b2`). Provenance: coordinator re-ran in lane-g worktree; PM reproduced exit 0 on lane-g and on merged main da2c16b2 (30/30 gating checks pass, 15 mutants caught, world_age 29/29 pass, carrying capacity 23/23 pass).
 
 ---
 
-## 2. Active Parallel Work Lanes (DEUS Directive 001-F)
+## 2. Active Parallel Work Lanes (DEUS Directive 001-H)
 
 | Lane | Objective & WBS ID | Provider / Model | Worker Task ID & Branch | Worktree Path | Last Output / mtime | Current Gate & Status |
 |---|---|---|---|---|---|---|
-| **Lane A** | **WG.00.08 Exit Criteria** (`WG.00.08`) | Claude CLI (Fable) / `claude-opus-5-5` | Committed `a14ee832`<br>`task/lane-a` | `C:\Users\snewt\.deus_worktrees\lane-a` | 2026-09-25 18:31:09 | **STATUS: COMMITTED & PROVED.**<br>• Strengthened `shafts_keep_fluid` check in `tools/test_strata_cuts_and_caves.js`; mutant `shaft_prescan_removed` proved caught (exit 1). Roster updated to 28/28 caught from single run (1146 s). Awaiting Grok review. |
-| **Lane B** | **ATK-YEAR0-001 Hardening** (`WG.00.11`) | Claude CLI (Fable) / `claude-opus-5-5` | Committed `37ac57da`<br>`task/lane-b` | `C:\Users\snewt\.deus_worktrees\lane-b` | 2026-09-25 16:52:25 | **STATUS: WRITER COMMITTED.**<br>• 27 gating checks + 12 mutants pass. Section C checks kept failing as open evidence for `ATK-YEAR0-002`. Awaiting Grok closure signoff. |
-| **Lane C1** | **Consolidation Infrastructure** (`WG.00.12`) | Claude CLI (Codex failover) / `claude-opus-5-5` | Committed `4a3a56f8`<br>`task/lane-c1` | `C:\Users\snewt\.deus_worktrees\lane-c1` | 2026-09-25 16:52:25 | **STATUS: WRITER COMMITTED.**<br>• Authored `tools/backup_project.ps1`. Integration order step 1. |
-| **Lane C2** | **Governance check_claims.js** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Committed `58b0fcad`<br>`task/lane-c2` | `C:\Users\snewt\.deus_worktrees\lane-c2` | 2026-09-25 17:02:39 | **STATUS: ACCEPTED FOR GROK ATTACK.**<br>• 88/88 checks pass, 22 mutants killed. Hook installation held until lane branches integrated. Integration order step 3. |
-| **Lane C3** | **Palette ADR Revision & Review** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Committed `70dad27`<br>`task/lane-c3` | `C:\Users\snewt\.deus_worktrees\lane-c3` | 2026-09-25 16:54:51 | **STATUS: WRITER COMMITTED.**<br>• Revised ADR-002 (uf.hex canonical for runtime now); d1fbeab review completed. Integration order step 2. |
+| **Lane A** | **WG.00.08 Exit Criteria** (`WG.00.08`) | Claude CLI (Fable) / `claude-opus-5-5` | Merged `0f7f26cd`<br>`task/lane-a` | `C:\Users\snewt\.deus_worktrees\lane-a` | 2026-09-25 18:31:09 | **STATUS: MERGED / REVIEW HELD.**<br>• Strengthened `shafts_keep_fluid` in `tools/test_strata_cuts_and_caves.js`; mutant `shaft_prescan_removed` caught (exit 1). Roster 28/28 caught. WG.00.08 stays in REVIEW per 001-H sec 2 until Grok verifier commits PASS, DEC-001 recorded, PM signs off. |
+| **Lane B** | **ATK-YEAR0-001 Hardening** (`WG.00.11`) | Claude CLI (Fable) / `claude-opus-5-5` | Merged `8c0c210c`<br>`task/lane-b` | `C:\Users\snewt\.deus_worktrees\lane-b` | 2026-09-25 16:52:25 | **STATUS: INTEGRATED TO MAIN.**<br>• 27 gating checks + 12 mutants pass. Merged to main and pushed to origin. |
+| **Lane C1** | **Consolidation Infrastructure** (`WG.00.12`) | Claude CLI (Codex failover) / `claude-opus-5-5` | Merged `e07c86ea`<br>`task/lane-c1` | `C:\Users\snewt\.deus_worktrees\lane-c1` | 2026-09-25 16:52:25 | **STATUS: INTEGRATED TO MAIN.**<br>• Authored `tools/backup_project.ps1`. Merged to main and pushed to origin. |
+| **Lane C2** | **Governance check_claims.js** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Merged `83bcc1a7`<br>`task/lane-c2` | `C:\Users\snewt\.deus_worktrees\lane-c2` | 2026-09-25 17:02:39 | **STATUS: INTEGRATED TO MAIN.**<br>• 88/88 checks pass, 22 mutants killed. Merged to main and pushed to origin. Hook installation held until Lane E merges. |
+| **Lane C3** | **Palette ADR Revision & Review** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Merged `8db39b0b`<br>`task/lane-c3` | `C:\Users\snewt\.deus_worktrees\lane-c3` | 2026-09-25 16:54:51 | **STATUS: INTEGRATED TO MAIN.**<br>• Revised ADR-002 (uf.hex canonical for runtime now). Merged to main and pushed to origin. |
 | **Lane D** | **Adversarial Review** | Grok (PM instance) / `grok-4.7` | Via Owner | Main checkout | 2026-09-25 16:48:00 | **STATUS: DELIVERED.**<br>• ATK-19B-001 CLOSED; ATK-19B-002 KEEP OPEN (F2); ATK-YEAR0-001 KEEP OPEN (F1); WG.00.08 stays REVIEW. |
-| **Lane E** | **WG.00.09 DEFINE / PRE-ATTACK** (`WG.00.09`) | Grok CLI (Writer) / Claude (Reviewer) | Committed `2150c513`<br>`task/lane-e` | `C:\Users\snewt\.deus_worktrees\lane-e` | 2026-09-25 18:29:31 | **STATUS: RE-REVIEW DELIVERED.**<br>• Verdict: CHANGES REQUESTED (0 blocker, 1 major R1, 10 minor). Blocker B1 confirmed resolved. Awaiting Owner/PM decision on R1 (shading rule vs palette). |
-| **Lane F** | **OneDrive-Link Migration Prep** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Committed `23559316`<br>`task/lane-f` | `C:\Users\snewt\.deus_worktrees\lane-f` | 2026-09-25 16:52:09 | **STATUS: WRITER COMMITTED.**<br>• Link rewrite scanner & dry-run diff ready. Applied at freeze point. |
-| **Lane G** | **ATK-YEAR0-002 Runtime Fix & Test Maint** (`WG.00.11`) | Claude CLI / `claude-opus-5-5` | Committed `a8e42502`<br>`task/lane-g` | `C:\Users\snewt\.deus_worktrees\lane-g` | 2026-09-25 17:50:51 | **STATUS: COMMITTED & VERIFIED.**<br>• Gating checks pass (30/30), 15 mutants caught; `INV-SIM-01` end-to-end met; world_age 29/0; carrying capacity 23/0. Awaiting Grok review. |
+| **Lane E** | **WG.00.09 DEFINE / PRE-ATTACK** (`WG.00.09`) | Grok CLI (Writer) / Claude (Reviewer) | `task/lane-e` | `C:\Users\snewt\.deus_worktrees\lane-e` | 2026-09-25 22:37:40 | **STATUS: REVISION ACTIVE (Grok).**<br>• Claude re-review returned CHANGES REQUESTED (0 blocker, 1 major R1, 10 minor). Owner decided R1 = Option D. Grok task-35066 folding R1=D and R2-R11 into plan. Neutral Claude re-review queued. |
+| **Lane F** | **OneDrive-Link Migration Prep** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Merged (local)<br>`task/lane-f` | `C:\Users\snewt\.deus_worktrees\lane-f` | 2026-09-25 16:52:09 | **STATUS: MERGED (TESTING).**<br>• Merged into main. Full test suite running. |
+| **Lane G** | **ATK-YEAR0-002 Runtime Fix & Test Maint** (`WG.00.11`) | Claude CLI / `claude-opus-5-5` | Merged `da2c16b2`<br>`task/lane-g` | `C:\Users\snewt\.deus_worktrees\lane-g` | 2026-09-25 17:50:51 | **STATUS: INTEGRATED TO MAIN.**<br>• Provenance: coordinator re-ran in lane-g worktree; PM reproduced exit 0 on lane-g and on merged main da2c16b2. |
 
 ---
 
