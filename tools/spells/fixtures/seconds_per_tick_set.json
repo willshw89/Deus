@@ -1,0 +1,12 @@
+{
+  "name": "seconds_per_tick_set",
+  "rule": "ruleSecondsPerTickOpen",
+  "brief": "secondsPerTick given a value (Q2 stays open)",
+  "description": "secondsPerTick.action is given a value and a PM status.",
+  "expect": ["Q2_SECONDS_PER_TICK"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "tuning", "op": "set", "path": "parameters/secondsPerTick.action/value", "value": "TEST_VALUE_NOT_A_RATE"},
+    {"file": "tuning", "op": "set", "path": "parameters/secondsPerTick.action/status", "value": "PM_DEFAULT"}
+  ]
+}

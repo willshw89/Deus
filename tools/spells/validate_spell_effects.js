@@ -932,6 +932,10 @@ function applyFixture(data, fixture) {
             else delete parent[key];
         } else if (op.op === "push") {
             locate(parent, [last]).push(clone(op.value));
+        } else if (op.op === "copy") {
+            // push a copy of another node (op.from, same file), with op.with assigned over it
+            const node = Object.assign(clone(locate(target, op.from.split("/").filter(Boolean))), clone(op.with || {}));
+            locate(parent, [last]).push(node);
         } else throw new Error("fixture: unknown op " + op.op);
     }
     return out;

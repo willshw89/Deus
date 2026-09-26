@@ -1,0 +1,11 @@
+{
+  "name": "srd_number_in_text",
+  "rule": "ruleSrdNumberCopied",
+  "brief": "any SRD number copied into effect data",
+  "description": "Fireball's blast ledger note repeats the SRD damage dice.",
+  "expect": ["SRD_NUMBER_COPIED"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:fireball/effects/@blast/ledger/note", "value": "Energy is the 8d6 roll."}
+  ]
+}

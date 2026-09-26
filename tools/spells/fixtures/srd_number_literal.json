@@ -1,0 +1,11 @@
+{
+  "name": "srd_number_literal",
+  "rule": "ruleSrdNumberCopied",
+  "brief": "a number in an effect that equals an SRD value of that spell without an srdRef",
+  "description": "Create or Destroy Water's volume is typed as the literal SRD gallons.",
+  "expect": ["SRD_NUMBER_COPIED"],
+  "alsoAllowed": ["SCHEMA_ANYOF", "SCHEMA_TYPE", "SRD_FIELD_LITERAL"],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:create-or-destroy-water/effects/@createInContainer/params/volume", "value": 10}
+  ]
+}

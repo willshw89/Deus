@@ -1,0 +1,11 @@
+{
+  "name": "srd_field_literal",
+  "rule": "ruleSrdFieldLiteral",
+  "brief": "any field named like damage/range/save/area/duration/castingTime holding a literal",
+  "description": "Fireball's blast energy names its damage by a literal word instead of a pointer.",
+  "expect": ["SRD_FIELD_LITERAL"],
+  "alsoAllowed": ["SCHEMA_TYPE"],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:fireball/effects/@blast/energy/damage", "value": "fire"}
+  ]
+}

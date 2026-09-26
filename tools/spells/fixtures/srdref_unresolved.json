@@ -1,0 +1,16 @@
+{
+  "name": "srdref_unresolved",
+  "rule": "ruleSrdRefs",
+  "brief": "an srdRef pointer that does not resolve in srd_baseline.json",
+  "description": "Fireball's blast energy points at a damage entry that does not exist.",
+  "expect": ["SRDREF_UNRESOLVED"],
+  "alsoAllowed": [],
+  "patch": [
+    {
+      "file": "effects",
+      "op": "set",
+      "path": "records/@srd:spell:fireball/effects/@blast/energy/damage",
+      "value": {"srdRef": "fireball.damage[5]"}
+    }
+  ]
+}

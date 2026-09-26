@@ -1,0 +1,16 @@
+{
+  "name": "ore_output_transform",
+  "rule": "ruleNoOre",
+  "brief": "any effect whose output is an ore class (LIFE-002, D-5)",
+  "description": "Earthquake's fissure turns broken rock into gold ore.",
+  "expect": ["ORE_OUTPUT"],
+  "alsoAllowed": ["LEDGER_ROW_UNKNOWN"],
+  "patch": [
+    {
+      "file": "effects",
+      "op": "set",
+      "path": "records/@srd:spell:earthquake/effects/@fissures/ledger/moves/0/to",
+      "value": {"class": "au_ore", "form": "strata"}
+    }
+  ]
+}

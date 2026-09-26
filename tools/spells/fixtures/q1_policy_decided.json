@@ -1,0 +1,11 @@
+{
+  "name": "q1_policy_decided",
+  "rule": "ruleSchema",
+  "brief": "Q1: default rows stay PM_DEFAULT_UNCONFIRMED (represent, never decide)",
+  "description": "The permanent conjured-matter row is marked as confirmed.",
+  "expect": ["SCHEMA_CONST"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "tuning", "op": "set", "path": "conjuredMatterPolicy/cases/permanent/status", "value": "OWNER_CONFIRMED"}
+  ]
+}

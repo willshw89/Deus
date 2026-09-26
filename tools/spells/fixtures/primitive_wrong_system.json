@@ -1,0 +1,28 @@
+{
+  "name": "primitive_wrong_system",
+  "rule": "rulePrimitiveSystem",
+  "brief": "a primitive not allowed under the record's systems (audit meta.primitiveSystems)",
+  "description": "A darken instance (LIGHT) is added to Fireball (HEAT, FORCE).",
+  "expect": ["PRIMITIVE_SYSTEM"],
+  "alsoAllowed": ["PRIMITIVE_COVERAGE"],
+  "patch": [
+    {
+      "file": "effects",
+      "op": "push",
+      "path": "records/@srd:spell:fireball/effects",
+      "value": {
+        "key": "testDarken",
+        "primitive": "darken",
+        "trigger": "onImpact",
+        "basis": "srd",
+        "srdQuote": "The fire spreads around corners.",
+        "magical": true,
+        "footprint": {
+          "area": {"srdRef": "fireball.area[0]"}
+        },
+        "params": {"blocksDarkvision": true},
+        "ledger": {"mode": "none"}
+      }
+    }
+  ]
+}

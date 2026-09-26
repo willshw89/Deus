@@ -1,0 +1,11 @@
+{
+  "name": "coverage_missing_record",
+  "rule": "ruleCoverage",
+  "brief": "a physical audit record with no effect entry (coverage 100%)",
+  "description": "The Fireball record is removed.",
+  "expect": ["COVERAGE_MISSING"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "effects", "op": "delete", "path": "records/@srd:spell:fireball"}
+  ]
+}

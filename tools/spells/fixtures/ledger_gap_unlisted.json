@@ -1,0 +1,11 @@
+{
+  "name": "ledger_gap_unlisted",
+  "rule": "ruleLedgerRows",
+  "brief": "a move with no ledger row names a listed gap",
+  "description": "Awaken's gap move names a gap that primitives.json does not list.",
+  "expect": ["LEDGER_ROW_UNKNOWN"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:awaken/effects/@awakenPlant/ledger/moves/0/gap", "value": "PROPOSED-V-99"}
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "variant_unknown",
+  "rule": "ruleVariants",
+  "brief": "an instance selects a declared variant",
+  "description": "Wall of Stone's thin-panel instance names a variant the record does not declare.",
+  "expect": ["VARIANT_UNKNOWN"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:wall-of-stone/effects/@thinPanels/variant", "value": "hugePanels"}
+  ]
+}

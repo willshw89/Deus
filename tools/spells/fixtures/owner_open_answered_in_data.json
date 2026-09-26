@@ -1,0 +1,28 @@
+{
+  "name": "owner_open_answered_in_data",
+  "rule": "ruleOwnerOpen",
+  "brief": "Q3/Q4: a primitive that exists only under a yes answer is not added to effect data",
+  "description": "Grease gets an ignite reaction although Q4 (does grease burn?) is open.",
+  "expect": ["OWNER_OPEN_REF"],
+  "alsoAllowed": ["PRIMITIVE_COVERAGE", "PRIMITIVE_SYSTEM"],
+  "patch": [
+    {
+      "file": "effects",
+      "op": "push",
+      "path": "records/@srd:spell:grease/effects",
+      "value": {
+        "key": "greaseBurns",
+        "primitive": "ignite",
+        "trigger": "onEnter",
+        "basis": "srd",
+        "srdQuote": "Slick grease covers the ground in a 10-foot square centered on a point within range and turns it into difficult terrain for the duration.",
+        "magical": false,
+        "footprint": {
+          "area": {"srdRef": "grease.area[0]"}
+        },
+        "params": {"targets": ["objects"]},
+        "ledger": {"mode": "none", "downstream": ["transform:burn"]}
+      }
+    }
+  ]
+}

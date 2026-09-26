@@ -1,0 +1,26 @@
+{
+  "name": "ledger_mode_wrong",
+  "rule": "ruleLedgerMode",
+  "brief": "each primitive's allowed ledger modes (primitives.json)",
+  "description": "Fireball's ignite claims a stone-to-rubble transform, which only volume damage and terrain edits may do.",
+  "expect": ["LEDGER_MODE"],
+  "alsoAllowed": [],
+  "patch": [
+    {
+      "file": "effects",
+      "op": "set",
+      "path": "records/@srd:spell:fireball/effects/@igniteObjects/ledger",
+      "value": {
+        "mode": "transform",
+        "cause": "spell:srd:spell:fireball",
+        "moves": [
+          {
+            "row": "break",
+            "from": {"class": "stone", "form": "strata"},
+            "to": {"class": "rubble", "form": "strata"}
+          }
+        ]
+      }
+    }
+  ]
+}

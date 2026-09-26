@@ -1,0 +1,16 @@
+{
+  "name": "owner_open_unknown",
+  "rule": "ruleOwnerOpen",
+  "brief": "Q1-Q4 held as data: every open value names a listed question item",
+  "description": "Entangle's flammability names a Q4 item that does not exist.",
+  "expect": ["OWNER_OPEN_REF"],
+  "alsoAllowed": [],
+  "patch": [
+    {
+      "file": "effects",
+      "op": "set",
+      "path": "records/@srd:spell:entangle/effects/@vines/params/flammable",
+      "value": {"ownerOpen": "Q4", "item": "vinesExplode"}
+    }
+  ]
+}

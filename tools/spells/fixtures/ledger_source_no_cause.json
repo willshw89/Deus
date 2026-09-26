@@ -1,0 +1,11 @@
+{
+  "name": "ledger_source_no_cause",
+  "rule": "ruleLedgerCause",
+  "brief": "any ledger source or sink without a cause",
+  "description": "Wall of Stone's conjured-stone source loses its cause.",
+  "expect": ["LEDGER_NO_CAUSE"],
+  "alsoAllowed": ["SCHEMA_REQUIRED"],
+  "patch": [
+    {"file": "effects", "op": "delete", "path": "records/@srd:spell:wall-of-stone/effects/@thickPanels/ledger/cause"}
+  ]
+}

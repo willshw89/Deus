@@ -1,0 +1,11 @@
+{
+  "name": "effect_key_duplicate",
+  "rule": "ruleKeys",
+  "brief": "effect keys are unique within a record",
+  "description": "Fireball's second instance reuses the first one's key.",
+  "expect": ["KEY_DUPLICATE"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:fireball/effects/@igniteCells/key", "value": "igniteObjects"}
+  ]
+}

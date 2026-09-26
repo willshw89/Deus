@@ -1,0 +1,16 @@
+{
+  "name": "srdref_other_spell",
+  "rule": "ruleSrdRefs",
+  "brief": "an srdRef pointer into another spell's baseline",
+  "description": "Fireball's blast energy borrows Meteor Swarm's damage.",
+  "expect": ["SRDREF_UNRESOLVED"],
+  "alsoAllowed": [],
+  "patch": [
+    {
+      "file": "effects",
+      "op": "set",
+      "path": "records/@srd:spell:fireball/effects/@blast/energy/damage",
+      "value": {"srdRef": "meteor-swarm.damage[0]"}
+    }
+  ]
+}

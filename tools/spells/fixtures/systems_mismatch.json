@@ -1,0 +1,11 @@
+{
+  "name": "systems_mismatch",
+  "rule": "ruleSystems",
+  "brief": "the record's systems equal the audit record's",
+  "description": "COLD is added to Fireball's systems.",
+  "expect": ["SYSTEMS_MISMATCH"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:fireball/systems", "value": ["HEAT", "FORCE", "COLD"]}
+  ]
+}

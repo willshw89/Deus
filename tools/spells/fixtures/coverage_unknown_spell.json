@@ -1,0 +1,17 @@
+{
+  "name": "coverage_unknown_spell",
+  "rule": "ruleCoverage",
+  "brief": "an effect for a spell not in the baseline",
+  "description": "A copy of the Fireball record is added for a spell that does not exist.",
+  "expect": ["COVERAGE_UNKNOWN_SPELL"],
+  "alsoAllowed": ["SRDREF_UNRESOLVED", "LEDGER_NO_CAUSE"],
+  "patch": [
+    {
+      "file": "effects",
+      "op": "copy",
+      "from": "records/@srd:spell:fireball",
+      "path": "records",
+      "with": {"spellId": "srd:spell:test-no-such-spell"}
+    }
+  ]
+}

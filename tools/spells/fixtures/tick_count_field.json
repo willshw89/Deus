@@ -1,0 +1,11 @@
+{
+  "name": "tick_count_field",
+  "rule": "ruleNoTickLiterals",
+  "brief": "a timed effect with a literal tick count",
+  "description": "Wall of Stone's lifetime gets a tick count.",
+  "expect": ["Q2_TICK_LITERAL"],
+  "alsoAllowed": ["SCHEMA_ADDITIONAL"],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:wall-of-stone/effects/@thickPanels/lifetime/ticks", "value": 17}
+  ]
+}

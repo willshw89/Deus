@@ -1,0 +1,16 @@
+{
+  "name": "srd_quote_ellipsis",
+  "rule": "ruleSrdQuotes",
+  "brief": "any basis: srd whose quote is not an exact substring (the SIM.60.01 review's ellipsis finding)",
+  "description": "Wall of Stone's quote is shortened with an ellipsis, so it is no longer one substring.",
+  "expect": ["SRD_QUOTE_INEXACT"],
+  "alsoAllowed": [],
+  "patch": [
+    {
+      "file": "effects",
+      "op": "set",
+      "path": "records/@srd:spell:wall-of-stone/effects/@thickPanels/srdQuote",
+      "value": "A nonmagical wall of solid stone springs into existence ... within range."
+    }
+  ]
+}
