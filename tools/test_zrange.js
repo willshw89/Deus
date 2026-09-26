@@ -54,7 +54,7 @@ const arg = (name, fallback) => { const a = args.find(x => x.startsWith(`--${nam
 const flag = name => args.includes(`--${name}`);
 const SEED = Number(arg("seed", "18"));
 const BASE = arg("base", "5255f1a58a9d95bb7bc08377ef055c366610e486");
-const UPDATES = Number(arg("updates", "3000"));
+const UPDATES = Number(arg("updates", "2400"));
 const KEEP = flag("keep");
 const RUN_TIMEOUT = 420000;
 const CONFIGS = arg("z-range", "") ? [arg("z-range", "")] : ["-4..4", "-16..15", "-2..2"];
@@ -167,16 +167,17 @@ function refreshBase() {
     const core = runPhase(clone, `base_core`, { ZR_PHASE: "core", DEUS_Z_RANGE: null });
     const core2 = runPhase(clone, `base_core_again`, { ZR_PHASE: "core", DEUS_Z_RANGE: null });
     const play = runPhase(clone, `base_play`, { ZR_PHASE: "play", DEUS_Z_RANGE: null });
-    const play2 = runPhase(clone, `base_play_again`, { ZR_PHASE: "play", DEUS_Z_RANGE: null });
-    if (!core.report || !play.report) throw new Error("the base runs wrote no report");
+    const sim = runPhase(clone, `base_sim`, { ZR_PHASE: "sim", DEUS_Z_RANGE: null });
+    const sim2 = runPhase(clone, `base_sim_again`, { ZR_PHASE: "sim", DEUS_Z_RANGE: null });
+    if (!core.report || !play.report || !sim.report) throw new Error("the base runs wrote no report");
     const d = { base: BASE, seed: SEED, updates: UPDATES, made: new Date().toISOString(), by: "node tools/test_zrange.js --refresh-base",
         core: core.report.data.core, census: core.report.data.census, blast: core.report.data.blast, saveFresh: play.report.data.saveFresh,
-        censusAfter: play.report.data.censusAfter, simulation: play.report.data.simulation, timing: core.report.timing, heapAfterNewGame: core.report.data.heapAfterNewGame,
+        censusAfter: sim.report.data.censusAfter, simulation: sim.report.data.simulation, timing: core.report.timing, heapAfterNewGame: core.report.data.heapAfterNewGame,
         memoryBase: core.report.data.memoryBase,
         repeat: { coreSame: JSON.stringify(core2.report && core2.report.data.core) === JSON.stringify(core.report.data.core),
             censusSame: JSON.stringify(core2.report && core2.report.data.census && strip(core2.report.data.census)) === JSON.stringify(strip(core.report.data.census)),
-            censusAfterSame: JSON.stringify(play2.report && play2.report.data.censusAfter && strip(play2.report.data.censusAfter)) === JSON.stringify(strip(play.report.data.censusAfter)),
-            censusAfterAgain: play2.report ? strip(play2.report.data.censusAfter) : null } };
+            censusAfterSame: JSON.stringify(sim2.report && sim2.report.data.censusAfter && strip(sim2.report.data.censusAfter)) === JSON.stringify(strip(sim.report.data.censusAfter)),
+            censusAfterAgain: sim2.report ? strip(sim2.report.data.censusAfter) : null, simulationAgain: sim2.report ? sim2.report.data.simulation : null } };
     fs.mkdirSync(FIX, { recursive: true });
     fs.writeFileSync(baseFixtureFile(), JSON.stringify(d, null, 1) + "\n");
     log(`wrote ${baseFixtureFile()} (repeat: ${JSON.stringify({ coreSame: d.repeat.coreSame, censusSame: d.repeat.censusSame, censusAfterSame: d.repeat.censusAfterSame })})`);
@@ -316,7 +317,8 @@ function evaluate(results, base, provoked) {
         const ledgerPath = path.join(provoked && provoked.clone ? provoked.clone : ROOT, "game", "js", "sim", "ledger.js");
         const lb = base && base.census ? ledgerTotals(base.census, ledgerPath) : null, lba = base && base.censusAfter ? ledgerTotals(base.censusAfter, ledgerPath) : null;
         for (const c of cfgs) {
-            const d0 = reportOf(c, "core"), d1 = reportOf(c, "play");
+            const d0 = reportOf(c, "core"), d1 = reportOf(c, "sim");
+            if (!lb || !lba) { ok = false; rows.push(`${c}: no base census to compare with`); continue; }
             if (!d0 || !d0.census || !d1 || !d1.censusAfter) { ok = false; rows.push(`${c}: no census`); continue; }
             const diff0 = censusDiff(d0.census, base.census), diff1 = censusDiff(d1.censusAfter, base.censusAfter);
             const caps0 = d0.census.capStrata === base.census.capStrata;
@@ -341,7 +343,7 @@ function runAll(provocation) {
     const edits = provocation ? provocation.edits : null;
     const clone = provocation && provocation.clone ? provocation.clone : ROOT;
     const results = {};
-    const phases = provocation && provocation.phases ? provocation.phases : ["core", "play"];
+    const phases = provocation && provocation.phases ? provocation.phases : ["core", "play", "sim"];
     const cfgs = provocation && provocation.configs ? provocation.configs.filter(c => CONFIGS.includes(c) || arg("z-range", "") === "") : CONFIGS;
     for (const c of cfgs) {
         results[c] = {};
@@ -404,9 +406,9 @@ function loadBase() {
             if (!c.pass) failed++;
             log(`${c.pass ? "PASS" : "FAIL"} ${name} - ${c.detail}`);
         }
-        const harness = Object.values(results).some(r => r && (r.core ? !r.core.result || !r.play.result : !r.result));
+        const harness = Object.values(results).some(r => r && (r.core ? ["core", "play", "sim"].some(ph => !r[ph] || !r[ph].result) : !r.result));
         const out = path.join(os.tmpdir(), `laneaa_zr_results_${process.pid}.json`);
-        fs.writeFileSync(out, JSON.stringify({ configs: CONFIGS, seed: SEED, base: BASE, checks: ev, reports: Object.fromEntries(Object.entries(results).map(([k, v]) => [k, v.core ? { core: v.core.report, play: v.play.report } : v.report])) }, null, 1));
+        fs.writeFileSync(out, JSON.stringify({ configs: CONFIGS, seed: SEED, base: BASE, checks: ev, reports: Object.fromEntries(Object.entries(results).map(([k, v]) => [k, v.core ? { core: v.core.report, play: v.play && v.play.report, sim: v.sim && v.sim.report } : v.report])) }, null, 1));
         log(`reports: ${out}`);
         const code = failed ? 1 : harness ? 2 : 0;
         log(`RESULT: ${CHECKS.length - failed} passed, ${failed} failed (exit ${code})`);

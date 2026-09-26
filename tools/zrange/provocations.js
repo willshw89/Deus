@@ -34,7 +34,7 @@ const PROVOCATIONS = {
     generator_changed: { check: "old_layers_identical", configs: ["-4..4"], phases: ["core"],
         edits: [[L, "nodeGap: [7, 13], chamberR: [2.5, 5.5], passageHalf: [0.7, 1.3],", "nodeGap: [7, 13], chamberR: [2.5, 5.5], passageHalf: [0.7, 1.4], /* PROVOKED */"]] },
     // Matter destroyed at New Game: a stone cell of -2's border rock becomes air (a change record; the baselines stay).
-    matter_destroyed: { check: "matter_unchanged", configs: ["-4..4"], phases: ["core", "play"],
+    matter_destroyed: { check: "matter_unchanged", configs: ["-4..4"], phases: ["core", "sim"],
         edits: [[L, "    function onWorldCreated(st) {\n        ensureWorldLevels(st);",
             "    function onWorldCreated(st) {\n        ensureWorldLevels(st);\n        setStrata({ area: { x: 0, y: 0 }, x: 0, y: 0, z: -2 }, { m: [\"air\", \"air\", \"air\", \"air\", \"air\"] }); /* PROVOKED */"]] },
     // View stepping stops one level short of the top.

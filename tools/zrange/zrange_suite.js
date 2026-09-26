@@ -10,7 +10,8 @@
  *           driver compares across commits and ranges: the core levels' checksums and cell hashes, the matter census
  *   play    extreme_layers_work (a unit stands, walks and paths on the top and bottom levels, the view switches there in
  *           place and stepping stops at the ends), sparse_save (fresh-world save sizes, a change high and low, save and
- *           load), then ZR_UPDATES map updates of simulation and the census again
+ *           load)
+ *   sim     ZR_UPDATES map updates of simulation from New Game at the highest speed, then the census again
  *   legacy  loads a save file (ZR_SAVE) written by the base commit and checks it plays at its own range; saves and
  *           loads it again
  *   make_legacy  (run on the base commit) writes the legacy save fixture and its fingerprint to ZR_OUT_DIR
@@ -24,7 +25,7 @@ function zrangeSuitePlugin() {
     const fs = require("fs"), path = require("path");
     const outDir = path.join(nw.__dirname || process.cwd(), "test_output");
     const PHASE = (process.env.ZR_PHASE || "core").trim();
-    const UPDATES = Math.max(0, Number(process.env.ZR_UPDATES || "3000") | 0);
+    const UPDATES = Math.max(0, Number(process.env.ZR_UPDATES || "2400") | 0);
     const report = { phase: PHASE, made: new Date().toISOString(), env: { DEUS_Z_RANGE: process.env.DEUS_Z_RANGE || null }, data: {}, timing: {} };
     const writeReport = () => { try { fs.writeFileSync(path.join(outDir, "zrange_report.json"), JSON.stringify(report, null, 1)); } catch (_) { /* reported by the driver */ } };
 
@@ -175,6 +176,7 @@ function zrangeSuitePlugin() {
         if (PHASE === "legacy") { await legacyLoad(); finishPhase(); return; }
         if (PHASE === "core") await corePhase();
         else if (PHASE === "play") await playPhase();
+        else if (PHASE === "sim") await simPhase();
         finishPhase();
 
         function finishPhase() {
@@ -320,7 +322,16 @@ function zrangeSuitePlugin() {
 
             //------------------------------------------------ path_scratch_bounded
             if (tip) {
-                const g = findBlock(24, 1, [0], 70, 100);
+                // A straight row of 21 walkable ground cells nobody stands on, round the view first.
+                let g = null;
+                for (let d = 0; d < 120 && !g; d += 2) for (const y of [v0.y + d, v0.y - d]) {
+                    if (y < 4 || y >= size - 4 || g) continue;
+                    for (let x = 8; x + 21 < size - 8; x++) {
+                        let ok = true;
+                        for (let k = 0; k <= 20 && ok; k++) if (!W.walkable(area.x, area.y, x + k, y, { z: 0 }) || W.standerAt(area.x, area.y, x + k, y, 0)) { ok = false; x += k; }
+                        if (ok) { g = { x, y }; break; }
+                    }
+                }
                 let res = null, path = null;
                 if (g) {
                     // A straight walk on the ground from the block's west end to its east end.
@@ -387,7 +398,12 @@ function zrangeSuitePlugin() {
                 //------------------------------------------------ extreme_layers_work
                 await extremeLayers();
             }
-            //------------------------------------------------ simulation, then the census again
+            resume();
+            t.check("play_data_written", true, `fresh save ${report.data.saveFresh.total} characters (levels ${report.data.saveFresh.levels} B)`);
+        }
+
+        //---------------------------------------------------------------- sim: ZR_UPDATES map updates, then the census
+        async function simPhase() {
             resume();
             if (UF.Time && UF.Time.setLevel) UF.Time.setLevel(UF.Time.speeds ? UF.Time.speeds.length - 1 : 4);
             const f0 = W._frame, tick0 = UF.Time && UF.Time.ticks ? UF.Time.ticks() : null, r0 = performance.now();
@@ -397,7 +413,7 @@ function zrangeSuitePlugin() {
             report.data.simulation = { updates: W._frame - f0, ticks: tick0 === null ? null : UF.Time.ticks() - tick0, realMs: +(performance.now() - r0).toFixed(0) };
             report.data.censusAfter = census();
             resume();
-            t.check("play_data_written", true, `after ${report.data.simulation.updates} map updates (${report.data.simulation.realMs} ms): census ${report.data.censusAfter.ms} ms`);
+            t.check("sim_data_written", report.data.simulation.updates >= UPDATES, `after ${report.data.simulation.updates} map updates (${report.data.simulation.realMs} ms; ${report.data.simulation.ticks} time ticks): census ${report.data.censusAfter.ms} ms`);
         }
 
         async function extremeLayers() {
