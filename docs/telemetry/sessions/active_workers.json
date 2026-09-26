@@ -114,7 +114,10 @@
     "branch": "task/lane-c2b",
     "launchTimeCT": "2026-09-26 01:00:17 CT",
     "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\run_review_lane_c2b.ps1",
-    "state": "running"
+    "state": "exited",
+    "exitCode": 0,
+    "tip": "2030ead6",
+    "endedAtCT": "2026-09-26 01:15:00 CT"
   },
   {
     "lane": "Lane J",
