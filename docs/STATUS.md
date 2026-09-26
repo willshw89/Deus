@@ -49,7 +49,22 @@
 - **Lane F (Claude CLI):** WG.00.12 Merged into `main` (`d09a1295`). 8-test post-F suite all passed with EXIT=0. Pushed to `origin`.
 - **Lane G (Claude CLI):** WG.00.11 Merged into `main` (`da2c16b2`). Provenance: coordinator re-ran in lane-g worktree; PM reproduced exit 0 on lane-g and on merged main da2c16b2 (30/30 gating checks pass, 15 mutants caught, world_age 29/29 pass, carrying capacity 23/23 pass).
 - **Lane H (Claude / Fable):** WG.00.08 Fresh Z-2 cut proof (`tools/test_generated_z2_cut_proof.js`) per Directive 001-I sec B. Committed `c8694f01` and pushed to `origin/task/lane-h`. Baseline 12/12 pass (exit 0), 8/8 mutants exit 1 (including `floating_slab_left`). Claude claims proof hardened and fluid ruling aligned; Grok verification pending.
-- **Lane C2b (Claude):** WG.00.12 Governance hardener (`tools/governance/check_claims.js`) per Directive 001-I sec C. Worktree `lane-c2b`.
+- **Lane C2b (Claude):** WG.00.12 Governance hardener (`tools/governance/check_claims.js`) per Directive 001-I sec C. Merged to `main` (`29d60a96`) after independent Grok review PASS (`7619c9cb`).
+- **Lane I (Claude Writer / Grok Reviewer):** WG.00.12 Automated merge gate (`tools/governance/merge_gate.js`). Merged to `main` (`099b6878`) after independent Grok review PASS (`a0183d68`).
+- **Lane J (Claude Writer / Grok Reviewer):** WG.00.12 Standard worker launcher and pre-push guard (`tools/ops/launch_worker.ps1`). Merged to `main` (`62067d1c`) after independent Grok review PASS (`5a1ec388`).
+- **Lane gap-audit (Claude Writer / Grok Reviewer):** SIM.50.01 Living world gap audit (`docs/audits/LIVING_WORLD_GAP_AUDIT.md`). Merged to `main` (`4614dbfa`) after independent Grok review PASS (`15745e41`).
+- **Lane N (Claude Writer / Grok Reviewer):** SIM.00.00 In-place layer switch (`game/js/plugins/DEUS_Levels.js`, `DEUS_World.js`, `tools/test_layer_switch_inplace.js`). Merged to `main` (`e27e8be5`) after independent Grok review CLEAN PASS (`14777983`).
+- **Lane K (Claude Writer):** WG.00.09b Global depth renderer (`game/js/plugins/DEUS_Depth.js`). Writer completed at tip `86bf49a9` (K3/K4 baselines, after-evidence screenshots). Awaiting Grok review launch by PM.
+- **Lane S (Claude Writer):** WG.20.02 Art catalogue. Active writer (PID 19508). NO ART GENERATION.
+- **Lane T (Claude Writer):** WG.32.02 Blank template tilesets. Active writer (PID 416). NO ART GENERATION.
+- **Lane U (Claude Writer):** WG.41.01 Placement & validation tooling. Active writer (PID 7440). NO ART GENERATION.
+- **Lane P (Claude Writer):** SIM.60.01 SRD spell-effect audit. Active writer (PID 6288). Design only.
+- **Lane M Rev 3 (Claude Writer):** SIM.00.01 ADR-003 Rev 3. Active writer (PID 21104).
+- **Queued for PM:** Lanes Q, R, W, and people-side gap audit when worker slots free.
+- **Open Ops Debt (PM):**
+  - Merge gate / check_claims distrust of `[pm]` commits (handled via PM manual merge).
+  - Lane S launcher prompt contains stale "Do not push" directive.
+  - Lane M `lane.json` incomplete.
 
 ---
 
@@ -79,27 +94,29 @@
 | Lane / Owner | Exclusive File Whitelist (Full Paths) | Access Policy |
 |---|---|---|
 | **Gemini (Coordinator)** | `docs/STATUS.md`<br>`docs/archive/STATUS_LEDGER_*.md`<br>`docs/WORK_QUEUE.md`<br>`docs/MODEL_AVAILABILITY.md`<br>`docs/telemetry/sessions/active_workers.json`<br>`docs/worldgen/DEUS_WORLDGEN_WBS.md`<br>`docs/art/DEUS_WORLD_WBS.md`<br>`docs/OWNER_DECISIONS.md` (entries only)<br>`tasks/WG.00.08/defects.jsonl` (append-only)<br>`C:\Users\snewt\.deus_pm\outbox\*` | **Exclusive Writer.** WBS coordination, integration authority, pulse reports, baseline records. Zero engine code. |
-| **Lane C2b (Claude)** | `tools/governance/check_claims.js`<br>`tools/governance/test_check_claims.js`<br>`tasks/WG.00.12/c2_governance_state.md` | **Exclusive Writer (Worktree lane-c2b).** Governance checker hardening per Directive 001-I sec C. |
-| **Lane E (Grok Writer / Claude Reviewer)** | `docs/systems/UF_Depth_Attack_Plan.md` (attack plan (Grok) — spec authority pending PM ruling)<br>`tasks/DEUS-TSK-FABLE-19C/*` | **Exclusive Writer (Worktree lane-e).** Depth renderer attack plan revision (Grok) and re-review (Claude). |
-| **Lane I (Claude Writer / Grok Reviewer)** | `tools/governance/merge_gate.js`<br>`tools/governance/test_merge_gate.js`<br>`tools/governance/MERGE_GATE.md`<br>`tasks/WG.00.12/lane-i/**` | **Exclusive Writer (Worktree lane-i).** Automated merge gate implementation per 001-N §1. |
-| **Lane J (Claude Writer / Grok Reviewer)** | `tools/ops/launch_worker.ps1`<br>`tools/ops/gate_tests.json`<br>`tools/ops/hooks/pre-push`<br>`tools/ops/install_lane_hooks.ps1`<br>`tools/ops/test_launch_worker.ps1`<br>`tools/ops/README.md`<br>`tools/ops/resume_queue.ps1`<br>`tools/ops/test_resume_queue.ps1`<br>`tasks/WG.00.12/lane-j/**` | **Exclusive Writer (Worktree lane-j).** Standard launcher & operational hooks per 001-N §2. |
-| **Lane S (Claude Writer / Grok Reviewer)** | `art/catalogue/**`<br>`docs/art/catalogue/**`<br>`tools/art/build_catalogue.js`<br>`tools/art/test_catalogue.js`<br>`tools/art/fixtures/catalogue/**`<br>`tasks/WG.20.02/lane-s/**` | **Exclusive Writer (Worktree lane-s).** WG.20.02 art catalogue. NO ART GENERATION. PM-launched 2026-09-26 (0028-AC Ã‚Â§2.3). |
-| **Lane T (Claude Writer / Grok Reviewer)** | `tools/art/make_blank_templates.js`<br>`tools/art/test_blank_templates.js`<br>`tools/art/fixtures/templates/**`<br>`art/templates/**`<br>`tasks/WG.32.02/lane-t/**` | **Exclusive Writer (Worktree lane-t).** WG.32.02 blank template tilesets. NO ART GENERATION. PM-launched 2026-09-26. |
-| **Lane U (Claude Writer / Grok Reviewer)** | `tools/art/place_art.js`<br>`tools/art/validate_art.js`<br>`tools/art/test_place_art.js`<br>`tools/art/fixtures/place/**`<br>`docs/art/APPROVALS_FORMAT.md`<br>`tasks/WG.41.01/lane-u/**` | **Exclusive Writer (Worktree lane-u).** WG.41.01 placement and validation tooling. NO ART GENERATION. PM-launched 2026-09-26. |
-| **Lane P (Claude Writer / Grok Reviewer)** | `docs/audits/SRD_SPELL_EFFECT_AUDIT.md`<br>`docs/audits/srd_spell_effect_audit.json`<br>`tasks/SIM.60.01/lane-p/**` | **Exclusive Writer (Worktree lane-p).** SIM.60.01 SRD spell-effect audit (design only). PM-launched 2026-09-26. |
-| **Lane N review (Grok Reviewer)** | `tasks/SIM.00.00/lane-n/review_grok_2f2a1ff2.md` | **Review file only (Worktree lane-n).** Independent review of Lane N writer tip 2f2a1ff2. PM-launched 2026-09-26. |
-| **Lane M Rev 3 (Claude Writer / Grok Reviewer)** | `docs/adr/ADR-003_sim_render_split_and_lod.md`<br>`docs/adr/README.md`<br>`tasks/SIM.00.01/lane-m/**` (except `review_grok_*.md`) | **Exclusive Writer (Worktree lane-m).** SIM.00.01 ADR-003 Rev 3 after Grok FAIL (review_grok_c456cb73.md). PM-relaunched 2026-09-26. |
+| **Lane K (Claude Writer)** | `game/js/plugins/DEUS_Depth.js`<br>`docs/systems/DEUS_Depth.md`<br>`tasks/WG.00.09b/lane-k/**` | **Finished Writer (Worktree lane-k).** WG.00.09b global depth renderer. Writer finished at tip `86bf49a9`. Awaiting Grok review. |
+| **Lane S (Claude Writer / Grok Reviewer)** | `art/catalogue/**`<br>`docs/art/catalogue/**`<br>`tools/art/build_catalogue.js`<br>`tools/art/test_catalogue.js`<br>`tools/art/fixtures/catalogue/**`<br>`tasks/WG.20.02/lane-s/**` | **Exclusive Writer (Worktree lane-s).** WG.20.02 art catalogue. NO ART GENERATION. Active writer (PID 19508). PM-launched 2026-09-26. |
+| **Lane T (Claude Writer / Grok Reviewer)** | `tools/art/make_blank_templates.js`<br>`tools/art/test_blank_templates.js`<br>`tools/art/fixtures/templates/**`<br>`art/templates/**`<br>`tasks/WG.32.02/lane-t/**` | **Exclusive Writer (Worktree lane-t).** WG.32.02 blank template tilesets. NO ART GENERATION. Active writer (PID 416). PM-launched 2026-09-26. |
+| **Lane U (Claude Writer / Grok Reviewer)** | `tools/art/place_art.js`<br>`tools/art/validate_art.js`<br>`tools/art/test_place_art.js`<br>`tools/art/fixtures/place/**`<br>`docs/art/APPROVALS_FORMAT.md`<br>`tasks/WG.41.01/lane-u/**` | **Exclusive Writer (Worktree lane-u).** WG.41.01 placement and validation tooling. NO ART GENERATION. Active writer (PID 7440). PM-launched 2026-09-26. |
+| **Lane P (Claude Writer / Grok Reviewer)** | `docs/audits/SRD_SPELL_EFFECT_AUDIT.md`<br>`docs/audits/srd_spell_effect_audit.json`<br>`tasks/SIM.60.01/lane-p/**` | **Exclusive Writer (Worktree lane-p).** SIM.60.01 SRD spell-effect audit (design only). Active writer (PID 6288). PM-launched 2026-09-26. |
+| **Lane M Rev 3 (Claude Writer / Grok Reviewer)** | `docs/adr/ADR-003_sim_render_split_and_lod.md`<br>`docs/adr/README.md`<br>`tasks/SIM.00.01/lane-m/**` (except `review_grok_*.md`) | **Exclusive Writer (Worktree lane-m).** SIM.00.01 ADR-003 Rev 3 after Grok FAIL (review_grok_c456cb73.md). Active writer (PID 21104). PM-relaunched 2026-09-26. |
+| **Lane E (PAUSED)** | `docs/systems/UF_Depth_Attack_Plan.md`<br>`tasks/DEUS-TSK-FABLE-19C/*` | **PAUSED (Worktree lane-e).** Held at `05948e9c` per Directives 0028-AC, 0029-AD, 0030-AE. |
 
 ### Retired Lanes: Write Access Revoked
 - **Lane A (Claude / Fable):** Merged to `main` (`0f7f26cd`). Write access revoked.
 - **Lane B (Claude / Fable):** Merged to `main` (`8c0c210c`). Write access revoked.
 - **Lane C1 (Claude CLI):** Merged to `main` (`e07c86ea`). Write access revoked.
 - **Lane C2 (Claude CLI):** Merged to `main` (`83bcc1a7`). Write access revoked.
+- **Lane C2b (Claude):** Merged to `main` (`29d60a96`). Write access revoked.
 - **Lane C3 (Claude CLI):** Merged to `main` (`8db39b0b`). Write access revoked.
 - **Lane D (Grok):** Delivered. Write access revoked.
 - **Lane F (Claude CLI):** Merged to `main` (`d09a1295`). Write access revoked.
 - **Lane G (Claude CLI):** Merged to `main` (`da2c16b2`). Write access revoked.
+- **Lane gap-audit (Claude / Grok):** Merged to `main` (`4614dbfa`). Write access revoked.
 - **Lane H (Claude / Fable):** Merged to `main` (`9acdee8a`). Write access revoked.
+- **Lane I (Claude / Grok):** Merged to `main` (`099b6878`). Write access revoked.
+- **Lane J (Claude / Grok):** Merged to `main` (`62067d1c`). Write access revoked.
+- **Lane N (Claude / Grok):** Merged to `main` (`e27e8be5`). Write access revoked.
 
 ### Frozen / Read-Only Paths
 - `C:\Dev\DEUS`
