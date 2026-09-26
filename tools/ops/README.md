@@ -13,8 +13,12 @@ Windows PowerShell 5.1 scripts; nothing here is loaded by the game.
 | `test_launch_worker.ps1` | Tests for the launcher, the hook, the installer and `gate_tests.json`. |
 | `test_resume_queue.ps1` | Tests for the resume queue, including an end-to-end relaunch through the real launcher. |
 
-Rules the tools enforce: one session per lane; workers never push; writer and reviewer of a lane are always
-different AI families; every change outside the lane's `allowedPaths` is reported.
+Rules the tools enforce: one session per lane; writer and reviewer of a lane are always different AI families;
+every change outside the lane's `allowedPaths` is reported. Pushing: since Owner directive 0028-AC A0 (2026-09-26,
+about 01:50 CT) the PM opens lanes whose briefs tell the worker to push its own lane branch
+(`git push origin task/<lane>`) and end with a `FINAL SHA:` line. The launcher's default prompt follows the brief
+(section 2, "The prompt"). The pre-push guard of section 5, where installed, still blocks every push without
+`DEUS_INTEGRATOR=1`.
 
 ---
 
@@ -39,6 +43,10 @@ The launcher reads `lane.json` from the folder that holds the brief (`tasks/<tas
 - `allowedPaths`: globs, relative to the repo root. `**` crosses folders, `*` and `?` stay inside one folder,
   matching is case-insensitive. Without `lane.json`, pass `-AllowedPaths a,b,c`. With neither, the launcher refuses
   (a scope check would be impossible).
+- `push` (optional, WG.00.12b): `true` or `false`. It decides whether the generated default prompt tells the worker
+  to push the lane branch; without it the brief decides (section 2, "The prompt"). Any other value refuses the
+  launch (exit 1). `tools/governance/merge_gate.js` accepts the field and refuses a non-boolean value
+  (`MANIFEST_INVALID`).
 
 ## 2. `launch_worker.ps1`
 
@@ -64,21 +72,77 @@ and returns when the worker has finished.
   reused PID does not block a lane.
   `RUNNING` entries whose processes are gone are marked `LOST` at this point.
 - The provider CLI must be found (`-ProviderExe` / `-ProviderArgs` override it; the tests use this).
+- `lane.json` `push`, when present, must be `true` or `false`. `-SavedPrompt` needs `-PromptFile`.
+
+### The prompt (WG.00.12b)
+
+Chosen in this order:
+
+1. **`-PromptFile <file>`**: used as given. With `-ResumeFromSha`, this launch's resume line goes on top, and a
+   resume line already at the top of the file is replaced, not stacked. Add `-SavedPrompt` when the file is an
+   earlier launch's prompt (`resume_queue.ps1` does). The launcher then also drops a relaunch note: everything up to
+   and including a line `--- original prompt follows ---`, the form the PM used for the lane-s relaunch
+   (`tasks/WG.20.02/lane-s/launches/20260926_034739_prompt.txt`). Without `-SavedPrompt` that note is kept, because
+   the PM may have written it for this launch.
+2. **The lane's saved prompt** (`Find-DeusSavedPrompt`), when no `-PromptFile` is given. It is reused like a
+   `-SavedPrompt` file: its old resume line and relaunch note are dropped, and this launch's resume line is added when
+   `-ResumeFromSha` is set. Candidates, first usable one wins:
+   - registry entries of the lane, newest `startedAt` first, with the **same `taskId`, `role` and `provider`**: the
+     entry's `promptFile` (the file it was given), then its `launchPromptPath` (the saved copy);
+   - prompt files committed at `HEAD` in `tasks/<task>/<lane>/launches/`, newest name first, whose adding commit has
+     the launcher's subject `[ops] <task> <lane> launch prompt <stamp> (<role> <provider>)` with the same role and
+     provider, and which have not been changed since.
+
+   A candidate is passed over, with the reason recorded in `promptCandidatesSkipped`, when the file is missing or
+   empty, when its registry entry or commit does not record the same role and provider, or when the launcher
+   generated it. Older subjects without `(<role> <provider>)`, and the coordinator's
+   `[gemini] Record Lane X ... launch prompt` commits, record neither, so their prompts are reused only through a
+   registry entry. The effects:
+   - A reviewer prompt is never reused for a writer, or a writer prompt for a reviewer. Reviewer launches with
+     `-NoCommitPrompt` leave their prompt, uncommitted, in the same `launches/` folder. Their registry entry says
+     `role: reviewer`, and uncommitted files are not candidates.
+   - A prompt written for another provider is not reused (after a failover its first line and commit tag would
+     name the wrong agent), and neither is a prompt of another task that happened to use the same lane name.
+   - A prompt the launcher generated is never reused, so a pre-WG.00.12b default with "Do not push" is not carried
+     forward. The default is generated again from the current brief. A generated prompt is recognised by its first
+     line (`You are the primary implementer|independent reviewer for <lane> (Task <id>), running as <provider>.`,
+     after any resume line) plus a `Standing rules:` line.
+3. **The generated default** (`New-DeusLanePrompt`). Standing rule 2 depends on the push rule (`Get-DeusPushRule`):
+   - `lane.json` `"push": true`, or no `push` field and a brief that contains `git push origin <branch>` (optionally
+     `-u` / `--set-upstream`) for the lane's own branch (`lane.json` `branch`, else the worktree's branch). Rule 2
+     then reads "... When finished, commit and push your own branch only: git push origin <branch>. Never push main or
+     any other branch, never force-push, never set DEUS_INTEGRATOR; if the push is refused, say so and stop. Do not
+     merge. ...", and the prompt ends with
+     `Your final output line must be exactly: FINAL SHA: <sha> (pasted from git rev-parse HEAD after the push).`
+   - Otherwise (`"push": false`, or a brief that names no push of the lane branch; `git push origin main` or another
+     lane's branch does not count): rule 2 keeps "Do not push. Do not merge." and there is no FINAL SHA line.
+
+   The brief match is plain text. A brief that says "never run git push origin task/lane-x" would count as asking
+   for a push. `"push": false` overrides that.
 
 ### What a run records
 
 | Where | What |
 |---|---|
-| `tasks/<task>/<lane>/launches/<yyyyMMdd_HHmmss>_prompt.txt` | The exact prompt, committed on the lane branch (`[ops] <task> <lane> launch prompt <stamp>`) before the worker starts. `-NoCommitPrompt` writes it without committing. |
+| `tasks/<task>/<lane>/launches/<yyyyMMdd_HHmmss>_prompt.txt` | The exact prompt, committed on the lane branch (`[ops] <task> <lane> launch prompt <stamp> (<role> <provider>)`; before WG.00.12b the subject ended at `<stamp>`) before the worker starts. `-NoCommitPrompt` writes it without committing. |
 | `<LogRoot>\<lane>\<runId>.log` | stdout and stderr of the worker, line by line (UTF-8). `<LogRoot>` defaults to `%USERPROFILE%\.deus_worktrees\logs`. |
 | `<LogRoot>\<lane>\<runId>.exit` | `EXIT=<code>` and `STATE=<state>`. |
 | `docs/telemetry/sessions/active_workers.json` in the **main** worktree (`-RegistryPath` to override) | One entry per run, keyed by `runId` (`<lane>_<stamp>`). Written at start (`state: RUNNING`, launcher PID, paths, `baseCommit`) and again at the end. |
 | `docs/telemetry/sessions/provider_status.json` (next to the registry, `-ProviderStatusPath` to override) | Only after a usage/quota/rate-limit stop: the provider's state and the lane's resume-queue entry (section 3). |
 
 Registry entry fields: `runId lane provider role taskId state flags pid processStartedAt launcherPid
-launcherStartedAt worktree branch briefPath launchPromptPath logPath launchTimeCT startedAt endedAt exitCode
+launcherStartedAt worktree branch briefPath launchPromptPath promptFile promptSource promptFrom
+promptCandidatesSkipped pushRule pushRuleSource logPath launchTimeCT startedAt endedAt exitCode
 timeoutMinutes baseCommit headCommit newCommits dirtyFiles outOfScope orphans orphansKilled usage timedOut
 startError logBytes outputDrained branchAfter resumeFromSha resumeHeadMismatch pushGuardHooksPath gitIdentity`.
+
+The prompt fields (WG.00.12b): `promptFile` is the source prompt, meaning the `-PromptFile` given or the saved prompt
+reused (full path), or `null` for a generated prompt. `launchPromptPath` stays the copy actually sent.
+`promptSource` is `file`, `saved` or `generated`. `promptFrom` says where it came from (`-PromptFile`,
+`-PromptFile -SavedPrompt`, `registry run <runId> promptFile|launchPromptPath`, `committed <path>`, or
+`generated (no saved <role> prompt for <provider>)`). `promptCandidatesSkipped` lists up to 20 candidates passed over,
+with the reason. `pushRule` is `push` or `no-push`, and `pushRuleSource` is `lane.json`, `brief` or `default`; both
+are recorded for every run, though only a generated prompt uses them.
 
 Older entries in the registry (`"lane": "Lane C2b"`, `"state": "running"`, no `launcherPid`) are read as the
 same lane (`lane-c2b`) and the same state.
@@ -176,7 +240,15 @@ One pass does the following:
    other role. It keeps its role (a reviewer stays a reviewer).
 3. **Relaunch.** Starts `launch_worker.ps1` hidden with `-ResumeFromSha <lastCommit>`, the same role, brief,
    worktree and timeout. The prompt's first line is exactly
-   `resume from HEAD <sha>; re-read BRIEF and the uncommitted diff first`. The entry becomes `RESUMED` once the
+   `resume from HEAD <sha>; re-read BRIEF and the uncommitted diff first`. The rest is the lane's saved prompt for
+   the entry's task and role and the chosen provider (WG.00.12b). `Find-DeusSavedPrompt` (section 2, "The prompt")
+   tries the queued run's own registry entry first (its `promptFile`, then its copy), then the lane's other entries,
+   then committed launch prompts. It passes the result as `-PromptFile <path> -SavedPrompt`, so the old resume line and
+   relaunch note are dropped and not stacked. When there is none, no `-PromptFile` is passed and the launcher makes
+   the same search itself before falling back to its default. Each relaunch logs
+   `<lane> prompt: saved <role> prompt <path> (<where from>)` or
+   `<lane> prompt: launcher default (no saved <role> prompt for <provider>; passed over: ...)`, and the queue entry
+   records `resumePromptFile` and `resumePromptFrom`. The entry becomes `RESUMED` once the
    launcher has registered a run under its PID (`resumeVerified: true`), or if the launcher is still running
    after `-LaunchVerifySeconds` (30) without registering (`resumeVerified: false`). If it exits first, the
    entry goes back to `QUEUED`. The launcher's own console output goes to
@@ -275,7 +347,18 @@ process against fake workers, a fake probe and a fake launcher. It isolates git 
 variables (a session started by the launcher has them), and kills every process it started before exiting.
 The `no_leftover_processes` check fails if any were still running.
 `-Mutants` copies `tools/ops`, applies one fault per copy (for example, no timeout kill, scope check off,
-same-family failover allowed, hook exits 0) and requires each copy to make at least one check FAIL.
+same-family failover allowed, hook exits 0) and requires each copy to make at least one check FAIL. A fresh clone on
+this machine checks the scripts out with CRLF (the system gitconfig sets `core.autocrlf=true`). The sweep therefore
+matches a multi-line fault's text with the file's own line ending. Before WG.00.12b the `launcher_pid_not_checked`
+fault was a SETUP-ERROR in such a clone.
+
+Counts (WG.00.12b; before it: 147 and 68 checks, 24 and 15 mutants): `test_launch_worker.ps1` 216 checks and 40
+mutants, `test_resume_queue.ps1` 95 checks and 20 mutants. The new tests cover the push rule (brief, other branch,
+`lane.json` true / false / invalid), prompt reuse (`-PromptFile` recorded then reused, resume without stacking, an
+explicit file with an old resume line, relaunch notes, reviewer vs writer both ways, a committed prompt without the
+registry, generated prompts not reused, another task or provider not reused) and, in the resume queue, the saved
+prompt passed on relaunch (the queued run first, the committed fallback, reviewer relaunch, no saved prompt, dry run,
+end to end through the real launcher).
 
 ### Library conventions
 

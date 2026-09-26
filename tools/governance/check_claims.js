@@ -825,7 +825,7 @@ function parseLaneMatrix(text) {
 // 4.4 then fails for every committer, the PM included.
 function withBuiltInLanes(matrix) {
     if (!matrix) return matrix;
-    const pm = { label: "PM (built-in whitelist)", key: "pm", agents: new Set(["pm"]), builtIn: true,
+    const pm = { label: "PM (built-in whitelist)", key: "pm", agents: new Set(["pm"]),
         globs: PM_WHITELIST.map(g => ({ raw: g, re: globToRe(g, ""), reI: globToRe(g, "i") })) };
     return { lanes: [...matrix.lanes, pm], frozen: matrix.frozen };
 }

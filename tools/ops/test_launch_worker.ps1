@@ -253,7 +253,7 @@ function Invoke-Launch {
 }
 
 function Get-TextFile([string]$Path) {
-    if (-not (Test-Path -LiteralPath $Path)) { return $null }
+    if (-not $Path -or -not (Test-Path -LiteralPath $Path)) { return $null }
     return [IO.File]::ReadAllText($Path, [Text.Encoding]::UTF8)
 }
 
@@ -296,7 +296,9 @@ function Save-LaunchFile($Fx, [string]$Stamp, [string]$Text, [string]$Subject) {
     return $full
 }
 
-function Get-RunStdin($Fx, $Entry) { return (Get-TextFile (Join-Path $Fx.Out "stdin_$($Entry['runId']).txt")) }
+function Get-RunStdin($Fx, $Entry) { if (-not $Entry) { return $null }; return (Get-TextFile (Join-Path $Fx.Out "stdin_$($Entry['runId']).txt")) }
+
+function Get-EntryField($Result, [string]$Name) { if (-not $Result.Entry) { return $null }; return $Result.Entry[$Name] }
 
 function Get-ResumeLineCount([string]$Text) { return ([regex]::Matches("$Text", '(?m)^resume from HEAD ')).Count }
 
@@ -396,28 +398,28 @@ $Tests = @(
         Reset-Lane $Fx
         Save-LaneFixture $Fx "# TEST_ brief`nNever git push origin main. The PM runs git push origin task/lane-t2 for another lane.`n" $null
         $r = Invoke-Launch $Fx -Mode 'commit'
-        $prompt = Get-TextFile $r.Entry['launchPromptPath']
         Check 'exit_0' ($r.Code -eq 0) "exit $($r.Code) $($r.Err)"
+        $prompt = Get-TextFile (Get-EntryField $r 'launchPromptPath')
         Check 'do_not_push_kept' ($prompt -match 'Do not push\. Do not merge\.' -and $prompt -notmatch 'FINAL SHA') $prompt
-        Check 'registry_no_push' ($r.Entry['pushRule'] -eq 'no-push') "$($r.Entry['pushRule'])"
+        Check 'registry_no_push' ((Get-EntryField $r 'pushRule') -eq 'no-push') "$(Get-EntryField $r 'pushRule')"
     } }
     @{ Name = 'push_rule_lane_json_true'; Body = {
         Reset-Lane $Fx
         Save-LaneFixture $Fx $null ([ordered]@{ push = $true })
         $r = Invoke-Launch $Fx -Mode 'commit'
-        $prompt = Get-TextFile $r.Entry['launchPromptPath']
         Check 'exit_0' ($r.Code -eq 0) "exit $($r.Code) $($r.Err)"
+        $prompt = Get-TextFile (Get-EntryField $r 'launchPromptPath')
         Check 'push_rule' ($prompt -match 'git push origin task/lane-t\.' -and $prompt -notmatch 'Do not push' -and $prompt -match 'FINAL SHA: <sha>') $prompt
-        Check 'registry_source_lane_json' ($r.Entry['pushRule'] -eq 'push' -and $r.Entry['pushRuleSource'] -eq 'lane.json') "$($r.Entry['pushRule']) $($r.Entry['pushRuleSource'])"
+        Check 'registry_source_lane_json' ((Get-EntryField $r 'pushRule') -eq 'push' -and (Get-EntryField $r 'pushRuleSource') -eq 'lane.json') "$(Get-EntryField $r 'pushRule') $(Get-EntryField $r 'pushRuleSource')"
     } }
     @{ Name = 'push_rule_lane_json_false_wins'; Body = {
         Reset-Lane $Fx
         Save-LaneFixture $Fx "# TEST_ brief`ngit push origin task/lane-t`n" ([ordered]@{ push = $false })
         $r = Invoke-Launch $Fx -Mode 'commit'
-        $prompt = Get-TextFile $r.Entry['launchPromptPath']
         Check 'exit_0' ($r.Code -eq 0) "exit $($r.Code) $($r.Err)"
+        $prompt = Get-TextFile (Get-EntryField $r 'launchPromptPath')
         Check 'do_not_push' ($prompt -match 'Do not push\.' -and $prompt -notmatch 'FINAL SHA') $prompt
-        Check 'registry_source_lane_json' ($r.Entry['pushRule'] -eq 'no-push' -and $r.Entry['pushRuleSource'] -eq 'lane.json') "$($r.Entry['pushRule']) $($r.Entry['pushRuleSource'])"
+        Check 'registry_source_lane_json' ((Get-EntryField $r 'pushRule') -eq 'no-push' -and (Get-EntryField $r 'pushRuleSource') -eq 'lane.json') "$(Get-EntryField $r 'pushRule') $(Get-EntryField $r 'pushRuleSource')"
     } }
     @{ Name = 'push_rule_lane_json_invalid_refused'; Body = {
         Reset-Lane $Fx
@@ -843,14 +845,19 @@ function Invoke-MutantSweep([string]$TestScriptName, $Defs) {
         Copy-Item -LiteralPath (Join-Path $OpsDir 'hooks\pre-push') -Destination (Join-Path $dir 'hooks')
         $file = Join-Path $dir $m.File
         $text = [IO.File]::ReadAllText($file)
-        $n = ([regex]::Matches($text, [regex]::Escape($m.Find))).Count
+        # A fresh clone checks the scripts out with CRLF when core.autocrlf is true (this machine's system config), so a
+        # multi-line Find written with `n is matched with the file's own line ending.
+        $find = $m.Find
+        $replace = $m.Replace
+        if ($text.Contains("`r`n")) { $find = $find.Replace("`r`n", "`n").Replace("`n", "`r`n"); $replace = $replace.Replace("`r`n", "`n").Replace("`n", "`r`n") }
+        $n = ([regex]::Matches($text, [regex]::Escape($find))).Count
         if ($n -ne 1) {
             Write-Host "MUTANT $($m.Name): SETUP-ERROR (the text to replace occurs $n times in $($m.File), expected 1)"
             $bad += $m.Name
             Remove-Item -LiteralPath $dir -Recurse -Force -ErrorAction SilentlyContinue
             continue
         }
-        [IO.File]::WriteAllText($file, $text.Replace($m.Find, $m.Replace), (New-Object Text.UTF8Encoding $false))
+        [IO.File]::WriteAllText($file, $text.Replace($find, $replace), (New-Object Text.UTF8Encoding $false))
         $r = Invoke-Proc -Exe $PsExe -Argv @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $dir $TestScriptName), '-OpsDir', $dir, '-RepoRoot', $RepoRoot, '-Only', $m.Tests) -TimeoutSeconds 900
         $fails = @(($r.Out -split "`r?`n") | Where-Object { $_ -match '^\s+FAIL ' } | ForEach-Object { $_.Trim().Substring(5) })
         if ($r.Code -eq 1 -and $fails.Count -gt 0) {

@@ -60,7 +60,8 @@ const FAMILIES = { claude: "claude", fable: "claude", grok: "grok", codex: "code
 // The PM's subject tag. Trusted to write lane.json (check (a)); not an agent family, so never a review.
 const PM_TAG = "pm";
 
-// Each mutant switches one check off. test_merge_gate.js must show every one caught by a case.
+// Each mutant switches one check off (the two *_untrusted ones make a rule stricter instead). test_merge_gate.js
+// must show every one caught by a case.
 const MUTANTS = {
     manifest_provenance_off: "accept lane.json edits by any commit",
     manifest_trust_any_tag: "accept lane.json edits by a single-parent commit with any tag or none",
