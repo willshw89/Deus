@@ -8,13 +8,14 @@
 | Base commit | `84ee3b55f3f8c1b8a16710ccf3878795d98d1683` (origin/main when the PM opened the lane). The worktree HEAD when writing started was `bedb03c2fe0013316b98037a48504e18551563e8`; `git diff --stat 84ee3b55 HEAD` lists only files under `tasks/SIM.40.01/lane-q/`, so every `game/`, `docs/`, `tools/` and `archive/` citation below holds at the base commit |
 | Kind of work | Design only. No file outside `tasks/SIM.40.01/lane-q/` was changed. No code, script or test is committed. No art was generated, drawn, requested or integrated (DEC-007) |
 | Status | PROPOSED. Every number is a tuning proposal. Every new work item is `PROPOSED-Q-NN`, not a WBS ID |
+| Revision | Fix 1 (2026-09-26), after the Grok review of `9d5b40d3` (`tasks/SIM.40.01/lane-q/review_grok_9d5b40d3.md`). Changed: one fall-length rule for units (§6.2 step 3, §6.5, §7.3, §8.6, §11.1 row 6, T10); one kg rounding rule and the corrected `timber_floor`, `timber_roof` and `conjured_stone` rows (§2.3, §2.5, T16); integer floating-ice capacity (§2.3, §4.3); lava-to-basalt ratio against basalt's one `kgPerVoxel` (§9.1, §9.2 row 18); the WBS Rev 25 line (§0.1) |
 
 ## 0. Header: inputs, method, limits, dependencies
 
 ### 0.1 Inputs read
 
 - **Audit:** `docs/audits/LIVING_WORLD_GAP_AUDIT.md` (SIM.50.01; the audit cites code at `75cf2ff3`). Sections read in full: §1, §2.1-§2.7, §3.7, §3.8, §3.9, §4.1-§4.3, §5, §6, §7, §8, §9, §10, Appendix A and B.
-- **WBS:** `docs/worldgen/DEUS_WORLDGEN_WBS.md` Rev 25 (`:3`): WG.00.17 (`:105`), WG.63.04 (`:210`), WG.65.15 (`:254`), WG.65.16 (`:255`), SIM.00.00-.06 (`:519-525`), SIM.30.01-.05 (`:529-533`), SIM.40.01-.10 (`:534-543`), SIM.50.02-.10 (`:545-553`), SIM.60.01-.04 (`:559-562`), GP.07.02 (`:578`). `docs/society/DEUS_SOCIETY_WBS.md` was checked for SOC rows that touch buildings; only SOC.10.03 (plan data, a SIM.50.08 dependency at `docs/worldgen/DEUS_WORLDGEN_WBS.md:551`) matters here.
+- **WBS:** `docs/worldgen/DEUS_WORLDGEN_WBS.md` Rev 25 (`:4`): WG.00.17 (`:105`), WG.63.04 (`:210`), WG.65.15 (`:254`), WG.65.16 (`:255`), SIM.00.00-.06 (`:519-525`), SIM.30.01-.05 (`:529-533`), SIM.40.01-.10 (`:534-543`), SIM.50.02-.10 (`:545-553`), SIM.60.01-.04 (`:559-562`), GP.07.02 (`:578`). `docs/society/DEUS_SOCIETY_WBS.md` was checked for SOC rows that touch buildings; only SOC.10.03 (plan data, a SIM.50.08 dependency at `docs/worldgen/DEUS_WORLDGEN_WBS.md:551`) matters here.
 - **Decisions:** `docs/OWNER_DECISIONS.md` DEC-010 (`:137-147`), DEC-011 (`:150-157`), DEC-012 (`:161-168`), DEC-013 (`:172-195`), DEC-014 (`:199-208`), DEC-015 (`:212-226`), DEC-018 (`:251-263`), DEC-019 (`:267-278`), DEC-020 (`:282-289`), DEC-021 (`:293-300`), DEC-022 (`:304-312`).
 - **VISION:** V74 (`docs/VISION.md:84`), V83 (`:94`), V95 (`:106`), V133 (`:127`), V136 (`:130`), V137 (`:131`), V138 (`:132`), V139 (`:133`), V140 (`:134`), V141 (`:135`), V142 (`:136`); V123 and V128 are decision-log entries (`:338-342`, `:365-367`).
 - **Invariants and risks:** INV-SIM-02 and INV-SIM-03 (`docs/INVARIANT_REGISTRY.md:52-53`); LIFE-001..004 (`docs/RISK_REGISTER.md:60-63`); NAT-003 (`docs/RISK_REGISTER.md:74`).
@@ -124,7 +125,7 @@ Every material id gets these properties (all integers, so the core stays float-f
 
 Natural rock resolves its type today through the seeded geology function (`DEUS_Jobs.js:464-466` reads `G.geologyAt(gx, gy, zOf(job.target))` for mined stone). This design gives each rock type its own id so that a voxel, its rubble and its ledger line know their rock without a geology call. Generic `stone` (id 1) stays for legacy saves and resolves through `geologyAt` exactly as today.
 
-Voxel mass = catalogue density × 1,415.84 kg per t/m³. Spans are `spanBase[t]` for thickness t = 1, 2, 3, 5, 10, 20, ≥40 strata (§4.3).
+Voxel mass = catalogue density × 1,415.84 kg per t/m³. **Rounding (one rule for §2.3-§2.5):** every kg/voxel is rounded once to the nearest integer kg, halves up, and that integer is the only value any system uses. A row derived from another material (a fill of a source, a loose fraction of a parent) multiplies the source's integer kg/voxel and rounds once; a row given in kg/m² multiplies by the cell area, 1.524² = 2.322576 m², and rounds once. Spans are `spanBase[t]` for thickness t = 1, 2, 3, 5, 10, 20, ≥40 strata (§4.3).
 
 | Id (proposed) | Key | kg/voxel | SRD AC | maxHP | DT | spanBase t=1,2,3,5,10,20,≥40 | ratedLoadKg | bearingKg | perm | flam | Weathering input | Debris |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -137,7 +138,7 @@ Voxel mass = catalogue density × 1,415.84 kg per t/m³. Spans are `spanBase[t]`
 | 37 | sandstone | 2,973 (`:4736`, 2.1) | 17 | 105 | 10 | 1,2,2,3,4,6,9 | 20 × kg | null | 3 | 0 | 45 | rubble |
 | 2 (exists) | soil | 2,265 (1.6 t/m³, extrapolated; no catalogue density) | 10 (extrapolated) | 40 (today `DEUS_Levels.js:1006`) | 0 | 0,0,0,0,1,1,2 | 2 × kg | 35,000 | 3 | 0 | none (erosion is SIM.50.03) | loose_fill |
 | 3 (exists) | wood (natural, e.g. a giant trunk) | 1,062 (oak 0.75, `:4611`) | 15 | 60 (today) | 5 | 1,1,2,2,3,3,3 (extrapolated: a trunk's grain runs vertically and it is weak across the grain, so the beam formula of §4.3 does not apply) | 5 × kg | 40,000 | 4 | 3 | rotResistance (oak 75, `:4616`) | broken_timber |
-| 10 (new) | ice | 1,011 (1 fluid depth unit of water held as ice with voids; solid ice would be 1,298 at 0.917 t/m³; §9.1) | 13 | 15 | 0 | 2,3,3,4,6,9,12 | floating: 3.5 × h_cm² (§4.3) | null | 0 | 0 | melts (SIM.50.06) | ice rubble = loose ice, then melt |
+| 10 (new) | ice | 1,011 (1 fluid depth unit of water held as ice with voids; solid ice would be 1,298 at 0.917 t/m³; §9.1) | 13 | 15 | 0 | 2,3,3,4,6,9,12 | floating: `floor(7 × h_cm² / 2)`, h_cm = 61 × t (§4.3) | null | 0 | 0 | melts (SIM.50.06) | ice rubble = loose ice, then melt |
 | 4, 5 (exist) | water, lava | fluid (§9.1) | — | 0 | — | — | — | — | — | lava ignites | — | — |
 
 - **HP.** SRD Wall of Stone gives "30 hit points per inch of thickness" for a 10 ft × 10 ft panel (`spells.json:17309`). That is 30 HP per 8.33 ft³, or 3.6 HP per ft³, so a 50 ft³ voxel of stone is **180 HP** whichever face is struck (5 × 2 ft face × 60 in, or 5 × 5 ft face × 24 in, both give 180). Per rock, 180 is scaled by the catalogue `fractureResistance` over 60 (granite 85 gives 255, sandstone 35 gives 105); **extrapolated**. Limestone's 120 equals today's diagnostic stone `maxHP` (`DEUS_Levels.js:1005`).
@@ -177,20 +178,21 @@ A constructed voxel is not solid timber or solid stone: a 5 ft cell holds a wall
 | 19 | stone_vault (arched floor or ceiling) | mineral | 0.35 × limestone | 1,140 | 17 | 63 | 10 | 3 | 8,000 | null | 1 | 0 | stone's | rubble |
 | 20 | foundation (footing) | mineral | 0.60 × limestone | 1,954 | 17 | 108 | 10 | 0 | — | null (spreads load: the soil voxel under it gets 4 × its bearingKg) | 1 | 0 | buried: slowest class | rubble |
 | 21 | rammed_earth | mineral + organic | 0.30 × compacted earth (1.9) | 807 | 10 (extrapolated) | 30 (extrapolated) | 0 | 0 | — | 60,000 | 3 | 0 | washes out: fastest mineral class | loose_fill |
-| 22 | timber_floor (planks on joists) | organic | 52 kg/m² | 120 | 15 | 27 | 5 | 2 | 1,000 | — | 4 | 3 / 5 | species rotResistance | broken_timber |
+| 22 | timber_floor (planks on joists) | organic | 52 kg/m² | 121 | 15 | 27 | 5 | 2 | 1,000 | — | 4 | 3 / 5 | species rotResistance | broken_timber |
 | 23 | timber_wall (log or plank) | organic | 0.25 × species | 266 (oak) | 15 | 27 | 5 | 1 | 1,500 | 40,000 | 3 | 3 / 5 | rotResistance | broken_timber |
 | 24 | timber_frame (framed, infilled) | organic + mineral infill | 0.12 × species | 127 | 15 | 18 | 0 | 1 | 800 | 15,000 | 3 | 3 / 5 | rotResistance | broken_timber |
 | 25 | timber_post (prop, pillar) | organic | 0.04 × species | 42 | 15 | 18 | 0 | 0 | — | 20,000 | 6 | 3 / 5 | rotResistance | broken_timber |
-| 26 | timber_roof (rafters, boards, shingles) | organic | 60 kg/m² | 138 | 15 | 18 | 0 | 2 | 400 | — | 3 | 3 / 5 | rotResistance, sky exposure | broken_timber |
+| 26 | timber_roof (rafters, boards, shingles) | organic | 60 kg/m² | 139 | 15 | 18 | 0 | 2 | 400 | — | 3 | 3 / 5 | rotResistance, sky exposure | broken_timber |
 | 27 | thatch_roof | organic | 41 kg/m² | 95 | 11 | 5 | 0 | 2 | 200 | — | 5 | 5 / 1 | fastest organic class | broken_timber |
 | 28 | bridge_deck (timber) | organic | 0.14 × species | 149 | 15 | 27 | 5 | 2 | 3,000 | — | 5 | 3 / 5 | rotResistance, wet exposure | broken_timber |
 | 29 | iron_grate (grille or plate floor) | metal:iron | 0.01 × iron | 111 | 19 | 54 (extrapolated) | 10 | 2 | 1,500 | — | 6 | 0 | corrosionResistance 30 (`:4893`) | scrap |
-| 30 | conjured_stone (SRD Wall of Stone, 6 in) | mineral | 0.10 × granite | 382 | 15 (SRD) | 18 (SRD panel 180 / 10 voxels) | 0 | 2 (SRD 20-ft span rule) | 2,000 | null | 0 | 0 | as granite | rubble |
+| 30 | conjured_stone (SRD Wall of Stone, 6 in) | mineral | 0.10 × granite (6 in of a 5 ft cell) | 389 | 15 (SRD) | 18 (SRD panel 180 / 10 voxels) | 0 | 2 (SRD 20-ft span rule) | 2,000 | null | 0 | 0 | as granite | rubble |
 | 31 | reserved (stairs flight, if §3.2's object form is replaced) | — | — | — | — | — | — | — | — | — | — | — | — | — |
 
 - **SRD links.** Wood is AC 15, stone 17, iron 19 (`rules.json:6950`). The SRD object HP table stops at Large: "Large (cart, 10-ft.-by-10-ft. window) | 5 (1d10) | 27 (5d10)" (`rules.json:7013`). A 5 ft × 5 ft section of timber floor or wall is treated as a Large resilient object (27), a thatch section as Large fragile (5), a light frame section as Medium resilient (18). The stone assemblies use the Wall of Stone rate of 3 HP per inch of a 10 ft² face (a 1.5 ft masonry wall: 18 in × 3 = 54). Conjured stone keeps the SRD's own figures: a panel is AC 15 with 30 HP per inch, so a 6 in panel has 180 HP; one panel is 2 cells × 5 strata = 10 voxels, 18 HP each. Iron's 54 is **extrapolated** (twice the Large resilient figure).
 - **Conjured stone's span** follows the SRD: "If you create a span greater than 20 feet in length, you must halve the size of each panel to create supports" (`spells.json:17309`). A 20 ft span is 4 cells, whose middle cells are 2 cells from a support, so spanBase 2.
 - **Species.** Timber assemblies take the species of the timber used (the item's `mat`, as mined stone does at `DEUS_Jobs.js:478`). Their kg scales by species density over oak's 0.75; the table shows oak.
+- **kg/voxel** follows the one rounding rule of §2.3: a fill multiplies the source's integer kg (masonry 0.30 × 3,256 = 976.8 → 977; timber_wall 0.25 × 1,062 = 265.5 → 266; conjured_stone 0.10 × 3,894 = 389.4 → 389), and a kg/m² row multiplies by 2.322576 m² (timber_floor 52 → 120.77 → 121; timber_roof 60 → 139.35 → 139; thatch_roof 41 → 95.23 → 95).
 - **Alloys.** An item or assembly of an alloy (bronze) carries an integer composition per family (for example bronze = copper 88 %, tin 12 % by kg), so the ledger sees each element (§9.1).
 
 ### 2.6 How loose matter is stored exactly
@@ -329,7 +331,7 @@ M is **supported** when it is bearing and passes the crush check (§4.4), or whe
 - A cave is stable while its width in cells is at most `2 × spanBase`. Limestone with 20 ft (10 strata) of rock above spans 5 cells from each wall, so a 10-cell (50 ft) cave stands and an 11-cell cave does not.
 - Soil cannot span unless it is thick: 20 ft of soil (t = 10) spans 1 cell, so a 2-cell (10 ft) tunnel under 20 ft of soil stands, and a 1-cell tunnel under 10 ft of soil (t = 5, span 0) falls in unless propped (OQ-Q-12).
 - Assemblies (§2.5): a timber floor (spanBase 2) clears up to 4 cells (20 ft) between bearing walls; a stone vault (3) 6 cells (30 ft); a bridge deck needs a pier every 5 cells (4 cells, 20 ft, clear); conjured stone follows the SRD's 20 ft rule.
-- Floating ice bears on water with capacity `P = 3.5 × h²` kg for thickness h in cm (Gold's formula, **extrapolated**, not SRD): 1 stratum (61 cm) carries 13,020 kg, 2 strata 52,080 kg. Freezing and thawing belong to SIM.50.06.
+- Floating ice bears on water with capacity `P = floor(7 × h² / 2)` kg, which is Gold's `3.5 × h²` truncated to an integer, for thickness h in whole centimetres, 61 per stratum (2 ft = 60.96 cm; Gold's formula, **extrapolated**, not SRD): 1 stratum (h = 61) carries 13,023 kg (3.5 × 3,721 = 13,023.5), 2 strata (h = 122) 52,094 kg (3.5 × 14,884). Freezing and thawing belong to SIM.50.06.
 
 **Scale.** **[STALE-1FT:** a table column t means t ft of thickness in the old model, half the DEC-013 value, so the old model's spans would be about 0.71 × these for the same strata count.**]**
 
@@ -448,7 +450,10 @@ Integers only; canonical neighbour order; the queue order is a function of the m
 For a collapsing member M in column (x, y) with voxels `e0..e1`:
 1. **What falls:** M's voxels; the loose stack on M's top; the objects and items on M's top cell; the units standing on it. A member resting on M's top is not dragged: it loses bearing, is enqueued, and falls in turn only if nothing else holds it (an upper floor held by other walls stays).
 2. **Where it lands:** the first voxel below `e0` in the same column that is solid or loose. Fluid is passed through: the debris sinks and the fluid authority re-levels the displaced water through the `levels:strataChanged` hook it already has (`DEUS_Fluid.js:941-944`).
-3. **Fall height:** `h = e0 − (landing + 1)` strata, `2h` ft.
+3. **Fall lengths (one rule).** A falling thing falls as far as its lowest surface drops: from where that surface was before the collapse down to the top surface of `landing`, both read before this collapse deposits anything. Voxel e fills the 2 ft between elevation boundaries e and e + 1, so the top surface of `landing` is boundary `landing + 1`. The rule gives two lengths, in strata (× 2 ft):
+   - `dropTop = e1 − landing`: the drop of M's top surface (boundary `e1 + 1`). Units, objects and items resting on M fall this far. **Unit fall damage uses `dropTop` and no other length** (§6.5). A unit standing on a floor at S0 of z+1 that falls to the floor or ground at S0 of z drops 5 strata, 10 ft: one layer.
+   - `dropGap = e0 − (landing + 1)`: the air gap under M (its bottom surface is boundary `e0`). M's own debris falls this far, and it sets only the debris addition of §6.5 (for the same floor, 4 strata, 8 ft).
+   - `dropTop = dropGap + t`. The member's own debris does not shorten a unit's fall: the unit and the floor under it fall together.
 4. **Conversion:** every voxel of M becomes its `debris` material with lineage = its own material and `kg = kgPerVoxel` (§6.3).
 5. **Deposit:** the kg are added to the landing cell's loose record, and the strata bytes are re-derived; overflow goes to talus (§6.4).
 6. **Writes and events:** M's voxels become air (`writeCell`, cause `collapse:fall`), the landing cell gets its loose voxels (cause `collapse:land`). Both emit `levels:strataChanged`, which enqueues the member M held up, the members rooted through M, and the landing member, whose load just grew.
@@ -473,12 +478,20 @@ For a collapsing member M in column (x, y) with voxels `e0..e1`:
 
 ### 6.5 Falls and impact damage (V95, SUP-4)
 
-- **A falling unit.** SRD: "a creature takes 1d6 bludgeoning damage for every 10 feet it fell, to a maximum of 20d6. The creature lands prone, unless it avoids taking damage from the fall" (`rules.json:4390`). The fall in feet is `2 × strata fallen`; dice = `floor(ft / 10)`: one full layer is 1d6, and the cap binds past 20 layers (200 ft) of the 320 ft world. Dice are seeded (ADR §10.1). **[STALE-1FT:** a one-level fall in the old model is 5 ft, 0 dice.**]**
+- **A falling unit.** SRD: "a creature takes 1d6 bludgeoning damage for every 10 feet it fell, to a maximum of 20d6. The creature lands prone, unless it avoids taking damage from the fall" (`rules.json:4390`). The distance a unit fell is `ft = 2 × dropTop` (§6.2 step 3: from the surface it stood on to the top surface of the voxel it lands on), and nothing else. Dice = `min(20, floor(ft / 10))`, in integers `min(20, floor(dropTop / 5))`. So a fall of one layer (floor at S0 of z+1 to S0 of z) is 10 ft and 1d6, and the cap binds from 100 strata (200 ft, 20 layers) of the 320 ft world. Dice are seeded (ADR §10.1). A unit that lands on a member that later fails falls again from there, as a new fall. Units standing on a voxel that a blast destroys fall the same way, with e1 = that voxel (§8.6). **[STALE-1FT:** a one-level fall in the old model is `dropTop` 5 strata of 1 ft, 5 ft, 0 dice.**]**
+
+  | The unit stands on (t = 1, open air below) | It lands on the top of | `dropTop` | ft | Dice | `dropGap` (debris only) |
+  |---|---|---|---|---|---|
+  | a floor at S0 of z+1 | S0 of z | 5 strata | 10 | 1d6 | 4 strata, 8 ft |
+  | a floor at S0 of z+2 | S0 of z | 10 strata | 20 | 2d6 | 9 strata, 18 ft |
+  | a floor at S0 of z+3 | S0 of z | 15 strata | 30 | 3d6 | 14 strata, 28 ft |
+  | a floor at S0 of z+20 or higher | S0 of z | ≥ 100 strata | ≥ 200 | 20d6 (the cap) | ≥ 99 strata |
+
 - **A unit hit by debris.** The SRD baseline is Earthquake's structure collapse: "the creature takes 5d6 bludgeoning damage, is knocked prone, and is buried in the rubble, requiring a DC 20 Strength (Athletics) check as an action to escape ... On a successful save, the creature takes half as much damage and doesn't fall prone or become buried" (`spells.json:6379`, Dexterity save).
   - For an Earthquake spell the SRD's own radius ("within half the distance of a structure's height") applies unchanged (SIM.60).
-  - For every other collapse, the units hit are those in the cells the debris passes through or lands on, plus talus spill cells. Units that were standing on the collapsing member fall with it and take the fall damage only. They take the same save and 5d6 (the SRD number), and the physical addition on top (DEC-018): +1d6 per further 10 ft the debris fell beyond the first 10 ft, capped at 20d6; debris under 500 kg on the unit's cell (one floorboard section) deals half. The addition is **extrapolated** (OQ-Q-08).
+  - For every other collapse, the units hit are those in the cells the debris passes through or lands on, plus talus spill cells. They take the same save and 5d6 (the SRD number), and the physical addition on top (DEC-018): +1d6 per further 10 ft of the debris's fall `dropGap` beyond the first 10 ft, that is `min(20, 5 + max(0, floor(dropGap / 5) − 1))` dice; debris under 500 kg on the unit's cell (one floorboard section) deals half. The addition is **extrapolated** (OQ-Q-08). Units that were standing on the collapsing member are not hit by its debris: they fall with it and take only the fall damage above.
 - **Buried units** stay buried until they make the DC 20 check or others clear the loose kg over them. Suffocation follows the SRD: a creature holds its breath for 1 + Constitution modifier minutes (minimum 30 seconds), then survives Constitution modifier rounds (`rules.json:4390`). With a 36 s tick (A1) there are 6 SRD rounds per tick; the rules layer resolves rounds inside the tick.
-- **Objects** take crushing damage from the same dice against their V95 HP and armour, and break into their remains at 0 HP. This replaces DURABILITY's `collapse.damage (20) × levels fallen` (`docs/design/DURABILITY.md:716`).
+- **Objects** hit by debris take the debris dice, and objects that fall with M take the fall dice of `dropTop`, both against their V95 HP and armour; they break into their remains at 0 HP. This replaces DURABILITY's `collapse.damage (20) × levels fallen` (`docs/design/DURABILITY.md:716`).
 - **Items** are moved to the landing cell. They have no HP.
 
 ### 6.6 The recheck the rubble itself triggers
@@ -514,7 +527,7 @@ Lane R (SIM.40.05) had no design on its branch when this section was first writt
 ### 7.3 How an abandoned house ends as rubble
 
 A 6 × 6 timber house with a thatch roof, 4 × 4 interior (20 ft, the most a thatch roof spans without a post):
-1. Lane R lowers thatch HP fastest (sky exposure). At the first band crossing the four middle roof cells (d = 2) fail: their thatch becomes broken_timber and falls 8 ft to the floor inside. The roof has fallen in.
+1. Lane R lowers thatch HP fastest (sky exposure). At the first band crossing the four middle roof cells (d = 2) fail: their thatch becomes broken_timber and falls 8 ft (`dropGap` 4 strata, §6.2 step 3) to the floor inside. The roof has fallen in.
 2. At band 3 the remaining roof ring (d = 1) falls.
 3. The walls are bearing. Now open to the sky, Lane R decays them faster. Each wall voxel that reaches HP 0 becomes broken_timber, and the voxels above it lose bearing and fall.
 4. What is left is a ring of broken_timber piles and, under stone walls, rubble and the foundation strata. Lane R rots broken timber to soil (organic) and buries the rest (the "buried mound"); foundations and stone rubble stay as recognisable traces (LIFE-003).
@@ -620,13 +633,13 @@ The two-floor fixture of §12 (T4) uses an impact energy between the "one floor"
 1. A destroyed floor voxel becomes its debris (loose). Loose over air is never supported (§4.2), so it falls in the same tick (cause `support-lost`, 0 ticks) and lands on the layer below, hitting units there (§6.5) and loading the floor it lands on (§6.6).
 2. The opening emits `levels:breach` (§11): fluid drains through it (SIM.50.02), the view mask updates (DEC-021), and paths are invalidated.
 3. Every member rooted through a destroyed voxel is enqueued (§5.1), so walls or roofs that the blown floor held may fail in later ticks.
-4. Units standing on destroyed voxels fall (§6.5).
+4. Units standing on destroyed voxels fall `dropTop` with e1 = the destroyed voxel (§6.2 step 3) and take the fall dice of §6.5.
 5. Ledger: `STRATUM_* → LOOSE` per destroyed voxel (§9.2).
 
 ### 8.7 Coupling to GP.07.02, DEC-022 and SIM.60
 
 - **One system.** Spells (the SIM.60.03 runtime's `volumeDamage` primitive, Lane P), explosives, and area impacts at the end of a ballistic path (GP.07.02) all call `Volume.damage` (§11.2). DEC-022 item 4 ("Area-of-effect blasts ... hitting a floor propagate cross-layer volume damage downward", `docs/OWNER_DECISIONS.md:312`) is §8.2 and §8.6.
-- **Range and line of sight** use the same half-feet geometry and the same 3D DDA (ADR §18.5). A dropped object or falling projectile gains impact from its fall height by GP.07.02's numbers, as a collapse does (§6.5).
+- **Range and line of sight** use the same half-feet geometry and the same 3D DDA (ADR §18.5). A dropped object or falling projectile gains impact from its fall, measured as the drop of its lowest surface (the rule of §6.2 step 3), by GP.07.02's numbers, as a collapse does (§6.5).
 - **Spell primitives** (Lane P's names, unreviewed):
 
   | SRD spell | Primitive | What this design does |
@@ -661,7 +674,7 @@ ADR-003 leaves the per-material mass tables to "SIM.40.01 with WG.65.15" (ADR §
 
 - **Composition.** A material with more than one family carries integer per-mille shares: soil mineral 950 / organic 50; ore rock mineral plus `metal:<element>` by grade; bronze copper 880 / tin 120. Splits use `floor` for the first family and the remainder for the last, so they are exact.
 - **Rock type** (granite, limestone, ...) is a sub-total inside `mineral`, carried as the loose record's lineage, so a mined granite stone and its rubble stay granite.
-- **Lava.** Lava is a fluid counted in du (Q-LAVA, ADR §7.8) and belongs to the `mineral` family at a fixed kg per du; its solidification into basalt (SIM.50.10) must use an exact integer ratio. Proposal: 3 du of lava become 2 basalt voxels, with the lava du defined as 2,738 kg and lava-born basalt as 4,107 kg per voxel (SIM.50.10 confirms).
+- **Lava.** Lava is a fluid counted in du (Q-LAVA, ADR §7.8) and belongs to the `mineral` family at a fixed kg per du; its solidification into basalt (SIM.50.10) must use an exact integer ratio against basalt's one `kgPerVoxel`, 4,106 kg (§2.3; lava-born basalt is the same id 33, with no second mass). Because 4,106 = 2 × 2,053 and 2,053 is prime, a whole number of du becomes a whole number of basalt voxels with no kg left over only if the du mass is a multiple of 2,053 kg. Proposal: 2 du of lava become 1 basalt voxel, with the lava du defined as 2,053 kg (2 × 2,053 = 4,106). One du is 1/7 of a 10 ft cell-layer (`DEUS_Fluid.js:50`, `DEPTH_MAX = 7`), 1.0113 m³, so this is about 2.03 t/m³: a gas-rich melt, lighter than dense molten basalt (about 2.7 t/m³), chosen for the exact ratio and **extrapolated**. When a cell's lava cools with one du left over, that du becomes 2,053 kg of basalt-lineage loose `rubble` (clinker) in the cell, so no lava is stranded and no kg is rounded (SIM.50.10 confirms both).
 - **Forms:** `STRATUM_NATURAL`, `STRATUM_BUILT`, `LOOSE`, `ITEM`, `OBJECT`, `FLUID`, `HELD` (spell-held), `BODY` (Lane W). A ledger key is `(family, form)`, with rock type as a sub-key. ADR-003's Q-STRATA, Q-ITEM, Q-OBJ and Q-WATER are these forms (ADR §7.8).
 
 ### 9.2 Entries for every path
@@ -685,7 +698,7 @@ ADR-003 leaves the per-material mass tables to "SIM.40.01 with WG.65.15" (ADR §
 | 15 | Migration of old saves | — | — | one-time logged `source(…, "migration:legacyWall")` and `source(…, "migration:legacyRoofDeck")`, or loose debris when an object outweighs its new strata | §3.5 |
 | 16 | Roof decks from `isRoofed` | `DEUS_Floors.js:276` | strata from nothing | removed as a behaviour; roofs are built (row 1) | |
 | 17 | Rust and weathering (Lane R) | — | — | `ITEM or LOOSE (metal) → LOOSE (mineral_trace)`, family `metal:<element>` unchanged | Never ore (§9.6) |
-| 18 | Lava solidifies (SIM.50.10) | legacy flood only (`DEUS_Levels.js:3418`) | — | `FLUID (lava) → STRATUM_NATURAL (basalt)` at the exact ratio of §9.1 | |
+| 18 | Lava solidifies (SIM.50.10) | legacy flood only (`DEUS_Levels.js:3418`) | — | `FLUID (lava) → STRATUM_NATURAL (basalt)`, 2 du (4,106 kg) per voxel, the exact ratio of §9.1; a last odd du `FLUID (lava) → LOOSE (rubble, basalt lineage)`, 2,053 kg | |
 | 19 | Freeze and thaw (SIM.50.06) | — | — | frozen flag: none; ice voxels: `FLUID ↔ STRATUM_NATURAL (ice)`, 1 du each | |
 
 ### 9.3 How the LAND-1 leaks close
@@ -795,7 +808,7 @@ Consumed events are listed in §5.1. Emitted events, in the order they occur wit
 | 3 | `support:rescued` | `{ memberKey }` | 13a | SIM.40.03, presentation |
 | 4 | `collapse:begin` | `{ collapseId, memberKeys, cause, tick }` | 13b, before any write | all below |
 | 5 | `levels:strataChanged` (existing, `DEUS_Levels.js:1558`) | `(ref, { before, after, cause })`, cause `collapse:fall`, `collapse:land`, `talus`, `blast:<type>`, `build:<typeId>`, `decay:<reason>` | each write | fluid (existing hook), support (§5.1), the ledger |
-| 6 | `collapse:impact` | `{ collapseId, target: "unit" \| "object", id, dice, save: "dex", damage, buried }` | 13b | the rules layer rolls; Combat applies; Lane W (bodies) |
+| 6 | `collapse:impact` | `{ collapseId, kind: "fall" \| "debris", target: "unit" \| "object", id, ft, dice, save: "dex" \| null, damage, buried }`; `ft` is `2 × dropTop` for a fall and `2 × dropGap` for debris (§6.2 step 3); a fall has `save: null` | 13b | the rules layer rolls; Combat applies; Lane W (bodies) |
 | 7 | `collapse:landed` | `{ collapseId, cells: [{ ref, s, material, lineage, kg }] }` | 13b | Lane R, provenance (WG.65.16) |
 | 8 | `levels:breach` | `{ ref, fromZ, toZ, cause }` | when a floor opening appears between two layers | SIM.50.02 (drain), view mask (DEC-021), paths |
 | 9 | `collapse:end` | `{ collapseId, kgByFamily, ticks }` | 13c, when its talus settles | Lane R, SIM.40.04 |
@@ -850,19 +863,19 @@ Before the core exists the same names go through `UF.Events`. Inside a phase, ev
 | T7 | Local bound | A dig beside a large lateral structure (a 20 × 20 stone-vault hall on a grid of pillars every 6 cells) | Evaluations ≤ 6 + 313 × R for the measured R | S_MAX not capped (search radius 64) |
 | T8 | A stable world at generation | The seed fixture, freshly generated at both ranges; a test-mode pass that evaluates every member once | Zero failing members | The generator's stability pass skipped (a 20-cell soil overhang survives) |
 | T9 | Decay hand-off, roofs first | The 6 × 6 timber house of §7.3; the test lowers HP through the strata writer band by band, as Lane R would | The four middle roof cells fail at band 7, the roof ring at band 3, the walls only at HP 0; debris kg equals the kg removed | HP-only writes that change the band do not enqueue |
-| T10 | Falls and burial | A unit on a timber floor at S0 of +2 over an open room down to the ground at 0 (20 ft); remove the floor's supports. Separately, a second unit stands on the ground under a stone-vault floor at S0 of +1 (1,140 kg a voxel) whose supports are removed | The first unit takes the seeded 2d6 and lands prone; the second makes a Dexterity save and on a failure takes 5d6 and is buried (DC 20 to escape), on a success half and not buried | (a) fall height from 1 ft strata (1d6). (b) burial not applied |
+| T10 | Falls and burial | Fall columns, both ranges. The ground surface is the top of the natural S0 of layer 0, with open air above it. Three units stand on one-stratum timber-floor voxels (t = 1) at S0 of +1, S0 of +2 and S0 of +3, each in its own column with open air down to that ground; the test removes each floor's supports. Separately, a fourth unit stands on the ground under a stone-vault floor at S0 of +1 (1,140 kg a voxel) whose supports are removed | The three falls are `dropTop` (§6.2 step 3) = 5, 10 and 15 strata: `collapse:impact` reports `kind: "fall"`, `ft` 10, 20 and 30 and `dice` 1, 2 and 3; each unit takes the seeded 1d6, 2d6 and 3d6 and lands prone. The fourth unit makes a Dexterity save and on a failure takes 5d6 (its debris `dropGap` is 4 strata, 8 ft, which adds nothing) and is buried (DC 20 to escape), on a success half and not buried | (a) the unit's fall measured as the air gap `dropGap` instead of `dropTop` (8, 18, 28 ft: 0, 1 and 2 dice). (b) a 1 ft stratum height (5, 10, 15 ft: 0, 1 and 1 dice). (c) burial not applied |
 | T11 | Determinism across ranges and hosts | T1-T4 twice at each range, in node and in NW.js | Identical checksums per range; node and NW.js equal (ADR §10.4) | `Math.random` in the talus spill order |
 | T12 | No ore | The transform table at load; then a run that rusts iron, blasts an ore vein and lithifies sediment | Ore kg per element never increases | A transform row rust → iron ore |
 | T13 | SRD numbers unchanged | With SIM.60.04: a Fireball's creature saves and damage with the physics on and off | Identical rules-layer results | The physics adds its own damage to creatures inside the SRD area |
 | T14 | Save migration | A legacy save (-2..+2, 1 ft strata) with `wall_wood`, `wall_stone`, `wall_brick`, a door, a `DEUS_Floors` roof deck and a `rubble` object | Assemblies written, wall objects gone, door kept, rubble kg kept; ledger baseline plus the logged migration sources equal the recount | The migration forgets the rubble object's mass |
 | T15 | Talus | 20 rubble voxels dropped on one cell beside an open shaft | No neighbour step above the repose limit; spills in canonical order; the kg that pours down the shaft lands on the layer below; mass exact | No spill (a 20-voxel column stands) |
-| T16 | Wall of Stone | A 10-panel wall (§2.5); then one with a 30 ft unsupported span; then a wall broken to rubble and its concentration ended | Source exactly 10 × 10 × 382 = 38,200 kg; the 30 ft span is refused at creation (the SRD's 20 ft rule); the early-end sink equals the provenance kg left, rubble included | (a) source not logged. (b) the span check skipped |
+| T16 | Wall of Stone | A 10-panel wall (§2.5); then one with a 30 ft unsupported span; then a wall broken to rubble and its concentration ended | Source exactly 10 × 10 × 389 = 38,900 kg; the 30 ft span is refused at creation (the SRD's 20 ft rule); the early-end sink equals the provenance kg left, rubble included | (a) source not logged. (b) the span check skipped |
 | T17 | Overload pancake | A stone vault storey collapses onto a timber floor below it | The timber floor fails by overload, and the cascade reaches the ground floor | Superimposed load ignored (Lsup = 0) |
 | T18 | Warning and rescue | Remove the wall under one end of a timber floor so that it is over span; place a `timber_post` 10 ticks later | `support:failing` with `failTick` 20 ticks after detection; the post makes it bearing again; `support:rescued`; nothing collapses | (a) `failTick` ignored (instant collapse). (b) the new post does not enqueue the member above it |
 
 ### 12.3 Fixtures to build (for SIM.40.04)
 
-Cave (T1), tower at two heights (T2), floor stack (T3, T4, T17), timber house (T9, T18), fall column (T10), legacy save with every wall type (T14), talus shaft (T15), Wall of Stone panels (T16), plus the ADR's sparse and seed fixtures (T5-T8, T11, T12). Each exists at -4..+4 and -16..+15 except T2's second tower and T14 (legacy range only).
+Cave (T1), tower at two heights (T2), floor stack (T3, T4, T17), timber house (T9, T18), fall columns from +1, +2 and +3 (T10), legacy save with every wall type (T14), talus shaft (T15), Wall of Stone panels (T16), plus the ADR's sparse and seed fixtures (T5-T8, T11, T12). Each exists at -4..+4 and -16..+15 except T2's second tower and T14 (legacy range only).
 
 ## WBS impact
 
@@ -916,7 +929,7 @@ None of these is answered here. Where an option is marked "recommended" that is 
 | OQ-Q-05 | Do units' weights load floors? | (a) recommended: no, except Huge and Gargantuan creatures (SRD sizes); (b) every unit is load; (c) no unit is load | §4.1, §10.4 |
 | OQ-Q-06 | Item masses and build costs. With exact mass, a 5 ft masonry wall cell weighs about 3.9 t | (a) realistic masses: more, heavier building items (a stone wall cell needs many stones); (b) abstract "load units": today's item counts, with item kg set so that each recipe balances exactly in the ledger; (c) a middle scale | §3.3, §9.2 |
 | OQ-Q-07 | Where does mining spoil go (the mass of a mined voxel beyond the stone items)? | (a) left as loose rubble at the work cell, to be hauled; (b) moved to a designated spoil heap as part of the job; (c) all of it yields as items | §9.2 row 3 |
-| OQ-Q-08 | Collapse damage to creatures | (a) recommended: the SRD Earthquake numbers (Dexterity save, 5d6, burial DC 20) plus +1d6 per further 10 ft fallen, capped at 20d6; (b) the SRD numbers alone; (c) damage scaled only by debris mass and height | §6.5 |
+| OQ-Q-08 | Collapse damage to creatures | (a) recommended: the SRD Earthquake numbers (Dexterity save, 5d6, burial DC 20) plus +1d6 per further 10 ft the debris fell (`dropGap`, §6.2), capped at 20d6; (b) the SRD numbers alone; (c) damage scaled only by debris mass and height | §6.5 |
 | OQ-Q-09 | Warning before a structure falls | (a) recommended: short creaks by material (timber 20 ticks, masonry 5, rock 0-10), none after a blast; (b) no warning ever; (c) long warnings (several game hours) so that players can react | §6.1 |
 | OQ-Q-10 | Blast feel: damage thresholds (the SRD gives the rule, not numbers), the pass table, and whether "spreads around corners" spells spread their physical energy around corners | (a) recommended: the §8.3 tables, with around-corners propagation for the spells whose SRD text says so; (b) the same tables, straight lines only (the ADR's rule); (c) tune both on the SIM.60.04 fixtures with the Owner | §2.3, §8 |
 | OQ-Q-11 | Roof decks that old saves got for free (`DEUS_Floors.js:276`) | (a) keep them with a logged one-time migration source; (b) remove them on load; (c) convert them to items on the floor below | §3.5 |

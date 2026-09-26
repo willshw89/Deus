@@ -7,7 +7,7 @@
       "id": "Q-01",
       "section": "## Material model",
       "status": "COVERED",
-      "notes": "Sections 2.1-2.8: today's table cited (DEUS_Levels.js:994-1016), the property set, natural materials with kg per 2-ft voxel, SRD AC/HP link and spans; new loose materials (rubble, loose_fill, sediment, ash, ice, scrap, mineral_trace, broken_timber, dust; snow reserved) and assemblies with free ids 6-37; the exact loose record; input to PROPOSED-Q-01. DT values and most HP values are marked extrapolated (OQ-Q-10)."
+      "notes": "Sections 2.1-2.8: today's table cited (DEUS_Levels.js:994-1016), the property set, natural materials with kg per 2-ft voxel, SRD AC/HP link and spans; new loose materials (rubble, loose_fill, sediment, ash, ice, scrap, mineral_trace, broken_timber, dust; snow reserved) and assemblies with free ids 6-37; the exact loose record; input to PROPOSED-Q-01. DT values and most HP values are marked extrapolated (OQ-Q-10). Fix 1: one kg rounding rule (nearest integer, halves up, once) stated in section 2.3; timber_floor 121, timber_roof 139 and conjured_stone 389 kg per voxel now follow it; floating-ice capacity is the integer floor(7 h^2 / 2) with h = 61 cm per stratum (13,023 and 52,094 kg)."
     },
     {
       "id": "Q-02",
@@ -31,7 +31,7 @@
       "id": "Q-05",
       "section": "## Sudden collapse",
       "status": "COVERED",
-      "notes": "Sections 6.1-6.6: failing state and warnings, the cascade through layers, equal-mass conversion to loose debris, talus by angle of repose with a budget, SRD falling (1d6 per 10 ft) and Earthquake collapse (5d6, burial DC 20) as the damage baseline with an extrapolated addition (OQ-Q-08), and the recheck the rubble triggers."
+      "notes": "Sections 6.1-6.6: failing state and warnings, the cascade through layers, equal-mass conversion to loose debris, talus by angle of repose with a budget, SRD falling (1d6 per 10 ft) and Earthquake collapse (5d6, burial DC 20) as the damage baseline with an extrapolated addition (OQ-Q-08), and the recheck the rubble triggers. Fix 1: one fall-length rule (section 6.2 step 3): a unit's fall is dropTop = e1 - landing strata (the drop of the surface it stood on), so one layer is 10 ft and 1d6; dropGap = e0 - (landing + 1) is the debris's air gap and feeds only the debris addition; section 6.5, T10 and the collapse:impact payload use the same rule."
     },
     {
       "id": "Q-06",
@@ -49,7 +49,7 @@
       "id": "Q-08",
       "section": "## Mass ledger",
       "status": "PARTIAL",
-      "notes": "Sections 9.1-9.7: families, forms and units; ledger entries for 19 paths including build, dig, mine, quarry, collapse, blast, rubble clearing, salvage and conjured matter; how each LAND-1 leak closes with the mutant that catches it; conjured matter as a logged source/sink (DEC-018 PM default, not answered); checks; no ore creation (LIFE-002). PARTIAL because the ledger unit and family list are not reconciled across the sibling lanes: Lane Q uses kg, Lane R 1/16 lb, Lane W grams (section 9.7); raised in escalation.md for the PM."
+      "notes": "Sections 9.1-9.7: families, forms and units; ledger entries for 19 paths including build, dig, mine, quarry, collapse, blast, rubble clearing, salvage and conjured matter; how each LAND-1 leak closes with the mutant that catches it; conjured matter as a logged source/sink (DEC-018 PM default, not answered); checks; no ore creation (LIFE-002). PARTIAL because the ledger unit and family list are not reconciled across the sibling lanes: Lane Q uses kg, Lane R 1/16 lb, Lane W grams (section 9.7); raised in escalation.md for the PM. Fix 1: lava solidifies at 2 du (2,053 kg each) per basalt voxel of 4,106 kg, basalt's one kgPerVoxel; an odd last du becomes basalt-lineage loose rubble (section 9.1, section 9.2 row 18)."
     },
     {
       "id": "Q-09",
@@ -169,7 +169,7 @@
         "WG.00.17"
       ],
       "acceptanceTests": [
-        "T10 falls and burial; mutants: fall height from 1-ft strata; burial not applied"
+        "T10 falls and burial: units on one-stratum floors at S0 of +1, +2 and +3 fall dropTop = 5, 10, 15 strata (10, 20, 30 ft) and take 1d6, 2d6, 3d6; mutants: the unit's fall measured as the air gap dropGap (0, 1, 2 dice); 1-ft stratum height (0, 1, 1 dice); burial not applied"
       ]
     },
     {
@@ -251,7 +251,7 @@
       "id": "OQ-Q-08",
       "question": "Collapse damage to creatures",
       "options": [
-        "(a) recommended: SRD Earthquake numbers (Dex save, 5d6, burial DC 20) plus +1d6 per further 10 ft fallen, cap 20d6",
+        "(a) recommended: SRD Earthquake numbers (Dex save, 5d6, burial DC 20) plus +1d6 per further 10 ft the debris fell (dropGap), cap 20d6",
         "(b) the SRD numbers alone",
         "(c) damage scaled only by debris mass and height"
       ]
