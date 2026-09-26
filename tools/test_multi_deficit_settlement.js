@@ -26,7 +26,7 @@ const quiet = process.argv.includes("--quiet");
 
 const MUTANTS = {
     no_dup_prevention: ["const unmet = Math.max(0, row.deficit - inFlightCapacity);", "const unmet = Math.max(0, row.deficit);"],
-    no_priority: ["const utility = unmet > 0 ? severity * fraction + bonus - activeOfKind * 10 : -Infinity;", "const utility = unmet > 0 ? 0 : -Infinity;"],
+    no_priority: ["const utility = unmet > 0 && phaseOk ? severity * fraction + bonus - activeOfKind * 10 : -Infinity;", "const utility = unmet > 0 && phaseOk ? 0 : -Infinity;"], // needle follows the FABLE-16 phase gate
     weight_not_nutrition: ["return t && t.food && Number.isFinite(t.food.nutrition) ? t.food.nutrition * (it.count | 0) : 0; };", "return t && t.food ? I.weightOf(it) : 0; };"]
 };
 
@@ -231,6 +231,7 @@ const nutritionOf = (cat, id) => cat.items.types.find(t => t.id === id).food.nut
 const weightOf = (cat, id) => cat.items.types.find(t => t.id === id).weight;
 /** The brain's formula, recomputed here from the same configuration, for one deficit row. */
 function expectedUtility(cfg, key, row, inFlightCapacity, activeOfKind) {
+    if (key === "housing") return -Infinity; // a cottage never opens in the camp phase (DEUS-TSK-FABLE-16); these fixtures are camps
     const unmet = Math.max(0, row.deficit - inFlightCapacity);
     const fraction = row.needed > 0 ? Math.min(1, unmet / row.needed) : 0;
     const critical = key === "food" && row.critical;
@@ -247,7 +248,7 @@ try {
     // A. Four deficits, food in colonist-days of nutrition, never weight.
     const A = makeFixture(20260923, { larder: { berries: 20, rations: 4 }, groundFood: [["fruit", 8, 20, 20]], fed: true });
     const cat = A.catalog, cfg = A.P.config();
-    check("plugins_load", typeof A.P.brain === "function" && A.P.deficits.join(",") === "shelter,food,bed,storage" && Object.keys(A.P.blueprints()).length === 4,
+    check("plugins_load", typeof A.P.brain === "function" && A.P.deficits.join(",") === "shelter,food,bed,storage,housing" && Object.keys(A.P.blueprints()).length === 5,
         `UF.Projects brain with deficits ${A.P.deficits.join("/")} and blueprints ${Object.keys(A.P.blueprints()).join(", ")}`);
     const d = A.P.evaluateDeficits(A.area);
     // Storage in physical slots (DEUS-TSK-GEMINI-07): the one-cell larder is one slot (a container on it would add its
@@ -265,7 +266,7 @@ try {
     const expected = b ? b.candidates.every(c => close(c.utility === -Infinity ? -1e9 : c.utility, expectedUtility(cfg, c.deficit, d[c.deficit], 0, 0) === -Infinity ? -1e9 : expectedUtility(cfg, c.deficit, d[c.deficit], 0, 0))) : false;
     const cycle = A.P.tick();
     const first = A.P.active()[0] || null;
-    check("brain_ranks_by_utility", !!b && expected && b.chosen && b.chosen.kind === "communal_shelter" && b.candidates[0].kind === "communal_shelter" && b.candidates[1].kind === "food_cache" && !!first && first.kind === "communal_shelter" && cycle.opened.length === 1 && first.capacity.shelter === 1 && first.capacity.bed === 8,
+    check("brain_ranks_by_utility", !!b && expected && b.chosen && b.chosen.kind === "communal_shelter" && b.candidates[0].kind === "communal_shelter" && b.candidates[1].kind === "food_cache" && !!first && first.kind === "communal_shelter" && cycle.opened.length === 1 && first.capacity.shelter === 1 && first.capacity.bed === 11,
         `${order.join("  ")}; opened ${first ? first.kind : "nothing"} adding ${first ? JSON.stringify(first.capacity) : "-"}`);
 
     // C. No project spam: with the founders idle, twelve cycles open at most one project per kind, and none for beds
@@ -275,7 +276,7 @@ try {
     const kinds = A.P.list().map(p => p.kind);
     const perKind = kinds.reduce((m, k) => Object.assign(m, { [k]: (m[k] || 0) + 1 }), {});
     const bedRow = A.P.brain().candidates.find(c => c.kind === "bedding_expansion");
-    check("no_project_spam", A.P.list().length === 3 && perKind.communal_shelter === 1 && perKind.food_cache === 1 && perKind.communal_stockpile === 1 && !perKind.bedding_expansion && bedRow && bedRow.unmet === 0 && bedRow.inFlightCapacity === 8,
+    check("no_project_spam", A.P.list().length === 3 && perKind.communal_shelter === 1 && perKind.food_cache === 1 && perKind.communal_stockpile === 1 && !perKind.bedding_expansion && !perKind.household_cottage && bedRow && bedRow.unmet === 0 && bedRow.inFlightCapacity === 11,
         `after 12 cycles: ${JSON.stringify(perKind)}; beds: deficit ${bedRow ? bedRow.total : "?"}, ${bedRow ? bedRow.inFlightCapacity : "?"} covered by the shelter, unmet ${bedRow ? bedRow.unmet : "?"}`);
 
     // D. Critical food outranks the shelter; the food cache builds a larder, then forages wild food into it.

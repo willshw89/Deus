@@ -38,7 +38,7 @@ const HOUR_TICKS = 600, MINUTE_TICKS = 10;
 const MUTANTS = {
     panics_into_fire_when_choked: [{ file: "jobs", from: "const HAZARD_STEP_COST = 25;", to: "const HAZARD_STEP_COST = 1;" }],
     unarmed_charges_threat: [{ file: "colonists", from: "const refuge = refugeFor(u, a);", to: "const refuge = { cell: { x: a.x + 1, y: a.y }, kind: \"the foe\" };" }],
-    ignores_burning_ally: [{ file: "colonists", from: "if (!J || !J.handler(\"douse\")) return null;", to: "if (true) return null;" }]
+    ignores_burning_ally: [{ file: "colonists", from: "if (!J || !J.handler(\"douse_ally\")) return feedJob(u);", to: "if (true) return feedJob(u);" }]
 };
 
 const catalogText = fs.readFileSync(path.join(ROOT, "game", "data", "UF_WorldCatalog.json"), "utf8");
@@ -323,7 +323,7 @@ try {
     const { W, O, I, J, C, E } = S;
     drive(S, 2);
     const probe = J.safeCellNear(S.founders[0], 4);
-    check("plugins_load", typeof J.fireNear === "function" && typeof J.carriesWater === "function" && typeof J.isAflame === "function" && !!J.handler("douse") && !!J.handler("extinguish") &&
+    check("plugins_load", typeof J.fireNear === "function" && typeof J.carriesWater === "function" && typeof J.isAflame === "function" && !!J.handler("douse_ally") && !!J.handler("extinguish") &&
         typeof C.assess === "function" && typeof C.raiseAlarm === "function" && typeof C.refugeFor === "function" && typeof C.douseJob === "function" && C._internal.lastIdleScan && typeof C._internal.lastIdleScan.get === "function" && C._internal.IDLE_SCAN_INTERVAL === 60 &&
         (probe === null || Array.isArray(probe.route)) && !!E && S.combatLoaded && !!S.Cond,
         `Jobs fireNear/carriesWater/isAflame + douse + extinguish, safeCellNear with a route; Colonists assess/raiseAlarm/refugeFor/douseJob, idle scan interval ${C._internal.IDLE_SCAN_INTERVAL}; Environment, Conditions and Combat loaded`);
@@ -391,7 +391,7 @@ try {
         const nArrive = flee ? drive(S2, 200, () => flee.state === "done" || flee.state === "failed") : -1;
         const end = { x: W2.x, y: W2.y };
         const inFire = stepsInFire(S2, W2, t0);
-        check("choked_escape_uses_corridor", nWork > 0 && assessed.priority === 2 && assessed.detail === "fire nearby" && nCut > 0 && chop.reason === "emergency: fire nearby" && nFlee > 0 && !!flee && flee.params.route && flee.params.route.length >= 5 &&
+        check("choked_escape_uses_corridor", nWork > 0 && assessed.priority === 2 && assessed.detail === "fire nearby" && nCut > 0 && (chop.reason === "emergency: fire nearby" || chop.reason === "fire at the work site") && nFlee > 0 && !!flee && flee.params.route && flee.params.route.length >= 5 &&
             nArrive > 0 && flee.state === "done" && inFire.length === 0 && !S2.E.isBurning(W2) && !S2.J.fireNear(S2.area, end.x, end.y) && !S2.J.inLethalHazard(W2) && !burning(S2, end.x, end.y),
             `${W2.name} at work at (20,50) with fire all round but a corridor: assess ${assessed.priority} (${assessed.detail}); chop ${chop.state} "${chop.reason}" after ${nCut}; route [${route}] taken after ${nFlee}, ${flee ? flee.state : "no flight"} after ${nArrive} at (${end.x},${end.y}); steps into fire ${inFire.length}${inFire.length ? ` (${inFire.map(s => `(${s.x},${s.y})`).join(" ")})` : ""}, aflame ${S2.E.isBurning(W2)}`);
         S2.fire.clear();
@@ -414,7 +414,7 @@ try {
         burnDown(B);
         const canAct = S3.Cond.canAct(B), assessedR = S3.C.assess(R), assessedB = S3.C.assess(B);
         const nCut = drive(S3, 120, () => chop.state === "failed");
-        const nDouse = drive(S3, 60, () => { const j = jobOf(S3, R); return !!j && j.type === "douse"; });
+        const nDouse = drive(S3, 60, () => { const j = jobOf(S3, R); return !!j && j.type === "douse_ally"; });
         const douseA = jobOf(S3, R);
         const nOutA = drive(S3, 400, () => !S3.E.isBurning(B));
         const doneA = douseA ? S3.J.get(douseA.id) : null;
@@ -422,14 +422,14 @@ try {
         S3.only(Cc, R2);
         walk(Cc, 43, 32); walk(R2, 38, 32);
         burnDown(Cc);
-        const nDouseB = drive(S3, 120, () => { const j = jobOf(S3, R2); return !!j && j.type === "douse"; });
+        const nDouseB = drive(S3, 120, () => { const j = jobOf(S3, R2); return !!j && j.type === "douse_ally"; });
         const douseB = jobOf(S3, R2);
         const nOutB = drive(S3, 400, () => !S3.E.isBurning(Cc));
         // (c) nothing to douse with: smother
         S3.only(D, R3);
         walk(D, 20, 20); walk(R3, 24, 20);
         burnDown(D);
-        const nDouseC = drive(S3, 120, () => { const j = jobOf(S3, R3); return !!j && j.type === "douse"; });
+        const nDouseC = drive(S3, 120, () => { const j = jobOf(S3, R3); return !!j && j.type === "douse_ally"; });
         const douseC = jobOf(S3, R3);
         const nOutC = drive(S3, 500, () => !S3.E.isBurning(D));
         const alive = [B, Cc, D].every(u => !u.data.dead && S3.W.unit(u.id) && u.data.hp > 0);

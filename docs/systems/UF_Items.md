@@ -21,6 +21,7 @@ Level seam added 2026-09-19: every area argument accepts `{x,y,z?}`, with omitte
 - `consume(itemId, count = 1)` → uses up `count` (the item is removed at 0); returns how many were consumed. `consumeFrom(unitId, typeId, count)` → the same across the unit's stacks of that type.
 - `remove(itemId)` → deletes the item wherever it is; `true` if it existed.
 - `inventoryOf(unitId)` → the item records the unit carries, pick-up order.
+- `detach(item)` → takes an item off whatever holds it (its cell index, its holder's `data.inventory`, its container), leaving `area`, `holder` and `container` null. Exported 2026-09-24 (DEUS-TSK-FABLE-18) because `UF.Containers.putItem` calls `Items.detach` when it exists and otherwise only cleared the fields: every haul into a chest left the item's id in the hauler's inventory, a phantom of the chest's stack that weighed the hauler down (encumbered founders then failed every fetch "too heavy to lift") and that its hunger read as food it carried ("the food moved"). Saves made before the fix may still hold such phantom ids.
 - `count(unitId | { x, y, area? }, typeId?)` → total count of that type (all types when omitted) in the inventory or on the cell.
 - `has(unitId, { typeId: count, ... })` → whether the unit carries at least that.
 - `describe(x, y)` → `{ text: "5 × Log, Stone", items: [{ id, type, name, count }] }` for the cell on screen, or `null` when nothing lies there (for UF_Look).

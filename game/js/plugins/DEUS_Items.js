@@ -255,6 +255,11 @@
         }
     }
 
+    // UF_Containers.putItem detaches an item through Items.detach when it exists, else it only cleared the fields and
+    // left the id in the carrier's inventory list: every haul into a chest left a phantom of the chest's stack in the
+    // hauler's pack, weighing it down until it could not lift a ration (DEUS-TSK-FABLE-18).
+    Items.detach = detach;
+
     function canMerge(a, b) {
         return !!a && !!b && a.type === b.type && (a.mat || null) === (b.mat || null) && (a.q ?? null) === (b.q ?? null);
     }

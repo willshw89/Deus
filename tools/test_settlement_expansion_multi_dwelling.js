@@ -248,6 +248,10 @@ const RATIONS_EACH = 4;
 const CONSTRUCTED = ["building", "wall", "door", "bed", "stockpile"];
 function makeSettlement(seed) {
     const catalog = JSON.parse(catalogText);
+    // This harness proves communal expansion (a second shelter and stockpile for newcomers). The cottage blueprint
+    // (DEUS-TSK-FABLE-16) is off: these unpaired founders would each get a cottage and leave the shelter beds the
+    // checks below follow; the village's housing is proven by tools/test_settlement_domestic_housing.js.
+    catalog.colony.projects = Object.assign({}, catalog.colony.projects, { blueprints: { household_cottage: null } });
     const S = makeSandbox(seed, SIZE, catalog);
     const { W, O, I, area } = S;
     for (let y = 30; y <= 34; y++) for (let x = 44; x <= 46; x++) W.water.add(y * SIZE + x);
@@ -403,7 +407,7 @@ function shelterParts(S, p) {
     const wallNeighbours = [[0, -1], [1, 0], [0, 1], [-1, 0]].filter(([ox, oy]) => { const t = S.O.atIn(S.area, dx + ox, dy + oy); return t && Array.isArray(t.tags) && t.tags.includes("wall"); }).length;
     const outside = { x: dx, y: dy + 1 };
     return {
-        walls: rel.walls.filter(c => at(c) === c.object).length, beds: rel.beds.filter(c => at(c) === "floor_straw").length, hearth: at(rel.hearth[0]) === "campfire",
+        walls: rel.walls.filter(c => at(c) === c.object).length, beds: rel.beds.filter(c => at(c) === "floor_straw").length, hearth: at(rel.hearth[0]) === S.P.hearthId(S.P.blueprint("communal_shelter")),
         door: { x: dx, y: dy, present: at(door) === "door_wood", wallNeighbours, outsideFree: !S.O.atIn(S.area, outside.x, outside.y) && !S.W.water.has(outside.y * SIZE + outside.x) },
         bedCells: rel.beds.map(c => `${p.origin.x + c.x},${p.origin.y + c.y}`)
     };
@@ -432,8 +436,8 @@ try {
     const cfg = P.config(), area = S.area;
     instrument(S);
     check("plugins_load", typeof P.structures === "function" && typeof P._internal.stockpileCellFor === "function" && typeof P._internal.tidyParcel === "function" && typeof C.claimBed === "function" && typeof C.allocateBeds === "function" && typeof C.bedClaims === "function" &&
-        cfg.perShelter === 8 && S.wild.fruit_tree === 80 && S.wild.berry_bush === 60,
-        `Projects structures/stockpileCellFor/tidyParcel, Colonists claimBed/allocateBeds/bedClaims; perShelter ${cfg.perShelter}, ${cfg.slotsPerColonist} slot(s) a colonist, ${cfg.slotsPerStockpileCell} a stockpile cell; ${S.wild.fruit_tree} fruit trees, ${S.wild.berry_bush} berry bushes`);
+        P._internal.perShelterOf(cfg) === 11 && S.wild.fruit_tree === 80 && S.wild.berry_bush === 60,
+        `Projects structures/stockpileCellFor/tidyParcel, Colonists claimBed/allocateBeds/bedClaims; perShelter ${P._internal.perShelterOf(cfg)} (the 6x6 shelter's beds), ${cfg.slotsPerColonist} slot(s) a colonist, ${cfg.slotsPerStockpileCell} a stockpile cell; ${S.wild.fruit_tree} fruit trees, ${S.wild.berry_bush} berry bushes`);
     drive(S, 16);
     rebase(S);
 
@@ -445,9 +449,9 @@ try {
     const parts1 = p1 ? shelterParts(S, p1) : null;
     const registered1 = s1 ? P.footprint(s1).filter(c => W.state.colony.stockpiles.some(s => s.x === c.x && s.y === c.y && s.stores.includes("wood"))).length : 0;
     const dA = P.evaluateDeficits(area);
-    check("founding_builds_shelter_and_stockpile", !!d0 && d0.population === 8 && d0.shelter.deficit === 1 && n1 > 0 && !!p1 && p1.state === "done" && !!parts1 && parts1.walls === 16 && parts1.beds === 8 && parts1.hearth && parts1.door.present &&
+    check("founding_builds_shelter_and_stockpile", !!d0 && d0.population === 8 && d0.shelter.deficit === 1 && n1 > 0 && !!p1 && p1.state === "done" && !!parts1 && parts1.walls === 20 && parts1.beds === 11 && parts1.hearth && parts1.door.present &&
         !!s1 && s1.state === "done" && registered1 === 9 && !!dA && dA.shelter.deficit === 0 && dA.storage.deficit === 0 && S.rec.assignCalls === 0 && S.rec.orders === 0 && S.rec.deaths.length === 0,
-        `${p1 ? P.describe(p1) : "no shelter"} (${parts1 ? `${parts1.walls}/16 walls and door, ${parts1.beds}/8 beds, hearth ${parts1.hearth}` : "-"}); ${s1 ? P.describe(s1) : "no stockpile"}, ${registered1}/9 cells registered; after ${n1 > 0 ? (n1 / DAY_TICKS).toFixed(2) : ">10"} days: shelter ${dA ? dA.shelter.current : "?"}/${dA ? dA.shelter.needed : "?"}, storage ${dA ? dA.storage.current : "?"}/${dA ? dA.storage.needed : "?"}; ${S.rec.assignCalls} assign calls, ${S.rec.orders} orders`);
+        `${p1 ? P.describe(p1) : "no shelter"} (${parts1 ? `${parts1.walls}/20 walls and door, ${parts1.beds}/11 beds, hearth ${parts1.hearth}` : "-"}); ${s1 ? P.describe(s1) : "no stockpile"}, ${registered1}/9 cells registered; after ${n1 > 0 ? (n1 / DAY_TICKS).toFixed(2) : ">10"} days: shelter ${dA ? dA.shelter.current : "?"}/${dA ? dA.shelter.needed : "?"}, storage ${dA ? dA.storage.current : "?"}/${dA ? dA.storage.needed : "?"}; ${S.rec.assignCalls} assign calls, ${S.rec.orders} orders`);
     const snapshot1 = p1 ? P.footprint(p1).map(c => `${c.x},${c.y}:${objectAt(S, c.x, c.y)}`) : [];
     const ringBefore = [...ringCells()].filter(k => { const [x, y] = k.split(",").map(Number); return objectAt(S, x, y) === "wall_wood"; }).length;
 
@@ -467,7 +471,8 @@ try {
     const dC = P.evaluateDeficits(area);
     const bC = P.brain();
     const storageNeeded = 12 * cfg.slotsPerColonist;
-    check("influx_deficits_recognised", came.units.length === 4 && !!dC && dC.population === 12 && dC.shelter.needed === 2 && dC.shelter.deficit === 1 && dC.bed.needed === 12 && dC.bed.deficit === 4 &&
+    // Shelter #1's 11 beds leave one newcomer without (DEUS-TSK-FABLE-16: 6x6, a hearth with clearance, 11 beds).
+    check("influx_deficits_recognised", came.units.length === 4 && !!dC && dC.population === 12 && dC.shelter.needed === 2 && dC.shelter.deficit === 1 && dC.bed.needed === 12 && dC.bed.deficit === 1 &&
         dC.storage.needed === storageNeeded && dC.storage.deficit === Math.max(0, storageNeeded - dC.storage.current) && dC.storage.deficit > 0 && !!bC && bC.chosen && bC.chosen.kind === "communal_shelter",
         `${came.units.length} arrived (${came.viaImmigration} through spawnImmigrants): population ${dC ? dC.population : "?"}; shelter ${dC ? dC.shelter.current : "?"}/${dC ? dC.shelter.needed : "?"} (deficit ${dC ? dC.shelter.deficit : "?"}), beds ${dC ? dC.bed.current : "?"}/${dC ? dC.bed.needed : "?"} (deficit ${dC ? dC.bed.deficit : "?"}), storage ${dC ? dC.storage.current : "?"}/${dC ? dC.storage.needed : "?"} (deficit ${dC ? dC.storage.deficit : "?"}); brain: ${bC ? bC.candidates.map(c => `${c.kind}:${c.utility === -Infinity ? "-" : c.utility.toFixed(2)}`).join("  ") : "none"}`);
 
@@ -495,7 +500,7 @@ try {
     const parts2 = shelters[1] ? shelterParts(S, shelters[1]) : null;
     const registered2 = piles[1] ? P.footprint(piles[1]).filter(c => W.state.colony.stockpiles.some(s => s.x === c.x && s.y === c.y)).length : 0;
     const dE = P.evaluateDeficits(area);
-    check("expansion_completes", nE > 0 && shelters.length === 2 && piles.length === 2 && !!parts2 && parts2.walls === 16 && parts2.beds === 8 && parts2.hearth && registered2 === 9 &&
+    check("expansion_completes", nE > 0 && shelters.length === 2 && piles.length === 2 && !!parts2 && parts2.walls === 20 && parts2.beds === 11 && parts2.hearth && registered2 === 9 &&
         !!dE && dE.population === 12 && dE.shelter.deficit === 0 && dE.bed.deficit === 0 && dE.storage.deficit === 0 && S.rec.assignCalls === 0 && S.rec.orders === 0,
         `${shelters.map(p => P.describe(p)).join("; ") || "no shelters"} | ${piles.map(p => P.describe(p)).join("; ") || "no stockpiles"}; after ${nE > 0 ? (nE / DAY_TICKS).toFixed(2) : ">12"} days: shelter ${dE ? dE.shelter.current : "?"}/${dE ? dE.shelter.needed : "?"}, beds ${dE ? dE.bed.current : "?"}/${dE ? dE.bed.needed : "?"}, storage ${dE ? dE.storage.current : "?"}/${dE ? dE.storage.needed : "?"}`);
 
@@ -542,24 +547,27 @@ try {
     // G. Nothing was taken from a standing building: no clearing job ever targeted one, Shelter #1 and the camp ring
     //    stand as they did, and every log, straw and stone is accounted for by a harvest or a build.
     const snapshotNow = p1 ? P.footprint(p1).map(c => `${c.x},${c.y}:${objectAt(S, c.x, c.y)}`) : [];
-    const shelter1Intact = snapshot1.length === 25 && snapshot1.every((k, i) => k === snapshotNow[i]);
+    const shelter1Intact = snapshot1.length === 36 && snapshot1.every((k, i) => k === snapshotNow[i]);
+    const shelter1Diff = snapshot1.map((k, i) => (k === snapshotNow[i] ? null : `${k} -> ${snapshotNow[i] ? snapshotNow[i].split(":")[1] : "?"}`)).filter(Boolean);
     const ringNow = [...ring].filter(k => { const [x, y] = k.split(",").map(Number); return objectAt(S, x, y) === "wall_wood"; }).length;
     const actual = totals(S), expected = expectedTotals(S);
     // Wood for the second shelter came from the wild (oaks and their stumps), never from a building.
     const woodHarvests = S.rec.created.filter(r => r.type === "chop" && (r.object === "oak" || r.object === "stump")).length;
     check("no_cannibalization", S.rec.violations.length === 0 && shelter1Intact && ringNow === ringBefore && groupsClose(actual, expected) && (S.ledger.built.log || 0) > 0 && (S.ledger.yields.log || 0) >= 6 && woodHarvests >= 2,
-        `${S.rec.violations.length} clearing job(s) on standing buildings${S.rec.violations.length ? ` (e.g. ${S.rec.violations[0].type} on ${S.rec.violations[0].object} at (${S.rec.violations[0].x},${S.rec.violations[0].y}) ${S.rec.violations[0].at})` : ""}; ${woodHarvests} chop(s) of wild wood; Shelter #1 ${shelter1Intact ? "intact" : "CHANGED"}, camp ring ${ringNow}/${ringBefore} walls; materials actual ${fmt(actual)} vs expected ${fmt(expected)} (yields ${JSON.stringify(S.ledger.yields)}, built ${JSON.stringify(S.ledger.built)})`);
+        `${S.rec.violations.length} clearing job(s) on standing buildings${S.rec.violations.length ? ` (e.g. ${S.rec.violations[0].type} on ${S.rec.violations[0].object} at (${S.rec.violations[0].x},${S.rec.violations[0].y}) ${S.rec.violations[0].at})` : ""}; ${woodHarvests} chop(s) of wild wood; Shelter #1 ${shelter1Intact ? "intact" : `CHANGED (${shelter1Diff.join("; ")})`}, camp ring ${ringNow}/${ringBefore} walls; materials actual ${fmt(actual)} vs expected ${fmt(expected)} (yields ${JSON.stringify(S.ledger.yields)}, built ${JSON.stringify(S.ledger.built)})`);
 
     // H. The newcomers hold Shelter #2's beds; the founders hold what they held; nobody shares a bed.
     drive(S, 31);
     const foundersKept = S.founders.filter(u => bedOf(u) === founderBeds.get(u.id)).length;
     const newcomerBeds = S.newcomers.map(bedOf);
+    // Shelter #1 has 11 beds (DEUS-TSK-FABLE-16), so three newcomers take its free beds and the rest Shelter #2's.
+    const newIn1 = parts1 ? newcomerBeds.filter(k => k && parts1.bedCells.includes(k)).length : 0;
     const inShelter2 = parts2 ? newcomerBeds.filter(k => k && parts2.bedCells.includes(k)).length : 0;
     const all = colonists(S), allBeds = all.map(bedOf);
     const distinctAll = new Set(allBeds.filter(Boolean)).size;
     const standing = all.filter(u => C.claimedBed(u)).length;
-    check("newcomers_bedded_without_displacement", foundersKept === 8 && inShelter2 === 4 && distinctAll === 12 && standing === 12,
-        `founders keeping their bed ${foundersKept}/8, newcomers on Shelter #2's beds ${inShelter2}/4 (${S.newcomers.map(u => `${u.name || "#" + u.id}@${bedOf(u)}`).join(" ")}); ${distinctAll} distinct claims among ${all.length}, ${standing} standing`);
+    check("newcomers_bedded_without_displacement", foundersKept === 8 && newIn1 + inShelter2 === 4 && inShelter2 >= 1 && distinctAll === 12 && standing === 12,
+        `founders keeping their bed ${foundersKept}/8, newcomers on Shelter #1's free beds ${newIn1}/4 and Shelter #2's ${inShelter2}/4 (${S.newcomers.map(u => `${u.name || "#" + u.id}@${bedOf(u)}`).join(" ")}); ${distinctAll} distinct claims among ${all.length}, ${standing} standing`);
 
     // I. Two more days: all twelve alive, sleeping in their own beds, fed.
     const sleepsBefore = S.rec.sleeps.length;

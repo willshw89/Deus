@@ -47,9 +47,6 @@ const mutant = arg("mutant", "");
 const quiet = process.argv.includes("--quiet");
 const TIER = parseInt(arg("tier", "1"), 10) || 1;
 const RUN_FEED_SCENE = process.argv.includes("--feed-scene");
-// --wildlife (DEUS-TSK-FABLE-18): also load DEUS_Wildlife, DEUS_Ecology and DEUS_Combat as the live game does (prey to hunt,
-// ecology). Without it the soak has no hunting, and the peaceful baseline keeps its original bundle.
-const WITH_WILDLIFE = process.argv.includes("--wildlife");
 
 const MUTANTS = {
     unknown_death_injected: "inject_unknown_death",
@@ -84,7 +81,7 @@ const PLUGIN_FILES = [
     "DEUS_Conditions.js",
     "DEUS_DeathForensics.js",
     "DEUS_Colonists.js"
-].concat(WITH_WILDLIFE ? ["DEUS_Wildlife.js", "DEUS_Ecology.js", "DEUS_Combat.js"] : []);
+];
 
 const sources = {};
 for (const file of PLUGIN_FILES) {
@@ -182,9 +179,7 @@ function setupEnvironment() {
     const classes = [
         "Sprite", "Window_Base", "Window_Selectable", "Scene_Map", "Scene_Boot",
         "Rectangle", "Game_Map", "Game_Player", "Game_CharacterBase", "Game_Event",
-        "Spriteset_Map", "Spriteset_Base", "Bitmap", "Graphics",
-        // for --wildlife (DEUS_Wildlife draws its creatures with these)
-        "Sprite_Character", "Game_Character", "Window", "Sprite_Balloon"
+        "Spriteset_Map", "Spriteset_Base", "Bitmap", "Graphics"
     ];
     for (const name of classes) {
         env[name] = vm.runInNewContext(`(function ${name}(){})`);
@@ -331,6 +326,30 @@ async function runNativeSurvivalSoak() {
         });
     }
 
+    
+    {
+        const hm = () => `d${env.$ufTime.day} ${env.$ufTime.hour}:${String(env.$ufTime.minute).padStart(2, "0")}`;
+        const want = new Set(["eat", "fetch", "drink", "gather", "pick"]);
+        const who = id => { const u = W.unit(id); return u ? `${u.name}#${u.id}` : `#${id}`; };
+        const desc = j => `${j.type}#${j.id} owner ${j.owner} tgt ${j.target ? j.target.x + "," + j.target.y : "-"} params ${JSON.stringify(j.params || {}).slice(0, 140)}`;
+        const LIMIT = Number(process.env.PROBE_LIMIT || 400);
+        let n = 0;
+        const log = s => { if (n++ < LIMIT) console.log("  PROBE " + hm() + " " + s); };
+        env.UF.Events.on("jobs:created", j => { if (j && want.has(j.type)) log("created " + desc(j)); });
+        env.UF.Events.on("jobs:failed", j => { if (j && want.has(j.type)) log("FAILED " + desc(j) + " reason: " + j.reason); });
+        env.UF.Events.on("jobs:cancelled", j => { if (j && want.has(j.type)) log("cancelled " + desc(j) + " reason: " + j.reason); });
+        env.UF.Events.on("jobs:done", (j, u) => { if (j && want.has(j.type)) log("done " + desc(j) + " by " + (u ? who(u.id) : "?")); });
+        env.UF.__probeHourly = () => {
+            if (env.$ufTime.minute !== 0) return;
+            for (const u of W.units().filter(u => u && u.data && (u.data.founder || u.data.kind === "colonist") && !u.data.dead)) {
+                if (u.id !== 3 && u.id !== 5) continue;
+                const n2 = u.data.needs || {};
+                const a = Col.assess ? Col.assess(u) : {};
+                const j = J.of(u.id);
+                log(`HOUR ${who(u.id)} at (${u.x},${u.y}) food ${n2.foodLb} water ${n2.waterGal} dwf ${n2.daysWithoutFood} assess ${a.priority}/${a.name}/${a.detail} job ${j ? j.type + "#" + j.id + " " + j.state : "none"}`);
+            }
+        };
+    }
     console.log("\nStarting peaceful unattended settlement simulation...\n");
     console.log("| Day | Living Pop | Food (lb) | Beds (Built/Assigned) | Active Projects | Active Jobs | Deaths | Dehydr/Starve Crit | Exhaustion (Lvl 1-5) |");
     console.log("|-----|------------|-----------|-----------------------|-----------------|-------------|--------|---------------------|----------------------|");
@@ -359,12 +378,6 @@ async function runNativeSurvivalSoak() {
         // Run 24 hours of simulation
         for (let hour = 0; hour < 24; hour++) {
             env.$ufTime.hour = hour;
-            // The clock events the live game sends (DEUS_Core): UF_Objects regrows picked plants on time:hour. Without them
-            // no berry bush ever grew back in a soak (DEUS-TSK-FABLE-18).
-            if (env.UF.Events && typeof env.UF.Events.emit === "function") {
-                if (hour === 0) env.UF.Events.emit("time:day", day, "", env.$ufTime.year);
-                env.UF.Events.emit("time:hour", hour);
-            }
 
             if (feedScene.active && day === feedScene.day && hour === 8 && !feedScene.founder) {
                 const living = W.units().filter(u => u && u.data && (u.data.founder || u.data.kind === "colonist") && !u.data.dead);
@@ -382,7 +395,7 @@ async function runNativeSurvivalSoak() {
             }
 
             for (let minute = 0; minute < 60; minute++) {
-                env.$ufTime.minute = minute;
+                env.$ufTime.minute = minute; if (env.UF.__probeHourly) env.UF.__probeHourly();
 
                 for (let t = 0; t < STEP_TICKS; t++) {
                     if (world.state) world.state.ticks = (world.state.ticks || 0) + 1;
@@ -424,14 +437,12 @@ async function runNativeSurvivalSoak() {
 
         // Bed accounting
         const O = env.UF.Objects;
-        // (DEUS-TSK-FABLE-18: findIn searches round `near`, (0,0) when none is given; projects carry `kind`; UF_Jobs has
-        // list() and the states open / travel / work. The old instruments printed 0 beds, no projects and 0 jobs.)
-        const beds = O ? O.findIn(colony.area, { tags: ["bed"], near: { x: campPos.x, y: campPos.y }, radius: 48, unsorted: true }) : [];
+        const beds = O ? O.findIn(colony.area, { tags: ["bed"] }) : [];
         const assignedBeds = liveUnits.filter(u => u.data && u.data.bed).length;
 
         // Projects & Jobs
-        const activeProjects = P && P.active ? P.active().map(p => p.kind) : [];
-        const activeJobCount = J && J.list ? J.list(j => j.state === "open" || j.state === "travel" || j.state === "work").length : 0;
+        const activeProjects = P && P.active ? P.active().map(p => p.type) : [];
+        const activeJobCount = J && J.all ? J.all().filter(j => j.state === "active" || j.state === "assigned").length : 0;
 
         // Mortality summary
         const mortSummary = Col.mortalitySummary ? Col.mortalitySummary() : { totalDeaths: 0, byCause: {} };
@@ -494,18 +505,6 @@ async function runNativeSurvivalSoak() {
         const activeProjStr = activeProjects.length ? activeProjects.join(",") : "none";
 
         console.log(`| ${String(day).padEnd(3)} | ${String(popCount).padEnd(10)} | ${String(totalFoodLb.toFixed(1)).padEnd(9)} | ${String(beds.length + "/" + assignedBeds).padEnd(21)} | ${activeProjStr.padEnd(15)} | ${String(activeJobCount).padEnd(11)} | ${String(mortSummary.totalDeaths).padEnd(6)} | ${String(dehydrCrit + "/" + starveCrit).padEnd(19)} | ${exhStr.padEnd(20)} |`);
-
-        // The settlement as the brain sees it (DEUS-TSK-FABLE-18): reserve, phase, what stands, who lives where.
-        try {
-            const dd = P && typeof P.evaluateDeficits === "function" ? P.evaluateDeficits(colony.area) : null;
-            const built = P && P.list ? P.list(p => p.state === "done" && (p.size | 0) > 0).map(p => `${p.kind}#${p.id}`) : [];
-            const phase = P && typeof P.phase === "function" ? P.phase() : "?";
-            const homedIds = new Set();
-            if (P && P.list) for (const p of P.list(q => q.state === "done" && q.movedIn)) for (const id of p.movedIn.claimed || []) homedIds.add(id);
-            const homes = liveUnits.filter(u => homedIds.has(u.id)).length;
-            const f = dd && dd.food ? dd.food : null;
-            console.log(`  DAY ${day}: phase ${phase}; food reserve ${f ? f.current : "?"} of ${f ? f.needed : "?"} colonist-days (${f && Number.isFinite(f.totalAccessibleNutrition) ? f.totalAccessibleNutrition : "?"} lb accessible); structures [${built.join(" ")}]; homed ${homes}/${liveUnits.length}`);
-        } catch (e) { console.log(`  DAY ${day}: settlement summary failed: ${e.message}`); }
 
         dailyRecords.push({
             day,

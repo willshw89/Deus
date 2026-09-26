@@ -39,7 +39,8 @@ const SEED = (parseInt(arg("seed", "20260923"), 10) >>> 0) || 20260923;
 
 const MUTANTS = {
     carried_not_counted: { file: "projects", from: "for (const u of people) for (const it of I.inventoryOf(u.id)) carriedLb += take(it);", to: "for (const u of people) for (const it of I.inventoryOf(u.id)) take(it);" },
-    survival_counts_as_failure: { file: "projects", from: "if (job && job.state === \"failed\" && !preempted(job)) {", to: "if (job && job.state === \"failed\") {" },
+    // (FABLE-17: the old needle named code that no longer exists; the guard is now cellFault's reason test.)
+    survival_counts_as_failure: { file: "projects", from: "const cellFault = job => !!job && job.state === \"failed\" && typeof job.reason === \"string\" && CELL_FAULT.test(job.reason);", to: "const cellFault = job => !!job && job.state === \"failed\";" },
     no_autonomy: { file: "jobs", from: "const candidates = open().filter(j => sameLevel(j.target, unit) && matches(j, filter));", to: "const candidates = open().filter(j => sameLevel(j.target, unit) && !(j.params && j.params.project) && matches(j, filter));" }
 };
 
@@ -228,9 +229,11 @@ const SIZE = 64, SITE = { x: 32, y: 32 }, RADIUS = 4, LARDER = { x: 37, y: 32 };
 const RATIONS_EACH = 3;
 function makeSettlement(seed) {
     const catalog = JSON.parse(catalogText);
-    // One communal shelter serves up to twelve here (the catalog's eight would make two newcomers a second shelter,
-    // whose eight beds would cover them; with twelve, their beds are a genuine bedding need).
-    catalog.colony.projects = Object.assign({}, catalog.colony.projects, { perShelter: 12 });
+    // One communal shelter serves up to sixteen here (the catalog's eight would make the newcomers of scene J a second
+    // shelter, whose beds would cover them; with sixteen, their beds are a genuine bedding need). The cottage
+    // blueprint (DEUS-TSK-FABLE-16) is off: this harness proves the camp's self-maintenance, and a cottage's beds
+    // would cover scene J's newcomers too; the village's housing is proven by tools/test_settlement_domestic_housing.js.
+    catalog.colony.projects = Object.assign({}, catalog.colony.projects, { perShelter: 16, blueprints: { household_cottage: null } });
     const S = makeSandbox(seed, SIZE, catalog);
     const { W, O, I, area } = S;
     for (let y = 30; y <= 34; y++) for (let x = 44; x <= 46; x++) W.water.add(y * SIZE + x);
@@ -479,10 +482,10 @@ try {
     const at = (c) => objectAt(S, shelter.origin.x + c.x, shelter.origin.y + c.y);
     const walls = shelter ? rel.walls.filter(c => at(c) === c.object).length : 0;
     const beds = shelter ? rel.beds.filter(c => at(c) === "floor_straw").length : 0;
-    const hearth = shelter ? at(rel.hearth[0]) === "campfire" : false;
+    const hearth = shelter ? at(rel.hearth[0]) === P.hearthId(P.blueprint("communal_shelter")) : false;
     const dS = P.evaluateDeficits(S.area);
-    check("shelter_completed_autonomously", n1 > 0 && !!shelter && shelter.state === "done" && walls === 16 && beds === 8 && hearth && !!dS && dS.shelter.current >= 1 && S.rec.assignCalls === 0 && S.rec.orders === 0 && S.rec.projectJobsDone > 0,
-        shelter ? `${P.describe(shelter)} after ${n1 > 0 ? (n1 / DAY_TICKS).toFixed(2) : ">14"} days: ${walls}/16 walls and door, ${beds}/8 beds, hearth ${hearth}; ${S.rec.projectJobsDone} project jobs done, ${S.rec.assignCalls} assign calls, ${S.rec.orders} orders; jobs done ${JSON.stringify(S.rec.done)}` : `no shelter project (${JSON.stringify(P.list().map(p => p.kind + ":" + p.state))})`);
+    check("shelter_completed_autonomously", n1 > 0 && !!shelter && shelter.state === "done" && walls === 20 && beds === 11 && hearth && !!dS && dS.shelter.current >= 1 && S.rec.assignCalls === 0 && S.rec.orders === 0 && S.rec.projectJobsDone > 0,
+        shelter ? `${P.describe(shelter)} after ${n1 > 0 ? (n1 / DAY_TICKS).toFixed(2) : ">14"} days: ${walls}/20 walls and door, ${beds}/11 beds, hearth ${hearth}; ${S.rec.projectJobsDone} project jobs done, ${S.rec.assignCalls} assign calls, ${S.rec.orders} orders; jobs done ${JSON.stringify(S.rec.done)}` : `no shelter project (${JSON.stringify(P.list().map(p => p.kind + ":" + p.state))})`);
     const stockpile = projectsOf(S, "communal_stockpile").find(p => p.state === "done") || projectsOf(S, "communal_stockpile")[0] || null;
     const registered = stockpile ? P.footprint(stockpile).filter(c => W.state.colony.stockpiles.some(s => s.x === c.x && s.y === c.y && s.stores.includes("wood"))).length : 0;
     check("stockpile_built_and_registered", !!stockpile && stockpile.state === "done" && P.footprint(stockpile).every(c => objectAt(S, c.x, c.y) === "stockpile") && registered === 9 && !!dS && dS.storage.current >= dS.storage.needed,
@@ -566,8 +569,12 @@ try {
     check("storage_disturbance_recovers", lost.length === 9 && !!dJ0 && !!dJ && dJ.storage.current === dJ0.storage.current - 9 && dJ.storage.deficit > 0 && !!newPile && nJ > 0 && registered2 === 9 && !!dJ2 && dJ2.storage.deficit === 0 && projectsOf(S, "communal_stockpile").slice(pilesBefore).length === 1,
         `${lost.length} stockpile cells removed -> storage ${dJ0 ? dJ0.storage.current : "?"} -> ${dJ ? dJ.storage.current : "?"} of ${dJ ? dJ.storage.needed : "?"} slots; ${newPile ? P.describe(newPile) : "no replacement"} after ${nJ > 0 ? (nJ / DAY_TICKS).toFixed(2) : ">4"} days, ${registered2} cells registered; storage ${dJ2 ? dJ2.storage.current : "?"} slots, one replacement project`);
 
-    // J. Two newcomers: exactly two beds are missing, one bedding project of capacity two lays them.
-    const newcomers = [[-2, -2], [2, 2]].map((s, i) => W.addUnit({ name: `Newcomer ${i + 1}`, x: SITE.x + s[0], y: SITE.y + s[1], data: { kind: "colonist", faction: "player", age: 22, gender: i ? "female" : "male", inventory: [], site: 1 } }));
+    // J. Newcomers outgrow the beds by exactly two (the 6x6 shelter has 11 and every finished cottage adds its own
+    //    since DEUS-TSK-FABLE-16, so as many arrive as it takes): one bedding project of capacity two lays them.
+    const dJb = P.evaluateDeficits(S.area);
+    const arriving = Math.max(2, dJb.bed.current - dJb.population + 2);
+    const seats = Array.from({ length: arriving }, (_, i) => [-3 + (i % 7), (i < 7 ? -2 : 2)]);
+    const newcomers = seats.map((s, i) => W.addUnit({ name: `Newcomer ${i + 1}`, x: SITE.x + s[0], y: SITE.y + s[1], data: { kind: "colonist", faction: "player", age: 22, gender: i % 2 ? "female" : "male", inventory: [], site: 1 } }));
     for (const u of newcomers) I.give("rations", RATIONS_EACH, u.id, { bypassLimits: true });
     rebase(S);
     const dK = P.evaluateDeficits(S.area);
@@ -575,7 +582,7 @@ try {
     const bedding = projectsOf(S, "bedding_expansion");
     const laid = bedding[0] ? bedding[0].phases[0].cells.filter(c => objectAt(S, c.x, c.y) === "floor_straw").length : 0;
     const dK2 = P.evaluateDeficits(S.area);
-    check("bedding_when_population_grows", !!dK && dK.population === 10 && dK.bed.deficit === 2 && bedding.length === 1 && bedding[0].capacity.bed === 2 && bedding[0].state === "done" && laid === 2 && nK > 0 && !!dK2 && dK2.bed.current === 10 && dK2.bed.deficit === 0,
+    check("bedding_when_population_grows", !!dK && dK.population === 8 + arriving && dK.bed.deficit === 2 && bedding.length === 1 && bedding[0].capacity.bed === 2 && bedding[0].state === "done" && laid === 2 && nK > 0 && !!dK2 && dK2.bed.current >= dK.population && dK2.bed.deficit === 0,
         `population ${dK ? dK.population : "?"}, bed deficit ${dK ? dK.bed.deficit : "?"} -> ${bedding.length} bedding project(s) ${bedding[0] ? `capacity ${bedding[0].capacity.bed}, ${bedding[0].state}, ${laid} beds laid` : ""} after ${nK > 0 ? (nK / DAY_TICKS).toFixed(2) : ">4"} days; beds ${dK2 ? dK2.bed.current : "?"}/${dK2 ? dK2.bed.needed : "?"}`);
 
     // K. Over the whole run: suppers and bedtimes cancelled project jobs and none counted against a cell; every long

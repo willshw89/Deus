@@ -34,7 +34,7 @@ A `move` job with `params.route` walks it a waypoint at a time (`DEUS_Jobs.js`, 
 
 The `extinguish` job (`UF_Jobs`): stands where the unit is, `method` `water` (30 ticks: a water square beside, or water carried) or `roll` (120 ticks), then `UF.Environment.extinguishUnit`; `result { extinguished, method }`.
 
-The `douse` job (`UF_Jobs`, DEUS-TSK-FABLE-12): emergency aid for a burning friend who cannot put itself out (`params.unitId`; unconscious, unable to act, or at exhaustion 5). The patient is reserved for the rescuer as in `stabilize`; the stand is a hazard-free square beside the patient; `method` `water` (30 ticks) when the rescuer carries water or water lies beside the patient or the stand, else `smother` (120 ticks); then `UF.Environment.extinguishUnit`; `result { extinguished, method, patientId }`. An emergency job (`params.emergency`: needs do not interrupt it), not a reflex: a rescuer whose own square catches fire runs like anyone. `burningPatientsFor(u)` lists such friends within `RESCUE_RADIUS` 40; `douseJob(u)` takes the nearest nobody is helping; a colonist itself aflame helps nobody.
+The `douse_ally` job (`UF_Jobs`, DEUS-TSK-FABLE-12; named `douse` until 2026-09-24, when it turned out `UF_Fire` defines its own `douse` for carrying water to a burning square after `UF_Jobs` loads, which replaced this one: every douse of a burning friend ran the square handler and failed "the fire is out"): emergency aid for a burning friend who cannot put itself out (`params.unitId`; unconscious, unable to act, or at exhaustion 5). The patient is reserved for the rescuer as in `stabilize`; the stand is a hazard-free square beside the patient; `method` `water` (30 ticks) when the rescuer carries water or water lies beside the patient or the stand, else `smother` (120 ticks); then `UF.Environment.extinguishUnit`; `result { extinguished, method, patientId }`. An emergency job (`params.emergency`: needs do not interrupt it), not a reflex: a rescuer whose own square catches fire runs like anyone. `burningPatientsFor(u)` lists such friends within `RESCUE_RADIUS` 40; `douseJob(u)` takes the nearest nobody is helping; a colonist itself aflame helps nobody.
 
 ## 3. Threats, the alarm and the move hook
 
@@ -87,6 +87,16 @@ Rule 4 mutants (each exit 1 on 2026-09-24): `ignores_fire_while_hauling` (3 fail
 Rule 4 mutants (each exit 1 on 2026-09-24): `panics_into_fire_when_choked` (a step through fire costs 1: 2 fail, the route runs north through the flames), `unarmed_charges_threat` (the refuge is a square beside the foe: 1 fails), `ignores_burning_ally` (`douseJob` returns null: 2 fail). Result 2026-09-24: **10/10 (exit 0)**.
 
 `tools/test_stabilization.js` reads the Medicine check's result at `jobs:done` (the finished job is pruned from `UF_Jobs`' list before the check runs since the idle fallback): 12/12.
+
+## 5b. A named bed (DEUS-TSK-FABLE-16, 2026-09-24)
+
+`UF.Colonists.claimBedAt(unit, { area, z, x, y })` claims one particular standing bed for the colonist: refused (`null`) when no bed stands there, the cell is on another level, or another living colonist holds it; else `data.bed` becomes that cell (the earlier claim lapses with it, so the communal bed a household member held is free for the next claimant), `UF.Ownership.assignBed` is told when present, the claim index is invalidated and `colonists:bedClaimed` is emitted. `DEUS_Projects` uses it when a household moves into its cottage.
+
+## 5c. Fire on the way, and a fair share of the larder (DEUS-TSK-FABLE-18, 2026-09-24)
+
+- **Rerouting round a new fire.** `UF_World` plans paths round burning squares but walks a planned path without looking at it again, so a fire that started across a colonist's route walked it into the flames (a reflex run, which the "fire nearby" cancel does not stop, most of all). `fire:ignited` notes the level; on the next update `rerouteAroundFire()` sends every colonist on that level whose remaining path (`World.pathOf`) steps onto a burning square to the same goal again (`World.stopUnit` + `World.sendUnit`), and the fresh plan goes round the fire. `u.data.fireReroutes` counts it; emits `colonists:rerouted(u, goal)`. Runs only in updates after an ignition, over the colonists and the squares still ahead of them. The fresh plan may pass beside the flames (the planner has no cost for a square next to fire; see the handoff to the engine owner).
+- **A meal, not the larder.** A hunger fetch names `params.count = mealCount(u, item)`: the rest of the day's pound by the type's nutrition, at least one. `UF_Jobs` now honours a count (and the weight limit) for container items too: the first fetch from the camp chest used to carry off its whole meat stack, and every other founder's fetch failed "someone else carries it" (7 of 8 founders starving by day 6 of the 7-day soak at `e054707`).
+- Checks: `node tools/test_fire_survival_behavior.js` (15 checks; `docs/systems/DEUS_Projects.md` §5) and `node tools/test_native_survival_soak.js` (7 days: 9/9).
 
 ## 6. Known limits
 

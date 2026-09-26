@@ -342,8 +342,8 @@ try {
     const planCells = new Set(catalog.colony.plan.filter(s => s.build && s.cells).flatMap(s => s.cells.map(c => `${SITE.x + c[0]},${SITE.y + c[1]}`)));
     const footprintOk = p && fp.every(c => c.x >= 1 && c.y >= 1 && c.x < SIZE - 1 && c.y < SIZE - 1 && !W.water.has(c.y * SIZE + c.x) && cheb(c, SITE) > RADIUS + 1 && !planCells.has(`${c.x},${c.y}`) && [null, "oak", "bush"].includes(objectAt(S, c.x, c.y)));
     const marginOk = p && (() => { for (let y = p.origin.y - 1; y < p.origin.y + p.size + 1; y++) for (let x = p.origin.x - 1; x < p.origin.x + p.size + 1; x++) if (W.water.has(y * SIZE + x)) return false; return true; })();
-    check("project_opened_and_sited", !!p && !!pre && p.origin.x === pre.x && p.origin.y === pre.y && p.kind === "communal_shelter" && p.state === "active" && p.phase === 0 && p.size === 5 && cycle.opened.length === 1 && P.list().length === 1 &&
-        footprintOk && marginOk && P.reservedAt(area, p.origin.x, p.origin.y) === p.id && P.reservedAt(area, p.origin.x + 4, p.origin.y + 4) === p.id &&
+    check("project_opened_and_sited", !!p && !!pre && p.origin.x === pre.x && p.origin.y === pre.y && p.kind === "communal_shelter" && p.state === "active" && p.phase === 0 && p.size === 6 && cycle.opened.length === 1 && P.list().length === 1 &&
+        footprintOk && marginOk && P.reservedAt(area, p.origin.x, p.origin.y) === p.id && P.reservedAt(area, p.origin.x + 5, p.origin.y + 5) === p.id &&
         P.reservedAt(area, SITE.x, SITE.y) === null && P.reservedAt(area, p.origin.x - 1, p.origin.y) === null && p.created.domain === "action",
         p ? `${P.describe(p)}; chooser predicted (${pre && pre.x},${pre && pre.y})` : `no project (cycle: ${JSON.stringify(cycle && cycle.deficits && cycle.deficits.shelter)})`);
 
@@ -387,7 +387,7 @@ try {
         const hauls = jobs.filter(j => j.type === "haul");
         const items = new Set(hauls.map(j => j.params.itemId));
         const toCells = new Set(hauls.map(j => `${j.params.to.x},${j.params.to.y}`));
-        const perimeter = c => c.x === p.origin.x || c.y === p.origin.y || c.x === p.origin.x + 4 || c.y === p.origin.y + 4;
+        const perimeter = c => c.x === p.origin.x || c.y === p.origin.y || c.x === p.origin.x + 5 || c.y === p.origin.y + 5;
         const toOk = hauls.every(j => perimeter(j.params.to) && P.reservedAt(area, j.params.to.x, j.params.to.y) === p.id && j.params.material === "log");
         const n = drive(S, 60, () => ownJobs(S, p).some(j => j.assigned));
         const taken = ownJobs(S, p).find(j => j.assigned);
@@ -419,23 +419,24 @@ try {
         const o = mid.origin;
         let walls = 0;
         for (const c of P.cells(mid, 1)) if (c.object === "wall_wood" && objectAt(S, c.x, c.y) === "wall_wood") walls++;
-        const door = objectAt(S, o.x + 2, o.y + 4) === "door_wood";
+        // The 6x6 blueprint (DEUS-TSK-FABLE-16): the door at the bottom middle (o.x+3, o.y+5), 19 wall cells, 20 logs.
+        const door = objectAt(S, o.x + 3, o.y + 5) === "door_wood";
         const logsAfter = I.find({ area: { x: 0, y: 0 }, z: 0, id: "log" }).reduce((n, f) => n + f.item.count, 0);
         const logsCarried = W.units().reduce((n, u) => n + I.inventoryOf(u.id).filter(it => it.type === "log").reduce((m, it) => m + it.count, 0), 0);
         // Every log is accounted for: exactly 16 in the walls and the door. A placement the world refused because a
         // unit stood on the square costs nothing since DEUS-TSK-FABLE-04 (UF_Jobs' build places before it consumes).
-        const refused = S.refusals.filter(r => r.x >= o.x && r.y >= o.y && r.x < o.x + 5 && r.y < o.y + 5).length;
+        const refused = S.refusals.filter(r => r.x >= o.x && r.y >= o.y && r.x < o.x + 6 && r.y < o.y + 6).length;
         const ticksMid = P.tick();
-        check("walls_then_door", n1 > 0 && mid.phase === 2 && walls === 15 && door && logsBefore - logsAfter - logsCarried === 16 && P.active().length === 1 && ticksMid.opened.length === 0,
-            `phase ${mid.phase} after ${n1} updates: ${walls}/15 walls, door ${door ? "at" : "missing at"} (${o.x + 2},${o.y + 4}); logs ${logsBefore} -> ${logsAfter} on the ground + ${logsCarried} carried = 16 used, ${refused} refused placement(s) cost nothing; still 1 active project`);
+        check("walls_then_door", n1 > 0 && mid.phase === 2 && walls === 19 && door && logsBefore - logsAfter - logsCarried === 20 && P.active().length === 1 && ticksMid.opened.length === 0,
+            `phase ${mid.phase} after ${n1} updates: ${walls}/19 walls, door ${door ? "at" : "missing at"} (${o.x + 3},${o.y + 5}); logs ${logsBefore} -> ${logsAfter} on the ground + ${logsCarried} carried = 20 used, ${refused} refused placement(s) cost nothing; still 1 active project`);
         const n2 = drive(S2, 60000, () => mid.state !== "active");
         let beds = 0;
         for (const c of P.cells(mid, 3)) if (objectAt(S, c.x, c.y) === "floor_straw") beds++;
-        const hearth = objectAt(S, o.x + 2, o.y + 2) === "campfire";
+        const hearthId = P.hearthId(P.blueprint("communal_shelter")); const hearth = objectAt(S, o.x + 3, o.y + 3) === hearthId;
         const d3 = P.evaluateDeficits(area);
         const after = P.tick();
-        check("hearth_and_beds_complete", n2 > 0 && mid.state === "done" && hearth && beds === 8 && !!d3 && d3.shelter.current === 1 && d3.shelter.deficit === 0 && d3.bed.current === 11 && after.opened.length === 0 && P.active().length === 0 && P.list().length === 1,
-            `${mid.state} after ${n2} more updates: hearth ${hearth ? "built" : "missing"}, ${beds}/8 beds; ${P.explain(area)}; ${P.list().length} project(s), ${P.active().length} active`);
+        check("hearth_and_beds_complete", n2 > 0 && mid.state === "done" && hearth && beds === 11 && !!d3 && d3.shelter.current === 1 && d3.shelter.deficit === 0 && d3.bed.current === 14 && after.opened.length === 0 && P.active().length === 0 && P.list().length === 1,
+            `${mid.state} after ${n2} more updates: hearth ${hearth ? `${hearthId} built` : `${hearthId} missing`}, ${beds}/11 beds; ${P.explain(area)}; ${P.list().length} project(s), ${P.active().length} active`);
     } else { check("walls_then_door", false, "no mid-construction project"); check("hearth_and_beds_complete", false, "no mid-construction project"); }
 
     check("no_errors", errors.length === 0, errors.length ? errors[0].slice(0, 200) : "no console errors during the run");

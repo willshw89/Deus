@@ -214,7 +214,8 @@
     }
 
     // Another unit (or a solid non-unit event on screen) already stands there, or an active job reserved it as its stand cell.
-    function occupiedIn(area, x, y, unitId) {
+    // opts.ignoreJobStands: only somebody standing there counts, not a square another job means to stand on (a rescue).
+    function occupiedIn(area, x, y, unitId, opts) {
         const W = World();
         if (W && typeof W.standerAt === "function") {
             const u = W.standerAt(area.x, area.y, x, y, zOf(area));
@@ -223,7 +224,7 @@
             for (const u of W.unitsInArea(area.x, area.y, zOf(area))) if (u.id !== unitId && u.x === x && u.y === y) return true;
         }
         const st = jobState();
-        if (st && st.list) {
+        if (st && st.list && !(opts && opts.ignoreJobStands)) {
             for (const j of st.list) {
                 if (j.assigned !== null && j.assigned !== undefined && j.assigned !== unitId && isActive(j) && j.stand) {
                     if (sameLevel(j.stand, { area, z: zOf(area) }) && j.stand.x === x && j.stand.y === y) {
@@ -242,7 +243,7 @@
     }
 
     /** True when a unit could stand on the cell: inside the area, walkable ground, no blocking object, no water, nobody there. */
-    function standableIn(area, x, y, unitId) {
+    function standableIn(area, x, y, unitId, opts) {
         const W = World();
         if (!area || !validLevel(area) || !W || !W.state || !W.inWorld(area.x, area.y, zOf(area))) return false;
         const size = W.state.size;
@@ -263,7 +264,7 @@
                 if (c && !c.walkable) return false;
             }
         }
-        return !occupiedIn(area, x, y, unitId);
+        return !occupiedIn(area, x, y, unitId, opts);
     }
 
     // Distance from a unit to a cell of an area, in cells, across areas.
@@ -577,8 +578,19 @@
         if (!it) return "the item is gone";
         if (it.holder === unit.id) return true;
         if (it.container && C) {
-            const taken = C.takeItem(it.container, it.id, unit.id);
-            return taken ? true : "the item is gone";
+            // Out of a container by the same rule as off the ground (DEUS-TSK-FABLE-18): the job's count, never more
+            // than keeps the carrier unencumbered. Taking the whole stack put the camp chest's meat in one founder's
+            // pack, and every other founder's fetch then failed "someone else carries it" and went hungry.
+            const qty = legalLift(job, unit, it);
+            if (qty <= 0) return "too heavy to lift";
+            const taken = C.takeItem(it.container, it.id, unit.id, qty);
+            if (!taken) return "the item is gone";
+            if (taken !== true && taken.id !== undefined && taken.id !== it.id) {
+                reservationManager.release(unit.id, it.id);
+                reservationManager.reserve(unit.id, taken.id);
+                job.params.itemId = taken.id;
+            }
+            return true;
         }
         if (!it.area) return "someone else carries it";
         const qty = legalLift(job, unit, it);
@@ -1077,13 +1089,46 @@
         const E = window.UF && UF.Environment;
         return !!u && !!u.data && ((E && typeof E.isBurning === "function" && E.isBurning(u)) || (u.data.burning && typeof u.data.burning === "object"));
     };
+    // Fire at the work site (DEUS-TSK-FABLE-18): a square burning on or beside the job's target, its stand, or a haul's
+    // destination. Only UF_Fire's spreading fire counts, never a hearth or campfire in its place. Such a job is not
+    // taken (it stays open with the reason), and one already taken fails "fire at the work site", so nobody walks into
+    // a burning building for a log or a meal; it is posted or chosen again once the fire is out. Reflex jobs (a flight,
+    // a douse, a roll) go to the fire on purpose and are exempt.
+    const FIRE_EXEMPT = new Set(["douse", "douse_ally", "extinguish"]);
+    function burningAround(ref) {
+        const F = window.UF && UF.Fire;
+        if (!F || typeof F.isBurning !== "function" || (typeof F.count === "function" && !F.count())) return false;
+        if (!ref || !ref.area || !Number.isFinite(ref.x) || !Number.isFinite(ref.y) || !validLevel(ref)) return false;
+        const level = lv(ref);
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+            try { if (F.isBurning(level, ref.x + dx, ref.y + dy)) return true; } catch (_) {}
+        }
+        return false;
+    }
+    function fireAtWorkSite(job) {
+        if (!job || FIRE_EXEMPT.has(job.type) || (job.params && job.params.reflex)) return false;
+        const F = window.UF && UF.Fire;
+        if (!F || (typeof F.count === "function" && !F.count())) return false;
+        if (burningAround(job.target) || burningAround(job.stand)) return true;
+        const to = job.params && job.params.to;
+        if (to && typeof to === "object" && Number.isFinite(to.x) && Number.isFinite(to.y) && job.target) {
+            const area = to.area || job.target.area;
+            if (burningAround({ area, x: to.x, y: to.y, z: to.z !== undefined ? to.z : refZ(job.target) })) return true;
+        }
+        return false;
+    }
     // A square beside the target to stand on that holds no lethal hazard, nearest to the unit; null when there is none.
-    function standBesideSafe(target, unit) {
-        const area = lv(target), eight = eightWay();
+    // opts.rescue (DEUS-TSK-FABLE-18): a square another job means to stand on (a bed being built beside a burning friend)
+    // does not keep the rescuer off it, only somebody standing there does; and a rescuer already beside the patient
+    // works from where it stands. In the camp every square round a burning friend was some job's stand, and it burned.
+    function standBesideSafe(target, unit, opts) {
+        const area = lv(target), eight = eightWay(), rescue = !!(opts && opts.rescue);
+        if (rescue && sameLevel(unit, target) && Math.max(Math.abs(unit.x - target.x), Math.abs(unit.y - target.y)) === 1 &&
+            (eight || unit.x === target.x || unit.y === target.y) && !lethalHazardAt(area, unit.x, unit.y)) return { area: copyArea(area), x: unit.x, y: unit.y, z: refZ(target) };
         let best = null, bestDist = Infinity;
         for (const [dx, dy] of eight ? NEIGHBORS.concat(DIAGONALS) : NEIGHBORS) {
             const x = target.x + dx, y = target.y + dy;
-            if (!standableIn(area, x, y, unit.id) || lethalHazardAt(area, x, y)) continue;
+            if (!standableIn(area, x, y, unit.id, rescue ? { ignoreJobStands: true } : null) || lethalHazardAt(area, x, y)) continue;
             const dist = eight ? octileDistance(unit, area, x, y) : unitDistance(unit, area, x, y);
             if (dist < bestDist) { bestDist = dist; best = { area: copyArea(area), x, y, z: refZ(target) }; }
         }
@@ -1114,7 +1159,10 @@
     // with water (carried, or beside the patient or the rescuer) in EXTINGUISH_WATER_WORK ticks, else by smothering the
     // flames in EXTINGUISH_ROLL_WORK. An emergency job (needs do not interrupt it), not a reflex: a rescuer whose own
     // square catches fire runs like anyone. The patient is reserved for the rescuer, as a stabilize does.
-    define("douse", {
+    // "douse_ally", not "douse" (DEUS-TSK-FABLE-18): UF_Fire defines its own "douse" (water carried to a burning square)
+    // after this plugin loads, and that definition replaced this one, so every douse of a burning friend ran the
+    // square handler and failed "the fire is out".
+    define("douse_ally", {
         verb: "Dousing",
         replanEvery: REPLAN_TICKS,
         plan(job, unit) {
@@ -1126,7 +1174,7 @@
             reservationManager.reserve(unit.id, { id: patient.id });
             job.params.patientName = patient.name;
             job.target = { area: copyArea(patient.area), x: patient.x, y: patient.y, z: zOf(patient) };
-            const stand = standBesideSafe(job.target, unit);
+            const stand = standBesideSafe(job.target, unit, { rescue: true });
             if (!stand) return { ok: false, reason: "can't get near" };
             job.params.method = carriesWater(unit) || waterBesideCell(lv(patient), patient.x, patient.y) || waterBesideCell(lv(stand), stand.x, stand.y) ? "water" : "smother";
             return { ok: true, stand };
@@ -1412,6 +1460,8 @@
         const candidates = open().filter(j => sameLevel(j.target, unit) && matches(j, filter));
         candidates.sort((a, b) => (b.priority - a.priority) || (unitDistance(unit, lv(a.target), a.target.x, a.target.y) - unitDistance(unit, lv(b.target), b.target.x, b.target.y)) || (a.id - b.id));
         for (const job of candidates.slice(0, 8)) {
+            // A burning work site is not taken (DEUS-TSK-FABLE-18); the job waits open with the reason.
+            if (fireAtWorkSite(job)) { job.reason = "fire at the work site"; continue; }
             // A dry run of the plan: a designation nobody can do yet (needs items, walled in) stays open.
             let r = null;
             try { r = handlers[job.type].plan(job, unit); } catch (e) { r = null; }
@@ -1646,6 +1696,12 @@
             fail(job, "emergency: lethal hazard");
             return;
         }
+        // Doomed work (DEUS-TSK-FABLE-18): the fire reached the work site after the job was taken. The worker gives it up
+        // (the handler's own cancel puts down a carried load, as for any failure) rather than walking on into the flames.
+        if (fireAtWorkSite(job)) {
+            fail(job, "fire at the work site");
+            return;
+        }
         if (!job.planned || (h.replanEvery > 0 && now() - job.plannedAt >= h.replanEvery)) {
             const wasStand = job.stand;
             if (!plan(job, unit)) return;
@@ -1758,6 +1814,7 @@
         fireNear,
         carriesWater,
         isAflame,
+        fireAtWorkSite,
         toolMultiplier,
         work: workOf,
         update,
