@@ -493,7 +493,7 @@ function zrangeSuitePlugin() {
                 fp.cells[z] = hex(h);
                 fp.changed[z] = changed;
             }
-            fp.units = W.units().map(u => `${u.id}:${u.name}:${u.area.x},${u.area.y},${u.x},${u.y},${u.z | 0}`).sort();
+            fp.units = unitKeys(st);
             const items = (st.items && st.items.byId) || {};
             fp.items = Object.keys(items).map(id => { const it = items[id]; return `${id}:${it.type || it.typeId}:${it.area ? `${it.area.x},${it.area.y}` : ""},${it.x},${it.y},${it.z | 0}:${it.count || it.qty || 1}`; }).sort();
             return fp;
@@ -527,8 +527,7 @@ function zrangeSuitePlugin() {
         }
         async function legacyLoad() {
             // want: the save's own fingerprint (made with it at the base commit); ref: the world as the base commit loads
-            // that save (its load drops the save's 5 TEST units and moves 4 colonists by one cell: base behaviour, so the
-            // units are judged against ref; cells and items against both).
+            // that save (tools/test_zrange.js --make-legacy-ref); units, cells and items are judged against both.
             const file = process.env.ZR_SAVE, fpFile = process.env.ZR_FINGERPRINT, refFile = process.env.ZR_LOADED_REF;
             const json = fs.readFileSync(file, "utf8"), want = JSON.parse(fs.readFileSync(fpFile, "utf8"));
             const ref = refFile && fs.existsSync(refFile) ? JSON.parse(fs.readFileSync(refFile, "utf8")) : null;
@@ -552,7 +551,7 @@ function zrangeSuitePlugin() {
             const fpNow = first.cells;
             const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
             if (process.env.ZR_OUT_DIR) { fs.mkdirSync(process.env.ZR_OUT_DIR, { recursive: true }); fs.writeFileSync(path.join(process.env.ZR_OUT_DIR, "legacy_loaded.json"), JSON.stringify(fpNow, null, 1)); }
-            const unitsOk = ref ? same(fpNow.units, ref.units) : same(fpNow.units, want.units);
+            const unitsOk = same(fpNow.units, want.units) && (!ref || same(fpNow.units, ref.units));
             const firstOk = !first.timedOut && first.fp.range.zMin === -2 && first.fp.range.zMax === 2 && same(fpNow.cells, want.cells) && same(fpNow.changed, want.changed) && unitsOk && same(fpNow.items, want.items) &&
                 (!ref || (same(fpNow.cells, ref.cells) && same(fpNow.items, ref.items)));
             const onlyIn = (a, b) => { const sb = new Set(b); return a.filter(x => !sb.has(x)); };
@@ -570,9 +569,14 @@ function zrangeSuitePlugin() {
             delete first.cells;
             t.check("legacy_save_loads", firstOk && secondOk,
                 `base save (${json.length} characters) loaded: range ${first.fp.range.zMin}..${first.fp.range.zMax} (${first.fp.levels} levels; saved zRange ${JSON.stringify(first.fp.stateRange)}), every cell of -2..+2 ${same(fpNow.cells, want.cells) ? "identical to the save" : `DIFFERENT ${JSON.stringify(fpNow.cells)} vs ${JSON.stringify(want.cells)}`}, changed cells ${JSON.stringify(fpNow.changed)} (save ${JSON.stringify(want.changed)}), items ${same(fpNow.items, want.items) ? `identical to the save (${fpNow.items.length})` : "DIFFERENT"}, ` +
-                `units ${ref ? (same(fpNow.units, ref.units) ? `identical to the base commit's load of it (${fpNow.units.length}; the save holds ${want.units.length}: the base load drops or moves ${want.units.filter(u => !ref.units.includes(u)).length})` : "DIFFERENT from the base commit's load") : (same(fpNow.units, want.units) ? "identical to the save" : "DIFFERENT from the save (no base load reference)")}${ref ? `, cells and items identical to the base commit's load ${same(fpNow.cells, ref.cells) && same(fpNow.items, ref.items)}` : ""}; ` +
+                `units ${same(fpNow.units, want.units) ? `identical to the save (${fpNow.units.length})` : `DIFFERENT from the save (${fpNow.units.length} loaded, ${want.units.length} saved)`}${ref ? `, cells, units and items identical to the base commit's load ${same(fpNow.cells, ref.cells) && same(fpNow.units, ref.units) && same(fpNow.items, ref.items)}` : ", no base load reference"}; ` +
                 `after 30 frames of play saved and loaded again: range ${second.fp.range.zMin}..${second.fp.range.zMax}, saved zRange ${JSON.stringify(second.fp.stateRange)}, the world as saved ${same(fp2, atSave) ? "identical (cells, units, items)" : "DIFFERENT"}${first.timedOut || second.timedOut ? ", A LOAD TIMED OUT" : ""}`);
             resume();
+        }
+        // The units of a state, read from the state itself: UF.World.units() caches its list and clears the cache only on
+        // addUnit/removeUnit, so right after a load it can still return the previous world's units (base behaviour, 5255f1a5).
+        function unitKeys(st2) {
+            return Object.values((st2 && st2.units) || {}).map(u => `${u.id}:${u.name}:${u.area.x},${u.area.y},${u.x},${u.y},${u.z | 0}`).sort();
         }
         // The fingerprint of the world now loaded (the state and area may be other objects than at the suite's start).
         function fingerprintLive() {
@@ -589,7 +593,7 @@ function zrangeSuitePlugin() {
                 fp.cells[z] = hex(h);
                 fp.changed[z] = changed;
             }
-            fp.units = W.units().map(u => `${u.id}:${u.name}:${u.area.x},${u.area.y},${u.x},${u.y},${u.z | 0}`).sort();
+            fp.units = unitKeys(st2);
             const items = (st2.items && st2.items.byId) || {};
             fp.items = Object.keys(items).map(id => { const it = items[id]; return `${id}:${it.type || it.typeId}:${it.area ? `${it.area.x},${it.area.y}` : ""},${it.x},${it.y},${it.z | 0}:${it.count || it.qty || 1}`; }).sort();
             return fp;

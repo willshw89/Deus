@@ -27,7 +27,7 @@
   },
   {
    "file": "DEUS_World.js",
-   "match": "const zr = { state: undefined, range: null, zMin: 0, zMax: 0, levels: null };",
+   "match": "const zr = { state: {}, range: null, zMin: 0, zMax: 0, levels: null };",
    "class": "notZ",
    "reason": "not a Z literal: this number is not a level (exhaustion level, a radius, a cell coordinate clamp, a mood value, a strata count, an initial value, or the 'not a level' index)"
   },
@@ -333,7 +333,7 @@
   },
   {
    "file": "DEUS_Levels.js",
-   "match": "const ZR = { st: undefined, zMin: 0, zMax: 0, n: 0, levels: null };",
+   "match": "const ZR = { st: {}, zMin: 0, zMax: 0, n: 0, levels: null, keys: null };",
    "class": "notZ",
    "reason": "not a Z literal: this number is not a level (exhaustion level, a radius, a cell coordinate clamp, a mood value, a strata count, an initial value, or the 'not a level' index)"
   },
@@ -346,6 +346,12 @@
   {
    "file": "DEUS_Levels.js",
    "match": "(st.levels[String(z)] || st.levels[\"0\"])",
+   "class": "groundKey",
+   "reason": "not a range literal: level 0 is the ground by definition (its entry exists in every world)"
+  },
+  {
+   "file": "DEUS_Levels.js",
+   "match": "(st.levels[ZR.keys[li]] || st.levels[\"0\"])",
    "class": "groundKey",
    "reason": "not a range literal: level 0 is the ground by definition (its entry exists in every world)"
   },
