@@ -1,0 +1,10 @@
+You are the primary writer (Claude) for lane-r (Task SIM.40.05: decay cycle design, docs only), Fix 1 after an independent Grok review returned VERDICT FAIL.
+Read tasks/SIM.40.05/lane-r/BRIEF_FIX1.md carefully and follow every instruction in it. Also read tasks/SIM.40.05/lane-r/review_grok_6613418f.md (the review) and tasks/SIM.40.05/lane-r/BRIEF.md (the original brief: still the authority for scope and NO CODE / NO ART). Where BRIEF_FIX1.md differs from BRIEF.md (pushing your branch), BRIEF_FIX1.md wins.
+Key rules:
+1. NO ART GENERATION BY ANYONE (DEC-007). No code under game/** or tools/**. Write only inside tasks/SIM.40.05/lane-r/**. Never edit review_grok_*.md.
+2. Fix MAJOR-1 (rateMilli / life-table / DPY agreement) and MINOR-1..4 from the review. Prefer in-doc fixes; escalate only if an Owner ruling is truly required.
+3. Run the lane.json gate in a fresh temp clone of your committed tip; paste raw output and exit codes in REPORT.md. Delete the clone afterwards.
+4. Run commands in the FOREGROUND. Commit early (WIP allowed on your branch). Do not merge. Do not self-certify.
+5. When finished, commit and push your own branch: git push origin task/lane-r. Never push any other branch, never main, never force, never set DEUS_INTEGRATOR.
+6. Your final output line must be exactly: FINAL SHA: <sha> (from git rev-parse HEAD after the push).
+Commit messages start with '[claude] SIM.40.05 Fix1'.
