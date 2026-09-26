@@ -234,4 +234,286 @@ Slots follow NAT-001's "strict semantic banding" (`docs/RISK_REGISTER.md:72`): o
 - art slot needed: `strata.rock_sed.breccia`, only if the Owner puts lithification in scope (OQ-R-03)
 - art slot needed: `remains.<size>.<stage>`, per-stage remains frames to replace REMAINS.md's stage tints (see "Metals and items")
 
+## Metals and items
+
+This section answers R-03: what happens to loose items, remains and metal. It covers SIM.40.07 ("loose organic items decompose into soil; metals rust; durable relics become buried finds ... mineral ore is never generated (LIFE-002)", `docs/worldgen/DEUS_WORLDGEN_WBS.md:540`) and the remains half of DEC-3.
+
+### R-03.1 What exists
+
+| Citation | Code | Finding |
+|---|---|---|
+| `DEUS_Items.js:7` | `@plugindesc [DEUS Items] Ground item entities, inventory stacks, material properties, decay rates, and container storage.` | The header claims decay rates; there is no item age, condition or decay code (DEC-2). |
+| `DEUS_Anim.js:77` | `const REMAINS_HOURS = 12;` | Remains are a sprite entry kept 12 game hours (catalog `"remainsHours": 12`, `game/data/DEUS_WorldCatalog.json:9922`)... |
+| `DEUS_Anim.js:1162` | `until: nowMinutes() + Math.round(remainsHours() * 60)` | ...then removed (`DEUS_Anim.js:1260`, `list.splice(i, 1);`), leaving nothing (DEC-3). |
+| `DEUS_Anim.js:78` | `const REMAINS_CAP = 200;` | Past 200, the oldest remains are dropped (`DEUS_Anim.js:1097`). |
+| `DEUS_Anim.js:1147` | `if (!cols \|\| !u.area \|\| !W.isDisplayed(u)) {` | A death off-screen leaves no remains at all. Remains depend on the view, which DEC-012's sim/render split forbids. |
+| `DEUS_Combat.js:1073` | `if (w && w.unit(victim.id)) w.removeUnit(victim.id);` | The dead unit is deleted; its body mass goes nowhere (REP-2). |
+
+**Design documents that disagree (flagged, not resolved):**
+- `docs/design/DURABILITY.md:320` records a user quote: "**Items** have no HP (the user, 14:19). Tools don't wear out." SIM.40.07 and V138 ("Loose items weather, rot, rust, or get buried by sediment", `docs/VISION.md:132`) require weathering of loose items. This design reconciles them as far as it can: weathering applies only to **unattended** items (R-03.2), never to tools in use, and uses a condition field, not HP. Whether that reading is right is **OQ-R-04**.
+- `docs/design/REMAINS.md:51` stages animal carcasses FRESH → ROTTING → BONES → gone, and `docs/design/REMAINS.md:428` has bones "crumble away after `bonesDays`". "Gone" deletes mass (LIFE-001); here bones become soil instead (R-03.4).
+- `docs/design/REMAINS.md:175` gives a person 24 h fresh and 72 h rotting; `docs/design/PEOPLES.md:215` gives risen bodies rotting "after 30 days" and bone "after 120 days". The two disagree with each other and with the durations below (R-03.4). **OQ-R-06**.
+- `docs/design/REMAINS.md:258` draws stages as a PIXI tint (`"tints": { "fresh": "#d87070", ... }`). Under DEC-011 ("no ... tint", `docs/OWNER_DECISIONS.md:154`) stages are sprite frames instead: `remains.<size>.<stage>` in R-02.5.
+
+### R-03.2 Which items decay
+
+- An item decays only while it is **unattended**: on the ground or in a container outside any maintained structure (R-01.7), or in an abandoned structure. Items carried by a unit, worn, or stored in a maintained structure get no decay state. Food spoilage in maintained stores belongs to the food and needs system; when it spoils, its mass goes through the rot transform below.
+- A decaying item gets a small record: `dc`, `ex`, `d0` (day it became unattended or last changed exposure), `cond0`, `nextDay`. It gets it on the event that makes it unattended (dropped, owner died, structure abandoned) and loses it when picked up.
+- **Composite items.** An item's catalog entry lists its components by family and class, for example a longsword as FE blade plus ORGANIC grip. Each component decays on its own schedule. When an organic component is gone the item becomes its stripped form (a blade, a spearhead) or SCRAP. This needs a `components` field in the item data (Lane Q's material table or the items owner); it is an interface assumption.
+
+### R-03.3 Organics: rot to soil and nutrients
+
+Default lives, sy, unattended (design defaults; real-world orders of magnitude):
+
+| dc | SEALED | SHELTERED | SKY | WET | BURIED-AER | BURIED-ANOX | CAVE |
+|---|---|---|---|---|---|---|---|
+| TEXTILE (cloth, leather, rope, paper) | 200 | 30 | 3 | 1 | 10 | 1,000 | 5 |
+| LIGHTWOOD items (furniture, bows, bowls) | 150 | 60 | 25 | 10 | 15 | 500 | 20 |
+| FOOD (bread, meat, grain) | 1 | 0.5 | 0.1 | 0.05 | 0.5 | 50 | 0.2 |
+
+**Rot transform.** At the end of the life: `T(ITEM→SOIL-ORG, ORGANIC, floor(m × hf), "decay.rot")` and `sink(AIR, ORGANIC, m − floor(m × hf), "decay.rot.outgas")`. Humus fractions `hf`: TIMBER and LIGHTWOOD 0.20, THATCH 0.15, TEXTILE 0.10, FOOD 0.05. SOIL-ORG goes to the cell's residue record (section "Sparse storage and cost"). **That residue is the soil-nutrient field DEC-3 says does not exist**: decay writes it, SIM.50.04 reads it as fertility and draws it down as plant growth (`T(SOIL-ORG→BIOMASS)`, SIM.50.04's entry).
+
+### R-03.4 Remains no longer vanish (DEC-3, V140, Lane W interface)
+
+**Every death makes a remains record**, on or off screen and at any LOD. Lane W owns the body: its brief lists "bodies and remains returning to soil via Lane R's decay chain" (`origin/task/lane-w:tasks/SIM.40.10/lane-w/BRIEF.md:46`). The hand-off:
+- At death, Lane W books `T(BODY→REMAINS, ORGANIC, m_soft, "death")` and `T(BODY→REMAINS, BONE, m_bone, "death")`. Default bone fraction 0.15 of body mass (humans; per-species data).
+- In an L2 region, deaths of anonymous bucket members become aggregate remains per region cell cluster (ADR-003 L1607: "the bodies become mass forms"), with the same transforms.
+
+**Stages and default durations (sy):**
+
+| Stage transition | SKY | SHELTERED | BURIED-AER (grave) | BURIED-ANOX (bog) | CAVE | Frozen (SIM.50.06 flag) |
+|---|---|---|---|---|---|---|
+| FRESH → SKELETAL (soft tissue gone) | 0.25 | 0.5 | 5 | 1,000 | 1 | paused |
+| SKELETAL → bone gone (bone to soil) | 50 | 500 | 2,000 | 10,000 | 20,000 | paused |
+
+- Soft tissue: `T(REMAINS→SOIL-ORG, ORGANIC, floor(m_soft × 0.05), "decay.rot")`, the rest `sink(AIR, ORGANIC, ..., "decay.rot.outgas")`.
+- Bone: `T(REMAINS→SOIL-MIN, BONE, m_bone, "decay.bone")`, a phosphate trace in the cell's residue record. Bone never leaves as gas.
+- Scavenging (a predator eating remains) is Lane W's transform `T(REMAINS→BODY)`, not a deletion.
+- **The 12-hour sprite removal (`DEUS_Anim.js:1162`) and the cap (`DEUS_Anim.js:1097`) are replaced** by stage frames driven by these records. The cap's purpose (bounded saves) is met instead by merging: once a remains record is SKELETAL and buried, or older than `mergeYears` (default 50 sy), it folds into its cell's residue record (bone mass, count, and anchor ids). Save size then grows with cells that hold remains, not with deaths.
+
+**Time scale warning (D-1).** Under D-1 option (b) (DPY = 1), 0.25 sy is 6 game hours, which is 60 real seconds at 1x (ADR-003 §3.2: 1 game hour = 10 s). `docs/design/REMAINS.md:175` (24 h + 72 h) is 4 sy under (b), sixteen times slower than this table. The durations are data; which feel is wanted is **OQ-R-06**, and the calendar itself is D-1.
+
+**SRD links.**
+- *Gentle repose*: "the target is protected from decay" for 10 days (`game/data/srd51/spells.json:8417`). It pauses the remains clock: `d0 += 10 game days`. Under D-1 (b) that is 10 sy; under (a) it is 10 / N sy.
+- Time limits that assume a body persists: *raise dead* "dead no longer than 10 days" (`spells.json:13455`), *resurrection* "no more than a century" (`spells.json:14025`), *true resurrection* 200 years (`spells.json:16818`). The remains record keeps its `personId` **anchor** for at least `anchorYears` (default 200 sy) even after all its mass has become soil: a zero-mass record, so no matter is invented and the SRD windows still have a target (TR-6).
+- *Speak with dead* needs a corpse that "must still have a mouth" (`spells.json:15402`): true while the skull is present (stage FRESH or SKELETAL).
+- *Animate dead* uses bones or a corpse (`spells.json:1838`): it takes the REMAINS record's mass into a BODY (Lane W's transform); nothing is created.
+
+### R-03.5 Bone, stone, glass and ceramic items
+
+- BONE items (tools, combs, ivory) use the SKELETAL row above.
+- GLASS, CERAMIC, STONEITEM: no decay. They break only through damage events (sherds stay ITEM mass of the same family). They are relics (TR-5).
+
+### R-03.6 Metals corrode to trace minerals, never ore (LIFE-002, D-5)
+
+Default lives, sy, from full metal to fully oxidised, for a reference section of 1/4 inch; thicker items multiply by `thicknessIn / 0.25` (data):
+
+| dc | SEALED | SHELTERED | SKY | WET | BURIED-AER | BURIED-ANOX | CAVE |
+|---|---|---|---|---|---|---|---|
+| FERROUS (iron, steel) | 2,000 | 300 | 60 | 25 | 150 | 3,000 | 400 |
+| CUPROUS (copper, bronze, brass) | ∞ | 20,000 | 5,000 | 1,500 | 8,000 | 30,000 | 20,000 |
+| LEADTIN (lead, tin, pewter) | ∞ | 10,000 | 3,000 | 800 | 5,000 | 20,000 | 10,000 |
+| SILVER | ∞ | ∞ | 30,000 | 10,000 | 20,000 | ∞ | ∞ |
+| NOBLE (gold, platinum) | ∞ | ∞ | ∞ | ∞ | ∞ | ∞ | ∞ |
+| SPECIAL (mithral, adamantine, magic items) | ∞ | ∞ | ∞ | ∞ | ∞ | ∞ | ∞ (OQ-R-05) |
+
+Scaled by catalog `corrosionResistance` (iron 30 at `game/data/DEUS_WorldCatalog.json:4893`, gold 99 at `:4953`): life × cR / 30 for FERROUS, and relative to each class's reference metal otherwise.
+
+**Corrosion transform.** Over its life a metal component converts in `steps` equal parts (default 4): each step books `T(ITEM→OXIDE, FE, floor(m0 / 4), "decay.corrode")`, the last step takes the remainder. When less than 10 % of the metal is left, the item is destroyed and the rest becomes OXIDE. OXIDE goes to the cell's residue record and keeps its family and form forever. When the cell's floor becomes soil or sediment, the OXIDE stays OXIDE inside it: a rust stain, a green copper trace.
+
+**The ore guard.** Four rules, each with a test (AT-R-06):
+1. **No transform outputs ore.** The transform table has no entry whose output is an ore material (ADR-003 L950).
+2. **OXIDE is not a resource.** It has no `mine` or `quarry` yield, no item form that can be picked, and no smelting recipe accepts it. Salvaged SCRAP (unoxidised metal) can be re-smelted: that recycles existing metal, it does not create it.
+3. **Runtime guard.** The ledger rejects any strata or object write whose output is an ore material or an ore outcrop object with a cause other than world generation. This would also have caught the ore sprouts (`DEUS_Ecology.js:739`, VEG-1, F-03), which D-5 removes.
+4. **Deep time too.** Lithification (if enabled, OQ-R-03) outputs only ROCK-SED kinds (breccia, conglomerate, sandstone, mudstone). It never outputs ore, gems, coal or a fossil-bed resource: bones inside lithified rock stay BONE mass in the rock's inclusion record, not a mineable object. V83 names "Finite stone, ore, gems and fossil beds" as non-respawning (`docs/VISION.md:94`).
+
+**SRD corrosion (DEC-018: SRD numbers first, physics on top).**
+- Rust monster, Rust Metal: a nonmagical metal weapon that hits it "takes a permanent and cumulative -1 penalty to damage rolls. If its penalty drops to -5, the weapon is destroyed" (`game/data/srd51/creatures.json:30549`). Each -1 books `T(ITEM→OXIDE, FE, floor(m_fe / 5), "srd.rust_metal")`, and destruction books the remainder.
+- Rust monster, Antennae: "If the object isn't being worn or carried, the touch destroys a 1-foot cube of it"; armor loses 1 AC per touch and is destroyed at AC 10 (`creatures.json:30573`). A 1-foot cube of iron is about 490 lb = 7,840 mu: `T(ITEM or BUILT→OXIDE, FE, min(7,840, m), "srd.antennae")`. Armor loses `m / (AC_base − 10)` per touch.
+- Black pudding and gray ooze corrode metal (and the pudding wood) by eating it (`creatures.json:28401`, `:28733`). Metal goes to OXIDE; eaten wood goes to the creature (`T(ITEM→BODY)`, Lane W).
+- *Mending* "repairs a single break or tear in an object" no larger than 1 foot (`spells.json:11589`). It restores a broken item's condition, but it cannot restore mass that has become OXIDE or rotted away. No matter is created.
+- *Creation* makes objects that last by material, down to 1 minute for adamantine or mithral (`spells.json:5091`): a CONJURED source at casting and a CONJURED sink at expiry (DEC-018's PM default). Decay never turns conjured matter into lasting residue: any residue of a conjured object inherits its expiry and is sunk with it.
+
+### R-03.7 Durable relics and buried finds
+
+- **Relic classes:** NOBLE, SILVER, SPECIAL, GLASS, CERAMIC, STONEITEM, and the remaining metal of a corroding item. Decay never removes them from the ITEM family (TR-5).
+- **Burial.** An item is buried when ≥ 1 slice (2 ft; stale 1 ft) of solid or loose material covers its slice. The trigger is the `levels:strataChanged` event on its cell. The item becomes ITEM-BURIED (ADR-003 L1678: `buried: true`, it stays an item): `T(ITEM→ITEM-BURIED, family, m, "decay.bury")`. It leaves the surface item index (no draw, no pickup) and joins its chunk's sparse buried-find list, keyed by cell and slice.
+- **Recovery.** A dig or mine write that removes the cover re-exposes it (`T(ITEM-BURIED→ITEM)`). WG.65.17 ("Subsurface excavation exposes genuine historical ruins, buried foundations, and forgotten artifacts", `docs/worldgen/DEUS_WORLDGEN_WBS.md:256`) reads the same list.
+
+## Fire residue
+
+This section answers R-04: burned matter leaves ash and charcoal with conserved mass (FIR-3), and the ash then weathers.
+
+### R-04.1 What exists
+
+| Citation | Code | Finding |
+|---|---|---|
+| `DEUS_Fire.js:442` | `for (const it of I.atIn(p.area, p.x, p.y)) if (I.remove(it.id)) destroyed++;` | Items on a burned cell are deleted (FIR-3). |
+| `DEUS_Fire.js:444` | `O.setIn(p.area, p.x, p.y, to);` | The object becomes its catalog `becomes` value. |
+| `DEUS_Fire.js:445` | `if (rule.ground) setGround(p.area, p.x, p.y, rule.ground);` | The only ash is a ground tile (`"id": "ash",`, `game/data/DEUS_WorldCatalog.json:257`), on level 0 only (`DEUS_Fire.js:453`, FIR-4). |
+| `game/data/DEUS_WorldCatalog.json:10246` | `"becomes": "rubble",` | A burned **wooden** wall becomes stone rubble, which picks for 2 stone (`:2104`): wood turns into stone (FIR-3, LAND-1). |
+| `game/data/DEUS_WorldCatalog.json:3664` | `"id": "charcoal",` | Charcoal already exists as an item, with a recipe (`:5304`). |
+
+Fire never damages strata (FIR-2). There is no carbon accounting (audit §3.4).
+
+### R-04.2 The residue rule
+
+One function, `residue.burn(composition, kappa, cell, cause)`, is **owned by this design** and **called by SIM.50.05** at every burnout (and by strata burning once FIR-2 is fixed). SIM.50.05 owns ignition, spread and the burn completeness `kappa` in 0..1 (defaults: open flame 0.8; roof collapsed onto the fire or smouldering under cover 0.3; unknown 0.6). The composition comes from the catalog material of the object, the components of each item (R-03.2), or the material of each burning slice.
+
+For each ORGANIC component of mass `m` and class `c`:
+- `ash = floor(m × ashFrac[c])`
+- `char = floor(m × charFrac[c] × (1 − kappa))`
+- `gas = m − ash − char`
+
+Ledger: `T(src→ASH, ORGANIC, ash, cause)`, `T(src→CHARCOAL, ORGANIC, char, cause)`, `sink(AIR, ORGANIC, gas, "fire.outgas")`. The AIR sink is the smoke; it is how SIM.50.05's "Conserves carbon mass" (`docs/worldgen/DEUS_WORLDGEN_WBS.md:548`) is met: carbon leaves through a named sink, it is not deleted.
+
+| class | ashFrac | charFrac (at kappa = 0) |
+|---|---|---|
+| TIMBER, LIGHTWOOD | 0.01 | 0.30 (TIMBER), 0.25 (LIGHTWOOD) |
+| THATCH | 0.05 | 0.10 |
+| TEXTILE, paper | 0.02 | 0.15 |
+| FLESH | 0.01 | 0.05 |
+| FOOD | 0.02 | 0.10 |
+
+Source: real-world orders of magnitude (wood ash about 1 % of dry mass; charcoal yield up to about a third under smothered burning). The SRD has no residue rules; it says only that "Paper or cloth objects might be vulnerable to fire and lightning damage" (`game/data/srd51/rules.json:7167`).
+
+**Worked example.** 1,000 lb of timber = 16,000 mu, kappa 0.6: ash = floor(16,000 × 0.01) = 160; char = floor(16,000 × 0.30 × 0.4) = 1,920; gas = 16,000 − 160 − 1,920 = 13,920. Total 16,000.
+
+**Other families in a fire:**
+- **BONE** calcines: `T(REMAINS→REMAINS, BONE, floor(m × 0.65))` marked calcined, and `sink(AIR, BONE, rest, "fire.outgas")` for the collagen.
+- **Metals** do not burn. Items survive as ITEM, minus their organic components, which burn as above; a spear becomes a spearhead (SCRAP). Lead and tin melt in a structure fire and become SCRAP of the same family (a puddle), not new matter.
+- **Stone, brick, glass, ceramic** lose HP through the fire factor (`DEUS_Levels.js:1005`, stone `fire: 0.1`) and keep their mass. Glass may slump into SCRAP (GLASS family).
+- **Conjured** matter's residue inherits its expiry (R-03.6).
+
+**Fixes this implies (for the SIM.50.05 lane, not done here):** item deletion at `DEUS_Fire.js:441-442` becomes `residue.burn` per item; the wooden-wall rule at `game/data/DEUS_WorldCatalog.json:10239-10246` becomes a charred ORGANIC rubble plus residue, and the nails and hinges become SCRAP.
+
+### R-04.3 Where the residue goes
+
+- Ash and charcoal go to the burning cell's residue record (`ashMu`, `charMu`) at its lowest standing slice.
+- When `ashMu` reaches one slice of mass, a strata write makes that slice an **ASH stratum** (a new material from Lane Q's table) and subtracts exactly one slice of mass; the remainder stays in the record. Ash bulk density about 40 lb/ft³ × 50 ft³ = 2,000 lb = **32,000 mu per slice** (stale 1-ft slice: 16,000 mu). Charcoal about 15 lb/ft³ × 50 ft³ = 750 lb = **12,000 mu per slice**.
+- **Worked example, a burned 10×10 timber house.** Assume (Lane Q decides the real number) a built timber wall slice is 20 % solid wood: 10 ft³ × 40 lb/ft³ = 400 lb. Walls 36 squares × 2 layers × 5 slices = 360 slices = 144,000 lb; roof 100 slices at 200 lb = 20,000 lb; total 164,000 lb. At kappa 0.6: ash 1,640 lb, charcoal 164,000 × 0.30 × 0.4 = 19,680 lb. Over the 100 floor cells that is about 16 lb of ash and 197 lb of charcoal per cell: sub-slice residue (0.26 slice of charcoal), held in the residue record and shown by the existing `ash` ground kind. No new strata write is needed.
+- A wildfire (SIM.50.05) does the same per burned plant object. It costs one residue entry per burned cell, which already has an entry in the active burning list (`DEUS_Fire.js:531`).
+
+### R-04.4 How ash and charcoal weather
+
+| Residue | SKY | SHELTERED | BURIED (either) | Transform at the end |
+|---|---|---|---|---|
+| ASH | 5 sy | 50 sy | ∞ (a buried ash horizon, TR-7) | `T(ASH→SOIL-MIN, ORGANIC, m, "decay.ash_to_soil")`: nutrient-rich soil; SIM.50.04 reads it as a fertility boost |
+| CHARCOAL | 20 sy to fragment into soil | 200 sy | ∞ | `T(CHARCOAL→SOIL-CARBON, ORGANIC, m)`; then SOIL-CARBON oxidises only if exposed at the surface: `sink(AIR, ORGANIC, m, "decay.char_oxidise")` over 5,000 sy |
+
+- Exposed ash is the most erodible material on a burned slope. SIM.50.03 may move it before it weathers; that is its transfer, ledgered as a move of the same form.
+- **Charcoal never becomes coal.** Coal is a finite mineral; no transform outputs it (ore guard rule 4).
+
+### R-04.5 The link to SIM.50.05 and WG.63.04 ash beds
+
+SIM.50.05 asks for "permanent ash beds (WG.63.04)" (`docs/worldgen/DEUS_WORLDGEN_WBS.md:548`). In this design an ash bed is the ASH stratum written by `residue.burn`, on any layer -16..+15 (fixing FIR-4's level-0 ground tile). "Permanent" is read as: a **buried** ash bed is permanent (TR-7); an **exposed** one weathers into soil in about 5 sy unless buried first. If "permanent" means that exposed ash never weathers, that contradicts this rule; the choice is **OQ-R-07**.
+
+**Cost.** One `residue.burn` call per burnout event, O(components). One residue entry per burned cell until it weathers. Nothing scans.
+
+## Decay-driven collapse
+
+This section answers R-05: how decay lowers member strength and hands off to SIM.40.01/.02 collapse, with localized support rechecks. It is an **interface contract with Lane Q**. Lane Q had not pushed a design when this was written (`origin/task/lane-q` at `9103799e` holds only its brief), so every Lane Q name below is **ASSUMED** and taken from ADR-003 §16 and the Lane Q brief. If Lane Q's reviewed design names things differently, the names change and the contract does not.
+
+### R-05.1 What exists
+
+| Citation | Code | Finding |
+|---|---|---|
+| `DEUS_Levels.js:1940` | `/** The load the cell carries, 0..1: sum over its solid strata of support x hp / 255, divided by 5 (diagnostic; no` | `effectiveSupport` (line 1942) is a per-cell diagnostic. No game code reads it; there is no propagation, span check or collapse (SUP-1). |
+| `DEUS_Levels.js:1558` | `emit("levels:strataChanged", ref, { before: Array.from(before), after: Array.from(rec), cause });` | Every strata write emits before and after records: the hook both lanes use. |
+| `DEUS_Levels.js:1795` | `function applyVolumeDamage(a, minX, minY, minZ, minS, maxX, maxY, maxZ, maxS, damage, damageType = "impact", opts = {}) {` | Box and sphere damage exist; only a self-test calls them (audit §2.4). |
+
+ADR-003 §16.3 feeds its `supportDirty` queue with "a decay failure (§17)" (ADR-003 L1579), and its collapse turns a fallen stratum into "rubble or talus of the same material family" by `ledger.transform(stratum → rubble)` (L1594).
+
+### R-05.2 Who owns what
+
+| Concern | Owner |
+|---|---|
+| Material table, `maxHP`, capacity, span, the HP thresholds at which capacity drops | Lane Q (SIM.40.01) |
+| Whether a stratum is supported; the `supportDirty` queue; its budget and order | Lane Q (SIM.40.01), ADR-003 §16.3 |
+| Breaking a stratum or object into rubble, talus or its catalog ruin; falling; spill; impact damage (V95) | Lane Q (SIM.40.02), ADR-003 §16.4 |
+| HP lost over time; exposure; maintenance and abandonment; member records; the decay heap | Lane R (SIM.40.05) |
+| Stages, reclamation, weathering of rubble after it has fallen, burial, items, remains, residue | Lane R (SIM.40.05-.08) |
+
+### R-05.3 The contract
+
+- **C-1. Decay writes HP only at thresholds.** Decay computes HP lazily (closed form). It writes an element's HP byte, through the single strata writer (`writeCell`, `DEUS_Levels.js:1537`) with cause `"decay"`, only when the lazy HP crosses one of the capacity thresholds Lane Q publishes for that material (`capacityThresholdsHP[material]`, an ascending list of HP bytes; ASSUMED name). ADR-003 §16.3 already enqueues "a stratum ... damaged across a capacity threshold", so every such write reaches the support queue without a second call. A member's thresholds are its `steps` (R-02.3); default 4, so a member causes at most 4 HP writes plus 1 failure in its life.
+- **C-2. Decay never removes matter itself.** At an element's `failDay` (HP 0), decay calls Lane Q's single break path, `collapse.breakElement(ref, "decay")` (ASSUMED name), the same code path a blast or a pick uses at 0 HP. Lane Q books `T(BUILT→RUBBLE, family, m, "collapse.decay")` and puts the cells into `supportDirty`. There is one break-conversion owner (Lane Q), so decay can never disagree with collapse about where the mass went. This replaces today's 0-HP-to-air rule (`DEUS_Levels.js:1702`) on the decay path.
+- **C-3. Collapse tells decay what changed.** Lane Q's collapse emits one event per cascade step (the ADR-003 feed's `EFFECT(collapse)`, or `structure:collapsed`; ASSUMED) carrying the cells, the forms and the masses moved. Decay listens and: marks the failed members, re-derives stages, and recomputes exposure **only** for members whose cells or face neighbours are in the event (rubble burying a wall base, a roof hole opening a room to the sky).
+- **C-4. Strength scaling is Lane Q's.** Capacity is `capacity[material]` scaled by `hp / maxHP` with integer thresholds (ADR-003 §16.3). Decay supplies the HP; it never computes load or support.
+- **C-5. Bounded work.** One decay event writes at most one member's strata (≤ 64, the member cap), so it enqueues at most 64 cells. ADR-003 §16.3 bounds one evaluation at O(span² × strata). With a span of 4 cells and 5 strata that is 16 × 5 = 80 strata reads per cell, ≤ 64 × 80 = 5,120 reads per decay event before the cascade, and the cascade only continues if something actually fails.
+- **C-6. Determinism.** Decay pops its heap in `(dueDay, memberId)` order; Lane Q processes `supportDirty` in its canonical order (FIFO by tick, then elevation, then cell index). No `Math.random` (ADR-003 §10).
+- **C-7. Ledger.** Decay's own entries are shedding (`BUILT→FINES`), rot and weathering of fallen rubble, and item and remains transforms. Lane Q's are the break (`BUILT→RUBBLE`) and falling. Every mass unit of a member ends in exactly one class; the long-run test checks the sum over both lanes.
+- **C-8. External loads act on decayed HP.** Snow load (SIM.50.06's annual maximum, R-01.5), blasts (DEC-013 §4, `applyVolumeDamage`) and the SRD *earthquake*, which "deals 50 bludgeoning damage to any structure in contact with the ground ... If a structure drops to 0 hit points, it collapses" (`game/data/srd51/spells.json:6391`), all act on the current, decayed HP. So old ruins fall first, without any special rule.
+
+### R-05.4 Roof to wall to collapse, step by step
+
+1. Day `d0`: the site is abandoned; the house's members get schedules. The TIMBER roof (SKY, 60 sy) and the ASHLAR walls (SHELTERED) are separate members.
+2. Each time the roof's lazy HP crosses a threshold, decay writes the roof strata's HP (C-1); Lane Q re-checks those cells. Snow load in a cold region may make the roof fail at a threshold before HP 0; Lane Q breaks it.
+3. At the roof's `failDay` (or earlier, by overload), `collapse.breakElement` turns the roof into RUBBLE that falls onto the floor (Lane Q). The collapse event (C-3) tells decay: the walls' tops are now SKY; decay splits the wall members (upper slices SKY, lower slices unchanged) and reschedules them. The structure is S3.
+4. Centuries later the upper wall members fail the same way. Their rubble lands against the wall bases: C-3 again; decay reclassifies the bases as BURIED-AER (∞). The structure is S4 and its foundations survive.
+
+### R-05.5 Underground props
+
+A PROP member (mine timbers, cellar posts) in CAVE exposure has a TIMBER life of 50 sy, halved again where cave fungus grows (R-06.6). Its failure is often the failure of a natural rock roof it held: Lane Q decides, under V128 (natural rock counts as structure) and DEC-010's default (lateral connectivity suffices, `docs/OWNER_DECISIONS.md:144`; DEC-010 is `OPEN`). **This is a DEC-010 dependency.**
+
+## Nature reclaiming
+
+This section answers R-06: vegetation invading abandoned cells, sediment burial, and the underground variants across the 16 layers below the surface. SIM.40.06's row is "vegetation spreads into abandoned cells; sediment slowly buries low ruins" (`docs/worldgen/DEUS_WORLDGEN_WBS.md:539`).
+
+### R-06.1 What exists
+
+| Citation | Code | Finding |
+|---|---|---|
+| `DEUS_Objects.js:266` | `// Never schedule regrowth on floors, walls, or constructed objects` | Vegetation is kept off built cells (line 267 returns), the opposite of overgrowth. The same guard sits in `DEUS_Ecology.js` (lines 275, 313, 354, 627, 776, 847). |
+| `DEUS_Ecology.js:581` | `const tries = o.tries > 0 ? o.tries : 64;` | Spread samples 64 cells per game hour; it is bounded sampling, not a scan (audit §3.3). |
+| `DEUS_Ecology.js:805` | `for (const z of [0, -1, -2]) {` | Underground sprouts exist only on the stale levels; spread is ground level only (VEG-5). |
+| `DEUS_Levels.js:994` | `const M_AIR = 0, M_STONE = 1, M_SOIL = 2, M_WOOD = 3, M_WATER = 4, M_LAVA = 5;` | No sediment, rubble or loose fill material exists (ERO-1). |
+
+### R-06.2 The reclamation rule (overturns `DEUS_Objects.js:266`)
+
+**New rule:** *never establish plants on a **maintained** built cell; on an **abandoned** built cell, allow establishment by stage.*
+- Decay publishes a sparse per-cell flag, `reclaimable`, in its chunk trace map. It is set when the cell's structure becomes unmaintained and reaches the stage below, and cleared if the structure is maintained again (re-founding, R-07). Ecology's establishment guard (the seven call sites above) asks `decay.isReclaimable(cell)` instead of refusing every built cell.
+- Which plants may establish on a reclaimable cell:
+
+| Stage | Cells | Establishes (SIM.50.04 decides species) |
+|---|---|---|
+| S1 | wall faces and tops | moss and lichen (a flag and a catalogue look only; no mass) |
+| S1 | floors open to the sky, doorways | pioneer herbs |
+| S3 | roofless floors, rubble tops | herbs, shrubs, saplings |
+| S4-S5 | rubble spreads and mounds | the biome's normal succession (WG.65.09) |
+| any | SHELTERED interiors | nothing without light, except fungi (R-06.6) |
+
+- Spread comes only from neighbouring vegetation and matures by day counts (ADR-003 §17.4). Growth is Ecology's ledgered source: photosynthetic AIR uptake plus a draw on the cell's SOIL-ORG (`T(SOIL-ORG→BIOMASS)`); nothing is created from nothing.
+- **Feedback.** A plant object on or beside a masonry member sets `M_root` (R-01.5) through the `objects:changed` event for that cell only.
+
+### R-06.3 Burial: what makes a mound
+
+A ruin becomes a buried mound (S5) through four mass transfers, all local and all ledgered:
+1. **Its own rubble.** Fallen roofs and walls bury the wall bases (R-05.4). Lane Q's transform.
+2. **Mudbrick melt and masonry shedding.** FINES collect at the wall foot (R-02.3): `T(BUILT→FINES)`.
+3. **Litter to soil.** Plants on the footprint drop litter (SIM.50.04's `T(BIOMASS→SOIL-ORG)`). The cell's residue record accumulates SOIL-ORG and FINES; when it reaches one slice of soil mass (soil bulk about 80 lb/ft³ × 50 ft³ = 4,000 lb = **64,000 mu**; stale 32,000 mu), decay writes one SOIL stratum on top and subtracts exactly that mass. Default build-up: 0.25 mm per sy on a vegetated footprint, so one 2-ft slice (610 mm) takes about 2,400 sy (stale 1-ft slice: about 1,200 sy).
+4. **Sediment from outside (SIM.50.03).** Slope wash and floods deposit SEDIMENT in low ruins (ADR-003 L1674: "Soil or rubble erodes at an exposed source cell in the same drainage (−k) and deposits at the low cell (+k)"). SIM.50.03 owns the rates. Decay only reacts to the strata-write events on its members' cells.
+
+Wind-blown dust (WG.65.06 names wind transport) is not modelled here.
+
+Every covering write reaches decay as `levels:strataChanged` on the member's cell or the cell above. Decay then changes the exposure of the covered slices (BURIED-AER or BURIED-ANOX) and buries items (R-03.7). No burial check runs on a clock.
+
+### R-06.4 Underground variants (layers -1..-16)
+
+| Layer band | Exposure of built matter | Reclaimers | Water |
+|---|---|---|---|
+| Layer -1 (top of Lower-1) | CAVE or SEALED; cellars and crypts under surface sites | Tree roots from layer 0 reach built strata in layer -1 (`M_root`); fungi | Surface rain seeps down shafts and stairwells (SIM.50.02): WET near openings |
+| Lower-1, -8..-1 (`docs/OWNER_DECISIONS.md:188`) | CAVE: humid, no sky, no freeze-thaw (`FT = 0`) | **Cave fungus** colonises organic members, props, doors, remains and organic rubble, spreading only from neighbouring fungus. Where fungus is present, TIMBER and LIGHTWOOD lives in CAVE are halved (`M_fungus = 2`). Fungus growth draws SOIL-ORG and the organic matter it consumes: `T(ITEM or RUBBLE→BIOMASS, ORGANIC, m)`, SIM.50.04's underground variant. | A rising water table (SIM.50.02) makes members WET, then BURIED-ANOX in waterlogged mud: timber is preserved, iron corrodes slowly. **D-4 dependency.** |
+| Lower-2, -16..-9 (`docs/OWNER_DECISIONS.md:187`) | CAVE or SEALED; dry sealed chambers keep nearly everything (relic-rich deep sites) | Fungi only; no roots | Deep flooding as above. Near lava (static pools today, `DEUS_Levels.js:1038`), organic members ignite through SIM.50.05 and leave residue (R-04). |
+| Upper layers, +1..+15 | SKY on tops and faces; SIM.50.06's lapse rate raises `FT` with altitude | Birds and wind seeds are SIM.50.04's; plants need a soil or rubble slice | No burial: tower ruins fall. Lane Q's cascade carries their rubble down to the first layer that holds it, so upper layers end empty and the mound forms at the base. |
+
+- **Flowstone** (mineral crusts growing over cave ruins) needs dissolved-load transport in the water ledger. It is out of scope and noted for SIM.50.02.
+- The fungus and root rules use the configurable Z range (WG.00.17). Today's `[0, -1, -2]` sprout list (`DEUS_Ecology.js:805`) is stale code state.
+
+### R-06.5 Data, triggers and cost
+
+- **Data:** the `reclaimable` flag and the SOIL-ORG and FINES residue in each chunk's sparse trace map (section "Sparse storage and cost").
+- **Triggers:** a structure changing maintenance state (one event per structure), a stage transition (one event per structure), `objects:changed` for root feedback, `levels:strataChanged` for burial.
+- **Cost:** setting flags for a 10×10 house plus its 1-cell halo is at most 12 × 12 = 144 flag writes, once per stage transition. Ecology's establishment keeps its own bounded sampling (moved into the core by ADR-003 SIM.00.05); decay adds a constant-time flag read to it.
+
 <!-- APPEND -->
