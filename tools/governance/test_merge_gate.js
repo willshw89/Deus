@@ -4,16 +4,17 @@
 /**
  * tools/governance/test_merge_gate.js
  *
- * WG.00.12 Lane I: tests for tools/governance/merge_gate.js.
+ * WG.00.12 Lane I: tests for tools/governance/merge_gate.js. WG.00.12b Lane G1: [pm] manifest trust.
  * Builds a throwaway repository in the OS temp folder: a bare "origin" and a clone ("work") with
  * main checked out and pushed. Each case builds its own lane branch task/lane-<name> with plumbing
- * (a [gemini] manifest commit, writer commits, a review commit), pushes it or not, and runs the
- * gate on it from the work tree. Refusal cases run without --dry-run, so a gate that wrongly passed
+ * (a [gemini] or [pm] manifest commit, writer commits, a review commit), pushes it or not, and runs
+ * the gate on it from the work tree. Refusal cases run without --dry-run, so a gate that wrongly passed
  * would really merge; every case checks that main did not move unless a merge was expected.
  * Each case must produce exactly its listed reason codes and exit code, and the passing cases
- * must print GATE: PASS. Then each --mutant of the gate (one check switched off) is run on the
- * case that targets that check and must make the case's reason code disappear, which shows each
- * check can fail (AGENTS.md rule 4, ENGINE_RULES §6).
+ * must print GATE: PASS. Then each --mutant of the gate (one check switched off, or one rule made
+ * stricter) is run on the case that targets it: on a refusal case it must make the case's reason code
+ * disappear, on a passing case it must make the gate refuse. That shows each check can fail
+ * (AGENTS.md rule 4, ENGINE_RULES §6).
  *
  * Usage: node tools/governance/test_merge_gate.js [--keep] [--only=<substring>]
  *   --keep   leave the temp repository     --only  run matching cases only (no mutants)
@@ -125,9 +126,19 @@ class Lane {
         return this.head;
     }
     manifestText(m) { return JSON.stringify(m || this.manifest, null, 2) + "\n"; }
-    manifestCommit(text) {
-        return this.commits.manifest = this.commit("[gemini] TEST_ brief + manifest",
+    manifestCommit(text, tag = "gemini") {
+        return this.commits.manifest = this.commit(`[${tag}] TEST_ brief + manifest`,
             { [this.manifestPath]: text !== undefined ? text : this.manifestText(), [`${this.dir}/BRIEF.md`]: "# TEST_ brief\n" });
+    }
+    // Opens the lane as the PM does since 0028-AC A0.
+    pmOpen() { return this.manifestCommit(undefined, "pm"); }
+    // A later manifest change by <subject>: allowedPaths gains src/extra.js, and gateTests gains a test that
+    // writes MARK_TAMPER, so a run of the tampered manifest's tests would be seen.
+    tamper(subject) {
+        const widened = JSON.parse(this.manifestText());
+        widened.allowedPaths.push("src/extra.js");
+        widened.gateTests.push({ cmd: "node", args: ["-e", `require("fs").writeFileSync(${JSON.stringify(MARK_TAMPER)}, "ran")`], timeoutSec: 30 });
+        return this.commit(subject, { [this.manifestPath]: this.manifestText(widened), "src/extra.js": "module.exports = 2;\n" });
     }
     writer(files, message) {
         return this.commits.writer = this.commit(message || "[claude] TEST_ feature", Object.assign({}, FEATURE, files || {}));
@@ -226,6 +237,17 @@ function verifySummary(r, l, before) {
     if (!/^\| 1 \| node tests\/test_feature\.js \| 60 s \| 0 \| \d+\.\d\d s \| PASS \|$/m.test(r.out)) missing.push("test row with command, exit 0 and duration");
     return missing.length ? `summary lacks: ${missing.join(" ; ")}` : null;
 }
+
+// An untrusted manifest stops the gate: scope, review and tests are skipped and no test runs.
+function verifyManifestStopsGate(r) {
+    const missing = ["(a) scope", "(b) review", "(c) tests"].map(c => `| ${c} | SKIPPED (manifest not trusted) | - |`).filter(s => !r.out.includes(s));
+    if (/^\.\. test \d+\//m.test(r.out)) missing.push("no gate test may run");
+    if (fs.existsSync(MARK_TAMPER)) missing.push("the tampered manifest's test ran");
+    return missing.length ? `the gate did not stop at the manifest: ${missing.join(" ; ")}` : null;
+}
+
+// The manifest is changed only by the lane-opening commit, tagged tag.
+const openedBy = tag => r => (new RegExp(`^\\| changed by \\| [0-9a-f]{40} \\[${tag}\\] TEST_ brief \\+ manifest \\|$`, "m").test(r.out) ? null : `the Manifest table does not list the [${tag}] commit`);
 
 function verifyRealMerge(r, l, before, after) {
     const tip = w(["rev-parse", `refs/heads/${l.branch}`]);
@@ -384,6 +406,48 @@ const CASES = [
         }),
         expect: REFUSE("MANIFEST_TAMPERED")
     },
+
+    // (a) manifest provenance for PM-opened lanes (0028-AC A0): [gemini] and [pm] single-parent commits only
+    { name: "pass_pm_opened_lane", build: () => built("pmopen", null, l => { l.pmOpen(); l.writer(); l.review(); l.push(); }), args: DRY, expect: PASS, verify: openedBy("pm") },
+    {
+        name: "pass_pm_opened_lane_widened_by_pm_then_gemini", args: DRY, expect: PASS,
+        build: () => built("pmupd", null, l => {
+            l.pmOpen(); l.writer();
+            l.manifest.allowedPaths.push("docs/feature.md");
+            l.commit("[pm] TEST_ widen scope", { [l.manifestPath]: l.manifestText() });
+            l.manifest.allowedPaths.push("docs/feature2.md");
+            l.commit("[gemini] TEST_ widen scope again", { [l.manifestPath]: l.manifestText() });
+            l.writer({ "docs/feature.md": "TEST_ doc\n", "docs/feature2.md": "TEST_ doc 2\n" }, "[claude] TEST_ docs"); l.review(); l.push();
+        }),
+        verify: r => ((r.out.match(/^\| (?:changed by)? \| [0-9a-f]{40} \[(?:pm|gemini)\] TEST_ (?:widen scope|brief \+ manifest)/gm) || []).length === 3 ? null : "the Manifest table does not list the three [pm] / [gemini] commits")
+    },
+    {
+        name: "fail_claude_edits_pm_opened_lane_json", expect: REFUSE("MANIFEST_TAMPERED"),
+        build: () => built("pmtamper", null, l => { l.pmOpen(); l.writer(); l.tamper("[claude] TEST_ widen my own scope"); l.review(); l.push(); }),
+        setup: () => fs.rmSync(MARK_TAMPER, { force: true }), verify: verifyManifestStopsGate
+    },
+    { name: "fail_lane_json_edited_by_ops", build: () => built("tops", null, l => { l.pmOpen(); l.writer(); l.tamper("[ops] TEST_ tweak manifest"); l.review(); l.push(); }), expect: REFUSE("MANIFEST_TAMPERED"), setup: () => fs.rmSync(MARK_TAMPER, { force: true }), verify: verifyManifestStopsGate },
+    { name: "fail_lane_json_edited_by_codex", build: () => built("tcodex", null, l => { l.pmOpen(); l.writer(); l.tamper("[codex] TEST_ tweak manifest"); l.review(); l.push(); }), expect: REFUSE("MANIFEST_TAMPERED"), setup: () => fs.rmSync(MARK_TAMPER, { force: true }), verify: verifyManifestStopsGate },
+    { name: "fail_lane_json_edited_by_untagged_commit", build: () => built("tnotag", null, l => { l.pmOpen(); l.writer(); l.tamper("TEST_ tweak manifest"); l.review(); l.push(); }), expect: REFUSE("MANIFEST_TAMPERED"), setup: () => fs.rmSync(MARK_TAMPER, { force: true }), verify: verifyManifestStopsGate },
+    { name: "fail_lane_json_edited_by_grok_pm_tag", build: () => built("tgrokpm", null, l => { l.pmOpen(); l.writer(); l.tamper("[grok_pm] TEST_ tweak manifest"); l.review(); l.push(); }), expect: REFUSE("MANIFEST_TAMPERED"), setup: () => fs.rmSync(MARK_TAMPER, { force: true }), verify: verifyManifestStopsGate },
+    {
+        name: "fail_lane_json_changed_by_pm_merge_commit",
+        build: () => built("pmmerge", null, l => {
+            l.pmOpen(); l.writer();
+            const side = commitTree([l.head], { [`${l.dir}/launches/p.txt`]: "x\n" }, "[pm] TEST_ side");
+            const widened = Object.assign({}, l.manifest, { allowedPaths: l.manifest.allowedPaths.concat("**") });
+            l.commit("[pm] Merge TEST_ side", { [`${l.dir}/launches/p.txt`]: "x\n", [l.manifestPath]: l.manifestText(widened) }, [side]);
+            l.review(); l.push();
+        }),
+        expect: REFUSE("MANIFEST_TAMPERED"), verify: verifyManifestStopsGate
+    },
+    {
+        name: "fail_pm_review_commit_is_not_a_review", expect: REFUSE("REVIEW_TAG_UNKNOWN"),
+        build: () => built("pmrev", { reviewer: undefined }, l => { l.pmOpen(); l.writer(); l.review({ tag: "pm" }); l.push(); }),
+        verify: r => (/^REFUSED REVIEW_TAG_UNKNOWN: .*\[pm\] may write lane\.json but never reviews$/m.test(r.out) ? null : "the refusal does not say [pm] never reviews")
+    },
+    { name: "fail_pm_commit_after_review", build: () => built("pmafter", null, l => { l.pmOpen(); l.writer(); l.review(); l.commit("[pm] TEST_ brief update", { [`${l.dir}/BRIEF.md`]: "# TEST_ brief v2\n" }); l.push(); }), expect: REFUSE("REVIEW_NOT_LAST") },
+
     { name: "fail_manifest_missing", build: () => built("nomani", null, l => { l.writer(); l.review(); l.push(); }), expect: REFUSE("MANIFEST_MISSING") },
     { name: "fail_manifest_invalid_json", build: () => built("badjson", null, l => { l.manifestCommit("{ \"lane\": "); l.writer(); l.review(); l.push(); }), expect: REFUSE("MANIFEST_INVALID") },
     { name: "fail_manifest_branch_mismatch", build: () => new Lane("mism", { branch: "task/lane-elsewhere" }).standard(), expect: REFUSE("MANIFEST_MISMATCH") },
@@ -491,9 +555,14 @@ const CASES = [
     }
 ];
 
-// Mutant -> the case whose reason code it must remove.
+// Mutant -> the case it must break: a refusal case must lose a reason code, a passing case must be refused.
 const KILLS = {
     manifest_provenance_off: "fail_writer_edits_lane_json",
+    manifest_trust_any_tag: "fail_lane_json_edited_by_ops",
+    manifest_trust_pm_merge: "fail_lane_json_changed_by_pm_merge_commit",
+    manifest_gemini_untrusted: "pass_valid_lane_dry_run_prints_summary",
+    manifest_pm_untrusted: "pass_pm_opened_lane",
+    pm_review_family: "fail_pm_review_commit_is_not_a_review",
     scope_off: "fail_out_of_scope_file",
     review_required_off: "fail_review_missing",
     review_order_off: "fail_writer_commit_after_review",
@@ -547,13 +616,26 @@ function unitChecks(G) {
         `rejected ${JSON.stringify(badP)}; accepted ${JSON.stringify(badF)}`);
     check("unit_tags_and_families", G.subjectTag("[grok] x") === "grok" && G.subjectTag("[Fable] y") === "fable" && G.subjectTag("Merge branch 'main'") === null &&
         G.subjectTag(" [grok] x") === null && G.family("fable") === "claude" && G.family("Claude") === "claude" && G.family("antigravity") === "gemini" &&
-        G.family("grok") === "grok" && G.family("bob") === null && G.family(null) === null, "subjectTag / family table");
+        G.family("grok") === "grok" && G.family("bob") === null && G.family(null) === null && G.PM_TAG === "pm" && G.family("pm") === null &&
+        G.family("PM") === null && G.subjectTag("[PM] Open lane-x") === "pm", "subjectTag / family table");
+    const hc = (tag, parents = 1) => ({ sha: "0".repeat(40), tag, parents: Array.from({ length: parents }, (_, i) => String(i)) });
+    const trusted = [hc("gemini"), hc("antigravity"), hc("pm")];
+    const untrusted = [hc("claude"), hc("fable"), hc("grok"), hc("codex"), hc("ops"), hc("owner"), hc(null), hc("grok_pm"), hc("pm_bot"), hc("pmx"),
+        hc("gemini", 2), hc("pm", 2), hc("pm", 3)];
+    const wrongT = trusted.filter(h => !G.trustedManifestCommit(h)), wrongU = untrusted.filter(h => G.trustedManifestCommit(h));
+    check("unit_manifest_trust", !wrongT.length && !wrongU.length,
+        `refused ${JSON.stringify(wrongT.map(h => [h.tag, h.parents.length]))}; trusted ${JSON.stringify(wrongU.map(h => [h.tag, h.parents.length]))}`);
     const h40 = "0123456789abcdef0123456789abcdef01234567", h64 = "f".repeat(64);
     check("unit_full_hashes", G.fullHashes(`a ${h40} b ${h64} ${h40.toUpperCase()} ${h40.slice(0, 12)}`).join() === h40, "fullHashes must keep exact 40-hex tokens only");
     check("unit_quarantine_path_normalisation", G.normPath(".\\tests\\Flaky.js") === "tests/flaky.js" && G.normPath("./tests/flaky.js") === "tests/flaky.js", "normPath");
     check("unit_manifest_validation", G.validateManifest({ lane: "l", taskId: "T", branch: "task/l", writer: "claude", reviewer: "fable", allowedPaths: ["a"], gateTests: [] }).some(e => e.includes("writer's family")) &&
         G.validateManifest({ lane: "l", taskId: "T", branch: "task/l", writer: "claude", allowedPaths: ["a"], gateTests: [{ cmd: "node", timeoutSec: 0 }] }).some(e => e.includes("timeoutSec")) &&
-        G.validateManifest({ lane: "l", taskId: "T", branch: "task/l", writer: "claude", allowedPaths: ["a"], gateTests: [{ cmd: "node", args: ["x"], timeoutSec: 5 }] }).length === 0,
+        G.validateManifest({ lane: "l", taskId: "T", branch: "task/l", writer: "claude", allowedPaths: ["a"], gateTests: [{ cmd: "node", args: ["x"], timeoutSec: 5 }] }).length === 0 &&
+        G.validateManifest({ lane: "l", taskId: "T", branch: "task/l", writer: "pm", allowedPaths: ["a"], gateTests: [] }).some(e => e.includes("writer \"pm\" is not a known agent")) &&
+        G.validateManifest({ lane: "l", taskId: "T", branch: "task/l", writer: "claude", reviewer: "pm", allowedPaths: ["a"], gateTests: [] }).some(e => e.includes("reviewer \"pm\" is not a known agent")) &&
+        G.validateManifest({ lane: "l", taskId: "T", branch: "task/l", writer: "claude", push: true, allowedPaths: ["a"], gateTests: [] }).length === 0 &&
+        G.validateManifest({ lane: "l", taskId: "T", branch: "task/l", writer: "claude", push: false, allowedPaths: ["a"], gateTests: [] }).length === 0 &&
+        ["yes", 1, null].every(p => G.validateManifest({ lane: "l", taskId: "T", branch: "task/l", writer: "claude", push: p, allowedPaths: ["a"], gateTests: [] }).some(e => e.includes("\"push\" must be true or false"))),
         "validateManifest");
     const mk = Object.keys(G.MUTANTS).sort().join(), kk = Object.keys(KILLS).sort().join();
     check("unit_every_mutant_has_a_kill_case", mk === kk && Object.values(KILLS).every(n => CASES.some(c => c.name === n)), `gate mutants [${mk}] vs kill table [${kk}]`);
@@ -592,7 +674,9 @@ function main() {
         const r = res.r;
         const applied = r && r.out.includes(`| mutants | ${mutant} (self-test only; merge disabled) |`) && !r.codes.includes("USAGE") && !r.codes.includes("MUTANT_NOT_ALLOWED");
         const lost = r ? c.expect.codes.filter(code => !r.codes.includes(code)) : [];
-        check(`mutant_${mutant}_killed`, applied && !res.ok && lost.length > 0,
+        // A mutant that makes a rule stricter is killed on a passing case, which it must make the gate refuse.
+        const broke = c.expect.codes.length ? lost.length > 0 : Boolean(r && r.codes.length > 0);
+        check(`mutant_${mutant}_killed`, applied && !res.ok && broke,
             !applied ? `mutant not applied: ${res.detail}` : `mutant survived: ${caseName} still reported [${r.codes.join(", ")}]`);
     }
 

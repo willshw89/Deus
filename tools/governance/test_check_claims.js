@@ -5,6 +5,7 @@
  * tools/governance/test_check_claims.js
  *
  * WG.00.12 Lanes C2 and C2b: tests for tools/governance/check_claims.js (Directive 001-I §C).
+ * WG.00.12b Lane G1: the pm agent (built-in 4.4 whitelist, never a closer, branch hints ignored).
  * Builds a throwaway git repository in the OS temp folder: a fixture docs/STATUS.md (lane matrix, two
  * defect tables, status prose), docs/OWNER_DECISIONS.md, a WBS with two leaf tables and a Revision Log,
  * two defect ledgers, a fix commit with a passing and a failing run log, review artifacts committed as
@@ -262,6 +263,19 @@ function wbsStatus(r, id, status, over = {}) {
     r.write(WBS, wbsDoc(Object.assign({ rows: rowsWith(id, doneRow(id, status)) }, over)));
     r.stage(WBS);
     return coordinator;
+}
+
+// The PM's lane-opening files for lane-q of TEST.07, a folder no fixture lane owns.
+function pmOpenFiles(r, brief = "BRIEF.md") {
+    r.write(`tasks/TEST.07/lane-q/${brief}`, "# TEST_ brief for lane-q\n");
+    r.write("tasks/TEST.07/lane-q/lane.json", JSON.stringify({ lane: "lane-q", taskId: "TEST.07", branch: "task/lane-q", writer: "claude", reviewer: "grok" }, null, 2) + "\n");
+}
+
+// A review artifact committed by [pm] that passes TEST-DEF-001 and TEST-DEF-003, so only the pm rule can refuse it.
+const PM_REVIEW = "reviews/review_pm_TEST.md";
+function pmReview(r) {
+    r.write(PM_REVIEW, "# TEST_ review by the PM\nVerdict PASS for TEST-DEF-001 and TEST-DEF-003.\n");
+    r.commit("[pm] TEST_ pm review", PM_REVIEW);
 }
 
 // A closure attack on TW.00.02 with no evidence and no reviewer: the parser must see a closure.
@@ -757,6 +771,86 @@ const CASES = [
         return ["--commit", old, "--epoch", old];
     } },
 
+    // pm, the PM agent (WG.00.12b; Owner directive 0028-AC A0): built-in whitelist, never a closer
+    { name: "pass_pm_lane_opening_commit", expect: [], setup(r) {
+        pmOpenFiles(r);
+        r.commit("[pm] Open lane-q (TEST.07): BRIEF.md and lane.json", "tasks/TEST.07");
+        return ["--commit", "HEAD"];
+    } },
+    { name: "pass_pm_status_claim_commit", expect: [], setup(r) {
+        r.edit("docs/STATUS.md", "| **FROZEN / READ-ONLY** |", "| **Lane Q (Claude Writer / Grok Reviewer)** | `tasks/TEST.07/lane-q/**` | **Exclusive Writer.** |\n| **FROZEN / READ-ONLY** |");
+        r.commit("[pm] Register write-set claim for Lane Q (TEST.07) in docs/STATUS.md", "docs/STATUS.md");
+        return ["--commit", "HEAD"];
+    } },
+    { name: "pass_pm_staged_on_the_lane_branch", expect: [], env: { DEUS_AGENT: "pm" }, setup(r) {
+        r.git("checkout", "-q", "-B", "task/lane-q", r.base);
+        pmOpenFiles(r, "BRIEF_REV2.md");
+        r.stage("tasks/TEST.07");
+        return [];
+    } },
+    { name: "pass_pm_range_with_head_ref_hint", expect: [], setup(r) {
+        r.git("checkout", "-q", "-B", "task/lane-q", r.base);
+        pmOpenFiles(r);
+        r.commit("[pm] Open lane-q (TEST.07): BRIEF.md and lane.json", "tasks/TEST.07");
+        r.git("checkout", "-q", "main");
+        return ["--range", "main..task/lane-q"];
+    } },
+    { name: "pass_pm_records_grok_closure_in_status", expect: [], setup(r) {
+        r.edit("docs/STATUS.md", "| `OPEN` | Gemini / Grok |", `| \`CLOSED\` (${r.fix7}; closedBy: grok, ${ART}) | Gemini / Grok |`);
+        r.commit("[pm] TEST_ record the grok closure of TEST-DEF-003", "docs/STATUS.md");
+        return ["--commit", "HEAD"];
+    } },
+    { name: "fail44_pm_edits_code", expect: ["4.4"], mention: ["game/js/plugins/TEST_X.js", "tools/governance/merge_gate.js", "src/fix.js: outside the PM (built-in whitelist) whitelist"], setup(r) {
+        r.write("game/js/plugins/TEST_X.js", "// TEST_ pm edits a plugin\n");
+        r.write("tools/governance/merge_gate.js", "// TEST_ pm edits the merge gate\n");
+        r.write("src/fix.js", "module.exports = 7; // TEST_ pm edits lane B code\n");
+        r.commit("[pm] TEST_ edits code", "game", "tools/governance/merge_gate.js", "src/fix.js");
+        return ["--commit", "HEAD"];
+    } },
+    { name: "fail44_pm_writes_lane_files_other_than_the_brief", expect: ["4.4"], mention: ["tasks/TEST.07/lane-q/review_grok_0123abcd.md", "tasks/TEST.07/lane-q/REPORT.md", "tasks/TEST.07/lane-q/launches/20260926_000000_prompt.txt"], setup(r) {
+        r.write("tasks/TEST.07/lane-q/review_grok_0123abcd.md", "# TEST_ forged review\nVERDICT: PASS\n");
+        r.write("tasks/TEST.07/lane-q/REPORT.md", "# TEST_ report\n");
+        r.write("tasks/TEST.07/lane-q/launches/20260926_000000_prompt.txt", "TEST_ prompt\n");
+        r.commit("[pm] TEST_ writes lane files", "tasks/TEST.07");
+        return ["--commit", "HEAD"];
+    } },
+    { name: "fail44_pm_frozen_path_inside_its_whitelist", expect: ["4.4"], mention: ["tasks/TEST.09/lane-z/lane.json: frozen"], setup(r) {
+        r.edit("docs/STATUS.md", "`engine/core.js` |", "`engine/core.js`<br>`tasks/TEST.09/*` |");
+        r.commit("[gemini] TEST_ freeze tasks/TEST.09", "docs/STATUS.md");
+        r.write("tasks/TEST.09/lane-z/lane.json", "{ \"lane\": \"lane-z\" }\n");
+        r.commit("[pm] Open lane-z (TEST.09)", "tasks/TEST.09");
+        return ["--commit", "HEAD"];
+    } },
+    { name: "fail44_pm_status_row_grants_nothing", expect: ["4.4"], mention: ["src/fix.js"], setup(r) {
+        r.edit("docs/STATUS.md", "| **FROZEN / READ-ONLY** |", "| **PM (Grok Bot)** | `src/fix.js` | **TEST_ row naming the PM.** |\n| **FROZEN / READ-ONLY** |");
+        r.commit("[pm] TEST_ give the PM a STATUS row", "docs/STATUS.md");
+        r.write("src/fix.js", "module.exports = 8; // TEST_ pm uses its STATUS row\n");
+        r.commit("[pm] TEST_ edits code through its STATUS row", "src/fix.js");
+        return ["--commit", "HEAD"];
+    } },
+    { name: "fail44_pm_explicit_lane_not_held", expect: ["4.4"], mention: ["does not hold"], env: { DEUS_AGENT: "pm" }, setup(r) {
+        r.append("docs/STATUS.md", "TEST_ pm edit declared as lane C2");
+        r.stage("docs/STATUS.md");
+        return ["--lane", "c2"];
+    } },
+    { name: "fail42_pm_self_certifies_in_status", expect: ["4.2"], mention: ["names pm as closer", "never reviews or closes"], setup(r) {
+        r.edit("docs/STATUS.md", "| `OPEN` | Gemini / Grok |", `| \`CLOSED\` (${r.fix7}; closedBy: pm) | Gemini / Grok |`);
+        r.commit("[pm] TEST_ closes TEST-DEF-003 itself", "docs/STATUS.md");
+        return ["--commit", "HEAD"];
+    } },
+    { name: "fail42_pm_named_as_closer_with_its_own_artifact", expect: ["4.2"], mention: ["names pm as closer"], setup(r) {
+        pmReview(r);
+        r.edit("docs/STATUS.md", "| `OPEN` | Gemini / Grok |", `| \`CLOSED\` (${r.fix7}; closedBy: pm, \`${PM_REVIEW}\`) | Gemini / Grok |`);
+        r.stage("docs/STATUS.md");
+        return coordinator;
+    } },
+    { name: "fail42_ledger_closedby_pm", expect: ["4.2"], mention: ["closedBy pm; the PM never reviews or closes work"], setup(r) {
+        pmReview(r);
+        r.append(L1, JSON.stringify(closeRecord("TEST-DEF-001", "TEST.01", r.fix7, { closedBy: "pm", closureEvidence: `pm review ${PM_REVIEW}: ${r.fix7} is in the tree` })));
+        r.stage(L1);
+        return ["--lane", "a"];
+    } },
+
     // --range gate (Directive 001-I §C.7)
     { name: "pass_range_gate_clean", expect: [], setup(r) {
         r.git("merge", "-q", "--no-ff", "-m", "[gemini] Merge branch 'task/lane-b'", "task/lane-b");
@@ -1043,6 +1137,23 @@ const UNITS = [
             [/TW\.00\.03/.test((d.get("DEC-900") || {}).text), true, "DEC-900 text"], [/TW\.00\.03/.test((d.get("DEC-903") || {}).text), false, "DEC-903 text"],
             [m && m.lanes.length, 5, "lanes"], [m && m.frozen.length, 1, "frozen"], [m && m.lanes.find(l => l.key === "c2").agents.has("claude"), true, "c2"],
             [m && m.lanes.find(l => l.key === "coordinator").agents.has("gemini"), true, "coordinator"], [m && m.lanes.find(l => l.key === "d").agents.has("grok"), true, "d"]]);
+    } },
+    { name: "unit_pm_agent", run(cm) {
+        const m = cm.withBuiltInLanes(cm.parseLaneMatrix(STATUS_DOC));
+        const pm = m && m.lanes[m.lanes.length - 1];
+        const owns = p => Boolean(pm && pm.globs.some(g => g.re.test(p)));
+        const allowed = ["tasks/WG.00.12b/lane-g1/BRIEF.md", "tasks/WG.00.12b/lane-g1/lane.json", "tasks/SIM.40.05/lane-r/BRIEF_REV2.md", "docs/STATUS.md"];
+        const refused = ["tasks/WG.00.12b/lane-g1/review_grok_0123abcd.md", "tasks/WG.00.12b/lane-g1/launches/20260926_042901_prompt.txt", "tasks/WG.00.12b/lane-g1/REPORT.md",
+            "tasks/WG.00.12b/BRIEF.md", "tasks/WG.00.12b/lane-g1/sub/lane.json", "docs/STATUS.md.bak", "docs/OWNER_DECISIONS.md", "game/js/plugins/X.js", "tools/governance/merge_gate.js"];
+        const withPmRow = STATUS_DOC.replace("| **FROZEN / READ-ONLY** |", "| **PM (Grok Bot)** | `src/fix.js` | **TEST_** |\n| **FROZEN / READ-ONLY** |");
+        const row = cm.parseLaneMatrix(withPmRow).lanes.find(l => l.label.startsWith("PM"));
+        return pairs([[cm.strictAgent("pm"), "pm"], [cm.strictAgent("[PM]"), "pm"], [cm.strictAgent("PM Grok Bot"), null], [cm.strictAgent("grok_pm"), "grok"],
+            [cm.normAgent("pm"), "pm"], [cm.normAgent("PM Grok Bot"), "grok", "free text"], [cm.normAgent("grok_bot"), "grok"],
+            [[...cm.reviewersIn("`CLOSED` (closedBy: pm)").valid].join(), "pm", "closedBy pm is a known name"],
+            [cm.KNOWN_AGENTS.includes("pm"), true, "known"], [cm.NON_CLOSERS.has("pm"), true, "non-closer"], [cm.NON_CLOSERS.size, 1, "only pm"],
+            [m && m.lanes.length, 6, "built-in lane added"], [pm && pm.key, "pm"], [pm && [...pm.agents].join(), "pm"], [cm.withBuiltInLanes(null), null, "no matrix"],
+            [allowed.filter(p => !owns(p)).join(), "", "pm owns"], [refused.filter(owns).join(), "", "pm does not own"],
+            [row && [...row.agents].sort().join(), "grok", "a STATUS row naming the PM grants pm nothing"]]);
     } }
 ];
 
@@ -1080,6 +1191,13 @@ const REAL = [
         const r = runReal(checker, revs.flatMap(x => ["--commit", x]));
         const bad = r.json ? r.json.results.filter(x => !x.ok).map(x => `${x.label}: ${JSON.stringify(Object.values(x.rules).flatMap(y => y.violations)).slice(0, 200)}`) : ["no JSON"];
         return { ok: r.status === 0 && r.json && r.json.results.length === revs.length, detail: `exit ${r.status}; ${bad.join(" | ")}` };
+    } },
+    // The PM's real STATUS claim commit and two lane-opening commits (one on task/lane-r only).
+    { name: "real_pm_claim_and_lane_opening_commits_pass", needs: ["f5c1dfd2", "d9766aa2", "41d24474"], run(checker) {
+        const revs = this.needs;
+        const r = runReal(checker, revs.flatMap(x => ["--commit", x]));
+        const bad = r.json ? r.json.results.filter(x => !x.ok || x.agent !== "pm").map(x => `${x.label} agent ${x.agent}: ${JSON.stringify(Object.values(x.rules).flatMap(y => y.violations)).slice(0, 200)}`) : ["no JSON"];
+        return { ok: r.status === 0 && r.json && r.json.results.length === revs.length && !bad.length, detail: `exit ${r.status}; ${bad.join(" | ")}` };
     } },
     { name: "real_2355931_pre_epoch_lane_commit_grandfathered", needs: ["2355931", "a12f94a7"], run(checker) {
         const r = runReal(checker, ["--commit", "2355931"]);
@@ -1200,7 +1318,7 @@ const MUTANTS = [
     { name: "ledger_denylist_instead_of_allowlist", from: "if (!st.terminal) return;", to: "if (![\"DONE\", \"CLOSED\", \"COMPLETE\", \"COMPLETED\", \"RESOLVED\", \"FIXED\", \"VERIFIED\"].includes(st.word)) return;", kills: ["fail42_ledger_unlisted_terminal_status"] },
     // 4.4 whitelist, grandfathering and the range gate
     { name: "4.4_whitelist_off", from: "if (lanes.some(l => l.globs.some(g => g.re.test(ch.path)))) continue;", to: "continue;", kills: ["fail44_file_of_another_lane"] },
-    { name: "4.4_whitelist_read_from_staged_status", from: "const matrix = parseLaneMatrix(parentTree.read(PATHS.status));", to: "const matrix = parseLaneMatrix(target.newTree.read(PATHS.status));", kills: ["fail44_commit_widens_own_whitelist"] },
+    { name: "4.4_whitelist_read_from_staged_status", from: "const matrix = withBuiltInLanes(parseLaneMatrix(parentTree.read(PATHS.status)));", to: "const matrix = withBuiltInLanes(parseLaneMatrix(target.newTree.read(PATHS.status)));", kills: ["fail44_commit_widens_own_whitelist"] },
     { name: "4.4_frozen_row_ignored", from: "const frozen = ctx.matrix.frozen.find(g => g.reI.test(ch.path));", to: "const frozen = null;", kills: ["fail44_frozen_path_even_for_coordinator"] },
     { name: "4.4_merge_counts_every_merged_path", from: "const mergeHead = revParse(\"MERGE_HEAD^{commit}\");", to: "const mergeHead = null;", kills: ["pass_clean_merge_by_coordinator"] },
     { name: "4.4_empty_merge_needs_identity", from: "if (!ctx.changes.length) return;", to: "if (false) return;", kills: ["pass_commit_merge_without_agent_subject"] },
@@ -1215,6 +1333,18 @@ const MUTANTS = [
     { name: "range_merge_lane_hints_off", from: "const lane = mergedLane(t.subject);", to: "const lane = null;", kills: ["range_gate_merge_lane_hint"] },
     { name: "range_head_ref_hint_off", from: "const headLane = laneOfRef(headRev);", to: "const headLane = null;", kills: ["range_gate_head_ref_hint"] },
     { name: "range_symmetric_allowed", from: "if (spec.includes(\"...\")) throw", to: "if (false) throw", kills: ["range_gate_refuses_symmetric_range"] },
+    // pm agent (WG.00.12b)
+    { name: "pm_builtin_whitelist_off", from: "return { lanes: [...matrix.lanes, pm], frozen: matrix.frozen };", to: "return matrix;", kills: ["pass_pm_lane_opening_commit"] },
+    { name: "pm_whitelist_any_path", from: "const PM_WHITELIST = [\"tasks/*/*/BRIEF*.md\", \"tasks/*/*/lane.json\", \"docs/STATUS.md\"];", to: "const PM_WHITELIST = [\"**\"];", kills: ["fail44_pm_edits_code"] },
+    { name: "pm_whitelist_whole_lane_folder", from: "\"tasks/*/*/BRIEF*.md\", \"tasks/*/*/lane.json\",", to: "\"tasks/*\",", kills: ["fail44_pm_writes_lane_files_other_than_the_brief"] },
+    { name: "pm_alias_of_grok", from: "pm: \"pm\"", to: "pm: \"grok\"", kills: ["pass_pm_lane_opening_commit"] },
+    { name: "pm_matched_in_free_text", from: ".filter(a => !EXACT_ONLY_AGENTS.has(a))", to: "", kills: ["fail44_pm_status_row_grants_nothing", "unit:unit_pm_agent"] },
+    { name: "pm_lane_hint_honoured", from: "if (agent === \"pm\" && laneKey && laneSource !== \"--lane\" && laneSource !== \"DEUS_LANE\") { laneKey = null; laneSource = null; }", to: "",
+        kills: ["pass_pm_staged_on_the_lane_branch", "pass_pm_range_with_head_ref_hint"] },
+    { name: "pm_explicit_lane_overridden", from: "if (agent === \"pm\" && laneKey && laneSource !== \"--lane\" && laneSource !== \"DEUS_LANE\") {", to: "if (agent === \"pm\" && laneKey) {", kills: ["fail44_pm_explicit_lane_not_held"] },
+    { name: "pm_may_close", from: "const NON_CLOSERS = new Set([\"pm\"]);", to: "const NON_CLOSERS = new Set();", kills: ["fail42_pm_named_as_closer_with_its_own_artifact", "fail42_ledger_closedby_pm"] },
+    { name: "pm_status_closer_rule_off", from: "const barred = [...valid].filter(a => NON_CLOSERS.has(a));", to: "const barred = [];", kills: ["fail42_pm_named_as_closer_with_its_own_artifact"] },
+    { name: "pm_ledger_closer_rule_off", from: "else if (NON_CLOSERS.has(c.agent)) R.fail(", to: "else if (false) R.fail(", kills: ["fail42_ledger_closedby_pm"] },
     // backfill and hook
     { name: "backfill_B1_window_zero", from: "a.actor !== b.actor && dt < burstMs", to: "a.actor !== b.actor && dt < 0", kills: ["backfill_chain_burst_B1"] },
     { name: "backfill_B2_off", from: "if (items.length >= 2) {", to: "if (items.length >= 99) {", kills: ["backfill_batch_burst_B2"] },
