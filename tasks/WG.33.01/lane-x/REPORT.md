@@ -361,3 +361,4 @@ None of these is resolved here. Each one is either baselined with a reason or re
 
 - Tested code commit: `66641f1c960af36fb7ac3ee0b3355b882e8f1112` (all evidence above).
 - The REPORT and evidence are committed on top of it. The final `git rev-parse HEAD` after `git push origin task/lane-x` is in the closing line of my session output, and in the commit that records it (below).
+- REPORT and evidence commit: `d132d007d5638ea2ac179294bbd2b45967d81ce0`. Scope check up to it: `git diff --name-only 425b594c146d5f353c10faa11f4b5d47f499b45f..d132d007d5638ea2ac179294bbd2b45967d81ce0` lists 47 paths. `grep -v -E '^(tools/verify_world_state_registry\.js|tools/test_verify_world_state_registry\.js|tools/wsr/|tasks/WG\.33\.01/)'` leaves 0 of them. The commit that adds this line changes only this file.
