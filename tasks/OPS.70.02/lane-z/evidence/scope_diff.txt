@@ -1,0 +1,26 @@
+$ git rev-parse origin/main; git merge-base origin/main HEAD
+0536d3920ae4ac6dd65364565583bcf69db20a60
+96483c517a95b10c5d52aec85d3b18ea01e599b4
+$ git diff --name-only origin/main...HEAD
+docs/archive/STATUS_LEDGER_20260925.md
+docs/telemetry/security_incidents.json
+tasks/OPS.70.02/lane-z/BRIEF.md
+tasks/OPS.70.02/lane-z/BRIEF_RESUME1.md
+tasks/OPS.70.02/lane-z/escalation.md
+tasks/OPS.70.02/lane-z/lane.json
+tasks/OPS.70.02/lane-z/launches/20260926_071010_prompt.txt
+tools/generate_nano_banana_pro.js
+tools/security/check_dependencies.js
+tools/security/dependency_baseline.json
+tools/security/libs_baseline.json
+tools/security/scan_secrets.js
+tools/security/secrets_allowlist.json
+tools/security/secrets_baseline.json
+tools/security/test_check_dependencies.js
+tools/security/test_scan_secrets.js
+tools/security/test_support.js
+EXIT=0
+$ git diff --name-only 425b594c146d5f353c10faa11f4b5d47f499b45f..HEAD | wc -l
+188
+$ comm -3 <(git diff --name-only 425b594c..HEAD | sort) <( (git diff --name-only 425b594c 96483c51; git diff --name-only origin/main...HEAD) | sort -u )   (empty = every other path came in with the main merge 86c074da)
+EXIT=0
