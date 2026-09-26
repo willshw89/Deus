@@ -126,6 +126,9 @@
     "branch": "task/lane-j",
     "launchTimeCT": "2026-09-26 01:00:29 CT",
     "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\run_review_lane_j.ps1",
-    "state": "running"
+    "state": "exited",
+    "exitCode": 0,
+    "tip": "5b0dbc7b",
+    "endedAtCT": "2026-09-26 01:11:03 CT"
   }
 ]
