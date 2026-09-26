@@ -1,0 +1,30 @@
+{
+    "lane":  "lane-aj",
+    "taskId":  "OPS.10.04",
+    "branch":  "task/lane-aj",
+    "writer":  "grok",
+    "reviewer":  "gemini",
+    "push":  true,
+    "allowedPaths":  [
+                         "tools/governance/merge_gate.js",
+                         "tools/governance/test_merge_gate.js",
+                         "tools/governance/MERGE_GATE.md",
+                         "tasks/OPS.10.04/**"
+                     ],
+    "gateTests":  [
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/governance/test_merge_gate.js"
+                                   ],
+                          "timeoutSec":  1800
+                      },
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/check_deus_syntax.js"
+                                   ],
+                          "timeoutSec":  300
+                      }
+                  ]
+}
