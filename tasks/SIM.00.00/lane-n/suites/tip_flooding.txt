@@ -1,0 +1,14 @@
+UF_Test run 2026-09-26T06:23:23.860Z args=[]
+DEBUG_SHEET: Scene_Boot.start called
+AVAILABLE SUITES: selftest, smoke, perf, native_starting_gear, native_survival_dying, native_perf_4x_benchmark, select, minimap, natural_connections, ownership, ecology, projects, settlement, colonists, overseer, world, spawn, worldgen, biomes, tiles, ground, factions, skins, history, objects, walls, doors, items, jobs, floors, wildlife, wildlife_seeds, stance, combat, anim, fog, daynight, timespeed, camera, culling, speech, overhead, look, sheet, talk, fire, vertical, natural_walls, flooding, strata, environment, faction_menus, title, load, setup, depth, select
+SUITE flooding
+PASS flooding.downward_breach_water - breach at (138,138,-1): flooded true, type water (want true, water)
+PASS flooding.lateral_flood_bounded - interior (139,138) flooded: true; perimeter wall (140,138) flooded: false; outside (141,138) flooded: false
+PASS flooding.wall_blocks_breach - solid rock on z=-1 directly under water remains unflooded: true
+PASS flooding.cascading_breach_to_minus2 - cascade from -1 to -2 at (138,138,-2): flooded true, type water (want true, water)
+PASS flooding.lava_flooding - lava pool (146,138): true (lava); adjacent (145,138): true (lava); wall (144,138): false
+PASS flooding.describe_flooded_cells - water desc "-1 · Flooded (Fresh water) · Shallow cave"; lava desc "-2 · Flooded (Lava) · Fossil bed"
+PASS flooding.flood_overlay_rendered - overlay present: true, active sprites: 66
+SHOT C:\Users\snewt\AppData\Local\Temp\deus_lane_n_suites\tip_22004\test_output\flooding.flooded_cavern_water_minus1.png
+PASS flooding.no_errors - none
+RESULT: 8 passed, 0 failed (exit 0)
