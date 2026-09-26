@@ -2903,13 +2903,14 @@
     World.rebindSpriteset = function(ss) {
         const map = window.$dataMap;
         if (!ss || !ss._tilemap || !ss._characterSprites || !map || !window.$gameMap || ss._ufBoundMap === map) return false;
-        const t0 = performance.now();
+        const t0 = performance.now(), split = {};
         const tm = ss._tilemap;
         tm.setData($gameMap.width(), $gameMap.height(), $gameMap.data());
         if (ss._tileset !== $gameMap.tileset()) ss.loadTileset();
         tm.refresh();
         ss.removeAllBalloons();
         ss.removeAllAnimations();
+        split.tiles = performance.now() - t0;
         const sprites = ss._characterSprites, live = new Set($gameMap.events());
         let kept = 0, dropped = 0;
         for (let i = 0; i < sprites.length; i++) {
@@ -2923,17 +2924,22 @@
             dropped++;
         }
         sprites.length = kept;
+        split.drop = performance.now() - t0 - split.tiles;
         const drawn = new Set(sprites.map(sp => sp._character));
         const fresh = [];
         for (const ev of live) if (!drawn.has(ev)) fresh.push(new Sprite_Character(ev));
+        split.create = performance.now() - t0 - split.tiles - split.drop;
         sprites.unshift(...fresh); // events first, as Spriteset_Map.createCharacters orders them
         for (const sp of fresh) tm.addChild(sp);
         ss._ufBoundMap = map;
-        viewSwitch.rebinds++;
-        viewSwitch.lastRebind = { ms: performance.now() - t0, dropped, added: fresh.length };
+        split.add = performance.now() - t0 - split.tiles - split.drop - split.create;
         const lv = this.viewLevel();
         if (lv && lv.z === 0) emit("world:areaBuilt", { x: lv.x, y: lv.y });
         else if (lv) emit("world:levelBuilt", { x: lv.x, y: lv.y, z: lv.z });
+        const ms = performance.now() - t0;
+        split.events = ms - split.tiles - split.drop - split.create - split.add;
+        viewSwitch.rebinds++;
+        viewSwitch.lastRebind = { ms, dropped, added: fresh.length, split };
         return true;
     };
     /** In-place view switches since boot: { switches, syncBuilds (builds a switch had to make), rebinds, last, lastRebind }. */

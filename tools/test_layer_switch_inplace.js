@@ -149,8 +149,8 @@ function suitePlugin() {
             else { const c = W.spawnCellFor(area.x, area.y, x, y, 6, "TEST_lsw_0", 0); x = c.x; y = c.y; }
             testUnits[z] = W.addUnit({ name: `TEST_lsw_${z}`, image: img, area, x, y, z, exact: true, data: { kind: "test" } });
         }
-        // Fog (disabled in play since 2026-09-22): forced on so its level binding can be checked. One cell per level that no
-        // level has explored gets explored on that level only.
+        // Fog (disabled in play since 2026-09-22): the second pass forces it on so its level binding can be checked. One cell
+        // per level that no level has explored gets explored on that level only.
         const Fog = UF.Fog, fogWas = Fog ? Fog.enabled : null;
         const fogCells = {};
         if (Fog) {
@@ -163,6 +163,7 @@ function suitePlugin() {
                 }
                 if (fogCells[z]) Fog.reveal(fogCells[z].x, fogCells[z].y, 0, z);
             }
+            Fog.enabled = fogWas;
         }
         await t.waitFrames(3);
         perf.units = W.units().length;
@@ -231,7 +232,10 @@ function suitePlugin() {
             if (depth && depth.viewZ !== z) bad.push(`depth planes for ${depth.viewZ}`);
             // Fog: this level's explored cell dim or clear, the other levels' cells dark; observer cells clear now.
             let fog = "not loaded";
-            if (Fog && ss && ss._ufFog) {
+            if (Fog && ss && ss._ufFog && !Fog.enabled) {
+                fog = ss._ufFog.visible ? "SHOWN while disabled" : "hidden (disabled in play)";
+                if (ss._ufFog.visible) bad.push("fog shown while disabled");
+            } else if (Fog && ss && ss._ufFog) {
                 const sp = ss._ufFog, bmp = sp._fogBitmap;
                 if (z > 0) fog = sp.visible ? "SHOWN above ground" : "hidden above ground";
                 else if (!sp.visible || !bmp) fog = "NOT SHOWN";
@@ -283,6 +287,7 @@ function suitePlugin() {
                 wSkipped: smp.filter(x => !x.paused && x.dW !== 1).length, pausedUpdates: smp.filter(x => x.paused).length,
                 ticksMoved: (UF.Time ? UF.Time.ticks() : 0) - k0.ticks, framesMoved: W._frame - k0.wf, maxUpdateMs: round2(Math.max(0, ...smp.map(x => x.ms))),
                 newRecord: L.stats().switches === n0 + 1, last: last ? Object.fromEntries(Object.entries(last).map(([k, v]) => [k, round2(v)])) : null,
+                world: typeof W.viewSwitchStats === "function" ? W.viewSwitchStats() : null,
                 shown: shown ? { ok: shown.ok, bad: shown.bad, units: shown.units, events: shown.events, fog: shown.fog, minimap: shown.mini } : null
             };
             perf.switches.push(Object.assign({ round: opts.round || 0 }, rec));
@@ -290,13 +295,16 @@ function suitePlugin() {
             return rec;
         }
 
-        //------------------------------------------------------------ the sequence, then the bench rounds
+        //------------------------------------------------------------ the sequence (fog as in play, then fog forced on), the bench rounds
         const seq = [1, 2, 0, -1, 0];
         const recs = [];
-        for (const z of seq) recs.push(await doSwitch(z, { inspect: true, round: 1, shot: `${recs.length + 1}_${label(z).replace("+", "p").replace("-", "m")}` }));
-        for (const round of [2, 3]) for (const z of seq) await doSwitch(z, { round });
+        for (const z of seq) recs.push(Object.assign(await doSwitch(z, { inspect: true, round: 1, shot: `${recs.length + 1}_${label(z).replace("+", "p").replace("-", "m")}` }), { pass: "play" }));
+        if (Fog) Fog.enabled = true;
+        for (const z of seq) recs.push(Object.assign(await doSwitch(z, { inspect: true, round: 2, shot: z === 0 && recs.length === 7 ? "fog_on_Ground" : null }), { pass: "fog on" }));
+        if (Fog) Fog.enabled = fogWas;
+        for (const round of [3, 4]) for (const z of seq) await doSwitch(z, { round });
         writePerf();
-        const fmt = r => `${label(r.from)}->${label(r.to)}`;
+        const fmt = r => `${r.pass === "fog on" ? "[fog on] " : ""}${label(r.from)}->${label(r.to)}`;
 
         t.check("same_scene_and_spriteset", recs.every(r => r.ok && !r.timedOut && r.sameScene && r.sameSpriteset && r.scenesMade === 0 && r.spritesetsMade === 0),
             recs.map(r => `${fmt(r)}: scene ${r.sameScene ? "same" : "NEW"}, spriteset ${r.sameSpriteset ? "same" : "NEW"}, Scene_Map made ${r.scenesMade}, Spriteset_Map made ${r.spritesetsMade}${r.timedOut ? ", TIMED OUT" : ""}${r.ok ? "" : ", setView refused"}`).join("; "));
@@ -312,8 +320,8 @@ function suitePlugin() {
             recs.map(r => `${fmt(r)}: ${r.shown ? (r.shown.ok ? `ok (${r.shown.events} unit events for ${r.shown.units} units; fog ${r.shown.fog}; minimap ${r.shown.minimap})` : `WRONG: ${r.shown.bad.join(" | ")}`) : "not inspected"}`).join("; "));
 
         //------------------------------------------------------------ save and load after several switches
-        await doSwitch(-1, { round: 4 });
-        await doSwitch(1, { round: 4, shot: "6_before_save_p1" });
+        await doSwitch(-1, { round: 5 });
+        await doSwitch(1, { round: 5, shot: "6_before_save_p1" });
         const st = W.state;
         const viewBefore = { z: L.view(), mapId: $gameMap.mapId(), px: $gamePlayer.x, py: $gamePlayer.y, dx: $gameMap.displayX(), dy: $gameMap.displayY(),
             record: JSON.stringify(st.view), plate: L.plateText() };
@@ -327,10 +335,19 @@ function suitePlugin() {
         DataManager.extractSaveContents(JsonEx.parse(json));
         const loadedWorld = worldKeys(W.state);
         const worldDiff = Object.keys(savedWorld).filter(k => savedWorld[k] !== loadedWorld[k]);
-        const tl0 = performance.now();
+        const tl0 = performance.now(), loadDiag = { readyCalls: 0, readyTrue: 0, builds0: builds, warm0: typeof W.prewarmStats === "function" ? W.prewarmStats().loadSteps : null };
+        const realReady = Scene_Map.prototype.isReady;
+        Scene_Map.prototype.isReady = function() { loadDiag.readyCalls++; const r = realReady.apply(this, arguments); if (r) loadDiag.readyTrue++; return r; };
+        phase = "load";
+        const savedScene = scene();
         SceneManager.goto(Scene_Map);
         let loadTimedOut = false;
-        await t.waitUntil(() => settled() && scene()._spriteset && W.viewLevel(), 90000, "the loaded game's map").catch(() => { loadTimedOut = true; });
+        await t.waitUntil(() => scene() !== savedScene && settled() && scene()._spriteset && W.viewLevel(), 90000, "the loaded game's map").catch(() => { loadTimedOut = true; });
+        Scene_Map.prototype.isReady = realReady;
+        phase = "idle";
+        loadDiag.builds = builds - loadDiag.builds0;
+        loadDiag.buildLog = buildLog.filter(b => b.phase === "load").map(b => b.z);
+        loadDiag.prewarmAtStart = typeof W.prewarmStats === "function" ? W.prewarmStats() : null;
         await t.waitFrames(3);
         const loadMs = performance.now() - tl0;
         const viewAfter = { z: L.view(), mapId: $gameMap.mapId(), px: $gamePlayer.x, py: $gamePlayer.y, dx: $gameMap.displayX(), dy: $gameMap.displayY(),
@@ -342,11 +359,11 @@ function suitePlugin() {
         const missingEv = unitsOnView.filter(u => !$gameMap._events[EB + u.id]).length;
         t.screenshot("7_after_load");
         const loadedScene = scene();
-        const again = await doSwitch(0, { round: 5 });
-        perf.load = { ms: round2(loadMs), scenesMade, prewarm: typeof W.prewarmStats === "function" ? W.prewarmStats() : null };
+        const again = await doSwitch(0, { round: 6 });
+        perf.load = { ms: round2(loadMs), scenesMade, diag: loadDiag, prewarm: typeof W.prewarmStats === "function" ? W.prewarmStats() : null };
         writePerf();
         t.check("save_load_keeps_view_and_world",
-            !loadTimedOut && worldDiff.length === 0 && viewDiff.length === 0 && recordMatches && missingEv === 0 && again.sameScene && scene() === loadedScene && again.last && again.last.inPlace === true,
+            !loadTimedOut && loadedScene !== savedScene && worldDiff.length === 0 && viewDiff.length === 0 && recordMatches && missingEv === 0 && again.sameScene && scene() === loadedScene && again.last && again.last.inPlace === true,
             `saved on ${label(viewBefore.z)} after ${perf.switches.length - 1} switches (${json.length} characters of JSON); world after the load: ${worldDiff.length ? `DIFFERS in ${worldDiff.join(", ")}` : "units (cells, levels), tile and object diffs, level strata, seed and next unit id the same"}; ` +
             `view before ${JSON.stringify(viewBefore)} after ${JSON.stringify(viewAfter)}${viewDiff.length ? ` (DIFFERS in ${viewDiff.join(", ")})` : " (same)"}; saved view record ${recordMatches ? "matches the view" : "DOES NOT MATCH the view"}; ` +
             `${unitsOnView.length} units on the loaded level, ${missingEv} without an event; load to map ${Math.round(loadMs)} ms${loadTimedOut ? " (TIMED OUT)" : ""}; ` +
