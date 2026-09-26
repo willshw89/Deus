@@ -1,0 +1,11 @@
+HEAD 66641f1c960af36fb7ac3ee0b3355b882e8f1112
+run a EXIT=0
+run b EXIT=0
+b83825de407981deef3f0387edf3a2eca576c4c04d1b5144883a37b055c904fc *<tmp>/a/WSR_REPORT.md
+3b9cf7ba959e849738ff1d18b80def56a9041abea2312dc953f87a7341a5ba84 *<tmp>/a/wsr_report.json
+b83825de407981deef3f0387edf3a2eca576c4c04d1b5144883a37b055c904fc *<tmp>/b/WSR_REPORT.md
+3b9cf7ba959e849738ff1d18b80def56a9041abea2312dc953f87a7341a5ba84 *<tmp>/b/wsr_report.json
+b83825de407981deef3f0387edf3a2eca576c4c04d1b5144883a37b055c904fc *tools/wsr/report/WSR_REPORT.md
+3b9cf7ba959e849738ff1d18b80def56a9041abea2312dc953f87a7341a5ba84 *tools/wsr/report/wsr_report.json
+BASELINE CHECK: OK (1248 entries match)
+make_baseline --check EXIT=0

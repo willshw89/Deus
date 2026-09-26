@@ -1,0 +1,40 @@
+clone HEAD 66641f1c960af36fb7ac3ee0b3355b882e8f1112 autocrlf=true status_lines_before=0
+CR count 220 docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md
+CR count 14752 game/data/UF_WorldCatalog.json
+CR count 31 art/APPROVALS.md
+CR count 0 tools/wsr/known_gaps.json
+CR count 0 tools/wsr/report/WSR_REPORT.md
+root: C:\Users\snewt\AppData\Local\Temp\lanexclone_crlf
+HEAD: 66641f1c960af36fb7ac3ee0b3355b882e8f1112
+$ node tools/test_verify_world_state_registry.js
+PASS mutants_left_tool_untouched: the tool file on disk is unchanged
+PASS repo_untouched: git status is the same before and after the run
+RESULT: 145 passed, 0 failed
+EXIT=0
+$ node tools/verify_world_state_registry.js
+RULE PLACED-IN-SLOT: 0 violation(s), 0 gap(s), 0 exempt
+BASELINE tools/wsr/known_gaps.json: 1248 entries, 1248 matched, 0 new, 0 stale
+GATE: OK (every violation and gap is baselined; no stale entry)
+EXIT=0
+$ node tools/verify_world_state_registry.js --check
+RULE MANIFEST-TEMPLATE: 0 violation(s), 983 gap(s), 0 exempt
+RULE PLACED-IN-SLOT: 0 violation(s), 0 gap(s), 0 exempt
+CHECK: OK (tools/wsr/report matches a fresh run)
+EXIT=0
+$ node tools/art/test_catalogue.js
+PASS catalogue.conflicts_required: 19/19 required topics present; conflicts.md 134 lines
+
+46/47 checks passed
+EXIT=1
+$ node tools/art/build_catalogue.js --check
+DIFF art/catalogue/catalogue.json
+DIFF art/catalogue/conflicts.md
+CHECK: FAILED (2 file(s) differ from a fresh build)
+EXIT=1
+$ node tools/check_deus_syntax.js
+Checked 52 DEUS plugin files. Errors: 0
+EXIT=0
+$ node tools/verify_world_state_registry.js --strict
+STRICT: FAILED (1248 violation(s) or gap(s); the baseline is ignored)
+EXIT=1
+git status --short (lines): 0
