@@ -162,6 +162,43 @@ INTEGRITY AUDIT SUMMARY: 15 passed, 0 failed
 EXIT=0
 ```
 
+## 10b. Rev 2: the review checklist and DEC-013 landed while Rev 1 was being written
+
+```
+$ git log --oneline -3   (after the Rev 1 commit)
+ddd1b865 [claude] SIM.00.01 ADR-003 sim/render split and LOD simulation (Rev 1, PROPOSED)
+f4e3b56d [gemini] 0021-V §3,§6,§7 Lane M review checklist: 9 layers, structural collapse, decay
+477bb3bf [gemini] Record Lane M launch prompt 20260926_002434
+EXIT=0
+$ git log --oneline -3 main
+0c1baf8d [gemini] 0021-V §1-§7 DEC-013, 9 layers/races, collapse & decay packages, WBS Rev 19
+8e99f6c5 [gemini] 0020-U §4 Align WG.00.09b row with DEC-011 flat layers
+2033e8db [gemini] 0019-T §1 Update active workers telemetry after restart relaunch
+EXIT=0
+$ git diff --stat ebeec892 0c1baf8d -- game tools
+(empty)
+EXIT=0
+```
+
+**Sources read:**
+- `tasks/SIM.00.01/lane-m/review_checklist.md` (from `f4e3b56d`).
+- The PM inbox `0021-V.md` (in `done/`) and `0021-V-addendum.md`.
+- `git show 0c1baf8d:` for `docs/OWNER_DECISIONS.md` (DEC-013, L171-187), `docs/VISION.md` (V137 L131, V138 L132, V128 log L361) and `docs/worldgen/DEUS_WORLDGEN_WBS.md` (WG.00.17 L105, SIM.40.01-.09 L525-533).
+
+**New code facts (checked with `sed -n` / `grep -n`, EXIT=0):**
+- Strata material table with support, maxHP and debris: `DEUS_Levels.js:1000-1010`.
+- A destroyed stratum becomes air: `:1700-1702`. The debris is only named in the event (`:1720-1722`), with "no item drops in 19A" (`:1001-1002`).
+- Change records: `REC = 11`, `:997`; encoder `:1110-1114`.
+- Five fixed change maps: `:1137`, `:1141`. Elevation `(minZ + 2) * STRATA`, capped at 24: `:1805`.
+- Minimap `Z_LEVELS` / `Z_COUNT`: `DEUS_Minimap.js:59-60`.
+- Unsupported airborne builds refused: `DEUS_Colonists.js:3736`.
+- Doors ruin/rubble: `DEUS_Doors.js:18`, `:444-451`.
+- `abandonedYear` set: `DEUS_HistoricalDemographics.js:521`.
+- Per-level allocations:
+  - `new Array(cells * 6)`: `DEUS_World.js:605`;
+  - Fluid grids/flood/`inQueue`: `DEUS_Fluid.js:179-183`;
+  - strata `Uint8Array(n * STRATA)`: `DEUS_Levels.js:1037`.
+
 ## 11. Method and caveats
 
 **How the survey was done.**
