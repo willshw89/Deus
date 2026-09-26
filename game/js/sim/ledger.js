@@ -33,6 +33,7 @@ function show(v) {
     if (typeof v === "string") return JSON.stringify(v);
     if (typeof v === "bigint") return String(v) + "n";
     if (typeof v === "symbol") return "a symbol";
+    if (typeof v === "function") return "a function";
     if (typeof v === "object" && v !== null) return Array.isArray(v) ? "an array" : "an object";
     return String(v);
 }
@@ -400,7 +401,7 @@ function createLedger(config) {
 
     //---- world registration --------------------------------------------------------------------------------------------
     function register(cls, form, amount, cause) {
-        const where = "register " + show(cls) + "/" + show(form);
+        const where = "register " + show(cls) + "/" + show(form) + " (cause " + show(cause === undefined ? "register" : cause) + ")";
         if (S.sealed) fail("E_SEALED", where + ": the ledger is sealed; after seal() matter changes only by transform, recipe, source or sink");
         const k = keyOf(cls, form, where);
         checkAmount(amount, where);
@@ -438,7 +439,7 @@ function createLedger(config) {
         needSealed(where);
         checkCause(cause, where);
         if (typeof id !== "string" || !has(C.recipes, id)) fail("E_NO_ENTRY", where + ": no such recipe (cause " + show(cause) + ")");
-        checkAmount(times, where + " times");
+        checkAmount(times, where + " times (cause " + show(cause) + ")");
         const r = C.recipes[id], changes = [], counters = [];
         for (const side of [r.inputs, r.outputs]) for (const e of side) {
             if (times > 0 && e[1] > Math.floor(MAX / times)) fail("E_OVERFLOW", where + ": " + times + " x " + e[1] + " exceeds Number.MAX_SAFE_INTEGER");

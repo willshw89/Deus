@@ -191,7 +191,13 @@ const SINKS = {
     }
 };
 
-module.exports = {
+// Frozen, so that no host can change the defaults another host gets; defaultConfig() in ledger.js returns a mutable copy.
+function deepFreeze(o) {
+    if (o !== null && typeof o === "object" && !Object.isFrozen(o)) { Object.freeze(o); for (const k of Object.keys(o)) deepFreeze(o[k]); }
+    return o;
+}
+
+module.exports = deepFreeze({
     schema: 1,
     families: FAMILIES,
     forms: FORMS,
@@ -201,4 +207,4 @@ module.exports = {
     sources: SOURCES,
     sinks: SINKS,
     logLimit: 256
-};
+});

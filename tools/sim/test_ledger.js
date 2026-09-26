@@ -46,7 +46,8 @@ function loadLedger(overrides) {
         if (typeof spec !== "string" || !/^\.\/ledger[a-z0-9_]*(\.js)?$/.test(spec)) throw new Error("PURITY: require(" + JSON.stringify(spec) + ") refused");
         return load(spec.slice(2).replace(/\.js$/, "") + ".js");
     }
-    return { L: load("ledger.js"), ctx };
+    const L = load("ledger.js");
+    return { L, D: load("ledger_defaults.js"), ctx };
 }
 
 //=======================================================================================================================
@@ -195,7 +196,7 @@ function throwsCode(fn, code, msg) {
 }
 const METALS = ["fe", "cu", "ag", "au", "pt"];
 
-function suite(L) {
+function suite(L, D) {
     const checks = [];
     const T = (name, fn) => checks.push([name, fn]);
     const cfg = () => L.defaultConfig();
@@ -295,6 +296,13 @@ function suite(L) {
         ok(rows.some(r => r.from === "steel" && r.to === "fe_trace"), "steel rusts to fe_trace");
         for (const r of rows) eq(r.to.split("_")[0], r.from === "steel" ? "fe" : r.from.split("_")[0], "rust element of " + rowKey(r));
         ok(!rows.some(r => r.from === "au_metal" || r.from === "pt_metal"), "gold and platinum do not rust");
+    });
+    T("defaults_module_is_frozen", () => {
+        for (const o of [D, D.families, D.classes, D.classes.fe_ore, D.transforms, D.transforms[0], D.transforms[0].toForms, D.sources, D.sources.magic, D.sinks.magic, D.recipes[0].inputs])
+            ok(Object.isFrozen(o), "a defaults object is not frozen");
+        const c = L.defaultConfig();
+        c.transforms.length = 0;
+        ok(L.defaultConfig().transforms.length > 50, "defaultConfig() must return an independent copy");
     });
     T("defaults_deterministic_describe_and_checksum", () => {
         same(L.createLedger().describe(), L.createLedger().describe(), "describe");
@@ -446,13 +454,15 @@ function suite(L) {
         const bad = [1.5, 0.5, NaN, Infinity, -Infinity, -1, -0.5, "5", null, undefined, Math.pow(2, 53), 1e300, {}, [], true, BigInt(5)];
         for (const v of bad) {
             const l = world();
-            const e = throwsCode(() => L.createLedger().register("stone", "strata", v), "E_AMOUNT", "register " + show(v));
-            ok(/stone/.test(e.message), "the error names the class: " + e.message);
+            const e = throwsCode(() => L.createLedger().register("stone", "strata", v, "worldgen:test"), "E_AMOUNT", "register " + show(v));
+            ok(/stone/.test(e.message) && /worldgen:test/.test(e.message), "the error names the class and cause: " + e.message);
             const t = throwsCode(() => l.transform("stone", "object", "stone", "ruin", v, "decay:test"), "E_AMOUNT", "transform " + show(v));
             ok(/stone/.test(t.message) && /decay:test/.test(t.message), "the error names class and cause: " + t.message);
-            throwsCode(() => l.source("magic", "stone", "object", v, "spell"), "E_AMOUNT", "source " + show(v));
-            throwsCode(() => l.sink("magic", "stone", "object", v, "spell"), "E_AMOUNT", "sink " + show(v));
-            throwsCode(() => l.recipe("alloy.electrum", v, "smith"), "E_AMOUNT", "recipe times " + show(v));
+            for (const e2 of [throwsCode(() => l.source("magic", "stone", "object", v, "spell:x"), "E_AMOUNT", "source " + show(v)),
+                throwsCode(() => l.sink("magic", "stone", "object", v, "spell:x"), "E_AMOUNT", "sink " + show(v))])
+                ok(/stone/.test(e2.message) && /spell:x/.test(e2.message), "the error names the class and cause: " + e2.message);
+            const e3 = throwsCode(() => l.recipe("alloy.electrum", v, "smith:x"), "E_AMOUNT", "recipe times " + show(v));
+            ok(/alloy\.electrum/.test(e3.message) && /smith:x/.test(e3.message), "the error names the recipe and cause: " + e3.message);
         }
     });
     T("amount_zero_allowed", () => {
@@ -907,9 +917,9 @@ function suite(L) {
     return checks;
 }
 
-function runSuite(L) {
+function runSuite(mod) {
     const results = [];
-    for (const [name, fn] of suite(L)) {
+    for (const [name, fn] of suite(mod.L, mod.D)) {
         try { fn(); results.push([name, true, ""]); } catch (e) { results.push([name, false, String(e && e.message || e).split("\n")[0].slice(0, 300)]); }
     }
     return results;
@@ -960,6 +970,7 @@ const MUTANTS = [
     ["defaults_decay_skip_row", "ledger_defaults.js", '["solidify", "lava", ["fluid"], "stone", ["strata"]],', '["solidify", "lava", ["fluid"], "stone", ["strata"]],\n    ["compact", "rubble", ["strata"], "stone", ["strata"]],'],
     ["defaults_magic_marked_confirmed", "ledger_defaults.js", 'classes: "*", forms: "*", allowFinite: false, ownerConfirmed: false,\n        authority: "PM default for DEC-018', 'classes: "*", forms: "*", allowFinite: false, ownerConfirmed: true,\n        authority: "PM default for DEC-018'],
     ["defaults_magic_allows_finite", "ledger_defaults.js", 'classes: "*", forms: "*", allowFinite: false, ownerConfirmed: false,\n        authority: "PM default for DEC-018', 'classes: "*", forms: "*", allowFinite: true, ownerConfirmed: false,\n        authority: "PM default for DEC-018'],
+    ["defaults_not_frozen", "ledger_defaults.js", "module.exports = deepFreeze({", "module.exports = ({"],
     ["hidden_math_random_caught_dynamically", "ledger.js", "function createLedger(config) {\n", 'function createLedger(config) {\n    Reflect.get(Reflect.getPrototypeOf(function () {}), "constr" + "uctor")("return Ma" + "th.ran" + "dom()")();\n']
 ];
 
@@ -982,7 +993,7 @@ if (real) {
     report("load_in_bare_vm_context", true, "ECMAScript built-ins only; Math.random throws; Date removed");
     const probe = vm.runInContext('[typeof window, typeof document, typeof process, typeof require, typeof global, typeof self, typeof setTimeout, typeof console, typeof Date, (function(){ try { Math.random(); return "returned"; } catch (e) { return "threw"; } })()].join(",")', real.ctx);
     report("purity_dynamic_context_is_bare", probe === "undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,threw", probe);
-    const results = runSuite(real.L);
+    const results = runSuite(real);
     for (const r of results) report(r[0], r[1], r[1] ? "" : r[2]);
 }
 
@@ -1020,7 +1031,7 @@ if (real && failed === 0) {
         if (n !== 1) { report("mutant_" + name + "_killed", false, "the find text occurs " + n + " times in " + file); continue; }
         const text = REAL[file].replace(find, () => repl);
         let res;
-        try { res = runSuite(loadLedger({ [file]: text }).L); } catch (e) { report("mutant_" + name + "_killed", true, "module failed to load: " + String(e.message).slice(0, 100)); continue; }
+        try { res = runSuite(loadLedger({ [file]: text })); } catch (e) { report("mutant_" + name + "_killed", true, "module failed to load: " + String(e.message).slice(0, 100)); continue; }
         const dead = res.filter(r => !r[1]);
         let extra = "";
         if (name === "hidden_math_random_caught_dynamically") extra = "; static scan of the mutant: " + (purityViolations(text).length ? "flagged" : "clean, so only the bare vm context catches it");
