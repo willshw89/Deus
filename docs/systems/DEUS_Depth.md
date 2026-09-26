@@ -31,20 +31,36 @@ Flat layer compositing. On every view, wherever the viewed level's cell is open,
 - **Colours that stay:** a unit's own `data.tint` and an item's material or type tint. These are the entities' colours, not depth shading.
 - **Canvas size.** `PAD` is 0: nothing projects inward any more. Each canvas is the tilemap's window, 912 × 720 px (19 × 15 tiles).
   - A canvas is repainted when the window's start tile changes, on a refresh (tile or shape events), or every 30 frames while A1 water is in the window (the water frame of the map, rule 12).
-  - Repaint cost: 1.3–8.3 ms per plane (`repaint_cost`, runs of 2026-09-26, this machine).
+  - Repaint times are printed by `repaint_cost`, reported but not gated (Fix 1). For example: 3.3 / 1.6 / 0.3 / 0.4 / 0.4 ms in `tasks/WG.00.09b/lane-k/evidence/after_eb446e06/results_depth_eb446e06.txt`.
 - **Data.** `UF.World.peekArea` gives the lower levels' cached builds (they are never re-read per frame). `UF.Levels.shapeGrid` gives the open cells, cached per level and patched cell by cell on `levels:shapeChanged` / `levels:cellChanged`.
 
 ## 2. Entities of the lower levels
 Objects, items, units, natural walls/cliff faces and, on the ground, ramps and stairs are pooled sprites in the plane's entity container. They are masked and sorted with the plane.
 
 - **Objects:** a subclass of `UF.Objects.Sprite_Layer`, fed the level's build. It rebuilds on `objects:levelChanged` / `objects:changed` for that level, on a repaint, or when the view crosses a cell.
-- **Items:** `UF.Items.find` on the level, using the frame rule of UF_Items. On `items:changed` only the item sprites of the plane whose level holds the item are re-read, and only if the item is on the ground there or was drawn there. A held item (an arrow shot, a meal) touches no plane. Before K4, combat rebuilt every plane's walls and objects on every arrow.
-- **Walls and connectors:** `UF.Levels.naturalWallCells` / `groundConnectorCells`, re-read on a repaint or when the view crosses a cell. The walls' near-black upper caps (rule 13) are the lower level's own. For example, the bottom row of a cut shows the caps of the rock south of it.
+- **The window at the loop seam (Fix 1, B1).** The areas loop (scrollType 3). Near an area's edge the view's display origin
+  wraps (a view centred at y 6 has its display at y 255.5), and the entity window runs past the seam.
+  - Items, walls and connectors are read in up to four pieces inside 0..size−1 (`windowPieces`), never as one query around
+    the unwrapped window.
+  - Before Fix 1, an item at y 3 was never found there, and the clamped wall window dropped every wall face past the seam.
+    The reproduction is in `tasks/WG.00.09b/lane-k/evidence/b1_repro_86bf49a9/`, the check is `entities_at_seam`, and its
+    provocation restores the old reads.
+- **Items:** one `UF.Items.find` per window piece, centred on the piece, keeping the items on the piece's cells. It uses the
+  frame rule of UF_Items.
+  - A lookup per window cell was tried and cost more on these item-sparse levels: up to 4.56 ms in one tick
+    (`perf/escalation_figures_output.txt`, `fix1a.B.depth.plane.rebuildItems.max`).
+  - On `items:changed`, only the item sprites of the plane whose level holds the item are re-read, and only if the item is
+    on the ground there or was drawn there. A held item (an arrow shot, a meal) touches no plane. Before K4, combat rebuilt
+    every plane's walls and objects on every arrow.
+- **Walls and connectors:** `UF.Levels.naturalWallCells` / `groundConnectorCells` per window piece (both clamp to the
+  area), re-read on a repaint or when the view crosses a cell.
+  - The walls' near-black upper caps (rule 13) are the lower level's own. For example, the bottom row of a cut shows the caps
+    of the rock south of it, and a one-cell hole in a terrace shows the cap of the ground wall south of it.
 - **Safety net:** items and walls are re-read at least every `config.entityRefreshFrames` (300) frames.
 - **Units (K2):**
   - **Membership every frame.** One pass over a candidate list: the world's units on the bound planes' levels, tested against the view window plus 3 cells (6 cells upwards for tall sprites).
     - The list is remade when `UF.World.units()` returns a new array (a unit was added or removed), on `world:unitLevelChanged` / `world:unitAreaChanged`, when the planes are bound again, and at least every 60 frames.
-    - No `world:unitMoved` listener is used. `UF.Events.emit` writes a synchronous log line per listener of every `world:*` event (DEUS_Core; about 0.14 ms each, escalated in `tasks/WG.00.09b/lane-k/escalation.md`).
+    - No `world:unitMoved` listener is used. `UF.Events.emit` writes a synchronous log line per listener of every `world:*` event (DEUS_Core; median 115.9 µs per append, escalated in `tasks/WG.00.09b/lane-k/escalation.md` E3).
   - **Same frame.** RMMZ updates the spriteset before the map, so the unit pass runs again after `Scene_Map.update` (`lateUpdate`). A step taken this frame gets its sprite's target before this frame is drawn.
     - Units are placed against the display origin the tiles of this frame were placed with (`_cam`), so a scroll inside the map update cannot shift them off their cells.
     - The spriteset's own update leaves the units to the late pass once one has run (K4: they used to run twice).
@@ -52,7 +68,7 @@ Objects, items, units, natural walls/cliff faces and, on the ground, ramps and s
     - A move of more than 2 cells (a fall or a placement) is not walked.
     - Loop seams are crossed the short way.
     - This is presentation only; the simulation is not touched. Frames are discrete sheet frames (rule 12).
-  - **Preload.** Every unit sheet of the area on screen starts loading at `Scene_Map.start`, at a rebuild (the planes' levels), and on `world:unitAdded` / `world:unitImageChanged` / level or area changes. A sprite never waits for its sheet after a switch.
+  - **Preload.** Every unit sheet of the area on screen starts loading at `Scene_Map.start`, at a rebuild (the planes' levels), and on `world:unitAdded` / `world:unitImageChanged` / level or area changes. A sprite never waits for its sheet after a switch. `UF.Depth.preloadsPending()` counts the preloaded sheets still loading (the checks wait for 0 before a switch).
 - **Not drawn on lower levels:** attack, cast and hurt frames, hitsplats, bars and RMMZ animations. DEUS_Anim and DEUS_Combat work only on Game_Events of the viewed level (escalation.md E5). Also not drawn: fire, the flood overlay, speech, stance rings, designations, fog.
 
 ## 3. Level switches and canvases
@@ -60,7 +76,11 @@ A level switch is still a map transfer (DEUS_Levels / DEUS_World; Lane N's in-pl
 - **Canvas pool.** `Scene_Map.terminate` (after RMMZ's background snapshot) returns the planes' 4 canvases to a module pool, and the next spriteset takes them.
   - Since boot, 4 canvases are made and none after that (`canvases_freed`). Without the pool (its provocation), 4 switches made 16 and destroyed 12.
 - **Bound in the switch's first frame.** The root binds, paints and places the planes when it is made (`createCharacters`). So in the frame of `levels:viewChanged` every visible plane is painted and every unit in the window has a frame (`switch_same_frame`).
-- **Measured:** request to started took 90–169 ms per switch after K4, in 12 switches. The planes' own part is the pooled canvases, peeks of cached builds (about 0.01 ms) and one paint of about 2–3 ms per plane.
+- **Measured** on the Fix 1 code (escalation.md E4, cited there):
+  - Request to started took 105.0–515.0 ms per switch over 12 switches. The slowest was DEUS_Levels' own transfer
+    (`lastSwitch.ms` 493.6).
+  - The planes' own part: the pooled canvases, peeks of cached builds (`lastPeekMs` 0.000–0.010 ms) and one paint of
+    1.585–2.590 ms per plane.
 
 ## 4. Public API (`UF.Depth`)
 | Member | Description |
@@ -73,6 +93,7 @@ A level switch is still a map transfer (DEUS_Levels / DEUS_World; Lane N's in-pl
 | `planes()` | The visible bound planes (`depth`, `level`, `map`, `unprojected()`, `entityCounts()`, `inEntityWindow(win, x, y, size)`). |
 | `root()` | The `Sprite_DepthRoot` of the map scene, or null. |
 | `isOpen(ax, ay, x, y, z)` | Whether a cell is open, from the cached shape grid. |
+| `preloadsPending()` | How many unit sheets the preload started are still loading (0: all ready or failed). |
 | `describe()`, `stats()` | `describe()`: "2 level(s) below, drawn 1:1 (DEC-011), void #08080c". `stats()`: `{ enabled, maxDepth, view, seeThrough, voidVisible, rebuilds, paints, lastPaintMs, peeks, lastPeekMs, layersAlive, canvasesMade, canvasesDestroyed, pooled, updates, lastUpdateMs, unitSteps, preloads, mainRepaints, unitsScanned, candidateRebuilds, entityRebuilds, itemRebuilds, itemDirties, objectDirties, planes: [{ depth, z, visible, scale, x, y, alpha, paints, water, entities, filters, bitmap }] }`. |
 
 Removed (DEC-011): the presets `deus`, `deus_scale`, `deus_color`, `A`–`E`, `off` (use `setEnabled`); `preset()`, `cameraScale()`, `setEyeHeight()`, `center()`; `config.camera`, `origin`, `maxParallaxPx`, `blurQuality`, `depths`; the `Preset` and `EyeHeightFt` parameters; the F7 hotkey (`Input.keyMapper[118]` is free again).
@@ -93,37 +114,72 @@ Removed (DEC-011): the presets `deus`, `deus_scale`, `deus_color`, `A`–`E`, `o
 ## 6. Checks
 Two suites, not default suites.
 
-- **`depth`**: `node tools/test_snapshot.js --name depth --plugins DEUS_Depth --suite depth`. 26 checks. They are listed with their changes in `tasks/WG.00.09b/lane-k/test_changes.md`: preconditions, proof_scene, planes_present, repaint_cost, projection_origin, exposure_by_upper_geometry, mask_order, depth2_through_depth1, entities_drawn, crisp_nearest, parallax_bounded, tunables_take_effect, no_filters_any_state, one_level_below, void_beyond, no_blends, flat_transform, entities_inherit_treatment, visual_settings_no_physics, config_deterministic, planes_cost, screenshots_written, ground_draws_through_openings, canvases_freed, hotkey_free, no_errors.
-- **`layers_flat`**: `node tools/test_layer_render_flat.js`. The driver requires every check, and `--provoke` proves each provocable check can fail. The same driver runs the depth suite with `--suite depth`. 12 checks: preconditions, fixtures, flat_position, flat_crisp, unit_step_same_frame, scan_candidates_only, item_change_scoped, every_view_sees_through, flat_no_filters, switch_same_frame, screenshots_written, no_errors.
+- **`depth`**: `node tools/test_layer_render_flat.js --suite depth` (the lane's gate 2 since Fix 1). The older
+  `node tools/test_snapshot.js --name depth --plugins DEUS_Depth --suite depth` runs the same suite, but in a fixed snapshot
+  folder. 27 checks, listed with their changes in `tasks/WG.00.09b/lane-k/test_changes.md`: preconditions, proof_scene,
+  planes_present, repaint_cost, projection_origin, exposure_by_upper_geometry, mask_order, depth2_through_depth1,
+  entities_drawn, crisp_nearest, parallax_bounded, tunables_take_effect, no_filters_any_state, one_level_below, void_beyond,
+  no_blends, flat_transform, entities_inherit_treatment, visual_settings_no_physics, config_deterministic, planes_cost,
+  screenshots_written, ground_draws_through_openings, entities_at_seam, canvases_freed, hotkey_free, no_errors.
+- **`layers_flat`**: `node tools/test_layer_render_flat.js`. 12 checks: preconditions, fixtures, flat_position, flat_crisp,
+  unit_step_same_frame, scan_candidates_only, item_change_scoped, every_view_sees_through, flat_no_filters,
+  switch_same_frame, screenshots_written, no_errors.
+- **The driver** (`tools/test_layer_render_flat.js`):
+  - It requires every check. `--provoke` proves each provocable check can fail; `--jobs n` runs n provocations at once.
+  - Every run gets its own snapshot folder (`%TEMP%\uf_snapshots\lanek_<suite>_<pid>_<time>`), printed and deleted
+    afterwards; `--keep` keeps it.
+  - A `HARNESS` line or a suite that stopped is exit 2.
 - **Provocations:** `UF_TEST_PROVOKE=depth.<check>`. Each is listed in `test_changes.md`.
-- **The suites set the harness clock to 12:00** (`UF.Time.setForTest`), because DEUS_DayNight tones the screen by the hour.
-- **Fixtures:**
-  - A 3 × 2 Z-2 cut is laid on the low ground nearest the window centre: the ground open; under it one −1 floor cell and five −1 open cells over a −2 floor.
-  - Test units are named `TEST_*`.
-  - The New Game seed differs per harness run, so the windows differ per run.
+- **Deterministic gates (Fix 1).**
+  - No check passes or fails on wall-clock time: `repaint_cost` and `planes_cost` print their milliseconds as "reported,
+    not gated" and assert only that the repaint happened and that the planes were off / on as set while sampled.
+  - No check depends on the generated world (the fixture scene below).
+  - Waits are condition waits: sheets loaded, the preload finished, the view switched, the weather cleared. A timeout is a
+    `HARNESS` line naming the condition.
+  - The unit step is judged on the simulation's clock (`UF.World._frame`), not on displayed frames.
+- **A still world.** The suites pause the simulation (`UF.Time.pause`) for everything except the unit step. They set the
+  harness clock to 12:00 (`UF.Time.setForTest`), because DEUS_DayNight tones the screen by the hour, and they clear the weather.
+- **The fixture scene** (`buildScene`), 16 × 9 columns × 5 levels around a centre C. Every view of both suites is centred on C.
+  - C is the first place, in a fixed order from (size/2 + 56, size/2 + 56), with no unit on any level within 33 × 33 cells.
+  - Objects there are cleared, the strata of every column are written explicitly (`UF.Levels.setStrata`), and the ground
+    floor cells get one painted ground tile (the catalog's first ground kind; AUDIT_LOG A9).
+  - Every level of every column is then verified. `proof_scene` / `fixtures` fail on any difference, and the suite stops
+    with a `HARNESS` line.
+  - The scene holds a +1 terrace with a one-cell hole, a +2 summit on a +1 hill, a wooden deck, low ground, and the 3 × 2 Z-2
+    cut at C: the ground open, one −1 floor cell and five −1 open cells over a −2 floor.
+  - Every probe cell is a named fixture cell (`SCENE_AT`), including a reference cell that is not open on each of the views
+    +2, +1, the ground and −1 (`every_view_sees_through`).
+  - `entities_at_seam` builds its own cells at the area's corner.
+  - Test units are named `TEST_*`. Both suites print the world seed in `preconditions`.
 
-## 7. Status (2026-09-26, Lane K, branch `task/lane-k`)
-- **Gates at 4da2e734:**
+## 7. Status (2026-09-26, Lane K Fix 1, branch `task/lane-k`, code at eb446e06)
+- **Gates on eb446e06**, run in fresh temp clones. Raw logs are in
+  `tasks/WG.00.09b/lane-k/evidence/determinism_eb446e06/`, and `tasks/WG.00.09b/lane-k/REPORT.md` has the details.
 
-  | Command | Exit | Result |
-  |---|---|---|
-  | `node tools/test_layer_render_flat.js` | 0 | 12/12 |
-  | `node tools/test_snapshot.js --name depth --plugins DEUS_Depth --suite depth` | 0 | 26/26 |
-  | `node tools/test_minimap.js` | 0 | 24/24 |
+  | Command | Runs | Exit 0 | Result each run |
+  |---|---|---|---|
+  | `node tools/test_layer_render_flat.js` | 5 in a row, then 4 with 3 other gate runs at the same time | 9/9 | 12/12 |
+  | `node tools/test_layer_render_flat.js --suite depth` | 5 in a row, then 4 with 3 other gate runs at the same time | 9/9 | 27/27 |
+  | `node tools/test_snapshot.js --name depth --plugins DEUS_Depth --suite depth` | 5 in a row | 5/5 | 27 passed, 0 failed |
+  | `node tools/test_minimap.js` | 5 in a row | 5/5 | 24/24 |
 
-  The final commit re-runs them; see the report.
-- **Provocations:** 8/8 `layers_flat` and 15/15 `depth` provocations fail their check. `mask_order` needed a stronger probe first: over ground without art it could not tell the order apart. The check now probes a +1 floor over painted ground, laying one deck cell if the world has none in view.
-- **Screenshots** (opened) are in `tasks/WG.00.09b/lane-k/evidence/after_<sha8>/`, with the before set in `before_3a9daa0f/`:
+- **Provocations:** 8/8 `layers_flat` and 16/16 `depth` provocations fail their own check
+  (`evidence/provoke_eb446e06/`). The Grok review decides; this is not a self-certification.
+- **Screenshots** (opened) are in `tasks/WG.00.09b/lane-k/evidence/after_eb446e06/`, of the fixture scene; the before set
+  is in `before_3a9daa0f/`:
   - `plus2_flat`: +1 and the ground at 1:1 through +2's open air.
   - `plus1_flat`: the ground and −1 through +1's.
   - `ground_flat`: through the cut, the −1 floor with a test unit and the −2 floor.
   - `minus1_off` / `minus1_flat`: the −2 floor through −1's open cells, under the blue cave tone.
-- **Cost:** see `tasks/WG.00.09b/lane-k/perf/` and `escalation.md`.
-  - With the simulation paused, the planes cost about 0.25–0.5 ms per tick (`paused_+2_planes_on/off`; `planes_cost` +0.5 ms).
-  - Under the stress scenario after K4, DEUS_Depth takes about 1.1 ms (update) + 1.1 ms (late pass) + 0.37 ms (render) per tick, against 3.4–3.7 + 1.1 + 0.36 before K4.
+- **Cost:** see `tasks/WG.00.09b/lane-k/perf/` and `escalation.md`. Every figure there cites its JSON field; the Fix 1 runs
+  carry their machine load.
+  - With the simulation paused, the planes' tick is 2.065–2.365 ms on vs 1.53–1.67 ms off (`fix1.ticks.paused`).
+  - Under the stress scenario and the steady views, DEUS_Depth's parts are 0.393 mean / 0.585 worst (update), 0.400 / 0.730
+    (late pass) and 0.142 / 0.200 (render) ms per tick (`fix1.B.*`).
   - A frame is dominated by the simulation (escalation.md E1–E3), not by the planes.
 - **Not done / known:**
   - Not tried in the editor's Playtest (F5).
   - Lower-level combat frames and effects are not drawn (E5).
   - A switch is still a map transfer (Lane N).
   - Fog of the lower levels is not applied.
+  - The viewed level's own natural wall sprites were not checked at the loop seam (E5).
