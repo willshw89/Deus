@@ -1474,7 +1474,7 @@ function ownerQuestions(S, cat) {
         { id: 'Q-BIOMES', text: 'Which 25 biomes exist and which 5 belong to each band (LOWER2, LOWER1, SURFACE, UPPER1, UPPER2)? Until then every entry is SHARED and the placeholders <BAND>_B1..B5 are unused.' },
         { id: 'Q-BANDS', text: `Are the band ranges (${bandIds(g).map(b => `${b} ${bandRange(g, b).join('..')}`).join(', ')}) and the z range ${g.zMin}..${g.zMax} final?` },
         { id: 'Q-LEGACY-Z', text: 'Legacy "z = -2 Deep Caverns" content (AR-1905..1908) lands in LOWER1 by numeric containment, not in LOWER2 "Deep Caverns". Which band should it be in?' },
-        { id: 'Q-STRATA', text: `Is the stratum split ${JSON.stringify(g.stratumPx)} final, and are strata listed bottom-up? (Slots use the tallest run of k strata, so order does not change slot sizes.)` },
+        { id: 'Q-STRATA', text: `Is the stratum split ${JSON.stringify(g.stratumPx)} final, and are strata listed bottom-up? (Slot sizes use the tallest run of k strata, so the order does not change them; target heights use the lowest k strata, so the order changes those.)` },
         { id: 'Q-FACINGS', text: `Edge strips and ramp side faces are catalogued for facings ${g.facings.join('/')} with the same ${g.tilePx}-px width and stratum-derived height. Are N/E/W vertical faces drawn at all in the top-down view, or only S faces plus top-edge lips?` },
         { id: 'Q-H5-FULL', text: 'Height difference 5 strata and the full-layer face have the same pixel height by default. Keep both slots, or merge them?' },
         { id: 'Q-RAMP-SLOT', text: `Ramp cells are sized tilePx + rise of k strata (PROPOSED). Is that the drawing convention?` },
