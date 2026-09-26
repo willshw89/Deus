@@ -22,8 +22,11 @@
  *                 That file holds the full 40-character hash of the last non-review commit on the
  *                 branch and a "VERDICT: PASS" or "VERDICT: CLEAN PASS" line (and no other verdict).
  *   (c) TESTS     each gateTests entry runs with spawnSync (no shell) in its own fresh clone checked
- *                 out at the tip, with its own timeout; each must exit 0. An entry on the quarantine
- *                 list of tools/ops/gate_tests.json (main's copy or the tip's) refuses the gate.
+ *                 out at the tip, with its own timeout; each must exit 0. The clone is forced to
+ *                 core.autocrlf=false, core.eol=lf and core.safecrlf=false before checkout, so the
+ *                 work-tree bytes equal the committed blobs whatever the caller's global or system
+ *                 line-ending config is. An entry on the quarantine list of
+ *                 tools/ops/gate_tests.json (main's copy or the tip's) refuses the gate.
  *   (d) PUSHED    after git fetch origin: rev-parse <branch> == rev-parse origin/<branch> ==
  *                 git ls-remote origin refs/heads/<branch>.
  *   (e) MAIN      main is checked out in a worktree with no uncommitted tracked changes and no
@@ -83,6 +86,7 @@ const MUTANTS = {
     test_timeout_off: "run tests without a timeout",
     quarantine_off: "ignore the quarantine list",
     fresh_clone_off: "run tests in the current work tree instead of a clone at the tip",
+    clone_autocrlf_off: "check out test clones without forcing core.autocrlf=false, core.eol=lf and core.safecrlf=false",
     push_off: "skip the local-vs-remote branch comparison",
     tracking_off: "skip the origin/<branch> tracking-ref comparison",
     main_clean_off: "skip the main work tree cleanliness check",
@@ -602,10 +606,28 @@ function quarantineList(R, rev, label) {
     return entries.map(p => ({ path: p, norm: normPath(p), from: label }));
 }
 
+// A caller's global or system core.autocrlf=true smudges LF blobs into CRLF on checkout.
+// core.eol=lf covers a text / text=auto path whose eol attribute is unspecified (Windows native,
+// or a caller's core.eol=crlf, would otherwise write CRLF). core.safecrlf=false stops a caller's
+// safecrlf from refusing that checkout. An explicit eol= attribute in the tree still wins.
+const CLONE_LF = [["core.autocrlf", "false"], ["core.eol", "lf"], ["core.safecrlf", "false"]];
+
+function cloneLfArgs() {
+    if (mut("clone_autocrlf_off")) return [];
+    return CLONE_LF.flatMap(([k, v]) => ["-c", `${k}=${v}`]);
+}
+
 function makeClone(ctx, dest) {
-    const c = git(["clone", "--quiet", "--shared", "--no-checkout", ctx.commonDir, dest], { allowFail: true, cwd: os.tmpdir() });
+    const lf = cloneLfArgs();
+    const c = git(["clone", ...lf, "--quiet", "--shared", "--no-checkout", ctx.commonDir, dest], { allowFail: true, cwd: os.tmpdir() });
     if (!c.ok) return `git clone failed: ${c.err}`;
-    const co = git(["-c", "advice.detachedHead=false", "checkout", "--quiet", "--detach", ctx.tip], { allowFail: true, cwd: dest });
+    if (lf.length) {
+        for (const [k, v] of CLONE_LF) {
+            const set = git(["config", "--local", k, v], { allowFail: true, cwd: dest });
+            if (!set.ok) return `git config --local ${k} ${v} failed: ${set.err}`;
+        }
+    }
+    const co = git([...lf, "-c", "advice.detachedHead=false", "checkout", "--quiet", "--detach", ctx.tip], { allowFail: true, cwd: dest });
     if (!co.ok) return `git checkout ${ctx.tip} failed: ${co.err}`;
     const head = revParse("HEAD", dest);
     return head === ctx.tip ? null : `clone HEAD is ${head}, expected ${ctx.tip}`;

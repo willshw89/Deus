@@ -60,7 +60,12 @@ const originMain = () => git(ORIGIN, ["rev-parse", "refs/heads/main"]);
 
 // ---------------------------------------------------------------- fixture
 
+// Temporary global config for the LF regression. Never the real user or system gitconfig.
+const AUTOCRLF_TRUE_CONFIG = path.join(TMP, "autocrlf-true.gitconfig");
+const AUTOCRLF_TRUE_ENV = { GIT_CONFIG_GLOBAL: AUTOCRLF_TRUE_CONFIG };
+
 function setupFixture() {
+    fs.writeFileSync(AUTOCRLF_TRUE_CONFIG, "[core]\n\tautocrlf = true\n\teol = crlf\n\tsafecrlf = true\n");
     git(TMP, ["init", "-q", "--bare", "-b", "main", ORIGIN]);
     fs.mkdirSync(WORK);
     w(["init", "-q", "-b", "main"]);
@@ -103,6 +108,20 @@ const FEATURE = {
     "tests/test_feature.js": "const f = require(\"../src/feature.js\");\nif (f.add(2, 2) !== 4) { console.log(\"FAIL TEST_ add\"); process.exit(1); }\nconsole.log(\"PASS TEST_ add\");\n"
 };
 const FAILING_TEST = { "tests/test_feature.js": "console.log(\"FAIL TEST_ deliberate\");\nprocess.exit(1);\n" };
+// Reads the committed feature bytes back. A CRLF smudge makes disk differ from the LF blob.
+const LF_BYTE_TEST = {
+    "tests/test_feature.js":
+        "const fs = require(\"fs\");\n" +
+        "const disk = fs.readFileSync(\"src/feature.js\");\n" +
+        "const expected = " + JSON.stringify(FEATURE["src/feature.js"]) + ";\n" +
+        "if (!disk.equals(Buffer.from(expected))) {\n" +
+        "    let cr = 0;\n" +
+        "    for (const b of disk) if (b === 13) cr++;\n" +
+        "    console.log(\"FAIL TEST_ bytes len=\" + disk.length + \" cr=\" + cr);\n" +
+        "    process.exit(1);\n" +
+        "}\n" +
+        "console.log(\"PASS TEST_ bytes\");\n"
+};
 
 class Lane {
     constructor(name, manifest) {
@@ -305,6 +324,13 @@ const CASES = [
     {
         name: "pass_run_from_lane_worktree", build: () => new Lane("wt").standard(), args: DRY, expect: PASS,
         setup: l => addWorktree(l), teardown: removeWorktree, cwd: l => l.wt
+    },
+    // OPS.10.04. The gate process sees only the temp global config (autocrlf=true, eol=crlf, safecrlf=true).
+    {
+        name: "pass_clone_lf_under_autocrlf_true",
+        build: () => built("lf", null, l => { l.manifestCommit(); l.writer(LF_BYTE_TEST); l.review(); l.push(); }),
+        args: DRY, env: AUTOCRLF_TRUE_ENV, expect: PASS,
+        verify: r => (/^\| 1 \| node tests\/test_feature\.js \| 60 s \| 0 \| \d+\.\d\d s \| PASS \|$/m.test(r.out) ? null : "LF byte test did not pass through the gate")
     },
 
     // (b) review
@@ -577,6 +603,7 @@ const KILLS = {
     test_timeout_off: "fail_test_timeout",
     quarantine_off: "fail_quarantined_test",
     fresh_clone_off: "fail_uncommitted_fix_not_counted",
+    clone_autocrlf_off: "pass_clone_lf_under_autocrlf_true",
     push_off: "fail_branch_unpushed_local_ahead",
     tracking_off: "fail_tracking_ref_stale",
     main_clean_off: "fail_main_dirty",
