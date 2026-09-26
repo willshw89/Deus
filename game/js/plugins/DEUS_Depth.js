@@ -1899,7 +1899,7 @@
             const atEvent = [];
             let awaitingDraw = null;
             const switchState = (to, frame) => {
-                const r = D.root(), out = { frame, root: !!r, want: [to - 1, to - 2].filter(z => L.isLevel(z)), planes: [], planesOk: false, units: [], missing: [], stale: [] };
+                const r = D.root(), out = { frame, root: !!r, want: [to - 1, to - 2].filter(z => L.isLevel(z) && (z === to - 1 || (config.exposes(to - 1) && openCells(area.x, area.y, to - 1).open > 0))), planes: [], planesOk: false, units: [], missing: [], stale: [] }; // depth 2 only under rebuild's rule (PM ruling E1-A, WG.00.17)
                 if (!r) return out;
                 const win = r.planes[0].entityWindow();
                 const footOf = u => ({ x: Math.round(($gameMap.adjustX(u.x) + 0.5) * TW), y: Math.round(($gameMap.adjustY(u.y) + 1) * TH) });
