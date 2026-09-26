@@ -415,7 +415,7 @@ function schemaValidate(schema, inst, root, where, out) {
 const QUOTE_KEY = k => k === "srdQuote" || /Quote$/.test(k);
 const ID_KEYS = new Set(["srdRef", "tuningRef", "cause", "key", "variant", "spellId", "deusRule", "question", "ownerOpen", "item",
     "part", "gap", "row", "q1Case", "primitive", "primitiveIfYes", "unit"]);
-const isPointer = v => v && typeof v === "object" && !Array.isArray(v) && (v.srdRef !== undefined || v.tuningRef !== undefined || v.ownerOpen !== undefined);
+const isPointer = v => v && typeof v === "object" && !Array.isArray(v) && (typeof v.srdRef === "string" || typeof v.tuningRef === "string" || typeof v.ownerOpen === "string");
 
 // visit(value, key, path, parent) for every node; pointer objects are visited but not entered.
 function walk(value, pathStr, visit, key, parent) {
@@ -538,7 +538,8 @@ function rulePrimitiveSystem(data, add) {
         instancesOf(rec).forEach((fx, i) => {
             const allowed = known[fx.primitive];
             if (!allowed) return;
-            const ok = none ? allowed.includes("meta") : allowed.some(s => sys.includes(s));
+            // Entity and meta primitives (audit section 3.3) may appear in any record; a physical primitive needs one of its systems.
+            const ok = allowed.includes("meta") || (!none && allowed.some(s => sys.includes(s)));
             if (!ok) add("PRIMITIVE_SYSTEM", rec.spellId, "/effects/" + i + "/primitive", fx.primitive + " needs one of " + allowed.join(",") + " but the record's systems are " + sys.join(","));
         });
     }
@@ -595,8 +596,12 @@ function ruleSrdQuotes(data, add) {
 }
 
 function ruleSrdRefs(data, add) {
+    const ids = new Set(Object.values((data.baseline || {}).spells || {}).map(s => s.id));
     for (const rec of recordsOf(data)) {
         const slug = slugOf(rec.spellId);
+        walk(rec, "", (v, k, p) => {
+            if ((k === "asSpell" || k === "spell") && typeof v === "string" && !ids.has(v)) add("SRDREF_UNRESOLVED", rec.spellId, p, JSON.stringify(v) + " is not a spell of srd_baseline.json");
+        });
         walk(rec, "", (v, k, p, parent) => {
             if (!v || typeof v !== "object" || v.srdRef === undefined) return;
             const r = resolveSrdRef(data, v.srdRef);
@@ -740,16 +745,21 @@ function ruleLedgerClasses(data, add) {
     for (const rec of recordsOf(data)) instancesOf(rec).forEach((fx, i) => {
         const Lg = ledgerOf(fx), p = "/effects/" + i + "/ledger";
         const check = (cls, form, where) => { const e = classFormErrors(L, cls, form); if (e) add("LEDGER_CLASS_UNKNOWN", rec.spellId, p + where, e); };
-        if (Lg.mode === "source" || Lg.mode === "sink" || Lg.mode === "policy") check(Lg.class, Lg.form, "");
+        if (Lg.mode === "source" || Lg.mode === "sink" || (Lg.mode === "policy" && (Lg.class !== undefined || Lg.form !== undefined))) check(Lg.class, Lg.form, "");
         if (Lg.mode === "transform") (Lg.moves || []).forEach((mv, j) => {
             check(mv.from && mv.from.class, mv.from && mv.from.form, "/moves/" + j + "/from");
             check(mv.to && mv.to.class, mv.to && mv.to.form, "/moves/" + j + "/to");
         });
-        if (Lg.mode === "relocate") (Lg.classes || []).forEach((c, j) => check(c, Lg.form, "/classes/" + j));
+        if (Lg.mode === "relocate") (Lg.classes || []).forEach((c, j) => {
+            if (!L.classes[c]) add("LEDGER_CLASS_UNKNOWN", rec.spellId, p + "/classes/" + j, "class " + JSON.stringify(c) + " is not declared in the ledger defaults");
+            else if (!(Lg.forms || []).some(f => L.classes[c].forms.includes(f))) add("LEDGER_CLASS_UNKNOWN", rec.spellId, p + "/classes/" + j, "class " + c + " has none of the forms " + JSON.stringify(Lg.forms));
+        });
+        if (Lg.mode === "relocate") (Lg.forms || []).forEach((f, j) => { if (!L.forms.includes(f)) add("LEDGER_CLASS_UNKNOWN", rec.spellId, p + "/forms/" + j, "form " + JSON.stringify(f) + " is not declared in the ledger defaults"); });
         const material = fx.params && fx.params.material;
         if (fx.primitive === "conjureMatter" && typeof material === "string") {
             const row = mat[material];
-            if (!row || !row.value) add("LEDGER_CLASS_UNKNOWN", rec.spellId, "/effects/" + i + "/params/material", "material " + JSON.stringify(material) + " has no ledger class in tuning.json tables.materialClass");
+            if (!row) add("LEDGER_CLASS_UNKNOWN", rec.spellId, "/effects/" + i + "/params/material", "material " + JSON.stringify(material) + " is not in tuning.json tables.materialClass");
+            else if (!row.value) { if (Lg.mode !== "policy") add("LEDGER_CLASS_UNKNOWN", rec.spellId, p, "material " + material + " has no fixed ledger class (tuning.json); only ledger mode policy may use it"); }
             else if (row.value.class !== Lg.class || row.value.form !== Lg.form) add("LEDGER_CLASS_UNKNOWN", rec.spellId, p, "material " + material + " maps to " + row.value.class + "/" + row.value.form + " in tuning.json, not " + Lg.class + "/" + Lg.form);
         }
     });
@@ -839,7 +849,7 @@ function ruleOwnerOpen(data, add) {
             }
         });
         walk(rec, "", (v, k, p) => {
-            if (v && typeof v === "object" && v.ownerOpen !== undefined && !known(v.ownerOpen, v.item)) add("OWNER_OPEN_REF", rec.spellId, p, "no Owner question " + v.ownerOpen + " item " + v.item + " in tuning.json ownerQuestions");
+            if (v && typeof v === "object" && typeof v.ownerOpen === "string" && !known(v.ownerOpen, v.item)) add("OWNER_OPEN_REF", rec.spellId, p, "no Owner question " + v.ownerOpen + " item " + v.item + " in tuning.json ownerQuestions");
         });
     }
 }

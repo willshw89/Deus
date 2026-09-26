@@ -1,0 +1,468 @@
+{
+  "schemaVersion": "deus-spell-primitives/1.0.0",
+  "description": "Catalogue of the 28 spell-effect primitives (SIM.60.01 audit section 3.2). systems, wbs and auditGaps are copied from the audit JSON meta (primitiveSystems, primitiveWbs, primitiveGaps) and the validator checks they still match. phase is the SIM.60.03 phase of audit section 4.4. adr186 maps each primitive to a row of the ADR-003 Rev 3 section 18.6 table (PROPOSED) or records that no row exists (adrGaps). ledgerModes are the ledger modes an instance of the primitive may use.",
+  "adr186": {
+    "source": "docs/adr/ADR-003_sim_render_split_and_lod.md section 18.6 table (lines 1816-1823 at base 425b594c), Rev 3, status PROPOSED",
+    "status": "PROPOSED",
+    "rows": [
+      {"row": "ignite, heat flux", "coreSystem": "Fire (§3.8, step 5; SIM.50.05)", "conservation": "burning is a named sink (§7.9)"},
+      {"row": "impulse / blast", "coreSystem": "volume damage (§18.2), then support (§16)", "conservation": "stratum → debris transform (§7.8)"},
+      {"row": "fluid source / sink", "coreSystem": "Fluid (SIM.50.02)", "conservation": "a named source or sink: DEC-018's PM default, OPEN (Q19)"},
+      {"row": "temperature / freeze", "coreSystem": "Environment and Fluid: water → an ice form", "conservation": "a transform within Q-MASS[water]"},
+      {
+        "row": "terrain edit",
+        "coreSystem": "terrain (SIM.00.05/terrain): strata transforms",
+        "conservation": "moved matter is a transform; conjured matter is a named source (Q19)"
+      },
+      {
+        "row": "light; growth / decay",
+        "coreSystem": "light is presentation; growth and decay are Ecology (§17)",
+        "conservation": "growth is Ecology's ledgered source"
+      }
+    ]
+  },
+  "primitives": [
+    {
+      "name": "ignite",
+      "kind": "physical",
+      "systems": ["HEAT"],
+      "wbs": ["SIM.50.05"],
+      "auditGaps": [],
+      "adrGaps": [],
+      "phase": "A",
+      "adr186": {"status": "MAPPED", "row": "ignite, heat flux", "coreSystem": "Fire", "match": "named"},
+      "ledgerModes": ["none"],
+      "does": "Hands flammable objects or cells to the fire system. The burn itself is the Fire system's ledger work (downstream burn rows)."
+    },
+    {
+      "name": "extinguish",
+      "kind": "physical",
+      "systems": ["HEAT"],
+      "wbs": ["SIM.50.05"],
+      "auditGaps": [],
+      "adrGaps": ["PROPOSED-V-10"],
+      "phase": "A",
+      "adr186": {
+        "status": "MAPPED",
+        "row": "ignite, heat flux",
+        "coreSystem": "Fire",
+        "match": "inferred",
+        "note": "The row does not name extinguish; the Fire system owns it (DEUS_Fire.js extinguish, audit section 4.2)."
+      },
+      "ledgerModes": ["none"],
+      "does": "Puts out named fire sources or exposed flames in a footprint."
+    },
+    {
+      "name": "heatFlux",
+      "kind": "physical",
+      "systems": ["HEAT", "COLD"],
+      "wbs": ["SIM.50.05", "SIM.50.06"],
+      "auditGaps": ["G-TEMP"],
+      "adrGaps": [],
+      "phase": "D",
+      "adr186": {
+        "status": "MAPPED",
+        "row": "ignite, heat flux",
+        "coreSystem": "Fire",
+        "match": "named",
+        "note": "The ADR puts heat flux under Fire; the audit also needs Environment (SIM.50.06) and a stored temperature field (G-TEMP) for cooling, melting and drying. Listed as a disagreement in the REPORT."
+      },
+      "ledgerModes": ["none"],
+      "does": "Adds or removes heat in cells, objects and fluids: dries fuel, melts snow and ice, heats metal, chills."
+    },
+    {
+      "name": "freezeFluid",
+      "kind": "physical",
+      "systems": ["COLD", "WATER"],
+      "wbs": ["SIM.50.02", "SIM.50.06"],
+      "auditGaps": ["G-TEMP"],
+      "adrGaps": [],
+      "phase": "D",
+      "adr186": {"status": "MAPPED", "row": "temperature / freeze", "coreSystem": "Environment and Fluid", "match": "named"},
+      "ledgerModes": ["transform"],
+      "does": "Phase change of water: liquid to ice (freeze) or ice to liquid (thaw), inside Q-MASS[water]."
+    },
+    {
+      "name": "volumeDamage",
+      "kind": "physical",
+      "systems": ["FORCE"],
+      "wbs": ["SIM.40.01", "SIM.40.02", "GP.07.02"],
+      "auditGaps": [],
+      "adrGaps": [],
+      "phase": "B",
+      "adr186": {"status": "MAPPED", "row": "impulse / blast", "coreSystem": "volume damage (§18.2), then support (§16)", "match": "named"},
+      "ledgerModes": ["transform"],
+      "does": "Damages strata, structures and objects in a volume, attenuated by material and propagated to lower layers; destroyed matter becomes debris."
+    },
+    {
+      "name": "impulse",
+      "kind": "physical",
+      "systems": ["FORCE"],
+      "wbs": ["GP.07.02", "WG.00.19"],
+      "auditGaps": [],
+      "adrGaps": ["PROPOSED-V-10"],
+      "phase": "B",
+      "adr186": {
+        "status": "MAPPED",
+        "row": "impulse / blast",
+        "coreSystem": "volume damage (§18.2), then support (§16)",
+        "match": "named",
+        "note": "The ADR row pairs impulse with blast. The audit's impulse also covers lifts, holds and inverted gravity, which are unit and object movement (WG.00.19 falls, GP.07.02), not volume damage. Listed as a disagreement in the REPORT."
+      },
+      "ledgerModes": ["none"],
+      "does": "Pushes, lifts, holds or throws loose objects and creatures; objects moved over an edge fall."
+    },
+    {
+      "name": "forceBarrier",
+      "kind": "physical",
+      "systems": ["FORCE"],
+      "wbs": ["SIM.00.04", "SIM.50.02"],
+      "auditGaps": [],
+      "adrGaps": ["PROPOSED-V-10"],
+      "phase": "A",
+      "adr186": {"status": "NO_ROW", "row": null, "coreSystem": null, "note": "No 18.6 row covers massless barriers that block movement, fluids, gas and fire."},
+      "ledgerModes": ["none"],
+      "does": "Massless magical barrier cells that block creatures, objects, fluids, gas, fire, projectiles or spells as configured."
+    },
+    {
+      "name": "conjureMatter",
+      "kind": "physical",
+      "systems": ["EARTH", "COLD", "WATER", "LIFE"],
+      "wbs": ["SIM.40.01", "SIM.40.02", "WG.61.02", "WG.65.15"],
+      "auditGaps": [],
+      "adrGaps": [],
+      "phase": "E",
+      "adr186": {
+        "status": "MAPPED",
+        "row": "terrain edit",
+        "coreSystem": "terrain (SIM.00.05/terrain)",
+        "match": "named",
+        "note": "Named in the row's conservation cell ('conjured matter is a named source (Q19)')."
+      },
+      "ledgerModes": ["source", "policy"],
+      "does": "Creates solid matter (stone, ice, plants, food, web, grease) that must meet a support rule and may fall; a Q1 policy source with a cause."
+    },
+    {
+      "name": "terrainEdit",
+      "kind": "physical",
+      "systems": ["EARTH"],
+      "wbs": ["SIM.40.01", "SIM.40.02", "WG.61.02", "WG.65.15"],
+      "auditGaps": [],
+      "adrGaps": [],
+      "phase": "E",
+      "adr186": {"status": "MAPPED", "row": "terrain edit", "coreSystem": "terrain (SIM.00.05/terrain)", "match": "named"},
+      "ledgerModes": ["transform", "relocate", "none"],
+      "does": "Mass-conserving strata edits: reshape, cut and fill, fissure, temporary passage, removal to dust."
+    },
+    {
+      "name": "surfaceState",
+      "kind": "physical",
+      "systems": ["EARTH"],
+      "wbs": ["SIM.00.04"],
+      "auditGaps": [],
+      "adrGaps": ["PROPOSED-V-10"],
+      "phase": "A",
+      "adr186": {
+        "status": "NO_ROW",
+        "row": null,
+        "coreSystem": null,
+        "note": "No 18.6 row covers ground movement state; the audit maps it to SIM.00.04 (units and movement)."
+      },
+      "ledgerModes": ["none"],
+      "does": "Ground-surface movement state: difficult, slick, spikes, restraining, illusory, or back to ordinary."
+    },
+    {
+      "name": "fluidSource",
+      "kind": "physical",
+      "systems": ["WATER"],
+      "wbs": ["SIM.50.02", "WG.61.02"],
+      "auditGaps": [],
+      "adrGaps": [],
+      "phase": "C",
+      "adr186": {"status": "MAPPED", "row": "fluid source / sink", "coreSystem": "Fluid (SIM.50.02)", "match": "named"},
+      "ledgerModes": ["source"],
+      "does": "Adds water (a container, the ground, rain or a flood rise); a Q1 policy source with a cause."
+    },
+    {
+      "name": "fluidSink",
+      "kind": "physical",
+      "systems": ["WATER"],
+      "wbs": ["SIM.50.02", "WG.61.02"],
+      "auditGaps": [],
+      "adrGaps": [],
+      "phase": "C",
+      "adr186": {"status": "MAPPED", "row": "fluid source / sink", "coreSystem": "Fluid (SIM.50.02)", "match": "named"},
+      "ledgerModes": ["sink"],
+      "does": "Removes water; a Q1 policy sink with a cause."
+    },
+    {
+      "name": "fluidMove",
+      "kind": "physical",
+      "systems": ["WATER"],
+      "wbs": ["SIM.50.02"],
+      "auditGaps": [],
+      "adrGaps": ["PROPOSED-V-10"],
+      "phase": "C",
+      "adr186": {
+        "status": "MAPPED",
+        "row": "fluid source / sink",
+        "coreSystem": "Fluid (SIM.50.02)",
+        "match": "inferred",
+        "note": "The row names only source and sink; moving existing water is also the Fluid system's."
+      },
+      "ledgerModes": ["relocate"],
+      "does": "Moves existing water: raise, part, redirect, whirlpool. The volume is kept."
+    },
+    {
+      "name": "gasVolume",
+      "kind": "physical",
+      "systems": ["AIR"],
+      "wbs": ["SIM.50.06"],
+      "auditGaps": ["G-GAS"],
+      "adrGaps": ["PROPOSED-V-10"],
+      "phase": "F",
+      "adr186": {"status": "NO_ROW", "row": null, "coreSystem": null, "note": "No 18.6 row covers gas volumes; audit gap G-GAS."},
+      "ledgerModes": ["none"],
+      "does": "Fog, poison gas, smoke or storm cloud that spreads around corners, obscures, drifts, sinks if heavy and disperses in wind."
+    },
+    {
+      "name": "gasDisperse",
+      "kind": "physical",
+      "systems": ["AIR"],
+      "wbs": ["SIM.50.06"],
+      "auditGaps": ["G-GAS"],
+      "adrGaps": ["PROPOSED-V-10"],
+      "phase": "F",
+      "adr186": {"status": "NO_ROW", "row": null, "coreSystem": null, "note": "No 18.6 row; audit gap G-GAS."},
+      "ledgerModes": ["none"],
+      "does": "Removes fog or gas in a footprint."
+    },
+    {
+      "name": "windField",
+      "kind": "physical",
+      "systems": ["AIR"],
+      "wbs": ["SIM.50.06", "SIM.50.05"],
+      "auditGaps": [],
+      "adrGaps": ["PROPOSED-V-10"],
+      "phase": "F",
+      "adr186": {
+        "status": "NO_ROW",
+        "row": null,
+        "coreSystem": null,
+        "note": "No 18.6 row covers wind; the audit maps it to SIM.50.06 weather and SIM.50.05 fire spread."
+      },
+      "ledgerModes": ["none"],
+      "does": "Directional wind: disperses gas, puts out or fans flames, pushes light objects, deflects arrows."
+    },
+    {
+      "name": "weatherOverride",
+      "kind": "physical",
+      "systems": ["AIR", "WATER", "COLD", "HEAT"],
+      "wbs": ["SIM.50.06"],
+      "auditGaps": [],
+      "adrGaps": ["PROPOSED-V-10"],
+      "phase": "D",
+      "adr186": {
+        "status": "MAPPED",
+        "row": "temperature / freeze",
+        "coreSystem": "Environment and Fluid",
+        "match": "inferred",
+        "note": "The row names temperature; weather stages (precipitation, wind) are also Environment. Rain stays the weather system's named source."
+      },
+      "ledgerModes": ["none"],
+      "does": "Shifts local weather stages (precipitation, temperature, wind) or gives shelter from the weather."
+    },
+    {
+      "name": "lightEmit",
+      "kind": "physical",
+      "systems": ["LIGHT"],
+      "wbs": ["WG.00.18"],
+      "auditGaps": ["G-LIGHT"],
+      "adrGaps": [],
+      "phase": "A",
+      "adr186": {
+        "status": "MAPPED",
+        "row": "light; growth / decay",
+        "coreSystem": "light is presentation",
+        "match": "named",
+        "note": "The ADR calls light presentation; the audit needs a simulation light field for vision and darkness (G-LIGHT). Listed as a disagreement in the REPORT."
+      },
+      "ledgerModes": ["none"],
+      "does": "Bright and dim light on a point, object or creature."
+    },
+    {
+      "name": "darken",
+      "kind": "physical",
+      "systems": ["LIGHT"],
+      "wbs": ["WG.00.18"],
+      "auditGaps": ["G-LIGHT"],
+      "adrGaps": ["PROPOSED-V-10"],
+      "phase": "A",
+      "adr186": {
+        "status": "MAPPED",
+        "row": "light; growth / decay",
+        "coreSystem": "light is presentation",
+        "match": "inferred",
+        "note": "Magical darkness is the light row's counterpart; G-LIGHT as for lightEmit."
+      },
+      "ledgerModes": ["none"],
+      "does": "Magical darkness that blocks darkvision and nonmagical light."
+    },
+    {
+      "name": "growth",
+      "kind": "physical",
+      "systems": ["LIFE"],
+      "wbs": ["SIM.50.04"],
+      "auditGaps": [],
+      "adrGaps": [],
+      "phase": "E",
+      "adr186": {"status": "MAPPED", "row": "light; growth / decay", "coreSystem": "Ecology (§17)", "match": "named"},
+      "ledgerModes": ["source", "none"],
+      "does": "Plant overgrowth, enrichment or bloom."
+    },
+    {
+      "name": "decay",
+      "kind": "physical",
+      "systems": ["LIFE"],
+      "wbs": ["SIM.50.04", "SIM.40.07", "SIM.40.10"],
+      "auditGaps": [],
+      "adrGaps": [],
+      "phase": "E",
+      "adr186": {"status": "MAPPED", "row": "light; growth / decay", "coreSystem": "Ecology (§17)", "match": "named"},
+      "ledgerModes": ["none"],
+      "does": "Withers plants, or pauses the decay of remains (Gentle Repose)."
+    },
+    {
+      "name": "bodyTransform",
+      "kind": "physical",
+      "systems": ["LIFE", "EARTH"],
+      "wbs": ["SIM.40.10"],
+      "auditGaps": [],
+      "adrGaps": ["PROPOSED-V-10"],
+      "phase": "E",
+      "adr186": {"status": "NO_ROW", "row": null, "coreSystem": null, "note": "No 18.6 row covers bodies; the audit maps it to SIM.40.10 (lifecycle)."},
+      "ledgerModes": ["policy", "transform", "none"],
+      "does": "Changes a body's or object's matter: mass scale, petrify, polymorph, restore or create a body."
+    },
+    {
+      "name": "animate",
+      "kind": "entity",
+      "systems": ["LIFE", "meta"],
+      "wbs": ["SIM.40.10"],
+      "auditGaps": [],
+      "adrGaps": ["PROPOSED-V-10"],
+      "phase": "E",
+      "adr186": {"status": "NO_ROW", "row": null, "coreSystem": null, "note": "Entity-level (audit section 3.3); no 18.6 row."},
+      "ledgerModes": ["transform", "none"],
+      "does": "A corpse, bones, plant, object or snow becomes a creature and keeps its matter."
+    },
+    {
+      "name": "objectTransform",
+      "kind": "entity",
+      "systems": ["EARTH", "LIFE", "meta"],
+      "wbs": ["WG.61.02"],
+      "auditGaps": [],
+      "adrGaps": ["PROPOSED-V-10"],
+      "phase": "E",
+      "adr186": {"status": "NO_ROW", "row": null, "coreSystem": null, "note": "Entity-level (audit section 3.3); no 18.6 row."},
+      "ledgerModes": ["transform", "none"],
+      "does": "Fabricates products from raw material, or repairs an object."
+    },
+    {
+      "name": "magicSuppress",
+      "kind": "meta",
+      "systems": ["meta"],
+      "wbs": [],
+      "auditGaps": [],
+      "adrGaps": ["PROPOSED-V-10"],
+      "phase": "A",
+      "adr186": {
+        "status": "NO_ROW",
+        "row": null,
+        "coreSystem": null,
+        "note": "Acts on the spell-effect runtime itself (18.6 prose: SIM.60.03's runtime is one core system); no table row."
+      },
+      "ledgerModes": ["none"],
+      "does": "Suppresses magical effects in a footprint (Antimagic Field; Globe of Invulnerability by level and origin)."
+    },
+    {
+      "name": "magicEnd",
+      "kind": "meta",
+      "systems": ["meta"],
+      "wbs": [],
+      "auditGaps": [],
+      "adrGaps": ["PROPOSED-V-10"],
+      "phase": "A",
+      "adr186": {
+        "status": "NO_ROW",
+        "row": null,
+        "coreSystem": null,
+        "note": "Acts on the spell-effect runtime; no table row. Ending a spell fires that spell's own paired sinks."
+      },
+      "ledgerModes": ["none"],
+      "does": "Ends spells on a target or in an area."
+    },
+    {
+      "name": "extraplanarHold",
+      "kind": "meta",
+      "systems": ["meta"],
+      "wbs": ["WG.61.02"],
+      "auditGaps": [],
+      "adrGaps": ["PROPOSED-V-05", "PROPOSED-V-10"],
+      "phase": "E",
+      "adr186": {"status": "NO_ROW", "row": null, "coreSystem": null, "note": "No 18.6 row; the ledger has no form for extradimensional storage (PROPOSED-V-05)."},
+      "ledgerModes": ["policy"],
+      "does": "Moves objects or creatures into extradimensional storage and back (Demiplane, Rope Trick, Secret Chest, Magnificent Mansion, Imprisonment)."
+    },
+    {
+      "name": "castStored",
+      "kind": "meta",
+      "systems": ["meta"],
+      "wbs": [],
+      "auditGaps": [],
+      "adrGaps": ["PROPOSED-V-10"],
+      "phase": null,
+      "phaseNote": "Audit section 4.4 assigns no phase to castStored (PROPOSED-V-09).",
+      "adr186": {"status": "NO_ROW", "row": null, "coreSystem": null, "note": "Acts on the spell-effect runtime; no table row."},
+      "ledgerModes": ["none"],
+      "does": "Runs another spell's effect list later (Glyph of Warding spell glyph, Contingency, Wish duplicating a spell)."
+    }
+  ],
+  "ledgerGaps": [
+    {
+      "id": "PROPOSED-V-01",
+      "need": "A ledger row that breaks non-stone solids (wood, timber) into loose debris under blast or impact.",
+      "reason": "game/js/sim/ledger_defaults.js has break only for stone (stone to rubble). SIM.40.01 section 8.3 has 'broken timber (loose)'. Blasts on wooden floors (Fireball, Thunderwave, Shatter) need it."
+    },
+    {
+      "id": "PROPOSED-V-02",
+      "need": "Ledger rows between remains and creature-held matter (animation of corpses and bones, revival, reverting to remains).",
+      "reason": "ledger_defaults.js moves biomass into creatures only by eat and out only by butcher and remains-to-humus. SIM.40.05 section on remains expects REMAINS to BODY transforms (Lane W)."
+    },
+    {
+      "id": "PROPOSED-V-03",
+      "need": "A ledger class or mapping for dust (disintegrated matter of any family).",
+      "reason": "SIM.40.01 section 2.4 defines dust with the source's family and composition; ledger_defaults.js has no dust class. Disintegrate's pile of dust must stay in its family."
+    },
+    {
+      "id": "PROPOSED-V-04",
+      "need": "A ledger form for spell-held matter (Passwall's suppressed passage, restored at the end).",
+      "reason": "SIM.40.01 section 9.1 lists a HELD form; ledger_defaults.js has none."
+    },
+    {
+      "id": "PROPOSED-V-05",
+      "need": "A ledger form, or named import and export, for extradimensional storage.",
+      "reason": "Matter in a Demiplane, Magnificent Mansion, Rope Trick space or Secret Chest leaves the world map. Owner question Q1(d) decides whether it is a held form, an import and export, or outside the ledger."
+    },
+    {
+      "id": "PROPOSED-V-06",
+      "need": "A named sink for the gas that burning releases, so a burn row closes.",
+      "reason": "ADR-003 Rev 3 section 7.9 calls burning a named sink; tasks/WG.65.15/lane-l1/LEDGER_API.md section 10 notes the default sink list has no AIR or outgas sink (its REPORT question Q5)."
+    },
+    {
+      "id": "PROPOSED-V-07",
+      "need": "A ledger row for animated objects and objects turned into creatures.",
+      "reason": "ledger_defaults.js gives wood, stone and metal classes no creature form; an animated object keeps its object form here."
+    }
+  ]
+}

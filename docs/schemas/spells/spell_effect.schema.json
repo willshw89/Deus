@@ -1,0 +1,1614 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deus.invalid/schemas/spells/spell_effect.schema.json",
+  "title": "DEUS spell-effect data (SIM.60.02, schemaVersion deus-spell-effect/1.0.0)",
+  "description": "Validates docs/schemas/spells/effects.json. One record per SRD spell that the SIM.60.01 audit marks physical, or NONE with an entity or meta primitive. A spell is data: a list of reusable primitive instances (DEC-018, R11: no per-spell code). SRD damage, range, saves, area, duration and casting are never copied here; they are pointers (srdRef) into srd_baseline.json (R1). DEUS numbers are pointers (tuningRef) into tuning.json. $defs/tuningFile and $defs/primitiveCatalogue validate tuning.json and primitives.json. The cross-file rules (SRD numbers, quotes, ledger names, ore, coverage, Q2) are in tools/spells/validate_spell_effects.js.",
+  "type": "object",
+  "required": ["schemaVersion", "baseline", "tuning", "primitives", "records"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {"const": "deus-spell-effect/1.0.0"},
+    "description": {"type": "string"},
+    "baseline": {"const": "docs/schemas/spells/srd_baseline.json"},
+    "tuning": {"const": "docs/schemas/spells/tuning.json"},
+    "primitives": {"const": "docs/schemas/spells/primitives.json"},
+    "records": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/spellRecord"}
+    }
+  },
+  "$defs": {
+    "ident": {"type": "string", "pattern": "^[a-z][a-zA-Z0-9]*$"},
+    "spellId": {"type": "string", "pattern": "^srd:spell:[a-z0-9-]+$"},
+    "system": {"enum": ["HEAT", "FORCE", "WATER", "COLD", "EARTH", "LIGHT", "LIFE", "AIR", "NONE"]},
+    "primitive": {
+      "description": "The 28 primitives of the SIM.60.01 audit (section 3.2; meta.primitiveSystems). primitives.json maps each to an ADR-003 Rev 3 section 18.6 core system or lists it as a gap.",
+      "enum": [
+        "ignite",
+        "extinguish",
+        "heatFlux",
+        "freezeFluid",
+        "volumeDamage",
+        "impulse",
+        "forceBarrier",
+        "conjureMatter",
+        "terrainEdit",
+        "surfaceState",
+        "fluidSource",
+        "fluidSink",
+        "fluidMove",
+        "gasVolume",
+        "gasDisperse",
+        "windField",
+        "weatherOverride",
+        "lightEmit",
+        "darken",
+        "growth",
+        "decay",
+        "bodyTransform",
+        "animate",
+        "objectTransform",
+        "magicSuppress",
+        "magicEnd",
+        "extraplanarHold",
+        "castStored"
+      ]
+    },
+    "srdRef": {
+      "description": "Pointer into srd_baseline.json: <spell slug>.<field>[<index>] (for example fireball.damage[0], wall-of-stone.measures[0], earthquake.duration) or <rule key>.<field>[<index>] for the SRD rule entries the baseline quotes (condition:petrified.measures[0]). A pointer into measures names the measure's unit, which the validator compares.",
+      "type": "object",
+      "required": ["srdRef"],
+      "additionalProperties": false,
+      "properties": {
+        "srdRef": {"type": "string", "pattern": "^[a-z0-9:-]+\\.[a-zA-Z]+(\\[[0-9]+\\])?$"},
+        "unit": {"type": "string", "pattern": "^[a-z0-9]+$"}
+      }
+    },
+    "tuningRef": {
+      "description": "Name of a parameter in tuning.json. DEUS coefficients are per damage type or per effect kind, never per spell.",
+      "type": "object",
+      "required": ["tuningRef"],
+      "additionalProperties": false,
+      "properties": {
+        "tuningRef": {"type": "string", "pattern": "^[a-z][A-Za-z0-9]*(\\.[a-z][A-Za-z0-9]*)+$"}
+      }
+    },
+    "srdTerm": {
+      "description": "A qualitative SRD term quoted exactly (for example \"strong wind\"). The quote must be a substring of the spell's SRD text.",
+      "type": "object",
+      "required": ["srdQuote"],
+      "additionalProperties": false,
+      "properties": {
+        "srdQuote": {"type": "string", "minLength": 1}
+      }
+    },
+    "ownerOpenValue": {
+      "description": "A value the SRD does not settle and that an open Owner question decides (Q1-Q4). Stored with no value chosen.",
+      "type": "object",
+      "required": ["ownerOpen", "item"],
+      "additionalProperties": false,
+      "properties": {
+        "ownerOpen": {"enum": ["Q1", "Q2", "Q3", "Q4"]},
+        "item": {"$ref": "#/$defs/ident"},
+        "note": {"type": "string"}
+      }
+    },
+    "quantity": {
+      "anyOf": [
+        {"$ref": "#/$defs/srdRef"},
+        {"$ref": "#/$defs/tuningRef"}
+      ]
+    },
+    "qualitative": {
+      "anyOf": [
+        {"$ref": "#/$defs/srdRef"},
+        {"$ref": "#/$defs/srdTerm"}
+      ]
+    },
+    "flag": {
+      "anyOf": [
+        {"type": "boolean"},
+        {"$ref": "#/$defs/ownerOpenValue"}
+      ]
+    },
+    "spellRecord": {
+      "type": "object",
+      "required": ["spellId", "systems", "effects"],
+      "additionalProperties": false,
+      "properties": {
+        "spellId": {"type": "string", "pattern": "^srd:spell:[a-z0-9-]+$"},
+        "systems": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/system"}
+        },
+        "variants": {
+          "description": "Caster-chosen modes the SRD names (for example create water or destroy water). An effect selects one with 'variant'.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "srdQuote"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {"$ref": "#/$defs/ident"},
+              "srdQuote": {"type": "string", "minLength": 1}
+            }
+          }
+        },
+        "effects": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/effect"}
+        },
+        "ownerOpen": {
+          "description": "Consequences that would exist only under an Owner answer not yet given. Never effect data (Q3, Q4).",
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/ownerOpenNote"}
+        },
+        "notes": {"type": "string"}
+      }
+    },
+    "ownerOpenNote": {
+      "type": "object",
+      "required": ["question", "item", "note"],
+      "additionalProperties": false,
+      "properties": {
+        "question": {"enum": ["Q1", "Q2", "Q3", "Q4"]},
+        "item": {"$ref": "#/$defs/ident"},
+        "primitiveIfYes": {"$ref": "#/$defs/primitive"},
+        "note": {"type": "string", "minLength": 10}
+      }
+    },
+    "effect": {
+      "description": "One primitive instance. additionalProperties false: a per-spell script hook or any other extra property is rejected (R11).",
+      "type": "object",
+      "required": ["key", "primitive", "trigger", "basis", "magical", "ledger"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {"$ref": "#/$defs/ident"},
+        "primitive": {"$ref": "#/$defs/primitive"},
+        "variant": {"$ref": "#/$defs/ident"},
+        "trigger": {
+          "description": "onCast: at casting. onImpact: where the effect lands or explodes. perRound: at the start of each of the caster's turns (SRD rounds, never ticks). continuous: holds for the lifetime. onEnter: when a creature or object enters. onEnd: when the spell ends. onTrigger: a glyph or contingency trigger. onDestroyed: when the conjured thing is destroyed. onHit: on a hit with the spell or weapon. onCommand: on the caster's later action or bonus action.",
+          "enum": ["onCast", "onImpact", "perRound", "continuous", "onEnter", "onEnd", "onTrigger", "onDestroyed", "onHit", "onCommand"]
+        },
+        "basis": {
+          "description": "srd: the SRD text states this physical effect; srdQuote is an exact substring of the spell's SRD text. deus: a DEUS physical consequence added on top of the SRD (DEC-018) under a design rule of audit section 3.1; deusReason says why.",
+          "enum": ["srd", "deus"]
+        },
+        "srdQuote": {"type": "string", "minLength": 1},
+        "deusRule": {
+          "description": "The audit design rule (section 3.1) that adds this consequence, or DEC-018 for a consequence the ruling names directly (fire ignites combustibles and spreads; blasts damage structures; water floods and flows; cold freezes liquid; earth spells reshape strata).",
+          "enum": ["R2", "R3", "R4", "R5", "R6", "R7", "R9", "DEC-018"]
+        },
+        "deusReason": {"type": "string", "minLength": 10},
+        "magical": {
+          "description": "R10. true: a live magical effect owned by the spell instance (suppressed by magicSuppress, ended by magicEnd, ends with the spell). false: a mundane consequence that persists as ordinary world state (a fire already lit, water created, ice formed by cold).",
+          "type": "boolean"
+        },
+        "ledger": {"$ref": "#/$defs/ledger"},
+        "footprint": {"$ref": "#/$defs/footprint"},
+        "lifetime": {"$ref": "#/$defs/lifetime"},
+        "energy": {"$ref": "#/$defs/energy"},
+        "params": {"type": "object"},
+        "schedule": {
+          "description": "SRD round numbers of a spell whose effects change by round (Storm of Vengeance): pointers into the spell's measures.",
+          "type": "object",
+          "required": ["fromRound"],
+          "additionalProperties": false,
+          "properties": {
+            "fromRound": {"$ref": "#/$defs/srdRef"},
+            "toRound": {"$ref": "#/$defs/srdRef"}
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "basis": {"const": "srd"}
+            }
+          },
+          "then": {
+            "required": ["srdQuote"],
+            "not": {
+              "anyOf": [
+                {"required": ["deusRule"]},
+                {"required": ["deusReason"]}
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "basis": {"const": "deus"}
+            }
+          },
+          "then": {
+            "required": ["deusRule", "deusReason"],
+            "not": {"required": ["srdQuote"]}
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "ignite"}
+            }
+          },
+          "then": {
+            "required": ["params"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_ignite"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "extinguish"}
+            }
+          },
+          "then": {
+            "required": ["params"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_extinguish"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "heatFlux"}
+            }
+          },
+          "then": {
+            "required": ["params"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_heatFlux"}
+            },
+            "anyOf": [
+              {"required": ["energy"]},
+              {
+                "properties": {
+                  "params": {"required": ["magnitude"]}
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "freezeFluid"}
+            }
+          },
+          "then": {
+            "required": ["params"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_freezeFluid"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "volumeDamage"}
+            }
+          },
+          "then": {
+            "required": ["params", "energy"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_volumeDamage"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "impulse"}
+            }
+          },
+          "then": {
+            "required": ["params"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_impulse"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "forceBarrier"}
+            }
+          },
+          "then": {
+            "required": ["params", "footprint"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_forceBarrier"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "conjureMatter"}
+            }
+          },
+          "then": {
+            "required": ["params", "footprint"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_conjureMatter"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "terrainEdit"}
+            }
+          },
+          "then": {
+            "required": ["params", "footprint"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_terrainEdit"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "surfaceState"}
+            }
+          },
+          "then": {
+            "required": ["params", "footprint"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_surfaceState"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"enum": ["fluidSource", "fluidSink"]}
+            }
+          },
+          "then": {
+            "required": ["params"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_fluidSourceSink"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "fluidMove"}
+            }
+          },
+          "then": {
+            "required": ["params", "footprint"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_fluidMove"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "gasVolume"}
+            }
+          },
+          "then": {
+            "required": ["params", "footprint"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_gasVolume"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "gasDisperse"}
+            }
+          },
+          "then": {
+            "required": ["params", "footprint"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_gasDisperse"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "windField"}
+            }
+          },
+          "then": {
+            "required": ["params", "footprint"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_windField"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "weatherOverride"}
+            }
+          },
+          "then": {
+            "required": ["params", "footprint"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_weatherOverride"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "lightEmit"}
+            }
+          },
+          "then": {
+            "required": ["params"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_lightEmit"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "darken"}
+            }
+          },
+          "then": {
+            "required": ["params", "footprint"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_darken"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "growth"}
+            }
+          },
+          "then": {
+            "required": ["params", "footprint"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_growth"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "decay"}
+            }
+          },
+          "then": {
+            "required": ["params"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_decay"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "bodyTransform"}
+            }
+          },
+          "then": {
+            "required": ["params"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_bodyTransform"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "animate"}
+            }
+          },
+          "then": {
+            "required": ["params"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_animate"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "objectTransform"}
+            }
+          },
+          "then": {
+            "required": ["params"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_objectTransform"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "magicSuppress"}
+            }
+          },
+          "then": {
+            "required": ["params", "footprint"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_magicSuppress"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "magicEnd"}
+            }
+          },
+          "then": {
+            "required": ["params"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_magicEnd"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "extraplanarHold"}
+            }
+          },
+          "then": {
+            "required": ["params"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_extraplanarHold"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "primitive": {"const": "castStored"}
+            }
+          },
+          "then": {
+            "required": ["params"],
+            "properties": {
+              "params": {"$ref": "#/$defs/p_castStored"}
+            }
+          }
+        }
+      ]
+    },
+    "footprint": {
+      "description": "Where the effect applies, in SRD feet (DEC-013: 5-ft cells, 10-ft layers, 2-ft slices; no layer count is fixed here). 'area' reuses an SRD area entry. Without an SRD area entry, 'shape' names the target and 'dims' points at SRD measures.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "area": {"$ref": "#/$defs/srdRef"},
+        "shape": {
+          "enum": [
+            "target",
+            "object",
+            "creature",
+            "caster",
+            "container",
+            "point",
+            "cell",
+            "square",
+            "cube",
+            "sphere",
+            "cylinder",
+            "line",
+            "wall",
+            "fissure",
+            "passage",
+            "surface",
+            "entrance"
+          ]
+        },
+        "dims": {
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "properties": {
+            "radius": {"$ref": "#/$defs/quantity"},
+            "diameter": {"$ref": "#/$defs/quantity"},
+            "side": {"$ref": "#/$defs/quantity"},
+            "length": {"$ref": "#/$defs/quantity"},
+            "width": {"$ref": "#/$defs/quantity"},
+            "height": {"$ref": "#/$defs/quantity"},
+            "depth": {"$ref": "#/$defs/quantity"},
+            "thickness": {"$ref": "#/$defs/quantity"}
+          }
+        },
+        "count": {"$ref": "#/$defs/srdRef"},
+        "origin": {"enum": ["point", "caster", "target", "surface", "glyph", "impactPoint", "object", "creature", "aboveCaster"]},
+        "vertical": {"enum": ["volume", "groundSurface", "column", "down", "surface"]},
+        "propagation": {"enum": ["lineOfEffect", "aroundCorners"]},
+        "clip": {"enum": ["solid", "none"]},
+        "movesWith": {"enum": ["fixed", "caster", "object", "commanded", "drift", "target"]}
+      },
+      "oneOf": [
+        {"required": ["area"]},
+        {"required": ["shape"]}
+      ]
+    },
+    "lifetime": {
+      "description": "SRD duration by pointer: <spell>.duration (seconds from the quoted SRD round rule, 1 round = 6 s) or a time measure. timeDomain tags the clock (action or historical). Ticks are the runtime's business: ticks = ceil(seconds / secondsPerTick[timeDomain]), and secondsPerTick is Owner question Q2 (null in tuning.json).",
+      "type": "object",
+      "required": ["duration", "timeDomain"],
+      "additionalProperties": false,
+      "properties": {
+        "duration": {
+          "anyOf": [
+            {"$ref": "#/$defs/srdRef"},
+            {"$ref": "#/$defs/srdTerm"}
+          ]
+        },
+        "timeDomain": {"enum": ["action", "historical"]},
+        "endsWithSpell": {"type": "boolean"},
+        "permanentIf": {"enum": ["concentrationHeldFullDuration", "never"]}
+      }
+    },
+    "energy": {
+      "description": "World energy from an SRD damage entry: the same roll the rules layer makes for creatures (one roll per cast, seeded), times a per-damage-type coefficient from tuning.json. The damage type is read from the pointed-at entry.",
+      "type": "object",
+      "required": ["damage", "use", "coefficient"],
+      "additionalProperties": false,
+      "properties": {
+        "damage": {"$ref": "#/$defs/srdRef"},
+        "use": {"enum": ["rolledTotal", "average"]},
+        "coefficient": {"$ref": "#/$defs/tuningRef"}
+      }
+    },
+    "ledgerClassForm": {
+      "type": "object",
+      "required": ["class", "form"],
+      "additionalProperties": false,
+      "properties": {
+        "class": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "form": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"}
+      }
+    },
+    "ledger": {
+      "description": "Conservation-ledger entry (LIFE-001, ADR-003 Rev 3 7.8, game/js/sim/ledger.js). none: no matter changes (downstream names the rows other systems use later). transform: moves between ledger (class, form) pairs, each naming a row of ledger_defaults.js or a listed gap. relocate: matter moves between cells, class and form unchanged. source / sink: conjured matter; the source or sink name comes from the Q1 policy row named by q1Case (tuning.json), never from the effect. policy: the direction and amount are decided by the Q1 policy row (bodies, planar storage).",
+      "type": "object",
+      "required": ["mode"],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {"enum": ["none", "transform", "relocate", "source", "sink", "policy"]},
+        "cause": {"type": "string", "pattern": "^spell:srd:spell:[a-z0-9-]+(#[A-Za-z][A-Za-z0-9]*)?$", "maxLength": 200},
+        "q1Case": {"$ref": "#/$defs/ident"},
+        "class": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "classes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"}
+        },
+        "pairedSinkOnEnd": {"type": "boolean"},
+        "provenance": {"type": "boolean"},
+        "moves": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/ledgerMove"}
+        },
+        "downstream": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^(transform|source|sink):[a-z][a-z0-9_-]*$"}
+        },
+        "note": {"type": "string"},
+        "forms": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"}
+        },
+        "form": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {"const": "none"}
+            }
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {"required": ["cause"]},
+                {"required": ["moves"]},
+                {"required": ["class"]},
+                {"required": ["q1Case"]},
+                {"required": ["classes"]}
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {"enum": ["source", "sink"]}
+            }
+          },
+          "then": {"required": ["cause", "q1Case", "class", "form"]}
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {"const": "policy"}
+            }
+          },
+          "then": {"required": ["cause", "q1Case"]}
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {"const": "transform"}
+            }
+          },
+          "then": {"required": ["cause", "moves"]}
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {"const": "relocate"}
+            }
+          },
+          "then": {"required": ["cause", "classes", "forms"]}
+        }
+      ]
+    },
+    "ledgerMove": {
+      "type": "object",
+      "required": ["row", "from", "to"],
+      "additionalProperties": false,
+      "properties": {
+        "row": {
+          "anyOf": [
+            {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+            {"type": "null"}
+          ]
+        },
+        "from": {"$ref": "#/$defs/ledgerClassForm"},
+        "to": {"$ref": "#/$defs/ledgerClassForm"},
+        "gap": {"type": "string", "pattern": "^PROPOSED-V-[0-9]{2}$"},
+        "note": {"type": "string"}
+      },
+      "if": {
+        "properties": {
+          "row": {"type": "null"}
+        }
+      },
+      "then": {"required": ["gap"]}
+    },
+    "p_ignite": {
+      "description": "Hands flammable targets to the fire system (SIM.50.05). Without 'threshold' every flammable target in the footprint ignites (the SRD wording); with it, only those that receive at least the threshold.",
+      "type": "object",
+      "required": ["targets"],
+      "additionalProperties": false,
+      "properties": {
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["objects", "cells", "directTarget", "contact", "namedSources"]}
+        },
+        "namedSources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"enum": ["candle", "torch", "smallCampfire"]}
+        },
+        "excludeWornCarried": {"type": "boolean"},
+        "threshold": {"$ref": "#/$defs/tuningRef"},
+        "casterMayExclude": {
+          "type": "array",
+          "items": {"enum": ["plants"]}
+        }
+      }
+    },
+    "p_extinguish": {
+      "type": "object",
+      "required": ["sources"],
+      "additionalProperties": false,
+      "properties": {
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["candle", "torch", "smallCampfire", "exposedFlames", "unprotectedFlames", "protectedFlames"]}
+        },
+        "chance": {"$ref": "#/$defs/srdRef"}
+      }
+    },
+    "p_heatFlux": {
+      "description": "Adds or removes heat in cells, objects and fluids. Needs a stored temperature field (gap G-TEMP). The amount is the energy block, or a tuning magnitude when the SRD gives no damage.",
+      "type": "object",
+      "required": ["direction"],
+      "additionalProperties": false,
+      "properties": {
+        "direction": {"enum": ["add", "remove"]},
+        "falloff": {"enum": ["none", "linear", "quadratic"]},
+        "side": {"enum": ["both", "chosen"]},
+        "effects": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"enum": ["dryFuel", "melt", "heatObject", "chill", "warm", "keepFrozen"]}
+        },
+        "contactTransfer": {"type": "boolean"},
+        "magnitude": {"$ref": "#/$defs/tuningRef"},
+        "sizeLimit": {"$ref": "#/$defs/srdRef"}
+      }
+    },
+    "p_freezeFluid": {
+      "type": "object",
+      "required": ["mode", "fluid"],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {"enum": ["freeze", "thaw"]},
+        "fluid": {"const": "water"},
+        "depth": {"$ref": "#/$defs/quantity"},
+        "thawAfter": {"$ref": "#/$defs/srdRef"},
+        "trapsSwimmers": {"type": "boolean"},
+        "onlyIf": {"enum": ["strikesWater", "exposedShallowWater", "destroyed"]}
+      }
+    },
+    "p_volumeDamage": {
+      "description": "One core volume-damage system (ADR-003 18.2; SIM.40.01 section 8). The damage type comes from energy.damage; tuning.json maps it to a physical class. Attenuation is the material table (SIM.40.01 8.3).",
+      "type": "object",
+      "required": ["applyTo", "selection"],
+      "additionalProperties": false,
+      "properties": {
+        "applyTo": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["objects", "strata", "structures"]}
+        },
+        "selection": {"enum": ["footprint", "directTargets", "groundContact"]},
+        "falloff": {"enum": ["constant", "linear", "quadratic"]},
+        "propagateDown": {"type": "boolean"},
+        "respectImmunityZones": {"type": "boolean"},
+        "excludeWornCarried": {"type": "boolean"},
+        "nonmagicalOnly": {"type": "boolean"},
+        "casterMayExclude": {
+          "type": "array",
+          "items": {"enum": ["plants"]}
+        }
+      }
+    },
+    "p_impulse": {
+      "type": "object",
+      "required": ["direction", "affects"],
+      "additionalProperties": false,
+      "properties": {
+        "direction": {"enum": ["radialAway", "alongLine", "chosen", "up", "invertGravity", "towardCenter", "awayFromCenter"]},
+        "affects": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["creatures", "objects", "looseLightMaterials", "vehicles", "floatingThings"]}
+        },
+        "distance": {"$ref": "#/$defs/quantity"},
+        "massLimit": {"$ref": "#/$defs/srdRef"},
+        "unsecuredOnly": {"type": "boolean"},
+        "creatureSave": {"$ref": "#/$defs/srdRef"},
+        "sustained": {"type": "boolean"},
+        "onEnd": {"enum": ["fallsGently", "falls", "none"]},
+        "strikesAsFall": {"type": "boolean"}
+      }
+    },
+    "p_forceBarrier": {
+      "type": "object",
+      "required": ["blocks"],
+      "additionalProperties": false,
+      "properties": {
+        "blocks": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "creatures": {"$ref": "#/$defs/flag"},
+            "objects": {"$ref": "#/$defs/flag"},
+            "fluids": {"$ref": "#/$defs/flag"},
+            "gas": {"$ref": "#/$defs/flag"},
+            "fire": {"$ref": "#/$defs/flag"},
+            "spells": {"$ref": "#/$defs/flag"},
+            "ethereal": {"$ref": "#/$defs/flag"},
+            "sight": {"$ref": "#/$defs/flag"},
+            "projectiles": {"enum": ["none", "partial", "nonmagical", "all"]}
+          }
+        },
+        "orientation": {"enum": ["any", "vertical", "horizontal", "enclosing"]},
+        "invulnerable": {"type": "boolean", "description": "SRD: immune to all damage (a flag; it names no SRD number)."},
+        "armorClass": {"$ref": "#/$defs/srdRef"},
+        "dispellable": {"type": "boolean"},
+        "bearsLoad": {"$ref": "#/$defs/flag"},
+        "loadLimit": {"$ref": "#/$defs/srdRef"},
+        "movable": {"enum": ["fixed", "followsCaster", "commanded", "rollable"]},
+        "destroyedBy": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["by", "breakerQuote"],
+            "additionalProperties": false,
+            "properties": {
+              "by": {"enum": ["spell", "damage", "wind", "light", "dispel"]},
+              "spell": {"type": "string", "pattern": "^srd:spell:[a-z0-9-]+$"},
+              "threshold": {"$ref": "#/$defs/srdRef"},
+              "breakerQuote": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      }
+    },
+    "p_conjureMatter": {
+      "description": "Creates solid matter that must meet a support rule and may fall (SIM.40.01-.02). The ledger class and form follow tuning.json tables.materialClass.",
+      "type": "object",
+      "required": ["material", "support", "permanence"],
+      "additionalProperties": false,
+      "properties": {
+        "material": {"enum": ["stone", "ice", "plants", "food", "web", "grease", "vegetableMatter", "crystal", "thorns", "anyNonMagicObject"]},
+        "quantity": {"$ref": "#/$defs/srdRef"},
+        "thickness": {"$ref": "#/$defs/srdRef"},
+        "panels": {"$ref": "#/$defs/srdRef"},
+        "hitPoints": {"$ref": "#/$defs/srdRef"},
+        "armorClass": {"$ref": "#/$defs/srdRef"},
+        "depth": {"$ref": "#/$defs/srdRef"},
+        "support": {"enum": ["mergeWithStone", "solidSurface", "anchoredOrLayered", "ground", "groundOrContainers", "hand", "free"]},
+        "span": {"$ref": "#/$defs/srdRef"},
+        "spanQuote": {"type": "string", "minLength": 1},
+        "permanence": {
+          "anyOf": [
+            {"enum": ["temporary", "permanent", "permanentIfConcentrationFull", "perMaterialDuration"]},
+            {"$ref": "#/$defs/ownerOpenValue"}
+          ]
+        },
+        "flammable": {"$ref": "#/$defs/flag"},
+        "fireVulnerable": {"type": "boolean"},
+        "spoilsAfter": {"$ref": "#/$defs/srdRef"},
+        "regrowsAfter": {"$ref": "#/$defs/srdRef"},
+        "collapsesIfUnanchored": {"type": "boolean"},
+        "asSpell": {"$ref": "#/$defs/spellId"}
+      }
+    },
+    "p_terrainEdit": {
+      "type": "object",
+      "required": ["mode", "massBalance"],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {"enum": ["reshape", "removeToDust", "fissure", "openPassage", "cutAndFill"]},
+        "materials": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["dirt", "sand", "clay", "stone", "wood", "plaster", "anyTarget"]}
+        },
+        "excludes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["naturalStone", "stoneConstruction", "magicItems"]}
+        },
+        "maxChange": {"$ref": "#/$defs/srdRef"},
+        "sizeLimit": {"$ref": "#/$defs/srdRef"},
+        "count": {"$ref": "#/$defs/srdRef"},
+        "depth": {"$ref": "#/$defs/srdRef"},
+        "depthMultiplier": {"$ref": "#/$defs/srdRef"},
+        "rate": {"$ref": "#/$defs/srdRef"},
+        "massBalance": {"enum": ["relocate", "toDust", "suppressRestore", "compactRims"]},
+        "supportNeutral": {"type": "boolean"},
+        "collapseStructuresAbove": {"type": "boolean"},
+        "placement": {"enum": ["seededRandom", "chosen"]},
+        "delay": {"enum": ["none", "startOfCastersNextTurn"]}
+      }
+    },
+    "p_surfaceState": {
+      "type": "object",
+      "required": ["states"],
+      "additionalProperties": false,
+      "properties": {
+        "states": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["difficult", "slick", "spikes", "restrain", "illusory", "ordinary", "hazard"]}
+        },
+        "movementCost": {"$ref": "#/$defs/srdRef"},
+        "camouflaged": {"type": "boolean"},
+        "cells": {"enum": ["ground", "vegetated", "wallSpace", "volume"]}
+      }
+    },
+    "p_fluidSourceSink": {
+      "type": "object",
+      "required": ["fluid", "placement"],
+      "additionalProperties": false,
+      "properties": {
+        "fluid": {"const": "water"},
+        "volume": {"$ref": "#/$defs/srdRef"},
+        "perSlotAbove": {"$ref": "#/$defs/srdRef"},
+        "placement": {"enum": ["openContainer", "rain", "groundOrContainers", "flood"]},
+        "extinguishExposedFlames": {"type": "boolean"}
+      }
+    },
+    "p_fluidMove": {
+      "type": "object",
+      "required": ["mode"],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {"enum": ["flood", "wave", "part", "redirect", "whirlpool"]},
+        "rise": {"$ref": "#/$defs/srdRef"},
+        "pull": {"$ref": "#/$defs/srdRef"},
+        "capsizeChance": {"$ref": "#/$defs/srdRef"},
+        "restoresOverNextRound": {"type": "boolean"}
+      }
+    },
+    "p_gasVolume": {
+      "type": "object",
+      "required": ["kind", "density"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"enum": ["fog", "poison", "smoke", "nauseatingGas", "stormCloud"]},
+        "density": {"enum": ["lighter", "neutral", "heavy"]},
+        "obscurement": {"enum": ["light", "heavy"]},
+        "spreadsAroundCorners": {"type": "boolean"},
+        "sinksThroughOpenings": {"type": "boolean"},
+        "altitude": {"$ref": "#/$defs/srdRef"},
+        "drift": {
+          "type": "object",
+          "required": ["distance", "direction"],
+          "additionalProperties": false,
+          "properties": {
+            "distance": {"$ref": "#/$defs/srdRef"},
+            "direction": {"enum": ["awayFromCaster", "chosenAwayFromCaster"]},
+            "alongGround": {"type": "boolean"}
+          }
+        },
+        "disperse": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["wind"],
+            "additionalProperties": false,
+            "properties": {
+              "wind": {"$ref": "#/$defs/qualitative"},
+              "after": {"$ref": "#/$defs/srdRef"},
+              "endsSpell": {"type": "boolean"}
+            }
+          }
+        },
+        "returnsAfter": {"$ref": "#/$defs/srdRef"},
+        "asSpell": {"$ref": "#/$defs/spellId"}
+      }
+    },
+    "p_gasDisperse": {
+      "type": "object",
+      "required": ["kinds"],
+      "additionalProperties": false,
+      "properties": {
+        "kinds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["fog", "mist", "gas", "vapor", "smoke"]}
+        },
+        "magicalToo": {"type": "boolean"}
+      }
+    },
+    "p_windField": {
+      "type": "object",
+      "required": ["strength"],
+      "additionalProperties": false,
+      "properties": {
+        "strength": {"$ref": "#/$defs/qualitative"},
+        "direction": {"enum": ["awayFromCaster", "chosen", "upward", "variable"]},
+        "gasBarrier": {"type": "boolean"},
+        "dispersesGas": {"type": "boolean"},
+        "deflectsProjectiles": {"type": "boolean"},
+        "liftsLightMaterials": {"type": "boolean"},
+        "blocksSmallFlyers": {"type": "boolean"},
+        "fansFires": {"type": "boolean"},
+        "movementCost": {"$ref": "#/$defs/srdRef"},
+        "asSpell": {"$ref": "#/$defs/spellId"},
+        "extinguishes": {
+          "type": "object",
+          "required": ["sources"],
+          "additionalProperties": false,
+          "properties": {
+            "sources": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {"enum": ["candle", "torch", "unprotectedFlames", "protectedFlames", "exposedFlames"]}
+            },
+            "protectedChance": {"$ref": "#/$defs/srdRef"}
+          }
+        },
+        "dispersesMagicalToo": {"type": "boolean"}
+      }
+    },
+    "p_weatherOverride": {
+      "type": "object",
+      "required": ["mode"],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {"enum": ["stageShift", "shelter", "storm"]},
+        "channels": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["precipitation", "temperature", "wind"]}
+        },
+        "stageStep": {"$ref": "#/$defs/srdRef"},
+        "delay": {"$ref": "#/$defs/srdRef"},
+        "delayMultiplier": {"$ref": "#/$defs/srdRef"},
+        "returnsGradually": {"type": "boolean"},
+        "requiresOpenSky": {"type": "boolean"}
+      }
+    },
+    "p_lightEmit": {
+      "description": "Bright and dim light (SRD radii by pointer). Needs a simulation light field (gap G-LIGHT); drawing it is presentation (WG.00.18).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bright": {"$ref": "#/$defs/measureOrTerm"},
+        "dim": {"$ref": "#/$defs/measureOrTerm"},
+        "dimIsAdditional": {"type": "boolean"},
+        "fills": {"enum": ["footprint", "none"]},
+        "level": {"enum": ["bright", "dim"]},
+        "sunlight": {"type": "boolean"},
+        "heat": {"$ref": "#/$defs/flag"},
+        "attachTo": {"enum": ["point", "object", "creature", "caster", "wall", "hand"]},
+        "count": {"$ref": "#/$defs/srdRef"},
+        "dispelsDarknessUpToLevel": {"$ref": "#/$defs/srdRef"},
+        "dispelsAllSpellDarkness": {"type": "boolean"},
+        "overridesLowerLevelDarkness": {"type": "boolean"},
+        "pulse": {"type": "boolean"},
+        "coverBlocks": {"type": "boolean"},
+        "modifiesExistingFlames": {"type": "boolean"},
+        "asSpell": {"$ref": "#/$defs/spellId"}
+      }
+    },
+    "p_darken": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "blocksDarkvision": {"type": "boolean"},
+        "blocksNonmagicalLight": {"type": "boolean"},
+        "blocksLowerLevelMagicalLight": {"type": "boolean"},
+        "dispelsLightUpToLevel": {"$ref": "#/$defs/srdRef"},
+        "spreadsAroundCorners": {"type": "boolean"},
+        "attachTo": {"enum": ["point", "object", "barrier", "interior"]},
+        "coverBlocks": {"type": "boolean"}
+      }
+    },
+    "p_growth": {
+      "type": "object",
+      "required": ["mode"],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {"enum": ["bloom", "overgrowth", "enrichment"]},
+        "movementCost": {"$ref": "#/$defs/srdRef"},
+        "yieldQuote": {"type": "string", "minLength": 1},
+        "casterMayExclude": {"type": "boolean"}
+      }
+    },
+    "p_decay": {
+      "type": "object",
+      "required": ["mode", "targets"],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {"enum": ["wither", "pause"]},
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["plants", "corpse", "remains"]}
+        }
+      }
+    },
+    "p_bodyTransform": {
+      "type": "object",
+      "required": ["mode", "targets"],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {"enum": ["scaleMass", "petrify", "polymorph", "shapechange", "restoreLife", "newBody", "regrowParts", "restoreParts", "shrink"]},
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["creature", "object", "corpse", "self"]}
+        },
+        "massFactor": {"$ref": "#/$defs/srdRef"},
+        "massStated": {"type": "boolean"},
+        "revertOnEnd": {"type": "boolean"},
+        "count": {"$ref": "#/$defs/srdRef"}
+      }
+    },
+    "p_animate": {
+      "type": "object",
+      "required": ["from", "revertsTo"],
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["corpse", "bones", "object", "plant", "beast", "iceOrSnow"]}
+        },
+        "revertsTo": {"enum": ["remains", "object", "meltwater", "none"]},
+        "count": {"$ref": "#/$defs/srdRef"},
+        "keepsMatter": {"type": "boolean"}
+      }
+    },
+    "p_objectTransform": {
+      "type": "object",
+      "required": ["mode"],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {"enum": ["fabricate", "repair"]},
+        "maxSize": {"$ref": "#/$defs/srdRef"},
+        "mineralMaxSize": {"$ref": "#/$defs/srdRef"},
+        "sameMaterial": {"type": "boolean"}
+      }
+    },
+    "p_magicSuppress": {
+      "type": "object",
+      "required": ["scope"],
+      "additionalProperties": false,
+      "properties": {
+        "scope": {"enum": ["allMagic", "spellsUpToLevel"]},
+        "levelMax": {"$ref": "#/$defs/srdRef"},
+        "origin": {"enum": ["any", "outside"]},
+        "closesPortals": {"type": "boolean"}
+      }
+    },
+    "p_magicEnd": {
+      "type": "object",
+      "required": ["targets"],
+      "additionalProperties": false,
+      "properties": {
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["spellsOnTarget", "forceCreations", "spellDarknessInArea"]}
+        },
+        "autoEndUpToLevel": {"$ref": "#/$defs/srdRef"},
+        "checkAbove": {"type": "boolean"}
+      }
+    },
+    "p_extraplanarHold": {
+      "type": "object",
+      "required": ["contents", "lossRule"],
+      "additionalProperties": false,
+      "properties": {
+        "contents": {"enum": ["objects", "creatures", "creaturesAndObjects", "chestAndContents"]},
+        "capacity": {"$ref": "#/$defs/srdRef"},
+        "lossRule": {"enum": ["none", "trappedInside", "lostIfEndsAway", "ejectedOnEnd", "dropsOut"]},
+        "lossChance": {"$ref": "#/$defs/srdRef"},
+        "lossAfter": {"$ref": "#/$defs/srdRef"},
+        "dropHeight": {"$ref": "#/$defs/srdRef"},
+        "removedObjectsDissipate": {"type": "boolean"}
+      }
+    },
+    "p_castStored": {
+      "type": "object",
+      "required": ["stores", "fires"],
+      "additionalProperties": false,
+      "properties": {
+        "stores": {"enum": ["spell"]},
+        "maxLevel": {"$ref": "#/$defs/srdRef"},
+        "fires": {"enum": ["onCondition", "onGlyphTrigger", "immediately"]},
+        "targetsSelfOnly": {"type": "boolean"}
+      }
+    },
+    "tuningParam": {
+      "type": "object",
+      "required": ["value", "unit", "status", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "value": {"type": ["number", "string", "object", "null"]},
+        "unit": {"type": "string", "minLength": 1},
+        "status": {"enum": ["PM_DEFAULT", "OWNER_OPEN", "PLACEHOLDER"]},
+        "source": {"type": "string", "minLength": 10},
+        "question": {"enum": ["Q1", "Q2", "Q3", "Q4"]},
+        "ownedBy": {"type": "string"},
+        "note": {"type": "string"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {"const": "OWNER_OPEN"}
+            }
+          },
+          "then": {
+            "required": ["question"],
+            "properties": {
+              "value": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {"const": "PM_DEFAULT"}
+            }
+          },
+          "then": {
+            "properties": {
+              "value": {"type": ["number", "string", "object"]}
+            }
+          }
+        }
+      ]
+    },
+    "policyCase": {
+      "type": "object",
+      "required": ["part", "covers", "default", "status", "options"],
+      "additionalProperties": false,
+      "properties": {
+        "part": {"enum": ["Q1(a)", "Q1(b)", "Q1(c)", "Q1(d)", "Q1(e)"]},
+        "covers": {"type": "string", "minLength": 10},
+        "default": {
+          "type": "object",
+          "required": ["source", "sink", "provenance"],
+          "additionalProperties": false,
+          "properties": {
+            "source": {"type": "string"},
+            "sink": {"type": "string"},
+            "provenance": {"type": "boolean"},
+            "pairedSinkOnEnd": {"type": "boolean"},
+            "sinkReach": {"enum": ["followProvenance"]}
+          }
+        },
+        "status": {"const": "PM_DEFAULT_UNCONFIRMED"},
+        "options": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "note": {"type": "string"}
+      }
+    },
+    "tuningFile": {
+      "type": "object",
+      "required": ["schemaVersion", "description", "statuses", "parameters", "tables", "conjuredMatterPolicy", "ownerQuestions"],
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {"const": "deus-spell-tuning/1.0.0"},
+        "description": {"type": "string"},
+        "statuses": {
+          "type": "object",
+          "required": ["PM_DEFAULT", "OWNER_OPEN", "PLACEHOLDER", "PM_DEFAULT_UNCONFIRMED"],
+          "additionalProperties": false,
+          "properties": {
+            "PM_DEFAULT": {"type": "string"},
+            "OWNER_OPEN": {"type": "string"},
+            "PLACEHOLDER": {"type": "string"},
+            "PM_DEFAULT_UNCONFIRMED": {"type": "string"}
+          }
+        },
+        "parameters": {
+          "type": "object",
+          "propertyNames": {"pattern": "^[a-z][A-Za-z0-9]*(\\.[a-z][A-Za-z0-9]*)+$"},
+          "additionalProperties": {"$ref": "#/$defs/tuningParam"}
+        },
+        "tables": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "propertyNames": {"pattern": "^[a-z][A-Za-z0-9]*$"},
+            "additionalProperties": {"$ref": "#/$defs/tuningParam"}
+          }
+        },
+        "conjuredMatterPolicy": {
+          "type": "object",
+          "required": ["question", "authority", "options", "cases"],
+          "additionalProperties": false,
+          "properties": {
+            "question": {"const": "Q1"},
+            "authority": {"type": "string"},
+            "options": {
+              "type": "object",
+              "required": ["A", "B", "C", "D", "E"],
+              "additionalProperties": {"type": "string"}
+            },
+            "cases": {
+              "type": "object",
+              "required": ["permanent", "temporaryLeavesArea", "massChangeOfBodies", "planarTransfer", "summonedBodies"],
+              "additionalProperties": false,
+              "properties": {
+                "permanent": {"$ref": "#/$defs/policyCase"},
+                "temporaryLeavesArea": {"$ref": "#/$defs/policyCase"},
+                "massChangeOfBodies": {"$ref": "#/$defs/policyCase"},
+                "planarTransfer": {"$ref": "#/$defs/policyCase"},
+                "summonedBodies": {"$ref": "#/$defs/policyCase"}
+              }
+            }
+          }
+        },
+        "ownerQuestions": {
+          "type": "object",
+          "required": ["Q1", "Q2", "Q3", "Q4"],
+          "additionalProperties": false,
+          "properties": {
+            "Q1": {"$ref": "#/$defs/ownerQuestion"},
+            "Q2": {"$ref": "#/$defs/ownerQuestion"},
+            "Q3": {"$ref": "#/$defs/ownerQuestion"},
+            "Q4": {"$ref": "#/$defs/ownerQuestion"}
+          }
+        }
+      }
+    },
+    "ownerQuestion": {
+      "type": "object",
+      "required": ["title", "source", "status", "items"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {"type": "string", "minLength": 5},
+        "source": {"type": "string", "minLength": 10},
+        "status": {"const": "OWNER_OPEN"},
+        "items": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {"pattern": "^[a-z][a-zA-Z0-9]*$"},
+          "additionalProperties": {
+            "type": "object",
+            "required": ["asks", "options"],
+            "additionalProperties": false,
+            "properties": {
+              "asks": {"type": "string", "minLength": 5},
+              "options": {
+                "type": "array",
+                "minItems": 2,
+                "items": {"type": "string"}
+              },
+              "recordsAffected": {
+                "type": "array",
+                "items": {"type": "string", "pattern": "^srd:spell:[a-z0-9-]+$"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "primitiveCatalogue": {
+      "type": "object",
+      "required": ["schemaVersion", "description", "adr186", "primitives", "ledgerGaps"],
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {"const": "deus-spell-primitives/1.0.0"},
+        "description": {"type": "string"},
+        "adr186": {
+          "type": "object",
+          "required": ["source", "status", "rows"],
+          "additionalProperties": false,
+          "properties": {
+            "source": {"type": "string"},
+            "status": {"const": "PROPOSED"},
+            "rows": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["row", "coreSystem", "conservation"],
+                "additionalProperties": false,
+                "properties": {
+                  "row": {"type": "string"},
+                  "coreSystem": {"type": "string"},
+                  "conservation": {"type": "string"}
+                }
+              }
+            }
+          }
+        },
+        "primitives": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["name", "kind", "systems", "wbs", "auditGaps", "adrGaps", "phase", "adr186", "ledgerModes", "does"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {"$ref": "#/$defs/primitive"},
+              "kind": {"enum": ["physical", "entity", "meta"]},
+              "systems": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "wbs": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "auditGaps": {
+                "type": "array",
+                "items": {"enum": ["G-TEMP", "G-GAS", "G-LIGHT"]}
+              },
+              "adrGaps": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "phase": {
+                "anyOf": [
+                  {"enum": ["A", "B", "C", "D", "E", "F"]},
+                  {"type": "null"}
+                ]
+              },
+              "phaseNote": {"type": "string"},
+              "adr186": {
+                "type": "object",
+                "required": ["status", "row", "coreSystem"],
+                "additionalProperties": false,
+                "properties": {
+                  "status": {"enum": ["MAPPED", "NO_ROW"]},
+                  "row": {
+                    "anyOf": [
+                      {"type": "string"},
+                      {"type": "null"}
+                    ]
+                  },
+                  "coreSystem": {
+                    "anyOf": [
+                      {"type": "string"},
+                      {"type": "null"}
+                    ]
+                  },
+                  "match": {"enum": ["named", "inferred"]},
+                  "note": {"type": "string"}
+                }
+              },
+              "ledgerModes": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {"enum": ["none", "transform", "relocate", "source", "sink", "policy"]}
+              },
+              "does": {"type": "string", "minLength": 10}
+            }
+          }
+        },
+        "ledgerGaps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "need", "reason"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {"type": "string", "pattern": "^PROPOSED-V-[0-9]{2}$"},
+              "need": {"type": "string"},
+              "reason": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "measureOrTerm": {
+      "anyOf": [
+        {"$ref": "#/$defs/srdRef"},
+        {"$ref": "#/$defs/tuningRef"},
+        {"$ref": "#/$defs/srdTerm"}
+      ]
+    }
+  }
+}
