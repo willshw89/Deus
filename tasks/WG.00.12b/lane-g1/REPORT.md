@@ -304,7 +304,47 @@ The fixture equivalent in the suite is `fail_claude_edits_pm_opened_lane_json` (
 - **Q4.** On provider failover, should the saved prompt be reused anyway (it names the old provider and commit tag), or should the default be generated, which is what happens now?
 
 ## 9. Scope
-`git diff --name-only 9cba41eaf6378048d50004dcf243defbfe7f17f4..HEAD` with each path checked against lane.json `allowedPaths` (the merge gate's `globToRegExp`): see §9.1, added after the report commit.
+`git diff --name-only 9cba41eaf6378048d50004dcf243defbfe7f17f4..HEAD` with each path checked against lane.json `allowedPaths` (the merge gate's `globToRegExp`): see §9.1. `BRIEF.md`, `lane.json` and `launches/20260926_042901_prompt.txt` are the PM's and the launcher's commits (`41d24474`, `242e526b`) and were not edited by this lane.
+
+### 9.1 Scope check (run on the report commit; the next commit changes only this REPORT.md, already listed)
+```
+$ git diff --name-only 9cba41eaf6378048d50004dcf243defbfe7f17f4..HEAD   (HEAD 1c7c5165779dee8405ea8be78329e5f75eee8322, the report commit)
+EXIT=0
+tasks/WG.00.12b/lane-g1/BRIEF.md  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/REPORT.md  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/evidence/base_mutants_resume_queue.log  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/evidence/base_test_check_claims.log  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/evidence/base_test_launch_worker.log  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/evidence/base_test_merge_gate.log  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/evidence/base_test_resume_queue.log  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/evidence/check_claims_before_after.log  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/evidence/gate1_test_merge_gate.log  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/evidence/gate2_test_check_claims.log  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/evidence/gate3_test_launch_worker.log  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/evidence/gate4_test_resume_queue.log  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/evidence/gate5_check_deus_syntax.log  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/evidence/merge_gate_dry_run_lane_k.log  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/evidence/merge_gate_dry_run_lane_m_and_o2.log  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/evidence/merge_gate_dry_run_lane_r.log  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/evidence/mutants_launch_worker.log  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/evidence/mutants_resume_queue.log  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/evidence/real_manifests_validation.log  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/lane.json  ->  in allowedPaths (tasks/WG.00.12b/**)
+tasks/WG.00.12b/lane-g1/launches/20260926_042901_prompt.txt  ->  in allowedPaths (tasks/WG.00.12b/**)
+tools/governance/MERGE_GATE.md  ->  in allowedPaths (tools/governance/MERGE_GATE.md)
+tools/governance/README.md  ->  in allowedPaths (tools/governance/README.md)
+tools/governance/check_claims.js  ->  in allowedPaths (tools/governance/check_claims.js)
+tools/governance/merge_gate.js  ->  in allowedPaths (tools/governance/merge_gate.js)
+tools/governance/test_check_claims.js  ->  in allowedPaths (tools/governance/test_check_claims.js)
+tools/governance/test_merge_gate.js  ->  in allowedPaths (tools/governance/test_merge_gate.js)
+tools/ops/README.md  ->  in allowedPaths (tools/ops/README.md)
+tools/ops/launch_worker.ps1  ->  in allowedPaths (tools/ops/launch_worker.ps1)
+tools/ops/resume_queue.ps1  ->  in allowedPaths (tools/ops/resume_queue.ps1)
+tools/ops/test_launch_worker.ps1  ->  in allowedPaths (tools/ops/test_launch_worker.ps1)
+tools/ops/test_resume_queue.ps1  ->  in allowedPaths (tools/ops/test_resume_queue.ps1)
+paths outside allowedPaths: 0
+EXIT=0
+```
 
 ## Appendix A: raw gateTests output (clone at `3387244f`), verbatim from `evidence/gate1..5_*.log`
 
