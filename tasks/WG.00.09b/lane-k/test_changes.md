@@ -10,6 +10,21 @@ Run commands:
   `%TEMP%\uf_snapshots\depth`. It still passes (REPORT.md).
 - The provocation logs are in `evidence/provoke_eb446e06/`: every provocable check is shown failing under its provocation.
 
+## Fix 2 (after the post-merge gate FAIL, `BRIEF_FIX2.md`; code at c2184c94): what changed in the checks, and why
+Main now switches levels in place (Lane N, SIM.00.00): the spriteset, the depth root, its planes and canvases outlive a
+switch. Two checks changed. No check was removed, and the counts stay 12 (`layers_flat`) and 27 (`depth`). Neither check
+was weakened.
+
+| Check | Old assertion (Fix 1) | New assertion | Why | Provocation that makes it FAIL |
+|---|---|---|---|---|
+| `layers_flat.switch_same_frame` | At `levels:viewChanged` (at least 4 events): every bound plane is shown with `paints > 0`. Every unit in the window on a plane's level has a visible sprite with a ready bitmap and a frame. Unit A is judged on a switch to +2 and unit B on a switch to the ground | Exactly the switches `0->2 2->1 1->0 0->-1 -1->0`. Each is judged **at `levels:viewChanged` and again just before the first render after it**: the suite wraps `Graphics.app.render` and restores it afterwards. Both times: (a) the bound planes are exactly the new view's levels below it (`[z-1, z-2]` within −2..+2), each shown and **painted since it was bound** (`tilemap.paints > plane._paintsAtBind` and no repaint pending); (b) every unit in the window on a plane's level has a visible sprite with a ready bitmap and a frame, **at its cell's foot**; (c) **no visible sprite of a unit of another level** on a plane. Units A and B are each judged at both moments | (a) The planes outlive an in-place switch, so their paint count is cumulative and `paints > 0` was true before the new level was painted. (b, c) Catch sprites left or misplaced from the old binding. The second moment is the frame the player sees (BRIEF_FIX2 §3.2). The judgement at the event is unchanged in strength | `depth.switch_same_frame`: no unit-sheet preload (as before), no sync at the in-place rebind, and the new planes' units held back one more frame. At the event the planes are NOT PAINTED and the units are missing; in the first drawn frame the units are missing (`evidence/fix2_c2184c94/gate1_provoke_layers_flat.log`). The unfixed renderer fails the event half too (`evidence/fix2_repro_3538594d/`) |
+| `depth.canvases_freed` | After the suite's level switches: 4 canvas layers in use, 4 made since boot, 0 destroyed, 0 pooled | The same counts after **2 map transfers** to the level on screen (`UF.World.transferView`, the load path), each giving a new spriteset (3 distinct roots). At each new scene's start (`Scene_Map.prototype.start` wrapped for the check, restored after), its planes are bound to `[view−1, view−2]` and shown | After the Lane N merge a level switch makes no spriteset, so the switches never touched the pool. The provocation was **NOT CAUGHT** on the merge base 00ff1c59 (`evidence/fix2_base_00ff1c59/`) and on WIP c98e80a2 (`evidence/fix2_wip_c98e80a2/provoke_depth.log`). The transfers also cover the map-transfer path of the planes (K2), which area edges and loads still take | `depth.canvases_freed` (no pool): 12 canvases made, 8 destroyed. `evidence/fix2_c2184c94/gate2_provoke_depth.log`, `depth_provoke_only_canvases_freed.log` |
+
+**Unchanged checks, changed failure text.** Under `depth.unit_step_same_frame` (units re-read only every 60 frames) the
+check now fails with "unit A missing" instead of a late target. The depth root now outlives the switch, so its frame
+counter no longer restarts at a switch. Unit A's sprite is not made before the check starts unless the 60-frame phase
+happens to fall inside that window. The check fails either way: caught, `evidence/fix2_c2184c94/gate1_provoke_layers_flat.log`.
+
 ## Fix 1 (after Grok FAIL, `review_grok_86bf49a9.md`; code at eb446e06): what changed in the checks, and why
 The gates must be deterministic (BRIEF_FIX1 §3.1): no required check may pass or fail on wall-clock time or on the world the
 generator made, and waits are condition waits.

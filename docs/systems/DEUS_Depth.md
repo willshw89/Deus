@@ -72,15 +72,54 @@ Objects, items, units, natural walls/cliff faces and, on the ground, ramps and s
 - **Not drawn on lower levels:** attack, cast and hurt frames, hitsplats, bars and RMMZ animations. DEUS_Anim and DEUS_Combat work only on Game_Events of the viewed level (escalation.md E5). Also not drawn: fire, the flood overlay, speech, stance rings, designations, fog.
 
 ## 3. Level switches and canvases
-A level switch is still a map transfer (DEUS_Levels / DEUS_World; Lane N's in-place switch is 0017-Q). DEUS_Depth makes the switch cheap on its side:
-- **Canvas pool.** `Scene_Map.terminate` (after RMMZ's background snapshot) returns the planes' 4 canvases to a module pool, and the next spriteset takes them.
-  - Since boot, 4 canvases are made and none after that (`canvases_freed`). Without the pool (its provocation), 4 switches made 16 and destroyed 12.
-- **Bound in the switch's first frame.** The root binds, paints and places the planes when it is made (`createCharacters`). So in the frame of `levels:viewChanged` every visible plane is painted and every unit in the window has a frame (`switch_same_frame`).
-- **Measured** on the Fix 1 code (escalation.md E4, cited there):
-  - Request to started took 105.0–515.0 ms per switch over 12 switches. The slowest was DEUS_Levels' own transfer
-    (`lastSwitch.ms` 493.6).
-  - The planes' own part: the pooled canvases, peeks of cached builds (`lastPeekMs` 0.000–0.010 ms) and one paint of
-    1.585–2.590 ms per plane.
+A level switch happens **in place** (Lane N, SIM.00.00, main merge `e27e8be5`). The Scene_Map, its Spriteset_Map and this
+plugin's `Sprite_DepthRoot` with its planes and canvases all stay. Area edges and loads are still map transfers: a new
+Scene_Map and a new spriteset.
+
+- **In place: bound, painted and placed before `levels:viewChanged` (Fix 2).** The order within one frame:
+  1. `DEUS_Levels` aliases `Spriteset_Map.update`. The alias sees that the spriteset is bound to an older `$dataMap` and calls
+     `finishSwitch`, before any layer of the spriteset updates.
+  2. `finishSwitch` calls `UF.World.rebindSpriteset`. That rebinds the map tilemap and the character sprites, then emits
+     `world:levelBuilt` (or `world:areaBuilt` when the new view is the ground).
+  3. DEUS_Depth's listener runs `Sprite_DepthRoot.levelShown`:
+     - `rebuild` binds the planes to the levels below the new view. A bind clears the plane's entity sprites.
+     - `sync` then does one whole frame of the root's work at once: the planes placed and painted, the exposure mask and the
+       void, the objects, items, walls and connectors, and the unit pass that `lateUpdate` would do later in the frame
+       (membership, sprites, frames and positions).
+  4. `rebindSpriteset` returns. `finishSwitch` refreshes the fog and emits `levels:viewChanged`. Every listener of that event
+     sees the new view's planes painted and their units drawn on their cells.
+     - This rests on the order of statements in `finishSwitch` (`DEUS_Levels.js`, the rebind comes before the emit).
+     - It does not rest on the order of the listeners of either event.
+  5. The frame continues as every frame:
+     - the spriteset's own update re-places the planes, with no repaint unless something moved;
+     - `Scene_Map.update` runs;
+     - the late unit pass runs.
+- **Before Fix 2** the listener only rebound, and binding clears the entity sprites. The paint and the unit pass waited for
+  the frame's own update and late pass, which come after the event.
+  - At `levels:viewChanged` the planes were on the right levels but not yet painted, and the units on their levels had no
+    sprite. The gate `switch_same_frame` failed on every run after the Lane N merge.
+  - The first frame drawn was already complete: same frame number, measured on `3538594d`
+    (`tasks/WG.00.09b/lane-k/evidence/fix2_repro_3538594d/`).
+  - So the lag was in the state that other code sees at the event, not on screen. The check now judges both moments.
+- **Cost of the move.** The paint and the unit pass now run inside the rebind instead of later in the same frame. Lane N's
+  instrumented gate was run once on each commit (seed 18, 23 switches; `tasks/WG.00.09b/lane-k/perf/fix2_switch_cost_output.txt`):
+  - The rebind's listener time went from a median of 1.24 ms to 7.31 ms, max 11.01 → 24.35 ms.
+  - The slowest `SceneManager.updateMain` around each switch went from a median of 59.22 ms to 52.24 ms. That difference is
+    one run each, noise: no increase was measured.
+- **Map transfer** (an area edge, a load).
+  - The `world:*Built` events fire in `Scene_Map.create`, before the new scene has a spriteset, so no root hears them.
+  - The new root binds, paints and places everything when it is made (`createCharacters`), before its scene starts.
+    `canvases_freed` checks that its planes are bound when the scene starts.
+- **Canvas pool.**
+  - On a map transfer, `Scene_Map.terminate` (after RMMZ's background snapshot) returns the planes' 4 canvases to a module
+    pool, and the next spriteset takes them. In-place switches keep them.
+  - Since boot, 4 canvases are made and none after that. `canvases_freed` goes through 2 map transfers, because the switches
+    alone no longer make spritesets (Fix 2). Without the pool (its provocation) the 2 transfers made 12 and destroyed 8.
+- **Measured.** DEUS_Levels' `lastSwitch.ms`, from the request to the rebind (DEUS_Depth's part included), was 8.9–29.2 ms
+  per in-place switch on `c2184c94`. That is 12 switches in `perf/baseline_c2184c94.json` (bench normal ×2, both runs
+  labelled quiet).
+  - The Fix 1 transfer switches measured 86.7–493.6 ms (`perf/baseline_eb446e06.json`, escalation.md E4).
+  - The bench's own request-to-settled time (34.6–179.1 ms on `c2184c94`) includes the frames the harness waits.
 
 ## 4. Public API (`UF.Depth`)
 | Member | Description |
@@ -102,7 +141,8 @@ Removed (DEC-011): the presets `deus`, `deus_scale`, `deus_color`, `A`–`E`, `o
 - **Listened:**
   - `levels:shapeChanged`, `levels:cellChanged`: patch the open-cell cache, repaint that level's plane, and repaint the map when the cell is on the viewed level.
   - `world:levelTileChanged`, `world:tileChanged`: repaint that level's plane.
-  - `world:levelBuilt`, `world:areaBuilt`: bind again.
+  - `world:levelBuilt`, `world:areaBuilt`: bind again; with a live root (an in-place switch), also paint and place
+    everything at once, before `levels:viewChanged` (§3).
   - `world:created`: clear the caches.
   - `objects:levelChanged`, `objects:changed`: the object layer of that level.
   - `items:changed`: the item sprites of the plane concerned.
@@ -124,6 +164,13 @@ Two suites, not default suites.
 - **`layers_flat`**: `node tools/test_layer_render_flat.js`. 12 checks: preconditions, fixtures, flat_position, flat_crisp,
   unit_step_same_frame, scan_candidates_only, item_change_scoped, every_view_sees_through, flat_no_filters,
   switch_same_frame, screenshots_written, no_errors.
+- **The two switch checks (Fix 2).**
+  - `switch_same_frame` judges each of the 5 switches 0→+2→+1→0→−1→0 twice: at `levels:viewChanged`, and just before the
+    first render after it. Both times:
+    - the planes are the new view's levels below it, shown and painted since they were bound;
+    - every unit in the window on a plane's level has a visible sprite with a ready bitmap and a frame, on its cell's foot;
+    - no plane draws a unit of another level.
+  - `canvases_freed` checks the pool across 2 map transfers, and that the planes are bound when each new scene starts.
 - **The driver** (`tools/test_layer_render_flat.js`):
   - It requires every check. `--provoke` proves each provocable check can fail; `--jobs n` runs n provocations at once.
   - Every run gets its own snapshot folder (`%TEMP%\uf_snapshots\lanek_<suite>_<pid>_<time>`), printed and deleted
@@ -152,7 +199,24 @@ Two suites, not default suites.
   - `entities_at_seam` builds its own cells at the area's corner.
   - Test units are named `TEST_*`. Both suites print the world seed in `preconditions`.
 
-## 7. Status (2026-09-26, Lane K Fix 1, branch `task/lane-k`, code at eb446e06)
+## 7. Status (2026-09-26, Lane K Fix 2, branch `task/lane-k`, code at c2184c94)
+- **Fix 2 gates on c2184c94.** This is the lane merged with main `1f683b94` (Lane N's in-place switch) plus the Fix 2
+  change. Each gate ran in its own fresh temp clone. Raw logs are in `tasks/WG.00.09b/lane-k/evidence/fix2_c2184c94/`, and
+  `tasks/WG.00.09b/lane-k/REPORT.md` "Fix 2" has the details.
+
+  | Command | Runs | Exit 0 | Result |
+  |---|---|---|---|
+  | `node tools/test_layer_render_flat.js` | 3 in a row | 3/3 | 12/12 each |
+  | `node tools/test_layer_render_flat.js --provoke --jobs 3` | 1 | 1/1 | 8/8 provocations caught |
+  | `node tools/test_layer_render_flat.js --suite depth` | 1 | 1/1 | 27/27 |
+  | `node tools/test_layer_render_flat.js --suite depth --provoke --jobs 3` | 1 | 1/1 | 16/16 provocations caught |
+  | `node tools/test_minimap.js` | 1 | 1/1 | 24/24 |
+  | `node tools/test_layer_switch_inplace.js` (Lane N) | 1 | 1/1 | 7/7 |
+  | `node tools/check_deus_syntax.js`, `node tools/test_palette.js` | 1 each | 2/2 | 52 files, 0 errors; palette loaded |
+
+- **Bench** on c2184c94: normal ×2 and stress ×2, all four labelled quiet (`perf/baseline_c2184c94.json`,
+  `perf/stress_baseline_c2184c94.json`, `perf/logs_c2184c94/`).
+- **Fix 1 status (code at eb446e06, before the merge with main):**
 - **Gates on eb446e06**, run in fresh temp clones. Raw logs are in
   `tasks/WG.00.09b/lane-k/evidence/determinism_eb446e06/`, and `tasks/WG.00.09b/lane-k/REPORT.md` has the details.
 
@@ -180,6 +244,7 @@ Two suites, not default suites.
 - **Not done / known:**
   - Not tried in the editor's Playtest (F5).
   - Lower-level combat frames and effects are not drawn (E5).
-  - A switch is still a map transfer (Lane N).
+  - The in-place switch's order (rebind before `levels:viewChanged`) is Lane N's. If it changes, `switch_same_frame`
+    shows it.
   - Fog of the lower levels is not applied.
   - The viewed level's own natural wall sprites were not checked at the loop seam (E5).
