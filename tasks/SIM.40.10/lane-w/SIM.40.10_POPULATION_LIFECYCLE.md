@@ -130,7 +130,7 @@ Findings from the table:
 
 **Due-date queue.** Each individual has at most one pending lifecycle event: its next stage boundary, its birth-giving date, or its natural-death date. Events sit in a **hierarchical timing wheel** keyed by due hour (buckets of 1 hour, 1 day, 1 season, 1 year, 1 decade; an event moves down a level when its bucket comes due). The slow clock services pop only the events that are due. Cost per game hour = O(events due), independent of population.
 
-**Natural death.** At birth (or at promotion from a crowd, section 6), draw the natural-death age once from the species' lifespan distribution with a seeded RNG `(worldSeed, 'death', individualId)`. For humans the distribution is V123's curve (0% before 55; 6% at 55-57 … 80% at 76+, `docs/VISION.md:341`), turned into a cumulative table so one draw replaces yearly rolls. Other hazards (famine, disease, violence) can end life earlier through the hooks in section 9; they never have to scan.
+**Natural death.** At birth (or at promotion from a crowd, section 6), draw the natural-death age once from the species' lifespan distribution with a seeded RNG `(worldSeed, 'death', individualId)`. For humans the distribution is V123's curve (0% before 55; 6% at 55-57 … 80% at 76+, `docs/VISION.md:341`), turned into a cumulative table so one draw replaces yearly rolls. For an individual promoted at age `a`, the draw uses the distribution conditioned on survival to `a` (the table truncated below `a` and renormalised), so promotion never produces a death date in the past. Other hazards (famine, disease, violence) can end life earlier through the hooks in section 9; they never have to scan.
 
 **Elderhood.** The `elder` boundary is a stage event like any other; it changes derived work capacity and fertility (section 3.2). REP-5 (elder at 50 in `DEUS_Colonists.js:2807`, at 55 in `:3243`) disappears because both call sites read one table.
 
@@ -165,7 +165,7 @@ Records (all per-entity, allocated on demand, so they are sparse by construction
 | **Lineage summary** | lineageId u32, founderId u32, species u8, firstBirth u32, lastBirth u32, bornCount u32, diedCount u32, livingCount u32, maxGeneration u16, trait means 16 B, notable list (u32 each): **about 48 bytes + 4 per notable** | every lineage that has ever had a member |
 | **Household** | kept in `UF_Households` records (`UF_Households.js:63`): id, members, home, familyId, lineageId | living households |
 
-**Bounded kinship query.** `kin(id, depth ≤ 3)` walks parent links up to 3 generations and a `childrenOf` index down. The index is a `Map<parentId, childId[]>` held only for living people and live stubs; its size is the number of those records. It is rebuilt from saved parent links on load (a cache, INV: "save truth, rebuild caches").
+**Bounded kinship query.** `kin(id, depth ≤ 3)` walks parent links up to 3 generations and a `childrenOf` index down. The index is a `Map<parentId, childId[]>` held only for living people and live stubs; its size is the number of those records. It is rebuilt from saved parent links on load (a cache; AGENTS.md rule 14: save truth, rebuild caches on load).
 
 ### 2.2 Compaction of old lineages
 
@@ -177,14 +177,14 @@ Records (all per-entity, allocated on demand, so they are sparse by construction
 
 **What survives.** Counts, generation depth, trait means and the notable list stay in the summary forever. Individual non-notable ancestors older than 3 generations back from every living descendant are gone; this is an intended loss, and the history-born export (section 2.4) reads only notable stubs and summaries.
 
-**Growth arithmetic.** Assume 20,000 tracked people and a crude birth rate of 35 per 1,000 per year (human `birthChance` 0.36 with 3-year spacing gives about this order).
+**Growth arithmetic.** Assume 20,000 tracked people and a crude birth rate of 35 per 1,000 per year (an assumption for sizing only; the real rate is an outcome of the model).
 - Without compaction: 700 stubs per year × 32 B = 22 KB per year, 2.2 MB per century, 22 MB per millennium.
 - With compaction: live stubs are bounded by living people × ancestors within 3 generations. With shared ancestors that is about 6 per person (not 14): 20,000 × 6 × 32 B ≈ 3.8 MB, flat over time. Notable stubs: assume 1% of deaths, 7 per year × 32 B, 224 KB per millennium. Lineage summaries: bounded by lineages ever founded; with 5,000 households and splitting at marriage, order 10,000 × 48 B = 480 KB after a millennium.
 - The steady state therefore scales with the **living** population, not with elapsed time.
 
 ### 2.3 Heritable traits
 
-**People.** The genome is 16 bytes: 8 appearance genes (today only `skinTone` is inherited, `DEUS_Colonists.js:801`, by a coin flip between parents) and 8 trait genes, each a byte. Offspring gene = one parent's value chosen by a seeded draw, with a mutation chance per gene (data). What the trait genes mean (for example ability-score tendencies) is a SOC/personality decision (O2 `MIND-05`, unreviewed); this design reserves the bytes and the rule only. SRD ability scores stay SRD: racial increases come from the SRD race entry, never from genes (DEC-018 principle: SRD numbers are the baseline).
+**People.** The genome is 16 bytes: 8 appearance genes (today only `skinTone` is inherited, `DEUS_Colonists.js:801`, by a coin flip between parents) and 8 trait genes, each a byte. Offspring gene = one parent's value chosen by a seeded draw, with a mutation chance per gene (data). What the trait genes mean (for example ability-score tendencies) is a SOC/personality decision (O2 `MIND-05`, unreviewed); this design reserves the bytes and the rule only. SRD ability scores stay SRD: racial increases come from the SRD race entry, never from genes (the BRIEF names the SRD as the rules bible; DEC-018 says the same for spells).
 
 **Animals in buckets.** A herd record keeps a **trait mean vector** (4 bytes per trait, 4 traits: size, coat, temperament, fecundity) instead of per-animal genes. Newborns take the herd mean plus a seeded mutation drawn at promotion. On demotion, an individual's traits fold back into the herd mean weighted by count. Anonymous animals therefore conserve counts and trait means, not individual genomes; section 6 states this as the conservation contract.
 
@@ -226,9 +226,9 @@ Records (all per-entity, allocated on demand, so they are sparse by construction
 - `waste`: droppings and urine, deposited into the region's soil-nutrient pool,
 - `metabolism`: matter lost as breath and heat. This is a **named sink**, the biological counterpart of burning, which ADR-003 §7.9 already treats as a named sink.
 
-For each meal `eaten = growth + waste + metabolism` holds exactly in integer grams (the remainder of the integer split goes to `waste`). The fractions are species data: growth is high for young, near zero for adults at target mass, and negative in starvation (body mass → metabolism sink).
+For each meal `eaten = growth + waste + metabolism` holds exactly in integer grams (the remainder of the integer split goes to `waste`). The fractions are species data: growth is high for young and zero for adults at target mass. In a deficit no fraction goes negative; body mass is burned by the separate `starve` transform below.
 
-**Daily intake baseline.** The SRD says a character "needs one pound of food per day" and can go without food for "3 + his or her Constitution modifier" days, then gains exhaustion (`game/data/srd51/rules.json:4403`); a character needs "one gallon of water per day, or two gallons per day if the weather is hot" (same entry). This design uses 1 lb (454 g) a day as the intake of a reference Medium humanoid of 150 lb (the only Medium average weight the SRD states, for dwarves). Other sizes scale by `(mass / 68,039 g)^0.75` (standard allometric scaling, not SRD; a tuning parameter). Water intake follows the SRD gallons the same way.
+**Daily intake baseline.** The SRD says a character "needs one pound of food per day" and can go without food for "3 + his or her Constitution modifier" days, then gains exhaustion (`game/data/srd51/rules.json:4403`); a character needs "one gallon of water per day, or two gallons per day if the weather is hot" (same entry). This design uses 1 lb (454 g) a day as the intake of a reference Medium humanoid of 150 lb (the SRD dwarf average; the SRD gives average weights only for dwarves, 150 lb, dragonborn, almost 250 lb, and halflings and gnomes, about 40 lb). Other sizes scale by `(mass / 68,039 g)^0.75` (standard allometric scaling, not SRD; a tuning parameter). Water intake follows the SRD gallons the same way.
 
 **Gestation mass.** While pregnant, a share of the mother's `growth` goes to `gestMass` (life block field). At birth, `gestMass` moves to the newborn's `bodyMass` (and splits across a litter); a placenta share goes to remains. If the mother starves, gestation lengthens by data rule, and below a threshold the pregnancy fails: `gestMass` moves to remains.
 
@@ -243,11 +243,11 @@ For each meal `eaten = growth + waste + metabolism` holds exactly in integer gra
 | birth | `body.gestation` (mother) → `body.tissue` (newborn) + `remains.organic` (placenta) | organics | `birth` |
 | starve | `body.tissue` → sink `metabolism` | organics | `starve` |
 | predation | `body.tissue` (prey) → `body.stomach` (predator) + `remains.organic` (carcass left) | organics | `predation` |
-| death | `body.tissue` + `body.stomach` + `body.gestation` → `remains.organic` (+ `remains.bone`) ; `body.water` → `remains.organic` | organics, water | `death:<cause>` |
+| death | `body.tissue` + `body.stomach` + `body.gestation` → `remains.organic` (+ `remains.bone`) ; `body.water` → `remains.water` (Lane R releases it to `soil.moisture` or `evaporation`) | organics ; water | `death:<cause>` |
 | decay (Lane R) | `remains.organic` → `soil.nutrient` + sink `metabolism` (decomposers' breath) ; `remains.bone` persists | organics | `decay:<stage>` |
 | harvest (livestock) | `body.tissue` → `item.meat`, `item.hide`, `item.bone` (today's `yields`, for example deer `meat_raw 3, hide 1, bone 2`, catalog `:6261`) | organics | `butcher` |
 
-**Nothing creates matter.** Birth has no source term; immigration moves people from another region's count (section 7); `created` bodies come from remains or items; `spawned` is the only source and it is a named, Owner-approved one. Ore never appears in any entry (LIFE-002): the only mineral-adjacent form is `remains.bone`, which is organic.
+**Nothing creates matter.** Birth has no source term; immigration moves people from another region's count (section 7); `created` bodies come from remains or items; `spawned` is the only source and it is a named, Owner-approved one. Ore never appears in any entry (LIFE-002). The only mineral matter is `remains.bone` (calcium phosphate), which stays a remains form and becomes a durable relic (IA-R2), never an ore form; test T-MASS-3 checks this. Each organics entry above that moves a body also moves that body's `body.water` in the water family; the table lists water only where it is the subject.
 
 **Buckets.** For an L2 bucket the same entries are made once per coarse step with the bucket's totals: `Σ intake`, `Σ growth`, `Σ waste`, `Σ metabolism`, births and deaths as counts × masses. The bucket stores `bodyMassTotal` (u32 g, or u64 for large herds) and `gestMassTotal`, so the totals stay exact however individuals are later drawn (section 6.3).
 
@@ -258,7 +258,7 @@ There is no soil-nutrient field today (decay gap DEC-3). `soil` is a strata mate
 - **Cell pool** for remains: a hashed chunk map `(area, z, chunk32) → Map<cellIndex, grams>`, allocated only where remains decayed.
 - Vegetation (SIM.50.04) draws from these pools later; that is its design, not this one.
 
-Memory: at most 1,024 region-layer entries × 2 layers per region = 2,048 × 8 B ≈ 16 KB per area even if every region has waste; cell entries only where bodies lay.
+Memory: at most 1,024 regions × 2 layers = 2,048 region-layer entries × 8 B ≈ 16 KB per area even if every region has waste; cell entries only where bodies lay.
 
 ### 3.5 Livestock specifics
 
@@ -277,7 +277,7 @@ Lane R (SIM.40.05 decay) and Lane Q (SIM.40.01 support) have no deliverable on t
 | IA-R1 | R | A call `decay.enqueueRemains(ref, {organicG, boneG}, cell, cause)` that takes over a corpse's matter and emits `remains.organic → soil.nutrient` transforms on its own slow clock. Today remains are a sprite removed after 12 game hours (`DEUS_Anim.js:1162`; `remainsHours: 12`, catalog `:9922`), leaving nothing. |
 | IA-R2 | R | Bone persists as a durable relic stage (V138 "durable relics survive as buried discoveries"). |
 | IA-R3 | R | Remains at L2 decay in closed form (ADR-003 §17.3), so this design never ticks corpses. |
-| IA-Q1 | Q | Shelter capacity (section 4.4) reads enclosed and roofed cells; Lane Q's support model decides which roofs stand. Natural rock counts as enclosure (V128). |
+| IA-Q1 | Q | Shelter capacity (sections 4.2-4.3) reads enclosed and roofed cells; Lane Q's support model decides which roofs stand. Natural rock counts as enclosure (V128). |
 | IA-Q2 | Q | Collapse events report crushed units through the violent-death hook in section 9 with `cause = collapse`. |
 
 ## Carrying capacity
@@ -315,10 +315,10 @@ About 48 bytes per record. At 32 layers an area has 1,024 regions (ADR-003 §5.1
 |---|---|---|---|
 | food ρF | (forage available to the region's diets + stored food) / (`demandG` × days to next step) | rations = ρF; body mass falls (section 3.3); fertility falls through `conditionFactor`; starvation hazard | "one pound of food per day"; "go without food for a number of days equal to 3 + … Constitution modifier (minimum 1)", then exhaustion (`game/data/srd51/rules.json:4403`; exhaustion `:10533`) |
 | water ρW | water available / demand (SRD gallons by size and heat) | the SRD dehydration rule: half water → DC 15 Constitution save or one exhaustion level a day; less → one level automatically | same entry, `game/data/srd51/rules.json:4403` |
-| shelter ρS | `shelterSlots` / (creatures that need shelter) | exposure hazard in cold or heat (reads SIM.50.06 temperature; today `DEUS_Environment.js` temperature per area) | none (SRD has extreme cold/heat rules in the same environment chapter; the hook passes them through, section 9) |
+| shelter ρS | `shelterSlots` / (creatures that need shelter) | exposure hazard in cold or heat (reads SIM.50.06 temperature; today only a per-area weather roll and a diurnal temperature exist, audit §1.1 row 5) | none (SRD has extreme cold/heat rules in the same environment chapter; the hook passes them through, section 9) |
 | space ρA | `walkable` × 25 ft² / Σ (creature count × space) | crowding: disease contact rate rises (section 4.5); movement slows | SRD size categories: Tiny 2½ × 2½ ft, Small and Medium 5 × 5 ft, Large 10 × 10 ft, Huge 15 × 15 ft (`game/data/srd51/rules.json:9005`) |
 
-**Famine arithmetic from SRD numbers.** For a Medium humanoid with Constitution modifier 0: with no food, 3 days pass without effect, then one exhaustion level a day; exhaustion level 6 is death (SRD exhaustion table). Death therefore comes on day 9. On half rations each day counts as half a day without food (same SRD entry). If exhaustion then accrues per full day-equivalent past the limit, death comes on day 18; if it accrues per calendar day once the limit (reached on day 6) is passed, death comes on day 12. The SRD text does not settle which; this design reads it the first way and marks that as an interpretation for review, held as a data switch. The bucket rule uses these numbers: the fraction of a bucket that dies of famine in a step is the fraction whose accumulated deficit days crossed `3 + Con + 6`, with Con from the species' SRD Constitution (people: 10 + racial increase; beasts: the creature's CON in `creatures.json`). Animals whose SRD entry has no age text still have a CON score, so the rule has an SRD anchor for every creature.
+**Famine arithmetic from SRD numbers.** For a Medium humanoid with Constitution modifier 0: with no food, 3 days pass without effect, then one exhaustion level a day; exhaustion level 6 is death (SRD exhaustion table). Death therefore comes on day 9. On half rations each day counts as half a day without food (same SRD entry). If exhaustion then accrues per full day-equivalent past the limit, death comes on day 18; if it accrues per calendar day once the limit (reached on day 6) is passed, death comes on day 12. The SRD text does not settle which; this design reads it the first way and marks that as an interpretation for review, held as a data switch. The bucket rule uses these numbers: the fraction of a bucket that dies of famine in a step is the fraction whose accumulated deficit days crossed `max(1, 3 + ConMod) + 6`, where ConMod is the Constitution modifier (an individual uses its own score; a people bucket uses 10 + the racial increase; a beast uses the CON of its SRD entry in `game/data/srd51/creatures.json`). Animals whose SRD entry has no age text still have a CON score, so the rule has an SRD anchor for every creature.
 
 **Geometry of shelter (DEC-013).** A shelter slot for a creature needs headroom of its height in whole 2 ft slices: Small (3-4 ft, halfling, gnome) 2 slices; Medium up to 6 ft 3 slices; a 6-7 ft Medium (dragonborn "well over 6 feet") 4 slices; Large a full 10 ft layer on a 2 × 2 cell footprint. **Stale model:** under the code's 1 ft strata these would be 4, 6, 7 and 10 strata of a 5 ft level (so a Large creature needs two levels); the counts above assume WG.00.17 has landed.
 
@@ -345,7 +345,7 @@ Consequence: until an underground food web exists (DEEP-04/05), ρF underground 
 | **Disease (hook only)** | the capacity service publishes `density = Σ count / walkable` and `contactRate ∝ density × crowding`; the health package (SIM.50.11 follow-ups; O2 G6-1, HEALTH-03) turns it into infections | DEC-014 §4 "epidemic disease in dense settlements"; rate constants belong to the health design |
 | **Predation** | predator buckets kill prey buckets in the same region by a saturating (Holling type II) rate: `kills = a × P × N / (1 + a × h × N)` per step, where `a` is attack rate and `h` handling time; kills move mass by the `predation` ledger entry | `a`, `h` per predator-prey pair are tuning data (not SRD); prey lists from the catalog's `kind` (`grazer`, `vermin`, `predator`, `flier`) |
 | **Exposure** | shelter ratio × temperature below the species' tolerance → exhaustion or damage via the SRD extreme-cold and extreme-heat rules (hook, section 9) | SRD environment chapter; SIM.50.06 temperature |
-| **Logistic strain** (anti-snowball, DEC-014 §4) | a faction's effective food in a region = local supply + imports − transport loss; loss grows with haul distance in regions, so a sprawling faction feeds its far settlements worse | loss per region hop is tuning; SOC.30 (economy) owns hauling |
+| **Logistic strain** (anti-snowball, DEC-014 §4) | a faction's effective food in a region = local supply + imports − transport loss; loss grows with haul distance in regions, so a sprawling faction feeds its far settlements worse | loss per region hop is tuning; the hauling and logistics model belongs to a later package (O2 §3.7 "Travel and logistics", unreviewed) |
 | **Rebellion, succession crisis** (DEC-014 §4) | not designed here; lifecycle raises `life:died` for office holders (SOC.20.01 offices) and publishes region pressure, which the SOC rebellion model reads | SOC.20.x (O2 GOV-*, unreviewed) |
 
 **No hidden ceiling test.** Section 11 test T-CAP-2 greps the life and capacity modules for numeric population comparisons, and a behaviour test doubles food and checks that population rises.
@@ -372,7 +372,7 @@ D-6 is a PM decision (the Owner may object): each of the nine SRD races gets its
 | `half-orc` | `:810` | `:7385` | **none** | Medium, 5 to well over 6 ft | 30 ft | 60 ft | Str +2, Con +1; matches |
 | `tiefling` | `:882` | `:7395` | **none** | Medium, human size | 30 ft | 60 ft | Int +1, Cha +2; matches |
 
-SRD line numbers are in `game/data/srd51/character_options.json`; catalog line numbers are in `game/data/DEUS_WorldCatalog.json`. The four catalog `stats` differences are a data defect for a later lane (section 8, D-08-17): SRD numbers are the baseline (DEC-018 principle, the BRIEF's rules bible).
+SRD line numbers are in `game/data/srd51/character_options.json`; catalog line numbers are in `game/data/DEUS_WorldCatalog.json`. The four catalog `stats` differences are a data defect for a later lane (section 8, D-08-17): SRD numbers are the baseline (the BRIEF names the SRD as the rules bible).
 
 ### 5.2 Population-relevant SRD traits
 
@@ -425,7 +425,7 @@ Stages beyond town (SET-3, PLAN-3) and the plan files themselves are SOC.10.02-0
 - **People (only if adopted):** key = (species, ageBand, sex, layerInSlab, faction u16, craft u8, civicOffice u8, class u8, obligation u8). These are DEC-014 §3's axes plus faction. The key space is large but only non-zero keys are stored.
 - **Lineage for people buckets:** each people bucket has a small table `lineageId → count`, capped at the 8 largest lineages plus an `other` residual count. On promotion an individual draws a lineage from this table without replacement; on demotion it adds back. Lineages in the residual are drawn as "unrecorded lineage of this faction", which the Owner may consider an acceptable loss (listed in OQ-W-05).
 
-Entry size: 8 bytes key + 2 count + 8 body mass (u64 for big herds) + 4 gestation mass + 2 carry = 24 bytes. A wildlife region with 5 species × 3 age bands × 2 sexes × 2 layers = 60 keys is 1.4 KB. Dense ADR arrays for 23 species × 4 bands × 2 sexes × 2 bytes would be 368 bytes per region **without** mass; the sparse array is chosen because mass totals are needed for LIFE-001 and most regions hold few species.
+Entry size: 8 bytes key + 2 count + 8 body mass (u64 for big herds) + 4 gestation mass + 2 carry = 24 bytes (26 for people, whose key is 10 bytes). A wildlife region with 5 species × 3 age bands × 2 sexes × 2 layers = 60 keys is 1.4 KB. Dense ADR arrays for 23 species × 4 bands × 2 sexes × 2 bytes would be 368 bytes per region **without** mass; the sparse array is chosen because mass totals are needed for LIFE-001 and most regions hold few species.
 
 ### 6.3 Promotion and demotion that conserve counts, mass and lineage
 
@@ -462,9 +462,9 @@ DEC-014 §2 sizes the budget by post-split benchmarks, which do not exist yet (A
 - `N_NAMED`: all tracked individuals in the world (fine + abstract).
 
 Arithmetic to show the orders of magnitude (assumptions labelled, nothing measured):
-- *Memory.* A fine person today carries needs, facets, skills, thoughts and up to 16 bonds (`DEUS_Colonists.js:2530`). Assume 2 KB. An abstract record plus life block is about 56 + 64 = 120 bytes of typed data; assume 200 bytes with a name. 2,000 fine people = 4 MB; 50,000 abstract = 10 MB.
+- *Memory.* A fine person today carries needs, facets, skills, thoughts and up to 16 bonds (`DEUS_Colonists.js:2530`). Assume 2 KB. An abstract record plus life block is about 56 + 64 = 120 bytes of typed data (assuming 64 bytes for the ADR abstract record); assume 200 bytes with a name. 2,000 fine people = 4 MB; 50,000 abstract = 10 MB.
 - *CPU.* Assume a fine person costs 2 µs per tick and the population share of a 100 ms tick (10 Hz) is 2 ms. Then `N_FINE` ≈ 1,000 at L0, or ≈ 10,000 at L1 (one step per 10 ticks). An abstract person costs O(1) per coarse step (every 100 ticks), so 50,000 abstract individuals cost 500 record updates per tick.
-- *Crowd.* One million anonymous people in buckets across 2,000 populated regions at 40 keys each is 80,000 entries × (24 + lineage table 36) bytes ≈ 4.8 MB, and 80,000 / 100 = 800 key updates per tick.
+- *Crowd.* One million anonymous people in buckets across 2,000 populated regions at 40 keys each is 80,000 entries × (26-byte people entry + 68-byte lineage table) ≈ 7.5 MB, and 80,000 / 100 = 800 key updates per tick.
 
 The real values replace these assumptions when SIM.30.04's benchmark exists. How many named individuals the Owner wants the world to hold is a separate design choice (OQ-W-03).
 
@@ -548,7 +548,7 @@ No health system is designed here. These are the smallest interfaces the lifecyc
 |---|---|---|
 | `health.kill(subject, cause, killerRef)` | the one way anything kills a tracked individual; the lifecycle performs the death transforms (section 3.3) and fires `life:died`. Combat keeps `Combat.onUnitDeath` (`DEUS_Combat.js:1021`, which emits `combat:kill` at `:1072`) as its caller | lifecycle calls it itself for old age and famine |
 | `health.bucketDeaths(regionId, key, count, cause)` | L2 deaths from disease, poison or exposure; the lifecycle removes `count` members and their mass to remains | none |
-| `health.addExhaustion(subject, levels, cause)` | the lifecycle's famine and thirst rules call this; health owns SRD conditions (O2 G6-2, HEALTH-01). SRD exhaustion: 1 disadvantage on ability checks, 2 speed halved, 3 disadvantage on attacks and saves, 4 hit point maximum halved, 5 speed 0, 6 death (`game/data/srd51/rules.json:10533`) | the lifecycle keeps an exhaustion count on the life block and calls `health.kill` at 6 |
+| `health.addExhaustion(subject, levels, cause)` | the lifecycle's famine and thirst rules call this; health owns SRD conditions (O2 G6-2, HEALTH-01). SRD exhaustion: 1 disadvantage on ability checks, 2 speed halved, 3 disadvantage on attacks and saves, 4 hit point maximum halved, 5 speed 0, 6 death (`game/data/srd51/rules.json:10533`) | the lifecycle keeps an exhaustion count in a sparse side map (entries only for creatures with exhaustion) and calls `health.kill` at 6 |
 | `health.fertilityFactor(id)`, `health.growthFactor(id)` | 0..1 multipliers from wounds, disease or exhaustion | 1 |
 | `health.shelterNeed(species, temperature)` | exposure threshold for the capacity model (reads SIM.50.06 temperature) | species data constant |
 
