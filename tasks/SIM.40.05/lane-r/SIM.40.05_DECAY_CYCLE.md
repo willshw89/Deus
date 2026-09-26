@@ -4,13 +4,14 @@
 |---|---|
 | Task | SIM.40.05 (one design covering SIM.40.05 decay, SIM.40.06 nature reclaiming, SIM.40.07 item weathering and burial, SIM.40.08 deep-history decay, and the long-run test SIM.40.09 needs). Lane R, branch `task/lane-r`. Source: Directive 0028-AC A2 item 6, re-scoped by the PM on 2026-09-26 to the SIM.50.01 audit. |
 | Writer / reviewer | Claude (writer). Grok (independent reviewer, launched later by the PM). This document does not certify itself. |
-| Date | 2026-09-26 |
+| Date | 2026-09-26 (first version and Fix 1) |
+| Fix 1 revision | Revised after the Grok review of `6613418ff5539c4156c5f42d589913d479dc0853` (`tasks/SIM.40.05/lane-r/review_grok_6613418f.md`, VERDICT FAIL: 0 BLOCKER, 1 MAJOR, 4 MINOR) under `BRIEF_FIX1.md`. Branch HEAD when Fix 1 started: `8d23c64c278f057c81e6a9a13968819d2cb3c6f7` (`git rev-parse HEAD`); its merge-base with `origin/main` is still `84ee3b55f3f8c1b8a16710ccf3878795d98d1683`. What changed: MAJOR-1, the decay clock replaces ADR-003's per-day `rateMilli` (R-01.2), with recomputed examples (R-01.6, R-02.4, R-09.3) and record layouts (R-10); MINOR-1, the visitor years now cite FX-R-01's wR 50 timeline (R-07.3); MINOR-2, due times are instants with sub-day resolution and remains and food drain every tick (R-08.5); MINOR-3, sibling-lane tips re-sampled (this table's "Limits" row, R-05); MINOR-4, the rebase assignment on an exposure change is written out (R-01.2, R-05.4). |
 | Base commit | Branch HEAD when writing started: `0026c89c997778e5d12380d68e5c72c57a98f9d3` (`git rev-parse HEAD`). Its merge-base with `origin/main` is the brief's base `84ee3b55f3f8c1b8a16710ccf3878795d98d1683`. `git diff --stat 84ee3b55 HEAD -- game/ docs/` is empty (EXIT=0), so every `game/` and `docs/` citation below resolves identically at both. Code is cited `file:line`; a bare plugin name (`DEUS_Levels.js:1558`) means `game/js/plugins/<name>`. |
 | Kind of work | Design only. No code, scripts, tests or art. Nothing outside `tasks/SIM.40.05/lane-r/` was written. No art was generated, requested or integrated (DEC-007); art needs are text-only "art slot needed" lines for the Owner. |
 | Inputs read | `docs/audits/LIVING_WORLD_GAP_AUDIT.md` (SIM.50.01, cited "audit"); `docs/worldgen/DEUS_WORLDGEN_WBS.md` Rev 25; `docs/society/DEUS_SOCIETY_WBS.md`; `docs/OWNER_DECISIONS.md` (DEC-010..DEC-022); `docs/VISION.md` (V74, V83, V95, V123, V128, V133, V137..V142); `docs/INVARIANT_REGISTRY.md`; `docs/RISK_REGISTER.md`; `docs/design/DURABILITY.md`, `REMAINS.md`, `ECOLOGY.md`, `TERRAIN_LEVELS.md`, `VERTICAL_WORLD.md`, `VERTICAL_NATURAL_WORLD.md`, `WORLD_ARCHITECTURE.md`, `TECH_TREE.md`, `PEOPLES.md` (decay parts); `DEUS_Levels.js`, `DEUS_Fire.js`, `DEUS_Anim.js`, `DEUS_Objects.js`, `DEUS_History.js`, `DEUS_HistoricalDemographics.js`, `DEUS_Doors.js`, `DEUS_Ecology.js`, `DEUS_Core.js`, `game/data/DEUS_WorldCatalog.json`; SRD 5.1 at `game/data/srd51/` (`rules.json`, `creatures.json`, `spells.json`); ADR-003 Rev 3 (PROPOSED) from `origin/task/lane-m`; sibling briefs `origin/task/lane-q:tasks/SIM.40.01/lane-q/BRIEF.md` and `origin/task/lane-w:tasks/SIM.40.10/lane-w/BRIEF.md`. |
 | Method | The writer read the audit's decay, fire, settlement, conservation and clock sections, ADR-003 §7.8, §14, §15.3, §16 and §17, and the material, writer, damage and support parts of `DEUS_Levels.js` directly. Four read-only search passes (code citations, design docs, planning IDs, SRD plus ADR-003 plus sibling lanes) were delegated; the citations used here were spot-checked against the files. |
-| Limits | Nothing was run in NW.js or the RMMZ editor; no screenshots exist because nothing visual is claimed. Every rate, fraction and duration is a **design default** (a parameter in data, tunable), not a measured or balanced value; real-world orders of magnitude are the source where the SRD is silent. Memory and CPU figures are arithmetic from stated assumptions, not measurements. Lanes Q and W had pushed only their briefs (`origin/task/lane-q` at `9103799e`, `origin/task/lane-w` at `31892ae7`); every interface with them is written here as an explicit, unreviewed assumption. |
-| Dependency on ADR-003 | ADR-003 Rev 3 (`docs/adr/ADR-003_sim_render_split_and_lod.md` on `origin/task/lane-m`, tip `9e0ef94d`) is cited **PROPOSED**: its own status line says it "stays PROPOSED until the Owner and the PM sign it off" (ADR-003 L3). A search pass reported that it was merged to `origin/main` after this lane's base (`3b33faa5`, with a Grok PASS), still marked PROPOSED; this lane's base does not contain it. Every mechanism below that uses its tick (10 Hz, 1 tick = 36 game-seconds, ADR-003 L58), its game-day cadence (L1689), its LOD levels L0/L1/L2 (L64-70), its 32×32 chunk storage (§15.3), its ledger transform API (§7.8) or its support queue (§16.3) is marked **[ADR-003]** and must be re-checked if ADR-003 changes. ADR-003 lines are cited `ADR-003 Lnnn`. |
+| Limits | Nothing was run in NW.js or the RMMZ editor; no screenshots exist because nothing visual is claimed. Every rate, fraction and duration is a **design default** (a parameter in data, tunable), not a measured or balanced value; real-world orders of magnitude are the source where the SRD is silent. Memory and CPU figures are arithmetic from stated assumptions, not measurements. **Sibling lanes.** The first version was written against the Lane Q and Lane W briefs (`9103799ecbbd1b389b427c15ddbe7f5c814c806a`, `31892ae7afea6c4bdfaf5102e1e3740c87f603d6`), which were the branch tips when the writer read them. Both lanes pushed designs before this design's first final commit, so its statement that they held only briefs was stale by then (review MINOR-3). Tips re-sampled for Fix 1 (`git fetch`, then `git rev-parse`): `origin/task/lane-q` = `44f868a70b72b88dca6152475a43c91eb1618ee4`, which is the PM's Lane Q Fix 1 brief on top of Lane Q's design at `9d5b40d32f96a38803b1f32f78287a902d2bead8` (`tasks/SIM.40.01/lane-q/SIM.40.01_STRUCTURAL_SUPPORT.md`; Grok FAIL at that commit, not merged). `origin/task/lane-w` = `63b6f20707fbb20cee5d77928aa3128098dce89d`, the Grok review (VERDICT PASS) of Lane W's design at `bed949e839c4b9a06d467a6f36be50891fd70be5`; `origin/main` merged it at `8997e238a97c7a4a2405d5e7249f587b4d8b298d`. Lane Q is in its own Fix 1, so its tip will move: a reader should read the current `origin/task/lane-q` and `origin/task/lane-w` rather than trust these hashes. Fix 1 does not adopt either design. Lane Q's §9.7 ("Reconciliation with Lanes R and W") records the differences between Lane Q and this design as of `6613418f`, and that reconciliation is Lane Q's; the mass unit is escalated by Lane Q to the PM and WG.65.15 (its `escalation.md`). Every Lane Q name here stays ASSUMED and R-05 stays PARTIAL. |
+| Dependency on ADR-003 | ADR-003 Rev 3 (`docs/adr/ADR-003_sim_render_split_and_lod.md` on `origin/task/lane-m`, tip `9e0ef94d`) is cited **PROPOSED**: its own status line says it "stays PROPOSED until the Owner and the PM sign it off" (ADR-003 L3). It was merged to `origin/main` after this lane's base (`3b33faa5`, with a Grok PASS), still marked PROPOSED; this lane's base does not contain it. Re-checked for Fix 1: `git merge-base --is-ancestor 3b33faa5 origin/main` printed EXIT=0, and the file on `origin/main` is byte-identical to the Lane M tip (`diff` EXIT=0), so every ADR-003 line cited below reads the same on both. Fix 1 proposes two amendments to ADR-003 §17 (R-12.3): the decay clock in place of the per-day `rateMilli` form (L1653), and exposure changes caused by decay taking effect at the causing instant rather than on the processing day (L1694). Every mechanism below that uses its tick (10 Hz, 1 tick = 36 game-seconds, ADR-003 L58), its game-day cadence (L1689), its LOD levels L0/L1/L2 (L64-70), its 32×32 chunk storage (§15.3), its ledger transform API (§7.8) or its support queue (§16.3) is marked **[ADR-003]** and must be re-checked if ADR-003 changes. ADR-003 lines are cited `ADR-003 Lnnn`. |
 
 ## 0. Conventions used in every section
 
@@ -35,7 +36,8 @@
 ### 0.3 Time units (D-1 is OWNER_OPEN)
 
 - Every duration is authored in **simulated years (sy)**. At load, a duration becomes game days with `days = sy × DPY`, where **DPY (game days per year) is the D-1 parameter**. Under D-1 option (b), keep V123 as coded, **DPY = 1** (`DEUS_Core.js:324`, `this.year++; // 1 day/night cycle per year`). Under D-1 option (a), separate the solar day from the year, **DPY = N > 1**, chosen by the Owner. This design does not choose.
-- Schedules are integer game days on ADR-003's integer tick clock (2,400 ticks per game day, 240 s real at 1x; ADR-003 §3.2). All decay timers are in the `historical` domain (INV-SIM-02, `docs/INVARIANT_REGISTRY.md:52`).
+- Schedules are **instants in year-ticks (yt)**: 1 yt = 1/2,400 sy, counted from world year 0 (R-01.2). ADR-003's integer tick clock has 2,400 ticks per game day (240 s real at 1x; ADR-003 §3.2), so 1 yt is exactly DPY ticks and `tick = yt × DPY` with no rounding under either D-1 option. An instant becomes a game day only when it is drained (R-08.5). All decay timers are in the `historical` domain (INV-SIM-02, `docs/INVARIANT_REGISTRY.md:52`).
+- Fix 1 note: the first version keyed schedules by integer game day and derived them from a per-day rate. That cannot hold multi-millennium lives in an HP byte, and it rounds differently at each DPY (review MAJOR-1). R-01.2 gives the replacement.
 - The mapping table for both options is in section "Deep history and LOD".
 
 ### 0.4 Rendering and art (DEC-011, DEC-007)
@@ -63,13 +65,82 @@ There is no maintenance state, no abandonment flag on structures, no exposure cl
 
 ### R-01.2 The rule
 
-Each built element (a built stratum marked `M_BUILT`, `DEUS_Levels.js:995`, or a built object) loses HP in closed form once it is unmaintained, following ADR-003 §17.3:
+Each built element (a built stratum marked `M_BUILT`, `DEUS_Levels.js:995`, or a built object) loses life in closed form once it is unmaintained. ADR-003 §17.3 gives the shape: a lazy closed form from a stored baseline, a precomputed `failDay`, a min-heap, and a recomputation when exposure changes (ADR-003 L1653, L1659-1662). This design keeps that shape. It does **not** keep ADR-003's per-day formula, `HP(day) = HP(d0) − floor(rateMilli[material][exposure] × (day − d0) / 1000)` with integer rates per game day (ADR-003 L1653). That formula cannot hold this design's life table (Fix 1, review MAJOR-1).
 
-`HP(day) = HP(d0) − floor(rateMilli[dc][ex] × (day − d0) / 1000)` (ADR-003 L1653),
+**Why the per-day rate is not used.**
+- Strata HP is a byte, and stone has `maxHP: 120` (`DEUS_Levels.js:1006`). A decaying element has `rateMilli ≥ 1`, so the longest life the formula can express is 1,000 × maxHP game days: 120,000 days, which is 6,000 sy at DPY 20 (12,750 sy even at the byte cap of 255). ASHLAR SHELTERED is 20,000 sy.
+- `ceil` of a per-day rate rounds differently at each DPY, so the two D-1 options disagree. The first version derived `rateMilli = ceil(1000 × maxHP / (lifeYears × DPY))`. For FX-R-01's H1 walls (R-09.3), that gives these band failure years:
 
-with two additions this design makes:
-1. **Rates are authored as lives, not per-day numbers.** For decay class `dc` and exposure `ex`, the data holds `lifeYears[dc][ex]`, the simulated years a full-HP element takes to reach 0 HP. At load, `rateMilli = ceil(1000 × maxHP / (lifeYears × DPY))`, so the same data works under both D-1 options. A life of "∞" means no decay and no schedule entry.
-2. **Modifiers multiply the life, never the HP.** `life = lifeYears[dc][ex] / (M_ft × M_root × M_fire)`, each modifier ≥ 1 and rounded up to the next 1/8, so that small climate changes do not reschedule anything.
+  | Run | Band 1 | Band 2 | Band 3 | Band 4 |
+  |---|---|---|---|---|
+  | DPY 1 | 1,407 | 2,530 | 3,475 | 4,275 |
+  | DPY 20 | 1,263 | 2,213 | 2,973 | 3,583 |
+  | life table | 1,397.3 | 2,523.0 | 3,479.9 | 4,293.2 |
+
+  These figures come from the writer's scratch calculation (REPORT.md), taking maxHP 120.
+- The per-day form inverts exactly only when `lifeYears × DPY` divides `1,000 × maxHP`. A 60-sy TIMBER roof at maxHP 120 qualifies: 2,000 milli-HP a day at DPY 1, 100 at DPY 20. That covers too few lives to keep the form for some classes and not others, so it is not used anywhere. It is replaced by the clock below. Proposed as an ADR-003 amendment (R-12.3).
+
+**Authoring (unchanged from the first version).**
+1. **Rates are authored as lives, not per-day numbers.** For decay class `dc` and exposure `ex`, the data holds `lifeYears[dc][ex]`, the simulated years a full-life element takes to fail. A life of "∞" means no decay and no schedule entry.
+2. **Modifiers divide the life, never the HP.** `life = lifeYears[dc][ex] / (M_ft × M_root × M_fire)`. Each modifier is ≥ 1 and rounded up to the next 1/8, so small climate changes do not reschedule anything.
+
+**The decay clock.** Every decaying record carries one clock of three stored integers. That covers a decay member (R-02.2), an unattended item or item component (R-03.2), a remains record (R-03.4), a weathering residue field (R-04.4) and a litter footprint (R-06.3).
+- **`t0`**: the instant the current segment began, in **year-ticks (yt)**.
+  - 1 yt = 1/2,400 sy, counted from world year 0.
+  - DPY never enters it. One yt is exactly DPY ticks (section 0.3).
+  - Stored as an integer below 2^53 (a float64), so instants are exact for about 3.7 × 10^12 sy.
+- **`rem0`**: the life remaining at `t0`, in millionths. **R = 1,000,000** is a full, undamaged life. This is ADR-003's `HP(d0)` at high resolution: the "hp0" of the closed form, in millionths of `maxHP` rather than as a byte.
+- **`lifeYt`**: the full life, in yt, at the segment's exposure and modifiers:
+  - `lifeYt = ceilDiv(lifeYears[dc][ex] × 2,400 × fieldNum × 512, fieldDen × ft8 × root8 × fire8)`.
+  - `fieldNum / fieldDen` is R-01.3's catalog scaling, for example `wR / 90`, or `1 / 1` where a class has none.
+  - `ft8`, `root8` and `fire8` are R-01.5's modifiers in eighths (8 = ×1; 9 = ×1.125).
+  - Stored as a u32; ∞ is the sentinel `0xFFFFFFFF` and schedules nothing.
+
+**The closed form.** Everything is integer. `ceilDiv(a, b)` is ⌈a / b⌉ and `floorDiv(a, b)` is ⌊a / b⌋, for a ≥ 0 and b > 0.
+
+| Quantity | Formula |
+|---|---|
+| Life left at instant `t ≥ t0` | `rem(t) = max(0, rem0 − floorDiv((t − t0) × R, lifeYt))` |
+| First instant at which `rem` reaches a point `p < rem0` | `cross(p) = t0 + ceilDiv((rem0 − p) × lifeYt, R)`. This inverts the row above exactly: `rem(t) ≤ p` holds if and only if `t ≥ cross(p)`, because `floorDiv(x, L) ≥ n` ⟺ `x ≥ n × L` for integer `n` |
+| Failure instant (ADR-003's `failDay`, as an instant) | `failYt = cross(0) = t0 + ceilDiv(rem0 × lifeYt, R)` |
+| Life fraction used by stages, salvage and re-founding | `h = rem / R`: S1 is `h ≤ 0.85`, which is `rem ≤ 850,000` (R-02.3) |
+| Strata HP byte (derived; never the schedule) | `HP = ceilDiv(maxHP × rem, R)`. It falls to a threshold byte `k` at `cross(floorDiv(k × R, maxHP))`, and it is 0 exactly when `rem` is 0 |
+
+**Next event.** A record's next event is the earliest `cross(p)` among the points it has not passed yet:
+- its stage point (850,000 for a member);
+- the `rem` values of its HP thresholds (C-1 in "Decay-driven collapse") or of its corrosion steps (R-03.6);
+- 0, which is failure. A FOUNDATION member uses the anchor floor 250,000 instead of 0 (TR-1).
+
+The heap key is that instant, `dueYt`, then the record id (R-08.5). The next event is not stored in the record; it is recomputed from the clock whenever the clock changes.
+
+**Rebase: the only way a clock changes (Fix 1, review MINOR-4).** Suppose an element's exposure class (R-01.4) or its quantized modifier (R-01.5) changes at instant `t1`, with `t0 ≤ t1 < failYt`. For every record affected, in this order:
+1. `rem0 ← rem(t1)`: the life left at `t1`, from the old segment's `t0`, `rem0` and `lifeYt`.
+2. `t0 ← t1`.
+3. `lifeYt ←` the life for the new exposure and modifiers, from the formula above.
+4. The record's heap entry is replaced by its new next event, recomputed from the new clock.
+
+A change that arrives at `t1 ≥ failYt` finds the record already failed; the failure is processed first (R-05.3 C-6). A change at `t1 < t0` falls inside the abandonment grace (R-01.7, where `t0` is set ahead to the end of the grace); only `lifeYt` changes then. Two other causes also rebase the clock:
+- External damage that lowers an element's HP byte to `k` rebases it with `rem0 ← min(rem(t1), floorDiv(k × R, maxHP))`. It also splits the element off its member if the other elements were not damaged (R-02.2).
+- A repair sets `rem0 ← R`.
+
+**`t1` is the instant of the cause, not the day the change is processed.**
+- If a decay event caused the change (a roof or wall band failing), `t1` is that event's `dueYt`. Lane Q's cascade carries it through (R-05.3 C-3).
+- For any other cause (a fire, a dig, a flood, a blast), `t1 = ceilDiv(tick, DPY)`, taken from the tick in which the cause happened.
+
+So a chain of decay events (a roof, then band after band) never depends on where a game-day boundary falls. ADR-003 instead lets an exposure change take effect "on the day the causing event is *processed*" (L1694). That text is kept for non-decay causes and amended for decay causes (R-12.3).
+
+**Lives longer than the HP byte can express.** The schedule is held in the clock, never in the byte, so a life may be far longer than 1,000 × maxHP game days (review MAJOR-1).
+- `lifeYt` is a u32. One segment may last up to 2^32 − 1 yt, about 1.79 million sy, under any DPY.
+- `t − t0` is clamped to `lifeYt` before multiplying (past that, `rem` is 0 anyway). So `(t − t0) × R` stays below 2^32 × 10^6 ≈ 4.3 × 10^15, which is under 2^53 ≈ 9.0 × 10^15. Every product above is therefore exact in a JavaScript number.
+- The HP byte only records the last threshold written, for Lane Q's support check. It is never read back to compute a schedule, except through the damage rebase above.
+- The data validator (AT-R-02) rejects two kinds of finite life: one whose `lifeYears × 2,400` is not an integer, and one whose `lifeYt` would exceed 2^32 − 2.
+
+**D-1 neutrality.** DPY appears in none of the formulas above. It enters only in two places: when an instant becomes a tick (`tick = dueYt × DPY`), and when it becomes a day for draining (R-08.5). DPY 1 and DPY 20 therefore produce the same results in three respects:
+- every transition instant;
+- every stage at a whole-year checkpoint;
+- every ledger total at such a checkpoint.
+
+Only the game day on which each event is processed differs (R-09.1, AT-R-20).
 
 ### R-01.3 Decay classes (dc)
 
@@ -111,13 +182,13 @@ ADR-003 names three exposures: open to the sky, wet, buried (L1654). This design
 | BURIED-ANOX | buried below the water table or under ≥ 1 full layer (10 ft) of fill | buried |
 | CAVE | underground (layer ≤ -1 under natural rock), humid, no sky, not flooded | sheltered, humid |
 
-Exposure is recomputed **only** for the elements whose inputs changed: a roof element failing (its cells' columns), a strata write above the element (burial or excavation), a fluid wet/dry transition on a face neighbour, or a maintenance change of the owning structure. Each of those arrives as an event (`levels:strataChanged`, `DEUS_Levels.js:1558`; the fluid change feed; the site upkeep event). Nothing walks the world to find exposure.
+Exposure is recomputed **only** for the elements whose inputs changed: a roof element failing (its cells' columns), a strata write above the element (burial or excavation), a fluid wet/dry transition on a face neighbour, or a maintenance change of the owning structure. Each of those arrives as an event (`levels:strataChanged`, `DEUS_Levels.js:1558`; the fluid change feed; the site upkeep event). Nothing walks the world to find exposure. Every exposure change rebases the affected clocks at the instant of its cause (R-01.2).
 
 **Water dependency (D-4).** WET and BURIED-ANOX need a water authority. Per the PM decision D-4 (audit §9), `DEUS_Fluid` becomes that authority and the legacy flood fill that creates water (`DEUS_Levels.js:3315`, WAT-1) is retired. If the Owner overturns D-4, WET and the water table must come from whatever replaces it; the rest of this design is unchanged. **This is a D-4 dependency.**
 
 ### R-01.5 Modifiers
 
-- **Freeze-thaw and snow (SIM.50.06).** SIM.50.06 publishes, per LOD region, an annual freeze-thaw index `FT` in 0..1 and an annual maximum snow load. For porous masonry (MUDBRICK, BRICK, RUBBLESTONE) `M_ft = 1 + 2 × FT`; for ASHLAR `M_ft = 1 + 2 × FT × (1 − wR / 100)`; for other classes `M_ft = 1`. Snow load is not a decay rate: it goes to Lane Q's roof load check, so a decay-weakened roof fails earlier in a snowy region (section "Decay-driven collapse"). Below layer -1 `FT = 0` (no freeze-thaw underground). A region's index change reschedules its elements only when the quantized modifier changes (1/8 steps), and only for elements in that region, which is bounded by that region's decaying-element count.
+- **Freeze-thaw and snow (SIM.50.06).** SIM.50.06 publishes, per LOD region, an annual freeze-thaw index `FT` in 0..1 and an annual maximum snow load. For porous masonry (MUDBRICK, BRICK, RUBBLESTONE) `M_ft = 1 + 2 × FT`; for ASHLAR `M_ft = 1 + 2 × FT × (1 − wR / 100)`; for other classes `M_ft = 1`. Snow load is not a decay rate: it goes to Lane Q's roof load check, so a decay-weakened roof fails earlier in a snowy region (section "Decay-driven collapse"). Below layer -1 `FT = 0` (no freeze-thaw underground). A region's index change rebases its elements (R-01.2) only when the quantized modifier changes (1/8 steps), and only for elements in that region, which is bounded by that region's decaying-element count.
 - **Roots (SIM.50.04).** A tree or shrub object on the element's cell or a face neighbour sets `M_root = 2` for MUDBRICK, BRICK, RUBBLESTONE and 1.5 for ASHLAR. It arrives as an `objects:changed` event for that cell.
 - **Fire damage.** Fire removes HP at once through the damage path (`registerDamageResponse`, `DEUS_Levels.js:1653`; DURABILITY's fire rule, `docs/design/DURABILITY.md:145`). A charred TIMBER or LIGHTWOOD element also gets `M_fire = 1.5` for the rest of its life. Fire residue is in "Fire residue".
 - **Burial** is not a modifier; it changes the exposure class (to BURIED-AER or BURIED-ANOX), which usually slows decay to nothing.
@@ -138,7 +209,21 @@ These are **design defaults** (data, tunable). Source for all rows: real-world o
 
 Item classes (TEXTILE, FLESH, BONE, metals) have their own tables in "Metals and items".
 
-**Worked example (stone house, timber roof, temperate, FT = 0.25, abandoned at year 0).** The TIMBER roof is SKY: life 60 sy, so it fails at 60 sy. The ASHLAR walls are SHELTERED while roofed: after 60 sy they have lost 60 / 20,000 = 0.3 % of HP. At 60 sy the roof's failure makes the **top band** of each wall SKY (only the top is open to the sky): ASHLAR SKY with `M_ft = 1 + 2 × 0.25 × 0.1 = 1.05`, rounded up to 1.125, life 3,000 / 1.125 ≈ 2,667 sy, so the top band fails near year 2,720. The band below has been weathering under cover (SHELTERED, life 20,000 / 1.125 ≈ 17,778 sy) and now becomes the top; it fails sooner, near year 4,980, and the next ones near 6,900 and 8,530 (two-layer walls: four upper bands of 2 slices each). The rubble of each fallen band banks up at the wall foot and buries the WALL-BASE (BURIED-AER, ∞), which then stops decaying: the foundation survives (TR-1 in "Ruins and re-founding").
+**Worked example (stone house, timber roof, temperate, FT = 0.25; every element abandoned at year 0, so every clock starts at `t0 = 0`, `rem0 = R`).** All values follow from R-01.2's closed form. They were computed with integer arithmetic in the writer's scratch calculation (REPORT.md), and the years are exact instants divided by 2,400.
+- **Roof.** TIMBER, SKY, elm (`rotResistance` 50, `game/data/DEUS_WorldCatalog.json:4680`, so the scaling is 1), no frost modifier: `lifeYt = 60 × 2,400 = 144,000`. S1 at `cross(850,000) = 21,600` yt (year 9.0); failure at `failYt = 144,000` yt (year 60.0).
+- **Walls.** ASHLAR at wR 90 (scaling 1). `M_ft = 1 + 2 × 0.25 × 0.1 = 1.05`, rounded up to 9/8.
+  - SHELTERED: `lifeYt = ceilDiv(20,000 × 2,400 × 8, 9) = 42,666,667` (17,777.8 sy).
+  - SKY: `lifeYt = ceilDiv(3,000 × 2,400 × 8, 9) = 6,400,000` (2,666.7 sy).
+- **Two-layer walls.** They have four upper bands of 2 slices each (R-02.2). All four are SHELTERED from year 0. When the roof or the band above fails, a band's top is open to the sky: it is **rebased** at that instant to SKY (R-01.2).
+
+| Band | Rebased to SKY at (yt) | `rem0` after the rebase | Fails at (yt) | Fails at (year) |
+|---|---|---|---|---|
+| 1 (top) | 144,000 (roof failure) | 1,000,000 − floorDiv(144,000 × 10^6, 42,666,667) = 996,626 | 144,000 + ceilDiv(996,626 × 6,400,000, 10^6) = 6,522,407 | 2,717.67 |
+| 2 | 6,522,407 | 847,132 | 11,944,052 | 4,976.69 |
+| 3 | 11,944,052 | 720,062 | 16,552,449 | 6,896.85 |
+| 4 | 16,552,449 | 612,052 | 20,469,582 | 8,528.99 |
+
+Each lower band fails sooner after the one above it. It has weathered under cover all along, so it enters SKY with less life left. The rubble of each fallen band spills off the 1-cell-wide wall top and banks up at the wall foot (Lane Q's spill; ASSUMED). It buries the WALL-BASE (BURIED-AER, ∞), which then stops decaying: the foundation survives (TR-1 in "Ruins and re-founding"). The same arithmetic at limestone's wR 50 is FX-R-01's H1 (R-09.3).
 
 ### R-01.7 Maintenance and abandonment
 
@@ -148,7 +233,7 @@ Item classes (TEXTILE, FLESH, BONE, metals) have their own tables in "Metals and
 
 If `k < 1`, the site keeps whole structures maintained in a deterministic triage order (most recently used first, ties by structure id) until the labour runs out; the rest become unmaintained. The triage list is recomputed only on the site's population-change and structure-change events, so its cost is bounded by that site's structure count. Upkeep consumes material: each repair books `T(ITEM→BUILT, family, m, "decay.repair")` for the mass the element shed (see R-02.3).
 
-**When an element becomes abandoned.** An element is abandoned `abandonYears[dc]` after it was last maintained (ADR-003's `abandonDays`, L1650; defaults 1 sy for THATCH and LIGHTWOOD, 2 sy for everything else). Only then does it get a decay schedule (`d0` = the day it became abandoned).
+**When an element becomes abandoned.** An element is abandoned `abandonYears[dc]` after it was last maintained (ADR-003's `abandonDays`, L1650; defaults 1 sy for THATCH and LIGHTWOOD, 2 sy for everything else). Only then does it get a decay schedule: its clock starts with `t0` = the instant it became abandoned and `rem0 = R` (or its current `rem` if it was damaged). The clock is written when the site loses maintenance, with `t0` set ahead to the end of the grace.
 
 **When a site becomes abandoned.** A site is ABANDONED when its resident population is 0 for `siteAbandonYears` (default 1 sy), or when SIM.50.09 declares it abandoned (war, famine, disease; `docs/worldgen/DEUS_WORLDGEN_WBS.md:552`). Its structures then all lose coverage in one event, bounded by the site's structure count. The site state machine is in "Ruins and re-founding".
 
