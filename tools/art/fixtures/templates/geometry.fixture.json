@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "deus-art-catalogue/1.1.0",
+  "fixture": "TEST_ geometry fixture for tools/art/test_blank_templates.js (WG.32.02 Lane T). Mirrors the BRIEF's deus-art-catalogue/1.1.0 geometry contract; it is not art/catalogue/geometry.json.",
+  "squareFt": 5,
+  "layerFt": 10,
+  "strataPerLayer": 5,
+  "stratumFt": 2,
+  "layerCount": 32,
+  "zMin": -16,
+  "zMax": 15,
+  "tilePx": 48,
+  "layerPx": 96,
+  "stratumPx": [19, 19, 19, 19, 20],
+  "humanPx": 42,
+  "frameClasses": {
+    "TINY": { "footprintSq": [1, 1], "drawnFootprintPx": [24, 24], "frame": [48, 48] },
+    "SMALL": { "footprintSq": [1, 1], "frame": [48, 48] },
+    "MEDIUM": { "footprintSq": [1, 1], "frame": [48, 48] },
+    "LARGE_TALL": { "footprintSq": [2, 2], "frame": [48, 96] },
+    "LARGE_LONG": { "footprintSq": [2, 2], "frame": [96, 48], "status": "PROPOSED" },
+    "HUGE": { "footprintSq": [3, 3], "frame": null, "status": "OWNER_OPEN", "future": true },
+    "GARGANTUAN": { "footprintSq": [4, 4], "frame": null, "status": "OWNER_OPEN", "future": true }
+  },
+  "optionalParams": {
+    "TALL_MEDIUM": { "frame": [48, 64], "enabled": false },
+    "smallRaceReadabilityFloorPx": { "value": [26, 28], "races": ["GNOME", "HALFLING"], "enabled": false }
+  },
+  "pxPerFootCreature": 7,
+  "rmmzCharacterBlocks": { "48x48": [144, 192], "48x96": [144, 384], "96x48": [288, 192] },
+  "bands": [
+    { "id": "LOWER2", "zMin": -16, "zMax": -9, "ownerOpen": true },
+    { "id": "LOWER1", "zMin": -8, "zMax": -1, "ownerOpen": true },
+    { "id": "SURFACE", "zMin": 0, "zMax": 3, "ownerOpen": true },
+    { "id": "UPPER1", "zMin": 4, "zMax": 9, "ownerOpen": true },
+    { "id": "UPPER2", "zMin": 10, "zMax": 15, "ownerOpen": true }
+  ],
+  "decisions": [
+    { "field": "layerCount, zMin, zMax", "source": "DEC-013 as amended (addendum §13), via BRIEF WG.32.02", "status": "DECIDED" },
+    { "field": "tilePx, layerPx, stratumPx", "source": "Owner 01:55 CT 2026-09-26, relayed by PM, via BRIEF WG.32.02", "status": "DECIDED" },
+    { "field": "frameClasses.LARGE_TALL", "source": "Owner 02:04 CT 2026-09-26, via BRIEF WG.32.02", "status": "DECIDED" },
+    { "field": "frameClasses.LARGE_LONG", "source": "PM proposal, via BRIEF WG.32.02", "status": "PROPOSED" },
+    { "field": "frameClasses.HUGE, frameClasses.GARGANTUAN", "source": "BRIEF WG.32.02", "status": "OWNER_OPEN" },
+    { "field": "optionalParams.TALL_MEDIUM, optionalParams.smallRaceReadabilityFloorPx", "source": "BRIEF WG.32.02", "status": "OWNER_OPEN" },
+    { "field": "bands", "source": "PM defaults, via BRIEF WG.32.02", "status": "OWNER_OPEN" }
+  ]
+}

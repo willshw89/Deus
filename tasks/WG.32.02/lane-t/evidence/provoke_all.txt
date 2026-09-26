@@ -1,0 +1,49 @@
+$ node tools/art/test_blank_templates.js --provoke-all
+PASS provoke.run
+INFO provoke.run -> FAIL templates.run: exit 1 stderr: ERROR: --bg must be one of transparent, magenta | usage: node tools/art/make_blank_templates.js --catalogue <catalogue.json> [--geometry <geometry.json>] --out <dir> [--bg transparent|m
+PASS provoke.one_per_sheet
+INFO provoke.one_per_sheet -> FAIL templates.one_per_sheet: 1 problem(s): unexpected file TEST_PROVOKED_EXTRA.png
+PASS provoke.dimensions
+INFO provoke.dimensions -> FAIL templates.dimensions: 1 problem(s): TEST_ATLAS_SURFACE: PNG is 4097x4096, catalogue says 4096x4096
+PASS provoke.census
+INFO provoke.census -> FAIL templates.census: 1 problem(s): TEST_ATLAS_SURFACE: 1 pixel(s) outside {bg #00000000, grid #00FFFFFF, label #FFFF00FF}, e.g. (4094,4094) #010203FF
+PASS provoke.slot_edges
+INFO provoke.slot_edges -> FAIL templates.slot_edges: 1 problem(s): TEST_ATLAS_SURFACE:0000 (0,0 96x96): 1 boundary pixel(s) not grid colour
+PASS provoke.interior
+INFO provoke.interior -> FAIL templates.interior: 1 problem(s): TEST_ATLAS_SURFACE:0000: 1 interior pixel(s) differ from grid/tick/background e.g. (1,1) #00FFFFFF want #00000000
+PASS provoke.free_area
+INFO provoke.free_area -> FAIL templates.free_area: 1 problem(s): TEST_ATLAS_SURFACE: 1 pixel(s) outside slots differ from grid/background e.g. (481,1) #00FFFFFF want #00000000
+PASS provoke.labels
+INFO provoke.labels -> FAIL templates.labels: 1 problem(s): TEST_ATLAS_SURFACE:0000: label reads "       " (want "0000 AB"), 68 pixel(s) differ
+PASS provoke.sidecar
+INFO provoke.sidecar -> FAIL templates.sidecar: 1 problem(s): TEST_ATLAS_SURFACE:0000: x is 1, want 0
+PASS provoke.png_chunks
+INFO provoke.png_chunks -> FAIL templates.png_chunks: 1 problem(s): TEST_ATLAS_SURFACE: chunks IHDR,IDAT,tEXt,IEND (want IHDR, IDAT..., IEND only)
+PASS provoke.determinism
+INFO provoke.determinism -> FAIL templates.determinism: 1 problem(s): $TEST_Horse.json: c369b7f979316fa1177eeb05beeddce0558cc1c18ded1d7829f33796d8c5caab vs bd2dcf8c67592bdb89b38f9b6f443bb7593e001fdf82c72bcfd287a43fba8ddc
+PASS provoke.palette
+INFO provoke.palette -> FAIL templates.palette: 2 problem(s): #00FFFF is in the master palette; template colour #00FFFFFF is in the master palette
+PASS provoke.bg_magenta
+INFO provoke.bg_magenta -> FAIL templates.bg_magenta: 3 problem(s): census: TEST_ATLAS_SURFACE: 1 pixel(s) outside {bg #FF00FFFF, grid #00FFFFFF, label #FFFF00FF}, e.g. (4094,4094) #FF00FF00; free_area: TEST_ATLAS_SURFACE: 1 pixel(s) outside slots
+PASS provoke.stratum_param
+INFO provoke.stratum_param -> FAIL templates.stratum_param[changed_split]: split [19,19,19,19,20]: no ramp/strip slot height moved from the base split [19,19,19,19,20]; wall face ticks [20,39,58,77] did not move from the base split
+PASS provoke.tall_medium
+INFO provoke.tall_medium -> FAIL templates.tall_medium[on_adds_slots]: exit 0; 0 TALL_MEDIUM slot(s) (0 with 48x64 frames), 28 slots vs 28 base; 
+PASS provoke.readability_floor
+INFO provoke.readability_floor -> FAIL templates.readability_floor: exit 0; 2 problem(s): TEST_ATLAS_SURFACE:0006: envelope h 21..28 below floor 26..28; TEST_ATLAS_SURFACE:0007: envelope h 21..21 below floor 26..28
+PASS provoke.refusals
+INFO provoke.refusals -> FAIL templates.refusals[provoked_valid_catalogue]: want exit 2 codes VARIANT_HAS_SLOT; got exit 0; out written: true
+PASS provoke.out_dir_safety
+INFO provoke.out_dir_safety -> FAIL templates.out_dir_safety[painted_template_refused]: exit 0; folder unchanged: true
+PASS provoke.no_literals
+INFO provoke.no_literals -> FAIL templates.no_literals: line 659: 0x30
+PASS provoke.mutants
+INFO provoke.mutants -> FAIL templates.mutants[provoked_noop]: survived: census found nothing
+PASS provoke.fixture_contract
+INFO provoke.fixture_contract -> FAIL templates.fixture_contract: missing: a CEILING-anchored slot
+PASS provoke.fixture_drift
+INFO provoke.fixture_drift -> FAIL templates.fixture_drift: catalogue.fixture.json differs from build_fixture.js output (rerun node tools/art/fixtures/templates/build_fixture.js)
+PASS provoke.repo_untouched
+INFO provoke.repo_untouched -> FAIL templates.repo_untouched: git status changed during the run:
+RESULT: 23 passed, 0 failed
+EXIT=0
