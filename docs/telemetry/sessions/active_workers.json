@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "lane": "Lane C2b",
+    "provider": "Claude / claude-opus-5-5",
+    "taskId": "task-35427",
+    "pid": 7264,
+    "worktree": "C:\\Users\\snewt\\.deus_worktrees\\lane-c2b",
+    "branch": "task/lane-c2b",
+    "launchTimeCT": "2026-09-25 23:01:17 CT",
+    "briefPath": "C:\\Users\\snewt\\.deus_worktrees\\lane-c2b\\BRIEF.md",
+    "launchPromptPath": "C:\\Users\\snewt\\.deus_worktrees\\run_lane_c2b.ps1",
+    "state": "running"
+  }
+]
