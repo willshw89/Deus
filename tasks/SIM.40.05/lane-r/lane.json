@@ -1,0 +1,20 @@
+{
+  "lane": "lane-r",
+  "taskId": "SIM.40.05",
+  "branch": "task/lane-r",
+  "writer": "claude",
+  "reviewer": "grok",
+  "allowedPaths": [
+    "tasks/SIM.40.05/lane-r/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "node",
+      "args": [
+        "-e",
+        "const fs=require('fs');const d='tasks/SIM.40.05/lane-r/';const t=JSON.parse(fs.readFileSync(d+'trace.json','utf8'));const md=fs.readFileSync(d+'SIM.40.05_DECAY_CYCLE.md','utf8');const want=Array.from({length:12},(_,i)=>'R-'+String(i+1).padStart(2,'0'));const S=['COVERED','PARTIAL','OWNER_QUESTION'];const r=t.requirements||[];const ids=r.map(x=>x.id);const bad=r.filter(x=>!S.includes(x.status)||!x.section||!md.includes(x.section));const miss=want.filter(w=>!ids.includes(w));const H=['## Decay drivers','## Structure stages','## Metals and items','## Fire residue','## Decay-driven collapse','## Nature reclaiming','## Ruins and re-founding','## Deep history and LOD','## Matter ledger long-run test','## Sparse storage and cost','## Acceptance tests','## WBS impact','## Owner questions'];const mh=H.filter(h=>!md.includes(h));const b=Buffer.byteLength(md);const oq=(t.ownerQuestions||[]).length;console.log('task',t.task,'reqs',r.length,'missing',miss.join(',')||'none','bad',bad.map(x=>x.id).join(',')||'none','missingHeadings',mh.join('|')||'none','ownerQuestions',oq,'mdBytes',b);if(t.task!=='SIM.40.05'||miss.length||bad.length||mh.length||r.length!==want.length||oq<1||b<24000)process.exit(1)"
+      ],
+      "timeoutSec": 60
+    }
+  ]
+}
