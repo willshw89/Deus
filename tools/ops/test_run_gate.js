@@ -281,6 +281,9 @@ async function gateChecks() {
         r = await runRunner(["--root", FULL, "--gate-list", path.join(LISTS, list)]);
         check(name, r.code === 2 && re.test(r.out) && !ran(sp("pass")), r.text);
     }
+    r = await runRunner(["--screen", "--root", FULL]);
+    check("screen_mode_runs_nothing", r.code === 0 && /^SCREEN RESULT: 4 NEEDS_NWJS, 15 clean, 19 suites \(nothing was run\)$/m.test(r.out)
+        && /^SCREEN tools\/test_guard_evasion\.js clean/m.test(r.out) && fs.readdirSync(MARKERS).length === 0, r.text);
     r = await runRunner(["--root", FULL, "--gate-list", path.join(LISTS, "gate_all_pass.json"), "--no-such-flag"]);
     check("usage_unknown_flag_exit_2", r.code === 2 && /unknown argument/.test(r.err), r.text);
     r = await runRunner(["--census", "--root", FULL, "--concurrency", "4", "--out", outFile("c4")]);
