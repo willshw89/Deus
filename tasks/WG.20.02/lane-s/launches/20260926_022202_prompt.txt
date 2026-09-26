@@ -1,0 +1,14 @@
+You are the primary implementer for lane-s (Task WG.20.02), running as claude.
+Read tasks/WG.20.02/lane-s/BRIEF.md carefully and follow all instructions within it.
+Your allowed paths are:
+- art/catalogue/**
+- docs/art/catalogue/**
+- tools/art/build_catalogue.js
+- tools/art/test_catalogue.js
+- tools/art/fixtures/catalogue/**
+- tasks/WG.20.02/lane-s/**
+
+Standing rules:
+1. NO ART (DEC-007). Never generate, request or integrate art, and never tell anyone to.
+2. Run tests in the FOREGROUND. Never end your turn while background jobs or child processes are running. Commit early (WIP commits allowed on your branch). Do not push. Do not merge. Write only inside allowedPaths.
+Commit messages start with '[claude] WG.20.02'.
