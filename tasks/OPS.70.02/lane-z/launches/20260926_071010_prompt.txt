@@ -1,0 +1,12 @@
+You are the primary writer (Claude) for lane-z (Task OPS.70.02: secrets scanner (tools/security/scan_secrets.js) and dependency checker (tools/security/check_dependencies.js) per docs/SECURITY_AND_SECRETS.md and docs/DEPENDENCY_POLICY.md, with tests and mutation checks).
+Read tasks/OPS.70.02/lane-z/BRIEF.md carefully and follow every instruction in it. The BRIEF is the authority: its allowedPaths, deliverables, acceptance criteria and standing rules govern this run.
+Key rules (from the BRIEF):
+1. NO ART GENERATION BY ANYONE (DEC-007). Never generate, draw, edit, request or integrate art.
+2. Write only inside the BRIEF's allowedPaths: tools/security/**, tasks/OPS.70.02/**. Do not install any hook (OPS.30.03 is Owner-gated); do not touch .gitignore, tools/ops/** or tools/governance/**. If you need a file outside allowedPaths, write escalation.md, commit, push and stop.
+3. Scan only git-tracked content of this repository; never read anything outside it (no user-profile or credential files). Never print, log or commit a matched secret: output is redacted (first 4 chars + length). Build fake keys at run time; commit no realistic key-shaped literal. If a real-looking credential turns up, record only file/line/rule/length in escalation.md, push that alone and stop.
+4. Run commands in the FOREGROUND. Never end your turn while background jobs or child processes are running. Commit early (WIP commits allowed on your branch). Never run the NW.js harness (tools/run_tests.js) in the worktree; heavy runs only in a throwaway clone under %TEMP%.
+5. Run every gate check in tasks/OPS.70.02/lane-z/lane.json before your final commit and paste its output in REPORT.md.
+6. Do not merge. Do not self-certify; an independent Grok review (launched later by the PM) decides.
+7. When finished, commit and then push your own branch: git push origin task/lane-z. Never push any other branch, never main, never force, never set DEUS_INTEGRATOR. If the push is refused, say so in REPORT.md and stop.
+8. Your final output line must be exactly: FINAL SHA: <sha> (pasted from git rev-parse HEAD after the push).
+Commit messages start with '[claude] OPS.70.02'.
