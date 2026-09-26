@@ -1,0 +1,157 @@
+=== determinism_runs 2026-09-26T09:59:00.359Z 5 consecutive run(s); cwd C:\Users\snewt\AppData\Local\Temp\lanek-fix1-eb446e06-det3; git HEAD eb446e068f42051253ec02a1dfb3047a073eb2c0 ===
+RUN 1 | node tools/test_minimap.js | load at start: CPU 4.3 % (3 s), AI workers 5, nw.exe 0 (2026-09-26T09:59:00.378Z) | EXIT=0 DURATION_MS=61 | RESULT: 24 passed, 0 failed (exit 0) | passed 24, failed 0 | world seed -
+--- raw output run 1 ---
+=== DEUS Minimap (TASK UI-MAP-01) Headless Verification Suite ===
+PASS minimap.api_loaded - Minimap API is present and loaded
+PASS minimap.discovery_initial_unexplored - Cell (100,100,0) starts as UNKNOWN
+PASS minimap.discovery_revealed - Cell (100,100,0) is DISCOVERED after explore()
+PASS minimap.discovery_radius_explored - Radius explore correctly marked neighbour (102,102,0)
+PASS minimap.z_layer_isolation_neg1 - Discovery on Z0 does NOT reveal Z-1
+PASS minimap.z_layer_isolation_pos1 - Discovery on Z0 does NOT reveal Z+1
+PASS minimap.z_layer_neg1_discovered - Z-1 cell becomes discovered independently
+PASS minimap.z_layer_neg2_still_unexplored - Z-2 remains unexplored
+PASS minimap.initial_chunks_flushed - Initial startup chunks cleanly flushed to base bitmap
+PASS minimap.geometry_invalidation_dirty - Building wall at (60,60,0) dirties exactly 1 chunk (1 dirty chunk)
+PASS minimap.chunk_rebuild_success - Dirty chunk successfully rebuilt (1 chunk rebuilt)
+PASS minimap.chunk_now_clean - All chunks are clean after rebuild
+PASS minimap.destruction_invalidation - Digging cell dirties exactly 1 chunk (16x16)
+PASS minimap.camera_pan_no_rebuild - Camera panning triggered 0 base rebuilds (258 == 258)
+PASS minimap.save_state_contains_minimap - Save contents include minimapDiscovery bitset
+PASS minimap.reload_restores_exact_state - Reload accurately restored saved discovery state and discarded unsaved cells
+PASS minimap.hostile_out_of_sight - Hostile at (200,200,0) is outside line of sight
+PASS minimap.z_switch_back_no_full_redirty - first visit of the -1 tab dirties 256 chunk(s) (want 256, built once); back on the built Z0 tab: 0 dirty chunk(s) (want 0)
+PASS minimap.z_switch_keeps_offtab_changes - a Z0 cell changed while the -1 tab was shown: 1 dirty chunk(s) on returning to Z0 (want 1)
+PASS minimap.tab_samples_its_own_level - (60,60): Z0 tab 148,163,184 (want the wall 148,163,184); -1 tab 71,85,105 (want the -1 rock 71,85,105, never Z0's wall)
+PASS minimap.overlay_throttled - 12 updates with a still camera redrew the overlay 3 time(s) (want 2-3, every 4th update); a camera move redrew it 1 time(s) in that update (want 1)
+PASS minimap.negative_coords_safe - Negative coordinates (-10,-50) handled safely without crash
+PASS minimap.z_clamped_high - Z=15 correctly clamped to +2
+PASS minimap.z_clamped_low - Z=-99 correctly clamped to -2
+
+======================================================
+RESULT: 24 passed, 0 failed (exit 0)
+======================================================
+RUN 2 | node tools/test_minimap.js | load at start: CPU 4.2 % (3 s), AI workers 5, nw.exe 0 (2026-09-26T09:59:03.764Z) | EXIT=0 DURATION_MS=45 | RESULT: 24 passed, 0 failed (exit 0) | passed 24, failed 0 | world seed -
+--- raw output run 2 ---
+=== DEUS Minimap (TASK UI-MAP-01) Headless Verification Suite ===
+PASS minimap.api_loaded - Minimap API is present and loaded
+PASS minimap.discovery_initial_unexplored - Cell (100,100,0) starts as UNKNOWN
+PASS minimap.discovery_revealed - Cell (100,100,0) is DISCOVERED after explore()
+PASS minimap.discovery_radius_explored - Radius explore correctly marked neighbour (102,102,0)
+PASS minimap.z_layer_isolation_neg1 - Discovery on Z0 does NOT reveal Z-1
+PASS minimap.z_layer_isolation_pos1 - Discovery on Z0 does NOT reveal Z+1
+PASS minimap.z_layer_neg1_discovered - Z-1 cell becomes discovered independently
+PASS minimap.z_layer_neg2_still_unexplored - Z-2 remains unexplored
+PASS minimap.initial_chunks_flushed - Initial startup chunks cleanly flushed to base bitmap
+PASS minimap.geometry_invalidation_dirty - Building wall at (60,60,0) dirties exactly 1 chunk (1 dirty chunk)
+PASS minimap.chunk_rebuild_success - Dirty chunk successfully rebuilt (1 chunk rebuilt)
+PASS minimap.chunk_now_clean - All chunks are clean after rebuild
+PASS minimap.destruction_invalidation - Digging cell dirties exactly 1 chunk (16x16)
+PASS minimap.camera_pan_no_rebuild - Camera panning triggered 0 base rebuilds (258 == 258)
+PASS minimap.save_state_contains_minimap - Save contents include minimapDiscovery bitset
+PASS minimap.reload_restores_exact_state - Reload accurately restored saved discovery state and discarded unsaved cells
+PASS minimap.hostile_out_of_sight - Hostile at (200,200,0) is outside line of sight
+PASS minimap.z_switch_back_no_full_redirty - first visit of the -1 tab dirties 256 chunk(s) (want 256, built once); back on the built Z0 tab: 0 dirty chunk(s) (want 0)
+PASS minimap.z_switch_keeps_offtab_changes - a Z0 cell changed while the -1 tab was shown: 1 dirty chunk(s) on returning to Z0 (want 1)
+PASS minimap.tab_samples_its_own_level - (60,60): Z0 tab 148,163,184 (want the wall 148,163,184); -1 tab 71,85,105 (want the -1 rock 71,85,105, never Z0's wall)
+PASS minimap.overlay_throttled - 12 updates with a still camera redrew the overlay 3 time(s) (want 2-3, every 4th update); a camera move redrew it 1 time(s) in that update (want 1)
+PASS minimap.negative_coords_safe - Negative coordinates (-10,-50) handled safely without crash
+PASS minimap.z_clamped_high - Z=15 correctly clamped to +2
+PASS minimap.z_clamped_low - Z=-99 correctly clamped to -2
+
+======================================================
+RESULT: 24 passed, 0 failed (exit 0)
+======================================================
+RUN 3 | node tools/test_minimap.js | load at start: CPU 3.4 % (3 s), AI workers 5, nw.exe 0 (2026-09-26T09:59:07.125Z) | EXIT=0 DURATION_MS=45 | RESULT: 24 passed, 0 failed (exit 0) | passed 24, failed 0 | world seed -
+--- raw output run 3 ---
+=== DEUS Minimap (TASK UI-MAP-01) Headless Verification Suite ===
+PASS minimap.api_loaded - Minimap API is present and loaded
+PASS minimap.discovery_initial_unexplored - Cell (100,100,0) starts as UNKNOWN
+PASS minimap.discovery_revealed - Cell (100,100,0) is DISCOVERED after explore()
+PASS minimap.discovery_radius_explored - Radius explore correctly marked neighbour (102,102,0)
+PASS minimap.z_layer_isolation_neg1 - Discovery on Z0 does NOT reveal Z-1
+PASS minimap.z_layer_isolation_pos1 - Discovery on Z0 does NOT reveal Z+1
+PASS minimap.z_layer_neg1_discovered - Z-1 cell becomes discovered independently
+PASS minimap.z_layer_neg2_still_unexplored - Z-2 remains unexplored
+PASS minimap.initial_chunks_flushed - Initial startup chunks cleanly flushed to base bitmap
+PASS minimap.geometry_invalidation_dirty - Building wall at (60,60,0) dirties exactly 1 chunk (1 dirty chunk)
+PASS minimap.chunk_rebuild_success - Dirty chunk successfully rebuilt (1 chunk rebuilt)
+PASS minimap.chunk_now_clean - All chunks are clean after rebuild
+PASS minimap.destruction_invalidation - Digging cell dirties exactly 1 chunk (16x16)
+PASS minimap.camera_pan_no_rebuild - Camera panning triggered 0 base rebuilds (258 == 258)
+PASS minimap.save_state_contains_minimap - Save contents include minimapDiscovery bitset
+PASS minimap.reload_restores_exact_state - Reload accurately restored saved discovery state and discarded unsaved cells
+PASS minimap.hostile_out_of_sight - Hostile at (200,200,0) is outside line of sight
+PASS minimap.z_switch_back_no_full_redirty - first visit of the -1 tab dirties 256 chunk(s) (want 256, built once); back on the built Z0 tab: 0 dirty chunk(s) (want 0)
+PASS minimap.z_switch_keeps_offtab_changes - a Z0 cell changed while the -1 tab was shown: 1 dirty chunk(s) on returning to Z0 (want 1)
+PASS minimap.tab_samples_its_own_level - (60,60): Z0 tab 148,163,184 (want the wall 148,163,184); -1 tab 71,85,105 (want the -1 rock 71,85,105, never Z0's wall)
+PASS minimap.overlay_throttled - 12 updates with a still camera redrew the overlay 3 time(s) (want 2-3, every 4th update); a camera move redrew it 1 time(s) in that update (want 1)
+PASS minimap.negative_coords_safe - Negative coordinates (-10,-50) handled safely without crash
+PASS minimap.z_clamped_high - Z=15 correctly clamped to +2
+PASS minimap.z_clamped_low - Z=-99 correctly clamped to -2
+
+======================================================
+RESULT: 24 passed, 0 failed (exit 0)
+======================================================
+RUN 4 | node tools/test_minimap.js | load at start: CPU 4.1 % (3 s), AI workers 5, nw.exe 0 (2026-09-26T09:59:10.488Z) | EXIT=0 DURATION_MS=46 | RESULT: 24 passed, 0 failed (exit 0) | passed 24, failed 0 | world seed -
+--- raw output run 4 ---
+=== DEUS Minimap (TASK UI-MAP-01) Headless Verification Suite ===
+PASS minimap.api_loaded - Minimap API is present and loaded
+PASS minimap.discovery_initial_unexplored - Cell (100,100,0) starts as UNKNOWN
+PASS minimap.discovery_revealed - Cell (100,100,0) is DISCOVERED after explore()
+PASS minimap.discovery_radius_explored - Radius explore correctly marked neighbour (102,102,0)
+PASS minimap.z_layer_isolation_neg1 - Discovery on Z0 does NOT reveal Z-1
+PASS minimap.z_layer_isolation_pos1 - Discovery on Z0 does NOT reveal Z+1
+PASS minimap.z_layer_neg1_discovered - Z-1 cell becomes discovered independently
+PASS minimap.z_layer_neg2_still_unexplored - Z-2 remains unexplored
+PASS minimap.initial_chunks_flushed - Initial startup chunks cleanly flushed to base bitmap
+PASS minimap.geometry_invalidation_dirty - Building wall at (60,60,0) dirties exactly 1 chunk (1 dirty chunk)
+PASS minimap.chunk_rebuild_success - Dirty chunk successfully rebuilt (1 chunk rebuilt)
+PASS minimap.chunk_now_clean - All chunks are clean after rebuild
+PASS minimap.destruction_invalidation - Digging cell dirties exactly 1 chunk (16x16)
+PASS minimap.camera_pan_no_rebuild - Camera panning triggered 0 base rebuilds (258 == 258)
+PASS minimap.save_state_contains_minimap - Save contents include minimapDiscovery bitset
+PASS minimap.reload_restores_exact_state - Reload accurately restored saved discovery state and discarded unsaved cells
+PASS minimap.hostile_out_of_sight - Hostile at (200,200,0) is outside line of sight
+PASS minimap.z_switch_back_no_full_redirty - first visit of the -1 tab dirties 256 chunk(s) (want 256, built once); back on the built Z0 tab: 0 dirty chunk(s) (want 0)
+PASS minimap.z_switch_keeps_offtab_changes - a Z0 cell changed while the -1 tab was shown: 1 dirty chunk(s) on returning to Z0 (want 1)
+PASS minimap.tab_samples_its_own_level - (60,60): Z0 tab 148,163,184 (want the wall 148,163,184); -1 tab 71,85,105 (want the -1 rock 71,85,105, never Z0's wall)
+PASS minimap.overlay_throttled - 12 updates with a still camera redrew the overlay 3 time(s) (want 2-3, every 4th update); a camera move redrew it 1 time(s) in that update (want 1)
+PASS minimap.negative_coords_safe - Negative coordinates (-10,-50) handled safely without crash
+PASS minimap.z_clamped_high - Z=15 correctly clamped to +2
+PASS minimap.z_clamped_low - Z=-99 correctly clamped to -2
+
+======================================================
+RESULT: 24 passed, 0 failed (exit 0)
+======================================================
+RUN 5 | node tools/test_minimap.js | load at start: CPU 4.1 % (3 s), AI workers 5, nw.exe 0 (2026-09-26T09:59:13.853Z) | EXIT=0 DURATION_MS=45 | RESULT: 24 passed, 0 failed (exit 0) | passed 24, failed 0 | world seed -
+--- raw output run 5 ---
+=== DEUS Minimap (TASK UI-MAP-01) Headless Verification Suite ===
+PASS minimap.api_loaded - Minimap API is present and loaded
+PASS minimap.discovery_initial_unexplored - Cell (100,100,0) starts as UNKNOWN
+PASS minimap.discovery_revealed - Cell (100,100,0) is DISCOVERED after explore()
+PASS minimap.discovery_radius_explored - Radius explore correctly marked neighbour (102,102,0)
+PASS minimap.z_layer_isolation_neg1 - Discovery on Z0 does NOT reveal Z-1
+PASS minimap.z_layer_isolation_pos1 - Discovery on Z0 does NOT reveal Z+1
+PASS minimap.z_layer_neg1_discovered - Z-1 cell becomes discovered independently
+PASS minimap.z_layer_neg2_still_unexplored - Z-2 remains unexplored
+PASS minimap.initial_chunks_flushed - Initial startup chunks cleanly flushed to base bitmap
+PASS minimap.geometry_invalidation_dirty - Building wall at (60,60,0) dirties exactly 1 chunk (1 dirty chunk)
+PASS minimap.chunk_rebuild_success - Dirty chunk successfully rebuilt (1 chunk rebuilt)
+PASS minimap.chunk_now_clean - All chunks are clean after rebuild
+PASS minimap.destruction_invalidation - Digging cell dirties exactly 1 chunk (16x16)
+PASS minimap.camera_pan_no_rebuild - Camera panning triggered 0 base rebuilds (258 == 258)
+PASS minimap.save_state_contains_minimap - Save contents include minimapDiscovery bitset
+PASS minimap.reload_restores_exact_state - Reload accurately restored saved discovery state and discarded unsaved cells
+PASS minimap.hostile_out_of_sight - Hostile at (200,200,0) is outside line of sight
+PASS minimap.z_switch_back_no_full_redirty - first visit of the -1 tab dirties 256 chunk(s) (want 256, built once); back on the built Z0 tab: 0 dirty chunk(s) (want 0)
+PASS minimap.z_switch_keeps_offtab_changes - a Z0 cell changed while the -1 tab was shown: 1 dirty chunk(s) on returning to Z0 (want 1)
+PASS minimap.tab_samples_its_own_level - (60,60): Z0 tab 148,163,184 (want the wall 148,163,184); -1 tab 71,85,105 (want the -1 rock 71,85,105, never Z0's wall)
+PASS minimap.overlay_throttled - 12 updates with a still camera redrew the overlay 3 time(s) (want 2-3, every 4th update); a camera move redrew it 1 time(s) in that update (want 1)
+PASS minimap.negative_coords_safe - Negative coordinates (-10,-50) handled safely without crash
+PASS minimap.z_clamped_high - Z=15 correctly clamped to +2
+PASS minimap.z_clamped_low - Z=-99 correctly clamped to -2
+
+======================================================
+RESULT: 24 passed, 0 failed (exit 0)
+======================================================
+=== every run exited 0 ===
