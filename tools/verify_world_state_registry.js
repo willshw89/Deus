@@ -72,9 +72,10 @@
  * Usage:
  *   node tools/verify_world_state_registry.js [--registry <md>] [--catalogue <json>] [--templates <dir>]
  *        [--world-catalog <json>] [--approvals <md>] [--placements <json>]... [--scope <json>]
- *        [--map <json>] [--baseline <json>] [--report <dir>] [--check | --strict]
+ *        [--map <json>] [--baseline <json>] [--report <dir>] [--work-dir <dir>] [--check | --strict]
  *   Defaults are the repository files (see DEFAULTS); relative paths given on the command line resolve
- *   against the current directory.
+ *   against the current directory. --work-dir is the parent of the generator's temp folder (default: the
+ *   OS temp folder); the temp folder inside it is always new and always deleted.
  * Exit: 0 gate passed / report matches, 1 gate failed / report differs, 2 usage error or unreadable or
  * invalid input (the message names the file, and the line for the registry).
  */
@@ -511,10 +512,12 @@ function subCatalogue(raw, keep) {
 }
 
 // Runs the generator in a temp folder; see the header. Returns {mode, runs, refusals, sidecars}.
-function generateTemplates(catFile, raw, cat) {
+function generateTemplates(catFile, raw, cat, workDir) {
     const gen = path.join(REPO_ROOT, GENERATOR);
     if (!fs.existsSync(gen)) throw new InputError(`template generator ${GENERATOR} not found`);
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'wsr-templates-'));
+    const parent = workDir || os.tmpdir();
+    if (!fs.existsSync(parent) || !fs.statSync(parent).isDirectory()) throw new InputError(`work folder ${parent} not found`);
+    const tmp = fs.mkdtempSync(path.join(parent, 'wsr-templates-'));
     const scrub = s => String(s).split(tmp).join('<tmp>');
     const res = { mode: 'GENERATED', source: GENERATOR, runs: [], refusals: [], sidecars: [], ignored: [] };
     try {
@@ -883,7 +886,7 @@ function evaluate(input) {
     const wc = worldCatalogIds(input.worldCatalog, input.files.worldCatalog);
     let rawTpl;
     if (input.templatesDir) rawTpl = Object.assign({ mode: 'DIR', source: displayPath(input.templatesDir), dir: input.templatesDir, runs: [], refusals: [] }, readSidecars(input.templatesDir));
-    else rawTpl = generateTemplates(input.files.catalogue, input.catalogue, cat);
+    else rawTpl = generateTemplates(input.files.catalogue, input.catalogue, cat, input.workDir);
     const tpl = indexTemplates(rawTpl);
     let ledger = null;
     if (input.approvalsText !== null) {
@@ -1151,7 +1154,8 @@ function reportMarkdown(rep) {
 const USAGE = [
     'usage: node tools/verify_world_state_registry.js [--registry <md>] [--catalogue <json>] [--templates <dir>]',
     '         [--world-catalog <json>] [--approvals <md>] [--placements <json>]... [--scope <json>] [--map <json>]',
-    '         [--baseline <json>] [--report <dir>] [--check | --strict]',
+    '         [--baseline <json>] [--report <dir>] [--work-dir <dir>] [--check | --strict]',
+    '  --work-dir  parent folder for the template generator\'s temp folder (default: the OS temp folder)',
     '  default: gate against the baseline (exit 1 on a new or stale gap)',
     '  --strict  ignore the baseline; exit 1 on any violation or gap',
     '  --check   exit 1 if the committed report (--report dir, default tools/wsr/report) differs from a fresh one',
@@ -1162,7 +1166,8 @@ function parseArgs(argv) {
     const o = { placements: [] };
     const valued = {
         '--registry': 'registry', '--catalogue': 'catalogue', '--templates': 'templates', '--world-catalog': 'worldCatalog',
-        '--approvals': 'approvals', '--placements': 'placements', '--scope': 'scope', '--map': 'map', '--baseline': 'baseline', '--report': 'report'
+        '--approvals': 'approvals', '--placements': 'placements', '--scope': 'scope', '--map': 'map', '--baseline': 'baseline', '--report': 'report',
+        '--work-dir': 'workDir'
     };
     for (let i = 0; i < argv.length; i++) {
         let a = argv[i], v;
@@ -1201,7 +1206,8 @@ function loadInputs(opts) {
         map: readJson(files.map, 'visual-state map'),
         approvalsText,
         placements: opts.placements.map(f => ({ file: path.resolve(f), obj: readJson(path.resolve(f), 'placement report') })),
-        templatesDir: opts.templates !== undefined ? path.resolve(opts.templates) : null
+        templatesDir: opts.templates !== undefined ? path.resolve(opts.templates) : null,
+        workDir: opts.workDir !== undefined ? path.resolve(opts.workDir) : null
     };
 }
 
@@ -1249,7 +1255,7 @@ function runChecker(argv) {
     }
     if (opts.strict) {
         const gating = ctx.findings.filter(x => GATING.has(x.severity));
-        for (const x of gating) out(`GAP ${x.rule} ${x.code} ${x.id}: ${x.detail} (${x.source})`);
+        for (const x of gating) out(`${x.severity} ${x.rule} ${x.code} ${x.id}: ${x.detail} (${x.source})`);
         out(gating.length ? `STRICT: FAILED (${gating.length} violation(s) or gap(s); the baseline is ignored)` : 'STRICT: OK (no violation or gap)');
         return { code: gating.length ? 1 : 0, lines, ctx, report };
     }

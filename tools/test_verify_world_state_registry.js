@@ -154,13 +154,16 @@ function laneTRefused() {
     c.sheets.find(s => s.sheetId === '$TEST_Horse').h = 240; // not 3 x 4 frames: SHEET_INVALID
     return c;
 }
+// The generator's temp folders go into this suite's own work folder (--work-dir), never the shared OS
+// temp folder, so other processes running the checker at the same time cannot disturb these checks.
+function workDir() { const d = path.join(tmpRoot, 'gen'); fs.mkdirSync(d, { recursive: true }); return d; }
 function genCase(T, cat) {
     return runCase(T, ws => {
         ws.generate = true;
         if (cat === null) ws.catalogueFile = LANE_T_CATALOGUE; else { ws.catalogue = cat; }
-    });
+    }, ['--work-dir', workDir()]);
 }
-function tmpTemplateDirs() { return fs.readdirSync(os.tmpdir()).filter(n => n.startsWith(TMP_PREFIX)).sort(); }
+function tmpTemplateDirs() { return fs.readdirSync(workDir()).filter(n => n.startsWith(TMP_PREFIX)).sort(); }
 
 // ---------------------------------------------------------------- checks
 
@@ -490,7 +493,12 @@ const CHECKS = [
         genCase(T, laneTRefused());
         const after = tmpTemplateDirs();
         assert(JSON.stringify(before) === JSON.stringify(after), `temp folders left behind: ${after.filter(x => !before.includes(x)).join(', ')}`);
-        return 'no wsr-templates-* folder left';
+        return 'no wsr-templates-* folder left in the work folder';
+    }],
+    ['gen_work_dir_missing', T => {
+        const res = runCase(T, ws => { ws.generate = true; ws.catalogueFile = LANE_T_CATALOGUE; }, ['--work-dir', path.join(tmpRoot, 'no-such-folder')]);
+        assert(res.code === 2 && res.lines.some(l => /work folder .* not found/.test(l)), `want exit 2; got ${res.lines.join(' / ')}`);
+        return 'exit 2';
     }]
 ];
 
@@ -533,7 +541,8 @@ const MUTANTS = [
     ['sheet_geometry_ignored', 'function sameSheet(a, b) { return a.kind === b.kind && a.w === b.w && a.h === b.h && a.gridPx === b.gridPx; }', 'function sameSheet(a, b) { return true; }'],
     ['template_to_catalogue_direction_off', 'for (const t of tpl.slots) if (!cat.slotById.has(t.slotId))', 'for (const t of []) if (!cat.slotById.has(t.slotId))'],
     ['refusals_dropped', 'for (const x of refusals) if (!res.refusals.some(y => y.key === x.key)) res.refusals.push(x);', ''],
-    ['temp_folder_kept', 'fs.rmSync(tmp, { recursive: true, force: true });', 'void tmp;'],
+    ['work_dir_ignored', 'const parent = workDir || os.tmpdir();', 'const parent = os.tmpdir();'],
+    ['temp_folder_kept','fs.rmSync(tmp, { recursive: true, force: true });', 'void tmp;'],
     ['composed_exempt_any_system', 'else if (!ctx.scope.composedExemptSystems.includes(sys))', 'else if (false)'],
     ['proposed_mapping_resolves', "push(m.status === 'ACCEPTED' ? accepted : proposed, m.visualStateId, m)", 'push(accepted, m.visualStateId, m)'],
     ['derived_variant_base_ignored', 'return base && cat.slotByEntry.has(base) ? base : null;', 'return null;'],
@@ -593,7 +602,7 @@ function main() {
                     killer = f ? `${f.name} (${f.detail.slice(0, 160)})` : null;
                 } catch (err) { killer = `compile/load error: ${err.message}`; }
                 // A mutant may leave the generator's temp folder behind (temp_folder_kept); remove it.
-                for (const d of tmpTemplateDirs()) if (!tmpBefore.has(d)) fs.rmSync(path.join(os.tmpdir(), d), { recursive: true, force: true });
+                for (const d of tmpTemplateDirs()) if (!tmpBefore.has(d)) fs.rmSync(path.join(workDir(), d), { recursive: true, force: true });
                 tally(!!killer);
                 console.log(killer ? `PASS mutant_${name}_killed: by ${killer}` : `FAIL mutant_${name}_killed: every check passed against the mutant`);
             }
