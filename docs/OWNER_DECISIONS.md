@@ -168,25 +168,29 @@ Every decision item recorded in this log must provide:
 
 ---
 
-### Decision `DEC-013`: Nine Z Layers, Nine Races, One Home Layer per Race, and Five Biome Bands
-- **Date Logged:** 2026-09-26
-- **Status:** `DECIDED` (Owner ruling 00:34 & 00:37 CT, directive 0021-V)
+### Decision `DEC-013`: Thirty-Two Z Layers, Nine Races, Home Layer Ranges, Five Biome Bands, and Governing Scale
+- **Date Logged:** 2026-09-26 (Amended 01:10 CT per Owner Directive 0021-V Addendum §12–§13; supersedes 9-layer baseline)
+- **Status:** `DECIDED` (Owner ruling 00:34, 00:37, 01:06–01:10 CT)
 - **Decider:** Owner
 - **Summary:**
-  1. **Nine Z Layers:** The world simulation and presentation expand to 9 vertical Z layers (up from 5 layers, formerly -2..+2).
-  2. **Nine Races with One Home Layer:** Exactly 9 races exist in the world, each assigned one native home layer where its settlements and natural habitat generate.
-  3. **Soft Home Boundaries:** "Home layer" defines where a race's settlements and native populations materialize; it is not a hard barrier. Races may travel, explore, trade, migrate, and engage in conflict across all Z layers.
-  4. **Five Vertical Biome Bands:** The 25 pipeline biomes are partitioned into 5 vertical bands of 5 biomes each:
-     - **Band Surface:** Layer 0 (5 biomes)
-     - **Band Upper-1:** Layers +1 and +2 (5 biomes)
-     - **Band Upper-2:** Layers +3 and +4 (5 biomes)
-     - **Band Lower-1:** Layers -1 and -2 (5 biomes)
-     - **Band Lower-2:** Layers -3 and -4 (5 biomes)
-     The two layers in each band share that band's biome set.
+  1. **Thirty-Two Z Layers:** The world simulation and presentation expand to 32 vertical Z layers (superseding 9 layers; formerly -2..+2). Total vertical headroom: 320 ft. The Z-range refactor targets 32 as the default gameplay layer count and must still support running at 9 in automated tests.
+  2. **Governing Geometry & Scale:**
+     - 1 square / cell = 5 ft × 5 ft (D&D movement standard).
+     - 1 Z layer = 10 ft tall (equivalent to 2 cubes).
+     - 5 strata per layer = 2 ft per stratum (5 strata × 2 ft = 10 ft).
+  3. **Mandatory Sparse Storage:** Memory, state arrays, and save size must scale with occupied cells/entities, NOT with 32 × area. Empty sky and untouched solid rock cost near zero.
+  4. **Cross-Layer Blast & Structural Damage:** Explosions and blasts (e.g. fireball) damage floors and propagate damage to the layer below depending on floor material, thickness, and attenuation. `applyVolumeDamage` propagates vertically with distance falloff and solid material attenuation (fire vs impact).
+  5. **Nine Races with Home Layer Ranges:** Exactly 9 races exist in the world, each assigned one native home layer range within the biome bands where its settlements and natural habitat generate (supersedes "one layer per race").
+  6. **Soft Home Boundaries:** "Home layer range" defines where a race's settlements and native populations materialize; it is not a hard barrier. Races may travel, explore, trade, migrate, and engage in conflict across all Z layers.
+  7. **Five Vertical Biome Bands Spanning 32 Layers:** The 25 pipeline biomes are partitioned into 5 vertical bands of 5 biomes each across the 32 layers (-16..+15, surface at 0):
+     - **Lower-2 (Deep Caverns):** Layers -16..-9 (8 layers, 5 biomes)
+     - **Lower-1 (Shallow Underground):** Layers -8..-1 (8 layers, 5 biomes)
+     - **Surface:** Layers 0..+3 (4 layers: ground, hills, low buildings; 5 biomes)
+     - **Upper-1 (Low Sky / Towers / Canopy):** Layers +4..+9 (6 layers, 5 biomes)
+     - **Upper-2 (High Sky / Peaks / Cloud Realm):** Layers +10..+15 (6 layers, 5 biomes)
 - **Open Sub-Questions (with PM defaults):**
-  - **Z-Range Coordinate Mapping:** Default `-4..+4` (surface = 0, four underground layers `-1..-4`, four upper layers `+1..+4`). Status: `OPEN` (PM default).
-  - **Race-to-Layer Mapping:** Which specific race occupies which home layer. Status: `OPEN` (no default; Owner assigns).
-  - **Strata per Layer:** Remains at 5 strata per layer unless testing demonstrates a need to modify. Status: `OPEN` (PM default).
+  - **Z-Range Coordinate Mapping:** Default `-16..+15` (surface = 0). Status: `OPEN` (PM default).
+  - **Race-to-Band/Layer-Range Mapping:** Which specific race occupies which home layer range. Status: `OPEN` (Owner assigns).
   - **Biome Assignment per Band:** Mapping of the 25 specific biomes into the 5 bands. Status: `OPEN` (Owner assigns).
 
 ---
