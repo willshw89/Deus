@@ -912,7 +912,7 @@ Code today: **PARTIAL** (a thin, capped text chronicle is LIVE; the typed ledger
   - Scope: one append-only, typed event store with stable IDs (deaths, births, pairings, crimes, battles, offices, discoveries, foundings, abandonments), each with participants, place, layer and tick; subscribes to live events and to `time:day` / `time:year` so the historical ledger stays current in play; compaction keeps all deaths, births, battles and offices and trims low-significance events per person beyond a cap; saved; the chronicle and the death ledger become views of it. A revival is its own event type that reopens the person's life record without deleting the death; what it does to offices, heirs and property follows the Owner's rule (OQ-17).
   - Depends on: MIND-01 (event record), SIM.00.02, SIM.00.06, SIM.40.10, SOC.51.01.
   - Acceptance tests: (1) a death in play appears in the log, in the person's biography and in the historical ledger; (2) the log survives save and load byte-identical; (3) compaction never drops a death, birth or battle; (4) a 100-game-year run stays under the size cap; (5) a revival fixture keeps both the death event and the revival event, and the person's ID is the same before and after. Mutant: a live death that never reaches the ledger (today's behaviour) must fail test 1; a revival that deletes the death event must fail test 5.
-  - Tick cost: significant events are rare (A-7 puts about 0.2 per tick at N = 1,000); an append costs about 1 µs. Memory: 32 B per event plus references; with a cap of 64 events per named person and all vital events kept, about 2 MiB for 1,000 named persons; crowd events are aggregated per settlement per game day (about 64 B each).
+  - Tick cost: every event a memory points to is appended, about 4.5 per tick at L0 (A-7), plus significant events at L1 and L2 (births, deaths, crimes, battles; assumed 0.2 per tick at N = 1,000); at about 1 µs per append that is about 5 µs per tick. Compaction runs once per named person per game day, staggered: 1,000 ÷ 2,400 ≈ 0.4 compactions per tick × 20 µs ≈ 8 µs. About 13 µs per tick in all. Memory: 32 B per event plus references; with a cap of 64 events per named person and all vital events kept, about 2 MiB for 1,000 named persons; crowd events are aggregated per settlement per game day (about 64 B each).
 
 - **PROPOSED-REC-02 Renown, reputation, rumour and legends** (G8-3, G8-7).
   - Scope: renown per person and faction from logged deeds; rumours travel as beliefs through social ties (MIND-02, MIND-04), can be wrong, and fade; "legend" status for persons whose renown passes a threshold; text-only legends and genealogy queries for the sheet and look views.
@@ -1127,4 +1127,224 @@ Code today: **PARTIAL** (cave fungus, cave herds, pools and underground homes ex
   - Acceptance tests: (1) on 20 seeds, every underground faction survives its first 30 game days with no input; (2) a fungus farm yields food only with water and organic input; (3) a start with no reachable water is rejected by worldgen. Mutant: the lava-only deepest level (today's rule) must fail test 3.
   - Tick cost: farm plots on the slow clock, about 16 B per plot; the viability check runs at generation only.
 
-<!-- PART E -->
+## 4. Interactions
+
+Each people area couples to the nine living-world systems (SIM.50.02-.10), to the coupled systems (SIM.40, DEC-014, DEC-015) and to DEC-018's spells. The tables name the proposed package that owns each coupling. A coupling with no owner is a gap and appears in the area's gap table in section 3.
+
+### 4.1 The nine living-world systems (SIM.50.02-.10)
+
+| System (WBS row) | People-side couplings (owner package) | What the row lacks on the people side |
+|---|---|---|
+| SIM.50.02 Cross-layer water (`docs/worldgen/DEUS_WORLDGEN_WBS.md:545`) | Drinking water for underground starts through wells into aquifers (DEEP-06). Waterborne disease: today a dormant dysentery hook (`DEUS_Colonists.js:5396`), later a HEALTH-03 source. Floods cut routes and fords, and boats need navigable water (LOG-01, LOG-04). Sieges cut water and flood tunnels (WAR-05). Floods are witnessed and logged (MIND-02, REC-01). | No water quality (clean or contaminated) and no draw interface: who takes how much water from where, with mass conserved. |
+| SIM.50.03 Erosion and sediment (`docs/worldgen/DEUS_WORLDGEN_WBS.md:546`) | Sediment buries relics and ruins (REC-03, REC-04, with SIM.40.07). Washouts dirty route-graph regions (LOG-01). Buried records are lost knowledge until someone digs them up (KNOW-05). | Nothing beyond burial; items rely on SIM.40.07. |
+| SIM.50.04 Vegetation (`docs/worldgen/DEUS_WORLDGEN_WBS.md:547`) | Herbs and medicine are harvested flora (HEALTH-05). Cave flora extends succession below ground (DEEP-04). A plant's uses are a technique to discover (KNOW-02). The dormant "nature" need reads green surroundings (MIND-01). | Its test text is surface succession (pioneer to climax forest, canopy). No underground succession, and no yield interface for herbs and food. |
+| SIM.50.05 Fire (`docs/worldgen/DEUS_WORLDGEN_WBS.md:548`) | Fire is a light source that burns fuel (DEEP-01, DEEP-03). Smoke in a closed cave is a hazard to people; the SRD's suffocation rule sits in the same environment entry as vision and light (`game/data/srd51/rules.json:4403`). Arson in raids (WAR-05). Fires are witnessed, feared and logged (MIND-02, REC-01). | No people response: no firefighting or fleeing duty (a SOC.13.01 duty) and no smoke volume (Lane P's G-GAS). |
+| SIM.50.06 Seasons and weather (`docs/worldgen/DEUS_WORLDGEN_WBS.md:549`) | Festivals and the farming calendar (CUL-03, OQ-03). Exposure, where cold and heat damage are already live (`DEUS_Environment.js:651`), and seasonal disease (HEALTH-03). Seasonal route weights (LOG-01). Campaign seasons (WAR-03). Weather as a mood source (MIND-03). | The row shifts temperature "across all 32 layers". Deep layers should follow WG.64.06's underground heat rather than the surface season, and DEEP-01 needs sky exposure, not season. How seasons weaken with depth is not stated. |
+| SIM.50.07 Migration and herds (`docs/worldgen/DEUS_WORLDGEN_WBS.md:550`) | Hunting follows herds. Pack and draft animals come from livestock (LOG-04). Cave fauna moves between regions below ground (DEEP-05). | Written for upland and lowland herds; no underground movement. |
+| SIM.50.08 Land reshaping (`docs/worldgen/DEUS_WORLDGEN_WBS.md:551`) | Roads lower route cost (LOG-01); the row makes roads terrain only. Dams, terraces and irrigation are techniques someone must know (KNOW-02). Land claims fall under law (GOV-01). Fortifications and siege tunnels (WAR-05). Mining opens caves, and the ecology design says that mining and torchlight collapse a cave predator's habitat (`docs/worldgen/DEUS_CREATURE_ECOLOGY.md:219`, DEEP-05). | Who decides to reshape, and why. The row depends on SOC.10.03 plan data but names no decision maker (DEC-015 build orders, office duties). |
+| SIM.50.09 Settlement lifecycle (`docs/worldgen/DEUS_WORLDGEN_WBS.md:552`) | The row names its own causes of contraction and abandonment: "war/famine/disease". War is WAR-04 and WAR-06, famine comes through supply (LOG-05), and disease is HEALTH-03; none of the three has a row. Fission and V42 departures found new settlements (GOV-05, MIND-06). Ruins keep their history (REC-04). Abandonment can lose knowledge (KNOW-05). | Every cause it names is unplanned on the people side, so the row cannot meet its own test text without the people packages. |
+| SIM.50.10 Catastrophes (`docs/worldgen/DEUS_WORLDGEN_WBS.md:553`) | Mass injuries (HEALTH-02). Grief and fear in witnesses (MIND-02). Disasters become legends (REC-01, REC-02). A legitimacy shock for the ruler (GOV-04). Cave-ins kill underground populations (DEEP-05, DEEP-06). Sinkholes open new cross-layer connectors (LOG-01). | No people response (evacuation, rescue, rebuilding duties). |
+
+Every one of the nine rows is physical. None names a consumer on the people side, and none emits events that witnesses, memories or records can use. PROPOSED-REC-01 gives them one event store to write to, and PROPOSED-MIND-02 turns those events into memories.
+
+### 4.2 Hyper-realistic SRD spells (DEC-018, SIM.60.01-.04)
+
+DEC-018 makes spell effects play out in the simulation while SRD numbers stay the baseline. SIM.60.02 plans a schema of physical primitives only:
+
+| Citation | Excerpt | Meaning |
+|---|---|---|
+| `docs/OWNER_DECISIONS.md:261` | `never replacing SRD numbers` | The SRD numbers stay; physical consequences are added on top. |
+| `docs/worldgen/DEUS_WORLDGEN_WBS.md:560` | `ignite, heat flux, impulse/blast via SIM.40.01, fluid source/sink, temperature/freeze, mass-conserving terrain edit, light, growth/decay` | SIM.60.02's primitives: none acts on a person's mind, health or knowledge. |
+| `docs/worldgen/DEUS_WORLDGEN_WBS.md:562` | `fireball ignites wooden floor and breaches to layer below` | SIM.60.04's reference fixture; the war coupling below builds on it. |
+
+Lane P's classification (SIM.60.01; read at `c9d1ed86`, Grok PASS, merged after this lane's base) finds 111 of 319 spells physical and 208 `NONE`. A `NONE` spell still changes a person. Lane P's §2.9 groups the 208 by reason; each group needs state that a people package holds:
+
+| Lane P `NONE` group | Count | People state it reads or writes | Owner package |
+|---|---|---|---|
+| Healing and hit points | 8 | Hit points, dying, death saves | HEALTH-01, HEALTH-06 |
+| Creature-targeted damage with no world effect | 19 | Hit points and wounds; witnesses | HEALTH-02, MIND-02 (GP.07.01 resolves the attack) |
+| Creature mind (charm, compulsion, fear, confusion) | 21 | Attitude, duty choice, mood, memory | MIND-10 |
+| Summoned or magical entities | 13 | New units: mounts (Find Steed, Phantom Steed), servants, guardians, and their loyalty | LOG-04, MIND-10; the matter they are made of is Lane P's Owner question Q1 |
+| Object state (locks, handling, repair, food quality) | 5 | Locks and theft (Knock, Arcane Lock), clean food and drink (Purify Food and Drink), repaired relics (Mending) | GOV-02, HEALTH-03, REC-03 |
+| Creature movement and abilities | 12 | Routes a single traveller can take (Spider Climb, Water Breathing, Meld into Stone) | LOG-01 (per-traveller edges), DEEP-02 |
+| Invisibility, stealth and concealment | 5 | Who can witness | MIND-02, GOV-02, WAR-05 |
+| Creature conditions, stats, rolls and protections | 48 | Conditions, curses, disease (Contagion), poison (Protection from Poison), restoration | HEALTH-01, HEALTH-03, HEALTH-04, HEALTH-06 |
+| Senses, divination and read-only queries | 25 | Darkvision, thoughts (Detect Thoughts), disease (Detect Poison and Disease), lore (Legend Lore), language (Comprehend Languages) | DEEP-02, MIND-10, HEALTH-03, REC-02, CUL-04 |
+| Illusion | 14 | False beliefs (Disguise Self, Seeming, Hallucinatory Terrain) | MIND-02 (belief kept apart from truth), GOV-02, LOG-01 (a traveller's route belief) |
+| Transport, teleport and planar travel | 21 | Magical route edges (Teleportation Circle, Transport via Plants, Word of Recall) | LOG-01, WAR-05; planes are Owner content |
+| Communication | 6 | Messages at a distance (Sending, Message), comprehension (Tongues), testimony of the dead (Speak with Dead) | WAR-02, CUL-04, GOV-03, REC-01 |
+| Meta-magic, wards and sound | 11 | Alarms and wards on property and holy places (Alarm, Forbiddance, Magic Circle) | GOV-02, WAR-05, CUL-02 |
+
+The counts add up to 208. The four couplings the brief names, and the other SRD text they rest on:
+
+| Citation | Excerpt | Meaning |
+|---|---|---|
+| `game/data/srd51/spells.json:10490` | `can end either one disease or one condition afflicting it` | **Disease versus Lesser Restoration.** Needs a per-person disease state (HEALTH-03) and a condition registry (HEALTH-01). At crowd LOD, a healer's cures move people from infected to recovered in the cohort compartments, so HEALTH-03's compartment model needs a "treated" flow. |
+| `game/data/srd51/spells.json:5184` | `regains a number of hit points equal to 1d8` | **Cure Wounds** heals hit points only. It ends no disease; whether it closes a V105 wound is HEALTH-02's rule (OQ-13). |
+| `game/data/srd51/spells.json:4519` | `Your touch inflicts disease.` | Contagion. Lane P notes it does not spread between creatures in the SRD, so HEALTH-03 must mark each disease as spreading or not, rather than treat all disease as contagious. |
+| `game/data/srd51/spells.json:13410` | `rendered free of poison and disease` | Purify Food and Drink needs a contamination flag on food and water (HEALTH-03, SIM.50.02). |
+| `game/data/srd51/spells.json:13364` | `If it is poisoned, you neutralize the poison.` | Protection from Poison acts on HEALTH-04's poison state. |
+| `game/data/srd51/spells.json:3415` | `When the spell ends, the creature knows it was charmed by you.` | **Crime versus Charm Person.** A charm is a crime tool with a witness built in: the victim remembers (MIND-10 test 1), and the charm itself may be an offence in the law data (GOV-01, OQ-05). |
+| `game/data/srd51/spells.json:5723` | `you can read the thoughts of certain creatures` | **Crime versus Detect Thoughts.** Needs readable mind state (MIND-01) and a rule on whether magical evidence can convict (GOV-01, GOV-03, OQ-05). |
+| `game/data/srd51/spells.json:17870` | `speak a deliberate lie while in the radius` | Zone of Truth in trials (GOV-03, MIND-10 test 3). |
+| `game/data/srd51/spells.json:12011` | `You attempt to reshape another` | Modify Memory changes belief, never the world record (MIND-10 test 2). |
+| `game/data/srd51/spells.json:15402` | `knows only what it knew in life` | Speak with Dead needs the dead person's memories kept for as long as the corpse can answer (MIND-01 retention, REC-01). |
+| `game/data/srd51/spells.json:10445` | `a brief summary of the significant lore about the thing you named` | Legend Lore needs legends that can be looked up by person, place or object (REC-02). |
+| `game/data/srd51/spells.json:13455` | `provided that it has been dead no longer than 10 days` | Raise Dead: G8-8 and OQ-17. Lane P records that revival reuses a retired unit ID. |
+| `game/data/srd51/spells.json:10582` | `sheds bright light in a 20-foot radius and dim light for an additional 20 feet` | **Underground light versus Light.** DEEP-01 test 1 uses the same radii as a torch. The spell's material component is "a firefly or phosphorescent moss", which ties it to DEEP-04's glowing flora as a real item. |
+| `game/data/srd51/spells.json:5382` | `A 60-foot-radius sphere of light spreads out from a point you choose within range.` | **Daylight.** Lane P notes that the SRD does not call it sunlight, so it lights a cave but grows nothing; DEEP-04 must not treat it as a growth source. |
+| `game/data/srd51/spells.json:4606` | `ruby dust worth 50 gp, which the spell consumes` | **Continual Flame**: permanent light with no fuel (DEEP-03), paid for with a consumed item. |
+| `game/data/srd51/spells.json:5291` | `Magical darkness spreads from a point you choose within range` | Darkness blocks darkvision, so DEEP-02 needs a magical-darkness case. |
+
+**War versus Fireball breaching floors.** Lane P classifies Fireball as `breaches-floor`, the Owner-named reference case, and does the same for Passwall, Stone Shape, Move Earth, Disintegrate and Earthquake. These are siege tools as well as weapons: WAR-05 test 3 uses SIM.40's attenuation, a breach dirties route-graph regions (LOG-01 test 4), defenders and bystanders form memories (MIND-02), the battle is logged (REC-01), and a ruler who cannot stop it loses standing (GOV-04).
+
+Additions to packages above that come from this section:
+- PROPOSED-REC-01 logs every cast as an event (caster, spell, targets, place, layer, tick), so witnesses, crimes and records use one source. SIM.60.03 lists no event output.
+- PROPOSED-LOG-01 treats a permanent Teleportation Circle pair, and any other SRD fixed magical link, as a graph edge with the SRD's conditions.
+- PROPOSED-DEEP-06's viability test states whether conjured food and water (Create Food and Water, Goodberry; Lane P's Q1 governs their ledger entry) count toward a start being viable.
+
+Tick cost: all of these run per cast event, and expiries go through PROPOSED-HEALTH-01's timer wheel; negligible at the planning point.
+
+### 4.3 Coupled systems: collapse, decay, reproduction, the population budget and faction plans
+
+| System | Rows | People-side couplings |
+|---|---|---|
+| Structural support and collapse | SIM.40.01-.04 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:534`) | Siege mining and floor breaching use SIM.40.01's attenuation (WAR-05). SIM.40.03's props and safe digging are duties that SOC.13.01 weighs and that a person may refuse under MIND-07. Cave-ins are witnessed and logged (MIND-02, REC-01). Underground homes must be stable at Year 0 (DEEP-06). |
+| Decay and reclamation | SIM.40.05-.09 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:538`) | SIM.40.07 turns durable relics into buried finds; REC-03 keeps their provenance. Ruins decay with their history attached (REC-04). Records rot and take knowledge with them (KNOW-05). Graves decay (CUL-03). LIFE-003 requires traces to last (`docs/RISK_REGISTER.md:62`). |
+| Reproduction and lifecycle | SIM.40.10 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:543`) | Heritable traits (MIND-05). Pairing through households (MIND-04). Each death of an office holder starts succession (GOV-05). Disease is a cause of death (HEALTH-03). Funerals act on remains (CUL-03). Births and deaths go to the event log (REC-01). P-02 applies: SIM.40.10 must run in play, not only in the pre-game history loop. |
+| Population budget and crowd LOD | DEC-014 (`docs/OWNER_DECISIONS.md:199`) | Crowd summaries for minds (MIND-08), health compartments (HEALTH-03), armies (WAR-04), knowledge holders (KNOW-01) and travellers (LOG-01). The four anti-snowball pressures map to GOV-04 (rebellions), HEALTH-03 (epidemics), LOG-05 (logistical strain) and GOV-05 (succession crises); none has a row today (P-04). Monster origins (DEC-014 §5) feed DEEP-05. |
+| Faction development plans | DEC-015 (`docs/OWNER_DECISIONS.md:212`), SOC.10.02, SOC.10.03 | Plan values and practices seed CUL-01 and bias MIND-05. Law sets live in plan data (GOV-01). The tech path becomes KNOW-02's prerequisite graph. Build orders under threat drive WAR-03 and SOC.40.02. The plans' "societal regression/collapse conditions" (`docs/OWNER_DECISIONS.md:225`) need KNOW-05's loss rule, which two designs forbid (OQ-12). Lore, names and values stay Owner-authored (`docs/OWNER_DECISIONS.md:226`): OQ-05, OQ-09, OQ-10, OQ-11. |
+
+## 5. Recommended order of work
+
+These are recommendations to the coordinator, who mints IDs and sets statuses. The priority column in section 1.1 ranks importance. This section orders the work, and pulls a package forward only where a hard dependency needs it.
+
+### 5.1 The order
+
+Individual minds go first. No other people area has to be built before them. What must come first is existing WBS rows and Owner answers, not people areas.
+
+| Step | Packages | Why here | Hard prerequisites |
+|---|---|---|---|
+| 0 | none (prerequisites) | Every people package runs in the headless core and reads its regions. | SIM.00.02, SIM.00.03, SIM.00.04, SIM.30.01. Owner: DEC-002 (society baseline; it gates every SOC row), OQ-03 (calendar); OQ-01 and OQ-04 before MIND-05 and MIND-08. |
+| 1 | MIND-01, MIND-02, MIND-03 with REC-01; then MIND-04, MIND-05, MIND-07, MIND-06, MIND-09; MIND-08 once SIM.30.02-.03 exist; MIND-10 once SIM.60.02 exists | P-01: the story loop. REC-01 belongs to area 8, but it shares MIND-01's event record and it is the fix for P-02 (G8-1): without it, aging, grief and succession never run in play. | SIM.00.06 (save), SIM.40.10 for REC-01's lifecycle events |
+| 2 | HEALTH-07 (small, can go at once), HEALTH-01, HEALTH-02, HEALTH-03 (contagion inside a settlement first; spread along routes after LOG-01), HEALTH-05, HEALTH-04, HEALTH-06 | G6-1 is a blocker (DEC-014 epidemics), and the conditions engine has no tick today. | OQ-13 (HEALTH-02), OQ-14 (HEALTH-03), SIM.60.02 (HEALTH-06) |
+| 3 | DEEP-01, DEEP-02, DEEP-03, DEEP-04, DEEP-06, DEEP-05 | G10-1 is a blocker: four of nine races start below ground. DEEP-01 also gives MIND-02 its sight rule and serves Lane P's 26 LIGHT spells. | WG.00.17, SIM.50.02, SIM.50.04; OQ-23, OQ-24 |
+| 4 | GOV-05 first (a dead leader is never replaced today), then GOV-06, GOV-01, GOV-02, GOV-03, GOV-04 | G2-2 is a blocker (rebellions). GOV-04 needs MIND-08's cohort mood. | SOC.20.01, SOC.23.02; OQ-05, OQ-06, OQ-07, OQ-08 |
+| 5 | LOG-01, LOG-04, LOG-02, LOG-03, LOG-05 | LOG-01 is the shared route graph: HEALTH-03's route spread, WAR-04, KNOW-04 and LOG-02 all need it. | WG.00.17, WG.00.20, SIM.50.08; OQ-16 |
+| 6 | WAR-01; CUL-04 (pulled forward from area 4, because WAR-02 depends on it); WAR-02, WAR-03, WAR-04, WAR-05, WAR-06 | G3-1 (P-03) is a blocker, but war needs routes (LOG-01), supply (LOG-05), succession (GOV-05) and legitimacy (GOV-04) first. | SIM.00.05 (Factions contact in the core), SOC.40.01-.02, GP.07.01-.02; OQ-09, OQ-11, OQ-25 |
+| 7 | REC-02, REC-03, REC-04, REC-05 | The rest of the records area, on top of REC-01. | SIM.40.07, SIM.40.08, SIM.50.09, WG.65.17; OQ-18 for REC-05 |
+| 8 | KNOW-01, KNOW-03, KNOW-02, KNOW-04, KNOW-05 | Needs holders (MIND), teaching duties (SOC.13.01) and routes (LOG-01). | SOC.10.02, SOC.12.01; OQ-12 |
+| 9 | MODE-01 (small; can run alongside step 1), MODE-02, MODE-03, MODE-04 | Waits on Owner answers; MODE-04 needs DEEP-02 and MIND-02. Nothing for Overlord until OQ-19 and OQ-20 are answered. | SIM.00.03, SOC.50.01; OQ-21, OQ-22 |
+| 10 | CUL-01, CUL-02, CUL-03, CUL-05 | The content is Owner-authored, which is why the area is last. The schemas can start earlier with `TEST_` placeholders (AGENTS.md rule 7). | SOC.10.03, SIM.50.06; OQ-03, OQ-10 |
+
+### 5.2 What the packages cost together
+
+The sum of the tick-cost lines in section 3, at the planning point of section 2.5 (N = 1,000 named, L0 = 150; P = 100,000 crowd in S = 200 settlements). Every per-operation cost is an assumption (A-5), not a measurement.
+
+| Area | Steady CPU per tick (µs) | From |
+|---|---|---|
+| 1 Minds | about 163 | MIND-02 45, MIND-03 95, MIND-04 10, MIND-06 8, MIND-07 5 |
+| 2 Government | about 17 | GOV-02 5, GOV-03 10, GOV-04 2 |
+| 3 Diplomacy and war | about 9 | WAR-02 2, WAR-03 2, WAR-04 5 |
+| 4 Culture | about 5 | CUL-02 4.5 |
+| 5 Knowledge | about 2 | KNOW-02 2 |
+| 6 Health | about 31 | HEALTH-01 5, HEALTH-02 8, HEALTH-03 17, HEALTH-05 1 |
+| 7 Travel and logistics | about 30 | LOG-01 30 |
+| 8 Records | about 18 | REC-01 13, REC-02 4.5 |
+| 9 Modes | 0 | per command only |
+| 10 Underground | about 98 | DEEP-01 56, DEEP-02 3.5, DEEP-03 3, DEEP-04 10, DEEP-05 25 |
+| **Total** | **about 370 µs** | 11% of the 3.4 ms per-tick budget at 8x, 1.4% of 27 ms at 1x (A-3) |
+
+- Bursts: MIND-08 promotion costs about 50 µs per person, so it is spread over prewarm ticks at no more than 20 promotions (1 ms) per tick. GOV-05's claimant scan costs under 1 ms per office holder's death.
+- Memory per named person: about 2.7 KiB (MIND-01 622 B, REC-01 2 KiB, KNOW-01 25 B, CUL-02 8 B, HEALTH-03 8 B, CUL-04 4 B, REC-02 4 B, DEEP-02 1 B, HEALTH-01 about 2 B on average), so about 2.7 MiB at N = 1,000.
+- Memory per settlement: about 3.2 KiB (MIND-01 cohort summaries 960 B, GOV-03 up to 1.3 KiB of open cases, HEALTH-01 cohort counts 320 B, REC-04 256 B, a LOG-03 market 256 B, GOV-04 32 B, CUL-02 32 B, KNOW-01 25 B, HEALTH-03 48 B), so about 0.64 MiB at S = 200, plus REC-01's crowd events of about 64 B per settlement per game day before compaction.
+- Memory per faction: GOV-01's law set about 1 KiB, CUL-01 64 B; WAR-01 8 B per faction pair.
+- Memory per layer: nothing for a layer with no occupied region (A-6). A region is 32 × 32 cells × 2 layers, so a 256 × 256 area has 64 regions per slab, the share of 32 regions per layer. Region-keyed data is LOG-01 at 64 B per traversable region (about 2 KiB per fully traversable layer, at most 64 KiB per area), DEEP-05 at 32 B per occupied region (1 KiB per layer, at most 32 KiB per area) and DEEP-04 at 64 B per active cave region. DEEP-01's sky-exposure cache is 1 B per column (64 KiB per area), whatever the layer count.
+
+The people side would take about a tenth of the per-tick simulation budget at 8x. The living-world systems of SIM.50.01 share the rest. SIM.30.04's benches replace these numbers.
+
+## 6. Owner questions
+
+Listed with options, never answered here. No option is marked as recommended. Where a document already records a PM default, the table quotes it.
+
+| ID | Area | Question | Blocks | Options |
+|---|---|---|---|---|
+| OQ-01 | 1 | Personality (V94): which facets and values does every person have, and how do culture and family shape them? | MIND-05, and every mind package that reads it | (a) Extend today's ten newborn facets (`DEUS_Colonists.js:2652`) with a values list. (b) A facet-and-value set in the Dwarf Fortress manner, re-authored in DEUS terms. (c) The SRD background tables (trait, ideal, bond, flaw; the Acolyte example at `game/data/srd51/character_options.json:7223`). |
+| OQ-02 | 1, 6 | Mental breaks and SRD madness (`game/data/srd51/rules.json:6291`). | MIND-07, HEALTH-01 | (a) None, as `docs/design/PERSONALITY.md:637` has it. (b) Bounded breaks without violence (refusing work, wandering off). (c) Breaks that can include violence, and SRD madness. |
+| OQ-03 | all | How long are a year, a season, a pregnancy, a childhood, a memory and a disease in play time? (VISION Q11, `docs/VISION.md:167`; SIM.50.01 D-1; Lane P's Q2.) | MIND-03 half-lives, HEALTH-03, CUL-03, REC-01 compaction | (a) Separate the day from the year. (b) Keep V123 (one day/night cycle is one year) and scale every duration to it. (c) Slow the life clock and the calendar together. |
+| OQ-04 | 1 | Who is always a named individual? DEC-014 §2 lists leaders, heroes and soldiers in formed armies, and leaves the budget to benchmarks. | MIND-08, REC-01 (whose history is kept in full) | (a) The focus bubble plus the persons DEC-014 lists. (b) The same plus their close kin and ties, so relationships survive demotion. (c) A fixed quota per settlement. |
+| OQ-05 | 2 | Law content per people: which acts are offences, what evidence convicts (including magical evidence such as Detect Thoughts or Zone of Truth), which sentences exist, and who judges. | GOV-01, GOV-03, MIND-10 | (a) The Owner writes nine law sets. (b) One shared baseline plus per-people changes. (c) Laws derived from culture values (CUL-01) within Owner bounds. |
+| OQ-06 | 2 | One order hierarchy: V52's tree of threes or SOC.20's offices? | GOV-06, MODE-02 | (a) The rank tree gives field orders and the offices run administration. (b) Offices only; the V52 tree is retired. (c) The rank tree only. |
+| OQ-07 | 2 | Theft and ownership transfer, which V71 says "need their own approved rules" (`docs/VISION.md:81`). | GOV-02, LOG-02 | (a) Theft exists as a crime with motive, risk and detection. (b) Only non-player factions steal. (c) No theft; ownership changes only by gift, trade and inheritance. |
+| OQ-08 | 2 | Can the player's own faction rebel, secede or split, taking people away from the player? | GOV-04, GOV-05 | (a) Yes, like any faction. (b) Only settlements away from the player's home site. (c) No; unrest acts on the player's faction in other ways. |
+| OQ-09 | 3 | The attitude table for the nine peoples (content, DEC-015 §4). | WAR-01 | (a) The Owner writes a 9 × 9 table. (b) Keep the 13 catalog pairs and zero elsewhere (`game/data/DEUS_WorldCatalog.json:7537`). (c) Derive attitudes from culture values and shared history. |
+| OQ-10 | 4 | Gods and religion. | CUL-02 | (a) The SRD's fantasy-historical pantheons (`game/data/srd51/rules.json:10977`). (b) THEME's unapproved proposal T21 A, "two unnamed ways of belief" (`docs/design/THEME.md:335`). (c) No gods; practices only. (d) Owner-authored pantheons. |
+| OQ-11 | 4 | Languages and names. | CUL-04, WAR-02 | (a) The SRD language table as it is (`game/data/srd51/rules.json:707`). (b) Unnamed per-people languages, with names from catalog syllables only. (c) The committed lexicon, once its provenance is checked (M-13). |
+| OQ-12 | 5 | Can knowledge be lost? DEC-015 asks for regression and collapse conditions; two designs say unlocks never lock again (M-08). | KNOW-05, CUL-01 | (a) Loss when the last holder and the last record are gone. (b) Loss only when a settlement collapses or is abandoned. (c) Permanent unlocks. |
+| OQ-13 | 6 | Injuries (VISION Q12, `docs/VISION.md:168`). | HEALTH-02 | (a) V105's four body regions with bleeding. (b) SRD hit points only, no wounds. (c) A fuller body-part model. |
+| OQ-14 | 6 | Which diseases exist, and how deadly may an epidemic be? | HEALTH-03 | (a) The SRD's three sample diseases only (`game/data/srd51/rules.json:5970`). (b) The SRD samples plus Owner-approved additions. (c) Generic data-defined diseases within Owner-set bounds on lethality. |
+| OQ-15 | 6 | Poison crafting and deliberate poisoning by people. | HEALTH-04, GOV-02 | (a) Allowed to anyone, and a crime where the law says so. (b) Only for certain callings. (c) No crafting; poison comes only from creatures and SRD items. |
+| OQ-16 | 7 | Trade: coin, barter or both, and who sets prices (V71). | LOG-02, LOG-03 | (a) Coin (SOC.30) with barter as a fallback. (b) Barter until a faction mints coin. (c) Owner-authored trade customs per people. |
+| OQ-17 | 8 | Resurrection (DEC-018; Raise Dead, Revivify): what happens to a revived person's office, heirs, property and ties after succession and inheritance have run? | REC-01, GOV-05, MIND-04 | (a) Nothing returns automatically; the revived person may claim it, which can start a succession crisis. (b) Everything returns. (c) The culture's law decides (GOV-01). |
+| OQ-18 | 8 | The history-born D&D character mode named in the brief: what is it? No repository document defines it. | REC-05 | (a) The Owner defines it and the coordinator adds a row. (b) It is Incarnate mode applied to a historical person. (c) Out of scope for now. |
+| OQ-19 | 9 | **Overlord mode:** what is it? No document at the base defines it (section 3.9). | Area 9; no package | (a) The Owner writes its definition and the coordinator adds a row. (b) It is a new name for something already written (V125's "God" role, or Command mode); the Owner says which. (c) The term is dropped. |
+| OQ-20 | 9 | **Overlord mode**, the open points once it is defined: which of V125's powers ("observe, intervene, alter history, or do absolutely nothing") it has; how it relates to Command, Combat and Incarnate; how it is entered and left; whether "Overlord" is the final name. | Area 9; no package | For the Owner to write. This audit lists the points and proposes nothing. |
+| OQ-21 | 9 | Battle screens: DEC-017 keeps them, ADR-001 and V45 say combat stays on the map (`escalation.md` E3, M-05). | MODE-03 | (a) DEC-017 means only "keep the RMMZ shell available"; combat stays on the map. (b) Some fights move to `Scene_Battle`. (c) ADR-001 is superseded. |
+| OQ-22 | 9 | Possession versus command (VISION Q4, OD-16). OD-16 records the default "Both modes, switchable" (`docs/worldgen/DEUS_WORLDGEN_WBS.md:718`) and is `OPEN`. | MODE-01, MODE-04 | (a) Both, switchable. (b) Command only. (c) Possession only. |
+| OQ-23 | 10 | Which people lives in which home layer range at 32 layers? DEC-013 leaves it open (`docs/OWNER_DECISIONS.md:194`), while V132 fixes spawn levels in the 5-level world (M-06). | DEEP-06, WG.62.02 | (a) The Owner assigns the ranges. (b) V132's order stretched over the bands (−2 to Lower-2, −1 to Lower-1, and so on). (c) Placement per seed within Owner bounds. |
+| OQ-24 | 10 | What feeds life in the deep caves? | DEEP-04, DEEP-05, DEEP-06 | (a) Organic input from above only (detritus, remains, matter carried by water). (b) That plus geothermal heat (WG.64.06) as a declared energy source. (c) That plus a magical or glowing source, logged in the ledger like Lane P's conjured matter (its Q1). |
+| OQ-25 | 3, 4 | Is V87 (eleven peoples) superseded by DEC-013's nine races (`escalation.md` E2, M-04)? | WAR-01, CUL-01, MIND-05 | (a) V87 is superseded and `docs/design/PEOPLES.md` is archived. (b) The extra peoples return as creatures or factions that are not races. (c) DEC-013 is amended. |
+| OQ-26 | 10 | Underground darkness on screen. Every view of an underground level gets the midnight screen tone (D-6), a code-applied darkening that DEC-011's amendment holds for an Owner-led review as an off-by-default toggle (`docs/OWNER_DECISIONS.md:157`). | Presentation only; DEEP-01 is simulation state and does not depend on it | (a) Remove the tone now (DEC-011, 1:1). (b) Keep it until the Owner-led review. (c) The Owner-led review decides what darkness looks like. |
+
+Open decisions this audit depends on but does not ask again: DEC-002 (society baseline, `docs/OWNER_DECISIONS.md:46`), DEC-014 (population budget, `OPEN`) and DEC-013's open sub-questions (Z mapping, biomes per band).
+
+## 7. Documentation and data that do not match
+
+| ID | Where | Says | Conflicts with |
+|---|---|---|---|
+| M-01 | `docs/worldgen/DEUS_WORLDGEN_WBS.md:108` | WG.00.20 cites DEC-017 | DEC-020 (`docs/OWNER_DECISIONS.md:282`) is the ramps decision; DEC-017 is the RMMZ shell (`escalation.md` E1). |
+| M-02 | `docs/worldgen/DEUS_WORLDGEN_WBS.md:109` | WG.00.21 cites DEC-018 | DEC-021 (`docs/OWNER_DECISIONS.md:293`) is the occlusion rule; DEC-018 is spells (E1). |
+| M-03 | `docs/worldgen/DEUS_WORLDGEN_WBS.md:578` | GP.07.02 cites DEC-019 and V148 | DEC-022 (`docs/OWNER_DECISIONS.md:304`) and V151 (`docs/VISION.md:412`) (E1). |
+| M-04 | `docs/VISION.md:98`, `docs/design/PEOPLES.md:1` | Eleven peoples found factions | DEC-013 §5: exactly nine races (`docs/OWNER_DECISIONS.md:184`) (E2, OQ-25). |
+| M-05 | `docs/OWNER_DECISIONS.md:243` | RMMZ keeps "battle screens" | ADR-001 (`docs/adr/ADR-001-RMMZ-Battle-Stack-Audit.md:37`) and V45 (`docs/VISION.md:53`) (E3, OQ-21). |
+| M-06 | `docs/VISION.md:126` | V132 fixes each people's spawn level from Z−2 to Z+2 | DEC-013 leaves the race-to-band mapping open at 32 layers (`docs/OWNER_DECISIONS.md:194`). The code follows V132 (`DEUS_Factions.js:149`) (OQ-23). |
+| M-07 | `docs/worldgen/DEUS_WORLDGEN_WBS.md:99` | WG.00.11 is the Incarnation layer | The task folder of that ID holds the Year-0 contract, now WG.00.14 (`tasks/WG.00.11/state.md:1`). |
+| M-08 | `docs/design/TECH_TREE.md:120`, `docs/systems/UF_CultureGrowth.md:35` | Unlocks and achieved knowledge never shrink | DEC-015 §3 asks for regression and collapse conditions (`docs/OWNER_DECISIONS.md:225`) (OQ-12). |
+| M-09 | `DEUS_Sheet.js:1952` | Prayers and blessings at sacred shrines | No shrine, prayer or blessing code exists (section 3.4). |
+| M-10 | `DEUS_Callings.js:31`, `DEUS_Callings.js:61`, `DEUS_Callings.js:63`, `DEUS_Callings.js:86`, `DEUS_Callings.js:102` | Medic, Cleric, Sheriff, Jailor and Thief callings | No behaviour reads them (sections 3.2, 3.4, 3.6). |
+| M-11 | `docs/systems/DEUS_Minimap.md:139` | `UF.Minimap.setMode` is the mode API | Nothing calls it, so the label always reads CMD (`DEUS_Minimap.js:421`, `DEUS_Minimap.js:569`). |
+| M-12 | `DEUS_Sheet.js:144` | A recipe makes torches | The catalog has no torch item (section 3.10). |
+| M-13 | `game/data/df_lexicon.json:3` | A six-language lexicon (committed, unused) | Two tools write this file: `tools/parse_df_raws.ps1:113` from Dwarf Fortress language raws, and `tools/compile_world_data.ps1:73` as "Original Kaldurath words". Which one produced the committed file was not checked. AGENTS.md says Dwarf Fortress raws and text never go into `game/`. Check before any use (CUL-04, OQ-11). |
+| M-14 | The brief | The WBS is "Rev 24 at base"; the SRD gives "creature habitats (Underdark)" | The base is already Rev 25 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:4`). No SRD creature has a habitat field, and "Underdark" occurs 0 times in `game/data/srd51/` (section 3.10). |
+
+## 8. Defects found in passing
+
+These are not people-side features, but each would corrupt a people system built on top of it.
+
+| ID | Where | Defect | Package |
+|---|---|---|---|
+| D-1 | `DEUS_DeathForensics.js:172` with `DEUS_Conditions.js:469` | `Cond.all()` returns a plain object. Iterating it with `for...of` throws, the empty `catch` swallows the error, and every forensic record lists no conditions. | HEALTH-07 |
+| D-2 | `DEUS_DeathForensics.js:51` | The death ledger is a module-level array with no save hook, so it is lost on save and load. | HEALTH-07, REC-01 |
+| D-3 | `DEUS_DeathForensics.js:260` | A death from old age is classed as exhaustion. | HEALTH-07 |
+| D-4 | `DEUS_Environment.js:662` | Cold or heat damage that reaches 0 HP kills at once, skipping the SRD dying state and death saves that combat uses (`DEUS_Colonists.js:1972`). | HEALTH-07 |
+| D-5 | `DEUS_Dnd5e.js:625`, `DEUS_Dnd5e.js:633`, `DEUS_Items.js:404` | The carrying limit is SRD pounds (Strength × 15), the carried mass is kilograms, and the computed speed penalty is never read. | LOG-04 |
+| D-6 | `DEUS_DayNight.js:83` with `DEUS_DayNight.js:124` | Every frame, every view of an underground level gets the midnight screen tone, whatever light is present. This is a code-applied darkening, which DEC-011's amendment holds for an Owner-led review as an off-by-default toggle (`docs/OWNER_DECISIONS.md:157`). Render side; this audit proposes no presentation. | OQ-26 |
+| D-7 | `DEUS_History.js:675` against `DEUS_History.js:228` | A hardcoded English surname pool breaks the stated rule that names come from catalog syllables. | CUL-04 |
+| D-8 | `DEUS_Jobs.js:375`, `DEUS_Jobs.js:1207`, `DEUS_Colonists.js:1548` | Talk and pair jobs lower a `social` need that the SRD needs record does not hold, so `lowerNeed` returns early. The `social` value in `START_NEEDS` is dropped when the needs record is rebuilt. The social need does nothing. | MIND-01 |
+
+## 9. Method, evidence and limits
+
+**How this was done.**
+- The WBS rows, DEC entries, V rows, the invariant and risk registers, the design and system documents in the header, and the SRD catalogue were read for requirements. Code was located with read-only searches (`git grep`, ripgrep) and by reading the cited parts of each plugin.
+- Each area was split into sub-elements (its coverage table), and each sub-element was matched to a WBS row whose own scope text names it. The rating follows the rule in section 0.
+- Every `file:line` citation, and every excerpt in an evidence table, is checked mechanically against the base by `tasks/SIM.50.01/gap-audit/verify_citations.js`, the SIM.50.01 verifier, run with `--commit 790387090083848959ce0b95bc560a395336fa3d`. Its self-test shows it can fail. Citations to documents that are not on the base (Lane P's audit, ADR-003, this lane's brief) are written by section only.
+- The counts (areas, gaps, packages, Owner questions) are computed from `people_gap_table.json`, which is generated from this file so the two cannot disagree. The gate check in `lane.json` was run before the final commit. Commands, raw `EXIT=` lines and outputs are in `REPORT.md`.
+
+**Not checked, and limits.**
+- Nothing was run in NW.js, the RMMZ editor or F5. There are no screenshots: this is a document-only task and nothing visual is claimed.
+- Whether the `require()`-loaded companions (Conditions, Households, DeathForensics and the others in section 2.1) bind to `window` under NW.js was not probed. The code-today notes assume they do.
+- No performance was measured. Every tick cost is arithmetic from assumptions A-1 to A-7.
+- Lane P's audit and ADR-003 were read on their branches. Both have since passed review and been merged to main after this lane's base (header). Between the base and `origin/main` at `51d78a38` the WBS files, `docs/OWNER_DECISIONS.md` and `docs/VISION.md` did not change (`git diff --stat` in `REPORT.md`).
+- `docs/STATUS.md` on main now registers Lanes Q, R and W for SIM.40.01, SIM.40.05 and SIM.40.10 design. Their designs may change the couplings in section 4.3.
+- The split of each area into sub-elements is the writer's. A different split would change the "n of m covered" counts, but not whether an area is MISSING, PARTLY or FULLY planned.
+- The zero-hit word searches in sections 3.2 and 3.4 cover `game/js/plugins` at the base; their commands and exit codes are in `REPORT.md`, with a control word that does match.
