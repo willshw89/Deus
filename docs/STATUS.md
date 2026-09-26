@@ -72,21 +72,32 @@
 
 ## 3. Strict File-Ownership Matrix (No Overlapping Write Sets)
 
+### Active Writers & Lanes
 | Lane / Owner | Exclusive File Whitelist (Full Paths) | Access Policy |
 |---|---|---|
-| **Gemini (Coordinator)** | `docs/STATUS.md`<br>`docs/archive/STATUS_LEDGER_*.md`<br>`docs/WORK_QUEUE.md`<br>`docs/CANONICAL_ROLES.md`<br>`docs/AGENT_UTILIZATION_POLICY.md`<br>`docs/OWNER_DECISIONS.md`<br>`docs/worldgen/DEUS_WORLDGEN_WBS.md`<br>`docs/telemetry/*`<br>`baseline/*` | **Exclusive Writer.** WBS coordination, integration authority, pulse reports, baseline records. Zero engine code. |
-| **Lane A (Claude / Fable)** | `tools/test_strata_cuts_and_caves.js`<br>`tasks/WG.00.08/*` | **Exclusive Writer (Worktree lane-a).** Adding & proving `shaft_prescan_removed` mutant. |
-| **Lane B (Claude / Fable)** | `game/js/plugins/DEUS_FactionMenus.js`<br>`tools/test_new_game_year0.js`<br>`tasks/WG.00.11/*` | **Exclusive Writer (Worktree lane-b).** Hardening committed (`37ac57da`). Independent review committed (`ed757456`). |
-| **Lane C1 (Claude CLI)** | `tools/backup_project.ps1`<br>`tasks/WG.00.12/state.md` | **Exclusive Writer (Worktree lane-c1).** External backup script committed (`4a3a56f8`). |
-| **Lane C2 (Claude CLI)** | `tools/governance/check_claims.js`<br>`tools/governance/test_check_claims.js`<br>`tasks/WG.00.12/c2_governance_state.md` | **Exclusive Writer (Worktree lane-c2).** Machine governance checker committed (`58b0fcad`). |
-| **Lane C3 (Claude CLI)** | `docs/adr/ADR-002-Palette-Canonicalization.md`<br>`tasks/WG.00.12/c3_commit_review_d1fbeab.md`<br>`tasks/WG.00.12/c3_state.md` | **Exclusive Writer (Worktree lane-c3).** ADR-002 runtime canonicalization committed (`70dad27`). |
-| **Lane D (Grok)** | `tasks/WG.00.12/grok_adversarial_review.md`<br>`tasks/WG.00.08/defects.jsonl` (closure lines only) | **Exclusive Writer.** Adversarial review findings, defect verification, and closure signatures. |
-| **Lane E (Grok CLI / Claude)** | `docs/systems/UF_Depth_Attack_Plan.md`<br>`tasks/DEUS-TSK-FABLE-19C/*` | **Exclusive Writer (Worktree lane-e).** Depth renderer specification revision (Grok) and re-review (Claude). |
-| **Lane F (Claude CLI)** | `tools/migration/rewrite_onedrive_links.js`<br>`docs/migration/*`<br>`tasks/lane-f/state.md` | **Exclusive Writer (Worktree lane-f).** Link scanner, dry-run diff preparation. |
-| **Lane G (Claude CLI)** | `game/js/plugins/DEUS_Core.js`<br>`game/js/plugins/DEUS_History.js`<br>`game/js/plugins/DEUS_HistoricalDemographics.js`<br>`game/js/plugins/DEUS_FactionMenus.js`<br>`game/js/plugins/DEUS_Test.js`<br>`tools/test_new_game_year0.js`<br>`tools/test_history_materialization_and_world_age.js`<br>`tools/test_historical_carrying_capacity.js`<br>`tasks/lane-g/state.md` | **Exclusive Writer (Worktree lane-g).** Runtime Year 0 engine implementation and test suite maintenance per 001-F. |
+| **Gemini (Coordinator)** | `docs/STATUS.md`<br>`docs/archive/STATUS_LEDGER_*.md`<br>`docs/WORK_QUEUE.md`<br>`docs/MODEL_AVAILABILITY.md`<br>`docs/telemetry/sessions/active_workers.json`<br>`docs/worldgen/DEUS_WORLDGEN_WBS.md`<br>`docs/art/DEUS_WORLD_WBS.md`<br>`docs/OWNER_DECISIONS.md` (entries only)<br>`tasks/WG.00.08/defects.jsonl` (append-only)<br>`C:\Users\snewt\.deus_pm\outbox\*` | **Exclusive Writer.** WBS coordination, integration authority, pulse reports, baseline records. Zero engine code. |
 | **Lane H (Claude / Fable)** | `tools/test_generated_z2_cut_proof.js`<br>`tasks/WG.00.08/*` (docs & evidence only) | **Exclusive Writer (Worktree lane-h).** Z-2 cut proof hardening per Directive 001-I sec B. NO engine edits. |
-| **Lane C2b (Claude)** | `tools/governance/check_claims.js`<br>`tools/governance/test_check_claims.js`<br>`tasks/WG.00.12/c2b_governance_hardening.md` | **Exclusive Writer (Worktree lane-c2b).** Governance checker hardening per Directive 001-I sec C. |
-| **FROZEN / READ-ONLY** | `C:\Dev\DEUS`<br>`game/js/plugins/DEUS_Levels.js`<br>`game/js/plugins/DEUS_World.js`<br>`game/js/plugins/DEUS_WorldGen.js`<br>`game/js/plugins/DEUS_Fluid.js`<br>`game/js/rmmz_*.js` | **Strictly Read-Only.** Core engine files locked during parallel consolidation. |
+| **Lane C2b (Claude)** | `tools/governance/check_claims.js`<br>`tools/governance/test_check_claims.js`<br>`tasks/WG.00.12/c2_governance_state.md` | **Exclusive Writer (Worktree lane-c2b).** Governance checker hardening per Directive 001-I sec C. |
+| **Lane E (Grok Writer / Claude Reviewer)** | `docs/systems/UF_Depth_Attack_Plan.md` (attack plan (Grok) — spec authority pending PM ruling)<br>`tasks/DEUS-TSK-FABLE-19C/*` | **Exclusive Writer (Worktree lane-e).** Depth renderer attack plan revision (Grok) and re-review (Claude). |
+
+### Retired Lanes: Write Access Revoked
+- **Lane A (Claude / Fable):** Merged to `main` (`0f7f26cd`). Write access revoked.
+- **Lane B (Claude / Fable):** Merged to `main` (`8c0c210c`). Write access revoked.
+- **Lane C1 (Claude CLI):** Merged to `main` (`e07c86ea`). Write access revoked.
+- **Lane C2 (Claude CLI):** Merged to `main` (`83bcc1a7`). Write access revoked.
+- **Lane C3 (Claude CLI):** Merged to `main` (`8db39b0b`). Write access revoked.
+- **Lane D (Grok):** Delivered. Write access revoked.
+- **Lane F (Claude CLI):** Merged to `main` (`d09a1295`). Write access revoked.
+- **Lane G (Claude CLI):** Merged to `main` (`da2c16b2`). Write access revoked.
+
+### Frozen / Read-Only Paths
+- `C:\Dev\DEUS`
+- `game/js/plugins/DEUS_Levels.js`
+- `game/js/plugins/DEUS_World.js`
+- `game/js/plugins/DEUS_WorldGen.js`
+- `game/js/plugins/DEUS_Fluid.js`
+- `game/js/rmmz_*.js`
+
 
 ---
 
