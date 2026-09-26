@@ -14,7 +14,7 @@ Every decision item recorded in this log must provide:
 - **Options:** Distinct, enumerated options
 - **Recommended Default:** The engineering/architecture team's recommended choice
 - **What Happens If Unanswered:** Safe default fallback behavior if no active decision is given within window
-- **Status:** `OPEN` | `DECIDED`
+- **Status:** `OPEN` | `DECIDED` | `SUSPENDED`
 - **Owner Ruling & Date:** Recorded upon Owner response
 
 ---
@@ -81,7 +81,7 @@ Every decision item recorded in this log must provide:
   3. Both private git remote and external physical drive mirror.
 - **Recommended Default:** Option 1 (Private git remote) + test clone and run.
 - **Status:** `DECIDED`
-- **Owner Ruling & Date:** 2026-09-25 (Decider: Owner): Option 1. Private GitHub remote `https://github.com/willshw89/Deus.git` (private remote). Verified live, 10,259 tracked files pushed (`game/img` whitelisted, `game/data/df_*.json` tracked). Pre-migration backup requirement complete.
+- **Owner Ruling & Date:** 2026-09-25 (Decider: Owner): Option 1. Private GitHub remote `https://github.com/willshw89/Deus.git` (private remote). Verified live, 10,259 tracked files pushed (`game/img` whitelisted, `game/data/df_*.json` tracked). Pre-migration backup requirement complete. Pending: Owner off-laptop copy of `C:\Users\snewt\DEUS_backups\deus_untracked_2026-09-25.zip` (BLOCKER-BACKUP resolved with this caveat).
 
 ---
 
@@ -109,5 +109,26 @@ Every decision item recorded in this log must provide:
 - **Recommended Default:** Option 2.
 - **Status:** `DECIDED`
 - **Owner Ruling & Date:** 2026-09-25 (Owner, relayed by PM 001-L): No art of any kind may be generated, requested from a generator, or integrated as newly generated art by anyone (the PM, Gemini or any worker) without the Owner's direct involvement. All earlier autonomous-generation mandates (AGENTS.md Rules 11/13, GEMINI.md, CLAUDE.md, art briefs, packets) are suspended until the Owner rewrites them.
+
+---
+
+### Decision `DEC-008`: Heavy-Job Cap Lifted & Power-Off Concurrency Tripwire
+- **Date Logged:** 2026-09-25
+- **Question:** Is the laptop thermal issue resolved, and can multi-worker concurrent execution proceed?
+- **Status:** `DECIDED`
+- **Owner Ruling & Date:** 2026-09-25 (Decider: Owner): Heavy-job cap lifted; power-off tripwire reinstates MAX_SIMULTANEOUS_HEAVY_LOCAL_JOBS=1; laptop power-loss issue considered fixed.
+
+---
+
+### Decision `DEC-009`: Master Palette Engine Migration Release-Blocking Status
+- **Date Logged:** 2026-09-25
+- **Question:** Is `art/palette/uf.hex` (the Ultima VII daylight palette) allowed to ship, or must the master-palette migration (WG.00.13) be release-blocking?
+- **Source:** ADR-002 §7 item 3.
+- **Options:**
+  1. Release-blocking: `uf.hex` is an interim runtime palette; master palette migration (WG.00.13) must be complete before any public/player release.
+  2. Non-blocking: `uf.hex` may ship in early alpha builds, with migration occurring in background.
+- **Recommended Default:** Option 1 (Release-blocking).
+- **What Happens If Unanswered:** Treated as release-blocking.
+- **Status:** `OPEN`
 
 
