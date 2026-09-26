@@ -8,7 +8,8 @@
  * Builds a throwaway git repository in the OS temp folder: a fixture docs/STATUS.md (lane matrix, two
  * defect tables, status prose), docs/OWNER_DECISIONS.md, a WBS with two leaf tables and a Revision Log,
  * two defect ledgers, a fix commit with a passing and a failing run log, review artifacts committed as
- * [grok], [fable], [gemini] and a forged [gr0k], an unmerged branch and a lane-B branch.
+ * [grok] (one passing, one rejecting, one with per-item verdicts, plus an AUDIT_LOG and a script that are
+ * not review artifacts), [fable], [gemini] and a forged [gr0k], an unmerged branch and a lane-B branch.
  * Each case resets to that baseline, stages or commits one change and runs the checker on it. Clean
  * cases must pass. Each forbidden change must be rejected under exactly the rules named for it, and
  * where a case names text, a violation must contain it. Unit checks call the parsers directly.
@@ -110,7 +111,7 @@ const STATUS_DOC = `# STATUS fixture (TEST_)
 | Lane / Owner | Exclusive File Whitelist (Full Paths) | Access Policy |
 |---|---|---|
 | **Gemini (Coordinator)** | \`docs/STATUS.md\`<br>\`docs/OWNER_DECISIONS.md\`<br>\`docs/worldgen/TEST_WBS.md\` | **Exclusive Writer.** |
-| **Lane A (Gemini)** | \`tasks/TEST.01/*\` | **Exclusive Writer.** |
+| **Lane A (Gemini)** | \`tasks/TEST.01/*\`<br>\`tasks/TEST.03/*\` | **Exclusive Writer.** |
 | **Lane B (Fable)** | \`src/fix.js\`<br>\`tools/test_fix.js\`<br>\`tasks/TEST.02/*\` | **Exclusive Writer.** |
 | **Lane C2 (Claude Subagent)** | \`tools/governance/check_claims.js\`<br>\`tools/governance/test_check_claims.js\`<br>\`.git/hooks/pre-commit\` | **Exclusive Writer.** |
 | **Lane D (Grok)** | \`tasks/TEST.01/defects.jsonl\`<br>\`reviews/*\` | **Exclusive Writer.** |
@@ -132,13 +133,17 @@ const STATUS_DOC = `# STATUS fixture (TEST_)
 
 const OWNER_DOC = `# OWNER DECISIONS fixture (TEST_)
 
-### Decision \`DEC-900\`: TEST_ decided question
+### Decision \`DEC-900\`: TEST_ decided question on TW.00.03
 - **Question:** TEST_
 - **Status:** \`DECIDED\`
 
-### Decision \`DEC-901\`: TEST_ open question
+### Decision \`DEC-901\`: TEST_ open question on TW.00.03
 - **Question:** TEST_
 - **Status:** \`OPEN\`
+
+### Decision \`DEC-903\`: TEST_ decided question on another item
+- **Question:** TEST_ about TW.00.04 only
+- **Status:** \`DECIDED\`
 `;
 
 const BASE_ROWS = [
@@ -154,13 +159,13 @@ const RANGE_EXPANDED = ["01", "02", "03"].map(n => `| **TW.10.${n}** | TEST_Rang
 const NEW_LEAF = "| **TW.00.05** | TEST_New | Fable | TEST_ scope five. | `PLANNED` |";
 const LOG4 = [1, 2, 3, 4];
 
-function wbsDoc({ rev = 3, rows = BASE_ROWS, rows2 = SECOND_ROWS, log = [1, 2, 3], logHeader = "Rev", statusHeader = "Status", noLog = false, logText = {} } = {}) {
+function wbsDoc({ rev = 3, rows = BASE_ROWS, rows2 = SECOND_ROWS, rows2Owner = "Owner", log = [1, 2, 3], logHeader = "Rev", statusHeader = "Status", noLog = false, logText = {} } = {}) {
     const out = ["# TEST_ WorldGen WBS", "", "**Namespace:** TW  "];
     if (rev != null) out.push(`**Rev:** ${rev}  `);
     out.push("**IDs:** Stable.", "", "---", "", "## 2. Leaves", "",
         `| WBS Leaf | Title | Owner | Scope & Deliverables | ${statusHeader} |`, "| :--- | :--- | :---: | :--- | :---: |", ...rows, "",
         "### TW.20 - Second band", "",
-        "| Leaf | Title | Owner | Scope & Deliverables | Status |", "| :--- | :--- | :---: | :--- | :---: |", ...rows2, "", "---", "");
+        `| Leaf | Title | ${rows2Owner} | Scope & Deliverables | Status |`, "| :--- | :--- | :---: | :--- | :---: |", ...rows2, "", "---", "");
     if (!noLog) {
         out.push("## Revision Log", "", `| ${logHeader} | Date | Change |`, "|:---:|:---:|:---|",
             ...log.slice().reverse().map(r => `| ${r} | 2026-09-25 | ${logText[r] || `TEST_ change ${r}.`} |`), "");
@@ -220,7 +225,12 @@ function buildFixture() {
     repo.fix7 = repo.commit("[fable] TEST_ fix for TEST-DEF-001 and TEST-DEF-002", ".").slice(0, 7);
     repo.write(REVIEW, "# TEST_ review by grok\nVerdict PASS for TW.00.02, TW.00.03, TW.00.04, TW.20.01, TEST-DEF-001, TEST-DEF-002, TEST-DEF-003, TEST-DEF-004.\n");
     repo.write("reviews/review_misc.md", "# TEST_ review by grok of something else\n");
-    repo.review7 = repo.commit("[grok] TEST_ review", "reviews").slice(0, 7);
+    repo.write("reviews/review_rejected.md", "# TEST_ review by grok\n\n## Verdict\n\n**FAIL.** TW.00.02 and TEST-DEF-001 need changes.\n");
+    repo.write("reviews/review_items.md", "# TEST_ per-item review by grok\n\n- Verdict for TW.00.03: CHANGES REQUESTED\n- Verdict for TW.00.02: PASS\n\n" +
+        "| Item | Result |\n|---|---|\n| TW.00.04 | FAIL |\n| TW.00.02 | PASS |\n");
+    repo.write("docs/AUDIT_LOG.md", "# TEST_ audit log\n\n- TW.00.02 reviewed by grok (TEST_).\n");
+    repo.write("tools/grok_audit.js", "// TEST_ grok audit script; checked TW.00.02\n");
+    repo.review7 = repo.commit("[grok] TEST_ review", "reviews", "docs/AUDIT_LOG.md", "tools/grok_audit.js").slice(0, 7);
     repo.write("reviews/review_by_fable.md", "# TEST_ notes by fable on TW.00.02, TW.00.04 and TEST-DEF-001\n");
     repo.commit("[fable] TEST_ fable notes", "reviews");
     repo.write("reviews/review_gemini_TEST.md", "# TEST_ coordinator notes on TW.00.02\n");
@@ -302,6 +312,13 @@ const CASES = [
         return coordinator;
     } },
     { name: "pass_owner_closure_with_decided_dec", expect: [], setup: r => wbsStatus(r, "TW.00.03", `\`DONE\` (${r.fix7}; closedBy: owner per DEC-900)`) },
+    { name: "pass_artifact_scoped_item_verdicts", expect: [], setup: r => wbsStatus(r, "TW.00.02", `\`DONE\` (${r.fix7}; closedBy: grok, \`reviews/review_items.md\`)`) },
+    { name: "pass_pair_column_writer_reviewer", expect: [], setup(r) {
+        r.write(WBS, wbsDoc({ rev: 4, log: LOG4, rows2Owner: `Writer ${RARROW} Reviewer`,
+            rows2: [`| **TW.20.01** | TEST_Second | Gemini ${RARROW} Grok | TEST_ leaf in a second table. | \`DONE\` (${r.fix7}; ${ART}) |`] }));
+        r.stage(WBS);
+        return coordinator;
+    } },
     { name: "pass_ledger_closed_by_reviewer_relayed", expect: [], setup(r) {
         r.append(L1, JSON.stringify(closeRecord("TEST-DEF-001", "TEST.01", r.fix7)));
         r.stage(L1);
@@ -384,10 +401,31 @@ const CASES = [
     attack("fail_status_unknown_word", "D0NE", "D0NE"),
     attack("fail_status_blanked", "", "(EMPTY)"),
     attack("fail_status_html_entity", "&#68;ONE", "DONE"),
-    attack("fail_status_emoji_mixed_case", `${CHECK_MARK} Done`, "DONE"),
+    attack("fail_status_emoji_mixed_case", `Done ${CHECK_MARK}`, "DONE"),
+    attack("fail_status_check_mark_beside_review", `\`REVIEW\` ${CHECK_MARK}`, "CHECKMARK"),
     { name: "fail_status_second_table_leaf", expect: ["4.1", "4.2"], mention: ["TW.20.01 -> DONE"], setup(r) {
         r.write(WBS, wbsDoc({ rows2: ["| **TW.20.01** | TEST_Second | Gemini | TEST_ leaf in a second table. | `DONE` |"] }));
         r.stage(WBS);
+        return coordinator;
+    } },
+    { name: "fail_status_leaf_id_with_suffix", expect: ["4.1", "4.2"], mention: ["TW.00.05 -> DONE"], setup(r) {
+        r.write(WBS, wbsDoc({ rev: 4, log: LOG4, rows: [...BASE_ROWS, "| **TW.00.05** (new) | TEST_New | Fable | TEST_ scope five. | `DONE` |"] }));
+        r.stage(WBS);
+        return coordinator;
+    } },
+    { name: "fail_status_blockquote_table_leaf", expect: ["4.1", "4.2", "4.3"], mention: ["TW.00.02 -> DONE", "used a second time"], setup(r) {
+        r.write(WBS, wbsDoc() + "\n> | Leaf | Status |\n> |---|---|\n> | **TW.00.02** | `DONE` |\n");
+        r.stage(WBS);
+        return coordinator;
+    } },
+    { name: "fail43_html_table_in_wbs", expect: ["4.3"], mention: ["HTML table"], setup(r) {
+        r.write(WBS, wbsDoc() + "\n<table>\n<tr><td>TW.00.02</td>\n<td>DONE</td></tr>\n</table>\n");
+        r.stage(WBS);
+        return coordinator;
+    } },
+    { name: "fail41_html_table_in_status", expect: ["4.1"], mention: ["HTML table"], setup(r) {
+        r.append("docs/STATUS.md", "\n<table>\n<tr><td>TEST-DEF-003</td>\n<td>CLOSED</td></tr>\n</table>");
+        r.stage("docs/STATUS.md");
         return coordinator;
     } },
 
@@ -412,6 +450,17 @@ const CASES = [
         r.edit("docs/STATUS.md", "| TEST_ deferred finding with no ledger. | `OPEN` |", `| TEST_ deferred finding with no ledger. | \`CLOSED\` (closedBy: grok, ${ART}) |`);
         r.stage("docs/STATUS.md");
         return coordinator;
+    } },
+    { name: "fail41_defect_id_cell_suffixed", expect: ["4.1"], mention: ["TEST-DEF-003 -> CLOSED"], setup(r) {
+        r.edit("docs/STATUS.md", "| **TEST-DEF-003** | `TW.00.02` | `MINOR` | TEST_ finding with no ledger. | `OPEN` |",
+            `| **TEST-DEF-003** (TEST_ note) | \`TW.00.02\` | \`MINOR\` | TEST_ finding with no ledger. | \`CLOSED\` (closedBy: grok, ${ART}) |`);
+        r.stage("docs/STATUS.md");
+        return coordinator;
+    } },
+    { name: "fail41_ledger_path_case_variant", expect: ["4.1", "4.2"], mention: ["TEST-DEF-005 -> CLOSED"], setup(r) {
+        r.write("tasks/TEST.03/Defects.jsonl", JSON.stringify({ defectId: "TEST-DEF-005", taskId: "TEST.03", status: "CLOSED", closedBy: "grok" }) + "\n");
+        r.stage("tasks/TEST.03/Defects.jsonl");
+        return ["--lane", "a"];
     } },
     { name: "fail41_defect_status_column_renamed", expect: ["4.1"], mention: ["lost its Status column"], setup(r) {
         r.edit("docs/STATUS.md", "| Title & Requirement | Status | Owner |", "| Title & Requirement | Notes | Owner |");
@@ -453,6 +502,20 @@ const CASES = [
         wbsStatus(r, "TW.00.02", `\`DONE\` (${r.fix7}; closedBy: grok, \`reviews/review_nope.md\`)`) },
     { name: "fail42_artifact_does_not_mention_leaf", expect: ["4.2"], mention: ["does not mention TW.00.02"], setup: r =>
         wbsStatus(r, "TW.00.02", `\`DONE\` (${r.fix7}; closedBy: grok, \`reviews/review_misc.md\`)`) },
+    { name: "fail42_status_document_as_review_artifact", expect: ["4.2"], mention: ["not a review artifact"], setup: r =>
+        wbsStatus(r, "TW.00.02", `\`DONE\` (${r.fix7}; closedBy: grok, \`docs/AUDIT_LOG.md\`)`) },
+    { name: "fail42_script_as_review_artifact", expect: ["4.2"], mention: ["is not a document"], setup: r =>
+        wbsStatus(r, "TW.00.02", `\`DONE\` (${r.fix7}; closedBy: grok, \`tools/grok_audit.js\`)`) },
+    { name: "fail42_artifact_records_failing_verdict", expect: ["4.2"], mention: ["failing verdict"], setup: r =>
+        wbsStatus(r, "TW.00.02", `\`DONE\` (${r.fix7}; closedBy: grok, \`reviews/review_rejected.md\`)`) },
+    { name: "fail42_artifact_item_verdict_fails", expect: ["4.2"], mention: ["failing verdict for TW.00.04"], setup: r =>
+        wbsStatus(r, "TW.00.04", `\`DONE\` (${r.fix7}; closedBy: grok, \`reviews/review_items.md\`)`) },
+    { name: "fail42_pair_column_writer_reviews_own_leaf", expect: ["4.2"], mention: ["names grok as reviewer"], setup(r) {
+        r.write(WBS, wbsDoc({ rev: 4, log: LOG4, rows2Owner: `Writer ${RARROW} Reviewer`,
+            rows2: [`| **TW.20.01** | TEST_Second | Grok ${RARROW} Grok | TEST_ leaf in a second table. | \`DONE\` (${r.fix7}; ${ART}) |`] }));
+        r.stage(WBS);
+        return coordinator;
+    } },
     { name: "fail42_closer_is_committer", expect: ["4.2"], mention: ["also the committing agent"], setup: r =>
         wbsStatus(r, "TW.00.02", `\`DONE\` (${r.fix7}; closedBy: gemini, \`reviews/review_gemini_TEST.md\`)`) },
     { name: "fail42_unknown_closer_name", expect: ["4.2"], mention: ["gr0k"], setup: r =>
@@ -461,8 +524,9 @@ const CASES = [
         wbsStatus(r, "TW.00.02", `\`DONE\` (${r.fix7}; closedBy: gr0k; verdict: grok, ${ART})`) },
     { name: "fail42_owner_closure_without_dec", expect: ["4.2"], mention: ["cites no DEC-xxx"], setup: r => wbsStatus(r, "TW.00.03", `\`DONE\` (${r.fix7}; closedBy: owner)`) },
     { name: "fail42_owner_closure_dec_open", expect: ["4.2"], mention: ["not DECIDED"], setup: r => wbsStatus(r, "TW.00.03", `\`DONE\` (${r.fix7}; closedBy: owner per DEC-901)`) },
+    { name: "fail42_owner_closure_dec_unrelated", expect: ["4.2"], mention: ["does not mention TW.00.03"], setup: r => wbsStatus(r, "TW.00.03", `\`DONE\` (${r.fix7}; closedBy: owner per DEC-903)`) },
     { name: "fail42_owner_closure_dec_added_in_same_commit", expect: ["4.2"], mention: ["DEC-902"], setup(r) {
-        r.append("docs/OWNER_DECISIONS.md", "\n### Decision `DEC-902`: TEST_ decided in the closing commit\n- **Status:** `DECIDED`");
+        r.append("docs/OWNER_DECISIONS.md", "\n### Decision `DEC-902`: TEST_ decided in the closing commit (TW.00.03)\n- **Status:** `DECIDED`");
         r.stage("docs/OWNER_DECISIONS.md");
         return wbsStatus(r, "TW.00.03", `\`DONE\` (${r.fix7}; closedBy: owner per DEC-902)`);
     } },
@@ -508,6 +572,11 @@ const CASES = [
     } },
     { name: "fail42_status_prose_claim", expect: ["4.2"], mention: ["TW.00.02 -> DONE (prose)"], setup(r) {
         r.edit("docs/STATUS.md", "## 3. Strict", `- TEST_ TW.00.02 is now DONE (${r.fix7}).\n\n## 3. Strict`);
+        r.stage("docs/STATUS.md");
+        return coordinator;
+    } },
+    { name: "fail42_status_prose_task_list_checked", expect: ["4.2"], mention: ["TW.00.02 -> CHECKMARK (prose)"], setup(r) {
+        r.edit("docs/STATUS.md", "## 3. Strict", `- [x] TEST_ TW.00.02 (${r.fix7})\n\n## 3. Strict`);
         r.stage("docs/STATUS.md");
         return coordinator;
     } },
@@ -896,7 +965,9 @@ const UNITS = [
         [`D${ZWSP}ONE`, true, "DONE"], [FULLWIDTH_DONE, true, "DONE"], ["**D**ONE", true, "DONE"], ["_DONE_", true, "DONE"], ["__DONE__", true, "DONE"],
         ["_IN_PROGRESS_", false, "IN_PROGRESS"], ["&#68;ONE", true, "DONE"], [`DO${COMBINING_GRAVE}NE`, true, "DONE"], [`${RLM}REVIEW`, false, "REVIEW"],
         ["~~OPEN~~ CLOSED", true, "CLOSED"], ["<s>DONE</s> REVIEW", false, "REVIEW"], ["<!-- DONE --> REVIEW", false, "REVIEW"], ["~~DONE~~ ACTIVE", false, "ACTIVE"],
-        [`${CHECK_MARK} Done`, true, "DONE"], ["`REVIEW` **DONE**", true, "REVIEW_DONE"], [`REVIEW ${CHECK_MARK} DONE`, true, "REVIEW_DONE"]]) },
+        [`${CHECK_MARK} Done`, true, "CHECKMARK"], [`Done ${CHECK_MARK}`, true, "DONE"], ["`REVIEW` **DONE**", true, "REVIEW_DONE"],
+        [`REVIEW ${CHECK_MARK} DONE`, true, "CHECKMARK"], [`REVIEW ${ch(0x2714, 0xFE0F)}`, true, "CHECKMARK"], [`REVIEW ${ch(0x2611)}`, true, "CHECKMARK"],
+        ["[x] REVIEW", true, "CHECKMARK"], ["REVIEW [ ]", false, "REVIEW"], [`REVIEW ${ch(0x274C)}`, false, "REVIEW"]]) },
     { name: "unit_status_arrows_labels_annotations", run: cm => statusTable(cm, [
         ["Status: DONE", true, "DONE"], ["Status: REVIEW", false, "REVIEW"], ["Status - DONE", true, "DONE"], ["Final status: REVIEW", false, "REVIEW"],
         [`\`REVIEW\` ${RARROW} \`DONE\``, true, "DONE"], ["REVIEW -> DONE", true, "DONE"], ["DONE -> REVIEW", false, "REVIEW"], [`\`DONE\` (${RARROW} REVIEW)`, true, "DONE"],
@@ -947,9 +1018,29 @@ const UNITS = [
         const got = cm.proseClaims(text, new Set(["ATK-19B-002"])).map(c => `${c.id}:${c.word}`).sort().join(",");
         return pairs([[got, "ATK-19B-002:CLOSED,WG.00.08:DONE,WG.00.10:DONE"]]);
     } },
+    { name: "unit_review_artifact_verdicts", run(cm) {
+        const V = (body, id) => { const v = cm.failingVerdict(body, id); return v ? v.line : 0; };
+        const items = "- Verdict for TW.00.03: CHANGES REQUESTED\n- Verdict for TW.00.02: PASS\n\n| Item | Result |\n|---|---|\n| TW.00.04 | FAIL |\n| TW.00.02 | PASS |\n";
+        return pairs([[V("# r\n\n## Verdict\n\n**FAIL.** TW.00.02 needs changes.\n", "TW.00.02"), 3, "heading verdict"],
+            [V("**Verdict:** CHANGES REQUESTED (TW.00.02)\n", "TW.00.02"), 1, "labelled verdict"], [V("Verdict by grok: REJECTED\n", "TW.00.02"), 1, "verdict by"],
+            [V("Verdict PASS for TW.00.02, TW.00.03.\n", "TW.00.02"), 0, "passing verdict"], [V("Their FAIL verdicts refer to 116a3de.\n", "TW.00.02"), 0, "verdict in prose"],
+            [V(items, "TW.00.02"), 0, "scoped pass"], [V(items, "TW.00.03"), 1, "scoped fail"], [V(items, "TW.00.04"), 6, "table row"],
+            [V("Verdict on 2026-09-25: FAIL\n", "TW.00.02"), 1, "dated verdict is not scoped"], [V("Verdict for ATK-19B-002: FAIL\n", "TW.00.02"), 0, "scoped to another item"],
+            [cm.reviewDocProblem("reviews/review_x.md"), null, "review doc"], [/status document/.test(cm.reviewDocProblem("docs/AUDIT_LOG.md")), true, "AUDIT_LOG"],
+            [/status document/.test(cm.reviewDocProblem("docs/worldgen/X_WBS_review.md")), true, "WBS"], [/not a document/.test(cm.reviewDocProblem("tools/health_audit.js")), true, "script"],
+            [/not a document/.test(cm.reviewDocProblem("art/review/x_review.png")), true, "image"]]);
+    } },
+    { name: "unit_record_ids_and_tables", run(cm) {
+        const w = cm.parseWbs("**Rev:** 1\n\n## L\n\n| Leaf | Status |\n|---|---|\n| **TW.00.05** (new) | DONE |\n| TW.00.07-x | OPEN |\n| TW.00.05/C1 | OPEN |\n\n" +
+            "> | Leaf | Status |\n> |---|---|\n> | TW.00.06 | DONE |\n");
+        const d = cm.parseDefectRows("| ID | Status |\n|---|---|\n| **A10-1** (reopened) | OPEN |\n| Lane C2 | OPEN |\n| A10-1/x | OPEN |\n");
+        return pairs([[[...w.leaves.keys()].join(), "TW.00.05,TW.00.06", "leaf IDs"], [w.dups.length, 0, "a sub-item is not its parent"], [d.occ.map(x => x.id).join(), "A10-1", "defect IDs"],
+            [cm.htmlTableCount("<table><tr><td>x</td></tr></table>"), 3, "html tags"], [cm.htmlTableCount("a <b>table</b> | x |"), 0, "no html table"]]);
+    } },
     { name: "unit_decisions_and_lane_matrix", run(cm) {
         const d = cm.parseDecisions(OWNER_DOC), m = cm.parseLaneMatrix(STATUS_DOC);
         return pairs([[/DECIDED/.test((d.get("DEC-900") || {}).status), true, "DEC-900"], [(d.get("DEC-901") || {}).status, "OPEN", "DEC-901"],
+            [/TW\.00\.03/.test((d.get("DEC-900") || {}).text), true, "DEC-900 text"], [/TW\.00\.03/.test((d.get("DEC-903") || {}).text), false, "DEC-903 text"],
             [m && m.lanes.length, 5, "lanes"], [m && m.frozen.length, 1, "frozen"], [m && m.lanes.find(l => l.key === "c2").agents.has("claude"), true, "c2"],
             [m && m.lanes.find(l => l.key === "coordinator").agents.has("gemini"), true, "coordinator"], [m && m.lanes.find(l => l.key === "d").agents.has("grok"), true, "d"]]);
     } }
@@ -1035,7 +1126,15 @@ const MUTANTS = [
     { name: "4.2_reviewer_regex_off", from: "for (const m of normText(text).matchAll(REVIEWER_RE)) {", to: "for (const m of []) {", kills: ["pass_wbs_done_with_commit_and_reviewer"] },
     { name: "4.2_reviewer_regex_unnormalized", from: "for (const m of normText(text).matchAll(REVIEWER_RE)) {", to: "for (const m of String(text).matchAll(REVIEWER_RE)) {", kills: ["unit:unit_reviewers_and_agents"] },
     { name: "4.2_ledger_closer_not_validated", from: "agent: strictAgent(raw) };", to: "agent: normAgent(raw) };", kills: ["fail42_ledger_closedby_not_an_agent"] },
-    { name: "4.2_owner_needs_no_decision", from: "if (reviewer === \"owner\") return ownerDecision(text, ctx);", to: "if (reviewer === \"owner\") return { ok: true };", kills: ["fail42_owner_closure_without_dec"] },
+    { name: "4.2_owner_needs_no_decision", from: "if (reviewer === \"owner\") return ownerDecision(id, text, ctx);", to: "if (reviewer === \"owner\") return { ok: true };", kills: ["fail42_owner_closure_without_dec"] },
+    { name: "4.2_owner_decision_scope_unchecked", from: "if (!idForms(id).some(f => e.text.includes(f))) {", to: "if (false) {", kills: ["fail42_owner_closure_dec_unrelated"] },
+    { name: "4.2_status_docs_count_as_review_artifacts", from: "const bad = reviewDocProblem(p);", to: "const bad = null;",
+        kills: ["fail42_status_document_as_review_artifact", "fail42_script_as_review_artifact"] },
+    { name: "4.2_artifact_verdict_unread", from: "if (verdict) { why.push(", to: "if (false) { why.push(", kills: ["fail42_artifact_records_failing_verdict"] },
+    { name: "4.2_artifact_heading_verdict_unread", from: String.raw`if (!value && /^\s{0,3}#{1,6}\s/.test(lines[i])) {`, to: "if (false) {", kills: ["fail42_artifact_records_failing_verdict"] },
+    { name: "4.2_artifact_verdict_scope_ignored", from: "if (!names(scope[1])) continue;", to: "", kills: ["pass_artifact_scoped_item_verdicts"] },
+    { name: "4.2_artifact_verdict_scope_without_item", from: "if (scope && namesAnItem(scope[1])) {", to: "if (scope) {", kills: ["unit:unit_review_artifact_verdicts"] },
+    { name: "4.2_artifact_table_verdicts_unread", from: "const vi = t.header.findIndex(h => /verdict|result|outcome/i.test(h));", to: "const vi = -1;", kills: ["fail42_artifact_item_verdict_fails"] },
     { name: "4.2_decision_status_ignored", from: String.raw`if (!/\bDECIDED\b/.test(e.status)) {`, to: "if (false) {", kills: ["fail42_owner_closure_dec_open"] },
     { name: "4.2_decisions_read_from_new_tree", from: "decisions: parseDecisions(parentTree.read(PATHS.decisions))", to: "decisions: parseDecisions(target.newTree.read(PATHS.decisions))", kills: ["fail42_owner_closure_dec_added_in_same_commit"] },
     { name: "4.2_closer_may_be_fixer", from: "else if (fixers.has(c.agent)) R.fail(", to: "else if (false) R.fail(", kills: ["fail42_ledger_closedby_is_fixer"] },
@@ -1060,6 +1159,19 @@ const MUTANTS = [
         to: String.raw`.normalize("NFD").replace(/\p{M}/gu, "").replace(INVISIBLE_RE, "").normalize("NFC");`, kills: ["fail_status_fullwidth"] },
     { name: "status_entities_not_decoded", from: "return stripEmphasis(normText(decodeEntities(s)));", to: "return stripEmphasis(normText(s));", kills: ["fail_status_html_entity"] },
     { name: "status_strikethrough_kept", from: String.raw`.replace(/(~~?)(?![~\s])([^~]*?[^~\s])\1(?!~)/g, " ")`, to: "", kills: ["pass_status_struck_old_value"] },
+    { name: "status_check_marks_ignored", from: ".replace(CHECK_MARK_RE, \" ; CHECKMARK ; \")", to: "",
+        kills: ["fail_status_check_mark_beside_review", "fail42_status_prose_task_list_checked"] },
+    { name: "leaf_ids_exact_only", from: "const lead = cell.match(LEAF_LEAD_RE);", to: "const lead = cell.match(/^(.*)$/);", kills: ["fail_status_leaf_id_with_suffix"] },
+    { name: "leaf_sub_ids_read_as_parent", from: String.raw`(?![\w.–\-/])/;`, to: String.raw`(?![\w.–-])/;`, kills: ["unit:unit_record_ids_and_tables"] },
+    { name: "defect_sub_ids_read_as_parent", from: String.raw`(?![\w.\-/])/i;`, to: String.raw`(?![\w.-])/i;`, kills: ["unit:unit_record_ids_and_tables"] },
+    { name: "pair_columns_read_as_owner_and_reviewer", from: "const isPairHeader = h => isOwnerHeader(h) && isReviewerHeader(h);", to: "const isPairHeader = h => false;",
+        kills: ["pass_pair_column_writer_reviewer"] },
+    { name: "pair_writer_not_an_owner", from: "for (const i of pairs) for (const a of agentsIn(splitPair(cells[i] || \"\")[0])) owners.add(a);", to: "",
+        kills: ["fail42_pair_column_writer_reviews_own_leaf"] },
+    { name: "defect_ids_exact_only", from: "const m = cell.match(DEFECT_LEAD_RE);", to: "const m = cell.match(/^(.*)$/);", kills: ["fail41_defect_id_cell_suffixed"] },
+    { name: "tables_in_blockquotes_skipped", from: String.raw`return line == null ? line : String(line).replace(/^\s{0,3}(?:>\s?)+/, "");`, to: "return line;", kills: ["fail_status_blockquote_table_leaf"] },
+    { name: "html_tables_allowed", from: "return (String(text == null ? \"\" : text).match(HTML_TABLE_RE) || []).length;", to: "return 0;",
+        kills: ["fail43_html_table_in_wbs", "fail41_html_table_in_status"] },
     { name: "status_leaf_tables_need_wbs_header", from: "const rows = t.rows.map(r => ({ r, id: leafKey(clean(r.cells[0])) })).filter(x => x.id);",
         to: String.raw`const rows = !/^WBS\b/i.test(h[0]) ? [] : t.rows.map(r => ({ r, id: leafKey(clean(r.cells[0])) })).filter(x => x.id);`, kills: ["fail_status_second_table_leaf"] },
     // identity and reads
@@ -1083,6 +1195,7 @@ const MUTANTS = [
     // ledger hardening
     { name: "ledger_keys_case_sensitive", from: "for (const [k, x] of Object.entries(v)) { const nk = normKey(k);",
         to: "for (const [k, x] of Object.entries(v)) { const nk = [\"defectId\", \"taskId\", \"closedBy\", \"fixedBy\", \"fixCommit\", \"closedAt\", \"messageId\"].includes(k) ? normKey(k) : k;", kills: ["pass_ledger_mixed_case_keys_fix_ready"] },
+    { name: "ledger_path_case_sensitive", from: String.raw`ledger: /^tasks\/[^/]+\/defects\.jsonl$/i,`, to: String.raw`ledger: /^tasks\/[^/]+\/defects\.jsonl$/,`, kills: ["fail41_ledger_path_case_variant"] },
     { name: "ledger_duplicate_keys_allowed", from: "if (conflicts.length) {", to: "if (false) {", kills: ["fail41_ledger_ambiguous_duplicate_keys"] },
     { name: "ledger_denylist_instead_of_allowlist", from: "if (!st.terminal) return;", to: "if (![\"DONE\", \"CLOSED\", \"COMPLETE\", \"COMPLETED\", \"RESOLVED\", \"FIXED\", \"VERIFIED\"].includes(st.word)) return;", kills: ["fail42_ledger_unlisted_terminal_status"] },
     // 4.4 whitelist, grandfathering and the range gate

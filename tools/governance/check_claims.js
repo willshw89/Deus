@@ -13,7 +13,8 @@
  * Markdown emphasis (* _ ** __ `) removed, and a "Status:" / "State:" label dropped. In "A -> B" or
  * "A → B" the status is B. A status is non-terminal only when it, every arrow target and every labelled
  * value in the cell is TODO, IN_PROGRESS, REVIEW or BLOCKED or one of their aliases (NON_TERMINAL), and no
- * closure word (TERMINAL_WORDS: DONE, CLOSED, ...) stands anywhere in the cell, unless negated ("was DONE",
+ * closure word (TERMINAL_WORDS: DONE, CLOSED, ..., and a check mark or ticked box: ✅ ✔ ✓ ☑ [x]) stands
+ * anywhere in the cell, unless negated ("was DONE",
  * "not DONE") or used after an article ("the fixed tools"). Any other value, known or not, blank included,
  * is a closure. A record whose status changes to a closure other than its prior value needs full closure
  * verification: rules 4.1 and 4.2.
@@ -25,11 +26,13 @@
  *       record cites must exist in the committed tree (the index, for a staged commit).
  *   4.2 Zero self-certification. Every closer the record names ("closedBy: grok", "verdict: grok",
  *       "reviewed by grok", a Reviewer column) must be a known agent, must not be an owner, a fixer or the
- *       author of a cited work commit, and must be backed: by a review artifact the record cites (a file
- *       whose name contains review, verdict, verif, signoff or audit, that exists in the tree, mentions the
- *       record's ID and was last committed by a "[closer]" commit before this one, unless the closer commits
- *       it now), or, for closedBy: owner, by a DEC-xxx entry of docs/OWNER_DECISIONS.md whose status is
- *       DECIDED in the parent commit. A status document (WBS, STATUS, AUDIT_LOG, issues) records a closure
+ *       author of a cited work commit, and must be backed: by a review artifact the record cites (a document,
+ *       .md / .txt / .json / .log / .yaml, whose name contains review, verdict, verif, signoff or audit, that
+ *       is not a status document or ledger, exists in the tree, mentions the record's ID, records no failing
+ *       verdict for it (FAIL, REJECTED, CHANGES REQUESTED, ...) and was last committed by a "[closer]" commit
+ *       before this one, unless the closer commits it now), or, for closedBy: owner, by a DEC-xxx entry of
+ *       docs/OWNER_DECISIONS.md that names the record and is DECIDED in the parent commit. A status document
+ *       (WBS, STATUS, AUDIT_LOG, issues) records a closure
  *       somebody else made, so there the closer must be a different agent than the committer. A defect
  *       ledger line is the closer's own signature; a fixer never commits it.
  *   4.3 WBS revision and immutability. Adding a leaf needs the header Rev to go up. A WBS keeps a Rev
@@ -51,16 +54,19 @@
  *       apart (B2); and closures without an independent audit trail (A1-A4).
  *
  * Records read:
- *   WBS leaves      rows of every table in docs/**\/*WBS*.md (not docs/archive/) whose first cell is a leaf
- *                   ID (WG.00.08), whatever the table's header says. A range row (WG.22.01–25) is one key;
- *                   replacing it with one row per ID is not a deletion.
- *   Defect ledgers  tasks/<task>/defects.jsonl, append-only JSON lines (tools/agents/defect_router.js). Keys
- *                   are compared case-insensitively ("Status" is "status"); a key given twice, or a "status"
- *                   and "state" that disagree, make the line ambiguous.
+ *   WBS leaves      rows of every table in docs/**\/*WBS*.md (not docs/archive/) whose first cell starts with
+ *                   a leaf ID (WG.00.08, "WG.00.08 (new)"), whatever the table's header says, blockquoted
+ *                   tables included. A range row (WG.22.01–25) is one key; replacing it with one row per ID
+ *                   is not a deletion. Adding an HTML table (<table>, <tr>, <td>) fails 4.3: it cannot be read.
+ *   Defect ledgers  tasks/<task>/defects.jsonl (any letter case), append-only JSON lines
+ *                   (tools/agents/defect_router.js). Keys are compared case-insensitively ("Status" is
+ *                   "status"); a key given twice, or a "status" and "state" that disagree, make the line
+ *                   ambiguous.
  *   Defect tables   rows of every table in docs/STATUS.md, docs/AUDIT_LOG.md and docs/issues/*.md whose
- *                   first cell is an ID (ATK-YEAR0-001, A10-1). A Status column that disappears fails 4.1.
+ *                   first cell starts with an ID (ATK-YEAR0-001, A10-1). A Status column that disappears,
+ *                   or an added HTML table, fails 4.1.
  *   STATUS prose    every sentence outside a table in docs/STATUS.md that names a leaf or defect ID and a
- *                   closure word ("WG.00.08 is now DONE") claims that closure for each ID it names, unless
+ *                   closure word ("WG.00.08 is now DONE", "- [x] WG.00.08") claims that closure for each ID it names, unless
  *                   the word is negated, follows an article or is hyphenated to the next word
  *                   ("closed-world census"). Claims already in the parent's prose are not rechecked.
  *
@@ -103,9 +109,10 @@ const NON_TERMINAL = {
 };
 const NON_TERMINAL_ALIAS = new Map(Object.entries(NON_TERMINAL).flatMap(([canon, list]) => list.map(w => [w, canon])));
 // Words that claim a closure wherever they stand in a status cell or a status sentence.
+// CHECKMARK stands for a check-mark glyph or a ticked box ("✅", "✔", "[x]").
 const TERMINAL_WORDS = new Set(["DONE", "CLOSED", "COMPLETE", "COMPLETED", "RESOLVED", "FIXED", "VERIFIED", "FROZEN",
     "FINAL", "FINALIZED", "FINALISED", "ACCEPTED", "APPROVED", "FINISHED", "SHIPPED", "DELIVERED", "SUPERSEDED",
-    "RETIRED", "CANCELLED", "CANCELED", "WONTFIX", "SIGNED", "CERTIFIED"]);
+    "RETIRED", "CANCELLED", "CANCELED", "WONTFIX", "SIGNED", "CERTIFIED", "CHECKMARK"]);
 // A closure word within three words after one of these is not claimed ("was DONE", "until it is DONE").
 const NEGATORS = new Set(["NOT", "NO", "NEVER", "CANNOT", "CANT", "WONT", "DONT", "DOESNT", "ISNT", "ARENT", "WASNT",
     "HASNT", "HAVENT", "UNTIL", "BEFORE", "AFTER", "PENDING", "AWAITING", "AWAITS", "WITHOUT", "NOR", "UNLESS", "IF",
@@ -132,7 +139,7 @@ const PATHS = {
     decisions: "docs/OWNER_DECISIONS.md",
     checker: "tools/governance/check_claims.js",
     wbs: /^docs\/(?!archive\/)(?:[^/]+\/)*[^/]*WBS[^/]*\.md$/i,
-    ledger: /^tasks\/[^/]+\/defects\.jsonl$/,
+    ledger: /^tasks\/[^/]+\/defects\.jsonl$/i,
     defectTables: /^docs\/(?:STATUS\.md|AUDIT_LOG\.md|issues\/[^/]+\.md)$/
 };
 // Ledger fields (compared case-insensitively) that describe the defect rather than its closure; everything else is evidence.
@@ -149,11 +156,21 @@ const HASH_RE = /\b[0-9a-f]{7,40}\b/gi;
 const PATH_RE = /(?:^|[\s`'"(\[<,;=])((?:[\w.@$!+-]+\/)+[\w.@$!+-]+\.[A-Za-z][A-Za-z0-9]{0,9})(?=$|[\s`'")\]>,;:.!?])/g;
 const SCRIPT_EXT_RE = /\.(?:js|mjs|cjs|bat|cmd|ps1|sh|py)$/i;
 const REVIEW_NAME_RE = /review|verdict|verif|sign-?off|audit/i;
+// A review artifact is a document; a script or an image records no verdict.
+const REVIEW_DOC_EXT_RE = /\.(?:md|markdown|txt|json|jsonl|log|ya?ml)$/i;
+// A verdict value that rejects the work under review.
+const FAILING_VERDICT_RE = /^(?:FAIL(?:ED|S|URE)?|REJECT(?:ED|S)?|CHANGES[\s_-]+REQUESTED|NO[\s_-]*GO|NOT[\s_-]+(?:APPROVED|ACCEPTED|PASSED|VERIFIED)|BLOCK(?:ED|ER|S)?|DENIED)\b/i;
+const CHECK_MARK_RE = /[✅✓✔☑\u{1F5F8}]|\[\s*[xX]\s*\]/gu;
+const HTML_TABLE_RE = /<\s*t(?:able|r|d|h)\b/gi;
 const PASS_OUTCOME_RE = /\bexit(?:\s+code)?\s*[:=]?\s*0\b|\b(\d+)\s*\/\s*\1\s+(?:checks?\s+)?pass(?:ed)?\b|\b\d+\s+pass(?:ed)?,\s*0\s+fail(?:ed|ures?)?\b|\bRESULT:\s*PASS\b|(?<!\bnot\s)\bALL\b[^.;|\n]{0,40}\bPASS(?:ED)?\b/i;
 const FAIL_OUTCOME_RE = /\b[1-9]\d*\s+fail(?:ed|ures?|ing|s)?\b|\bRESULT:\s*FAIL|\bexit(?:\s+code)?\s*[:=]?\s*[1-9]\d*\b|^\s*FAIL\b|\b(\d+)\s*\/\s*(?!\1\b)\d+\s+(?:checks?\s+)?pass(?:ed)?\b/im;
 const LEAF_ID_RE = /^([A-Z]{2,5}\.\d{2})\.(\d{2})(?:\.\d{2})?(?:\s*[–-]\s*(\d{2}))?$/;
+// A table row's first cell names a leaf or defect when it starts with the ID ("WG.00.08", "A10-1 (reopened)").
+// A sub-item ID ("WG.00.12/C1") is not its parent.
+const LEAF_LEAD_RE = /^([A-Z]{2,5}\.\d{2}\.\d{2}(?:\.\d{2})?(?:\s*[–-]\s*\d{2})?)(?![\w.–\-/])/;
 const LEAF_ID_SRC = "[A-Z]{2,5}\\.\\d{2}\\.\\d{2}(?:\\s*[–-]\\s*\\d{2})?";
 const DEFECT_ID_RE = /^[A-Z][A-Z0-9]*(?:[-.][A-Z0-9]+)+$/i;
+const DEFECT_LEAD_RE = /^([A-Z][A-Z0-9]*(?:[-.][A-Z0-9]+)+)(?![\w.\-/])/i;
 const DEC_RE = /\bDEC-\d{3,}\b/gi;
 const INVISIBLE_RE = /[\p{Cf}\u115F\u1160\u3164\uFFA0\u2800]/gu;
 const ARROW = { R: "\u0001", L: "\u0002", B: "\u0003" };
@@ -311,6 +328,7 @@ function plainStatusText(value) {
 // an arrow leads from or to and which follow a "Status:" label.
 function statusPhrases(value) {
     const s = plainStatusText(value).toUpperCase()
+        .replace(CHECK_MARK_RE, " ; CHECKMARK ; ")
         .replace(/(\p{L})['\u2019](?=\p{L})/gu, "$1")
         .replace(/<-+>|<=+>/g, ` ${ARROW.B} `)
         .replace(/-+>|=+>|>>|~>/g, ` ${ARROW.R} `)
@@ -451,7 +469,12 @@ function splitRow(line) {
     return t.split(/(?<!\\)\|/).map(c => c.trim());
 }
 
-// Every GitHub-flavoured table (leading pipe optional) outside code fences.
+// A line without its blockquote markers: a table inside "> " renders like any other.
+function unquote(line) {
+    return line == null ? line : String(line).replace(/^\s{0,3}(?:>\s?)+/, "");
+}
+
+// Every GitHub-flavoured table (leading pipe optional, blockquoted or not) outside code fences.
 function parseTables(text) {
     const lines = String(text == null ? "" : text).replace(/\r\n?/g, "\n").split("\n");
     const tables = [], tableLines = new Set();
@@ -464,13 +487,13 @@ function parseTables(text) {
             continue;
         }
         if (fence) continue;
-        const cells = splitRow(lines[i]);
+        const cells = splitRow(unquote(lines[i]));
         if (cur) {
             if (cells) { cur.rows.push({ cells, line: i + 1, text: lines[i] }); tableLines.add(i + 1); continue; }
             cur = null;
         }
         if (!cells) continue;
-        const next = splitRow(lines[i + 1]);
+        const next = splitRow(unquote(lines[i + 1]));
         if (next && next.length && next.every(c => /^:?-+:?$/.test(c))) {
             cur = { header: cells.map(clean), line: i + 1, rows: [] };
             tables.push(cur);
@@ -482,24 +505,55 @@ function parseTables(text) {
     return { tables, lines, tableLines };
 }
 
+// HTML table tags (<table>, <tr>, <td>, <th>): records in them are not read, so a document may not add them.
+function htmlTableCount(text) {
+    return (String(text == null ? "" : text).match(HTML_TABLE_RE) || []).length;
+}
+
 const isStatusHeader = h => /\b(?:status|state|progress)\b/i.test(h);
 const isOwnerHeader = h => /owner|writer|author|assignee/i.test(h) && !/whitelist/i.test(h);
 const isTitleHeader = h => /title|leaf name|^name$/i.test(h);
 const isReviewerHeader = h => /review|closed\s*by|closer|verifier|verdict|sign-?off/i.test(h);
 const isRecordStateHeader = h => isStatusHeader(h) || /commit|\bref\b|evidence|review|verdict|closed|closer|verifier|sign-?off/i.test(h);
 const isRevHeader = h => /^(?:rev(?:ision)?|ver(?:sion)?)\.?(?:\s*(?:#|no\.?|number))?$/i.test(h);
+// One column naming both ("Writer → Reviewer"): its cells read "Claude → Grok".
+const isPairHeader = h => isOwnerHeader(h) && isReviewerHeader(h);
 
 function columns(header, test) {
     return header.map((h, i) => i).filter(i => i > 0 && test(header[i]));
 }
 
+// "Claude → Grok" -> ["Claude", "Grok"]: writer before the arrow, reviewer after; no arrow, no reviewer.
+function splitPair(cell) {
+    const m = normText(cell).match(/^(.*?)\s*(?:->|=>|[→⇒⟶➔➜-➞➡])\s*(.*)$/u);
+    return m ? [m[1], m[2]] : [normText(cell), ""];
+}
+
+// Owners and reviewer cells of a row: pure owner / reviewer columns plus both halves of any pair column.
+function rowPeople(header, cells) {
+    const pairs = columns(header, isPairHeader);
+    const oi = header.findIndex(h => isOwnerHeader(h) && !isPairHeader(h));
+    const owners = new Set(oi >= 0 ? agentsIn(cells[oi]) : []);
+    for (const i of pairs) for (const a of agentsIn(splitPair(cells[i] || "")[0])) owners.add(a);
+    const reviewerCells = [...columns(header, h => isReviewerHeader(h) && !isPairHeader(h)).map(i => cells[i] || ""),
+        ...pairs.map(i => splitPair(cells[i] || "")[1])];
+    return { owners, reviewerCells };
+}
+
 // ---------------------------------------------------------------- WBS
 
-// "WG.00.08" -> "WG.00.08"; "WG.22.01–25" or "WG.22.01-25" -> "WG.22.01–25"; anything else -> null.
+// "WG.00.08" or "WG.00.08 (new)" -> "WG.00.08"; "WG.22.01–25" or "WG.22.01-25" -> "WG.22.01–25"; anything else -> null.
 function leafKey(cell) {
-    const m = cell.match(LEAF_ID_RE);
+    const lead = cell.match(LEAF_LEAD_RE);
+    const m = lead && lead[1].match(LEAF_ID_RE);
     if (!m) return null;
-    return m[3] ? `${m[1]}.${m[2]}–${m[3]}` : cell;
+    return m[3] ? `${m[1]}.${m[2]}–${m[3]}` : lead[1];
+}
+
+// "A10-1" or "**ATK-19B-002** (reopened)" -> "A10-1" / "ATK-19B-002"; anything else -> null.
+function defectKey(cell) {
+    const m = cell.match(DEFECT_LEAD_RE);
+    return m && DEFECT_ID_RE.test(m[1]) ? m[1].toUpperCase() : null;
 }
 
 function rangeIds(key) {
@@ -565,21 +619,22 @@ function parseWbs(text) {
         if (h.length && isRevHeader(h[0])) continue;
         const rows = t.rows.map(r => ({ r, id: leafKey(clean(r.cells[0])) })).filter(x => x.id);
         if (!rows.length) continue;
-        const si = columns(h, isStatusHeader), ri = columns(h, isReviewerHeader);
+        const si = columns(h, isStatusHeader);
         if (!si.length) {
             out.problems.push(`the table at line ${t.line} lists leaves (${rows.slice(0, 3).map(x => x.id).join(", ")}${rows.length > 3 ? ", ..." : ""}) but has no Status column (missing or renamed)`);
         }
-        const ti = h.findIndex(isTitleHeader), oi = h.findIndex(isOwnerHeader);
+        const ti = h.findIndex(isTitleHeader);
         // Status and evidence columns change with a closure; every other column except the ID
         // (compared as the key) is the leaf's identity.
         const sigCols = h.map((x, i) => i).filter(i => i > 0 && !isRecordStateHeader(h[i]));
         for (const { r, id } of rows) {
+            const people = rowPeople(h, r.cells);
             const leaf = {
                 id, line: r.line, text: r.text, k: out.occ.filter(x => x.id === id).length,
                 title: ti >= 0 ? clean(r.cells[ti]) : "",
-                owners: oi >= 0 ? agentsIn(r.cells[oi]) : new Set(),
+                owners: people.owners,
                 status: si.length ? statusOfCells(si.map(i => r.cells[i])) : null,
-                reviewerCells: ri.map(i => r.cells[i] || ""),
+                reviewerCells: people.reviewerCells,
                 sig: JSON.stringify(sigCols.map(i => clean(r.cells[i])))
             };
             out.occ.push(leaf);
@@ -602,12 +657,12 @@ function parseDefectRows(text) {
     for (const t of parseTables(text).tables) {
         const h = t.header;
         if (h.length && isRevHeader(h[0])) continue;
-        const si = columns(h, isStatusHeader), ri = columns(h, isReviewerHeader);
+        const si = columns(h, isStatusHeader);
         for (const r of t.rows) {
-            const id = clean(r.cells[0]).toUpperCase();
-            if (!DEFECT_ID_RE.test(id)) continue;
+            const id = defectKey(clean(r.cells[0]));
+            if (!id) continue;
             out.occ.push({ id, k: out.occ.filter(x => x.id === id).length, line: r.line, text: r.text,
-                status: si.length ? statusOfCells(si.map(i => r.cells[i])) : null, reviewerCells: ri.map(i => r.cells[i] || "") });
+                status: si.length ? statusOfCells(si.map(i => r.cells[i])) : null, reviewerCells: rowPeople(h, r.cells).reviewerCells });
         }
     }
     return out;
@@ -684,6 +739,7 @@ function proseClaims(text, known) {
 }
 
 // docs/OWNER_DECISIONS.md: "### Decision `DEC-001`: ..." headings, each with a "Status:" line.
+// text: the entry's heading and body, normalized and upper-cased, for the items it rules on.
 function parseDecisions(text) {
     const out = new Map();
     if (text == null) return out;
@@ -691,10 +747,11 @@ function parseDecisions(text) {
     for (const line of String(text).replace(/\r\n?/g, "\n").split("\n")) {
         if (/^\s{0,3}#{1,6}\s/.test(line)) {
             const m = normText(line).match(/\bDEC-\d{3,}\b/i);
-            cur = m && !out.has(m[0].toUpperCase()) ? { id: m[0].toUpperCase(), status: "" } : null;
+            cur = m && !out.has(m[0].toUpperCase()) ? { id: m[0].toUpperCase(), status: "", text: "" } : null;
             if (cur) out.set(cur.id, cur);
-            continue;
         }
+        if (cur) cur.text += `${normText(line).toUpperCase()}\n`;
+        if (/^\s{0,3}#{1,6}\s/.test(line)) continue;
         if (cur && !cur.status) {
             const s = plainStatusText(line).match(/^\s*[-+]?\s*status\s*:\s*(.+)$/i);
             if (s) cur.status = s[1].trim().toUpperCase();
@@ -866,12 +923,64 @@ function requireEvidence(where, text, ctx, R) {
     return ev;
 }
 
-// A review artifact the record cites, written by the closer, that names the record.
+// Why p cannot be a closer's review artifact, or null. Status documents and ledgers record closures and
+// every lane writes to them, so their last committer did not write what they say about an item.
+function reviewDocProblem(p) {
+    if (PATHS.wbs.test(p) || PATHS.ledger.test(p) || PATHS.defectTables.test(p) || p === PATHS.decisions) {
+        return "is a status document or ledger that every lane writes to, not a review artifact";
+    }
+    if (!REVIEW_DOC_EXT_RE.test(p)) return "is not a document (.md / .txt / .json / .log / .yaml), so it records no verdict";
+    return null;
+}
+
+// The first failing verdict an artifact records for id, or null: a "Verdict: ..." line (or the line under a
+// "Verdict" heading) unless it is scoped to other items ("Verdict for WG.00.09: FAIL"; "Verdict on
+// 2026-09-25: FAIL" names no item, so it is not scoped), or a table row naming id whose Verdict / Result /
+// Outcome cell fails.
+function failingVerdict(body, id) {
+    const forms = idForms(id);
+    const names = s => { const u = normText(s).toUpperCase(); return forms.some(f => u.includes(f)); };
+    const namesAnItem = s => /\b[A-Z]{2,5}\.\d{2}\.\d{2}\b|\b[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+\b/.test(normText(s));
+    const bare = s => stripEmphasis(normText(s)).replace(/^[\s>#:=.|\-–—]+/, "").trim();
+    const { tables, lines, tableLines } = parseTables(body);
+    for (let i = 0; i < lines.length; i++) {
+        if (tableLines.has(i + 1)) continue;
+        const m = stripEmphasis(normText(lines[i])).match(/\bverdicts?\b(.*)$/i);
+        if (!m) continue;
+        let rest = m[1];
+        const scope = rest.match(/^\s*(?:for|on|of)\b([^:]*):(.*)$/i);
+        if (scope && namesAnItem(scope[1])) {
+            if (!names(scope[1])) continue;
+            rest = scope[2];
+        } else if (scope) rest = scope[2];
+        let value = bare(rest.replace(/^\s*(?:is|was|by\s+[\w-]+)\b/i, ""));
+        if (!value && /^\s{0,3}#{1,6}\s/.test(lines[i])) {
+            const next = lines.slice(i + 1).find(l => l.trim());
+            value = next ? bare(next) : "";
+        }
+        if (FAILING_VERDICT_RE.test(value)) return { line: i + 1, text: clean(lines[i]).slice(0, 80) };
+    }
+    for (const t of tables) {
+        const vi = t.header.findIndex(h => /verdict|result|outcome/i.test(h));
+        if (vi < 0) continue;
+        for (const r of t.rows) {
+            if (r.cells.some(names) && FAILING_VERDICT_RE.test(bare(r.cells[vi] || ""))) return { line: r.line, text: clean(r.text).slice(0, 80) };
+        }
+    }
+    return null;
+}
+
+// A review artifact the record cites, written by the closer, that names the record and does not reject it.
 function reviewArtifact(reviewer, id, text, ctx) {
-    const cands = citedPaths(text).filter(p => REVIEW_NAME_RE.test(path.posix.basename(p)));
-    if (!cands.length) return { ok: false, why: `cites no review artifact (a committed *review* / *verdict* / *audit* file by [${reviewer}]); a typed closedBy is not evidence` };
-    const present = ctx.facts.exists(cands.map(p => ctx.newTree.objectName(p)));
+    const named = citedPaths(text).filter(p => REVIEW_NAME_RE.test(path.posix.basename(p)));
+    if (!named.length) return { ok: false, why: `cites no review artifact (a committed *review* / *verdict* / *audit* file by [${reviewer}]); a typed closedBy is not evidence` };
     const why = [];
+    const cands = named.filter(p => {
+        const bad = reviewDocProblem(p);
+        if (bad) why.push(`${p} ${bad}`);
+        return !bad;
+    });
+    const present = ctx.facts.exists(cands.map(p => ctx.newTree.objectName(p)));
     for (let i = 0; i < cands.length; i++) {
         const p = cands[i];
         if (!present[i]) { why.push(`${p} does not exist in the committed tree`); continue; }
@@ -881,15 +990,19 @@ function reviewArtifact(reviewer, id, text, ctx) {
             const last = ctx.facts.lastCommit(p, ctx.bases);
             if (!last || last.agent !== reviewer) { why.push(`${p} was last committed by ${last ? `"${last.subject}"` : "no commit"}, not by a [${reviewer}] commit`); continue; }
         }
-        const body = normText(ctx.newTree.read(p) || "").toUpperCase();
+        const raw = ctx.newTree.read(p) || "";
+        const body = normText(raw).toUpperCase();
         if (!idForms(id).some(f => body.includes(f))) { why.push(`${p} does not mention ${id}`); continue; }
+        const verdict = failingVerdict(raw, id);
+        if (verdict) { why.push(`${p} records a failing verdict for ${id} (line ${verdict.line}: "${verdict.text}")`); continue; }
         return { ok: true, path: p };
     }
     return { ok: false, why: why.join("; ") };
 }
 
-// closedBy: owner stands only on a DECIDED entry of docs/OWNER_DECISIONS.md as of the parent commit.
-function ownerDecision(text, ctx) {
+// closedBy: owner stands only on a DECIDED entry of docs/OWNER_DECISIONS.md, as of the parent commit, that
+// names the record: any decided question is not a ruling on this one.
+function ownerDecision(id, text, ctx) {
     const ids = [...new Set((normText(text).match(DEC_RE) || []).map(d => d.toUpperCase()))];
     if (!ids.length) return { ok: false, why: `closedBy owner cites no DEC-xxx entry of ${PATHS.decisions}` };
     const why = [];
@@ -897,13 +1010,14 @@ function ownerDecision(text, ctx) {
         const e = ctx.decisions.get(d);
         if (!e) { why.push(`${d} is not an entry of ${PATHS.decisions} in the parent commit`); continue; }
         if (!/\bDECIDED\b/.test(e.status)) { why.push(`${d} is "${e.status || "without a status"}", not DECIDED`); continue; }
+        if (!idForms(id).some(f => e.text.includes(f))) { why.push(`${d} is DECIDED but does not mention ${id}`); continue; }
         return { ok: true, id: d };
     }
     return { ok: false, why: why.join("; ") };
 }
 
 function backing(reviewer, id, text, ctx) {
-    if (reviewer === "owner") return ownerDecision(text, ctx);
+    if (reviewer === "owner") return ownerDecision(id, text, ctx);
     return reviewArtifact(reviewer, id, text, ctx);
 }
 
@@ -994,6 +1108,7 @@ function checkWbsFile(p, oldText, newText, ctx, R) {
     if (added.length && !revUp) R.fail("4.3", `${p}: ${added.join(", ")} added but Rev did not go up (Rev ${fmt(o.rev)} -> ${fmt(n.rev)})`);
     if (edited.length && !revUp) R.fail("4.3", `${p}: non-status edits to ${edited.join(", ")} without a Rev increase (Rev ${fmt(o.rev)} -> ${fmt(n.rev)})`);
     if (newText != null) {
+        if (htmlTableCount(newText) > htmlTableCount(oldText)) R.fail("4.3", `${p}: adds an HTML table (<table> / <tr> / <td>); leaves and their status are read from Markdown tables only, so it could not be checked`);
         for (const problem of n.problems) R.fail("4.3", `${p}: ${problem}`);
         if (n.rev == null) R.fail("4.3", `${p}: no Rev header ("**Rev:** N" before the first section)${o.rev != null ? `; it was Rev ${o.rev}` : ""}`);
         const ol = o.revLog, nl = n.revLog;
@@ -1110,6 +1225,10 @@ function checkDefectTableFile(p, oldText, newText, ctx, R) {
     if (lost.length) {
         R.count("4.1");
         R.fail("4.1", `${p}: ${lost.join(", ")} lost its Status column (missing or renamed), so its closures could not be checked`);
+    }
+    if (newText != null && htmlTableCount(newText) > htmlTableCount(oldText)) {
+        R.count("4.1");
+        R.fail("4.1", `${p}: adds an HTML table (<table> / <tr> / <td>); defect rows and their status are read from Markdown tables only, so it could not be checked`);
     }
     const before = new Map(o.occ.map(x => [`${x.id}#${x.k}`, x]));
     for (const nr of n.occ) {
@@ -1565,5 +1684,6 @@ if (require.main === module) process.exit(main());
 module.exports = {
     parseTables, parseWbs, parseRevisionLog, parseDefectRows, parseLaneMatrix, parseDecisions, globToRe,
     statusOf, statusWord, normText, normAgent, strictAgent, reviewersIn, jsonKeyConflicts, normRecord, proseClaims,
-    citedPaths, PASS_OUTCOME_RE, FAIL_OUTCOME_RE, NON_TERMINAL, TERMINAL_WORDS, BURST_MS, GOVERNANCE_EPOCH
+    citedPaths, PASS_OUTCOME_RE, FAIL_OUTCOME_RE, NON_TERMINAL, TERMINAL_WORDS, BURST_MS, GOVERNANCE_EPOCH,
+    failingVerdict, reviewDocProblem, htmlTableCount
 };
