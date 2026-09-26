@@ -29,7 +29,7 @@ The ids above are `TEST_` placeholders. `<sha256 of that file>` stands for the r
 | :--- | :--- |
 | Date | A real calendar date, `YYYY-MM-DD`. |
 | Decision (YEA/NAY) | `YEA` or `NAY`, upper case. |
-| Entry or slot ids | One or more catalogue entry ids (`BAND_BIOME_CATEGORY_TYPE_VARIANT_STATE`) or slot ids (`<sheetId>:<4-digit index>`), separated by commas. A slot id approves the file for the entry that owns that slot. |
+| Entry or slot ids | One or more catalogue entry ids (`BAND_BIOME_CATEGORY_TYPE_VARIANT_STATE`) or slot ids (`<sheetId>:<4-digit index>`), separated by commas. A slot id approves the file for whichever entry owns that slot. Prefer entry ids: if the catalogue is rebuilt and slots are renumbered, a slot id can move to another entry of the same size. The tools print a warning when a file is approved by slot id only. |
 | File (repo path) | Where the approved file lives in the repo, ending `.png`, no spaces. It is a record for people; the tools match the hash, not the path. |
 | SHA-256 (64 lowercase hex) | SHA-256 of the file's bytes: exactly 64 characters, `0-9` and `a-f`. Upper-case hex is refused. |
 | Approved derived variants (ids or none) | `none`, or the ids of derived variant rows (catalogue `variants.derivedFrom` = this entry) that the Owner approves deriving from this file. `place_art.js` reports them as `ledgerApprovedVariant`; it derives nothing (rows with `derivedFrom` stay `DERIVED_PENDING`). |
@@ -50,7 +50,9 @@ Backticks around values are optional.
   - the table header text differs, or the `| --- |` separator row is missing;
   - a row does not have six cells, or has a bad date, decision, id list, file path, hash or variants value;
   - table rows appear after the table has ended (after a blank line);
-  - an HTML comment (`<!--`) appears in the section, or a row is indented four or more spaces. A reader cannot see these rows, so the tools do not guess.
+  - a line directly under the table that does not start with `|`. Markdown shows it as one more table row, so every row must start with `|`, and other text needs a blank line above it;
+  - a second table, including one whose rows do not start with `|` (detected by its `--- | ---` separator row);
+  - an HTML comment (`<!--`) in the section, or a comment that hides the heading, or a row indented four or more spaces. A reader cannot see these rows, so the tools do not guess.
 - `place_art.js` checks the ledger again on every run for files placed earlier. If an earlier file is no longer approved (a `NAY` was added), the run is refused with `APPROVAL_REVOKED`; place everything again into a new `--out`.
 
 ## Getting a file's hash
