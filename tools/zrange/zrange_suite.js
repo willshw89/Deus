@@ -11,7 +11,7 @@
  *   play    extreme_layers_work (a unit stands, walks and paths on the top and bottom levels, the view switches there in
  *           place and stepping stops at the ends), sparse_save (fresh-world save sizes, a change high and low, save and
  *           load)
- *   sim     ZR_UPDATES map updates of simulation from New Game at the highest speed, then the census again
+ *   sim     exactly ZR_UPDATES map updates of simulation from New Game (at 1x), then the census again
  *   legacy  loads a save file (ZR_SAVE) written by the base commit and checks it plays at its own range; saves and
  *           loads it again
  *   make_legacy  (run on the base commit) writes the legacy save fixture and its fingerprint to ZR_OUT_DIR
@@ -407,7 +407,8 @@ function zrangeSuitePlugin() {
         //---------------------------------------------------------------- sim: ZR_UPDATES map updates, then the census
         async function simPhase() {
             resume();
-            if (UF.Time && UF.Time.setLevel) UF.Time.setLevel(UF.Time.speeds ? UF.Time.speeds.length - 1 : 4);
+            // At 1x one map update a frame, so the run stops after exactly UPDATES updates (the waiter checks every update).
+            if (UF.Time && UF.Time.setLevel) UF.Time.setLevel(0);
             const f0 = W._frame, tick0 = UF.Time && UF.Time.ticks ? UF.Time.ticks() : null, r0 = performance.now();
             await t.waitUntil(() => W._frame - f0 >= UPDATES, 150000, `${UPDATES} map updates`).catch(() => {});
             pause();
