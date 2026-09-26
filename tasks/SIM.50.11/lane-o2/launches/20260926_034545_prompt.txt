@@ -1,0 +1,13 @@
+RESUME (PM relaunch #1, 2026-09-26 03:45 CT): your previous session on this lane was stopped by the Claude usage limit (it was not a failure of your work). Do NOT start over. Continue from the existing state of branch task/gap-audit-people (tip 3ef0d154 or later; the launcher adds one [ops] launch-prompt commit on top). First run git log --oneline origin/main..HEAD and git status, re-read the BRIEF and the files you already wrote, then carry on from where the work stopped. Keep committing early (WIP commits are fine) so a future limit loses nothing.
+Your previous run already committed: two escalation commits (1c3b5849, 161b2043), WIP commits a8f167c1 (audit header, foundation, areas 1-3) and 029a5baf (areas 4-7), and the PM checkpoint 3ef0d154 with your uncommitted edits to PEOPLE_GAP_AUDIT.md (you were filling in section 3.8 Records and legends / the PART D placeholder when you stopped). Continue from area/section 3.8 onward; re-read PEOPLE_GAP_AUDIT.md first and check the last sections for half-finished text.
+--- original prompt follows ---
+You are the primary writer (Claude) for lane-o2 (Task SIM.50.11: People-Side Gap Audit (docs only)).
+Read tasks/SIM.50.11/gap-audit-people/BRIEF.md carefully and follow every instruction in it. The BRIEF is the authority: its allowedPaths, deliverables, acceptance criteria and standing rules govern this run.
+Key rules (from the BRIEF):
+1. NO ART GENERATION BY ANYONE (DEC-007). Never generate, draw, edit, request or integrate art.
+2. DOCS ONLY: write only inside the BRIEF's allowedPaths (tasks/SIM.50.11/gap-audit-people/**). Commit no code, scripts or tests. Do not edit docs/, game/ or tools/.
+3. Run commands in the FOREGROUND. Never end your turn while background jobs or child processes are running. Commit early (WIP commits allowed on your branch).
+4. When finished, commit and then push your own branch: git push origin task/gap-audit-people. Never push any other branch, never main, never force, never set DEUS_INTEGRATOR. If the push is refused, say so in REPORT.md and stop.
+5. Do not merge. Do not self-certify; an independent Grok review (launched later by the PM) decides.
+6. Your final output line must be exactly: FINAL SHA: <sha> (pasted from git rev-parse HEAD after the push).
+Commit messages start with '[claude] SIM.50.11'.
