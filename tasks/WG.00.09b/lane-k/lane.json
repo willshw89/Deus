@@ -1,0 +1,49 @@
+{
+  "lane": "lane-k",
+  "taskId": "WG.00.09b",
+  "branch": "task/lane-k",
+  "writer": "claude",
+  "reviewer": "grok",
+  "allowedPaths": [
+    "game/js/plugins/DEUS_Depth.js",
+    "game/js/plugins.js",
+    "game/js/plugins/DEUS_Minimap.js",
+    "game/js/plugins/DEUS_Fog.js",
+    "game/js/plugins/DEUS_DayNight.js",
+    "docs/systems/DEUS_Depth.md",
+    "docs/systems/DEUS_Minimap.md",
+    "tools/test_layer_render_flat.js",
+    "tools/bench_render_layers.js",
+    "tools/test_minimap.js",
+    "tasks/WG.00.09b/lane-k/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "node",
+      "args": [
+        "tools/test_layer_render_flat.js"
+      ],
+      "timeoutSec": 900
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/test_snapshot.js",
+        "--name",
+        "depth",
+        "--plugins",
+        "DEUS_Depth",
+        "--suite",
+        "depth"
+      ],
+      "timeoutSec": 900
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/test_minimap.js"
+      ],
+      "timeoutSec": 300
+    }
+  ]
+}
