@@ -273,7 +273,8 @@ function readPriorState(ctx, outDir) {
         let buf;
         try { buf = fs.readFileSync(file); } catch (e) { return fail('OUT_STATE_TAMPERED', `${file} is missing (${e.code})`); }
         if (V.sha256(buf) !== s.sha256) return fail('OUT_STATE_TAMPERED', `${file} changed since it was placed (sha256 ${V.sha256(buf)}, recorded ${s.sha256})`);
-        const img = decodePNG(buf, file);
+        let img;
+        try { img = decodePNG(buf, file); } catch (e) { return fail('OUT_STATE_INVALID', `${file} cannot be decoded: ${e.message}`); }
         if (img.width !== sheet.w || img.height !== sheet.h) return fail('OUT_STATE_INVALID', `${file} is ${img.width}x${img.height}; sheet ${sheet.sheetId} is ${sheet.w}x${sheet.h}`);
         state.canvases.set(sheet.sheetId, { w: sheet.w, h: sheet.h, data: Buffer.from(img.data) });
     }
@@ -351,6 +352,14 @@ function coverageMarkdown(cov) {
 
 // ------------------------------------------------------------------ placement
 
+const inputEntryId = name => name.replace(/\.png$/i, '');
+// Input names that map to one entry (X.png and X.PNG on a case-sensitive file system).
+function duplicateInputs(names) {
+    const by = new Map();
+    for (const n of names) { const id = inputEntryId(n); by.set(id, (by.get(id) || []).concat([n])); }
+    return [...by].filter(([, files]) => files.length > 1);
+}
+
 function refusedReport(refusals, extra) {
     return Object.assign({ tool: 'place_art', schema: REPORT_SCHEMA, result: 'REFUSED', refusals }, extra || {});
 }
@@ -391,9 +400,10 @@ function placeArt(opts) {
     const listing = fs.readdirSync(inDir).sort(cmp);
     const names = listing.filter(n => /\.png$/i.test(n) && fs.statSync(path.join(inDir, n)).isFile());
     const ignoredFiles = listing.filter(n => !names.includes(n));
+    for (const [entryId, files] of duplicateInputs(names)) refuse('DUPLICATE_INPUT', `${files.join(' and ')} both name entry ${entryId}`, { entryId });
     const placements = [];
     for (const name of names) {
-        const entryId = name.replace(/\.png$/i, '');
+        const entryId = inputEntryId(name);
         if (!ctx.entries.has(entryId)) { refuse('UNKNOWN_INPUT', `no catalogue entry ${entryId}; inputs are named <entryId>.png`, { input: name, entryId }); continue; }
         let buf;
         try { buf = fs.readFileSync(path.join(inDir, name)); }
@@ -545,6 +555,6 @@ function main(argv) {
     return exitCode;
 }
 
-module.exports = { placeArt, tilesetTarget, characterTarget, runtimeRel, checkCatalogue, copyRect, REPORT_SCHEMA, COVERAGE_SCHEMA };
+module.exports = { placeArt, tilesetTarget, characterTarget, runtimeRel, checkCatalogue, copyRect, duplicateInputs, REPORT_SCHEMA, COVERAGE_SCHEMA };
 
 if (require.main === module) process.exitCode = main(process.argv.slice(2));

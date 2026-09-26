@@ -169,6 +169,7 @@ function ledgerDoc(rows, o = {}) {
         `| 2026-09-18 | \`${ID.PROP}\` | TEST_ legacy row${o.legacySha ? ` ${o.legacySha}` : ''} | \`art/masters/test_chest.png\` | ignored |`, ''];
     const section = [o.heading || LEDGER_HEADING, '', 'TEST_ ledger. Owner rows only.', '', o.header || LEDGER_HEADER, '| :--- | :--- | :--- | :--- | :--- | :--- |'];
     for (const r of rows) section.push(`| ${r.date || '2026-09-26'} | ${r.decision} | \`${r.ids}\` | \`${r.file}\` | \`${r.sha}\` | ${r.variants} |`);
+    if (o.extra) section.push(...o.extra);
     if (o.noLedger) { /* legacy table only */ }
     else if (o.fenced) L.push('```text', ...section, '```');
     else L.push(...section);
@@ -367,6 +368,11 @@ negCase('neg.ledger_only_in_code_fence', { entry: ID.PROP, codes: ['APPROVAL_MIS
 negCase('neg.ledger_heading_twice', { entry: ID.PROP, codes: ['LEDGER_MALFORMED', 'APPROVAL_MISSING'], build: w => approvalsOnly(w, 'ledger_twice', w.rows, { second: true }) });
 negCase('neg.ledger_heading_near_miss', { entry: ID.PROP, codes: ['LEDGER_MALFORMED', 'APPROVAL_MISSING'],
     build: w => approvalsOnly(w, 'ledger_near', w.rows, { heading: '## SHA-256 Approval Ledger (v1)' }) });
+const stoolRow = w => `| 2026-09-26 | YEA | \`${ID.STOOL}\` | \`art/approved/stool.png\` | \`${w.cells.get(ID.STOOL).sha}\` | none |`;
+negCase('neg.ledger_row_in_html_comment', { entry: ID.PROP, codes: ['LEDGER_MALFORMED'], msg: 'HTML comments',
+    build: w => approvalsOnly(w, 'ledger_comment', w.rows, { extra: [`<!-- ${stoolRow(w)} -->`] }) });
+negCase('neg.ledger_row_indented_as_code', { entry: ID.PROP, codes: ['LEDGER_MALFORMED'], msg: 'indented',
+    build: w => approvalsOnly(w, 'ledger_indent', w.rows, { extra: [`    ${stoolRow(w)}`] }) });
 
 // file size, alpha, palette, template residue, opacity, PNG format
 negCase('neg.dims_47x48', { entry: ID.TILE, codes: ['DIMS_MISMATCH'], build: w => {
@@ -404,6 +410,9 @@ for (const [suffix, dx, dy] of [['x_plus_1', 1, 0], ['x_minus_1', -1, 0], ['y_pl
 negCase('neg.tile_with_hole', { entry: ID.TILE, codes: ['TILE_NOT_OPAQUE'], pixel: [20, 20], build: w => variant(w, 'tile_hole', ID.TILE, { mutate: img => { img.data[(20 * 48 + 20) * 4 + 3] = 0; } }) });
 negCase('neg.png_16bit', { entry: ID.PROP, codes: ['PNG_16BIT'], build: w => variant(w, 'png16', ID.PROP, { raw: png16 }) });
 negCase('neg.png_corrupt', { entry: ID.PROP, codes: ['PNG_INVALID'], build: w => variant(w, 'png_corrupt', ID.PROP, { raw: () => Buffer.from('TEST_ not a png') }) });
+negCase('neg.png_huge_header_not_decoded', { entry: ID.PROP, codes: ['DIMS_MISMATCH'], msg: 'not decoded', build: w => variant(w, 'png_huge', ID.PROP, {
+    raw: () => { const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(60000, 0); ihdr.writeUInt32BE(60000, 4); ihdr[8] = 8; ihdr[9] = 6; return Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk('IHDR', ihdr), chunk('IEND', Buffer.alloc(0))]); }
+}) });
 
 // scale envelope and anchors
 const env = id => entryIn(FIX.catalogue, id).envelope;
@@ -598,6 +607,23 @@ function main() {
         if (pv('fixture.catalogue_slots_valid')) Object.assign(entryIn(ctx.catalogue, ID.STOOL).slot, { x: entryIn(ctx.catalogue, ID.PROP).slot.x + 1, y: entryIn(ctx.catalogue, ID.PROP).slot.y + 1 });
         const errs = T.P.checkCatalogue(ctx);
         check('fixture.catalogue_slots_valid', errs.length === 0, errs.join('; '));
+        // Geometry sizes come from geometry.json: no stratum, layer, tile or human pixel literal in
+        // the tools. Format constants are allowed where they are defined: 48 as RMMZ's autotile shape
+        // count, 20 as a PNG header byte offset, 64 as the SHA-256 hex length.
+        const lits = [];
+        for (const f of ['validate_art.js', 'place_art.js']) {
+            const lines = fs.readFileSync(path.join(HERE, f), 'utf8').split('\n');
+            if (pv('static.no_geometry_literals_in_tools') && f === 'place_art.js') lines.push('const TEST_LAYER_PX = 96;');
+            lines.forEach((l, i) => {
+                if (/^\s*(\/\/|\*|\/\*)/.test(l)) return;
+                for (const m of l.matchAll(/\b(19|20|42|48|64|96)\b/g)) {
+                    const ok = (m[1] === '48' && l.includes('AUTOTILE_SHAPES = 48')) || (m[1] === '20' && l.includes('PNG_IHDR_H_AT = 20')) ||
+                        (m[1] === '64' && (l.includes('{64}') || l.includes('64 lowercase')));
+                    if (!ok) lits.push(`${f}:${i + 1}: ${l.trim()}`);
+                }
+            });
+        }
+        check('static.no_geometry_literals_in_tools', lits.length === 0, lits.join(' | '));
     }
 
     // --- unit checks
@@ -630,6 +656,9 @@ function main() {
         };
         check('unit.geometry_rows', r.default.join() === want1.join() && r.splitB.join() === '20,39,58,77,96' && r.face === 96 && r.tile.w === 48 && r.tile.h === 48 &&
             r.tall.w === 48 && r.tall.h === 96 && r.s6 === 'GEOM_ROW_UNKNOWN' && r.tm === 'FRAME_CLASS_DISABLED', JSON.stringify(r));
+        const names = pv('unit.duplicate_inputs') ? ['A.png', 'B.PNG'] : ['A.png', 'A.PNG', 'B.png'];
+        const dups = T.P.duplicateInputs(names);
+        check('unit.duplicate_inputs', JSON.stringify(dups) === JSON.stringify([['A', ['A.png', 'A.PNG']]]), JSON.stringify(dups));
         const runtimeRels = ['img/x.png', 'a/b/$c.png'].map(T.P.runtimeRel);
         const refusedRels = ['../x.png', '/abs.png', 'a\\b.png', 'a//b.png', 'C:/x.png', 'x.jpg', './x.png'].concat(pv('unit.runtime_file_paths') ? ['ok/fine.png'] : []).filter(p => T.P.runtimeRel(p) !== null);
         check('unit.runtime_file_paths', runtimeRels.every(Boolean) && refusedRels.length === 0, `accepted: ${refusedRels}`);

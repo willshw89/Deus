@@ -62,6 +62,7 @@ const ANCHOR_TYPES = ['GROUND', 'CEILING', 'WALL', 'CENTER'];
 // RMMZ character blocks are 3 animation columns x 4 facing rows (docs/RMMZ_ASSET_SPEC.md §2).
 const RMMZ_CHAR_COLS = 3, RMMZ_CHAR_ROWS = 4;
 const MAX_COORDS = 16; // pixel coordinates listed per reason
+const PNG_IHDR_W_AT = 16, PNG_IHDR_H_AT = 20; // PNG file format: byte offsets of IHDR width and height
 
 class Refusal extends Error {
     constructor(code, message) { super(message); this.code = code; }
@@ -224,7 +225,16 @@ function parseLedger(text, file) {
     for (let i = heads[0] + 1; i < lines.length; i++) if (!fenced[i] && /^#{1,2}\s/.test(lines[i])) { end = i; break; }
     let state = 'before'; // before -> sep -> rows -> after
     for (let i = heads[0] + 1; i < end; i++) {
+        // Content a reader cannot see (HTML comments, rows indented into code) must not count.
+        if (!fenced[i] && lines[i].includes('<!--')) {
+            ledger.errors.push({ line: i + 1, message: 'HTML comments are not allowed in the ledger section; hidden rows cannot be told from shown ones' });
+            return ledger;
+        }
         const isRow = !fenced[i] && lines[i].trim().startsWith('|');
+        if (isRow && /^\s{4,}/.test(lines[i])) {
+            ledger.errors.push({ line: i + 1, message: 'table row indented 4 or more spaces (Markdown shows it as code, not as a ledger row)' });
+            return ledger;
+        }
         if (!isRow) {
             if (state === 'sep') { ledger.errors.push({ line: i + 1, message: 'the ledger table header is not followed by a | --- | separator row' }); return ledger; }
             if (state === 'rows') state = 'after';
@@ -574,6 +584,14 @@ function validateBuffer(ctx, buf, label, entryId) {
         }
     }
 
+    // A header far larger than the slot is refused before its pixels are inflated.
+    if (buf.length >= PNG_IHDR_H_AT + 4 && buf.toString('ascii', PNG_IHDR_W_AT - 4, PNG_IHDR_W_AT) === 'IHDR') {
+        const hw = buf.readUInt32BE(PNG_IHDR_W_AT), hh = buf.readUInt32BE(PNG_IHDR_H_AT);
+        if (hw * hh > slot.w * slot.h * 4) {
+            add('DIMS_MISMATCH', `file header says ${hw}x${hh}; slot ${slot.slotId} is ${slot.w}x${slot.h} (not decoded)`);
+            return finish(result, null);
+        }
+    }
     let img;
     try { img = decodePNG(buf, label); }
     catch (e) { add('PNG_INVALID', e.message); return finish(result, null); }
