@@ -1,0 +1,63 @@
+# merge_gate.js loaded from C:\Users\snewt\.deus_worktrees\lane-g1\tools\governance\merge_gate.js; repository HEAD 3387244fbc7f6151360506c523ef66d8dbc3196c
+
+task/lane-r (d1fdf14730745ee73f8dcab6d4c6cb3a414c27d0) tasks/SIM.40.05/lane-r/lane.json
+  changed by d9766aa25fb98095bf48b217412a54c9e046d517 parents 1 tag [pm] trusted true | [pm] Open lane-r (SIM.40.05): BRIEF.md and lane.json
+  validateManifest: 0 errors
+
+task/lane-q (6c3e8f38b96acd0fc1abfdf8939d91695dc4bc31) tasks/SIM.40.01/lane-q/lane.json
+  changed by 9103799ecbbd1b389b427c15ddbe7f5c814c806a parents 1 tag [pm] trusted true | [pm] Open lane-q (SIM.40.01): BRIEF.md and lane.json
+  validateManifest: 0 errors
+
+task/lane-w (63b6f20707fbb20cee5d77928aa3128098dce89d) tasks/SIM.40.10/lane-w/lane.json
+  changed by 31892ae7afea6c4bdfaf5102e1e3740c87f603d6 parents 1 tag [pm] trusted true | [pm] Open lane-w (SIM.40.10): BRIEF.md and lane.json
+  validateManifest: 0 errors
+
+main (6aa1a332e7afb5da18c2b92d8f32692488a459c3) tasks/SIM.60.01/lane-p/lane.json
+  changed by e39b20e6e2b28ee22b67d03cf4610009573842e7 parents 1 tag [pm] trusted true | [pm] Open lane-p (SIM.60.01): BRIEF.md and lane.json
+  validateManifest: 0 errors
+
+main (6aa1a332e7afb5da18c2b92d8f32692488a459c3) tasks/WG.20.02/lane-s/lane.json
+  changed by 147bf517103440d15403bdd5bdb81e6366ec4898 parents 1 tag [pm] trusted true | [pm] Open lane-s (WG.20.02): BRIEF.md and lane.json
+  validateManifest: 0 errors
+
+main (6aa1a332e7afb5da18c2b92d8f32692488a459c3) tasks/WG.32.02/lane-t/lane.json
+  changed by 728737e7307128dfb190ce7be339f16b83d04ab1 parents 1 tag [pm] trusted true | [pm] Open lane-t (WG.32.02): BRIEF.md and lane.json
+  validateManifest: 0 errors
+
+main (6aa1a332e7afb5da18c2b92d8f32692488a459c3) tasks/WG.41.01/lane-u/lane.json
+  changed by ed4aa23de5b0aee4642f49c5b038e6697d14861d parents 1 tag [pm] trusted true | [pm] Open lane-u (WG.41.01): BRIEF.md and lane.json
+  validateManifest: 0 errors
+
+task/lane-l1 (d53f604cb4effba268267157922c6bbc4e9cfaf7) tasks/WG.65.15/lane-l1/lane.json
+  changed by e2cbe558058ade64f1acb10c9f5c7916cfc6f9d8 parents 1 tag [pm] trusted true | [pm] Open lane-l1 (WG.65.15): BRIEF.md and lane.json
+  validateManifest: 0 errors
+
+task/lane-g1 (3387244fbc7f6151360506c523ef66d8dbc3196c) tasks/WG.00.12b/lane-g1/lane.json
+  changed by 41d2447414afdd7f473511453fad7890149aa846 parents 1 tag [pm] trusted true | [pm] Open lane-g1 (WG.00.12b): BRIEF.md and lane.json
+  validateManifest: 0 errors
+
+main (6aa1a332e7afb5da18c2b92d8f32692488a459c3) tasks/SIM.50.11/gap-audit-people/lane.json
+  changed by 7ec8b1311d9d5009f536b917b9ad37f7419b89a6 parents 1 tag [pm] trusted true | [pm] Open lane-o2 (SIM.50.11): BRIEF.md and lane.json
+  validateManifest: 0 errors
+
+main (6aa1a332e7afb5da18c2b92d8f32692488a459c3) tasks/SIM.00.01/lane-m/lane.json
+  changed by 8b2da031a3fd997177b1635bb2548f416ce7ef6a parents 1 tag [gemini] trusted true | [gemini] Open Lane M (SIM.00.01 / ADR-003): lane.json and BRIEF.md
+  validateManifest: "taskId" must be a non-empty string; "writer" must be a non-empty string; "gateTests" must be an array
+
+task/lane-k (0315c84ab713dc4854da588efbf76feed78eb14c) tasks/WG.00.09b/lane-k/lane.json
+  changed by e3896d7623b57bca165ffede272c26d9c7c7afd5 parents 1 tag [claude] trusted false | [claude] WG.00.09b Fix1: deterministic gates (fixture scene, condition waits, tick-based s
+  changed by 84f6d072c40032bb19ec22b71c1fe5db5d406930 parents 1 tag [gemini] trusted true | [gemini] 0017-Q sec2 Lane K brief + manifest (WG.00.09b)
+  validateManifest: 0 errors
+
+main (6aa1a332e7afb5da18c2b92d8f32692488a459c3) tasks/SIM.00.00/lane-n/lane.json
+  changed by 6e8e839c2fc48422d40b6f81b70d2bc9164e4ffe parents 1 tag [gemini] trusted true | [gemini] 0017-Q sec5 Lane N brief + manifest (SIM.00.00)
+  validateManifest: 0 errors
+
+main (6aa1a332e7afb5da18c2b92d8f32692488a459c3) tasks/WG.00.12/lane-i/lane.json
+  changed by 06b4ec3ccc76c2420fa2498457ec890805a94802 parents 1 tag [gemini] trusted true | [gemini] 001-N sec1 brief + manifest
+  validateManifest: 0 errors
+
+main (6aa1a332e7afb5da18c2b92d8f32692488a459c3) tasks/WG.00.12/lane-j/lane.json
+  changed by 61f9b749f9fda0a4fc6d74ac0be68fb888569c8e parents 1 tag [gemini] trusted true | [gemini] 001-N sec2 brief + manifest
+  validateManifest: 0 errors
+EXIT=0

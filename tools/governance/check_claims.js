@@ -34,7 +34,8 @@
  *       docs/OWNER_DECISIONS.md that names the record and is DECIDED in the parent commit. A status document
  *       (WBS, STATUS, AUDIT_LOG, issues) records a closure
  *       somebody else made, so there the closer must be a different agent than the committer. A defect
- *       ledger line is the closer's own signature; a fixer never commits it.
+ *       ledger line is the closer's own signature; a fixer never commits it. "pm" (NON_CLOSERS) is never a
+ *       valid closer: the PM records and merges other agents' closures but never reviews or closes work.
  *   4.3 WBS revision and immutability. Adding a leaf needs the header Rev to go up. A WBS keeps a Rev
  *       header and a Revision Log (first column Rev / Revision / Version) whose revisions are contiguous
  *       positive integers ending at the header Rev, and whose old rows are never deleted, rewritten or
@@ -48,7 +49,8 @@
  *       differ from every parent count as touched, and a merge that touches none passes. In --commit and
  *       --range audits, a commit at or before the governance epoch (GOVERNANCE_EPOCH, the Directive 001-I
  *       base) predates the hook: its 4.4 violations are reported as GRANDFATHERED and do not fail it.
- *       Rules 4.1-4.3 still apply to it.
+ *       Rules 4.1-4.3 still apply to it. The PM's whitelist is built in (PM_WHITELIST: tasks/<id>/<lane>/BRIEF*.md,
+ *       tasks/<id>/<lane>/lane.json, docs/STATUS.md), not read from STATUS, and no STATUS row grants pm a path.
  *   --check-backfill. Flags stamps made in a burst: two agents acting on one item less than
  *       BURST_MS apart (B1), or several items given a certifying stamp less than BURST_MS
  *       apart (B2); and closures without an independent audit trail (A1-A4).
@@ -78,7 +80,9 @@
  *          prefix of the commit subject
  * DEUS_LANE, DEUS_AGENT and the branch apply to the staged commit only, never to --commit audits.
  * An agent without a lane gets the union of that agent's lanes. Neither means rejection.
- * Claude and Fable count as one agent, as do Gemini and Antigravity (CANONICAL_ROLES §2).
+ * Claude and Fable count as one agent, as do Gemini and Antigravity (CANONICAL_ROLES §2). "pm" is an agent
+ * of its own (the PM, Owner directive 0028-AC A0), matched only as a whole name, never inside free text; the
+ * grok_pm and grok_bot aliases still mean grok. For pm a branch or range hint never picks the lane.
  *
  * Usage:
  *   node tools/governance/check_claims.js [--pre-commit]            check the staged index
@@ -128,9 +132,20 @@ const AGENT_ALIASES = {
     claude: "claude", fable: "claude",
     grok: "grok", grok_pm: "grok", grok_bot: "grok",
     codex: "codex",
-    owner: "owner", owner_review: "owner"
+    owner: "owner", owner_review: "owner",
+    pm: "pm"
 };
 const KNOWN_AGENTS = [...new Set(Object.values(AGENT_ALIASES))];
+// Names that count only where an agent name stands alone ("[pm]", --agent pm, "closedBy: pm"), never as a word
+// inside free text: "PM" also stands in clock times and in names such as "PM Grok Bot".
+const EXACT_ONLY_AGENTS = new Set(["pm"]);
+// The PM (Grok Bot, main chat) opens lanes, launches workers, registers write-set claims and merges since Owner
+// directive 0028-AC A0 (2026-09-26 ~01:50 CT). It never reviews or closes work, so it is never a valid closer (4.2).
+const NON_CLOSERS = new Set(["pm"]);
+// The PM's 4.4 whitelist: the lane-opening files and docs/STATUS.md, where it registers claims. It is built in rather
+// than read from a STATUS row, because a [pm] commit may edit STATUS and so could widen what the next [pm] commit
+// may touch; STATUS rows never grant pm anything. The FROZEN / READ-ONLY row still applies.
+const PM_WHITELIST = ["tasks/*/*/BRIEF*.md", "tasks/*/*/lane.json", "docs/STATUS.md"];
 // Verdict words that may follow "verdict:" or "reviewer" without naming anybody.
 const REVIEWER_SKIP = new Set([...TERMINAL_WORDS, ...NON_TERMINAL_ALIAS.keys(), "PASS", "PASSED", "FAIL", "FAILED",
     "REJECTED", "CHANGES", "OK", "GO", "NOGO", "SIGN", "SIGN_OFF", "SIGNOFF"]);
@@ -150,7 +165,7 @@ const HOOK_FAMILY = "DEUS-GOVERNANCE-HOOK";
 // The coordinator moves it to the hook-install commit when the hook is installed (DEC-004).
 const GOVERNANCE_EPOCH = "a12f94a70c1f5c9f2b6ae3f4fcfb2fbe752f9f3d";
 
-const AGENT_RE = new RegExp(`\\b(${Object.keys(AGENT_ALIASES).sort((a, b) => b.length - a.length).join("|")})\\b`, "gi");
+const AGENT_RE = new RegExp(`\\b(${Object.keys(AGENT_ALIASES).filter(a => !EXACT_ONLY_AGENTS.has(a)).sort((a, b) => b.length - a.length).join("|")})\\b`, "gi");
 const REVIEWER_RE = /\b(?:closed\s*by|closer|reviewer|reviewed\s+by|verified\s+by|verdict(?:\s+by)?|sign(?:ed)?[\s-]*off(?:\s+by)?|approved\s+by|accepted\s+by)\b[\s:=`*"'([]*([A-Za-z][\w-]*)/gi;
 const HASH_RE = /\b[0-9a-f]{7,40}\b/gi;
 const PATH_RE = /(?:^|[\s`'"(\[<,;=])((?:[\w.@$!+-]+\/)+[\w.@$!+-]+\.[A-Za-z][A-Za-z0-9]{0,9})(?=$|[\s`'")\]>,;:.!?])/g;
@@ -806,6 +821,15 @@ function parseLaneMatrix(text) {
     return { lanes, frozen };
 }
 
+// The parsed STATUS matrix plus the built-in PM lane (PM_WHITELIST). With no STATUS matrix there is nothing to add to:
+// 4.4 then fails for every committer, the PM included.
+function withBuiltInLanes(matrix) {
+    if (!matrix) return matrix;
+    const pm = { label: "PM (built-in whitelist)", key: "pm", agents: new Set(["pm"]),
+        globs: PM_WHITELIST.map(g => ({ raw: g, re: globToRe(g, ""), reI: globToRe(g, "i") })) };
+    return { lanes: [...matrix.lanes, pm], frozen: matrix.frozen };
+}
+
 function normLaneKey(k) {
     return String(k).toLowerCase().replace(/^\s*lane[\s_-]*/, "").replace(/[\s_-]+/g, "");
 }
@@ -826,6 +850,9 @@ function resolveIdentity(opts, matrix, ctx) {
     else if (env.DEUS_AGENT) { agentRaw = env.DEUS_AGENT; agentSource = "DEUS_AGENT"; }
     else if (ctx.subject && subjectAgent(ctx.subject)) { agentRaw = subjectAgent(ctx.subject); agentSource = "commit subject"; }
     let agent = normAgent(agentRaw);
+    // The PM opens every lane on that lane's own branch, so a branch name or a merge / head-ref hint never names the
+    // PM's lane. Only an explicit --lane or DEUS_LANE does.
+    if (agent === "pm" && laneKey && laneSource !== "--lane" && laneSource !== "DEUS_LANE") { laneKey = null; laneSource = null; }
     let lanes = [];
     if (matrix) {
         if (laneKey) {
@@ -1030,6 +1057,12 @@ function verifyStatusDocClosure(where, id, text, owners, reviewerCells, ctx, R) 
     const list = [...work].join(", ") || "none";
     const { valid, invalid } = reviewersIn(text, reviewerCells);
     if (invalid.length) R.fail("4.2", `${where}: names ${invalid.join(", ")} as closer, which is not a known agent (${KNOWN_AGENTS.join(", ")})`);
+    const barred = [...valid].filter(a => NON_CLOSERS.has(a));
+    if (barred.length) {
+        R.fail("4.2", `${where}: names ${barred.join(", ")} as closer; the PM opens lanes, records claims and merges, but never reviews or closes work (0028-AC A0)`);
+        for (const a of barred) valid.delete(a);
+        if (!valid.size) return;
+    }
     if (!valid.size) {
         const committer = ctx.agent && work.has(ctx.agent) ? `; the committer, ${ctx.agent}, is one of them` : "";
         R.fail("4.2", `${where}: names no independent reviewer ("closedBy: <agent>" plus that agent's committed review artifact); owners and cited-commit authors are ${list}${committer}`);
@@ -1075,6 +1108,7 @@ function requireIndependentCloser(where, rec, ctx, R, statusDoc) {
     const list = [...fixers].join(", ") || "none recorded";
     if (!c.raw) R.fail("4.2", `${where}: the closure names no closedBy`);
     else if (!c.agent) R.fail("4.2", `${where}: closedBy "${c.raw}" is not a known agent (${KNOWN_AGENTS.join(", ")})`);
+    else if (NON_CLOSERS.has(c.agent)) R.fail("4.2", `${where}: closedBy ${c.agent}; the PM never reviews or closes work (0028-AC A0)`);
     else if (fixers.has(c.agent)) R.fail("4.2", `${where}: closedBy ${c.agent} is one of the fixers (${list})`);
     else {
         const b = backing(c.agent, rec.defectid, JSON.stringify(omit(rec, NON_EVIDENCE_FIELDS)), ctx);
@@ -1382,7 +1416,7 @@ function resolveEpoch(opts, facts) {
 function checkTarget(target, opts, facts, epoch) {
     const R = makeReport(target.label);
     const parentTree = target.statusRev ? makeTree("commit", target.statusRev) : makeTree("empty");
-    const matrix = parseLaneMatrix(parentTree.read(PATHS.status));
+    const matrix = withBuiltInLanes(parseLaneMatrix(parentTree.read(PATHS.status)));
     const identity = resolveIdentity(opts, matrix, target);
     const historical = Boolean(target.sha && epoch && epoch.sha && (target.sha === epoch.sha || facts.isAncestor(target.sha, epoch.sha)));
     const ctx = Object.assign({}, target, {
@@ -1682,7 +1716,8 @@ function main() {
 if (require.main === module) process.exit(main());
 
 module.exports = {
-    parseTables, parseWbs, parseRevisionLog, parseDefectRows, parseLaneMatrix, parseDecisions, globToRe,
+    parseTables, parseWbs, parseRevisionLog, parseDefectRows, parseLaneMatrix, withBuiltInLanes, parseDecisions, globToRe,
+    KNOWN_AGENTS, NON_CLOSERS, PM_WHITELIST,
     statusOf, statusWord, normText, normAgent, strictAgent, reviewersIn, jsonKeyConflicts, normRecord, proseClaims,
     citedPaths, PASS_OUTCOME_RE, FAIL_OUTCOME_RE, NON_TERMINAL, TERMINAL_WORDS, BURST_MS, GOVERNANCE_EPOCH,
     failingVerdict, reviewDocProblem, htmlTableCount

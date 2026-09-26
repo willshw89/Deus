@@ -1,0 +1,299 @@
+$ powershell -NoProfile -ExecutionPolicy Bypass -File tools/ops/test_launch_worker.ps1   (temp clone C:\Users\snewt\AppData\Local\Temp\g1_verify_20260926_051909 at 3387244fbc7f6151360506c523ef66d8dbc3196c; start 2026-09-26T10:25:40Z)
+test_launch_worker: ops C:\Users\snewt\AppData\Local\Temp\g1_verify_20260926_051909\tools\ops; temp C:\Users\snewt\AppData\Local\Temp\deus_lw_test_19084_1193
+TEST refuse_missing_brief
+  PASS exit_1
+  PASS says_not_found
+  PASS no_registry_entry
+  PASS no_prompt_file
+  (0.4 s)
+TEST refuse_empty_brief
+  PASS exit_1
+  PASS says_empty
+  PASS no_registry_entry
+  PASS no_prompt_file
+  (0.4 s)
+TEST commit_run
+  PASS exit_0
+  PASS state_completed
+  PASS run_id_format
+  PASS prompt_saved
+  PASS prompt_tracked
+  PASS prompt_committed_before_worker
+  PASS prompt_commit_names_role_and_provider
+  PASS registry_prompt_generated
+  PASS registry_push_rule_default
+  PASS worker_got_exact_prompt
+  PASS prompt_names_brief
+  PASS prompt_lists_allowed
+  PASS prompt_no_art_rule
+  PASS prompt_do_not_push_without_push_brief
+  PASS log_path
+  PASS log_has_stdout
+  PASS log_has_stderr
+  PASS exit_file
+  PASS registry_pid
+  PASS registry_process_start
+  PASS registry_start_end
+  PASS registry_exit_code
+  PASS registry_new_commit
+  PASS registry_launch_time_ct
+  PASS worker_process_gone
+  PASS env_author
+  PASS env_committer
+  PASS env_integrator_stripped
+  PASS commit_author_identity
+  PASS no_flags
+  (1.8 s)
+TEST resume_prompt
+  PASS exit_0
+  PASS first_line_exact
+  PASS still_names_brief
+  PASS registry_resume_sha
+  PASS no_head_mismatch
+  (1.6 s)
+TEST push_rule_from_brief
+  PASS exit_0
+  PASS no_do_not_push
+  PASS rule2_pushes_own_branch
+  PASS ends_with_final_sha
+  PASS worker_got_it
+  PASS registry_push_rule
+  (1.6 s)
+TEST push_rule_other_branch_is_not_a_push
+  PASS exit_0
+  PASS do_not_push_kept
+  PASS registry_no_push
+  (1.6 s)
+TEST push_rule_lane_json_true
+  PASS exit_0
+  PASS push_rule
+  PASS registry_source_lane_json
+  (1.5 s)
+TEST push_rule_lane_json_false_wins
+  PASS exit_0
+  PASS do_not_push
+  PASS registry_source_lane_json
+  (1.6 s)
+TEST push_rule_lane_json_invalid_refused
+  PASS exit_1
+  PASS says_push_boolean
+  PASS no_registry_entry
+  (0.5 s)
+TEST prompt_file_recorded_then_reused
+  PASS first_exit_0
+  PASS first_verbatim
+  PASS registry_prompt_file
+  PASS second_exit_0
+  PASS second_run_is_new
+  PASS saved_prompt_reused
+  PASS no_do_not_push_injected
+  PASS registry_saved
+  (2.9 s)
+TEST reuse_with_resume_does_not_stack
+  PASS first_has_one_resume_line
+  PASS exit_0
+  PASS reused_the_copy
+  PASS source_gone_was_skipped
+  PASS exactly_one_resume_line
+  PASS new_sha_on_top
+  (3.1 s)
+TEST explicit_prompt_file_resume_not_stacked
+  PASS without_resume_verbatim
+  PASS exit_0
+  PASS one_resume_line_new_sha
+  (2.9 s)
+TEST relaunch_note_dropped_when_reused
+  PASS explicit_note_kept
+  PASS exit_0
+  PASS reused
+  PASS note_dropped_resume_on_top
+  (2.9 s)
+TEST reviewer_prompt_never_reused_for_writer
+  PASS reviewer_run_recorded
+  PASS exit_0
+  PASS writer_role
+  PASS no_reviewer_text
+  PASS generated_writer_prompt
+  PASS skipped_registry_reviewer_by_role
+  PASS skipped_committed_reviewer
+  PASS skipped_unknown_role
+  (3.1 s)
+TEST writer_prompt_never_reused_for_reviewer
+  PASS writer_exit_0
+  PASS reviewer_role
+  PASS no_writer_text
+  PASS generated_reviewer_prompt
+  (2.8 s)
+TEST committed_prompt_reused_without_registry
+  PASS exit_0
+  PASS reused_committed_copy
+  PASS worker_got_pm_prompt
+  (2.8 s)
+TEST generated_prompt_not_reused
+  PASS first_generated_no_push
+  PASS exit_0
+  PASS regenerated_with_push
+  PASS old_generated_skipped
+  (3.1 s)
+TEST other_task_or_provider_not_reused
+  PASS exit_0
+  PASS generated
+  PASS skipped_task
+  PASS skipped_provider
+  (1.6 s)
+TEST saved_prompt_flag_needs_prompt_file
+  PASS exit_1
+  PASS says_needs_prompt_file
+  PASS no_registry_entry
+  (0.5 s)
+TEST timeout_kill
+  PASS exit_2
+  PASS state_timeout
+  PASS timed_out_flag
+  PASS bounded_time
+  PASS worker_killed
+  PASS child_started
+  PASS child_killed
+  PASS log_has_output
+  PASS registry_end
+  (7.4 s)
+TEST orphaned_children
+  PASS exit_2
+  PASS state_orphaned
+  PASS orphan_pid_recorded
+  PASS orphan_left_running
+  PASS worker_committed
+  (2.5 s)
+TEST kill_orphans
+  PASS state_orphaned
+  PASS orphans_killed_flag
+  PASS orphan_dead
+  (3.0 s)
+TEST exited_no_commit
+  PASS exit_2
+  PASS state_exited_no_commit
+  PASS dirty_file_listed
+  PASS no_new_commit
+  (1.4 s)
+TEST clean_no_commit_is_ok
+  PASS flag_absent
+  (1.4 s)
+TEST scope_check
+  PASS exit_2
+  PASS state_out_of_scope
+  PASS entries_are_paths
+  PASS committed_outside_listed
+  PASS uncommitted_outside_listed
+  PASS allowed_not_listed
+  PASS committed_allowed_not_listed
+  PASS exactly_two
+  (1.7 s)
+TEST empty_log
+  PASS exit_2
+  PASS state_empty_log
+  PASS log_bytes_0
+  PASS log_file_exists
+  (1.5 s)
+TEST usage_claude_epoch
+  PASS exit_2
+  PASS state_usage
+  PASS matched_text
+  PASS reset_from_epoch
+  PASS provider_exhausted
+  PASS provider_reset
+  PASS queued_once
+  PASS queue_fields
+  PASS queue_last_commit
+  (1.6 s)
+TEST usage_clock_reset
+  PASS state_usage
+  PASS reset_source_clock
+  PASS reset_5pm_ct
+  PASS reset_within_a_day
+  (1.5 s)
+TEST usage_codex_relative
+  PASS state_usage
+  PASS reset_2h05
+  PASS matched_text
+  PASS codex_exhausted
+  (1.5 s)
+TEST usage_grok_default
+  PASS role_reviewer
+  PASS state_usage
+  PASS default_reset_60
+  PASS matched_429
+  (1.5 s)
+TEST usage_no_false_positive
+  PASS exit_0
+  PASS state_completed
+  PASS no_usage
+  PASS not_queued
+  (1.5 s)
+TEST lane_lock
+  PASS exit_1
+  PASS says_locked
+  PASS no_run
+  (3.7 s)
+TEST active_pid_refusal
+  PASS exit_1
+  PASS says_live_worker
+  PASS no_new_entry
+  (0.5 s)
+TEST stale_entry_marked_lost
+  PASS exit_0
+  PASS stale_marked_lost
+  (1.7 s)
+TEST family_refusal
+  PASS grok_writer_refused
+  PASS claude_reviewer_refused
+  PASS no_run
+  (0.8 s)
+TEST branch_refusal
+  PASS exit_1
+  PASS says_branch
+  (0.5 s)
+TEST hooks_install_and_block
+  PASS install_exit_0
+  PASS worktree_scoped_hookspath
+  PASS worktree_config_enabled
+  PASS main_not_guarded
+  PASS repo_wide_not_set
+  PASS global_not_set
+  PASS hook_copied_exactly
+  PASS push_blocked
+  PASS remote_untouched
+  PASS push_blocked_unless_exactly_1
+  PASS integrator_push_allowed
+  PASS remote_updated
+  PASS main_push_not_guarded
+  PASS check_reports_guarded
+  PASS check_reports_unguarded
+  (2.2 s)
+TEST hooks_refuse_main
+  PASS exit_1
+  PASS says_main
+  PASS main_not_guarded
+  PASS global_not_set
+  (0.3 s)
+TEST gate_registry
+  PASS valid_json
+  PASS gate_is_list_of_paths
+  PASS quarantine_has_path_and_reason
+  PASS gate_has_check_deus_syntax
+  PASS gate_has_test_palette
+  PASS gate_has_test_check_claims
+  PASS gate_has_test_strata_cuts_and_caves
+  PASS gate_has_test_new_game_year0
+  PASS gate_has_test_history_materialization_and_world_age
+  PASS gate_has_test_historical_carrying_capacity
+  PASS gate_has_test_geology_strata
+  PASS gate_has_test_strata_foundation
+  PASS z2_quarantined
+  PASS no_path_in_both
+  PASS no_duplicates
+  PASS all_paths_exist
+  (0.0 s)
+  PASS no_leftover_processes
+RESULT: PASS (216 checks, 0 failed)
+EXIT=0
+wall=75 s

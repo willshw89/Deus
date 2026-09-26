@@ -1,0 +1,99 @@
+# same throwaway gate clone C:\Users\snewt\AppData\Local\Temp\g1_gateclone_053404; main d655c122ab00eb8ee863a7fda990369f4c4574c0; task/lane-k abdb6bbefb3ae128b1647f5ef3af4b6c6e44a7f2. --dry-run.
+
+######## OLD gate: $ node <OLD merge_gate.js> --lane lane-k --manifest tasks/WG.00.09b/lane-k/lane.json --dry-run
+
+# DEUS merge gate summary (tools/governance/merge_gate.js)
+| Item | Value |
+|---|---|
+| lane | lane-k |
+| branch | task/lane-k |
+| manifest | tasks/WG.00.09b/lane-k/lane.json |
+| mode | dry-run |
+| repository | C:\Users\snewt\AppData\Local\Temp\g1_gateclone_053404 |
+
+## Refs (raw values after git fetch origin)
+| Ref | Command | Hash |
+|---|---|---|
+| local branch | git rev-parse refs/heads/task/lane-k | abdb6bbefb3ae128b1647f5ef3af4b6c6e44a7f2 |
+| tracking ref | git rev-parse refs/remotes/origin/task/lane-k | abdb6bbefb3ae128b1647f5ef3af4b6c6e44a7f2 |
+| remote branch | git ls-remote origin refs/heads/task/lane-k | abdb6bbefb3ae128b1647f5ef3af4b6c6e44a7f2 |
+| local main | git rev-parse refs/heads/main | d655c122ab00eb8ee863a7fda990369f4c4574c0 |
+| tracking main | git rev-parse refs/remotes/origin/main | d655c122ab00eb8ee863a7fda990369f4c4574c0 |
+| remote main | git ls-remote origin refs/heads/main | d655c122ab00eb8ee863a7fda990369f4c4574c0 |
+| main worktree | git worktree list --porcelain | C:/Users/snewt/AppData/Local/Temp/g1_gateclone_053404 |
+| merge-base | git merge-base d655c122 abdb6bbe | 8592b07aa9315c1cdd2c8d29e1a6d37d3d055deb |
+| checked sha | (local branch tip; every check reads this commit) | abdb6bbefb3ae128b1647f5ef3af4b6c6e44a7f2 |
+
+## Manifest
+| Item | Value |
+|---|---|
+| path | tasks/WG.00.09b/lane-k/lane.json |
+| blob at tip | 0dc21ec81966f636534a92086da9ef9ab124deb8 |
+| changed by | e3896d7623b57bca165ffede272c26d9c7c7afd5 [claude] WG.00.09b Fix1: deterministic gates (fixture scene, condition waits, tick-based step, report-only timings), seam-safe item/wall windows (B1), per-run snapshot dirs, bench machineLoad |
+|  | 84f6d072c40032bb19ec22b71c1fe5db5d406930 [gemini] 0017-Q sec2 Lane K brief + manifest (WG.00.09b) |
+| writer / reviewer | - |
+
+## Checks
+| Check | Result | Reason codes |
+|---|---|---|
+| refs | PASS | - |
+| (a) manifest | REFUSED | MANIFEST_TAMPERED |
+| (a) scope | SKIPPED (manifest not trusted) | - |
+| (b) review | SKIPPED (manifest not trusted) | - |
+| (c) tests | SKIPPED (manifest not trusted) | - |
+| (d) pushed | PASS | - |
+| (e) main | PASS | - |
+| (f) execution | NOT RUN (refused) | - |
+
+REFUSED MANIFEST_TAMPERED: e3896d7623b57bca165ffede272c26d9c7c7afd5 "[claude] WG.00.09b Fix1: deterministic gates (fixture scene, condition waits, tick-based step, report-only timings), seam-safe item/wall windows (B1), per-run snapshot dirs, bench machineLoad" changed tasks/WG.00.09b/lane-k/lane.json; only [gemini] commits may change it
+GATE: REFUSED (exit 1)
+EXIT=1
+
+######## NEW gate: $ node <NEW merge_gate.js> --lane lane-k --manifest tasks/WG.00.09b/lane-k/lane.json --dry-run
+
+# DEUS merge gate summary (tools/governance/merge_gate.js)
+| Item | Value |
+|---|---|
+| lane | lane-k |
+| branch | task/lane-k |
+| manifest | tasks/WG.00.09b/lane-k/lane.json |
+| mode | dry-run |
+| repository | C:\Users\snewt\AppData\Local\Temp\g1_gateclone_053404 |
+
+## Refs (raw values after git fetch origin)
+| Ref | Command | Hash |
+|---|---|---|
+| local branch | git rev-parse refs/heads/task/lane-k | abdb6bbefb3ae128b1647f5ef3af4b6c6e44a7f2 |
+| tracking ref | git rev-parse refs/remotes/origin/task/lane-k | abdb6bbefb3ae128b1647f5ef3af4b6c6e44a7f2 |
+| remote branch | git ls-remote origin refs/heads/task/lane-k | abdb6bbefb3ae128b1647f5ef3af4b6c6e44a7f2 |
+| local main | git rev-parse refs/heads/main | d655c122ab00eb8ee863a7fda990369f4c4574c0 |
+| tracking main | git rev-parse refs/remotes/origin/main | d655c122ab00eb8ee863a7fda990369f4c4574c0 |
+| remote main | git ls-remote origin refs/heads/main | d655c122ab00eb8ee863a7fda990369f4c4574c0 |
+| main worktree | git worktree list --porcelain | C:/Users/snewt/AppData/Local/Temp/g1_gateclone_053404 |
+| merge-base | git merge-base d655c122 abdb6bbe | 8592b07aa9315c1cdd2c8d29e1a6d37d3d055deb |
+| checked sha | (local branch tip; every check reads this commit) | abdb6bbefb3ae128b1647f5ef3af4b6c6e44a7f2 |
+
+## Manifest
+| Item | Value |
+|---|---|
+| path | tasks/WG.00.09b/lane-k/lane.json |
+| blob at tip | 0dc21ec81966f636534a92086da9ef9ab124deb8 |
+| changed by | e3896d7623b57bca165ffede272c26d9c7c7afd5 [claude] WG.00.09b Fix1: deterministic gates (fixture scene, condition waits, tick-based step, report-only timings), seam-safe item/wall windows (B1), per-run snapshot dirs, bench machineLoad |
+|  | 84f6d072c40032bb19ec22b71c1fe5db5d406930 [gemini] 0017-Q sec2 Lane K brief + manifest (WG.00.09b) |
+| writer / reviewer | - |
+
+## Checks
+| Check | Result | Reason codes |
+|---|---|---|
+| refs | PASS | - |
+| (a) manifest | REFUSED | MANIFEST_TAMPERED |
+| (a) scope | SKIPPED (manifest not trusted) | - |
+| (b) review | SKIPPED (manifest not trusted) | - |
+| (c) tests | SKIPPED (manifest not trusted) | - |
+| (d) pushed | PASS | - |
+| (e) main | PASS | - |
+| (f) execution | NOT RUN (refused) | - |
+
+REFUSED MANIFEST_TAMPERED: e3896d7623b57bca165ffede272c26d9c7c7afd5 "[claude] WG.00.09b Fix1: deterministic gates (fixture scene, condition waits, tick-based step, report-only timings), seam-safe item/wall windows (B1), per-run snapshot dirs, bench machineLoad" changed tasks/WG.00.09b/lane-k/lane.json; only [gemini] or [pm] commits may change it
+GATE: REFUSED (exit 1)
+EXIT=1

@@ -6,6 +6,9 @@
     Starts one provider CLI session (claude, grok or codex) in a lane worktree and watches it to the end.
       - Refuses to start when the brief is missing or empty, the lane already has a live worker, the
         worktree is on the wrong branch, or the provider shares an AI family with the lane's other role.
+      - Prompt: -PromptFile, else the lane's saved prompt for the same task, role and provider (never a prompt of the
+        other role, never one the launcher generated), else the generated default, whose rule 2 says to push the lane's
+        own branch (and to end with FINAL SHA) only when lane.json "push" or the brief asks for it (WG.00.12b).
       - Saves the exact prompt to tasks/<task>/<lane>/launches/<yyyyMMdd_HHmmss>_prompt.txt and commits it.
       - Tees stdout and stderr to <LogRoot>\<lane>\<runId>.log. A 0-byte log is a failure (EMPTY-LOG).
       - Records PID, start, end, exit code and state in docs/telemetry/sessions/active_workers.json.
@@ -34,6 +37,7 @@ param(
     [string]$LogRoot,
     [string]$Role,
     [string]$PromptFile,
+    [switch]$SavedPrompt,
     [string]$ResumeFromSha,
     [string[]]$AllowedPaths,
     [switch]$NoCommitPrompt,
@@ -853,8 +857,134 @@ function Get-DeusResumeLine([string]$Sha) {
     return "resume from HEAD $Sha; re-read BRIEF and the uncommitted diff first"
 }
 
+# The line a PM relaunch prompt puts between its one-off relaunch note and the original prompt
+# (tasks/WG.20.02/lane-s/launches/20260926_034739_prompt.txt).
+function Get-DeusOriginalPromptMarker { return '--- original prompt follows ---' }
+
+function Remove-DeusResumePreamble {
+    # The prompt without what belonged to one earlier launch: leading resume lines (Get-DeusResumeLine) and, unless
+    # -ResumeLinesOnly, a relaunch note ending in the original-prompt marker line (nested notes are all removed).
+    param([string]$Text, [switch]$ResumeLinesOnly)
+    $t = "$Text".TrimStart([char]0xFEFF)
+    $resumeRe = '\A(?:resume from HEAD \S+; re-read BRIEF and the uncommitted diff first[ \t]*(?:\r?\n|\z)(?:[ \t]*\r?\n)*)+'
+    $markerRe = '(?m)^' + [regex]::Escape((Get-DeusOriginalPromptMarker)) + '[ \t]*(?:\r?\n|\z)'
+    while ($true) {
+        $m = [regex]::Match($t, $resumeRe)
+        if ($m.Success) { $t = $t.Substring($m.Length); continue }
+        if ($ResumeLinesOnly) { break }
+        $k = [regex]::Match($t, $markerRe)
+        if ($k.Success) { $t = $t.Substring($k.Index + $k.Length); continue }
+        break
+    }
+    return $t
+}
+
+function Set-DeusPromptResume {
+    # The prompt with this launch's resume line on top (none without -Sha). Any earlier resume line is removed first,
+    # so resume lines never stack; see Remove-DeusResumePreamble for -ResumeLinesOnly.
+    param([string]$Text, [string]$Sha, [switch]$ResumeLinesOnly)
+    $base = Remove-DeusResumePreamble -Text $Text -ResumeLinesOnly:$ResumeLinesOnly
+    if (-not $Sha) { return $base }
+    return (Get-DeusResumeLine $Sha) + "`n`n" + $base
+}
+
+function Test-DeusGeneratedPrompt([string]$Text) {
+    # True for a prompt New-DeusLanePrompt wrote: its first line (after any resume line) and its standing-rules block.
+    $t = Remove-DeusResumePreamble -Text $Text -ResumeLinesOnly
+    $first = ($t -split "`n", 2)[0].TrimEnd("`r")
+    return ($first -match '^You are (?:the primary implementer|the independent reviewer) for \S+ \(Task [^)]+\), running as \S+\.$' -and $t -match '(?m)^Standing rules:\r?$')
+}
+
+function Get-DeusLaunchCommitRole([string]$Subject) {
+    # Role and provider named by the launcher's prompt commit subject, or $null (subjects before WG.00.12b name neither).
+    if ("$Subject" -match '^\[ops\] \S+ \S+ launch prompt \S+ \((writer|reviewer) ([a-z]+)\)$') { return @{ Role = $Matches[1]; Provider = $Matches[2] } }
+    return $null
+}
+
+function Find-DeusSavedPrompt {
+    # The prompt an earlier launch of this lane used for the same task, role and provider. Returns
+    # @{ Path; From; RunId; Skipped }, with Path $null when there is none; Skipped lists each candidate passed over and why.
+    # Candidates in order, the first usable one wins:
+    #   1. registry entries of the lane (the -PreferRunId entry first, then newest startedAt first) with the same taskId,
+    #      role and provider: the entry's promptFile (the source prompt it was given), then its launchPromptPath (the copy);
+    #   2. prompt files committed at HEAD in tasks/<task>/<lane>/launches/, newest first, whose launcher commit subject
+    #      names the same role and provider and which are unchanged since.
+    # Skipped: a missing or empty file, a registry entry or commit that does not record the role and provider, and any
+    # prompt the launcher generated itself (the default is regenerated from the current brief instead of reused).
+    param([string]$Worktree, [string]$TaskId, [string]$Lane, [string]$Role, [string]$Provider, [string]$RegistryPath, [string]$PreferRunId)
+    $skipped = New-Object System.Collections.Generic.List[string]
+    $key = ConvertTo-DeusLaneKey $Lane
+    $role = "$Role".ToLowerInvariant()
+    $prov = "$Provider".ToLowerInvariant()
+    $usable = {
+        param([string]$Path, [string]$What)
+        if (-not $Path) { return $false }
+        if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { $skipped.Add("${What}: $Path does not exist"); return $false }
+        $text = [IO.File]::ReadAllText($Path, [Text.Encoding]::UTF8)
+        if (-not (Remove-DeusResumePreamble $text).Trim()) { $skipped.Add("${What}: $Path is empty"); return $false }
+        if (Test-DeusGeneratedPrompt $text) { $skipped.Add("${What}: $Path was generated by the launcher"); return $false }
+        return $true
+    }
+    $entries = New-Object System.Collections.ArrayList
+    if ($RegistryPath -and (Test-Path -LiteralPath $RegistryPath)) {
+        $list = $null
+        try { $list = Read-DeusJsonFile $RegistryPath (New-Object System.Collections.ArrayList) } catch { $skipped.Add("registry ${RegistryPath}: unreadable ($($_.Exception.Message))") }
+        $i = 0
+        foreach ($e in @($list)) {
+            $i++
+            if ($e -is [System.Collections.IDictionary] -and (ConvertTo-DeusLaneKey $e['lane']) -eq $key) { [void]$entries.Add(@{ E = $e; Order = $i }) }
+        }
+    }
+    $sorted = @($entries | Sort-Object -Property @{ Expression = { [int]($PreferRunId -and "$($_.E['runId'])" -eq $PreferRunId) }; Descending = $true },
+        @{ Expression = { "$($_.E['startedAt'])" }; Descending = $true }, @{ Expression = { $_.Order }; Descending = $true })
+    foreach ($x in $sorted) {
+        $e = $x.E
+        $rid = "$($e['runId'])"
+        $what = "registry run $rid"
+        if ("$($e['taskId'])" -ne $TaskId) { $skipped.Add("${what}: task '$($e['taskId'])', not $TaskId"); continue }
+        if ("$($e['role'])".ToLowerInvariant() -ne $role) { $skipped.Add("${what}: role '$($e['role'])', not $role"); continue }
+        if ("$($e['provider'])".ToLowerInvariant() -ne $prov) { $skipped.Add("${what}: provider '$($e['provider'])', not $prov"); continue }
+        foreach ($field in @('promptFile', 'launchPromptPath')) {
+            $p = "$($e[$field])"
+            if (& $usable $p "$what $field") { return @{ Path = (Resolve-Path -LiteralPath $p).ProviderPath; From = "registry run $rid $field"; RunId = $rid; Skipped = $skipped } }
+        }
+    }
+    if ($Worktree -and (Test-Path -LiteralPath $Worktree -PathType Container)) {
+        $rel = "tasks/$TaskId/$Lane/launches"
+        $files = @(Get-DeusGitLines $Worktree @('ls-tree', '-r', '-z', '--name-only', 'HEAD', '--', "$rel/") | Where-Object { $_.StartsWith("$rel/") -and $_.EndsWith('_prompt.txt') } | Sort-Object -Descending)
+        foreach ($f in $files) {
+            $what = "committed $f"
+            $subject = "$(& git -C $Worktree log -1 --diff-filter=A --format=%s -- $f 2>$null)"
+            $made = Get-DeusLaunchCommitRole $subject
+            if (-not $made) { $skipped.Add("${what}: its commit ('$subject') does not name a role and provider"); continue }
+            if ($made.Role -ne $role -or $made.Provider -ne $prov) { $skipped.Add("${what}: saved for $($made.Role) $($made.Provider)"); continue }
+            & git -C $Worktree diff --quiet HEAD -- $f 2>$null
+            if ($LASTEXITCODE -ne 0) { $skipped.Add("${what}: changed since it was committed"); continue }
+            $full = Join-Path $Worktree ($f.Replace('/', '\'))
+            if (& $usable $full $what) { return @{ Path = $full; From = "committed $f"; RunId = $null; Skipped = $skipped } }
+        }
+    }
+    return @{ Path = $null; From = $null; RunId = $null; Skipped = $skipped }
+}
+
+function Get-DeusPushRule {
+    # Whether the lane's worker pushes its own branch. lane.json "push" (true or false) decides. Without it, the brief
+    # asks for a push when it contains "git push origin <branch>" (optionally with -u / --set-upstream) for the lane's
+    # own branch. Returns @{ Push; Source = 'lane.json' | 'brief' | 'default' }, or @{ Error } when "push" is not boolean.
+    param([System.Collections.IDictionary]$LaneInfo, [string]$BriefText, [string]$Branch)
+    if ($LaneInfo -and $LaneInfo.Contains('push')) {
+        $p = $LaneInfo['push']
+        if ($p -is [bool]) { return @{ Push = $p; Source = 'lane.json' } }
+        return @{ Error = "lane.json ""push"" must be true or false, not '$p'" }
+    }
+    if ($Branch -and "$BriefText" -match ('(?im)\bgit\s+push\s+(?:(?:-u|--set-upstream)\s+)?origin\s+' + [regex]::Escape($Branch) + '(?=$|[\s`''".,;:)\]])')) {
+        return @{ Push = $true; Source = 'brief' }
+    }
+    return @{ Push = $false; Source = 'default' }
+}
+
 function New-DeusLanePrompt {
-    param([string]$Lane, [string]$TaskId, [string]$Provider, [string]$Role, [string]$BriefRel, [string[]]$Allowed, [string]$ResumeSha)
+    param([string]$Lane, [string]$TaskId, [string]$Provider, [string]$Role, [string]$BriefRel, [string[]]$Allowed, [string]$ResumeSha, [switch]$Push, [string]$Branch)
     $lines = New-Object System.Collections.Generic.List[string]
     if ($ResumeSha) { $lines.Add((Get-DeusResumeLine $ResumeSha)); $lines.Add('') }
     if ($Role -eq 'reviewer') { $what = 'the independent reviewer' } else { $what = 'the primary implementer' }
@@ -865,8 +995,13 @@ function New-DeusLanePrompt {
     $lines.Add('')
     $lines.Add('Standing rules:')
     $lines.Add('1. NO ART (DEC-007). Never generate, request or integrate art, and never tell anyone to.')
-    $lines.Add('2. Run tests in the FOREGROUND. Never end your turn while background jobs or child processes are running. Commit early (WIP commits allowed on your branch). Do not push. Do not merge. Write only inside allowedPaths.')
+    if ($Push) {
+        $lines.Add("2. Run tests in the FOREGROUND. Never end your turn while background jobs or child processes are running. Commit early (WIP commits allowed on your branch). When finished, commit and push your own branch only: git push origin $Branch. Never push main or any other branch, never force-push, never set DEUS_INTEGRATOR; if the push is refused, say so and stop. Do not merge. Write only inside allowedPaths.")
+    } else {
+        $lines.Add('2. Run tests in the FOREGROUND. Never end your turn while background jobs or child processes are running. Commit early (WIP commits allowed on your branch). Do not push. Do not merge. Write only inside allowedPaths.')
+    }
     $lines.Add("Commit messages start with '[$Provider] $TaskId'.")
+    if ($Push) { $lines.Add('Your final output line must be exactly: FINAL SHA: <sha> (pasted from git rev-parse HEAD after the push).') }
     return ($lines -join "`n")
 }
 
@@ -941,6 +1076,13 @@ function Invoke-DeusLaunchMain {
     $branch = (& git -C $wt rev-parse --abbrev-ref HEAD 2>$null)
     if ($laneInfo['branch'] -and $branch -ne $laneInfo['branch']) { Stop-DeusLaunch "worktree is on branch '$branch', lane.json says '$($laneInfo['branch'])'" }
 
+    # --- push rule (the generated prompt's rule 2) ----------------------------------------------
+    $pushBranch = $branch
+    if ($laneInfo['branch']) { $pushBranch = "$($laneInfo['branch'])" }
+    $pushRule = Get-DeusPushRule -LaneInfo $laneInfo -BriefText ([IO.File]::ReadAllText($brief)) -Branch $pushBranch
+    if ($pushRule.Error) { Stop-DeusLaunch $pushRule.Error }
+    if ($SavedPrompt -and -not $PromptFile) { Stop-DeusLaunch '-SavedPrompt needs -PromptFile' }
+
     # --- telemetry paths ----------------------------------------------------------------------
     $mainWt = Get-DeusMainWorktree $wt
     $reg = $RegistryPath
@@ -971,14 +1113,34 @@ function Invoke-DeusLaunchMain {
     if (-not $spec -or -not $spec.Exe -or -not (Test-Path -LiteralPath $spec.Exe)) { Stop-DeusLaunch "no CLI found for provider $prov" }
 
     # --- prompt -----------------------------------------------------------------------------
+    # -PromptFile: used as given (with -ResumeFromSha: this launch's resume line replaces any at the top). -SavedPrompt
+    # marks it as an earlier launch's prompt, whose resume line and relaunch note are dropped too. Without -PromptFile the
+    # lane's saved prompt for this task, role and provider is reused the same way; only when there is none is the
+    # default generated, with rule 2 following the push rule.
     $headBefore = (& git -C $wt rev-parse HEAD 2>$null)
+    $promptFileUsed = $null
+    $promptSkipped = @()
     if ($PromptFile) {
         if (-not (Test-Path -LiteralPath $PromptFile -PathType Leaf)) { Stop-DeusLaunch "prompt file not found: $PromptFile" }
-        $promptText = [IO.File]::ReadAllText((Resolve-Path -LiteralPath $PromptFile).ProviderPath, [Text.Encoding]::UTF8).TrimStart([char]0xFEFF)
-        if ($ResumeFromSha) { $promptText = (Get-DeusResumeLine $ResumeFromSha) + "`n`n" + $promptText }
+        $promptFileUsed = (Resolve-Path -LiteralPath $PromptFile).ProviderPath
+        $promptText = [IO.File]::ReadAllText($promptFileUsed, [Text.Encoding]::UTF8).TrimStart([char]0xFEFF)
+        if ($SavedPrompt) { $promptSource = 'saved'; $promptFrom = '-PromptFile -SavedPrompt'; $promptText = Set-DeusPromptResume -Text $promptText -Sha $ResumeFromSha }
+        else {
+            $promptSource = 'file'; $promptFrom = '-PromptFile'
+            if ($ResumeFromSha) { $promptText = Set-DeusPromptResume -Text $promptText -Sha $ResumeFromSha -ResumeLinesOnly }
+        }
     } else {
-        $promptText = New-DeusLanePrompt -Lane $Lane -TaskId $taskId -Provider $prov -Role $roleName -BriefRel $briefRel -Allowed $allowed -ResumeSha $ResumeFromSha
+        $saved = Find-DeusSavedPrompt -Worktree $wt -TaskId $taskId -Lane $Lane -Role $roleName -Provider $prov -RegistryPath $reg
+        $promptSkipped = @($saved.Skipped | Select-Object -First 20)
+        if ($saved.Path) {
+            $promptFileUsed = $saved.Path; $promptSource = 'saved'; $promptFrom = $saved.From
+            $promptText = Set-DeusPromptResume -Text ([IO.File]::ReadAllText($saved.Path, [Text.Encoding]::UTF8)) -Sha $ResumeFromSha
+        } else {
+            $promptSource = 'generated'; $promptFrom = "generated (no saved $roleName prompt for $prov)"
+            $promptText = New-DeusLanePrompt -Lane $Lane -TaskId $taskId -Provider $prov -Role $roleName -BriefRel $briefRel -Allowed $allowed -ResumeSha $ResumeFromSha -Push:$pushRule.Push -Branch $pushBranch
+        }
     }
+    Write-DeusLaunchMessage "launch_worker: prompt $promptSource from $promptFrom$(if ($promptFileUsed) { ": $promptFileUsed" }); push rule $(if ($pushRule.Push) { 'push' } else { 'no-push' }) ($($pushRule.Source))"
     if (-not $promptText.Trim()) { Stop-DeusLaunch 'prompt is empty' }
     $launchRel = "tasks/$taskId/$Lane/launches"
     $launchDir = Join-Path $wt ($launchRel.Replace('/', '\'))
@@ -996,7 +1158,7 @@ function Invoke-DeusLaunchMain {
     [IO.File]::WriteAllText($promptPath, $promptText, (New-Object Text.UTF8Encoding $false))
     if (-not $NoCommitPrompt) {
         & git -C $wt add -- $promptRel 2>&1 | Out-Null
-        & git -C $wt commit -q --only -m "[ops] $taskId $Lane launch prompt $stamp$suffix" -- $promptRel 2>&1 | Out-Null
+        & git -C $wt commit -q --only -m "[ops] $taskId $Lane launch prompt $stamp$suffix ($roleName $prov)" -- $promptRel 2>&1 | Out-Null
         if ($LASTEXITCODE -ne 0) { Stop-DeusLaunch "could not commit the prompt file $promptRel" }
     }
     $base = (& git -C $wt rev-parse HEAD 2>$null)
@@ -1013,6 +1175,8 @@ function Invoke-DeusLaunchMain {
         pid = $null; processStartedAt = $null; launcherPid = $PID
         launcherStartedAt = (Format-DeusIso (Get-Process -Id $PID).StartTime)
         worktree = $wt; branch = $branch; briefPath = $brief; launchPromptPath = $promptPath
+        promptFile = $promptFileUsed; promptSource = $promptSource; promptFrom = $promptFrom; promptCandidatesSkipped = $promptSkipped
+        pushRule = $(if ($pushRule.Push) { 'push' } else { 'no-push' }); pushRuleSource = $pushRule.Source
         logPath = $logPath; launchTimeCT = (Format-DeusCentral (Get-Date)); startedAt = (Format-DeusIso (Get-Date))
         endedAt = $null; exitCode = $null; timeoutMinutes = $TimeoutMinutes; baseCommit = $base
         resumeFromSha = $(if ($ResumeFromSha) { $ResumeFromSha } else { $null }); pushGuardHooksPath = $(if ($pushGuard) { $pushGuard } else { $null })

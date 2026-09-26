@@ -1,0 +1,184 @@
+# throwaway gate clone C:\Users\snewt\AppData\Local\Temp\g1_gateclone2_054258: main 6aa1a332e7afb5da18c2b92d8f32692488a459c3 checked out; task/lane-m 9e0ef94d36ace947ea30426a107e0a80e434f3be, task/gap-audit-people 881a07d275e6a201a27628780aa13fab534eeb66. --dry-run.
+# old gate = merge_gate.js at 9cba41ea; new gate = merge_gate.js at 3387244f (both via git show)
+# git show task/lane-m:tasks/SIM.00.01/lane-m/lane.json
+#   {
+#     "lane": "lane-m",
+#     "wbsId": "SIM.00.01",
+#     "branch": "task/lane-m",
+#     "worktree": "C:\\Users\\snewt\\.deus_worktrees\\lane-m",
+#     "baseCommit": "ebeec892",
+#     "allowedPaths": [
+#       "docs/adr/ADR-003_sim_render_split_and_lod.md",
+#       "docs/adr/README.md",
+#       "tasks/SIM.00.01/lane-m/**"
+#     ],
+#     "forbiddenPaths": [
+#       "game/**",
+#       "tools/**",
+#       "docs/worldgen/**",
+#       "docs/art/**",
+#       "docs/society/**"
+#     ],
+#     "gateTest": "node tools/check_deus_syntax.js",
+#     "closureReviewer": "grok"
+#   }
+
+######## OLD gate: $ node <OLD merge_gate.js> --lane lane-m --manifest tasks/SIM.00.01/lane-m/lane.json --dry-run
+
+# DEUS merge gate summary (tools/governance/merge_gate.js)
+| Item | Value |
+|---|---|
+| lane | lane-m |
+| branch | task/lane-m |
+| manifest | tasks/SIM.00.01/lane-m/lane.json |
+| mode | dry-run |
+| repository | C:\Users\snewt\AppData\Local\Temp\g1_gateclone2_054258 |
+
+## Refs (raw values after git fetch origin)
+| Ref | Command | Hash |
+|---|---|---|
+| local branch | git rev-parse refs/heads/task/lane-m | 9e0ef94d36ace947ea30426a107e0a80e434f3be |
+| tracking ref | git rev-parse refs/remotes/origin/task/lane-m | 9e0ef94d36ace947ea30426a107e0a80e434f3be |
+| remote branch | git ls-remote origin refs/heads/task/lane-m | 9e0ef94d36ace947ea30426a107e0a80e434f3be |
+| local main | git rev-parse refs/heads/main | 6aa1a332e7afb5da18c2b92d8f32692488a459c3 |
+| tracking main | git rev-parse refs/remotes/origin/main | 6aa1a332e7afb5da18c2b92d8f32692488a459c3 |
+| remote main | git ls-remote origin refs/heads/main | 6aa1a332e7afb5da18c2b92d8f32692488a459c3 |
+| main worktree | git worktree list --porcelain | C:/Users/snewt/AppData/Local/Temp/g1_gateclone2_054258 |
+| merge-base | git merge-base 6aa1a332 9e0ef94d | 9e0ef94d36ace947ea30426a107e0a80e434f3be |
+| checked sha | (local branch tip; every check reads this commit) | 9e0ef94d36ace947ea30426a107e0a80e434f3be |
+
+## Checks
+| Check | Result | Reason codes |
+|---|---|---|
+| refs | REFUSED | NOTHING_TO_MERGE |
+| (a) manifest | SKIPPED (nothing to merge) | - |
+| (a) scope | SKIPPED (nothing to merge) | - |
+| (b) review | SKIPPED (nothing to merge) | - |
+| (c) tests | SKIPPED (nothing to merge) | - |
+| (d) pushed | PASS | - |
+| (e) main | PASS | - |
+| (f) execution | NOT RUN (refused) | - |
+
+REFUSED NOTHING_TO_MERGE: task/lane-m 9e0ef94d36ace947ea30426a107e0a80e434f3be is already contained in main
+GATE: REFUSED (exit 1)
+EXIT=1
+
+######## NEW gate: $ node <NEW merge_gate.js> --lane lane-m --manifest tasks/SIM.00.01/lane-m/lane.json --dry-run
+
+# DEUS merge gate summary (tools/governance/merge_gate.js)
+| Item | Value |
+|---|---|
+| lane | lane-m |
+| branch | task/lane-m |
+| manifest | tasks/SIM.00.01/lane-m/lane.json |
+| mode | dry-run |
+| repository | C:\Users\snewt\AppData\Local\Temp\g1_gateclone2_054258 |
+
+## Refs (raw values after git fetch origin)
+| Ref | Command | Hash |
+|---|---|---|
+| local branch | git rev-parse refs/heads/task/lane-m | 9e0ef94d36ace947ea30426a107e0a80e434f3be |
+| tracking ref | git rev-parse refs/remotes/origin/task/lane-m | 9e0ef94d36ace947ea30426a107e0a80e434f3be |
+| remote branch | git ls-remote origin refs/heads/task/lane-m | 9e0ef94d36ace947ea30426a107e0a80e434f3be |
+| local main | git rev-parse refs/heads/main | 6aa1a332e7afb5da18c2b92d8f32692488a459c3 |
+| tracking main | git rev-parse refs/remotes/origin/main | 6aa1a332e7afb5da18c2b92d8f32692488a459c3 |
+| remote main | git ls-remote origin refs/heads/main | 6aa1a332e7afb5da18c2b92d8f32692488a459c3 |
+| main worktree | git worktree list --porcelain | C:/Users/snewt/AppData/Local/Temp/g1_gateclone2_054258 |
+| merge-base | git merge-base 6aa1a332 9e0ef94d | 9e0ef94d36ace947ea30426a107e0a80e434f3be |
+| checked sha | (local branch tip; every check reads this commit) | 9e0ef94d36ace947ea30426a107e0a80e434f3be |
+
+## Checks
+| Check | Result | Reason codes |
+|---|---|---|
+| refs | REFUSED | NOTHING_TO_MERGE |
+| (a) manifest | SKIPPED (nothing to merge) | - |
+| (a) scope | SKIPPED (nothing to merge) | - |
+| (b) review | SKIPPED (nothing to merge) | - |
+| (c) tests | SKIPPED (nothing to merge) | - |
+| (d) pushed | PASS | - |
+| (e) main | PASS | - |
+| (f) execution | NOT RUN (refused) | - |
+
+REFUSED NOTHING_TO_MERGE: task/lane-m 9e0ef94d36ace947ea30426a107e0a80e434f3be is already contained in main
+GATE: REFUSED (exit 1)
+EXIT=1
+
+######## NEW gate: $ node <NEW merge_gate.js> --lane lane-o2 --branch task/gap-audit-people --manifest tasks/SIM.50.11/gap-audit-people/lane.json --dry-run
+
+# DEUS merge gate summary (tools/governance/merge_gate.js)
+| Item | Value |
+|---|---|
+| lane | lane-o2 |
+| branch | task/gap-audit-people |
+| manifest | tasks/SIM.50.11/gap-audit-people/lane.json |
+| mode | dry-run |
+| repository | C:\Users\snewt\AppData\Local\Temp\g1_gateclone2_054258 |
+
+## Refs (raw values after git fetch origin)
+| Ref | Command | Hash |
+|---|---|---|
+| local branch | git rev-parse refs/heads/task/gap-audit-people | 881a07d275e6a201a27628780aa13fab534eeb66 |
+| tracking ref | git rev-parse refs/remotes/origin/task/gap-audit-people | 881a07d275e6a201a27628780aa13fab534eeb66 |
+| remote branch | git ls-remote origin refs/heads/task/gap-audit-people | 881a07d275e6a201a27628780aa13fab534eeb66 |
+| local main | git rev-parse refs/heads/main | 6aa1a332e7afb5da18c2b92d8f32692488a459c3 |
+| tracking main | git rev-parse refs/remotes/origin/main | 6aa1a332e7afb5da18c2b92d8f32692488a459c3 |
+| remote main | git ls-remote origin refs/heads/main | 6aa1a332e7afb5da18c2b92d8f32692488a459c3 |
+| main worktree | git worktree list --porcelain | C:/Users/snewt/AppData/Local/Temp/g1_gateclone2_054258 |
+| merge-base | git merge-base 6aa1a332 881a07d2 | 881a07d275e6a201a27628780aa13fab534eeb66 |
+| checked sha | (local branch tip; every check reads this commit) | 881a07d275e6a201a27628780aa13fab534eeb66 |
+
+## Checks
+| Check | Result | Reason codes |
+|---|---|---|
+| refs | REFUSED | NOTHING_TO_MERGE |
+| (a) manifest | SKIPPED (nothing to merge) | - |
+| (a) scope | SKIPPED (nothing to merge) | - |
+| (b) review | SKIPPED (nothing to merge) | - |
+| (c) tests | SKIPPED (nothing to merge) | - |
+| (d) pushed | PASS | - |
+| (e) main | PASS | - |
+| (f) execution | NOT RUN (refused) | - |
+
+REFUSED NOTHING_TO_MERGE: task/gap-audit-people 881a07d275e6a201a27628780aa13fab534eeb66 is already contained in main
+GATE: REFUSED (exit 1)
+EXIT=1
+
+######## NEW gate: $ node <NEW merge_gate.js> --lane gap-audit-people --manifest tasks/SIM.50.11/gap-audit-people/lane.json --dry-run
+
+# DEUS merge gate summary (tools/governance/merge_gate.js)
+| Item | Value |
+|---|---|
+| lane | gap-audit-people |
+| branch | task/gap-audit-people |
+| manifest | tasks/SIM.50.11/gap-audit-people/lane.json |
+| mode | dry-run |
+| repository | C:\Users\snewt\AppData\Local\Temp\g1_gateclone2_054258 |
+
+## Refs (raw values after git fetch origin)
+| Ref | Command | Hash |
+|---|---|---|
+| local branch | git rev-parse refs/heads/task/gap-audit-people | 881a07d275e6a201a27628780aa13fab534eeb66 |
+| tracking ref | git rev-parse refs/remotes/origin/task/gap-audit-people | 881a07d275e6a201a27628780aa13fab534eeb66 |
+| remote branch | git ls-remote origin refs/heads/task/gap-audit-people | 881a07d275e6a201a27628780aa13fab534eeb66 |
+| local main | git rev-parse refs/heads/main | 6aa1a332e7afb5da18c2b92d8f32692488a459c3 |
+| tracking main | git rev-parse refs/remotes/origin/main | 6aa1a332e7afb5da18c2b92d8f32692488a459c3 |
+| remote main | git ls-remote origin refs/heads/main | 6aa1a332e7afb5da18c2b92d8f32692488a459c3 |
+| main worktree | git worktree list --porcelain | C:/Users/snewt/AppData/Local/Temp/g1_gateclone2_054258 |
+| merge-base | git merge-base 6aa1a332 881a07d2 | 881a07d275e6a201a27628780aa13fab534eeb66 |
+| checked sha | (local branch tip; every check reads this commit) | 881a07d275e6a201a27628780aa13fab534eeb66 |
+
+## Checks
+| Check | Result | Reason codes |
+|---|---|---|
+| refs | REFUSED | NOTHING_TO_MERGE |
+| (a) manifest | SKIPPED (nothing to merge) | - |
+| (a) scope | SKIPPED (nothing to merge) | - |
+| (b) review | SKIPPED (nothing to merge) | - |
+| (c) tests | SKIPPED (nothing to merge) | - |
+| (d) pushed | PASS | - |
+| (e) main | PASS | - |
+| (f) execution | NOT RUN (refused) | - |
+
+REFUSED NOTHING_TO_MERGE: task/gap-audit-people 881a07d275e6a201a27628780aa13fab534eeb66 is already contained in main
+GATE: REFUSED (exit 1)
+EXIT=1

@@ -11,6 +11,9 @@
            fail -> resetAt = max(resetAt, now) + 30 minutes
       2. Relaunches each QUEUED lane through launch_worker.ps1 with the prompt
          "resume from HEAD <sha>; re-read BRIEF and the uncommitted diff first", when its provider is AVAILABLE.
+         The rest of the prompt is the lane's saved prompt for the same task, role and provider (Find-DeusSavedPrompt:
+         the queued run's registry promptFile first), passed as -PromptFile -SavedPrompt; the launcher default is used
+         only when there is none. Each relaunch logs which one it used (WG.00.12b).
          With -AllowFailover a lane whose provider is still exhausted may move to another AVAILABLE provider,
          but only if the writer and the reviewer stay in different AI families (never Grok writing for a
          Grok reviewer).
@@ -203,6 +206,18 @@ foreach ($l in $launches) {
         '-RegistryPath', $reg, '-ProviderStatusPath', $statusPath, '-LogRoot', $logs, '-Quiet'
     )
     if ($q['worktree']) { $launchArgs += @('-Worktree', "$($q['worktree'])") }
+    # The lane's saved prompt for this task, role and provider; the queued run's own registry entry is tried first.
+    $qRole = "$($q['role'])".ToLowerInvariant()
+    if (-not $qRole) { $qRole = 'writer' }
+    $qWt = "$($q['worktree'])"
+    if (-not $qWt) { $qWt = Join-Path $WorktreeRoot $lane }
+    $sel = Find-DeusSavedPrompt -Worktree $qWt -TaskId "$($q['taskId'])" -Lane $lane -Role $qRole -Provider $l.Provider -RegistryPath $reg -PreferRunId "$($q['runId'])"
+    if ($sel.Path) {
+        $launchArgs += @('-PromptFile', $sel.Path, '-SavedPrompt')
+        Write-Queue "$lane prompt: saved $qRole prompt $($sel.Path) ($($sel.From))"
+    } else {
+        Write-Queue "$lane prompt: launcher default (no saved $qRole prompt for $($l.Provider)$(if ($sel.Skipped.Count) { '; passed over: ' + ($sel.Skipped -join '; ') }))"
+    }
     $launchArgs += $LauncherExtraArgs
     $argLine = ($launchArgs | ForEach-Object { ConvertTo-DeusArg ([string]$_) }) -join ' '
     if ($DryRun) { Write-Queue "would relaunch $lane on $($l.Provider): powershell $argLine"; continue }
@@ -244,6 +259,8 @@ foreach ($l in $launches) {
         foreach ($x in $s['queue']) {
             if ($x -isnot [System.Collections.IDictionary]) { continue }
             if ($x['runId'] -ne $q['runId'] -or (ConvertTo-DeusLaneKey $x['lane']) -ne (ConvertTo-DeusLaneKey $lane) -or $x['state'] -ne 'RESUMING') { continue }
+            $x['resumePromptFile'] = $sel.Path
+            $x['resumePromptFrom'] = $(if ($sel.Path) { $sel.From } else { 'launcher default' })
             if ($ok) {
                 $x['state'] = 'RESUMED'
                 $x['resumedAt'] = Format-DeusIso (Get-Date)

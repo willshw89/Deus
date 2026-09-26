@@ -1,0 +1,55 @@
+# temp clone C:\Users\snewt\AppData\Local\Temp\g1_verify_20260926_051909 at 3387244fbc7f6151360506c523ef66d8dbc3196c; d9766aa2 is on task/lane-r: origin/task/lane-r 
+
+## BEFORE: $ node <tools/governance/check_claims.js from base 9cba41ea, extracted with git show> --range f5c1dfd2~1..f5c1dfd2
+DEUS check_claims: commit f5c1dfd "[pm] Register write-set claims for Lanes Q, R, W (SIM.40.01 / SIM.40.05 / SIM.40.10 design) in docs/STATUS.md"
+  agent pm (commit subject), lane unknown (every lane held by pm)
+  1 path(s): M docs/STATUS.md
+PASS 4.1 evidence required (0 checked)
+PASS 4.2 zero self-certification (0 checked)
+PASS 4.3 WBS revision and immutability (0 checked)
+FAIL 4.4 single-writer whitelist: 1 violation(s)
+  - agent "pm" (commit subject) holds no lane in the whitelist matrix
+RESULT: 3 passed, 1 failed - commit rejected
+RESULT (all): 0 clean, 1 rejected, 0 with grandfathered 4.4 notes
+epoch: built-in a12f94a7 (Directive 001-I base)
+EXIT=1
+
+## AFTER: $ node tools/governance/check_claims.js --range f5c1dfd2~1..f5c1dfd2
+DEUS check_claims: commit f5c1dfd "[pm] Register write-set claims for Lanes Q, R, W (SIM.40.01 / SIM.40.05 / SIM.40.10 design) in docs/STATUS.md"
+  agent pm (commit subject), lane PM (built-in whitelist) (every lane held by pm)
+  1 path(s): M docs/STATUS.md
+PASS 4.1 evidence required (0 checked)
+PASS 4.2 zero self-certification (0 checked)
+PASS 4.3 WBS revision and immutability (0 checked)
+PASS 4.4 single-writer whitelist (1 checked)
+RESULT: 4 passed, 0 failed
+RESULT (all): 1 clean, 0 rejected, 0 with grandfathered 4.4 notes
+epoch: built-in a12f94a7 (Directive 001-I base)
+EXIT=0
+
+## BEFORE: $ node <tools/governance/check_claims.js from base 9cba41ea, extracted with git show> --range d9766aa2~1..d9766aa2
+DEUS check_claims: commit d9766aa "[pm] Open lane-r (SIM.40.05): BRIEF.md and lane.json"
+  agent pm (commit subject), lane unknown (every lane held by pm)
+  2 path(s): A tasks/SIM.40.05/lane-r/BRIEF.md, A tasks/SIM.40.05/lane-r/lane.json
+PASS 4.1 evidence required (0 checked)
+PASS 4.2 zero self-certification (0 checked)
+PASS 4.3 WBS revision and immutability (0 checked)
+FAIL 4.4 single-writer whitelist: 1 violation(s)
+  - agent "pm" (commit subject) holds no lane in the whitelist matrix
+RESULT: 3 passed, 1 failed - commit rejected
+RESULT (all): 0 clean, 1 rejected, 0 with grandfathered 4.4 notes
+epoch: built-in a12f94a7 (Directive 001-I base)
+EXIT=1
+
+## AFTER: $ node tools/governance/check_claims.js --range d9766aa2~1..d9766aa2
+DEUS check_claims: commit d9766aa "[pm] Open lane-r (SIM.40.05): BRIEF.md and lane.json"
+  agent pm (commit subject), lane PM (built-in whitelist) (every lane held by pm)
+  2 path(s): A tasks/SIM.40.05/lane-r/BRIEF.md, A tasks/SIM.40.05/lane-r/lane.json
+PASS 4.1 evidence required (0 checked)
+PASS 4.2 zero self-certification (0 checked)
+PASS 4.3 WBS revision and immutability (0 checked)
+PASS 4.4 single-writer whitelist (2 checked)
+RESULT: 4 passed, 0 failed
+RESULT (all): 1 clean, 0 rejected, 0 with grandfathered 4.4 notes
+epoch: built-in a12f94a7 (Directive 001-I base)
+EXIT=0

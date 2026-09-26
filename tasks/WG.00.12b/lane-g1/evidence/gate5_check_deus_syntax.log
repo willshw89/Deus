@@ -1,0 +1,4 @@
+$ node tools/check_deus_syntax.js   (temp clone C:\Users\snewt\AppData\Local\Temp\g1_verify_20260926_051909 at 3387244fbc7f6151360506c523ef66d8dbc3196c; start 2026-09-26T10:27:31Z)
+Checked 52 DEUS plugin files. Errors: 0
+EXIT=0
+wall=3 s

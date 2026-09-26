@@ -1,0 +1,66 @@
+{
+  "lane": "lane-g1",
+  "taskId": "WG.00.12b",
+  "branch": "task/lane-g1",
+  "writer": "claude",
+  "reviewer": "grok",
+  "allowedPaths": [
+    "tools/governance/merge_gate.js",
+    "tools/governance/test_merge_gate.js",
+    "tools/governance/MERGE_GATE.md",
+    "tools/governance/check_claims.js",
+    "tools/governance/test_check_claims.js",
+    "tools/governance/README.md",
+    "tools/ops/launch_worker.ps1",
+    "tools/ops/test_launch_worker.ps1",
+    "tools/ops/resume_queue.ps1",
+    "tools/ops/test_resume_queue.ps1",
+    "tools/ops/README.md",
+    "tasks/WG.00.12b/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "node",
+      "args": [
+        "tools/governance/test_merge_gate.js"
+      ],
+      "timeoutSec": 1800
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/governance/test_check_claims.js"
+      ],
+      "timeoutSec": 1800
+    },
+    {
+      "cmd": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tools/ops/test_launch_worker.ps1"
+      ],
+      "timeoutSec": 1800
+    },
+    {
+      "cmd": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tools/ops/test_resume_queue.ps1"
+      ],
+      "timeoutSec": 1800
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/check_deus_syntax.js"
+      ],
+      "timeoutSec": 300
+    }
+  ]
+}

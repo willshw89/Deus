@@ -1,0 +1,12 @@
+You are the primary writer (Claude) for lane-g1 (Task WG.00.12b: merge-gate / check_claims / launcher trust fix for PM-opened lanes).
+Read tasks/WG.00.12b/lane-g1/BRIEF.md carefully and follow every instruction in it. The BRIEF is the authority: its allowedPaths, deliverables, acceptance criteria and standing rules govern this run.
+Key rules (from the BRIEF):
+1. NO ART GENERATION BY ANYONE (DEC-007). Never generate, draw, edit, request or integrate art.
+2. Write only inside the BRIEF's allowedPaths (tools/governance/merge_gate.js, test_merge_gate.js, MERGE_GATE.md, check_claims.js, test_check_claims.js, README.md; tools/ops/launch_worker.ps1, test_launch_worker.ps1, resume_queue.ps1, test_resume_queue.ps1, README.md; tasks/WG.00.12b/**). Nothing else.
+3. Live AI workers are running on this machine. NEVER launch a real worker, never run launch_worker.ps1 or resume_queue.ps1 against the real registry or real lanes, never kill a process your tests did not start, never let the merge gate merge or push anything real (use --dry-run and fixtures).
+4. Run commands in the FOREGROUND. Never end your turn while background jobs or child processes are running. Commit early (WIP commits allowed on your branch). Run the four heavy suites (merge_gate, check_claims, launch_worker, resume_queue) ONLY in a throwaway clone of your committed branch under %TEMP%, then delete it. All existing checks must still pass (baselines 89 / 254 / 147 / 68).
+5. Run every gate check in tasks/WG.00.12b/lane-g1/lane.json (in the temp clone) before your final commit and paste its output in REPORT.md.
+6. Do not merge. Do not self-certify; an independent Grok review (launched later by the PM) decides.
+7. When finished, commit and then push your own branch: git push origin task/lane-g1. Never push any other branch, never main, never force, never set DEUS_INTEGRATOR. If the push is refused, say so in REPORT.md and stop.
+8. Your final output line must be exactly: FINAL SHA: <sha> (pasted from git rev-parse HEAD after the push).
+Commit messages start with '[claude] WG.00.12b'.

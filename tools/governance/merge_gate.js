@@ -9,7 +9,10 @@
  * the merge unless every condition below holds. Each refusal prints "REFUSED <CODE>: <detail>".
  *
  *   (a) MANIFEST  tasks/<id>/<lane>/lane.json exists at the tip and every commit that ever changed
- *                 it (git log <tip> -- <manifest>) is a non-merge "[gemini]" commit. Any other
+ *                 it (git log <tip> -- <manifest>) is a non-merge "[gemini]" (coordinator) or "[pm]"
+ *                 commit. The PM opens lanes since Owner directive 0028-AC A0 (2026-09-26 ~01:50 CT).
+ *                 [pm] is trusted for manifest provenance only: it is no agent family, so a [pm]
+ *                 commit is never a review and "pm" is never a valid writer or reviewer. Any other
  *                 change stops the gate at once: scope, review and tests are not evaluated and the
  *                 manifest's gateTests are never run.
  *   (a) SCOPE     every path in git diff <merge-base main> <tip> matches a manifest allowedPaths glob.
@@ -54,10 +57,18 @@ const LOG_TAIL_LINES = 20;
 
 // Claude and Fable run on the same CLI, as do Gemini and Antigravity (docs/CANONICAL_ROLES.md §2).
 const FAMILIES = { claude: "claude", fable: "claude", grok: "grok", codex: "codex", gemini: "gemini", antigravity: "gemini" };
+// The PM's subject tag. Trusted to write lane.json (check (a)); not an agent family, so never a review.
+const PM_TAG = "pm";
 
-// Each mutant switches one check off. test_merge_gate.js must show every one caught by a case.
+// Each mutant switches one check off (the two *_untrusted ones make a rule stricter instead). test_merge_gate.js
+// must show every one caught by a case.
 const MUTANTS = {
     manifest_provenance_off: "accept lane.json edits by any commit",
+    manifest_trust_any_tag: "accept lane.json edits by a single-parent commit with any tag or none",
+    manifest_trust_pm_merge: "accept lane.json edits by a [pm] merge commit",
+    manifest_gemini_untrusted: "refuse lane.json edits by [gemini] commits",
+    manifest_pm_untrusted: "refuse lane.json edits by [pm] commits",
+    pm_review_family: "count [pm] as an agent family, so a [pm] commit can be the review",
     scope_off: "accept paths outside allowedPaths",
     review_required_off: "accept a branch with no review commit",
     review_order_off: "use the latest review commit even when other commits follow it",
@@ -171,7 +182,17 @@ function family(agent) {
     if (!agent) return null;
     const a = String(agent).trim().toLowerCase();
     if (a === "fable" && mut("fable_alias_off")) return "fable";
+    if (a === PM_TAG && mut("pm_review_family")) return PM_TAG;
     return FAMILIES[a] || null;
+}
+
+// A commit may change lane.json when it has one parent and a [gemini]-family or [pm] subject tag.
+function trustedManifestCommit(h) {
+    if (h.parents.length > 1 && !(mut("manifest_trust_pm_merge") && h.tag === PM_TAG)) return false;
+    if (mut("manifest_trust_any_tag")) return true;
+    if (family(h.tag) === "gemini") return !mut("manifest_gemini_untrusted");
+    if (h.tag === PM_TAG) return !mut("manifest_pm_untrusted");
+    return false;
 }
 
 // "*" and "?" stay inside one path segment; "**" crosses segments; a trailing "/" means "dir/**".
@@ -424,6 +445,8 @@ function validateManifest(m) {
         if (!family(m.reviewer)) errs.push(`reviewer "${m.reviewer}" is not a known agent`);
         else if (family(m.reviewer) === family(m.writer)) errs.push(`reviewer "${m.reviewer}" is in the writer's family`);
     }
+    // Optional; tools/ops/launch_worker.ps1 reads it to decide whether the worker pushes its branch.
+    if ("push" in m && typeof m.push !== "boolean") errs.push(`"push" must be true or false`);
     if (!Array.isArray(m.allowedPaths) || !m.allowedPaths.length) errs.push(`"allowedPaths" must be a non-empty array`);
     else for (const g of m.allowedPaths) if (!globToRegExp(g)) errs.push(`allowedPaths entry ${JSON.stringify(g)} is not a relative forward-slash glob`);
     if (!Array.isArray(m.gateTests)) errs.push(`"gateTests" must be an array`);
@@ -453,11 +476,11 @@ function checkManifest(R, ctx) {
         return null;
     }
     if (!mut("manifest_provenance_off")) {
-        const bad = history.filter(h => h.parents.length > 1 || family(h.tag) !== "gemini");
+        const bad = history.filter(h => !trustedManifestCommit(h));
         for (const h of bad) {
             R.refuse("MANIFEST", "MANIFEST_TAMPERED", h.parents.length > 1
-                ? `merge commit ${h.sha} "${h.subject}" changed ${mp} (differs from every parent); only [gemini] commits may change it`
-                : `${h.sha} "${h.subject}" changed ${mp}; only [gemini] commits may change it`);
+                ? `merge commit ${h.sha} "${h.subject}" changed ${mp} (differs from every parent); only single-parent [gemini] or [pm] commits may change it`
+                : `${h.sha} "${h.subject}" changed ${mp}; only [gemini] or [pm] commits may change it`);
         }
         if (bad.length) return null;
     }
@@ -520,8 +543,10 @@ function checkReview(R, ctx, man) {
     const target = V.target = below[t] || null;
 
     const fam = family(rc.tag);
-    if (!fam) R.refuse("REVIEW", "REVIEW_TAG_UNKNOWN", `review commit ${rc.sha} subject "${rc.subject}" has no known agent tag (${Object.keys(FAMILIES).map(a => `[${a}]`).join(", ")})`);
-    else {
+    if (!fam) {
+        R.refuse("REVIEW", "REVIEW_TAG_UNKNOWN", `review commit ${rc.sha} subject "${rc.subject}" has no known agent tag (${Object.keys(FAMILIES).map(a => `[${a}]`).join(", ")})` +
+            (rc.tag === PM_TAG ? "; [pm] may write lane.json but never reviews" : ""));
+    } else {
         if (fam === writerFam && !mut("review_family_off")) {
             R.refuse("REVIEW", "REVIEW_SAME_FAMILY", `review tag [${rc.tag}] is in the writer's family (writer ${man.writer}; claude and fable are one family)`);
         }
@@ -777,6 +802,6 @@ function cleanup(ctx, opts) {
     try { fs.rmSync(ctx.tmp, { recursive: true, force: true, maxRetries: 3 }); } catch (e) { console.log(`.. NOTE temporary folder not removed: ${ctx.tmp}: ${e.message}`); }
 }
 
-module.exports = { MUTANTS, FAMILIES, globToRegExp, parseVerdict, fullHashes, subjectTag, family, normPath, validateManifest };
+module.exports = { MUTANTS, FAMILIES, PM_TAG, globToRegExp, parseVerdict, fullHashes, subjectTag, family, normPath, validateManifest, trustedManifestCommit };
 
 if (require.main === module) process.exitCode = run(process.argv.slice(2));
