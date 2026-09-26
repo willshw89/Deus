@@ -172,6 +172,7 @@ function ledgerDoc(rows, o = {}) {
     if (o.extra) section.push(...o.extra);
     if (o.noLedger) { /* legacy table only */ }
     else if (o.fenced) L.push('```text', ...section, '```');
+    else if (o.commentWrap) L.push('<!-- TEST_ hidden from readers', ...section, '-->');
     else L.push(...section);
     if (o.second) L.push('', ...section);
     L.push('', '## Later section', '', 'TEST_ text after the ledger.', '');
@@ -371,6 +372,8 @@ negCase('neg.ledger_heading_near_miss', { entry: ID.PROP, codes: ['LEDGER_MALFOR
 const stoolRow = w => `| 2026-09-26 | YEA | \`${ID.STOOL}\` | \`art/approved/stool.png\` | \`${w.cells.get(ID.STOOL).sha}\` | none |`;
 negCase('neg.ledger_row_in_html_comment', { entry: ID.PROP, codes: ['LEDGER_MALFORMED'], msg: 'HTML comments',
     build: w => approvalsOnly(w, 'ledger_comment', w.rows, { extra: [`<!-- ${stoolRow(w)} -->`] }) });
+negCase('neg.ledger_inside_html_comment', { entry: ID.PROP, codes: ['LEDGER_MALFORMED', 'APPROVAL_MISSING'], msg: 'inside an HTML comment',
+    build: w => approvalsOnly(w, 'ledger_comment_wrap', w.rows, { commentWrap: true }) });
 negCase('neg.ledger_row_indented_as_code', { entry: ID.PROP, codes: ['LEDGER_MALFORMED'], msg: 'indented',
     build: w => approvalsOnly(w, 'ledger_indent', w.rows, { extra: [`    ${stoolRow(w)}`] }) });
 
@@ -887,6 +890,37 @@ function main() {
                 fs.writeFileSync(f, writePNG(img.data, img.width, img.height));
             }
             return expectCodes(runPlace(T, w, inDir(w, 'tamper', []), o), ['OUT_STATE_TAMPERED']);
+        });
+        // A partial placement (chest only) as the earlier state for the next three cases.
+        const partial = outDir(w, 'partial', T);
+        const partialRun = runPlace(T, w, inDir(w, 'partial', [ID.PROP]), partial);
+        if (partialRun.exitCode !== 0) check('place.partial_run', false, JSON.stringify(refusalCodes(partialRun)));
+        refusedCase('place.out_state_unlisted_sheet_refused', p => {
+            const o = outDir(w, 'unlisted', T);
+            fs.cpSync(partial, o, { recursive: true });
+            if (!p) { const b = entryIn(w.cat, ID.BOULDER); const img = compose(768, 768, [{ img: w.cells.get(ID.BOULDER).img, x: b.slot.x, y: b.slot.y }]); fs.writeFileSync(path.join(o, 'sheets', `${b.slot.sheetId}.png`), writePNG(img.data, img.w, img.h)); }
+            return expectCodes(runPlace(T, w, inDir(w, 'unlisted', [ID.BOULDER]), o), ['OUT_STATE_TAMPERED']);
+        });
+        refusedCase('place.out_state_pixels_in_empty_slot_refused', p => {
+            // Sheet and report edited together, so the recorded sheet hash still matches.
+            const o = outDir(w, 'emptyslot', T);
+            fs.cpSync(partial, o, { recursive: true });
+            if (!p) {
+                const f = path.join(o, 'sheets', `${ATLAS}.png`), img = decodePNG(fs.readFileSync(f), f), s = entryIn(w.cat, ID.STOOL).slot;
+                img.data[((s.y + 5) * img.width + s.x + 5) * 4 + 3] = 255;
+                const buf = writePNG(img.data, img.width, img.height);
+                fs.writeFileSync(f, buf);
+                const rf = path.join(o, 'placement_report.json'), r = JSON.parse(fs.readFileSync(rf, 'utf8'));
+                r.sheets.find(x => x.sheetId === ATLAS).sha256 = sha(buf);
+                fs.writeFileSync(rf, JSON.stringify(r, null, 2) + '\n');
+            }
+            return expectCodes(runPlace(T, w, inDir(w, 'emptyslot', []), o), ['OUT_STATE_TAMPERED']);
+        });
+        refusedCase('place.replace_with_refused_input_reports_only_the_refusal', p => {
+            const o = outDir(w, 'repbad', T);
+            fs.cpSync(partial, o, { recursive: true });
+            const src = p ? propB(w) : badProp;
+            return expectCodes(runPlace(T, w, inDir(w, 'repbad', [], { [`${ID.PROP}.png`]: src.file }), o, { approvals: badProp.approvals, replace: [S(ID.PROP)] }), ['OFF_PALETTE']);
         });
         refusedCase('place.out_state_stale', p => {
             const o = outDir(w, 'stale', T);

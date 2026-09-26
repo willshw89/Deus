@@ -266,6 +266,10 @@ function readPriorState(ctx, outDir) {
     if (shaOf('catalogue') !== ctx.catalogueSha || shaOf('geometry') !== ctx.geometrySha || shaOf('palette') !== ctx.paletteSha) {
         return fail('OUT_STATE_STALE', `the catalogue, geometry or palette changed since ${outDir} was placed; place everything again into a new --out`);
     }
+    const listed = new Set(rep.sheets.map(s => s && `${s.sheetId}.png`));
+    const sheetDir = path.join(outDir, 'sheets');
+    const unlisted = fs.existsSync(sheetDir) ? fs.readdirSync(sheetDir).filter(n => !listed.has(n)).sort(cmp) : [];
+    if (unlisted.length) return fail('OUT_STATE_TAMPERED', `${sheetDir} holds files that placement_report.json does not list: ${unlisted.join(', ')}`);
     for (const s of rep.sheets) {
         const sheet = s && ctx.sheets.get(s.sheetId);
         if (!sheet || s.file !== `sheets/${s.sheetId}.png`) return fail('OUT_STATE_INVALID', `${reportFile} lists an unknown sheet ${JSON.stringify(s)}`);
@@ -289,6 +293,14 @@ function readPriorState(ctx, outDir) {
             return fail('OUT_STATE_TAMPERED', `the pixels of slot ${s.slotId} in sheets/${s.sheetId}.png differ from the recorded placement`);
         }
         state.filled.set(f.slotId, f);
+    }
+    // Slots that are not filled must still be empty (all bytes 0) in the earlier sheets.
+    for (const e of ctx.entries.values()) {
+        const c = e.slot && !V.isDerived(e) && state.canvases.get(e.slot.sheetId);
+        if (!c || state.filled.has(e.slot.slotId)) continue;
+        if (rectBytes(c.data, c.w, e.slot).some(b => b !== 0)) {
+            return fail('OUT_STATE_TAMPERED', `slot ${e.slot.slotId} is not filled, but sheets/${e.slot.sheetId}.png has pixels in it`);
+        }
     }
     return state;
 }
@@ -420,7 +432,8 @@ function placeArt(opts) {
         placements.push({ source: name, entryId, slot, sha256: res.sha256, image: res.image, action });
     }
     const targeted = new Set(placements.map(p => p.slot.slotId));
-    for (const id of replace) if (slotOwner.has(id) && !targeted.has(id)) refuse('REPLACE_UNUSED', `--replace ${id} was given but no input targets that slot`);
+    const inputSlots = new Set(names.map(n => ctx.entries.get(inputEntryId(n))).filter(e => e && e.slot && !V.isDerived(e)).map(e => e.slot.slotId));
+    for (const id of replace) if (slotOwner.has(id) && !inputSlots.has(id)) refuse('REPLACE_UNUSED', `--replace ${id} was given but no input targets that slot`);
 
     // Earlier placements that stay must still be approved by the current ledger.
     for (const [slotId, f] of prior.filled) {

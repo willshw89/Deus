@@ -82,7 +82,7 @@ function readFileOr(file, what) {
 }
 
 function parseJson(buf, file, code) {
-    try { return JSON.parse(buf.toString('utf8').replace(/^﻿/, '')); }
+    try { return JSON.parse(buf.toString('utf8').replace(/^\uFEFF/, '')); }
     catch (e) { throw new Refusal(code, `${file} is not valid JSON: ${e.message}`); }
 }
 
@@ -139,7 +139,7 @@ function checkGeometry(g, file) {
 // One colour per line, #RRGGBB or RRGGBB. Returns a Set of 0xRRGGBB numbers.
 function parsePalette(buf, file) {
     const set = new Set();
-    buf.toString('utf8').replace(/^﻿/, '').split(/\r?\n/).forEach((line, i) => {
+    buf.toString('utf8').replace(/^\uFEFF/, '').split(/\r?\n/).forEach((line, i) => {
         const t = line.trim();
         if (!t) return;
         const m = /^#?([0-9A-Fa-f]{6})$/.exec(t);
@@ -162,6 +162,29 @@ function markFences(lines) {
             out[i] = true;
             if (m && m[1][0] === open[0] && m[1].length >= open.length && !l.trim().slice(m[1].length).trim()) open = null;
         } else if (m) { open = m[1]; out[i] = true; }
+    });
+    return out;
+}
+
+// Marks the lines an HTML comment (<!-- ... -->) hides in whole or in part. Fenced lines are skipped.
+function markComments(lines, fenced) {
+    const out = new Array(lines.length).fill(false);
+    let open = false;
+    lines.forEach((l, i) => {
+        if (fenced[i]) return;
+        let pos = 0, hidden = open;
+        for (;;) {
+            if (open) {
+                const e = l.indexOf('-->', pos);
+                if (e < 0) break;
+                open = false; pos = e + 3;
+            } else {
+                const s = l.indexOf('<!--', pos);
+                if (s < 0) break;
+                open = true; hidden = true; pos = s + 4;
+            }
+        }
+        out[i] = hidden;
     });
     return out;
 }
@@ -204,13 +227,16 @@ function parseLedgerRow(cells, line) {
 // heading or a near-miss heading makes the whole ledger unusable (errors[] non-empty).
 function parseLedger(text, file) {
     const ledger = { file, present: false, rows: [], errors: [] };
-    const lines = text.replace(/^﻿/, '').split(/\r?\n/);
+    const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/);
     const fenced = markFences(lines);
+    const hidden = markComments(lines, fenced);
     const heads = [];
     lines.forEach((l, i) => {
         if (fenced[i]) return;
         const t = l.trimEnd();
-        if (t === LEDGER_HEADING) heads.push(i);
+        if (hidden[i] && /sha-?256\s+approval\s+ledger/i.test(t)) {
+            ledger.errors.push({ line: i + 1, message: 'the ledger heading is inside an HTML comment; hidden ledgers cannot be told from shown ones' });
+        } else if (t === LEDGER_HEADING) heads.push(i);
         else if (/^\s{0,3}#{1,6}\s*sha-?256\s+approval\s+ledger/i.test(t)) {
             ledger.errors.push({ line: i + 1, message: `heading "${t.trim()}" is not exactly "${LEDGER_HEADING}"` });
         }
@@ -226,7 +252,7 @@ function parseLedger(text, file) {
     let state = 'before'; // before -> sep -> rows -> after
     for (let i = heads[0] + 1; i < end; i++) {
         // Content a reader cannot see (HTML comments, rows indented into code) must not count.
-        if (!fenced[i] && lines[i].includes('<!--')) {
+        if (hidden[i]) {
             ledger.errors.push({ line: i + 1, message: 'HTML comments are not allowed in the ledger section; hidden rows cannot be told from shown ones' });
             return ledger;
         }
