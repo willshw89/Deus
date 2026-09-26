@@ -14,9 +14,25 @@
 // every run (--runs n, default 1 normal / 2 stress) and a summary per phase: median, p95 and worst frame interval and the
 // fps they imply, the tick and its parts.
 //
-// Usage: node tools/bench_render_layers.js [--scenario normal|stress] [--runs n] [--rev <git rev>] [--allow-dirty]
-//   --rev   measure an older revision: every file under game/ that differs between <rev> and HEAD is taken from <rev> in the
-//           copy (only copied folders: js/, data/). The output name then carries that revision's sha8.
+// Machine load (WG.00.09b Fix 1, P3; DEC-017 hygiene): every run carries a machineLoad block: the CPU % of the whole machine
+// sampled once a second while the run lasts (os.cpus() idle/total time deltas over all logical CPUs, the same quantity as
+// \Processor(_Total)\% Processor Time), min / median / max per phase and overall; the concurrent AI worker count (the PM's
+// filter, this session included) and the other nw.exe processes at start, every 15 s and at the end; and a label: "quiet"
+// (overall median CPU <= 25 % and no other nw.exe seen) or "loaded". The numbers are reported with it and judged separately.
+//
+// Usage: node tools/bench_render_layers.js [--scenario normal|stress] [--runs n] [--rev <git rev>] [--allow-dirty] [--append]
+//                                          [--pre-log <file>] [--keep]
+//   --rev      measure an older revision: every file under game/ that differs between <rev> and HEAD is taken from <rev> in the
+//              copy (only copied folders: js/, data/). The output name then carries that revision's sha8.
+//   --append   add the run(s) to the existing output file of this scenario and sha instead of writing a new _<n> file.
+//   --pre-log  the load-probe log of the wait before this run (below): stored in machineLoad.preRun.
+//   --keep     keep the snapshot folder (by default each run's own folder is deleted after its numbers are read).
+//        node tools/bench_render_layers.js --load-probe --log <file> [--probe-seconds 30] [--poll-seconds 120]
+//                                          [--total-wait-seconds 1800] [--max-seconds 540]
+//   Before a run (Fix 1 section 3.3): samples the CPU for 30 s and counts the other nw.exe. Quiet (median <= 25 %, no other
+//   nw.exe): exit 0. Otherwise it waits --poll-seconds and samples again, for at most --max-seconds in this call (exit 3: call
+//   it again) and --total-wait-seconds since the first attempt in the log (exit 0: run anyway, labelled loaded). Every attempt
+//   is appended to the log (JSON lines). Nothing is ever killed or paused to make the machine quiet.
 // Exit: 0 all runs finished and wrote their numbers; 1 a run finished without numbers; 2 harness problem.
 "use strict";
 const fs = require("fs");
@@ -26,6 +42,81 @@ const { spawnSync, execFileSync } = require("child_process");
 
 const args = process.argv.slice(2);
 const opt = (name, fallback) => { const i = args.indexOf(name); return i >= 0 && args[i + 1] !== undefined ? args[i + 1] : fallback; };
+
+//-----------------------------------------------------------------------------
+// Machine load: CPU % from os.cpus() time deltas, the AI workers and the other nw.exe (PowerShell CIM, the PM's filter).
+
+function cpuTimes() { let idle = 0, total = 0; for (const c of os.cpus()) { const t = c.times; idle += t.idle; total += t.user + t.nice + t.sys + t.idle + t.irq; } return { idle, total }; }
+/** Sample the machine's CPU % once a second until stop(); samples are { t: epoch ms at the end of the second, cpu }. */
+function cpuSampler() {
+    const samples = [];
+    let last = cpuTimes();
+    const timer = setInterval(() => {
+        const now = cpuTimes(), dt = now.total - last.total;
+        if (dt > 0) samples.push({ t: Date.now(), cpu: +(100 * (1 - (now.idle - last.idle) / dt)).toFixed(1) });
+        last = now;
+    }, 1000);
+    return { samples, stop: () => clearInterval(timer) };
+}
+const stats3 = arr => { if (!arr.length) return { samples: 0, min: null, median: null, max: null }; const s = arr.slice().sort((a, b) => a - b); return { samples: s.length, min: s[0], median: s[Math.floor((s.length - 1) / 2)], max: s[s.length - 1] }; };
+const PS_PROCS = [
+    "$all = @(Get-CimInstance Win32_Process)",
+    "$w = @($all | Where-Object { ($_.Name -eq 'claude.exe' -and $_.CommandLine -match ' -p ') -or $_.Name -eq 'grok.exe' -or ($_.Name -eq 'node.exe' -and $_.CommandLine -match 'codex\\.js.* exec') }).Count",
+    "$nw = @($all | Where-Object { $_.Name -eq 'nw.exe' } | ForEach-Object { [pscustomobject]@{ pid = $_.ProcessId; cmd = [string]$_.CommandLine } })",
+    "[pscustomobject]@{ workers = $w; nw = $nw } | ConvertTo-Json -Compress -Depth 3"
+].join("; ");
+/** { at, aiWorkers, otherNwExe, otherNwPids } now. own: a string in the command line of this run's own nw.exe processes. */
+function procsOf(at, own, out) {
+    const j = JSON.parse(String(out).trim());
+    const nw = j.nw ? [].concat(j.nw) : [];
+    const others = nw.filter(p => !own || !String(p.cmd || "").includes(own));
+    return { at, aiWorkers: j.workers, otherNwExe: others.length, otherNwPids: others.map(p => p.pid) };
+}
+const PS_ARGS = ["-NoProfile", "-NonInteractive", "-Command", PS_PROCS];
+function procs(own) {
+    const at = new Date().toISOString();
+    try { return procsOf(at, own, execFileSync("powershell", PS_ARGS, { encoding: "utf8", windowsHide: true, timeout: 60000 })); }
+    catch (e) { return { at, aiWorkers: null, otherNwExe: null, otherNwPids: [], error: e.message.split("\n")[0] }; }
+}
+/** The same without blocking the event loop (the checks during a run: the CPU sampler and the DevTools socket keep going). */
+function procsAsync(own) {
+    const at = new Date().toISOString();
+    return new Promise(resolve => require("child_process").execFile("powershell", PS_ARGS, { encoding: "utf8", windowsHide: true, timeout: 60000 }, (err, out) => {
+        if (err) return resolve({ at, aiWorkers: null, otherNwExe: null, otherNwPids: [], error: err.message.split("\n")[0] });
+        try { resolve(procsOf(at, own, out)); } catch (e) { resolve({ at, aiWorkers: null, otherNwExe: null, otherNwPids: [], error: e.message }); }
+    }));
+}
+const LOAD_NOTE = "aiWorkers: PowerShell CIM, claude.exe with ' -p ', grok.exe, node.exe running codex.js exec (the PM's filter); the session running this bench counts as 1. otherNwExe: nw.exe processes whose command line does not name this run's own profile folder.";
+
+if (args.includes("--load-probe")) {
+    // The pre-run wait (Fix 1 section 3.3). Never kills or pauses anything.
+    const log = opt("--log", null);
+    if (!log) { console.error("HARNESS: --load-probe needs --log <file>"); process.exit(2); }
+    const probeS = Number(opt("--probe-seconds", "30")), pollS = Number(opt("--poll-seconds", "120")), totalS = Number(opt("--total-wait-seconds", "1800")), maxS = Number(opt("--max-seconds", "540"));
+    const read = () => (fs.existsSync(log) ? fs.readFileSync(log, "utf8").split(/\r?\n/).filter(Boolean).map(l => JSON.parse(l)) : []);
+    const sleepMs = ms => new Promise(r => setTimeout(r, ms));
+    (async () => {
+        const began = Date.now();
+        for (;;) {
+            const prior = read(), first = prior.length ? Date.parse(prior[0].at) : Date.now();
+            const p0 = procs(null), s = cpuSampler();
+            await sleepMs(probeS * 1000 + 200);
+            s.stop();
+            const c = stats3(s.samples.map(x => x.cpu)), p1 = procs(null);
+            const quiet = c.median !== null && c.median <= 25 && p0.otherNwExe === 0 && p1.otherNwExe === 0;
+            const waited = (Date.now() - first) / 1000;
+            const attempt = { at: p0.at, probeSeconds: probeS, cpu: c, aiWorkers: [p0.aiWorkers, p1.aiWorkers], otherNwExe: [p0.otherNwExe, p1.otherNwExe], quiet, waitedSeconds: +waited.toFixed(0) };
+            fs.appendFileSync(log, JSON.stringify(attempt) + "\n");
+            console.log(`LOAD-PROBE ${attempt.at}: CPU median ${c.median} % (min ${c.min}, max ${c.max}, ${c.samples} samples), AI workers ${attempt.aiWorkers.join("/")}, other nw.exe ${attempt.otherNwExe.join("/")} -> ${quiet ? "QUIET" : "loaded"}; waited ${attempt.waitedSeconds} s since the first attempt`);
+            if (quiet) { console.log("exit 0 (quiet: run now)"); process.exit(0); }
+            if (waited + pollS >= totalS) { console.log(`exit 0 (waited ${attempt.waitedSeconds} s of ${totalS}: run anyway; the run is labelled by its own load)`); process.exit(0); }
+            if ((Date.now() - began) / 1000 + pollS + probeS > maxS) { console.log(`exit 3 (this call's ${maxS} s are used up: call --load-probe again)`); process.exit(3); }
+            await sleepMs(pollS * 1000);
+        }
+    })();
+    return;
+}
+
 const scenario = opt("--scenario", "normal");
 if (!["normal", "stress"].includes(scenario)) { console.error(`HARNESS: unknown scenario "${scenario}"`); process.exit(2); }
 const runs = Math.max(1, parseInt(opt("--runs", scenario === "stress" ? "2" : "1"), 10) || 1);
@@ -44,10 +135,13 @@ if (dirty && !rev && !args.includes("--allow-dirty")) {
 const outDir = path.join(root, "tasks", "WG.00.09b", "lane-k", "perf");
 fs.mkdirSync(outDir, { recursive: true });
 // An existing result is never overwritten (a diagnostic run once replaced a two-run baseline): the next free _<n> suffix is
-// used instead, unless --force.
+// used instead, unless --force; --append adds the new run(s) to it.
 const outBase = path.join(outDir, `${scenario === "stress" ? "stress_baseline" : "baseline"}_${sha8}${dirty && !rev ? "_dirty" : ""}`);
+const append = args.includes("--append");
 let outFile = `${outBase}.json`;
-for (let n = 2; fs.existsSync(outFile) && !args.includes("--force"); n++) outFile = `${outBase}_${n}.json`;
+for (let n = 2; fs.existsSync(outFile) && !append && !args.includes("--force"); n++) outFile = `${outBase}_${n}.json`;
+const preLog = opt("--pre-log", null);
+const keepSnapshot = args.includes("--keep");
 
 //-----------------------------------------------------------------------------
 // The in-engine plugin (written into the snapshot copy only).
@@ -105,7 +199,7 @@ const PLUGIN = String.raw`//====================================================
         for (const k in acc) parts[k] = +acc[k].toFixed(3);
         const calls = {};
         for (const k in cnt) calls[k] = cnt[k];
-        const rec = { dt: +dt.toFixed(3), tick: +tick.toFixed(3), draws: drawCalls, parts, calls };
+        const rec = { dt: +dt.toFixed(3), tick: +tick.toFixed(3), draws: drawCalls, parts, calls, at: Date.now() };
         const c = counters();
         if (c) rec.counts = c;
         recording.frames.push(rec);
@@ -231,6 +325,8 @@ const PLUGIN = String.raw`//====================================================
         const draws = frames.map(f => f.draws);
         const out = {
             phase, frames: frames.length,
+            // Wall-clock span of the phase (epoch ms, the same clock as the tool's CPU samples: machineLoad.cpu.byPhase).
+            wallStart: frames.length ? frames[0].at : null, wallEnd: frames.length ? frames[frames.length - 1].at : null,
             frameMs: { median: r3(med), p95: r3(p95), worst: r3(worst) },
             fps: { atMedian: med ? r3(1000 / med) : null, atP95: p95 ? r3(1000 / p95) : null, atWorst: worst ? r3(1000 / worst) : null },
             over16_7: dts.filter(v => v > 16.7).length, over33_4: dts.filter(v => v > 33.4).length, over50: dts.filter(v => v > 50).length,
@@ -581,6 +677,17 @@ const PLUGIN = String.raw`//====================================================
 //-----------------------------------------------------------------------------
 // Snapshot, instrumentation, runs
 
+/** Delete a snapshot folder. Its asset folders are junctions to the real game/ folders: unlink them, never recurse into them. */
+function removeSnapshot(dir) {
+    if (!fs.existsSync(dir)) return;
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const p = path.join(dir, entry.name);
+        if (entry.isSymbolicLink() || fs.lstatSync(p).isSymbolicLink()) fs.unlinkSync(p);
+        else fs.rmSync(p, { recursive: true, force: true });
+    }
+    fs.rmdirSync(dir);
+}
+
 function makeSnapshot(name) {
     const dir = path.join(os.tmpdir(), "uf_snapshots", name);
     const r = spawnSync(process.execPath, [path.join(__dirname, "test_snapshot.js"), "--name", name, "--plugins", "DEUS_Depth", "--dir", dir, "--no-run"], { encoding: "utf8" });
@@ -659,8 +766,12 @@ async function runGame(dir, env, label) {
     const resultsFile = path.join(dir, "test_output", "results.txt");
     fs.rmSync(resultsFile, { force: true });
     const port = await freePort();
-    const profileDir = path.join(os.tmpdir(), `uf_test_profile_${process.pid}_${Date.now()}`);
+    const profileName = `uf_test_profile_${process.pid}_${Date.now()}`;
+    const profileDir = path.join(os.tmpdir(), profileName);
     const noThrottle = ["--disable-background-timer-throttling", "--disable-renderer-backgrounding", "--disable-backgrounding-occluded-windows", "--disable-features=CalculateNativeWinOcclusion"];
+    // Machine load (Fix 1, P3): processes before the game starts, then the CPU every second and the processes every 15 s.
+    const loadStart = procs(profileName), cpu = cpuSampler(), during = [];
+    const procTimer = setInterval(() => { procsAsync(profileName).then(p => during.push({ at: p.at, aiWorkers: p.aiWorkers, otherNwExe: p.otherNwExe, otherNwPids: p.otherNwPids })); }, 15000);
     const child = spawn(NW, [dir, `--user-data-dir=${profileDir}`, ...noThrottle, "--deus-test=bench_layers", `--remote-debugging-port=${port}`], { env, stdio: ["ignore", "ignore", "ignore"] });
     const profiles = {}, notes = [];
     let exited = false, exitCode = null;
@@ -717,50 +828,97 @@ async function runGame(dir, env, label) {
     }
     await exitP;
     clearTimeout(killer);
+    cpu.stop();
+    clearInterval(procTimer);
+    const loadEnd = procs(profileName);
     try { if (ws) ws.close(); } catch (e) { /* closed */ }
     try { fs.rmSync(profileDir, { recursive: true, force: true }); } catch (e) { /* still locked */ }
     const text = fs.existsSync(resultsFile) ? fs.readFileSync(resultsFile, "utf8") : "";
     const m = text.match(/^RESULT: (\d+) passed, (\d+) failed \(exit (\d)\)$/m);
-    return { status: m ? Number(m[3]) : 2, text, profiles, notes, seconds: +((Date.now() - t0) / 1000).toFixed(1), nwExit: exitCode };
+    return { status: m ? Number(m[3]) : 2, text, profiles, notes, seconds: +((Date.now() - t0) / 1000).toFixed(1), nwExit: exitCode,
+        load: { start: loadStart, end: loadEnd, during, cpuSamples: cpu.samples } };
+}
+
+/** The machineLoad block of a run: the CPU per phase (a 1 s sample counts for a phase when its second overlaps the phase) and overall. */
+function machineLoad(load, phases, preRun) {
+    const byPhase = {};
+    for (const p of phases) {
+        if (!Number.isFinite(p.wallStart) || !Number.isFinite(p.wallEnd)) continue;
+        const c = stats3(load.cpuSamples.filter(s => s.t > p.wallStart && s.t - 1000 < p.wallEnd).map(s => s.cpu));
+        byPhase[p.phase] = c;
+        p.cpuPercent = c;
+    }
+    const overall = stats3(load.cpuSamples.map(s => s.cpu));
+    const nwCounts = [load.start.otherNwExe, ...load.during.map(d => d.otherNwExe), load.end.otherNwExe].filter(n => Number.isFinite(n));
+    const otherNwMax = nwCounts.length ? Math.max(...nwCounts) : null;
+    const quiet = overall.median !== null && overall.median <= 25 && otherNwMax === 0;
+    return {
+        label: quiet ? "quiet" : "loaded",
+        labelRule: "quiet: overall median CPU <= 25 % and no other nw.exe at the start, in any 15 s check or at the end; otherwise loaded (WG.00.09b Fix 1 section 3.3)",
+        method: "CPU: os.cpus() idle/total time deltas over all logical CPUs, one sample a second from before nw.exe starts to after it exits (the same quantity as \\Processor(_Total)\\% Processor Time); a sample counts for a phase when its second overlaps the phase's wall span. " + LOAD_NOTE,
+        startedAt: load.start.at, finishedAt: load.end.at,
+        start: { aiWorkers: load.start.aiWorkers, otherNwExe: load.start.otherNwExe, otherNwPids: load.start.otherNwPids, error: load.start.error },
+        end: { aiWorkers: load.end.aiWorkers, otherNwExe: load.end.otherNwExe, otherNwPids: load.end.otherNwPids, error: load.end.error },
+        during: load.during, otherNwExeMax: otherNwMax,
+        cpu: { intervalMs: 1000, overall, byPhase, samples: load.cpuSamples },
+        preRun: preRun || null
+    };
 }
 
 (async () => {
     console.log(`=== bench_render_layers: scenario ${scenario}, ${runs} run(s), measuring ${sha8}${rev ? ` (--rev ${rev})` : ""}${dirty && !rev ? " with uncommitted changes" : ""} ===`);
     const report = { task: "WG.00.09b", lane: "lane-k", scenario, measuredSha, headSha, dirty: dirty && !rev,
         machine: { host: os.hostname(), cpus: os.cpus().length, cpu: os.cpus()[0] && os.cpus()[0].model, totalMemGb: +(os.totalmem() / 2 ** 30).toFixed(1) },
-        method: "nw.exe harness (DEUS_Test, --deus-test=bench_layers, background throttling off, the same flags as tools/run_tests.js) on a snapshot copy of game/. Per engine tick (Graphics._onTick): the frame interval (tick start to tick start), the tick duration (update + render submission), wrapped update and render parts (ms per tick; 'update' can run 0, 1 or 2 times per tick: RMMZ's fixed 60 Hz step), WebGL draw calls. Medians and p95 over the ticks of a phase. CPU profiles: V8 sampling profiler over the DevTools protocol, 500 us interval; ms per update = sampled ms / simulation updates in the profiled window.",
+        method: "nw.exe harness (DEUS_Test, --deus-test=bench_layers, background throttling off, the same flags as tools/run_tests.js) on a snapshot copy of game/. Per engine tick (Graphics._onTick): the frame interval (tick start to tick start), the tick duration (update + render submission), wrapped update and render parts (ms per tick; 'update' can run 0, 1 or 2 times per tick: RMMZ's fixed 60 Hz step), WebGL draw calls. Medians and p95 over the ticks of a phase. CPU profiles: V8 sampling profiler over the DevTools protocol, 500 us interval; ms per update = sampled ms / simulation updates in the profiled window. Machine load: runs[].machineLoad (Fix 1, P3).",
         runs: [] };
+    // --append: the runs already in the file stay; the new ones are numbered after them.
+    let prior = null;
+    if (append && fs.existsSync(outFile)) {
+        prior = JSON.parse(fs.readFileSync(outFile, "utf8"));
+        if (prior.measuredSha !== measuredSha || prior.scenario !== scenario) { console.error(`HARNESS: --append: ${path.relative(root, outFile)} is for ${prior.scenario} ${prior.measuredSha}`); process.exit(2); }
+        report.runs = prior.runs;
+    }
+    const preRun = preLog && fs.existsSync(preLog) ? fs.readFileSync(preLog, "utf8").split(/\r?\n/).filter(Boolean).map(l => JSON.parse(l)) : null;
+    const newRuns = [];
     let failures = 0, harness = 0;
     for (let i = 0; i < runs; i++) {
-        const name = `lanek_bench_${scenario}${rev ? `_${sha8}` : ""}`;
+        const runNo = report.runs.length + 1;
+        const name = `lanek_bench_${scenario}_${sha8}_${process.pid}_${Date.now()}`;
         const dir = makeSnapshot(name);
         const json = path.join(dir, "test_output", "bench.json");
         fs.rmSync(json, { force: true });
         const env = Object.assign({}, process.env, { BENCH_OUT: json, BENCH_SCENARIO: scenario });
         delete env.UF_TEST_PROVOKE;
+        console.log(`  run ${runNo}: snapshot ${dir}`);
         const r = await runGame(dir, env, name);
-        for (const line of r.text.split(/\r?\n/)) if (/^(BENCH|PASS|FAIL|ERROR|HARNESS|RESULT)/.test(line)) console.log(`  run ${i + 1}: ${line}`);
-        for (const n of r.notes) console.log(`  run ${i + 1}: note: ${n}`);
-        if (!fs.existsSync(json)) { console.error(`  run ${i + 1}: no numbers written (exit ${r.status}, ${r.seconds} s)`); if (r.status === 2) harness++; else failures++; continue; }
-        const data = JSON.parse(fs.readFileSync(json, "utf8"));
-        data.run = i + 1;
+        for (const line of r.text.split(/\r?\n/)) if (/^(BENCH|PASS|FAIL|ERROR|HARNESS|RESULT)/.test(line)) console.log(`  run ${runNo}: ${line}`);
+        for (const n of r.notes) console.log(`  run ${runNo}: note: ${n}`);
+        const data = fs.existsSync(json) ? JSON.parse(fs.readFileSync(json, "utf8")) : null;
+        if (!keepSnapshot) { try { removeSnapshot(dir); } catch (e) { console.log(`  run ${runNo}: could not remove ${dir}: ${e.message}`); } }
+        if (!data) { console.error(`  run ${runNo}: no numbers written (exit ${r.status}, ${r.seconds} s)`); if (r.status === 2) harness++; else failures++; continue; }
+        data.run = runNo;
         data.wallSeconds = r.seconds;
         data.exit = r.status;
+        data.machineLoad = machineLoad(r.load, data.phases || [], i === 0 ? preRun : null);
         data.profiles = r.profiles;
         data.toolNotes = r.notes;
         report.runs.push(data);
+        newRuns.push(data);
+        const ml = data.machineLoad;
+        console.log(`  run ${runNo}: machine load ${ml.label}: CPU overall median ${ml.cpu.overall.median} % (min ${ml.cpu.overall.min}, max ${ml.cpu.overall.max}, ${ml.cpu.overall.samples} samples); AI workers ${ml.start.aiWorkers} at start, ${ml.end.aiWorkers} at the end; other nw.exe ${ml.start.otherNwExe} / max ${ml.otherNwExeMax} / ${ml.end.otherNwExe}`);
         if (r.status !== 0) failures++;
     }
     report.writtenAt = new Date().toISOString();
-    if (report.runs.length) {
+    if (prior) report.firstWrittenAt = prior.firstWrittenAt || prior.writtenAt;
+    if (newRuns.length) {
         fs.writeFileSync(outFile, JSON.stringify(report, null, 1));
-        console.log(`wrote ${path.relative(root, outFile)} (${report.runs.length} run(s))`);
+        console.log(`wrote ${path.relative(root, outFile)} (${report.runs.length} run(s), ${newRuns.length} new)`);
     } else console.log("no run produced numbers: nothing written");
-    for (const run of report.runs) {
-        for (const p of run.phases) console.log(`  run ${run.run} ${p.phase.padEnd(26)} frame median ${String(p.frameMs.median).padStart(7)} p95 ${String(p.frameMs.p95).padStart(7)} worst ${String(p.frameMs.worst).padStart(8)} ms (${p.fps.atMedian} fps at the median)  tick ${p.tickMs.median} ms  draws ${p.drawCalls.median}${p.peak ? `  peak ${JSON.stringify(p.peak)}` : ""}`);
+    for (const run of newRuns) {
+        for (const p of run.phases) console.log(`  run ${run.run} ${p.phase.padEnd(26)} frame median ${String(p.frameMs.median).padStart(7)} p95 ${String(p.frameMs.p95).padStart(7)} worst ${String(p.frameMs.worst).padStart(8)} ms (${p.fps.atMedian} fps at the median)  tick ${p.tickMs.median} ms  draws ${p.drawCalls.median}  CPU ${p.cpuPercent ? `${p.cpuPercent.min}/${p.cpuPercent.median}/${p.cpuPercent.max} %` : "-"}${p.peak ? `  peak ${JSON.stringify(p.peak)}` : ""}`);
         for (const [lab, pr] of Object.entries(run.profiles || {})) console.log(`  run ${run.run} profile ${lab}: ${pr.samples} samples, ${pr.sampledMs} ms over ${pr.updates} updates; top scripts (self) ${pr.selfByScript.slice(0, 5).map(e => `${e.fn} ${e.msPerUpdate}`).join(", ")} ms/update`);
     }
-    const code = report.runs.length === runs && failures === 0 ? 0 : (harness ? 2 : 1);
+    const code = newRuns.length === runs && failures === 0 ? 0 : (harness ? 2 : 1);
     console.log(`exit ${code}`);
     process.exit(code);
 })();

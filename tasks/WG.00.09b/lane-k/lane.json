@@ -28,11 +28,7 @@
     {
       "cmd": "node",
       "args": [
-        "tools/test_snapshot.js",
-        "--name",
-        "depth",
-        "--plugins",
-        "DEUS_Depth",
+        "tools/test_layer_render_flat.js",
         "--suite",
         "depth"
       ],
