@@ -1,0 +1,198 @@
+test_launch_worker: ops C:\Users\snewt\.deus_worktrees\lane-j\tools\ops; temp C:\Users\snewt\AppData\Local\Temp\deus_lw_test_11424_91473
+TEST refuse_missing_brief
+  PASS exit_1
+  PASS says_not_found
+  PASS no_registry_entry
+  PASS no_prompt_file
+  (0.5 s)
+TEST refuse_empty_brief
+  PASS exit_1
+  PASS says_empty
+  PASS no_registry_entry
+  PASS no_prompt_file
+  (0.5 s)
+TEST commit_run
+  PASS exit_0
+  PASS state_completed
+  PASS run_id_format
+  PASS prompt_saved
+  PASS prompt_tracked
+  PASS prompt_committed_before_worker
+  PASS worker_got_exact_prompt
+  PASS prompt_names_brief
+  PASS prompt_lists_allowed
+  PASS prompt_no_art_rule
+  PASS log_path
+  PASS log_has_stdout
+  PASS log_has_stderr
+  PASS exit_file
+  PASS registry_pid
+  PASS registry_process_start
+  PASS registry_start_end
+  PASS registry_exit_code
+  PASS registry_new_commit
+  PASS registry_launch_time_ct
+  PASS worker_process_gone
+  PASS env_author
+  PASS env_committer
+  PASS env_integrator_stripped
+  PASS commit_author_identity
+  PASS no_flags
+  (2.2 s)
+TEST resume_prompt
+  PASS exit_0
+  PASS first_line_exact
+  PASS still_names_brief
+  PASS registry_resume_sha
+  PASS no_head_mismatch
+  (1.9 s)
+TEST timeout_kill
+  PASS exit_2
+  PASS state_timeout
+  PASS timed_out_flag
+  PASS bounded_time
+  PASS worker_killed
+  PASS child_started
+  PASS child_killed
+  PASS log_has_output
+  PASS registry_end
+  (8.0 s)
+TEST orphaned_children
+  PASS exit_2
+  PASS state_orphaned
+  PASS orphan_pid_recorded
+  PASS orphan_left_running
+  PASS worker_committed
+  (3.2 s)
+TEST kill_orphans
+  PASS state_orphaned
+  PASS orphans_killed_flag
+  PASS orphan_dead
+  (3.4 s)
+TEST exited_no_commit
+  PASS exit_2
+  PASS state_exited_no_commit
+  PASS dirty_file_listed
+  PASS no_new_commit
+  (1.8 s)
+TEST clean_no_commit_is_ok
+  PASS flag_absent
+  (1.8 s)
+TEST scope_check
+  PASS exit_2
+  PASS state_out_of_scope
+  PASS entries_are_paths
+  PASS committed_outside_listed
+  PASS uncommitted_outside_listed
+  PASS allowed_not_listed
+  PASS committed_allowed_not_listed
+  PASS exactly_two
+  (2.1 s)
+TEST empty_log
+  PASS exit_2
+  PASS state_empty_log
+  PASS log_bytes_0
+  PASS log_file_exists
+  (1.7 s)
+TEST usage_claude_epoch
+  PASS exit_2
+  PASS state_usage
+  PASS matched_text
+  PASS reset_from_epoch
+  PASS provider_exhausted
+  PASS provider_reset
+  PASS queued_once
+  PASS queue_fields
+  PASS queue_last_commit
+  (1.9 s)
+TEST usage_clock_reset
+  PASS state_usage
+  PASS reset_source_clock
+  PASS reset_5pm_ct
+  PASS reset_within_a_day
+  (2.0 s)
+TEST usage_codex_relative
+  PASS state_usage
+  PASS reset_2h05
+  PASS matched_text
+  PASS codex_exhausted
+  (1.9 s)
+TEST usage_grok_default
+  PASS role_reviewer
+  PASS state_usage
+  PASS default_reset_60
+  PASS matched_429
+  (1.8 s)
+TEST usage_no_false_positive
+  PASS exit_0
+  PASS state_completed
+  PASS no_usage
+  PASS not_queued
+  (1.7 s)
+TEST lane_lock
+  PASS exit_1
+  PASS says_locked
+  PASS no_run
+  (3.6 s)
+TEST active_pid_refusal
+  PASS exit_1
+  PASS says_live_worker
+  PASS no_new_entry
+  (0.6 s)
+TEST stale_entry_marked_lost
+  PASS exit_0
+  PASS stale_marked_lost
+  (1.8 s)
+TEST family_refusal
+  PASS grok_writer_refused
+  PASS claude_reviewer_refused
+  PASS no_run
+  (0.9 s)
+TEST branch_refusal
+  PASS exit_1
+  PASS says_branch
+  (0.6 s)
+TEST hooks_install_and_block
+  PASS install_exit_0
+  PASS worktree_scoped_hookspath
+  PASS worktree_config_enabled
+  PASS main_not_guarded
+  PASS repo_wide_not_set
+  PASS global_not_set
+  PASS hook_copied_exactly
+  PASS push_blocked
+  PASS remote_untouched
+  PASS push_blocked_unless_exactly_1
+  PASS integrator_push_allowed
+  PASS remote_updated
+  PASS main_push_not_guarded
+  PASS check_reports_guarded
+  PASS check_reports_unguarded
+  (2.6 s)
+TEST hooks_refuse_main
+  PASS exit_1
+  PASS says_main
+  PASS main_not_guarded
+  PASS global_not_set
+  (0.4 s)
+TEST gate_registry
+  PASS valid_json
+  PASS gate_is_list_of_paths
+  PASS quarantine_has_path_and_reason
+  PASS gate_has_check_deus_syntax
+  PASS gate_has_test_palette
+  PASS gate_has_test_check_claims
+  PASS gate_has_test_strata_cuts_and_caves
+  PASS gate_has_test_new_game_year0
+  PASS gate_has_test_history_materialization_and_world_age
+  PASS gate_has_test_historical_carrying_capacity
+  PASS gate_has_test_geology_strata
+  PASS gate_has_test_strata_foundation
+  PASS z2_quarantined
+  PASS no_path_in_both
+  PASS no_duplicates
+  PASS all_paths_exist
+  (0.0 s)
+  PASS no_leftover_processes
+RESULT: PASS (147 checks, 0 failed)
+EXIT=0

@@ -1,0 +1,16 @@
+#!/bin/sh
+# DEUS lane push guard (WG.00.12 Lane J). Installed per lane worktree by tools/ops/install_lane_hooks.ps1.
+# Lane workers never push; only the integrator does, with DEUS_INTEGRATOR=1 set in its own shell.
+# git passes: $1 = remote name, $2 = remote URL; the refs being pushed arrive on stdin.
+
+if [ "${DEUS_INTEGRATOR:-}" = "1" ]; then
+    exit 0
+fi
+
+# Read the ref list so git never writes into a closed pipe.
+cat >/dev/null 2>&1
+
+branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+echo "pre-push: BLOCKED push of '${branch}' to '${1}'. Lane worktrees do not push (DEUS WG.00.12)." >&2
+echo "pre-push: the integrator pushes with DEUS_INTEGRATOR=1 set in its own shell." >&2
+exit 1

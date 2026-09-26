@@ -1,0 +1,13 @@
+﻿You are the primary implementer for Lane J (Task WG.00.12: Standard Worker Launcher & Pre-Push Guard).
+Read tasks/WG.00.12/lane-j/BRIEF.md carefully.
+Your worktree has tools/ops salvaged in commit dbab763f.
+Next steps:
+- Ensure tools/ops/test_launch_worker.ps1 and tools/ops/test_resume_queue.ps1 pass.
+- Write tools/ops/README.md.
+- Commit your work to task/lane-j with message starting with '[claude] WG.00.12'.
+Standing rules:
+1. One primary writer per file set.
+2. Workers never push. Only the integrator pushes.
+3. Capture the exit code of every command, one per command ('EXIT=$LASTEXITCODE'). Put raw values in your reports.
+4. FOREGROUND rule: Run tests in the FOREGROUND. Never end your turn while background jobs or child processes are running.
+5. NO ART (DEC-007).

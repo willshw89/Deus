@@ -1,0 +1,30 @@
+{
+  "lane": "lane-j",
+  "taskId": "WG.00.12",
+  "branch": "task/lane-j",
+  "writer": "claude",
+  "reviewer": "grok",
+  "allowedPaths": [
+    "tools/ops/launch_worker.ps1",
+    "tools/ops/gate_tests.json",
+    "tools/ops/hooks/pre-push",
+    "tools/ops/install_lane_hooks.ps1",
+    "tools/ops/test_launch_worker.ps1",
+    "tools/ops/README.md",
+    "tools/ops/resume_queue.ps1",
+    "tools/ops/test_resume_queue.ps1",
+    "tasks/WG.00.12/lane-j/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tools/ops/test_launch_worker.ps1"
+      ]
+    }
+  ]
+}
