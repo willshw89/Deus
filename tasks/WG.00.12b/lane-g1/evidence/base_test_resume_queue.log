@@ -1,0 +1,107 @@
+$ powershell -NoProfile -ExecutionPolicy Bypass -File tools/ops/test_resume_queue.ps1   (BASE temp clone C:\Users\snewt\AppData\Local\Temp\g1_base_053456 at 9cba41eaf6378048d50004dcf243defbfe7f17f4)
+test_resume_queue: ops C:\Users\snewt\AppData\Local\Temp\g1_base_053456\tools\ops; temp C:\Users\snewt\AppData\Local\Temp\deus_rq_test_11076_38287
+TEST not_due_no_probe
+  PASS exit_0
+  PASS not_probed
+  PASS reset_unchanged
+  PASS no_launch
+  PASS still_queued
+  PASS skip_reason
+  (0.8 s)
+TEST probe_fail_backoff
+  PASS exit_0
+  PASS all_three_probed
+  PASS late_reset_backs_off_from_now
+  PASS on_time_reset_plus_30
+  PASS unknown_reset_now_plus_30
+  PASS still_exhausted
+  PASS probe_result_usage
+  PASS no_launch
+  PASS still_queued
+  (1.9 s)
+TEST probe_ok_relaunch
+  PASS exit_0
+  PASS probed
+  PASS available
+  PASS reset_cleared
+  PASS launched_once
+  PASS launch_lane_provider
+  PASS launch_resume_sha
+  PASS launch_role_writer
+  PASS launch_brief
+  PASS entry_resumed
+  (1.5 s)
+TEST probe_timeout
+  PASS exit_0
+  PASS bounded_time
+  PASS timeout_recorded
+  PASS backed_off
+  PASS no_launch
+  (4.1 s)
+TEST live_pid_blocks
+  PASS no_launch
+  PASS still_queued
+  PASS skip_lane_active
+  (0.6 s)
+TEST launcher_pid_blocks
+  PASS no_launch
+  PASS skip_lane_active
+  (0.6 s)
+TEST dead_pid_does_not_block
+  PASS launched
+  (1.3 s)
+TEST lane_lock_blocks
+  PASS no_launch
+  PASS skip_locked
+  (0.6 s)
+TEST one_session_per_lane
+  PASS launched_once
+  PASS one_resumed_one_queued
+  (0.9 s)
+TEST failover_refuses_same_family
+  PASS no_launch
+  PASS still_queued
+  PASS reason_family
+  (0.6 s)
+TEST failover_to_distinct_family
+  PASS launched_once
+  PASS codex_writer
+  PASS failover_recorded
+  (1.0 s)
+TEST reviewer_role_preserved
+  PASS launched_once
+  PASS not_claude
+  PASS codex_reviewer
+  (1.0 s)
+TEST no_failover_without_flag
+  PASS no_launch
+  PASS still_queued
+  (0.6 s)
+TEST codex_probed
+  PASS codex_probed
+  PASS codex_available
+  (1.1 s)
+TEST launch_failure_requeues
+  PASS exit_1
+  PASS launcher_called
+  PASS back_to_queued
+  PASS error_recorded
+  (0.9 s)
+TEST dry_run_writes_nothing
+  PASS exit_0
+  PASS status_unchanged
+  PASS no_probe
+  PASS no_launch
+  PASS says_would_probe
+  (0.6 s)
+TEST end_to_end_real_launcher
+  PASS exit_0
+  PASS resumed_verified
+  PASS run_completed
+  PASS resume_prompt
+  PASS same_provider
+  (2.1 s)
+  PASS no_leftover_processes
+RESULT: PASS (68 checks, 0 failed)
+EXIT=0
+wall=21 s

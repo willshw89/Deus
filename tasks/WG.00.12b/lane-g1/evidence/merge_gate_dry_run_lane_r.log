@@ -1,0 +1,133 @@
+# throwaway gate clone C:\Users\snewt\AppData\Local\Temp\g1_gateclone_053404 of the lane-g1 worktree repository: main d655c122ab00eb8ee863a7fda990369f4c4574c0 checked out; task/lane-r d1fdf14730745ee73f8dcab6d4c6cb3a414c27d0 and task/lane-k abdb6bbefb3ae128b1647f5ef3af4b6c6e44a7f2 created from origin/*. All runs use --dry-run.
+# old gate = tools/governance/merge_gate.js at base 9cba41ea (git show); new gate = the evidence clone's copy at 3387244fbc7f6151360506c523ef66d8dbc3196c
+# git log task/lane-r -- tasks/SIM.40.05/lane-r/lane.json:
+#   d9766aa25fb98095bf48b217412a54c9e046d517 84ee3b55f3f8c1b8a16710ccf3878795d98d1683 | [pm] Open lane-r (SIM.40.05): BRIEF.md and lane.json
+# git log task/lane-k -- tasks/WG.00.09b/lane-k/lane.json:
+#   e3896d7623b57bca165ffede272c26d9c7c7afd5 dcd5d465f00e2067a8fdc7a2de4ea10e8a676fab | [claude] WG.00.09b Fix1: deterministic gates (fixture scene, condition waits, tick-based step, report-only timings), seam-safe item/wall windows (B1), per-run snapshot dirs, bench machineLoad
+#   84f6d072c40032bb19ec22b71c1fe5db5d406930 8592b07aa9315c1cdd2c8d29e1a6d37d3d055deb | [gemini] 0017-Q sec2 Lane K brief + manifest (WG.00.09b)
+
+######## OLD gate: $ node <OLD merge_gate.js> --lane lane-r --manifest tasks/SIM.40.05/lane-r/lane.json --dry-run
+
+# DEUS merge gate summary (tools/governance/merge_gate.js)
+| Item | Value |
+|---|---|
+| lane | lane-r |
+| branch | task/lane-r |
+| manifest | tasks/SIM.40.05/lane-r/lane.json |
+| mode | dry-run |
+| repository | C:\Users\snewt\AppData\Local\Temp\g1_gateclone_053404 |
+
+## Refs (raw values after git fetch origin)
+| Ref | Command | Hash |
+|---|---|---|
+| local branch | git rev-parse refs/heads/task/lane-r | d1fdf14730745ee73f8dcab6d4c6cb3a414c27d0 |
+| tracking ref | git rev-parse refs/remotes/origin/task/lane-r | d1fdf14730745ee73f8dcab6d4c6cb3a414c27d0 |
+| remote branch | git ls-remote origin refs/heads/task/lane-r | d1fdf14730745ee73f8dcab6d4c6cb3a414c27d0 |
+| local main | git rev-parse refs/heads/main | d655c122ab00eb8ee863a7fda990369f4c4574c0 |
+| tracking main | git rev-parse refs/remotes/origin/main | d655c122ab00eb8ee863a7fda990369f4c4574c0 |
+| remote main | git ls-remote origin refs/heads/main | d655c122ab00eb8ee863a7fda990369f4c4574c0 |
+| main worktree | git worktree list --porcelain | C:/Users/snewt/AppData/Local/Temp/g1_gateclone_053404 |
+| merge-base | git merge-base d655c122 d1fdf147 | 84ee3b55f3f8c1b8a16710ccf3878795d98d1683 |
+| checked sha | (local branch tip; every check reads this commit) | d1fdf14730745ee73f8dcab6d4c6cb3a414c27d0 |
+
+## Manifest
+| Item | Value |
+|---|---|
+| path | tasks/SIM.40.05/lane-r/lane.json |
+| blob at tip | aea7ac28da5d90180ae4745de135f6d9798fa3f5 |
+| changed by | d9766aa25fb98095bf48b217412a54c9e046d517 [pm] Open lane-r (SIM.40.05): BRIEF.md and lane.json |
+| writer / reviewer | - |
+
+## Checks
+| Check | Result | Reason codes |
+|---|---|---|
+| refs | PASS | - |
+| (a) manifest | REFUSED | MANIFEST_TAMPERED |
+| (a) scope | SKIPPED (manifest not trusted) | - |
+| (b) review | SKIPPED (manifest not trusted) | - |
+| (c) tests | SKIPPED (manifest not trusted) | - |
+| (d) pushed | PASS | - |
+| (e) main | PASS | - |
+| (f) execution | NOT RUN (refused) | - |
+
+REFUSED MANIFEST_TAMPERED: d9766aa25fb98095bf48b217412a54c9e046d517 "[pm] Open lane-r (SIM.40.05): BRIEF.md and lane.json" changed tasks/SIM.40.05/lane-r/lane.json; only [gemini] commits may change it
+GATE: REFUSED (exit 1)
+EXIT=1
+
+######## NEW gate: $ node <NEW merge_gate.js> --lane lane-r --manifest tasks/SIM.40.05/lane-r/lane.json --dry-run
+.. test 1/1: node -e "const fs=require('fs');const d='tasks/SIM.40.05/lane-r/';const t=JSON.parse(fs.readFileSync(d+'trace.json','utf8'));const md=fs.readFileSync(d+'SIM.40.05_DECAY_CYCLE.md','utf8');const want=Array.from({length:12},(_,i)=>'R-'+String(i+1).padStart(2,'0'));const S=['COVERED','PARTIAL','OWNER_QUESTION'];const r=t.requirements||[];const ids=r.map(x=>x.id);const bad=r.filter(x=>!S.includes(x.status)||!x.section||!md.includes(x.section));const miss=want.filter(w=>!ids.includes(w));const H=['## Decay drivers','## Structure stages','## Metals and items','## Fire residue','## Decay-driven collapse','## Nature reclaiming','## Ruins and re-founding','## Deep history and LOD','## Matter ledger long-run test','## Sparse storage and cost','## Acceptance tests','## WBS impact','## Owner questions'];const mh=H.filter(h=>!md.includes(h));const b=Buffer.byteLength(md);const oq=(t.ownerQuestions||[]).length;console.log('task',t.task,'reqs',r.length,'missing',miss.join(',')||'none','bad',bad.map(x=>x.id).join(',')||'none','missingHeadings',mh.join('|')||'none','ownerQuestions',oq,'mdBytes',b);if(t.task!=='SIM.40.05'||miss.length||bad.length||mh.length||r.length!==want.length||oq<1||b<24000)process.exit(1)" (timeout 60 s) in C:\Users\snewt\AppData\Local\Temp\deus-merge-gate-af9279\clone-1
+
+# DEUS merge gate summary (tools/governance/merge_gate.js)
+| Item | Value |
+|---|---|
+| lane | lane-r |
+| branch | task/lane-r |
+| manifest | tasks/SIM.40.05/lane-r/lane.json |
+| mode | dry-run |
+| repository | C:\Users\snewt\AppData\Local\Temp\g1_gateclone_053404 |
+
+## Refs (raw values after git fetch origin)
+| Ref | Command | Hash |
+|---|---|---|
+| local branch | git rev-parse refs/heads/task/lane-r | d1fdf14730745ee73f8dcab6d4c6cb3a414c27d0 |
+| tracking ref | git rev-parse refs/remotes/origin/task/lane-r | d1fdf14730745ee73f8dcab6d4c6cb3a414c27d0 |
+| remote branch | git ls-remote origin refs/heads/task/lane-r | d1fdf14730745ee73f8dcab6d4c6cb3a414c27d0 |
+| local main | git rev-parse refs/heads/main | d655c122ab00eb8ee863a7fda990369f4c4574c0 |
+| tracking main | git rev-parse refs/remotes/origin/main | d655c122ab00eb8ee863a7fda990369f4c4574c0 |
+| remote main | git ls-remote origin refs/heads/main | d655c122ab00eb8ee863a7fda990369f4c4574c0 |
+| main worktree | git worktree list --porcelain | C:/Users/snewt/AppData/Local/Temp/g1_gateclone_053404 |
+| merge-base | git merge-base d655c122 d1fdf147 | 84ee3b55f3f8c1b8a16710ccf3878795d98d1683 |
+| checked sha | (local branch tip; every check reads this commit) | d1fdf14730745ee73f8dcab6d4c6cb3a414c27d0 |
+
+## Manifest
+| Item | Value |
+|---|---|
+| path | tasks/SIM.40.05/lane-r/lane.json |
+| blob at tip | aea7ac28da5d90180ae4745de135f6d9798fa3f5 |
+| changed by | d9766aa25fb98095bf48b217412a54c9e046d517 [pm] Open lane-r (SIM.40.05): BRIEF.md and lane.json |
+| writer / reviewer | claude / grok |
+
+## Diff (git diff --name-status 84ee3b55 d1fdf147): 11 file(s)
+| # | Status | Path | In allowedPaths |
+|---|---|---|---|
+| 1 | A | tasks/SIM.40.05/lane-r/BRIEF.md | yes |
+| 2 | A | tasks/SIM.40.05/lane-r/BRIEF_FIX1.md | yes |
+| 3 | A | tasks/SIM.40.05/lane-r/REPORT.md | yes |
+| 4 | A | tasks/SIM.40.05/lane-r/SIM.40.05_DECAY_CYCLE.md | yes |
+| 5 | A | tasks/SIM.40.05/lane-r/lane.json | yes |
+| 6 | A | tasks/SIM.40.05/lane-r/launches/20260926_033114_prompt.txt | yes |
+| 7 | A | tasks/SIM.40.05/lane-r/launches/20260926_034659_prompt.txt | yes |
+| 8 | A | tasks/SIM.40.05/lane-r/launches/20260926_044230_prompt.txt | yes |
+| 9 | A | tasks/SIM.40.05/lane-r/review_grok_6613418f.md | yes |
+| 10 | A | tasks/SIM.40.05/lane-r/review_grok_9a2908fb.md | yes |
+| 11 | A | tasks/SIM.40.05/lane-r/trace.json | yes |
+
+## Review
+| Item | Value |
+|---|---|
+| review commit | d1fdf14730745ee73f8dcab6d4c6cb3a414c27d0 [grok] SIM.40.05 review 9a2908fb |
+| reviewer file | tasks/SIM.40.05/lane-r/review_grok_9a2908fb.md |
+| expected file | tasks/SIM.40.05/lane-r/review_grok_9a2908fb.md |
+| last non-review commit | 9a2908fbe7741d22cacf2fe18b84ecb4c272526d [claude] SIM.40.05 Fix1 REPORT.md: findings and changes, gate in a temp clone of 6ff05cfe, checks and counts |
+| full hashes in file | 9a2908fbe7741d22cacf2fe18b84ecb4c272526d, 6613418ff5539c4156c5f42d589913d479dc0853, 6ff05cfee2357fe3a5d1e0a481789a65989371e1, 5a0627aec679f0ec443c1d474d65fd4a80bc28cc, 49a96d079812d34afb83694197176eda8b4a0439, a98a9af133587245ec979143397ea6aaf772eb9d, 27688ca573777f0fc15b0da1038a90c8476c4c8b, c3acb0db8e7a5b540c49552f9ba980f75ac6b9ad, 8d23c64c278f057c81e6a9a13968819d2cb3c6f7, b2cc93610b7478b407eb05944f433ac8fcd9424e, 84ee3b55f3f8c1b8a16710ccf3878795d98d1683, fd256fc5316adf70e8ba4fb0540014a87ca82fb7, 63b6f20707fbb20cee5d77928aa3128098dce89d, 9d5b40d32f96a38803b1f32f78287a902d2bead8, bed949e839c4b9a06d467a6f36be50891fd70be5, 8997e238a97c7a4a2405d5e7249f587b4d8b298d, 9e0ef94d36ace947ea30426a107e0a80e434f3be, 3b33faa5b1ce77ce2de52773064d865d017489cb, be11aaf69953592618cade751ea23f986e3a68e3 |
+| verdict | VERDICT: PASS |
+
+## Tests (spawnSync, no shell; each in a fresh clone at the checked sha)
+| # | Command | Timeout | Exit | Duration | Result |
+|---|---|---|---|---|---|
+| 1 | node -e "const fs=require('fs');const d='tasks/SIM.40.05/lane-r/';const t=JSON.parse(fs.readFileSync(d+'trace.json','utf8'));const md=fs.readFileSync(d+'SIM.40.05_DECAY_CYCLE.md','utf8');const want=Array.from({length:12},(_,i)=>'R-'+String(i+1).padStart(2,'0'));const S=['COVERED','PARTIAL','OWNER_QUESTION'];const r=t.requirements\|\|[];const ids=r.map(x=>x.id);const bad=r.filter(x=>!S.includes(x.status)\|\|!x.section\|\|!md.includes(x.section));const miss=want.filter(w=>!ids.includes(w));const H=['## Decay drivers','## Structure stages','## Metals and items','## Fire residue','## Decay-driven collapse','## Nature reclaiming','## Ruins and re-founding','## Deep history and LOD','## Matter ledger long-run test','## Sparse storage and cost','## Acceptance tests','## WBS impact','## Owner questions'];const mh=H.filter(h=>!md.includes(h));const b=Buffer.byteLength(md);const oq=(t.ownerQuestions\|\|[]).length;console.log('task',t.task,'reqs',r.length,'missing',miss.join(',')\|\|'none','bad',bad.map(x=>x.id).join(',')\|\|'none','missingHeadings',mh.join('\|')\|\|'none','ownerQuestions',oq,'mdBytes',b);if(t.task!=='SIM.40.05'\|\|miss.length\|\|bad.length\|\|mh.length\|\|r.length!==want.length\|\|oq<1\|\|b<24000)process.exit(1)" | 60 s | 0 | 0.04 s | PASS |
+
+## Checks
+| Check | Result | Reason codes |
+|---|---|---|
+| refs | PASS | - |
+| (a) manifest | PASS | - |
+| (a) scope | PASS | - |
+| (b) review | PASS | - |
+| (c) tests | PASS | - |
+| (d) pushed | PASS | - |
+| (e) main | PASS | - |
+| (f) execution | SKIPPED (dry-run) | - |
+
+GATE: PASS (exit 0)
+EXIT=0
