@@ -1288,7 +1288,7 @@ function buildReferences(ctx, S, cat) {
         if (r.tracked) {
             if (!present) { verification = 'MISSING'; S.stats.errors.push({ code: 'REF_MISSING', id: r.path, msg: 'tracked reference is missing' }); }
             else if (sha256(ctx.buf(r.path)) !== r.sha256) { verification = 'MISMATCH'; S.stats.errors.push({ code: 'REF_HASH', id: r.path, msg: 'tracked reference does not hash-match its pin' }); }
-            else verification = 'VERIFIED';
+            else verification = 'HASH_MATCH';
         } else {
             if (!present) { verification = 'UNVERIFIED_ABSENT'; S.stats.warnings.push(`UNVERIFIED_ABSENT ${r.path} (untracked third-party reference not present in this checkout)`); }
             else if (sha256(ctx.buf(r.path)) !== r.sha256) { verification = 'UNVERIFIED_ABSENT'; S.stats.warnings.push(`UNVERIFIED_MISMATCH ${r.path} differs from its pin`); }
@@ -1432,7 +1432,7 @@ function buildConflicts(ctx, S, cat, sizeDoc, scaleRows) {
     li(`${SRC.manifest} has ${manifest.length} registered rows (lines ${manifest.length ? manifest[0].line + '-' + manifest[manifest.length - 1].line : '-'}); 20 are claimed (${at('tasks/WG.20.02/lane-s/BRIEF.md', 'ASSET_MANIFEST 18 rows vs 20 claimed')}). The claim's own location was not found in docs/, tasks/ or art/.`);
     for (const c of claims.filter(x => ['standards', 'manifest', 'naming', 'lighting', 'biomes', 'bands'].includes(x.topic))) li(claimLine(c));
     const ghost = manifest.filter(r => /YES/.test(r.verified) && !ctx.exists('game/' + r.sheet));
-    if (ghost.length) li(`${SRC.manifest} marks ${ghost.length} rows IN-GAME VERIFIED YES whose sheet file is not in game/: ${ghost.map(r => '`' + r.id + '` -> game/' + r.sheet + ` (${SRC.manifest}:${r.line})`).join('; ')}. The catalogue marks them MISSING.`);
+    if (ghost.length) li(`${SRC.manifest} marks ${ghost.length} rows "IN-GAME VERIFIED: YES" whose sheet file is not in game/: ${ghost.map(r => '`' + r.id + '` -> game/' + r.sheet + ` (${SRC.manifest}:${r.line})`).join('; ')}. The catalogue marks them MISSING.`);
     const briefVsAr = [];
     for (const b of briefs) for (const a of b.ars) if (!requests.some(r => r.id === a)) briefVsAr.push(`${b.sourceId} cites ${a} (${b.file}:${b.line})`);
     if (briefVsAr.length) li(`brief headings citing AR ids with no request row: ${uniq(briefVsAr).join('; ')}`);
