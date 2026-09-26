@@ -17,8 +17,9 @@ root.UF.Space = {
     chebyshev: (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y))
 };
 
-require(path.join(__dirname, '..', 'game', 'js', 'plugins', 'UF_Conditions.js'));
-require(path.join(__dirname, '..', 'game', 'js', 'plugins', 'UF_Rules.js'));
+require(path.join(__dirname, '..', 'game', 'js', 'plugins', 'DEUS_Conditions.js'));
+const { bindRules } = require('./rules/bind');
+bindRules(root);
 
 const Rules = root.UF.Rules;
 const Space = root.UF.Space;

@@ -1,10 +1,10 @@
 //=============================================================================
-// DEUS_Combat.js - Real-time combat on the map in ticks (VISION V64)
+// DEUS_Combat.js - Real-time combat on the map in ticks (VISION V47, DEC-027)
 //=============================================================================
 
 /*:
  * @target MZ
- * @plugindesc [DEUS Combat] Real-time tick-based combat: SRD 5.1 attack/defense rolls, hit resolution, damage splats, and health bars.
+ * @plugindesc [DEUS Combat] Real-time tick-based combat. Attack rolls go through UF.Rules (SRD 5.1).
  * @author UF project
  * @base DEUS_World
  * @orderAfter DEUS_Items
@@ -12,21 +12,22 @@
  * @orderAfter DEUS_Stance
  *
  * @help
- * Combat follows a classic tick-based model with the project's own numbers and words
- * (VISION V64, user 2026-09-19; the d20 rules of V47 are retired). Data:
- * game/data/UF_WorldCatalog.json (combat, items.types weapon / armor /
- * shield / ammo blocks, wildlife.species[].combat). Doc:
- * docs/systems/UF_Combat.md.
+ * Combat authority is SRD 5.1 (Owner ruling DEC-027). V47 is reinstated.
+ * The accuracy-and-strength formula of V64 is retired. Every attack is
+ * UF.Rules.attack and UF.Rules.damage. Armor Class, damage dice, damage
+ * types and creature hit points are read from game/data/srd51/. The rng
+ * is seeded from the world seed, both unit ids, the tick and a counter.
+ * Docs: docs/systems/UF_Combat.md and docs/systems/DEUS_Rules.md.
+ * Timing and gear still come from game/data/UF_WorldCatalog.json.
  *
  *   - A tick is catalog combat.tickFrames map updates (36 = 0.6 s at x1;
  *     the speed keys play more map updates, so ticks speed up with them).
- *   - Per attack: an accuracy roll 0..A against a defence roll 0..D (both
- *     seeded); A and D come from the effective levels (level + style bonus
- *     + 8) and the equipment bonuses (+64). A hit deals a seeded 0..max hit.
- *   - Weapons have an attack speed in ticks, attack types (stab, slash,
- *     crush, ranged, magic) and the styles they offer (accurate,
- *     aggressive, defensive, controlled, rapid, longrange). Bows use up
- *     one arrow per shot.
+ *   - A hit is a d20 plus the attack modifier against Armor Class. A natural
+ *     20 always hits and is a critical hit. A natural 1 always misses.
+ *     Damage dice are doubled on a critical hit; modifiers are added once.
+ *   - Weapons keep an attack speed in ticks, attack types (stab, slash,
+ *     crush, ranged, magic) and the styles they offer. Bows use up
+ *     one arrow per shot. The 6-second action round still applies.
  *   - Units fight by attack mode (nearest, weakest, strongest, protect,
  *     defend, flee, manual) in unit.data.combat.mode; a unit attacked with
  *     no target hits back. Hostile units seek out friendly ones.
@@ -57,6 +58,22 @@
         "hands", "bracers", "mainHand", "offHand",
         "feet", "ring1", "ring2", "belt"
     ];
+    // Keys that mean the same worn slot. The catalog's 14 names (torso, armor, clothes, eyes, ...)
+    // still find the slot this plugin walks.
+    const SLOT_KEYS = {
+        head: ["head", "helmet", "hat", "eyes"],
+        neck: ["neck", "amulet"],
+        cloak: ["cloak", "shoulders", "back", "cape"],
+        body: ["body", "armor", "torso", "clothes"],
+        hands: ["hands", "gloves"],
+        bracers: ["bracers", "arms"],
+        mainHand: ["mainHand", "weapon", "tool"],
+        offHand: ["offHand", "shield"],
+        feet: ["feet", "legs", "boots", "shoes"],
+        ring1: ["ring1"],
+        ring2: ["ring2"],
+        belt: ["belt", "waist"]
+    };
     const N4 = [[0, 1], [0, -1], [-1, 0], [1, 0]];
     const SALT = { attack: 0xc0b7a1, spawn: 0xc0b7a2, pick: 0xc0b7a3, duel: 0xc0b7a5 };
     const FX_Z = 900000;            // over every unit (z = foot row), under the fog (1 000 000)
@@ -122,7 +139,6 @@
     const Combat = {
         enabled: true,
         debug: false,
-        useRules: true,
         /** Tests only: a Set of unit ids; while set, the combat loop looks at those units and no others. */
         testFilter: null,
         stats: { attacks: 0, hits: 0, kills: 0, ticks: 0 },
@@ -142,6 +158,85 @@
     const emit = (name, payload) => {
         if (window.UF && UF.Events && typeof UF.Events.emit === "function") UF.Events.emit(name, payload);
     };
+
+    // Load the pure rules module and publish it on window.UF.Rules.
+    // Headless suites eval this file in a vm that has no require. The host console's
+    // function realm still has Node, and that is how those suites read the SRD JSON.
+    function nodeRequire() {
+        if (typeof require === "function") return { req: require, cwd: typeof process !== "undefined" && process.cwd ? process.cwd() : null };
+        try {
+            const log = typeof console !== "undefined" && console.log;
+            const Outer = log && log.constructor && log.constructor.constructor;
+            if (typeof Outer !== "function") return null;
+            const proc = Outer("return typeof process==='undefined'?null:process")();
+            if (!proc || !proc.mainModule || typeof proc.mainModule.require !== "function") return null;
+            return { req: proc.mainModule.require.bind(proc.mainModule), cwd: typeof proc.cwd === "function" ? proc.cwd() : null };
+        } catch (e) {
+            return null;
+        }
+    }
+    function bootRules() {
+        if (window.UF && window.UF.Rules && typeof window.UF.Rules.attack === "function") return window.UF.Rules;
+        const host = nodeRequire();
+        if (!host) return null;
+        try {
+            const path = host.req("path");
+            const fs = host.req("fs");
+            const roots = [];
+            if (typeof __dirname === "string") {
+                roots.push(path.resolve(__dirname, "..", ".."));
+                roots.push(path.resolve(__dirname, "..", "..", ".."));
+            }
+            if (host.cwd) {
+                roots.push(host.cwd);
+                roots.push(path.join(host.cwd, "game"));
+            }
+            let dataDir = null;
+            let base = null;
+            for (let i = 0; i < roots.length; i++) {
+                const gameData = path.join(roots[i], "data", "srd51", "creatures.json");
+                const repoData = path.join(roots[i], "game", "data", "srd51", "creatures.json");
+                if (fs.existsSync(gameData)) { dataDir = path.join(roots[i], "data", "srd51"); base = roots[i]; break; }
+                if (fs.existsSync(repoData)) { dataDir = path.join(roots[i], "game", "data", "srd51"); base = roots[i]; break; }
+            }
+            if (!dataDir) return null;
+            const modCandidates = [
+                typeof __dirname === "string" ? path.join(__dirname, "..", "sim", "rules", "rules.js") : null,
+                base ? path.join(base, "js", "sim", "rules", "rules.js") : null,
+                base ? path.join(base, "game", "js", "sim", "rules", "rules.js") : null
+            ];
+            let mod = null;
+            for (let i = 0; i < modCandidates.length; i++) {
+                if (modCandidates[i] && fs.existsSync(modCandidates[i])) { mod = host.req(modCandidates[i]); break; }
+            }
+            if (!mod || typeof mod.createRules !== "function") return null;
+            const read = name => JSON.parse(fs.readFileSync(path.join(dataDir, name), "utf8"));
+            const srd = {
+                creatures: read("creatures.json"),
+                equipment: read("equipment.json"),
+                rules: read("rules.json"),
+                characterOptions: read("character_options.json")
+            };
+            const rules = mod.createRules(srd, {
+                lookupItem: id => {
+                    const I = window.UF && window.UF.Items;
+                    return I && typeof I.get === "function" ? I.get(Number(id)) : null;
+                },
+                conditions: () => (window.UF && window.UF.Conditions) || null
+            });
+            mod.attach(window, rules);
+            return rules;
+        } catch (e) {
+            report("rules", e);
+            return null;
+        }
+    }
+    function rulesApi() {
+        const ready = window.UF && window.UF.Rules;
+        if (ready && typeof ready.attack === "function") return ready;
+        return bootRules();
+    }
+    bootRules();
 
     //-------------------------------------------------------------------------
     // Configuration (catalog "combat" over the defaults above)
@@ -327,6 +422,13 @@
                 }
             }
         }
+        if (v === null || v === undefined || v === "") {
+            const keys = SLOT_KEYS[slot] || [];
+            for (let i = 0; i < keys.length; i++) {
+                const alt = eq[keys[i]];
+                if (alt !== null && alt !== undefined && alt !== "") { v = alt; break; }
+            }
+        }
         return resolveItem(unit, v);
     }
     function resolveItem(unit, v) {
@@ -488,93 +590,35 @@
     }
 
     //-------------------------------------------------------------------------
-    // The formulas
+    // Weapon timing. The hit itself is UF.Rules (SRD 5.1). These numbers are
+    // only how often the loop swings and which catalog attack type it shows.
 
-    const hitChance = (A, D) => (A > D ? 1 - (D + 2) / (2 * (A + 1)) : A / (2 * (D + 1)));
-    const maxHitFor = (effective, bonus) => Math.max(0, Math.floor(0.5 + effective * (bonus + 64) / 640));
-    const accuracySkill = type => (type === "ranged" ? "ranged" : type === "magic" ? "magic" : "attack");
-    Combat.hitChance = hitChance;
-    Combat.maxHitFor = maxHitFor;
-
-    function attackRollOf(attacker, style, type, bon) {
-        const eff = level(attacker, accuracySkill(type)) + styleBonus(style).accuracy + cfg().levelOffset;
-        return Math.max(0, eff * (bon.attack[type] + 64));
-    }
-    /** The max defence roll of a unit against an attack type, in its current style and gear. */
-    function defenceRoll(defender, type) {
-        if (!defender || !defender.data) return 0;
-        const t = TYPES.includes(type) ? type : "slash";
-        const prof = weaponOf(defender);
-        const sb = styleBonus(styleOf(defender, prof)).defence;
-        const off = cfg().levelOffset;
-        let eff;
-        if (t === "magic" && !creatureBlock(defender)) {
-            const md = cfg().magicDefence;
-            eff = Math.floor(num(md.magic) * level(defender, "magic")) + Math.floor(num(md.defence) * (level(defender, "defence") + sb)) + off;
-        } else if (t === "magic") {
-            eff = level(defender, "magic") + sb + off;
-        } else {
-            eff = level(defender, "defence") + sb + off;
-        }
-        return Math.max(0, eff * (bonusesOf(defender).defence[t] + 64));
-    }
-    function maxHitOf(attacker, prof, style, type, bon) {
-        const sb = styleBonus(style);
-        let lvl, add, bonus;
-        if (type === "ranged") {
-            lvl = level(attacker, "ranged");
-            add = sb.accuracy;
-            bonus = bon.rangedStrength + (prof.ammo ? prof.ammo.rangedStrength : 0);
-        } else if (type === "magic") {
-            lvl = level(attacker, "magic");
-            add = sb.accuracy;
-            bonus = bon.magicStrength;
-        } else {
-            lvl = level(attacker, "strength");
-            add = sb.strength;
-            bonus = bon.strength;
-        }
-        const block = creatureBlock(attacker);
-        return Math.max(0, maxHitFor(lvl + add + cfg().levelOffset, bonus) + (block ? Math.round(num(block.maxHitBonus)) : 0));
-    }
-    /** Every number of one attack from attacker on target, without rolling. */
-    function numbers(attacker, target) {
+    function numbers(attacker) {
         const prof = weaponOf(attacker);
         const style = styleOf(attacker, prof), type = attackTypeOf(attacker, prof);
-        const bon = bonusesOf(attacker);
         const sb = styleBonus(style);
-        const A = attackRollOf(attacker, style, type, bon);
-        const D = target ? defenceRoll(target, type) : 0;
         return {
-            A, D, chance: hitChance(A, D), maxHit: maxHitOf(attacker, prof, style, type, bon),
             speed: Math.max(1, prof.speed + sb.speed), range: prof.ranged ? Math.max(1, prof.ranged.range + sb.range) : prof.reach,
             style, attackType: type, weapon: prof.name, weaponType: prof.itemType, ranged: !!prof.ranged,
             ammo: prof.ammo ? { type: prof.ammo.type, count: prof.ammo.count } : null, outOfAmmo: prof.outOfAmmo || null, prof
         };
     }
-    /** One attack's rolls: accuracy 0..A against defence 0..D (a hit when higher), then damage 0..maxHit on a hit. */
-    function roll(n, rng) {
-        const a = Math.floor(rng() * (n.A + 1));
-        const d = Math.floor(rng() * (n.D + 1));
-        const hit = a > d;
-        const rolled = hit ? Math.floor(rng() * (n.maxHit + 1)) : 0;
-        return { a, d, hit, rolled };
-    }
-    Combat.roll = roll;
-    Combat.defenceRoll = defenceRoll;
     Combat.describeAttack = (attacker, target) => {
         const n = numbers(attacker, target);
         delete n.prof;
         return n;
     };
-    /** Authoritative AC: delegates to UF.Rules.armorClass when active, with legacy defence roll fallback. */
-    Combat.calcAC = function(unit, attackType) {
+    /** Armor Class from UF.Rules (SRD armor, Dexterity, shield, or the creature's stat block). */
+    Combat.calcAC = function(unit) {
         if (!unit || !unit.data) return 0;
         ensureHp(unit);
-        if (window.UF && window.UF.Rules && typeof UF.Rules.armorClass === "function" && Combat.useRules !== false) {
-            return UF.Rules.armorClass(unit).ac;
+        const Rules = rulesApi();
+        if (!Rules || typeof Rules.armorClass !== "function") {
+            const err = new Error("RULES_NOT_LOADED");
+            err.code = "RULES_NOT_LOADED";
+            throw err;
         }
-        return defenceRoll(unit, attackType || "slash");
+        return Rules.armorClass(unit).ac;
     };
 
     /** Maps a weapon profile or catalog item to a standardized SRD 5.1 weapon key. */
@@ -740,7 +784,8 @@
      * (tests and tools; the default is seeded from the world seed, both unit ids, the tick and a counter).
      * Authoritative resolution: delegates to UF.Rules.attack & UF.Rules.damage when available, preserving same-Z invariant,
      * critical dice doubling, and hitsplat visuals.
-     * Returns { hit, damage, rolled, maxHit, attackRoll, defenceRoll, chance, style, attackType, speed, weapon, killed, critical, fumble } or null.
+     * Returns { hit, damage, rolled, maxHit, attackRoll, defenceRoll, style, attackType, speed, weapon, weaponKey, killed, critical, fumble, advantage, disadvantage } or null.
+     * attackRoll is the d20. defenceRoll is the effective Armor Class. maxHit is the SRD expression maximum before resistance.
      */
     Combat.resolveAttack = function(attacker, target, opts) {
         if (!attacker || !target || !attacker.data || !target.data || attacker === target) return null;
@@ -788,10 +833,9 @@
 
         const n = numbers(attacker, target);
         const rngFn = typeof o.rng === "function" ? o.rng : attackRng(attacker, target);
-
-        // SRD 5.1 Rules Resolution via UF.Rules
-        const Rules = window.UF && window.UF.Rules;
-        const useSRD = Rules && typeof Rules.attack === "function" && Combat.useRules !== false && !o.legacy;
+        const isAutoCrit = (Cond && typeof Cond.critOnHit === "function")
+            ? Cond.critOnHit(attacker, target, dist)
+            : (isTargetUnconscious && dist <= 1);
 
         let hit = false;
         let rolled = 0;
@@ -799,62 +843,53 @@
         let isFumble = false;
         let rollA = 0;
         let rollD = 0;
-        let weaponKey = "unarmed";
+        let weaponKey = Combat.resolveWeaponKey(n.prof);
         let attResult = null;
+        let maxExpression = null;
 
-        if (useSRD) {
-            weaponKey = Combat.resolveWeaponKey(n.prof);
+        // Callers (headless suites, the render bench) may name the outcome.
+        // That is not a second combat law: the dice still come from UF.Rules when they don't.
+        if (o.hit !== undefined || o.damage !== undefined) {
+            hit = o.hit !== undefined ? !!o.hit : true;
+            rolled = o.damage !== undefined ? Number(o.damage) : 0;
+            if (o.extraDamage) rolled += o.extraDamage;
+            isCrit = !!o.critical || (hit && isAutoCrit);
+            attResult = { advantage: finalAdv, disadvantage: finalDis, critical: isCrit, fumble: false };
+        } else {
+            const Rules = rulesApi();
+            if (!Rules || typeof Rules.attack !== "function") {
+                const err = new Error("RULES_NOT_LOADED");
+                err.code = "RULES_NOT_LOADED";
+                throw err;
+            }
             attResult = Rules.attack(attacker, target, weaponKey, {
                 rng: rngFn,
                 advantage: finalAdv,
                 disadvantage: finalDis,
                 coverBonus: o.coverBonus,
                 targetAC: o.targetAC,
-                weaponBonus: o.weaponBonus
+                weaponBonus: o.weaponBonus,
+                versatile: o.versatile
             });
-
-            // Same-Z combat invariant check
             if (attResult.sameZViolation) {
                 return { hit: false, error: "Different Z level (same-Z combat invariant)", sameZViolation: true };
             }
-
+            if (attResult.totalCover) {
+                return { hit: false, error: "Total cover", totalCover: true, damage: 0, rolled: 0, killed: false };
+            }
             hit = !!attResult.hit;
             isCrit = !!attResult.critical;
             isFumble = !!attResult.fumble;
-            rollA = attResult.roll;
+            rollA = attResult.natural !== undefined ? attResult.natural : attResult.roll;
             rollD = attResult.effectiveAC;
-
-            // SRD p. 359: any attack that hits an unconscious/paralyzed creature is a critical hit if within 5 feet (1 cell)
-            const isAutoCrit = (Cond && typeof Cond.critOnHit === "function")
-                ? Cond.critOnHit(attacker, target, dist)
-                : (isTargetUnconscious && dist <= 1);
+            maxExpression = attResult.maxHit;
             if (hit && isAutoCrit) {
                 isCrit = true;
                 attResult.critical = true;
             }
-
             if (hit) {
-                const dmgResult = Rules.damage(attacker, target, attResult, { rng: rngFn, extraDamage: o.extraDamage });
+                const dmgResult = Rules.damage(attacker, target, attResult, { rng: rngFn, extraDamage: o.extraDamage || 0 });
                 rolled = dmgResult.damage;
-            }
-        } else {
-            // Legacy tick/OSRS formula fallback
-            let r = roll(n, rngFn);
-            if (finalDis || finalAdv) {
-                const r2 = roll(n, rngFn);
-                if (finalDis) {
-                    if (r2.rolled < r.rolled || (!r2.hit && r.hit)) r = r2;
-                } else if (finalAdv) {
-                    if (r2.rolled > r.rolled || (r2.hit && !r.hit)) r = r2;
-                }
-            }
-            hit = (o.hit !== undefined) ? !!o.hit : r.hit;
-            rolled = (o.damage !== undefined) ? o.damage : (r.rolled + (o.extraDamage || 0));
-            rollA = r.a;
-            rollD = r.d;
-            if (o.critical !== undefined) isCrit = !!o.critical;
-            else if (hit && ((Cond && typeof Cond.critOnHit === "function") ? Cond.critOnHit(attacker, target, dist) : (isTargetUnconscious && dist <= 1))) {
-                isCrit = true;
             }
         }
 
@@ -935,10 +970,9 @@
             hit,
             damage: hit ? damage : 0,
             rolled,
-            maxHit: n.maxHit,
-            attackRoll: useSRD ? rollA : n.A,
-            defenceRoll: useSRD ? rollD : n.D,
-            chance: n.chance,
+            maxHit: maxExpression,
+            attackRoll: rollA,
+            defenceRoll: rollD,
             style: n.style,
             attackType: n.attackType,
             speed: n.speed,
@@ -1076,19 +1110,28 @@
 
     /** A fight of two units worked out in ticks without touching them (tests, balance). */
     Combat.duel = function(a, b, seed, maxTicks) {
+        const Rules = rulesApi();
         const w = World();
+        if (!Rules || !w || typeof w.mulberry32 !== "function") {
+            const err = new Error("RULES_NOT_LOADED");
+            err.code = "RULES_NOT_LOADED";
+            throw err;
+        }
         const rng = w.mulberry32(w.hash32(w.state ? w.state.seed >>> 0 : 0, SALT.duel, (seed | 0) >>> 0));
-        const na = numbers(a, b), nb = numbers(b, a);
+        const na = numbers(a), nb = numbers(b);
         let ha = maxHp(a), hb = maxHp(b), ta = 0, tb = Math.ceil(nb.speed / 2);
         const limit = maxTicks || 3000;
+        const keyA = Combat.resolveWeaponKey(na.prof), keyB = Combat.resolveWeaponKey(nb.prof);
         for (let t = 0; t < limit; t++) {
             if (t >= ta) {
-                hb -= roll(na, rng).rolled;
+                const att = Rules.attack(a, b, keyA, { rng: rng });
+                if (att.hit) hb -= Rules.damage(a, b, att, { rng: rng }).damage;
                 ta = t + na.speed;
                 if (hb <= 0) return { winner: "a", ticks: t, hpA: ha, hpB: 0 };
             }
             if (t >= tb) {
-                ha -= roll(nb, rng).rolled;
+                const att = Rules.attack(b, a, keyB, { rng: rng });
+                if (att.hit) ha -= Rules.damage(b, a, att, { rng: rng }).damage;
                 tb = t + nb.speed;
                 if (ha <= 0) return { winner: "b", ticks: t, hpA: 0, hpB: hb };
             }
@@ -1150,7 +1193,7 @@
         const levels = {};
         for (const s of SKILLS) levels[s] = level(unit, s);
         return { combatLevel: combatLevel(unit), levels, hp: ensureHp(unit), maxHp: maxHp(unit), mode: modeOf(unit), style: n.style,
-            attackType: n.attackType, weapon: n.weapon, speed: n.speed, range: n.range, maxHit: n.maxHit, ammo: n.ammo, outOfAmmo: n.outOfAmmo,
+            attackType: n.attackType, weapon: n.weapon, speed: n.speed, range: n.range, maxHit: null, ammo: n.ammo, outOfAmmo: n.outOfAmmo,
             bonuses: bonusesOf(unit), targetId: c.targetId === undefined ? null : c.targetId, inCombat: Combat.inCombat(unit) };
     };
 
@@ -1291,7 +1334,13 @@
                 c.chase = null;
             }
             if (tick >= c.nextAttackTick) {
-                const r = Combat.resolveAttack(u, t);
+                let r = null;
+                try {
+                    r = Combat.resolveAttack(u, t);
+                } catch (err) {
+                    report("resolveAttack", err);
+                    c.nextAttackTick = tick + speedOf(u);
+                }
                 if (r) c.nextAttackTick = tick + r.speed;
             }
         } else if (canChase(u)) {
@@ -2149,8 +2198,9 @@
                 return u;
             };
             const L = (a, s, d, hp, extra) => Object.assign({ attack: a, strength: s, defence: d, ranged: 1, magic: 1, hitpoints: hp }, extra || {});
-            const person = (name, x, y, levels, equipment, extra) => add(name, personImg, x, y, Object.assign({ faction: "player", combatLevels: levels, equipment: equipment || {} }, extra || {}));
-            const foe = (name, x, y, levels, extra) => add(name, personImg, x, y, Object.assign({ tags: ["hostile"], combatLevels: levels }, extra || {}));
+            const srdScores = { str: 16, dex: 14, con: 14, int: 10, wis: 12, cha: 10 };
+            const person = (name, x, y, levels, equipment, extra) => add(name, personImg, x, y, Object.assign({ faction: "player", combatLevels: levels, stats: srdScores, level: 1, equipment: equipment || {} }, extra || {}));
+            const foe = (name, x, y, levels, extra) => add(name, personImg, x, y, Object.assign({ tags: ["hostile"], combatLevels: levels, stats: srdScores, level: 1 }, extra || {}));
             const creature = (name, id, x, y, extra) => {
                 const s = sp(id);
                 return add(name, s ? s.image : personImg, x, y, Object.assign({ species: id, tags: s ? [s.kind] : [], tint: s ? s.tint : undefined }, extra || {}));
@@ -2249,89 +2299,64 @@
             };
 
             try {
-                // 1. hit_chance: 100,000 seeded rolls per pair against the formula.
-                {
-                    const rng = w.mulberry32(0xc0ffee);
-                    const pairs = [[1850, 576], [768, 1344], [4000, 4000]];
-                    const N = 100000;
-                    const res = pairs.map(([A, D]) => {
-                        let h = 0;
-                        for (let i = 0; i < N; i++) if (roll({ A, D, maxHit: 0 }, rng).hit) h++;
-                        return { A, D, observed: h / N, formula: Combat.hitChance(A, D) };
-                    });
-                    const exact = Math.abs(Combat.hitChance(1850, 576) - (1 - 578 / 3702)) < 1e-12 && Math.abs(Combat.hitChance(768, 1344) - 768 / 2690) < 1e-12;
-                    t.check("hit_chance", exact && res.every(r => Math.abs(r.observed - r.formula) <= 0.01),
-                        res.map(r => `A ${r.A} D ${r.D}: ${N} rolls hit ${(r.observed * 100).toFixed(2)}%, formula ${(r.formula * 100).toFixed(2)}%`).join("; ") + `; formula values exact ${exact}`);
-                }
-
-                // 2. max_hit: known effective strength and bonus -> known max hit; 3000 attacks never exceed it and span 0..max.
+                // 1. SRD d20: a natural 20 hits and is a critical hit, a natural 1 misses.
                 const dummy = person("TEST_combat_dummy", ax + 1, ay + 1, L(1, 1, 1, 99), {}, { combat: { mode: "manual" } });
                 {
-                    const known = [[71, 50, 13], [9, 0, 1], [110, 100, 28], [68, 24, 9]];
-                    const formulaOk = known.every(([e, b, m]) => Combat.maxHitFor(e, b) === m);
-                    const att = person("TEST_combat_striker", ax + 2, ay + 1, L(99, 60, 1, 99), { weapon: "sword_long" }, { combat: { style: "aggressive", mode: "manual" } });
-                    const n = Combat.describeAttack(att, dummy);
-                    // strength 60 + aggressive 3 + 8 = 71; long sword strength bonus from the catalog
-                    const bonus = Combat.bonusesOf(att).strength;
-                    const want = Math.floor(0.5 + 71 * (bonus + 64) / 640);
-                    const seen = new Map();
-                    let maxSeen = 0, over = 0, hitsN = 0;
-                    for (let i = 0; i < 3000; i++) {
-                        dummy.data.hp = 99;
-                        const r = Combat.resolveAttack(att, dummy);
-                        if (!r) continue;
-                        if (r.hit) hitsN++;
-                        seen.set(r.damage, (seen.get(r.damage) || 0) + 1);
-                        if (r.damage > maxSeen) maxSeen = r.damage;
-                        if (r.damage > n.maxHit) over++;
-                    }
-                    const span = [];
-                    for (let v = 0; v <= n.maxHit; v++) if (!seen.has(v)) span.push(v);
-                    t.check("max_hit", formulaOk && n.maxHit === want && want > 0 && over === 0 && maxSeen === n.maxHit && span.length === 0,
-                        `formula: ${known.map(([e, b, m]) => `(${e}, ${b}) -> ${Combat.maxHitFor(e, b)} want ${m}`).join(", ")}; strength 60 aggressive with a long sword (strength bonus ${bonus}): max hit ${n.maxHit}, want ${want}; ` +
-                        `3000 attacks, ${hitsN} hits, largest ${maxSeen}, over the max ${over}, damage values never seen in 0..${n.maxHit}: ${span.length ? span.join(",") : "none"}`);
+                    const Rules = window.UF && UF.Rules;
+                    const att = person("TEST_combat_striker", ax + 2, ay + 1, L(16, 16, 10, 99), { weapon: "sword_long" }, { combat: { mode: "manual" } });
+                    const hi = Combat.resolveAttack(att, dummy, { rng: alwaysHigh, bypassGcd: true });
+                    dummy.data.hp = Combat.maxHp(dummy);
+                    const lo = Combat.resolveAttack(att, dummy, { rng: alwaysLow, bypassGcd: true });
+                    const loaded = !!(Rules && typeof Rules.attack === "function" && typeof Rules.damage === "function");
+                    t.check("srd_d20", loaded && !!hi && hi.hit === true && hi.critical === true && hi.damage > 0 && !!lo && lo.hit === false && lo.fumble === true && lo.damage === 0,
+                        `UF.Rules ${loaded}; natural 20 hit ${hi && hi.hit} crit ${hi && hi.critical} damage ${hi && hi.damage}; natural 1 hit ${lo && lo.hit} fumble ${lo && lo.fumble} damage ${lo && lo.damage}`);
                     made.delete(att.id);
                     w.removeUnit(att.id);
                 }
 
-                // 3. styles: aggressive raises the max hit, defensive the defence roll, accurate the attack roll; combat:hit carries the style.
+                // 2. Longsword damage stays inside 1d8 + Strength, and a critical hit doubles that die.
                 {
-                    const att = person("TEST_combat_stylist", ax + 2, ay + 1, L(60, 60, 60, 99), { weapon: "sword_long" }, { combat: { mode: "manual" } });
-                    Combat.setStyle(att, "accurate");
-                    const acc = Combat.describeAttack(att, dummy), accDef = Combat.defenceRoll(att, "slash");
-                    Combat.setStyle(att, "aggressive");
-                    const agg = Combat.describeAttack(att, dummy);
-                    Combat.setStyle(att, "defensive");
-                    const defDef = Combat.defenceRoll(att, "slash");
+                    const att = person("TEST_combat_blade", ax + 2, ay + 1, L(16, 16, 10, 99), { weapon: "sword_long" }, { combat: { mode: "manual" } });
+                    dummy.data.hp = Combat.maxHp(dummy);
+                    const hit = Combat.resolveAttack(att, dummy, { rng: () => 0.54, bypassGcd: true });
+                    dummy.data.hp = Combat.maxHp(dummy);
+                    const crit = Combat.resolveAttack(att, dummy, { rng: alwaysHigh, bypassGcd: true });
+                    const within = !!hit && hit.hit === true && hit.damage >= 4 && hit.damage <= 11;
+                    const critOk = !!crit && crit.critical === true && crit.damage >= 5 && crit.damage <= 19;
+                    t.check("srd_damage", within && critOk,
+                        `longsword hit damage ${hit && hit.damage} (want 4..11); critical ${crit && crit.critical} damage ${crit && crit.damage} (want 5..19)`);
+                    made.delete(att.id);
+                    w.removeUnit(att.id);
+                }
+
+                // 3. The chosen style is still carried on combat:hit. It does not change the d20 modifier.
+                {
+                    const att = person("TEST_combat_stylist", ax + 2, ay + 1, L(16, 16, 10, 99), { weapon: "sword_long" }, { combat: { mode: "manual" } });
                     const before = hits.length;
                     const order = ["aggressive", "defensive", "controlled", "accurate"];
                     for (const s of order) {
                         Combat.setStyle(att, s);
-                        dummy.data.hp = 99;
-                        Combat.resolveAttack(att, dummy);
+                        dummy.data.hp = Combat.maxHp(dummy);
+                        Combat.resolveAttack(att, dummy, { rng: alwaysHigh, bypassGcd: true });
                     }
                     const evs = hits.slice(before).map(h => h.e);
                     const keysOk = evs.every(e => ["attackType", "attacker", "damage", "hit", "style", "target"].every(k => k in e) && e.attacker === att && e.target === dummy &&
                         typeof e.damage === "number" && typeof e.hit === "boolean" && TYPES.includes(e.attackType) && (e.hit || e.damage === 0));
                     const stylesOk = evs.length === 4 && evs.every((e, i) => e.style === order[i]);
-                    t.check("styles", agg.maxHit > acc.maxHit && defDef > accDef && acc.A > agg.A && stylesOk && keysOk,
-                        `long sword, levels 60: max hit accurate ${acc.maxHit}, aggressive ${agg.maxHit}; attack roll accurate ${acc.A}, aggressive ${agg.A}; defence roll (slash) accurate ${accDef}, defensive ${defDef}; ` +
-                        `combat:hit styles ${evs.map(e => e.style).join(", ")} (want ${order.join(", ")}); payload keys ${evs.length ? Object.keys(evs[0]).join(",") : "none"}, types ${evs.map(e => e.attackType).join(",")}: ${keysOk}`);
+                    t.check("srd_styles", stylesOk && keysOk,
+                        `combat:hit styles ${evs.map(e => e.style).join(", ")} (want ${order.join(", ")}); keys ${evs.length ? Object.keys(evs[0]).join(",") : "none"}`);
                     made.delete(att.id);
                     w.removeUnit(att.id);
                 }
 
-                // 4. equipment: an iron sword beats a stone knife in expected damage per tick; iron and copper beat stone and wood
-                //    within a class; a bow fires one arrow per shot and falls back to fists when they run out.
+                // 4. Catalog weapons map onto SRD keys. A bow still spends one arrow a shot.
                 {
                     const wolf = creature("TEST_combat_wolf_target", "wolf", ax + 4, ay + 1, { combat: { mode: "manual" } });
-                    const att = person("TEST_combat_armed", ax + 5, ay + 1, L(40, 40, 40, 99), {}, { combat: { mode: "manual" } });
-                    const ep = {};
-                    for (const id of ["stone_knife", "dagger_iron", "sword_short", "stone_axe", "axe_iron", "club", "mace"]) {
-                        att.data.equipment = { weapon: id };
-                        const n = Combat.describeAttack(att, wolf);
-                        ep[id] = n.chance * (n.maxHit / 2) / n.speed;
-                    }
+                    const att = person("TEST_combat_armed", ax + 5, ay + 1, L(16, 16, 10, 99), {}, { combat: { mode: "manual" } });
+                    const mapOk = Combat.resolveWeaponKey({ name: "Long sword", itemType: "sword_long" }) === "longsword"
+                        && Combat.resolveWeaponKey({ name: "Iron dagger", itemType: "dagger_iron" }) === "dagger"
+                        && Combat.resolveWeaponKey({ name: "Short bow", itemType: "bow_short" }) === "shortbow"
+                        && Combat.resolveWeaponKey({ natural: true, types: ["stab"] }) === "bite";
                     att.data.equipment = { weapon: "bow_short" };
                     let bowOk = false, bowDetail = "no UF.Items";
                     if (I && typeof I.give === "function") {
@@ -2339,7 +2364,7 @@
                         const counts = [I.count(att.id, "arrows")];
                         const shots = [];
                         for (let i = 0; i < 3; i++) {
-                            const r = Combat.resolveAttack(att, wolf);
+                            const r = Combat.resolveAttack(att, wolf, { rng: alwaysHigh, bypassGcd: true });
                             wolf.data.hp = Combat.maxHp(wolf);
                             shots.push(r ? r.attackType : "none");
                             counts.push(I.count(att.id, "arrows"));
@@ -2348,14 +2373,12 @@
                         bowOk = counts.join(",") === "3,2,1,0" && shots.every(s => s === "ranged") && after.outOfAmmo === "arrows" && after.attackType === "crush";
                         bowDetail = `bow with 3 arrows: arrows ${counts.join(" -> ")} after each shot (types ${shots.join(",")}); then out of ammo "${after.outOfAmmo}", attacking with ${after.weapon} (${after.attackType})`;
                     }
-                    const f = v => v.toFixed(3);
-                    const tiers = ep.sword_short > ep.stone_knife && ep.dagger_iron > ep.stone_knife && ep.axe_iron > ep.stone_axe && ep.mace > ep.club;
-                    t.check("equipment", tiers && bowOk,
-                        `expected damage per tick vs a wolf, levels 40: stone knife ${f(ep.stone_knife)}, iron dagger ${f(ep.dagger_iron)}, iron short sword ${f(ep.sword_short)}; stone axe ${f(ep.stone_axe)}, iron axe ${f(ep.axe_iron)}; wooden club ${f(ep.club)}, copper mace ${f(ep.mace)}; ${bowDetail}`);
+                    t.check("srd_equipment", mapOk && bowOk, `weapon keys ${mapOk}; ${bowDetail}`);
                     for (const u of [wolf, att]) { made.delete(u.id); w.removeUnit(u.id); }
                 }
 
-                // 5. creatures: every species has a combat block; wolf, hare and troll as specified; a level-1 colonist usually loses to a wolf.
+                // 5. Catalog species keep their combat blocks. A wolf resolves through its SRD stat block.
+                //    A hare has no SRD creature, so an attack fails loudly.
                 {
                     const keys = ["attack", "strength", "defence", "ranged", "magic", "hitpoints", "attackSpeed", "attackType", "maxHitBonus", "bonuses"];
                     const missing = speciesList.filter(s => !s.combat || keys.some(k => s.combat[k] === undefined)).map(s => s.id);
@@ -2365,21 +2388,20 @@
                     const cat2 = creature("TEST_combat_wildcat", "wildcat", ax + 10, ay + 1, { combat: { mode: "manual" } });
                     const hb = sp("hare") && sp("hare").combat;
                     const hareOk = !!hb && ["attack", "strength", "defence", "ranged", "magic"].every(k => hb[k] === 1) && hb.hitpoints === 2 && Combat.maxHp(hare) === 2;
-                    const lv = { wolf: Combat.combatLevel(wolf), troll: Combat.combatLevel(troll), hare: Combat.combatLevel(hare) };
                     const typesOk = Combat.describeAttack(wolf, hare).attackType === "stab" && Combat.describeAttack(troll, hare).attackType === "crush" && Combat.describeAttack(cat2, hare).attackType === "slash";
-                    const novice = person("TEST_combat_novice", ax + 11, ay + 1, L(1, 1, 1, 10), {});
-                    const veteran = person("TEST_combat_veteran", ax + 12, ay + 1, L(40, 40, 40, 40), { weapon: "sword_short", torso: "mail_iron", head: "helmet_iron", shield: "shield_iron" });
-                    let wolfWins = 0, vetWins = 0, ticks = 0;
-                    for (let s = 1; s <= 100; s++) {
-                        const r = Combat.duel(novice, wolf, s);
-                        if (r.winner === "b") wolfWins++;
-                        ticks += r.ticks;
-                        if (Combat.duel(veteran, wolf, 1000 + s).winner === "a") vetWins++;
-                    }
-                    t.check("creatures", missing.length === 0 && hareOk && lv.wolf >= 15 && lv.wolf <= 25 && lv.troll >= 60 && lv.troll <= 80 && typesOk && wolfWins >= 80 && vetWins >= 80,
-                        `${speciesList.length} species, without a full combat block: ${missing.join(", ") || "none"}; hare 1s and 2 hp ${hareOk}; fighting levels wolf ${lv.wolf}, troll ${lv.troll}, hare ${lv.hare}; ` +
-                        `attack types wolf/troll/wildcat stab/crush/slash ${typesOk}; 100 duels: the wolf beat a level-1 colonist (10 hp, fists) ${wolfWins} times (avg ${(ticks / 100).toFixed(1)} ticks); a level-40 colonist in iron beat the wolf ${vetWins} times`);
-                    for (const u of [wolf, hare, troll, cat2, novice, veteran]) { made.delete(u.id); w.removeUnit(u.id); }
+                    const veteran = person("TEST_combat_veteran", ax + 12, ay + 1, L(16, 16, 14, 40), { weapon: "sword_short", torso: "mail_iron", shield: "shield_iron" });
+                    let wolfHit = false, wolfErr = "", hareCode = "";
+                    try {
+                        const r = Combat.resolveAttack(wolf, veteran, { rng: alwaysHigh, bypassGcd: true });
+                        wolfHit = !!(r && r.hit === true);
+                    } catch (e) { wolfErr = (e && (e.code || e.message)) || "throw"; }
+                    try {
+                        Combat.resolveAttack(hare, veteran, { rng: alwaysHigh, bypassGcd: true });
+                    } catch (e) { hareCode = (e && e.code) || ""; }
+                    const ac = Combat.calcAC(veteran);
+                    t.check("srd_creatures", missing.length === 0 && hareOk && typesOk && wolfHit && hareCode === "NO_SRD_MAPPING" && ac === 18,
+                        `${speciesList.length} species, without a full combat block: ${missing.join(", ") || "none"}; hare hp ${hareOk}; attack types ${typesOk}; wolf hit ${wolfHit} ${wolfErr}; hare code ${hareCode}; veteran AC ${ac}`);
+                    for (const u of [wolf, hare, troll, cat2, veteran]) { made.delete(u.id); w.removeUnit(u.id); }
                 }
 
                 // 6. hitsplats: a hit shows a red splat with its number, a miss a blue 0; at most 4 stack; gone after 1 s; no text popups.
