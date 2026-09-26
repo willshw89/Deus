@@ -477,7 +477,7 @@ SELECT NEXT UNBLOCKED LEAF
 | ID | Title | Status (evidence) | Source | Depends on | Writer → Reviewer | Definition of done | Size | Gate |
 |---|---|---|---|---|---|---|---|---|
 | WG.00.09a | Global Five-Z Depth Renderer: plan / attack plan (Lane E, FABLE-19C) | CHANGES_REQUESTED. 8 commits on `task/lane-e`, unmerged; latest Grok `5964f772`; Claude review `6a71a4c4` CHANGES REQUESTED (N5/N6) | lane-e `docs/systems/UF_Depth_Attack_Plan.md`; `tasks/DEUS-TSK-FABLE-19C/*`; DEC-006 | — | Claude → Grok | N5/N6 addressed; Grok re-attack says PASS; the PM rules the document an attack plan, not a spec (PM-1); merged through the gate | M | — |
-| WG.00.09b | Global Five-Z Depth Renderer: implementation (scale-only shading per DEC-006/R1; chunk mask cache) | QUEUED | WG WBS WG.00.09; DEC-006 | WG.00.09a, WG.00.08; OPS.50.04 (Gap 8) | Claude → Grok | The harness suites named in the plan exit 0; per-frame cost within the WG.85 budget; the mutation list from the attack plan is all caught | L | — |
+| WG.00.09b | Global Five-Z Depth Renderer: implementation (flat 1:1 layers per DEC-011 (no blur/scale/zoom/filter); depth effects deferred (WG.00.16); chunk mask cache) | QUEUED | WG WBS WG.00.09; DEC-011 | WG.00.09a, WG.00.08; OPS.50.04 (Gap 8) | Claude → Grok | The harness suites named in the plan exit 0; per-frame cost within the WG.85 budget; the mutation list from the attack plan is all caught | L | — |
 | WG.00.09c | Depth rendering picture gate: F5 screenshots of all 5 Z | PLANNED | WG WBS rule 4 (F5 required); DEC-006 | WG.00.09b | Claude captures the harness renders → Owner judges | The Owner approves the F5 screenshots (test-harness renders, which DEC-007 says are not art) | S | **OWNER-GATED** (Owner visual approval) |
 
 ---
