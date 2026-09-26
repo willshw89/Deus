@@ -80,10 +80,22 @@ const ID = {
     TILE: 'SURFACE_B1_TERRAIN_TEST_SOIL_V1_BASE', PROP: 'SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED', HANG: 'SURFACE_B1_PROP_TEST_LANTERN_V1_HANGING',
     WALL: 'SURFACE_B1_WALL_TEST_STONE_V1_FACE', CAVE: 'LOWER1_B1_TERRAIN_TEST_CAVEFLOOR_V1_BASE', STOOL: 'TEST_NOBAND_B1_PROP_TEST_STOOL_V1_BASE',
     GIANT: 'SURFACE_B1_CREATURE_TEST_GIANT_V1_WALK', FLIPH: 'SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED_FLIPH', A2: 'SURFACE_B1_TERRAIN_TEST_GRASS_V1_AUTOTILE',
-    BOULDER: 'SURFACE_B1_ROCK_TEST_BOULDER_V1_BASE', RAT: 'SURFACE_B1_CREATURE_TEST_RAT_V1_WALK', TALLMED: 'SURFACE_B1_CREATURE_TEST_TALLFOLK_V1_STAND'
+    BOULDER: 'SURFACE_B1_ROCK_TEST_BOULDER_V1_BASE', RAT: 'SURFACE_B1_CREATURE_TEST_RAT_V1_WALK', TALLMED: 'SURFACE_B1_CREATURE_TEST_TALLFOLK_V1_STAND',
+    STRIP1: 'SURFACE_B1_EDGE_TEST_SOIL_V1_H1', STRIP3: 'SURFACE_B1_EDGE_TEST_SOIL_V1_H3', RIM: 'SURFACE_B1_RIMSHADOW_TEST_RIM_V1_E', FACE: 'SURFACE_B1_FACE_TEST_FOLK_V1_SHEET'
 };
-const RAMP = k => `SURFACE_B1_RAMP_TEST_SOIL_V1_S${k}`;
-const cumStrata = (g, k) => g.stratumPx.slice(0, k).reduce((a, b) => a + b, 0);
+const RAMP = k => `SURFACE_B1_RAMP_TEST_SOIL_V1_C${k}`;
+// Test-side geometry: heights of every run of k consecutive strata (independent of validate_art.js).
+const runsOf = (g, k) => { const r = []; for (let i = 0; i + k <= g.stratumPx.length; i++) r.push(g.stratumPx.slice(i, i + k).reduce((a, b) => a + b, 0)); return r; };
+const SPLIT_C = [16, 20, 20, 20, 20]; // a valid split whose k-runs are not contiguous ranges
+// Rebuilds strip and ramp envelopes from the geometry (as the Lane S builder does); slots keep their rects.
+function envelopesFromGeometry(cat, g) {
+    for (const e of cat.entries) {
+        const m = /^GEOM_(STRATUM|RAMP)_(\d)$/.exec(e.scaleRow || '');
+        if (!m) continue;
+        const k = Number(m[2]), top = m[1] === 'RAMP' ? g.tilePx : 0, r = runsOf(g, k);
+        Object.assign(e.envelope, { hMin: top + Math.min(...r), hTarget: top + r[0], hMax: top + Math.max(...r) });
+    }
+}
 const entryIn = (cat, id) => cat.entries.find(e => e.id === id);
 
 const TOOLS_REAL = { V: require('./validate_art'), P: require('./place_art'), tag: 'real', dir: HERE };
@@ -106,24 +118,24 @@ const cloneImg = img => ({ w: img.w, h: img.h, data: Buffer.from(img.data) });
 const pxAt = (img, x, y) => { const o = (y * img.w + x) * 4; return [...img.data.subarray(o, o + 4)]; };
 const idSeed = id => [...id].reduce((a, c) => a + c.charCodeAt(0), 0) % PAL.length;
 
-// One solid block per frame, sized to the envelope target (the whole frame for GEOM_* rows) and
-// placed by the anchor: GROUND on the frame's last row, CEILING on row 0, otherwise centred.
+// One solid block per frame, sized to the envelope target and placed by the anchor: GROUND on the
+// frame's last row, CEILING and WALL from row 0, otherwise centred.
 function makeCell(entry, o = {}) {
     const s = entry.slot, f = entry.frames || {}, cols = f.cols || 1, rows = f.rows || 1;
-    const fw = s.w / cols, fh = s.h / rows, env = entry.envelope, full = entry.scaleRow.startsWith('GEOM_');
+    const fw = s.w / cols, fh = s.h / rows, env = entry.envelope;
     const img = blank(s.w, s.h);
     const seed = o.seed === undefined ? idSeed(entry.id) : o.seed;
     for (let fr = 0; fr < rows; fr++) {
         for (let fc = 0; fc < cols; fc++) {
             const idx = fr * cols + fc;
-            let bw = full ? fw : Math.min(env.wTarget, fw), bh = full ? fh : Math.min(env.hTarget, fh), dx = 0, dy = 0;
+            let bw = Math.min(env.wTarget, fw), bh = Math.min(env.hTarget, fh), dx = 0, dy = 0;
             const b = o.block ? o.block(idx) || {} : {};
             if (b.bw !== undefined) bw = b.bw;
             if (b.bh !== undefined) bh = b.bh;
             dx = b.dx || 0; dy = b.dy || 0;
             const t = entry.anchor.type;
             const x = Math.floor((fw - bw) / 2) + dx;
-            const y = (t === 'GROUND' ? fh - bh : t === 'CEILING' ? 0 : Math.floor((fh - bh) / 2)) + dy;
+            const y = (t === 'GROUND' ? fh - bh : t === 'CEILING' || t === 'WALL' ? 0 : Math.floor((fh - bh) / 2)) + dy;
             if (bw > 0 && bh > 0) fillRect(img, fc * fw + x, fr * fh + y, bw, bh, PAL[(seed + idx) % PAL.length]);
         }
     }
@@ -457,23 +469,44 @@ negCase('neg.huge_frame_owner_open_with_slot', { entry: ID.GIANT, codes: ['FRAME
 
 // geometry-derived heights (stratumPx / layerPx, never literals)
 negCase('neg.ramp_height_ignores_stratumPx', { entry: RAMP(2), codes: ['GEOM_HEIGHT_MISMATCH'], msg: 'stratumPx',
-    world: () => makeWorld('ramp_literal', { catalogue: cat => { const e = entryIn(cat, RAMP(2)); e.slot.h = 40; Object.assign(e.envelope, { hMin: 40, hTarget: 40, hMax: 40 }); } }),
+    world: () => makeWorld('ramp_literal', { catalogue: cat => { Object.assign(entryIn(cat, RAMP(2)).envelope, { hMin: 96, hTarget: 96, hMax: 96 }); } }),
     build: w => ({ file: w.cells.get(RAMP(2)).file }) });
+// Envelope 86..96 (96 a literal two tiles); the art is drawn 86, an allowed height, so only the envelope rule fires.
+negCase('neg.ramp_envelope_ignores_stratumPx', { entry: RAMP(2), codes: ['GEOM_HEIGHT_MISMATCH'], msg: 'envelope height 86..96',
+    world: () => makeWorld('ramp_env_literal', { catalogue: cat => { Object.assign(entryIn(cat, RAMP(2)).envelope, { hMax: 96 }); } }),
+    build: w => ({ file: w.cells.get(RAMP(2)).file }) });
+// Split [16,20,20,20,20]: ramp cell 1 may be 64 or 68 px; 66 lies inside the envelope 64..68 but is not a stratum run.
+const splitC = () => makeWorld('split_c_rebuilt', { geometry: g => { g.stratumPx = SPLIT_C.slice(); }, catalogue: envelopesFromGeometry });
+negCase('neg.ramp_drawn_height_not_a_run', { entry: RAMP(1), codes: ['GEOM_HEIGHT_MISMATCH'], msg: 'drawn 66',
+    world: splitC, build: w => variant(w, 'ramp_66', RAMP(1), { img: makeCell(entryIn(w.cat, RAMP(1)), { block: () => ({ bh: 66 }) }) }) });
 negCase('neg.wall_face_height_ignores_layerPx', { entry: ID.WALL, codes: ['GEOM_HEIGHT_MISMATCH'], msg: 'layerPx',
     world: () => makeWorld('wall_literal', { catalogue: cat => { const e = entryIn(cat, ID.WALL); e.slot.h = 48; Object.assign(e.envelope, { hMin: 48, hTarget: 48, hMax: 48 }); } }),
     build: w => ({ file: w.cells.get(ID.WALL).file }) });
-const SPLIT_B = [20, 19, 19, 19, 19];
-negCase('neg.stratumPx_changed_old_ramp_refused', { entry: RAMP(1), codes: ['GEOM_HEIGHT_MISMATCH'], msg: 'is 20 px',
-    world: () => makeWorld('split_b_old_slots', { geometry: g => { g.stratumPx = SPLIT_B.slice(); } }), build: w => ({ file: w.cells.get(RAMP(1)).file }) });
+// stratumPx changed, catalogue not rebuilt: the ramp drawn at the old 67 px is no longer a run (64 or 68).
+negCase('neg.stratumPx_changed_old_ramp_refused', { entry: RAMP(1), codes: ['GEOM_HEIGHT_MISMATCH'], msg: 'drawn 67',
+    world: () => makeWorld('split_c_old_catalogue', { geometry: g => { g.stratumPx = SPLIT_C.slice(); } }), build: w => ({ file: w.cells.get(RAMP(1)).file }) });
 negCase('neg.stratumPx_zero_stratum', { entry: ID.PROP, codes: ['GEOMETRY_INVALID'], world: () => makeWorld('split_zero', { geometry: g => { g.stratumPx = [24, 24, 24, 24, 0]; } }), build: w => ({ file: w.cells.get(ID.PROP).file }) });
 negCase('neg.stratumPx_sum_not_layerPx', { entry: ID.PROP, codes: ['GEOMETRY_INVALID'], world: () => makeWorld('split_sum', { geometry: g => { g.stratumPx = [20, 19, 19, 19, 20]; } }), build: w => ({ file: w.cells.get(ID.PROP).file }) });
 negCase('neg.stratumPx_wrong_count', { entry: ID.PROP, codes: ['GEOMETRY_INVALID'], world: () => makeWorld('split_count', { geometry: g => { g.stratumPx = [48, 48]; } }), build: w => ({ file: w.cells.get(ID.PROP).file }) });
 negCase('neg.geometry_hash_mismatch', { entry: ID.PROP, codes: ['GEOMETRY_HASH_MISMATCH'], world: () => makeWorld('geom_hash', { drift: cat => { cat.geometry.sha256 = '0'.repeat(64); } }), build: w => ({ file: w.cells.get(ID.PROP).file }) });
 negCase('neg.geometry_flag_still_hash_checked', { entry: ID.PROP, codes: ['GEOMETRY_HASH_MISMATCH'], build: w => {
-    const g = clone(w.geometry); g.stratumPx = SPLIT_B.slice();
+    const g = clone(w.geometry); g.stratumPx = SPLIT_C.slice();
     return { file: w.cells.get(ID.PROP).file, geometry: put(w.root, 'neg/geometry_other.json', JSON.stringify(g, null, 2) + '\n') };
 } });
 negCase('neg.palette_hash_mismatch', { entry: ID.PROP, codes: ['PALETTE_HASH_MISMATCH'], world: () => makeWorld('pal_hash', { drift: cat => { cat.palette.sha256 = 'f'.repeat(64); } }), build: w => ({ file: w.cells.get(ID.PROP).file }) });
+
+// tile class, frame class present, ledger table edges, PNG bombs
+negCase('neg.autotile_with_hole', { entry: ID.A2, codes: ['TILE_NOT_OPAQUE'], pixel: [50, 70], build: w => variant(w, 'a2_hole', ID.A2, { mutate: img => { img.data[(70 * 96 + 50) * 4 + 3] = 0; } }) });
+negCase('neg.frame_class_missing', { entry: ID.HUMAN, codes: ['FRAME_CLASS_MISSING'],
+    world: () => makeWorld('no_frame_class', { catalogue: cat => { entryIn(cat, ID.HUMAN).frameClass = null; } }), build: w => ({ file: w.cells.get(ID.HUMAN).file }) });
+const nayLine = w => `2026-09-27 | NAY | \`${ID.PROP}\` | \`art/approved/chest.png\` | \`${w.cells.get(ID.PROP).sha}\` | none`;
+negCase('neg.ledger_row_without_leading_pipe', { entry: ID.PROP, codes: ['LEDGER_MALFORMED'], msg: 'does not start with',
+    build: w => approvalsOnly(w, 'ledger_pipeless_row', w.rows, { extra: [nayLine(w)] }) });
+negCase('neg.ledger_pipeless_second_table', { entry: ID.PROP, codes: ['LEDGER_MALFORMED'], msg: 'separator row outside',
+    build: w => approvalsOnly(w, 'ledger_pipeless_table', w.rows, { extra: ['', LEDGER_HEADER.slice(2, -2), '--- | --- | --- | --- | --- | ---', nayLine(w)] }) });
+negCase('neg.png_inflate_bomb', { entry: ID.PROP, codes: ['PNG_INVALID'], msg: 'inflates past', build: w => variant(w, 'png_bomb', ID.PROP, {
+    raw: () => { const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(48, 0); ihdr.writeUInt32BE(48, 4); ihdr[8] = 8; ihdr[9] = 6; return Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk('IHDR', ihdr), chunk('IDAT', zlib.deflateSync(Buffer.alloc(8 * 1024 * 1024))), chunk('IEND', Buffer.alloc(0))]); }
+}) });
 
 // entries that own no paint slot
 negCase('neg.unknown_entry', { entry: 'TEST_NOT_AN_ENTRY', codes: ['ENTRY_NOT_FOUND'], build: w => ({ file: w.cells.get(ID.PROP).file }) });
@@ -510,6 +543,7 @@ const RT_EXPECT = {
     'img/characters/TEST_Critters.png': { w: 576, h: 384, parts: [[ID.RAT, 144, 192]] },
     'img/tilesets/TEST_Surface_A2.png': { w: 768, h: 576, parts: [[ID.A2, 0, 0]] },
     'img/tilesets/TEST_Surface_A5.png': { w: 384, h: 768, parts: [[ID.TILE, 144, 0]] },
+    'img/faces/TEST_Faces.png': { w: 576, h: 288, parts: [[ID.FACE, 0, 0]] },
     'img/tilesets/TEST_Surface_B.png': { w: 768, h: 768, parts: [[ID.BOULDER, 48, 96]] }
 };
 const readOut = (out, rel) => decodePNG(fs.readFileSync(path.join(out, ...rel.split('/'))), rel);
@@ -564,7 +598,11 @@ const MUTANTS = [
     { name: 'ceiling_anchor_disabled', kill: 'neg.ceiling_anchor_1px_low', edits: [['validate_art.js', "if (anchor === 'CEILING' && (maxY < 0 || minY !== 0)) {", 'if (false) {']] },
     { name: 'tile_opacity_disabled', kill: 'neg.tile_with_hole', edits: [['validate_art.js', 'if (tileClass && a !== 255) holes.add(', 'if (false) holes.add(']] },
     { name: 'frame_class_check_disabled', kill: 'neg.large_tall_slot_96x96', edits: [['validate_art.js', 'if (fw !== fc.frame[0] || fh !== fc.frame[1]) {', 'if (false) {']] },
-    { name: 'geom_height_check_disabled', kill: 'neg.ramp_height_ignores_stratumPx', edits: [['validate_art.js', "if (fh !== gs.h) add('GEOM_HEIGHT_MISMATCH'", "if (false) add('GEOM_HEIGHT_MISMATCH'"]] },
+    { name: 'geom_envelope_check_disabled', kill: 'neg.ramp_envelope_ignores_stratumPx', edits: [['validate_art.js', "if (env.hMin < lo || env.hMax > hi) add('GEOM_HEIGHT_MISMATCH'", "if (false) add('GEOM_HEIGHT_MISMATCH'"]] },
+    { name: 'geom_drawn_height_check_disabled', kill: 'neg.ramp_drawn_height_not_a_run', edits: [['validate_art.js', 'if (geomHeights && !geomHeights.has(bh)) {', 'if (false) {']] },
+    { name: 'tile_class_rows_reduced_to_geom_tile', kill: 'neg.autotile_with_hole', edits: [['validate_art.js', "const TILE_CLASS_ROWS = ['GEOM_TILE', 'RMMZ_AUTOTILE_A1', 'RMMZ_AUTOTILE_A2', 'RMMZ_AUTOTILE_A3', 'RMMZ_AUTOTILE_A4'];", "const TILE_CLASS_ROWS = ['GEOM_TILE'];"]] },
+    { name: 'pipeless_row_check_disabled', kill: 'neg.ledger_row_without_leading_pipe', edits: [['validate_art.js', "if (state === 'rows' && !fenced[i] && lines[i].trim() && !/^\\s{0,3}#/.test(lines[i])) {", 'if (false) {']] },
+    { name: 'inflate_cap_removed', kill: 'neg.png_inflate_bomb', edits: [['validate_art.js', 'try { zlib.inflateSync(Buffer.concat(chunks.idat), { maxOutputLength: cap * 2 }); }', 'try { /* no cap */ }']] },
     { name: 'stratum_sum_check_disabled', kill: 'neg.stratumPx_sum_not_layerPx', edits: [['validate_art.js', 'if (sum !== g.layerPx) bad(', 'if (false) bad(']] },
     { name: 'copy_offset_x_plus_1', kill: 'place.all_good_exit0', edits: [['place_art.js', 'c.data, c.w, p.slot.x, p.slot.y, p.slot.w, p.slot.h);', 'c.data, c.w, p.slot.x + 1, p.slot.y, p.slot.w, p.slot.h);']] },
     {
@@ -601,10 +639,17 @@ function main() {
         const files = listFiles(FIX_DIR).concat(pv('fixture.json_only_no_png') ? ['TEST_provoked.png'] : []);
         const pngs = listFiles(HERE).filter(n => /\.png$/i.test(n)).concat(pv('fixture.json_only_no_png') ? ['TEST_provoked.png'] : []);
         check('fixture.json_only_no_png', files.length > 0 && files.every(n => n.endsWith('.json')) && pngs.length === 0, `fixtures [${files}], PNGs under tools/art [${pngs}]`);
-        const g = pv('fixture.geom_slots_follow_stratumPx') ? Object.assign(clone(FIX.geometry), { stratumPx: SPLIT_B }) : FIX.geometry;
-        const bad = FIX.catalogue.entries.filter(e => e.slot && /^GEOM_(STRATUM_\d+|LAYER_FACE)$/.test(e.scaleRow))
-            .filter(e => e.slot.h !== (e.scaleRow === 'GEOM_LAYER_FACE' ? g.layerPx : cumStrata(g, Number(e.scaleRow.split('_').pop()))));
-        check('fixture.geom_slots_follow_stratumPx', bad.length === 0, `slot heights not from stratumPx/layerPx: ${bad.map(e => `${e.id} h=${e.slot.h}`).join(', ')}`);
+        // Fixture strips, ramps and faces: envelope heights are the stratumPx runs (+ tilePx for ramps),
+        // or layerPx; slot heights are the envelope maximum rounded up to the 48-px grid.
+        const g = pv('fixture.geom_slots_follow_stratumPx') ? Object.assign(clone(FIX.geometry), { stratumPx: SPLIT_C }) : FIX.geometry;
+        const geomEntries = FIX.catalogue.entries.filter(e => e.slot && /^GEOM_(STRATUM_\d|RAMP_\d|LAYER_FACE)$/.test(e.scaleRow));
+        const bad = geomEntries.filter(e => {
+            const m = /^GEOM_(STRATUM|RAMP)_(\d)$/.exec(e.scaleRow);
+            const r = m ? runsOf(g, Number(m[2])).map(h => h + (m[1] === 'RAMP' ? g.tilePx : 0)) : [g.layerPx];
+            return e.envelope.hMin !== Math.min(...r) || e.envelope.hMax !== Math.max(...r) || e.slot.h !== 48 * Math.ceil(e.envelope.hMax / 48);
+        });
+        check('fixture.geom_slots_follow_stratumPx', geomEntries.length === 8 && bad.length === 0,
+            `${geomEntries.length} geometry entries; not from stratumPx/layerPx: ${bad.map(e => `${e.id} env h ${e.envelope.hMin}..${e.envelope.hMax} slot h ${e.slot.h}`).join(', ')}`);
         const w = BASE();
         const ctx = T.V.loadContext({ catalogue: w.catalogueFile, approvals: w.approvalsFile, root: w.root });
         if (pv('fixture.catalogue_slots_valid')) Object.assign(entryIn(ctx.catalogue, ID.STOOL).slot, { x: entryIn(ctx.catalogue, ID.PROP).slot.x + 1, y: entryIn(ctx.catalogue, ID.PROP).slot.y + 1 });
@@ -612,7 +657,7 @@ function main() {
         check('fixture.catalogue_slots_valid', errs.length === 0, errs.join('; '));
         // Geometry sizes come from geometry.json: no stratum, layer, tile or human pixel literal in
         // the tools. Format constants are allowed where they are defined: 48 as RMMZ's autotile shape
-        // count, 20 as a PNG header byte offset, 64 as the SHA-256 hex length.
+        // count, 64 as the SHA-256 hex length.
         const lits = [];
         for (const f of ['validate_art.js', 'place_art.js']) {
             const lines = fs.readFileSync(path.join(HERE, f), 'utf8').split('\n');
@@ -620,8 +665,7 @@ function main() {
             lines.forEach((l, i) => {
                 if (/^\s*(\/\/|\*|\/\*)/.test(l)) return;
                 for (const m of l.matchAll(/\b(19|20|42|48|64|96)\b/g)) {
-                    const ok = (m[1] === '48' && l.includes('AUTOTILE_SHAPES = 48')) || (m[1] === '20' && l.includes('PNG_IHDR_H_AT = 20')) ||
-                        (m[1] === '64' && (l.includes('{64}') || l.includes('64 lowercase')));
+                    const ok = (m[1] === '48' && l.includes('AUTOTILE_SHAPES = 48')) || (m[1] === '64' && (l.includes('{64}') || l.includes('64 lowercase')));
                     if (!ok) lits.push(`${f}:${i + 1}: ${l.trim()}`);
                 }
             });
@@ -633,7 +677,7 @@ function main() {
     {
         // [tileId, type, x, y, w, h]: RMMZ Tilemap positions worked out by hand.
         const table = [
-            [0, 'B', 0, 0, 48, 48], [17, 'B', 48, 96, 48, 48], [128, 'B', 384, 0, 48, 48], [255, 'B', 720, 720, 48, 48], [1023, 'E', 720, 720, 48, 48],
+            [1, 'B', 48, 0, 48, 48], [17, 'B', 48, 96, 48, 48], [128, 'B', 384, 0, 48, 48], [255, 'B', 720, 720, 48, 48], [1023, 'E', 720, 720, 48, 48],
             [1536, 'A5', 0, 0, 48, 48], [1539, 'A5', 144, 0, 48, 48], [1663, 'A5', 336, 720, 48, 48],
             [2048, 'A1', 0, 0, 288, 144], [2096, 'A1', 0, 144, 288, 144], [2144, 'A1', 288, 0, 96, 144], [2192, 'A1', 288, 144, 96, 144],
             [2240, 'A1', 384, 0, 288, 144], [2288, 'A1', 672, 0, 96, 144], [2336, 'A1', 384, 144, 288, 144], [2384, 'A1', 672, 144, 96, 144],
@@ -648,17 +692,33 @@ function main() {
         const wrong = table.filter(([id, type, x, y, w, h]) => { const t = T.P.tilesetTarget(id, 48); return t.error || t.type !== type || t.x !== x || t.y !== y || t.w !== w || t.h !== h; })
             .map(([id]) => `${id}: ${JSON.stringify(T.P.tilesetTarget(id, 48))}`);
         check('unit.tileset_targets', wrong.length === 0, wrong.join('; '));
-        const bad = [1024, 1535, 2049, 8192, 1.5].concat(pv('unit.tileset_target_errors') ? [17] : []).filter(id => !T.P.tilesetTarget(id, 48).error);
+        const bad = [0, 1024, 1535, 2049, 8192, 1.5].concat(pv('unit.tileset_target_errors') ? [17] : []).filter(id => !T.P.tilesetTarget(id, 48).error);
         check('unit.tileset_target_errors', bad.length === 0, `no error for tile ids ${bad}`);
-        const g = clone(FIX.geometry), g2 = Object.assign(clone(FIX.geometry), { stratumPx: SPLIT_B.slice() });
-        const hs = gg => [1, 2, 3, 4, 5].map(k => T.V.geometryRowSize(gg, `GEOM_STRATUM_${k}`).h);
-        const want1 = pv('unit.geometry_rows') ? [19, 38, 57, 76, 95] : [19, 38, 57, 76, 96];
-        const r = {
-            default: hs(g), splitB: hs(g2), face: T.V.geometryRowSize(g, 'GEOM_LAYER_FACE').h, tile: T.V.geometryRowSize(g, 'GEOM_TILE'),
-            tall: T.V.geometryRowSize(g, 'GEOM_FRAME_LARGE_TALL'), s6: T.V.geometryRowSize(g, 'GEOM_STRATUM_6').code, tm: T.V.geometryRowSize(g, 'GEOM_FRAME_TALL_MEDIUM').code
+        // Allowed drawn heights per geometry row, default split and [16,20,20,20,20].
+        const g = clone(FIX.geometry), gC = Object.assign(clone(FIX.geometry), { stratumPx: SPLIT_C.slice() });
+        const hs = (gg, row) => { const x = T.V.geometryRow(gg, row); return x.heights ? [...x.heights].sort((a, b) => a - b).join('/') : x.code || `${x.frameW}x${x.frameH}`; };
+        const got = {
+            s: [1, 2, 3, 4, 5].map(k => hs(g, `GEOM_STRATUM_${k}`)), ramp: [1, 2, 3, 4, 5].map(k => hs(g, `GEOM_RAMP_${k}`)),
+            sC: [1, 2, 5].map(k => hs(gC, `GEOM_STRATUM_${k}`)), rampC: [1, 3].map(k => hs(gC, `GEOM_RAMP_${k}`)),
+            face: hs(g, 'GEOM_LAYER_FACE'), tile: hs(g, 'GEOM_TILE'), tall: hs(g, 'GEOM_FRAME_LARGE_TALL'), s6: hs(g, 'GEOM_STRATUM_6'), tm: hs(g, 'GEOM_FRAME_TALL_MEDIUM')
         };
-        check('unit.geometry_rows', r.default.join() === want1.join() && r.splitB.join() === '20,39,58,77,96' && r.face === 96 && r.tile.w === 48 && r.tile.h === 48 &&
-            r.tall.w === 48 && r.tall.h === 96 && r.s6 === 'GEOM_ROW_UNKNOWN' && r.tm === 'FRAME_CLASS_DISABLED', JSON.stringify(r));
+        const want = {
+            s: [pv('unit.geometry_rows') ? '19' : '19/20', '38/39', '57/58', '76/77', '96'], ramp: ['67/68', '86/87', '105/106', '124/125', '144'],
+            sC: ['16/20', '36/40', '96'], rampC: ['64/68', '104/108'], face: '96', tile: '48x48', tall: '48x96', s6: 'GEOM_ROW_UNKNOWN', tm: 'FRAME_CLASS_DISABLED'
+        };
+        check('unit.geometry_rows', JSON.stringify(got) === JSON.stringify(want), `got ${JSON.stringify(got)}`);
+        // Face sheets: 4x2 square cells; a whole sheet or one cell by index.
+        const faceE = (w, h, cols, rows, index) => ({ runtime: { kind: 'RMMZ_FACE', file: 'img/faces/x.png', index }, slot: { w, h }, frames: { cols, rows } });
+        const ft = (e) => { const f = T.P.faceTarget(e, { cols: e.frames.cols, rows: e.frames.rows, fw: e.slot.w / e.frames.cols, fh: e.slot.h / e.frames.rows }); return f.error ? 'error' : f.pending ? 'pending' : `${f.x},${f.y},${f.w}x${f.h} in ${f.fileW}x${f.fileH}`; };
+        const faces = [ft(faceE(576, 288, 4, 2, null)), ft(faceE(144, 144, 1, 1, pv('unit.face_targets') ? 4 : 5)), ft(faceE(144, 144, 1, 1, null)), ft(faceE(144, 96, 1, 1, 0)), ft(faceE(144, 144, 1, 1, 8))];
+        check('unit.face_targets', faces.join(' | ') === '0,0,576x288 in 576x288 | 144,144,144x144 in 576x288 | pending | error | error', faces.join(' | '));
+        // Character blocks: "$" file = one block; other files = 4x2 blocks by index; other frame grids pending.
+        const chE = (file, index, cols, rows, fw, fh) => ({ runtime: { kind: 'RMMZ_CHARACTER', file, index }, grid: { cols, rows, fw, fh } });
+        const ct = e => { const r = T.P.characterTarget(e, e.grid, FIX.geometry); return r.error ? 'error' : r.pending ? 'pending' : `${r.x},${r.y},${r.w}x${r.h} in ${r.fileW}x${r.fileH}`; };
+        const chars = [ct(chE('img/characters/$a.png', null, 3, 4, 48, 96)), ct(chE('img/characters/!$b.png', 0, 3, 4, 96, 48)),
+            ct(chE('img/characters/c.png', pv('unit.character_targets') ? 4 : 5, 3, 4, 48, 48)), ct(chE('img/characters/!$d.png', 0, 1, 1, 48, 96)),
+            ct(chE('img/characters/e.png', null, 3, 4, 48, 48)), ct(chE('img/characters/f.png', 8, 3, 4, 48, 48)), ct(chE('img/characters/$g.png', 0, 3, 4, 48, 64))];
+        check('unit.character_targets', chars.join(' | ') === '0,0,144x384 in 144x384 | 0,0,288x192 in 288x192 | 144,192,144x192 in 576x384 | pending | pending | error | error', chars.join(' | '));
         const names = pv('unit.duplicate_inputs') ? ['A.png', 'B.PNG'] : ['A.png', 'A.PNG', 'B.png'];
         const dups = T.P.duplicateInputs(names);
         check('unit.duplicate_inputs', JSON.stringify(dups) === JSON.stringify([['A', ['A.png', 'A.PNG']]]), JSON.stringify(dups));
@@ -672,10 +732,22 @@ function main() {
         const w = BASE();
         const results = [...w.cells].map(([id, c]) => [id, runValidate(T, w, pv('validate.good_cells_accepted') && id === ID.HANG ? ID.PROP : id, c.file)]);
         const bad = results.filter(([, r]) => r.result !== 'ACCEPTED');
-        check('validate.good_cells_accepted', bad.length === 0 && results.length === 19 - 2, `${results.length} cells; refused: ${bad.map(([id, r]) => `${id} ${r.codes}`).join('; ')}`);
-        const hangRow = w.rows.find(r => r.ids === (pv('validate.slot_id_approval') ? ID.HANG : entryIn(w.cat, ID.HANG).slot.slotId));
+        check('validate.good_cells_accepted', bad.length === 0 && results.length === 21, `${results.length} cells; refused: ${bad.map(([id, r]) => `${id} ${r.codes}`).join('; ')}`);
+        const hangRow = w.rows.find(r => r.ids === (pv('validate.slot_id_approval_warned') ? ID.HANG : entryIn(w.cat, ID.HANG).slot.slotId));
         const hang = runValidate(T, w, ID.HANG, w.cells.get(ID.HANG).file);
-        check('validate.slot_id_approval', !!hangRow && hang.result === 'ACCEPTED', `ledger row by slot id: ${!!hangRow}; result ${hang.result} ${hang.codes}`);
+        check('validate.slot_id_approval_warned', !!hangRow && hang.result === 'ACCEPTED' && hang.warnings.some(x => x.includes('slot id')),
+            `ledger row by slot id: ${!!hangRow}; result ${hang.result} ${hang.codes}; warnings ${JSON.stringify(hang.warnings)}`);
+        // Overlays (groupType OVERLAY) are not tile-class; the same cell without the overlay mark is.
+        const rimTile = makeWorld('rim_not_overlay', { catalogue: cat => { entryIn(cat, ID.RIM).groupType = 'TILE'; } });
+        const rimW = pv('validate.overlay_exempt_from_opacity') ? rimTile : w;
+        const rim = runValidate(T, rimW, ID.RIM, rimW.cells.get(ID.RIM).file), rimAsTile = runValidate(T, rimTile, ID.RIM, rimTile.cells.get(ID.RIM).file);
+        const rimHoles = pxAt(w.cells.get(ID.RIM).img, 0, 0)[3] === 0;
+        check('validate.overlay_exempt_from_opacity', rimHoles && rim.result === 'ACCEPTED' && rimAsTile.codes.join() === 'TILE_NOT_OPAQUE',
+            `overlay: ${rim.result} ${rim.codes}; same cell as a tile: ${rimAsTile.result} ${rimAsTile.codes}`);
+        // A colour-management chunk (gAMA) is reported; the pixels are still checked as stored.
+        const withGama = variant(w, 'gama', ID.PROP, { raw: img => { const b = writePNG(img.data, img.w, img.h); const g = Buffer.alloc(4); g.writeUInt32BE(45455, 0); return pv('validate.colour_chunk_warned') ? b : Buffer.concat([b.subarray(0, 33), chunk('gAMA', g), b.subarray(33)]); } });
+        const gr = runValidate(T, w, ID.PROP, withGama.file, { approvals: withGama.approvals });
+        check('validate.colour_chunk_warned', gr.result === 'ACCEPTED' && gr.warnings.some(x => x.includes('gAMA')), `${gr.result} ${gr.codes}; warnings ${JSON.stringify(gr.warnings)}`);
         const crlf = put(w.root, 'neg/crlf_bom.APPROVALS.md', ledgerDoc(w.rows, { eol: pv('validate.ledger_crlf_and_bom') ? '\r' : '\r\n', bom: true }));
         const rc = runValidate(T, w, ID.PROP, w.cells.get(ID.PROP).file, { approvals: crlf });
         check('validate.ledger_crlf_and_bom', rc.result === 'ACCEPTED', `${rc.result} ${rc.codes}`);
@@ -689,16 +761,15 @@ function main() {
         const off = makeWorld('tall_medium_off', { catalogue: addTallMedium });
         const rOn = runValidate(T, on, ID.TALLMED, on.cells.get(ID.TALLMED).file), rOff = runValidate(T, off, ID.TALLMED, off.cells.get(ID.TALLMED).file);
         check('validate.tall_medium_enabled_accepts', rOn.result === 'ACCEPTED' && rOff.result === 'REFUSED', `enabled: ${rOn.result} ${rOn.codes}; disabled: ${rOff.result} ${rOff.codes}`);
-        // stratumPx [20,19,19,19,19]: slot heights rebuilt from it are accepted and differ from the default split's.
-        const rebuilt = makeWorld('split_b_new_slots', {
-            geometry: g => { g.stratumPx = SPLIT_B.slice(); },
-            catalogue: (cat, g) => { for (let k = 1; k <= 5; k++) { const e = entryIn(cat, RAMP(k)), h = cumStrata(g, k); e.slot.h = h; Object.assign(e.envelope, { hMin: h, hTarget: h, hMax: h }); e.anchor.y = h - 1; } }
-        });
-        const useW = pv('validate.stratumPx_changed_slots_follow') ? BASE() : rebuilt;
-        const heights = [1, 2, 3, 4, 5].map(k => entryIn(rebuilt.cat, RAMP(k)).slot.h), baseHeights = [1, 2, 3, 4, 5].map(k => entryIn(w.cat, RAMP(k)).slot.h);
-        const rr = [1, 2, 3, 4, 5].map(k => runValidate(T, rebuilt, RAMP(k), useW.cells.get(RAMP(k)).file));
-        check('validate.stratumPx_changed_slots_follow', rr.every(x => x.result === 'ACCEPTED') && heights.join() === '20,39,58,77,96' && baseHeights.join() === '19,38,57,76,96',
-            `heights ${heights} (default ${baseHeights}); results ${rr.map(x => `${x.result}${x.codes && x.codes.length ? ` ${x.codes}` : ''}`).join(', ')}`);
+        // stratumPx [16,20,20,20,20] with envelopes rebuilt from it: strips and ramps drawn at the new
+        // heights are accepted, and those heights differ from the default split's.
+        const rebuilt = splitC();
+        const useW = pv('validate.stratumPx_changed_heights_follow') ? BASE() : rebuilt;
+        const geo = [ID.STRIP1, ID.STRIP3, RAMP(1), RAMP(2), RAMP(3), RAMP(4), RAMP(5)];
+        const heights = geo.map(id => entryIn(rebuilt.cat, id).envelope.hTarget), baseHeights = geo.map(id => entryIn(w.cat, id).envelope.hTarget);
+        const rr = geo.map(id => runValidate(T, rebuilt, id, useW.cells.get(id).file));
+        check('validate.stratumPx_changed_heights_follow', rr.every(x => x.result === 'ACCEPTED') && heights.join() === '16,56,64,84,104,124,144' && baseHeights.join() === '19,57,67,86,105,124,144',
+            `drawn heights ${heights} (default ${baseHeights}); results ${rr.map(x => `${x.result}${x.codes && x.codes.length ? ` ${x.codes}` : ''}`).join(', ')}`);
     }
 
     // --- negative cases, one per refusal rule
@@ -767,12 +838,13 @@ function main() {
 
         // Coverage report, exact.
         const S = id => entryIn(w.cat, id).slot.slotId;
-        const surfaceIds = [ID.HUMAN, ID.OGRE, ID.HORSE, ID.TILE, ID.PROP, ID.HANG, ID.WALL, RAMP(1), RAMP(2), RAMP(3), RAMP(4), RAMP(5), ID.A2, ID.BOULDER, ID.RAT].sort();
-        const atlasFilled = [ID.HUMAN, ID.OGRE, ID.HORSE, ID.TILE, ID.PROP, ID.HANG, ID.WALL, RAMP(1), RAMP(2), RAMP(3), RAMP(4), RAMP(5)].map(S).sort();
+        const atlasIds = [ID.HUMAN, ID.OGRE, ID.HORSE, ID.TILE, ID.PROP, ID.HANG, ID.WALL, RAMP(1), RAMP(2), RAMP(3), RAMP(4), RAMP(5), ID.STRIP1, ID.STRIP3, ID.RIM, ID.FACE];
+        const surfaceIds = atlasIds.concat([ID.A2, ID.BOULDER, ID.RAT]).sort();
+        const atlasFilled = atlasIds.map(S).sort();
         const sheetRow = (sheetId, kind, filled, empty, unexpected) => ({ sheetId, kind, slots: filled.length + empty.length, filled, empty, unexpected, notInTemplate: [], template: 'OK', strayPixels: 0 });
         const expectedCov = {
             schema: 'deus-art-coverage/1', catalogueSha256: sha(fs.readFileSync(w.catalogueFile)),
-            totals: { slots: 17, filled: 15, empty: 2, unexpected: 1, strayPixels: 0, derivedPending: 1, noSlot: 1 },
+            totals: { slots: 21, filled: 19, empty: 2, unexpected: 1, strayPixels: 0, derivedPending: 1, noSlot: 1 },
             sheets: [
                 sheetRow(ATLAS, 'ATLAS', atlasFilled, [S(ID.CAVE), S(ID.STOOL)], [`${ATLAS}:0099`]),
                 sheetRow('CHR_TEST_SURFACE_B1_RAT', 'RMMZ_CHARACTER', [S(ID.RAT)], [], []),
@@ -781,7 +853,7 @@ function main() {
             ],
             bands: [
                 { band: 'LOWER1', inGeometry: true, slots: 1, filled: [], empty: [ID.CAVE], derivedPending: [], noSlot: [], unexpected: [] },
-                { band: 'SURFACE', inGeometry: true, slots: 15, filled: surfaceIds, empty: [], derivedPending: [ID.FLIPH], noSlot: [ID.GIANT], unexpected: [] },
+                { band: 'SURFACE', inGeometry: true, slots: 19, filled: surfaceIds, empty: [], derivedPending: [ID.FLIPH], noSlot: [ID.GIANT], unexpected: [] },
                 { band: 'TEST_NOBAND', inGeometry: false, slots: 1, filled: [], empty: [ID.STOOL], derivedPending: [], noSlot: [], unexpected: [ID.STOOL] }
             ]
         };
@@ -789,7 +861,7 @@ function main() {
         const cov = JSON.parse(fs.readFileSync(path.join(out, 'coverage_report.json'), 'utf8'));
         check('place.coverage_report_exact', JSON.stringify(cov) === JSON.stringify(expectedCov), `got ${JSON.stringify(cov)}`);
         const md = fs.readFileSync(path.join(out, 'coverage_report.md'), 'utf8');
-        const mdRow = pv('place.coverage_markdown') ? `| ${ATLAS} | ATLAS | 14 | 14 |` : `| ${ATLAS} | ATLAS | 14 | 12 | 2 | 1 | 0 | 0 | OK |`;
+        const mdRow = pv('place.coverage_markdown') ? `| ${ATLAS} | ATLAS | 18 | 18 |` : `| ${ATLAS} | ATLAS | 18 | 16 | 2 | 1 | 0 | 0 | OK |`;
         check('place.coverage_markdown', md.includes(mdRow) && md.includes('| TEST_NOBAND | no | 1 | 0 | 1 | 0 | 0 | 1 |'), md.split('\n').slice(0, 12).join(' / '));
 
         // Placement report: filled slots carry the file hash and the hash of the copied bytes.
@@ -803,6 +875,16 @@ function main() {
         const dpOk = dp.length === 1 && dp[0].entryId === ID.FLIPH && dp[0].derivedFrom === ID.PROP && dp[0].status === 'DERIVED_PENDING' && dp[0].parentFilled === true && dp[0].ledgerApprovedVariant === wantApproved;
         const mentions = Object.keys(snapshot(out)).filter(f => f.includes(ID.FLIPH)).concat(rep.filled.filter(f => f.entryId === ID.FLIPH).map(f => f.slotId));
         check('place.derived_pending_reported', dpOk && mentions.length === 0, `derivedPending ${JSON.stringify(dp)}; files or slots for it: [${mentions}]`);
+        // Runtime target without a file: placed in the atlas, reported RUNTIME_PENDING, not exported.
+        const wantPending = pv('place.runtime_pending_reported') ? [] : [{ entryId: ID.HANG, slotId: S(ID.HANG), kind: 'RMMZ_CHARACTER', reason: 'no runtime file named' }];
+        check('place.runtime_pending_reported', JSON.stringify(rep.runtimePending) === JSON.stringify(wantPending) && rep.filled.some(f => f.entryId === ID.HANG),
+            `runtimePending ${JSON.stringify(rep.runtimePending)}`);
+        // Runtime files holding only some of their tiles are marked partial and warned about.
+        const wantPartial = { 'img/characters/$TEST_Horse.png': false, 'img/characters/$TEST_Human.png': pv('place.runtime_partial_flagged'), 'img/characters/$TEST_Ogre.png': false,
+            'img/characters/TEST_Critters.png': true, 'img/faces/TEST_Faces.png': false, 'img/tilesets/TEST_Surface_A2.png': true, 'img/tilesets/TEST_Surface_A5.png': true, 'img/tilesets/TEST_Surface_B.png': true };
+        const gotPartial = Object.fromEntries(rep.runtime.map(r => [r.file.replace(/^runtime\//, ''), r.partial]));
+        const warned = rep.warnings.filter(x => x.includes('is partial')).length;
+        check('place.runtime_partial_flagged', JSON.stringify(gotPartial) === JSON.stringify(wantPartial) && warned === 4, `partial ${JSON.stringify(gotPartial)}; ${warned} partial warnings`);
 
         // Determinism: a second run into a new folder gives byte-identical output.
         const out2 = outDir(w, 'rerun', T);
@@ -877,10 +959,11 @@ function main() {
             return expectCodes(runPlace(T, ww, inDir(ww, name, ids), outDir(ww, name, T)), codes);
         });
         worldCase('place.catalogue_overlap_refused', () => makeWorld('overlap', { catalogue: cat => { Object.assign(entryIn(cat, ID.STOOL).slot, { x: 200, y: 200 }); } }), [ID.PROP], ['CATALOGUE_INVALID']);
-        worldCase('place.runtime_path_escape_refused', () => makeWorld('rt_escape', { catalogue: cat => { entryIn(cat, ID.PROP).runtime = { kind: 'TILESET', file: '../TEST_escape.png', tileId: 3 }; } }), [ID.PROP], ['RUNTIME_INVALID']);
+        worldCase('place.runtime_path_escape_refused', () => makeWorld('rt_escape', { catalogue: cat => { entryIn(cat, ID.PROP).runtime = { kind: 'RMMZ_TILESET', file: '../TEST_escape.png', tileId: 3 }; } }), [ID.PROP], ['RUNTIME_INVALID']);
         worldCase('place.runtime_size_mismatch_refused', () => makeWorld('rt_size', { catalogue: cat => { entryIn(cat, ID.TILE).runtime.tileId = 2816; } }), [ID.TILE], ['RUNTIME_INVALID']);
         worldCase('place.runtime_kind_unknown_refused', () => makeWorld('rt_kind', { catalogue: cat => { entryIn(cat, ID.PROP).runtime = { kind: 'TEST_SPRITE', file: 'img/TEST_x.png', index: 0 }; } }), [ID.PROP], ['RUNTIME_INVALID']);
-        worldCase('place.runtime_target_clash_refused', () => makeWorld('rt_clash', { catalogue: cat => { entryIn(cat, ID.PROP).runtime = { kind: 'TILESET', file: 'img/tilesets/TEST_Surface_B.png', tileId: 17 }; } }), [ID.PROP, ID.BOULDER], ['RUNTIME_INVALID']);
+        worldCase('place.runtime_target_clash_refused', () => makeWorld('rt_clash', { catalogue: cat => { entryIn(cat, ID.PROP).runtime = { kind: 'RMMZ_TILESET', file: 'img/tilesets/TEST_Surface_B.png', tileId: 17 }; } }), [ID.PROP, ID.BOULDER], ['RUNTIME_INVALID']);
+        worldCase('place.runtime_tile_zero_refused', () => makeWorld('rt_zero', { catalogue: cat => { entryIn(cat, ID.BOULDER).runtime.tileId = 0; } }), [ID.BOULDER], ['RUNTIME_INVALID']);
         refusedCase('place.out_state_tampered', p => {
             const o = outDir(w, 'tamper', T);
             fs.cpSync(out, o, { recursive: true });
@@ -921,6 +1004,15 @@ function main() {
             fs.cpSync(partial, o, { recursive: true });
             const src = p ? propB(w) : badProp;
             return expectCodes(runPlace(T, w, inDir(w, 'repbad', [], { [`${ID.PROP}.png`]: src.file }), o, { approvals: badProp.approvals, replace: [S(ID.PROP)] }), ['OFF_PALETTE']);
+        });
+        refusedCase('place.template_change_makes_out_stale', p => {
+            const tw = makeWorld('template_change');
+            const o = outDir(tw, 'tplchange', T);
+            const first = runPlace(T, tw, inDir(tw, 'tplchange1', [ID.PROP]), o);
+            if (first.exitCode !== 0) return `first placement refused: ${JSON.stringify(refusalCodes(first))}`;
+            const f = path.join(tw.templatesDir, `${ATLAS}.json`), side = JSON.parse(fs.readFileSync(f, 'utf8'));
+            if (!p) { side.gridColour = '#00FFFE'; fs.writeFileSync(f, JSON.stringify(side, null, 2) + '\n'); }
+            return expectCodes(runPlace(T, tw, inDir(tw, 'tplchange2', []), o), ['OUT_STATE_STALE']);
         });
         refusedCase('place.out_state_stale', p => {
             const o = outDir(w, 'stale', T);

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "deus-art-catalogue/1.1.0",
-  "note": "TEST_ fixture for tools/art/test_place_art.js. Every name is a TEST_ placeholder. geometry.sha256 and palette.sha256 are filled in by the test after it writes those files into its temp folder.",
+  "note": "TEST_ fixture for tools/art/test_place_art.js. Every name is a TEST_ placeholder. geometry.sha256 and palette.sha256 are filled in by the test after it writes those files into its temp folder. Geometry-derived envelopes follow the Lane S catalogue schema (GEOM_STRATUM_k: runs of k strata; GEOM_RAMP_k: tilePx + runs; slot height rounded up to the tile grid).",
   "tileSizePx": 48,
   "geometry": {
     "path": "art/catalogue/geometry.json",
@@ -25,7 +25,7 @@
         "type": "TEST_MIXED"
       },
       "w": 576,
-      "h": 576,
+      "h": 864,
       "gridPx": 48,
       "runtimeFile": null
     },
@@ -112,7 +112,12 @@
       "frames": {
         "cols": 3,
         "rows": 4,
-        "facings": 4,
+        "facings": [
+          "S",
+          "W",
+          "E",
+          "N"
+        ],
         "rate": 8
       },
       "slot": {
@@ -124,7 +129,7 @@
         "h": 192
       },
       "runtime": {
-        "kind": "CHARACTER",
+        "kind": "RMMZ_CHARACTER",
         "file": "img/characters/$TEST_Human.png",
         "index": 0
       },
@@ -185,7 +190,12 @@
       "frames": {
         "cols": 3,
         "rows": 4,
-        "facings": 4,
+        "facings": [
+          "S",
+          "W",
+          "E",
+          "N"
+        ],
         "rate": 8
       },
       "slot": {
@@ -197,9 +207,9 @@
         "h": 384
       },
       "runtime": {
-        "kind": "CHARACTER",
+        "kind": "RMMZ_CHARACTER",
         "file": "img/characters/$TEST_Ogre.png",
-        "index": 0
+        "index": null
       },
       "variants": {
         "derivedFrom": null,
@@ -258,7 +268,12 @@
       "frames": {
         "cols": 3,
         "rows": 4,
-        "facings": 4,
+        "facings": [
+          "S",
+          "W",
+          "E",
+          "N"
+        ],
         "rate": 8
       },
       "slot": {
@@ -270,7 +285,7 @@
         "h": 192
       },
       "runtime": {
-        "kind": "CHARACTER",
+        "kind": "RMMZ_CHARACTER",
         "file": "img/characters/$TEST_Horse.png",
         "index": 0
       },
@@ -291,7 +306,7 @@
     },
     {
       "id": "SURFACE_B1_TERRAIN_TEST_SOIL_V1_BASE",
-      "category": "TERRAIN",
+      "category": "TOP",
       "band": "SURFACE",
       "biome": "SURFACE_B1",
       "zMin": 0,
@@ -338,7 +353,7 @@
         "h": 48
       },
       "runtime": {
-        "kind": "TILESET",
+        "kind": "RMMZ_TILESET",
         "file": "img/tilesets/TEST_Surface_A5.png",
         "tileId": 1539
       },
@@ -355,11 +370,12 @@
       "standardPending": null,
       "alphaMode": "BINARY",
       "status": "MISSING",
-      "statusWhy": "TEST_ fixture entry; no art exists"
+      "statusWhy": "TEST_ fixture entry; no art exists",
+      "groupType": "TILE"
     },
     {
       "id": "SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED",
-      "category": "PROP",
+      "category": "FURNITURE",
       "band": "SURFACE",
       "biome": "SURFACE_B1",
       "zMin": 0,
@@ -405,7 +421,11 @@
         "w": 48,
         "h": 48
       },
-      "runtime": null,
+      "runtime": {
+        "kind": "NONE",
+        "file": null,
+        "index": null
+      },
       "variants": {
         "derivedFrom": null,
         "flipH": false,
@@ -423,7 +443,7 @@
     },
     {
       "id": "SURFACE_B1_PROP_TEST_LANTERN_V1_HANGING",
-      "category": "PROP",
+      "category": "HANGING",
       "band": "SURFACE",
       "biome": "SURFACE_B1",
       "zMin": 0,
@@ -469,7 +489,11 @@
         "w": 48,
         "h": 48
       },
-      "runtime": null,
+      "runtime": {
+        "kind": "RMMZ_CHARACTER",
+        "file": null,
+        "index": null
+      },
       "variants": {
         "derivedFrom": null,
         "flipH": false,
@@ -483,11 +507,11 @@
       "standardPending": null,
       "alphaMode": "BINARY",
       "status": "MISSING",
-      "statusWhy": "TEST_ fixture entry; no art exists"
+      "statusWhy": "TEST_ fixture: runtime file not decided yet (RUNTIME_PENDING)"
     },
     {
       "id": "SURFACE_B1_WALL_TEST_STONE_V1_FACE",
-      "category": "WALL",
+      "category": "EDGE",
       "band": "SURFACE",
       "biome": "SURFACE_B1",
       "zMin": 0,
@@ -519,9 +543,9 @@
         "h": 1
       },
       "anchor": {
-        "type": "GROUND",
+        "type": "WALL",
         "x": 24,
-        "y": 95
+        "y": 0
       },
       "paletteRampIds": [],
       "frames": null,
@@ -533,7 +557,11 @@
         "w": 48,
         "h": 96
       },
-      "runtime": null,
+      "runtime": {
+        "kind": "NONE",
+        "file": null,
+        "index": null
+      },
       "variants": {
         "derivedFrom": null,
         "flipH": false,
@@ -550,7 +578,7 @@
       "statusWhy": "TEST_ fixture entry; no art exists"
     },
     {
-      "id": "SURFACE_B1_RAMP_TEST_SOIL_V1_S1",
+      "id": "SURFACE_B1_RAMP_TEST_SOIL_V1_C1",
       "category": "RAMP",
       "band": "SURFACE",
       "biome": "SURFACE_B1",
@@ -569,270 +597,14 @@
         "matrix": [],
         "addendum": []
       },
-      "scaleRow": "GEOM_STRATUM_1",
+      "scaleRow": "GEOM_RAMP_1",
       "envelope": {
         "wMin": 48,
         "wTarget": 48,
         "wMax": 48,
-        "hMin": 19,
-        "hTarget": 19,
-        "hMax": 19
-      },
-      "footprint": {
-        "w": 1,
-        "h": 1
-      },
-      "anchor": {
-        "type": "GROUND",
-        "x": 24,
-        "y": 18
-      },
-      "paletteRampIds": [],
-      "frames": null,
-      "slot": {
-        "sheetId": "ATLAS_TEST_SURFACE_B1",
-        "slotId": "ATLAS_TEST_SURFACE_B1:0008",
-        "x": 336,
-        "y": 192,
-        "w": 48,
-        "h": 19
-      },
-      "runtime": null,
-      "variants": {
-        "derivedFrom": null,
-        "flipH": false,
-        "flipV": false,
-        "rot": 0,
-        "paletteSwap": null,
-        "lightingSafe": true
-      },
-      "paperDoll": null,
-      "references": [],
-      "standardPending": null,
-      "alphaMode": "BINARY",
-      "status": "MISSING",
-      "statusWhy": "TEST_ fixture entry; no art exists"
-    },
-    {
-      "id": "SURFACE_B1_RAMP_TEST_SOIL_V1_S2",
-      "category": "RAMP",
-      "band": "SURFACE",
-      "biome": "SURFACE_B1",
-      "zMin": 0,
-      "zMax": 3,
-      "sizeClass": null,
-      "frameClass": null,
-      "sourceIds": {
-        "catalog": [],
-        "assetIndex": [],
-        "brief": [
-          "WG.41.01 TEST_ fixture"
-        ],
-        "ar": [],
-        "manifest": [],
-        "matrix": [],
-        "addendum": []
-      },
-      "scaleRow": "GEOM_STRATUM_2",
-      "envelope": {
-        "wMin": 48,
-        "wTarget": 48,
-        "wMax": 48,
-        "hMin": 38,
-        "hTarget": 38,
-        "hMax": 38
-      },
-      "footprint": {
-        "w": 1,
-        "h": 1
-      },
-      "anchor": {
-        "type": "GROUND",
-        "x": 24,
-        "y": 37
-      },
-      "paletteRampIds": [],
-      "frames": null,
-      "slot": {
-        "sheetId": "ATLAS_TEST_SURFACE_B1",
-        "slotId": "ATLAS_TEST_SURFACE_B1:0009",
-        "x": 384,
-        "y": 192,
-        "w": 48,
-        "h": 38
-      },
-      "runtime": null,
-      "variants": {
-        "derivedFrom": null,
-        "flipH": false,
-        "flipV": false,
-        "rot": 0,
-        "paletteSwap": null,
-        "lightingSafe": true
-      },
-      "paperDoll": null,
-      "references": [],
-      "standardPending": null,
-      "alphaMode": "BINARY",
-      "status": "MISSING",
-      "statusWhy": "TEST_ fixture entry; no art exists"
-    },
-    {
-      "id": "SURFACE_B1_RAMP_TEST_SOIL_V1_S3",
-      "category": "RAMP",
-      "band": "SURFACE",
-      "biome": "SURFACE_B1",
-      "zMin": 0,
-      "zMax": 3,
-      "sizeClass": null,
-      "frameClass": null,
-      "sourceIds": {
-        "catalog": [],
-        "assetIndex": [],
-        "brief": [
-          "WG.41.01 TEST_ fixture"
-        ],
-        "ar": [],
-        "manifest": [],
-        "matrix": [],
-        "addendum": []
-      },
-      "scaleRow": "GEOM_STRATUM_3",
-      "envelope": {
-        "wMin": 48,
-        "wTarget": 48,
-        "wMax": 48,
-        "hMin": 57,
-        "hTarget": 57,
-        "hMax": 57
-      },
-      "footprint": {
-        "w": 1,
-        "h": 1
-      },
-      "anchor": {
-        "type": "GROUND",
-        "x": 24,
-        "y": 56
-      },
-      "paletteRampIds": [],
-      "frames": null,
-      "slot": {
-        "sheetId": "ATLAS_TEST_SURFACE_B1",
-        "slotId": "ATLAS_TEST_SURFACE_B1:0010",
-        "x": 432,
-        "y": 192,
-        "w": 48,
-        "h": 57
-      },
-      "runtime": null,
-      "variants": {
-        "derivedFrom": null,
-        "flipH": false,
-        "flipV": false,
-        "rot": 0,
-        "paletteSwap": null,
-        "lightingSafe": true
-      },
-      "paperDoll": null,
-      "references": [],
-      "standardPending": null,
-      "alphaMode": "BINARY",
-      "status": "MISSING",
-      "statusWhy": "TEST_ fixture entry; no art exists"
-    },
-    {
-      "id": "SURFACE_B1_RAMP_TEST_SOIL_V1_S4",
-      "category": "RAMP",
-      "band": "SURFACE",
-      "biome": "SURFACE_B1",
-      "zMin": 0,
-      "zMax": 3,
-      "sizeClass": null,
-      "frameClass": null,
-      "sourceIds": {
-        "catalog": [],
-        "assetIndex": [],
-        "brief": [
-          "WG.41.01 TEST_ fixture"
-        ],
-        "ar": [],
-        "manifest": [],
-        "matrix": [],
-        "addendum": []
-      },
-      "scaleRow": "GEOM_STRATUM_4",
-      "envelope": {
-        "wMin": 48,
-        "wTarget": 48,
-        "wMax": 48,
-        "hMin": 76,
-        "hTarget": 76,
-        "hMax": 76
-      },
-      "footprint": {
-        "w": 1,
-        "h": 1
-      },
-      "anchor": {
-        "type": "GROUND",
-        "x": 24,
-        "y": 75
-      },
-      "paletteRampIds": [],
-      "frames": null,
-      "slot": {
-        "sheetId": "ATLAS_TEST_SURFACE_B1",
-        "slotId": "ATLAS_TEST_SURFACE_B1:0011",
-        "x": 480,
-        "y": 192,
-        "w": 48,
-        "h": 76
-      },
-      "runtime": null,
-      "variants": {
-        "derivedFrom": null,
-        "flipH": false,
-        "flipV": false,
-        "rot": 0,
-        "paletteSwap": null,
-        "lightingSafe": true
-      },
-      "paperDoll": null,
-      "references": [],
-      "standardPending": null,
-      "alphaMode": "BINARY",
-      "status": "MISSING",
-      "statusWhy": "TEST_ fixture entry; no art exists"
-    },
-    {
-      "id": "SURFACE_B1_RAMP_TEST_SOIL_V1_S5",
-      "category": "RAMP",
-      "band": "SURFACE",
-      "biome": "SURFACE_B1",
-      "zMin": 0,
-      "zMax": 3,
-      "sizeClass": null,
-      "frameClass": null,
-      "sourceIds": {
-        "catalog": [],
-        "assetIndex": [],
-        "brief": [
-          "WG.41.01 TEST_ fixture"
-        ],
-        "ar": [],
-        "manifest": [],
-        "matrix": [],
-        "addendum": []
-      },
-      "scaleRow": "GEOM_STRATUM_5",
-      "envelope": {
-        "wMin": 48,
-        "wTarget": 48,
-        "wMax": 48,
-        "hMin": 96,
-        "hTarget": 96,
-        "hMax": 96
+        "hMin": 67,
+        "hTarget": 67,
+        "hMax": 68
       },
       "footprint": {
         "w": 1,
@@ -847,13 +619,289 @@
       "frames": null,
       "slot": {
         "sheetId": "ATLAS_TEST_SURFACE_B1",
-        "slotId": "ATLAS_TEST_SURFACE_B1:0012",
-        "x": 528,
+        "slotId": "ATLAS_TEST_SURFACE_B1:0008",
+        "x": 336,
         "y": 192,
         "w": 48,
         "h": 96
       },
-      "runtime": null,
+      "runtime": {
+        "kind": "NONE",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture entry; no art exists"
+    },
+    {
+      "id": "SURFACE_B1_RAMP_TEST_SOIL_V1_C2",
+      "category": "RAMP",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "WG.41.01 TEST_ fixture"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_RAMP_2",
+      "envelope": {
+        "wMin": 48,
+        "wTarget": 48,
+        "wMax": 48,
+        "hMin": 86,
+        "hTarget": 86,
+        "hMax": 87
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 95
+      },
+      "paletteRampIds": [],
+      "frames": null,
+      "slot": {
+        "sheetId": "ATLAS_TEST_SURFACE_B1",
+        "slotId": "ATLAS_TEST_SURFACE_B1:0009",
+        "x": 384,
+        "y": 192,
+        "w": 48,
+        "h": 96
+      },
+      "runtime": {
+        "kind": "NONE",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture entry; no art exists"
+    },
+    {
+      "id": "SURFACE_B1_RAMP_TEST_SOIL_V1_C3",
+      "category": "RAMP",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "WG.41.01 TEST_ fixture"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_RAMP_3",
+      "envelope": {
+        "wMin": 48,
+        "wTarget": 48,
+        "wMax": 48,
+        "hMin": 105,
+        "hTarget": 105,
+        "hMax": 106
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 143
+      },
+      "paletteRampIds": [],
+      "frames": null,
+      "slot": {
+        "sheetId": "ATLAS_TEST_SURFACE_B1",
+        "slotId": "ATLAS_TEST_SURFACE_B1:0010",
+        "x": 432,
+        "y": 192,
+        "w": 48,
+        "h": 144
+      },
+      "runtime": {
+        "kind": "NONE",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture entry; no art exists"
+    },
+    {
+      "id": "SURFACE_B1_RAMP_TEST_SOIL_V1_C4",
+      "category": "RAMP",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "WG.41.01 TEST_ fixture"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_RAMP_4",
+      "envelope": {
+        "wMin": 48,
+        "wTarget": 48,
+        "wMax": 48,
+        "hMin": 124,
+        "hTarget": 124,
+        "hMax": 125
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 143
+      },
+      "paletteRampIds": [],
+      "frames": null,
+      "slot": {
+        "sheetId": "ATLAS_TEST_SURFACE_B1",
+        "slotId": "ATLAS_TEST_SURFACE_B1:0011",
+        "x": 480,
+        "y": 192,
+        "w": 48,
+        "h": 144
+      },
+      "runtime": {
+        "kind": "NONE",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture entry; no art exists"
+    },
+    {
+      "id": "SURFACE_B1_RAMP_TEST_SOIL_V1_C5",
+      "category": "RAMP",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "WG.41.01 TEST_ fixture"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_RAMP_5",
+      "envelope": {
+        "wMin": 48,
+        "wTarget": 48,
+        "wMax": 48,
+        "hMin": 144,
+        "hTarget": 144,
+        "hMax": 144
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "GROUND",
+        "x": 24,
+        "y": 143
+      },
+      "paletteRampIds": [],
+      "frames": null,
+      "slot": {
+        "sheetId": "ATLAS_TEST_SURFACE_B1",
+        "slotId": "ATLAS_TEST_SURFACE_B1:0012",
+        "x": 528,
+        "y": 192,
+        "w": 48,
+        "h": 144
+      },
+      "runtime": {
+        "kind": "NONE",
+        "file": null,
+        "index": null
+      },
       "variants": {
         "derivedFrom": null,
         "flipH": false,
@@ -871,7 +919,7 @@
     },
     {
       "id": "LOWER1_B1_TERRAIN_TEST_CAVEFLOOR_V1_BASE",
-      "category": "TERRAIN",
+      "category": "TOP",
       "band": "LOWER1",
       "biome": "LOWER1_B1",
       "zMin": -8,
@@ -917,7 +965,11 @@
         "w": 48,
         "h": 48
       },
-      "runtime": null,
+      "runtime": {
+        "kind": "NONE",
+        "file": null,
+        "index": null
+      },
       "variants": {
         "derivedFrom": null,
         "flipH": false,
@@ -931,11 +983,12 @@
       "standardPending": null,
       "alphaMode": "BINARY",
       "status": "MISSING",
-      "statusWhy": "TEST_ fixture entry; no art exists"
+      "statusWhy": "TEST_ fixture entry; no art exists",
+      "groupType": "TILE"
     },
     {
       "id": "TEST_NOBAND_B1_PROP_TEST_STOOL_V1_BASE",
-      "category": "PROP",
+      "category": "FURNITURE",
       "band": "TEST_NOBAND",
       "biome": "TEST_NOBAND_B1",
       "zMin": 0,
@@ -981,7 +1034,291 @@
         "w": 48,
         "h": 48
       },
-      "runtime": null,
+      "runtime": {
+        "kind": "RMMZ_TILESET",
+        "file": null,
+        "tileId": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture entry; no art exists"
+    },
+    {
+      "id": "SURFACE_B1_EDGE_TEST_SOIL_V1_H1",
+      "category": "EDGE",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "WG.41.01 TEST_ fixture"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_STRATUM_1",
+      "envelope": {
+        "wMin": 48,
+        "wTarget": 48,
+        "wMax": 48,
+        "hMin": 19,
+        "hTarget": 19,
+        "hMax": 20
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "WALL",
+        "x": 24,
+        "y": 0
+      },
+      "paletteRampIds": [],
+      "frames": null,
+      "slot": {
+        "sheetId": "ATLAS_TEST_SURFACE_B1",
+        "slotId": "ATLAS_TEST_SURFACE_B1:0017",
+        "x": 240,
+        "y": 240,
+        "w": 48,
+        "h": 48
+      },
+      "runtime": {
+        "kind": "NONE",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture entry; no art exists"
+    },
+    {
+      "id": "SURFACE_B1_EDGE_TEST_SOIL_V1_H3",
+      "category": "EDGE",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "WG.41.01 TEST_ fixture"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_STRATUM_3",
+      "envelope": {
+        "wMin": 48,
+        "wTarget": 48,
+        "wMax": 48,
+        "hMin": 57,
+        "hTarget": 57,
+        "hMax": 58
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "WALL",
+        "x": 24,
+        "y": 0
+      },
+      "paletteRampIds": [],
+      "frames": null,
+      "slot": {
+        "sheetId": "ATLAS_TEST_SURFACE_B1",
+        "slotId": "ATLAS_TEST_SURFACE_B1:0018",
+        "x": 144,
+        "y": 288,
+        "w": 48,
+        "h": 96
+      },
+      "runtime": {
+        "kind": "NONE",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "BINARY",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture entry; no art exists"
+    },
+    {
+      "id": "SURFACE_B1_RIMSHADOW_TEST_RIM_V1_E",
+      "category": "RIMSHADOW",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "WG.41.01 TEST_ fixture"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "GEOM_TILE",
+      "envelope": {
+        "wMin": 24,
+        "wTarget": 36,
+        "wMax": 48,
+        "hMin": 24,
+        "hTarget": 36,
+        "hMax": 48
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "CENTER",
+        "x": 24,
+        "y": 24
+      },
+      "paletteRampIds": [],
+      "frames": null,
+      "slot": {
+        "sheetId": "ATLAS_TEST_SURFACE_B1",
+        "slotId": "ATLAS_TEST_SURFACE_B1:0019",
+        "x": 192,
+        "y": 288,
+        "w": 48,
+        "h": 48
+      },
+      "runtime": {
+        "kind": "NONE",
+        "file": null,
+        "index": null
+      },
+      "variants": {
+        "derivedFrom": null,
+        "flipH": false,
+        "flipV": false,
+        "rot": 0,
+        "paletteSwap": null,
+        "lightingSafe": true
+      },
+      "paperDoll": null,
+      "references": [],
+      "standardPending": null,
+      "alphaMode": "OWNER_OPEN",
+      "status": "MISSING",
+      "statusWhy": "TEST_ fixture: overlay drawn over other tiles, so it is not a tile-class slot",
+      "groupType": "OVERLAY"
+    },
+    {
+      "id": "SURFACE_B1_FACE_TEST_FOLK_V1_SHEET",
+      "category": "FACE",
+      "band": "SURFACE",
+      "biome": "SURFACE_B1",
+      "zMin": 0,
+      "zMax": 3,
+      "sizeClass": null,
+      "frameClass": null,
+      "sourceIds": {
+        "catalog": [],
+        "assetIndex": [],
+        "brief": [
+          "WG.41.01 TEST_ fixture"
+        ],
+        "ar": [],
+        "manifest": [],
+        "matrix": [],
+        "addendum": []
+      },
+      "scaleRow": "RMMZ_FACE_144",
+      "envelope": {
+        "wMin": 96,
+        "wTarget": 120,
+        "wMax": 144,
+        "hMin": 96,
+        "hTarget": 120,
+        "hMax": 144
+      },
+      "footprint": {
+        "w": 1,
+        "h": 1
+      },
+      "anchor": {
+        "type": "CENTER",
+        "x": 72,
+        "y": 72
+      },
+      "paletteRampIds": [],
+      "frames": {
+        "cols": 4,
+        "rows": 2,
+        "facings": [
+          "S"
+        ],
+        "rate": null
+      },
+      "slot": {
+        "sheetId": "ATLAS_TEST_SURFACE_B1",
+        "slotId": "ATLAS_TEST_SURFACE_B1:0020",
+        "x": 0,
+        "y": 576,
+        "w": 576,
+        "h": 288
+      },
+      "runtime": {
+        "kind": "RMMZ_FACE",
+        "file": "img/faces/TEST_Faces.png",
+        "index": null
+      },
       "variants": {
         "derivedFrom": null,
         "flipH": false,
@@ -1039,11 +1376,20 @@
       "frames": {
         "cols": 3,
         "rows": 4,
-        "facings": 4,
+        "facings": [
+          "S",
+          "W",
+          "E",
+          "N"
+        ],
         "rate": 8
       },
       "slot": null,
-      "runtime": null,
+      "runtime": {
+        "kind": "NONE",
+        "file": null,
+        "index": null
+      },
       "variants": {
         "derivedFrom": null,
         "flipH": false,
@@ -1061,7 +1407,7 @@
     },
     {
       "id": "SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED_FLIPH",
-      "category": "PROP",
+      "category": "FURNITURE",
       "band": "SURFACE",
       "biome": "SURFACE_B1",
       "zMin": 0,
@@ -1100,7 +1446,11 @@
       "paletteRampIds": [],
       "frames": null,
       "slot": null,
-      "runtime": null,
+      "runtime": {
+        "kind": "NONE",
+        "file": null,
+        "index": null
+      },
       "variants": {
         "derivedFrom": "SURFACE_B1_PROP_TEST_CHEST_V1_CLOSED",
         "flipH": true,
@@ -1136,14 +1486,14 @@
         "matrix": [],
         "addendum": []
       },
-      "scaleRow": "GEOM_TILE",
+      "scaleRow": "RMMZ_AUTOTILE_A2",
       "envelope": {
-        "wMin": 48,
-        "wTarget": 48,
-        "wMax": 48,
-        "hMin": 48,
-        "hTarget": 48,
-        "hMax": 48
+        "wMin": 96,
+        "wTarget": 96,
+        "wMax": 96,
+        "hMin": 144,
+        "hTarget": 144,
+        "hMax": 144
       },
       "footprint": {
         "w": 1,
@@ -1151,16 +1501,11 @@
       },
       "anchor": {
         "type": "CENTER",
-        "x": 24,
-        "y": 24
+        "x": 48,
+        "y": 72
       },
       "paletteRampIds": [],
-      "frames": {
-        "cols": 2,
-        "rows": 3,
-        "facings": 1,
-        "rate": 0
-      },
+      "frames": null,
       "slot": {
         "sheetId": "TS_TEST_SURFACE_B1_A2",
         "slotId": "TS_TEST_SURFACE_B1_A2:0001",
@@ -1170,7 +1515,7 @@
         "h": 144
       },
       "runtime": {
-        "kind": "TILESET",
+        "kind": "RMMZ_TILESET",
         "file": "img/tilesets/TEST_Surface_A2.png",
         "tileId": 2816
       },
@@ -1191,7 +1536,7 @@
     },
     {
       "id": "SURFACE_B1_ROCK_TEST_BOULDER_V1_BASE",
-      "category": "ROCK",
+      "category": "STONE",
       "band": "SURFACE",
       "biome": "SURFACE_B1",
       "zMin": 0,
@@ -1238,7 +1583,7 @@
         "h": 48
       },
       "runtime": {
-        "kind": "TILESET",
+        "kind": "RMMZ_TILESET",
         "file": "img/tilesets/TEST_Surface_B.png",
         "tileId": 17
       },
@@ -1299,7 +1644,12 @@
       "frames": {
         "cols": 3,
         "rows": 4,
-        "facings": 4,
+        "facings": [
+          "S",
+          "W",
+          "E",
+          "N"
+        ],
         "rate": 8
       },
       "slot": {
@@ -1311,7 +1661,7 @@
         "h": 192
       },
       "runtime": {
-        "kind": "CHARACTER",
+        "kind": "RMMZ_CHARACTER",
         "file": "img/characters/TEST_Critters.png",
         "index": 5
       },

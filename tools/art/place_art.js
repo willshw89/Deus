@@ -27,13 +27,23 @@
  * needs --replace <slotId>. Rows with variants.derivedFrom are reported DERIVED_PENDING and nothing
  * is written for them. Output bytes depend only on the inputs, so reruns give equal sha256.
  *
- * Runtime export (entries[].runtime; null = atlas only):
- *   {kind: "TILESET", file, tileId}   RMMZ tile id. B-E (0..1023) and A5 (1536..1663) place one
- *                                     tile; A1-A4 (2048..8191, autotile shape 0) place the whole
- *                                     autotile block. Positions follow Tilemap in game/js/rmmz_core.js.
- *   {kind: "CHARACTER", file, index}  a 3x4-frame slot. A "$" file holds one block (index 0); other
- *                                     files hold 4x2 blocks (index 0..7). Block sizes come from
- *                                     geometry.rmmzCharacterBlocks.
+ * Runtime export (entries[].runtime, kinds as in the Lane S catalogue schema):
+ *   null or {kind: "NONE"}                 atlas only, nothing exported
+ *   {kind: "RMMZ_TILESET", file, tileId}   RMMZ tile id. B-E (1..1023) and A5 (1536..1663) place
+ *                                          one tile; A1-A4 (2048..8191, autotile shape 0) place the
+ *                                          whole autotile block. Positions follow Tilemap in
+ *                                          game/js/rmmz_core.js.
+ *   {kind: "RMMZ_CHARACTER", file, index}  a 3x4-frame slot. A "$" file holds one block (index 0 or
+ *                                          null); other files hold 4x2 blocks (index 0..7). Block
+ *                                          sizes come from geometry.rmmzCharacterBlocks. Slots with
+ *                                          other frame grids (single-frame props) are pending: the
+ *                                          cells they fill are not specified.
+ *   {kind: "RMMZ_FACE", file, index}       a whole face sheet (4x2 square cells, index null or 0) or
+ *                                          one cell (index 0..7); cells are 4 across as in
+ *                                          Window_Base.drawFace.
+ * A target with no file (or no tileId / index where one is needed) is reported RUNTIME_PENDING and
+ * not exported. Runtime files hold only the placed parts; everything else in them is transparent,
+ * so a file marked partial must not replace a complete sheet in game/img.
  *
  * Exit: 0 placed, 1 refused, 2 usage or I/O error.
  */
@@ -46,7 +56,7 @@ const { decodePNG } = require('../png_read');
 
 const REPORT_SCHEMA = 'deus-art-placement/1';
 const COVERAGE_SCHEMA = 'deus-art-coverage/1';
-const ATLAS_MAX_PX = 4096; // contract deus-art-catalogue/1.1.0: ATLAS sides at most 4096
+const ATLAS_MAX_PX = 4096; // contract deus-art-catalogue/1.1.0: ATLAS sides at most 4096 (or geometry.atlasMaxPx)
 // RMMZ tilesets (docs/RMMZ_ASSET_SPEC.md §3): tile-id ranges and sheet size in tiles. The tile size
 // comes from geometry.tilePx.
 const RMMZ_TILESETS = [
@@ -70,6 +80,7 @@ const { Refusal, cmp } = V;
 // Tilemap._addAutotile). Autotile ids must be shape 0 and address the kind's whole block.
 function tilesetTarget(tileId, t) {
     if (!Number.isInteger(tileId)) return { error: `tileId ${JSON.stringify(tileId)} is not an integer` };
+    if (tileId === 0) return { error: 'tileId 0 is the empty tile; RMMZ never draws it (Tilemap.isVisibleTile)' };
     const set = RMMZ_TILESETS.find(s => tileId >= s.first && tileId < s.end);
     if (!set) return { error: `tileId ${tileId} is not in an RMMZ tileset range` };
     const base = { type: set.type, fileW: set.cols * t, fileH: set.rows * t };
@@ -99,7 +110,7 @@ function tilesetTarget(tileId, t) {
 function characterTarget(entry, grid, geometry) {
     const rt = entry.runtime;
     if (grid.cols !== V.RMMZ_CHAR_COLS || grid.rows !== V.RMMZ_CHAR_ROWS) {
-        return { error: `CHARACTER export needs a ${V.RMMZ_CHAR_COLS}x${V.RMMZ_CHAR_ROWS}-frame slot; this one is ${grid.cols}x${grid.rows}` };
+        return { pending: `a ${grid.cols}x${grid.rows}-frame slot; which cells of the ${V.RMMZ_CHAR_COLS}x${V.RMMZ_CHAR_ROWS} character block it fills is not specified` };
     }
     const key = `${grid.fw}x${grid.fh}`;
     const block = (geometry.rmmzCharacterBlocks || {})[key];
@@ -110,11 +121,28 @@ function characterTarget(entry, grid, geometry) {
         return { type: `CHARACTER_SINGLE_${key}`, fileW: block[0], fileH: block[1], x: 0, y: 0, w: block[0], h: block[1] };
     }
     const n = RMMZ_MULTI_COLS * RMMZ_MULTI_ROWS;
+    if (rt.index === undefined || rt.index === null) return { pending: `no character index for the 4x2 sheet ${rt.file}` };
     if (!Number.isInteger(rt.index) || rt.index < 0 || rt.index >= n) return { error: `character index must be 0..${n - 1}, got ${JSON.stringify(rt.index)}` };
     return {
         type: `CHARACTER_MULTI_${key}`, fileW: block[0] * RMMZ_MULTI_COLS, fileH: block[1] * RMMZ_MULTI_ROWS,
         x: (rt.index % RMMZ_MULTI_COLS) * block[0], y: Math.floor(rt.index / RMMZ_MULTI_COLS) * block[1], w: block[0], h: block[1]
     };
+}
+
+// Face sheets: square cells, 4 across and 2 down (Window_Base.drawFace: faceIndex % 4, / 4). The
+// cell size is the entry's frame size, which must match the project's faceSize.
+function faceTarget(entry, grid) {
+    const rt = entry.runtime, n = RMMZ_MULTI_COLS * RMMZ_MULTI_ROWS;
+    if (grid.fw !== grid.fh) return { error: `face cells must be square; frames are ${grid.fw}x${grid.fh}` };
+    const fileW = grid.fw * RMMZ_MULTI_COLS, fileH = grid.fh * RMMZ_MULTI_ROWS, type = `FACE_${grid.fw}`;
+    if (grid.cols === RMMZ_MULTI_COLS && grid.rows === RMMZ_MULTI_ROWS) {
+        if (rt.index !== undefined && rt.index !== null && rt.index !== 0) return { error: `a whole face sheet has index 0 or null, got ${JSON.stringify(rt.index)}` };
+        return { type, fileW, fileH, x: 0, y: 0, w: fileW, h: fileH };
+    }
+    if (grid.cols !== 1 || grid.rows !== 1) return { error: `a face slot is one cell or a whole ${RMMZ_MULTI_COLS}x${RMMZ_MULTI_ROWS} sheet; this one is ${grid.cols}x${grid.rows} frames` };
+    if (rt.index === undefined || rt.index === null) return { pending: `no face index for ${rt.file}` };
+    if (!Number.isInteger(rt.index) || rt.index < 0 || rt.index >= n) return { error: `face index must be 0..${n - 1}, got ${JSON.stringify(rt.index)}` };
+    return { type, fileW, fileH, x: (rt.index % RMMZ_MULTI_COLS) * grid.fw, y: Math.floor(rt.index / RMMZ_MULTI_COLS) * grid.fh, w: grid.fw, h: grid.fh };
 }
 
 // runtime.file must stay inside <out>/runtime: relative, "/" separators, no "." or ".." parts.
@@ -130,18 +158,24 @@ function frameGrid(entry) {
     return { cols, rows, fw: entry.slot.w / cols, fh: entry.slot.h / rows };
 }
 
-// Maps every filled slot with a runtime target to its runtime file. Returns {errors, files}.
+const RUNTIME_KINDS = ['NONE', 'RMMZ_TILESET', 'RMMZ_CHARACTER', 'RMMZ_FACE'];
+
+// Maps every filled slot with a runtime target to its runtime file. Returns {errors, pending, files}.
 function runtimePlan(ctx, filled) {
-    const errors = [], files = new Map();
+    const errors = [], pending = [], files = new Map();
     for (const f of filled) {
         const entry = ctx.entries.get(f.entryId), rt = entry.runtime;
-        if (!rt) continue;
+        if (!rt || rt.kind === 'NONE') continue;
+        if (!RUNTIME_KINDS.includes(rt.kind)) { errors.push(`${entry.id}: runtime.kind ${JSON.stringify(rt.kind)} is not ${RUNTIME_KINDS.join(', ')}`); continue; }
+        if (rt.file === null || rt.file === undefined) { pending.push({ entryId: entry.id, slotId: entry.slot.slotId, kind: rt.kind, reason: 'no runtime file named' }); continue; }
         const rel = runtimeRel(rt.file);
         if (!rel) { errors.push(`${entry.id}: runtime.file ${JSON.stringify(rt.file)} must be a relative .png path with / separators and no . or .. parts`); continue; }
         let target;
-        if (rt.kind === 'TILESET') target = tilesetTarget(rt.tileId, ctx.geometry.tilePx);
-        else if (rt.kind === 'CHARACTER') target = characterTarget(entry, frameGrid(entry), ctx.geometry);
-        else target = { error: `runtime.kind ${JSON.stringify(rt.kind)} is not TILESET or CHARACTER` };
+        if (rt.kind === 'RMMZ_TILESET') {
+            target = rt.tileId === null || rt.tileId === undefined ? { pending: `no tileId in ${rel}` } : tilesetTarget(rt.tileId, ctx.geometry.tilePx);
+        } else if (rt.kind === 'RMMZ_CHARACTER') target = characterTarget(entry, frameGrid(entry), ctx.geometry);
+        else target = faceTarget(entry, frameGrid(entry));
+        if (target.pending) { pending.push({ entryId: entry.id, slotId: entry.slot.slotId, kind: rt.kind, reason: target.pending }); continue; }
         if (target.error) { errors.push(`${entry.id}: ${target.error}`); continue; }
         if (target.w !== entry.slot.w || target.h !== entry.slot.h) {
             errors.push(`${entry.id}: slot is ${entry.slot.w}x${entry.slot.h} but its ${target.type} target in ${rel} is ${target.w}x${target.h}`);
@@ -157,20 +191,25 @@ function runtimePlan(ctx, filled) {
         rf.parts.push({ entryId: entry.id, slotId: entry.slot.slotId, sheetId: entry.slot.sheetId, src: entry.slot, x: target.x, y: target.y, w: target.w, h: target.h });
     }
     const list = [...files.values()].sort((a, b) => cmp(a.file, b.file));
-    for (const rf of list) rf.parts.sort((a, b) => cmp(a.slotId, b.slotId));
-    return { errors, files: list };
+    for (const rf of list) {
+        rf.parts.sort((a, b) => cmp(a.slotId, b.slotId));
+        rf.partial = rf.parts.reduce((n, p) => n + p.w * p.h, 0) < rf.w * rf.h;
+    }
+    pending.sort((a, b) => cmp(a.slotId, b.slotId));
+    return { errors, pending, files: list };
 }
 
 // ------------------------------------------------------------------ catalogue checks
 
 function checkCatalogue(ctx) {
     const errors = [], t = ctx.geometry.tilePx, lower = new Map();
+    const atlasMax = Number.isInteger(ctx.geometry.atlasMaxPx) ? ctx.geometry.atlasMaxPx : ATLAS_MAX_PX;
     for (const s of ctx.sheets.values()) {
         const k = s.sheetId.toLowerCase();
         if (lower.has(k)) errors.push(`sheets ${lower.get(k)} and ${s.sheetId} differ only in letter case`);
         lower.set(k, s.sheetId);
-        if (s.kind === 'ATLAS' && (s.w % t || s.h % t || s.w > ATLAS_MAX_PX || s.h > ATLAS_MAX_PX)) {
-            errors.push(`ATLAS ${s.sheetId} is ${s.w}x${s.h}; sides must be multiples of tilePx ${t} and at most ${ATLAS_MAX_PX}`);
+        if (s.kind === 'ATLAS' && (s.w % t || s.h % t || s.w > atlasMax || s.h > atlasMax)) {
+            errors.push(`ATLAS ${s.sheetId} is ${s.w}x${s.h}; sides must be multiples of tilePx ${t} and at most ${atlasMax}`);
         }
         if (s.kind === 'RMMZ_TILESET' && !RMMZ_TILESETS.some(f => f.cols * t === s.w && f.rows * t === s.h)) {
             errors.push(`RMMZ_TILESET ${s.sheetId} is ${s.w}x${s.h}, not an RMMZ tileset size`);
@@ -265,6 +304,14 @@ function readPriorState(ctx, outDir) {
     const shaOf = k => rep[k] && rep[k].sha256;
     if (shaOf('catalogue') !== ctx.catalogueSha || shaOf('geometry') !== ctx.geometrySha || shaOf('palette') !== ctx.paletteSha) {
         return fail('OUT_STATE_STALE', `the catalogue, geometry or palette changed since ${outDir} was placed; place everything again into a new --out`);
+    }
+    // The template sidecars the earlier files were checked against must be unchanged too.
+    for (const t of Array.isArray(rep.templates) ? rep.templates : [null]) {
+        const sheet = t && ctx.sheets.get(t.sheetId);
+        const now = sheet && V.loadTemplate(ctx, sheet);
+        if (!now || now.error || now.sha256 !== t.sha256) {
+            return fail('OUT_STATE_STALE', `template sidecar ${t ? t.sheetId : '(list missing)'} changed or is missing since ${outDir} was placed; place everything again into a new --out`);
+        }
     }
     const listed = new Set(rep.sheets.map(s => s && `${s.sheetId}.png`));
     const sheetDir = path.join(outDir, 'sheets');
@@ -413,7 +460,7 @@ function placeArt(opts) {
     const names = listing.filter(n => /\.png$/i.test(n) && fs.statSync(path.join(inDir, n)).isFile());
     const ignoredFiles = listing.filter(n => !names.includes(n));
     for (const [entryId, files] of duplicateInputs(names)) refuse('DUPLICATE_INPUT', `${files.join(' and ')} both name entry ${entryId}`, { entryId });
-    const placements = [];
+    const placements = [], warnings = [];
     for (const name of names) {
         const entryId = inputEntryId(name);
         if (!ctx.entries.has(entryId)) { refuse('UNKNOWN_INPUT', `no catalogue entry ${entryId}; inputs are named <entryId>.png`, { input: name, entryId }); continue; }
@@ -430,6 +477,7 @@ function placeArt(opts) {
         }
         const action = !prev ? 'PLACED' : prev.sha256 === res.sha256 ? 'UNCHANGED' : 'REPLACED';
         placements.push({ source: name, entryId, slot, sha256: res.sha256, image: res.image, action });
+        for (const w of res.warnings) warnings.push(`${name}: ${w}`);
     }
     const targeted = new Set(placements.map(p => p.slot.slotId));
     const inputSlots = new Set(names.map(n => ctx.entries.get(inputEntryId(n))).filter(e => e && e.slot && !V.isDerived(e)).map(e => e.slot.slotId));
@@ -499,9 +547,12 @@ function placeArt(opts) {
             copyRect(c.data, c.w, part.src.x, part.src.y, data, rf.w, part.x, part.y, part.w, part.h);
         }
         const buf = writePNG(data, rf.w, rf.h);
-        runtimeOut.push({ file: `runtime/${rf.file}`, type: rf.type, w: rf.w, h: rf.h, sha256: V.sha256(buf), parts: rf.parts.map(p => ({ entryId: p.entryId, slotId: p.slotId, x: p.x, y: p.y, w: p.w, h: p.h })) });
+        runtimeOut.push({ file: `runtime/${rf.file}`, type: rf.type, w: rf.w, h: rf.h, sha256: V.sha256(buf), partial: rf.partial, parts: rf.parts.map(p => ({ entryId: p.entryId, slotId: p.slotId, x: p.x, y: p.y, w: p.w, h: p.h })) });
         writes.push({ rel: `runtime/${rf.file}`, buf });
+        if (rf.partial) warnings.push(`runtime/${rf.file} is partial (${rf.parts.length} placed part(s), the rest transparent); do not copy it over a complete sheet`);
     }
+    // Template sidecars of the sheets that hold placed files (a later change makes this --out stale).
+    const templates = sheetsOut.map(s => ({ sheetId: s.sheetId, sha256: V.loadTemplate(ctx, ctx.sheets.get(s.sheetId)).sha256 }));
     const derivedPending = [...ctx.entries.values()].filter(V.isDerived).sort((a, b) => cmp(a.id, b.id)).map(e => {
         const parent = ctx.entries.get(e.variants.derivedFrom);
         const pf = parent && parent.slot && filled.get(parent.slot.slotId);
@@ -515,7 +566,7 @@ function placeArt(opts) {
         catalogue: { sha256: ctx.catalogueSha }, geometry: { sha256: ctx.geometrySha }, palette: { sha256: ctx.paletteSha }, approvals: { sha256: ctx.approvalsSha },
         filled: filledList,
         actions: placements.map(p => ({ slotId: p.slot.slotId, entryId: p.entryId, action: p.action, sha256: p.sha256, source: p.source })).sort((a, b) => cmp(a.slotId, b.slotId)),
-        derivedPending, sheets: sheetsOut, runtime: runtimeOut, ignoredFiles,
+        derivedPending, sheets: sheetsOut, templates, runtime: runtimeOut, runtimePending: plan.pending, ignoredFiles, warnings,
         coverage: { file: 'coverage_report.json', totals: coverage.totals }
     };
     writes.push({ rel: 'coverage_report.json', buf: Buffer.from(JSON.stringify(coverage, null, 2) + '\n') });
@@ -542,6 +593,8 @@ function printReport(r) {
     }
     for (const a of r.actions || []) console.log(`${a.action} ${a.slotId} <- ${a.source} (${a.entryId})`);
     for (const d of r.derivedPending || []) console.log(`DERIVED_PENDING ${d.entryId} (from ${d.derivedFrom})`);
+    for (const p of r.runtimePending || []) console.log(`RUNTIME_PENDING ${p.slotId} (${p.entryId}): ${p.kind}, ${p.reason}`);
+    for (const w of r.warnings || []) console.log(`WARN ${w}`);
     if (r.result === 'PLACED') {
         const t = r.coverage.totals;
         console.log(`RESULT: PLACED filled=${t.filled}/${t.slots} empty=${t.empty} unexpected=${t.unexpected} derivedPending=${t.derivedPending} sheets=${r.sheets.length} runtime=${r.runtime.length}`);
@@ -568,6 +621,6 @@ function main(argv) {
     return exitCode;
 }
 
-module.exports = { placeArt, tilesetTarget, characterTarget, runtimeRel, checkCatalogue, copyRect, duplicateInputs, REPORT_SCHEMA, COVERAGE_SCHEMA };
+module.exports = { placeArt, tilesetTarget, characterTarget, faceTarget, runtimeRel, runtimePlan, checkCatalogue, copyRect, duplicateInputs, REPORT_SCHEMA, COVERAGE_SCHEMA };
 
 if (require.main === module) process.exitCode = main(process.argv.slice(2));

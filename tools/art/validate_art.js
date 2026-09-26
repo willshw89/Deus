@@ -34,11 +34,15 @@
  *   SCALE_OUT_OF_ENVELOPE  a frame's drawn bounding box is outside [wMin..wMax] x [hMin..hMax].
  *   ANCHOR_GROUND          GROUND anchor: the lowest drawn row of a frame is not frameH-1.
  *   ANCHOR_CEILING         CEILING anchor: the highest drawn row of a frame is not row 0.
- *   TILE_NOT_OPAQUE        a tile-class slot (scaleRow GEOM_TILE) with a pixel that is not opaque.
- *   FRAME_CLASS_MISMATCH / FRAME_CLASS_DISABLED / FRAME_CLASS_OWNER_OPEN / FRAME_CLASS_UNKNOWN
- *       slot frame size differs from geometry.json, or the class is switched off or not yet set.
+ *   TILE_NOT_OPAQUE        a tile-class slot (scaleRow GEOM_TILE or RMMZ_AUTOTILE_A1..A4, not
+ *                          groupType OVERLAY) with a pixel that is not opaque.
+ *   FRAME_CLASS_MISMATCH / FRAME_CLASS_DISABLED / FRAME_CLASS_OWNER_OPEN / FRAME_CLASS_UNKNOWN /
+ *   FRAME_CLASS_MISSING
+ *       slot frame size differs from geometry.json, the class is switched off or not yet set, or a
+ *       sized creature entry has no frame class.
  *   GEOM_HEIGHT_MISMATCH / GEOM_WIDTH_MISMATCH / GEOM_ROW_UNKNOWN
- *       a geometry-derived slot whose size is not the geometry.json value (see geometryRowSize).
+ *       a geometry-derived piece (edge strip, wall face, ramp) whose envelope or drawn height is
+ *       not a stratumPx / layerPx value from geometry.json (see geometryRow).
  *   plus ENTRY_NOT_FOUND, ENTRY_NOT_PLACEABLE, CATALOGUE_INVALID, GEOMETRY_INVALID,
  *   GEOMETRY_HASH_MISMATCH, PALETTE_INVALID, PALETTE_HASH_MISMATCH, TEMPLATE_SIDECAR_MISSING,
  *   TEMPLATE_SIDECAR_INVALID, PNG_INVALID, PNG_16BIT.
@@ -48,6 +52,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const zlib = require('zlib');
 const crypto = require('crypto');
 const { decodePNG } = require('../png_read');
 
@@ -62,7 +67,6 @@ const ANCHOR_TYPES = ['GROUND', 'CEILING', 'WALL', 'CENTER'];
 // RMMZ character blocks are 3 animation columns x 4 facing rows (docs/RMMZ_ASSET_SPEC.md §2).
 const RMMZ_CHAR_COLS = 3, RMMZ_CHAR_ROWS = 4;
 const MAX_COORDS = 16; // pixel coordinates listed per reason
-const PNG_IHDR_W_AT = 16, PNG_IHDR_H_AT = 20; // PNG file format: byte offsets of IHDR width and height
 
 class Refusal extends Error {
     constructor(code, message) { super(message); this.code = code; }
@@ -263,6 +267,16 @@ function parseLedger(text, file) {
         }
         if (!isRow) {
             if (state === 'sep') { ledger.errors.push({ line: i + 1, message: 'the ledger table header is not followed by a | --- | separator row' }); return ledger; }
+            // Markdown shows a text line directly under a table as one more row, and a table needs
+            // no leading "|": neither may slip past the parser unread.
+            if (state === 'rows' && !fenced[i] && lines[i].trim() && !/^\s{0,3}#/.test(lines[i])) {
+                ledger.errors.push({ line: i + 1, message: 'a line directly under the ledger table (no blank line between) is shown as a table row but does not start with "|"' });
+                return ledger;
+            }
+            if (!fenced[i] && lines[i].includes('|') && /-/.test(lines[i]) && /^[\s|:-]+$/.test(lines[i])) {
+                ledger.errors.push({ line: i + 1, message: 'a table separator row outside the ledger table (a second table, or rows that do not start with "|")' });
+                return ledger;
+            }
             if (state === 'rows') state = 'after';
             continue;
         }
@@ -357,7 +371,8 @@ function parseColour(v, isBg) {
 }
 
 function readTemplate(file, sheet) {
-    const s = parseJson(readFileOr(file, 'template sidecar'), file, 'TEMPLATE_SIDECAR_INVALID');
+    const buf = readFileOr(file, 'template sidecar');
+    const s = parseJson(buf, file, 'TEMPLATE_SIDECAR_INVALID');
     const bad = msg => { throw new Refusal('TEMPLATE_SIDECAR_INVALID', `${file}: ${msg}`); };
     if (!s || typeof s !== 'object') bad('not a JSON object');
     if (s.sheetId !== sheet.sheetId) bad(`sheetId ${JSON.stringify(s.sheetId)} is not ${sheet.sheetId}`);
@@ -375,7 +390,7 @@ function readTemplate(file, sheet) {
         if (slots.has(sl.slotId)) bad(`slot ${sl.slotId} is listed twice`);
         slots.set(sl.slotId, sl);
     }
-    return { file, residue, slots };
+    return { file, sha256: sha256(buf), residue, slots };
 }
 
 // Cached per sheet: {file, residue: Map(0xRRGGBB -> field), slots: Map(slotId -> rect)} or {error}.
@@ -515,25 +530,72 @@ function resolveFrameClass(g, id) {
     return { code: 'FRAME_CLASS_UNKNOWN', message: `frame class ${id} is in neither geometry.frameClasses nor geometry.optionalParams` };
 }
 
-// Per-frame size of a geometry row (scaleRow GEOM_*), read from geometry.json only.
-// GEOM_STRATUM_k is a piece spanning k strata from the layer floor (the edge strip for a k-stratum
-// drop, ramp cell k of 5): height = stratumPx[0] + ... + stratumPx[k-1]. GEOM_STRATUM_<strata> is
-// therefore layerPx. This reading of the contract's row names is open for Lane S to confirm.
-function geometryRowSize(g, row) {
-    if (row === 'GEOM_TILE') return { w: g.tilePx, h: g.tilePx, source: 'tilePx' };
-    if (row === 'GEOM_LAYER_FACE') return { h: g.layerPx, source: 'layerPx' };
-    let m = /^GEOM_STRATUM_(\d+)$/.exec(row);
+// Heights of every run of k consecutive strata (a step of k strata may start on any stratum).
+function strataRuns(g, k) {
+    const out = new Set();
+    for (let i = 0; i + k <= g.stratumPx.length; i++) out.add(g.stratumPx.slice(i, i + k).reduce((a, b) => a + b, 0));
+    return out;
+}
+
+// Size rules of a geometry row (scaleRow GEOM_*), read from geometry.json only; the row meanings
+// follow the Lane S catalogue schema (docs/art/catalogue/SCHEMA.md):
+//   GEOM_TILE           frame tilePx x tilePx
+//   GEOM_STRATUM_k      frame width tilePx; drawn height = a run of k consecutive strata
+//   GEOM_RAMP_k         frame width tilePx; drawn height = tilePx + a run of k consecutive strata
+//   GEOM_LAYER_FACE     frame width tilePx; drawn height = layerPx
+//   GEOM_FRAME_<CLASS>  frame = that frame class's frame
+// Returns {frameW, frameH, heights (Set of allowed drawn heights), source} or {code, message}.
+function geometryRow(g, row) {
+    if (row === 'GEOM_TILE') return { frameW: g.tilePx, frameH: g.tilePx, source: 'tilePx' };
+    if (row === 'GEOM_LAYER_FACE') return { frameW: g.tilePx, heights: new Set([g.layerPx]), source: 'layerPx' };
+    let m = /^GEOM_(STRATUM|RAMP)_(\d+)$/.exec(row);
     if (m) {
-        const k = Number(m[1]);
+        const k = Number(m[2]);
         if (k < 1 || k > g.strataPerLayer) return { code: 'GEOM_ROW_UNKNOWN', message: `${row}: geometry has strata 1..${g.strataPerLayer}` };
-        return { h: g.stratumPx.slice(0, k).reduce((a, b) => a + b, 0), source: `stratumPx[0..${k - 1}] = [${g.stratumPx.slice(0, k)}]` };
+        const top = m[1] === 'RAMP' ? g.tilePx : 0;
+        return { frameW: g.tilePx, heights: new Set([...strataRuns(g, k)].map(h => top + h)), source: `${top ? 'tilePx + ' : ''}a run of ${k} of stratumPx [${g.stratumPx}]` };
     }
     m = /^GEOM_FRAME_([A-Z0-9_]+)$/.exec(row);
     if (m) {
         const fc = resolveFrameClass(g, m[1]);
-        return fc.code ? fc : { w: fc.frame[0], h: fc.frame[1], source: `frame class ${m[1]}` };
+        return fc.code ? fc : { frameW: fc.frame[0], frameH: fc.frame[1], source: `frame class ${m[1]}` };
     }
-    return { code: 'GEOM_ROW_UNKNOWN', message: `scaleRow ${row} is not a geometry row (GEOM_TILE, GEOM_LAYER_FACE, GEOM_STRATUM_<k>, GEOM_FRAME_<class>)` };
+    return { code: 'GEOM_ROW_UNKNOWN', message: `scaleRow ${row} is not a geometry row (GEOM_TILE, GEOM_LAYER_FACE, GEOM_STRATUM_<k>, GEOM_RAMP_<k>, GEOM_FRAME_<class>)` };
+}
+const setText = s => `{${[...s].sort((a, b) => a - b).join(', ')}}`;
+
+// Tile-class slots must be 100% opaque: ground tiles (GEOM_TILE) and RMMZ autotile blocks. Overlays
+// (groupType OVERLAY: rim shadows, height shading) are drawn over other tiles and are exempt.
+const TILE_CLASS_ROWS = ['GEOM_TILE', 'RMMZ_AUTOTILE_A1', 'RMMZ_AUTOTILE_A2', 'RMMZ_AUTOTILE_A3', 'RMMZ_AUTOTILE_A4'];
+const isTileClass = e => TILE_CLASS_ROWS.includes(e.scaleRow) && e.groupType !== 'OVERLAY';
+
+// Walks the PNG chunks before decoding: IHDR, the IDAT data and colour-management chunks.
+const PNG_CHANNELS = { 0: 1, 2: 3, 3: 1, 4: 2, 6: 4 };
+const ADAM7 = [[0, 0, 8, 8], [4, 0, 8, 8], [0, 4, 4, 8], [2, 0, 4, 4], [0, 2, 2, 4], [1, 0, 2, 2], [0, 1, 1, 2]];
+function pngChunks(buf) {
+    const out = { ihdr: null, idat: [], colour: [] };
+    let pos = 8;
+    while (pos + 8 <= buf.length) {
+        const len = buf.readUInt32BE(pos), type = buf.toString('ascii', pos + 4, pos + 8), d = pos + 8;
+        if (d + len + 4 > buf.length) break;
+        if (type === 'IHDR' && len === 13) out.ihdr = { w: buf.readUInt32BE(d), h: buf.readUInt32BE(d + 4), depth: buf[d + 8], colorType: buf[d + 9], interlace: buf[d + 12] };
+        else if (type === 'IDAT') out.idat.push(buf.subarray(d, d + len));
+        else if (['gAMA', 'cHRM', 'iCCP', 'sRGB', 'sBIT'].includes(type)) out.colour.push(type);
+        else if (type === 'IEND') break;
+        pos = d + len + 4;
+    }
+    return out;
+}
+// Bytes of filtered scanlines the header allows (null when the header is unreadable).
+function rawSize(h) {
+    const ch = PNG_CHANNELS[h.colorType];
+    if (!ch || !h.depth) return null;
+    const line = pw => 1 + Math.ceil(pw * ch * h.depth / 8);
+    if (h.interlace !== 1) return h.h * line(h.w);
+    return ADAM7.reduce((n, [x0, y0, dx, dy]) => {
+        const pw = Math.ceil((h.w - x0) / dx), ph = Math.ceil((h.h - y0) / dy);
+        return pw > 0 && ph > 0 ? n + ph * line(pw) : n;
+    }, 0);
 }
 
 // Collects the first MAX_COORDS pixel coordinates of a reason, and the total count.
@@ -576,8 +638,15 @@ function validateBuffer(ctx, buf, label, entryId) {
 
     // Approval: the sha256 of these bytes must be in a YEA ledger row for this entry or slot.
     for (const r of approvalReasons(ctx.ledger, result.sha256, entry)) add(r.code, r.message);
+    const yeaRows = ctx.ledger.rows.filter(r => r.decision === 'YEA' && r.sha256 === result.sha256);
+    if (yeaRows.some(r => r.ids.includes(slot.slotId)) && !yeaRows.some(r => r.ids.includes(entry.id))) {
+        result.warnings.push(`approved by slot id ${slot.slotId} only; a slot id follows the slot's position if the catalogue is rebuilt`);
+    }
 
     // Frame size authorities: geometry.json frame classes and geometry rows (never literals).
+    if (entry.sizeClass && !entry.frameClass) {
+        add('FRAME_CLASS_MISSING', `entry ${entry.id} has sizeClass ${entry.sizeClass} but no frameClass, so its frame size cannot be checked`);
+    }
     if (entry.frameClass) {
         const fc = resolveFrameClass(ctx.geometry, entry.frameClass);
         if (fc.code) add(fc.code, `entry ${entry.id}: ${fc.message}`);
@@ -588,12 +657,20 @@ function validateBuffer(ctx, buf, label, entryId) {
             }
         }
     }
+    let geomHeights = null;
     if (entry.scaleRow.startsWith('GEOM_')) {
-        const gs = geometryRowSize(ctx.geometry, entry.scaleRow);
-        if (gs.code) add(gs.code, `entry ${entry.id}: ${gs.message}`);
+        const gr = geometryRow(ctx.geometry, entry.scaleRow);
+        if (gr.code) add(gr.code, `entry ${entry.id}: ${gr.message}`);
         else {
-            if (gs.w !== undefined && fw !== gs.w) add('GEOM_WIDTH_MISMATCH', `slot ${slot.slotId} frames are ${fw} px wide; ${entry.scaleRow} is ${gs.w} px (${gs.source} in geometry.json)`);
-            if (fh !== gs.h) add('GEOM_HEIGHT_MISMATCH', `slot ${slot.slotId} frames are ${fh} px tall; ${entry.scaleRow} is ${gs.h} px (${gs.source} in geometry.json)`);
+            const from = `${entry.scaleRow} (${gr.source} in geometry.json)`;
+            if (gr.frameW !== undefined && fw !== gr.frameW) add('GEOM_WIDTH_MISMATCH', `slot ${slot.slotId} frames are ${fw} px wide; ${from} is ${gr.frameW} px`);
+            if (gr.frameH !== undefined && fh !== gr.frameH) add('GEOM_HEIGHT_MISMATCH', `slot ${slot.slotId} frames are ${fh} px tall; ${from} is ${gr.frameH} px`);
+            if (gr.heights) {
+                geomHeights = gr.heights;
+                const lo = Math.min(...gr.heights), hi = Math.max(...gr.heights);
+                if (env.hMin < lo || env.hMax > hi) add('GEOM_HEIGHT_MISMATCH', `envelope height ${env.hMin}..${env.hMax} of ${entry.id} is not from geometry: ${from} allows ${setText(gr.heights)}`);
+                if (fh < hi) add('GEOM_HEIGHT_MISMATCH', `slot ${slot.slotId} frames are ${fh} px tall, less than the ${hi} px ${from} can need`);
+            }
         }
     }
 
@@ -610,13 +687,25 @@ function validateBuffer(ctx, buf, label, entryId) {
         }
     }
 
-    // A header far larger than the slot is refused before its pixels are inflated.
-    if (buf.length >= PNG_IHDR_H_AT + 4 && buf.toString('ascii', PNG_IHDR_W_AT - 4, PNG_IHDR_W_AT) === 'IHDR') {
-        const hw = buf.readUInt32BE(PNG_IHDR_W_AT), hh = buf.readUInt32BE(PNG_IHDR_H_AT);
+    // Before decoding: a header far larger than the slot, or image data that inflates past what its
+    // header allows, is refused without decoding the pixels.
+    const chunks = pngChunks(buf);
+    if (chunks.ihdr) {
+        const { w: hw, h: hh } = chunks.ihdr;
         if (hw * hh > slot.w * slot.h * 4) {
             add('DIMS_MISMATCH', `file header says ${hw}x${hh}; slot ${slot.slotId} is ${slot.w}x${slot.h} (not decoded)`);
             return finish(result, null);
         }
+        const cap = rawSize(chunks.ihdr);
+        if (cap !== null) {
+            try { zlib.inflateSync(Buffer.concat(chunks.idat), { maxOutputLength: cap * 2 }); }
+            catch (e) {
+                if (e.code === 'ERR_BUFFER_TOO_LARGE') { add('PNG_INVALID', `${label}: image data inflates past the ${cap} bytes its ${hw}x${hh} header allows (not decoded)`); return finish(result, null); }
+            }
+        }
+    }
+    if (chunks.colour.length) {
+        result.warnings.push(`${label} carries colour-management chunks (${chunks.colour.join(', ')}); pixel values are checked and copied as stored, and placed sheets carry no colour profile`);
     }
     let img;
     try { img = decodePNG(buf, label); }
@@ -630,7 +719,7 @@ function validateBuffer(ctx, buf, label, entryId) {
     if (!dimsOk) add('DIMS_MISMATCH', `file is ${W}x${H}; slot ${slot.slotId} is ${slot.w}x${slot.h}`);
 
     // Per pixel: binary alpha, master palette, template residue, tile opacity.
-    const tileClass = entry.scaleRow === 'GEOM_TILE';
+    const tileClass = isTileClass(entry);
     const alphaBad = coordList(), offPal = coordList(), resid = coordList(), holes = coordList();
     for (let y = 0; y < H; y++) {
         for (let x = 0; x < W; x++) {
@@ -650,14 +739,14 @@ function validateBuffer(ctx, buf, label, entryId) {
     }
     if (offPal.count) add('OFF_PALETTE', `${offPal.count} non-transparent pixel(s) not in ${path.basename(ctx.paletteFile)}; ${firstAt(offPal)}`, offPal);
     if (resid.count) add('TEMPLATE_RESIDUE', `${resid.count} non-transparent pixel(s) in a template colour of ${path.basename(tpl.file)}; ${firstAt(resid)}`, resid);
-    if (holes.count) add('TILE_NOT_OPAQUE', `tile-class slot (GEOM_TILE) must be 100% opaque; ${holes.count} pixel(s) are not; ${firstAt(holes)}`, holes);
+    if (holes.count) add('TILE_NOT_OPAQUE', `tile-class slot (${entry.scaleRow}) must be 100% opaque; ${holes.count} pixel(s) are not; ${firstAt(holes)}`, holes);
 
     // Per frame: scale envelope and anchor.
     if (!dimsOk) result.notChecked.push('scale envelope and anchor (file size differs from the slot)');
     else {
         if (anchor === 'WALL' || anchor === 'CENTER') result.notChecked.push(`anchor (${anchor} anchors have no pixel rule)`);
-        const scaleBad = coordList(), groundBad = coordList(), ceilBad = coordList();
-        const scaleNotes = [], groundNotes = [], ceilNotes = [];
+        const scaleBad = coordList(), groundBad = coordList(), ceilBad = coordList(), geomBad = coordList();
+        const scaleNotes = [], groundNotes = [], ceilNotes = [], geomNotes = [];
         for (let fr = 0; fr < rows; fr++) {
             for (let fc = 0; fc < cols; fc++) {
                 const idx = fr * cols + fc, x0 = fc * fw, y0 = fr * fh;
@@ -679,6 +768,10 @@ function validateBuffer(ctx, buf, label, entryId) {
                     scaleBad.add(at[0], at[1]);
                     scaleNotes.push(`frame ${idx}: ${box}`);
                 }
+                if (geomHeights && !geomHeights.has(bh)) {
+                    geomBad.add(at[0], at[1]);
+                    geomNotes.push(`frame ${idx}: drawn ${bh} px tall`);
+                }
                 if (anchor === 'GROUND' && maxY !== fh - 1) {
                     groundBad.add(maxX < 0 ? x0 : x0 + minX, y0 + (maxY < 0 ? 0 : maxY));
                     groundNotes.push(`frame ${idx}: ${maxY < 0 ? 'nothing drawn' : `lowest drawn row ${maxY}`}, baseline is ${fh - 1}`);
@@ -692,6 +785,9 @@ function validateBuffer(ctx, buf, label, entryId) {
         const few = notes => notes.slice(0, 4).join('; ') + (notes.length > 4 ? `; +${notes.length - 4} more` : '');
         if (scaleBad.count) {
             add('SCALE_OUT_OF_ENVELOPE', `${scaleBad.count} of ${cols * rows} frame(s) outside envelope w ${env.wMin}..${env.wMax} h ${env.hMin}..${env.hMax} (scaleRow ${entry.scaleRow}): ${few(scaleNotes)}`, scaleBad);
+        }
+        if (geomBad.count) {
+            add('GEOM_HEIGHT_MISMATCH', `${geomBad.count} frame(s) drawn at a height ${entry.scaleRow} does not allow; geometry.json allows ${setText(geomHeights)}: ${few(geomNotes)}`, geomBad);
         }
         if (groundBad.count) add('ANCHOR_GROUND', `${groundBad.count} frame(s) not standing on the baseline: ${few(groundNotes)}`, groundBad);
         if (ceilBad.count) add('ANCHOR_CEILING', `${ceilBad.count} frame(s) not hanging from row 0: ${few(ceilNotes)}`, ceilBad);
@@ -777,7 +873,7 @@ function main(argv) {
 
 module.exports = {
     Refusal, sha256, parseArgs, loadContext, validateFile, validateBuffer, slotRect, slotSpec,
-    parseLedger, approvalReasons, parsePalette, checkGeometry, resolveFrameClass, geometryRowSize,
+    parseLedger, approvalReasons, parsePalette, checkGeometry, resolveFrameClass, geometryRow, strataRuns, isTileClass,
     loadTemplate, parseColour, isDerived, cmp,
     LEDGER_HEADING, LEDGER_COLUMNS, SAFE_NAME_RE, RMMZ_CHAR_COLS, RMMZ_CHAR_ROWS, REPO_ROOT
 };
