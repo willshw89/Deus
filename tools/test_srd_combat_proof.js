@@ -133,11 +133,12 @@ global.UF.World = {
     mulberry32: () => () => 0.5
 };
 
-// Load Plugins in dependency sequence
+// DEUS_Conditions and DEUS_Combat. UF_* files are shims that do not install the plugins under Node.
+// Share one UF object so DEUS_Combat does not replace the mocks above.
+global.DEUS = global.UF;
 const pluginsDir = path.join(__dirname, "..", "game", "js", "plugins");
-eval(fs.readFileSync(path.join(pluginsDir, "UF_Conditions.js"), "utf8"));
-eval(fs.readFileSync(path.join(pluginsDir, "UF_Rules.js"), "utf8"));
-eval(fs.readFileSync(path.join(pluginsDir, "UF_Combat.js"), "utf8"));
+eval(fs.readFileSync(path.join(pluginsDir, "DEUS_Conditions.js"), "utf8"));
+eval(fs.readFileSync(path.join(pluginsDir, "DEUS_Combat.js"), "utf8"));
 
 // -----------------------------------------------------------------------------
 // Proof 1: Weapon Key Mapping & Armor Class Integration
@@ -197,13 +198,13 @@ UF.World.addUnit(defender);
 // Attack mod: +3 (STR mod) + 2 (Prof bonus) = +5.
 // Defender AC: 16.
 // Roll 10: 10 + 5 = 15 < 16 -> MISS
-const missRes = UF.Combat.resolveAttack(attacker, defender, { rng: () => 0.4999 }); // floor(0.4999*20)+1 = 10
+const missRes = UF.Combat.resolveAttack(attacker, defender, { bypassGcd: true, rng: () => 0.4999 }); // floor(0.4999*20)+1 = 10
 assert(missRes.hit === false, "Attack roll 10 + 5 = 15 vs AC 16 misses");
 assert(missRes.damage === 0, "Damage on miss is 0");
 assert(defender.data.hp === 30, "Defender HP unchanged after miss");
 
 // Roll 11: 11 + 5 = 16 >= 16 -> HIT
-const hitRes = UF.Combat.resolveAttack(attacker, defender, { rng: () => 0.54 }); // floor(0.54*20)+1 = 11
+const hitRes = UF.Combat.resolveAttack(attacker, defender, { bypassGcd: true, rng: () => 0.54 }); // floor(0.54*20)+1 = 11
 assert(hitRes.hit === true, "Attack roll 11 + 5 = 16 vs AC 16 hits");
 assert(hitRes.damage > 0, `Damage dealt on hit: ${hitRes.damage}`);
 assert(defender.data.hp < 30, `Defender HP reduced to ${defender.data.hp}`);
@@ -215,7 +216,7 @@ console.log("\n[Proof 3] Critical Hits & Fumbles");
 
 // Natural 20 Crit: rng returns 0.999999 -> roll 20
 defender.data.hp = 30;
-const critRes = UF.Combat.resolveAttack(attacker, defender, { rng: () => 0.999999 });
+const critRes = UF.Combat.resolveAttack(attacker, defender, { bypassGcd: true, rng: () => 0.999999 });
 assert(critRes.hit === true, "Natural 20 automatically hits");
 
 if (!isMutant) {
@@ -229,7 +230,7 @@ if (!isMutant) {
 
 // Natural 1 Fumble: rng returns 0 -> roll 1
 defender.data.hp = 30;
-const fumbleRes = UF.Combat.resolveAttack(attacker, defender, { rng: () => 0 });
+const fumbleRes = UF.Combat.resolveAttack(attacker, defender, { bypassGcd: true, rng: () => 0 });
 assert(fumbleRes.hit === false, "Natural 1 is an automatic miss (fumble)");
 assert(fumbleRes.fumble === true, "Natural 1 flagged as fumble");
 assert(fumbleRes.damage === 0, "Fumble deals 0 damage");
@@ -248,7 +249,7 @@ const highDefender = {
 };
 UF.World.addUnit(highDefender);
 
-const crossZRes = UF.Combat.resolveAttack(attacker, highDefender, { rng: () => 0.999999 });
+const crossZRes = UF.Combat.resolveAttack(attacker, highDefender, { bypassGcd: true, rng: () => 0.999999 });
 assert(crossZRes.hit === false, "Cross-Z attack is strictly rejected");
 assert(crossZRes.sameZViolation === true, "Cross-Z attack flagged with sameZViolation");
 assert(highDefender.data.hp === 20, "Defender on different Z suffers 0 damage");
@@ -260,20 +261,20 @@ console.log("\n[Proof 5] Conditions Integration (Prone & Paralyzed)");
 
 // 1. Prone defender within 5 ft gives Advantage
 defender.data.hp = 30;
-UF.Conditions.apply(defender, "prone", 10, "action");
+UF.Conditions.add(defender, "prone", { duration: 10, domain: "action" });
 assert(UF.Conditions.has(defender, "prone"), "Defender has prone condition");
 
 // Attack against prone within 5 ft should have advantage
-const proneAttRes = UF.Combat.resolveAttack(attacker, defender, { rng: () => 0.54 });
+const proneAttRes = UF.Combat.resolveAttack(attacker, defender, { bypassGcd: true, rng: () => 0.54 });
 assert(proneAttRes.advantage === true, "Melee attack against prone defender has Advantage");
 
 // 2. Paralyzed defender within 5 ft triggers automatic critical hit on hit
 UF.Conditions.remove(defender, "prone");
-UF.Conditions.apply(defender, "paralyzed", 10, "action");
+UF.Conditions.add(defender, "paralyzed", { duration: 10, domain: "action" });
 assert(UF.Conditions.has(defender, "paralyzed"), "Defender has paralyzed condition");
 
 // Attack with regular roll 12 (12+5=17 vs AC 16 -> hit): should be promoted to critical!
-const paralyzedAttRes = UF.Combat.resolveAttack(attacker, defender, { rng: () => 0.58 });
+const paralyzedAttRes = UF.Combat.resolveAttack(attacker, defender, { bypassGcd: true, rng: () => 0.58 });
 assert(paralyzedAttRes.hit === true, "Attack hits paralyzed defender");
 assert(paralyzedAttRes.critical === true, "Attack within 5 ft against paralyzed defender automatically crits");
 
@@ -287,7 +288,7 @@ UF.Events.on("combat:hit", evt => { lastHitEvent = evt; });
 
 UF.Conditions.remove(defender, "paralyzed");
 defender.data.hp = 30;
-const hitEventRes = UF.Combat.resolveAttack(attacker, defender, { rng: () => 0.54 });
+const hitEventRes = UF.Combat.resolveAttack(attacker, defender, { bypassGcd: true, rng: () => 0.54 });
 
 assert(lastHitEvent !== null, "combat:hit event was emitted");
 assert(lastHitEvent.attacker === attacker, "Event specifies correct attacker");
@@ -308,7 +309,7 @@ UF.Events.on("combat:kill", evt => {
 
 // Set defender HP to 1 so any hit kills
 defender.data.hp = 1;
-const lethalRes = UF.Combat.resolveAttack(attacker, defender, { rng: () => 0.54 });
+const lethalRes = UF.Combat.resolveAttack(attacker, defender, { bypassGcd: true, rng: () => 0.54 });
 
 assert(lethalRes.hit === true, "Lethal attack hits");
 assert(lethalRes.killed === true, "Lethal attack reports target killed");
@@ -317,40 +318,64 @@ assert(defender.data.dead === true, "Target marked dead");
 assert(killEmitted === true, "combat:kill event was emitted");
 
 // -----------------------------------------------------------------------------
-// Proof 8: Legacy Fallback Compatibility
+// Proof 8: Commoner default, and an unknown species still fails loudly
 // -----------------------------------------------------------------------------
-console.log("\n[Proof 8] Legacy Fallback Compatibility");
+console.log("\n[Proof 8] Commoner default and unmapped species");
 
-// When legacy: true is explicitly requested, it uses the OSRS legacy formula
-const legacyAttacker = {
+// combatLevels alone is how the render bench builds a unit. It is a humanoid
+// with no ability scores, so the SRD Commoner stat block applies.
+const benchAttacker = {
     id: 20,
     area: { x: 0, y: 0, z: 0 },
     x: 0, y: 0, z: 0,
     data: {
-        hp: 20, maxHp: 20,
+        hp: 20, maxHp: 20, kind: "test",
         combatLevels: { attack: 60, strength: 60, defence: 60, hitpoints: 20 },
         equipment: { weapon: "sword_long" },
         combat: { mode: "manual", style: "aggressive" }
     }
 };
-const legacyDefender = {
+const benchDefender = {
     id: 21,
     area: { x: 0, y: 0, z: 0 },
     x: 0, y: 1, z: 0,
     data: {
-        hp: 20, maxHp: 20,
+        hp: 20, maxHp: 20, kind: "test",
         combatLevels: { attack: 1, strength: 1, defence: 1, hitpoints: 20 },
         equipment: {},
         combat: { mode: "manual" }
     }
 };
-UF.World.addUnit(legacyAttacker);
-UF.World.addUnit(legacyDefender);
+UF.World.addUnit(benchAttacker);
+UF.World.addUnit(benchDefender);
 
-const legacyRes = UF.Combat.resolveAttack(legacyAttacker, legacyDefender, { legacy: true, rng: () => 0.999999 });
-assert(legacyRes !== null, "Legacy attack resolved successfully");
-assert(legacyRes.hit === true, "Legacy attack hit with high rng");
-assert(typeof legacyRes.maxHit === "number" && legacyRes.maxHit > 0, `Legacy maxHit calculated (${legacyRes.maxHit})`);
+let benchCode = "";
+let benchRes = null;
+try {
+    benchRes = UF.Combat.resolveAttack(benchAttacker, benchDefender, { bypassGcd: true, rng: () => 0.999999 });
+} catch (e) {
+    benchCode = e && e.code ? e.code : (e && e.message) || "throw";
+}
+assert(benchCode === "" && benchRes && benchRes.hit === true, "A combatLevels-only unit resolves as a Commoner (" + benchCode + ")");
+assert(UF.Combat.maxHp(benchDefender) === 4, "Commoner hit points are 4, not the combatLevels pool (" + UF.Combat.maxHp(benchDefender) + ")");
+
+const unknownAttacker = {
+    id: 22,
+    area: { x: 0, y: 0, z: 0 },
+    x: 0, y: 2, z: 0,
+    data: { hp: 20, maxHp: 20, species: "not_a_creature", combat: { mode: "manual" } }
+};
+UF.World.addUnit(unknownAttacker);
+benchDefender.data.hp = 4;
+benchDefender.data.dead = false;
+delete benchDefender.data._isDying;
+let unmappedCode = "";
+try {
+    UF.Combat.resolveAttack(unknownAttacker, benchDefender, { bypassGcd: true, rng: () => 0.999999 });
+} catch (e) {
+    unmappedCode = e && e.code ? e.code : "";
+}
+assert(unmappedCode === "NO_SRD_MAPPING", "A species with no SRD creature fails loudly (" + unmappedCode + ")");
 
 // -----------------------------------------------------------------------------
 // Summary

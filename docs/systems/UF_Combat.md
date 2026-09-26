@@ -1,5 +1,9 @@
 # UF_Combat
-Real-time combat on the map in the OSRS model with our own numbers and words (VISION V64, user 2026-09-19: "lets drop the d20 combat rule, and adopt OSRS combat"; the d20 rules of V47 are retired). Fights run in ticks on the map (V45). Each attack rolls accuracy against defence from levels, styles and equipment bonuses. A hit deals a seeded 0..max hit. Units fight by the Ultima VII attack modes (V29), each in an OSRS style. Hitsplats and a health bar show the fight. Attack, hurt and death motion come only from the sprite sheets (V58, V60, V61, played by UF_Anim).
+Combat authority is SRD 5.1 (Owner ruling DEC-027). V47 is reinstated. The accuracy-and-strength formula of V64 is retired. `DEUS_Combat.resolveAttack` calls `UF.Rules.attack` and `UF.Rules.damage` only. Armor Class, attack bonuses, damage dice, damage types and creature hit points are read from `game/data/srd51/`. The rng is seeded from the world seed, both unit ids, the tick and a counter. The rules module is `game/js/sim/rules/` (`docs/systems/DEUS_Rules.md`).
+
+A natural 20 hits and is a critical hit (damage dice are rolled twice, modifiers once). A natural 1 misses. The 6-second action round, weapon tick speed, attack modes, hitsplats, health bars and the same-Z rejection stay. Fights still run in ticks on the map (V45). Attack, hurt and death motion come only from the sprite sheets (V58, V60, V61).
+
+The measurements and the accuracy-roll formulas below are the retired V64 model from the 2026-09-19 rewrite. They are history, not the current combat law.
 Status: rewritten 2026-09-19 by Claude Code, replacing Gemini's d20 engine. Checks: `combat` (16 checks). Runs of 2026-09-19:
 - **Working snapshot** (the new plugin and the converted catalog): `combat` 16/16, `anim` 9/9, `wildlife` 15/15, `smoke` 13/13; `jobs` 14/17 and `colonists` 20/21. A baseline snapshot with the old d20 UF_Combat and the old catalog fails the same checks: jobs `hunt`, `stalled_fails` and `saved` (plus a flaky `open_job_taken`), and colonists `plan_reads_the_site`.
 - **After the copy back, a fresh snapshot of `game/`:** `smoke` 13/13, `anim` 9/9, `combat` 16/16, `fire` 10/10 (its `units_hurt` goes through `addPopup` and `playHitAnimation`).
@@ -14,18 +18,9 @@ The `perf` average varies between runs from 0.23 to 0.44 ms per frame against th
 ## The model
 **Ticks.** One combat tick = `combat.tickFrames` map updates (36 = 0.6 s at ×1). The loop runs from a `Game_Map.update` alias, so it stops while paused and speeds up with the speed keys (UF_TimeSpeed plays more map updates per frame). The counters are `UF.World.state.combat.updates` and `.tick`. Nothing reads `Graphics.frameCount` for simulation.
 
-**Levels.** Skill ids are `attack`, `strength`, `defence`, `ranged`, `magic` and `hitpoints`. `level(unit, id)` works down this list:
-1. A creature (a unit whose `data.species` has a `wildlife.species[].combat` block) uses the block, and never levels up.
-2. Everyone else gets `UF.Skills.level(unit, id)` when UF_Skills exists and it answers ≥ 1.
-3. Else `unit.data.combatLevels[id]`.
-4. Else the catalog's `combat.people` defaults (all 1, hitpoints 10).
-5. Else 1.
+**Hit points and rank.** A mapped creature's maximum is `UF.Rules.hitPoints` on its SRD stat block, the printed average (wolf 11, deer 4, jackal 3, boar 11, giant spider 26, troll 84). The catalog `combat` block is not read for hit points, attack, defence, or level. A humanoid with no ability scores uses the SRD Commoner (4 hit points). A character uses `data.dnd.hpMax` or `data.maxHp`. The current value is `unit.data.hp`. "Strongest" target order is the creature's challenge rating, or the character's level. The chronicle names that rank. The old skill ladder (`attack`, `strength`, `defence`, `ranged`, `magic`, `hitpoints`, and the fighting-level formula) is the retired V64 model. **Regeneration:** every `combat.regen.everyTicks` ticks (100 = 60 s at ×1 = one game hour on the clock), every living unit that has `data.hp` and is below its maximum gains `regen.hp` (1).
 
-The 10-hitpoint default in step 4 is ours. The contract says "else 1", but 1 would make a person without UF_Skills die to one punch. UF_Skills itself never gives hitpoints below 10.
-
-**Hitpoints.** The maximum is the creature block's `hitpoints`, or the person's hitpoints level. The current value is `unit.data.hp`. `data.maxHp` is a cache of the maximum, written whenever UF_Combat reads hitpoints. Hitpoints are set up on first use (an attack, `calcAC`, `hp()`). A unit at 0 dies (`onUnitDeath`). **Regeneration:** every `combat.regen.everyTicks` ticks (100 = 60 s at ×1 = one game hour on the clock), every living unit that has `data.hp` and is below its maximum gains `regen.hp` (1).
-
-**One attack** (`resolveAttack`). The effective level is `level + style bonus + combat.levelOffset (8)`.
+**One attack** (`resolveAttack`), retired V64 numbers. The live path is `UF.Rules` (see the top of this file and `docs/systems/DEUS_Rules.md`). The effective level was `level + style bonus + combat.levelOffset (8)`.
 - **A** (max attack roll) = effective attack × (the equipment's attack bonus for the attack type + 64). Ranged attacks use ranged instead of attack; magic uses magic.
 - **D** (max defence roll) = effective defence × (the defender's defence bonus for that attack type + 64). The defender's style counts: defensive +3, controlled +1, longrange +3.
 - **Against magic:** a person's effective defence is `floor(0.7 × magic) + floor(0.3 × (defence + style bonus)) + 8` (`combat.magicDefence`), and a creature's is `magic + style bonus + 8`.

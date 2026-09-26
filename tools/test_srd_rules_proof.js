@@ -22,9 +22,10 @@ root.UF.Space = {
     feetToGrid: feet => Math.ceil(feet / 5)
 };
 
-// Load UF_Conditions and UF_Rules
-require(path.join(__dirname, '..', 'game', 'js', 'plugins', 'UF_Conditions.js'));
-require(path.join(__dirname, '..', 'game', 'js', 'plugins', 'UF_Rules.js'));
+// DEUS_Conditions is the conditions authority. UF.Rules is the headless SRD module.
+require(path.join(__dirname, '..', 'game', 'js', 'plugins', 'DEUS_Conditions.js'));
+const { bindRules } = require('./rules/bind');
+bindRules(root);
 
 const Rules = root.UF.Rules;
 const Conditions = root.UF.Conditions;
@@ -99,7 +100,7 @@ assert(passiveDisadv === 9, 'Passive Perception with Disadvantage subtracts 5 (g
 
 // Mutual cancellation of adv/disadv
 Rules._clearTestRoll();
-let advCancel = Rules.check(hero, "str", 10, { advantage: true, disadvantage: true });
+let advCancel = Rules.check(hero, "str", 10, { advantage: true, disadvantage: true, rng: () => 0.2 });
 assert(advCancel.advantage === false && advCancel.disadvantage === false, 'Advantage and Disadvantage cancel to normal single roll');
 
 // -----------------------------------------------------------------------------
@@ -111,7 +112,7 @@ let strSave = Rules.save(hero, "str", 15);
 assert(strSave.ok === true, 'STR save with prof succeeds: 10 + 3 + 2 = 15 vs DC 15');
 
 // Apply Paralyzed condition
-Conditions.apply(hero, "paralyzed");
+Conditions.add(hero, "paralyzed");
 let dexSaveParalyzed = Rules.save(hero, "dex", 10);
 assert(dexSaveParalyzed.ok === false, 'DEX save automatically fails while Paralyzed');
 assert(dexSaveParalyzed.autoFailed === true, 'autoFailed flag is set on condition failure');
@@ -202,9 +203,9 @@ let critAttack = Rules.attack(attacker, targetZ0, "longsword", { targetAC: 25 })
 assert(critAttack.hit === true, 'Natural 20 hits regardless of high AC');
 assert(critAttack.critical === true, 'Natural 20 is a critical hit');
 
-let critDamage = Rules.damage(attacker, targetZ0, critAttack);
+let critDamage = Rules.damage(attacker, targetZ0, critAttack, { rng: () => 0 });
 assert(critDamage.critical === true, 'Damage resolution recognises critical hit');
-assert(critDamage.diceRolled === (mutant ? "1d8" : "2d8"), 'Critical hit rolls damage dice twice (2d8 for longsword)');
+assert(critDamage.diceRolled === "2d8", 'Critical hit rolls damage dice twice (2d8 for longsword)');
 
 // -----------------------------------------------------------------------------
 // Proof 7: Heroic Death Saving Throws at 0 HP

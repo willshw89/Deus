@@ -1,0 +1,82 @@
+# Lane AB Brief: SIM.60.05 SRD 5.1 combat rules engine (pure headless UF.Rules, seeded dice, wired into DEUS_Combat)
+
+**NO ART GENERATION BY ANYONE (DEC-007).** Rules code, data readers, tests and docs only. Never generate, draw, edit, request or integrate art, and never tell anyone to.
+
+**Lane:** lane-ab | **Task ID:** SIM.60.05 (SRD 5.1 combat rules engine; `docs/worldgen/DEUS_WORLDGEN_WBS.md` M3.4 row, line ~569) | **Branch:** task/lane-ab | **Worktree:** `C:\Users\snewt\.deus_worktrees\lane-ab` | **Writer:** grok | **Reviewer:** claude (independent attack/mutation review, launched later by the PM; the task is not DONE until that review passes) | **Base:** origin/main `092c0181949c8cb2568d86546e7e03132445df9c` | **Source:** Owner ruling DEC-027 (08:20 CT, Directive 0062-BK): SRD 5.1 is the combat authority, V64 (OSRS-style accuracy/strength) is RETIRED and V47 reinstated. WBS dependency SIM.60.02 is merged on main (Lane V, `5a68fd5a`, Grok CLEAN PASS). PM brief prepared 2026-09-26 by main-chat ops for the Owner. Provider note: Codex is usage-limited until Sep 29 21:34 CT and Claude is at 95% of its weekly limit, so this lane is written by Grok and reviewed by Claude (a different AI family, as launch_worker and merge_gate require).
+
+**allowedPaths** (exact; mirrored in `tasks/SIM.60.05/lane-ab/lane.json`):
+- `game/js/sim/rules/**` (NEW: the pure headless rules engine)
+- `game/js/plugins/DEUS_Combat.js` (wire UF.Rules in, delete the OSRS formula path and its self-tests)
+- `tools/rules/**` (NEW: tests, fixtures, mutation checks)
+- `tools/test_srd_rules_proof.js`, `tools/test_srd_combat_proof.js`, `tools/test_srd_equipment_proof.js`, `tools/test_d20_equipment_slots.js` (repoint these legacy proofs to the new module; see "State at base")
+- `docs/systems/UF_Combat.md`, `docs/systems/DEUS_Rules.md` (NEW)
+- `tasks/SIM.60.05/**` (REPORT and evidence; the launcher saves its prompt under `tasks/SIM.60.05/lane-ab/launches/`; leave that alone)
+
+**FORBIDDEN:** everything else. In particular: `game/data/**` (read only: `game/data/srd51/*.json`, `game/data/DEUS_WorldCatalog.json`, `game/data/UF_WorldCatalog.json`); `game/js/plugins.js`; every other plugin (read only, including `DEUS_Conditions.js`, `DEUS_Items.js`, `DEUS_Wildlife.js`, `DEUS_Colonists.js`: most of them are Lane AA's live write set); `game/js/sim/ledger*` and `game/js/sim/materials*` (Lane AC); `archive/**` (read only: reference material); `docs/VISION.md` (the coordinator applies the V47/V64 text change from 0062-BK), `docs/STATUS.md`, `docs/OWNER_DECISIONS.md`, every `*WBS*.md`, `docs/adr/**`, `docs/audits/**`; `tools/**` outside the tool paths above (including `tools/ops/**`, `tools/governance/**`, `tools/sim/**`, `tools/bench_render_layers.js`, `tools/run_tests.js`); `art/**`. You do NOT mint WBS IDs, change WBS statuses or answer Owner questions; proposed follow-up work is written `PROPOSED-AB-NN`.
+
+## Goal
+Make SRD 5.1 the only combat law in DEUS: a pure, deterministic, host-agnostic `UF.Rules` engine (d20 attack rolls against Armor Class, SRD damage dice and types, critical hits, advantage/disadvantage, saving throws, initiative, resistance/immunity/vulnerability, hit points from SRD stat blocks) that reads the SRD 5.1 data already in `game/data/srd51/`, runs under Node with no engine globals, and is the single path `DEUS_Combat.resolveAttack` uses. Zero OSRS fallback remains.
+
+## Owner rules (non-negotiable)
+1. **DEC-027** (`docs/OWNER_DECISIONS.md` ~L366-373): d20 vs AC, SRD damage dice, SRD stat blocks/hit points, initiative, action economy and conditions are canonical; V64 is retired; `game/data/srd51/` is authoritative; rules sit behind `UF.Rules` with pure, deterministic, seeded dice compatible with headless simulation under ADR-003.
+2. **SRD numbers come from the data, never from code.** Every AC, hit-point value, attack bonus, damage expression and damage type used at runtime is read from `game/data/srd51/*.json` (creatures, equipment, rules). Tests may quote SRD examples, each with a pointer to the record they come from.
+3. **ADR-003 purity** (Rev 3 sections 2.3-2.5, PROPOSED; follow `game/js/sim/ledger.js` as the house example): CommonJS subset, no `window`, `document`, `PIXI`, `$game*`, `$data*`, `Game_*`, `Scene_*`, `Sprite*`, no `Date`, no `Math.random`, no file I/O inside `game/js/sim/rules/**`. Randomness only through an injected seeded rng; the same seed and inputs give the same results.
+4. **Geometry and invariants:** 5-ft squares (DEC-013 as amended), same-Z combat invariant (DEUS_Combat already returns `sameZViolation`; keep it), the 6-second round / action cooldown already in DEUS_Combat stays. Do not hard-code a layer count.
+5. **Open Owner questions: represent, never decide** (for example anything the SRD leaves to the DM). List them in REPORT.md.
+
+## State at base (verify and cite file:line at your base)
+- `DEUS_Combat.resolveAttack` (~L745) already calls `UF.Rules.attack(attacker, target, weaponKey, opts)` and `UF.Rules.damage(attacker, target, attResult, opts)` when `window.UF.Rules` exists (~L786-835), and `UF.Rules.armorClass(unit).ac` (~L570-575); otherwise it runs the legacy OSRS formula (~L841, `hitChance`/`maxHitFor` ~L493-497, `maxHitOf` ~L521). The plugin header (~L1-40) still says V64 and "the d20 rules of V47 are retired". In-plugin self-tests (~L2255-2320 and later) assert the OSRS formulas.
+- **UF.Rules is not loaded on main.** The old implementation was moved by commit `0544ef02` to `archive/plugins/DEUS_Rules.js` (666 lines; read it as reference only, do not restore it wholesale). `tools/test_srd_rules_proof.js`, `tools/test_srd_combat_proof.js`, `tools/test_srd_equipment_proof.js` and `tools/test_d20_equipment_slots.js` still require `game/js/plugins/UF_Rules.js`, which no longer exists: all four exit 1 at base.
+- **Loader trap (LWGA F-05, `docs/audits/LIVING_WORLD_GAP_AUDIT.md` ~L52):** a module loaded with `require()` that assigns itself to a function-local `UF` never reaches `window.UF`. Your wiring must assign `window.UF.Rules` explicitly, and a test must prove it (a vm context with a `window` object, and plain Node `require`).
+- Plugins can load project files with `require` (for example `DEUS_Colonists.js` ~L86-92 `require("./UF_SettlementPillars.js")`); verify how relative paths resolve under NW.js before relying on it, and do not edit `game/js/plugins.js`.
+- Light tests that pass at base and must still pass: `tools/test_conditions_system.js` (55/0), `tools/test_conditions_native_closure.js` (18/0), `tools/test_combat_dying_integration.js`, `tools/check_deus_syntax.js`. `tools/validate_srd_catalog.js` exits 1 at base (37/1): not yours; note it.
+
+## What to build
+1. **`game/js/sim/rules/dice.js`**: seeded dice. Parse SRD expressions (`1d8+3`, `2d6`, `1d4+1d6`), roll with an injected rng, advantage/disadvantage (roll twice, keep higher/lower), critical-hit dice doubling (SRD: roll all damage dice twice, modifiers once). Deterministic; no `Math.random`.
+2. **`game/js/sim/rules/srd_index.js`**: normalises the parsed SRD JSON the host hands in (creatures: AC, hit points and hit dice, ability scores, proficiency bonus/CR, actions with to-hit and damage; equipment: weapons with damage dice, type and properties such as finesse, versatile, ranged, two-handed, ammunition; armor with base AC, Dex cap and shield bonus; rules: conditions). No file I/O here: Node tests read the files and pass them in; the NW.js adapter does the same.
+3. **`game/js/sim/rules/rules.js`** (export a factory, for example `createRules(srd, opts)`), keeping the call shapes DEUS_Combat already uses:
+   - `armorClass(unit)` -> `{ ac, breakdown }` (armor, Dex cap, shield, natural armor from the stat block);
+   - `attack(attacker, target, weaponKey, opts)` -> `{ hit, roll, natural, total, effectiveAC, critical, fumble, advantage, disadvantage, sameZViolation }` (natural 20 always hits and crits, natural 1 always misses; ability modifier: Str, or Dex for finesse/ranged; proficiency bonus; cover bonus to AC; opts `advantage`, `disadvantage`, `coverBonus`, `targetAC`, `weaponBonus`, `rng`);
+   - `damage(attacker, target, attResult, opts)` -> `{ damage, rolls, type, critical, modifiers }` with resistance (halve, round down), vulnerability (double) and immunity (0) from the target's stat block;
+   - `savingThrow(unit, ability, dc, opts)`, `initiative(unit, opts)` (d20 + Dex modifier), `abilityModifier(score)`, `proficiencyBonus(levelOrCr)`, `hitPoints(statBlock, opts)` (average or rolled from hit dice, the choice as an option).
+   Conditions stay in `DEUS_Conditions.js` (read only); the rules take the advantage/disadvantage/auto-crit flags DEUS_Combat already computes.
+4. **Host adapter in `DEUS_Combat.js`:** load the engine once, build `window.UF.Rules` explicitly from the SRD JSON, and map DEUS units to SRD stat views (colonists and wildlife: document the mapping from `unit.data`, the catalog and `srd51/creatures.json`; a unit with no SRD mapping must fail loudly in tests, never silently fall back). **Delete the OSRS path**: `hitChance`, `maxHitFor`, `maxHitOf`, the legacy branch in `resolveAttack`, `Combat.useRules`/`o.legacy` switches, and the OSRS self-tests; replace them with SRD self-tests. Update the header to V47/DEC-027. Keep the `combat:hit` / `combat:kill` events and the result keys other code reads (list every key you keep, rename or drop, with the reader file:line; `tools/test_conditions_system.js`, `tools/test_conditions_native_closure.js` and `tools/bench_render_layers.js` call `resolveAttack`).
+5. **Docs:** `docs/systems/DEUS_Rules.md` (API, data mapping, determinism, loader, what is SRD and what is DEUS) and `docs/systems/UF_Combat.md` updated to DEC-027 (V47 reinstated, V64 retired). Do not edit `docs/VISION.md`.
+6. **Tests `tools/rules/test_srd_rules.js`** (one `PASS <name>` / `FAIL <name>` line per check, final `RESULT: <n> passed, <m> failed`, exit 0 only when all pass): SRD worked examples with record pointers (for example a goblin's scimitar attack against a stat-block AC, a longsword with versatile damage, a finesse weapon using Dex, a crit doubling dice, natural 1 and 20, advantage/disadvantage, resistance/vulnerability/immunity, a save against a DC, initiative); determinism (same seed twice gives identical transcripts; different seeds differ); purity (a static scan of `game/js/sim/rules/**` for forbidden globals, seen to fail on a mutant); **zero-OSRS** (a static check that fails if `DEUS_Combat.js` still contains `hitChance`, `maxHitFor`, `maxHitOf`, "OSRS" or a legacy branch); loader (window.UF.Rules set under a vm `window` and under `require`); coverage (every creature in `srd51/creatures.json` with an attack action resolves an attack and damage without throwing); **mutation checks** on in-memory copies of the sources (never edit files on disk to mutate): at least one mutant per rule (crit doubling modifiers, natural-1 hit, resistance rounding up, Dex ignored for finesse, advantage ignored, unseeded rng) is killed.
+7. **Repoint the four legacy proofs** to the new module (keep each assertion or record in REPORT.md why it changed), so all four exit 0.
+
+## Tests and commands
+- FOREGROUND, from the worktree root: `node tools/rules/test_srd_rules.js`, the four repointed proofs, `node tools/test_conditions_system.js`, `node tools/test_conditions_native_closure.js`, `node tools/test_combat_dying_integration.js`, `node tools/check_deus_syntax.js`.
+- NW.js: if a `tools/run_tests.js` suite exercises `DEUS_Combat` in the engine, run it only in a throwaway clone under `%TEMP%` (never in the worktree), paste the tail, and delete the clone before your final commit. If none exists, say so; do not add one outside allowedPaths.
+- Before your final commit run every `gateTests` entry of `tasks/SIM.60.05/lane-ab/lane.json` exactly as written and paste raw output with `EXIT=` lines in REPORT.md.
+- Prove scope: paste `git diff --name-only 092c0181949c8cb2568d86546e7e03132445df9c..HEAD` and show every path matches allowedPaths.
+
+## Deliverables
+1. The engine, adapter, docs, tests and repointed proofs above.
+2. `tasks/SIM.60.05/lane-ab/REPORT.md`: every command with raw `EXIT=` lines; counts (checks, SRD examples, creatures covered, mutants killed); the result-key table (kept/renamed/dropped with readers); the unit-to-stat-block mapping; disagreements between SRD data files; Owner/DM-open questions (not answered); `PROPOSED-AB-NN` follow-ups (for SIM.60.06 benchmark hooks and spells via SIM.60.03); the scope diff; the final `git rev-parse HEAD`.
+
+## Acceptance criteria (the independent Claude reviewer will check these)
+- No file outside allowedPaths changed; `game/data/**` and `game/js/plugins.js` untouched.
+- `resolveAttack` resolves only through `UF.Rules`; no OSRS formula, switch or self-test remains; `window.UF.Rules` is set in NW.js and in Node.
+- Every SRD number at runtime comes from `game/data/srd51/`; dice are seeded and deterministic; the purity scan and every mutant are caught; all listed suites exit 0.
+- Nothing self-certified; REPORT evidence is raw.
+
+Commit messages start `[grok] SIM.60.05`.
+
+## Standing rules (verbatim, every lane)
+1. One primary writer per file set. Your write set is exactly the allowedPaths above. It is disjoint from every other live lane (table below), the merged governance/ops tools (`tools/governance/**`, `tools/ops/**`: read only) and the coordinator's files (`docs/STATUS.md`, `docs/VISION.md`, `docs/OWNER_DECISIONS.md`, every `*WBS*.md`, `docs/telemetry/**`: read only).
+2. Capture the exit code of every command, one per command (`"EXIT=$LASTEXITCODE"` in PowerShell, `echo EXIT=$?` in bash). Put raw values in your reports. Never type or paraphrase a commit hash: paste it from `git rev-parse` output.
+3. Run commands in the FOREGROUND. Never end your turn while background jobs or child processes are running. Commit early (WIP commits allowed on your branch). Do not merge. Write only inside allowedPaths.
+4. Commit and push to your own branch only: `git push origin task/lane-ab` after your final commit (never any other branch, never `main`, never force). If the push is refused, do not work around it (never set `DEUS_INTEGRATOR`); write the refusal in your REPORT and stop; the PM pushes.
+5. Do not merge. Do not self-certify: never write DONE, PASS, VERIFIED or CLOSED about your own work in any file (test-runner `PASS <check>` lines are fine). Your REPORT states what you did and the raw evidence. An independent Claude review decides; the PM merges.
+6. Stop and write `tasks/SIM.60.05/lane-ab/escalation.md` (then commit and push it) if you need a file outside your allowedPaths, find a bug in a read-only shared file, or find two sources that disagree in a way the brief does not settle. Never resolve an Owner question yourself.
+7. Your very last output line must be `FINAL SHA: <sha>`, with the sha pasted from `git rev-parse HEAD` after a successful push (or `FINAL SHA: <sha> (push refused)`).
+
+## Live lanes at preparation (write sets are disjoint; do not touch another lane's paths)
+| Lane | Task | Role | Write set |
+|---|---|---|---|
+| Y | OPS.30.01 GATE runner and quarantine census | Claude writer | `tools/ops/run_gate.js`, `tools/ops/test_run_gate.js`, `tools/ops/quarantine.json`, `tools/ops/fixtures/run_gate/**`, `tasks/OPS.30.01/**` |
+| Z | OPS.70.02 secrets scanner and dependency checker (resume 1) | Claude writer | `tools/security/**`, `tasks/OPS.70.02/**` (+ three PM security-fix grants) |
+| AA | WG.00.17 32-layer Z range, sparse storage | Claude writer | 22 `game/js/plugins/*.js` files (Levels, World, Fluid, WorldGen, Minimap, Depth, Environment, DayNight, Ecology, Wildlife, History, Colonists, Doors, Fire, Floors, Items, Jobs, Objects, Ownership, Walls, UF_Households, HistoricalDemographics), 5 `docs/systems` files, `tools/test_zrange.js`, `tools/zrange/**`, `tasks/WG.00.17/**` |
+| AC | SIM.40.00 material and constructed-strata model | Grok writer | `game/data/sim/**`, `game/js/sim/materials.js`, `tools/sim/test_materials.js`, `tools/sim/fixtures/materials/**`, `docs/systems/DEUS_Materials.md`, `tasks/SIM.40.00/**` |
+| E | WG.00.09a attack plan | PAUSED (do not touch) | `docs/systems/UF_Depth_Attack_Plan.md`, `tasks/DEUS-TSK-FABLE-19C/*` |
