@@ -1619,13 +1619,30 @@
         const n = ensureNeeds(u);
         if (!n) return null;
         if (n.exhaustion >= 5) return "exhaustion";
-        if (sleepingHours(u) && n.lastRestDay !== dayKey()) return "rest";
+        if (sleepingHours(u) && n.lastRestDay !== dayKey()) {
+            // Supper and a drink before the long rest (DEUS-TSK-FABLE-14): a colonist that goes to bed short of the
+            // day's water rolls exhaustion at midnight, so the pond and the larder come first while they are within
+            // reach. The rest is held off for one decision (needJob then serves the drink or the meal through its own
+            // branches); a need nothing can meet (needBlocked) does not keep the colonist from its bed.
+            // (No search here: this runs every sweep for every colonist. needJob blocks a need it found nothing for.)
+            if (n.waterGal < waterNeed(u) && !needBlocked(u, "thirst")) { avoid.set(needKey(u, "rest"), ticks() + DECIDE_EVERY); return "thirst"; }
+            if (n.foodLb < FOOD_LB_PER_DAY && !needBlocked(u, "hunger")) { avoid.set(needKey(u, "rest"), ticks() + DECIDE_EVERY); return "hunger"; }
+            return "rest";
+        }
         if (hourNow() >= lastMealHour() && !sleepingHours(u)) {
             if (n.waterGal < waterNeed(u)) return "thirst";
             if (n.foodLb < FOOD_LB_PER_DAY) return "hunger";
         }
+        // Breakfast (DEUS-TSK-FABLE-14): for two hours after a long rest, water and food short of the day's need come
+        // before the day's work, so nobody sets out on a long shift or a gathering trip dry.
+        if (breakfastDue(u)) {
+            if (n.waterGal < waterNeed(u) && !needBlocked(u, "thirst")) return "thirst";
+            if (n.foodLb < FOOD_LB_PER_DAY && !needBlocked(u, "hunger")) return "hunger";
+        }
         return null;
     }
+    const BREAKFAST_TICKS = 2 * 600; // two game hours after waking
+    const breakfastDue = u => { const n = u && u.data && u.data.needs; return !!n && Number.isFinite(n.wokeTick) && ticks() - n.wokeTick >= 0 && ticks() - n.wokeTick < BREAKFAST_TICKS && !sleepingHours(u); };
     //-------------------------------------------------------------------------
     // Reflexive self-preservation (DEUS-TSK-FABLE-11). Above every project and routine: a colonist standing in fire,
     // lava or deep water, or burning, drops whatever it is doing and gets out (UF_Jobs fails the job on its own step
@@ -1812,7 +1829,7 @@
     }
     // A meal hour with the day's food or water still short is a break from work: the sweep interrupts labour for it
     // (once per PREEMPT_EVERY), so the daily needs are met before the last meal hour makes them urgent.
-    const mealNeed = u => { const n = ensureNeeds(u); return n && isMealHour() && !sleepingHours(u) && (n.foodLb < FOOD_LB_PER_DAY || n.waterGal < waterNeed(u)) ? "meal" : null; };
+    const mealNeed = u => { const n = ensureNeeds(u); return n && (isMealHour() || breakfastDue(u)) && !sleepingHours(u) && (n.foodLb < FOOD_LB_PER_DAY || n.waterGal < waterNeed(u)) ? "meal" : null; };
     const isDrafted = u => !!(u && u.data && (u.data.drafted === true || (u.data.combat && u.data.combat.mode === "manual")));
     /** What a colonist would do next and why, without doing it: { priority: 1..9, name, detail } (UF_Sheet, harnesses). */
     function assess(u) {
@@ -1825,6 +1842,7 @@
         if (exhaustionOf(u) < 5) {
             const burning = !aflame(u) && burningPatientsFor(u).length > 0;
             if (burning || patientsFor(u).length) return { priority: 4, name: PRIORITY[4], detail: burning ? "douse" : "stabilize" };
+            if (feedPatientsFor(u).length) return { priority: 4, name: PRIORITY[4], detail: "feed" };
         }
         const crit = criticalNeed(u);
         if (crit) return { priority: 5, name: PRIORITY[5], detail: crit };
@@ -1844,7 +1862,13 @@
     }
 
     // A job that serves the need is never preempted for it; first aid is never preempted for a daily need either.
-    const isNeedJob = (job, need) => !!job && (NEED_JOBS.includes(job.type) || job.type === "stabilize" ||
+    // A fetch that brings food to the colonist's own mouth (from the larder chest, or marked for a need) is a need job
+    // whatever need the sweep is looking at, and so is the walk through the camp's gap that routes one (params.via):
+    // a colonist fetching supper is never sent for water first and back again every hour (DEUS-TSK-FABLE-14).
+    const survivalFetch = job => job.type === "fetch" && !!job.params && (!!job.params.need || !!job.params.fromContainer || job.params.to === "eat" ||
+        (!!job.params.itemId && !!Items() && isFoodType(itemType((Items().get(job.params.itemId) || {}).type))));
+    const isNeedJob = (job, need) => !!job && (NEED_JOBS.includes(job.type) || job.type === "stabilize" || job.type === "douse" || survivalFetch(job) || (job.type === "haul" && !!job.params && !!job.params.feed) ||
+        (job.type === "move" && !!job.params && !!job.params.via && (NEED_JOBS.includes(job.params.via) || job.params.via === "fetch")) ||
         ((need === "hunger" || need === "meal") && (job.type === "hunt" || job.type === "fetch" || job.type === "gather" || job.type === "craft")));
     // Anti-thrash: a need nothing could meet waits NEED_RETRY_TICKS before the search runs again (keyed on the hearth).
     const needKey = (u, need) => { const c = colonyState(u); return avoidKey(u, "need_" + need, c ? c.site.x : 0, c ? c.site.y : 0); };
@@ -1949,16 +1973,66 @@
         return colonists().filter(o => o !== u && o.data.faction === u.data.faction && sameLevel(o, u) && !o.data.dead && aflame(o) && cannotDouseSelf(o) && chebyshev(o.x, o.y, u.x, u.y) <= RESCUE_RADIUS);
     }
     // Douse a burning friend: the nearest one nobody is helping, by a colonist not itself aflame (fire kills faster
-    // than wounds, so this comes before first aid).
+    // than wounds, so this comes before first aid). With nobody burning, a friend too worn down to walk is fed.
     function douseJob(u) {
         if (!isColonist(u) || unconscious(u) || exhaustionOf(u) >= 5 || aflame(u)) return null;
         const J = Jobs();
-        if (!J || !J.handler("douse")) return null;
+        if (!J || !J.handler("douse")) return feedJob(u);
         const patients = burningPatientsFor(u).sort((a, b) => chebyshev(a.x, a.y, u.x, u.y) - chebyshev(b.x, b.y, u.x, u.y) || a.id - b.id);
         for (const p of patients) {
             if (J.reservation && J.reservation.isReservedByOther(u.id, { id: p.id })) continue;
             const j = give(u, { type: "douse", target: { x: p.x, y: p.y }, params: { unitId: p.id, emergency: true } });
             if (j) return j;
+        }
+        return feedJob(u);
+    }
+    // Feeding the immobile (DEUS-TSK-FABLE-14): a colonist at exhaustion 5 has no speed (SRD) and cannot walk to the
+    // larder; with nothing to eat in its pack or at its feet it would starve beside a full chest. A friend brings a
+    // stack of food and puts it down at its feet (a haul with params.feed); the eater's own next meal is then an eat
+    // job on its own square. Water cannot be carried yet (no fill job), so thirst at that level remains open.
+    const immobile = o => !!o && !!o.data && !o.data.dead && !unconscious(o) && exhaustionOf(o) >= 5;
+    function needsFeeding(o) {
+        const n = ensureNeeds(o), I = Items();
+        if (!n || !I || n.foodLb >= FOOD_LB_PER_DAY) return false;
+        if (I.inventoryOf(o.id).some(it => isFoodType(itemType(it.type)))) return false;
+        return !I.atIn(levelArea(o), o.x, o.y).some(it => isFoodType(itemType(it.type)));
+    }
+    function feedPatientsFor(u) {
+        return colonists().filter(o => o !== u && o.data.faction === u.data.faction && sameLevel(o, u) && immobile(o) && needsFeeding(o) && chebyshev(o.x, o.y, u.x, u.y) <= RESCUE_RADIUS);
+    }
+    // The nearest stack of food the rescuer can bring: its own pack first, else the larder chest, a larder cell or the ground.
+    function foodToBring(u) {
+        const I = Items(), C = window.UF && UF.Containers;
+        if (!I) return null;
+        const mine = I.inventoryOf(u.id).find(it => isFoodType(itemType(it.type)));
+        if (mine) return { item: mine, x: u.x, y: u.y, containerId: null };
+        let best = null, bestD = Infinity;
+        for (const it of foodStored(u)) {
+            const cont = it.container && C ? C.get(it.container) : null, pos = cont || it;
+            const d = chebyshev(pos.x, pos.y, u.x, u.y);
+            if (d < bestD) { best = { item: it, x: pos.x, y: pos.y, containerId: it.container || null }; bestD = d; }
+        }
+        for (const f of groundItemsNear(u, { radius: FOOD_ITEM_RADIUS })) {
+            if (!isFoodType(itemType(f.item.type)) || f.item.container) continue;
+            const d = chebyshev(f.x, f.y, u.x, u.y);
+            if (d < bestD) { best = { item: f.item, x: f.x, y: f.y, containerId: null }; bestD = d; }
+        }
+        return best;
+    }
+    function feedJob(u) {
+        if (!isColonist(u) || unconscious(u) || exhaustionOf(u) >= 5) return null;
+        if (urgent(u)) return null; // a rescuer in urgent need of its own drinks or eats first (the feed haul is short and, once taken, uninterrupted)
+        const J = Jobs();
+        if (!J || !J.handler("haul")) return null;
+        const patients = feedPatientsFor(u).sort((a, b) => chebyshev(a.x, a.y, u.x, u.y) - chebyshev(b.x, b.y, u.x, u.y) || a.id - b.id);
+        for (const p of patients) {
+            if (J.reservation && J.reservation.isReservedByOther(u.id, { id: p.id })) continue;
+            const f = foodToBring(u);
+            if (!f) return null;
+            const params = { itemId: f.item.id, count: Math.min(f.item.count | 0, 2), to: { x: p.x, y: p.y }, material: "food", feed: true, unitId: p.id, emergency: true };
+            if (f.containerId) params.fromContainer = f.containerId;
+            const j = give(u, { type: "haul", target: { x: f.x, y: f.y }, params });
+            if (j) { if (J.reservation && typeof J.reservation.reserve === "function") J.reservation.reserve(u.id, { id: p.id }); addThought(u, `Brought food to ${p.name || "a friend"}.`, 2); return j; }
         }
         return null;
     }
@@ -1989,6 +2063,7 @@
         const n = ensureNeeds(u);
         if (!n) return;
         n.lastRestDay = dayKey();
+        n.wokeTick = ticks(); // breakfast follows (DEUS-TSK-FABLE-14)
         const d = u.data;
         if (Number.isFinite(d.hp) && Number.isFinite(d.maxHp) && d.hp >= 1) d.hp = d.maxHp;
         if (n.exhaustion > 0) {
@@ -2094,6 +2169,9 @@
         });
         const seen = new Set(stored.map(f => f.item.id));
         const ground = stored.concat(groundItemsNear(u, { radius: FOOD_ITEM_RADIUS }).filter(f => isFoodType(itemType(f.item.type)) && !seen.has(f.item.id) && (!f.item.firstOwner || f.item.firstOwner === u.id))).sort((a, b) => a.dist - b.dist);
+        // Nearest first: what lies at the colonist's feet (a friend's delivery) before the larder across the camp,
+        // which a colonist too worn down to walk could never reach (DEUS-TSK-FABLE-14).
+        ground.sort((a, b) => a.dist - b.dist || a.item.id - b.item.id);
         const kill = ground.find(f => rawFood(itemType(f.item.type)) && f.dist <= FOOD_ITEM_RADIUS);
         if (kill) {
             const spec = fire && cookRecipeFor(kill.item.type)
@@ -3184,6 +3262,85 @@
         }
     }
 
+    //-------------------------------------------------------------------------
+    // Bed claims (DEUS-TSK-FABLE-13). A colonist's bed is the one it claimed: data.bed (saved) is the single record;
+    // the claim holds while the bed stands and its holder lives, and lapses when the bed is gone. Newcomers take
+    // unclaimed beds only, so nobody is displaced from a bed it holds. Claims are indexed from the colonists once per
+    // map update; allocation runs at a sweep after a bed is built or someone arrives (bedsDirty), never per frame.
+    // A household's planned bed (UF_Households, built by makeBedJob) is a record too and is left alone until it stands.
+
+    const BED_SEARCH_RADIUS = 24;    // cells from the hearth a settlement bed may lie: a second shelter sits beyond the camp ring
+    const bedSearchRadius = c => Math.max(((c && c.radius) | 0) + 6, BED_SEARCH_RADIUS);
+    const isBedType = t => !!t && (t.id === "floor_straw" || t.id === "bed_wood" || hasTag(t, "bed"));
+    const bedKeyAt = (ref, x, y) => `${ref && ref.area ? ref.area.x : 0},${ref && ref.area ? ref.area.y : 0},${zOf(ref)}:${x},${y}`;
+    let _claimTick = -1, _claimIndex = null, bedsDirty = true;
+    /** bed key -> holder id for every living colonist's record; the earliest claimant keeps a contested key. */
+    function bedClaims() {
+        if (_claimIndex && _claimTick === localTicks) return _claimIndex;
+        const idx = new Map();
+        for (const o of colonists()) {
+            const b = o.data.bed;
+            if (o.data.dead || !b || typeof b !== "object" || !Number.isFinite(b.x)) continue;
+            const k = bedKeyAt(b, b.x, b.y);
+            if (!idx.has(k)) idx.set(k, o.id);
+        }
+        _claimTick = localTicks; _claimIndex = idx;
+        return idx;
+    }
+    const bedStands = (u, b) => { const O = Objects(); return !!(O && b && typeof b === "object" && sameLevel(b, u) && isBedType(O.atIn(levelArea(u), b.x, b.y))); };
+    // A record still worth keeping: the bed stands, or its square is free ground a household may still build on.
+    const bedRecordUsable = u => {
+        const b = u && u.data ? u.data.bed : null, O = Objects();
+        if (!b || typeof b !== "object" || !O || !sameLevel(b, u)) return false;
+        const here = O.atIn(levelArea(u), b.x, b.y);
+        return !here || isBedType(here);
+    };
+    /** The bed this colonist holds, or null: its record while the bed stands and nobody earlier holds it. */
+    function claimedBed(u) {
+        const b = u && u.data ? u.data.bed : null;
+        if (!b || typeof b !== "object" || !bedStands(u, b)) return null;
+        const holder = bedClaims().get(bedKeyAt(b, b.x, b.y));
+        return holder === undefined || holder === u.id ? b : null;
+    }
+    /** Claims the nearest unclaimed standing bed of the settlement for the colonist (kept when its record is usable). Returns the record or null. */
+    function claimBed(u) {
+        const O = Objects(), c = colonyState(u);
+        if (!O || !c || !u || !u.data || u.data.dead) return null;
+        if (bedRecordUsable(u)) {
+            const b = u.data.bed, holder = bedClaims().get(bedKeyAt(b, b.x, b.y));
+            if (holder === undefined || holder === u.id) return b;
+        }
+        const area = levelArea(u), claims = bedClaims(), Own = window.UF && UF.Ownership;
+        let best = null, bestD = Infinity;
+        for (const b of O.findIn(area, { near: { x: c.site.x, y: c.site.y }, radius: bedSearchRadius(c), tags: ["bed"], unsorted: true })) {
+            const holder = claims.get(bedKeyAt(u, b.x, b.y));
+            if (holder !== undefined && holder !== u.id) continue; // held by a living colonist: never displaced
+            if (Own && typeof Own.ownerOf === "function") {
+                const owner = Own.ownerOf({ kind: "object", area: copyArea(u.area), z: zOf(u), x: b.x, y: b.y });
+                if (owner && owner.kind === "unit" && owner.id !== u.id) continue;
+            }
+            const d = chebyshev(b.x, b.y, u.x, u.y);
+            if (d < bestD || (d === bestD && best && (b.y < best.y || (b.y === best.y && b.x < best.x)))) { best = b; bestD = d; }
+        }
+        if (!best) return null;
+        u.data.bed = { area: copyArea(u.area), x: best.x, y: best.y, z: zOf(u) };
+        if (Own && typeof Own.assignBed === "function") { try { Own.assignBed(u, { area: copyArea(u.area), z: zOf(u), x: best.x, y: best.y }); } catch (e) { console.error(e); } }
+        _claimTick = -1;
+        emit("colonists:bedClaimed", u, u.data.bed);
+        return u.data.bed;
+    }
+    // Who gets a new bed first: the most exhausted, then the eldest, then the earliest arrival (stable across runs).
+    const bedPriority = (a, b) => (exhaustionOf(b) - exhaustionOf(a)) || ((b.data.age | 0) - (a.data.age | 0)) || (a.id - b.id);
+    /** Gives every colonist without a usable bed record the nearest unclaimed bed, in priority order; returns how many were bedded. */
+    function allocateBeds() {
+        bedsDirty = false;
+        const unbedded = colonists().filter(o => !o.data.dead && !(bedRecordUsable(o) && claimBed(o))).sort(bedPriority);
+        let n = 0;
+        for (const o of unbedded) if (claimBed(o)) n++;
+        return n;
+    }
+    const markBedsDirty = () => { bedsDirty = true; };
+
     function myBedTarget(u) {
         if (!u || !u.data) return null;
         if (u.data.bed === null) return null;
@@ -3316,15 +3473,19 @@
         }
 
         const taken = new Set(activeJobs().filter(j => j.type === "sleep" && j.assigned !== u.id && j.target && sameLevel(j.target, u)).map(j => `${j.target.x},${j.target.y}`));
-        const beds = O ? O.findIn(levelArea(u), { near: { x: c ? c.site.x : u.x, y: c ? c.site.y : u.y }, radius: (c ? c.radius : 8) + 6, tags: ["bed"] }).filter(b => !taken.has(`${b.x},${b.y}`)) : [];
+        const beds = O ? O.findIn(levelArea(u), { near: { x: c ? c.site.x : u.x, y: c ? c.site.y : u.y }, radius: bedSearchRadius(c), tags: ["bed"] }).filter(b => !taken.has(`${b.x},${b.y}`)) : [];
         const owned = UF.Ownership && UF.Ownership.bedOf(u);
+        const claims = bedClaims();
         const permitted = beds.filter(b => {
+            const holder = claims.get(bedKeyAt(u, b.x, b.y));
+            if (holder !== undefined && holder !== u.id) return false; // another colonist's claimed bed (DEUS-TSK-FABLE-13)
             const owner = UF.Ownership && UF.Ownership.ownerOf({ kind: "object", area: copyArea(u.area), z: zOf(u), x: b.x, y: b.y });
             return !owner || owner.kind === "public" || owner.kind === "unit" && owner.id === u.id || owner.kind === "faction" && owner.id === u.data.faction;
         });
         const fire = nearestFire(u);
         const fireRef = fire ? { x: fire.x, y: fire.y } : null;
-        const myBed = (u.data && u.data.bed && sameLevel(u.data.bed, u)) ? u.data.bed : (owned && sameLevel(owned, u) ? owned : null);
+        const mine = claimBed(u); // the colonist's own claim first (a newcomer claims a free bed here when none was allocated yet)
+        const myBed = mine && bedStands(u, mine) ? mine : (owned && sameLevel(owned, u) ? owned : null);
         const spots = myBed && !taken.has(`${myBed.x},${myBed.y}`) ? [{ x: myBed.x, y: myBed.y, fire: fireRef }] : [];
 
         // Permitted unoccupied beds in the settlement take precedence over sleeping on the floor:
@@ -4866,10 +5027,15 @@
         const open = openJobs().filter(j => j.target && j.params && ids.has(j.params.project) && sameLevel(j.target, u));
         if (!open.length) return null;
         const RM = J.reservation || null, t = ticks();
+        // Food work (a cache's gathering and its hauls to the larder) weighs double for a colonist whose calling is
+        // foraging, hunting or farming (UF.Callings), so the sustenance loop is theirs first (DEUS-TSK-FABLE-14).
+        const Callings = getCallings();
+        const forager = !!(Callings && typeof Callings.isForager === "function" && Callings.isForager(u));
+        const foodWork = j => !!(j.params && (j.params.forage || j.params.material === "food"));
         const score = j => {
             const skill = SKILL_OF[j.type] ? ((u.data.skills && u.data.skills[SKILL_OF[j.type]]) || 0) : 0;
             const dist = Math.hypot(j.target.x - u.x, j.target.y - u.y);
-            return priorityOf(j.type, u) * (1 + skill / 20) * (1 + (j.priority | 0)) / (1 + dist / 20);
+            return priorityOf(j.type, u) * (forager && foodWork(j) ? 2 : 1) * (1 + skill / 20) * (1 + (j.priority | 0)) / (1 + dist / 20);
         };
         open.sort((a, b) => score(b) - score(a) || a.id - b.id);
         for (const j of open.slice(0, 6)) {
@@ -4987,6 +5153,7 @@
         // nearest ordinary worker off its job ("emergency: aid"), once per PREEMPT_EVERY per worker.
         if (sweep) {
             const all = colonists();
+            if (bedsDirty) allocateBeds(); // a bed was built or someone arrived: the unbedded claim beds (DEUS-TSK-FABLE-13)
             for (const u of all) {
                 if (unconscious(u) && !u.data.dead) startDying(u); // idle or busy, 0 hit points is dying
                 tickDying(u, t);
@@ -4994,7 +5161,8 @@
             // A burning colonist that cannot put itself out comes first (fire kills faster than wounds), then the dying.
             const unhelped = o => !(J.reservation && J.reservation.reservedBy({ id: o.id }) !== null);
             const burningOnes = all.filter(o => !o.data.dead && aflame(o) && cannotDouseSelf(o) && unhelped(o));
-            const patients = burningOnes.concat(all.filter(o => dyingOf(o) && !dyingOf(o).stable && unhelped(o)));
+            const starvingOnes = all.filter(o => immobile(o) && needsFeeding(o) && unhelped(o));
+            const patients = burningOnes.concat(all.filter(o => dyingOf(o) && !dyingOf(o).stable && unhelped(o)), starvingOnes);
             for (const p of patients) {
                 const helpers = all.filter(o => o !== p && !unconscious(o) && exhaustionOf(o) < 5 && !aflame(o) && sameLevel(o, p) && chebyshev(o.x, o.y, p.x, p.y) <= RESCUE_RADIUS)
                     .sort((a, b) => chebyshev(a.x, a.y, p.x, p.y) - chebyshev(b.x, b.y, p.x, p.y) || a.id - b.id);
@@ -5366,7 +5534,8 @@
         get: colonist,
         isColonist,
         assess, hazardOf, threatOf, criticalNeed, onUnitMoved, PRIORITY,
-        raiseAlarm, refugeFor, douseJob, burningPatientsFor, openJobs,
+        claimBed, claimedBed, allocateBeds, bedClaims, bedSearchRadius,
+        raiseAlarm, refugeFor, douseJob, burningPatientsFor, openJobs, feedJob, feedPatientsFor,
         state: colonyState,
         faction: () => (window.UF.Factions ? UF.Factions.get(factionId()) : null),
         site(ref) {
@@ -5420,7 +5589,7 @@
         spendCredits,
         stepMerchantCaravan,
         advanceTicks: (count = 60) => { localTicks += count; return localTicks; },
-        _internal: { preemptAt, lastIdleScan, IDLE_SCAN_INTERVAL, ALARM_RADIUS, REFUGE_RADIUS, advanceTicks: (count = 60) => { localTicks += count; return localTicks; }, progressAging, progressPregnancies, buildCells, foodJob, needJob, planJob, footprintClearingJob, tidyStockpileJob, constructionHaulingJob, colonistLedger, awardCredits, spendCredits, stepMerchantCaravan, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, allFactionPeople, stepFactionReproduction, attemptAdulthoodPairbond, conceptionChance, twinChance, postPartumCooldownSeconds, gestationSeconds, factionPopulation, immigrationWaveSize, immigrationChance, spawnImmigrants, stepImmigration, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }
+        _internal: { preemptAt, lastIdleScan, markBedsDirty, bedPriority, IDLE_SCAN_INTERVAL, ALARM_RADIUS, REFUGE_RADIUS, advanceTicks: (count = 60) => { localTicks += count; return localTicks; }, progressAging, progressPregnancies, buildCells, foodJob, needJob, planJob, footprintClearingJob, tidyStockpileJob, constructionHaulingJob, colonistLedger, awardCredits, spendCredits, stepMerchantCaravan, waterNear, ringGap, moodOf, physicalChange, handleMated, giveBirth, simulationUnits, allFactionPeople, stepFactionReproduction, attemptAdulthoodPairbond, conceptionChance, twinChance, postPartumCooldownSeconds, gestationSeconds, factionPopulation, immigrationWaveSize, immigrationChance, spawnImmigrants, stepImmigration, claimed, groundItemsNear, onBuildCell, scan, homeJob, levelArea, sameLevel, eligibleForIntimacy, privatePairRoom, rememberConversation, guardMateHandler }
     };
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;
@@ -5458,6 +5627,10 @@
         UF.Events.on("combat:hit", ev => { try { noteThreat(ev); } catch (e) { console.error(e); } });
         UF.Events.on("world:unitMoved", (u, from, to) => { try { onUnitMoved(u, from, to); } catch (e) { console.error(e); } });
         UF.Events.on("objects:changed", clearObjectCaches);
+        UF.Events.on("objects:changed", (area, x, y, fromId, toId) => { const O = Objects(); if (O && (isBedType(O.type(toId)) || isBedType(O.type(fromId)))) markBedsDirty(); });
+        UF.Events.on("projects:done", markBedsDirty);
+        UF.Events.on("colonists:immigrated", markBedsDirty);
+        UF.Events.on("world:unitAdded", markBedsDirty);
         UF.Events.on("world:created", state => {
             try { setupColony(state); } catch (e) { console.error("UF_Colonists: setup failed", e); }
         });

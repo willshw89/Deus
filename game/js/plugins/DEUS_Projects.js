@@ -224,6 +224,8 @@
         const hit = active().find(p => sameLevel(levelArea(p.origin), area) && inFootprint(p, x, y, 0));
         return hit ? hit.id : null;
     }
+    /** Finished footprint projects and their ground, for other planners to keep clear of: [{ id, kind, origin, size, cells }] (DEUS-TSK-FABLE-13). */
+    const structures = () => list(p => p.state === "done" && (p.size | 0) > 0).map(p => ({ id: p.id, kind: p.kind, origin: { x: p.origin.x, y: p.origin.y }, size: p.size | 0, cells: footprint(p) }));
 
     //-------------------------------------------------------------------------
     // Reading cells
@@ -494,6 +496,87 @@
         return null;
     }
     // What a project of this kind adds to each deficit once done (for duplicate prevention and the utility term).
+    // A registered stockpile cell for a loose stack (DEUS-TSK-FABLE-13): UF.Stockpiles' own destination when it is
+    // loaded (its priorities, filters and reservations), else the nearest registered cell of the colony whose `stores`
+    // take the item's kind and that holds nothing but the same kind under its stack limit (one stack a cell). Null
+    // when no stockpile has room. `exclude`: cell keys never offered (the project's own footprint).
+    function stockpileCellFor(c, item, exclude, inflight) {
+        const I = Items(), O = Objects(), St = window.UF && UF.Stockpiles;
+        if (!I || !O || !c || !item) return null;
+        const t = I.type(item.type);
+        if (!t) return null;
+        const area = levelArea(c);
+        if (St && typeof St.findDestination === "function") {
+            const d = St.findDestination(item, null, c.factionId || "player");
+            if (d && sameLevel(levelArea(d), area) && !(exclude && exclude.has(cellKey(d.x, d.y)))) return { x: d.x, y: d.y, containerId: d.containerId || null };
+        }
+        const tags = Array.isArray(t.tags) ? t.tags : [];
+        let best = null, bestD = Infinity;
+        for (const sp of c.stockpiles || []) {
+            if (!Array.isArray(sp.stores) || !sp.stores.length) continue;
+            if (!sp.stores.includes("all") && !sp.stores.some(s => s === item.type || tags.includes(s))) continue;
+            if (exclude && exclude.has(cellKey(sp.x, sp.y))) continue;
+            if (!hasTag(O.atIn(area, sp.x, sp.y), "stockpile")) continue;
+            const stacks = I.atIn(area, sp.x, sp.y);
+            if (stacks.some(s => s.type !== item.type)) continue;
+            // What the cell holds plus what is already on its way there (hauls posted this round or still alive).
+            const sent = inflight && inflight.get(cellKey(sp.x, sp.y));
+            if (sent && sent.type !== item.type) continue;
+            const held = stacks.reduce((n, s) => n + (s.count | 0), 0) + (sent ? sent.count | 0 : 0);
+            if (held > 0 && held + (item.count | 0) > Math.max(1, t.stack | 0)) continue;
+            const d = chebyshev(sp.x, sp.y, item.x | 0, item.y | 0);
+            if (d < bestD || (d === bestD && best && (sp.y < best.y || (sp.y === best.y && sp.x < best.x)))) { best = { x: sp.x, y: sp.y, containerId: null }; bestD = d; }
+        }
+        return best;
+    }
+    const isMaterialItem = (I, it) => { const t = I.type(it.type); return !!t && !t.food && Array.isArray(t.tags) && t.tags.includes("material"); };
+    // The cleared parcel is tidied before anything goes up on it (DEUS-TSK-FABLE-13): loose material the clearing
+    // left on the footprint (a felled tree's logs, quarried stone) is hauled to a registered stockpile with room, so
+    // the walls draw on the stockpile and no delivery lands on a square that must be cleared again. Each stack is
+    // offered once (p.tidied); with no stockpile room the material stays where it lies and the build uses it there.
+    // Returns the tidy hauls alive after posting; the site phase waits while any are.
+    const TIDY_TRIES = 3; // hauls offered for one stack before what is left of it stays on the parcel
+    function tidyParcel(p, summary) {
+        const I = Items(), J = Jobs(), c = colony(), cfg = config(), area = levelArea(p.origin);
+        if (!I || !J || !c) return 0;
+        // Hauls alive, and what each destination cell already has on its way (a carrier lifts the legal part of a
+        // stack, so a remainder may be offered again, up to TIDY_TRIES).
+        let alive = 0;
+        const inflight = new Map();
+        for (const id of Object.keys(p.hauls)) {
+            const h = p.hauls[id];
+            if (h.cell !== "tidy") continue;
+            alive++;
+            if (h.to) { const s = inflight.get(h.to) || { type: h.type, count: 0 }; s.count += h.count | 0; inflight.set(h.to, s); }
+        }
+        const cells = footprint(p), exclude = new Set(cells.map(cell => cellKey(cell.x, cell.y)));
+        p.tidied = p.tidied || {};
+        let posted = 0;
+        for (const cell of cells) {
+            for (const it of I.atIn(area, cell.x, cell.y)) {
+                if (alive + posted >= cfg.harvestPerMaterial * 2 || openCount(p) >= cfg.maxOpenJobs) break;
+                if (p.hauls[it.id] || (p.tidied[it.id] | 0) >= TIDY_TRIES || !isMaterialItem(I, it)) continue;
+                if (J.reservation && J.reservation.reservedBy(it.id)) continue;
+                const dest = stockpileCellFor(c, it, exclude, inflight);
+                if (!dest) continue;
+                const params = { itemId: it.id, count: it.count | 0, to: targetOf(p, dest.x, dest.y), material: it.type, tidy: true };
+                if (dest.containerId) params.toContainer = dest.containerId;
+                const job = postJob(p, { type: "haul", target: targetOf(p, cell.x, cell.y), params });
+                if (!job) continue;
+                const toKey = cellKey(dest.x, dest.y);
+                p.hauls[it.id] = { job: job.id, cell: "tidy", type: it.type, count: it.count | 0, to: toKey };
+                const s = inflight.get(toKey) || { type: it.type, count: 0 };
+                s.count += it.count | 0;
+                inflight.set(toKey, s);
+                p.tidied[it.id] = (p.tidied[it.id] | 0) + 1;
+                posted++;
+            }
+        }
+        summary.tidy = alive + posted;
+        if (posted > 0) { summary.posted += posted; log(p, `${posted} stack(s) cleared from the parcel sent to the stockpile`); wakeIdle(p, summary); }
+        return alive + posted;
+    }
+
     function capacityFor(bp, d, phases) {
         const cfg = config();
         if (bp.id === "communal_shelter") return { shelter: 1, bed: relativeCells(bp).beds.length };
@@ -827,6 +910,23 @@
     }
 
     // Objects whose harvest yields food (from the catalog), and the gather jobs a food cache posts on them.
+    // The settlement's chest with room for a food stack (DEUS-TSK-FABLE-14): the nearest to the hearth within
+    // scanRadius that UF.Containers will store it in, as { x, y, containerId }; null when none (or no containers plugin).
+    function foodChestFor(c, item) {
+        const C = window.UF && UF.Containers, cfg = config();
+        if (!C || typeof C.all !== "function" || typeof C.canStore !== "function" || !c || !c.site) return null;
+        const area = levelArea(c);
+        let best = null, bestD = Infinity;
+        for (const cont of C.all(area, area.z)) {
+            const d = chebyshev(cont.x, cont.y, c.site.x, c.site.y);
+            if (d > cfg.scanRadius || d >= bestD) continue;
+            const can = C.canStore(cont.id, item, item.count | 0);
+            if (!can || !can.ok) continue;
+            best = { x: cont.x, y: cont.y, containerId: cont.id };
+            bestD = d;
+        }
+        return best;
+    }
     function foodSources() {
         const cat = catalog(), I = Items();
         const out = [];
@@ -853,16 +953,25 @@
         const standing = sp => !!sp && !!O.atIn(area, sp.x, sp.y) && !refusedAt(p, cellKey(sp.x, sp.y));
         const larder = standing(p.larder) ? p.larder : (larderCells(c).find(sp => standing(sp) && hasTag(O.atIn(area, sp.x, sp.y), "stockpile")) || null);
         if (!larder && larderCell(c)) summary.refused = 1;
-        // Loose food (on the ground, not in a larder or container) is hauled into the larder.
+        // Loose food (on the ground, not in a larder or container) is hauled into the communal store: the settlement's
+        // chest when one has room for it (DEUS-TSK-FABLE-14: UF.Containers, so every colonist eats from it), else the
+        // larder cell.
         if (larder) {
             const larders = new Set(larderCells(c).map(sp => cellKey(sp.x, sp.y)));
+            // A stack somebody is walking to for a meal (an eat or a fetch on it) is theirs: hauling it to the larder
+            // under their feet fails their meal "the food moved" (DEUS-TSK-FABLE-14, seen in the survival soak).
+            const spokenFor = new Set(J.list(j => !finished(j) && (j.type === "eat" || j.type === "fetch") && j.params && j.params.itemId !== undefined).map(j => j.params.itemId));
             for (const f of I.find({ area: { x: area.x, y: area.y }, z: area.z, near: { x: larder.x, y: larder.y }, radius: cfg.materialRadius, tags: ["food"] })) {
                 if (openCount(p) >= cfg.maxOpenJobs) break;
-                if (larders.has(cellKey(f.x, f.y)) || f.item.container || p.hauls[f.item.id]) continue;
+                if (larders.has(cellKey(f.x, f.y)) || f.item.container || p.hauls[f.item.id] || spokenFor.has(f.item.id)) continue;
                 if (J.reservation && J.reservation.reservedBy(f.item.id)) continue;
-                const job = postJob(p, { type: "haul", target: targetOf(p, f.x, f.y), params: { itemId: f.item.id, count: f.item.count | 0, to: targetOf(p, larder.x, larder.y), material: "food" } });
+                const chest = foodChestFor(c, f.item);
+                const to = chest || larder;
+                const params = { itemId: f.item.id, count: f.item.count | 0, to: targetOf(p, to.x, to.y), material: "food" };
+                if (chest) params.toContainer = chest.containerId;
+                const job = postJob(p, { type: "haul", target: targetOf(p, f.x, f.y), params });
                 if (!job) continue;
-                p.hauls[f.item.id] = { job: job.id, cell: cellKey(larder.x, larder.y), type: f.item.type, count: f.item.count | 0 };
+                p.hauls[f.item.id] = { job: job.id, cell: cellKey(to.x, to.y), type: f.item.type, count: f.item.count | 0 };
                 posted++;
             }
         }
@@ -993,6 +1102,8 @@
             }
             if (starved) summary.starved++;
         }
+        // A cleared parcel is tidied into the stockpile before its walls go up (DEUS-TSK-FABLE-13).
+        if ((p.size | 0) > 0 && spec.name === "site" && summary.todo === 0 && summary.blocked === 0 && tidyParcel(p, summary) > 0) return summary;
         if (summary.posted > 0) wakeIdle(p, summary);
         // Nothing workable: cells remain, no job of the project is alive, nothing was posted and nobody is standing
         // in the way (blocked squares, materials nothing within reach yields, squares waiting to retry, deliveries
@@ -1195,6 +1306,7 @@
         advance: id => { const p = get(id); return p ? advance(p) : null; },
         tick: runCycle,
         reservedAt,
+        structures,
         footprint,
         sheltered: () => { const c = colony(); return c ? [...shelteredCells(c)].map(k => { const [x, y] = k.split(",").map(Number); return { x, y }; }) : []; },
         cells: (ref, phase) => {
@@ -1206,7 +1318,7 @@
         describe,
         setEnabled: on => { enabled = !!on; return enabled; },
         isEnabled: () => enabled,
-        _internal: { chooseSite, siteValid, reservedCellSet, cellStatus, canFullyClear, clearAction, relativeCells, harvestSources, foodSources, shelteredCells, beddingCells, larderCell, capacityFor, brain, coolKind, cellFault, staleReason, refusedAt, wakeIdle, isIdleJob, onMapUpdate, onLoaded, now }
+        _internal: { chooseSite, siteValid, stockpileCellFor, tidyParcel, reservedCellSet, cellStatus, canFullyClear, clearAction, relativeCells, harvestSources, foodSources, shelteredCells, beddingCells, larderCell, capacityFor, brain, coolKind, cellFault, staleReason, refusedAt, wakeIdle, isIdleJob, onMapUpdate, onLoaded, now }
     };
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;

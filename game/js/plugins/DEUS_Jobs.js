@@ -629,6 +629,13 @@
             if (job.params.toContainer && C) {
                 const stored = C.putItem(job.params.toContainer, job.params.itemId);
                 job.result = stored ? { itemId: job.params.itemId, containerId: job.params.toContainer } : null;
+            } else if (job.params.feed && job.params.unitId !== undefined && job.params.unitId !== null) {
+                // A delivery to a friend who cannot walk (DEUS-TSK-FABLE-14): put down at its feet and straight into its
+                // pack, so it eats where it lies and no tidy haul or hungry passer-by takes the food first.
+                const eater = World().unit(job.params.unitId);
+                const placed = I.putDown(job.params.itemId, lv(to), to.x | 0, to.y | 0);
+                const handed = !!placed && !!eater && !!eater.data && !eater.data.dead && eater.x === (to.x | 0) && eater.y === (to.y | 0) && !!I.pickUp(placed.id, eater.id);
+                job.result = placed ? { itemId: placed.id, unitId: handed ? eater.id : null } : null;
             } else {
                 const placed = I.putDown(job.params.itemId, lv(to), to.x | 0, to.y | 0);
                 job.result = placed ? { itemId: placed.id } : null;
@@ -1659,8 +1666,11 @@
             }
             return;
         }
-        // A unit must have its own exclusive square to act:
-        const sharingSquare = W.unitsInArea(unit.area.x, unit.area.y, zOf(unit)).some(o => o.id !== unit.id && o.x === unit.x && o.y === unit.y);
+        // A unit must have its own exclusive square to begin work at a stand cell; a job with no stand (eating from
+        // the pack, an equip) acts where the unit is, and a job already at work goes on however crowded its square
+        // gets (DEUS-TSK-FABLE-14: two founders on one square at the larder chest left the one eating from her pack
+        // replanning forever; a sleeper whose square four others stepped onto was held at "work" for thirty hours).
+        const sharingSquare = !!job.stand && job.state !== "work" && W.unitsInArea(unit.area.x, unit.area.y, zOf(unit)).some(o => o.id !== unit.id && o.x === unit.x && o.y === unit.y);
         if (sharingSquare) {
             const ev = unitEvent(unit);
             const otherEvs = window.$gameMap ? $gameMap.eventsXyNt(unit.x, unit.y).filter(e => e !== ev) : [];
