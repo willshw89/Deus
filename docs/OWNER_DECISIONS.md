@@ -95,8 +95,8 @@ Every decision item recorded in this log must provide:
   - Option D: Scale-only depth separation, no color darkening, until tile art is migrated to the master palette. Revisit shading after migration.
 - **Recommended Default:** Option D.
 - **What Happens If Unanswered:** WG.00.09 DEFINE stays BLOCKED.
-- **Status:** `DECIDED`
-- **Owner Ruling & Date:** 2026-09-25 (Decider: Owner): Option D. Scale-only depth separation, no colour darkening, until tile art is migrated to the master palette. Revisit shading after migration. Fold R1=D plus items R2–R11 into the depth attack plan.
+- **Status:** `SUPERSEDED by DEC-011`
+- **Owner Ruling & Date:** 2026-09-25 (Decider: Owner): Option D. Scale-only depth separation, no colour darkening, until tile art is migrated to the master palette. Revisit shading after migration. Fold R1=D plus items R2–R11 into the depth attack plan. Superseded by DEC-011 (2026-09-25 23:54 CT).
 
 ---
 
@@ -144,6 +144,17 @@ Every decision item recorded in this log must provide:
 - **Recommended Default:** Option 1 (Lateral connectivity is sufficient; natural overhangs allowed if grounded to wall/edge).
 - **What Happens If Unanswered:** Treated as Option 1 default.
 - **Status:** `OPEN`
+
+---
+
+### Decision `DEC-011`: Owner overrides DEC-006/R1 (Option D). Flat layer rendering
+- **Date Logged:** 2026-09-25
+- **Decider:** Owner (23:54 CT, relayed by PM 0017-Q)
+- **Status:** `DECIDED`
+- **Owner Ruling:** Owner overrides R1/Option D. Every Z layer renders 1:1. That means no blur, no scale or zoom, no parallax or projection offset, and no ColorMatrix, alpha or tint depth shading or any other filter. The first goal is correct layer display. Visual depth effects will be revisited later, and only with the Owner.
+- **Engine Fact:** Option D was never implemented in the engine. `main` still ships `DEUS_Depth` with Preset `deus` (`game/js/plugins.js`, lines ~270-278: `"Preset": "deus"`, `"EyeHeightFt": "140"`). That preset gives camera-model scale 0.959/0.921 plus ColorMatrix plus BlurFilter 0.6/1.2 px (`DEUS_Depth.js` L121-124, L135, L203). R1 exists only in the Lane E plan doc and in WORK_QUEUE WB-007.
+- **Lane E Consequence:** WB-007's plan mandates "scale-only recession (DEC-006 / R1 = Option D)". Pause Lane E until the PM re-scopes it to DEC-011. Do not merge Lane E as written.
+
 
 
 
