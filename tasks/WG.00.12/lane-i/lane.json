@@ -1,0 +1,29 @@
+{
+  "lane": "lane-i",
+  "taskId": "WG.00.12",
+  "branch": "task/lane-i",
+  "writer": "claude",
+  "reviewer": "grok",
+  "allowedPaths": [
+    "tools/governance/merge_gate.js",
+    "tools/governance/test_merge_gate.js",
+    "tools/governance/MERGE_GATE.md",
+    "tasks/WG.00.12/lane-i/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "node",
+      "args": [
+        "tools/governance/test_merge_gate.js"
+      ],
+      "timeoutSec": 900
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/governance/test_check_claims.js"
+      ],
+      "timeoutSec": 600
+    }
+  ]
+}
