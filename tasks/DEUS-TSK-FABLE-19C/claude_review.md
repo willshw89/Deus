@@ -6,7 +6,8 @@
 - **Branch / worktree:** `task/lane-e` (`C:\Users\snewt\.deus_worktrees\lane-e`)
 - **Verdict:** **CHANGES REQUESTED** (1 BLOCKER, 8 MAJOR, 9 MINOR)
 - **Re-review of `37fc1473` (2026-09-25, Section 4):** **CHANGES REQUESTED** (0 BLOCKER, 1 MAJOR, 10 MINOR). B1 is resolved.
-- **Re-review of `87c1e5b8` (2026-09-25, Section 5 at the end of this file):** **CHANGES REQUESTED** (0 BLOCKER, 0 MAJOR, 4 MINOR). R1 is closed by owner ruling DEC-006.
+- **Re-review of `87c1e5b8` (2026-09-25, Section 5):** **CHANGES REQUESTED** (0 BLOCKER, 0 MAJOR, 4 MINOR). R1 is closed by owner ruling DEC-006.
+- **Diff review of `5964f772` (2026-09-25, Section 6 at the end of this file):** **CHANGES REQUESTED** (0 BLOCKER, 0 MAJOR, 2 MINOR). N2 and N4 are resolved, N3 is resolved as asked, and N1 is partly resolved.
 
 The plan's depth math, its tables, and its rejection of the shape grid, the blur, and the colour matrix hold up against the code. It is not accepted because of one gap. The plan assumes the live tilemap is see-through exactly where the ray passes, and the live tilemap does not work that way. The live tilemap picks each cell's tile from the derived shape. On generated terrain the two disagree in both directions, and on the Ground and `-1` views they disagree on every exposed column. None of the plan's checks can see this. Most of the other findings are checks that can't fail on the mutant they are mapped to, or palette and performance rules that don't work on the real registry.
 
@@ -594,3 +595,176 @@ The probe does not load the plugin and does not run a wrapper or a harness. It m
 - **Next review:** I expect to pass the next revision on a diff review. I won't re-probe unless the cutout ordering or the allocation check changes shape.
 
 This re-review claims no check result, mutant kill, screenshot or frame time.
+
+---
+
+# Section 6: Diff Review of `5964f772`
+
+- **Reviewer:** Claude CLI session (Lane E, `REVIEW_BRIEF.md`, Directive 001-J)
+- **Date:** 2026-09-25
+- **Document under review:** `docs/systems/UF_Depth_Attack_Plan.md` at `5964f772` (Grok, "Address Claude review findings N1-N4"), diffed against `710fa095`
+- **Merge in between:** `6633993d` merged `main` into lane-e. `git diff --stat 710fa095 6633993d` over the plan and `tasks/DEUS-TSK-FABLE-19C/` is empty, so every line of the plan diff is Grok's.
+- **Verdict:** **CHANGES REQUESTED** (0 BLOCKER, 0 MAJOR, 2 MINOR)
+
+N2 and N4 are resolved. N3 is resolved as asked: the tie-break is pinned, and `entity_clip` now expects the frames the rule gives. Grok's tie example is also correct, and it fixes my own Section 5 example, which could not tie (6.1). N1 is partly resolved. The recording layers, the scope sentence and the nw changes are what I asked for. The allocation check changed shape, so I probed it, as Section 5.6 said I would. A correct build can still fail it: through stock `updateTransform`, and through the window length I proposed myself (N5). I also read the rewritten §7 against the real sprite sidecars and found a crop gap that predates this revision (N6). Both are text edits, and neither needs the owner.
+
+## 6.1 Item-by-item
+
+| Item | Verdict | Basis |
+|---|---|---|
+| **N1** `C-LIVE-ALLOC` | Partly resolved; continues as N5 | **Done as asked:** the stub's live tilemap has two recording layers. `addRect` writes into a typed array allocated at construction, overflow exits 2, and `clear` resets a count (§8.1, §8.2). Stock `addRect` is declared outside the depth budget (§3.5, §6.4, §8.6 q3). The measurement follows `no_allocation_queries`: three windows after `global.gc()`, a `gc` observer, zero collections, and the least window judged (`tools/test_strata_foundation.js:768-787`, citation checked). The nw pan benchmark reports GCs during live rebuilds and does not fail on them, and it judges a flush net of an empty pair (§8.5). A stub that installs stock layers fails, which is right: 1,298 B per frame at 240 frames. **Still open (N5):** the frame driver isn't named, and stock `updateTransform` allocates 31 B per frame. The window-length floor comes from a no-loop empty window, and at 61,620 frames a loop that allocates nothing can exceed it. The single-pair flush rule in §8.5 is below the jitter I measured. |
+| **N2** dig repaint | Resolved | The `cellChanged` handler only marks the block dirty (§6.3 table, §3.5). The depth update sets `_needsRepaint` after a dirty in-window rebuild or a `V` or `H` change (§6.2). The ordering paragraph matches the code: `rmmz_scenes.js:819-824`; `rmmz_core.js:808-815` (`_onTick`: tick handler, then render); `:2376-2386` (`updateTransform` consumes and clears the flag); `:2360-2362` (`refresh`); `DEUS_World.js:700` (`patchTile` → `refresh`); `DEUS_Colonists.js:5748-5756`. I walked both builds through that order. **Correct build:** frame N rebuilds from the old `dHit`, because the painter calls `refresh`. Frame N+1's depth update rebuilds the summary and sets the flag, so that frame's render uses the new `dHit`. **`repaint_left_to_handler`:** the flag is consumed on frame N. On N+1 nothing sets it, so the wrapper doesn't run and its last decision is stale. `C-DIG-REPAINT` covers both directions (Run A skips the spot, Run B draws the live tile). It is in the stub row of §8.1 and has a §8.3 row and a mutant. See note 1. |
+| **N3** crop rule | Resolved; see N6 | The tie-break is pinned (§7: height, then width, then the foot row as bottom edge, then the left edge). `entity_clip` now has four frames derived from the rule, and I recomputed each. (1) A wall with the north cell mismatched: `(0, 48, 48, 48)`. (2) 144×48 with the east column mismatched: `{W, foot}`, `(0, 0, 96, 48)`. (3) Both sides mismatched: `(48, 0, 48, 48)`. (4) 96×96 with the foot at SW, NW and SE matching and NE not: `{SW, NW}` and `{SW, SE}` are both 4,608 px², the full frame is excluded, and the taller one wins, `(0, 0, 48, 96)`. A foot-only crop fails (2) and (4). A width-first tie-break fails (4). A separable crop ("keep north if it matches, keep the sides if they match") keeps NE in (4) and fails. **Correction to my Section 5 text:** my tie example (NE and NW both mismatched) could not tie, because `{foot, north}` would contain a mismatched cell. Grok's example (4) is the one that ties. |
+| **N4** citations | Resolved | DEC-006 in `docs/OWNER_DECISIONS.md` is cited in the header, in the intro (with `eefd1f2c`), in the §5.2 heading and body, and in the §9 row (line 812). Since `6633993d` the record is inside this branch: `git merge-base --is-ancestor eefd1f2c HEAD` succeeds, and `docs/OWNER_DECISIONS.md:88` is DEC-006. `uf.hex` now reads "256 lines and 250 distinct colors (ADR-002 Rev 2 §5)". `wc -l` gives 256, the distinct count is 250, and ADR-002 lines 36 and 146 agree. The only "384" left in the plan is the 16,384-byte block-word row. |
+
+## 6.2 New findings
+
+### MINOR
+
+**CR-19C-N5: `C-LIVE-ALLOC` can still fail a build that allocates nothing, and the §8.5 flush rule is below the measurement jitter.**
+
+The recording layers take stock `addRect` off the path. Three other things can still fail a correct build. I probed each with `node --expose-gc` (6.5.1).
+
+- **Stock `updateTransform` allocates every frame.**
+  - It calls `_sortChildren` (`rmmz_core.js:2388`, `:2650-2652`), which runs `this.children.sort(this._compareChildOrder.bind(this))`: a new bound function and a sort every frame.
+  - The plan never says what drives the frames. §3.5 says stock `update` and `updateTransform` produce the 30-frame rebuild, and `C-DIG-REPAINT` calls `updateTransform` in the same stub.
+  - Measured, with recording layers as the only children: stock `update` plus `updateTransform` grow the heap by 31.0 B per frame over 61,620 frames. With `_sortChildren` made a no-op, the same stock code grows 616 B in total.
+  - "The harness loop that drives the frames allocates nothing" forbids this in effect. It doesn't say that stock `updateTransform` is what allocates.
+- **The window-length floor rests on a no-loop empty window.**
+  - `framesPerWindow` is `max(61,600, 100 × emptyLeast)`. A window with no loop is not a floor for a window that runs one.
+  - The same no-loop pair read 18,120 B at the start of one run and 616 B at its end.
+  - A frame loop that allocates nothing, with the frame body written inline, grew 61,424 to 176,624 B per window. The growth did not scale with length: it was the same at 61,620, 616,200 and 1,812,000 frames.
+  - At 61,620 frames it was over the 61,620 B budget in 10 of 11 runs. The same work called through a per-frame function grew only 616 to 6,656 B, so this fixed cost depends on how the harness is written.
+  - When the empty windows read 616 B, the formula picks 61,620 frames, and a correct build can fail.
+  - §8.2 says "eight rebuilds grow the heap by the empty-window figure … so a correct build stays under the long-window budget". That stretches my 240-frame probe to a window 257 times longer, and the probe doesn't support it.
+  - The 100× rule is the one I proposed in Section 5. Like part of N1, this comes from my own fix.
+- **The §8.5 flush rows compare one sample pair to one empty pair at a 1-byte threshold.**
+  - Identical no-loop pairs in one run differed by 192 B (18,312 against 18,120, and 808 against 616). A flush that allocates nothing can read more than 1 B over the empty pair.
+  - No stub check forces a plane repaint. `C-LIVE-ALLOC` holds the camera still, and a still frame uploads nothing (§6.4). §6.4's "zero allocation inside a plane repaint" is therefore proven only by these nw rows, and no mutant targets it.
+- **Fix:**
+  - Name the stub's frame driver. The stock spot chain stays stock: `_addAllSpots` through `_readMapData` (`rmmz_core.js:2422-2648`). The §8.1 and §8.2 list leaves out `_addNormalTile` (`:2483`) and `_addTableEdge` (`:2579`), and gives no line for `_addSpotTile` (`:2465`).
+  - Inside a judged window, stock `update` and `updateTransform` don't run. Either make the stub's `_sortChildren` a no-op, or have the driver repeat `updateTransform`'s repaint test (`_needsRepaint`, `animationFrame`, start tile) and call stock `_addAllSpots`. State that the stock sort is outside the depth budget, the same way `addRect` is.
+  - Raise the floor well above the loop's own fixed cost. At least 1,000,000 frames per window gives a 1 MB budget, 5.6 times the largest growth I measured with no allocation. Keep the 100× empty-window rule on top of that floor, and drop the sentence that stretches the 240-frame figure.
+  - Prove the plane repaint in the stub. Add a stub phase that forces one plane to repaint on many frames, using the same forcing as the §8.5 "one dirty plane" row. Judge it the same way, and add a mutant that allocates inside the repaint.
+  - In nw, fail only on a GC inside a flush. Report net growth as the least of three flush windows against the least of three empty windows, and don't fail it at 1 B.
+
+**CR-19C-N6: the §7 crop does not register frame cells to map columns, and `entity_clip` can't see a crop that moves the kept texels.**
+
+§7 defines the crop on "48 px cells" of the authored frame, with `setFrame` coordinates in that frame. Two things are missing.
+
+- **Registration.**
+  - The depth plugin puts a sprite's anchor on the bottom centre of the foot cell (`DEUS_Depth.js:609`). The anchor comes from the sidecar and defaults to (0.5, 1) (`:374`, `:386`).
+  - In `game/img/characters`, 36 sheets have 96 px frames with anchor x 48, and 4 have 192 px frames with anchor x 96 (6.5.2). Each of those frames reaches 24 px into the column on either side of the foot. None of its 48 px cells lines up with a map cell, so none of them is the foot cell.
+  - Vertically, 33 of the 96 px sheets anchor at y 95, so the frame reaches 1 px into the row below the foot. `$U7_Adam` anchors at 140 of 144.
+  - `entity_clip` (4) and the §7 tie example use a 96×96 frame whose south-west cell is the foot cell. No sheet in the folder is anchored that way. The check tests a geometry the game doesn't use, and the rule gives no answer for the 40 sheets it does use.
+  - The 144 px sheets (anchor x 72) do line up horizontally, which is why cases (2) and (3) work.
+- **The anchor after a crop.**
+  - PIXI offsets a sprite by `-anchor._x * orig.width` (`pixi.js:30853`), and RMMZ's `_refresh` sets the texture frame to the crop (`rmmz_core.js:2132-2158`). The anchor is therefore a fraction of the *cropped* frame.
+  - In case (2), `setFrame(0, 0, 96, 48)` with the anchor left at 0.5 puts authored x 48, the foot cell's west edge, on the foot centre. The kept texels move 24 px east, into the east column the crop was meant to drop. The correct anchor is 72 / 96 = 0.75.
+  - If case (4) is anchored at its south-west cell (0.25), a kept fraction moves its column 12 px east. The correct anchor there is 0.5.
+  - `entity_clip` reads only the `setFrame` rectangle, so a build that leaves the anchor alone passes all four cases. No mutant targets it.
+- **Fix:**
+  - Define the crop in map cells. Place the uncropped frame by its sidecar anchor on the foot point. The candidates are the map cells the frame overlaps, and the §7 rule picks the rectangle over those cells. `setFrame` is that rectangle intersected with the frame, in frame pixels. Area and the tie-break use the intersected rectangle.
+  - After the crop, re-express the anchor so the authored anchor pixel stays on the foot point: `anchor.x = (ax·w − cropX) / cropW`, and the same for y.
+  - `entity_clip` also asserts the drawn rectangle in plane pixels. Add a centred 96 px case built from a real sidecar (for example `!$UF_Birch.json`, anchor `[48, 95]`), and state the anchor used in case (4).
+  - Add a mutant that keeps the anchor fraction through the crop. It must fail case (2).
+- **History:** this gap predates `5964f772`. The R11 text already assumed aligned cells. I missed it in Sections 4 and 5, and my own N3 example used the same 96×96 shape.
+
+### Notes (no change required)
+
+1. **`C-DIG-REPAINT` timing.** `repaint_left_to_handler` survives if frame N+1 is an animation tick or a start-tile change, because either one rebuilds spots anyway. A one-line precondition would stop a harness author from picking such a frame by accident: camera still, and `animationFrame` unchanged on N+1, else exit 2. The §8 rule that a check counts only after it has failed on its mutant would catch this anyway.
+2. **Two tie-break steps never decide anything.**
+   - Step 2 (greater width): equal area plus equal height means equal width.
+   - Step 4's fallback: every candidate's left edge is at or west of the foot column, so equal distances mean the same left edge.
+   - Both are harmless.
+
+## 6.3 Coordinator items
+
+1. **ADR-002 Rev 2 and the void texel.** ADR-002 Rev 2 is still PROPOSED, and it is now in this branch (`docs/adr/ADR-002-Palette-Canonicalization.md:3`). The void-texel conflict from Section 5.3 item 1 stands: `#0C0D12` is a master colour, and Rev 2 makes `uf.hex` the runtime palette.
+2. **DEC-006 Option A figure.** It still reads "~67% darker at depth 3". The measured figure is about 53% (Section 4.4.2). The ruling doesn't change.
+3. **Rebase:** done. `6633993d` merged `main`, and the plan's citations now resolve inside the branch.
+4. **m7** is still open.
+
+## 6.4 Containment
+
+- `git show --name-status 5964f772` lists the plan and `tasks/DEUS-TSK-FABLE-19C/state.md` only.
+- `git diff --stat 6633993d 5964f772 -- game tools run_tests.bat` is empty. `710fa095..5964f772` does show 476 files under `game/` and `tools/`, and all of them come from the `main` merge.
+- `git diff --stat 710fa095 6633993d -- docs/systems/UF_Depth_Attack_Plan.md tasks/DEUS-TSK-FABLE-19C/` is empty.
+- The `state.md` update matches the plan diff. It claims no harness run, mutant kill or screenshot.
+- This review edits `claude_review.md` and `state.md` only. The probe scripts ran from the system temp folder and were deleted.
+
+## 6.5 Evidence (commands run in this session)
+
+### 6.5.1 Frame-driver heap probe (N5)
+
+- **Where it ran:** four scripts in the system temp folder, deleted after the runs. All used `node --expose-gc` on Node v24.19.0.
+- **What they contain:**
+  - stock `Tilemap.prototype.update` (`rmmz_core.js:2327-2335`), `updateTransform` (`:2367-2391`), and `_sortChildren` with `_compareChildOrder` (`:2650-2662`), read from the file by line range and evaluated;
+  - `PIXI.Container.prototype.updateTransform` as a no-op;
+  - two recording layers (an `Int32Array` allocated at construction, with `clear` resetting a count) as the only children;
+  - `_addAllSpots` replaced by 285 `addRect` calls into a recording layer.
+- **What they do:** a warm-up of 200,000 to 800,000 frames, then three windows per variant, measured the way `no_allocation_queries` measures (`global.gc()`, `used_heap_size` before and after, a `gc` observer).
+
+Output, trimmed. Two runs are shown, and the repeat runs are summarised below the blocks.
+
+```text
+empty window                                         growth 18312 / 18120 / 18120 B, least 18120 B ; GCs in windows 0
+recording layers, stock update + updateTransform     growth 1941832 / 1922992 / 1909680 B, least 1909680 B 30.991 B per frame over 61620 frames; GCs in windows 0
+stock update + updateTransform, _sortChildren no-op  growth 3688 / 2840 / 616 B, least 616 B 0.010 B per frame over 61620 frames; GCs in windows 0
+recording layers, driver without _sortChildren       growth 108544 / 150224 / 115872 B, least 108544 B 1.762 B per frame over 61620 frames; GCs in windows 0
+```
+
+```text
+empty window (no loop) N=0         growth 18312 / 18120 / 18120 B, least 18120; GCs 0
+no-sort driver N=61620             growth 136936 / 115080 / 127160 B, least 115080 = 1.8676 B/frame; GCs 0
+no-sort driver N=616200            growth 128240 / 150896 / 143200 B, least 128240 = 0.2081 B/frame; GCs 0
+no-sort driver N=1812000           growth 107488 / 176624 / 135744 B, least 107488 = 0.0593 B/frame; GCs 0
+per-frame function driver N=61620  growth 6656 / 2912 / 4504 B, least 2912 = 0.0473 B/frame; GCs 0
+per-frame function driver N=1812000 growth 8000 / 616 / 616 B, least 616 = 0.0003 B/frame; GCs 0
+empty window (no loop) N=0         growth 808 / 616 / 616 B, least 616; GCs 0
+```
+
+- **Stock path:** 30.99 to 31.07 B per frame across four runs.
+- **Inline no-sort driver at 61,620 frames:** across eleven runs, the least of three was 61,424, 66,960, 66,992, 67,920, 79,448, 91,032, 108,544, 111,048, 113,304, 115,080 and 122,152 B. One of those is under 61,620. The largest single window at any length was 176,624 B.
+- **Scope:** the probe doesn't load the plugin, a wrapper or a harness. It measures the stock per-frame path and the loop's own fixed cost. It doesn't measure nw.js, so the 192 B jitter is a Node figure.
+
+### 6.5.2 Sheet anchors (N6)
+
+- **Sidecar survey:** `node` over `game/img/characters/*.json`, reading `frameWidth`, `frameHeight` and `anchor`:
+  - 96×96: 33 at `[48,95]` (for example `!$UF_Birch`, `!$UF_Fruit_Tree`), and 3 at `[48,96]` (`!$CaveLadder`, `!$IronOreVein`, `$U7_CaveCrawler`)
+  - 144×96 at `[72,96]` (`!$CaveMouth`), and 144×144 at `[72,140]` (`$U7_Adam`)
+  - 192×192 at `[96,192]` (`$U7_BogHorror`, `$U7_CaveLurker`, `$U7_Orc`), and 192×240 at `[96,240]` (`$U7_Automaton`)
+  - 635 sidecars with 48 px frames
+- **Current plugin:**
+  - `DEUS_Depth.js:374` and `:386`: the sidecar anchor divided by the frame size
+  - `:609`: the foot point is the cell centre in x and the cell bottom in y
+  - `:617-618`: `setFrame`, then `anchor.set`
+- **Anchor maths:** `rmmz_core.js:2132-2158` (`Sprite._refresh` sets `texture.frame` to the crop), and `game/js/libs/pixi.js:30853` (`-anchor._x * orig.width`).
+
+### 6.5.3 Code read (N2, N4)
+
+- **Update order and repaint:** `rmmz_scenes.js:819-846`; `rmmz_core.js:808-815`, `:2327-2335`, `:2360-2391`, `:2422-2662` and `:2917-2928`; `DEUS_World.js:691-700`; `DEUS_Colonists.js:5745-5756`.
+- **Measurement method:** `tools/test_strata_foundation.js:755-787`.
+- **Citations:** `docs/OWNER_DECISIONS.md:88-100` (DEC-006); `docs/adr/ADR-002-Palette-Canonicalization.md:3`, `:36` and `:146`.
+- **`uf.hex`:** `wc -l art/palette/uf.hex` gives 256, and a case-folded `sort -u` gives 250.
+
+### 6.5.4 Cross-check of the plan text (`node`, `grep`)
+
+- **Counts:** §8.2 defines 50 check ids (49 before). §8.3 has 35 failure scenarios (33 before), and §8.4 has 28 mutants (27 before).
+- **Names:** §8.3 and §8.4 use 33 check names, and none is undefined. The stub row of §8.1 lists `C-DIG-REPAINT` and `C-LIVE-ALLOC`.
+- **`_needsRepaint`:** it appears at lines 192, 405, 423, 647, 698 and 738. None of them has the handler set it.
+
+**Not checked:** no harness, compositor, screenshot or frame time exists yet. Nothing in the plan was run.
+
+## 6.6 Overall verdict
+
+**CHANGES REQUESTED** (0 BLOCKER, 0 MAJOR, 2 MINOR).
+
+- **Resolved:** N2 and N4 are resolved. N3 is resolved as asked, and so are the parts of N1 I asked for.
+- **Open:**
+  - N5 finishes N1. The stub's frame driver, the window floor and the flush comparison can each fail a build that allocates nothing.
+  - N6 makes the crop apply to the sheets the game actually has, and it makes `entity_clip` check where the kept texels land.
+- **Nature of the fixes:** text edits inside the plan, and none needs the owner. N5's window rule and N6's example shape both trace back to text I proposed in Section 5.
+- **Next review:** a diff review. I'll re-probe only if the frame driver or the window rule changes shape again.
+
+This review claims no check result, mutant kill, screenshot or frame time.
