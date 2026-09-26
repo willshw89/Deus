@@ -25,7 +25,7 @@
 
 - The ledger is the ADR-003 Q-MASS ledger: integer mass per material **family**, moved between **forms** only by `ledger.transform(fromForm, toForm, family, mu, cause)`; sources and sinks only by `ledger.source/sink(q, n, cause)` with a named cause (ADR-003 L943-950, §7.9). WG.65.15 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:254`) builds the verifier.
 - **Mass unit (mu).** ADR-003 leaves the unit to SIM.40.01 with WG.65.15. This design **assumes 1 mu = 1/16 lb** (SRD weights are in pounds). If they choose another unit, every mu figure below scales by one constant. JS integers are exact to 2^53 ≈ 9.0 × 10^15 mu; one 256×256 area fully solid at 32 layers is 65,536 × 160 slices × ≈132,000 mu (granite at 165 lb/ft³ × 50 ft³ × 16) ≈ 1.4 × 10^12 mu, so about 6,400 such areas fit before exactness is at risk.
-- **Rounding.** Every split of an integer mass into several outputs computes all but one output with `floor` and gives the last output the remainder by subtraction, so the parts always sum exactly to the input. Sub-slice leftovers are held in a per-cell residue record (section "Sparse storage and cost"), never dropped.
+- **Rounding.** Every split of an integer mass into several outputs computes all but one output with `floor` and gives the last output the remainder by subtraction, so the parts always sum exactly to the input. Sub-slice leftovers are held in a residue record, a member's shed pool or a footprint's litter schedule (section "Sparse storage and cost"), never dropped.
 - **Families used here:** STONE (per lithology), EARTH (clay, silt, soil mineral fraction, mudbrick, ceramic), ORGANIC (wood, plant fibre, textile, leather, paper, flesh, food, humus, and the ash and charcoal they leave: a family keeps its mass through every form it takes), BONE, FE, CU (copper and its alloys, split by element per WG.65.15: Cu, Sn, Zn), PB, AG, AU, PT, SPECIAL (mithral, adamantine), GLASS, WATER. WG.65.15 names "Fe, Cu, Ag, Au, Pt" (`docs/worldgen/DEUS_WORLDGEN_WBS.md:254`); the rest are this design's proposal.
 - **Forms used here:** NATURAL (in-place natural strata), BUILT (constructed strata or objects), RUBBLE (loose broken material in strata), SCRAP (metal fragments as items), FINES (weathering dust and mortar crumbs, a sediment form), SEDIMENT, SOIL-MIN (soil mineral fraction), SOIL-ORG (humus, nutrients), SOIL-CARBON (charcoal fragments in soil), ITEM, ITEM-BURIED (ADR-003's `buried: true`, L1678), REMAINS (corpses and bones), ASH, CHARCOAL, OXIDE (rust, patina, tarnish: trace mineral, never ore), ROCK-SED (lithified; Owner-gated, OQ-R-03), BIOMASS (living plants, owned by SIM.50.04), BODY (living creatures, owned by SIM.40.10 / Lane W).
 - **Explicit sources and sinks used here:** AIR (outgassing of rot and combustion as a sink; photosynthetic uptake by plants as SIM.50.04's source), CONJURED (DEC-018's PM default, `docs/OWNER_DECISIONS.md:262`), and, in test fixtures only, FIXTURE-FEED (a scripted sediment or water feeder standing in for systems not built yet).
@@ -69,7 +69,7 @@ Each built element (a built stratum marked `M_BUILT`, `DEUS_Levels.js:995`, or a
 
 with two additions this design makes:
 1. **Rates are authored as lives, not per-day numbers.** For decay class `dc` and exposure `ex`, the data holds `lifeYears[dc][ex]`, the simulated years a full-HP element takes to reach 0 HP. At load, `rateMilli = ceil(1000 × maxHP / (lifeYears × DPY))`, so the same data works under both D-1 options. A life of "∞" means no decay and no schedule entry.
-2. **Modifiers multiply the life, never the HP.** `life = lifeYears[dc][ex] / (M_ft × M_root × M_fire)`, each modifier ≥ 1, quantized to 1/8 steps so that small climate changes do not reschedule anything.
+2. **Modifiers multiply the life, never the HP.** `life = lifeYears[dc][ex] / (M_ft × M_root × M_fire)`, each modifier ≥ 1 and rounded up to the next 1/8, so that small climate changes do not reschedule anything.
 
 ### R-01.3 Decay classes (dc)
 
@@ -105,7 +105,7 @@ ADR-003 names three exposures: open to the sky, wet, buried (L1654). This design
 |---|---|---|
 | SEALED | roofed **and** maintained, or enclosed in dry rock underground with no seep | (none: lowest) |
 | SHELTERED | roofed (a solid stratum above within the structure) but unmaintained | sky, reduced |
-| SKY | no solid stratum above up to `zMax` (ADR-003's cached per-column "open to the sky" aggregate) | sky |
+| SKY | no solid stratum above up to `zMax` (ADR-003's cached per-column "open to the sky" aggregate). For a wall this is only its **top band**; the bands below it count as SHELTERED while a built stratum stands above them | sky |
 | WET | the element's cell or a face neighbour holds fluid for ≥ 1 game day (D-4 water authority), or is saturated below the water table | wet |
 | BURIED-AER | covered by ≥ 1 slice (2 ft; stale: 1 ft) of soil, sediment or rubble, above the water table | buried |
 | BURIED-ANOX | buried below the water table or under ≥ 1 full layer (10 ft) of fill | buried |
@@ -138,7 +138,7 @@ These are **design defaults** (data, tunable). Source for all rows: real-world o
 
 Item classes (TEXTILE, FLESH, BONE, metals) have their own tables in "Metals and items".
 
-**Worked example (stone house, timber roof, temperate, FT = 0.25, abandoned at year 0).** The TIMBER roof is SKY: life 60 sy, so it fails at 60 sy. The ASHLAR walls are SHELTERED while roofed: after 60 sy they have lost 60 / 20,000 = 0.3 % of HP. At 60 sy the roof's failure makes the wall tops SKY: ASHLAR SKY with `M_ft = 1 + 2 × 0.25 × 0.1 = 1.05`, quantized to 1.125, life 3,000 / 1.125 ≈ 2,667 sy, so the upper courses fail near year 2,720. The fallen courses bury the lower courses (BURIED-AER, ∞), which then stop decaying: the foundation survives (TR-1 in "Ruins and re-founding").
+**Worked example (stone house, timber roof, temperate, FT = 0.25, abandoned at year 0).** The TIMBER roof is SKY: life 60 sy, so it fails at 60 sy. The ASHLAR walls are SHELTERED while roofed: after 60 sy they have lost 60 / 20,000 = 0.3 % of HP. At 60 sy the roof's failure makes the **top band** of each wall SKY (only the top is open to the sky): ASHLAR SKY with `M_ft = 1 + 2 × 0.25 × 0.1 = 1.05`, rounded up to 1.125, life 3,000 / 1.125 ≈ 2,667 sy, so the top band fails near year 2,720. The band below has been weathering under cover (SHELTERED, life 20,000 / 1.125 ≈ 17,778 sy) and now becomes the top; it fails sooner, near year 4,980, and the next ones near 6,900 and 8,530 (two-layer walls: four upper bands of 2 slices each). The rubble of each fallen band banks up at the wall foot and buries the WALL-BASE (BURIED-AER, ∞), which then stops decaying: the foundation survives (TR-1 in "Ruins and re-founding").
 
 ### R-01.7 Maintenance and abandonment
 
@@ -181,7 +181,7 @@ ADR-003 schedules per element (L1659-1661). A house of 10×10 squares with two-l
 
 This design groups elements into **decay members**: a run of built strata of one structure with the same `dc`, the same `ex` and the same role (ROOF, WALL-UPPER, WALL-BASE, FLOOR, FOUNDATION, PROP, FITTING). A member holds at most 64 strata (a cap that bounds the support work one member event can cause). One heap entry per member, keyed `(nextDay, memberId)`. Each element's HP is still the closed-form ADR-003 value; the member just shares `d0`, `HP(d0)` and the rate. A member is split when its elements' exposure diverges (for example, rubble buries the lower slices of a wall): the split is local to that member.
 
-Roles are assigned when the structure is built (Lane Q's build path writes them into the member index, not into the strata). **WALL-BASE** is the lowest two slices (4 ft; stale: 2 ft) of every wall; **FOUNDATION** is any built stratum at or below the ground surface of its cell.
+Roles are assigned when the structure is built (Lane Q's build path writes them into the member index, not into the strata). **WALL-BASE** is the lowest two slices (4 ft; stale: 2 ft) of every wall; **FOUNDATION** is any built stratum at or below the ground surface of its cell. **WALL-UPPER** members are horizontal **bands** at most 2 slices high, so a wall loses height from the top, one band at a time (R-01.4, R-01.6).
 
 ### R-02.3 The stages
 
@@ -190,15 +190,15 @@ Stages are derived (ADR-003 L1666) per structure from member states, then per si
 | Stage | Entered when (structure level) | In the strata / object model | Ledger entries at entry | Catalogue slot (names only, DEC-011) |
 |---|---|---|---|---|
 | S0 INTACT | maintained, or every member `h > 0.85` | built strata at full or repaired HP | none | the built tile or object as it is |
-| S1 WEATHERED | any member `h ≤ 0.85`, no member failed | built strata, HP byte lowered at Lane Q's capacity thresholds (see "Decay-driven collapse") | per HP step of a masonry or mudbrick member: `T(BUILT→FINES, family, f_shed × mass_member / steps, "decay.shed")`, fines deposited on the member's foot cell | `decay.<family>.weathered` |
+| S1 WEATHERED | any member `h ≤ 0.85`, no member failed | built strata, HP byte lowered at Lane Q's capacity thresholds (see "Decay-driven collapse") | per HP step of a masonry or mudbrick member: `T(BUILT→FINES, family, f_shed × mass_member / steps, "decay.shed")`, added to the member's shed pool (below) | `decay.<family>.weathered` |
 | S2 OVERGROWN | S1 or later, and vegetation (SIM.50.04) holds ≥ 1 plant object on the footprint or its 1-cell halo | plant objects on built cells (allowed by the reclamation rule in "Nature reclaiming") | plant growth is SIM.50.04's AIR source; none from decay | `decay.<family>.overgrown` |
 | S3 COLLAPSED RUIN | ≥ 50 % of ROOF mass has failed and at least one WALL-UPPER member still stands | roof strata have broken into RUBBLE (via Lane Q) on the floor slices below; walls partly standing | Lane Q's `T(BUILT→RUBBLE, family, m, "collapse.decay")`; FITTING members release `T(BUILT→SCRAP, FE, m, "decay.release")` | `decay.<family>.collapsed` |
 | S4 RUBBLE / SCRAP | every WALL-UPPER member has failed; WALL-BASE and FOUNDATION remain | a rubble spread within the footprint plus a 1-cell halo, over standing wall bases | Lane Q's `T(BUILT→RUBBLE)` for each wall member; organic rubble starts to rot (below) | `rubble.<family>`, `scrap.<metal>` |
-| S5 BURIED MOUND | ≥ 50 % of the footprint's rubble and wall bases lie under ≥ 1 slice (2 ft; stale 1 ft) of SOIL or SEDIMENT, and the footprint stands ≥ 1 slice above its surroundings | SOIL-ORG and SEDIMENT strata over RUBBLE strata over WALL-BASE and FOUNDATION built strata | burial is SIM.50.03's transfer or decay's own litter and melt (see "Nature reclaiming") | `mound.buried` (a ground and slope look, not a building) |
+| S5 BURIED MOUND | ≥ 50 % of the footprint's rubble and wall bases lie under ≥ 1 slice (2 ft; stale 1 ft) of SOIL or SEDIMENT (FINES count as SEDIMENT), and the footprint stands ≥ 1 slice above its surroundings | SOIL-ORG and SEDIMENT strata over RUBBLE strata over WALL-BASE and FOUNDATION built strata | burial is SIM.50.03's transfer or decay's own litter and melt (see "Nature reclaiming") | `mound.buried` (a ground and slope look, not a building) |
 | S6 SOIL / SEDIMENT | the non-anchor RUBBLE and FINES have become SOIL-MIN (stony soil) | a stony soil horizon; anchor matter (TR-1..TR-7) stays as it is | `T(RUBBLE→SOIL-MIN, family, m, "decay.pedogenesis")`, `T(FINES→SOIL-MIN)` | `soil.stony` |
 | S7 ROCK | Owner-gated (OQ-R-03): SEDIMENT and SOIL-MIN under ≥ 1 layer (10 ft) of cover for ≥ `lithYears` | a ROCK-SED stratum (breccia, conglomerate, mudstone, sandstone) | `T(SEDIMENT→ROCK-SED, family, m, "geology.lithify")` | `strata.rock_sed.<kind>` |
 
-**Roofs fail before walls.** Roofs are SKY-exposed from the start; walls are SHELTERED while the roof stands (R-01.6). With the default lives, every roof class fails before every wall class of the same structure: a THATCH roof at 12 sy, a LIGHTWOOD roof at 25 sy and a TIMBER roof at 60 sy, against 96 sy or more for timber walls, about 60 sy after roof loss for mudbrick, and centuries or more for masonry. A data validator (AT-R-02) rejects any table in which a structure's ROOF life at SKY is not shorter than its WALL life at SHELTERED.
+**Roofs fail before walls.** Roofs are SKY-exposed from the start; walls are SHELTERED while the roof stands (R-01.6). With the default lives, every roof class fails before every wall class of the same structure: a THATCH roof at 12 sy, a LIGHTWOOD roof at 25 sy and a TIMBER roof at 60 sy, against 96 sy or more for timber walls, 40-60 sy after roof loss for the top band of a mudbrick wall, and centuries or more for masonry. A data validator (AT-R-02) rejects any table in which a structure's ROOF life at SKY is not shorter than its WALL life at SHELTERED.
 
 **Shedding.** Masonry and mudbrick lose mortar, plaster and surface grains as they weather. At each HP step (the capacity thresholds, at most `steps` per life, default 4) a member books `f_shed / steps` of its mass to FINES. Defaults `f_shed`: MUDBRICK 0.30 (walls melt into their own mound), RUBBLESTONE 0.05, BRICK 0.03, ASHLAR 0.01, timber classes 0 (they rot after breaking instead). FINES accumulate in the member's own **shed pool** (one integer per member, not one record per cell). When the pool holds one slice of mass for every foot cell of the member, decay writes one FINES slice along those foot cells and subtracts exactly that mass; the remainder stays in the pool.
 
@@ -213,10 +213,10 @@ Stages are derived (ADR-003 L1666) per structure from member states, then per si
 | THATCH roof | SKY: weathered at ~2 sy, fails at 12 sy (S3) → RUBBLE rots to SOIL-ORG and AIR at 12 sy more | soil; nothing structural |
 | LIGHTWOOD | roof fails at 25 sy; walls SHELTERED then SKY, fail near 50 sy; rubble rots by ~75 sy; nails and hinges become SCRAP (FE) at breakage and then corrode (R-03) | soil with an iron-oxide trace (TR-8) |
 | TIMBER | roof fails at 60 sy; walls fail near 96 sy; posts in the ground are BURIED-AER (40 sy) and rot first at the base, which is what brings timber walls down; waterlogged timbers (BURIED-ANOX) last 2,000 sy | soil; post stains (a SOIL-ORG trace in the post hole) |
-| MUDBRICK | roof fails first (whatever its class); walls SKY 60 sy, shedding 30 % of their mass as FINES around their base while they stand; upper walls fail and slump; the fines and slumped brick bury the wall bases (BURIED-AER, ∞) | a mound (tell) around standing wall stubs: S5 |
-| RUBBLESTONE | walls SKY 400 sy after roof loss; upper courses fall and bury the bases | S4 then S5 as soil accumulates |
-| BRICK | walls SKY 800 sy after roof loss | S4 then S5 |
-| ASHLAR | walls SKY about 2,700-3,000 sy after roof loss; foundations never decay | S3 or S4 at 10,000 sy on a stable site; S5 where sediment accumulates |
+| MUDBRICK | roof fails first (whatever its class); the top band melts within about 40-60 sy of roof loss (frost shortens it), the bands below faster, shedding 30 % of their mass as FINES around the base while they stand; the fines and slumped brick bury the wall bases (BURIED-AER, ∞) | a mound (tell) around standing wall stubs: S5 |
+| RUBBLESTONE | the top band fails about 400 sy after roof loss (less with frost); each band below follows at a shorter interval, because it has weathered under cover all along; fallen bands bury the bases | S4 then S5 as soil accumulates |
+| BRICK | the top band about 800 sy after roof loss (533 sy at FT 0.25), then the bands below at shorter intervals | S4 then S5 |
+| ASHLAR | the top band about 2,700 sy after roof loss, the last upper band near 8,500 sy (R-01.6 worked example); foundations never decay | S4 by about 8,500 sy on a stable site; S5 where soil or sediment accumulates |
 | Vaults (masonry below ground) | CAVE or SEALED: 20,000 sy or ∞ for ASHLAR; the risk is collapse, not decay (Lane Q) | standing voids (TR-2) |
 
 ### R-02.5 Catalogue slots and art needs (names only)
@@ -319,7 +319,7 @@ Default lives, sy, from full metal to fully oxidised, for a reference section of
 
 Scaled by catalog `corrosionResistance` (iron 30 at `game/data/DEUS_WorldCatalog.json:4893`, gold 99 at `:4953`): life × cR / 30 for FERROUS, and relative to each class's reference metal otherwise.
 
-**Corrosion transform.** Over its life a metal component converts in `steps` equal parts (default 4): each step books `T(ITEM→OXIDE, FE, floor(m0 / 4), "decay.corrode")`, the last step takes the remainder. When less than 10 % of the metal is left, the item is destroyed and the rest becomes OXIDE. OXIDE goes to the cell's residue record and keeps its family and form forever. When the cell's floor becomes soil or sediment, the OXIDE stays OXIDE inside it: a rust stain, a green copper trace.
+**Corrosion transform.** Over its life a metal component converts in `steps` equal parts (default 4): each step books `T(ITEM→OXIDE, FE, floor(m0 / 4), "decay.corrode")`, the last step takes the remainder and destroys the item. OXIDE goes to the cell's residue record and keeps its family and form forever. When the cell's floor becomes soil or sediment, the OXIDE stays OXIDE inside it: a rust stain, a green copper trace.
 
 **The ore guard.** Four rules, each with a test (AT-R-06):
 1. **No transform outputs ore.** The transform table has no entry whose output is an ore material (ADR-003 L950).
@@ -450,11 +450,11 @@ ADR-003 §16.3 feeds its `supportDirty` queue with "a decay failure (§17)" (ADR
 1. Day `d0`: the site is abandoned; the house's members get schedules. The TIMBER roof (SKY, 60 sy) and the ASHLAR walls (SHELTERED) are separate members.
 2. Each time the roof's lazy HP crosses a threshold, decay writes the roof strata's HP (C-1); Lane Q re-checks those cells. Snow load in a cold region may make the roof fail at a threshold before HP 0; Lane Q breaks it.
 3. At the roof's `failDay` (or earlier, by overload), `collapse.breakElement` turns the roof into RUBBLE that falls onto the floor (Lane Q). The collapse event (C-3) tells decay: the walls' tops are now SKY; decay splits the wall members (upper slices SKY, lower slices unchanged) and reschedules them. The structure is S3.
-4. Centuries later the upper wall members fail the same way. Their rubble lands against the wall bases: C-3 again; decay reclassifies the bases as BURIED-AER (∞). The structure is S4 and its foundations survive.
+4. Centuries later the top wall band fails the same way; the band below becomes the top (C-3 again) and fails in turn, sooner, since it has weathered under cover all along. The rubble banks against the wall bases; decay reclassifies the covered slices as BURIED-AER (∞). When the last upper band has fallen the structure is S4, and its foundations survive.
 
 ### R-05.5 Underground props
 
-A PROP member (mine timbers, cellar posts) in CAVE exposure has a TIMBER life of 50 sy, halved again where cave fungus grows (R-06.6). Its failure is often the failure of a natural rock roof it held: Lane Q decides, under V128 (natural rock counts as structure) and DEC-010's default (lateral connectivity suffices, `docs/OWNER_DECISIONS.md:144`; DEC-010 is `OPEN`). **This is a DEC-010 dependency.**
+A PROP member (mine timbers, cellar posts) in CAVE exposure has a TIMBER life of 50 sy, halved again where cave fungus grows (R-06.4). Its failure is often the failure of a natural rock roof it held: Lane Q decides, under V128 (natural rock counts as structure) and DEC-010's default (lateral connectivity suffices, `docs/OWNER_DECISIONS.md:144`; DEC-010 is `OPEN`). **This is a DEC-010 dependency.**
 
 ## Nature reclaiming
 
@@ -481,7 +481,7 @@ This section answers R-06: vegetation invading abandoned cells, sediment burial,
 | S1 | floors open to the sky, doorways | pioneer herbs |
 | S3 | roofless floors, rubble tops | herbs, shrubs, saplings |
 | S4-S5 | rubble spreads and mounds | the biome's normal succession (WG.65.09) |
-| any | SHELTERED interiors | nothing without light, except fungi (R-06.6) |
+| any | SHELTERED interiors | nothing without light, except fungi (R-06.4) |
 
 - Spread comes only from neighbouring vegetation and matures by day counts (ADR-003 §17.4). Growth is Ecology's ledgered source: photosynthetic AIR uptake plus a draw on the cell's SOIL-ORG (`T(SOIL-ORG→BIOMASS)`); nothing is created from nothing.
 - **Feedback.** A plant object on or beside a masonry member sets `M_root` (R-01.5) through the `objects:changed` event for that cell only.
@@ -568,9 +568,10 @@ The site record belongs to SIM.50.09. Decay adds these fields: `state`, `abandon
 | Years after abandonment | What is visible |
 |---|---|
 | 10 | weathered roofs, weeds in doorways (S1-S2) |
-| 100 | roofless houses with standing walls, saplings inside (S3) |
-| 1,000 | the same walls lower and cracked; shrubs and young woodland; an iron-stained floor; ceramic and glass in the leaf litter (S3) |
-| 2,000 | wall stubs and rubble spreads (S4); foundations complete |
+| 100 | roofless houses with full-height walls, saplings inside (S3) |
+| 1,000 | the same walls, cracked; shrubs and young woodland; an iron-stained floor; ceramic and glass in the leaf litter (S3) |
+| 2,000 | walls about 4 ft lower (the top band fell near 1,400), rubble banked against them (S3) |
+| 5,000 | wall stubs and rubble spreads (S4, from about 4,300); foundations complete |
 | 10,000 | low grassed or wooded mounds on the old plan (S5), foundations under them, relics and an ash line at the burned house under the soil |
 
 ### R-07.4 Salvage with conserved mass
@@ -650,8 +651,8 @@ Fixed facts: 1 game day = 2,400 ticks = 240 s real at 1x (ADR-003 §3.2). Durati
 | 1 | site abandonment grace | 1 d / 4 min | 80 min | 22.4 h |
 | 12 | thatch roof fails, SKY | 12 d / 48 min | 16 h | 11.2 days |
 | 60 | timber roof fails, SKY; V123's mean lifespan | 60 d / 4 h | 3.3 days | 56 days |
-| 400 | rubblestone walls fail after roof loss | 400 d / 26.7 h | 22.2 days | 1.02 years |
-| 3,000 | ashlar walls fail after roof loss (wR 90) | 3,000 d / 8.3 days | 167 days | 7.7 years |
+| 400 | a rubblestone wall's top band fails after roof loss | 400 d / 26.7 h | 22.2 days | 1.02 years |
+| 3,000 | an ashlar wall's top band fails after roof loss (wR 90, no frost) | 3,000 d / 8.3 days | 167 days | 7.7 years |
 | 10,000 | the long-run test horizon | 10,000 d / 27.8 days | 1.5 years | 25.6 years |
 | 1,000,000 | lithification scale (OQ-R-03) | 10^6 d / 7.6 years | 152 years | 2,557 years |
 
@@ -722,10 +723,10 @@ This section answers R-09: a deterministic fixture, aged through every stage ove
 
 | Structure | S1 | S2 | S3 | S4 | S5 |
 |---|---|---|---|---|---|
-| H1 stone house | ~y22 (roof h ≤ 0.85) | ~y22 (halo vegetation) | ~y73 (TIMBER roof, d0 y13 + 60) | ~y1,400 (walls SKY, life about 1,333 sy) | ~y2,500-4,000 (litter plus feed) |
-| H2 mudbrick | ~y14 | ~y20 | ~y24 (THATCH roof, d0 y12 + 12) | ~y63 (MUDBRICK SKY 60 / 1.5) | ~y70-100 (own fines) |
+| H1 stone house | ~y22 (roof h ≤ 0.85) | ~y22 (halo vegetation) | ~y73 (TIMBER roof, d0 y13 + 60) | ~y4,290 (four upper bands fall near y1,400, 2,520, 3,480, 4,290; top-band SKY life about 1,333 sy) | ~y5,000-7,000 (litter plus feed over the last rubble) |
+| H2 mudbrick | ~y14 | ~y20 | ~y24 (THATCH roof, d0 y12 + 12) | ~y95 (two upper bands near y62 and y95; SKY 60 / 1.5) | ~y100-150 (its own fines, which count as SEDIMENT cover) |
 | H3 timber hall | burned y5 | ~y15 | y5 (fire collapse) | y5-y100 | ~y2,500 |
-| H4 brick tower | ~y16 | ~y20 | ~y37 (LIGHTWOOD roof) | ~y570 (BRICK SKY 800 / 1.5) | ~y3,000 |
+| H4 brick tower | ~y16 | ~y20 | ~y37 (LIGHTWOOD roof) | ~y1,570 (seven upper bands from y563 to y1,569; SKY 800 / 1.5) | ~y3,000-4,000 |
 
 ### R-09.4 Mutants that must fail
 
