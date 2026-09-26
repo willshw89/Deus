@@ -215,6 +215,7 @@ const CHECKS = [
     // WSR-02
     negative('neg_wsr02_visual_state_null_family', 'WSR-02', 'ASSET_FAMILY_MISSING', 'STATE_TEST_BOULDER', ws => setCell(ws, 'STATE_TEST_BOULDER', 'Semantic Asset Family', '*None*')),
     negative('neg_wsr02_visual_state_null_id', 'WSR-02', 'VISUAL_STATE_ID_MISSING', 'STATE_TEST_BOULDER', ws => setCell(ws, 'STATE_TEST_BOULDER', 'Visual State ID', '*None*')),
+    negative('neg_wsr02_visual_state_id_not_an_id', 'WSR-02', 'VISUAL_STATE_ID_INVALID', 'STATE_TEST_BOULDER', ws => setCell(ws, 'STATE_TEST_BOULDER', 'Visual State ID', '*a grey boulder*')),
     negative('neg_wsr02_vfx_null_family', 'WSR-02', 'ASSET_FAMILY_MISSING', 'STATE_TEST_FLAME', ws => setCell(ws, 'STATE_TEST_FLAME', 'Semantic Asset Family', '')),
     negative('neg_wsr02_simulation_has_visual', 'WSR-02', 'SIMULATION_HAS_VISUAL', 'STATE_TEST_AQUIFER', ws => setCell(ws, 'STATE_TEST_AQUIFER', 'Visual State ID', '`test_spring`')),
     negative('neg_wsr02_composed_other_system', 'WSR-02', 'COMPOSED_NOT_ALLOWED', 'STATE_TEST_ARCH', ws => setCell(ws, 'STATE_TEST_ARCH', 'System', '`GEOLOGY`')),
@@ -269,6 +270,10 @@ const CHECKS = [
         const s = sidecar(ws, 'ATLAS_ALL_TEST_PROP_01'); const x = s.slots.find(y => y.slotId === 'ATLAS_ALL_TEST_PROP_01:0002');
         s.slots = s.slots.filter(y => y !== x); sidecar(ws, 'RMMZ_TEST_A2').slots.push(x);
     }),
+    negative('neg_mt_slot_id_not_of_its_sheet', 'MANIFEST-TEMPLATE', 'SLOT_ID_SHEET_MISMATCH', 'ATLAS_ALL_TEST_OTHER_01:0002', ws => { entry(ws, 'ALL_SHARED_ITEM_TEST-LOG_V1_DEFAULT').slot.slotId = 'ATLAS_ALL_TEST_OTHER_01:0002'; }),
+    negative('neg_mt_slot_on_unknown_sheet', 'MANIFEST-TEMPLATE', 'SLOT_SHEET_UNKNOWN', 'ATLAS_ALL_TEST_GONE_01:0001', ws => { const s = entry(ws, 'ALL_SHARED_ITEM_TEST-LOG_V1_DEFAULT').slot; s.sheetId = 'ATLAS_ALL_TEST_GONE_01'; s.slotId = 'ATLAS_ALL_TEST_GONE_01:0001'; }),
+    negative('neg_mt_duplicate_template_slot', 'MANIFEST-TEMPLATE', 'DUPLICATE_TEMPLATE_SLOT', 'ATLAS_ALL_TEST_PROP_01:0002', ws => { sidecar(ws, 'ATLAS_ALL_TEST_CHARACTER_01').slots.push(Object.assign({}, tslot(ws, 'ATLAS_ALL_TEST_PROP_01:0002'))); }),
+    negative('neg_mt_duplicate_entry_id', 'MANIFEST-TEMPLATE', 'DUPLICATE_ENTRY_ID', 'ALL_SHARED_ITEM_TEST-LOG_V1_DEFAULT', ws => { ws.catalogue.entries.push(Object.assign({}, entry(ws, 'ALL_SHARED_ITEM_TEST-LOG_V1_DEFAULT'), { slot: null })); }),
     negative('neg_mt_duplicate_catalogue_slot', 'MANIFEST-TEMPLATE', 'DUPLICATE_SLOT_ID', 'ATLAS_ALL_TEST_PROP_01:0002', ws => { entry(ws, 'ALL_SHARED_EFFECT_FX-FLAME_V1_DEFAULT').slot.slotId = 'ATLAS_ALL_TEST_PROP_01:0002'; }),
 
     // PLACED-IN-SLOT
@@ -414,6 +419,15 @@ const CHECKS = [
         assert(res.code === 2 && res.lines.some(l => l.includes(`registry.md:${line}:`) && l.includes('does not parse')), `want exit 2 naming registry.md:${line}; got ${res.lines.join(' / ')}`);
         return `registry.md:${line}`;
     }],
+    ['parse_every_seed_table_read', T => {
+        const res = runCase(T, ws => {
+            ws.registry += '\n## 3b. More TEST_ states\n\n| State ID | System | Authoritative Source | Visual Class | Semantic Asset Family | Visual State ID | Performance Class |\n|---|---|---|---|---|---|---|\n| `STATE_TEST_EXTRA` | `CREATURE_ECOLOGY` | TEST | `SIMULATION_ONLY` | *None* | *None* | `STATIC_TERRAIN` |\n';
+        });
+        const c = JSON.parse(res.report.json).counts.registry;
+        assert(c.rows === 9 && c.seedTables.length === 2, `want 9 rows in 2 tables; got ${c.rows} rows, ${JSON.stringify(c.seedTables)}`);
+        assert(has(res, 'WSR-01', 'SYSTEM_NOT_IN_ENUM', 'STATE_TEST_EXTRA') && has(res, 'WSR-SCHEMA', 'COLUMN_MISSING', 'description'), `the second table's row or its missing columns were not checked; ${summary(res)}`);
+        return '2 tables, 9 rows; second-table row and its missing columns reported';
+    }],
     ['parse_no_seed_table', T => {
         const res = runCase(T, ws => { ws.registry = ws.registry.replace('| State ID |', '| Name |'); });
         assert(res.code === 2 && res.lines.some(l => l.includes('no seed table')), `want exit 2; got ${res.lines.join(' / ')}`);
@@ -529,7 +543,8 @@ const MUTANTS = [
     ['baseline_reason_not_required', "if (typeof e.reason !== 'string' || e.reason.trim().length < 10 || /[\\r\\n]/.test(e.reason))", 'if (false)'],
     ['check_always_matches', 'return { code: diffs.length ? 1 : 0, lines, ctx, report };', 'return { code: 0, lines, ctx, report };'],
     ['report_timestamped', 'const report = { schema: SCHEMA.report, tool: TOOL,', 'const report = { schema: SCHEMA.report, generatedAt: String(process.hrtime.bigint()), tool: TOOL,'],
-    ['parse_line_dropped', "throw new InputError(`${where(i + 1)}: seed table row has", "throw new InputError(`${displayPath(file)}: seed table row has"]
+    ['later_seed_tables_ignored', 'hdr = i - 1;', 'hdr = lines.length;'],
+    ['parse_line_dropped',"throw new InputError(`${where(i + 1)}: seed table row has", "throw new InputError(`${displayPath(file)}: seed table row has"]
 ];
 
 // ---------------------------------------------------------------- runner

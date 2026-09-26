@@ -240,6 +240,12 @@
   ],
   "counts": {
     "registry": {
+      "seedTables": [
+        {
+          "line": 128,
+          "rows": 49
+        }
+      ],
       "rows": 49,
       "states": 49,
       "bySystem": {
@@ -976,10 +982,10 @@
     {"rule":"WSR-05","code":"PERFORMANCE_CLASS_MISSING","severity":"VIOLATION","idKind":"stateId","id":"STATE_WILDLIFE_GAME_TRAIL","detail":"the seed table has no Performance Class column","source":"docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:155","gate":"BASELINED"},
     {"rule":"WSR-05","code":"PERFORMANCE_CLASS_MISSING","severity":"VIOLATION","idKind":"stateId","id":"STATE_WILDLIFE_GRAZING_DENSITY","detail":"the seed table has no Performance Class column","source":"docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:153","gate":"BASELINED"},
     {"rule":"WSR-05","code":"PERFORMANCE_CLASS_MISSING","severity":"VIOLATION","idKind":"stateId","id":"STATE_WILDLIFE_PREDATOR_DENSITY","detail":"the seed table has no Performance Class column","source":"docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:154","gate":"BASELINED"},
-    {"rule":"WSR-SCHEMA","code":"COLUMN_MISSING","severity":"VIOLATION","idKind":"field","id":"description","detail":"the schema (docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:27) requires description; the seed table has no column for it, so none of its 49 rows declares it","source":"docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:128","gate":"BASELINED"},
-    {"rule":"WSR-SCHEMA","code":"COLUMN_MISSING","severity":"VIOLATION","idKind":"field","id":"saveRequired","detail":"the schema (docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:27) requires saveRequired; the seed table has no column for it, so none of its 49 rows declares it","source":"docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:128","gate":"BASELINED"},
-    {"rule":"WSR-SCHEMA","code":"COLUMN_MISSING","severity":"VIOLATION","idKind":"field","id":"transitionStates","detail":"the schema (docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:27) requires transitionStates; the seed table has no column for it, so none of its 49 rows declares it","source":"docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:128","gate":"BASELINED"},
-    {"rule":"WSR-SCHEMA","code":"COLUMN_MISSING","severity":"VIOLATION","idKind":"field","id":"visible","detail":"the schema (docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:27) requires visible; the seed table has no column for it, so none of its 49 rows declares it","source":"docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:128","gate":"BASELINED"},
+    {"rule":"WSR-SCHEMA","code":"COLUMN_MISSING","severity":"VIOLATION","idKind":"field","id":"description","detail":"the schema (docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:27) requires description; the seed table at line 128 has no column for it, so 49 row(s) do not declare it","source":"docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:128","gate":"BASELINED"},
+    {"rule":"WSR-SCHEMA","code":"COLUMN_MISSING","severity":"VIOLATION","idKind":"field","id":"saveRequired","detail":"the schema (docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:27) requires saveRequired; the seed table at line 128 has no column for it, so 49 row(s) do not declare it","source":"docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:128","gate":"BASELINED"},
+    {"rule":"WSR-SCHEMA","code":"COLUMN_MISSING","severity":"VIOLATION","idKind":"field","id":"transitionStates","detail":"the schema (docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:27) requires transitionStates; the seed table at line 128 has no column for it, so 49 row(s) do not declare it","source":"docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:128","gate":"BASELINED"},
+    {"rule":"WSR-SCHEMA","code":"COLUMN_MISSING","severity":"VIOLATION","idKind":"field","id":"visible","detail":"the schema (docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:27) requires visible; the seed table at line 128 has no column for it, so 49 row(s) do not declare it","source":"docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:128","gate":"BASELINED"},
     {"rule":"MANIFEST-TEMPLATE","code":"SHEET_NOT_IN_TEMPLATE","severity":"GAP","idKind":"sheetId","id":"ATLAS_LOWER1_SHARED_TILE_01","detail":"the generator refused this sheet or slots on it; 203 catalogue slot(s) on it are not compared","source":"art/catalogue/catalogue.json:1325","gate":"BASELINED"},
     {"rule":"MANIFEST-TEMPLATE","code":"SHEET_NOT_IN_TEMPLATE","severity":"GAP","idKind":"sheetId","id":"ATLAS_LOWER2_SHARED_TILE_01","detail":"the generator refused this sheet or slots on it; 6 catalogue slot(s) on it are not compared","source":"art/catalogue/catalogue.json:1329","gate":"BASELINED"},
     {"rule":"MANIFEST-TEMPLATE","code":"SHEET_NOT_IN_TEMPLATE","severity":"GAP","idKind":"sheetId","id":"ATLAS_SURFACE_SHARED_TILE_01","detail":"the generator refused this sheet or slots on it; 1731 catalogue slot(s) on it are not compared","source":"art/catalogue/catalogue.json:1333","gate":"BASELINED"},

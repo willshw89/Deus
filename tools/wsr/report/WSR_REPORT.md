@@ -56,6 +56,8 @@ Template generator runs (each in a fresh OS temp folder, deleted afterwards):
 
 ## Registry
 
+Seed tables read (every table with a State ID column): line 128 (49 rows).
+
 | Rows | States | Art-required (not composed) | Composed exempt | With visualStateId | Resolving to a catalogue entry | With a slot | With a slot confirmed in the template | visualStateId is a WorldCatalog id |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 49 | 49 | 40 | 2 | 40 | 0 | 0 | 0 | 0 |
@@ -531,10 +533,10 @@ Approvals file: art/APPROVALS.md; SHA-256 ledger section: ABSENT; ledger rows: 0
 
 | Code | Severity | Gate | Id | Detail | Source |
 | --- | --- | --- | --- | --- | --- |
-| COLUMN_MISSING | VIOLATION | BASELINED | field description | the schema (docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:27) requires description; the seed table has no column for it, so none of its 49 rows declares it | docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:128 |
-| COLUMN_MISSING | VIOLATION | BASELINED | field saveRequired | the schema (docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:27) requires saveRequired; the seed table has no column for it, so none of its 49 rows declares it | docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:128 |
-| COLUMN_MISSING | VIOLATION | BASELINED | field transitionStates | the schema (docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:27) requires transitionStates; the seed table has no column for it, so none of its 49 rows declares it | docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:128 |
-| COLUMN_MISSING | VIOLATION | BASELINED | field visible | the schema (docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:27) requires visible; the seed table has no column for it, so none of its 49 rows declares it | docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:128 |
+| COLUMN_MISSING | VIOLATION | BASELINED | field description | the schema (docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:27) requires description; the seed table at line 128 has no column for it, so 49 row(s) do not declare it | docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:128 |
+| COLUMN_MISSING | VIOLATION | BASELINED | field saveRequired | the schema (docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:27) requires saveRequired; the seed table at line 128 has no column for it, so 49 row(s) do not declare it | docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:128 |
+| COLUMN_MISSING | VIOLATION | BASELINED | field transitionStates | the schema (docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:27) requires transitionStates; the seed table at line 128 has no column for it, so 49 row(s) do not declare it | docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:128 |
+| COLUMN_MISSING | VIOLATION | BASELINED | field visible | the schema (docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:27) requires visible; the seed table at line 128 has no column for it, so 49 row(s) do not declare it | docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md:128 |
 
 ### MANIFEST-TEMPLATE (983)
 

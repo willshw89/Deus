@@ -255,37 +255,45 @@ function parseRegistry(text, file) {
     if (!Array.isArray(schema.required) || !schema.required.every(x => typeof x === 'string')) throw new InputError(`${where(schemaLine)}: schema has no required[] list of field names`);
     const enums = { system: enumOf('system'), visualClass: enumOf('visualClass'), performanceClass: enumOf('performanceClass') };
 
-    // §3: the first table (outside code blocks) with a "State ID" column.
-    let hdr = -1;
-    for (let i = 0; i < lines.length; i++) {
-        if (!fenced[i] && isTableLine(lines[i]) && splitRow(lines[i]).some(c => norm(c) === 'stateid')) { hdr = i; break; }
-    }
-    if (hdr < 0) throw new InputError(`${displayPath(file)}: no seed table with a "State ID" column found`);
-    const header = splitRow(lines[hdr]);
-    const fields = header.map(h => COLUMN_FIELDS[norm(h)] || null);
-    const seenField = new Map();
-    fields.forEach((f, k) => {
-        if (!f) return;
-        if (seenField.has(f)) throw new InputError(`${where(hdr + 1)}: columns "${header[seenField.get(f)]}" and "${header[k]}" both map to ${f}`);
-        seenField.set(f, k);
-    });
-    if (hdr + 1 >= lines.length || !isSeparator(lines[hdr + 1])) throw new InputError(`${where(hdr + 2)}: the seed table header is not followed by a | --- | separator row`);
+    // §3: every table (outside code blocks) whose header has a "State ID" column; the rows of all of
+    // them are read, so a state added in a later table is never skipped.
+    const tables = [];
     const rows = [];
-    for (let i = hdr + 2; i < lines.length && !fenced[i] && isTableLine(lines[i]); i++) {
-        const cells = splitRow(lines[i]);
-        if (cells.length !== header.length) throw new InputError(`${where(i + 1)}: seed table row has ${cells.length} cells; the header has ${header.length}`);
-        const row = { line: i + 1, cells: {} };
-        fields.forEach((f, k) => { if (f) row.cells[f] = parseCell(cells[k]); });
-        const sid = row.cells.stateId;
-        if (sid.kind !== 'VALUE') throw new InputError(`${where(i + 1)}: State ID ${JSON.stringify(sid.raw)} is not one identifier`);
-        row.stateId = sid.value;
-        rows.push(row);
+    for (let hdr = 0; hdr < lines.length; hdr++) {
+        const startsTable = !fenced[hdr] && isTableLine(lines[hdr]) && !(hdr > 0 && !fenced[hdr - 1] && isTableLine(lines[hdr - 1]));
+        if (!startsTable || !splitRow(lines[hdr]).some(c => norm(c) === 'stateid')) continue;
+        const header = splitRow(lines[hdr]);
+        const fields = header.map(h => COLUMN_FIELDS[norm(h)] || null);
+        const seenField = new Map();
+        fields.forEach((f, k) => {
+            if (!f) return;
+            if (seenField.has(f)) throw new InputError(`${where(hdr + 1)}: columns "${header[seenField.get(f)]}" and "${header[k]}" both map to ${f}`);
+            seenField.set(f, k);
+        });
+        if (hdr + 1 >= lines.length || !isSeparator(lines[hdr + 1])) throw new InputError(`${where(hdr + 2)}: the seed table header is not followed by a | --- | separator row`);
+        const table = { line: hdr + 1, header, fields: new Set(fields.filter(Boolean)), unknown: header.filter((h, k) => !fields[k]), rows: 0 };
+        let i = hdr + 2;
+        for (; i < lines.length && !fenced[i] && isTableLine(lines[i]); i++) {
+            const cells = splitRow(lines[i]);
+            if (cells.length !== header.length) throw new InputError(`${where(i + 1)}: seed table row has ${cells.length} cells; the header has ${header.length}`);
+            const row = { line: i + 1, table: tables.length, cells: {} };
+            fields.forEach((f, k) => { if (f) row.cells[f] = parseCell(cells[k]); });
+            const sid = row.cells.stateId;
+            if (sid.kind !== 'VALUE') throw new InputError(`${where(i + 1)}: State ID ${JSON.stringify(sid.raw)} is not one identifier`);
+            row.stateId = sid.value;
+            rows.push(row);
+            table.rows++;
+        }
+        if (!table.rows) throw new InputError(`${where(hdr + 1)}: the seed table has no rows`);
+        tables.push(table);
+        hdr = i - 1;
     }
-    if (!rows.length) throw new InputError(`${where(hdr + 1)}: the seed table has no rows`);
+    if (!tables.length) throw new InputError(`${displayPath(file)}: no seed table with a "State ID" column found`);
     return {
-        file, schemaLine, tableLine: hdr + 1, enums, required: schema.required.slice(),
-        header, columns: new Set(fields.filter(Boolean)),
-        unknownColumns: header.filter((h, k) => !fields[k]),
+        file, schemaLine, enums, required: schema.required.slice(), tables,
+        // A field counts as a column only if every seed table has it.
+        columns: new Set([...tables[0].fields].filter(f => tables.every(t => t.fields.has(f)))),
+        unknownColumns: uniq([].concat(...tables.map(t => t.unknown))),
         rows
     };
 }
@@ -748,14 +756,17 @@ function ruleSchema(ctx, add) {
     const R = 'WSR-SCHEMA';
     const reg = displayPath(ctx.reg.file);
     for (const f of ctx.reg.required) {
-        if (!OWN_RULE_FIELDS.has(f) && !ctx.reg.columns.has(f)) add(R, 'COLUMN_MISSING', 'VIOLATION', 'field', f, `the schema (${reg}:${ctx.reg.schemaLine}) requires ${f}; the seed table has no column for it, so none of its ${ctx.reg.rows.length} rows declares it`, `${reg}:${ctx.reg.tableLine}`);
+        if (OWN_RULE_FIELDS.has(f) || ctx.reg.columns.has(f)) continue;
+        const lacking = ctx.reg.tables.filter(t => !t.fields.has(f));
+        const n = lacking.reduce((s, t) => s + t.rows, 0);
+        add(R, 'COLUMN_MISSING', 'VIOLATION', 'field', f, `the schema (${reg}:${ctx.reg.schemaLine}) requires ${f}; ${lacking.length === 1 ? 'the seed table' : `${lacking.length} seed tables`} at line ${lacking.map(t => t.line).join(', ')} ${lacking.length === 1 ? 'has' : 'have'} no column for it, so ${n} row(s) do not declare it`, `${reg}:${lacking[0].line}`);
     }
     const ids = new Set(ctx.reg.rows.map(r => r.stateId));
     for (const r of ctx.reg.rows) {
         const at = `${reg}:${r.line}`;
         if (!STATE_ID_RE.test(r.stateId)) add(R, 'STATE_ID_FORMAT', 'VIOLATION', 'stateId', r.stateId, 'stateId is not STATE_<SYSTEM>_<NAME> in upper case', at);
         const vc = r.cells.visualClass;
-        if (ctx.reg.columns.has('visualClass') && (!vc || vc.kind !== 'VALUE' || !ctx.reg.enums.visualClass.includes(vc.value))) add(R, 'ENUM_INVALID', 'VIOLATION', 'stateId', r.stateId, `visualClass ${JSON.stringify(vc ? vc.raw : '')} is not in the enum (${ctx.reg.enums.visualClass.join(', ')})`, at);
+        if (vc !== undefined && (vc.kind !== 'VALUE' || !ctx.reg.enums.visualClass.includes(vc.value))) add(R, 'ENUM_INVALID', 'VIOLATION', 'stateId', r.stateId, `visualClass ${JSON.stringify(vc ? vc.raw : '')} is not in the enum (${ctx.reg.enums.visualClass.join(', ')})`, at);
         for (const f of BOOLEAN_FIELDS) {
             const c = r.cells[f];
             if (c && !(c.kind === 'VALUE' && /^(true|false)$/.test(c.value))) add(R, 'TYPE_INVALID', 'VIOLATION', 'stateId', r.stateId, `${f} ${JSON.stringify(c.raw)} is not true or false`, at);
@@ -946,6 +957,7 @@ function computeCounts(ctx, g) {
     const forbidden = uniq(cat.forbiddenBiomes.map(String)).sort(cmp);
     return {
         registry: {
+            seedTables: reg.tables.map(t => ({ line: t.line, rows: t.rows })),
             rows: rows.length, states: new Set(rows.map(r => r.stateId)).size,
             bySystem: countBy(rows, sysOf), byVisualClass: countBy(rows, vcOf),
             artRequired: art.length, composedExempt: exempt.size,
@@ -1083,6 +1095,7 @@ function reportMarkdown(rep) {
     table(['Rule', 'Violations', 'Gaps', 'Exempt', 'Baselined', 'New'], Object.entries(c.rules).map(([r, o]) => [r, o.VIOLATION, o.GAP, o.EXEMPT, o.baselined, o.new]));
     L.push('## Registry', '');
     const rg = c.registry;
+    L.push(`Seed tables read (every table with a State ID column): ${rg.seedTables.map(t => `line ${t.line} (${t.rows} rows)`).join(', ')}.`, '');
     table(['Rows', 'States', 'Art-required (not composed)', 'Composed exempt', 'With visualStateId', 'Resolving to a catalogue entry', 'With a slot', 'With a slot confirmed in the template', 'visualStateId is a WorldCatalog id'],
         [[rg.rows, rg.states, rg.artRequired, rg.composedExempt, rg.withVisualStateId, rg.withCatalogueEntry, rg.withSlot, rg.withTemplateSlot, rg.withWorldCatalogId]]);
     L.push('Per system:', '');
