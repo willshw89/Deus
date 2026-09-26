@@ -352,4 +352,95 @@ From `docs/audits/SRD_SPELL_EFFECT_AUDIT.md` §5-§6 (`:1434-1522`). Where they 
 
 ## 9. Scope
 
-(Filled in after the commit that adds this report.)
+Run at `2e98544d3d344396ea809cc7e09ffcf9125e45af` (the commit that added this report; the only later commit changes this file, `tasks/SIM.60.02/lane-v/REPORT.md`, which is already in the list):
+
+```
+$ git diff --name-only 425b594c146d5f353c10faa11f4b5d47f499b45f..HEAD
+docs/schemas/spells/.gitattributes
+docs/schemas/spells/README.md
+docs/schemas/spells/effects.json
+docs/schemas/spells/primitives.json
+docs/schemas/spells/spell_effect.schema.json
+docs/schemas/spells/srd_baseline.json
+docs/schemas/spells/tuning.json
+tasks/SIM.60.02/lane-v/BRIEF.md
+tasks/SIM.60.02/lane-v/REPORT.md
+tasks/SIM.60.02/lane-v/evidence/gate_fresh_clone.txt
+tasks/SIM.60.02/lane-v/evidence/gate_worktree.txt
+tasks/SIM.60.02/lane-v/lane.json
+tasks/SIM.60.02/lane-v/launches/20260926_070925_prompt.txt
+tools/spells/fixtures/baseline_tampered.json
+tools/spells/fixtures/catalogue_systems_changed.json
+tools/spells/fixtures/catalogue_unmapped.json
+tools/spells/fixtures/coverage_duplicate_record.json
+tools/spells/fixtures/coverage_missing_record.json
+tools/spells/fixtures/coverage_none_record.json
+tools/spells/fixtures/coverage_unknown_spell.json
+tools/spells/fixtures/effect_key_duplicate.json
+tools/spells/fixtures/effect_script_hook.json
+tools/spells/fixtures/finite_family_source.json
+tools/spells/fixtures/ledger_cause_other_spell.json
+tools/spells/fixtures/ledger_class_unknown.json
+tools/spells/fixtures/ledger_downstream_unknown.json
+tools/spells/fixtures/ledger_gap_unlisted.json
+tools/spells/fixtures/ledger_mode_wrong.json
+tools/spells/fixtures/ledger_row_unknown.json
+tools/spells/fixtures/ledger_sink_name_unknown.json
+tools/spells/fixtures/ledger_source_no_cause.json
+tools/spells/fixtures/ore_output_source.json
+tools/spells/fixtures/ore_output_transform.json
+tools/spells/fixtures/owner_open_answered_in_data.json
+tools/spells/fixtures/owner_open_unknown.json
+tools/spells/fixtures/primitive_audit_missing.json
+tools/spells/fixtures/primitive_unknown.json
+tools/spells/fixtures/primitive_wrong_system.json
+tools/spells/fixtures/q1_case_unknown.json
+tools/spells/fixtures/q1_policy_decided.json
+tools/spells/fixtures/record_script_hook.json
+tools/spells/fixtures/schema_keyword_unsupported.json
+tools/spells/fixtures/schema_missing_magical.json
+tools/spells/fixtures/seconds_per_tick_set.json
+tools/spells/fixtures/srd_field_literal.json
+tools/spells/fixtures/srd_number_in_text.json
+tools/spells/fixtures/srd_number_literal.json
+tools/spells/fixtures/srd_quote_ellipsis.json
+tools/spells/fixtures/srd_quote_inexact.json
+tools/spells/fixtures/srdref_other_spell.json
+tools/spells/fixtures/srdref_unresolved.json
+tools/spells/fixtures/srdref_wrong_kind.json
+tools/spells/fixtures/srdref_wrong_unit.json
+tools/spells/fixtures/systems_mismatch.json
+tools/spells/fixtures/tick_count_field.json
+tools/spells/fixtures/tick_text.json
+tools/spells/fixtures/tick_trigger.json
+tools/spells/fixtures/time_domain_wrong.json
+tools/spells/fixtures/tuning_ref_unknown.json
+tools/spells/fixtures/variant_unknown.json
+tools/spells/test_spell_effects.js
+tools/spells/validate_spell_effects.js
+EXIT=0
+
+$ git diff --name-only 425b594c146d5f353c10faa11f4b5d47f499b45f..HEAD -- game
+EXIT=0
+
+$ git diff --name-status 425b594c146d5f353c10faa11f4b5d47f499b45f..HEAD | node scope_check.js   (temp script: each path against lane.json allowedPaths as globs)
+paths 62, outside allowedPaths 0, {"docs/schemas/spells/**":7,"status A":62,"tasks/SIM.60.02/**":6,"tools/spells/**":49}
+EXIT=0
+```
+
+Every path matches `docs/schemas/spells/**` (7), `tools/spells/**` (49) or `tasks/SIM.60.02/**` (6); the diff for `game` is empty. `BRIEF.md`, `lane.json` and the launch prompt were added by the PM and ops commits on this branch (`aae105cd`, `62a43b38`), not by the writer. The same scope checker, fed four probe paths, reported `game/data/x.json` and `tools/other/x.js` as OUTSIDE and exited 1, so it can fail.
+
+Commits on this branch since the base, the PM and ops commits included (pasted from `git log --format="%h %s" 425b594c146d5f353c10faa11f4b5d47f499b45f..HEAD`):
+
+```
+2e98544d [claude] SIM.60.02 REPORT.md and raw gate evidence (worktree and fresh CRLF-default clone at 357df39c)
+357df39c [claude] SIM.60.02 README, LF attributes, Fabricate rubble moves
+0489663c [claude] SIM.60.02 WIP: time-domain rule, Q3 classes open, magical-fire consistency
+4d94f2b6 [claude] SIM.60.02 WIP: test suite, 46 negative fixtures, 39 mutants
+4ef87756 [claude] SIM.60.02 WIP: schema, tuning, primitive catalogue and effect data for 121 records
+d6dd9bfd [claude] SIM.60.02 WIP: validator skeleton and generated SRD baseline
+62a43b38 [ops] SIM.60.02 lane-v launch prompt 20260926_070925 (writer claude)
+aae105cd [pm] Open lane-v (SIM.60.02): BRIEF.md and lane.json
+```
+
+The final pushed commit is given by the last line of the writer's session output (`FINAL SHA: ...`), pasted from `git rev-parse HEAD` after the push.
