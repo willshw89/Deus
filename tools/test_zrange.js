@@ -69,7 +69,15 @@ const { PROVOCATIONS } = require("./zrange/provocations.js");
 const log = (...a) => console.log(...a);
 const sha8 = s => String(s).slice(0, 8);
 const baseFixtureFile = () => path.join(FIX, `base_${sha8(BASE)}_seed${SEED}.json`);
-const legacyFiles = () => ({ save: path.join(FIX, `legacy_save_${sha8(BASE)}_seed${SEED}.json`), fingerprint: path.join(FIX, `legacy_fingerprint_${sha8(BASE)}_seed${SEED}.json`) });
+const legacyFiles = () => ({ save: path.join(FIX, `legacy_save_${sha8(BASE)}_seed${SEED}.json.gz`), fingerprint: path.join(FIX, `legacy_fingerprint_${sha8(BASE)}_seed${SEED}.json`) });
+/** The legacy save fixture, gunzipped to a temp file for the game to read (ZR_SAVE). */
+function legacySaveFile() {
+    const lf = legacyFiles();
+    if (!fs.existsSync(lf.save)) return null;
+    const out = path.join(os.tmpdir(), `laneaa_zr_legacy_save_${process.pid}.json`);
+    fs.writeFileSync(out, require("zlib").gunzipSync(fs.readFileSync(lf.save)));
+    return out;
+}
 
 //-----------------------------------------------------------------------------
 // Snapshots and runs
@@ -126,14 +134,20 @@ function makeSnapshot(gameDir, tag, edits) {
     fs.writeFileSync(pk, JSON.stringify(pkg, null, 2));
     return dir;
 }
-/** One NW.js run of the suite on a snapshot: { status, checks: { name: { pass, detail } }, result, report, text, secs }. */
-function runPhase(clone, label, env, edits) {
+/** One NW.js run of the suite on a snapshot: resolves { status, checks: { name: { pass, detail } }, result, report, text, secs }. */
+async function runPhase(clone, label, env, edits) {
     const gameDir = path.join(clone, "game");
     const snap = makeSnapshot(gameDir, label.replace(/[^\w.-]/g, "_"), edits);
     const t0 = Date.now();
     const e = Object.assign({}, process.env, env, { ZR_UPDATES: String(UPDATES) });
     if (env.DEUS_Z_RANGE === null) delete e.DEUS_Z_RANGE;
-    const r = spawnSync(process.execPath, [path.join(clone, "tools", "run_tests.js"), "zrange", "--game", snap], { encoding: "utf8", timeout: RUN_TIMEOUT, env: e, maxBuffer: 64 * 1024 * 1024 });
+    const r = await new Promise(resolve => {
+        const child = spawn(process.execPath, [path.join(clone, "tools", "run_tests.js"), "zrange", "--game", snap], { env: e, stdio: ["ignore", "pipe", "pipe"] });
+        child.stdout.on("data", () => {});
+        child.stderr.on("data", () => {});
+        const timer = setTimeout(() => { try { child.kill(); } catch (_) { /* gone */ } }, RUN_TIMEOUT);
+        child.on("exit", status => { clearTimeout(timer); resolve({ status }); });
+    });
     const out = path.join(snap, "test_output");
     const text = fs.existsSync(path.join(out, "results.txt")) ? fs.readFileSync(path.join(out, "results.txt"), "utf8") : "";
     let report = null;
@@ -161,14 +175,15 @@ function baseClone(tag) {
     const { makeClone } = require("./zrange/clone.js");
     return makeClone(BASE, `base_${sha8(BASE)}_${tag}`).dir;
 }
-function refreshBase() {
+async function refreshBase() {
     const clone = baseClone("fixture");
     log(`base ${BASE} cloned at ${clone}`);
-    const core = runPhase(clone, `base_core`, { ZR_PHASE: "core", DEUS_Z_RANGE: null });
-    const core2 = runPhase(clone, `base_core_again`, { ZR_PHASE: "core", DEUS_Z_RANGE: null });
-    const play = runPhase(clone, `base_play`, { ZR_PHASE: "play", DEUS_Z_RANGE: null });
-    const sim = runPhase(clone, `base_sim`, { ZR_PHASE: "sim", DEUS_Z_RANGE: null });
-    const sim2 = runPhase(clone, `base_sim_again`, { ZR_PHASE: "sim", DEUS_Z_RANGE: null });
+    const [core, core2, play, sim, sim2] = await pool([
+        () => runPhase(clone, `base_core`, { ZR_PHASE: "core", DEUS_Z_RANGE: null }),
+        () => runPhase(clone, `base_core_again`, { ZR_PHASE: "core", DEUS_Z_RANGE: null }),
+        () => runPhase(clone, `base_play`, { ZR_PHASE: "play", DEUS_Z_RANGE: null }),
+        () => runPhase(clone, `base_sim`, { ZR_PHASE: "sim", DEUS_Z_RANGE: null }),
+        () => runPhase(clone, `base_sim_again`, { ZR_PHASE: "sim", DEUS_Z_RANGE: null })]);
     if (!core.report || !play.report || !sim.report) throw new Error("the base runs wrote no report");
     const d = { base: BASE, seed: SEED, updates: UPDATES, made: new Date().toISOString(), by: "node tools/test_zrange.js --refresh-base",
         core: core.report.data.core, census: core.report.data.census, blast: core.report.data.blast, saveFresh: play.report.data.saveFresh,
@@ -183,15 +198,15 @@ function refreshBase() {
     log(`wrote ${baseFixtureFile()} (repeat: ${JSON.stringify({ coreSame: d.repeat.coreSame, censusSame: d.repeat.censusSame, censusAfterSame: d.repeat.censusAfterSame })})`);
     if (!KEEP) require("./zrange/clone.js").removeTree(clone);
 }
-function makeLegacyFixture() {
+async function makeLegacyFixture() {
     const clone = baseClone("legacy");
     const tmp = path.join(os.tmpdir(), "laneaa_zr_legacy");
     removeTree(tmp);
-    const r = runPhase(clone, "base_make_legacy", { ZR_PHASE: "make_legacy", DEUS_Z_RANGE: null, ZR_OUT_DIR: tmp });
+    const r = await runPhase(clone, "base_make_legacy", { ZR_PHASE: "make_legacy", DEUS_Z_RANGE: null, ZR_OUT_DIR: tmp });
     if (!r.checks.legacy_fixture_written || !r.checks.legacy_fixture_written.pass) throw new Error("make_legacy failed");
     const lf = legacyFiles();
     fs.mkdirSync(FIX, { recursive: true });
-    fs.copyFileSync(path.join(tmp, "legacy_save.json"), lf.save);
+    fs.writeFileSync(lf.save, require("zlib").gzipSync(fs.readFileSync(path.join(tmp, "legacy_save.json")), { level: 9 }));
     const fp = JSON.parse(fs.readFileSync(path.join(tmp, "legacy_fingerprint.json"), "utf8"));
     fp.base = BASE;
     fs.writeFileSync(lf.fingerprint, JSON.stringify(fp, null, 1) + "\n");
@@ -204,10 +219,14 @@ const strip = c => { if (!c) return c; const o = Object.assign({}, c); delete o.
 //-----------------------------------------------------------------------------
 // The checks
 
+// Matter doesn't depend on where it is: items and units are compared by type and kind summed over the levels (a unit
+// that walks up a ramp takes its pack with it; the base commit's own two runs differ only there). Strata and objects are
+// per material and type on the core levels.
+const byType = o => { const out = {}; for (const k in o || {}) { const t = k.replace(/:-?\d+$/, ""); out[t] = (out[t] || 0) + o[k]; } return out; };
 function censusDiff(a, b) {
     const out = [];
     for (const key of ["strata", "objects", "items", "units"]) {
-        const ka = a[key] || {}, kb = b[key] || {};
+        const ka = key === "items" || key === "units" ? byType(a[key]) : a[key] || {}, kb = key === "items" || key === "units" ? byType(b[key]) : b[key] || {};
         for (const k of new Set([...Object.keys(ka), ...Object.keys(kb)])) if ((ka[k] || 0) !== (kb[k] || 0)) out.push(`${key}.${k}: ${ka[k] || 0} vs ${kb[k] || 0}`);
     }
     return out;
@@ -339,20 +358,35 @@ function evaluate(results, base, provoked) {
 //-----------------------------------------------------------------------------
 // Main
 
-function runAll(provocation) {
+/** Run task functions (each returning a promise) at most JOBS at a time; resolves their results in order. */
+const JOBS = Math.max(1, Number(arg("jobs", "3")) | 0);
+async function pool(tasks) {
+    const out = new Array(tasks.length);
+    let next = 0;
+    const worker = async () => { while (next < tasks.length) { const k = next++; out[k] = await tasks[k](); } };
+    await Promise.all(Array.from({ length: Math.min(JOBS, tasks.length) }, worker));
+    return out;
+}
+async function runAll(provocation) {
     const edits = provocation ? provocation.edits : null;
     const clone = provocation && provocation.clone ? provocation.clone : ROOT;
     const results = {};
-    const phases = provocation && provocation.phases ? provocation.phases : ["core", "play", "sim"];
+    const phases = provocation && provocation.phases ? provocation.phases.filter(p => p !== "legacy") : ["core", "play", "sim"];
     const cfgs = provocation && provocation.configs ? provocation.configs.filter(c => CONFIGS.includes(c) || arg("z-range", "") === "") : CONFIGS;
-    for (const c of cfgs) {
-        results[c] = {};
-        for (const ph of phases) results[c][ph] = runPhase(clone, `${provocation ? `p_${provocation.name}_` : ""}${c}_${ph}`, { ZR_PHASE: ph, DEUS_Z_RANGE: c }, edits);
+    const tasks = [];
+    // The longest runs first (sim), so the pool ends together.
+    for (const ph of ["sim", "play", "core"].filter(p => phases.includes(p))) for (const c of cfgs) {
+        (results[c] = results[c] || {});
+        tasks.push(async () => { results[c][ph] = await runPhase(clone, `${provocation ? `p_${provocation.name}_` : ""}${c}_${ph}`, { ZR_PHASE: ph, DEUS_Z_RANGE: c }, edits); });
     }
-    if (!provocation || (provocation.phases || []).includes("legacy") || !provocation.phases) {
+    let save = null;
+    if (!provocation || (provocation.phases || []).includes("legacy")) {
         const lf = legacyFiles();
-        if (fs.existsSync(lf.save)) results.__legacy = runPhase(clone, `${provocation ? `p_${provocation.name}_` : ""}legacy`, { ZR_PHASE: "legacy", DEUS_Z_RANGE: null, ZR_SAVE: lf.save, ZR_FINGERPRINT: lf.fingerprint }, edits);
+        save = legacySaveFile();
+        if (save) tasks.push(async () => { results.__legacy = await runPhase(clone, `${provocation ? `p_${provocation.name}_` : ""}legacy`, { ZR_PHASE: "legacy", DEUS_Z_RANGE: null, ZR_SAVE: save, ZR_FINGERPRINT: lf.fingerprint }, edits); });
     }
+    await pool(tasks);
+    if (save) fs.rmSync(save, { force: true });
     return results;
 }
 function loadBase() {
@@ -362,8 +396,8 @@ function loadBase() {
 
 (async () => {
     try {
-        if (flag("refresh-base")) { refreshBase(); process.exit(0); }
-        if (flag("make-legacy-fixture")) { makeLegacyFixture(); process.exit(0); }
+        if (flag("refresh-base")) { await refreshBase(); process.exit(0); }
+        if (flag("make-legacy-fixture")) { await makeLegacyFixture(); process.exit(0); }
         const base = loadBase();
         if (!base) log(`NOTE: no base fixture ${baseFixtureFile()} (node tools/test_zrange.js --refresh-base makes it)`);
         const pv = arg("provoke", ""), all = flag("provoke-all");
@@ -387,7 +421,7 @@ function loadBase() {
                     prov.scanRoot = tmp;
                 }
                 let r;
-                try { r = runAll(prov); } catch (e) { log(`PROVOCATION ${name}: HARNESS ${e.message}`); broken++; continue; }
+                try { r = await runAll(prov); } catch (e) { log(`PROVOCATION ${name}: HARNESS ${e.message}`); broken++; continue; }
                 const ev = evaluate(r, p.withoutBase ? null : base, prov);
                 const caught = ev[p.check] && !ev[p.check].pass;
                 if (!caught) uncaught++;
@@ -397,8 +431,8 @@ function loadBase() {
             log(`PROVOCATIONS: ${names.length - uncaught - broken}/${names.length} caught${broken ? `, ${broken} harness problem(s)` : ""}`);
             process.exit(broken ? 2 : uncaught ? 1 : 0);
         }
-        log(`=== WG.00.17 zrange: configurations ${CONFIGS.join(", ")}, seed ${SEED}, base ${sha8(BASE)}, ${UPDATES} updates ===`);
-        const results = runAll(null);
+        log(`=== WG.00.17 zrange: configurations ${CONFIGS.join(", ")}, seed ${SEED}, base ${sha8(BASE)}, ${UPDATES} updates, ${JOBS} run(s) at a time ===`);
+        const results = await runAll(null);
         const ev = evaluate(results, base, null);
         let failed = 0;
         for (const name of CHECKS) {
