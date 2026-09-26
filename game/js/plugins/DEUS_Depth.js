@@ -514,6 +514,7 @@
         this._winDx = NaN;
         this._winDy = NaN;
         this._scanStamp = 0;
+        this._paintsAtBind = 0;
         this.addChild(this._lower);
         this.addChild(this._entities);
         this.addChild(this._upper);
@@ -549,6 +550,7 @@
         tm.flags = ts ? ts.flags : [];
         tm.setBitmaps(ts ? ts.tilesetNames.map(n => ImageManager.loadTileset(n)) : []);
         tm.refresh();
+        this._paintsAtBind = tm.paints; // a paint after this one shows the level just bound (switch_same_frame)
         this.clearEntities();
     };
     Sprite_DepthPlane.prototype.refresh = function() { this._tilemap.refresh(); this._entityDirty = true; if (this._objectLayer) this._objectLayer.markDirty(false); };
@@ -1840,27 +1842,49 @@
                 await t.waitFrames(8);
             };
 
-            // (4) In the same frame as levels:viewChanged every visible plane is bound and painted, and every unit in the window on a
-            //     plane's level has a visible sprite with a frame (no one-frame-late planes, no units hidden while their sheet loads).
+            // (4) No lag after a level switch (DEC-011). Each of the 5 switches (0->+2->+1->0->-1->0) is judged twice: in the same
+            //     frame as levels:viewChanged, and again just before the first render after it (the first frame drawn on the new
+            //     view). Both times the planes are the new view's levels below it (depth 1 on z-1, depth 2 on z-2), shown and painted
+            //     since they were bound (an in-place switch keeps the planes, so their paint count alone proves nothing, Fix 2);
+            //     every unit in the window on a plane's level has a visible sprite with a ready bitmap and a frame, on its cell's
+            //     foot; and no plane draws a unit of another level (no one-frame-late planes, units or leftovers).
             const atEvent = [];
-            const snapshotAtEvent = (from, to) => {
-                const r = D.root(), frame = Graphics.frameCount, out = { from, to, frame, root: !!r, planes: [], units: [], missing: [] };
-                if (r) {
-                    const win = r.planes[0].entityWindow();
-                    for (const p of r.planes) {
-                        if (!p.level) continue;
-                        out.planes.push({ depth: p.depth, z: p.level.z, visible: p.visible, paints: p._tilemap.paints });
-                        for (const u of W.units()) {
-                            if (!u || !u.area || u.area.x !== p.level.x || u.area.y !== p.level.y || (u.z || 0) !== p.level.z || (u.data && (u.data.dead || u.data.hidden))) continue;
-                            if (!p.inEntityWindow(win, u.x, u.y, size)) continue;
-                            const s = p._units.get(u.id);
-                            const ok = !!s && s.visible && !!s.bitmap && s.bitmap.isReady() && s._frame.width > 0 && s._ufCol >= 0;
-                            out.units.push(u.id);
-                            if (!ok) out.missing.push(`${u.name}#${u.id}@${p.level.z}`);
-                        }
+            let awaitingDraw = null;
+            const switchState = (to, frame) => {
+                const r = D.root(), out = { frame, root: !!r, want: [to - 1, to - 2].filter(z => L.isLevel(z)), planes: [], planesOk: false, units: [], missing: [], stale: [] };
+                if (!r) return out;
+                const win = r.planes[0].entityWindow();
+                const footOf = u => ({ x: Math.round(($gameMap.adjustX(u.x) + 0.5) * TW), y: Math.round(($gameMap.adjustY(u.y) + 1) * TH) });
+                for (const p of r.planes) {
+                    if (!p.level) continue;
+                    const tm = p._tilemap;
+                    out.planes.push({ depth: p.depth, z: p.level.z, visible: p.visible, paints: tm.paints, painted: tm.paints > p._paintsAtBind && !tm._needsRepaint });
+                    for (const u of W.units()) {
+                        if (!u || !u.area || u.area.x !== p.level.x || u.area.y !== p.level.y || (u.z || 0) !== p.level.z || (u.data && (u.data.dead || u.data.hidden))) continue;
+                        if (!p.inEntityWindow(win, u.x, u.y, size)) continue;
+                        const s = p._units.get(u.id), f = footOf(u);
+                        const ok = !!s && s.visible && !!s.bitmap && s.bitmap.isReady() && s._frame.width > 0 && s._ufCol >= 0 && s.x === f.x && s.y === f.y;
+                        out.units.push(u.id);
+                        if (!ok) out.missing.push(`${u.name}#${u.id}@${p.level.z}${s && s.visible ? ` at (${s.x},${s.y}), its foot (${f.x},${f.y})` : ""}`);
+                    }
+                    for (const s of p._units.values()) {
+                        const u = s._ufRef;
+                        if (s.visible && u && (!u.area || u.area.x !== p.level.x || u.area.y !== p.level.y || (u.z || 0) !== p.level.z)) out.stale.push(`${u.name}#${u.id}@${u.z || 0} on the ${p.level.z} plane`);
                     }
                 }
+                out.planesOk = out.planes.length === out.want.length && out.planes.every((p, i) => p.z === out.want[i] && p.visible && p.painted);
+                return out;
+            };
+            const snapshotAtEvent = (from, to) => {
+                const out = Object.assign({ from, to }, switchState(to, Graphics.frameCount));
                 atEvent.push(out);
+                awaitingDraw = out;
+            };
+            // The first render after the event: RMMZ renders once per tick, after the tick's updates (Graphics._onTick).
+            const app = Graphics.app, ownRender = Object.prototype.hasOwnProperty.call(app, "render"), realRender = app.render;
+            app.render = function() {
+                if (awaitingDraw) { awaitingDraw.drawn = switchState(awaitingDraw.to, Graphics.frameCount); awaitingDraw = null; }
+                return realRender.apply(this, arguments);
             };
             UF.Events.on("levels:viewChanged", snapshotAtEvent);
             await goTo(2);
@@ -2054,15 +2078,22 @@
             D.setEnabled(true); await t.waitFrames(3); shots.push(t.screenshot("minus1_flat"));
             await goTo(0);
             UF.Events.off("levels:viewChanged", snapshotAtEvent);
+            if (ownRender) app.render = realRender; else delete app.render;
             t.check("every_view_sees_through", views.length === 4 && views.every(v => v.ok), views.map(v => v.text).join("; "));
 
             // (1) Flat on +2 and +1 with both planes bound: no filter anywhere under the root, scale 1 and alpha 1 on the root, the
             //     planes and their entity containers; the map's tilemap at scale 1 without filters.
             const flatOk = ["plus2", "plus1"].every(k => flatAt[k] && flatAt[k].bound.length === 2 && flatAt[k].bad.length === 0);
             t.check("flat_no_filters", flatOk, ["plus2", "plus1"].map(k => `${k}: planes on levels [${flatAt[k] ? flatAt[k].bound.join(", ") : "-"}], ${flatAt[k] && flatAt[k].bad.length ? flatAt[k].bad.slice(0, 4).join("; ") : "flat"}`).join("; "));
-            const evOk = atEvent.length >= 4 && atEvent.every(e => e.root && e.planes.length > 0 && e.planes.every(p => p.visible && p.paints > 0) && e.missing.length === 0)
-                && atEvent.some(e => e.to === 2 && unitA && e.units.includes(unitA.id)) && atEvent.some(e => e.to === 0 && unitB && e.units.includes(unitB.id));
-            t.check("switch_same_frame", evOk, atEvent.map(e => `${e.from}->${e.to} (frame ${e.frame}): planes ${e.planes.map(p => `${p.z}:${p.visible ? "shown" : "HIDDEN"} ${p.paints} paint(s)`).join(", ") || "NONE"}; ${e.units.length} unit(s) in the window${e.missing.length ? `, WITHOUT a frame: ${e.missing.join(" ")}` : ", all with a frame"}`).join("; ") || "no viewChanged event");
+            // Both observations of every switch must hold; the fixture units A (+1, seen from +2) and B (-1, seen from the ground) are
+            // among the units judged at both.
+            const stateOk = s => !!s && s.root && s.planesOk && s.missing.length === 0 && s.stale.length === 0;
+            const sequence = atEvent.map(e => `${e.from}->${e.to}`).join(" "), wantSequence = "0->2 2->1 1->0 0->-1 -1->0";
+            const judged = (e, u) => !!u && e.units.includes(u.id) && !!e.drawn && e.drawn.units.includes(u.id);
+            const evOk = sequence === wantSequence && atEvent.every(e => stateOk(e) && stateOk(e.drawn))
+                && atEvent.some(e => e.to === 2 && judged(e, unitA)) && atEvent.some(e => e.to === 0 && judged(e, unitB));
+            const stateText = s => !s ? "NEVER DRAWN" : `planes ${s.planes.map(p => `${p.z}:${p.visible ? "shown" : "HIDDEN"} ${p.painted ? "painted" : "NOT PAINTED"} since bound (${p.paints} paint(s))`).join(", ") || "NONE"}${s.planesOk ? "" : ` (want levels [${s.want.join(", ")}], shown and painted)`}; ${s.units.length} unit(s) in the window${s.missing.length ? `, NOT DRAWN ON THEIR CELL: ${s.missing.join(" ")}` : ", all with a frame on their cell"}${s.stale.length ? `; STALE: ${s.stale.join(" ")}` : ""}`;
+            t.check("switch_same_frame", evOk, `switches ${sequence || "none"}${sequence === wantSequence ? "" : ` (want ${wantSequence})`}: ` + atEvent.map(e => `${e.from}->${e.to} at levels:viewChanged (frame ${e.frame}): ${stateText(e)}; first drawn frame${e.drawn ? ` (frame ${e.drawn.frame})` : ""}: ${stateText(e.drawn)}`).join("; "));
             const fs = require("fs");
             const sizes = shots.map(f => (fs.existsSync(f) ? fs.statSync(f).size : 0));
             t.check("screenshots_written", shots.length === 4 && sizes.every(n => n > 10000), shots.map((f, i) => `${require("path").basename(f)} ${sizes[i]} B`).join(", "));
