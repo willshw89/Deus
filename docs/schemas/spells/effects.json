@@ -2554,7 +2554,7 @@
             "dim": {"srdRef": "flame-blade.measures[2]", "unit": "ft"},
             "dimIsAdditional": true,
             "attachTo": "hand",
-            "heat": false
+            "heat": {"ownerOpen": "Q4", "item": "magicalFireFuel"}
           },
           "ledger": {"mode": "none"}
         },
@@ -2574,6 +2574,13 @@
           },
           "params": {"targets": ["directTarget"], "excludeWornCarried": true},
           "ledger": {"mode": "none", "downstream": ["transform:burn"]}
+        }
+      ],
+      "ownerOpen": [
+        {
+          "question": "Q4",
+          "item": "magicalFireFuel",
+          "note": "Whether the fiery blade heats or lights what it only touches is SRD-silent; ignition of a struck flammable object is added under rule R2."
         }
       ]
     },
@@ -7068,8 +7075,7 @@
           },
           "params": {
             "bright": {"tuningRef": "light.flameRadius"},
-            "attachTo": "wall",
-            "heat": true
+            "attachTo": "wall"
           },
           "ledger": {"mode": "none"}
         }

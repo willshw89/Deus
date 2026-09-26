@@ -1,0 +1,11 @@
+{
+  "name": "time_domain_wrong",
+  "rule": "ruleTimeDomain",
+  "brief": "durations are SRD seconds with a timeDomain tag (action or historical)",
+  "description": "Gentle Repose (days) is tagged with the action clock.",
+  "expect": ["TIME_DOMAIN"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:gentle-repose/effects/@preserve/lifetime/timeDomain", "value": "action"}
+  ]
+}

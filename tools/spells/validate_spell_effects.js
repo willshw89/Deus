@@ -695,6 +695,24 @@ function ruleSecondsPerTickOpen(data, add) {
 
 function ledgerOf(fx) { return fx && fx.ledger && typeof fx.ledger === "object" ? fx.ledger : {}; }
 
+// Q2: every lifetime carries the time-domain tag that tuning.json tables.timeDomain gives its SRD unit (a label, never a rate).
+function ruleTimeDomain(data, add) {
+    const table = (((data.tuning || {}).tables) || {}).timeDomain || {};
+    for (const rec of recordsOf(data)) instancesOf(rec).forEach((fx, i) => {
+        const lt = fx.lifetime;
+        if (!lt || !lt.duration) return;
+        let unit = "turnRelative";
+        if (typeof lt.duration.srdRef === "string") {
+            const r = resolveSrdRef(data, lt.duration.srdRef);
+            if (r.error || !r.node) return;
+            unit = r.node.kind === "timed" ? r.node.unit : (r.node.unit || r.node.kind);
+        }
+        const row = table[unit];
+        if (!row || typeof row.value !== "string") add("TIME_DOMAIN", rec.spellId, "/effects/" + i + "/lifetime", "no time-domain row for SRD unit " + JSON.stringify(unit) + " in tuning.json tables.timeDomain");
+        else if (lt.timeDomain !== row.value) add("TIME_DOMAIN", rec.spellId, "/effects/" + i + "/lifetime/timeDomain", "an SRD " + unit + " lifetime is tagged " + row.value + " (tuning.json), not " + lt.timeDomain);
+    });
+}
+
 function ruleLedgerCause(data, add) {
     for (const rec of recordsOf(data)) instancesOf(rec).forEach((fx, i) => {
         const L = ledgerOf(fx);
@@ -883,7 +901,7 @@ function ruleBaselineFresh(data, add) {
 
 const RULES = [
     ruleSchema, ruleCoverage, ruleSystems, rulePrimitiveKnown, rulePrimitiveSystem, rulePrimitiveCoverage, ruleKeys, ruleVariants,
-    ruleSrdQuotes, ruleSrdRefs, ruleSrdNumberCopied, ruleSrdFieldLiteral, ruleNoTickLiterals, ruleSecondsPerTickOpen,
+    ruleSrdQuotes, ruleSrdRefs, ruleSrdNumberCopied, ruleSrdFieldLiteral, ruleNoTickLiterals, ruleSecondsPerTickOpen, ruleTimeDomain,
     ruleLedgerCause, ruleLedgerNames, ruleLedgerClasses, ruleLedgerRows, ruleNoOre, ruleSourceScope, ruleLedgerMode,
     ruleTuningRefs, ruleOwnerOpen, ruleCatalogue, ruleBaselineFresh
 ];

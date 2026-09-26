@@ -195,18 +195,18 @@
         "source": "SIM.40.01 section 8.3 (objects are immune to psychic damage, same SRD rule)."
       },
       "necrotic": {
-        "value": "none",
+        "value": null,
         "unit": "physical class",
-        "status": "PM_DEFAULT",
-        "source": "SIM.40.01 section 8.3 (the SRD is silent for objects). Effects on plants are Owner question Q3.",
-        "question": "Q3"
+        "status": "OWNER_OPEN",
+        "question": "Q3",
+        "source": "SIM.40.01 section 8.3 maps necrotic to none because the SRD is silent for objects; whether necrotic has a physical effect (on plants) is Owner question Q3, so no class is set here. No effect record uses necrotic for volume damage."
       },
       "radiant": {
-        "value": "none",
+        "value": null,
         "unit": "physical class",
-        "status": "PM_DEFAULT",
-        "source": "SIM.40.01 section 8.3 (the SRD is silent for objects). Effects on plants are Owner question Q3.",
-        "question": "Q3"
+        "status": "OWNER_OPEN",
+        "question": "Q3",
+        "source": "SIM.40.01 section 8.3 maps radiant to none because the SRD is silent for objects; whether radiant has a physical effect (on plants) is Owner question Q3, so no class is set here. No effect record uses radiant for volume damage."
       },
       "piercing": {
         "value": "weaponAttackPath",
@@ -290,6 +290,65 @@
         "unit": "ledger class and form",
         "status": "PLACEHOLDER",
         "source": "SRD Wish: 'one object of up to 25,000 gp in value that isn’t a magic item'. The class is the object's own material, set per object; a finite-family object is Owner question Q1 (item finiteFamilyMatter). The effect uses ledger mode policy."
+      }
+    },
+    "timeDomain": {
+      "instantaneous": {
+        "value": "action",
+        "unit": "time domain",
+        "status": "PM_DEFAULT",
+        "source": "Tag only: which clock a lifetime runs on. The rate of each clock is secondsPerTick, Owner question Q2 (null). SRD rounds, minutes and hours are action timers (docs/SRD5_1_INTEGRATION.md:66); days and longer run on the historical clock (SIM.40.05 authors Gentle Repose's days there)."
+      },
+      "round": {
+        "value": "action",
+        "unit": "time domain",
+        "status": "PM_DEFAULT",
+        "source": "Tag only: which clock a lifetime runs on. The rate of each clock is secondsPerTick, Owner question Q2 (null). SRD rounds, minutes and hours are action timers (docs/SRD5_1_INTEGRATION.md:66); days and longer run on the historical clock (SIM.40.05 authors Gentle Repose's days there)."
+      },
+      "minute": {
+        "value": "action",
+        "unit": "time domain",
+        "status": "PM_DEFAULT",
+        "source": "Tag only: which clock a lifetime runs on. The rate of each clock is secondsPerTick, Owner question Q2 (null). SRD rounds, minutes and hours are action timers (docs/SRD5_1_INTEGRATION.md:66); days and longer run on the historical clock (SIM.40.05 authors Gentle Repose's days there)."
+      },
+      "hour": {
+        "value": "action",
+        "unit": "time domain",
+        "status": "PM_DEFAULT",
+        "source": "Tag only: which clock a lifetime runs on. The rate of each clock is secondsPerTick, Owner question Q2 (null). SRD rounds, minutes and hours are action timers (docs/SRD5_1_INTEGRATION.md:66); days and longer run on the historical clock (SIM.40.05 authors Gentle Repose's days there)."
+      },
+      "turnRelative": {
+        "value": "action",
+        "unit": "time domain",
+        "status": "PM_DEFAULT",
+        "source": "Tag only: which clock a lifetime runs on. The rate of each clock is secondsPerTick, Owner question Q2 (null). SRD rounds, minutes and hours are action timers (docs/SRD5_1_INTEGRATION.md:66); days and longer run on the historical clock (SIM.40.05 authors Gentle Repose's days there).",
+        "note": "An SRD end such as 'until the end of your next turn'."
+      },
+      "day": {
+        "value": "historical",
+        "unit": "time domain",
+        "status": "PM_DEFAULT",
+        "source": "Tag only: which clock a lifetime runs on. The rate of each clock is secondsPerTick, Owner question Q2 (null). SRD rounds, minutes and hours are action timers (docs/SRD5_1_INTEGRATION.md:66); days and longer run on the historical clock (SIM.40.05 authors Gentle Repose's days there)."
+      },
+      "year": {
+        "value": "historical",
+        "unit": "time domain",
+        "status": "PM_DEFAULT",
+        "source": "Tag only: which clock a lifetime runs on. The rate of each clock is secondsPerTick, Owner question Q2 (null). SRD rounds, minutes and hours are action timers (docs/SRD5_1_INTEGRATION.md:66); days and longer run on the historical clock (SIM.40.05 authors Gentle Repose's days there)."
+      },
+      "untilDispelled": {
+        "value": "historical",
+        "unit": "time domain",
+        "status": "PM_DEFAULT",
+        "source": "Tag only: which clock a lifetime runs on. The rate of each clock is secondsPerTick, Owner question Q2 (null). SRD rounds, minutes and hours are action timers (docs/SRD5_1_INTEGRATION.md:66); days and longer run on the historical clock (SIM.40.05 authors Gentle Repose's days there).",
+        "note": "No expiry; the tag only says which clock the instance is kept on."
+      },
+      "special": {
+        "value": "historical",
+        "unit": "time domain",
+        "status": "PM_DEFAULT",
+        "source": "Tag only: which clock a lifetime runs on. The rate of each clock is secondsPerTick, Owner question Q2 (null). SRD rounds, minutes and hours are action timers (docs/SRD5_1_INTEGRATION.md:66); days and longer run on the historical clock (SIM.40.05 authors Gentle Repose's days there).",
+        "note": "A special duration points at a time measure instead; this row is a fallback."
       }
     }
   },
@@ -443,9 +502,9 @@
         "entangleBurns": {"asks": "Do Entangle's conjured weeds and vines burn?", "options": ["yes", "no"], "recordsAffected": ["srd:spell:entangle"]},
         "thornsBurn": {"asks": "Does Wall of Thorns' brush burn?", "options": ["yes", "no"], "recordsAffected": ["srd:spell:wall-of-thorns"]},
         "magicalFireFuel": {
-          "asks": "Does magical fire (Wall of Fire, Flaming Sphere, Fire Shield, Produce Flame) consume fuel, leave ash, or light tinder?",
+          "asks": "Does magical fire (Wall of Fire, Flaming Sphere, Fire Shield, Produce Flame, Flame Blade) consume fuel, leave ash, or light tinder?",
           "options": ["no", "yes (the Owner specifies which)"],
-          "recordsAffected": ["srd:spell:wall-of-fire", "srd:spell:flaming-sphere", "srd:spell:fire-shield", "srd:spell:produce-flame"]
+          "recordsAffected": ["srd:spell:wall-of-fire", "srd:spell:flaming-sphere", "srd:spell:fire-shield", "srd:spell:produce-flame", "srd:spell:flame-blade"]
         },
         "forceBearsLoad": {
           "asks": "Does a horizontal Wall of Force, a Forcecage or a Resilient Sphere bear load?",
