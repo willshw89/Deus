@@ -972,6 +972,7 @@ function main() {
             const ctl = safe(CASES[m.kill], control, false);
             const res = safe(CASES[m.kill], pv(name) ? control : mt, false);
             check(name, ctl === null && res !== null, ctl !== null ? `kill case ${m.kill} fails on the unmutated copy: ${ctl}` : `mutant survived: ${m.kill} still passes`);
+            if (res !== null) console.log(`  ${m.kill} on the mutant: ${res.length > 300 ? `${res.slice(0, 300)}...` : res}`);
         }
     }
 
