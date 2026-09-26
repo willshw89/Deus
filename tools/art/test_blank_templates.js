@@ -482,6 +482,7 @@ function refusalCases(toolPath, tag, base, onlyNames) {
         ['character_sheet_size', ['SHEET_INVALID'], c => { c.sheets.find(s => s.sheetId === '$TEST_Human').w += 1; }],
         ['atlas_too_big', ['SHEET_INVALID'], c => { c.sheets[0].w += 1; }],
         ['unsafe_sheet_id', ['SHEET_INVALID', 'SLOT_INVALID'], c => { c.sheets.find(s => s.sheetId === '$TEST_Human').sheetId = '../TEST_escape'; }],
+        ['sheet_id_case_clash', ['SHEET_INVALID'], c => { c.sheets.push(Object.assign(clone(c.sheets[1]), { sheetId: c.sheets[1].sheetId.toLowerCase() })); }],
         ['geometry_missing', ['GEOMETRY_MISSING'], c => { c.geometry.path = path.join(TMP, 'TEST_no_such_geometry.json'); }],
         ['palette_missing', ['PALETTE_UNREADABLE'], c => { c.palette.path = path.join(TMP, 'TEST_no_such_palette.hex'); }],
         ['grid_colour_in_palette', ['PALETTE_COLLISION'], c => { c.palette.path = synthPalette('grid', tool.GRID_HEX); }],

@@ -248,12 +248,14 @@ function checkCatalogue(cat, g, geoFile, refuse) {
     }
 
     const sheets = new Map();
+    const fileNames = new Set();      // sheet ids name files, and Windows file names ignore case
     if (!Array.isArray(cat.sheets) || cat.sheets.length === 0) refuse('CATALOGUE_INVALID', 'sheets must be a non-empty array');
     const frames = activeFrames(g);
     for (const s of cat.sheets || []) {
         const id = s && s.sheetId;
         if (typeof id !== 'string' || !SAFE_SHEET_ID.test(id)) { refuse('SHEET_INVALID', `sheetId ${JSON.stringify(id)} is not a safe file name`); continue; }
-        if (sheets.has(id)) { refuse('SHEET_INVALID', `sheetId ${id} appears twice`); continue; }
+        if (fileNames.has(id.toLowerCase())) { refuse('SHEET_INVALID', `sheetId ${id} appears twice (ignoring case)`); continue; }
+        fileNames.add(id.toLowerCase());
         sheets.set(id, s);
         if (!SHEET_KINDS.includes(s.kind)) refuse('SHEET_INVALID', `${id}: kind ${JSON.stringify(s.kind)} is not one of ${SHEET_KINDS.join(', ')}`);
         if (!isPosInt(s.w) || !isPosInt(s.h)) { refuse('SHEET_INVALID', `${id}: w and h must be positive integers`); continue; }
