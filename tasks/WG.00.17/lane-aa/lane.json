@@ -2,8 +2,8 @@
   "lane": "lane-aa",
   "taskId": "WG.00.17",
   "branch": "task/lane-aa",
-  "writer": "claude",
-  "reviewer": "grok",
+  "writer": "grok",
+  "reviewer": "gemini",
   "allowedPaths": [
     "game/js/plugins/DEUS_Levels.js",
     "game/js/plugins/DEUS_World.js",
