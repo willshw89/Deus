@@ -1,0 +1,85 @@
+{
+    "lane":  "lane-ab",
+    "taskId":  "SIM.60.05",
+    "branch":  "task/lane-ab",
+    "writer":  "grok",
+    "reviewer":  "claude",
+    "push":  true,
+    "allowedPaths":  [
+                         "game/js/sim/rules/**",
+                         "game/js/plugins/DEUS_Combat.js",
+                         "tools/rules/**",
+                         "tools/test_srd_rules_proof.js",
+                         "tools/test_srd_combat_proof.js",
+                         "tools/test_srd_equipment_proof.js",
+                         "tools/test_d20_equipment_slots.js",
+                         "docs/systems/UF_Combat.md",
+                         "docs/systems/DEUS_Rules.md",
+                         "tasks/SIM.60.05/**"
+                     ],
+    "gateTests":  [
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/rules/test_srd_rules.js"
+                                   ],
+                          "timeoutSec":  900
+                      },
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/test_srd_rules_proof.js"
+                                   ],
+                          "timeoutSec":  300
+                      },
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/test_srd_combat_proof.js"
+                                   ],
+                          "timeoutSec":  300
+                      },
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/test_srd_equipment_proof.js"
+                                   ],
+                          "timeoutSec":  300
+                      },
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/test_d20_equipment_slots.js"
+                                   ],
+                          "timeoutSec":  300
+                      },
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/test_conditions_system.js"
+                                   ],
+                          "timeoutSec":  300
+                      },
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/test_conditions_native_closure.js"
+                                   ],
+                          "timeoutSec":  300
+                      },
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/test_combat_dying_integration.js"
+                                   ],
+                          "timeoutSec":  300
+                      },
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/check_deus_syntax.js"
+                                   ],
+                          "timeoutSec":  600
+                      }
+                  ]
+}
