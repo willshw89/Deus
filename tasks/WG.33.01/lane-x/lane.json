@@ -1,0 +1,59 @@
+{
+  "lane": "lane-x",
+  "taskId": "WG.33.01",
+  "branch": "task/lane-x",
+  "writer": "claude",
+  "reviewer": "grok",
+  "allowedPaths": [
+    "tools/verify_world_state_registry.js",
+    "tools/test_verify_world_state_registry.js",
+    "tools/wsr/**",
+    "tasks/WG.33.01/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "node",
+      "args": [
+        "tools/test_verify_world_state_registry.js"
+      ],
+      "timeoutSec": 600
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/verify_world_state_registry.js"
+      ],
+      "timeoutSec": 600
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/verify_world_state_registry.js",
+        "--check"
+      ],
+      "timeoutSec": 600
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/art/test_catalogue.js"
+      ],
+      "timeoutSec": 600
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/art/build_catalogue.js",
+        "--check"
+      ],
+      "timeoutSec": 600
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/check_deus_syntax.js"
+      ],
+      "timeoutSec": 600
+    }
+  ]
+}
