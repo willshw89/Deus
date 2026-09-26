@@ -41,6 +41,8 @@ const { spawnSync } = require("child_process");
 
 const DEFAULT_ALLOWLIST = "tools/security/secrets_allowlist.json";
 const ALLOWLIST_SCHEMA = "deus.secrets_allowlist.v1";
+const DEFAULT_BASELINE = "tools/security/secrets_baseline.json";
+const BASELINE_SCHEMA = "deus.secrets_baseline.v1";
 const REDACT_KEEP = 4;
 const NUL_SNIFF_BYTES = 8000;           // git's own "is this binary" window
 const MAX_BUFFER = 1024 * 1024 * 1024;
@@ -50,14 +52,23 @@ const COMMIT_MESSAGE_PATH = "<commit-message>";
 // characters of ENTROPY_MIN_LEN..ENTROPY_MAX_LEN (longer runs are data blobs, not credentials).
 // Mixed runs (upper, lower and digit all present) are a finding at ENTROPY_MIN_BITS bits per
 // character or more. Pure hex runs (commit hashes, sha256 sums, colours) are only a finding when
-// they are the value of a credential-named assignment (ENTROPY_HEX_CONTEXT) and reach
-// ENTROPY_HEX_MIN_BITS.
+// they are the value of a credential-named assignment (ENTROPY_CONTEXT, looked for in the
+// ENTROPY_CONTEXT_WINDOW characters before the run) and reach ENTROPY_HEX_MIN_BITS.
+// False-positive tuning (escalation.md: 176 of 184 first-run hits were file paths or URLs, 3 were
+// base64 alphabet tables):
+//   - "/" separates path and URL segments. A run containing "/" is judged per "/"-free segment. The
+//     whole run is judged too only when it shows a sign of base64 that paths lack ("+", or "="
+//     padding) or when it is the value of a credential-named assignment.
+//   - A run holding ENTROPY_SEQ_RUN or more consecutive ascending characters ("ABCDEF", "012345")
+//     is an alphabet or lookup table, not a generated value.
 const ENTROPY_MIN_LEN = 32;
 const ENTROPY_MAX_LEN = 256;
 const ENTROPY_MIN_BITS = 4.5;
 const ENTROPY_HEX_MIN_BITS = 3.0;
+const ENTROPY_SEQ_RUN = 6;
+const ENTROPY_CONTEXT_WINDOW = 60;
 const ENTROPY_TOKEN_RE = new RegExp("[A-Za-z0-9+/_-]{" + ENTROPY_MIN_LEN + ",}={0,2}", "g");
-const ENTROPY_HEX_CONTEXT = /(?:secret|passw(?:or)?d|pwd|token|api[_-]?key|apikey|access[_-]?key|private[_-]?key|credential|auth)[\w.-]*["']?\s*[:=]\s*["']?$/i;
+const ENTROPY_CONTEXT = /(?:secret|passw(?:or)?d|pwd|token|api[_-]?key|apikey|access[_-]?key|private[_-]?key|credential|auth)[\w.-]*["']?\s*[:=]\s*["']?$/i;
 
 // Skipped without reading (their bytes are image, audio, font, archive or engine binary formats).
 const BINARY_EXTENSIONS = new Set([
@@ -155,23 +166,42 @@ function overlaps(taken, a, b) {
     return false;
 }
 
+function hasSequentialRun(s, n) {
+    let run = 1;
+    for (let i = 1; i < s.length; i++) {
+        run = s.charCodeAt(i) === s.charCodeAt(i - 1) + 1 ? run + 1 : 1;
+        if (run >= n) return true;
+    }
+    return false;
+}
+
 function entropyHits(line, taken) {
     const hits = [];
     ENTROPY_TOKEN_RE.lastIndex = 0;
     let m;
     while ((m = ENTROPY_TOKEN_RE.exec(line)) !== null) {
+        const padded = m[0].endsWith("=");
         const tok = m[0].replace(/=+$/, "");
-        const start = m.index, end = m.index + tok.length;
-        if (tok.length < ENTROPY_MIN_LEN || tok.length > ENTROPY_MAX_LEN) continue;
-        if (overlaps(taken, start, end)) continue;
-        const bits = shannonBits(tok);
-        if (/^[0-9a-fA-F]+$/.test(tok)) {
-            if (bits < ENTROPY_HEX_MIN_BITS) continue;
-            if (!ENTROPY_HEX_CONTEXT.test(line.slice(Math.max(0, start - 60), start))) continue;
-        } else if (!(hasUpper(tok) && hasLower(tok) && hasDigit(tok)) || bits < ENTROPY_MIN_BITS) {
-            continue;
+        const context = ENTROPY_CONTEXT.test(line.slice(Math.max(0, m.index - ENTROPY_CONTEXT_WINDOW), m.index));
+        const candidates = [];
+        if (!tok.includes("/") || padded || tok.includes("+") || context) candidates.push([m.index, tok]);
+        else {
+            let off = m.index;
+            for (const seg of tok.split("/")) { candidates.push([off, seg]); off += seg.length + 1; }
         }
-        hits.push({ rule: ENTROPY_RULE.id, start, end, value: tok, bits: Math.round(bits * 100) / 100 });
+        for (const [start, value] of candidates) {
+            const end = start + value.length;
+            if (value.length < ENTROPY_MIN_LEN || value.length > ENTROPY_MAX_LEN) continue;
+            if (overlaps(taken, start, end)) continue;
+            if (hasSequentialRun(value, ENTROPY_SEQ_RUN)) continue;
+            const bits = shannonBits(value);
+            if (/^[0-9a-fA-F]+$/.test(value)) {
+                if (bits < ENTROPY_HEX_MIN_BITS || !context) continue;
+            } else if (!(hasUpper(value) && hasLower(value) && hasDigit(value)) || bits < ENTROPY_MIN_BITS) {
+                continue;
+            }
+            hits.push({ rule: ENTROPY_RULE.id, start, end, value, bits: Math.round(bits * 100) / 100 });
+        }
     }
     return hits;
 }
@@ -306,10 +336,22 @@ function gitHeaderPath(rest) {
 
 // Parse git diff / git log -p output (with --text, -U0, --no-renames) into files with added lines.
 // A commit marker line "\x01<sha>" precedes each commit's patch in range mode.
+// The buffer is split line by line (a whole history patch can be larger than the biggest string V8
+// allows).
+function* bufferLines(buf) {
+    let pos = 0;
+    while (pos < buf.length) {
+        let nl = buf.indexOf(10, pos);
+        if (nl < 0) nl = buf.length;
+        yield buf.toString("latin1", pos, nl);
+        pos = nl + 1;
+    }
+}
+
 function parsePatch(buf) {
     const files = [];
     let commit = null, cur = null, hunk = null;
-    for (const raw of buf.toString("latin1").split("\n")) {
+    for (const raw of bufferLines(buf)) {
         if (raw.startsWith("\x01")) { commit = raw.slice(1).trim(); cur = null; hunk = null; continue; }
         if (raw.startsWith("diff --git ") || raw.startsWith("diff --cc ") || raw.startsWith("diff --combined ")) {
             let p;
@@ -389,20 +431,30 @@ function collectStaged(root) {
     return { units: unitsFromPatch(parsePatch(git(root, ["diff", "--cached"].concat(DIFF_FLAGS, ["--"])))), full: [] };
 }
 
+// Commits of a range are read RANGE_BATCH at a time, so one git output never has to hold the patch
+// of a whole history.
+const RANGE_BATCH = 64;
+
 function collectRange(root, range) {
     const m = /^([^.\s][^\s]*?)\.\.(\.?)([^.\s][^\s]*)$/.exec(range || "");
     if (!m || range.startsWith("-")) throw new UsageError("--range needs <a>..<b>");
     for (const rev of [m[1], m[3]]) git(root, ["rev-parse", "--verify", "--quiet", "--end-of-options", rev + "^{commit}"]);
-    const patch = git(root, ["log", "-p", "--cc", "--format=%x01%H"].concat(DIFF_FLAGS, ["--end-of-options", range, "--"]));
-    const units = unitsFromPatch(parsePatch(patch));
-    // Commit messages are history too (policy section 1): scan them as a pseudo-file per commit.
-    const msgs = git(root, ["log", "--format=%x01%H%x02%B%x03", "--end-of-options", range, "--"]).toString("latin1");
-    for (const rec of msgs.split("\x03")) {
-        const s = rec.indexOf("\x01"), t = rec.indexOf("\x02");
-        if (s < 0 || t < 0) continue;
-        units.push({ commit: rec.slice(s + 1, t), path: COMMIT_MESSAGE_PATH, binary: null, lines: splitLines(rec.slice(t + 1)) });
+    const commits = git(root, ["rev-list", "--end-of-options", range, "--"]).toString("utf8").split("\n").filter(Boolean);
+    function* units() {
+        for (let i = 0; i < commits.length; i += RANGE_BATCH) {
+            const batch = commits.slice(i, i + RANGE_BATCH);
+            const patch = git(root, ["log", "--no-walk=unsorted", "--root", "-p", "--cc", "--format=%x01%H"].concat(DIFF_FLAGS, ["--end-of-options"], batch, ["--"]));
+            yield* unitsFromPatch(parsePatch(patch));
+            // Commit messages are history too (policy section 1): scan them as a pseudo-file per commit.
+            const msgs = git(root, ["log", "--no-walk=unsorted", "--format=%x01%H%x02%B%x03", "--end-of-options"].concat(batch, ["--"])).toString("latin1");
+            for (const rec of msgs.split("\x03")) {
+                const s = rec.indexOf("\x01"), t = rec.indexOf("\x02");
+                if (s < 0 || t < 0) continue;
+                yield { commit: rec.slice(s + 1, t), path: COMMIT_MESSAGE_PATH, binary: null, lines: splitLines(rec.slice(t + 1)) };
+            }
+        }
     }
-    return { units, full: [] };
+    return { units: units(), full: [], commits };
 }
 
 function collectPath(root, cwd, p) {
@@ -432,7 +484,7 @@ function loadAllowlist(file, explicit) {
         return [];
     }
     let doc;
-    try { doc = JSON.parse(fs.readFileSync(file, "utf8").replace(/^﻿/, "")); } catch (e) { throw new UsageError("allowlist " + file + ": " + e.message); }
+    try { doc = JSON.parse(fs.readFileSync(file, "utf8").replace(/^\uFEFF/, "")); } catch (e) { throw new UsageError("allowlist " + file + ": " + e.message); }
     if (!doc || doc.schema !== ALLOWLIST_SCHEMA || !Array.isArray(doc.entries)) {
         throw new UsageError("allowlist " + file + ": expected { \"schema\": \"" + ALLOWLIST_SCHEMA + "\", \"entries\": [...] }");
     }
@@ -454,11 +506,92 @@ function loadAllowlist(file, explicit) {
 }
 
 // ---------------------------------------------------------------------------------------------
+// Baseline of known, accepted historical findings (BRIEF_RESUME1 item 1)
+//
+// Entries are { fingerprint, rule, incident, onlyInHistoryBefore, addedIn, reason }. `fingerprint`
+// is the sha256 of the matched value (never the value). A finding with that fingerprint and rule is
+// BASELINED only in a --range scan and only in a commit that is a strict ancestor of
+// `onlyInHistoryBefore` (the commit that removed the value). Anywhere else (HEAD, --staged, --path, a
+// commit that is not such an ancestor) it stays a finding: a revoked value added again is new.
+// `addedIn` lists the commits that added the value. A range scan that includes one of them must
+// baseline the entry there; if it does not, the entry is STALE and fails the run.
+// ---------------------------------------------------------------------------------------------
+
+function loadBaseline(file, explicit) {
+    if (!fs.existsSync(file)) {
+        if (explicit) throw new UsageError("baseline not found: " + file);
+        return [];
+    }
+    let doc;
+    try { doc = JSON.parse(fs.readFileSync(file, "utf8").replace(/^\s+/, "")); } catch (e) { throw new UsageError("baseline " + file + ": " + e.message); }
+    if (!doc || doc.schema !== BASELINE_SCHEMA || !Array.isArray(doc.entries)) {
+        throw new UsageError("baseline " + file + ": expected { \"schema\": \"" + BASELINE_SCHEMA + "\", \"entries\": [...] }");
+    }
+    const seen = new Set();
+    const isSha = v => typeof v === "string" && /^[0-9a-f]{40}$/.test(v);
+    doc.entries.forEach((e, i) => {
+        const where = "baseline entry " + i + ": ";
+        if (!e || typeof e !== "object" || Array.isArray(e)) throw new UsageError(where + "not an object");
+        const keys = Object.keys(e).sort().join(",");
+        if (keys !== "addedIn,fingerprint,incident,onlyInHistoryBefore,reason,rule") {
+            throw new UsageError(where + "needs exactly fingerprint, rule, incident, onlyInHistoryBefore, addedIn, reason");
+        }
+        if (typeof e.fingerprint !== "string" || !/^[0-9a-f]{64}$/.test(e.fingerprint)) throw new UsageError(where + "fingerprint must be 64 lowercase hex characters (sha256 of the value)");
+        if (!RULE_IDS.has(e.rule)) throw new UsageError(where + "unknown rule " + JSON.stringify(e.rule));
+        if (typeof e.incident !== "string" || !e.incident.trim()) throw new UsageError(where + "incident must name the incident record");
+        if (!isSha(e.onlyInHistoryBefore)) throw new UsageError(where + "onlyInHistoryBefore must be a full 40-character commit sha");
+        if (!Array.isArray(e.addedIn) || e.addedIn.length === 0 || !e.addedIn.every(isSha) || new Set(e.addedIn).size !== e.addedIn.length) {
+            throw new UsageError(where + "addedIn must be a non-empty list of distinct full commit shas");
+        }
+        if (e.addedIn.includes(e.onlyInHistoryBefore)) throw new UsageError(where + "addedIn cannot name onlyInHistoryBefore itself");
+        if (typeof e.reason !== "string" || e.reason.trim().length < 10) throw new UsageError(where + "reason must say why (10+ characters)");
+        const key = e.fingerprint + "\0" + e.rule;
+        if (seen.has(key)) throw new UsageError(where + "duplicate of an earlier entry");
+        seen.add(key);
+    });
+    return doc.entries;
+}
+
+// Strict ancestry, cached: is `commit` in the history before `fix`?
+function ancestryChecker(root) {
+    const cache = new Map();
+    return (commit, fix) => {
+        if (!commit || commit === fix) return false;
+        const key = commit + " " + fix;
+        if (!cache.has(key)) {
+            const r = spawnSync("git", ["merge-base", "--is-ancestor", commit, fix], { cwd: root, windowsHide: true });
+            if (r.error || (r.status !== 0 && r.status !== 1)) {
+                throw new UsageError("git merge-base --is-ancestor " + commit.slice(0, 12) + " " + fix.slice(0, 12) + " failed" +
+                                     (r.stderr && r.stderr.length ? ": " + r.stderr.toString("utf8").trim().split("\n")[0] : ""));
+            }
+            cache.set(key, r.status === 0);
+        }
+        return cache.get(key);
+    };
+}
+
+// Range mode only: every baseline commit must exist and every addedIn commit must be in the history
+// before onlyInHistoryBefore. A baseline that cannot be checked fails the run (exit 2).
+function checkBaselineCommits(root, entries, isBefore) {
+    entries.forEach((e, i) => {
+        for (const c of [e.onlyInHistoryBefore].concat(e.addedIn)) {
+            const r = spawnSync("git", ["cat-file", "-e", c + "^{commit}"], { cwd: root, windowsHide: true });
+            if (r.status !== 0) throw new UsageError("baseline entry " + i + ": commit " + c.slice(0, 12) + " is not in this repository");
+        }
+        for (const c of e.addedIn) {
+            if (!isBefore(c, e.onlyInHistoryBefore)) {
+                throw new UsageError("baseline entry " + i + ": addedIn " + c.slice(0, 12) + " is not in the history before " + e.onlyInHistoryBefore.slice(0, 12));
+            }
+        }
+    });
+}
+
+// ---------------------------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------------------------
 
 function parseArgs(argv) {
-    const o = { mode: "head", json: false, allowlist: null, range: null, path: null };
+    const o = { mode: "head", json: false, allowlist: null, baseline: null, range: null, path: null };
     const setMode = m => { if (o.mode !== "head") throw new UsageError("choose one of --staged, --range, --path"); o.mode = m; };
     for (let i = 0; i < argv.length; i++) {
         const a = argv[i];
@@ -467,14 +600,17 @@ function parseArgs(argv) {
         else if (a === "--range") { setMode("range"); o.range = argv[++i]; if (o.range === undefined) throw new UsageError("--range needs <a>..<b>"); }
         else if (a === "--path") { setMode("path"); o.path = argv[++i]; if (o.path === undefined) throw new UsageError("--path needs a file"); }
         else if (a === "--allowlist") { o.allowlist = argv[++i]; if (o.allowlist === undefined) throw new UsageError("--allowlist needs a file"); }
+        else if (a === "--baseline") { o.baseline = argv[++i]; if (o.baseline === undefined) throw new UsageError("--baseline needs a file"); }
         else if (a === "-h" || a === "--help") o.help = true;
         else throw new UsageError("unknown argument " + JSON.stringify(a));
     }
     return o;
 }
 
-function scan(collected, allowEntries) {
-    const findings = [], allowed = [], skipped = [];
+// `baseline` is { entries, isBefore } in range mode and null in every other mode (no baseline there).
+function scan(collected, allowEntries, baseline) {
+    const findings = [], allowed = [], baselined = [], skipped = [];
+    const baseEntries = baseline ? baseline.entries : [];
     let scanned = 0;
     for (const u of collected.units) {
         if (u.lines === null) { skipped.push({ path: u.path, commit: u.commit || null, reason: u.binary }); continue; }
@@ -496,16 +632,34 @@ function scan(collected, allowEntries) {
             };
             if (h.bits !== undefined) rec.bits = h.bits;
             const entry = allowEntries.find(e => e.path === rec.path && e.rule === rec.rule && e.lineSha256 === rec.lineSha256);
-            if (entry) { entry.used = true; rec.reason = entry.reason; allowed.push(rec); } else findings.push(rec);
+            if (entry) { entry.used = true; rec.reason = entry.reason; allowed.push(rec); continue; }
+            const fp = h.value === null ? null : sha256(h.value);
+            const base = fp === null ? undefined : baseEntries.find(e => e.fingerprint === fp && e.rule === rec.rule);
+            if (base && baseline.isBefore(rec.commit, base.onlyInHistoryBefore)) {
+                base.matchedIn.add(rec.commit);
+                Object.assign(rec, { fingerprint: fp, incident: base.incident, reason: base.reason });
+                baselined.push(rec);
+                continue;
+            }
+            // Out of scope: say so, so a re-added revoked value is recognisable. A fingerprint is only
+            // ever printed for a value the baseline already names.
+            if (base) Object.assign(rec, { fingerprint: fp, baselineOutOfScope: base.incident, onlyInHistoryBefore: base.onlyInHistoryBefore });
+            findings.push(rec);
         }
     }
-    // A (wrapped) unit binary-skipped for a NUL byte in a text-looking file is listed by name.
     const fullSet = collected.full === "all" ? null : new Set(collected.full);
     const stale = allowEntries.filter(e => !e.used && (fullSet === null || fullSet.has(e.path)))
         .map(e => ({ path: e.path, rule: e.rule, lineSha256: e.lineSha256, reason: e.reason }));
+    // A range scan that includes an addedIn commit must have baselined the entry in that commit.
+    const scannedCommits = new Set(collected.commits || []);
+    const staleBaseline = [];
+    for (const e of baseEntries) {
+        const missed = e.addedIn.filter(c => scannedCommits.has(c) && !e.matchedIn.has(c));
+        if (missed.length) staleBaseline.push({ fingerprint: e.fingerprint, rule: e.rule, incident: e.incident, missedIn: missed, reason: e.reason });
+    }
     const order = (a, b) => (a.commit || "").localeCompare(b.commit || "") || a.path.localeCompare(b.path) || a.line - b.line || a.rule.localeCompare(b.rule);
-    findings.sort(order); allowed.sort(order);
-    return { scanned, skipped, findings, allowed, stale };
+    findings.sort(order); allowed.sort(order); baselined.sort(order);
+    return { scanned, skipped, findings, allowed, baselined, stale, staleBaseline };
 }
 
 function where(r) {
@@ -517,30 +671,47 @@ function main(argv, cwd = process.cwd()) {
     let o;
     try {
         o = parseArgs(argv);
-        if (o.help) { out("usage: node tools/security/scan_secrets.js [--staged | --range <a>..<b> | --path <file>] [--json] [--allowlist <file>]"); return 0; }
+        if (o.help) { out("usage: node tools/security/scan_secrets.js [--staged | --range <a>..<b> | --path <file>] [--json] [--allowlist <file>] [--baseline <file>]"); return 0; }
         const root = repoRoot(cwd);
         const allowFile = o.allowlist ? path.resolve(cwd, o.allowlist) : path.join(root, DEFAULT_ALLOWLIST);
         const entries = loadAllowlist(allowFile, !!o.allowlist).map(e => Object.assign({}, e, { used: false }));
+        const baseFile = o.baseline ? path.resolve(cwd, o.baseline) : path.join(root, DEFAULT_BASELINE);
+        const baseEntries = loadBaseline(baseFile, !!o.baseline).map(e => Object.assign({}, e, { matchedIn: new Set() }));
+        let baseline = null;
+        if (o.mode === "range") {
+            baseline = { entries: baseEntries, isBefore: ancestryChecker(root) };
+            checkBaselineCommits(root, baseEntries, baseline.isBefore);
+        }
         const collected = o.mode === "staged" ? collectStaged(root)
             : o.mode === "range" ? collectRange(root, o.range)
             : o.mode === "path" ? collectPath(root, cwd, o.path)
             : collectHead(root);
-        const r = scan(collected, entries);
-        const code = r.findings.length || r.stale.length ? 1 : 0;
+        const r = scan(collected, entries, baseline);
+        const code = r.findings.length || r.stale.length || r.staleBaseline.length ? 1 : 0;
         if (o.json) {
             out(JSON.stringify({
                 tool: "scan_secrets", schema: "deus.scan_secrets.v1", mode: o.mode, range: o.range, filesScanned: r.scanned,
                 binarySkipped: r.skipped.length, skipped: r.skipped, findings: r.findings, allowed: r.allowed,
-                staleAllowlist: r.stale, exitCode: code
+                baselined: r.baselined, staleAllowlist: r.stale, staleBaseline: r.staleBaseline, exitCode: code
             }, null, 2));
             return code;
         }
-        for (const f of r.findings) out("FINDING " + where(f) + " " + f.rule + " " + f.redacted + (f.bits !== undefined ? " entropy=" + f.bits : ""));
+        for (const f of r.findings) {
+            out("FINDING " + where(f) + " " + f.rule + " " + f.redacted + (f.bits !== undefined ? " entropy=" + f.bits : "") +
+                (f.baselineOutOfScope ? " (fingerprint " + f.fingerprint.slice(0, 12) + " is baselined for " + f.baselineOutOfScope +
+                 " only in the history before " + f.onlyInHistoryBefore.slice(0, 12) + ")" : ""));
+        }
         for (const a of r.allowed) out("ALLOWED " + where(a) + " " + a.rule + " " + a.redacted + " reason: " + a.reason);
+        for (const b of r.baselined) out("BASELINED " + where(b) + " " + b.rule + " " + b.redacted + " fingerprint=" + b.fingerprint.slice(0, 12) + " incident: " + b.incident);
         for (const s of r.stale) out("STALE_ALLOWLIST " + s.path + " " + s.rule + " lineSha256=" + s.lineSha256.slice(0, 12) + " (matches nothing) reason: " + s.reason);
+        for (const s of r.staleBaseline) {
+            out("STALE_BASELINE fingerprint=" + s.fingerprint.slice(0, 12) + " " + s.rule + " incident: " + s.incident +
+                " (not found in addedIn commit " + s.missedIn.map(c => c.slice(0, 12)).join(", ") + ")");
+        }
         for (const s of r.skipped) if (s.reason === "nul") out("SKIPPED_BINARY " + (s.commit ? s.commit.slice(0, 12) + " " : "") + s.path + " (NUL byte)");
         out("RESULT: " + r.scanned + " files scanned, " + r.skipped.length + " binary skipped, " + r.findings.length + " findings, " +
-            r.allowed.length + " allowed, " + r.stale.length + " stale allowlist entries");
+            r.allowed.length + " allowed, " + r.baselined.length + " baselined, " + r.stale.length + " stale allowlist entries, " +
+            r.staleBaseline.length + " stale baseline entries");
         return code;
     } catch (e) {
         if (!(e instanceof UsageError)) throw e;
@@ -550,8 +721,8 @@ function main(argv, cwd = process.cwd()) {
     }
 }
 
-module.exports = { main, scanLine, shannonBits, redact, credentialFileHit, isBinaryPath, parsePatch, RULES, ENTROPY_RULE, CREDENTIAL_FILE_RULE,
-                   ENTROPY_MIN_LEN, ENTROPY_MAX_LEN, ENTROPY_MIN_BITS, ENTROPY_HEX_MIN_BITS, REDACT_KEEP };
+module.exports = { main, scanLine, shannonBits, redact, credentialFileHit, isBinaryPath, parsePatch, sha256, RULES, ENTROPY_RULE, CREDENTIAL_FILE_RULE,
+                   ENTROPY_MIN_LEN, ENTROPY_MAX_LEN, ENTROPY_MIN_BITS, ENTROPY_HEX_MIN_BITS, ENTROPY_SEQ_RUN, REDACT_KEEP };
 
 if (require.main === module) {
     try { process.exitCode = main(process.argv.slice(2)); } catch (e) { process.stderr.write("scan_secrets: internal error: " + (e && e.stack || e) + "\n"); process.exitCode = 2; }
