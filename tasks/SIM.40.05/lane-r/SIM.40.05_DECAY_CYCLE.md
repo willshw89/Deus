@@ -736,7 +736,7 @@ For these, a region keeps **cohort records** `(dc, stage, count, massByForm[])`:
 ### R-08.4 Fast-forward and deep history
 
 - **Day jumps.** Fast-forward, history mode and off-focus catch-up all advance the day counter and pop every heap entry due up to the new day, in `(dueYt, id)` order (ADR-003 L1696: "It runs the same heaps with day jumps"). **Cost is proportional to due events, not to years.**
-- **Worked example.** Aging a 40-structure site by 10,000 sy: 40 structures × 15 members × at most 6 events (4 thresholds, a failure, a burial change) = 3,600 member events; 2,000 unattended items × 4 steps = 8,000; 200 remains × 3 = 600. Total about 12,200 events, whatever the number of years. At an assumed 1-10 µs per event (heap pop plus a few writes; not measured) that is 12-122 ms, plus Lane Q's rechecks for the failures (C-5).
+- **Worked example.** Aging a 40-structure site by 10,000 sy: 40 structures × 15 members × at most 7 events (4 thresholds, the S1 stage point, a failure, a burial change; R-01.2) = 4,200 member events; 2,000 unattended items × 4 steps = 8,000; 200 remains × 3 = 600. Total about 12,800 events, whatever the number of years. At an assumed 1-10 µs per event (heap pop plus a few writes; not measured) that is 13-128 ms, plus Lane Q's rechecks for the failures (C-5).
 - **DEC-4 and Year 0.** History-produced ruins must come from the history-mode core, where "Traces are ordinary sim data, not flavour text" and there is "no second 'trace generator' that could invent material" (ADR-003 §14.2). Decay then only ages what history built. Whether a New Game may start with aged history at all is ADR-003 Q6 against INV-SIM-01 (ADR-003 L1249, §14.3), an Owner question this design does not answer. Decay works the same either way.
 
 ### R-08.5 Slow clocks (NAT-003, INV-SIM-02)
@@ -748,7 +748,7 @@ For these, a region keeps **cohort records** `(dc, stage, count, massByForm[])`:
 | Heap | Holds | Drained | Why |
 |---|---|---|---|
 | **Long heap** | decay members, litter footprints, residue weathering, pedogenesis, and item corrosion and rot steps (all lives ≥ 1 sy) | at each game-day boundary (ADR-003 L1689). At the boundary that starts day D, an entry is due when `dueYt × DPY ≤ D × 2,400`, that is, when its instant is not after the boundary. The batch is processed in `(dueYt, id)` order, at most ⌈due / 2,400⌉ per tick (ADR-003 L1047, L1690) | **Intentional.** These events are years to millennia apart. Processing them up to one game day late changes no whole-year checkpoint (below) and no chained instant (R-01.2 rebases at the causing instant, not the processing day) |
-| **Short heap** | remains records and FOOD items, the only classes with lives under 1 sy (R-03.3, R-03.4) | every tick. An entry is due when `dueYt × DPY ≤ tick`; `dueYt × DPY` is an exact integer tick. At most `B_short` entries per tick (default 16); any excess waits in key order, which delays it and never drops it | At DPY 1 a day-boundary drain would show a 0.25-sy corpse stage up to 0.75 game day (180 s real) late, and it would bunch every food event onto the day boundary |
+| **Short heap** | remains records and FOOD items, the only classes with lives under 1 sy (R-03.3, R-03.4) | every tick. An entry is due when `dueYt × DPY ≤ tick`; `dueYt × DPY` is an exact integer tick. At most `B_short` entries per tick (default 16); any excess waits in key order, which delays it and never drops it | At DPY 1 a day-boundary drain would show a 0.25-sy corpse stage up to 2,399 ticks (just under one game day, 240 s real) late, and it would bunch every food event onto the day boundary |
 
 - **Whole-year checkpoints stay day-keyed on purpose.** A checkpoint at year Y is sampled after both heaps have drained every entry with `dueYt ≤ 2,400 × Y`, and none later. An entry is in that set exactly when its instant is at most Y, so the set does not depend on DPY. For the long heap, `ceilDiv(dueYt × DPY, 2,400) ≤ Y × DPY` holds exactly when `dueYt ≤ 2,400 × Y`, because `ceilDiv(x, n) ≤ m` ⟺ `x ≤ m × n` for integers. FX-R-01's checkpoints (R-09.2) are whole years, so they need no sub-day key. The short heap exists for play-time placement and for AT-R-08, not for the long-run test. **[ADR-003]**
 - Decay needs no separate hour, season or decade service: each record carries its own due day, so a 3,000-sy wall life is one heap entry, not 3,000 annual ticks. This is how NAT-003's "multi-timescale execution (action, daily, seasonal, century)" (`docs/RISK_REGISTER.md:74`) is met for decay.
@@ -881,7 +881,7 @@ Band 2 has been SHELTERED since y13. It is rebased at 3,353,604 to `rem0 = 844,2
 | MR-01 residue leak | `residue.burn` computes gas as `floor(m × (1 − a − c))` instead of the remainder | A1, A2 at y5 |
 | MR-02 shed leak | shedding books FINES but does not add them to the member's shed pool | A1 |
 | MR-03 ore creation | the corrosion transform outputs an ore form, or an ore outcrop object, at y1,000 | A3 |
-| MR-04 foundation erasure | FOUNDATION members get a `failDay` (the TR-1 floor removed) | A4 at y3,000 or y10,000 |
+| MR-04 foundation erasure | FOUNDATION members get a `failYt` (the TR-1 floor removed) | A4 at y3,000 or y10,000 |
 | MR-05 relic erasure | the gold ring and glass rot like organics | A4 at y12,000 |
 | MR-06 vanishing remains | remains removed after 12 game hours (today's `DEUS_Anim.js:1162`) | A1, A4 |
 | MR-07 fire deletes items | today's `DEUS_Fire.js:442` behaviour | A1 at y5 |
@@ -958,12 +958,12 @@ DEC-014 gives no population numbers: the budget is "sized by post-split simulati
 
 - **Class:** O(k log n) per tick, where k ≤ ⌈due / 2,400⌉ is the number of due heap entries processed that tick (ADR-003 L1047) and n is the heap size. When nothing is due, the cost is one comparison of a heap top against the current boundary: once per game day for the long heap, once per tick for the short heap (R-08.5).
 - **Scenario L event rate:**
-  - members: 45,000 unmaintained × 6 events per life ÷ a mean life of about 500 sy = 540 per sy;
+  - members: 45,000 unmaintained × 7 events per life (R-08.4) ÷ a mean life of about 500 sy = 630 per sy;
   - items: 200,000 × 4 steps ÷ about 50 sy = 16,000 per sy;
   - remains: 833 × 3 = 2,500 per sy;
   - residue and litter: about 1,000 per sy;
   - **about 20,000 events per sy**.
-- **Under D-1 (b), DPY = 1:** 20,000 events per game day = ⌈20,000 / 2,400⌉ = **9 per tick**, 90 per real second at 1x, 1,440 at 16x. Each is a heap pop and push of at most about log2(245,000) ≈ 18 comparisons. The long heap holds about 245,000 entries (45,000 members and most of the 200,000 items); the short heap holds about 42,000 (41,700 remains and the food). Only the 540 member events per sy write strata (≤ 64 each) and wake Lane Q (C-5).
+- **Under D-1 (b), DPY = 1:** 20,000 events per game day = ⌈20,000 / 2,400⌉ = **9 per tick**, 90 per real second at 1x, 1,440 at 16x. Each is a heap pop and push of at most about log2(245,000) ≈ 18 comparisons. The long heap holds about 245,000 entries (45,000 members and most of the 200,000 items); the short heap holds about 42,000 (41,700 remains and the food). Only the member events (at most 630 per sy) write strata (≤ 64 each) and wake Lane Q (C-5).
 - **Under D-1 (a), DPY = N:** 20,000 / N per game day: 1 per tick at N = 20.
 - **Short heap:** remains at 2,500 per sy are about 1 per tick at DPY 1 (2,500 / 2,400), well inside `B_short` = 16.
 - **Per frame: zero.** Decay runs only in the core tick (historical domain), never from a render hook (A8).
@@ -1011,17 +1011,17 @@ This section answers R-11: automatable tests for SIM.40.05-.09 (and the interfac
 
 | Id | Leaf | Fixture and assertion | Mutant that must fail |
 |---|---|---|---|
-| AT-R-01 | SIM.40.05 | One member per dc and ex: lazy HP at sampled days equals the closed form; HP bytes are written only at the published thresholds and at failure (≤ `steps` + 1 writes per life) | HP written every day (write count above the bound); or the rate ignores `ex` |
-| AT-R-02 | SIM.40.05 | Data validator: every life > 0 or ∞; ∞ only where the table allows it; for every structure template, ROOF life at SKY < WALL life at SHELTERED; ore, coal, gem or fossil outputs absent from the transform table | ROOF and WALL lives swapped (MR-13): the validator exits 1 |
+| AT-R-01 | SIM.40.05 | One member per dc and ex: `rem` and the derived HP byte at sampled instants equal R-01.2's closed form; every event lands on its `cross` instant; HP bytes are written only at the published thresholds and at failure (≤ `steps` + 1 writes per life). A long-life case: ASHLAR SHELTERED at wR 90 with no modifier (20,000 sy, longer than 1,000 × maxHP game days at DPY 20) fails at exactly 48,000,000 yt under DPY 1 and DPY 20. A rebase case: an exposure change at `t1` sets `rem0 = rem(t1)`, `t0 = t1` and the new `lifeYt` (R-01.2) | HP written every day (write count above the bound); or the rate ignores `ex`; or the per-day `rateMilli` schedule (MR-15: at DPY 20, maxHP 120 and `rateMilli` 1, the 20,000-sy member fails at 6,000 sy); or a rebase that keeps the old `t0` (the failure instant moves) |
+| AT-R-02 | SIM.40.05 | Data validator: every life > 0 or ∞; ∞ only where the table allows it; every finite `lifeYears × 2,400` is an integer and every `lifeYt` ≤ 2^32 − 2 (R-01.2); for every structure template, ROOF life at SKY < WALL life at SHELTERED; ore, coal, gem or fossil outputs absent from the transform table | ROOF and WALL lives swapped (MR-13): the validator exits 1 |
 | AT-R-03 | SIM.40.05 | A maintained site: zero heap entries for its members and zero decay work over 10 game days (ADR-003 §17.6) | maintenance ignored: entries appear and work > 0 |
 | AT-R-04 | SIM.40.05, SIM.50.09 | Population to 0: ABANDONED after `siteAbandonYears`; at S3 on ≥ 50 % of mass the site is RUIN, `isRuined` is true, and the History reader gives `site.ruined = abandonedYear` | `isRuined` never set (today's X-7) |
-| AT-R-05 | SIM.40.05 with SIM.40.02 | House fixture: at the roof's `failDay`, Lane Q's break path is called once per roof member; wall tops become SKY; ≤ 64 cells enqueued per decay event; the ledger shows `BUILT→RUBBLE`, not a deletion | decay turns the strata to air itself (today's `DEUS_Levels.js:1702` path): ledger leak, no collapse event; or a whole-world support recheck (visit counter above the bound) |
+| AT-R-05 | SIM.40.05 with SIM.40.02 | House fixture: at the roof's `failYt`, Lane Q's break path is called once per roof member; wall tops become SKY and are rebased at that instant (`rem0 = rem(failYt)`, `t0 = failYt`, SKY `lifeYt`); ≤ 64 cells enqueued per decay event; the ledger shows `BUILT→RUBBLE`, not a deletion | decay turns the strata to air itself (today's `DEUS_Levels.js:1702` path): ledger leak, no collapse event; or a whole-world support recheck (visit counter above the bound) |
 | AT-R-06 | SIM.40.07 | Ore guard: static transform-table check; the runtime guard rejects an ore write with a non-generation cause and logs it; no recipe accepts OXIDE | corrosion outputs an ore form (MR-03); or an ore sprout like `DEUS_Ecology.js:739` is reintroduced and not rejected |
 | AT-R-07 | SIM.40.07 | An unattended iron longsword at SKY: 4 corrosion steps at the expected days, the grip rots on its own schedule, masses exact; the same sword carried by a unit never changes | attended items decay (breaks the DURABILITY.md:320 reading, OQ-R-04) |
-| AT-R-08 | SIM.40.07 with SIM.40.10 | An off-screen death makes a remains record; stages at the expected days; mass to SOIL-ORG, SOIL-MIN and AIR exact; the anchor is kept for 200 sy; *gentle repose* shifts the clock by 10 game days | remains removed after 12 game hours (MR-06, `DEUS_Anim.js:1162`); or no remains off-screen (`DEUS_Anim.js:1147`) |
+| AT-R-08 | SIM.40.07 with SIM.40.10 | An off-screen death makes a remains record; stages at the expected instants; mass to SOIL-ORG, SOIL-MIN and AIR exact; the anchor is kept for 200 sy; *gentle repose* pauses the clock for 10 game days. **Sub-day placement (R-08.5):** at DPY 1 a SKY death at tick `k` (with `k` a multiple of DPY, so `t0 = k / DPY`) becomes SKELETAL on tick `k + 600`, and a loaf of bread dropped under the sky rots on tick `k + 240` (0.1 sy); at DPY 20, on ticks `k + 12,000` and `k + 4,800` | remains removed after 12 game hours (MR-06, `DEUS_Anim.js:1162`); or no remains off-screen (`DEUS_Anim.js:1147`); or remains and food drained only at day boundaries (at DPY 1 the SKELETAL stage lands on the next day boundary, up to 2,399 ticks late) |
 | AT-R-09 | SIM.50.05 with this design | Burn fixture (timber, cloth, iron nails, a lead cup, bone): `residue.burn` totals exact; metals survive; lead becomes SCRAP; charcoal and ash in the residue entry | items deleted (MR-07, `DEUS_Fire.js:442`); or gas by `floor` (MR-01) |
 | AT-R-10 | SIM.40.06 | Plants establish on an abandoned S3 floor within the stand-in schedule and never on a maintained built cell | the `DEUS_Objects.js:266` guard kept (no establishment); or the guard removed entirely (plants on maintained cells) |
-| AT-R-11 | SIM.40.06, SIM.40.07 | A strata write that covers a member or item reclassifies it BURIED in the same tick and reschedules or removes its heap entry; the item becomes ITEM-BURIED; excavation re-exposes it | no burial reclassification: the foundation keeps decaying and A4 fails |
+| AT-R-11 | SIM.40.06, SIM.40.07 | A strata write that covers a member or item reclassifies it BURIED in the same tick, rebases its clock at the instant of the write (R-01.2) and replaces or removes its heap entry; the item becomes ITEM-BURIED; excavation re-exposes it | no burial reclassification: the foundation keeps decaying and A4 fails |
 | AT-R-12 | SIM.40.06 | Members at layers -3 and -12 never get SKY or `FT > 0`; cave fungus halves TIMBER lives; a flood makes members WET | bottom layer hard-coded at -2 or -4 (caught by the -12 member in the 32-layer run) |
 | AT-R-13 | SIM.50.09 | Salvage of a limestone rubble slice yields 93 stones of 800 mu and leaves 272 mu of RUBBLE | fixed 2-stone yields (MR-08); or the remainder dropped |
 | AT-R-14 | SIM.50.09 | Re-founding on H1: ruin cells are claimable; only missing slices consume items; reused slices keep their mass and change `structureId` | ruin cells block building (`DEUS_Colonists.js:3733`); or the whole wall's materials are consumed again |
@@ -1030,7 +1030,7 @@ This section answers R-11: automatable tests for SIM.40.05-.09 (and the interfac
 | AT-R-17 | SIM.40.09 | The long-run ledger test, FX-R-01 with A1-A9 | MR-01..MR-16 (section "Matter ledger long-run test") |
 | AT-R-18 | SIM.40.05 | Sparse fixture: decay heap and record bytes identical at 9 and 32 layers; residue planes only in touched chunks | a per-layer dense residue plane: `heap(32) − heap(9)` above 64 KiB |
 | AT-R-19 | SIM.40.05 | Save at y1,000, reload, continue: identical checksums (A9); decay save bytes grow only with unmaintained members, unattended items, remains and touched cells | heap not rebuilt on load (MR-12) |
-| AT-R-20 | SIM.40.05 | D-1 neutrality: FX-R-01 at DPY = 1 and DPY = 20 gives identical stage **years** and ledger totals | one duration authored in days instead of sy |
+| AT-R-20 | SIM.40.05 | D-1 neutrality: FX-R-01 at DPY = 1 and DPY = 20 gives identical transition instants (yt) for every member failure and stage change, and identical stages and ledger totals at every whole-year checkpoint (R-09.1). The instants equal R-09.3's table, for example H1's bands at 3,353,604, 6,055,246, 8,351,640 and 10,303,576 yt | one duration authored in days instead of sy; the per-day `rateMilli` schedule (MR-15: H1's first band at y1,407 under DPY 1 and y1,263 under DPY 20); a rebase at the processing day (MR-16: H1's second band at 6,056,602 yt under DPY 1 and 6,055,276 under DPY 20) |
 | AT-R-21 | SIM.60.03 interface | SRD: a rust monster hit five times destroys a weapon and moves its iron to OXIDE exactly; the antennae destroy a 1-ft cube (7,840 mu) of an unattended iron object; a conjured wooden object that burns leaves residue that is sunk at the spell's expiry | conjured residue kept as permanent charcoal (the CONJURED sink does not balance its source) |
 | AT-R-22 | PROPOSED-R-11 (Owner-gated) | FX-R-01L to 1,000,000 sy: ROCK-SED forms; no ore, coal, gem or fossil-bed output | charcoal becomes coal (MR-14) |
 
@@ -1049,9 +1049,9 @@ The audit's §6 order: 1) rule-breach fixes, 2) the ledger WG.65.15 moved earlie
 | Id | Title | Real dependencies | Maps to | Acceptance tests |
 |---|---|---|---|---|
 | PROPOSED-R-01 | Decay parameter data (dc, ex, lives, thresholds, residue fractions) and its validator | SIM.40.01, WG.65.15 | SIM.40.05 | AT-R-02, AT-R-20 |
-| PROPOSED-R-02 | Decay members and the closed-form scheduler | SIM.40.01, SIM.40.02, SIM.00.05, WG.00.17, WG.65.15 | SIM.40.05 | AT-R-01, AT-R-05, AT-R-18, AT-R-19 |
+| PROPOSED-R-02 | Decay members, the decay clock (R-01.2) and the instant-keyed scheduler with its long and short heaps (R-08.5) | SIM.40.01, SIM.40.02, SIM.00.05, WG.00.17, WG.65.15 | SIM.40.05 | AT-R-01, AT-R-05, AT-R-18, AT-R-19 |
 | PROPOSED-R-03 | Maintenance, abandonment and the site state machine (X-7) | SIM.00.05, SIM.40.10, SOC.10.02 | SIM.40.05, SIM.50.09 | AT-R-03, AT-R-04 |
-| PROPOSED-R-04 | Item weathering, remains to soil, buried finds | SIM.40.05, SIM.40.10, WG.65.15 | SIM.40.07 | AT-R-07, AT-R-08, AT-R-11 |
+| PROPOSED-R-04 | Item weathering, remains to soil, buried finds; reconcile the remains hand-off names and mass unit with Lane W's merged design (IA-R1) | SIM.40.05, SIM.40.10, WG.65.15 | SIM.40.07 | AT-R-07, AT-R-08, AT-R-11 |
 | PROPOSED-R-05 | Corrosion to OXIDE and the ore guard | WG.65.15, SIM.40.05 | SIM.40.07 | AT-R-06, AT-R-21 |
 | PROPOSED-R-06 | Fire residue function (ash, charcoal, carbon sink) | SIM.50.05, WG.63.04, WG.65.15 | SIM.50.05 | AT-R-09 |
 | PROPOSED-R-07 | Reclamation rule and burial exposure, surface and underground | SIM.40.05, SIM.50.04, SIM.50.03, SIM.50.02 | SIM.40.06 | AT-R-10, AT-R-11, AT-R-12 |
@@ -1068,6 +1068,12 @@ The audit's §6 order: 1) rule-breach fixes, 2) the ledger WG.65.15 moved earlie
 - **SIM.40.08** needs SIM.30.03 as well as SIM.30.02 (promotion must conserve cohort masses).
 - **SIM.50.05** needs PROPOSED-R-06 (or its content) for FIR-3, and SIM.50.06 (audit §6 step 8).
 - **Overlaps.** WG.65.10 "Construction Degradation & Ruins: Maintained → Damaged → Ruined → Collapsed → Overgrown" (`docs/worldgen/DEUS_WORLDGEN_WBS.md:249`) duplicates SIM.40.05/.06. WG.65.01 (lifecycle state machine), WG.65.08 (pedogenesis), WG.65.13 (catch-up), WG.65.14 (disturbed-region scheduler), WG.65.17 (archaeology) and WG.65.18 (multi-century stress test) each overlap a part of this design; WG.61.02 "Closed-Loop Finite Conservation Ledger" (`docs/worldgen/DEUS_WORLDGEN_WBS.md:194`, QUEUED) overlaps WG.65.15. The Coordinator decides which rows to merge or supersede.
+- **ADR-003 §17 (PROPOSED; merged to main).** Three amendments follow from Fix 1, for the ADR-003 owner and the PM:
+  - L1653's per-day `HP(day) = HP(d0) − floor(rateMilli × (day − d0) / 1000)` becomes R-01.2's decay clock (`t0` in yt, `rem0` in millionths, `lifeYt`), with `failDay` as the instant `failYt`;
+  - L1694 ("take effect on the day the causing event is *processed*") becomes "at the causing instant" for decay-caused changes (R-05.3 C-3), and stays as written for other causes;
+  - L1689-1690 gain a short heap drained every tick for remains and food (R-08.5).
+
+  `decay.work_per_tick` (L1047) is unchanged for the long heap.
 - **Stale geometry in planning text.** WG.65.02 says "1 ft strata cells" (`docs/worldgen/DEUS_WORLDGEN_WBS.md:241`); SIM.30.01 says "256×256×5 Z" (`docs/worldgen/DEUS_WORLDGEN_WBS.md:529`); INV-GEO-01 "1 stratum = 1 ft" and INV-GEO-02 "5 macro-Z levels" (`docs/INVARIANT_REGISTRY.md:29-30`) contradict DEC-013.
 
 ### R-12.4 Disagreements flagged (none resolved here)
@@ -1084,10 +1090,13 @@ The audit's §6 order: 1) rule-breach fixes, 2) the ledger WG.65.15 moved earlie
 | `docs/design/VERTICAL_WORLD.md:288` | dense per-level arrays, against DEC-013 §3 at 32 layers | outside decay; flagged for WG.00.17 |
 | WG.63.04 / SIM.50.05 "permanent ash beds" vs R-04.4 | whether exposed ash weathers | OQ-R-07 |
 | SRD damage threshold (`game/data/srd51/rules.json:7167`) vs V138 | decay against walls with a threshold | OQ-R-09 |
+| ADR-003 L1653 (integer `rateMilli` per game day) and L1694 (exposure changes "take effect on the day the causing event is *processed*") vs R-01.2 and R-05.3 C-3 (Fix 1) | The per-day form cannot hold lives longer than 1,000 × maxHP game days, and it rounds differently at each DPY (review MAJOR-1). A rebase on the processing day makes decay chains depend on DPY (MR-16) | R-12.3 amendment, for the ADR-003 owner and the PM. `BRIEF_FIX1.md` directs this design's form, so no escalation file was needed |
+| Lane Q's C2 at `9d5b40d3` (`9d5b40d32f96a38803b1f32f78287a902d2bead8:tasks/SIM.40.01/lane-q/SIM.40.01_STRUCTURAL_SUPPORT.md:505`: "generalises ADR §17.3's `failDay` into a `nextBandDay` heap") vs R-01.2 and R-08.5 | Lane Q reads Lane R's schedule as day-keyed; since Fix 1 it is keyed by instant (`dueYt`) and drained at day boundaries. Lane Q's §9.7 predates Fix 1 | Lane Q's reconciliation (its §9.7); R-05 stays PARTIAL |
+| Lane W's IA-R1 (`origin/main:tasks/SIM.40.10/lane-w/SIM.40.10_POPULATION_LIFECYCLE.md:277`, `decay.enqueueRemains` in grams) vs R-03.4 (`T(BODY→REMAINS)` booked by Lane W, in mu) | hand-off call names and mass unit | PROPOSED-R-04; the mass unit is Lane Q's escalation to the PM and WG.65.15 |
 
 **Dependencies on PM decisions the Owner may overturn:** D-4 (water authority: WET, BURIED-ANOX, flooding, fixture water; R-01.4, R-06.4, R-09.2) and D-6 (race-to-plan slots: re-founding policy; R-07.5). **On an OPEN decision:** DEC-010 (props and natural rock roofs; R-05.5). **On OWNER_OPEN D-1:** every duration (section 0.3, R-08.6).
 
-No escalation file was written: every disagreement above is one the brief tells this lane to flag, and none needed a file outside the allowed paths.
+No escalation file was written, in the first version or in Fix 1. Every disagreement above is one of two kinds: one the brief tells this lane to flag, or one `BRIEF_FIX1.md` settles (the ADR-003 closed form). None needed a file outside the allowed paths, and none needs an Owner ruling that this design would otherwise have to make.
 
 ## Owner questions
 
@@ -1110,7 +1119,8 @@ These are questions, not answers. Each option list starts with the default this 
 - Nothing was run. There is no code in this lane; every test above is a specification for later code lanes.
 - Every rate, fraction and duration is a design default from real-world orders of magnitude; none was balanced or measured.
 - Memory and CPU figures are arithmetic from the stated assumptions; the per-event time (1-10 µs) is an assumption.
-- Lane Q and Lane W designs did not exist when this was written; the collapse contract (R-05) and the remains hand-off (R-03.4) use assumed names.
+- The collapse contract (R-05) and the remains hand-off (R-03.4) still use assumed names. They were written against the Lane Q and Lane W briefs. Both lanes have since pushed designs: Lane Q's was reviewed (Grok FAIL at `9d5b40d3`) and is in its own Fix 1, and Lane W's is merged. Fix 1 re-sampled their tips (header, "Limits") but did not reconcile names; Lane Q's §9.7 is that reconciliation's record.
+- The FX-R-01 instants in R-09.3 and the R-01.6 band table come from the writer's scratch calculation of R-01.2 (REPORT.md). No implementation or independent oracle exists yet. Those instants assume that roofs fail at HP 0 and that band rubble spills to the wall foot (Lane Q's rules, not yet fixed).
 - ADR-003 is PROPOSED; every **[ADR-003]** mark depends on it.
-- A search pass reported ADR-003 merged on `origin/main` after this lane's base; that was not re-checked by the writer beyond `git show` of the Lane M branch file.
+- ADR-003's merge to `origin/main` was re-checked in Fix 1: `git merge-base --is-ancestor 3b33faa5 origin/main` printed EXIT=0, and the main file is identical to the Lane M tip. It is still marked PROPOSED, and the R-12.3 amendments are proposals only.
 
