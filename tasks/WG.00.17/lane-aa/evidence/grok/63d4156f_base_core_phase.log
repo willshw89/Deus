@@ -1,0 +1,13 @@
+# 63d4156f6e986c5680e2c0246f20b47e4e26a3db
+# cwd: C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f
+# node tools/test_zrange.js --phase=core --commit=5255f1a58a9d95bb7bc08377ef055c366610e486
+# DEUS_Z_RANGE=unset
+# start 2026-09-26T11:20:13.1931636-05:00
+  run c5255f1a5_own_core: RESULT: 2 passed, 0 failed (exit 0) in 25 s (run_tests exit 0); snapshot C:\Users\snewt\AppData\Local\Temp\laneaa_zr_snap\c5255f1a5_own_core_6912_1790439615887 (deleted)
+PASS zrange.core_data_written - range -2..2, seed 18: checksums {"0":"34c59783","1":"eaf389b9","2":"9998ffb2","-2":"dcfbb91b","-1":"433f2728"}; census 136 ms
+PASS zrange.no_errors - harness errors 0; console.error 0
+RESULT: 2 passed, 0 failed (exit 0)
+report: C:\Users\snewt\AppData\Local\Temp\laneaa_zr_phase_core_6912_0.json
+
+EXIT=0
+# end 2026-09-26T11:20:42.5238906-05:00

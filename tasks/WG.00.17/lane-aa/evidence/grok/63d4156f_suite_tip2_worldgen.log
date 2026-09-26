@@ -1,0 +1,35 @@
+# node tools/run_tests.js worldgen
+# cwd C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f
+# DEUS_Z_RANGE=unset
+# start 2026-09-26T12:15:51.1330214-05:00
+Running --deus-test=worldgen on C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game
+UF_Test run 2026-09-26T17:15:51.773Z args=[]
+DEBUG_SHEET: Scene_Boot.start called
+AVAILABLE SUITES: selftest, smoke, perf, native_starting_gear, native_survival_dying, native_perf_4x_benchmark, select, minimap, natural_connections, ownership, ecology, projects, settlement, colonists, overseer, world, spawn, worldgen, biomes, tiles, ground, factions, skins, history, objects, walls, doors, items, jobs, floors, wildlife, wildlife_seeds, stance, combat, anim, fog, daynight, timespeed, camera, culling, speech, overhead, look, sheet, talk, fire, vertical, natural_walls, flooding, strata, environment, faction_menus, title, load, setup, depth, layers_flat, select
+SUITE worldgen
+PASS worldgen.catalog_loaded - 87 object types, 33 biomes
+PASS worldgen.catalog_images_exist - 87 object images/sheets found
+PASS worldgen.catalog_ids_resolve - 33 biomes, 26 ground kinds, 9 water kinds, 87 objects all resolve
+PASS worldgen.autotile_matches_editor - 47 shapes derived; a 3-wide vertical strip gives 16,0,24 (the editor painted 16,0,24)
+PASS worldgen.tileset_id - built map tilesetId 91, map on screen 91, UF.Tiles.TILESET_ID 91
+PASS worldgen.start_in_middle - UF_Colonists installed: 0 generator start events (want 0); note "<glade>"
+PASS worldgen.names_vary_by_seed - this world: Liaric and Yvea; next seed: Helem and Zorys
+PASS worldgen.water_near_start - nearest water 14.4 cells from the pair (reach 29)
+PASS worldgen.river_not_through_start - river(s) pass 91 cells from the start (keep away 14)
+PASS worldgen.rivers_count - 1 river(s) (catalog count 1-2) at columns 35 (half-width 2)
+FAIL worldgen.river_continuous - 256 break(s); first: river at column 35: row 0 dry
+PASS worldgen.objects_placed - 1769 objects in map.ufObjects of the start area (stats sum 1769, 0 object events); most common: grass_tuft 657, pine 178, rocks_small 132, lichen 127, flowers 106, fern 95, berry_bush 92, oak 91
+PASS worldgen.glade_clear - 0 objects inside the start clearing (radius 0) as generated
+PASS worldgen.no_objects_in_water - 5036 water cells; 3 objects on water, 0 of them not water plants; 0 water plants on land
+FAIL worldgen.kit_per_area - 5 factions; 5 area centre(s), kit within 20 cells, drinkable water within 30: Torar Company (128,128): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 1/1, ore 1/1; water fresh at 14.4 | Quinum Grove (12,144): berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; water NONE | Iren Moot (201,144): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 2/1, ore 2/1; water pond at 6.7 | Duneth Enclave (156,99): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 1/1, ore 1/1; water fresh at 19.1 | Irireth Warband (159,213): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 1/1, ore 1/1; water NONE; FAILING: Quinum Grove at (12,144): short berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; no drinkable water within 30; Irireth Warband at (159,213): no drinkable water within 30
+FAIL worldgen.kit_covers_plan - first stage (hearth, larder, knives, clothes, axe, pick, food, woodpile, shelter, beds, workstone) for 8 founders, the most any of 7 cultures needs, plus 8 meals: log 26, stone 60, fiber 58, straw 16, food 16, ore 2 (human 26/14/58/16/14, elf 24/10/56/16/16, dwarf 3/60/58/16/14, gnome 26/14/58/16/14, goblin 3/14/58/16/14, orc 26/14/58/16/14, automaton 3/60/58/16/14 as log/stone/fiber/straw/food); the kit's minimums alone are worth log 36, stone 47, fiber 60, straw 8, food 19, ore 2 (SHORT: stone 47/60, straw 8/16); within 20 cells of each campfire: Torar Company (128,128): log 36, stone 47, fiber 60, straw 12, food 19, ore 2 | Quinum Grove (12,144): log 0, stone 0, fiber 0, straw 0, food 0, ore 0 | Iren Moot (201,144): log 49, stone 50, fiber 67, straw 12, food 22, ore 4 | Duneth Enclave (156,99): log 36, stone 47, fiber 60, straw 13, food 19, ore 2 | Irireth Warband (159,213): log 44, stone 47, fiber 71, straw 8, food 19, ore 2; FAILING: Torar Company: short stone 47/60, straw 12/16; Quinum Grove: short log 0/26, stone 0/60, fiber 0/58, straw 0/16, food 0/16, ore 0/2; Iren Moot: short stone 50/60, straw 12/16; Duneth Enclave: short stone 47/60, straw 13/16; Irireth Warband: short stone 47/60, straw 8/16
+FAIL worldgen.kit_fair - minimums for every area: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 1, ore 1-2 of ironstone/copper_outcrop; per area: Torar Company: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 1, ore 1 (ironstone 1); water fresh 14.4 | Quinum Grove: berry_bush 0, oak 0, rocks_small 0, grass_tuft 0, reeds 0, granite_boulder 0, fruit_tree 0, ore 0 (none); water NONE | Iren Moot: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 2, ore 2 (ironstone 2); water pond 6.7 | Duneth Enclave: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 1, ore 1 (copper_outcrop 1); water fresh 19.1 | Irireth Warband: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 1, ore 1 (copper_outcrop 1); water NONE; SHORT: Quinum Grove: berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1
+PASS worldgen.kit_seeded - seed 1637081696: 228 kit objects placed (first berry_bush (128,134), berry_bush (113,126), berry_bush (134,126); ore ironstone (133,110), ironstone (211,139), ironstone (194,136), copper_outcrop (171,100), copper_outcrop (177,214)), a second build identical; seed 1637081697: 211 placed, ore copper_outcrop/copper_outcrop/ironstone/ironstone/copper_outcrop, another layout
+PASS worldgen.peaks_region_250 - 33141 peak_rock tiles, 33141 cells with region 250, 0 mismatched in the start area
+FAIL worldgen.autotile_shapes - 7150 interior cells sampled (552 water, the rest ground away from water), 265 wrong shapes; first: (73,4) ground shape 24, expected 0
+PASS worldgen.deterministic - tiles 440088444 / 440088444, objects -1980399711 / -1980399711 on rebuild (442 ms first build)
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\worldgen.start_area.png
+PASS worldgen.no_errors - none during worldgen checks
+RESULT: 17 passed, 5 failed (exit 1)
+
+EXIT=1

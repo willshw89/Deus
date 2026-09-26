@@ -1,2 +1,32 @@
+# completed rerun; the checkpoint copy of this file stopped at the first snapshot line
+# measured 575c5fdb2e346fff91ddc3b643854875aea1b817
+# game/ is identical to 63d4156f6e986c5680e2c0246f20b47e4e26a3db (git diff 575c5fdb HEAD -- game is empty)
 === bench_render_layers: scenario stress, 2 run(s), measuring 575c5fdb ===
-  run 1: snapshot C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_bench_stress_575c5fdb_12656_1790437580166
+  run 1: snapshot C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_bench_stress_575c5fdb_10456_1790442183661
+(node:10456) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  run 1: BENCH stress_day_30s: 284 frames in 30129 ms, frame median 85.46 ms (p95 287.685, worst 431.01), tick median 83.17 ms, draw calls median 215, peak {"unitsOnScreenLevel":80,"unitsOnLowerPlanes":145,"lowerPlaneSprites":291,"projectilesAlive":64,"rmmzAnimationsAlive":62,"placeholderImpactsAlive":36,"effectSpritesAlive":135,"unitsDrawn":225}
+  run 1: BENCH stress_night_30s: 292 frames in 30136 ms, frame median 81.825 ms (p95 244.395, worst 396.54), tick median 79.435 ms, draw calls median 205, peak {"unitsOnScreenLevel":80,"unitsOnLowerPlanes":143,"lowerPlaneSprites":282,"projectilesAlive":55,"rmmzAnimationsAlive":60,"placeholderImpactsAlive":31,"effectSpritesAlive":124,"unitsDrawn":223}
+  run 1: PASS bench_layers.bench_finished - 2 phase(s), 0 switch(es) written to C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_bench_stress_575c5fdb_10456_1790442183661\test_output\bench.json
+  run 1: PASS bench_layers.no_errors - none
+  run 1: RESULT: 2 passed, 0 failed (exit 0)
+  run 1: machine load loaded: CPU overall median 26.6 % (min 17.1, max 61.3, 107 samples); AI workers 1 at start, 1 at the end; other nw.exe 0 / max 0 / 0
+  run 2: snapshot C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_bench_stress_575c5fdb_10456_1790442292586
+  run 2: BENCH stress_day_30s: 388 frames in 30012 ms, frame median 65.03 ms (p95 168.545, worst 408.31), tick median 64.025 ms, draw calls median 84, peak {"unitsOnScreenLevel":22,"unitsOnLowerPlanes":265,"lowerPlaneSprites":471,"projectilesAlive":53,"rmmzAnimationsAlive":20,"placeholderImpactsAlive":37,"effectSpritesAlive":92,"unitsDrawn":287}
+  run 2: BENCH stress_night_30s: 321 frames in 30095 ms, frame median 82.75 ms (p95 184.525, worst 277.8), tick median 81.54 ms, draw calls median 85, peak {"unitsOnScreenLevel":22,"unitsOnLowerPlanes":265,"lowerPlaneSprites":467,"projectilesAlive":49,"rmmzAnimationsAlive":20,"placeholderImpactsAlive":33,"effectSpritesAlive":84,"unitsDrawn":287}
+  run 2: PASS bench_layers.bench_finished - 2 phase(s), 0 switch(es) written to C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_bench_stress_575c5fdb_10456_1790442292586\test_output\bench.json
+  run 2: PASS bench_layers.no_errors - none
+  run 2: RESULT: 2 passed, 0 failed (exit 0)
+  run 2: machine load quiet: CPU overall median 23.7 % (min 12.1, max 68.6, 99 samples); AI workers 1 at start, 1 at the end; other nw.exe 0 / max 0 / 0
+wrote tasks\WG.00.09b\lane-k\perf\stress_baseline_575c5fdb.json (2 run(s), 2 new)
+  run 1 stress_day_30s             frame median   85.46 p95 287.685 worst   431.01 ms (11.701 fps at the median)  tick 83.17 ms  draws 215  CPU 18.7/25.9/61.3 %  peak {"unitsOnScreenLevel":80,"unitsOnLowerPlanes":145,"lowerPlaneSprites":291,"projectilesAlive":64,"rmmzAnimationsAlive":62,"placeholderImpactsAlive":36,"effectSpritesAlive":135,"unitsDrawn":225}
+  run 1 stress_night_30s           frame median  81.825 p95 244.395 worst   396.54 ms (12.221 fps at the median)  tick 79.435 ms  draws 205  CPU 17.6/28/51 %  peak {"unitsOnScreenLevel":80,"unitsOnLowerPlanes":143,"lowerPlaneSprites":282,"projectilesAlive":55,"rmmzAnimationsAlive":60,"placeholderImpactsAlive":31,"effectSpritesAlive":124,"unitsDrawn":223}
+  run 1 profile stress_day: 15225 samples, 7906.8 ms over 120 updates; top scripts (self) DEUS_Objects.js 31.215, DEUS_World.js 10.195, DEUS_Floors.js 3.135, (garbage collector) 2.681, wasm  2.579 ms/update
+  run 1 profile stress_night: 14483 samples, 7533 ms over 120 updates; top scripts (self) DEUS_Objects.js 27.815, DEUS_World.js 11.87, (garbage collector) 3.224, DEUS_Floors.js 2.62, wasm  2.574 ms/update
+  run 2 stress_day_30s             frame median   65.03 p95 168.545 worst   408.31 ms (15.378 fps at the median)  tick 64.025 ms  draws 84  CPU 12.1/19.6/34.2 %  peak {"unitsOnScreenLevel":22,"unitsOnLowerPlanes":265,"lowerPlaneSprites":471,"projectilesAlive":53,"rmmzAnimationsAlive":20,"placeholderImpactsAlive":37,"effectSpritesAlive":92,"unitsDrawn":287}
+  run 2 stress_night_30s           frame median   82.75 p95 184.525 worst    277.8 ms (12.085 fps at the median)  tick 81.54 ms  draws 85  CPU 13/23.3/49.6 %  peak {"unitsOnScreenLevel":22,"unitsOnLowerPlanes":265,"lowerPlaneSprites":467,"projectilesAlive":49,"rmmzAnimationsAlive":20,"placeholderImpactsAlive":33,"effectSpritesAlive":84,"unitsDrawn":287}
+  run 2 profile stress_day: 9583 samples, 4981.7 ms over 120 updates; top scripts (self) DEUS_Objects.js 19.79, DEUS_World.js 7.373, (garbage collector) 1.912, wasm  1.749, open 1.199 ms/update
+  run 2 profile stress_night: 13442 samples, 6956.8 ms over 120 updates; top scripts (self) DEUS_Objects.js 25.191, DEUS_World.js 16.95, (garbage collector) 2.86, wasm  2.219, rmmz_objects.js 1.327 ms/update
+exit 0
+
+EXIT=0

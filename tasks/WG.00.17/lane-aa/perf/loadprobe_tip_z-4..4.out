@@ -1,0 +1,4 @@
+LOAD-PROBE 2026-09-26T17:06:33.836Z: CPU median 14.8 % (min 2.3, max 42.9, 29 samples), AI workers 1/1, other nw.exe 0/0 -> QUIET; waited 31 s since the first attempt
+exit 0 (quiet: run now)
+
+load-probe EXIT=0

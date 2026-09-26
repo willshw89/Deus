@@ -1,0 +1,2523 @@
+{
+ "configs": [
+  "-4..4",
+  "-16..15",
+  "-2..2"
+ ],
+ "seed": 18,
+ "base": "5255f1a58a9d95bb7bc08377ef055c366610e486",
+ "checks": {
+  "single_authority": {
+   "pass": true,
+   "detail": "static scan: 133 lines with a Z pattern, 133 allowed (110 entries), 0 not allowed, 0 stale; in-game: -4..4 PASS, -16..15 PASS, -2..2 PASS"
+  },
+  "elevation_math": {
+   "pass": true,
+   "detail": "-4..4: e = (z - -4) * 5 + s on cell (12,40) of levels -4, -3, -2, -1, 0, 1, 2, 3, 4: worldStrataElevationAt, airRunAt at e (0) and e + 1 (air above), a one-stratum box damage at e destroys exactly (z, s); highest elevation 44 ( || -16..15: e = (z - -16) * 5 + s on cell (12,40) of levels -16, -15, -2, -1, 0, 1, 2, 14, 15: worldStrataElevationAt, airRunAt at e (0) and e + 1 (air above), a one-stratum box damage at e destroys exactly (z, s); highest elevation || -2..2: e = (z - -2) * 5 + s on cell (12,40) of levels -2, -1, 0, 1, 2: worldStrataElevationAt, airRunAt at e (0) and e + 1 (air above), a one-stratum box damage at e destroys exactly (z, s); highest elevation 24 (the top S4: 24"
+  },
+  "feet_2ft_10ft": {
+   "pass": true,
+   "detail": "-4..4: constants ok, blast = 2 ft table (r3 3, r5 9, r7 27); -16..15: constants ok, blast = 2 ft table (r3 3, r5 9, r7 27); -2..2: constants ok, blast = 2 ft table (r3 3, r5 9, r7 27); base 5255f1a5: = 1 ft table (r3 7, r5 15, r7 51); tables: 2 ft r3 3, r5 9, r7 27, 1 ft r3 7, r5 15, r7 51 strata"
+  },
+  "sparse_memory": {
+   "pass": true,
+   "detail": "-4..4: outer UNIFORM, split one chunk, -16..15: outer UNIFORM, split one chunk, -2..2: outer UNIFORM, split one chunk; baseline store (directories, MIXED arrays, caps) -16..+15 1693592 B, -2..+2 1622552 B: difference 71040 B, bound 71040 B ((32 - 5 levels) x 64 chunks x 2 B = 3456 B of directory + 12 MIXED chunks outside the core (the mountain rock above +2) x 5632 B = 67584 B); shape grids cached 589824 / 327680 B; JS heap after New Game (forced GC true): 109000000 vs 103000000 B (difference 6000000 B, reported, not judged)"
+  },
+  "sparse_save": {
+   "pass": true,
+   "detail": "-4..4: changes one record each, round trip ok, -16..15: changes one record each, round trip ok, -2..2: changes one record each, round trip ok; fresh world, terrain and fluid parts (levels + zRange + fluid): -16..+15 5881 B, -4..+4 5879 B: difference 2 B (bound 256 B); whole saves 6608484 / 6608483 characters"
+  },
+  "legacy_save_loads": {
+   "pass": true,
+   "detail": "base save (6611410 characters) loaded: range -2..2 (5 levels; saved zRange \"absent\"), every cell of -2..+2 identical to the save, changed cells {\"0\":1,\"1\":170,\"2\":1,\"-2\":0,\"-1\":1} (save {\"0\":1,\"1\":170,\"2\":1,\"-2\":0,\"-1\":1}), items identical to the save (3302), units identical to the save (1240), cells, units and items identical to the base commit's load true; after 30 frames of play saved and loaded again: range -2..2, saved zRange \"absent\", the world as saved identical (cells, units, items)"
+  },
+  "old_layers_identical": {
+   "pass": true,
+   "detail": "base 5255f1a5 seed 18: -4..4: identical (checksums 34c59783 eaf389b9 9998ffb2 dcfbb91b 433f2728); -16..15: identical (checksums 34c59783 eaf389b9 9998ffb2 dcfbb91b 433f2728); -2..2: identical (checksums 34c59783 eaf389b9 9998ffb2 dcfbb91b 433f2728)"
+  },
+  "matter_unchanged": {
+   "pass": true,
+   "detail": "base 5255f1a5 seed 18 (base repeat: census true, after play true): -4..4: New Game identical, rock above +2 5160 strata (base caps 5160), ledger f09726b0 (base f09726b0); after 1500 updates identical, ledger f09726b0 (base f09726b0); layers outside -2..+2: 4 material keys; -16..15: New Game identical, rock above +2 5160 strata (base caps 5160), ledger f09726b0 (base f09726b0); after 1500 updates identical, ledger f09726b0 (base f09726b0); layers outside -2..+2: 17 material keys; -2..2: New Game identical, rock above +2 5160 strata (base caps 5160), ledger f09726b0 (base f09726b0); after 1500 updates identical, ledger f09726b0 (base f09726b0); layers outside -2..+2: 0 material keys"
+  },
+  "extreme_layers_work": {
+   "pass": true,
+   "detail": "-4..4: PASS top 4 (a wooden deck) and bottom -4 (a dug room), 7 x 5 cells at (125,126), floors true: 4: setView true (in place true, frames 0), plate \"+4\", unit walked to (131,128) (event on screen), path 6 cells (scratch on [4]), up past the end refused; -4: setView true (in place true, frames 0), plate \"-4\", unit walked to (131,128) (event on screen), path 6 cells (scratch on [-4]), down past the end refuse; errors core none, play none || -16..15: PASS top 15 (a wooden deck) and bottom -16 (a dug room), 7 x 5 cells at (125,126), floors true: 15: setView true (in place true, frames 0), plate \"+15\", unit walked to (131,128) (event on screen), path 6 cells (scratch on [15]), up past the end refused; -16: setView true (in place true, frames 0), plate \"-16\", unit walked to (131,128) (event on screen), path 6 cells (scratch on [-16]), down past the en; errors core none, play none || -2..2: PASS top 2 (a wooden deck) and bottom -2 (a dug room), 7 x 5 cells at (125,126), floors true: 2: setView true (in place true, frames 0), plate \"+2\", unit walked to (131,128) (event on screen), path 6 cells (scratch on [2]), up past the end refused; -2: setView true (in place true, frames 0), plate \"-2\", unit walked to (131,128) (event on screen), path 6 cells (scratch on [-2]), down past the end refuse; errors core none, play none"
+  },
+  "path_scratch_bounded": {
+   "pass": true,
+   "detail": "-4..4: a 3D search on the ground from (78,4) to (98,4): path 20 cells; its scratch reached level(s) [0] of 9; layers with scratch arrays since boot 1 (1310720 B each), heap 262152 entries || -16..15: a 3D search on the ground from (78,4) to (98,4): path 20 cells; its scratch reached level(s) [0] of 32; layers with scratch arrays since boot 1 (1310720 B each), heap 262152 entries || -2..2: a 3D search on the ground from (78,4) to (98,4): path 20 cells; its scratch reached level(s) [0] of 5; layers with scratch arrays since boot 1 (1310720 B each), heap 262152 entries"
+  }
+ },
+ "reports": {
+  "-4..4": {
+   "core": {
+    "phase": "core",
+    "made": "2026-09-26T16:17:40.565Z",
+    "env": {
+     "DEUS_Z_RANGE": "-4..4"
+    },
+    "data": {
+     "tip": true,
+     "range": {
+      "zMin": -4,
+      "zMax": 4
+     },
+     "levels": 9,
+     "seed": 18,
+     "savedZRange": {
+      "zMin": -4,
+      "zMax": 4
+     },
+     "view": {
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "px": 128,
+      "py": 128
+     },
+     "heapAfterNewGame": {
+      "gc": true,
+      "usedJSHeapSize": 109000000,
+      "nodeHeapUsed": 39227392
+     },
+     "pathScratchAtStart": {
+      "layersAllocated": 1,
+      "layersWithScratch": [
+       0
+      ],
+      "bytesPerLayer": 1310720,
+      "bytes": 4456544,
+      "lastSearchLayers": [
+       0
+      ],
+      "heapEntries": 262152,
+      "levels": 9
+     },
+     "memory": {
+      "dir": 1152,
+      "strata": 1510400,
+      "connectors": 151040,
+      "shapeGrids": 589824,
+      "biome": 131072,
+      "surface": 65536,
+      "legacyViews": 262144,
+      "dense": 0,
+      "caps": 6552,
+      "capEntries": 819,
+      "chunks": 576,
+      "mixedChunks": 295,
+      "outerMixedChunks": 8,
+      "levels": 9,
+      "total": 2717720
+     },
+     "memoryPerLevel": {
+      "0": {
+       "dir": 128,
+       "strata": 296960,
+       "connectors": 29696,
+       "chunks": 64,
+       "mixedChunks": 58
+      },
+      "1": {
+       "dir": 128,
+       "strata": 317440,
+       "connectors": 31744,
+       "chunks": 64,
+       "mixedChunks": 62
+      },
+      "2": {
+       "dir": 128,
+       "strata": 199680,
+       "connectors": 19968,
+       "chunks": 64,
+       "mixedChunks": 39
+      },
+      "3": {
+       "dir": 128,
+       "strata": 20480,
+       "connectors": 2048,
+       "chunks": 64,
+       "mixedChunks": 4
+      },
+      "4": {
+       "dir": 128,
+       "strata": 20480,
+       "connectors": 2048,
+       "chunks": 64,
+       "mixedChunks": 4
+      },
+      "-4": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "-3": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "-2": {
+       "dir": 128,
+       "strata": 327680,
+       "connectors": 32768,
+       "chunks": 64,
+       "mixedChunks": 64
+      },
+      "-1": {
+       "dir": 128,
+       "strata": 327680,
+       "connectors": 32768,
+       "chunks": 64,
+       "mixedChunks": 64
+      }
+     },
+     "palette": {
+      "entries": 3,
+      "bytes": 96
+     },
+     "fluid": "UF.Fluid not bound in this build",
+     "levelEntries": [
+      -2,
+      -1,
+      0,
+      1,
+      2
+     ],
+     "authorityProbe": [
+      "-5: refused",
+      "-4: accepted",
+      "-3: accepted",
+      "-2: accepted",
+      "0: accepted",
+      "2: accepted",
+      "3: accepted",
+      "4: accepted",
+      "5: refused"
+     ],
+     "elevation": {
+      "cell": {
+       "x": 12,
+       "y": 40
+      },
+      "samples": [
+       "-4/S0=0",
+       "-4/S2=2",
+       "-4/S4=4",
+       "-3/S0=5",
+       "-3/S2=7",
+       "-3/S4=9",
+       "-2/S0=10",
+       "-2/S2=12",
+       "-2/S4=14",
+       "-1/S0=15",
+       "-1/S2=17",
+       "-1/S4=19",
+       "0/S0=20",
+       "0/S2=22",
+       "0/S4=24",
+       "1/S0=25",
+       "1/S2=27",
+       "1/S4=29",
+       "2/S0=30",
+       "2/S2=32",
+       "2/S4=34",
+       "3/S0=35",
+       "3/S2=37",
+       "3/S4=39",
+       "4/S0=40",
+       "4/S2=42",
+       "4/S4=44"
+      ],
+      "maxElevation": 44,
+      "topElevation": 44
+     },
+     "blast": {
+      "block": {
+       "x": 20,
+       "y": 20
+      },
+      "center": {
+       "x": 23,
+       "y": 23,
+       "z": -1,
+       "s": 2
+      },
+      "radii": {
+       "3": {
+        "ok": true,
+        "strataDestroyed": 3,
+        "levels": [
+         -1
+        ],
+        "hits": [
+         "0,0,1,1",
+         "0,0,1,2",
+         "0,0,1,3"
+        ]
+       },
+       "5": {
+        "ok": true,
+        "strataDestroyed": 9,
+        "levels": [
+         -1
+        ],
+        "hits": [
+         "-1,0,1,2",
+         "0,-1,1,2",
+         "0,0,1,0",
+         "0,0,1,1",
+         "0,0,1,2",
+         "0,0,1,3",
+         "0,0,1,4",
+         "0,1,1,2",
+         "1,0,1,2"
+        ]
+       },
+       "7": {
+        "ok": true,
+        "strataDestroyed": 27,
+        "levels": [
+         -2,
+         -1,
+         0
+        ],
+        "hits": [
+         "-1,0,1,0",
+         "-1,0,1,1",
+         "-1,0,1,2",
+         "-1,0,1,3",
+         "-1,0,1,4",
+         "0,-1,1,0",
+         "0,-1,1,1",
+         "0,-1,1,2",
+         "0,-1,1,3",
+         "0,-1,1,4",
+         "0,0,0,4",
+         "0,0,1,0",
+         "0,0,1,1",
+         "0,0,1,2",
+         "0,0,1,3",
+         "0,0,1,4",
+         "0,0,2,0",
+         "0,1,1,0",
+         "0,1,1,1",
+         "0,1,1,2",
+         "0,1,1,3",
+         "0,1,1,4",
+         "1,0,1,0",
+         "1,0,1,1",
+         "1,0,1,2",
+         "1,0,1,3",
+         "1,0,1,4"
+        ]
+       }
+      }
+     },
+     "sparse": {
+      "outerLevels": 4,
+      "outerDirBytes": 512,
+      "outerMixedChunks": 8,
+      "outerMixedBytes": 45056,
+      "capColumns": 691,
+      "chunksPerLevel": 64,
+      "totalBytes": 2717720,
+      "dirBytes": 1152,
+      "mixedBytes": 1661440,
+      "coreMixedChunks": 287
+     },
+     "split": {
+      "level": 4,
+      "cell": {
+       "x": 60,
+       "y": 60
+      },
+      "before": {
+       "split": 0,
+       "mixedNow": 4,
+       "records": 0
+      },
+      "after": {
+       "split": 1,
+       "mixedNow": 5,
+       "records": 1,
+       "changedChunks": [
+        9
+       ]
+      },
+      "entry": "{\"z\":4,\"gen\":5,\"strata\":{\"0,0\":{\"15420\":\"008300000000ff00000000\"}}}",
+      "entryAfterRevert": false
+     },
+     "heapAfterChecks": {
+      "gc": true,
+      "usedJSHeapSize": 109000000,
+      "nodeHeapUsed": 35871496
+     },
+     "pathScratch": {
+      "from": {
+       "x": 78,
+       "y": 4
+      },
+      "pathLength": 20,
+      "stats": {
+       "layersAllocated": 1,
+       "layersWithScratch": [
+        0
+       ],
+       "bytesPerLayer": 1310720,
+       "bytes": 4456544,
+       "lastSearchLayers": [
+        0
+       ],
+       "heapEntries": 262152,
+       "levels": 9
+      }
+     },
+     "core": {
+      "checksums": {
+       "0": "34c59783",
+       "1": "eaf389b9",
+       "2": "9998ffb2",
+       "-2": "dcfbb91b",
+       "-1": "433f2728"
+      },
+      "regenerated": {
+       "0": "34c59783",
+       "1": "eaf389b9",
+       "2": "9998ffb2",
+       "-2": "dcfbb91b",
+       "-1": "433f2728"
+      },
+      "baseline": {
+       "0": "ac9a96da",
+       "1": "eaf389b9",
+       "2": "99c985a5",
+       "-2": "9006b9ab",
+       "-1": "7ae4f294"
+      },
+      "cells": {
+       "0": "c90cb1ee",
+       "1": "cdb703b3",
+       "2": "f9ff0f2e",
+       "-2": "1fc9be8d",
+       "-1": "d7f3cf29"
+      },
+      "shapes": {
+       "0": "af074beb",
+       "1": "4b51f17f",
+       "2": "df0c47cd",
+       "-2": "4c9bec9e",
+       "-1": "1806cb4d"
+      }
+     },
+     "census": {
+      "strata": {
+       "1": 550959,
+       "2": 209862,
+       "4": 278,
+       "5": 128,
+       "131": 169
+      },
+      "outer": {
+       "-4:1": 327680,
+       "-3:1": 327680,
+       "3:1": 3248,
+       "4:1": 1723
+      },
+      "objects": {
+       "1": 76,
+       "2": 9,
+       "3": 440,
+       "4": 87,
+       "5": 5,
+       "7": 69,
+       "15": 171,
+       "17": 123,
+       "18": 26,
+       "19": 69,
+       "20": 4,
+       "22": 1389,
+       "23": 49,
+       "24": 187,
+       "25": 2,
+       "26": 71,
+       "27": 2,
+       "28": 139,
+       "29": 373,
+       "30": 71,
+       "31": 8,
+       "32": 1,
+       "33": 325,
+       "35": 51,
+       "36": 5,
+       "37": 6,
+       "39": 3,
+       "41": 1,
+       "63": 15,
+       "64": 8,
+       "65": 5,
+       "66": 32,
+       "67": 17,
+       "68": 9,
+       "69": 1,
+       "72": 9
+      },
+      "items": {
+       "meat_cooked:0": 144,
+       "shovel:0": 9,
+       "stone_pick:0": 9,
+       "stone_axe:0": 9,
+       "common_clothes:0": 636,
+       "pouch:0": 636,
+       "gold_coin:0": 9540,
+       "common_clothes:-1": 226,
+       "pouch:-1": 226,
+       "gold_coin:-1": 3390,
+       "common_clothes:-2": 216,
+       "pouch:-2": 216,
+       "gold_coin:-2": 3240
+      },
+      "units": {
+       "elf:0": 103,
+       "gnome:-1": 103,
+       "dwarf:-1": 123,
+       "half-elf:0": 140,
+       "halfling:0": 142,
+       "tiefling:-2": 109,
+       "dragonborn:-2": 107,
+       "human:0": 117,
+       "half-orc:0": 134,
+       "deer:0": 25,
+       "aurochs:0": 15,
+       "wild_horse:0": 9,
+       "wild_sheep:0": 8,
+       "hare:0": 19,
+       "fowl:0": 28,
+       "wolf:0": 8,
+       "jackal:0": 3,
+       "fox:0": 4,
+       "arctic_fox:0": 3,
+       "hawk:0": 2,
+       "songbird:0": 5,
+       "troll:0": 1,
+       "bat:-1": 10,
+       "bog_horror:-1": 1,
+       "troll:-1": 1,
+       "giant_spider:-1": 2,
+       "bat:-2": 6,
+       "giant_spider:-2": 4,
+       "bog_horror:-2": 1,
+       "boar:0": 2
+      },
+      "capStrata": 5160,
+      "capColumns": 128,
+      "fluidStrata": 406,
+      "ms": 285
+     },
+     "heapAfterCensus": {
+      "gc": true,
+      "usedJSHeapSize": 109000000,
+      "nodeHeapUsed": 35969484
+     },
+     "errors": {
+      "harness": [],
+      "console": []
+     }
+    },
+    "timing": {
+     "setupNewGameMs": 18363.4,
+     "setupNewGameAtMs": 661.7,
+     "firstMapStartMs": 22145.7
+    }
+   },
+   "play": {
+    "phase": "play",
+    "made": "2026-09-26T16:17:01.661Z",
+    "env": {
+     "DEUS_Z_RANGE": "-4..4"
+    },
+    "data": {
+     "tip": true,
+     "range": {
+      "zMin": -4,
+      "zMax": 4
+     },
+     "levels": 9,
+     "seed": 18,
+     "savedZRange": {
+      "zMin": -4,
+      "zMax": 4
+     },
+     "view": {
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "px": 128,
+      "py": 128
+     },
+     "saveFresh": {
+      "levels": 5859,
+      "zRange": 20,
+      "fluid": 0,
+      "fluidAlias": 0,
+      "total": 6608483
+     },
+     "saveChanges": {
+      "levels": {
+       "zHi": 4,
+       "zLo": -4
+      },
+      "cell": {
+       "x": 90,
+       "y": 90
+      },
+      "bytes": {
+       "before": 5859,
+       "afterHigh": 5931,
+       "afterLow": 6005
+      },
+      "records": {
+       "high": "{\"z\":4,\"gen\":5,\"strata\":{\"0,0\":{\"23130\":\"00000000000100000000ff\"}}}",
+       "low": "{\"z\":-4,\"gen\":5,\"strata\":{\"0,0\":{\"23130\":\"000101010100ffffffff00\"}}}"
+      },
+      "roundTrip": true
+     },
+     "saveAfterRevert": {
+      "levels": 5859,
+      "entries": [
+       -2,
+       -1,
+       0,
+       1,
+       2
+      ]
+     },
+     "extreme": {
+      "deck": {
+       "x0": 125,
+       "y0": 126
+      },
+      "rows": [
+       "4: setView true (in place true, frames 0), plate \"+4\", unit walked to (131,128) (event on screen), path 6 cells (scratch on [4]), up past the end refused",
+       "-4: setView true (in place true, frames 0), plate \"-4\", unit walked to (131,128) (event on screen), path 6 cells (scratch on [-4]), down past the end refused"
+      ],
+      "path": {
+       "4": {
+        "length": 6,
+        "layers": [
+         4
+        ]
+       },
+       "-4": {
+        "length": 6,
+        "layers": [
+         -4
+        ]
+       }
+      },
+      "screenshots": [
+       "C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-4..4_play_26412_1790439420562\\test_output\\zrange.extreme_p4.png",
+       "C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-4..4_play_26412_1790439420562\\test_output\\zrange.extreme_m4.png"
+      ]
+     },
+     "errors": {
+      "harness": [],
+      "console": []
+     }
+    },
+    "timing": {
+     "setupNewGameMs": 19140.3,
+     "setupNewGameAtMs": 922.3,
+     "firstMapStartMs": 23179.7
+    }
+   },
+   "sim": {
+    "phase": "sim",
+    "made": "2026-09-26T16:15:23.682Z",
+    "env": {
+     "DEUS_Z_RANGE": "-4..4"
+    },
+    "data": {
+     "tip": true,
+     "range": {
+      "zMin": -4,
+      "zMax": 4
+     },
+     "levels": 9,
+     "seed": 18,
+     "savedZRange": {
+      "zMin": -4,
+      "zMax": 4
+     },
+     "view": {
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "px": 128,
+      "py": 128
+     },
+     "simulation": {
+      "updates": 1500,
+      "ticks": 1500,
+      "realMs": 68381
+     },
+     "censusAfter": {
+      "strata": {
+       "1": 550959,
+       "2": 209862,
+       "4": 278,
+       "5": 128,
+       "131": 169
+      },
+      "outer": {
+       "-4:1": 327680,
+       "-3:1": 327680,
+       "3:1": 3248,
+       "4:1": 1723
+      },
+      "objects": {
+       "1": 76,
+       "2": 9,
+       "3": 440,
+       "4": 87,
+       "5": 4,
+       "6": 1,
+       "7": 69,
+       "15": 143,
+       "16": 28,
+       "17": 132,
+       "18": 26,
+       "19": 69,
+       "20": 4,
+       "22": 1392,
+       "23": 49,
+       "24": 187,
+       "25": 2,
+       "26": 72,
+       "27": 2,
+       "28": 139,
+       "29": 373,
+       "30": 71,
+       "31": 8,
+       "32": 1,
+       "33": 328,
+       "35": 51,
+       "36": 5,
+       "37": 6,
+       "39": 3,
+       "41": 1,
+       "63": 15,
+       "64": 8,
+       "65": 5,
+       "66": 32,
+       "67": 17,
+       "68": 9,
+       "69": 1,
+       "70": 9,
+       "72": 9
+      },
+      "items": {
+       "meat_cooked:0": 137,
+       "shovel:0": 9,
+       "stone_pick:0": 9,
+       "stone_axe:0": 9,
+       "common_clothes:0": 631,
+       "pouch:0": 631,
+       "gold_coin:0": 9465,
+       "common_clothes:-1": 226,
+       "pouch:-1": 226,
+       "gold_coin:-1": 3390,
+       "common_clothes:-2": 216,
+       "pouch:-2": 216,
+       "gold_coin:-2": 3240,
+       "common_clothes:1": 5,
+       "pouch:1": 5,
+       "gold_coin:1": 75,
+       "feathers:0": 32,
+       "hide:0": 24,
+       "bone:0": 30,
+       "meat_raw:0": 20,
+       "berries:0": 4,
+       "wool:0": 1
+      },
+      "units": {
+       "elf:0": 103,
+       "gnome:-1": 103,
+       "dwarf:-1": 123,
+       "half-elf:0": 140,
+       "halfling:0": 142,
+       "tiefling:-2": 109,
+       "dragonborn:-2": 107,
+       "human:0": 112,
+       "half-orc:0": 134,
+       "human:1": 5,
+       "deer:0": 16,
+       "aurochs:0": 12,
+       "wild_horse:0": 9,
+       "wild_sheep:0": 9,
+       "hare:0": 12,
+       "fowl:0": 21,
+       "wolf:0": 8,
+       "jackal:0": 3,
+       "fox:0": 4,
+       "arctic_fox:0": 3,
+       "hawk:0": 2,
+       "songbird:0": 5,
+       "troll:0": 1,
+       "bat:-1": 10,
+       "bog_horror:-1": 1,
+       "troll:-1": 1,
+       "giant_spider:-1": 2,
+       "bat:-2": 6,
+       "giant_spider:-2": 4,
+       "bog_horror:-2": 1,
+       "boar:0": 2
+      },
+      "capStrata": 5160,
+      "capColumns": 128,
+      "fluidStrata": 406,
+      "ms": 309
+     },
+     "errors": {
+      "harness": [],
+      "console": []
+     }
+    },
+    "timing": {
+     "setupNewGameMs": 19407.7,
+     "setupNewGameAtMs": 1099.5,
+     "firstMapStartMs": 23716.1
+    }
+   }
+  },
+  "-16..15": {
+   "core": {
+    "phase": "core",
+    "made": "2026-09-26T16:17:48.015Z",
+    "env": {
+     "DEUS_Z_RANGE": "-16..15"
+    },
+    "data": {
+     "tip": true,
+     "range": {
+      "zMin": -16,
+      "zMax": 15
+     },
+     "levels": 32,
+     "seed": 18,
+     "savedZRange": {
+      "zMin": -16,
+      "zMax": 15
+     },
+     "view": {
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "px": 128,
+      "py": 128
+     },
+     "heapAfterNewGame": {
+      "gc": true,
+      "usedJSHeapSize": 109000000,
+      "nodeHeapUsed": 39349068
+     },
+     "pathScratchAtStart": {
+      "layersAllocated": 1,
+      "layersWithScratch": [
+       0
+      ],
+      "bytesPerLayer": 1310720,
+      "bytes": 4456544,
+      "lastSearchLayers": [
+       0
+      ],
+      "heapEntries": 262152,
+      "levels": 32
+     },
+     "memory": {
+      "dir": 4096,
+      "strata": 1530880,
+      "connectors": 153088,
+      "shapeGrids": 589824,
+      "biome": 131072,
+      "surface": 65536,
+      "legacyViews": 262144,
+      "dense": 0,
+      "caps": 5528,
+      "capEntries": 691,
+      "chunks": 2048,
+      "mixedChunks": 299,
+      "outerMixedChunks": 12,
+      "levels": 32,
+      "total": 2742168
+     },
+     "memoryPerLevel": {
+      "0": {
+       "dir": 128,
+       "strata": 296960,
+       "connectors": 29696,
+       "chunks": 64,
+       "mixedChunks": 58
+      },
+      "1": {
+       "dir": 128,
+       "strata": 317440,
+       "connectors": 31744,
+       "chunks": 64,
+       "mixedChunks": 62
+      },
+      "2": {
+       "dir": 128,
+       "strata": 199680,
+       "connectors": 19968,
+       "chunks": 64,
+       "mixedChunks": 39
+      },
+      "3": {
+       "dir": 128,
+       "strata": 20480,
+       "connectors": 2048,
+       "chunks": 64,
+       "mixedChunks": 4
+      },
+      "4": {
+       "dir": 128,
+       "strata": 20480,
+       "connectors": 2048,
+       "chunks": 64,
+       "mixedChunks": 4
+      },
+      "5": {
+       "dir": 128,
+       "strata": 20480,
+       "connectors": 2048,
+       "chunks": 64,
+       "mixedChunks": 4
+      },
+      "6": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "7": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "8": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "9": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "10": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "11": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "12": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "13": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "14": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "15": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "-16": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "-15": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "-14": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "-13": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "-12": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "-11": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "-10": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "-9": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "-8": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "-7": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "-6": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "-5": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "-4": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "-3": {
+       "dir": 128,
+       "strata": 0,
+       "connectors": 0,
+       "chunks": 64,
+       "mixedChunks": 0
+      },
+      "-2": {
+       "dir": 128,
+       "strata": 327680,
+       "connectors": 32768,
+       "chunks": 64,
+       "mixedChunks": 64
+      },
+      "-1": {
+       "dir": 128,
+       "strata": 327680,
+       "connectors": 32768,
+       "chunks": 64,
+       "mixedChunks": 64
+      }
+     },
+     "palette": {
+      "entries": 3,
+      "bytes": 96
+     },
+     "fluid": "UF.Fluid not bound in this build",
+     "levelEntries": [
+      -2,
+      -1,
+      0,
+      1,
+      2
+     ],
+     "authorityProbe": [
+      "-17: refused",
+      "-16: accepted",
+      "-15: accepted",
+      "-2: accepted",
+      "0: accepted",
+      "2: accepted",
+      "14: accepted",
+      "15: accepted",
+      "16: refused"
+     ],
+     "elevation": {
+      "cell": {
+       "x": 12,
+       "y": 40
+      },
+      "samples": [
+       "-16/S0=0",
+       "-16/S2=2",
+       "-16/S4=4",
+       "-15/S0=5",
+       "-15/S2=7",
+       "-15/S4=9",
+       "-2/S0=70",
+       "-2/S2=72",
+       "-2/S4=74",
+       "-1/S0=75",
+       "-1/S2=77",
+       "-1/S4=79",
+       "0/S0=80",
+       "0/S2=82",
+       "0/S4=84",
+       "1/S0=85",
+       "1/S2=87",
+       "1/S4=89",
+       "2/S0=90",
+       "2/S2=92",
+       "2/S4=94",
+       "14/S0=150",
+       "14/S2=152",
+       "14/S4=154",
+       "15/S0=155",
+       "15/S2=157",
+       "15/S4=159"
+      ],
+      "maxElevation": 159,
+      "topElevation": 159
+     },
+     "blast": {
+      "block": {
+       "x": 20,
+       "y": 20
+      },
+      "center": {
+       "x": 23,
+       "y": 23,
+       "z": -1,
+       "s": 2
+      },
+      "radii": {
+       "3": {
+        "ok": true,
+        "strataDestroyed": 3,
+        "levels": [
+         -1
+        ],
+        "hits": [
+         "0,0,1,1",
+         "0,0,1,2",
+         "0,0,1,3"
+        ]
+       },
+       "5": {
+        "ok": true,
+        "strataDestroyed": 9,
+        "levels": [
+         -1
+        ],
+        "hits": [
+         "-1,0,1,2",
+         "0,-1,1,2",
+         "0,0,1,0",
+         "0,0,1,1",
+         "0,0,1,2",
+         "0,0,1,3",
+         "0,0,1,4",
+         "0,1,1,2",
+         "1,0,1,2"
+        ]
+       },
+       "7": {
+        "ok": true,
+        "strataDestroyed": 27,
+        "levels": [
+         -2,
+         -1,
+         0
+        ],
+        "hits": [
+         "-1,0,1,0",
+         "-1,0,1,1",
+         "-1,0,1,2",
+         "-1,0,1,3",
+         "-1,0,1,4",
+         "0,-1,1,0",
+         "0,-1,1,1",
+         "0,-1,1,2",
+         "0,-1,1,3",
+         "0,-1,1,4",
+         "0,0,0,4",
+         "0,0,1,0",
+         "0,0,1,1",
+         "0,0,1,2",
+         "0,0,1,3",
+         "0,0,1,4",
+         "0,0,2,0",
+         "0,1,1,0",
+         "0,1,1,1",
+         "0,1,1,2",
+         "0,1,1,3",
+         "0,1,1,4",
+         "1,0,1,0",
+         "1,0,1,1",
+         "1,0,1,2",
+         "1,0,1,3",
+         "1,0,1,4"
+        ]
+       }
+      }
+     },
+     "sparse": {
+      "outerLevels": 27,
+      "outerDirBytes": 3456,
+      "outerMixedChunks": 12,
+      "outerMixedBytes": 67584,
+      "capColumns": 691,
+      "chunksPerLevel": 64,
+      "totalBytes": 3004312,
+      "dirBytes": 4096,
+      "mixedBytes": 1683968,
+      "coreMixedChunks": 287
+     },
+     "split": {
+      "level": 12,
+      "cell": {
+       "x": 60,
+       "y": 60
+      },
+      "before": {
+       "split": 0,
+       "mixedNow": 0,
+       "records": 0
+      },
+      "after": {
+       "split": 1,
+       "mixedNow": 1,
+       "records": 1,
+       "changedChunks": [
+        9
+       ]
+      },
+      "entry": "{\"z\":12,\"gen\":5,\"strata\":{\"0,0\":{\"15420\":\"008300000000ff00000000\"}}}",
+      "entryAfterRevert": false
+     },
+     "heapAfterChecks": {
+      "gc": true,
+      "usedJSHeapSize": 109000000,
+      "nodeHeapUsed": 35945528
+     },
+     "pathScratch": {
+      "from": {
+       "x": 78,
+       "y": 4
+      },
+      "pathLength": 20,
+      "stats": {
+       "layersAllocated": 1,
+       "layersWithScratch": [
+        0
+       ],
+       "bytesPerLayer": 1310720,
+       "bytes": 4456544,
+       "lastSearchLayers": [
+        0
+       ],
+       "heapEntries": 262152,
+       "levels": 32
+      }
+     },
+     "core": {
+      "checksums": {
+       "0": "34c59783",
+       "1": "eaf389b9",
+       "2": "9998ffb2",
+       "-2": "dcfbb91b",
+       "-1": "433f2728"
+      },
+      "regenerated": {
+       "0": "34c59783",
+       "1": "eaf389b9",
+       "2": "9998ffb2",
+       "-2": "dcfbb91b",
+       "-1": "433f2728"
+      },
+      "baseline": {
+       "0": "ac9a96da",
+       "1": "eaf389b9",
+       "2": "99c985a5",
+       "-2": "9006b9ab",
+       "-1": "7ae4f294"
+      },
+      "cells": {
+       "0": "c90cb1ee",
+       "1": "cdb703b3",
+       "2": "f9ff0f2e",
+       "-2": "1fc9be8d",
+       "-1": "d7f3cf29"
+      },
+      "shapes": {
+       "0": "af074beb",
+       "1": "4b51f17f",
+       "2": "df0c47cd",
+       "-2": "4c9bec9e",
+       "-1": "1806cb4d"
+      }
+     },
+     "census": {
+      "strata": {
+       "1": 550959,
+       "2": 209862,
+       "4": 278,
+       "5": 128,
+       "131": 169
+      },
+      "outer": {
+       "-16:1": 327680,
+       "-15:1": 327680,
+       "-14:1": 327680,
+       "-13:1": 327680,
+       "-12:1": 327680,
+       "-11:1": 327680,
+       "-10:1": 327680,
+       "-9:1": 327680,
+       "-8:1": 327680,
+       "-7:1": 327680,
+       "-6:1": 327680,
+       "-5:1": 327680,
+       "-4:1": 327680,
+       "-3:1": 327680,
+       "3:1": 3248,
+       "4:1": 1723,
+       "5:1": 189
+      },
+      "objects": {
+       "1": 76,
+       "2": 9,
+       "3": 440,
+       "4": 87,
+       "5": 5,
+       "7": 69,
+       "15": 171,
+       "17": 123,
+       "18": 26,
+       "19": 69,
+       "20": 4,
+       "22": 1389,
+       "23": 49,
+       "24": 187,
+       "25": 2,
+       "26": 71,
+       "27": 2,
+       "28": 139,
+       "29": 373,
+       "30": 71,
+       "31": 8,
+       "32": 1,
+       "33": 325,
+       "35": 51,
+       "36": 5,
+       "37": 6,
+       "39": 3,
+       "41": 1,
+       "63": 15,
+       "64": 8,
+       "65": 5,
+       "66": 32,
+       "67": 17,
+       "68": 9,
+       "69": 1,
+       "72": 9
+      },
+      "items": {
+       "meat_cooked:0": 144,
+       "shovel:0": 9,
+       "stone_pick:0": 9,
+       "stone_axe:0": 9,
+       "common_clothes:0": 636,
+       "pouch:0": 636,
+       "gold_coin:0": 9540,
+       "common_clothes:-1": 226,
+       "pouch:-1": 226,
+       "gold_coin:-1": 3390,
+       "common_clothes:-2": 216,
+       "pouch:-2": 216,
+       "gold_coin:-2": 3240
+      },
+      "units": {
+       "elf:0": 103,
+       "gnome:-1": 103,
+       "dwarf:-1": 123,
+       "half-elf:0": 140,
+       "halfling:0": 142,
+       "tiefling:-2": 109,
+       "dragonborn:-2": 107,
+       "human:0": 117,
+       "half-orc:0": 134,
+       "deer:0": 25,
+       "aurochs:0": 15,
+       "wild_horse:0": 9,
+       "wild_sheep:0": 8,
+       "hare:0": 19,
+       "fowl:0": 28,
+       "wolf:0": 8,
+       "jackal:0": 3,
+       "fox:0": 4,
+       "arctic_fox:0": 3,
+       "hawk:0": 2,
+       "songbird:0": 5,
+       "troll:0": 1,
+       "bat:-1": 10,
+       "bog_horror:-1": 1,
+       "troll:-1": 1,
+       "giant_spider:-1": 2,
+       "bat:-2": 6,
+       "giant_spider:-2": 4,
+       "bog_horror:-2": 1,
+       "boar:0": 2
+      },
+      "capStrata": 5160,
+      "capColumns": 0,
+      "fluidStrata": 406,
+      "ms": 358
+     },
+     "heapAfterCensus": {
+      "gc": true,
+      "usedJSHeapSize": 109000000,
+      "nodeHeapUsed": 35362380
+     },
+     "errors": {
+      "harness": [],
+      "console": []
+     }
+    },
+    "timing": {
+     "setupNewGameMs": 19314.2,
+     "setupNewGameAtMs": 659.1,
+     "firstMapStartMs": 23230.2
+    }
+   },
+   "play": {
+    "phase": "play",
+    "made": "2026-09-26T16:17:04.078Z",
+    "env": {
+     "DEUS_Z_RANGE": "-16..15"
+    },
+    "data": {
+     "tip": true,
+     "range": {
+      "zMin": -16,
+      "zMax": 15
+     },
+     "levels": 32,
+     "seed": 18,
+     "savedZRange": {
+      "zMin": -16,
+      "zMax": 15
+     },
+     "view": {
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "px": 128,
+      "py": 128
+     },
+     "saveFresh": {
+      "levels": 5859,
+      "zRange": 22,
+      "fluid": 0,
+      "fluidAlias": 0,
+      "total": 6608484
+     },
+     "saveChanges": {
+      "levels": {
+       "zHi": 12,
+       "zLo": -14
+      },
+      "cell": {
+       "x": 90,
+       "y": 90
+      },
+      "bytes": {
+       "before": 5859,
+       "afterHigh": 5933,
+       "afterLow": 6009
+      },
+      "records": {
+       "high": "{\"z\":12,\"gen\":5,\"strata\":{\"0,0\":{\"23130\":\"00000000000100000000ff\"}}}",
+       "low": "{\"z\":-14,\"gen\":5,\"strata\":{\"0,0\":{\"23130\":\"000101010100ffffffff00\"}}}"
+      },
+      "roundTrip": true
+     },
+     "saveAfterRevert": {
+      "levels": 5859,
+      "entries": [
+       -2,
+       -1,
+       0,
+       1,
+       2
+      ]
+     },
+     "extreme": {
+      "deck": {
+       "x0": 125,
+       "y0": 126
+      },
+      "rows": [
+       "15: setView true (in place true, frames 0), plate \"+15\", unit walked to (131,128) (event on screen), path 6 cells (scratch on [15]), up past the end refused",
+       "-16: setView true (in place true, frames 0), plate \"-16\", unit walked to (131,128) (event on screen), path 6 cells (scratch on [-16]), down past the end refused"
+      ],
+      "path": {
+       "15": {
+        "length": 6,
+        "layers": [
+         15
+        ]
+       },
+       "-16": {
+        "length": 6,
+        "layers": [
+         -16
+        ]
+       }
+      },
+      "screenshots": [
+       "C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-16..15_play_26412_1790439422776\\test_output\\zrange.extreme_p15.png",
+       "C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-16..15_play_26412_1790439422776\\test_output\\zrange.extreme_m16.png"
+      ]
+     },
+     "errors": {
+      "harness": [],
+      "console": []
+     }
+    },
+    "timing": {
+     "setupNewGameMs": 18596.4,
+     "setupNewGameAtMs": 876.1,
+     "firstMapStartMs": 22560.6
+    }
+   },
+   "sim": {
+    "phase": "sim",
+    "made": "2026-09-26T16:15:23.694Z",
+    "env": {
+     "DEUS_Z_RANGE": "-16..15"
+    },
+    "data": {
+     "tip": true,
+     "range": {
+      "zMin": -16,
+      "zMax": 15
+     },
+     "levels": 32,
+     "seed": 18,
+     "savedZRange": {
+      "zMin": -16,
+      "zMax": 15
+     },
+     "view": {
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "px": 128,
+      "py": 128
+     },
+     "simulation": {
+      "updates": 1500,
+      "ticks": 1500,
+      "realMs": 68029
+     },
+     "censusAfter": {
+      "strata": {
+       "1": 550959,
+       "2": 209862,
+       "4": 278,
+       "5": 128,
+       "131": 169
+      },
+      "outer": {
+       "-16:1": 327680,
+       "-15:1": 327680,
+       "-14:1": 327680,
+       "-13:1": 327680,
+       "-12:1": 327680,
+       "-11:1": 327680,
+       "-10:1": 327680,
+       "-9:1": 327680,
+       "-8:1": 327680,
+       "-7:1": 327680,
+       "-6:1": 327680,
+       "-5:1": 327680,
+       "-4:1": 327680,
+       "-3:1": 327680,
+       "3:1": 3248,
+       "4:1": 1723,
+       "5:1": 189
+      },
+      "objects": {
+       "1": 76,
+       "2": 9,
+       "3": 440,
+       "4": 87,
+       "5": 4,
+       "6": 1,
+       "7": 69,
+       "15": 143,
+       "16": 28,
+       "17": 132,
+       "18": 26,
+       "19": 69,
+       "20": 4,
+       "22": 1392,
+       "23": 49,
+       "24": 187,
+       "25": 2,
+       "26": 72,
+       "27": 2,
+       "28": 139,
+       "29": 373,
+       "30": 71,
+       "31": 8,
+       "32": 1,
+       "33": 328,
+       "35": 51,
+       "36": 5,
+       "37": 6,
+       "39": 3,
+       "41": 1,
+       "63": 15,
+       "64": 8,
+       "65": 5,
+       "66": 32,
+       "67": 17,
+       "68": 9,
+       "69": 1,
+       "70": 9,
+       "72": 9
+      },
+      "items": {
+       "meat_cooked:0": 137,
+       "shovel:0": 9,
+       "stone_pick:0": 9,
+       "stone_axe:0": 9,
+       "common_clothes:0": 631,
+       "pouch:0": 631,
+       "gold_coin:0": 9465,
+       "common_clothes:-1": 226,
+       "pouch:-1": 226,
+       "gold_coin:-1": 3390,
+       "common_clothes:-2": 216,
+       "pouch:-2": 216,
+       "gold_coin:-2": 3240,
+       "common_clothes:1": 5,
+       "pouch:1": 5,
+       "gold_coin:1": 75,
+       "feathers:0": 32,
+       "hide:0": 24,
+       "bone:0": 30,
+       "meat_raw:0": 20,
+       "berries:0": 4,
+       "wool:0": 1
+      },
+      "units": {
+       "elf:0": 103,
+       "gnome:-1": 103,
+       "dwarf:-1": 123,
+       "half-elf:0": 140,
+       "halfling:0": 142,
+       "tiefling:-2": 109,
+       "dragonborn:-2": 107,
+       "human:0": 112,
+       "half-orc:0": 134,
+       "human:1": 5,
+       "deer:0": 16,
+       "aurochs:0": 12,
+       "wild_horse:0": 9,
+       "wild_sheep:0": 9,
+       "hare:0": 12,
+       "fowl:0": 21,
+       "wolf:0": 8,
+       "jackal:0": 3,
+       "fox:0": 4,
+       "arctic_fox:0": 3,
+       "hawk:0": 2,
+       "songbird:0": 5,
+       "troll:0": 1,
+       "bat:-1": 10,
+       "bog_horror:-1": 1,
+       "troll:-1": 1,
+       "giant_spider:-1": 2,
+       "bat:-2": 6,
+       "giant_spider:-2": 4,
+       "bog_horror:-2": 1,
+       "boar:0": 2
+      },
+      "capStrata": 5160,
+      "capColumns": 0,
+      "fluidStrata": 406,
+      "ms": 331
+     },
+     "errors": {
+      "harness": [],
+      "console": []
+     }
+    },
+    "timing": {
+     "setupNewGameMs": 19395.3,
+     "setupNewGameAtMs": 1085.7,
+     "firstMapStartMs": 23723.3
+    }
+   }
+  },
+  "-2..2": {
+   "core": {
+    "phase": "core",
+    "made": "2026-09-26T16:17:52.623Z",
+    "env": {
+     "DEUS_Z_RANGE": "-2..2"
+    },
+    "data": {
+     "tip": true,
+     "range": {
+      "zMin": -2,
+      "zMax": 2
+     },
+     "levels": 5,
+     "seed": 18,
+     "savedZRange": {
+      "zMin": -2,
+      "zMax": 2
+     },
+     "view": {
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "px": 128,
+      "py": 128
+     },
+     "heapAfterNewGame": {
+      "gc": true,
+      "usedJSHeapSize": 103000000,
+      "nodeHeapUsed": 33080520
+     },
+     "pathScratchAtStart": {
+      "layersAllocated": 1,
+      "layersWithScratch": [
+       0
+      ],
+      "bytesPerLayer": 1310720,
+      "bytes": 4456544,
+      "lastSearchLayers": [
+       0
+      ],
+      "heapEntries": 262152,
+      "levels": 5
+     },
+     "memory": {
+      "dir": 640,
+      "strata": 1469440,
+      "connectors": 146944,
+      "shapeGrids": 327680,
+      "biome": 131072,
+      "surface": 65536,
+      "legacyViews": 262144,
+      "dense": 0,
+      "caps": 5528,
+      "capEntries": 691,
+      "chunks": 320,
+      "mixedChunks": 287,
+      "outerMixedChunks": 0,
+      "levels": 5,
+      "total": 2408984
+     },
+     "memoryPerLevel": {
+      "0": {
+       "dir": 128,
+       "strata": 296960,
+       "connectors": 29696,
+       "chunks": 64,
+       "mixedChunks": 58
+      },
+      "1": {
+       "dir": 128,
+       "strata": 317440,
+       "connectors": 31744,
+       "chunks": 64,
+       "mixedChunks": 62
+      },
+      "2": {
+       "dir": 128,
+       "strata": 199680,
+       "connectors": 19968,
+       "chunks": 64,
+       "mixedChunks": 39
+      },
+      "-2": {
+       "dir": 128,
+       "strata": 327680,
+       "connectors": 32768,
+       "chunks": 64,
+       "mixedChunks": 64
+      },
+      "-1": {
+       "dir": 128,
+       "strata": 327680,
+       "connectors": 32768,
+       "chunks": 64,
+       "mixedChunks": 64
+      }
+     },
+     "palette": {
+      "entries": 3,
+      "bytes": 96
+     },
+     "fluid": "UF.Fluid not bound in this build",
+     "levelEntries": [
+      -2,
+      -1,
+      0,
+      1,
+      2
+     ],
+     "authorityProbe": [
+      "-3: refused",
+      "-2: accepted",
+      "-1: accepted",
+      "0: accepted",
+      "2: accepted",
+      "1: accepted",
+      "3: refused"
+     ],
+     "elevation": {
+      "cell": {
+       "x": 12,
+       "y": 40
+      },
+      "samples": [
+       "-2/S0=0",
+       "-2/S2=2",
+       "-2/S4=4",
+       "-1/S0=5",
+       "-1/S2=7",
+       "-1/S4=9",
+       "0/S0=10",
+       "0/S2=12",
+       "0/S4=14",
+       "1/S0=15",
+       "1/S2=17",
+       "1/S4=19",
+       "2/S0=20",
+       "2/S2=22",
+       "2/S4=24"
+      ],
+      "maxElevation": 24,
+      "topElevation": 24
+     },
+     "blast": {
+      "block": {
+       "x": 20,
+       "y": 20
+      },
+      "center": {
+       "x": 23,
+       "y": 23,
+       "z": -1,
+       "s": 2
+      },
+      "radii": {
+       "3": {
+        "ok": true,
+        "strataDestroyed": 3,
+        "levels": [
+         -1
+        ],
+        "hits": [
+         "0,0,1,1",
+         "0,0,1,2",
+         "0,0,1,3"
+        ]
+       },
+       "5": {
+        "ok": true,
+        "strataDestroyed": 9,
+        "levels": [
+         -1
+        ],
+        "hits": [
+         "-1,0,1,2",
+         "0,-1,1,2",
+         "0,0,1,0",
+         "0,0,1,1",
+         "0,0,1,2",
+         "0,0,1,3",
+         "0,0,1,4",
+         "0,1,1,2",
+         "1,0,1,2"
+        ]
+       },
+       "7": {
+        "ok": true,
+        "strataDestroyed": 27,
+        "levels": [
+         -2,
+         -1,
+         0
+        ],
+        "hits": [
+         "-1,0,1,0",
+         "-1,0,1,1",
+         "-1,0,1,2",
+         "-1,0,1,3",
+         "-1,0,1,4",
+         "0,-1,1,0",
+         "0,-1,1,1",
+         "0,-1,1,2",
+         "0,-1,1,3",
+         "0,-1,1,4",
+         "0,0,0,4",
+         "0,0,1,0",
+         "0,0,1,1",
+         "0,0,1,2",
+         "0,0,1,3",
+         "0,0,1,4",
+         "0,0,2,0",
+         "0,1,1,0",
+         "0,1,1,1",
+         "0,1,1,2",
+         "0,1,1,3",
+         "0,1,1,4",
+         "1,0,1,0",
+         "1,0,1,1",
+         "1,0,1,2",
+         "1,0,1,3",
+         "1,0,1,4"
+        ]
+       }
+      }
+     },
+     "sparse": {
+      "outerLevels": 0,
+      "outerDirBytes": 0,
+      "outerMixedChunks": 0,
+      "outerMixedBytes": 0,
+      "capColumns": 691,
+      "chunksPerLevel": 64,
+      "totalBytes": 2408984,
+      "dirBytes": 640,
+      "mixedBytes": 1616384,
+      "coreMixedChunks": 287
+     },
+     "split": {
+      "level": 2,
+      "cell": {
+       "x": 60,
+       "y": 60
+      },
+      "before": {
+       "split": 0,
+       "mixedNow": 39,
+       "records": 0
+      },
+      "after": {
+       "split": 1,
+       "mixedNow": 40,
+       "records": 1,
+       "changedChunks": [
+        9
+       ]
+      },
+      "entry": "{\"z\":2,\"gen\":5,\"checksum\":\"9998ffb2\",\"strata\":{\"0,0\":{\"15420\":\"008300000000ff00000000\"}}}",
+      "entryAfterRevert": true
+     },
+     "heapAfterChecks": {
+      "gc": true,
+      "usedJSHeapSize": 103000000,
+      "nodeHeapUsed": 29653396
+     },
+     "pathScratch": {
+      "from": {
+       "x": 78,
+       "y": 4
+      },
+      "pathLength": 20,
+      "stats": {
+       "layersAllocated": 1,
+       "layersWithScratch": [
+        0
+       ],
+       "bytesPerLayer": 1310720,
+       "bytes": 4456544,
+       "lastSearchLayers": [
+        0
+       ],
+       "heapEntries": 262152,
+       "levels": 5
+      }
+     },
+     "core": {
+      "checksums": {
+       "0": "34c59783",
+       "1": "eaf389b9",
+       "2": "9998ffb2",
+       "-2": "dcfbb91b",
+       "-1": "433f2728"
+      },
+      "regenerated": {
+       "0": "34c59783",
+       "1": "eaf389b9",
+       "2": "9998ffb2",
+       "-2": "dcfbb91b",
+       "-1": "433f2728"
+      },
+      "baseline": {
+       "0": "ac9a96da",
+       "1": "eaf389b9",
+       "2": "99c985a5",
+       "-2": "9006b9ab",
+       "-1": "7ae4f294"
+      },
+      "cells": {
+       "0": "c90cb1ee",
+       "1": "cdb703b3",
+       "2": "f9ff0f2e",
+       "-2": "1fc9be8d",
+       "-1": "d7f3cf29"
+      },
+      "shapes": {
+       "0": "af074beb",
+       "1": "4b51f17f",
+       "2": "df0c47cd",
+       "-2": "4c9bec9e",
+       "-1": "1806cb4d"
+      }
+     },
+     "census": {
+      "strata": {
+       "1": 550959,
+       "2": 209862,
+       "4": 278,
+       "5": 128,
+       "131": 169
+      },
+      "outer": {},
+      "objects": {
+       "1": 76,
+       "2": 9,
+       "3": 440,
+       "4": 87,
+       "5": 5,
+       "7": 69,
+       "15": 171,
+       "17": 123,
+       "18": 26,
+       "19": 69,
+       "20": 4,
+       "22": 1389,
+       "23": 49,
+       "24": 187,
+       "25": 2,
+       "26": 71,
+       "27": 2,
+       "28": 139,
+       "29": 373,
+       "30": 71,
+       "31": 8,
+       "32": 1,
+       "33": 325,
+       "35": 51,
+       "36": 5,
+       "37": 6,
+       "39": 3,
+       "41": 1,
+       "63": 15,
+       "64": 8,
+       "65": 5,
+       "66": 32,
+       "67": 17,
+       "68": 9,
+       "69": 1,
+       "72": 9
+      },
+      "items": {
+       "meat_cooked:0": 144,
+       "shovel:0": 9,
+       "stone_pick:0": 9,
+       "stone_axe:0": 9,
+       "common_clothes:0": 636,
+       "pouch:0": 636,
+       "gold_coin:0": 9540,
+       "common_clothes:-1": 226,
+       "pouch:-1": 226,
+       "gold_coin:-1": 3390,
+       "common_clothes:-2": 216,
+       "pouch:-2": 216,
+       "gold_coin:-2": 3240
+      },
+      "units": {
+       "elf:0": 103,
+       "gnome:-1": 103,
+       "dwarf:-1": 123,
+       "half-elf:0": 140,
+       "halfling:0": 142,
+       "tiefling:-2": 109,
+       "dragonborn:-2": 107,
+       "human:0": 117,
+       "half-orc:0": 134,
+       "deer:0": 25,
+       "aurochs:0": 15,
+       "wild_horse:0": 9,
+       "wild_sheep:0": 8,
+       "hare:0": 19,
+       "fowl:0": 28,
+       "wolf:0": 8,
+       "jackal:0": 3,
+       "fox:0": 4,
+       "arctic_fox:0": 3,
+       "hawk:0": 2,
+       "songbird:0": 5,
+       "troll:0": 1,
+       "bat:-1": 10,
+       "bog_horror:-1": 1,
+       "troll:-1": 1,
+       "giant_spider:-1": 2,
+       "bat:-2": 6,
+       "giant_spider:-2": 4,
+       "bog_horror:-2": 1,
+       "boar:0": 2
+      },
+      "capStrata": 5160,
+      "capColumns": 691,
+      "fluidStrata": 406,
+      "ms": 216
+     },
+     "heapAfterCensus": {
+      "gc": true,
+      "usedJSHeapSize": 103000000,
+      "nodeHeapUsed": 29750544
+     },
+     "errors": {
+      "harness": [],
+      "console": []
+     }
+    },
+    "timing": {
+     "setupNewGameMs": 16074.8,
+     "setupNewGameAtMs": 662,
+     "firstMapStartMs": 19070.9
+    }
+   },
+   "play": {
+    "phase": "play",
+    "made": "2026-09-26T16:17:04.409Z",
+    "env": {
+     "DEUS_Z_RANGE": "-2..2"
+    },
+    "data": {
+     "tip": true,
+     "range": {
+      "zMin": -2,
+      "zMax": 2
+     },
+     "levels": 5,
+     "seed": 18,
+     "savedZRange": {
+      "zMin": -2,
+      "zMax": 2
+     },
+     "view": {
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "px": 128,
+      "py": 128
+     },
+     "saveFresh": {
+      "levels": 5859,
+      "zRange": 20,
+      "fluid": 0,
+      "fluidAlias": 0,
+      "total": 6608363
+     },
+     "saveChanges": {
+      "levels": {
+       "zHi": 2,
+       "zLo": -2
+      },
+      "cell": {
+       "x": 90,
+       "y": 90
+      },
+      "bytes": {
+       "before": 5859,
+       "afterHigh": 5899,
+       "afterLow": 5939
+      },
+      "records": {
+       "high": "{\"z\":2,\"gen\":5,\"checksum\":\"9998ffb2\",\"strata\":{\"0,0\":{\"23130\":\"00000000000100000000ff\"}}}",
+       "low": "{\"z\":-2,\"gen\":5,\"checksum\":\"dcfbb91b\",\"strata\":{\"0,0\":{\"23130\":\"000100000001ff000000ff\"}}}"
+      },
+      "roundTrip": true
+     },
+     "saveAfterRevert": {
+      "levels": 5859,
+      "entries": [
+       -2,
+       -1,
+       0,
+       1,
+       2
+      ]
+     },
+     "extreme": {
+      "deck": {
+       "x0": 125,
+       "y0": 126
+      },
+      "rows": [
+       "2: setView true (in place true, frames 0), plate \"+2\", unit walked to (131,128) (event on screen), path 6 cells (scratch on [2]), up past the end refused",
+       "-2: setView true (in place true, frames 0), plate \"-2\", unit walked to (131,128) (event on screen), path 6 cells (scratch on [-2]), down past the end refused"
+      ],
+      "path": {
+       "2": {
+        "length": 6,
+        "layers": [
+         2
+        ]
+       },
+       "-2": {
+        "length": 6,
+        "layers": [
+         -2
+        ]
+       }
+      },
+      "screenshots": [
+       "C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-2..2_play_26412_1790439423082\\test_output\\zrange.extreme_p2.png",
+       "C:\\Users\\snewt\\AppData\\Local\\Temp\\laneaa_zr_snap\\-2..2_play_26412_1790439423082\\test_output\\zrange.extreme_m2.png"
+      ]
+     },
+     "errors": {
+      "harness": [],
+      "console": []
+     }
+    },
+    "timing": {
+     "setupNewGameMs": 15025.2,
+     "setupNewGameAtMs": 657.5,
+     "firstMapStartMs": 18010.3
+    }
+   },
+   "sim": {
+    "phase": "sim",
+    "made": "2026-09-26T16:15:23.758Z",
+    "env": {
+     "DEUS_Z_RANGE": "-2..2"
+    },
+    "data": {
+     "tip": true,
+     "range": {
+      "zMin": -2,
+      "zMax": 2
+     },
+     "levels": 5,
+     "seed": 18,
+     "savedZRange": {
+      "zMin": -2,
+      "zMax": 2
+     },
+     "view": {
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "px": 128,
+      "py": 128
+     },
+     "simulation": {
+      "updates": 1500,
+      "ticks": 1500,
+      "realMs": 68786
+     },
+     "censusAfter": {
+      "strata": {
+       "1": 550959,
+       "2": 209862,
+       "4": 278,
+       "5": 128,
+       "131": 169
+      },
+      "outer": {},
+      "objects": {
+       "1": 76,
+       "2": 9,
+       "3": 440,
+       "4": 87,
+       "5": 4,
+       "6": 1,
+       "7": 69,
+       "15": 143,
+       "16": 28,
+       "17": 132,
+       "18": 26,
+       "19": 69,
+       "20": 4,
+       "22": 1392,
+       "23": 49,
+       "24": 187,
+       "25": 2,
+       "26": 72,
+       "27": 2,
+       "28": 139,
+       "29": 373,
+       "30": 71,
+       "31": 8,
+       "32": 1,
+       "33": 328,
+       "35": 51,
+       "36": 5,
+       "37": 6,
+       "39": 3,
+       "41": 1,
+       "63": 15,
+       "64": 8,
+       "65": 5,
+       "66": 32,
+       "67": 17,
+       "68": 9,
+       "69": 1,
+       "70": 9,
+       "72": 9
+      },
+      "items": {
+       "meat_cooked:0": 137,
+       "shovel:0": 9,
+       "stone_pick:0": 9,
+       "stone_axe:0": 9,
+       "common_clothes:0": 631,
+       "pouch:0": 631,
+       "gold_coin:0": 9465,
+       "common_clothes:-1": 226,
+       "pouch:-1": 226,
+       "gold_coin:-1": 3390,
+       "common_clothes:-2": 216,
+       "pouch:-2": 216,
+       "gold_coin:-2": 3240,
+       "common_clothes:1": 5,
+       "pouch:1": 5,
+       "gold_coin:1": 75,
+       "feathers:0": 32,
+       "hide:0": 24,
+       "bone:0": 30,
+       "meat_raw:0": 20,
+       "berries:0": 4,
+       "wool:0": 1
+      },
+      "units": {
+       "elf:0": 103,
+       "gnome:-1": 103,
+       "dwarf:-1": 123,
+       "half-elf:0": 140,
+       "halfling:0": 142,
+       "tiefling:-2": 109,
+       "dragonborn:-2": 107,
+       "human:0": 112,
+       "half-orc:0": 134,
+       "human:1": 5,
+       "deer:0": 16,
+       "aurochs:0": 12,
+       "wild_horse:0": 9,
+       "wild_sheep:0": 9,
+       "hare:0": 12,
+       "fowl:0": 21,
+       "wolf:0": 8,
+       "jackal:0": 3,
+       "fox:0": 4,
+       "arctic_fox:0": 3,
+       "hawk:0": 2,
+       "songbird:0": 5,
+       "troll:0": 1,
+       "bat:-1": 10,
+       "bog_horror:-1": 1,
+       "troll:-1": 1,
+       "giant_spider:-1": 2,
+       "bat:-2": 6,
+       "giant_spider:-2": 4,
+       "bog_horror:-2": 1,
+       "boar:0": 2
+      },
+      "capStrata": 5160,
+      "capColumns": 691,
+      "fluidStrata": 406,
+      "ms": 239
+     },
+     "errors": {
+      "harness": [],
+      "console": []
+     }
+    },
+    "timing": {
+     "setupNewGameMs": 16884.9,
+     "setupNewGameAtMs": 1016.3,
+     "firstMapStartMs": 20849.7
+    }
+   }
+  },
+  "__legacy": {
+   "phase": "legacy",
+   "made": "2026-09-26T16:18:15.684Z",
+   "env": {
+    "DEUS_Z_RANGE": null
+   },
+   "data": {
+    "tip": true,
+    "range": {
+     "zMin": -16,
+     "zMax": 15
+    },
+    "levels": 32,
+    "seed": 18,
+    "savedZRange": {
+     "zMin": -16,
+     "zMax": 15
+    },
+    "view": {
+     "x": 0,
+     "y": 0,
+     "z": 0,
+     "px": 128,
+     "py": 128
+    },
+    "legacyFirst": {
+     "load": {
+      "timedOut": false,
+      "fp": {
+       "range": {
+        "zMin": -2,
+        "zMax": 2
+       },
+       "stateRange": "absent",
+       "levels": 5
+      },
+      "shown": {
+       "x": 0,
+       "y": 0,
+       "z": 0
+      }
+     },
+     "cellsMatch": true,
+     "changed": {
+      "0": 1,
+      "1": 170,
+      "2": 1,
+      "-2": 0,
+      "-1": 1
+     },
+     "unitsMatch": true,
+     "itemsMatch": true,
+     "unitsOnlyLoaded": [],
+     "unitsOnlyBase": [],
+     "units": 1240,
+     "items": 3302,
+     "cells": {
+      "0": "140bf9dd",
+      "1": "e5c8a6ed",
+      "2": "f9bea4a8",
+      "-2": "1fc9be8d",
+      "-1": "daa6fbb8"
+     },
+     "want": {
+      "0": "140bf9dd",
+      "1": "e5c8a6ed",
+      "2": "f9bea4a8",
+      "-2": "1fc9be8d",
+      "-1": "daa6fbb8"
+     }
+    },
+    "legacySecond": {
+     "load": {
+      "timedOut": false,
+      "fp": {
+       "range": {
+        "zMin": -2,
+        "zMax": 2
+       },
+       "stateRange": "absent",
+       "levels": 5
+      },
+      "shown": {
+       "x": 0,
+       "y": 0,
+       "z": 0
+      }
+     },
+     "cellsSame": true,
+     "unitsSame": true,
+     "itemsSame": true
+    },
+    "errors": {
+     "harness": [],
+     "console": []
+    }
+   },
+   "timing": {
+    "setupNewGameMs": 16914.6,
+    "setupNewGameAtMs": 665.6,
+    "firstMapStartMs": 20094.9
+   }
+  }
+ }
+}

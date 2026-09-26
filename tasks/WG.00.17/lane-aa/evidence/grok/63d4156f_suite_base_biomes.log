@@ -1,0 +1,26 @@
+# node tools/run_tests.js biomes
+# cwd C:\Users\snewt\AppData\Local\Temp\laneaa_clones\runtests_base
+# DEUS_Z_RANGE=unset
+# start 2026-09-26T12:13:42.7016103-05:00
+Running --deus-test=biomes on C:\Users\snewt\AppData\Local\Temp\laneaa_clones\runtests_base\game
+UF_Test run 2026-09-26T17:13:43.348Z args=[]
+DEBUG_SHEET: Scene_Boot.start called
+AVAILABLE SUITES: selftest, smoke, perf, native_starting_gear, native_survival_dying, native_perf_4x_benchmark, select, minimap, natural_connections, ownership, ecology, projects, settlement, colonists, overseer, world, spawn, worldgen, biomes, tiles, ground, factions, skins, history, objects, walls, doors, items, jobs, floors, wildlife, wildlife_seeds, stance, combat, anim, fog, daynight, timespeed, camera, culling, speech, overhead, look, sheet, talk, fire, vertical, natural_walls, flooding, strata, environment, faction_menus, title, load, setup, depth, layers_flat, select
+SUITE biomes
+PASS biomes.all_biomes_reachable - 33 ids produced by classify over 37044 synthetic field sets; unreachable: none; not in catalog: none
+FAIL biomes.world_variety - 8 distinct biomes over 144 sampled cells (seed 433621342): grassland_temperate 57, mountain 30, forest_temperate_conifer 22, shrubland_temperate 17, tundra 13, savanna_temperate 3, forest_temperate_broadleaf 1, grassland_tropical 1
+FAIL biomes.ocean_rim - 0 of 128 cells 2 in from the world edge are ocean (0 %, want >= 60 %)
+PASS biomes.start_habitable - start cell: grassland_temperate, ground meadow, region tame/neutral, walkable true
+PASS biomes.region_tiers_exist - savagery tiers in the sample: primeval, wild, tame (want >= 2 of tame/wild/primeval); alignment: neutral, cursed
+PASS biomes.lakes_or_rivers - 7 of 9 inland blocks have lake/river/pond water (sampled cells per block: 96 0 35 92 5 28 94 0 28)
+FAIL biomes.objects_dense - 533 objects in the start area (want >= 2500); biomes by cells: grassland_temperate 27396, mountain 13726, forest_temperate_conifer 8935, tundra 6442, shrubland_temperate 6111, savanna_temperate 1626
+FAIL biomes.kit_present - 5 area centre(s), kit within 20 cells, drinkable water within 30: Marar Kingdom (128,128): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 1/1, ore 1/1; water fresh at 13.0 | Ethen Court (60,93): berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; water NONE | Halum Burrow (72,237): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 1/1, ore 1/1; water fresh at 21.2 | Marostar Enclave (69,192): berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; water NONE | Yoris Warband (78,129): berry_bush 8/8, oak 1/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; water NONE; FAILING: Ethen Court at (60,93): short berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; no drinkable water within 30; Marostar Enclave at (69,192): short berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; no drinkable water within 30; Yoris Warband at (78,129): short oak 1/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; no drinkable water within 30
+FAIL biomes.camps_cleared - 5 sites in area (0,0): 5 bare camps (want 8), 0 older sites stamped; every bare camp's disc is free of objects
+PASS biomes.build_time - median 512 ms of 3 builds (633, 512, 416 ms) for 256x256 with 533 objects
+PASS biomes.deterministic - tiles -510085951 / -510085951, objects -1811683852 / -1811683852
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\runtests_base\game\test_output\biomes.start_zoom_0.png
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\runtests_base\game\test_output\biomes.corner.png
+PASS biomes.no_errors - none during biome checks
+RESULT: 7 passed, 5 failed (exit 1)
+
+EXIT=1

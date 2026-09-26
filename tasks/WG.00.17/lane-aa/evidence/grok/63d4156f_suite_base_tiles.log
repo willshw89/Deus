@@ -1,0 +1,23 @@
+# node tools/run_tests.js tiles
+# cwd C:\Users\snewt\AppData\Local\Temp\laneaa_clones\runtests_base
+# DEUS_Z_RANGE=unset
+# start 2026-09-26T12:14:22.2344055-05:00
+Running --deus-test=tiles on C:\Users\snewt\AppData\Local\Temp\laneaa_clones\runtests_base\game
+UF_Test run 2026-09-26T17:14:22.871Z args=[]
+DEBUG_SHEET: Scene_Boot.start called
+AVAILABLE SUITES: selftest, smoke, perf, native_starting_gear, native_survival_dying, native_perf_4x_benchmark, select, minimap, natural_connections, ownership, ecology, projects, settlement, colonists, overseer, world, spawn, worldgen, biomes, tiles, ground, factions, skins, history, objects, walls, doors, items, jobs, floors, wildlife, wildlife_seeds, stance, combat, anim, fog, daynight, timespeed, camera, culling, speech, overhead, look, sheet, talk, fire, vertical, natural_walls, flooding, strata, environment, faction_menus, title, load, setup, depth, layers_flat, select
+SUITE tiles
+PASS tiles.ground_kinds - 26 ground kinds: meadow, tropical_grass, dry_grass, shrub_soil, forest_floor, needle_floor, jungle_floor, tundra, snow, ice, sand, stony, red_clay, rock, peak_rock, mud, swamp_mud, dirt, cursed_grass, blessed_grass, ash, scree, road, floor_wood, floor_stone, floor_rushes
+PASS tiles.runtime_tileset - tileset 91: Outside_A1, Outside_A2, UF_GenLevels_A4, Outside_B, Outside_C, UF_GenShade_E
+PASS tiles.generated_sheet - 768x576
+PASS tiles.kinds_look_different - 23 distinct sample colors across 26 kinds
+PASS tiles.pixel_grid_3x - every sampled 3x3 block is a single color
+FAIL tiles.tileset_names - A1 Outside_A1, A2 Outside_A2, A5 , B Outside_B, C Outside_C, E UF_GenShade_E
+PASS tiles.flags - peak_rock flags 0xf/0xf (want 0xf), meadow 0x0/0x0 (want 0x0)
+PASS tiles.water_impassable - 9 water kinds; walkable: none
+PASS tiles.kind_of_tile - forest_floor shape 17 -> forest_floor; an A1 tile -> null
+PASS tiles.area_uses_tileset - area (0,0) on screen has tilesetId 91 (want 91)
+PASS tiles.no_errors - none
+RESULT: 10 passed, 1 failed (exit 1)
+
+EXIT=1

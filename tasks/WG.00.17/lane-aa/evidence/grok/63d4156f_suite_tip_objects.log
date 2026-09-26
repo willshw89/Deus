@@ -1,0 +1,31 @@
+# node tools/run_tests.js objects
+# cwd C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f
+# DEUS_Z_RANGE=unset
+# start 2026-09-26T12:20:17.0954840-05:00
+Running --deus-test=objects on C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game
+UF_Test run 2026-09-26T17:20:17.720Z args=[]
+DEBUG_SHEET: Scene_Boot.start called
+AVAILABLE SUITES: selftest, smoke, perf, native_starting_gear, native_survival_dying, native_perf_4x_benchmark, select, minimap, natural_connections, ownership, ecology, projects, settlement, colonists, overseer, world, spawn, worldgen, biomes, tiles, ground, factions, skins, history, objects, walls, doors, items, jobs, floors, wildlife, wildlife_seeds, stance, combat, anim, fog, daynight, timespeed, camera, culling, speech, overhead, look, sheet, talk, fire, vertical, natural_walls, flooding, strata, environment, faction_menus, title, load, setup, depth, layers_flat, select
+SUITE objects
+PASS objects.catalog_types - 87 types, 86 image, 1 tile, 0 generated; all becomes/regrow/ruin/yields resolve
+PASS objects.images_exist - 79 character sheets (79 with a sidecar) and 1 tile sheets found
+PASS objects.names_clean - 87 names checked against the banned-word list
+PASS objects.layer_in_tilemap - Sprite_UFObjectLayer is a child of the map's tilemap
+PASS objects.drawn_in_view - oak at (128,134): sprite present next frame, 142 opaque samples in a 96x96 frame, anchor at screen (408.0,624.0) expected (408.0,624.0); after set 0: sprite gone
+FAIL objects.tile_object_drawn - sapling (Outside_B #152) frame (384,144) 48x48 of img/tilesets/Outside_B.png, 0 opaque samples
+PASS objects.tint_applied - sapling tint 0x7fb35a (catalog #7fb35a)
+PASS objects.generated_drawn - all objects have authentic character or tile sheets (0 generated)
+FAIL objects.blocks_passage - ground passable before: true; oak at (131,132) passable: true; tall grass at (125,132) passable: true
+FAIL objects.sorted_with_units - unit z 576; grass on its cell z 476, oak north z null, pine south z 624 (want grass < north < unit < south)
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\objects.objects_in_view.png
+PASS objects.apply_chop - oak at (123,132) chopped: now "stump", returned yields {"log":3}, objects:changed {"from":"oak","to":"stump"}, gather on the stump -> null (no such action); 3 logs on the cell through UF.Items
+FAIL objects.regrow - gathered berry bush at (123,133): entry MISSING; after 47 h still bare: false; after 48 h a berry bush: false; entry cleared: true
+FAIL objects.persists - boulder at (134,124) after a reload of the same area: grid rebuilt, object GONE; save round-trip: objectDiffs["0,0"][31878] = undefined, regrow list saved
+FAIL objects.drawn_after_reload - boulder sprite missing on the new scene's layer
+PASS objects.perf - layer update avg 0.611 ms, max 5.26 ms over 240 frames (70 rebuilds), 127 sprites in view, 4007 objects written into the grid (no diffs), zoom 1.000, view scrolling
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\objects.objects_zoomed_out.png
+FAIL objects.perf_dense - layer update avg 1.947 ms, max 20.19 ms over 240 frames (70 rebuilds), 79 sprites in view, 4402 objects written into the grid (no diffs), zoom 1.000, view scrolling
+PASS objects.no_errors - none during objects checks
+RESULT: 10 passed, 7 failed (exit 1)
+
+EXIT=1

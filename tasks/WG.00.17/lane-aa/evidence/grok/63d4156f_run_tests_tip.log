@@ -1,0 +1,329 @@
+# 63d4156f6e986c5680e2c0246f20b47e4e26a3db
+# cwd: C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f
+# node tools/run_tests.js
+# DEUS_Z_RANGE=unset
+# start 2026-09-26T11:51:45.7221663-05:00
+Running --deus-test on C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game
+UF_Test run 2026-09-26T16:51:46.462Z args=[]
+DEBUG_SHEET: Scene_Boot.start called
+AVAILABLE SUITES: selftest, smoke, perf, native_starting_gear, native_survival_dying, native_perf_4x_benchmark, select, minimap, natural_connections, ownership, ecology, projects, settlement, colonists, overseer, world, spawn, worldgen, biomes, tiles, ground, factions, skins, history, objects, walls, doors, items, jobs, floors, wildlife, wildlife_seeds, stance, combat, anim, fog, daynight, timespeed, camera, culling, speech, overhead, look, sheet, talk, fire, vertical, natural_walls, flooding, strata, environment, faction_menus, title, load, setup, depth, layers_flat, select
+SUITE smoke
+PASS smoke.reached_map - map 1000 ""
+PASS smoke.player_not_visible
+PASS smoke.event_drawn.Elus - 1 in view drawn at screen (312,570); 4 more elsewhere in the area
+PASS smoke.event_drawn.Fenan - 1 in view drawn at screen (408,234); 1 more elsewhere in the area
+PASS smoke.event_drawn.Elric - 1 in view drawn at screen (600,282); 2 more elsewhere in the area
+PASS smoke.event_drawn.Garric - 1 in view drawn at screen (264,426); 4 more elsewhere in the area
+PASS smoke.event_drawn.Garald - 1 in view drawn at screen (264,474); 2 more elsewhere in the area
+PASS smoke.event_drawn.Ulan - 1 in view drawn at screen (552,282); 1 more elsewhere in the area
+PASS smoke.event_drawn.Isah - 1 in view drawn at screen (456,378); 3 more elsewhere in the area
+PASS smoke.event_drawn.Dorina - 1 in view drawn at screen (552,426); 2 more elsewhere in the area
+PASS smoke.event_drawn.Perina - 1 in view drawn at screen (168,138); 2 more elsewhere in the area
+PASS smoke.event_drawn.Garine - 1 in view drawn at screen (312,234); 1 more elsewhere in the area
+PASS smoke.event_drawn.Oran - 1 in view drawn at screen (648,90); 1 more elsewhere in the area
+PASS smoke.event_drawn.Alar - 1 in view drawn at screen (264,186); 1 more elsewhere in the area
+PASS smoke.event_drawn.Naor - 1 in view drawn at screen (360,474); 2 more elsewhere in the area
+PASS smoke.event_drawn.Zorar - 1 in view drawn at screen (600,138); 1 more elsewhere in the area
+PASS smoke.event_drawn.Isic - 1 in view drawn at screen (504,234); 1 more elsewhere in the area
+PASS smoke.event_drawn.Elan - 1 in view drawn at screen (360,330); 2 more elsewhere in the area
+PASS smoke.event_drawn.Fenon - 1 in view drawn at screen (360,426); 2 more elsewhere in the area
+PASS smoke.event_drawn.Rora - 1 in view drawn at screen (648,234); 1 more elsewhere in the area
+PASS smoke.event_drawn.Oric - 1 in view drawn at screen (168,474); 1 more elsewhere in the area
+PASS smoke.event_drawn.Caeette - 1 in view drawn at screen (216,186); 1 more elsewhere in the area
+PASS smoke.event_drawn.Saald - 1 in view drawn at screen (360,378); 1 more elsewhere in the area
+PASS smoke.event_drawn.Wilald - 1 in view drawn at screen (456,522); 1 more elsewhere in the area
+PASS smoke.event_drawn.Zoran - 1 in view drawn at screen (648,570); 2 more elsewhere in the area
+PASS smoke.event_drawn.Veren - 1 in view drawn at screen (600,426); 2 more elsewhere in the area
+PASS smoke.event_drawn.Liawen - 1 in view drawn at screen (600,234); 1 more elsewhere in the area
+PASS smoke.event_drawn.Caeys - 1 in view drawn at screen (600,330); 3 more elsewhere in the area
+PASS smoke.event_drawn.Fenine - 1 in view drawn at screen (312,426); 1 more elsewhere in the area
+PASS smoke.event_drawn.Braette - 1 in view drawn at screen (312,474); 1 more elsewhere in the area
+PASS smoke.event_drawn.Kaar - 1 in view drawn at screen (312,378); 1 more elsewhere in the area
+PASS smoke.event_drawn.Yvewen - 1 in view drawn at screen (648,186); 1 more elsewhere in the area
+PASS smoke.event_drawn.Zorys - 1 in view drawn at screen (600,570); 2 more elsewhere in the area
+PASS smoke.event_drawn.Helelle - 1 in view drawn at screen (312,330); 3 more elsewhere in the area
+PASS smoke.event_drawn.Caeem - 1 in view drawn at screen (552,474); 2 more elsewhere in the area
+PASS smoke.event_drawn.Wilor - 1 in view drawn at screen (456,330); 2 more elsewhere in the area
+PASS smoke.event_drawn.Nawen - 1 in view drawn at screen (360,282); 1 more elsewhere in the area
+PASS smoke.event_drawn.Rous - 1 in view drawn at screen (408,282)
+PASS smoke.event_drawn.Helen - 1 in view drawn at screen (456,282)
+PASS smoke.event_drawn.Orys - 1 in view drawn at screen (408,378)
+PASS smoke.event_drawn.Merys - 1 in view drawn at screen (312,138); 2 more elsewhere in the area
+PASS smoke.event_drawn.Zoria - 1 in view drawn at screen (648,282); 1 more elsewhere in the area
+PASS smoke.event_drawn.Caeine - 1 in view drawn at screen (264,90); 2 more elsewhere in the area
+PASS smoke.event_drawn.Roan - 1 in view drawn at screen (360,234)
+PASS smoke.event_drawn.Joren - 1 in view drawn at screen (456,234); 1 more elsewhere in the area
+PASS smoke.event_drawn.Naem - 1 in view drawn at screen (504,186); 1 more elsewhere in the area
+PASS smoke.event_drawn.Dorwen - 1 in view drawn at screen (312,282); 1 more elsewhere in the area
+PASS smoke.event_drawn.Roia - 1 in view drawn at screen (504,282)
+PASS smoke.event_drawn.Liaa - 1 in view drawn at screen (504,330); 1 more elsewhere in the area
+PASS smoke.event_drawn.Isra - 1 in view drawn at screen (504,378)
+PASS smoke.event_drawn.Ulem - 1 in view drawn at screen (408,522); 1 more elsewhere in the area
+PASS smoke.event_drawn.Merus - 1 in view drawn at screen (552,378); 1 more elsewhere in the area
+PASS smoke.event_drawn.Fenette - 1 in view drawn at screen (552,330); 1 more elsewhere in the area
+PASS smoke.event_drawn.Kaine - 1 in view drawn at screen (216,90); 1 more elsewhere in the area
+PASS smoke.event_drawn.Tamette - 1 in view drawn at screen (408,186); 2 more elsewhere in the area
+PASS smoke.event_drawn.Kaette - 1 in view drawn at screen (408,426)
+PASS smoke.event_drawn.Zoren - 1 in view drawn at screen (456,426)
+PASS smoke.event_drawn.Tamon - 1 in view drawn at screen (504,426); 1 more elsewhere in the area
+PASS smoke.event_drawn.Zorald - 1 in view drawn at screen (360,138); 2 more elsewhere in the area
+PASS smoke.event_drawn.Caeor - 1 in view drawn at screen (312,186)
+PASS smoke.event_drawn.Orah - 1 in view drawn at screen (360,186); 1 more elsewhere in the area
+PASS smoke.event_drawn.Tamald - 1 in view drawn at screen (456,186); 2 more elsewhere in the area
+PASS smoke.event_drawn.Liaah - 1 in view drawn at screen (552,186); 1 more elsewhere in the area
+PASS smoke.event_drawn.Wilen - 1 in view drawn at screen (264,234); 1 more elsewhere in the area
+PASS smoke.event_drawn.Perys - 1 in view drawn at screen (552,234)
+PASS smoke.event_drawn.Helah - 1 in view drawn at screen (264,282)
+PASS smoke.event_drawn.Merine - 1 in view drawn at screen (264,330)
+PASS smoke.event_drawn.Orar - 1 in view drawn at screen (264,378)
+PASS smoke.event_drawn.Braia - 1 in view drawn at screen (408,42); 1 more elsewhere in the area
+PASS smoke.event_drawn.Nays - 1 in view drawn at screen (360,522); 1 more elsewhere in the area
+PASS smoke.event_drawn.Helon - 1 in view drawn at screen (264,42); 2 more elsewhere in the area
+PASS smoke.event_drawn.Yveor - 1 in view drawn at screen (408,474)
+PASS smoke.event_drawn.Iswen - 1 in view drawn at screen (456,474)
+PASS smoke.event_drawn.Verra - 1 in view drawn at screen (168,570); 1 more elsewhere in the area
+PASS smoke.event_drawn.Meren - 1 in view drawn at screen (504,474); 2 more elsewhere in the area
+PASS smoke.event_drawn.Ulys - 1 in view drawn at screen (216,138)
+PASS smoke.event_drawn.Iselwen - 1 in view drawn at screen (264,138)
+PASS smoke.event_drawn.Alus - 1 in view drawn at screen (408,138)
+PASS smoke.event_drawn.Wilus - 1 in view drawn at screen (456,138)
+PASS smoke.event_drawn.Wilem - 1 in view drawn at screen (504,138)
+PASS smoke.event_drawn.Isroic - 1 in view drawn at screen (552,138)
+PASS smoke.event_drawn.Pertamelle - 1 in view drawn at screen (600,186)
+PASS smoke.event_drawn.Isem - 1 in view drawn at screen (216,234)
+PASS smoke.event_drawn.Kaic - 1 in view drawn at screen (216,282)
+PASS smoke.event_drawn.Caeina - 1 in view drawn at screen (168,234); 2 more elsewhere in the area
+PASS smoke.event_drawn.Naus - 1 in view drawn at screen (216,330); 1 more elsewhere in the area
+PASS smoke.event_drawn.Fenem - 1 in view drawn at screen (216,378)
+PASS smoke.event_drawn.Fenwen - 1 in view drawn at screen (600,378); 1 more elsewhere in the area
+PASS smoke.event_drawn.Alra - 1 in view drawn at screen (216,426)
+PASS smoke.event_drawn.Roina - 1 in view drawn at screen (216,474)
+PASS smoke.event_drawn.Zorkaette - 1 in view drawn at screen (600,474)
+PASS smoke.event_drawn.Tamina - 1 in view drawn at screen (216,522); 1 more elsewhere in the area
+PASS smoke.event_drawn.Alan - 1 in view drawn at screen (264,522)
+PASS smoke.event_drawn.Perperor - 1 in view drawn at screen (312,522)
+PASS smoke.event_drawn.Verroar - 1 in view drawn at screen (504,522)
+PASS smoke.event_drawn.Brays - 1 in view drawn at screen (552,522)
+PASS smoke.event_drawn.Caea - 1 in view drawn at screen (168,330); 1 more elsewhere in the area
+PASS smoke.event_drawn.Caenara - 1 in view drawn at screen (600,522)
+PASS smoke.event_drawn.Liafenus - 1 in view drawn at screen (168,90)
+PASS smoke.event_drawn.Alette - 1 in view drawn at screen (312,90)
+PASS smoke.event_drawn.Joror - 1 in view drawn at screen (360,90)
+PASS smoke.event_drawn.Verem - 1 in view drawn at screen (408,90)
+PASS smoke.event_drawn.Braen - 1 in view drawn at screen (456,90)
+PASS smoke.event_drawn.Yvea - 1 in view drawn at screen (504,90); 1 more elsewhere in the area
+PASS smoke.event_drawn.Wilulah - 1 in view drawn at screen (552,90)
+PASS smoke.event_drawn.Iszoria - 1 in view drawn at screen (648,138)
+PASS smoke.event_drawn.Orette - 1 in view drawn at screen (168,186)
+PASS smoke.event_drawn.Isette - 1 in view drawn at screen (168,282)
+PASS smoke.event_drawn.Tamys - 1 in view drawn at screen (648,330)
+PASS smoke.event_drawn.Helus - 1 in view drawn at screen (168,378); 2 more elsewhere in the area
+PASS smoke.event_drawn.Joralwen - 1 in view drawn at screen (648,378)
+PASS smoke.event_drawn.Vergarar - 1 in view drawn at screen (168,426)
+PASS smoke.event_drawn.Saric - 1 in view drawn at screen (648,426)
+PASS smoke.event_drawn.Brara - 1 in view drawn at screen (648,474)
+PASS smoke.event_drawn.Wilar - 1 in view drawn at screen (168,522)
+PASS smoke.event_drawn.Tamah - 1 in view drawn at screen (648,522)
+PASS smoke.event_drawn.Says - 1 in view drawn at screen (168,42); 1 more elsewhere in the area
+PASS smoke.event_drawn.Orwilwen - 1 in view drawn at screen (216,570)
+PASS smoke.event_drawn.Naen - 1 in view drawn at screen (264,570)
+PASS smoke.event_drawn.Sadoran - 1 in view drawn at screen (360,570)
+PASS smoke.event_drawn.Zorric - 1 in view drawn at screen (408,570)
+PASS smoke.event_drawn.Caekaelle - 1 in view drawn at screen (456,570)
+PASS smoke.event_drawn.Brahelan - 1 in view drawn at screen (504,570)
+PASS smoke.event_drawn.Wildoria - 1 in view drawn at screen (552,570)
+PASS smoke.event_drawn.Jorina - 1 in view drawn at screen (120,42)
+PASS smoke.event_drawn.Kaor - 1 in view drawn at screen (216,42)
+PASS smoke.event_drawn.Garra - 1 in view drawn at screen (312,42)
+PASS smoke.event_drawn.Jorwen - 1 in view drawn at screen (360,42)
+PASS smoke.save_serializes
+PASS smoke.colony_state_in_save
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\smoke.map.png
+PASS smoke.no_errors - none in first ~3 s on map
+SUITE minimap
+PASS minimap.minimap_api_exists - Minimap API is present
+PASS minimap.initial_far_tile_unexplored - tile (10,10,0) is unexplored
+PASS minimap.tile_becomes_discovered - tile (10,10,0) is discovered after explore()
+PASS minimap.z_layer_isolation - tile (10,10,-1) remains unexplored when Z0 was explored
+PASS minimap.dirty_chunk_invalidation - invalidating cell marks chunk dirty
+PASS minimap.dirty_chunk_rebuild - processDirty rebuilt 1 chunks
+PASS minimap.minimap_hud_present - Minimap HUD is attached to Scene_Map
+PASS minimap.minimap_overlay_active - Minimap dynamic overlay active
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\minimap.minimap_verified.png
+SUITE ownership
+PASS ownership.registry_contract - faction claim true; overwrite without force refused; forced owner public; released true
+PASS ownership.bed_assignment - TEST_Ada -> (127,126), owner {"kind":"unit","id":5530}; TEST_Bram -> (130,126); unique true
+PASS ownership.inspection_visible - Look line at (127,126): "Straw bed — dismantle · Owned by TEST_Ada"
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\ownership.owned_bed.png
+PASS ownership.exhausted_uses_owned_bed - old failed (exhausted); sleep done at (127,126), ownedBed true; need after 5
+PASS ownership.survival_and_danger_win - hungry: reason hunger, sleep false; danger: reason danger, sleep false; original job still active true
+PASS ownership.destroyed_bed_clears - object none; bedOf null; owner null
+PASS ownership.saved - round-trip claim {"kind":"unit","id":5531}; unit bed (130,126); save points at live ownership true
+PASS ownership.perf - 20,000 ownerOf calls: 1.01 us each (budget 20 us); 20 area reconciliations: 2.097 ms each (budget 20 ms)
+PASS ownership.no_errors - 0 uncaught error(s); 0 caught inside UF_Ownership
+SUITE ecology
+PASS ecology.state_saved - version 1; 1 area baseline(s); JsonEx ecology true; save points at live ecology true
+PASS ecology.renewable_only - oak/bush/grass renewable true; iron/stone/crystal finite true; hours tree/bush/plant 672/168/72
+PASS ecology.renewable_timer - chop -> stump; occupied pass due/grown/held 1/0/1; clear pass grown 1; final oak
+PASS ecology.native_regrow_single - UF_Objects timers 1; Ecology timers 0; cell berry_bush_bare
+PASS ecology.deterministic_safe_cell - troll chose (152,45) twice; safe true
+PASS ecology.hard_cap - status capped; population/cap 4/4; spawned 0
+PASS ecology.monster_replenishes - spawned: 1 troll in area (0,0), cap 6
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\ecology.replenished_monster.png
+PASS ecology.prey_replenishes - spawned: 2 deer; prey 127 -> 129
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\ecology.replenished_prey.png
+PASS ecology.bounded_work - 100 capped attempts in 13.745 ms (budget 20 ms); current prey/monsters 129/5; hour 305/306 processed 0/1 area(s)
+PASS ecology.beat_sprouting - 5 beats spawned 4 sprouts (total 7 active); levels represented: 0, -1
+PASS ecology.maturation_cycle - sprout bush at (149,138,z=0) matured into berry_bush: true
+PASS ecology.no_errors - 0 uncaught error(s); 0 caught inside UF_Ecology
+SUITE colonists
+PASS colonists.colonists_exist - 126 colonists present
+PASS colonists.player_faction - player faction f1 (colony: f1)
+PASS colonists.colonist_identity - colonist #4639 name Nawen, ai=null
+PASS colonists.order_move - manual move job: 41
+PASS colonists.no_errors - no errors during colonists check
+SUITE world
+PASS world.in_area_map - area (0,0), map 1000, seed 936317840
+PASS world.area_size - 256x256, data length 393216, objects 65536
+PASS world.level_ids - levels -16, -15, -14, -13, -12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 -> map ids 1032, 1030, 1028, 1026, 1024, 1022, 1020, 1018, 1016, 1014, 1012, 1010, 1008, 1006, 1004, 1003, 1000, 1001, 1002, 1005, 1007, 1009, 1011, 1013, 1015, 1017, 1019, 1021, 1023, 1025, 1027, 1029 (distinct); levelOfMapId round trip true; ground id 1000 (MapIdBase 1000, unchanged); areaOfMapId(level -1) null (want null); inWorld at level 16 / -17: false / false
+PASS world.seeded - area (0,0) built twice: 665461525 / 665461525; generators: uf_levels_terrain, uf_worldgen, uf_underground_resources
+PASS world.diff_applies_live - tile (3,3) 3488 -> 2048
+PASS world.object_diffs - on screen (5,5) = 7; area (0,0) cell (9,9) = 3 through the peek cache (same cached build)
+PASS world.save_roundtrip - 5975837 bytes, 1272 units
+FAIL world.single_area_world - 1x1 areas, map 1000; walk from x null to x null on row 128
+PASS world.unit_enters_view - event 6536 at (0,128), sprite created
+FAIL world.faces_its_steps - 0 step(s) taken (0 diagonal), 0 not facing the step's direction; facing 6 after walking west (want 4)
+FAIL world.unit_walks_to_goal - at (0,128) in area (0,0), goal (null,128) given up
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\world.unit_in_view.png
+PASS world.spawn_not_in_walls - an oak was set at (100,100) (free: false); the unit spawned at (106,106), 6 cell(s) away, on a free cell: true
+PASS world.unit_image_refresh - event now draws "$U7_Ranger"
+PASS world.view_wraps_in_round_world - view at (0,128) after stepping east at the edge (expected 0)
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\world.round_seam_wrap.png
+PASS world.view_wraps_back_west - view returned to (255,128) after stepping west from 0
+PASS world.diff_persists - tile (3,3) is 2048 (expected 2048) and object (5,5) is 7 (expected 7) after leaving and returning
+FAIL world.path_setup - no 27x27 patch of walkable ground at least 16 cells from every unit in area (0,0)
+PASS world.no_errors - none during world checks
+SUITE worldgen
+PASS worldgen.catalog_loaded - 87 object types, 33 biomes
+PASS worldgen.catalog_images_exist - 87 object images/sheets found
+PASS worldgen.catalog_ids_resolve - 33 biomes, 26 ground kinds, 9 water kinds, 87 objects all resolve
+PASS worldgen.autotile_matches_editor - 47 shapes derived; a 3-wide vertical strip gives 16,0,24 (the editor painted 16,0,24)
+PASS worldgen.tileset_id - built map tilesetId 91, map on screen 91, UF.Tiles.TILESET_ID 91
+PASS worldgen.start_in_middle - UF_Colonists installed: 0 generator start events (want 0); note "<glade>"
+PASS worldgen.names_vary_by_seed - this world: Garen and Fena; next seed: Oron and Verine
+PASS worldgen.water_near_start - nearest water 12.0 cells from the pair (reach 29)
+PASS worldgen.river_not_through_start - river(s) pass 76 cells from the start (keep away 14)
+PASS worldgen.rivers_count - 1 river(s) (catalog count 1-2) at columns 50 (half-width 1)
+FAIL worldgen.river_continuous - 256 break(s); first: river at column 50: row 0 dry
+PASS worldgen.objects_placed - 476 objects in map.ufObjects of the start area (stats sum 476, 0 object events); most common: grass_tuft 232, flowers 35, rocks_small 34, oak 34, berry_bush 28, wild_grain 16, flowers_blue 12, birch 12
+PASS worldgen.glade_clear - 0 objects inside the start clearing (radius 0) as generated
+PASS worldgen.no_objects_in_water - 39 water cells; 0 objects on water, 0 of them not water plants; 0 water plants on land
+FAIL worldgen.kit_per_area - 5 factions; 5 area centre(s), kit within 20 cells, drinkable water within 30: Solor League (128,128): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 1/1, ore 1/1; water fresh at 12.0 | Gorvasor Grove (24,63): berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; water NONE | Halwyn Shire (126,168): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 1/1, ore 2/1; water fresh at 22.0 | Quinum Circle (84,180): berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; water NONE | Ulula Tribe (81,84): berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; water NONE; FAILING: Gorvasor Grove at (24,63): short berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; no drinkable water within 30; Quinum Circle at (84,180): short berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; no drinkable water within 30; Ulula Tribe at (81,84): short berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; no drinkable water within 30
+FAIL worldgen.kit_covers_plan - first stage (hearth, larder, knives, clothes, axe, pick, food, woodpile, shelter, beds, workstone) for 8 founders, the most any of 7 cultures needs, plus 8 meals: log 26, stone 60, fiber 58, straw 16, food 16, ore 2 (human 26/14/58/16/14, elf 24/10/56/16/16, dwarf 3/60/58/16/14, gnome 26/14/58/16/14, goblin 3/14/58/16/14, orc 26/14/58/16/14, automaton 3/60/58/16/14 as log/stone/fiber/straw/food); the kit's minimums alone are worth log 36, stone 47, fiber 60, straw 8, food 19, ore 2 (SHORT: stone 47/60, straw 8/16); within 20 cells of each campfire: Solor League (128,128): log 36, stone 47, fiber 60, straw 11, food 19, ore 2 | Gorvasor Grove (24,63): log 0, stone 0, fiber 0, straw 0, food 0, ore 0 | Halwyn Shire (126,168): log 36, stone 50, fiber 60, straw 8, food 19, ore 4 | Quinum Circle (84,180): log 0, stone 0, fiber 0, straw 0, food 0, ore 0 | Ulula Tribe (81,84): log 0, stone 0, fiber 0, straw 0, food 0, ore 0; FAILING: Solor League: short stone 47/60, straw 11/16; Gorvasor Grove: short log 0/26, stone 0/60, fiber 0/58, straw 0/16, food 0/16, ore 0/2; Halwyn Shire: short stone 50/60, straw 8/16; Quinum Circle: short log 0/26, stone 0/60, fiber 0/58, straw 0/16, food 0/16, ore 0/2; Ulula Tribe: short log 0/26, stone 0/60, fiber 0/58, straw 0/16, food 0/16, ore 0/2
+FAIL worldgen.kit_fair - minimums for every area: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 1, ore 1-2 of ironstone/copper_outcrop; per area: Solor League: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 1, ore 1 (ironstone 1); water fresh 12.0 | Gorvasor Grove: berry_bush 0, oak 0, rocks_small 0, grass_tuft 0, reeds 0, granite_boulder 0, fruit_tree 0, ore 0 (none); water NONE | Halwyn Shire: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 1, ore 2 (ironstone 2); water fresh 22.0 | Quinum Circle: berry_bush 0, oak 0, rocks_small 0, grass_tuft 0, reeds 0, granite_boulder 0, fruit_tree 0, ore 0 (none); water NONE | Ulula Tribe: berry_bush 0, oak 0, rocks_small 0, grass_tuft 0, reeds 0, granite_boulder 0, fruit_tree 0, ore 0 (none); water NONE; SHORT: Gorvasor Grove: berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; Quinum Circle: berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; Ulula Tribe: berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1
+PASS worldgen.kit_seeded - seed 936317840: 129 kit objects placed (first berry_bush (109,127), berry_bush (127,137), berry_bush (146,126); ore ironstone (119,124), ironstone (124,150), ironstone (124,149)), a second build identical; seed 936317841: 239 placed, ore ironstone/ironstone/ironstone/copper_outcrop/copper_outcrop, another layout
+PASS worldgen.peaks_region_250 - 57623 peak_rock tiles, 57623 cells with region 250, 0 mismatched in the start area
+FAIL worldgen.autotile_shapes - 7224 interior cells sampled (6 water, the rest ground away from water), 244 wrong shapes; first: (145,7) ground shape 16, expected 0
+PASS worldgen.deterministic - tiles 665461525 / 665461525, objects -1869796825 / -1869796825 on rebuild (414 ms first build)
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\worldgen.start_area.png
+PASS worldgen.no_errors - none during worldgen checks
+SUITE biomes
+PASS biomes.all_biomes_reachable - 33 ids produced by classify over 37044 synthetic field sets; unreachable: none; not in catalog: none
+PASS biomes.world_variety - 12 distinct biomes over 144 sampled cells (seed 936317840): mountain 58, grassland_temperate 27, forest_temperate_conifer 19, taiga 10, forest_temperate_broadleaf 10, tundra 5, forest_tropical_dry_broadleaf 5, glacier 3, forest_tropical_conifer 2, lake_fresh 2, marsh_temperate_fresh 2, forest_tropical_moist_broadleaf 1
+FAIL biomes.ocean_rim - 0 of 128 cells 2 in from the world edge are ocean (0 %, want >= 60 %)
+PASS biomes.start_habitable - start cell: grassland_temperate, ground meadow, region tame/neutral, walkable true
+PASS biomes.region_tiers_exist - savagery tiers in the sample: primeval, wild, tame (want >= 2 of tame/wild/primeval); alignment: neutral, cursed
+PASS biomes.lakes_or_rivers - 4 of 9 inland blocks have lake/river/pond water (sampled cells per block: 55 0 0 117 10 0 68 0 0)
+FAIL biomes.objects_dense - 502 objects in the start area (want >= 2500); biomes by cells: mountain 25705, grassland_temperate 13092, forest_temperate_conifer 8164, forest_temperate_broadleaf 5947, taiga 3732, tundra 1904
+FAIL biomes.kit_present - 5 area centre(s), kit within 20 cells, drinkable water within 30: Solor League (128,128): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 1/1, ore 1/1; water fresh at 12.0 | Gorvasor Grove (24,63): berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; water NONE | Halwyn Shire (126,168): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 1/1, ore 2/1; water fresh at 22.0 | Quinum Circle (84,180): berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; water NONE | Ulula Tribe (81,84): berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; water NONE; FAILING: Gorvasor Grove at (24,63): short berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; no drinkable water within 30; Quinum Circle at (84,180): short berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; no drinkable water within 30; Ulula Tribe at (81,84): short berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; no drinkable water within 30
+FAIL biomes.camps_cleared - 5 sites in area (0,0): 5 bare camps (want 8), 0 older sites stamped; every bare camp's disc is free of objects
+PASS biomes.build_time - median 577 ms of 3 builds (690, 514, 577 ms) for 256x256 with 502 objects
+PASS biomes.deterministic - tiles 665461525 / 665461525, objects -1869796825 / -1869796825
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\biomes.start_zoom_0.png
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\biomes.corner.png
+PASS biomes.no_errors - none during biome checks
+SUITE tiles
+PASS tiles.ground_kinds - 26 ground kinds: meadow, tropical_grass, dry_grass, shrub_soil, forest_floor, needle_floor, jungle_floor, tundra, snow, ice, sand, stony, red_clay, rock, peak_rock, mud, swamp_mud, dirt, cursed_grass, blessed_grass, ash, scree, road, floor_wood, floor_stone, floor_rushes
+PASS tiles.runtime_tileset - tileset 91: Outside_A1, Outside_A2, UF_GenLevels_A4, Outside_B, Outside_C, UF_GenShade_E
+PASS tiles.generated_sheet - 768x576
+PASS tiles.kinds_look_different - 23 distinct sample colors across 26 kinds
+PASS tiles.pixel_grid_3x - every sampled 3x3 block is a single color
+FAIL tiles.tileset_names - A1 Outside_A1, A2 Outside_A2, A5 , B Outside_B, C Outside_C, E UF_GenShade_E
+PASS tiles.flags - peak_rock flags 0xf/0xf (want 0xf), meadow 0x0/0x0 (want 0x0)
+PASS tiles.water_impassable - 9 water kinds; walkable: none
+PASS tiles.kind_of_tile - forest_floor shape 17 -> forest_floor; an A1 tile -> null
+PASS tiles.area_uses_tileset - area (0,0) on screen has tilesetId 91 (want 91)
+PASS tiles.no_errors - none
+SUITE ground
+PASS ground.shades_vary - 56853 shaded cells with 243 distinct shade tile keys on Layer 1
+PASS ground.patches_broad - rolling terrain gradient verified across map
+PASS ground.no_hard_seams - shared corners continuous across cell edges without outline gaps
+PASS ground.palette_only - UF_GenShade_E 768x768 generated with 100% uf.hex palette compliance
+PASS ground.build_time - shade plan computed in 13.2 ms (median of 3, budget <= 80 ms) [min: 12.0ms, max: 110.8ms]
+PASS ground.deterministic - 0 layer-1 differences across 65536 cells on rebuild
+PASS ground.passability_unchanged - all 256 shade tile IDs (768-1023) have flag 0x0000 (walkable)
+PASS ground.edits_follow - live tile edits update Layer 1 ground shades seamlessly
+PASS ground.diag_seam - (-4,-1):meadow:L1=967[pure:grass:5] | (-3,-1):meadow:L1=967[pure:grass:5] | (-2,-1):meadow:L1=967[pure:grass:5] | (-1,-1):meadow:L1=967[pure:grass:5] | (0,-1):meadow:L1=967[pure:grass:5] | (1,-1):meadow:L1=967[pure:grass:5] | (2,-1):meadow:L1=967[pure:grass:5] | (3,-1):meadow:L1=967[pure:grass:5] | (4,-1):meadow:L1=967[pure:grass:5] || (-4,0):meadow:L1=967[pure:grass:5] | (-3,0):meadow:L1=967[pure:grass:5] | (-2,0):meadow:L1=967[pure:grass:5] | (-1,0):meadow:L1=967[pure:grass:5] | (0,0):meadow:L1=967[pure:grass:5] | (1,0):meadow:L1=967[pure:grass:5] | (2,0):meadow:L1=967[pure:grass:5] | (3,0):meadow:L1=967[pure:grass:5] | (4,0):meadow:L1=967[pure:grass:5] || (-4,1):meadow:L1=967[pure:grass:5] | (-3,1):meadow:L1=967[pure:grass:5] | (-2,1):meadow:L1=967[pure:grass:5] | (-1,1):meadow:L1=967[pure:grass:5] | (0,1):meadow:L1=967[pure:grass:5] | (1,1):meadow:L1=967[pure:grass:5] | (2,1):meadow:L1=967[pure:grass:5] | (3,1):meadow:L1=967[pure:grass:5] | (4,1):meadow:L1=967[pure:grass:5] || (-4,2):meadow:L1=967[pure:grass:5] | (-3,2):meadow:L1=967[pure:grass:5] | (-2,2):meadow:L1=967[pure:grass:5] | (-1,2):meadow:L1=967[pure:grass:5] | (0,2):meadow:L1=967[pure:grass:5] | (1,2):meadow:L1=967[pure:grass:5] | (2,2):meadow:L1=967[pure:grass:5] | (3,2):meadow:L1=967[pure:grass:5] | (4,2):meadow:L1=967[pure:grass:5]
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\ground.terrain_gradient_closeup.png
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\ground.terrain_gradient_medium.png
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\ground.terrain_gradient_wide.png
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\ground.terrain_gradient_border.png
+PASS ground.no_errors - none during ground checks
+SUITE factions
+PASS factions.generated_with_world - 9 factions (yours among them), seed 936317840
+PASS factions.count_in_range - 9 factions (all 9 SRD races), 8 besides the player's
+PASS factions.player_faction - the player's faction is The Solor League (human, id f1); "player" resolves to it
+PASS factions.names_unique - The Solor League | The Gorvasor Grove | The Halwyn Shire | The Dunar Clan | The Zanen Workshop | The Vaspelar Flight | The Quinum Circle | The Ulula Tribe | The Gorloris Covenant
+PASS factions.species_unique - species: human, elf, halfling, dwarf, gnome, dragonborn, half-elf, half-orc, tiefling
+PASS factions.layer_distribution - layers: Z0 (human, elf, halfling, half-elf, half-orc), Z-1 (dwarf, gnome), Z-2 (dragonborn, tiefling)
+PASS factions.relations_complete - 36 of 36 pairs, range -72 to 65
+PASS factions.aligned_and_disaligned - 3 strong alliance(s), 1 serious hostility(ies)
+PASS factions.relation_symmetric - relation(a, b) = relation(b, a)
+PASS factions.areas - Solor League (human, yours) at (128,128) grassland_temperate, water ~12 cells, rule centre; Gorvasor Grove (elf) at (24,63) taiga, water ~15 cells, rule preferred+water; Halwyn Shire (halfling) at (126,168) grassland_temperate, water ~24 cells, rule preferred+water; Dunar Clan (dwarf) at (52,44) null, water none cells, rule underground-pocket; Zanen Workshop (gnome) at (219,215) null, water none cells, rule underground-pocket; Vaspelar Flight (dragonborn) at (60,196) null, water none cells, rule underground-pocket; Quinum Circle (half-elf) at (84,180) grassland_temperate, water ~20 cells, rule preferred+water; Ulula Tribe (half-orc) at (81,84) forest_temperate_conifer, water ~24 cells, rule preferred+water; Gorloris Covenant (tiefling) at (240,8) null, water none cells, rule underground-pocket; closest pair 40.0 (want >= 40); player's 0.0 from the centre (want <= 6); same seed same areas, seed+1 other areas; last placement 794 ms, 8183 cell lookups, 1 attempt(s)
+PASS factions.same_seed_same_factions - generated twice from seed 936317840: identical; same names and player (f1) as the live world
+PASS factions.new_seed_new_factions - another seed gives: The Falgora Court, The Goren Clan, The Wenesh Deep, The Kelloresh Guild, The Coris Clan, The Solar Freehold, The Gorar Warband, The Yorar Covenant
+PASS factions.saved_with_world - factions round-trip through the save format
+PASS factions.unmet_not_listed - ledger lists 1 met faction(s) (f1); 8 unmet and hidden
+PASS factions.contact_reveals_faction - The Gorvasor Grove: met true after a scout of ours stood 3 cells from one of theirs; listed true
+PASS factions.ledger_opens - F toggles the ledger window
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\factions.ledger.png
+PASS factions.no_errors - none during faction checks
+SUITE history
+FAIL history.generated_with_world - history version 6, 9 camps, 400 events, founders for 9 factions, seed 936317840 (12101.1 ms)
+PASS history.player_faction - playerId f1 = The Solor League (human); home Loreth (camp, bare true, id 1) at (128,128), 0.0 cells from the centre (want <= 6); on the faction's camp cell (128,128), 0.0 from its area centre (128,128): true; viewStart (128,128) matches; the view (128,128) is on it; seeds 936317841/936317842: home at the centre in both
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\history.home_area.png
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\history.other_area.png
+PASS history.dwarf_two_level_start - 4 subterranean faction(s) on assigned Z levels (-1 dwarves/gnomes, -2 tieflings/dragonborn); levels and founders agree
+FAIL history.no_years - catalog history.simulate false, settleYears 0 (want false and 0); this world: 500 years simulated, 9 camps, 0 wars, 0 year-1 lines, e.g. "Orric was born to Jorra and Jorald."; seed 936317840: PROBLEMS years 500, simulated true; simulated event types present; The Solor League: founding lines do not match camps; The Solor League: 17 rulers; The Gorvasor Grove: founding lines do not match camps; The Gorvasor Grove: 3 rulers; The Halwyn Shire: founding lines do not match camps; The Halwyn Shire: 10 rulers; The Dunar Clan: founding lines do not match camps; The Dunar Clan: 5 rulers; The Zanen Workshop: founding lines do not match camps; The Zanen Workshop: 4 rulers; The Vaspelar Flight: founding lines do not match camps; The Vaspelar Flight: 17 rulers; The Quinum Circle: founding lines do not match camps; The Quinum Circle: 7 rulers; The Ulula Tribe: founding lines do not match camps; The Ulula Tribe: 24 rulers; The Gorloris Covenant: founding lines do not match camps; The Gorloris Covenant: 14 rulers; seed 936317841: PROBLEMS years 500, simulated true; simulated event types present; The Gorular Kingdom: founding lines do not match camps; The Gorular Kingdom: 18 rulers; The Falgora Court: founding lines do not match camps; The Falgora Court: 3 rulers; The Goren Clan: founding lines do not match camps; The Goren Clan: 10 rulers; The Wenesh Deep: founding lines do not match camps; The Wenesh Deep: 9 rulers; The Kelloresh Guild: founding lines do not match camps; The Kelloresh Guild: 6 rulers; The Coris Clan: founding lines do not match camps; The Coris Clan: 22 rulers; The Solar Freehold: founding lines do not match camps; The Solar Freehold: 9 rulers; The Gorar Warband: founding lines do not match camps; The Gorar Warband: 23 rulers; The Yorar Covenant: founding lines do not match camps; The Yorar Covenant: 18 rulers; seed 936317842: PROBLEMS years 500, simulated true; simulated event types present; The Quineth Freehold: founding lines do not match camps; The Quineth Freehold: 17 rulers; The Gorar Circle: founding lines do not match camps; The Gorar Circle: 3 rulers; The Zanira Moot: founding lines do not match camps; The Zanira Moot: 11 rulers; The Ara Deep: founding lines do not match camps; The Ara Deep: 4 rulers; The Falic Burrow: founding lines do not match camps; The Falic Burrow: 5 rulers; The Ulzaneth Cohort: founding lines do not match camps; The Ulzaneth Cohort: 18 rulers; The Zangorok Freehold: founding lines do not match camps; The Zangorok Freehold: 12 rulers; The Arath Warband: founding lines do not match camps; The Arath Warband: 23 rulers; The Corwenic Covenant: founding lines do not match camps; The Corwenic Covenant: 21 rulers
+FAIL history.founders - 0 founders for 9 factions (want 4 men + 4 women each, ages 18-40, within 3 of the centre, * = leader, offsets from the centre): Solor League: ; Gorvasor Grove: ; Halwyn Shire: ; Dunar Clan: ; Zanen Workshop: ; Vaspelar Flight: ; Quinum Circle: ; Ulula Tribe: ; Gorloris Covenant: ; PROBLEMS (9): The Solor League: 0 founders, 0 men, 0 women; The Gorvasor Grove: 0 founders, 0 men, 0 women; The Halwyn Shire: 0 founders, 0 men, 0 women; The Dunar Clan: 0 founders, 0 men, 0 women; The Zanen Workshop: 0 founders, 0 men, 0 women; The Vaspelar Flight: 0 founders, 0 men, 0 women
+FAIL history.campfire_start - 9 camps as drawn (PPP/PFP/PPP; facings N-NE-E-SE-S-SW-W-NW in RMMZ numbers, 2 down 8 up 6 right 4 left): Solor League z0 (human, 128,128): chest_wood + 0 on the ring (sheets ), genders N-NE-E-SE-S-SW-W-NW ????????, facings --------, first frame xxx/xFx/xxx [PROBLEM]; Gorvasor Grove z0 (elf, 24,63): chest_wood + 0 on the ring (sheets ), genders N-NE-E-SE-S-SW-W-NW ????????, facings --------, first frame .../.F./... [PROBLEM]; Halwyn Shire z0 (halfling, 126,168): chest_wood + 0 on the ring (sheets ), genders N-NE-E-SE-S-SW-W-NW ????????, facings --------, first frame .../.F./... [PROBLEM]; Dunar Clan z-1 (dwarf, 52,44): chest_wood + 0 on the ring (sheets ), genders N-NE-E-SE-S-SW-W-NW ????????, facings --------, not captured [PROBLEM]; Zanen Workshop z-1 (gnome, 219,215): chest_wood + 0 on the ring (sheets ), genders N-NE-E-SE-S-SW-W-NW ????????, facings --------, not captured [PROBLEM]; Vaspelar Flight z-2 (dragonborn, 60,196): chest_wood + 0 on the ring (sheets ), genders N-NE-E-SE-S-SW-W-NW ????????, facings --------, not captured [PROBLEM]; Quinum Circle z0 (half-elf, 84,180): chest_wood + 0 on the ring (sheets ), genders N-NE-E-SE-S-SW-W-NW ????????, facings --------, first frame .../.F./... [PROBLEM]; Ulula Tribe z0 (half-orc, 81,84): chest_wood + 0 on the ring (sheets ), genders N-NE-E-SE-S-SW-W-NW ????????, facings --------, first frame .../.F./... [PROBLEM]; Gorloris Covenant z-2 (tiefling, 240,8): chest_wood + 0 on the ring (sheets ), genders N-NE-E-SE-S-SW-W-NW ????????, facings --------, not captured [PROBLEM]; chest_wood: placed at center; start capture done after 37 frames (ready at 24), shots history.start_zoom1.png, history.start_zoom23.png, history.start_other.png; PROBLEMS (23): Solor League z0: 0 founders, 0 on the ring, 0 ring cells taken (want 126 founders); Solor League z0: 0 men, 0 women; Solor League z0 at the first frame: -1,-1: no object, Nawen dir 2 (not a founder); 0,-1: no object, Rous dir 2 (not a founder); 1,-1: no object, Helen dir 2 (not a founder); Gorvasor Grove z0: 9 of the nine cells water or peak; Gorvasor Grove z0: 0 founders, 0 on the ring, 0 ring cells taken (want 76 founders); Gorvasor Grove z0: 0 men, 0 women
+FAIL history.stats_and_ranks - 0 founders checked; 9 problems: The Solor League: 0 leaders, chronicle names unit null; The Gorvasor Grove: 0 leaders, chronicle names unit null; The Halwyn Shire: 0 leaders, chronicle names unit null; The Dunar Clan: 0 leaders, chronicle names unit null; sample: no leader
+PASS history.nothing_built - 9 camps, 0 with pieces; 0 built objects (tags building/ruin) in a pristine build of 3 area(s)
+PASS history.deterministic - regenerated from seed 936317840: year 1 identical to the live world, areas identical; seed 936317841: another year 1
+PASS history.saved - history round-trips through the save format (2581353 bytes)
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\history.chronicle.png
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\history.chronicle_founders.png
+PASS history.chronicle_opens - H (Input.keyMapper[72] = "ufChronicle") opened the chronicle on page 1 of 2 (want 2): true; Tab turned to page 2: true, back to page 1: true; a second H closed it: true; year now 501
+PASS history.describe_site - (24,63): "Yorvaseth, the camp of The Gorvasor Grove (settled in year 1)"; home: "Loreth, your home camp of The Solor League (settled in year 1)"; free cell (0,128): null
+FAIL history.add_event - addEvent gave { year 501, type test_event, clock {"day":1,"month":0,"year":501} } (current year 501); events 400 -> 401; events({type}) found 1; history:event heard: true; without text: refused
+PASS history.no_banned_words - 408 texts checked (events, camp names, founder names and descriptions); 0 with a banned word
+FAIL history.settle_off - history.simulate false, settleYears 0; the live history has no settling record; a synthetic New Game (seed 936317843) wrote 3 object-diff areas and no settling record; History.settle function
+FAIL history.legacy_switchable - simulate on (seed 936317844): 500 years, 9 sites, 400 events, 0 wars, settling run MISSING (16305 ms)
+PASS history.no_errors - none during history checks
+SUITE objects
+PASS objects.catalog_types - 87 types, 86 image, 1 tile, 0 generated; all becomes/regrow/ruin/yields resolve
+PASS objects.images_exist - 79 character sheets (79 with a sidecar) and 1 tile sheets found
+PASS objects.names_clean - 87 names checked against the banned-word list
+PASS objects.layer_in_tilemap - Sprite_UFObjectLayer is a child of the map's tilemap
+FAIL objects.drawn_in_view - oak at (128,133): sprite MISSING next frame, 0 opaque samples in a none frame, anchor at screen (NaN,NaN) expected (408.0,576.0); after set 0: sprite gone
+FAIL objects.tile_object_drawn - sapling (Outside_B #152) frame (384,144) 48x48 of img/tilesets/Outside_B.png, 0 opaque samples
+PASS objects.tint_applied - sapling tint 0x7fb35a (catalog #7fb35a)
+PASS objects.generated_drawn - all objects have authentic character or tile sheets (0 generated)
+FAIL objects.blocks_passage - ground passable before: true; oak at (131,132) passable: true; tall grass at (125,132) passable: true
+HARNESS watchdog: whole run took longer than 180 s
+HARNESS current scene: Scene_Map
+SHOT C:\Users\snewt\AppData\Local\Temp\laneaa_clones\gates_63d4156f\game\test_output\harness.on_failure.png
+RESULT: 256 passed, 25 failed (exit 2)
+
+EXIT=2
+# end 2026-09-26T11:54:47.4877170-05:00

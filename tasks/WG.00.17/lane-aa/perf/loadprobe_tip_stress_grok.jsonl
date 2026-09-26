@@ -1,0 +1,4 @@
+{"at":"2026-09-26T16:54:50.665Z","probeSeconds":30,"cpu":{"samples":30,"min":28.7,"median":36.3,"max":48.4},"aiWorkers":[2,2],"otherNwExe":[7,7],"quiet":false,"waitedSeconds":31}
+{"at":"2026-09-26T16:57:21.716Z","probeSeconds":30,"cpu":{"samples":29,"min":32,"median":40.2,"max":50.2},"aiWorkers":[2,2],"otherNwExe":[7,7],"quiet":false,"waitedSeconds":182}
+{"at":"2026-09-26T16:59:52.806Z","probeSeconds":30,"cpu":{"samples":29,"min":24.5,"median":34.8,"max":50.7},"aiWorkers":[2,2],"otherNwExe":[7,7],"quiet":false,"waitedSeconds":333}
+{"at":"2026-09-26T17:02:23.960Z","probeSeconds":30,"cpu":{"samples":29,"min":13.9,"median":24.5,"max":45.4},"aiWorkers":[1,1],"otherNwExe":[7,0],"quiet":false,"waitedSeconds":484}

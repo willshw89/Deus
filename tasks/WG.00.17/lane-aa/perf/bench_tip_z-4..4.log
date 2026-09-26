@@ -1,0 +1,42 @@
+# DEUS_Z_RANGE=-4..4 one normal run
+# measured 575c5fdb2e346fff91ddc3b643854875aea1b817
+=== bench_render_layers: scenario normal, 1 run(s), measuring 575c5fdb ===
+  run 1: snapshot C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_bench_normal_575c5fdb_22676_1790442424849
+(node:22676) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  run 1: BENCH paused_+2_planes_on_r1: 214 frames, frame median 6.945 ms (p95 7.12, worst 20.8), tick median 1.295 ms, draw calls median 15
+  run 1: BENCH paused_+2_planes_off_r1: 216 frames, frame median 6.945 ms (p95 7.075, worst 7.5), tick median 0.895 ms, draw calls median 13
+  run 1: BENCH paused_+2_planes_on_r2: 216 frames, frame median 6.95 ms (p95 7.085, worst 7.605), tick median 1.06 ms, draw calls median 15
+  run 1: BENCH paused_+2_planes_off_r2: 213 frames, frame median 6.94 ms (p95 7.07, worst 10.885), tick median 0.75 ms, draw calls median 13
+  run 1: BENCH steady_+2: 155 frames, frame median 16.165 ms (p95 82.745, worst 217.765), tick median 15.44 ms, draw calls median 15
+  run 1: BENCH steady_+1: 75 frames, frame median 63.56 ms (p95 174.36, worst 228.58), tick median 60.74 ms, draw calls median 17
+  run 1: BENCH steady_Ground: 75 frames, frame median 83.155 ms (p95 175.865, worst 270.9), tick median 82.66 ms, draw calls median 20
+  run 1: BENCH steady_-1: 75 frames, frame median 126.07 ms (p95 280.895, worst 469.915), tick median 125.54 ms, draw calls median 18
+  run 1: PASS bench_layers.bench_finished - 16 phase(s), 6 switch(es) written to C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_bench_normal_575c5fdb_22676_1790442424849\test_output\bench.json
+  run 1: PASS bench_layers.no_errors - none
+  run 1: RESULT: 2 passed, 0 failed (exit 0)
+  run 1: machine load quiet: CPU overall median 24.9 % (min 9.1, max 53.3, 117 samples); AI workers 1 at start, 1 at the end; other nw.exe 0 / max 0 / 0
+wrote tasks\WG.00.09b\lane-k\perf\baseline_575c5fdb.json (1 run(s), 1 new)
+  run 1 paused_+2_planes_on_r1     frame median   6.945 p95    7.12 worst     20.8 ms (143.988 fps at the median)  tick 1.295 ms  draws 15  CPU 17.9/20.2/24.6 %  peak {"unitsOnScreenLevel":0,"unitsOnLowerPlanes":5,"lowerPlaneSprites":107}
+  run 1 paused_+2_planes_off_r1    frame median   6.945 p95   7.075 worst      7.5 ms (143.988 fps at the median)  tick 0.895 ms  draws 13  CPU 23.8/24.6/24.6 %  peak {"unitsOnScreenLevel":0,"unitsOnLowerPlanes":0,"lowerPlaneSprites":0}
+  run 1 paused_+2_planes_on_r2     frame median    6.95 p95   7.085 worst    7.605 ms (143.885 fps at the median)  tick 1.06 ms  draws 15  CPU 24.6/24.6/25.6 %  peak {"unitsOnScreenLevel":0,"unitsOnLowerPlanes":5,"lowerPlaneSprites":107}
+  run 1 paused_+2_planes_off_r2    frame median    6.94 p95    7.07 worst   10.885 ms (144.092 fps at the median)  tick 0.75 ms  draws 13  CPU 13.7/19.4/25.6 %  peak {"unitsOnScreenLevel":0,"unitsOnLowerPlanes":0,"lowerPlaneSprites":0}
+  run 1 steady_+2                  frame median  16.165 p95  82.745 worst  217.765 ms (61.862 fps at the median)  tick 15.44 ms  draws 15  CPU 14.6/26.3/34.7 %  peak {"unitsOnScreenLevel":0,"unitsOnLowerPlanes":5,"lowerPlaneSprites":107}
+  run 1 steady_+1                  frame median   63.56 p95  174.36 worst   228.58 ms (15.733 fps at the median)  tick 60.74 ms  draws 17  CPU 22.1/22.7/27.9 %  peak {"unitsOnScreenLevel":0,"unitsOnLowerPlanes":8,"lowerPlaneSprites":148}
+  run 1 steady_Ground              frame median  83.155 p95 175.865 worst    270.9 ms (12.026 fps at the median)  tick 82.66 ms  draws 20  CPU 19.3/28.2/34.6 %  peak {"unitsOnScreenLevel":8,"unitsOnLowerPlanes":0,"lowerPlaneSprites":174}
+  run 1 steady_-1                  frame median  126.07 p95 280.895 worst  469.915 ms (7.932 fps at the median)  tick 125.54 ms  draws 18  CPU 22.9/32.9/46.3 %  peak {"unitsOnScreenLevel":0,"unitsOnLowerPlanes":0,"lowerPlaneSprites":87}
+  run 1 pan_+2                     frame median 126.155 p95 287.735 worst   295.93 ms (7.927 fps at the median)  tick 125.39 ms  draws 16  CPU 11.2/18.7/53.3 %  peak {"unitsOnScreenLevel":0,"unitsOnLowerPlanes":7,"lowerPlaneSprites":129}
+  run 1 minimap_tabs               frame median  116.51 p95  291.75 worst   381.06 ms (8.583 fps at the median)  tick 116.035 ms  draws 16  CPU 12.4/21/31 %  peak {"minimapDirty":240}
+  run 1 switch_2_to_1              frame median 102.975 p95 182.815 worst    211.9 ms (9.711 fps at the median)  tick 101.235 ms  draws 18  CPU 15.5/20.4/27.9 %  peak {"unitsOnScreenLevel":1,"unitsOnLowerPlanes":2,"lowerPlaneSprites":163}
+  run 1 switch_1_to_0              frame median  121.67 p95 206.845 worst  388.965 ms (8.219 fps at the median)  tick 135.96 ms  draws 19  CPU 27.9/31/37.2 %  peak {"unitsOnScreenLevel":0,"unitsOnLowerPlanes":0,"lowerPlaneSprites":174}
+  run 1 switch_0_to_-1             frame median  107.97 p95  186.99 worst  236.025 ms (9.262 fps at the median)  tick 106.635 ms  draws 18  CPU 11.9/17.3/31 %  peak {"unitsOnScreenLevel":0,"unitsOnLowerPlanes":0,"lowerPlaneSprites":87}
+  run 1 switch_-1_to_0             frame median  140.48 p95  187.36 worst  217.395 ms (7.118 fps at the median)  tick 147.915 ms  draws 19  CPU 9.5/10.5/11.9 %  peak {"unitsOnScreenLevel":1,"unitsOnLowerPlanes":0,"lowerPlaneSprites":174}
+  run 1 switch_0_to_1              frame median   110.6 p95 214.615 worst   443.37 ms (9.042 fps at the median)  tick 87.305 ms  draws 18  CPU 9.1/10.5/10.5 %  peak {"unitsOnScreenLevel":1,"unitsOnLowerPlanes":0,"lowerPlaneSprites":161}
+  run 1 switch_1_to_2              frame median  137.34 p95  264.82 worst  412.065 ms (7.281 fps at the median)  tick 138.435 ms  draws 16  CPU 9.1/15.8/18.7 %  peak {"unitsOnScreenLevel":0,"unitsOnLowerPlanes":1,"lowerPlaneSprites":124}
+  run 1 profile steady_+2: 7122 samples, 3681 ms over 90 updates; top scripts (self) DEUS_Objects.js 30.332, DEUS_World.js 4.112, (garbage collector) 1.763, pixi.js 0.49, DEUS_Jobs.js 0.436 ms/update
+  run 1 profile steady_+1: 8001 samples, 4146.4 ms over 90 updates; top scripts (self) DEUS_Objects.js 26.416, DEUS_World.js 9.759, (garbage collector) 2.2, DEUS_Levels.js 1.41, DEUS_Jobs.js 0.961 ms/update
+  run 1 profile steady_Ground: 10580 samples, 5505.8 ms over 90 updates; top scripts (self) DEUS_Objects.js 38.885, DEUS_World.js 9.564, (garbage collector) 2.325, DEUS_Levels.js 1.507, DEUS_Jobs.js 1.331 ms/update
+  run 1 profile steady_-1: 13829 samples, 7172.3 ms over 90 updates; top scripts (self) DEUS_Objects.js 35.785, DEUS_World.js 24.475, DEUS_Floors.js 3.589, (garbage collector) 3.07, DEUS_Levels.js 2.311 ms/update
+exit 0
+
+EXIT=0
