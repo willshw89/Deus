@@ -1,0 +1,145 @@
+# command: node tools/test_generated_z2_cut_proof.js  (the file as of a12f94a7, blob c664372b, compiled in place as tools/test_generated_z2_cut_proof.js)
+# worktree: lane-h (task/lane-h), HEAD a12f94a7 (= main a12f94a7), game/ unchanged from main, test blob c664372b
+# started: 2026-09-25T23:18:17-05:00
+======================================================================
+DEUS TARGETED PROOF: GENERATED Z-2 CUT & FLUID PRESERVATION
+======================================================================
+Setting up VM and generating World Seed 18 (generator version 5)...
+World generated in 16128 ms.
+
+--- 1. STRATA COLUMN INSPECTION AT (194, 89) ---
+Cell index: 22978
+First air elevation: 3 ft
+Elevation | Level | Stratum | Material | Solid?
+----------------------------------------------
+   24     |  Z=+2  |   S4    | AIR      | false
+   23     |  Z=+2  |   S3    | AIR      | false
+   22     |  Z=+2  |   S2    | AIR      | false
+   21     |  Z=+2  |   S1    | AIR      | false
+   20     |  Z=+2  |   S0    | AIR      | false
+   19     |  Z=+1  |   S4    | AIR      | false
+   18     |  Z=+1  |   S3    | AIR      | false
+   17     |  Z=+1  |   S2    | AIR      | false
+   16     |  Z=+1  |   S1    | AIR      | false
+   15     |  Z=+1  |   S0    | AIR      | false
+   14     |  Z=+0  |   S4    | AIR      | false
+   13     |  Z=+0  |   S3    | AIR      | false
+   12     |  Z=+0  |   S2    | AIR      | false
+   11     |  Z=+0  |   S1    | AIR      | false
+   10     |  Z=+0  |   S0    | AIR      | false
+    9     |  Z=-1  |   S4    | AIR      | false
+    8     |  Z=-1  |   S3    | AIR      | false
+    7     |  Z=-1  |   S2    | AIR      | false
+    6     |  Z=-1  |   S1    | AIR      | false
+    5     |  Z=-1  |   S0    | AIR      | false
+    4     |  Z=-2  |   S4    | AIR      | false
+    3     |  Z=-2  |   S3    | AIR      | false
+    2     |  Z=-2  |   S2    | STONE    | true
+    1     |  Z=-2  |   S1    | STONE    | true
+    0     |  Z=-2  |   S0    | STONE    | true
+
+--- 2. MULTI-Z SHAPE & HEIGHT STATE AT (194, 89) ---
+Level Z=-2: shape = floor    | heightState = HEIGHT_3_OF_5
+Level Z=-1: shape = open     | heightState = HEIGHT_0_OF_5
+Level Z=+0: shape = open     | heightState = HEIGHT_0_OF_5
+Level Z=+1: shape = open     | heightState = HEIGHT_0_OF_5
+Level Z=+2: shape = open     | heightState = HEIGHT_0_OF_5
+
+--- 3. FEATURE METADATA ---
+Identified Cut Feature: Type = ravine, Family = TEMP, DepthClass = z2
+  Anchor = (201, 96), FloorLevel = -2, Cells = 257
+
+--- 4. ADJACENT FLUID PRESERVATION AUDIT ---
+ILLEGAL CARVE UNDER FLUID at (209, 74): fluid at e=7, but air at e=6!
+ILLEGAL CARVE UNDER FLUID at (210, 74): fluid at e=7, but air at e=6!
+ILLEGAL CARVE UNDER FLUID at (209, 75): fluid at e=7, but air at e=6!
+ILLEGAL CARVE UNDER FLUID at (210, 75): fluid at e=7, but air at e=6!
+ILLEGAL CARVE UNDER FLUID at (209, 87): fluid at e=6, but air at e=1!
+ILLEGAL CARVE UNDER FLUID at (209, 87): fluid at e=6, but air at e=2!
+ILLEGAL CARVE UNDER FLUID at (209, 87): fluid at e=6, but air at e=3!
+ILLEGAL CARVE UNDER FLUID at (209, 87): fluid at e=6, but air at e=4!
+ILLEGAL CARVE UNDER FLUID at (209, 87): fluid at e=7, but air at e=1!
+ILLEGAL CARVE UNDER FLUID at (209, 87): fluid at e=7, but air at e=2!
+ILLEGAL CARVE UNDER FLUID at (209, 87): fluid at e=7, but air at e=3!
+ILLEGAL CARVE UNDER FLUID at (209, 87): fluid at e=7, but air at e=4!
+ILLEGAL CARVE UNDER FLUID at (209, 87): fluid at e=7, but air at e=6!
+ILLEGAL CARVE UNDER FLUID at (210, 87): fluid at e=6, but air at e=1!
+ILLEGAL CARVE UNDER FLUID at (210, 87): fluid at e=6, but air at e=2!
+ILLEGAL CARVE UNDER FLUID at (210, 87): fluid at e=6, but air at e=3!
+ILLEGAL CARVE UNDER FLUID at (210, 87): fluid at e=6, but air at e=4!
+ILLEGAL CARVE UNDER FLUID at (210, 87): fluid at e=7, but air at e=1!
+ILLEGAL CARVE UNDER FLUID at (210, 87): fluid at e=7, but air at e=2!
+ILLEGAL CARVE UNDER FLUID at (210, 87): fluid at e=7, but air at e=3!
+ILLEGAL CARVE UNDER FLUID at (210, 87): fluid at e=7, but air at e=4!
+ILLEGAL CARVE UNDER FLUID at (210, 87): fluid at e=7, but air at e=6!
+ILLEGAL CARVE UNDER FLUID at (220, 87): fluid at e=7, but air at e=6!
+ILLEGAL CARVE UNDER FLUID at (221, 87): fluid at e=7, but air at e=6!
+ILLEGAL CARVE UNDER FLUID at (209, 88): fluid at e=6, but air at e=1!
+ILLEGAL CARVE UNDER FLUID at (209, 88): fluid at e=6, but air at e=2!
+ILLEGAL CARVE UNDER FLUID at (209, 88): fluid at e=6, but air at e=3!
+ILLEGAL CARVE UNDER FLUID at (209, 88): fluid at e=6, but air at e=4!
+ILLEGAL CARVE UNDER FLUID at (209, 88): fluid at e=7, but air at e=1!
+ILLEGAL CARVE UNDER FLUID at (209, 88): fluid at e=7, but air at e=2!
+ILLEGAL CARVE UNDER FLUID at (209, 88): fluid at e=7, but air at e=3!
+ILLEGAL CARVE UNDER FLUID at (209, 88): fluid at e=7, but air at e=4!
+ILLEGAL CARVE UNDER FLUID at (209, 88): fluid at e=7, but air at e=6!
+ILLEGAL CARVE UNDER FLUID at (210, 88): fluid at e=6, but air at e=1!
+ILLEGAL CARVE UNDER FLUID at (210, 88): fluid at e=6, but air at e=2!
+ILLEGAL CARVE UNDER FLUID at (210, 88): fluid at e=6, but air at e=3!
+ILLEGAL CARVE UNDER FLUID at (210, 88): fluid at e=6, but air at e=4!
+ILLEGAL CARVE UNDER FLUID at (210, 88): fluid at e=7, but air at e=1!
+ILLEGAL CARVE UNDER FLUID at (210, 88): fluid at e=7, but air at e=2!
+ILLEGAL CARVE UNDER FLUID at (210, 88): fluid at e=7, but air at e=3!
+ILLEGAL CARVE UNDER FLUID at (210, 88): fluid at e=7, but air at e=4!
+ILLEGAL CARVE UNDER FLUID at (210, 88): fluid at e=7, but air at e=6!
+ILLEGAL CARVE UNDER FLUID at (220, 88): fluid at e=7, but air at e=6!
+ILLEGAL CARVE UNDER FLUID at (221, 88): fluid at e=7, but air at e=6!
+Scanned 61x61 neighborhood: found 12 fluid columns (24 total fluid strata).
+Illegal air carves under fluid: 44
+
+--- 5. ASCII ELEVATION CROSS-SECTION (Y = 89, X = 186..202) ---
+Elev | 67890123456789012
+------------------------
+ 24  | .................  (Z=+2 S4)
+ 23  | .................  (Z=+2 S3)
+ 22  | .................  (Z=+2 S2)
+ 21  | .................  (Z=+2 S1)
+ 20  | .................  (Z=+2 S0)
+ 19  | .................  (Z=+1 S4)
+ 18  | .................  (Z=+1 S3)
+ 17  | .................  (Z=+1 S2)
+ 16  | .................  (Z=+1 S1)
+ 15  | ####.........####  (Z=+1 S0)
+ 14  | ####.........####  (Z=+0 S4)
+ 13  | ####.........####  (Z=+0 S3)
+ 12  | ####.........####  (Z=+0 S2)
+ 11  | #####.......#####  (Z=+0 S1)
+ 10  | #####.......#####  (Z=+0 S0)
+  9  | #####.......#....  (Z=-1 S4)
+  8  | #####.......#....  (Z=-1 S3)
+  7  | ######.....##....  (Z=-1 S2)
+  6  | ######.....##....  (Z=-1 S1)
+  5  | #######....######  (Z=-1 S0)
+  4  | ###..###..####...  (Z=-2 S4)
+  3  | ###..###..####...  (Z=-2 S3)
+  2  | ###..#########...  (Z=-2 S2)
+  1  | ###..#########...  (Z=-2 S1)
+  0  | #################  (Z=-2 S0)
+Legend: '#' = Solid Rock/Soil, '.' = Air, '~' = Water
+
+--- 6. RENDERING CRISP 2D MAP VISUAL PROOF (128x128 CELL VIEW) ---
+Visual proof rendered and saved to: C:\Users\snewt\.deus_worktrees\lane-h\game\test_output\z2_cut_proof_seed18_194_89.png (4598 bytes, 512x512 px)
+
+--- 7. CHECK VERIFICATION SUMMARY ---
+  [PASS] first_air_is_3ft: First air is 3 ft (expected 3 ft)
+  [PASS] z0_is_open: Z0 shape=open height=HEIGHT_0_OF_5
+  [PASS] z_minus1_is_open: Z-1 shape=open height=HEIGHT_0_OF_5
+  [PASS] z_minus2_is_floor: Z-2 shape=floor height=HEIGHT_3_OF_5
+  [PASS] z_plus1_is_open: Z+1 shape=open
+  [PASS] z_plus2_is_open: Z+2 shape=open
+  [FAIL] fluid_preserved_no_under_carves: 44 air carves found under fluid columns
+
+======================================================================
+VERIFICATION RESULT: FAILURE DETECTED (EXIT 1)
+======================================================================
+# exit: 1  (17 s)

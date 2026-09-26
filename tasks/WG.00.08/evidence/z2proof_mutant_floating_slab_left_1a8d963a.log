@@ -1,0 +1,124 @@
+# command: node tools/test_generated_z2_cut_proof.js --mutant=floating_slab_left
+# worktree: lane-h (task/lane-h), HEAD a12f94a7 (game/ identical to main f21e3bb5), test blob 1a8d963a (uncommitted working copy)
+# node: v24.19.0
+# started: 2026-09-25T23:28:15-05:00
+======================================================================
+DEUS TARGETED PROOF: GENERATED Z-2 CUT & FLUID PRESERVATION (WG.00.08, Directive 001-I sec B)
+World Seed 18, generator 5, target (194, 89), MUTANT floating_slab_left
+======================================================================
+World seed 18 generated in the natural vm in 10668 ms.
+World seed 18 generated in the probed vm in 15604 ms.
+World seed 18 generated in the fixture vm in 15935 ms.
+
+--- 1. STRATA COLUMN AT (194, 89) (natural run; cell index 22978) ---
+First air elevation: 3 ft
+Elevation | Level | Stratum | Material | Solid?
+----------------------------------------------
+   24     |  Z=+2  |   S4    | AIR      | false
+   23     |  Z=+2  |   S3    | AIR      | false
+   22     |  Z=+2  |   S2    | AIR      | false
+   21     |  Z=+2  |   S1    | AIR      | false
+   20     |  Z=+2  |   S0    | AIR      | false
+   19     |  Z=+1  |   S4    | AIR      | false
+   18     |  Z=+1  |   S3    | AIR      | false
+   17     |  Z=+1  |   S2    | AIR      | false
+   16     |  Z=+1  |   S1    | AIR      | false
+   15     |  Z=+1  |   S0    | AIR      | false
+   14     |  Z=+0  |   S4    | AIR      | false
+   13     |  Z=+0  |   S3    | AIR      | false
+   12     |  Z=+0  |   S2    | AIR      | false
+   11     |  Z=+0  |   S1    | AIR      | false
+   10     |  Z=+0  |   S0    | AIR      | false
+    9     |  Z=-1  |   S4    | AIR      | false
+    8     |  Z=-1  |   S3    | AIR      | false
+    7     |  Z=-1  |   S2    | AIR      | false
+    6     |  Z=-1  |   S1    | AIR      | false
+    5     |  Z=-1  |   S0    | AIR      | false
+    4     |  Z=-2  |   S4    | AIR      | false
+    3     |  Z=-2  |   S3    | AIR      | false
+    2     |  Z=-2  |   S2    | STONE    | true
+    1     |  Z=-2  |   S1    | STONE    | true
+    0     |  Z=-2  |   S0    | STONE    | true
+
+--- 2. MULTI-Z SHAPE & HEIGHT STATE AT (194, 89) ---
+Level Z=-2: shape = floor    | heightState = HEIGHT_3_OF_5
+Level Z=-1: shape = open     | heightState = HEIGHT_0_OF_5
+Level Z=+0: shape = open     | heightState = HEIGHT_0_OF_5
+Level Z=+1: shape = open     | heightState = HEIGHT_0_OF_5
+Level Z=+2: shape = open     | heightState = HEIGHT_0_OF_5
+
+--- 3. RAVINE FOOTPRINT (probed run: the cut plan before the carve) ---
+Plan owner of (194, 89): cut #6; planned columns 257, carved 257, kept for a fluid 0, off plan 0; changed columns outside every cut plan 0
+Fixture: water planted in 6 ravine columns before the carve: (189, 77) 15 ft over rock 9..14 ft; (192, 82) 15 ft over rock 8..14 ft; (193, 87) 15 ft over rock 5..14 ft; (200, 91) 15 ft over rock 11..14 ft; (204, 97) 15 ft over rock 13..14 ft; (199, 114) 10 ft over rock 9..9 ft
+Fixture carve: carved 251, kept for a fluid 6, off plan 0
+
+--- 4. FLUID SUPPORT AUDIT (Owner ruling DEC-001: fluid directly on air is a defect) ---
+Whole area (natural): 406 fluid strata; on fluid 203, on solid 203 (of them over a lower void, >= 1 solid between: 66), on the model floor 0, directly on air 0
+61 x 61 round (194, 89) (natural): 24 fluid strata; on fluid 12, on solid 12 (over a lower void: 4), directly on air 0
+Whole area (fixture): 412 fluid strata; on fluid 203, on solid 209, directly on air 0
+  (209, 74) e=0..24: ######~~..######.........
+  (210, 74) e=0..24: ######~~..######.........
+  (209, 75) e=0..24: ######~~..######.........
+  (210, 75) e=0..24: ######~~..######.........
+  (209, 87) e=0..24: #....#~~..#..............
+  (210, 87) e=0..24: #....#~~..#..............
+  (220, 87) e=0..24: ######~~..#..............
+  (221, 87) e=0..24: ######~~..#..............
+  (209, 88) e=0..24: #....#~~..#..............
+  (210, 88) e=0..24: #....#~~..#..............
+  (220, 88) e=0..24: ######~~..#..............
+  (221, 88) e=0..24: ######~~..#..............
+
+--- 5. ASCII ELEVATION CROSS-SECTION (Y = 89, X = 186..202, natural run) ---
+Elev | 67890123456789012
+------------------------
+ 24  | .................  (Z=+2 S4)
+ 23  | .................  (Z=+2 S3)
+ 22  | .................  (Z=+2 S2)
+ 21  | .................  (Z=+2 S1)
+ 20  | .................  (Z=+2 S0)
+ 19  | .................  (Z=+1 S4)
+ 18  | .................  (Z=+1 S3)
+ 17  | .................  (Z=+1 S2)
+ 16  | .................  (Z=+1 S1)
+ 15  | ####.........####  (Z=+1 S0)
+ 14  | ####.........####  (Z=+0 S4)
+ 13  | ####.........####  (Z=+0 S3)
+ 12  | ####.........####  (Z=+0 S2)
+ 11  | #####.......#####  (Z=+0 S1)
+ 10  | #####.......#####  (Z=+0 S0)
+  9  | #####.......#....  (Z=-1 S4)
+  8  | #####.......#....  (Z=-1 S3)
+  7  | ######.....##....  (Z=-1 S2)
+  6  | ######.....##....  (Z=-1 S1)
+  5  | #######....######  (Z=-1 S0)
+  4  | ###..###..####...  (Z=-2 S4)
+  3  | ###..###..####...  (Z=-2 S3)
+  2  | ###..#########...  (Z=-2 S2)
+  1  | ###..#########...  (Z=-2 S1)
+  0  | #################  (Z=-2 S0)
+Legend: '#' = Solid Rock/Soil, '.' = Air, '~' = Water / Lava
+
+--- 6. CHECKS ---
+PASS first_air_is_3ft - first air at 3 ft (Z-2 S3)
+PASS z_minus2_is_floor - Z-2 shape=floor height=HEIGHT_3_OF_5
+PASS z_minus1_is_open - Z-1 shape=open height=HEIGHT_0_OF_5
+PASS z0_is_open - Z0 shape=open height=HEIGHT_0_OF_5
+PASS z_plus1_z_plus2_open - Z+1 shape=open, Z+2 shape=open
+PASS ravine_identity - cut #6: kind cut, type ravine, depthClass z2, family TEMP, floorLevel -2, minFloor 3 ft, deepest (194, 89), anchor (201, 96), 257 cells, length 56, line/u
+PASS ravine_footprint_matches_plan - probed: cut #6, 257 planned columns, 257 carved to plan (= descriptor), 0 kept for a fluid, 0 off plan, 0 changed outside the plans; fixture: 251 carved, 6 kept (the 6 planted), 0 off plan
+PASS fluid_rests_on_support - natural: 406 fluid strata, 0 on air (on fluid 203, on solid 203 of which 66 over a lower void through >= 1 solid; 61 x 61: 24 strata, 4 over a lower void); fixture: 412 strata, 0 on air
+PASS fluid_conserved_across_cut - probed: 406 fluid strata before the cut carve (61 x 61: 24, ravine footprint: 0), the same after generation (0 lost, 0 added, also from before any feature); fixture: 412 strata incl. 6 planted in the ravine's carve path, 0 lost, 0 added
+FAIL no_floating_solids - solid strata not grounded (1 of them with air or fluid right under) [(190, 72) 16 ft over air]: 1, expected 0
+
+1 !== 0
+
+PASS probe_read_only - 1638400 strata and the feature descriptors identical
+PASS no_vm_errors - 0 errors (warnings: 0/0/0)
+
+--- 7. VISUAL PROOF (128 x 128 cells round (194, 89), 4 px per cell) ---
+Mutant run: the map is not written and a previous one is left as it is.
+
+RESULT: 11 passed, 1 failed (exit 1) - no_floating_solids
+Run times: natural 10668 ms, probed 15604 ms, fixture 15935 ms
+# exit: 1  (42 s)
