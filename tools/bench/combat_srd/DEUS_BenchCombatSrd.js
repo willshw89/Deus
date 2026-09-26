@@ -71,6 +71,15 @@
             finally { onTickEnd(dt); }
         };
         ticker.add(Graphics._onTick, Graphics);
+        if (typeof SceneManager.updateMain === "function" && !SceneManager.__benchUpdate) {
+            SceneManager.__benchUpdate = true;
+            const updateMain = SceneManager.updateMain;
+            SceneManager.updateMain = function () {
+                const t = now();
+                try { return updateMain.apply(this, arguments); }
+                finally { add("update", now() - t); }
+            };
+        }
         const render = app.render;
         if (typeof render === "function") {
             app.render = function () {
@@ -115,7 +124,9 @@
             const update = W.update;
             W.update = function () {
                 tally.worldUpdateCalls++;
-                return update.apply(this, arguments);
+                const t = now();
+                try { return update.apply(this, arguments); }
+                finally { add("update.world", now() - t); }
             };
             const area = W.unitsInArea;
             W.unitsInArea = function () {
@@ -451,7 +462,7 @@
                         }
                     });
                     result.phases.push(summary);
-                    t.write("BENCH " + name + ": " + frames.length + " frames, median " + summary.frameMs.median + " ms (" + summary.fps.atMedian + " fps), sim " + summary.simMs.median + " ms, render " + summary.renderMs.median + " ms, fullScans " + summary.resolution.fullScans);
+                    T.write("BENCH " + name + ": " + frames.length + " frames, median " + summary.frameMs.median + " ms (" + summary.fps.atMedian + " fps), sim " + summary.simMs.median + " ms, render " + summary.renderMs.median + " ms, fullScans " + summary.resolution.fullScans);
                 };
 
                 const wantBase = MODE === "both" || MODE === "base";
