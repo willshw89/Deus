@@ -174,6 +174,8 @@
 | **SCRATCH-SALVAGE** | `OPERATIONS` | `INFO` | Uncommitted scratch worktrees salvaged to salvage/* branches on origin per Directive 001-N §4 (unreviewed). Temp worktrees removed. | `OPEN` | PM / Owner |
 | **DUAL-MAILBOX** | `GOVERNANCE` | `INFO` | docs/agents/mailboxes and tools/agents/bus.js are frozen; C:\Users\snewt\.deus_pm is authoritative. | `OPEN` | PM / Coordinator |
 | **LANES I/J** | `WG.00.12` | `INFO` | Automated merge gate (Lane I) and standard worker launcher / pre-push guard (Lane J) active per Directive 001-N. | `OPEN` | Claude / Grok |
+| **DEF-COORD-WBS-CORRUPT-01** | `GOVERNANCE` | `MAJOR` | WBS files corrupted by script/regex in commit 0536d392; whole-file rewrites banned. | `OPEN` | Coordinator |
+| **DEF-COORD-STATUS-CORRUPT-01** | `GOVERNANCE` | `MAJOR` | STATUS file escape corruption (backslash interpretation) in commit a81d0daf; backslash paths must be raw. | `OPEN` | Coordinator |
 
 ---
 

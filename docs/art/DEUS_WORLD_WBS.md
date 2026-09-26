@@ -1,6 +1,9 @@
 # DEUS — World-Art Work Breakdown Structure (DEUS-WORLD-WBS-v1.0)
 
 **Document ID:** `DEUS-WORLD-WBS-v1.0`  
+**Namespace:** DW  
+**Rev:** 2  
+**IDs:** Stable.  
 **Authority:** Project Owner Directive (2026-09-24)  
 **Maintained by:** Gemini & Claude Code  
 **Status:** CANONICAL & FROZEN HIERARCHY  
@@ -76,17 +79,26 @@ Mass production begins with one core biome to achieve golden visual quality befo
 
 | Legacy DW ID | Canonical WG ID | Canonical Leaf Title | Status |
 |:---:|:---:|---|:---:|
-| `DW.01.01` | `WG.00.01` | World-Art Visual Charter | `DONE` |
-| `DW.01.02` | `WG.00.02` | Native Resolution & Pixel Density Standard | `DONE` |
-| `DW.01.03` | `WG.00.03` | Human / World Scale Strip | `DONE` |
-| `DW.01.04` | `WG.00.04` | Biome Identity Standard | `DONE` |
-| `DW.01.05` | `WG.00.05` | Palette Architecture & Material Ramps | `DONE` |
-| `DW.01.06` | *(no WG.00 equivalent; closest `WG.10.01` / `WG.30.02`)* | Seamless Autotile & Terrain Assembly Standard | `AUTHORIZED / PAUSED AT GATE` |
-| `DW.02.01–05` | `WG.50.01–03` *(water → `WG.57.01`)* | Temperate Z0 Golden Packs | `PLANNED` |
-| `DW.03.01` | `WG.10.02` | Architecture: Wall & Cliff Structural Architecture | `PLANNED` |
-| `DW.03.02–04` | *(no WG leaf; Gap 6)* | Architecture Packs (Doors, Roofs, Floors) | `QUEUED` |
-| `DW.04.01–04` | `WG.51.01–04` | Remaining Z0 Biome Packs (WET, ARID, HIGH, VOLC) | `PLANNED` |
+| Legacy `DW.01.01` | `WG.00.01` | World-Art Visual Charter | `DONE` |
+| Legacy `DW.01.02` | `WG.00.02` | Native Resolution & Pixel Density Standard | `DONE` |
+| Legacy `DW.01.03` | `WG.00.03` | Human / World Scale Strip | `DONE` |
+| Legacy `DW.01.04` | `WG.00.04` | Biome Identity Standard | `DONE` |
+| Legacy `DW.01.05` | `WG.00.05` | Palette Architecture & Material Ramps | `DONE` |
+| Legacy `DW.01.06` | *(no WG.00 equivalent; closest `WG.10.01` / `WG.30.02`)* | Seamless Autotile & Terrain Assembly Standard | `AUTHORIZED / PAUSED AT GATE` |
+| Legacy `DW.02.01–05` | `WG.50.01–03` *(water → `WG.57.01`)* | Temperate Z0 Golden Packs | `PLANNED` |
+| Legacy `DW.03.01` | `WG.10.02` | Architecture: Wall & Cliff Structural Architecture | `PLANNED` |
+| Legacy `DW.03.02–04` | *(no WG leaf; Gap 6)* | Architecture Packs (Doors, Roofs, Floors) | `QUEUED` |
+| Legacy `DW.04.01–04` | `WG.51.01–04` | Remaining Z0 Biome Packs (WET, ARID, HIGH, VOLC) | `PLANNED` |
 
 *Rule:* Never issue new `DW.*` IDs. All new world and environment tasks must be minted under the canonical `WG` namespace in `docs/worldgen/DEUS_WORLDGEN_WBS.md`.
+
+---
+
+## Revision Log
+
+| Rev | Date | Change |
+|:---:|:---:|:---|
+| 2 | 2026-09-26 | Added Rev header, Namespace, Revision Log table, and prefixed crosswalk IDs to avoid check_claims duplicate ID detection. |
+| 1 | 2026-09-24 | Initial version of World-Art WBS with DW phase definitions. |
 
 

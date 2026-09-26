@@ -407,6 +407,9 @@ Every decision item recorded in this log must provide:
 - **Geology-first method:** Rock bodies span layers. Per-biome placement rules on top of geology. Vertical links: physical cause, surface tells, passages, shared resources.
 - **Supersedes:** WG.00.04 (old 5 biomes) and DEC-013 band ranges. Replaces 25-biome drafting (Directive 0069-BR). Each of the 6 biomes is expressed across all 5 depths (30 biome-depth combinations).
 - **World Map:** 3x3 grid of 256x256 maps (approx 768x768 tiles). Wraps on all edges (round world). Coarse resolution whole-world generation first. Current map runs full detail, other 8 run at ADR-003 LOD summary level.
+- **Transitions:** 15 pairwise biome transitions (6 choose 2).
+- **Engine Data:** Grid size is data so it can be re-scaled (e.g. to 4x4) later.
+- **Map Edges:** Seamless transitions reuse Lane N's in-place swap, with no load screen.
 
 ---
 
