@@ -1,0 +1,11 @@
+{
+  "name": "tick_text",
+  "rule": "ruleNoTickLiterals",
+  "brief": "no tick rate, calendar length or day/year ratio anywhere",
+  "description": "A note in the tuning table states a tick count.",
+  "expect": ["Q2_TICK_LITERAL"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "tuning", "op": "set", "path": "parameters/wind.fanFactor/note", "value": "TEST: lasts 5 ticks"}
+  ]
+}

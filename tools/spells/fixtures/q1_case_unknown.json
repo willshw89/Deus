@@ -1,0 +1,11 @@
+{
+  "name": "q1_case_unknown",
+  "rule": "ruleLedgerNames",
+  "brief": "a source or sink names a case of the Q1 policy table",
+  "description": "Wall of Stone's source names a Q1 case that does not exist.",
+  "expect": ["Q1_CASE_UNKNOWN"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:wall-of-stone/effects/@thickPanels/ledger/q1Case", "value": "borrowedMatter"}
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "srd_quote_inexact",
+  "rule": "ruleSrdQuotes",
+  "brief": "any basis: srd whose quote is not an exact substring of the spell's SRD text",
+  "description": "Fireball's SRD quote is reworded ('all flammable objects').",
+  "expect": ["SRD_QUOTE_INEXACT"],
+  "alsoAllowed": [],
+  "patch": [
+    {
+      "file": "effects",
+      "op": "set",
+      "path": "records/@srd:spell:fireball/effects/@igniteObjects/srdQuote",
+      "value": "It ignites all flammable objects in the area that aren’t being worn or carried."
+    }
+  ]
+}

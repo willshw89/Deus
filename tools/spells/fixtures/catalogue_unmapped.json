@@ -1,0 +1,11 @@
+{
+  "name": "catalogue_unmapped",
+  "rule": "ruleCatalogue",
+  "brief": "every primitive maps to an ADR-003 18.6 row or is listed as a gap",
+  "description": "forceBarrier loses its ADR gap entry.",
+  "expect": ["CATALOGUE_MISMATCH"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "primitives", "op": "set", "path": "primitives/@forceBarrier/adrGaps", "value": []}
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "name": "schema_keyword_unsupported",
+  "rule": "ruleSchema",
+  "brief": "the in-file validator refuses schema keywords it does not implement",
+  "description": "The schema uses patternProperties, which the in-file validator does not implement.",
+  "expect": ["SCHEMA_KEYWORD"],
+  "alsoAllowed": [],
+  "patch": [
+    {
+      "file": "schema",
+      "op": "set",
+      "path": "$defs/p_ignite/patternProperties",
+      "value": {
+        "^x": {"type": "string"}
+      }
+    }
+  ]
+}

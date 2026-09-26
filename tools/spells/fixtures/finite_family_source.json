@@ -1,0 +1,12 @@
+{
+  "name": "finite_family_source",
+  "rule": "ruleSourceScope",
+  "brief": "the magic source may not add to a finite family (ledger allowFinite false)",
+  "description": "Creation's vegetable object is switched to iron metal.",
+  "expect": ["LEDGER_SOURCE_SCOPE"],
+  "alsoAllowed": ["LEDGER_CLASS_UNKNOWN"],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:creation/effects/@vegetableObject/ledger/class", "value": "fe_metal"},
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:creation/effects/@vegetableObject/ledger/form", "value": "item"}
+  ]
+}

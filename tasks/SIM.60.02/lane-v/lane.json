@@ -1,0 +1,43 @@
+{
+  "lane": "lane-v",
+  "taskId": "SIM.60.02",
+  "branch": "task/lane-v",
+  "writer": "claude",
+  "reviewer": "grok",
+  "allowedPaths": [
+    "docs/schemas/spells/**",
+    "tools/spells/**",
+    "tasks/SIM.60.02/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "node",
+      "args": [
+        "tools/spells/test_spell_effects.js"
+      ],
+      "timeoutSec": 600
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/spells/validate_spell_effects.js"
+      ],
+      "timeoutSec": 600
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/spells/validate_spell_effects.js",
+        "--check"
+      ],
+      "timeoutSec": 600
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/check_deus_syntax.js"
+      ],
+      "timeoutSec": 600
+    }
+  ]
+}

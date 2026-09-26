@@ -1,0 +1,11 @@
+{
+  "name": "primitive_unknown",
+  "rule": "rulePrimitiveKnown",
+  "brief": "any unknown primitive",
+  "description": "Fireball's heat instance uses a primitive the catalogue does not have.",
+  "expect": ["PRIMITIVE_UNKNOWN"],
+  "alsoAllowed": ["SCHEMA_ENUM", "PRIMITIVE_COVERAGE"],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:fireball/effects/@heat/primitive", "value": "teleportMatter"}
+  ]
+}

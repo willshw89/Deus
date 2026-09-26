@@ -1,0 +1,11 @@
+{
+  "name": "record_script_hook",
+  "rule": "ruleSchema",
+  "brief": "a per-spell hook / extra property at effect level (additionalProperties: false)",
+  "description": "The Fireball record gets a per-spell hook next to its effects.",
+  "expect": ["SCHEMA_ADDITIONAL"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:fireball/hook", "value": "fireball_special.js"}
+  ]
+}

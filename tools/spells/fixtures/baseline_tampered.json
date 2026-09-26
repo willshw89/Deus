@@ -1,0 +1,11 @@
+{
+  "name": "baseline_tampered",
+  "rule": "ruleBaselineFresh",
+  "brief": "--check: the committed baseline equals the rebuild",
+  "description": "Fireball's baseline damage dice are edited by hand.",
+  "expect": ["BASELINE_STALE"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "baseline", "op": "set", "path": "spells/fireball/damage/0/dice", "value": "9d6"}
+  ]
+}

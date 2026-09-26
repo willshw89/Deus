@@ -1,0 +1,11 @@
+{
+  "name": "primitive_audit_missing",
+  "rule": "rulePrimitiveCoverage",
+  "brief": "effects are built from the audit record's primitives",
+  "description": "Fireball loses its heatFlux instance, which the audit record lists.",
+  "expect": ["PRIMITIVE_COVERAGE"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "effects", "op": "delete", "path": "records/@srd:spell:fireball/effects/@heat"}
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "ledger_cause_other_spell",
+  "rule": "ruleLedgerCause",
+  "brief": "a cause must name the record's own spell",
+  "description": "Wall of Stone's source names Fireball as its cause.",
+  "expect": ["LEDGER_NO_CAUSE"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:wall-of-stone/effects/@thickPanels/ledger/cause", "value": "spell:srd:spell:fireball"}
+  ]
+}

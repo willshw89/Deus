@@ -1,0 +1,524 @@
+{
+  "schemaVersion": "deus-spell-tuning/1.0.0",
+  "description": "DEUS tuning for the spell-effect layer (SIM.60.02). Coefficients are per damage type or per effect kind, never per spell (audit section 3.5). Every entry has a value (or null), a unit, a status and a source. Numbers owned by a sibling design are cited, not copied, so there is one source of truth (AGENTS Rule 14). Owner questions are held as data with no value chosen.",
+  "statuses": {
+    "PM_DEFAULT": "A default the PM or a reviewed design supplies; the Owner may change it.",
+    "OWNER_OPEN": "An open Owner question decides it; the value is null until the Owner answers.",
+    "PLACEHOLDER": "Needed by SIM.60.03 but not yet set; value null or a provisional value named as such. Set with the owning design on the SIM.60.04 fixtures.",
+    "PM_DEFAULT_UNCONFIRMED": "The PM default for DEC-018's open sub-question (conjured matter), not confirmed by the Owner (docs/OWNER_DECISIONS.md:262)."
+  },
+  "parameters": {
+    "secondsPerTick.action": {
+      "value": null,
+      "unit": "game seconds per simulation tick (action time domain)",
+      "status": "OWNER_OPEN",
+      "question": "Q2",
+      "source": "Owner question Q2 (docs/audits/SRD_SPELL_EFFECT_AUDIT.md section 6; tasks/SIM.60.01/lane-p/escalation.md): the sources disagree on the time scale. Not set here.",
+      "note": "The runtime converts a lifetime with ticks = ceil(seconds / secondsPerTick[timeDomain]) once the Owner answers."
+    },
+    "secondsPerTick.historical": {
+      "value": null,
+      "unit": "game seconds per simulation tick (historical time domain)",
+      "status": "OWNER_OPEN",
+      "question": "Q2",
+      "source": "Owner question Q2 (docs/audits/SRD_SPELL_EFFECT_AUDIT.md section 6; tasks/SIM.60.01/lane-p/escalation.md). Not set here."
+    },
+    "volume.perDamage.fire": {
+      "value": 1,
+      "unit": "volume-damage energy per SRD damage point",
+      "status": "PM_DEFAULT",
+      "source": "ADR-003 Rev 3 section 18.2 (PROPOSED): 'energy is the damage the rules layer rolled'; tasks/SIM.40.01/lane-q/SIM.40.01_STRUCTURAL_SUPPORT.md section 8.2 (same). The type difference lives in the SIM.40.01 material tables."
+    },
+    "volume.perDamage.bludgeoning": {
+      "value": 1,
+      "unit": "volume-damage energy per SRD damage point",
+      "status": "PM_DEFAULT",
+      "source": "ADR-003 Rev 3 section 18.2 (PROPOSED); SIM.40.01 section 8.2."
+    },
+    "volume.perDamage.force": {
+      "value": 1,
+      "unit": "volume-damage energy per SRD damage point",
+      "status": "PM_DEFAULT",
+      "source": "ADR-003 Rev 3 section 18.2 (PROPOSED); SIM.40.01 section 8.2."
+    },
+    "volume.perDamage.thunder": {
+      "value": 1,
+      "unit": "volume-damage energy per SRD damage point",
+      "status": "PM_DEFAULT",
+      "source": "ADR-003 Rev 3 section 18.2 (PROPOSED); SIM.40.01 section 8.2."
+    },
+    "volume.perDamage.lightning": {
+      "value": 1,
+      "unit": "volume-damage energy per SRD damage point",
+      "status": "PM_DEFAULT",
+      "source": "ADR-003 Rev 3 section 18.2 (PROPOSED); SIM.40.01 section 8.2 ('fire (fire, and lightning for ignition)')."
+    },
+    "volume.perDamage.acid": {
+      "value": 1,
+      "unit": "volume-damage energy per SRD damage point",
+      "status": "PM_DEFAULT",
+      "source": "ADR-003 Rev 3 section 18.2 (PROPOSED); SIM.40.01 section 8.2. Used only where the SRD itself damages objects with acid (Storm of Vengeance); corrosion beyond that is Owner question Q3."
+    },
+    "volume.falloff.default": {
+      "value": "linear",
+      "unit": "falloff name",
+      "status": "PM_DEFAULT",
+      "source": "ADR-003 Rev 3 section 18.2 (PROPOSED) falloff table; today's default is linear (DEUS_Levels.js FALLOFF, cited in SIM.40.01 section 8.1). An effect names a falloff only where the SRD fixes one (Earthquake: the same damage to every structure)."
+    },
+    "volume.materialTables": {
+      "value": null,
+      "unit": "per-mille pass and resist tables by material group and physical class",
+      "status": "PLACEHOLDER",
+      "ownedBy": "SIM.40.01",
+      "source": "tasks/SIM.40.01/lane-q/SIM.40.01_STRUCTURAL_SUPPORT.md section 8.3 (passPm, resistPm; ADR-003 Q18). Not copied here: SIM.40.01 owns the numbers."
+    },
+    "ignite.threshold": {
+      "value": null,
+      "unit": "fire damage points (before resist) that ignite a combustible voxel or object",
+      "status": "PLACEHOLDER",
+      "ownedBy": "SIM.40.01",
+      "source": "tasks/SIM.40.01/lane-q/SIM.40.01_STRUCTURAL_SUPPORT.md section 8.3 (ignitePts per material group). Inside an SRD area that says it ignites flammables, everything flammable ignites whatever the threshold (SIM.40.01 section 8.3)."
+    },
+    "heat.perDamage.fire": {
+      "value": null,
+      "unit": "heat units per SRD fire damage point",
+      "status": "PLACEHOLDER",
+      "source": "Audit section 3.5 names a per-type heat coefficient (heat.fire). There is no stored temperature field to give it a unit yet (gap G-TEMP, audit section 4.3)."
+    },
+    "heat.perDamage.cold": {
+      "value": null,
+      "unit": "heat units removed per SRD cold damage point",
+      "status": "PLACEHOLDER",
+      "source": "Audit section 3.5 (heat.cold); gap G-TEMP (audit section 4.3)."
+    },
+    "heat.minorMagnitude": {
+      "value": null,
+      "unit": "heat units for a cantrip-scale warm or chill with no SRD damage",
+      "status": "PLACEHOLDER",
+      "source": "Audit record srd:spell:prestidigitation notes: a small heatFlux too small to melt or freeze a cell. One value for every no-damage heat effect of this size; gap G-TEMP."
+    },
+    "heat.contactTransfer": {
+      "value": null,
+      "unit": "fraction of an object's stored heat passed to what it touches per SRD round",
+      "status": "PLACEHOLDER",
+      "source": "Audit record srd:spell:heat-metal (contact heat transfer, added under DEC-018); gap G-TEMP."
+    },
+    "freeze.depthPerDamage.cold": {
+      "value": null,
+      "unit": "feet of exposed water frozen per SRD cold damage point",
+      "status": "PLACEHOLDER",
+      "source": "Audit section 3.2 freezeFluid 'depthFrom: energy' and rule R5; gap G-TEMP."
+    },
+    "freeze.maxDepthFromCold": {
+      "value": 2,
+      "unit": "ft",
+      "status": "PLACEHOLDER",
+      "source": "Audit section 3.7 Cone of Cold worked example (maxDepthFt 2: one 2-ft slice under DEC-013). Applies only to added freezing (R5); an SRD freeze clause states its own depth."
+    },
+    "wind.fanFactor": {
+      "value": null,
+      "unit": "multiplier on fire spread downwind",
+      "status": "PLACEHOLDER",
+      "ownedBy": "SIM.50.05",
+      "source": "Audit records srd:spell:gust-of-wind and srd:spell:storm-of-vengeance (fires fanned downwind, SIM.50.05 wind rule). DEUS_Fire.js has no wind term today (audit section 4.2)."
+    },
+    "impulse.blastPush": {
+      "value": null,
+      "unit": "ft of push on loose unsecured objects per volume-damage energy point",
+      "status": "PLACEHOLDER",
+      "source": "Audit rule R4 (a burst of thunder or force is a blast) and the audit records for Shatter and Glyph of Warding, which list impulse without an SRD distance. Set with GP.07.02 ballistics."
+    },
+    "heat.precipitationChill": {
+      "value": null,
+      "unit": "heat units removed per SRD round by freezing precipitation",
+      "status": "PLACEHOLDER",
+      "source": "Audit record srd:spell:sleet-storm ('the falling water and ice chill the area'); gap G-TEMP."
+    },
+    "heat.iceChill": {
+      "value": null,
+      "unit": "heat units removed per SRD round from cells next to conjured ice",
+      "status": "PLACEHOLDER",
+      "source": "Audit record srd:spell:wall-of-ice ('the ice chills adjacent cells'); gap G-TEMP."
+    },
+    "light.flameRadius": {
+      "value": null,
+      "unit": "ft of bright light around a large magical flame whose SRD text gives no radius",
+      "status": "PLACEHOLDER",
+      "source": "Audit record srd:spell:wall-of-fire ('the flames light the area'); gap G-LIGHT. One value for every flame of this kind, not per spell."
+    }
+  },
+  "tables": {
+    "damageClass": {
+      "fire": {
+        "value": "fire",
+        "unit": "physical class",
+        "status": "PM_DEFAULT",
+        "source": "SIM.40.01 section 8.3: SRD damage types map to fire, impact, cold or none."
+      },
+      "lightning": {
+        "value": "fire",
+        "unit": "physical class",
+        "status": "PM_DEFAULT",
+        "source": "SIM.40.01 section 8.3 ('fire (fire, and lightning for ignition)'); audit rule R3 (the SRD Lightning Bolt clause). Conduction is Owner question Q3."
+      },
+      "bludgeoning": {"value": "impact", "unit": "physical class", "status": "PM_DEFAULT", "source": "SIM.40.01 section 8.3."},
+      "force": {"value": "impact", "unit": "physical class", "status": "PM_DEFAULT", "source": "SIM.40.01 section 8.3."},
+      "thunder": {
+        "value": "impact",
+        "unit": "physical class",
+        "status": "PM_DEFAULT",
+        "source": "SIM.40.01 section 8.3. Used where the SRD or rule R4 damages objects (Shatter, Thunderwave, Glyph of Warding); wider structural thunder damage is Owner question Q3."
+      },
+      "acid": {
+        "value": "impact",
+        "unit": "physical class",
+        "status": "PLACEHOLDER",
+        "source": "SIM.40.01 section 8.3 maps acid to impact 'provisional pending Lane P's Q3'. Used only for Storm of Vengeance's SRD object damage.",
+        "question": "Q3"
+      },
+      "cold": {
+        "value": "cold",
+        "unit": "physical class",
+        "status": "PM_DEFAULT",
+        "source": "SIM.40.01 section 8.3; ADR-003 Rev 3 section 18.2 (cold does no HP damage to strata by default and freezes fluid)."
+      },
+      "poison": {
+        "value": "none",
+        "unit": "physical class",
+        "status": "PM_DEFAULT",
+        "source": "SIM.40.01 section 8.3 (objects are immune to poison, game/data/srd51/rules.json srd:rule:objects-statistics-for-objects)."
+      },
+      "psychic": {
+        "value": "none",
+        "unit": "physical class",
+        "status": "PM_DEFAULT",
+        "source": "SIM.40.01 section 8.3 (objects are immune to psychic damage, same SRD rule)."
+      },
+      "necrotic": {
+        "value": null,
+        "unit": "physical class",
+        "status": "OWNER_OPEN",
+        "question": "Q3",
+        "source": "SIM.40.01 section 8.3 maps necrotic to none because the SRD is silent for objects; whether necrotic has a physical effect (on plants) is Owner question Q3, so no class is set here. No effect record uses necrotic for volume damage."
+      },
+      "radiant": {
+        "value": null,
+        "unit": "physical class",
+        "status": "OWNER_OPEN",
+        "question": "Q3",
+        "source": "SIM.40.01 section 8.3 maps radiant to none because the SRD is silent for objects; whether radiant has a physical effect (on plants) is Owner question Q3, so no class is set here. No effect record uses radiant for volume damage."
+      },
+      "piercing": {
+        "value": "weaponAttackPath",
+        "unit": "physical class",
+        "status": "PM_DEFAULT",
+        "source": "SIM.40.01 section 8.3: piercing and slashing attacks on structures use the V95 attack path, not volume damage."
+      },
+      "slashing": {"value": "weaponAttackPath", "unit": "physical class", "status": "PM_DEFAULT", "source": "SIM.40.01 section 8.3 (same rule as piercing)."}
+    },
+    "materialClass": {
+      "stone": {
+        "value": {"class": "stone", "form": "object"},
+        "unit": "ledger class and form",
+        "status": "PM_DEFAULT",
+        "source": "game/js/sim/ledger_defaults.js (class stone; form object covers constructed strata); SIM.40.01 section 9.2 row 12 (conjured stone is mineral)."
+      },
+      "ice": {
+        "value": {"class": "water", "form": "ice"},
+        "unit": "ledger class and form",
+        "status": "PM_DEFAULT",
+        "source": "game/js/sim/ledger_defaults.js (water has an ice form); ADR-003 Rev 3 section 7.8 ('Water that freezes stays Q-MASS[water] in an ice form')."
+      },
+      "plants": {
+        "value": {"class": "biomass", "form": "object"},
+        "unit": "ledger class and form",
+        "status": "PM_DEFAULT",
+        "source": "game/js/sim/ledger_defaults.js (biomass: living plants as objects)."
+      },
+      "thorns": {
+        "value": {"class": "biomass", "form": "object"},
+        "unit": "ledger class and form",
+        "status": "PM_DEFAULT",
+        "source": "SRD Wall of Thorns 'tangled brush'; game/js/sim/ledger_defaults.js biomass object."
+      },
+      "food": {
+        "value": {"class": "biomass", "form": "item"},
+        "unit": "ledger class and form",
+        "status": "PM_DEFAULT",
+        "source": "game/js/sim/ledger_defaults.js (biomass item: food; the eat row moves it into creatures)."
+      },
+      "web": {
+        "value": {"class": "biomass", "form": "object"},
+        "unit": "ledger class and form",
+        "status": "PLACEHOLDER",
+        "source": "The SRD says webbing, not what it is made of; an organic class is assumed because the SRD says it burns."
+      },
+      "grease": {
+        "value": {"class": "biomass", "form": "object"},
+        "unit": "ledger class and form",
+        "status": "PLACEHOLDER",
+        "source": "The SRD says grease, not what it is made of; an organic class is assumed. Whether it burns is Owner question Q4."
+      },
+      "vegetableMatter": {
+        "value": {"class": "biomass", "form": "object"},
+        "unit": "ledger class and form",
+        "status": "PLACEHOLDER",
+        "source": "SRD Creation 'soft goods, rope, wood, or something similar'; one organic item class is assumed."
+      },
+      "crystal": {
+        "value": {"class": "stone", "form": "object"},
+        "unit": "ledger class and form",
+        "status": "PLACEHOLDER",
+        "source": "SRD Creation 'stone or crystal' share one duration; crystal is treated as mineral, not the finite gem family."
+      },
+      "preciousMetal": {
+        "value": null,
+        "unit": "ledger class and form",
+        "status": "OWNER_OPEN",
+        "question": "Q1",
+        "source": "SRD Creation 'Precious metals', 'Adamantine or mithral' and Wish's object: finite families. game/js/sim/ledger_defaults.js refuses a magic source for them (allowFinite false). Not in effect data until the Owner answers Q1 (item finiteFamilyMatter)."
+      },
+      "gem": {
+        "value": null,
+        "unit": "ledger class and form",
+        "status": "OWNER_OPEN",
+        "question": "Q1",
+        "source": "SRD Creation 'Gems': the finite gem family (ledger_defaults.js gem, finite). Not in effect data until the Owner answers Q1 (item finiteFamilyMatter)."
+      },
+      "anyNonMagicObject": {
+        "value": null,
+        "unit": "ledger class and form",
+        "status": "PLACEHOLDER",
+        "source": "SRD Wish: 'one object of up to 25,000 gp in value that isn’t a magic item'. The class is the object's own material, set per object; a finite-family object is Owner question Q1 (item finiteFamilyMatter). The effect uses ledger mode policy."
+      }
+    },
+    "timeDomain": {
+      "instantaneous": {
+        "value": "action",
+        "unit": "time domain",
+        "status": "PM_DEFAULT",
+        "source": "Tag only: which clock a lifetime runs on. The rate of each clock is secondsPerTick, Owner question Q2 (null). SRD rounds, minutes and hours are action timers (docs/SRD5_1_INTEGRATION.md:66); days and longer run on the historical clock (SIM.40.05 authors Gentle Repose's days there)."
+      },
+      "round": {
+        "value": "action",
+        "unit": "time domain",
+        "status": "PM_DEFAULT",
+        "source": "Tag only: which clock a lifetime runs on. The rate of each clock is secondsPerTick, Owner question Q2 (null). SRD rounds, minutes and hours are action timers (docs/SRD5_1_INTEGRATION.md:66); days and longer run on the historical clock (SIM.40.05 authors Gentle Repose's days there)."
+      },
+      "minute": {
+        "value": "action",
+        "unit": "time domain",
+        "status": "PM_DEFAULT",
+        "source": "Tag only: which clock a lifetime runs on. The rate of each clock is secondsPerTick, Owner question Q2 (null). SRD rounds, minutes and hours are action timers (docs/SRD5_1_INTEGRATION.md:66); days and longer run on the historical clock (SIM.40.05 authors Gentle Repose's days there)."
+      },
+      "hour": {
+        "value": "action",
+        "unit": "time domain",
+        "status": "PM_DEFAULT",
+        "source": "Tag only: which clock a lifetime runs on. The rate of each clock is secondsPerTick, Owner question Q2 (null). SRD rounds, minutes and hours are action timers (docs/SRD5_1_INTEGRATION.md:66); days and longer run on the historical clock (SIM.40.05 authors Gentle Repose's days there)."
+      },
+      "turnRelative": {
+        "value": "action",
+        "unit": "time domain",
+        "status": "PM_DEFAULT",
+        "source": "Tag only: which clock a lifetime runs on. The rate of each clock is secondsPerTick, Owner question Q2 (null). SRD rounds, minutes and hours are action timers (docs/SRD5_1_INTEGRATION.md:66); days and longer run on the historical clock (SIM.40.05 authors Gentle Repose's days there).",
+        "note": "An SRD end such as 'until the end of your next turn'."
+      },
+      "day": {
+        "value": "historical",
+        "unit": "time domain",
+        "status": "PM_DEFAULT",
+        "source": "Tag only: which clock a lifetime runs on. The rate of each clock is secondsPerTick, Owner question Q2 (null). SRD rounds, minutes and hours are action timers (docs/SRD5_1_INTEGRATION.md:66); days and longer run on the historical clock (SIM.40.05 authors Gentle Repose's days there)."
+      },
+      "year": {
+        "value": "historical",
+        "unit": "time domain",
+        "status": "PM_DEFAULT",
+        "source": "Tag only: which clock a lifetime runs on. The rate of each clock is secondsPerTick, Owner question Q2 (null). SRD rounds, minutes and hours are action timers (docs/SRD5_1_INTEGRATION.md:66); days and longer run on the historical clock (SIM.40.05 authors Gentle Repose's days there)."
+      },
+      "untilDispelled": {
+        "value": "historical",
+        "unit": "time domain",
+        "status": "PM_DEFAULT",
+        "source": "Tag only: which clock a lifetime runs on. The rate of each clock is secondsPerTick, Owner question Q2 (null). SRD rounds, minutes and hours are action timers (docs/SRD5_1_INTEGRATION.md:66); days and longer run on the historical clock (SIM.40.05 authors Gentle Repose's days there).",
+        "note": "No expiry; the tag only says which clock the instance is kept on."
+      },
+      "special": {
+        "value": "historical",
+        "unit": "time domain",
+        "status": "PM_DEFAULT",
+        "source": "Tag only: which clock a lifetime runs on. The rate of each clock is secondsPerTick, Owner question Q2 (null). SRD rounds, minutes and hours are action timers (docs/SRD5_1_INTEGRATION.md:66); days and longer run on the historical clock (SIM.40.05 authors Gentle Repose's days there).",
+        "note": "A special duration points at a time measure instead; this row is a fallback."
+      }
+    }
+  },
+  "conjuredMatterPolicy": {
+    "question": "Q1",
+    "authority": "DEC-018 open sub-question with its PM default (docs/OWNER_DECISIONS.md:262): conjured matter is an explicitly modelled magical source or sink, logged like rain and evaporation. game/js/sim/ledger_defaults.js declares sources.magic and sinks.magic with ownerConfirmed false. Effects name a case below; the runtime takes the source and sink names from the case, so an Owner ruling changes only this table.",
+    "options": {
+      "A": "PM default: conjured matter is an explicit magical source or sink with a named cause (spell:<id>), logged in the ledger like rain and evaporation; temporary matter has a paired sink at the end.",
+      "B": "Borrowed matter: conjured matter is drawn from the surroundings within a radius as a transform; the spell fails or shrinks if there is not enough.",
+      "C": "Temporary only: all conjured matter is magical and vanishes at the end; permanence clauses become magical permanence outside Q-MASS until dispelled.",
+      "D": "Outside the ledger: magic is exempt from LIFE-001 (the ledger ignores spell matter).",
+      "E": "Hybrid: permanent matter is an A-style source; temporary matter is a magical form outside Q-MASS until it becomes permanent, tracked by provenance so the sink always finds it."
+    },
+    "cases": {
+      "permanent": {
+        "part": "Q1(a)",
+        "covers": "Permanent conjured matter and permanent removal: Create or Destroy Water, Create Food and Water, Goodberry, a permanent Wall of Stone, Plant Growth's overgrowth.",
+        "default": {"source": "magic", "sink": "magic", "provenance": false, "pairedSinkOnEnd": false},
+        "status": "PM_DEFAULT_UNCONFIRMED",
+        "options": ["A", "B", "C", "D", "E", "another rule the Owner sets"]
+      },
+      "temporaryLeavesArea": {
+        "part": "Q1(b)",
+        "covers": "Temporary conjured matter that can leave its area or change form before the spell ends (flood water, melt from ice walls and hail, storm rain, Creation's objects, feast food, conjured plants, web, grease).",
+        "default": {"source": "magic", "sink": "magic", "provenance": true, "pairedSinkOnEnd": true, "sinkReach": "followProvenance"},
+        "status": "PM_DEFAULT_UNCONFIRMED",
+        "options": ["the paired sink follows the matter by provenance", "the matter left outside the area stays", "the matter becomes permanent", "A", "B", "C", "D", "E"],
+        "note": "If the matter becomes permanent under its spell's own rule (Wall of Stone held for the whole duration), the paired sink is cancelled and the permanent case applies."
+      },
+      "massChangeOfBodies": {
+        "part": "Q1(c)",
+        "covers": "Mass changes of bodies and objects: Enlarge/Reduce, petrification, polymorph and shapechange forms, and new or restored bodies (Clone, Reincarnate, Resurrection, True Resurrection, Regenerate).",
+        "default": {"source": "magic", "sink": "magic", "provenance": true, "pairedSinkOnEnd": true},
+        "status": "PM_DEFAULT_UNCONFIRMED",
+        "options": [
+          "the ledger tracks creature tissue and the SRD weight bears on floors",
+          "creature tissue is outside the ledger; the SRD weight still bears on floors",
+          "neither",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E"
+        ]
+      },
+      "planarTransfer": {
+        "part": "Q1(d)",
+        "covers": "Planar travel and extradimensional storage: Secret Chest's permanent loss, Demiplane and Magnificent Mansion contents, Rope Trick, Imprisonment's hedged prison, the violet prismatic ray.",
+        "default": {"source": "magic", "sink": "magic", "provenance": true},
+        "status": "PM_DEFAULT_UNCONFIRMED",
+        "options": ["ledger import and export with a named cause", "a held form inside the ledger", "outside the ledger", "A", "B", "C", "D", "E"]
+      },
+      "summonedBodies": {
+        "part": "Q1(e)",
+        "covers": "Summoned creatures that disappear without remains (Conjure Animals, Find Familiar, Find Steed, the elementals, Insect Plague's swarm).",
+        "default": {"source": "magic", "sink": "magic", "provenance": true, "pairedSinkOnEnd": true},
+        "status": "PM_DEFAULT_UNCONFIRMED",
+        "options": ["bodies are outside Q-MASS", "a magic source and paired sink", "Conjure Elemental consumes the matter it rises from", "A", "B", "C", "D", "E"],
+        "note": "No effect record uses this case: the summoning spells are NONE in the audit. The row exists so the policy is complete."
+      }
+    }
+  },
+  "ownerQuestions": {
+    "Q1": {
+      "title": "Conjured matter and the conservation ledger (DEC-018 open sub-question)",
+      "source": "docs/audits/SRD_SPELL_EFFECT_AUDIT.md sections 5 and 6 (Q1 parts a-e); docs/OWNER_DECISIONS.md:262",
+      "status": "OWNER_OPEN",
+      "items": {
+        "permanent": {"asks": "Q1(a): is permanent conjured matter a named ledger source, and are there limits?", "options": ["A", "B", "C", "D", "E", "another rule"]},
+        "temporaryLeavesArea": {
+          "asks": "Q1(b): does the paired sink follow temporary matter that left its area or changed form (provenance), leave it behind, or does it become permanent?",
+          "options": ["follow by provenance", "leave behind", "becomes permanent"]
+        },
+        "massChangeOfBodies": {
+          "asks": "Q1(c): does the ledger track creature tissue, and does the SRD weight apply to floor load?",
+          "options": ["yes and yes", "no and yes", "no and no"]
+        },
+        "planarTransfer": {
+          "asks": "Q1(d): are planar travel and extradimensional storage ledger imports and exports?",
+          "options": ["yes, named import and export", "a held form", "outside the ledger"]
+        },
+        "summonedBodies": {
+          "asks": "Q1(e): are summoned bodies outside Q-MASS, and does Conjure Elemental consume the matter it rises from?",
+          "options": ["outside Q-MASS", "magic source and sink", "consumes its matter"]
+        },
+        "finiteFamilyMatter": {
+          "asks": "Q1(a) and Q1(b) for finite families: Creation's precious metals, gems, adamantine and mithral, and Wish's object, would be new metal or gem matter; the ledger defaults refuse a magic source for finite families and LIFE-002 forbids ore. May a spell create them, and how?",
+          "options": ["no (the ledger default stands)", "yes, as a temporary magic source with provenance and a paired sink", "yes, permanently (Wish)", "another rule"],
+          "recordsAffected": ["srd:spell:creation", "srd:spell:wish"]
+        }
+      }
+    },
+    "Q2": {
+      "title": "Time scale for spell durations",
+      "source": "docs/audits/SRD_SPELL_EFFECT_AUDIT.md sections 6 and 7; tasks/SIM.60.01/lane-p/escalation.md (four sources disagree)",
+      "status": "OWNER_OPEN",
+      "items": {
+        "secondsPerTick": {
+          "asks": "How many game seconds does one simulation tick represent for action-domain and for historical-domain spell lifetimes?",
+          "options": [
+            "the world clock of DEUS_Core.js:59-61 and ADR-003 Rev 2 section 3.2",
+            "the VISION V46 and V101 beat",
+            "a separate SRD action clock (docs/SRD5_1_INTEGRATION.md:66)",
+            "another rate the Owner sets"
+          ]
+        },
+        "actionClock": {
+          "asks": "Do SRD rounds and minutes run on a separate action clock, or on the one world clock (V101)?",
+          "options": ["a separate action clock", "one world clock"]
+        }
+      }
+    },
+    "Q3": {
+      "title": "Physical effects for damage types DEC-018 does not name",
+      "source": "docs/audits/SRD_SPELL_EFFECT_AUDIT.md section 6 (Q3)",
+      "status": "OWNER_OPEN",
+      "items": {
+        "acidCorrosion": {
+          "asks": "Does acid corrode materials? The SRD damages objects with acid only in Storm of Vengeance's rain.",
+          "options": ["no physical effect beyond the SRD", "add corrosion (the Owner specifies)"],
+          "recordsAffected": ["srd:spell:acid-arrow", "srd:spell:acid-splash", "srd:spell:glyph-of-warding", "srd:spell:prismatic-spray", "srd:spell:storm-of-vengeance"]
+        },
+        "lightningConduction": {
+          "asks": "Does lightning conduct through water or metal? The SRD's only metal rule is Shocking Grasp's advantage against metal armour.",
+          "options": ["no", "yes (the Owner specifies)"],
+          "recordsAffected": ["srd:spell:call-lightning", "srd:spell:chain-lightning", "srd:spell:lightning-bolt", "srd:spell:shocking-grasp", "srd:spell:storm-of-vengeance"]
+        },
+        "necroticPlants": {
+          "asks": "Do necrotic areas kill plants (for example Circle of Death)?",
+          "options": ["no", "yes (the Owner specifies)"],
+          "recordsAffected": ["srd:spell:circle-of-death", "srd:spell:symbol"]
+        },
+        "radiantPlants": {
+          "asks": "Do radiant damage and spell sunlight affect plants?",
+          "options": ["no", "yes (the Owner specifies)"],
+          "recordsAffected": ["srd:spell:sunbeam", "srd:spell:sunburst", "srd:spell:moonbeam", "srd:spell:flame-strike"]
+        },
+        "thunderStructures": {
+          "asks": "Does thunder damage structures beyond Shatter and Thunderwave?",
+          "options": ["no", "yes (the Owner specifies)"],
+          "recordsAffected": ["srd:spell:storm-of-vengeance", "srd:spell:glyph-of-warding"]
+        }
+      }
+    },
+    "Q4": {
+      "title": "SRD-silent properties of magical substances and barriers",
+      "source": "docs/audits/SRD_SPELL_EFFECT_AUDIT.md section 6 (Q4) and the records that cite it",
+      "status": "OWNER_OPEN",
+      "items": {
+        "greaseBurns": {"asks": "Does Grease burn?", "options": ["yes", "no"], "recordsAffected": ["srd:spell:grease"]},
+        "entangleBurns": {"asks": "Do Entangle's conjured weeds and vines burn?", "options": ["yes", "no"], "recordsAffected": ["srd:spell:entangle"]},
+        "thornsBurn": {"asks": "Does Wall of Thorns' brush burn?", "options": ["yes", "no"], "recordsAffected": ["srd:spell:wall-of-thorns"]},
+        "magicalFireFuel": {
+          "asks": "Does magical fire (Wall of Fire, Flaming Sphere, Fire Shield, Produce Flame, Flame Blade) consume fuel, leave ash, or light tinder?",
+          "options": ["no", "yes (the Owner specifies which)"],
+          "recordsAffected": ["srd:spell:wall-of-fire", "srd:spell:flaming-sphere", "srd:spell:fire-shield", "srd:spell:produce-flame", "srd:spell:flame-blade"]
+        },
+        "forceBearsLoad": {
+          "asks": "Does a horizontal Wall of Force, a Forcecage or a Resilient Sphere bear load?",
+          "options": ["yes", "no"],
+          "recordsAffected": ["srd:spell:wall-of-force", "srd:spell:forcecage", "srd:spell:resilient-sphere"]
+        },
+        "reverseGravityFluids": {"asks": "Does Reverse Gravity lift loose water?", "options": ["yes", "no"], "recordsAffected": ["srd:spell:reverse-gravity"]},
+        "flamingSphereFalls": {"asks": "Does Flaming Sphere fall into a shaft it is rolled over?", "options": ["yes", "no"], "recordsAffected": ["srd:spell:flaming-sphere"]},
+        "sphereFallsWithFloor": {
+          "asks": "Does a weightless Resilient Sphere fall when the floor under it collapses?",
+          "options": ["yes", "no"],
+          "recordsAffected": ["srd:spell:resilient-sphere"]
+        }
+      }
+    }
+  }
+}

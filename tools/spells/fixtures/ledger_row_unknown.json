@@ -1,0 +1,16 @@
+{
+  "name": "ledger_row_unknown",
+  "rule": "ruleLedgerRows",
+  "brief": "a transform must be a row of the ledger's transform table",
+  "description": "Cone of Cold's freeze move ends in an item form that no freeze row allows.",
+  "expect": ["LEDGER_ROW_UNKNOWN"],
+  "alsoAllowed": [],
+  "patch": [
+    {
+      "file": "effects",
+      "op": "set",
+      "path": "records/@srd:spell:cone-of-cold/effects/@freezeWater/ledger/moves/0/to",
+      "value": {"class": "water", "form": "item"}
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "effect_script_hook",
+  "rule": "ruleSchema",
+  "brief": "a per-spell hook / extra property at effect level (additionalProperties: false)",
+  "description": "Fireball's ignite instance gets a per-spell script hook.",
+  "expect": ["SCHEMA_ADDITIONAL"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:fireball/effects/@igniteObjects/onCastScript", "value": "fireball_special.js"}
+  ]
+}

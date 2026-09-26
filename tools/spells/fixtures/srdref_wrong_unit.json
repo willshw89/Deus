@@ -1,0 +1,11 @@
+{
+  "name": "srdref_wrong_unit",
+  "rule": "ruleSrdRefs",
+  "brief": "a measure pointer whose unit differs from the measure's",
+  "description": "Wall of Stone's thickness pointer claims feet for an inch measure.",
+  "expect": ["SRDREF_KIND"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:wall-of-stone/effects/@thickPanels/params/thickness/unit", "value": "ft"}
+  ]
+}

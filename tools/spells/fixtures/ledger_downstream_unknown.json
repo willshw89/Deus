@@ -1,0 +1,11 @@
+{
+  "name": "ledger_downstream_unknown",
+  "rule": "ruleLedgerNames",
+  "brief": "a source or sink name not declared in game/js/sim/ledger_defaults.js",
+  "description": "Fireball's ignite names a downstream source the ledger does not declare.",
+  "expect": ["LEDGER_NAME_UNKNOWN"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:fireball/effects/@igniteObjects/ledger/downstream", "value": ["transform:burn", "source:mana"]}
+  ]
+}

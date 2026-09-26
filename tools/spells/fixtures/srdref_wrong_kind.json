@@ -1,0 +1,16 @@
+{
+  "name": "srdref_wrong_kind",
+  "rule": "ruleSrdRefs",
+  "brief": "an srdRef that resolves to the wrong kind of SRD value",
+  "description": "Fireball's blast energy points at its area instead of its damage.",
+  "expect": ["SRDREF_KIND"],
+  "alsoAllowed": [],
+  "patch": [
+    {
+      "file": "effects",
+      "op": "set",
+      "path": "records/@srd:spell:fireball/effects/@blast/energy/damage",
+      "value": {"srdRef": "fireball.area[0]"}
+    }
+  ]
+}

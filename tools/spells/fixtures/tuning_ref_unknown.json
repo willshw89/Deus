@@ -1,0 +1,16 @@
+{
+  "name": "tuning_ref_unknown",
+  "rule": "ruleTuningRefs",
+  "brief": "every tuningRef names a tuning.json parameter",
+  "description": "Fireball's heat coefficient names a parameter that does not exist.",
+  "expect": ["TUNING_REF_UNKNOWN"],
+  "alsoAllowed": [],
+  "patch": [
+    {
+      "file": "effects",
+      "op": "set",
+      "path": "records/@srd:spell:fireball/effects/@heat/energy/coefficient",
+      "value": {"tuningRef": "heat.perDamage.plasma"}
+    }
+  ]
+}

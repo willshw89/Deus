@@ -1,0 +1,11 @@
+{
+  "name": "ore_output_source",
+  "rule": "ruleNoOre",
+  "brief": "any effect whose output is an ore class (LIFE-002, D-5)",
+  "description": "Wall of Stone's conjured source is switched to iron ore.",
+  "expect": ["ORE_OUTPUT"],
+  "alsoAllowed": ["LEDGER_CLASS_UNKNOWN", "LEDGER_SOURCE_SCOPE"],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:wall-of-stone/effects/@thickPanels/ledger/class", "value": "fe_ore"}
+  ]
+}

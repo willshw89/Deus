@@ -1,0 +1,11 @@
+{
+  "name": "ledger_sink_name_unknown",
+  "rule": "ruleLedgerNames",
+  "brief": "a source or sink name not declared in game/js/sim/ledger_defaults.js",
+  "description": "The permanent conjured-matter row names a sink the ledger does not declare.",
+  "expect": ["LEDGER_NAME_UNKNOWN"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "tuning", "op": "set", "path": "conjuredMatterPolicy/cases/permanent/default/sink", "value": "void"}
+  ]
+}

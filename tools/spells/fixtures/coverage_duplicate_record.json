@@ -1,0 +1,11 @@
+{
+  "name": "coverage_duplicate_record",
+  "rule": "ruleCoverage",
+  "brief": "one effect record per spell",
+  "description": "A second Fireball record is added.",
+  "expect": ["COVERAGE_DUPLICATE"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "effects", "op": "copy", "from": "records/@srd:spell:fireball", "path": "records"}
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "tick_trigger",
+  "rule": "ruleNoTickLiterals",
+  "brief": "a timed effect driven per tick",
+  "description": "Earthquake's structure damage is set to run per tick instead of per SRD round.",
+  "expect": ["Q2_TICK_LITERAL"],
+  "alsoAllowed": ["SCHEMA_ENUM"],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:earthquake/effects/@structures/trigger", "value": "perTick"}
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "schema_missing_magical",
+  "rule": "ruleSchema",
+  "brief": "schema: every instance carries primitive, trigger, basis, magical and ledger",
+  "description": "Wall of Stone's instance loses its magical flag (R10).",
+  "expect": ["SCHEMA_REQUIRED"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "effects", "op": "delete", "path": "records/@srd:spell:wall-of-stone/effects/@thickPanels/magical"}
+  ]
+}

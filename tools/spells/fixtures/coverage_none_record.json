@@ -1,0 +1,17 @@
+{
+  "name": "coverage_none_record",
+  "rule": "ruleCoverage",
+  "brief": "only physical records and NONE records with an entity or meta primitive take effects",
+  "description": "A record is added for Magic Missile, which the audit classifies NONE with no primitive.",
+  "expect": ["COVERAGE_UNKNOWN_SPELL"],
+  "alsoAllowed": ["SYSTEMS_MISMATCH", "PRIMITIVE_COVERAGE", "PRIMITIVE_SYSTEM", "SRDREF_UNRESOLVED", "LEDGER_NO_CAUSE", "SRD_QUOTE_INEXACT"],
+  "patch": [
+    {
+      "file": "effects",
+      "op": "copy",
+      "from": "records/@srd:spell:fireball",
+      "path": "records",
+      "with": {"spellId": "srd:spell:magic-missile"}
+    }
+  ]
+}

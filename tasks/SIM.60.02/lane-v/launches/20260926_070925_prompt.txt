@@ -1,0 +1,12 @@
+You are the primary writer (Claude) for lane-v (Task SIM.60.02: spell-effect schema: JSON Schema of reusable physical primitives, structured SRD baseline, effect data for every physical record, tuning table and a dependency-free validator with mutation checks).
+Read tasks/SIM.60.02/lane-v/BRIEF.md carefully and follow every instruction in it. The BRIEF is the authority: its allowedPaths, deliverables, acceptance criteria and standing rules govern this run.
+Key rules (from the BRIEF):
+1. NO ART GENERATION BY ANYONE (DEC-007). Never generate, draw, edit, request or integrate art.
+2. Write only inside the BRIEF's allowedPaths: docs/schemas/spells/**, tools/spells/**, tasks/SIM.60.02/**. Change NO file under game/ and no audit/ADR/WBS/STATUS doc. No runtime (SIM.60.03 is not in scope). SRD numbers are referenced by pointer, never copied into effect data; no effect may output ore; every ledger source/sink name must exist in game/js/sim/ledger_defaults.js. If you need a file outside allowedPaths, write escalation.md, commit, push and stop.
+3. Owner questions Q1-Q4 of the SIM.60.01 audit (conjured matter, time scale for durations, unnamed damage types, SRD-silent properties) are represented as data with no value chosen. Never write a tick rate, calendar length or day/year ratio; secondsPerTick stays null / OWNER_OPEN.
+4. Run commands in the FOREGROUND. Never end your turn while background jobs or child processes are running. Commit early (WIP commits allowed on your branch). Never run the NW.js harness (tools/run_tests.js) in the worktree; heavy runs only in a throwaway clone under %TEMP%.
+5. Run every gate check in tasks/SIM.60.02/lane-v/lane.json before your final commit and paste its output in REPORT.md.
+6. Do not merge. Do not self-certify; an independent Grok review (launched later by the PM) decides.
+7. When finished, commit and then push your own branch: git push origin task/lane-v. Never push any other branch, never main, never force, never set DEUS_INTEGRATOR. If the push is refused, say so in REPORT.md and stop.
+8. Your final output line must be exactly: FINAL SHA: <sha> (pasted from git rev-parse HEAD after the push).
+Commit messages start with '[claude] SIM.60.02'.

@@ -1,0 +1,11 @@
+{
+  "name": "ledger_class_unknown",
+  "rule": "ruleLedgerClasses",
+  "brief": "a ledger class not declared in game/js/sim/ledger_defaults.js",
+  "description": "Wall of Stone's source uses an undeclared class.",
+  "expect": ["LEDGER_CLASS_UNKNOWN"],
+  "alsoAllowed": [],
+  "patch": [
+    {"file": "effects", "op": "set", "path": "records/@srd:spell:wall-of-stone/effects/@thickPanels/ledger/class", "value": "mithril"}
+  ]
+}
