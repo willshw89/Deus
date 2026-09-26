@@ -1,0 +1,10 @@
+{
+  "expect": "E_ALLOY",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=electrum].ledger.composition.au",
+      "value": 2
+    }
+  ]
+}

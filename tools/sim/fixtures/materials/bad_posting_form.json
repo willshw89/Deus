@@ -1,0 +1,10 @@
+{
+  "expect": "E_FORM",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=granite].yield.postings.0.form",
+      "value": "fluid"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "expect": "E_GAP_UNDECLARED",
+  "steps": [
+    {
+      "op": "delete",
+      "path": "catalogue.materials[id=tin].unmapped.reason"
+    }
+  ]
+}

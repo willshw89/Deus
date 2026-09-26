@@ -1,0 +1,10 @@
+{
+  "expect": "E_COLLAPSE_MASS",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=granite].collapse.postings.0.mu",
+      "value": 1
+    }
+  ]
+}

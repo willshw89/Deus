@@ -1,0 +1,10 @@
+{
+  "expect": "E_COLLAPSE_MASS",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=lava].solidify.duPerBasaltVoxel",
+      "value": 3
+    }
+  ]
+}

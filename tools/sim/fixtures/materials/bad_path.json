@@ -1,0 +1,12 @@
+{
+  "expect": "E_PATH",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=granite].reclaim.path",
+      "value": [
+        "transmute:stone->gold"
+      ]
+    }
+  ]
+}

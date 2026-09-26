@@ -1,0 +1,17 @@
+{
+  "expect": "E_ITEM_TYPE",
+  "steps": [
+    {
+      "op": "push",
+      "path": "catalogue.materials[id=granite].yield.postings",
+      "value": {
+        "process": "quarry",
+        "fromClass": "stone",
+        "fromForm": "strata",
+        "class": "stone",
+        "form": "item",
+        "mu": 1
+      }
+    }
+  ]
+}

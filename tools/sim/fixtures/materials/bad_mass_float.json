@@ -1,0 +1,10 @@
+{
+  "expect": "E_MASS",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=granite].massPerSlice",
+      "value": 1.5
+    }
+  ]
+}

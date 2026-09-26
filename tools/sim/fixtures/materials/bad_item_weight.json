@@ -1,0 +1,10 @@
+{
+  "expect": "E_ITEM_WEIGHT",
+  "steps": [
+    {
+      "op": "set",
+      "path": "masses.items.sword_long.massMu",
+      "value": 1
+    }
+  ]
+}

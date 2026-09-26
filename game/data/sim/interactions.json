@@ -1,0 +1,368 @@
+{
+  "schema": 1,
+  "bears": [
+    {
+      "id": "natural_rock",
+      "bears": true,
+      "spans": true,
+      "lateral": true,
+      "note": "Bearing when the voxel below is solid, or at the bottom of the column. Span is spanBase."
+    },
+    {
+      "id": "loose",
+      "bears": true,
+      "spans": false,
+      "lateral": false,
+      "note": "Loose matter bears and never spans or gives lateral support (SIM.40.01 §4.2)."
+    },
+    {
+      "id": "soil",
+      "bears": true,
+      "spans": "only when spanBase at that thickness is above zero",
+      "lateral": false
+    },
+    {
+      "id": "timber",
+      "bears": true,
+      "spans": true,
+      "lateral": true
+    },
+    {
+      "id": "masonry",
+      "bears": true,
+      "spans": true,
+      "lateral": true
+    },
+    {
+      "id": "water",
+      "bears": false,
+      "supports": [
+        "ice"
+      ],
+      "note": "Floating ice bears on a full fluid voxel. Other matter does not bear on water."
+    },
+    {
+      "id": "lava",
+      "bears": false,
+      "supports": [],
+      "note": "Lava is load only, and it ignites what it touches."
+    }
+  ],
+  "burns": [
+    {
+      "group": "wood",
+      "burns": true,
+      "products": [
+        "ash",
+        "charcoal"
+      ]
+    },
+    {
+      "group": "thatch",
+      "burns": true,
+      "products": [
+        "ash",
+        "charcoal"
+      ]
+    },
+    {
+      "group": "biomass",
+      "burns": true,
+      "products": [
+        "ash",
+        "charcoal"
+      ]
+    },
+    {
+      "group": "charcoal",
+      "burns": true,
+      "products": [
+        "ash"
+      ]
+    },
+    {
+      "group": "stone",
+      "burns": false
+    },
+    {
+      "group": "soil",
+      "burns": false
+    },
+    {
+      "group": "metal",
+      "burns": false,
+      "note": "Metals do not burn. They may become scrap."
+    },
+    {
+      "group": "water",
+      "burns": false
+    },
+    {
+      "group": "ice",
+      "burns": false,
+      "note": "Fire melts ice; the mass stays water."
+    }
+  ],
+  "rusts": [
+    {
+      "class": "fe_metal",
+      "to": "fe_trace"
+    },
+    {
+      "class": "steel",
+      "to": "fe_trace"
+    },
+    {
+      "class": "cu_metal",
+      "to": "cu_trace"
+    },
+    {
+      "class": "ag_metal",
+      "to": "ag_trace"
+    },
+    {
+      "class": "au_metal",
+      "reason": "NOBLE"
+    },
+    {
+      "class": "pt_metal",
+      "reason": "NOBLE"
+    },
+    {
+      "class": "electrum",
+      "reason": "No rust row. Same-class scrap only."
+    }
+  ],
+  "erodes": [
+    {
+      "process": "erode",
+      "from": "soil",
+      "to": "sediment"
+    },
+    {
+      "process": "weather",
+      "from": "rubble",
+      "to": "soil"
+    },
+    {
+      "process": "weather",
+      "from": "rubble",
+      "to": "sediment"
+    },
+    {
+      "process": "weather",
+      "from": "ash",
+      "to": "humus"
+    },
+    {
+      "process": "weather",
+      "from": "charcoal",
+      "to": "humus"
+    },
+    {
+      "process": "lithify",
+      "from": "sediment",
+      "to": "stone"
+    },
+    {
+      "process": "pedogenesis",
+      "from": "sediment",
+      "to": "soil"
+    },
+    {
+      "process": "rot",
+      "from": "wood",
+      "to": "humus"
+    },
+    {
+      "process": "rot",
+      "from": "biomass",
+      "to": "humus"
+    }
+  ],
+  "blast": {
+    "status": "PM_DEFAULT",
+    "source": "SIM.40.01 §8.3. Extrapolated except ice fire vulnerability, stone impact 0.5 and wood blast 1.2.",
+    "groups": {
+      "air": {
+        "pass": {
+          "fire": 1000,
+          "impact": 1000,
+          "cold": 1000
+        },
+        "resist": {}
+      },
+      "water": {
+        "pass": {
+          "fire": 0,
+          "impact": 900,
+          "cold": 1000
+        },
+        "resist": {
+          "fire": 0,
+          "impact": 0
+        }
+      },
+      "lava": {
+        "pass": {
+          "fire": 1000,
+          "impact": 900,
+          "cold": 0
+        },
+        "resist": {
+          "fire": 0,
+          "impact": 0
+        },
+        "ignites": true
+      },
+      "natural_rock": {
+        "pass": {
+          "fire": 50,
+          "impact": 300,
+          "cold": 200
+        },
+        "resist": {
+          "fire": 100,
+          "impact": 500
+        }
+      },
+      "soil": {
+        "pass": {
+          "fire": 100,
+          "impact": 450,
+          "cold": 300
+        },
+        "resist": {
+          "fire": 200,
+          "impact": 1000
+        }
+      },
+      "natural_wood": {
+        "pass": {
+          "fire": 150,
+          "impact": 600,
+          "cold": 500
+        },
+        "resist": {
+          "fire": 2000,
+          "impact": 1000
+        },
+        "ignitePts": 5
+      },
+      "ice": {
+        "pass": {
+          "fire": 0,
+          "impact": 500,
+          "cold": 1000
+        },
+        "resist": {
+          "fire": 2000,
+          "impact": 1000
+        }
+      },
+      "loose": {
+        "pass": {
+          "fire": 100,
+          "impact": 500,
+          "cold": 400
+        },
+        "resist": {
+          "fire": 0,
+          "impact": 0
+        }
+      },
+      "ash": {
+        "pass": {
+          "fire": 300,
+          "impact": 700,
+          "cold": 600
+        },
+        "resist": {
+          "fire": 0,
+          "impact": 0
+        }
+      },
+      "broken_timber": {
+        "pass": {
+          "fire": 400,
+          "impact": 700,
+          "cold": 600
+        },
+        "resist": {
+          "fire": 0,
+          "impact": 0
+        },
+        "ignitePts": 3
+      },
+      "masonry": {
+        "pass": {
+          "fire": 60,
+          "impact": 400,
+          "cold": 300
+        },
+        "resist": {
+          "fire": 100,
+          "impact": 1000
+        }
+      },
+      "ashlar": {
+        "pass": {
+          "fire": 50,
+          "impact": 350,
+          "cold": 250
+        },
+        "resist": {
+          "fire": 100,
+          "impact": 800
+        }
+      },
+      "timber": {
+        "pass": {
+          "fire": 250,
+          "impact": 700,
+          "cold": 600
+        },
+        "resist": {
+          "fire": 2000,
+          "impact": 1200
+        },
+        "ignitePts": 5
+      },
+      "thatch": {
+        "pass": {
+          "fire": 700,
+          "impact": 900,
+          "cold": 800
+        },
+        "resist": {
+          "fire": 2000,
+          "impact": 1500
+        },
+        "ignitePts": 1
+      },
+      "iron_grate": {
+        "pass": {
+          "fire": 800,
+          "impact": 800,
+          "cold": 800
+        },
+        "resist": {
+          "fire": 0,
+          "impact": 500
+        }
+      },
+      "conjured": {
+        "pass": {
+          "fire": 200,
+          "impact": 800,
+          "cold": 600
+        },
+        "resist": {
+          "fire": 100,
+          "impact": 1000
+        }
+      }
+    }
+  },
+  "exemptionRef": "DEC-028.3"
+}

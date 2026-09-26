@@ -1,0 +1,10 @@
+{
+  "expect": "E_ORE_OUTPUT",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=scrap].reclaim.classByElement.iron",
+      "value": "fe_ore"
+    }
+  ]
+}

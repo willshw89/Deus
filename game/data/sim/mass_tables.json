@@ -1,0 +1,6051 @@
+{
+  "schema": 1,
+  "muRef": "MU_SIZE",
+  "catalogIndex": {
+    "items": [
+      "armor_leather",
+      "arrows",
+      "axe_iron",
+      "bar_copper",
+      "bar_iron",
+      "berries",
+      "bone",
+      "bow_long",
+      "bow_short",
+      "brick_clay",
+      "charcoal",
+      "clay",
+      "club",
+      "common_clothes",
+      "dagger_iron",
+      "feathers",
+      "fiber",
+      "fiber_wrap",
+      "firewood",
+      "fish",
+      "fruit",
+      "gem_cut",
+      "gem_rough",
+      "gold",
+      "gold_coin",
+      "greaves_iron",
+      "hardware_iron",
+      "helmet_iron",
+      "helmet_leather",
+      "hide",
+      "hide_cloak",
+      "leather",
+      "leggings_leather",
+      "log",
+      "mace",
+      "mail_iron",
+      "meat_cooked",
+      "meat_raw",
+      "mortar_lime",
+      "mushroom",
+      "ore_copper",
+      "ore_iron",
+      "plank_dressed",
+      "pouch",
+      "rations",
+      "root",
+      "sand",
+      "seeds",
+      "shield_iron",
+      "shield_wood",
+      "sling",
+      "spear",
+      "stone",
+      "stone_axe",
+      "stone_block",
+      "stone_knife",
+      "stone_pick",
+      "straw",
+      "sword_long",
+      "sword_short",
+      "wool"
+    ],
+    "objects": [
+      "apothecary_bench",
+      "bed_wood",
+      "berry_bush",
+      "berry_bush_bare",
+      "birch",
+      "bones_pile",
+      "bowyer_bench",
+      "bridge",
+      "bush",
+      "cactus",
+      "cactus_tall",
+      "campfire",
+      "cave_moss",
+      "cave_mushrooms",
+      "chest_wood",
+      "clay_deposit",
+      "copper_outcrop",
+      "crib",
+      "crystal",
+      "crystal_small",
+      "crystal_spire",
+      "dead_tree",
+      "desert_shrub",
+      "dining_bench",
+      "dining_table",
+      "door_iron",
+      "door_stone",
+      "door_wood",
+      "farm_plot",
+      "fern",
+      "fir_snow",
+      "fletcher_bench",
+      "floor_straw",
+      "flowers",
+      "flowers_blue",
+      "flowers_purple",
+      "flowers_white",
+      "fruit_tree",
+      "fruit_tree_bare",
+      "furnace",
+      "glow_caps",
+      "gold_outcrop",
+      "granite_boulder",
+      "grass_tuft",
+      "gravel",
+      "ironstone",
+      "kitchen_counter",
+      "kitchen_hearth",
+      "kitchen_pantry",
+      "lichen",
+      "lily_pad",
+      "mangrove",
+      "mason_bench",
+      "oak",
+      "palm",
+      "pine",
+      "pottery_kiln",
+      "reeds",
+      "rocks_small",
+      "rubble",
+      "rubble_pillar",
+      "sand_deposit",
+      "sapling",
+      "shop_counter",
+      "skeleton",
+      "smithy",
+      "snow_bush",
+      "spore_reeds",
+      "stalagmite",
+      "stockpile",
+      "stump",
+      "tanning_rack",
+      "tower_cap",
+      "tree_cursed",
+      "tree_savanna",
+      "tree_swamp",
+      "tree_tropical",
+      "wall_ashlar",
+      "wall_brick",
+      "wall_stone",
+      "wall_timber_frame",
+      "wall_wood",
+      "weapon_rack",
+      "well",
+      "wheat_wild",
+      "wild_grain",
+      "workbench"
+    ]
+  },
+  "items": {
+    "log": {
+      "massMu": 8000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledger": {
+        "class": "wood",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "firewood": {
+      "massMu": 2000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledger": {
+        "class": "wood",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "stone": {
+      "massMu": 15000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledger": {
+        "class": "stone",
+        "family": "mineral"
+      },
+      "oreItem": false
+    },
+    "ore_iron": {
+      "massMu": 12000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledger": {
+        "class": "fe_ore",
+        "family": "fe"
+      },
+      "oreItem": true
+    },
+    "ore_copper": {
+      "massMu": 10000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledger": {
+        "class": "cu_ore",
+        "family": "cu"
+      },
+      "oreItem": true
+    },
+    "gold": {
+      "massMu": 100,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledger": {
+        "class": "au_metal",
+        "family": "au"
+      },
+      "oreItem": false
+    },
+    "gem_rough": {
+      "massMu": 50,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledger": {
+        "class": "gem",
+        "family": "gem"
+      },
+      "oreItem": false
+    },
+    "gem_cut": {
+      "massMu": 20,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledger": {
+        "class": "gem",
+        "family": "gem"
+      },
+      "oreItem": false
+    },
+    "bar_iron": {
+      "massMu": 4000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledger": {
+        "class": "fe_metal",
+        "family": "fe"
+      },
+      "oreItem": false
+    },
+    "berries": {
+      "massMu": 100,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 100,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "fruit": {
+      "massMu": 300,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 300,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "mushroom": {
+      "massMu": 100,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 100,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "root": {
+      "massMu": 300,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 300,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "seeds": {
+      "massMu": 50,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "fiber": {
+      "massMu": 200,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "straw": {
+      "massMu": 500,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "meat_raw": {
+      "massMu": 500,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 500,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "meat_cooked": {
+      "massMu": 400,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 400,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "fish": {
+      "massMu": 500,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 500,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "rations": {
+      "massMu": 2000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 2000,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "hide": {
+      "massMu": 3000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "bone": {
+      "massMu": 500,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "boneGap": "D-BONE",
+      "oreItem": false
+    },
+    "wool": {
+      "massMu": 400,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "stone_axe": {
+      "massMu": 1400,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 1400,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "stone",
+        "family": "mineral"
+      },
+      "compositeGap": "Catalogue item has no component masses. The whole mu is booked to the dominant class.",
+      "oreItem": false
+    },
+    "stone_knife": {
+      "massMu": 300,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 300,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "stone",
+        "family": "mineral"
+      },
+      "compositeGap": "Catalogue item has no component masses. The whole mu is booked to the dominant class.",
+      "oreItem": false
+    },
+    "stone_pick": {
+      "massMu": 1800,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 1800,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "stone",
+        "family": "mineral"
+      },
+      "compositeGap": "Catalogue item has no component masses. The whole mu is booked to the dominant class.",
+      "oreItem": false
+    },
+    "fiber_wrap": {
+      "massMu": 500,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 500,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "hide_cloak": {
+      "massMu": 5400,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 5400,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "charcoal": {
+      "massMu": 500,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 500,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "charcoal",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "bar_copper": {
+      "massMu": 2000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 2000,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "cu_metal",
+        "family": "cu"
+      },
+      "oreItem": false
+    },
+    "feathers": {
+      "massMu": 100,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 100,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "leather": {
+      "massMu": 1000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 1000,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "arrows": {
+      "massMu": 50,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 50,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "wood",
+        "family": "organic"
+      },
+      "compositeGap": "Catalogue item has no component masses. The whole mu is booked to the dominant class.",
+      "oreItem": false
+    },
+    "bow_short": {
+      "massMu": 900,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 900,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "wood",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "bow_long": {
+      "massMu": 900,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 900,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "wood",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "sling": {
+      "massMu": 100,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 100,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "club": {
+      "massMu": 900,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 900,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "wood",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "spear": {
+      "massMu": 1400,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 1400,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "wood",
+        "family": "organic"
+      },
+      "compositeGap": "Catalogue item has no component masses. The whole mu is booked to the dominant class.",
+      "oreItem": false
+    },
+    "dagger_iron": {
+      "massMu": 500,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 500,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "fe_metal",
+        "family": "fe"
+      },
+      "compositeGap": "Catalogue item has no component masses. The whole mu is booked to the dominant class.",
+      "oreItem": false
+    },
+    "sword_short": {
+      "massMu": 900,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 900,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "fe_metal",
+        "family": "fe"
+      },
+      "compositeGap": "Catalogue item has no component masses. The whole mu is booked to the dominant class.",
+      "oreItem": false
+    },
+    "sword_long": {
+      "massMu": 1400,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 1400,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "fe_metal",
+        "family": "fe"
+      },
+      "compositeGap": "Catalogue item has no component masses. The whole mu is booked to the dominant class.",
+      "oreItem": false
+    },
+    "axe_iron": {
+      "massMu": 1800,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 1800,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "fe_metal",
+        "family": "fe"
+      },
+      "compositeGap": "Catalogue item has no component masses. The whole mu is booked to the dominant class.",
+      "oreItem": false
+    },
+    "mace": {
+      "massMu": 1800,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 1800,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "fe_metal",
+        "family": "fe"
+      },
+      "compositeGap": "Catalogue item has no component masses. The whole mu is booked to the dominant class.",
+      "oreItem": false
+    },
+    "helmet_leather": {
+      "massMu": 500,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 500,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "helmet_iron": {
+      "massMu": 1400,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 1400,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "fe_metal",
+        "family": "fe"
+      },
+      "compositeGap": "Catalogue item has no component masses. The whole mu is booked to the dominant class.",
+      "oreItem": false
+    },
+    "armor_leather": {
+      "massMu": 4500,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 4500,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "mail_iron": {
+      "massMu": 25000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 25000,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "fe_metal",
+        "family": "fe"
+      },
+      "compositeGap": "Catalogue item has no component masses. The whole mu is booked to the dominant class.",
+      "oreItem": false
+    },
+    "leggings_leather": {
+      "massMu": 900,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 900,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "greaves_iron": {
+      "massMu": 2700,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 2700,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "fe_metal",
+        "family": "fe"
+      },
+      "compositeGap": "Catalogue item has no component masses. The whole mu is booked to the dominant class.",
+      "oreItem": false
+    },
+    "shield_wood": {
+      "massMu": 2700,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 2700,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "wood",
+        "family": "organic"
+      },
+      "compositeGap": "Catalogue item has no component masses. The whole mu is booked to the dominant class.",
+      "oreItem": false
+    },
+    "shield_iron": {
+      "massMu": 5000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 5000,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "fe_metal",
+        "family": "fe"
+      },
+      "compositeGap": "Catalogue item has no component masses. The whole mu is booked to the dominant class.",
+      "oreItem": false
+    },
+    "clay": {
+      "massMu": 1500,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 1500,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "soil",
+        "family": "mineral"
+      },
+      "oreItem": false
+    },
+    "sand": {
+      "massMu": 1500,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 1500,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "soil",
+        "family": "mineral"
+      },
+      "oreItem": false
+    },
+    "brick_clay": {
+      "massMu": 2000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 2000,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "stone",
+        "family": "mineral"
+      },
+      "oreItem": false
+    },
+    "mortar_lime": {
+      "massMu": 1200,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 1200,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "soil",
+        "family": "mineral"
+      },
+      "oreItem": false
+    },
+    "stone_block": {
+      "massMu": 3000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 3000,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "stone",
+        "family": "mineral"
+      },
+      "oreItem": false
+    },
+    "plank_dressed": {
+      "massMu": 1800,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 1800,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "wood",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "hardware_iron": {
+      "massMu": 500,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 500,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "fe_metal",
+        "family": "fe"
+      },
+      "oreItem": false
+    },
+    "common_clothes": {
+      "massMu": 3000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 3000,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "pouch": {
+      "massMu": 1000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 1000,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "biomass",
+        "family": "organic"
+      },
+      "oreItem": false
+    },
+    "gold_coin": {
+      "massMu": 20,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "catalogWeightTimes1000": 20,
+      "unitAssumption": "The catalogue weight field has no unit. It is treated as kilograms, so mu is weight x 1000 under the unconfirmed gram proposal.",
+      "ledger": {
+        "class": "au_metal",
+        "family": "au"
+      },
+      "oreItem": false
+    }
+  },
+  "objects": {
+    "campfire": {
+      "massless": false,
+      "massMu": 69000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 45000
+        },
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 24000
+        }
+      ],
+      "bill": [
+        {
+          "item": "log",
+          "count": 3,
+          "mu": 24000,
+          "class": "wood",
+          "family": "organic"
+        },
+        {
+          "item": "stone",
+          "count": 3,
+          "mu": 45000,
+          "class": "stone",
+          "family": "mineral"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 24000,
+            "item": "log",
+            "count": 3,
+            "family": "organic"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 45000,
+            "item": "stone",
+            "count": 3,
+            "family": "mineral"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 45000,
+            "family": "mineral"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 24000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 3
+          }
+        ]
+      },
+      "catalogNotApplied": [
+        "ruin bones_pile is not a mass path"
+      ],
+      "disagreement": [
+        "D-CAMPFIRE-RUIN"
+      ]
+    },
+    "wall_wood": {
+      "massless": false,
+      "massMu": 8000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 8000
+        }
+      ],
+      "bill": [
+        {
+          "item": "log",
+          "count": 1,
+          "mu": 8000,
+          "class": "wood",
+          "family": "organic"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "item": "log",
+            "count": 1,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 1
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [],
+      "assembly": "timber_wall"
+    },
+    "wall_stone": {
+      "massless": false,
+      "massMu": 30000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 30000
+        }
+      ],
+      "bill": [
+        {
+          "item": "stone",
+          "count": 2,
+          "mu": 30000,
+          "class": "stone",
+          "family": "mineral"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 30000,
+            "item": "stone",
+            "count": 2,
+            "family": "mineral"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 30000,
+            "family": "mineral"
+          }
+        ]
+      },
+      "catalogNotApplied": [
+        "quarry and mine yield 2 stone and become rubble, which would add a second mass (D-CATALOG-YIELD)"
+      ],
+      "disagreement": [],
+      "assembly": "masonry"
+    },
+    "floor_straw": {
+      "massless": false,
+      "massMu": 1000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 1000
+        }
+      ],
+      "bill": [
+        {
+          "item": "straw",
+          "count": 2,
+          "mu": 1000,
+          "class": "biomass",
+          "family": "organic"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 1000,
+            "item": "straw",
+            "count": 2,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 1000,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "crib": {
+      "massless": false,
+      "massMu": 8000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 8000
+        }
+      ],
+      "bill": [
+        {
+          "item": "log",
+          "count": 1,
+          "mu": 8000,
+          "class": "wood",
+          "family": "organic"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "item": "log",
+            "count": 1,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 1
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "workbench": {
+      "massless": false,
+      "massMu": 38000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 30000
+        },
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 8000
+        }
+      ],
+      "bill": [
+        {
+          "item": "log",
+          "count": 1,
+          "mu": 8000,
+          "class": "wood",
+          "family": "organic"
+        },
+        {
+          "item": "stone",
+          "count": 2,
+          "mu": 30000,
+          "class": "stone",
+          "family": "mineral"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "item": "log",
+            "count": 1,
+            "family": "organic"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 30000,
+            "item": "stone",
+            "count": 2,
+            "family": "mineral"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 30000,
+            "family": "mineral"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 1
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "furnace": {
+      "massless": false,
+      "massMu": 90000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 90000
+        }
+      ],
+      "bill": [
+        {
+          "item": "stone",
+          "count": 6,
+          "mu": 90000,
+          "class": "stone",
+          "family": "mineral"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 90000,
+            "item": "stone",
+            "count": 6,
+            "family": "mineral"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 90000,
+            "family": "mineral"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "smithy": {
+      "massless": false,
+      "massMu": 72000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "fe_metal",
+          "family": "fe",
+          "mu": 4000
+        },
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 60000
+        },
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 8000
+        }
+      ],
+      "bill": [
+        {
+          "item": "bar_iron",
+          "count": 1,
+          "mu": 4000,
+          "class": "fe_metal",
+          "family": "fe"
+        },
+        {
+          "item": "log",
+          "count": 1,
+          "mu": 8000,
+          "class": "wood",
+          "family": "organic"
+        },
+        {
+          "item": "stone",
+          "count": 4,
+          "mu": 60000,
+          "class": "stone",
+          "family": "mineral"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "fe_metal",
+            "fromForm": "object",
+            "class": "fe_metal",
+            "form": "item",
+            "mu": 4000,
+            "item": "bar_iron",
+            "count": 1,
+            "family": "fe"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "item": "log",
+            "count": 1,
+            "family": "organic"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 60000,
+            "item": "stone",
+            "count": 4,
+            "family": "mineral"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "fe_metal",
+            "fromForm": "object",
+            "class": "fe_metal",
+            "form": "item",
+            "mu": 4000,
+            "family": "fe",
+            "debrisMaterial": "scrap",
+            "disagreement": "D-SCRAP-FORM",
+            "item": "bar_iron",
+            "count": 1
+          },
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 60000,
+            "family": "mineral"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 1
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "bowyer_bench": {
+      "massless": false,
+      "massMu": 16000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 16000
+        }
+      ],
+      "bill": [
+        {
+          "item": "log",
+          "count": 2,
+          "mu": 16000,
+          "class": "wood",
+          "family": "organic"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "item": "log",
+            "count": 2,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "fletcher_bench": {
+      "massless": false,
+      "massMu": 31000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 15000
+        },
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 16000
+        }
+      ],
+      "bill": [
+        {
+          "item": "log",
+          "count": 2,
+          "mu": 16000,
+          "class": "wood",
+          "family": "organic"
+        },
+        {
+          "item": "stone",
+          "count": 1,
+          "mu": 15000,
+          "class": "stone",
+          "family": "mineral"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "item": "log",
+            "count": 2,
+            "family": "organic"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 15000,
+            "item": "stone",
+            "count": 1,
+            "family": "mineral"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 15000,
+            "family": "mineral"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "tanning_rack": {
+      "massless": false,
+      "massMu": 24400,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 400
+        },
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 24000
+        }
+      ],
+      "bill": [
+        {
+          "item": "fiber",
+          "count": 2,
+          "mu": 400,
+          "class": "biomass",
+          "family": "organic"
+        },
+        {
+          "item": "log",
+          "count": 3,
+          "mu": 24000,
+          "class": "wood",
+          "family": "organic"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 400,
+            "item": "fiber",
+            "count": 2,
+            "family": "organic"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 24000,
+            "item": "log",
+            "count": 3,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 400,
+            "family": "organic"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 24000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 3
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "weapon_rack": {
+      "massless": false,
+      "massMu": 16000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 16000
+        }
+      ],
+      "bill": [
+        {
+          "item": "log",
+          "count": 2,
+          "mu": 16000,
+          "class": "wood",
+          "family": "organic"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "item": "log",
+            "count": 2,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "door_wood": {
+      "massless": false,
+      "massMu": 8000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 8000
+        }
+      ],
+      "bill": [
+        {
+          "item": "log",
+          "count": 1,
+          "mu": 8000,
+          "class": "wood",
+          "family": "organic"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "item": "log",
+            "count": 1,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 1
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "door_stone": {
+      "massless": false,
+      "massMu": 30000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 30000
+        }
+      ],
+      "bill": [
+        {
+          "item": "stone",
+          "count": 2,
+          "mu": 30000,
+          "class": "stone",
+          "family": "mineral"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 30000,
+            "item": "stone",
+            "count": 2,
+            "family": "mineral"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 30000,
+            "family": "mineral"
+          }
+        ]
+      },
+      "catalogNotApplied": [
+        "dismantle, mine and quarry return 1 stone of the 2 built (D-CATALOG-YIELD)"
+      ],
+      "disagreement": []
+    },
+    "door_iron": {
+      "massless": false,
+      "massMu": 8000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "fe_metal",
+          "family": "fe",
+          "mu": 8000
+        }
+      ],
+      "bill": [
+        {
+          "item": "bar_iron",
+          "count": 2,
+          "mu": 8000,
+          "class": "fe_metal",
+          "family": "fe"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "fe_metal",
+            "fromForm": "object",
+            "class": "fe_metal",
+            "form": "item",
+            "mu": 8000,
+            "item": "bar_iron",
+            "count": 2,
+            "family": "fe"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "fe_metal",
+            "fromForm": "object",
+            "class": "fe_metal",
+            "form": "item",
+            "mu": 8000,
+            "family": "fe",
+            "debrisMaterial": "scrap",
+            "disagreement": "D-SCRAP-FORM",
+            "item": "bar_iron",
+            "count": 2
+          }
+        ]
+      },
+      "catalogNotApplied": [
+        "dismantle and mine return 1 bar of the 2 built (D-CATALOG-YIELD)"
+      ],
+      "disagreement": []
+    },
+    "bed_wood": {
+      "massless": false,
+      "massMu": 16200,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 200
+        },
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 16000
+        }
+      ],
+      "bill": [
+        {
+          "item": "fiber",
+          "count": 1,
+          "mu": 200,
+          "class": "biomass",
+          "family": "organic"
+        },
+        {
+          "item": "log",
+          "count": 2,
+          "mu": 16000,
+          "class": "wood",
+          "family": "organic"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 200,
+            "item": "fiber",
+            "count": 1,
+            "family": "organic"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "item": "log",
+            "count": 2,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 200,
+            "family": "organic"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "chest_wood": {
+      "massless": false,
+      "massMu": 16200,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 200
+        },
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 16000
+        }
+      ],
+      "bill": [
+        {
+          "item": "fiber",
+          "count": 1,
+          "mu": 200,
+          "class": "biomass",
+          "family": "organic"
+        },
+        {
+          "item": "log",
+          "count": 2,
+          "mu": 16000,
+          "class": "wood",
+          "family": "organic"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 200,
+            "item": "fiber",
+            "count": 1,
+            "family": "organic"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "item": "log",
+            "count": 2,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 200,
+            "family": "organic"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "dining_table": {
+      "massless": false,
+      "massMu": 16000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 16000
+        }
+      ],
+      "bill": [
+        {
+          "item": "log",
+          "count": 2,
+          "mu": 16000,
+          "class": "wood",
+          "family": "organic"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "item": "log",
+            "count": 2,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "dining_bench": {
+      "massless": false,
+      "massMu": 8000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 8000
+        }
+      ],
+      "bill": [
+        {
+          "item": "log",
+          "count": 1,
+          "mu": 8000,
+          "class": "wood",
+          "family": "organic"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "item": "log",
+            "count": 1,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 1
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "kitchen_counter": {
+      "massless": false,
+      "massMu": 16000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 16000
+        }
+      ],
+      "bill": [
+        {
+          "item": "log",
+          "count": 2,
+          "mu": 16000,
+          "class": "wood",
+          "family": "organic"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "item": "log",
+            "count": 2,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "kitchen_pantry": {
+      "massless": false,
+      "massMu": 31000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 15000
+        },
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 16000
+        }
+      ],
+      "bill": [
+        {
+          "item": "log",
+          "count": 2,
+          "mu": 16000,
+          "class": "wood",
+          "family": "organic"
+        },
+        {
+          "item": "stone",
+          "count": 1,
+          "mu": 15000,
+          "class": "stone",
+          "family": "mineral"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "item": "log",
+            "count": 2,
+            "family": "organic"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 15000,
+            "item": "stone",
+            "count": 1,
+            "family": "mineral"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 15000,
+            "family": "mineral"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "kitchen_hearth": {
+      "massless": false,
+      "massMu": 68000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 60000
+        },
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 8000
+        }
+      ],
+      "bill": [
+        {
+          "item": "log",
+          "count": 1,
+          "mu": 8000,
+          "class": "wood",
+          "family": "organic"
+        },
+        {
+          "item": "stone",
+          "count": 4,
+          "mu": 60000,
+          "class": "stone",
+          "family": "mineral"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "item": "log",
+            "count": 1,
+            "family": "organic"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 60000,
+            "item": "stone",
+            "count": 4,
+            "family": "mineral"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 60000,
+            "family": "mineral"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 1
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "shop_counter": {
+      "massless": false,
+      "massMu": 31000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 15000
+        },
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 16000
+        }
+      ],
+      "bill": [
+        {
+          "item": "log",
+          "count": 2,
+          "mu": 16000,
+          "class": "wood",
+          "family": "organic"
+        },
+        {
+          "item": "stone",
+          "count": 1,
+          "mu": 15000,
+          "class": "stone",
+          "family": "mineral"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "item": "log",
+            "count": 2,
+            "family": "organic"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 15000,
+            "item": "stone",
+            "count": 1,
+            "family": "mineral"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 15000,
+            "family": "mineral"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "apothecary_bench": {
+      "massless": false,
+      "massMu": 31000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 15000
+        },
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 16000
+        }
+      ],
+      "bill": [
+        {
+          "item": "log",
+          "count": 2,
+          "mu": 16000,
+          "class": "wood",
+          "family": "organic"
+        },
+        {
+          "item": "stone",
+          "count": 1,
+          "mu": 15000,
+          "class": "stone",
+          "family": "mineral"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "item": "log",
+            "count": 2,
+            "family": "organic"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 15000,
+            "item": "stone",
+            "count": 1,
+            "family": "mineral"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 15000,
+            "family": "mineral"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 2
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "pottery_kiln": {
+      "massless": false,
+      "massMu": 45000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 45000
+        }
+      ],
+      "bill": [
+        {
+          "item": "stone",
+          "count": 3,
+          "mu": 45000,
+          "class": "stone",
+          "family": "mineral"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 45000,
+            "item": "stone",
+            "count": 3,
+            "family": "mineral"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 45000,
+            "family": "mineral"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "mason_bench": {
+      "massless": false,
+      "massMu": 53000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 45000
+        },
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 8000
+        }
+      ],
+      "bill": [
+        {
+          "item": "log",
+          "count": 1,
+          "mu": 8000,
+          "class": "wood",
+          "family": "organic"
+        },
+        {
+          "item": "stone",
+          "count": 3,
+          "mu": 45000,
+          "class": "stone",
+          "family": "mineral"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "item": "log",
+            "count": 1,
+            "family": "organic"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 45000,
+            "item": "stone",
+            "count": 3,
+            "family": "mineral"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 45000,
+            "family": "mineral"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 1
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "wall_timber_frame": {
+      "massless": false,
+      "massMu": 4100,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "fe_metal",
+          "family": "fe",
+          "mu": 500
+        },
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 3600
+        }
+      ],
+      "bill": [
+        {
+          "item": "hardware_iron",
+          "count": 1,
+          "mu": 500,
+          "class": "fe_metal",
+          "family": "fe"
+        },
+        {
+          "item": "plank_dressed",
+          "count": 2,
+          "mu": 3600,
+          "class": "wood",
+          "family": "organic"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "fe_metal",
+            "fromForm": "object",
+            "class": "fe_metal",
+            "form": "item",
+            "mu": 500,
+            "item": "hardware_iron",
+            "count": 1,
+            "family": "fe"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 3600,
+            "item": "plank_dressed",
+            "count": 2,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "fe_metal",
+            "fromForm": "object",
+            "class": "fe_metal",
+            "form": "item",
+            "mu": 500,
+            "family": "fe",
+            "debrisMaterial": "scrap",
+            "disagreement": "D-SCRAP-FORM",
+            "item": "hardware_iron",
+            "count": 1
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 3600,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "plank_dressed",
+            "count": 2
+          }
+        ]
+      },
+      "catalogNotApplied": [
+        "chop and mine return the planks and drop the hardware (D-CATALOG-YIELD)"
+      ],
+      "disagreement": [],
+      "assembly": "timber_frame"
+    },
+    "wall_brick": {
+      "massless": false,
+      "massMu": 5200,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "soil",
+          "family": "mineral",
+          "mu": 1200,
+          "form": "strata"
+        },
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 4000
+        }
+      ],
+      "bill": [
+        {
+          "item": "brick_clay",
+          "count": 2,
+          "mu": 4000,
+          "class": "stone",
+          "family": "mineral"
+        },
+        {
+          "item": "mortar_lime",
+          "count": 1,
+          "mu": 1200,
+          "class": "soil",
+          "family": "mineral"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 4000,
+            "item": "brick_clay",
+            "count": 2,
+            "family": "mineral"
+          },
+          {
+            "process": "dig",
+            "fromClass": "soil",
+            "fromForm": "strata",
+            "class": "soil",
+            "form": "item",
+            "mu": 1200,
+            "item": "mortar_lime",
+            "count": 1,
+            "family": "mineral"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "soil",
+            "fromForm": "strata",
+            "class": "soil",
+            "form": "strata",
+            "mu": 1200,
+            "family": "mineral"
+          },
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 4000,
+            "family": "mineral"
+          }
+        ]
+      },
+      "catalogNotApplied": [
+        "quarry and mine return the bricks and become rubble (D-CATALOG-YIELD)"
+      ],
+      "disagreement": [],
+      "assembly": "brick"
+    },
+    "wall_ashlar": {
+      "massless": false,
+      "massMu": 7200,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "soil",
+          "family": "mineral",
+          "mu": 1200,
+          "form": "strata"
+        },
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 6000
+        }
+      ],
+      "bill": [
+        {
+          "item": "mortar_lime",
+          "count": 1,
+          "mu": 1200,
+          "class": "soil",
+          "family": "mineral"
+        },
+        {
+          "item": "stone_block",
+          "count": 2,
+          "mu": 6000,
+          "class": "stone",
+          "family": "mineral"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "dig",
+            "fromClass": "soil",
+            "fromForm": "strata",
+            "class": "soil",
+            "form": "item",
+            "mu": 1200,
+            "item": "mortar_lime",
+            "count": 1,
+            "family": "mineral"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 6000,
+            "item": "stone_block",
+            "count": 2,
+            "family": "mineral"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "soil",
+            "fromForm": "strata",
+            "class": "soil",
+            "form": "strata",
+            "mu": 1200,
+            "family": "mineral"
+          },
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 6000,
+            "family": "mineral"
+          }
+        ]
+      },
+      "catalogNotApplied": [
+        "quarry and mine return the blocks and become rubble (D-CATALOG-YIELD)"
+      ],
+      "disagreement": [],
+      "assembly": "ashlar"
+    },
+    "stockpile": {
+      "massless": true,
+      "massMu": 0,
+      "massStatus": "PM_DEFAULT",
+      "reason": "A stockpile is a designation of ground. The catalogue build consumes no items.",
+      "lines": [],
+      "bill": [],
+      "yield": {
+        "postings": []
+      },
+      "collapse": {
+        "postings": []
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "farm_plot": {
+      "massless": true,
+      "massMu": 0,
+      "massStatus": "PM_DEFAULT",
+      "reason": "A farm plot marks soil that is already in the strata. The catalogue places no items.",
+      "lines": [],
+      "bill": [],
+      "yield": {
+        "postings": []
+      },
+      "collapse": {
+        "postings": []
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "bridge": {
+      "massless": false,
+      "massMu": 32000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 32000
+        }
+      ],
+      "bill": [
+        {
+          "item": "log",
+          "count": 4,
+          "mu": 32000,
+          "class": "wood",
+          "family": "organic"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 32000,
+            "item": "log",
+            "count": 4,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 32000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 4
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [
+        "D-OBJECT-VOXEL"
+      ],
+      "assembly": "bridge_deck",
+      "reason": "The catalogue object has no build bill. Four logs is a PM default, not one bridge_deck voxel (D-OBJECT-VOXEL)."
+    },
+    "well": {
+      "massless": false,
+      "massMu": 60000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 60000
+        }
+      ],
+      "bill": [
+        {
+          "item": "stone",
+          "count": 4,
+          "mu": 60000,
+          "class": "stone",
+          "family": "mineral"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 60000,
+            "item": "stone",
+            "count": 4,
+            "family": "mineral"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 60000,
+            "family": "mineral"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [
+        "D-OBJECT-VOXEL"
+      ],
+      "reason": "The catalogue object has no build bill. Four stone is a PM default for the lining. Water in the well is fluid du, not part of this mass."
+    },
+    "stump": {
+      "massless": false,
+      "massMu": 8000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 8000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "item": "log",
+            "count": 1,
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "item": "log",
+            "count": 1,
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "oak": {
+      "massless": false,
+      "massMu": 32000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 32000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 24000,
+            "item": "log",
+            "count": 3,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 24000,
+            "item": "log",
+            "count": 3,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [
+        "D-TREE-CLASS"
+      ],
+      "treeNote": "D-TREE-CLASS"
+    },
+    "birch": {
+      "massless": false,
+      "massMu": 24000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 24000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "item": "log",
+            "count": 2,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "item": "log",
+            "count": 2,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [
+        "D-TREE-CLASS"
+      ],
+      "treeNote": "D-TREE-CLASS"
+    },
+    "pine": {
+      "massless": false,
+      "massMu": 32000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 32000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 24000,
+            "item": "log",
+            "count": 3,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 24000,
+            "item": "log",
+            "count": 3,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [
+        "D-TREE-CLASS"
+      ],
+      "treeNote": "D-TREE-CLASS"
+    },
+    "fir_snow": {
+      "massless": false,
+      "massMu": 32000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 32000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 24000,
+            "item": "log",
+            "count": 3,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 24000,
+            "item": "log",
+            "count": 3,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [
+        "D-TREE-CLASS"
+      ],
+      "treeNote": "D-TREE-CLASS"
+    },
+    "fruit_tree_bare": {
+      "massless": false,
+      "massMu": 32000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 32000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 24000,
+            "item": "log",
+            "count": 3,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 24000,
+            "item": "log",
+            "count": 3,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [
+        "D-TREE-CLASS"
+      ],
+      "treeNote": "D-TREE-CLASS"
+    },
+    "fruit_tree": {
+      "massless": false,
+      "massMu": 32900,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 900
+        },
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 32000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 900,
+            "item": "fruit",
+            "count": 3,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 32000,
+            "object": "fruit_tree_bare",
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 900,
+            "family": "organic"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 32000,
+            "family": "organic",
+            "debrisMaterial": "broken_timber",
+            "disagreement": "D-WOOD-COLLAPSE",
+            "item": "log",
+            "count": 4
+          }
+        ]
+      },
+      "catalogNotApplied": [
+        "see disagreements"
+      ],
+      "disagreement": [
+        "D-CATALOG-YIELD",
+        "D-TREE-CLASS"
+      ],
+      "treeNote": "D-TREE-CLASS"
+    },
+    "tree_savanna": {
+      "massless": false,
+      "massMu": 24000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 24000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "item": "log",
+            "count": 2,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "item": "log",
+            "count": 2,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [
+        "D-TREE-CLASS"
+      ],
+      "treeNote": "D-TREE-CLASS"
+    },
+    "tree_swamp": {
+      "massless": false,
+      "massMu": 24000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 24000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "item": "log",
+            "count": 2,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "item": "log",
+            "count": 2,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [
+        "D-TREE-CLASS"
+      ],
+      "treeNote": "D-TREE-CLASS"
+    },
+    "mangrove": {
+      "massless": false,
+      "massMu": 24000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 24000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "item": "log",
+            "count": 2,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 16000,
+            "item": "log",
+            "count": 2,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [
+        "D-TREE-CLASS"
+      ],
+      "treeNote": "D-TREE-CLASS"
+    },
+    "tree_tropical": {
+      "massless": false,
+      "massMu": 40000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 40000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 32000,
+            "item": "log",
+            "count": 4,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 32000,
+            "item": "log",
+            "count": 4,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [
+        "D-TREE-CLASS"
+      ],
+      "treeNote": "D-TREE-CLASS"
+    },
+    "palm": {
+      "massless": false,
+      "massMu": 16000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 16000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "item": "log",
+            "count": 1,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "item": "log",
+            "count": 1,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [
+        "D-TREE-CLASS"
+      ],
+      "treeNote": "D-TREE-CLASS"
+    },
+    "dead_tree": {
+      "massless": false,
+      "massMu": 20000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 20000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 4000,
+            "item": "firewood",
+            "count": 2,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "item": "log",
+            "count": 1,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 4000,
+            "item": "firewood",
+            "count": 2,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "item": "log",
+            "count": 1,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [
+        "D-TREE-CLASS"
+      ],
+      "treeNote": "D-TREE-CLASS"
+    },
+    "tree_cursed": {
+      "massless": false,
+      "massMu": 16000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 16000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "item": "log",
+            "count": 1,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 8000,
+            "item": "log",
+            "count": 1,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [
+        "D-TREE-CLASS"
+      ],
+      "treeNote": "D-TREE-CLASS"
+    },
+    "berry_bush_bare": {
+      "massless": false,
+      "massMu": 200,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 200
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "object",
+            "mu": 200,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 200,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [],
+      "reason": "No catalogue yield. A small biomass residual, PM default."
+    },
+    "berry_bush": {
+      "massless": false,
+      "massMu": 400,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 400
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 200,
+            "item": "berries",
+            "count": 2,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "object",
+            "mu": 200,
+            "object": "berry_bush_bare",
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 400,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "bush": {
+      "massless": false,
+      "massMu": 400,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 400
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 400,
+            "item": "fiber",
+            "count": 2,
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 400,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "desert_shrub": {
+      "massless": false,
+      "massMu": 200,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 200
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 200,
+            "item": "fiber",
+            "count": 1,
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 200,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "snow_bush": {
+      "massless": false,
+      "massMu": 200,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 200
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 200,
+            "item": "fiber",
+            "count": 1,
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 200,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "cactus": {
+      "massless": false,
+      "massMu": 300,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 300
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 300,
+            "item": "fruit",
+            "count": 1,
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 300,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "cactus_tall": {
+      "massless": false,
+      "massMu": 400,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 400
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 400,
+            "item": "fiber",
+            "count": 2,
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 400,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "grass_tuft": {
+      "massless": false,
+      "massMu": 200,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 200
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 200,
+            "item": "fiber",
+            "count": 1,
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 200,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "reeds": {
+      "massless": false,
+      "massMu": 1000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 1000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 1000,
+            "item": "straw",
+            "count": 2,
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 1000,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "flowers": {
+      "massless": false,
+      "massMu": 100,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 100
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "object",
+            "mu": 100,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 100,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [],
+      "reason": "No catalogue yield. A small biomass residual, PM default."
+    },
+    "flowers_purple": {
+      "massless": false,
+      "massMu": 100,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 100
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "object",
+            "mu": 100,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 100,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [],
+      "reason": "No catalogue yield. A small biomass residual, PM default."
+    },
+    "flowers_blue": {
+      "massless": false,
+      "massMu": 100,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 100
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "object",
+            "mu": 100,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 100,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [],
+      "reason": "No catalogue yield. A small biomass residual, PM default."
+    },
+    "flowers_white": {
+      "massless": false,
+      "massMu": 100,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 100
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "object",
+            "mu": 100,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 100,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [],
+      "reason": "No catalogue yield. A small biomass residual, PM default."
+    },
+    "fern": {
+      "massless": false,
+      "massMu": 200,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 200
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 200,
+            "item": "fiber",
+            "count": 1,
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 200,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "lichen": {
+      "massless": false,
+      "massMu": 100,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 100
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "object",
+            "mu": 100,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 100,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [],
+      "reason": "No catalogue yield. A small biomass residual, PM default."
+    },
+    "wild_grain": {
+      "massless": false,
+      "massMu": 550,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 550
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 50,
+            "item": "seeds",
+            "count": 1,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 500,
+            "item": "straw",
+            "count": 1,
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 550,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "wheat_wild": {
+      "massless": false,
+      "massMu": 550,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 550
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 50,
+            "item": "seeds",
+            "count": 1,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 500,
+            "item": "straw",
+            "count": 1,
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 550,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "lily_pad": {
+      "massless": false,
+      "massMu": 100,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 100
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "object",
+            "mu": 100,
+            "family": "organic"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 100,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [],
+      "reason": "No catalogue yield. A small biomass residual, PM default."
+    },
+    "rocks_small": {
+      "massless": false,
+      "massMu": 30000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 30000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 30000,
+            "item": "stone",
+            "count": 2,
+            "family": "mineral",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 30000,
+            "family": "mineral"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "gravel": {
+      "massless": false,
+      "massMu": 15000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 15000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 15000,
+            "item": "stone",
+            "count": 1,
+            "family": "mineral",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 15000,
+            "family": "mineral"
+          }
+        ]
+      },
+      "catalogNotApplied": [
+        "see disagreements"
+      ],
+      "disagreement": [
+        "D-GRAVEL-OBJECT"
+      ],
+      "reason": "Booked as stone because the catalogue pick yields stone (D-GRAVEL-OBJECT)."
+    },
+    "granite_boulder": {
+      "massless": false,
+      "massMu": 90000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 90000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 60000,
+            "item": "stone",
+            "count": 4,
+            "family": "mineral",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "object",
+            "mu": 30000,
+            "object": "rocks_small",
+            "family": "mineral",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 90000,
+            "family": "mineral"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "ironstone": {
+      "massless": false,
+      "massMu": 69000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "fe_ore",
+          "family": "fe",
+          "mu": 24000
+        },
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 45000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "mine",
+            "fromClass": "fe_ore",
+            "fromForm": "object",
+            "class": "fe_ore",
+            "form": "item",
+            "mu": 24000,
+            "item": "ore_iron",
+            "count": 2,
+            "family": "fe",
+            "sameClass": true
+          },
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 15000,
+            "item": "stone",
+            "count": 1,
+            "family": "mineral",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "object",
+            "mu": 30000,
+            "object": "rocks_small",
+            "family": "mineral",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "mine",
+            "fromClass": "fe_ore",
+            "fromForm": "object",
+            "class": "fe_ore",
+            "form": "item",
+            "mu": 24000,
+            "family": "fe",
+            "sameClass": true,
+            "item": "ore_iron",
+            "count": 2
+          },
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 45000,
+            "family": "mineral"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "copper_outcrop": {
+      "massless": false,
+      "massMu": 65000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "cu_ore",
+          "family": "cu",
+          "mu": 20000
+        },
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 45000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "mine",
+            "fromClass": "cu_ore",
+            "fromForm": "object",
+            "class": "cu_ore",
+            "form": "item",
+            "mu": 20000,
+            "item": "ore_copper",
+            "count": 2,
+            "family": "cu",
+            "sameClass": true
+          },
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 15000,
+            "item": "stone",
+            "count": 1,
+            "family": "mineral",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "object",
+            "mu": 30000,
+            "object": "rocks_small",
+            "family": "mineral",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "mine",
+            "fromClass": "cu_ore",
+            "fromForm": "object",
+            "class": "cu_ore",
+            "form": "item",
+            "mu": 20000,
+            "family": "cu",
+            "sameClass": true,
+            "item": "ore_copper",
+            "count": 2
+          },
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 45000,
+            "family": "mineral"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "gold_outcrop": {
+      "massless": false,
+      "massMu": 45100,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "au_ore",
+          "family": "au",
+          "mu": 100
+        },
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 45000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "mine",
+            "fromClass": "au_ore",
+            "fromForm": "object",
+            "class": "au_ore",
+            "form": "item",
+            "mu": 100,
+            "family": "au",
+            "sameClass": true,
+            "gap": "D-AU-ORE-ITEM",
+            "note": "No au_ore item in the catalogue. The mine row's only output form is item."
+          },
+          {
+            "process": "smelt",
+            "fromClass": "au_ore",
+            "fromForm": "item",
+            "class": "au_metal",
+            "form": "item",
+            "mu": 100,
+            "item": "gold",
+            "count": 1,
+            "family": "au",
+            "path": [
+              "mine",
+              "smelt"
+            ],
+            "disagreement": "D-GOLD-NUGGET"
+          },
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 15000,
+            "item": "stone",
+            "count": 1,
+            "family": "mineral"
+          },
+          {
+            "process": "identity",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "object",
+            "mu": 30000,
+            "object": "rocks_small",
+            "family": "mineral"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "mine",
+            "fromClass": "au_ore",
+            "fromForm": "object",
+            "class": "au_ore",
+            "form": "item",
+            "mu": 100,
+            "family": "au",
+            "sameClass": true,
+            "gap": "D-AU-ORE-ITEM",
+            "note": "No au_ore item in the catalogue. The mine row's only output form is item."
+          },
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 45000,
+            "family": "mineral"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [
+        "D-GOLD-NUGGET"
+      ]
+    },
+    "crystal_small": {
+      "massless": false,
+      "massMu": 50,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "gem",
+          "family": "gem",
+          "mu": 50
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "unset",
+            "fromClass": "gem",
+            "fromForm": "object",
+            "class": "gem",
+            "form": "item",
+            "mu": 50,
+            "item": "gem_rough",
+            "count": 1,
+            "family": "gem",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "unset",
+            "fromClass": "gem",
+            "fromForm": "object",
+            "class": "gem",
+            "form": "item",
+            "mu": 50,
+            "family": "gem",
+            "item": "gem_rough",
+            "count": 1
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "crystal": {
+      "massless": false,
+      "massMu": 150,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "gem",
+          "family": "gem",
+          "mu": 150
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "unset",
+            "fromClass": "gem",
+            "fromForm": "object",
+            "class": "gem",
+            "form": "item",
+            "mu": 100,
+            "item": "gem_rough",
+            "count": 2,
+            "family": "gem",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "gem",
+            "fromForm": "object",
+            "class": "gem",
+            "form": "object",
+            "mu": 50,
+            "object": "crystal_small",
+            "family": "gem",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "unset",
+            "fromClass": "gem",
+            "fromForm": "object",
+            "class": "gem",
+            "form": "item",
+            "mu": 150,
+            "family": "gem",
+            "item": "gem_rough",
+            "count": 3
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "bones_pile": {
+      "massless": false,
+      "massMu": 1000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 1000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 1000,
+            "item": "bone",
+            "count": 2,
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 1000,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "rubble": {
+      "massless": false,
+      "massMu": 30000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "rubble",
+          "family": "mineral",
+          "mu": 30000,
+          "form": "strata"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "rubble",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 30000,
+            "family": "mineral",
+            "note": "Catalogue yields stone. Not applied (D-RUBBLE-OBJECT). The prop is loose strata; rubble has no object form. No rubble item. The mass stays loose rubble strata (SIM.40.01 §9.2 row 8)."
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "rubble",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 30000,
+            "family": "mineral"
+          }
+        ]
+      },
+      "catalogNotApplied": [
+        "catalogue yield is stone x 2"
+      ],
+      "disagreement": [
+        "D-RUBBLE-OBJECT"
+      ],
+      "reason": "Mass number uses the catalogue stone count as a yardstick. The class stays rubble."
+    },
+    "rubble_pillar": {
+      "massless": false,
+      "massMu": 45000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "rubble",
+          "family": "mineral",
+          "mu": 45000,
+          "form": "strata"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "rubble",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 45000,
+            "family": "mineral",
+            "note": "Catalogue yields stone. Not applied (D-RUBBLE-OBJECT). The prop is loose strata; rubble has no object form. No rubble item. The mass stays loose rubble strata (SIM.40.01 §9.2 row 8)."
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "rubble",
+            "fromForm": "strata",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 45000,
+            "family": "mineral"
+          }
+        ]
+      },
+      "catalogNotApplied": [
+        "catalogue yield is stone x 3"
+      ],
+      "disagreement": [
+        "D-RUBBLE-OBJECT"
+      ],
+      "reason": "Mass number uses the catalogue stone count as a yardstick. The class stays rubble."
+    },
+    "glow_caps": {
+      "massless": false,
+      "massMu": 200,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 200
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 200,
+            "item": "mushroom",
+            "count": 2,
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 200,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "cave_mushrooms": {
+      "massless": false,
+      "massMu": 200,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 200
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 200,
+            "item": "mushroom",
+            "count": 2,
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 200,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "tower_cap": {
+      "massless": false,
+      "massMu": 32000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "wood",
+          "family": "organic",
+          "mu": 32000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 24000,
+            "item": "log",
+            "count": 3,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "item",
+            "mu": 24000,
+            "item": "log",
+            "count": 3,
+            "family": "organic",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "wood",
+            "fromForm": "object",
+            "class": "wood",
+            "form": "object",
+            "mu": 8000,
+            "object": "stump",
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [
+        "D-TREE-CLASS"
+      ],
+      "treeNote": "D-TREE-CLASS"
+    },
+    "cave_moss": {
+      "massless": false,
+      "massMu": 400,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 400
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 400,
+            "item": "fiber",
+            "count": 2,
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 400,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "spore_reeds": {
+      "massless": false,
+      "massMu": 1000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 1000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 1000,
+            "item": "straw",
+            "count": 2,
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 1000,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "stalagmite": {
+      "massless": false,
+      "massMu": 75000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "stone",
+          "family": "mineral",
+          "mu": 75000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "salvage",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "item",
+            "mu": 45000,
+            "item": "stone",
+            "count": 3,
+            "family": "mineral",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "stone",
+            "form": "object",
+            "mu": 30000,
+            "object": "rocks_small",
+            "family": "mineral",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "break",
+            "fromClass": "stone",
+            "fromForm": "object",
+            "class": "rubble",
+            "form": "strata",
+            "mu": 75000,
+            "family": "mineral"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "crystal_spire": {
+      "massless": false,
+      "massMu": 150,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "gem",
+          "family": "gem",
+          "mu": 150
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "unset",
+            "fromClass": "gem",
+            "fromForm": "object",
+            "class": "gem",
+            "form": "item",
+            "mu": 100,
+            "item": "gem_rough",
+            "count": 2,
+            "family": "gem",
+            "sameClass": false
+          },
+          {
+            "process": "identity",
+            "fromClass": "gem",
+            "fromForm": "object",
+            "class": "gem",
+            "form": "object",
+            "mu": 50,
+            "object": "crystal_small",
+            "family": "gem",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "unset",
+            "fromClass": "gem",
+            "fromForm": "object",
+            "class": "gem",
+            "form": "item",
+            "mu": 150,
+            "family": "gem",
+            "item": "gem_rough",
+            "count": 3
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "sapling": {
+      "massless": false,
+      "massMu": 200,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 200
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 200,
+            "item": "fiber",
+            "count": 1,
+            "family": "organic",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 200,
+            "family": "organic"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    },
+    "skeleton": {
+      "massless": false,
+      "massMu": 1000,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "biomass",
+          "family": "organic",
+          "mu": 1000
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "harvest",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "biomass",
+            "form": "item",
+            "mu": 1000,
+            "item": "bone",
+            "count": 2,
+            "family": "organic",
+            "disagreement": "D-BONE"
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "litter",
+            "fromClass": "biomass",
+            "fromForm": "object",
+            "class": "humus",
+            "form": "strata",
+            "mu": 1000,
+            "family": "organic",
+            "disagreement": "D-BONE"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": [
+        "D-BONE"
+      ],
+      "reason": "No catalogue yield. Two bone, the same count as bones_pile, is a PM default."
+    },
+    "clay_deposit": {
+      "massless": false,
+      "massMu": 4500,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "soil",
+          "family": "mineral",
+          "mu": 4500,
+          "form": "strata"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "dig",
+            "fromClass": "soil",
+            "fromForm": "strata",
+            "class": "soil",
+            "form": "item",
+            "mu": 4500,
+            "item": "clay",
+            "count": 3,
+            "family": "mineral",
+            "note": "Soil has no object form. The deposit is strata."
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "soil",
+            "fromForm": "strata",
+            "class": "soil",
+            "form": "strata",
+            "mu": 4500,
+            "family": "mineral"
+          }
+        ]
+      },
+      "catalogNotApplied": [
+        "gather yields clay x 2 (D-CLAY-ACTIONS)"
+      ],
+      "disagreement": [
+        "D-CLAY-ACTIONS"
+      ],
+      "reason": "Quarry is the applied removal. Gather is the smaller catalogue action."
+    },
+    "sand_deposit": {
+      "massless": false,
+      "massMu": 4500,
+      "massStatus": "PM_DEFAULT_UNCONFIRMED",
+      "lines": [
+        {
+          "class": "soil",
+          "family": "mineral",
+          "mu": 4500,
+          "form": "strata"
+        }
+      ],
+      "yield": {
+        "postings": [
+          {
+            "process": "dig",
+            "fromClass": "soil",
+            "fromForm": "strata",
+            "class": "soil",
+            "form": "item",
+            "mu": 4500,
+            "item": "sand",
+            "count": 3,
+            "family": "mineral",
+            "sameClass": false
+          }
+        ]
+      },
+      "collapse": {
+        "postings": [
+          {
+            "process": "identity",
+            "fromClass": "soil",
+            "fromForm": "strata",
+            "class": "soil",
+            "form": "strata",
+            "mu": 4500,
+            "family": "mineral"
+          }
+        ]
+      },
+      "catalogNotApplied": [],
+      "disagreement": []
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "expect": "E_LEDGER_CLASS",
+  "steps": [
+    {
+      "op": "set",
+      "path": "masses.objects.wall_stone.lines.0.class",
+      "value": "nope"
+    }
+  ]
+}

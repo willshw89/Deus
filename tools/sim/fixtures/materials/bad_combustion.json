@@ -1,0 +1,10 @@
+{
+  "expect": "E_COMBUSTION_MASS",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=wood].combustion.ledger.charPerMille",
+      "value": 1
+    }
+  ]
+}

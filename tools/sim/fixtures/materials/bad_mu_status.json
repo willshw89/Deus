@@ -1,0 +1,10 @@
+{
+  "expect": "E_MU_STATUS",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.mu.status",
+      "value": "SOURCED"
+    }
+  ]
+}

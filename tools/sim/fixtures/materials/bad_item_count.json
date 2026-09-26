@@ -1,0 +1,10 @@
+{
+  "expect": "E_BOM",
+  "steps": [
+    {
+      "op": "set",
+      "path": "masses.objects.crystal_small.yield.postings.0.count",
+      "value": 2
+    }
+  ]
+}

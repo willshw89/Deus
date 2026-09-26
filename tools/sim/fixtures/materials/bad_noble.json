@@ -1,0 +1,10 @@
+{
+  "expect": "E_METAL_RECLAIM",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=gold].reclaim.ledgerClass",
+      "value": "fe_trace"
+    }
+  ]
+}

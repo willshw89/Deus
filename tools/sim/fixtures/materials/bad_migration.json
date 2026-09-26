@@ -1,0 +1,10 @@
+{
+  "expect": "E_MIGRATION",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.geometry.legacyHalfSlice.implemented",
+      "value": true
+    }
+  ]
+}

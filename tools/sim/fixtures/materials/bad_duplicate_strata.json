@@ -1,0 +1,10 @@
+{
+  "expect": "E_ID",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=sand].strataId",
+      "value": 32
+    }
+  ]
+}

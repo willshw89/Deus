@@ -1,0 +1,9 @@
+{
+  "expect": "E_MASSLESS",
+  "steps": [
+    {
+      "op": "delete",
+      "path": "masses.objects.stockpile.reason"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "expect": "E_MU_STATUS",
+  "steps": [
+    {
+      "op": "delete",
+      "path": "masses.muRef"
+    }
+  ]
+}

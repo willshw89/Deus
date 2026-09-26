@@ -1,0 +1,18 @@
+{
+  "expect": "E_ORE_OUTPUT",
+  "steps": [
+    {
+      "op": "push",
+      "path": "catalogue.materials[id=granite].yield.postings",
+      "value": {
+        "process": "mine",
+        "fromClass": "fe_ore",
+        "fromForm": "strata",
+        "class": "fe_ore",
+        "form": "item",
+        "mu": 1,
+        "sameClass": true
+      }
+    }
+  ]
+}

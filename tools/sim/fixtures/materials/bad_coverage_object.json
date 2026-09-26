@@ -1,0 +1,9 @@
+{
+  "expect": "E_COVERAGE",
+  "steps": [
+    {
+      "op": "delete",
+      "path": "masses.objects.oak"
+    }
+  ]
+}

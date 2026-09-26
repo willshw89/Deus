@@ -1,0 +1,14 @@
+{
+  "expect": "E_UNIT",
+  "steps": [
+    {
+      "op": "set",
+      "path": "catalogue.materials[id=ice].yield.postings.0.mu",
+      "value": 1
+    },
+    {
+      "op": "delete",
+      "path": "catalogue.materials[id=ice].yield.postings.0.du"
+    }
+  ]
+}
