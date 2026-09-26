@@ -1,0 +1,26 @@
+=== bench_render_layers: scenario stress, 2 run(s), measuring 5255f1a5 ===
+  run 1: snapshot C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_bench_stress_5255f1a5_8632_1790437181253
+  run 1: BENCH stress_day_30s: 336 frames in 30032 ms, frame median 73.97 ms (p95 221.01, worst 341.14), tick median 72.06 ms, draw calls median 93, peak {"unitsOnScreenLevel":27,"unitsOnLowerPlanes":194,"lowerPlaneSprites":363,"projectilesAlive":64,"rmmzAnimationsAlive":23,"placeholderImpactsAlive":45,"effectSpritesAlive":110,"unitsDrawn":221}
+  run 1: BENCH stress_night_30s: 304 frames in 30043 ms, frame median 90.055 ms (p95 201.165, worst 311.825), tick median 88.46 ms, draw calls median 95, peak {"unitsOnScreenLevel":27,"unitsOnLowerPlanes":194,"lowerPlaneSprites":349,"projectilesAlive":52,"rmmzAnimationsAlive":22,"placeholderImpactsAlive":37,"effectSpritesAlive":97,"unitsDrawn":221}
+  run 1: PASS bench_layers.bench_finished - 2 phase(s), 0 switch(es) written to C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_bench_stress_5255f1a5_8632_1790437181253\test_output\bench.json
+  run 1: PASS bench_layers.no_errors - none
+  run 1: RESULT: 2 passed, 0 failed (exit 0)
+  run 1: machine load loaded: CPU overall median 30.4 % (min 14.1, max 58, 106 samples); AI workers 5 at start, 5 at the end; other nw.exe 0 / max 0 / 0
+  run 2: snapshot C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_bench_stress_5255f1a5_8632_1790437289885
+  run 2: BENCH stress_day_30s: 332 frames in 30114 ms, frame median 72.385 ms (p95 210.715, worst 325.94), tick median 70.18 ms, draw calls median 205, peak {"unitsOnScreenLevel":75,"unitsOnLowerPlanes":148,"lowerPlaneSprites":336,"projectilesAlive":65,"rmmzAnimationsAlive":58,"placeholderImpactsAlive":32,"effectSpritesAlive":133,"unitsDrawn":223}
+  run 2: BENCH stress_night_30s: 273 frames in 30122 ms, frame median 87.31 ms (p95 254.93, worst 485.12), tick median 85.35 ms, draw calls median 202, peak {"unitsOnScreenLevel":75,"unitsOnLowerPlanes":148,"lowerPlaneSprites":328,"projectilesAlive":52,"rmmzAnimationsAlive":58,"placeholderImpactsAlive":27,"effectSpritesAlive":121,"unitsDrawn":223}
+  run 2: PASS bench_layers.bench_finished - 2 phase(s), 0 switch(es) written to C:\Users\snewt\AppData\Local\Temp\uf_snapshots\lanek_bench_stress_5255f1a5_8632_1790437289885\test_output\bench.json
+  run 2: PASS bench_layers.no_errors - none
+  run 2: RESULT: 2 passed, 0 failed (exit 0)
+  run 2: machine load quiet: CPU overall median 24.8 % (min 12, max 54, 106 samples); AI workers 5 at start, 5 at the end; other nw.exe 0 / max 0 / 0
+wrote tasks\WG.00.09b\lane-k\perf\stress_baseline_5255f1a5.json (2 run(s), 2 new)
+  run 1 stress_day_30s             frame median   73.97 p95  221.01 worst   341.14 ms (13.519 fps at the median)  tick 72.06 ms  draws 93  CPU 22.8/31.2/46.7 %  peak {"unitsOnScreenLevel":27,"unitsOnLowerPlanes":194,"lowerPlaneSprites":363,"projectilesAlive":64,"rmmzAnimationsAlive":23,"placeholderImpactsAlive":45,"effectSpritesAlive":110,"unitsDrawn":221}
+  run 1 stress_night_30s           frame median  90.055 p95 201.165 worst  311.825 ms (11.104 fps at the median)  tick 88.46 ms  draws 95  CPU 14.1/23.1/37.5 %  peak {"unitsOnScreenLevel":27,"unitsOnLowerPlanes":194,"lowerPlaneSprites":349,"projectilesAlive":52,"rmmzAnimationsAlive":22,"placeholderImpactsAlive":37,"effectSpritesAlive":97,"unitsDrawn":221}
+  run 1 profile stress_day: 12954 samples, 6741.6 ms over 120 updates; top scripts (self) DEUS_Objects.js 29.694, DEUS_World.js 6.438, DEUS_Floors.js 2.995, wasm  2.206, (garbage collector) 2.004 ms/update
+  run 1 profile stress_night: 11863 samples, 6165.3 ms over 120 updates; top scripts (self) DEUS_Objects.js 26.206, DEUS_World.js 5.408, DEUS_Floors.js 2.719, (garbage collector) 2.38, wasm  2.362 ms/update
+  run 2 stress_day_30s             frame median  72.385 p95 210.715 worst   325.94 ms (13.815 fps at the median)  tick 70.18 ms  draws 205  CPU 15.2/24.4/46.8 %  peak {"unitsOnScreenLevel":75,"unitsOnLowerPlanes":148,"lowerPlaneSprites":336,"projectilesAlive":65,"rmmzAnimationsAlive":58,"placeholderImpactsAlive":32,"effectSpritesAlive":133,"unitsDrawn":223}
+  run 2 stress_night_30s           frame median   87.31 p95  254.93 worst   485.12 ms (11.453 fps at the median)  tick 85.35 ms  draws 202  CPU 14.4/23.1/48.4 %  peak {"unitsOnScreenLevel":75,"unitsOnLowerPlanes":148,"lowerPlaneSprites":328,"projectilesAlive":52,"rmmzAnimationsAlive":58,"placeholderImpactsAlive":27,"effectSpritesAlive":121,"unitsDrawn":223}
+  run 2 profile stress_day: 15080 samples, 7849.2 ms over 120 updates; top scripts (self) DEUS_Objects.js 30.696, DEUS_World.js 9.928, DEUS_Floors.js 3.287, wasm  2.693, (garbage collector) 2.586 ms/update
+  run 2 profile stress_night: 14149 samples, 7332.5 ms over 120 updates; top scripts (self) DEUS_Objects.js 28.858, DEUS_World.js 10.38, DEUS_Floors.js 2.984, wasm  2.535, (garbage collector) 2.327 ms/update
+exit 0
+EXIT=0

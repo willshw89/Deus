@@ -1,0 +1,13 @@
+You are the primary writer (Claude) for lane-aa (Task WG.00.17: make the Z range one configurable setting, expand to 32 layers -16..+15 with mandatory sparse storage in memory and saves, 2-ft strata / 10-ft layers / 5-ft squares, 9-layer test mode kept).
+Read tasks/WG.00.17/lane-aa/BRIEF.md carefully and follow every instruction in it. The BRIEF is the authority: its allowedPaths, Owner facts, scope phases, tests, performance budget, acceptance criteria and standing rules govern this run.
+Key rules (from the BRIEF):
+1. NO ART GENERATION BY ANYONE (DEC-007). Never generate, draw, edit, request or integrate art.
+2. Write only inside the BRIEF's allowedPaths (the 22 listed game/js/plugins files, only for Z-range / sparse-storage / new-layer generation / feet changes; the listed docs/systems files; tools/test_zrange.js; tools/zrange/**; tasks/WG.00.17/**). Never change game/js/plugins.js, DEUS_Test.js, the ledger, any gate tool (test_layer_render_flat.js, test_minimap.js, test_layer_switch_inplace.js, test_snapshot.js, bench_render_layers.js, run_tests.js, check_deus_syntax.js) or DEUS_Depth.js check code. If you need a file outside allowedPaths, write escalation.md, commit, push and stop.
+3. Owner facts are non-negotiable: 32 layers, default split -16..+15 held as data, 5-ft squares, 10-ft layers, 2-ft strata, sparse storage for memory and saves, DEC-011 1:1 with no filters, old 5-level saves load unchanged at -2..+2. Never answer an open Owner question (Q16, the lava rule, the band table); list them in REPORT.md.
+4. Keep the layers_flat (12), depth (27), minimap (24) and layer_switch_inplace (7) gates passing strictly and unchanged, at -16..+15 and at -4..+4, with provocations still caught. Meet the BRIEF's performance budget against a same-session base rerun, with machine load recorded.
+5. Run commands in the FOREGROUND. Never end your turn while background jobs or child processes are running. Commit early (WIP commits allowed on your branch). Heavy NW.js runs (run_tests, bench, provocations) only in throwaway clones under %TEMP%, never in the worktree; delete them before your final commit.
+6. Run every gate check in tasks/WG.00.17/lane-aa/lane.json before your final commit and paste its output in REPORT.md.
+7. Do not merge. Do not self-certify; an independent Grok review (launched later by the PM) decides.
+8. When finished, commit and then push your own branch: git push origin task/lane-aa. Never push any other branch, never main, never force, never set DEUS_INTEGRATOR. If the push is refused, say so in REPORT.md and stop.
+9. Your final output line must be exactly: FINAL SHA: <sha> (pasted from git rev-parse HEAD after the push).
+Commit messages start with '[claude] WG.00.17'.

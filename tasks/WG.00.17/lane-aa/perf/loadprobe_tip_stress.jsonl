@@ -1,0 +1,2 @@
+{"at":"2026-09-26T15:43:17.978Z","probeSeconds":30,"cpu":{"samples":29,"min":2.4,"median":28.5,"max":46.8},"aiWorkers":[5,5],"otherNwExe":[0,0],"quiet":false,"waitedSeconds":31}
+{"at":"2026-09-26T15:45:48.967Z","probeSeconds":30,"cpu":{"samples":29,"min":12.7,"median":17.7,"max":29.4},"aiWorkers":[5,5],"otherNwExe":[0,0],"quiet":true,"waitedSeconds":182}
