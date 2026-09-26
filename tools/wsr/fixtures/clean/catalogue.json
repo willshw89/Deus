@@ -1,6 +1,7 @@
 {
   "schemaVersion": "deus-art-catalogue/1.1.0",
   "tileSizePx": 48,
+  "geometry": { "path": "tools/wsr/fixtures/clean/geometry.json", "sha256": null },
   "about": "TEST_ fixture for tools/test_verify_world_state_registry.js: only the fields the checker reads (sheets, entries with id, category, family, sourceIds, slot, variants; biomes.forbidden). Not a full deus-art-catalogue/1.1.0 document. No image data.",
   "biomes": { "canonical": ["TEST"], "forbidden": ["SNOW"], "placeholders": [] },
   "sourceIdIndex": { "catalog": ["groundKinds:test_soil_dry", "groundKinds:test_trail", "items:test_log", "objects:test_boulder", "objects:test_campfire", "people:test_human", "underground:test_moss", "water:test_spring"] },

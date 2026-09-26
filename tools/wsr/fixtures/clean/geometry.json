@@ -1,0 +1,5 @@
+{
+  "about": "TEST_ fixture geometry for tools/test_verify_world_state_registry.js: only the dimensions the checker reads.",
+  "tilePx": 48,
+  "atlasMaxPx": 4096
+}

@@ -13,6 +13,7 @@
       "kinds": [
         "addendum"
       ],
+      "mayDisplayWorldState": true,
       "why": "TEST addendum families."
     },
     "CHARACTERS": {
@@ -21,6 +22,7 @@
         "brief",
         "ar"
       ],
+      "mayDisplayWorldState": false,
       "why": "TEST characters."
     },
     "EFFECTS": {
@@ -29,6 +31,7 @@
         "brief",
         "ar"
       ],
+      "mayDisplayWorldState": true,
       "why": "TEST effects."
     },
     "ITEMS": {
@@ -37,6 +40,7 @@
         "brief",
         "ar"
       ],
+      "mayDisplayWorldState": false,
       "why": "TEST items."
     }
   },

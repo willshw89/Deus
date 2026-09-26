@@ -53,7 +53,8 @@ function compileTool(src) {
 // ---------------------------------------------------------------- fixture workspaces
 
 function loadClean() {
-    const r = f => fs.readFileSync(path.join(CLEAN, f), 'utf8');
+    // CRLF folded, so the suite behaves the same in a CRLF checkout.
+    const r = f => fs.readFileSync(path.join(CLEAN, f), 'utf8').replace(/\r\n/g, '\n');
     const j = f => JSON.parse(r(f));
     const templates = {};
     for (const n of fs.readdirSync(path.join(CLEAN, 'templates')).sort()) templates[n] = JSON.parse(fs.readFileSync(path.join(CLEAN, 'templates', n), 'utf8'));
@@ -82,6 +83,7 @@ function writeWorkspace(ws) {
         a.push('--templates', path.join(dir, 'templates'));
     }
     ws.placements.forEach((p, i) => a.push('--placements', w(`placement_${i}.json`, p)));
+    if (!ws.placements.length && !ws.discover) a.push('--placements', 'none');
     return { dir, args: a };
 }
 
@@ -236,12 +238,23 @@ const CHECKS = [
     negative('neg_wsr03_map_target_unknown', 'WSR-03', 'MAP_TARGET_UNKNOWN', 'test_flame', ws => { ws.map.visualStates[0].target = { entryId: 'ALL_SHARED_EFFECT_FX-NOPE_V1_DEFAULT' }; }),
     negative('neg_wsr03_map_unused', 'WSR-03', 'MAP_UNUSED', 'test_unused', ws => { ws.map.visualStates.push({ visualStateId: 'test_unused', target: { entryId: 'ALL_SHARED_ITEM_TEST-LOG_V1_DEFAULT' }, status: 'PROPOSED', reason: 'TEST unused row.' }); }),
 
+    negative('neg_wsr03_optional_state_without_entry', 'WSR-03', 'NO_CATALOGUE_ENTRY', 'STATE_TEST_TRAIL', ws => setCell(ws, 'STATE_TEST_TRAIL', 'Visual State ID', '`test_trail_missing`')),
+    negative('neg_wsr03_optional_state_unknown_family', 'WSR-03', 'FAMILY_NOT_IN_CATALOGUE', 'FAM_TEST_UNKNOWN', ws => setCell(ws, 'STATE_TEST_TRAIL', 'Semantic Asset Family', '`FAM_TEST_UNKNOWN`')),
+    ['neg_wsr03_item_icon_does_not_display_a_state', T => {
+        const res = runCase(T, ws => setCell(ws, 'STATE_TEST_BOULDER', 'Visual State ID', '`test_log`'));
+        const f = findings(res).find(x => x.rule === 'WSR-03' && x.code === 'NO_CATALOGUE_ENTRY' && x.id === 'STATE_TEST_BOULDER');
+        assert(res.code === 1 && f && f.detail.includes('ALL_SHARED_ITEM_TEST-LOG_V1_DEFAULT (SOURCE:ITEM)'), `want NO_CATALOGUE_ENTRY naming the rejected item match; got ${summary(res)}`);
+        return 'WSR-03 NO_CATALOGUE_ENTRY STATE_TEST_BOULDER (item match rejected)';
+    }],
+
     // WSR-04
     negative('neg_wsr04_natural_slot_without_state', 'WSR-04', 'SLOT_NO_STATE', 'ATLAS_ALL_TEST_PROP_01:0003', ws => {
         ws.catalogue.entries.push({ id: 'SURFACE_SHARED_STONE_TEST-PEBBLE_V1_DEFAULT', category: 'STONE', family: 'SOURCE', sourceIds: { catalog: ['objects:test_pebble'] }, slot: { sheetId: 'ATLAS_ALL_TEST_PROP_01', slotId: 'ATLAS_ALL_TEST_PROP_01:0003', x: 96, y: 0, w: 48, h: 48 }, variants: { derivedFrom: null } });
         sidecar(ws, 'ATLAS_ALL_TEST_PROP_01').slots.push({ slotId: 'ATLAS_ALL_TEST_PROP_01:0003', entryId: 'SURFACE_SHARED_STONE_TEST-PEBBLE_V1_DEFAULT', x: 96, y: 0, w: 48, h: 48 });
     }),
-    negative('neg_wsr04_class_undeclared', 'WSR-04', 'SLOT_CLASS_UNDECLARED', 'SOURCE:FLORA', ws => { entry(ws, 'ALL_SHARED_ITEM_TEST-LOG_V1_DEFAULT').category = 'FLORA'; }),
+    negative('neg_wsr04_class_undeclared', 'WSR-04', 'SLOT_CLASS_UNDECLARED', 'ATLAS_ALL_TEST_PROP_01:0002', ws => { entry(ws, 'ALL_SHARED_ITEM_TEST-LOG_V1_DEFAULT').category = 'FLORA'; }),
+    negative('neg_wsr04_empty_source_id', 'WSR-04', 'SLOT_SOURCE_UNDECLARED', 'ATLAS_ALL_TEST_CHARACTER_01:0001', ws => { entry(ws, 'ALL_SHARED_CHARACTER_TEST-HUMAN_MALE_DEFAULT').sourceIds.brief = ['']; }),
+    negative('neg_wsr04_unknown_catalog_source', 'WSR-04', 'SLOT_SOURCE_UNDECLARED', 'ATLAS_ALL_TEST_PROP_01:0002', ws => { entry(ws, 'ALL_SHARED_ITEM_TEST-LOG_V1_DEFAULT').sourceIds.catalog = ['items:does_not_exist']; }),
     negative('neg_wsr04_non_world_slot_without_source', 'WSR-04', 'SLOT_SOURCE_UNDECLARED', 'ATLAS_ALL_TEST_CHARACTER_01:0001', ws => { entry(ws, 'ALL_SHARED_CHARACTER_TEST-HUMAN_MALE_DEFAULT').sourceIds.brief = []; }),
 
     // WSR-05
@@ -259,6 +272,7 @@ const CHECKS = [
     negative('neg_schema_visual_class_not_in_enum', 'WSR-SCHEMA', 'ENUM_INVALID', 'STATE_TEST_TRAIL', ws => setCell(ws, 'STATE_TEST_TRAIL', 'Visual Class', '`VISUAL_MANDATORY`')),
     negative('neg_schema_state_id_format', 'WSR-SCHEMA', 'STATE_ID_FORMAT', 'State_Test_Aquifer', ws => tableEdit(ws, t => { const i = t.row('STATE_TEST_AQUIFER'); t.lines[i] = t.lines[i].replace('`STATE_TEST_AQUIFER`', '`State_Test_Aquifer`'); })),
     negative('neg_schema_transition_unknown', 'WSR-SCHEMA', 'TRANSITION_UNKNOWN', 'STATE_TEST_SPRING', ws => setCell(ws, 'STATE_TEST_SPRING', 'Transition States', '`STATE_TEST_NOWHERE`')),
+    negative('neg_schema_required_string_empty', 'WSR-SCHEMA', 'VALUE_MISSING', 'STATE_TEST_SPRING', ws => setCell(ws, 'STATE_TEST_SPRING', 'Authoritative Source', '')),
     negative('neg_schema_boolean_invalid', 'WSR-SCHEMA', 'TYPE_INVALID', 'STATE_TEST_SPRING', ws => setCell(ws, 'STATE_TEST_SPRING', 'Visible', '`yes`')),
 
     // MANIFEST-TEMPLATE
@@ -277,12 +291,18 @@ const CHECKS = [
     negative('neg_mt_slot_on_unknown_sheet', 'MANIFEST-TEMPLATE', 'SLOT_SHEET_UNKNOWN', 'ATLAS_ALL_TEST_GONE_01:0001', ws => { const s = entry(ws, 'ALL_SHARED_ITEM_TEST-LOG_V1_DEFAULT').slot; s.sheetId = 'ATLAS_ALL_TEST_GONE_01'; s.slotId = 'ATLAS_ALL_TEST_GONE_01:0001'; }),
     negative('neg_mt_duplicate_template_slot', 'MANIFEST-TEMPLATE', 'DUPLICATE_TEMPLATE_SLOT', 'ATLAS_ALL_TEST_PROP_01:0002', ws => { sidecar(ws, 'ATLAS_ALL_TEST_CHARACTER_01').slots.push(Object.assign({}, tslot(ws, 'ATLAS_ALL_TEST_PROP_01:0002'))); }),
     negative('neg_mt_duplicate_entry_id', 'MANIFEST-TEMPLATE', 'DUPLICATE_ENTRY_ID', 'ALL_SHARED_ITEM_TEST-LOG_V1_DEFAULT', ws => { ws.catalogue.entries.push(Object.assign({}, entry(ws, 'ALL_SHARED_ITEM_TEST-LOG_V1_DEFAULT'), { slot: null })); }),
+    negative('neg_mt_slot_outside_its_sheet', 'MANIFEST-TEMPLATE', 'SLOT_OUTSIDE_SHEET', 'ATLAS_ALL_TEST_PROP_01:0002', ws => { entry(ws, 'ALL_SHARED_ITEM_TEST-LOG_V1_DEFAULT').slot.x = 180; tslot(ws, 'ATLAS_ALL_TEST_PROP_01:0002').x = 180; }),
+    negative('neg_mt_sheet_grid_not_tile', 'MANIFEST-TEMPLATE', 'SHEET_GRID_MISMATCH', 'ATLAS_ALL_TEST_PROP_01', ws => { ws.catalogue.sheets.find(s => s.sheetId === 'ATLAS_ALL_TEST_PROP_01').gridPx = 32; sidecar(ws, 'ATLAS_ALL_TEST_PROP_01').gridPx = 32; }),
+    negative('neg_mt_sheet_too_large', 'MANIFEST-TEMPLATE', 'SHEET_TOO_LARGE', 'ATLAS_ALL_TEST_PROP_01', ws => { ws.catalogue.sheets.find(s => s.sheetId === 'ATLAS_ALL_TEST_PROP_01').w = 4128; sidecar(ws, 'ATLAS_ALL_TEST_PROP_01').w = 4128; }),
+    negative('neg_mt_sidecar_not_json', 'MANIFEST-TEMPLATE', 'TEMPLATE_SIDECAR_INVALID', 'BROKEN.json', ws => { ws.templates['BROKEN.json'] = '{ "format": "deus-blank-template/1", '; }),
     negative('neg_mt_duplicate_catalogue_slot', 'MANIFEST-TEMPLATE', 'DUPLICATE_SLOT_ID', 'ATLAS_ALL_TEST_PROP_01:0002', ws => { entry(ws, 'ALL_SHARED_EFFECT_FX-FLAME_V1_DEFAULT').slot.slotId = 'ATLAS_ALL_TEST_PROP_01:0002'; }),
 
     // PLACED-IN-SLOT
     negative('neg_placed_region_outside_slot', 'PLACED-IN-SLOT', 'PLACED_OUTSIDE_SLOT', 'ATLAS_ALL_TEST_PROP_01:0002', ws => { ws.placements[0].filled[1].x = 96; }),
     negative('neg_placed_region_larger_than_slot', 'PLACED-IN-SLOT', 'PLACED_OUTSIDE_SLOT', 'ATLAS_SURFACE_TEST_TILE_01:0006', ws => { ws.placements[0].filled[0].h = 144; }),
     negative('neg_placed_unknown_slot_outside', 'PLACED-IN-SLOT', 'PLACED_OUTSIDE_SLOT', 'ATLAS_ALL_TEST_PROP_01@144,0,48x48', ws => { const f = ws.placements[0].filled[1]; delete f.slotId; f.x = 144; }),
+    negative('neg_placed_unknown_slot_id_no_fallback', 'PLACED-IN-SLOT', 'PLACED_SLOT_UNKNOWN', 'ATLAS_ALL_TEST_PROP_01:0009', ws => { ws.placements[0].filled[1].slotId = 'ATLAS_ALL_TEST_PROP_01:0009'; }),
+    negative('neg_placed_entry_not_slot_owner', 'PLACED-IN-SLOT', 'PLACED_ENTRY_MISMATCH', 'ATLAS_ALL_TEST_PROP_01:0002', ws => { ws.placements[0].filled[1].entryId = 'SURFACE_SHARED_STONE_TEST-BOULDER_V1_DEFAULT'; }),
     negative('neg_placed_ledger_unknown_id', 'PLACED-IN-SLOT', 'LEDGER_ID_UNKNOWN', 'ATLAS_ALL_TEST_PROP_01:0007', ws => { ws.approvals = ws.approvals.replace('`ATLAS_ALL_TEST_PROP_01:0002`', '`ATLAS_ALL_TEST_PROP_01:0007`'); }),
     negative('neg_placed_ledger_malformed', 'PLACED-IN-SLOT', 'LEDGER_MALFORMED', 'approvals.md', ws => { ws.approvals = ws.approvals.replace('| 2026-09-26 | YEA | `ATLAS_ALL', '| 2026-13-45 | YEA | `ATLAS_ALL'); }),
     negative('neg_placed_report_invalid', 'PLACED-IN-SLOT', 'PLACEMENT_REPORT_INVALID', 'placement_0.json', ws => { ws.placements[0].schema = 'deus-art-placement/0'; }),
@@ -340,6 +360,26 @@ const CHECKS = [
         const res = runCase(T, ws => { ws.baseline.entries.push(e, Object.assign({}, e)); });
         assert(res.code === 2 && res.lines.some(l => /duplicate entry/.test(l)), `want exit 2 (duplicate); got ${res.lines.join(' / ')}`);
         return 'exit 2';
+    }],
+
+    ['baseline_value_is_part_of_the_key', T => {
+        const mut = ws => setCell(ws, 'STATE_TEST_TRAIL', 'System', '`CREATURE_ECOLOGY`');
+        const entryFor = value => ({ rule: 'WSR-01', code: 'SYSTEM_NOT_IN_ENUM', id: 'STATE_TEST_TRAIL', value, reason: 'TEST: baselined with a system value.' });
+        const same = runCase(T, ws => { mut(ws); ws.baseline.entries.push(entryFor('CREATURE_ECOLOGY')); });
+        const other = runCase(T, ws => { mut(ws); ws.baseline.entries.push(entryFor('OTHER_SYSTEM')); });
+        assert(same.code === 0, `the same value must match; got ${same.lines.slice(-1)}`);
+        assert(other.code === 1 && other.lines.some(l => l.startsWith('NEW WSR-01 SYSTEM_NOT_IN_ENUM STATE_TEST_TRAIL [CREATURE_ECOLOGY]')) && other.lines.some(l => l.startsWith('STALE WSR-01 SYSTEM_NOT_IN_ENUM STATE_TEST_TRAIL [OTHER_SYSTEM]')), `a different value must be NEW + STALE; got ${other.lines.slice(-3).join(' / ')}`);
+        return 'same value: exit 0; other value: NEW + STALE, exit 1';
+    }],
+    ['scope_value_not_in_schema_enum', T => {
+        const res = runCase(T, ws => { ws.scope.artRequiredClasses = ['VISUAL_REQUIRD', 'VFX_REQUIRED']; });
+        assert(res.code === 2 && res.lines.some(l => l.includes('artRequiredClasses VISUAL_REQUIRD')), `want exit 2 naming the typo; got ${res.lines.join(' / ')}`);
+        return 'exit 2';
+    }],
+    ['map_of_wrong_shape_refused', T => {
+        const res = runCase(T, ws => { ws.map.visualStates = {}; });
+        assert(res.code === 2 && res.lines.some(l => /visual-state map .* is invalid: visualStates must be an array/.test(l)), `want exit 2 with a message; got ${res.lines.join(' / ')}`);
+        return 'exit 2, no crash';
     }],
 
     // Report, --check, determinism
@@ -431,6 +471,22 @@ const CHECKS = [
         assert(has(res, 'WSR-01', 'SYSTEM_NOT_IN_ENUM', 'STATE_TEST_EXTRA') && has(res, 'WSR-SCHEMA', 'COLUMN_MISSING', 'description'), `the second table's row or its missing columns were not checked; ${summary(res)}`);
         return '2 tables, 9 rows; second-table row and its missing columns reported';
     }],
+    ...[
+        ['parse_row_without_leading_pipe_refused', t => { const i = t.row('STATE_TEST_ARCH'); t.lines.splice(i + 1, 0, t.lines[i].replace('STATE_TEST_ARCH', 'STATE_TEST_HIDDEN').replace(/^\| /, '')); return i + 2; }],
+        ['parse_row_after_blank_line_refused', t => { const i = t.row('STATE_TEST_ARCH'); t.lines.splice(i + 1, 0, '', t.lines[i].replace('STATE_TEST_ARCH', 'STATE_TEST_HIDDEN')); return i + 3; }],
+        ['parse_row_after_comment_refused', t => { const i = t.row('STATE_TEST_SPRING'); t.lines.splice(i, 0, '<!-- TEST comment -->'); return i + 2; }],
+        ['parse_indented_row_refused', t => { const i = t.row('STATE_TEST_ARCH'); t.lines.splice(i + 1, 0, '    ' + t.lines[i].replace('STATE_TEST_ARCH', 'STATE_TEST_HIDDEN')); return i + 2; }]
+    ].map(([name, edit]) => [name, T => {
+        let line = 0;
+        const res = runCase(T, ws => tableEdit(ws, t => { line = edit(t); }));
+        assert(res.code === 2 && res.lines.some(l => l.includes(`registry.md:${line}:`) && l.includes('looks like a seed-table row')), `want exit 2 naming registry.md:${line}; got ${res.lines.join(' / ')}`);
+        return `exit 2 at registry.md:${line}`;
+    }]),
+    ['parse_short_separator_accepted', T => {
+        const res = runCase(T, ws => tableEdit(ws, t => { t.lines[t.h + 1] = '|' + t.header.map(() => '-').join('|') + '|'; }));
+        assert(res.code === 0, `a |-|-| separator is valid markdown; got ${summary(res)}`);
+        return 'exit 0';
+    }],
     ['parse_no_seed_table', T => {
         const res = runCase(T, ws => { ws.registry = ws.registry.replace('| State ID |', '| Name |'); });
         assert(res.code === 2 && res.lines.some(l => l.includes('no seed table')), `want exit 2; got ${res.lines.join(' / ')}`);
@@ -514,6 +570,13 @@ const DISK_CHECKS = [
         assert(ok === 0 && strict === 0 && neg === 1 && bad === 2, `exits clean ${ok}, strict ${strict}, negative ${neg}, bad argument ${bad}`);
         return 'clean 0, strict 0, negative 1, bad argument 2';
     }],
+    ['placements_discovered_when_not_given', T => {
+        const res = runCase(T, ws => { ws.placements = []; ws.discover = true; });
+        const p = JSON.parse(res.report.json).counts.placed;
+        const tracked = childProcess.spawnSync('git', ['ls-files', '--', 'art/*placement_report.json'], { cwd: REPO, encoding: 'utf8' }).stdout.split('\n').filter(Boolean).length;
+        assert(res.code === 0 && p.placementReportsHow.startsWith('DISCOVERED') && p.placementReports === tracked, `want DISCOVERED with ${tracked} report(s); got ${JSON.stringify(p)} ${summary(res)}`);
+        return `DISCOVERED, ${tracked} tracked report(s) under art/`;
+    }],
     ['real_baseline_valid', T => {
         const b = T.loadBaseline(path.join(REPO, T.DEFAULTS.baseline));
         assert(b.entries.length > 0, 'the committed baseline is empty');
@@ -548,11 +611,20 @@ const MUTANTS = [
     ['derived_variant_base_ignored', 'return base && cat.slotByEntry.has(base) ? base : null;', 'return null;'],
     ['world_catalog_leg_off', 'if (!ctx.wc.bare.has(v) && !viaEntry) {', 'if (false) {'],
     ['family_leg_off', 'if (ctx.cat.families.has(fam) || (m && ctx.cat.families.has(m.catalogueFamily))) continue;', 'continue;'],
-    ['undeclared_class_allowed', 'if (!decl) { push(undeclared, cls, s); continue; }', 'if (!decl) { continue; }'],
+    ['undeclared_class_allowed', "if (!decl) { add(R, 'SLOT_CLASS_UNDECLARED'", "if (!decl) { continue; add(R, 'SLOT_CLASS_UNDECLARED'"],
     ['baseline_reason_not_required', "if (typeof e.reason !== 'string' || e.reason.trim().length < 10 || /[\\r\\n]/.test(e.reason))", 'if (false)'],
     ['check_always_matches', 'return { code: diffs.length ? 1 : 0, lines, ctx, report };', 'return { code: 0, lines, ctx, report };'],
     ['report_timestamped', 'const report = { schema: SCHEMA.report, tool: TOOL,', 'const report = { schema: SCHEMA.report, generatedAt: String(process.hrtime.bigint()), tool: TOOL,'],
     ['later_seed_tables_ignored', 'hdr = i - 1;', 'hdr = lines.length;'],
+    ['row_outside_table_accepted', 'throw new InputError(`${where(k + 1)}: line looks like', 'if (false) throw new InputError(`${where(k + 1)}: line looks like'],
+    ['wsr03_art_required_rows_only', 'if (isComposed(r) || !res.visualStateId) continue;', 'if (!artRequired(ctx, r) || isComposed(r) || !res.visualStateId) continue;'],
+    ['any_class_displays_a_state', "return !!d && (d.scope === 'NATURAL_WORLD' || ctx.scope.sourceClasses[d.sourceClass].mayDisplayWorldState === true);", 'return true;'],
+    ['source_ids_not_checked_real', "const real = (k, sid) => typeof sid === 'string' && sid.trim() !== '' &&", 'const real = (k, sid) => true ||'],
+    ['value_not_in_gate_key', "function keyOf(f) { return `${f.rule}|${f.code}|${f.id}|${f.value || ''}`; }", 'function keyOf(f) { return `${f.rule}|${f.code}|${f.id}`; }'],
+    ['placed_unknown_slot_falls_back', "if (typeof f.slotId === 'string') {", "if (typeof f.slotId === 'string' && ctx.cat.slotById.has(f.slotId)) {"],
+    ['scope_enums_not_checked', 'if (badVc.length || badSys.length) {', 'if (false) {'],
+    ['required_strings_not_checked', "if (c && (c.kind === 'EMPTY' || c.kind === 'NONE')) add(R, 'VALUE_MISSING'", "if (false) add(R, 'VALUE_MISSING'"],
+    ['geometry_dimensions_off', 'if (cat.geometry) {', 'if (false) {'],
     ['parse_line_dropped',"throw new InputError(`${where(i + 1)}: seed table row has", "throw new InputError(`${displayPath(file)}: seed table row has"]
 ];
 

@@ -11,6 +11,11 @@
  * reads, prints or writes image data (DEC-007). The template generator it runs writes its template PNGs into
  * a fresh OS temp folder, which this tool deletes before it returns.
  *
+ * Registry input: the §2 JSON schema (enums, required fields and their types) and the rows of every table
+ * (outside code blocks) whose header has a "State ID" column. A line that looks like a state row but is
+ * not inside such a table (no leading "|", after a blank line or an HTML comment, indented 4+ spaces) is
+ * refused (exit 2), so no row can be skipped silently. Parse errors name the file and line.
+ *
  * Rules and finding codes (severity VIOLATION or GAP gates; EXEMPT is reported and never gates):
  *   WSR-01 single ownership: every state has exactly one system from the schema's system enum.
  *          DUPLICATE_STATE, NO_SYSTEM, MULTIPLE_SYSTEMS, SYSTEM_NOT_IN_ENUM
@@ -20,32 +25,41 @@
  *          are COMPOSED_EXEMPT (EXEMPT).
  *          VISUAL_STATE_ID_MISSING, VISUAL_STATE_ID_INVALID, ASSET_FAMILY_MISSING, ASSET_FAMILY_INVALID,
  *          SIMULATION_HAS_VISUAL, COMPOSED_INCOMPLETE, COMPOSED_NOT_ALLOWED, COMPOSED_EXEMPT
- *   WSR-03 atlas allocation: an art-required visualStateId resolves to a catalogue entry (see Resolution),
- *          the entry (or its derivedFrom base) owns a paint slot, and that slot is in the template output
- *          with the same sheet and rect. The catalogue sheets/slots are the atlas of record (WG.30.01 has no
- *          deliverable). The spec's UF_WorldCatalog leg is checked too: the visualStateId is a WorldCatalog id,
- *          or a resolved entry cites a WorldCatalog id. Every asset family must exist in the catalogue.
+ *   WSR-03 atlas allocation: every visualStateId (any visual class; composed rows excepted) resolves to a
+ *          catalogue entry (see Resolution), the entry (or its derivedFrom base) owns a paint slot, and that
+ *          slot is in the template output with the same sheet and rect. The catalogue sheets/slots are the
+ *          atlas of record (WG.30.01 has no deliverable). The spec's UF_WorldCatalog leg is checked too: the
+ *          visualStateId is a WorldCatalog id, or a resolved entry cites a WorldCatalog id. Every asset family
+ *          a row names must exist in the catalogue.
  *          NO_CATALOGUE_ENTRY, NO_SLOT, SLOT_NOT_IN_TEMPLATE, TEMPLATE_UNAVAILABLE, NOT_IN_WORLD_CATALOG,
  *          FAMILY_NOT_IN_CATALOGUE, MAP_TARGET_UNKNOWN, MAP_UNUSED
- *   WSR-04 no phantom assets: every catalogue slot's class (<family>:<category>) is declared in scope.json;
- *          a NATURAL_WORLD slot traces to a registry state (some state resolves to its entry or to a variant
- *          derived from it); a NON_WORLD_STATE slot's entry cites a source of the kinds its source class allows.
+ *   WSR-04 no phantom assets: every catalogue slot's class (<family>:<category>) is declared in scope.json
+ *          (else SLOT_CLASS_UNDECLARED, per slot); a NATURAL_WORLD slot traces to a registry state (some state
+ *          resolves to its entry or to a variant derived from it); a NON_WORLD_STATE slot's entry cites at
+ *          least one real source id of the kinds its source class allows (non-empty, listed in the
+ *          catalogue's sourceIdIndex for that kind, and for catalog ids a WorldCatalog id).
  *          SLOT_CLASS_UNDECLARED, SLOT_NO_STATE, SLOT_SOURCE_UNDECLARED
  *   WSR-05 performance class: every state declares a performanceClass from the enum.
  *          PERFORMANCE_CLASS_MISSING, PERFORMANCE_CLASS_INVALID. "Never scanned globally per frame" is a
  *          runtime property and is listed under notCheckable in the report.
  *   WSR-SCHEMA the seed table against the §2 schema: a column for every required field (system and
- *          performanceClass have their own rules), enum and boolean values, id format, known transitions.
- *          COLUMN_MISSING, ENUM_INVALID, TYPE_INVALID, STATE_ID_FORMAT, TRANSITION_UNKNOWN
- *   MANIFEST-TEMPLATE 100% agreement both ways between catalogue sheets/slots and the template slot map.
+ *          performanceClass have their own rules), non-empty required string fields, enum and boolean values,
+ *          id format, known transitions.
+ *          COLUMN_MISSING, VALUE_MISSING, ENUM_INVALID, TYPE_INVALID, STATE_ID_FORMAT, TRANSITION_UNKNOWN
+ *   MANIFEST-TEMPLATE 100% agreement both ways between catalogue sheets/slots and the template slot map, and
+ *          slot/sheet dimensions against the sheet and geometry.json (tilePx grid, atlasMaxPx).
  *          TEMPLATE_REFUSED_<generator code>, SHEET_NOT_IN_TEMPLATE, SHEET_NOT_IN_CATALOGUE,
  *          SHEET_GEOMETRY_DIFFERS, SLOT_NOT_IN_TEMPLATE, SLOT_NOT_IN_CATALOGUE, SLOT_RECT_DIFFERS,
  *          SLOT_SHEET_DIFFERS, SLOT_ENTRY_DIFFERS, SLOT_ID_SHEET_MISMATCH, SLOT_SHEET_UNKNOWN, SLOT_INVALID,
- *          DUPLICATE_SLOT_ID, DUPLICATE_ENTRY_ID, DUPLICATE_SHEET_ID, DUPLICATE_TEMPLATE_SLOT,
- *          DUPLICATE_TEMPLATE_SHEET, TEMPLATE_SIDECAR_INVALID
+ *          SLOT_OUTSIDE_SHEET, SHEET_GRID_MISMATCH, SHEET_TOO_LARGE, DUPLICATE_SLOT_ID, DUPLICATE_ENTRY_ID,
+ *          DUPLICATE_SHEET_ID, DUPLICATE_TEMPLATE_SLOT, DUPLICATE_TEMPLATE_SHEET, TEMPLATE_SIDECAR_INVALID
  *   PLACED-IN-SLOT placed art lies inside catalogue slots: every id in the approval ledger is a catalogue
- *          entry or slot id; every filled region of a placement report lies inside its catalogue slot.
- *          LEDGER_MALFORMED, LEDGER_ID_UNKNOWN, PLACEMENT_REPORT_INVALID, PLACED_OUTSIDE_SLOT
+ *          entry or slot id; every filled region of a placement report lies inside the catalogue slot it
+ *          names (a named slot must exist and belong to the placed entry), or inside some slot on its sheet
+ *          when it names none. Placement reports: --placements <file>..., --placements none, or by default
+ *          every tracked placement_report.json at any depth under art/ (git ls-files).
+ *          LEDGER_MALFORMED, LEDGER_ID_UNKNOWN, PLACEMENT_REPORT_INVALID, PLACED_SLOT_UNKNOWN,
+ *          PLACED_OUTSIDE_SLOT, PLACED_ENTRY_MISMATCH
  *
  * Resolution of a visualStateId v to catalogue entries (WSR-03, and the reverse trace of WSR-04):
  *   ID      an entry whose id is v, or whose TYPE field (4th of the 6 id fields) is v upper-cased with every
@@ -56,18 +70,22 @@
  *           ids as they are; AR and addendum ids never match;
  *   MAP     an ACCEPTED row of the visual-state map (tools/wsr/visual_state_map.json). PROPOSED rows are
  *           listed as candidates and never resolve anything.
- *   A derived variant (variants.derivedFrom) is displayed through its base's slot.
+ *   Only entries whose class may display a world state count (NATURAL_WORLD classes, and NON_WORLD_STATE
+ *   classes whose source class has mayDisplayWorldState: true in scope.json); other matches are reported as
+ *   rejected. A derived variant (variants.derivedFrom) is displayed through its base's slot.
  *
- * Template slot map: by default the generator runs on the catalogue in a fresh OS temp folder. Every refusal
+ * Template slot map: by default the generator runs on the catalogue in a fresh temp folder. Every refusal
  * becomes a MANIFEST-TEMPLATE gap. The generator then runs again on a copy of the catalogue that holds only
  * the sheets it did not refuse (and their slotted entries), and repeats until a run succeeds, so the sheets it
  * accepts are still compared slot by slot. --templates <dir> reads existing sidecars instead.
  *
- * Gate (default): exit 1 on any VIOLATION or GAP whose (rule, code, id) is not in the baseline, and on any
- * baseline entry that no longer occurs (stale: the baseline must shrink as gaps close). --strict ignores the
- * baseline and exits 1 on any VIOLATION or GAP. --check builds the report in memory and exits 1 if the
- * committed report differs (CRLF is folded to LF before comparing). --report <dir> writes wsr_report.json and
- * WSR_REPORT.md (deterministic: no timestamps, no absolute paths, sorted).
+ * Gate (default): the key of a finding is (rule, code, id, value), where value is the offending value (a
+ * system name, a visual state id, the entry owning a slot, a rect), so a gap whose value changes is a new gap.
+ * Exit 1 on any VIOLATION or GAP whose key is not in the baseline, and on any baseline entry that no longer
+ * occurs (stale: the baseline must shrink as gaps close). --strict ignores the baseline and exits 1 on any
+ * VIOLATION or GAP. --check builds the report in memory and exits 1 if the committed report differs (CRLF is
+ * folded to LF before comparing). --report <dir> writes wsr_report.json and WSR_REPORT.md (deterministic: no
+ * timestamps, no absolute paths, sorted).
  *
  * Usage:
  *   node tools/verify_world_state_registry.js [--registry <md>] [--catalogue <json>] [--templates <dir>]
@@ -170,7 +188,9 @@ function parseJsonText(text, file, what) {
     try { return JSON.parse(text); } catch (err) { throw new InputError(`${what} ${displayPath(file)} is not valid JSON: ${err.message}`); }
 }
 function readJson(file, what) { return parseJsonText(readText(file, what), file, what); }
-function keyOf(f) { return `${f.rule}|${f.code}|${f.id}`; }
+// Gate key. value is the offending value (a system name, a visual state id, the entry owning a slot, a
+// rect); it is part of the key so a gap whose value changes is a new gap, not the old baselined one.
+function keyOf(f) { return `${f.rule}|${f.code}|${f.id}|${f.value || ''}`; }
 
 // ---------------------------------------------------------------- registry markdown
 
@@ -190,7 +210,7 @@ function splitRow(l) {
     cells.push(cur.trim());
     return cells;
 }
-function isSeparator(l) { const c = splitRow(l); return c.length > 0 && c.every(x => /^:?-{3,}:?$/.test(x)); }
+function isSeparator(l) { const c = splitRow(l); return c.length > 0 && c.every(x => /^:?-+:?$/.test(x)); }
 function fenceMask(lines) {
     const mask = [];
     let open = null;
@@ -255,11 +275,14 @@ function parseRegistry(text, file) {
     };
     if (!Array.isArray(schema.required) || !schema.required.every(x => typeof x === 'string')) throw new InputError(`${where(schemaLine)}: schema has no required[] list of field names`);
     const enums = { system: enumOf('system'), visualClass: enumOf('visualClass'), performanceClass: enumOf('performanceClass') };
+    // Required fields whose schema type is a plain string: their cells may not be empty (WSR-SCHEMA).
+    const stringFields = schema.required.filter(f => isObj(schema.properties[f]) && schema.properties[f].type === 'string');
 
     // §3: every table (outside code blocks) whose header has a "State ID" column; the rows of all of
     // them are read, so a state added in a later table is never skipped.
     const tables = [];
     const rows = [];
+    const consumed = new Set();
     for (let hdr = 0; hdr < lines.length; hdr++) {
         const startsTable = !fenced[hdr] && isTableLine(lines[hdr]) && !(hdr > 0 && !fenced[hdr - 1] && isTableLine(lines[hdr - 1]));
         if (!startsTable || !splitRow(lines[hdr]).some(c => norm(c) === 'stateid')) continue;
@@ -287,11 +310,21 @@ function parseRegistry(text, file) {
         }
         if (!table.rows) throw new InputError(`${where(hdr + 1)}: the seed table has no rows`);
         tables.push(table);
+        for (let k = hdr; k < i; k++) consumed.add(k);
         hdr = i - 1;
     }
     if (!tables.length) throw new InputError(`${displayPath(file)}: no seed table with a "State ID" column found`);
+    // A line that looks like a state row but is not inside a seed table would be skipped silently
+    // (no leading "|", after a blank line or an HTML comment, indented 4+ spaces, under another header).
+    // Markdown readers may still show it as a row, so it is refused.
+    for (let k = 0; k < lines.length; k++) {
+        if (fenced[k] || consumed.has(k)) continue;
+        if (/^\s*\|?\s*`?STATE_[A-Za-z0-9_]+`?\s*\|/.test(lines[k])) {
+            throw new InputError(`${where(k + 1)}: line looks like a seed-table row (a state id followed by "|") but is not inside a table with a State ID header, so it would not be read`);
+        }
+    }
     return {
-        file, schemaLine, enums, required: schema.required.slice(), tables,
+        file, schemaLine, enums, required: schema.required.slice(), stringFields, tables,
         // A field counts as a column only if every seed table has it.
         columns: new Set([...tables[0].fields].filter(f => tables.every(t => t.fields.has(f)))),
         unknownColumns: uniq([].concat(...tables.map(t => t.unknown))),
@@ -324,7 +357,9 @@ function indexCatalogue(cat, text, file) {
         slotsBySheet: new Map(), dupSheets: [], dupEntries: [], dupSlots: [], badSlots: [],
         typeIndex: new Map(), bareSource: new Map(), fullSource: new Map(), families: new Set(),
         forbiddenBiomes: isObj(cat.biomes) && Array.isArray(cat.biomes.forbidden) ? cat.biomes.forbidden.slice() : [],
-        catalogIndex: isObj(cat.sourceIdIndex) && Array.isArray(cat.sourceIdIndex.catalog) ? cat.sourceIdIndex.catalog.slice() : null
+        catalogIndex: isObj(cat.sourceIdIndex) && Array.isArray(cat.sourceIdIndex.catalog) ? cat.sourceIdIndex.catalog.slice() : null,
+        // sourceIdIndex per kind (every source id the catalogue builder ingested); null for a kind it lacks.
+        sourceIndex: Object.fromEntries(SOURCE_KINDS.map(k => [k, isObj(cat.sourceIdIndex) && Array.isArray(cat.sourceIdIndex[k]) ? new Set(cat.sourceIdIndex[k]) : null]))
     };
     for (const s of cat.sheets) {
         if (!isObj(s) || typeof s.sheetId !== 'string' || !s.sheetId) throw new InputError(`catalogue ${where}: a sheet has no sheetId`);
@@ -408,6 +443,7 @@ function loadScope(obj, file) {
     else for (const [k, v] of Object.entries(obj.sourceClasses)) {
         if (!isObj(v) || !strList(v.kinds) || !v.kinds.length || !v.kinds.every(x => SOURCE_KINDS.includes(x))) errs.push(`sourceClasses.${k}.kinds must list source kinds from ${SOURCE_KINDS.join(', ')}`);
         if (!isObj(v) || typeof v.why !== 'string' || !v.why.trim()) errs.push(`sourceClasses.${k}.why is required`);
+        if (!isObj(v) || typeof v.mayDisplayWorldState !== 'boolean') errs.push(`sourceClasses.${k}.mayDisplayWorldState must be true or false`);
     }
     if (!isObj(obj.classes)) errs.push('classes must be an object');
     else for (const [k, v] of Object.entries(obj.classes)) {
@@ -428,7 +464,7 @@ function loadMap(obj, file) {
     if (obj.schema !== SCHEMA.map) errs.push(`schema must be ${SCHEMA.map}`);
     if (!Array.isArray(obj.visualStates)) errs.push('visualStates must be an array');
     if (!Array.isArray(obj.assetFamilies)) errs.push('assetFamilies must be an array');
-    (obj.visualStates || []).forEach((m, i) => {
+    (Array.isArray(obj.visualStates) ? obj.visualStates : []).forEach((m, i) => {
         const at = `visualStates[${i}]`;
         if (!isObj(m) || typeof m.visualStateId !== 'string' || !m.visualStateId) { errs.push(`${at}.visualStateId is required`); return; }
         const t = m.target;
@@ -437,7 +473,7 @@ function loadMap(obj, file) {
         if (!MAP_STATUS.includes(m.status)) errs.push(`${at}.status must be one of ${MAP_STATUS.join(', ')}`);
         if (typeof m.reason !== 'string' || !m.reason.trim()) errs.push(`${at}.reason is required`);
     });
-    (obj.assetFamilies || []).forEach((m, i) => {
+    (Array.isArray(obj.assetFamilies) ? obj.assetFamilies : []).forEach((m, i) => {
         const at = `assetFamilies[${i}]`;
         if (!isObj(m) || typeof m.assetFamily !== 'string' || !m.assetFamily) { errs.push(`${at}.assetFamily is required`); return; }
         if (typeof m.catalogueFamily !== 'string' || !m.catalogueFamily) errs.push(`${at}.catalogueFamily is required`);
@@ -462,6 +498,7 @@ function loadBaseline(file) {
         if (!RULES.includes(e.rule)) errs.push(`${at}: rule ${JSON.stringify(e.rule)} is not one of ${RULES.join(', ')}`);
         if (typeof e.code !== 'string' || !e.code) errs.push(`${at}: code is required`);
         if (typeof e.id !== 'string' || !e.id) errs.push(`${at}: id is required`);
+        if (e.value !== undefined && typeof e.value !== 'string') errs.push(`${at}: value must be a string when given`);
         if (typeof e.reason !== 'string' || e.reason.trim().length < 10 || /[\r\n]/.test(e.reason)) errs.push(`${at} (${e.id}): reason must be one line of at least 10 characters`);
         const k = keyOf(e);
         if (seen.has(k)) errs.push(`${at}: duplicate entry ${k}`);
@@ -475,13 +512,16 @@ function loadBaseline(file) {
 
 function readSidecars(dir) {
     if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) throw new InputError(`template folder ${displayPath(dir)} not found`);
-    const out = [], ignored = [];
+    const out = [], ignored = [], bad = [];
     for (const name of fs.readdirSync(dir).filter(n => n.toLowerCase().endsWith('.json')).sort(cmp)) {
         let obj = null;
-        try { obj = JSON.parse(fs.readFileSync(path.join(dir, name), 'utf8').replace(/^﻿/, '')); } catch (err) { obj = null; }
+        try { obj = JSON.parse(fs.readFileSync(path.join(dir, name), 'utf8').replace(/^﻿/, '')); } catch (err) {
+            bad.push({ file: name, why: `not valid JSON (${err.message.split('\n')[0]})` });
+            continue;
+        }
         if (isObj(obj) && obj.format === SCHEMA.template) out.push({ file: name, obj }); else ignored.push(name);
     }
-    return { sidecars: out, ignored };
+    return { sidecars: out, ignored, bad };
 }
 
 function parseRefusals(stderr, cat, scrub) {
@@ -492,14 +532,17 @@ function parseRefusals(stderr, cat, scrub) {
         const code = m[1], message = scrub(m[2]);
         const p = /^([^\s:]+):\s/.exec(message);
         const id = p ? p[1] : null;
-        let level = 'catalogue', target = 'catalogue', idKind = 'file', sheetId = null;
-        if (id && cat.sheets.has(id)) { level = 'sheet'; target = id; idKind = 'sheetId'; sheetId = id; }
-        else if (id && cat.entries.has(id)) {
+        let level = 'catalogue', target = 'catalogue', idKind = 'file', sheetId = null, value = '';
+        if (id && cat.sheets.has(id)) {
+            level = 'sheet'; target = id; idKind = 'sheetId'; sheetId = id;
+            // A sheet-level refusal about particular slots (SLOT_OVERLAP) keeps them in its key.
+            value = (message.slice(p[0].length).match(/[^\s,;()]+:\d{4}\b/g) || []).join('+');
+        } else if (id && cat.entries.has(id)) {
             const s = cat.slotByEntry.get(id);
-            if (s && cat.sheets.has(s.sheetId)) { level = 'slot'; target = s.slotId; idKind = 'slotId'; sheetId = s.sheetId; }
+            if (s && cat.sheets.has(s.sheetId)) { level = 'slot'; target = s.slotId; idKind = 'slotId'; sheetId = s.sheetId; value = id; }
             else { level = 'entry'; target = id; idKind = 'entryId'; }
         }
-        out.push({ code, message, level, id: target, idKind, sheetId, key: `${code}|${target}|${message}` });
+        out.push({ code, message, level, id: target, idKind, sheetId, value, key: `${code}|${target}|${message}` });
     }
     return out;
 }
@@ -530,7 +573,7 @@ function generateTemplates(catFile, raw, cat, workDir) {
             const r = childProcess.spawnSync(process.execPath, [gen, '--catalogue', input, '--out', out], { cwd: REPO_ROOT, encoding: 'utf8', maxBuffer: 1 << 28 });
             const refusals = r.status === 2 ? parseRefusals(r.stderr || '', cat, scrub) : [];
             res.runs.push({ run: n + 1, catalogue: n === 0 ? displayPath(catFile) : `<tmp>/catalogue_sub${n}.json`, sheets: sheetIds.length, exit: r.status, refusals: refusals.length });
-            if (r.status === 0) { const s = readSidecars(out); res.sidecars = s.sidecars; res.ignored = s.ignored; break; }
+            if (r.status === 0) { const s = readSidecars(out); res.sidecars = s.sidecars; res.ignored = s.ignored; res.bad = s.bad; break; }
             if (r.status !== 2 || !refusals.length) {
                 const tail = scrub(lf(r.stderr || '').trim().split('\n').slice(-3).join(' / '));
                 throw new InputError(`template generator ${GENERATOR} exited ${r.status}${r.error ? ` (${r.error.message})` : ''}: ${tail}`);
@@ -552,7 +595,7 @@ function generateTemplates(catFile, raw, cat, workDir) {
 }
 
 function indexTemplates(t) {
-    const idx = Object.assign({}, t, { sheets: new Map(), slots: [], slotById: new Map(), dupSlots: [], dupSheets: [], bad: [] });
+    const idx = Object.assign({}, t, { sheets: new Map(), slots: [], slotById: new Map(), dupSlots: [], dupSheets: [], bad: (t.bad || []).slice() });
     for (const sc of t.sidecars) {
         const o = sc.obj;
         if (typeof o.sheetId !== 'string' || !o.sheetId || !Array.isArray(o.slots)) { idx.bad.push({ file: sc.file, why: 'no sheetId or slots[]' }); continue; }
@@ -597,6 +640,13 @@ function tracingRow(ctx, r) {
     return !!vc && vc.kind === 'VALUE' && ctx.reg.enums.visualClass.includes(vc.value) && vc.value !== 'SIMULATION_ONLY' && !isComposed(r) && !!v && v.kind === 'VALUE';
 }
 
+// Whether catalogue entry `id` may display a world state: its class is NATURAL_WORLD, or NON_WORLD_STATE
+// with a source class whose mayDisplayWorldState is true (scope.json). Undeclared classes may not.
+function displaysWorldState(ctx, id) {
+    const d = ctx.scope.classes[classOf(ctx.cat.entries.get(id))];
+    return !!d && (d.scope === 'NATURAL_WORLD' || ctx.scope.sourceClasses[d.sourceClass].mayDisplayWorldState === true);
+}
+
 function resolveStates(ctx) {
     const { cat, map } = ctx;
     const accepted = new Map(), proposed = new Map();
@@ -606,7 +656,7 @@ function resolveStates(ctx) {
     for (const r of ctx.reg.rows) {
         const v = r.cells.visualStateId;
         const vid = v && v.kind === 'VALUE' ? v.value : null;
-        const res = { row: r, visualStateId: vid, entries: [], slots: [], proposals: [] };
+        const res = { row: r, visualStateId: vid, entries: [], rejected: [], slots: [], proposals: [] };
         if (vid) {
             const hits = new Map();
             const hit = (id, how) => { if (!hits.has(id)) hits.set(id, new Set()); hits.get(id).add(how); };
@@ -614,7 +664,11 @@ function resolveStates(ctx) {
             for (const id of cat.typeIndex.get(typeToken(vid)) || []) hit(id, 'ID');
             for (const id of cat.bareSource.get(vid) || []) hit(id, 'SOURCE');
             for (const m of accepted.get(vid) || []) for (const id of mapTargets(cat, m)) hit(id, 'MAP');
-            res.entries = [...hits.keys()].sort(cmp).map(id => ({ entryId: id, methods: [...hits.get(id)].sort(cmp) }));
+            // Only entries of a class that may display a world state count (scope.json): a world state is
+            // never "displayed" by an item icon, a person, a creature or a face that happens to share its id.
+            const ids = [...hits.keys()].sort(cmp);
+            res.entries = ids.filter(id => displaysWorldState(ctx, id)).map(id => ({ entryId: id, methods: [...hits.get(id)].sort(cmp) }));
+            res.rejected = ids.filter(id => !displaysWorldState(ctx, id)).map(id => `${id} (${classOf(cat.entries.get(id))})`);
             res.proposals = uniq((proposed.get(vid) || []).map(describeTarget)).sort(cmp);
             const owners = uniq(res.entries.map(x => slotOwner(cat, x.entryId)).filter(Boolean)).sort(cmp);
             res.slots = owners.map(id => { const s = cat.slotByEntry.get(id); return { entryId: id, slotId: s.slotId, sheetId: s.sheetId, template: templateStatus(ctx, s) }; });
@@ -635,8 +689,8 @@ function ruleWsr01(ctx, add) {
         const at = `${displayPath(ctx.reg.file)}:${r.line}`;
         const systems = !c || c.kind === 'EMPTY' || c.kind === 'NONE' || c.kind === 'COMPOSED' ? [] : c.kind === 'VALUE' ? [c.value] : c.tokens;
         if (!systems.length) add(R, 'NO_SYSTEM', 'VIOLATION', 'stateId', r.stateId, `no owning system (cell ${JSON.stringify(c ? c.raw : '')})`, at);
-        else if (systems.length > 1) add(R, 'MULTIPLE_SYSTEMS', 'VIOLATION', 'stateId', r.stateId, `${systems.length} systems in one cell: ${systems.join(', ')}`, at);
-        else if (!ctx.reg.enums.system.includes(systems[0])) add(R, 'SYSTEM_NOT_IN_ENUM', 'VIOLATION', 'stateId', r.stateId, `system ${systems[0]} is not in the schema's system enum (${displayPath(ctx.reg.file)}:${ctx.reg.schemaLine})`, at);
+        else if (systems.length > 1) add(R, 'MULTIPLE_SYSTEMS', 'VIOLATION', 'stateId', r.stateId, `${systems.length} systems in one cell: ${systems.join(', ')}`, at, systems.join('+'));
+        else if (!ctx.reg.enums.system.includes(systems[0])) add(R, 'SYSTEM_NOT_IN_ENUM', 'VIOLATION', 'stateId', r.stateId, `system ${systems[0]} is not in the schema's system enum (${displayPath(ctx.reg.file)}:${ctx.reg.schemaLine})`, at, systems[0]);
     }
     for (const [id, rows] of lines) {
         if (rows.length < 2) continue;
@@ -657,17 +711,17 @@ function ruleWsr02(ctx, add) {
             const both = fam && fam.kind === 'COMPOSED' && vis && vis.kind === 'COMPOSED';
             const sys = r.cells.system && r.cells.system.kind === 'VALUE' ? r.cells.system.value : null;
             if (!both) add(R, 'COMPOSED_INCOMPLETE', 'VIOLATION', 'stateId', r.stateId, `a composed row needs "*Compositional Assembly*" as family and "*None (Composed)*" as visual state; got ${JSON.stringify(fam ? fam.raw : '')} / ${JSON.stringify(vis ? vis.raw : '')}`, at);
-            else if (!ctx.scope.composedExemptSystems.includes(sys)) add(R, 'COMPOSED_NOT_ALLOWED', 'VIOLATION', 'stateId', r.stateId, `composed exemption is declared only for ${ctx.scope.composedExemptSystems.join(', ') || '(no system)'}; this row's system is ${sys || '(invalid)'}`, at);
+            else if (!ctx.scope.composedExemptSystems.includes(sys)) add(R, 'COMPOSED_NOT_ALLOWED', 'VIOLATION', 'stateId', r.stateId, `composed exemption is declared only for ${ctx.scope.composedExemptSystems.join(', ') || '(no system)'}; this row's system is ${sys || '(invalid)'}`, at, sys || '');
             else add(R, 'COMPOSED_EXEMPT', 'EXEMPT', 'stateId', r.stateId, `${vc.value} landmark assembled from catalogue pieces (WG.63.02); no slot of its own`, at);
             continue;
         }
         if (ctx.scope.artRequiredClasses.includes(vc.value)) {
             if (!has(vis)) add(R, 'VISUAL_STATE_ID_MISSING', 'VIOLATION', 'stateId', r.stateId, `${vc.value} state has no visualStateId`, at);
-            else if (vis.kind !== 'VALUE') add(R, 'VISUAL_STATE_ID_INVALID', 'VIOLATION', 'stateId', r.stateId, `visualStateId ${JSON.stringify(vis.raw)} is not one identifier`, at);
+            else if (vis.kind !== 'VALUE') add(R, 'VISUAL_STATE_ID_INVALID', 'VIOLATION', 'stateId', r.stateId, `visualStateId ${JSON.stringify(vis.raw)} is not one identifier`, at, vis.raw);
             if (!has(fam)) add(R, 'ASSET_FAMILY_MISSING', 'VIOLATION', 'stateId', r.stateId, `${vc.value} state has no assetFamily`, at);
-            else if (fam.kind !== 'VALUE') add(R, 'ASSET_FAMILY_INVALID', 'VIOLATION', 'stateId', r.stateId, `assetFamily ${JSON.stringify(fam.raw)} is not one identifier`, at);
+            else if (fam.kind !== 'VALUE') add(R, 'ASSET_FAMILY_INVALID', 'VIOLATION', 'stateId', r.stateId, `assetFamily ${JSON.stringify(fam.raw)} is not one identifier`, at, fam.raw);
         } else if (vc.value === 'SIMULATION_ONLY' && (has(vis) || has(fam))) {
-            add(R, 'SIMULATION_HAS_VISUAL', 'VIOLATION', 'stateId', r.stateId, `SIMULATION_ONLY state names ${[has(fam) ? `assetFamily ${fam.value}` : null, has(vis) ? `visualStateId ${vis.value}` : null].filter(Boolean).join(' and ')}`, at);
+            add(R, 'SIMULATION_HAS_VISUAL', 'VIOLATION', 'stateId', r.stateId, `SIMULATION_ONLY state names ${[has(fam) ? `assetFamily ${fam.value}` : null, has(vis) ? `visualStateId ${vis.value}` : null].filter(Boolean).join(' and ')}`, at, `${has(fam) ? fam.value : ''}|${has(vis) ? vis.value : ''}`);
         }
     }
 }
@@ -675,19 +729,22 @@ function ruleWsr02(ctx, add) {
 function ruleWsr03(ctx, add) {
     const R = 'WSR-03';
     const reg = displayPath(ctx.reg.file);
+    // Every visualStateId (spec: "Every visualStateId must match ..."), whatever the row's visual class;
+    // composed landmark rows are the declared exemption (WSR-02).
     for (const res of ctx.resolved) {
         const r = res.row;
-        if (!artRequired(ctx, r) || isComposed(r) || !res.visualStateId) continue;
+        if (isComposed(r) || !res.visualStateId) continue;
         const at = `${reg}:${r.line}`;
         const v = res.visualStateId;
         const cand = res.proposals.length ? `; candidates (PROPOSED, not used): ${res.proposals.join(', ')}` : '';
+        const rej = res.rejected.length ? `; matches only entries whose class may not display a world state: ${res.rejected.join(', ')}` : '';
         if (!res.entries.length) {
-            add(R, 'NO_CATALOGUE_ENTRY', 'GAP', 'stateId', r.stateId, `visualStateId ${v} resolves to no catalogue entry (by id, TYPE field, source id or ACCEPTED map row)${cand}`, at);
+            add(R, 'NO_CATALOGUE_ENTRY', 'GAP', 'stateId', r.stateId, `visualStateId ${v} resolves to no catalogue entry (by id, TYPE field, source id or ACCEPTED map row)${rej}${cand}`, at, v);
         } else if (!res.slots.length) {
-            add(R, 'NO_SLOT', 'GAP', 'stateId', r.stateId, `visualStateId ${v} resolves to ${res.entries.map(x => x.entryId).join(', ')}, none of which (or their derivedFrom base) owns a paint slot`, at);
+            add(R, 'NO_SLOT', 'GAP', 'stateId', r.stateId, `visualStateId ${v} resolves to ${res.entries.map(x => x.entryId).join(', ')}, none of which (or their derivedFrom base) owns a paint slot`, at, v);
         } else if (!res.slots.some(s => s.template === 'OK')) {
             const all = res.slots.every(s => s.template === 'UNAVAILABLE');
-            add(R, all ? 'TEMPLATE_UNAVAILABLE' : 'SLOT_NOT_IN_TEMPLATE', 'GAP', 'stateId', r.stateId, `visualStateId ${v}: no slot confirmed in the template output (${res.slots.map(s => `${s.slotId} ${s.template}`).join(', ')})`, at);
+            add(R, all ? 'TEMPLATE_UNAVAILABLE' : 'SLOT_NOT_IN_TEMPLATE', 'GAP', 'stateId', r.stateId, `visualStateId ${v}: no slot confirmed in the template output (${res.slots.map(s => `${s.slotId} ${s.template}`).join(', ')})`, at, v);
         }
         const viaEntry = res.entries.some(x => {
             const e = ctx.cat.entries.get(x.entryId);
@@ -695,53 +752,56 @@ function ruleWsr03(ctx, add) {
             return list.some(sid => ctx.wc.prefixed.has(sid));
         });
         if (!ctx.wc.bare.has(v) && !viaEntry) {
-            add(R, 'NOT_IN_WORLD_CATALOG', 'GAP', 'stateId', r.stateId, `visualStateId ${v} is not an id in ${displayPath(ctx.files.worldCatalog)}, and no resolved catalogue entry cites one`, at);
+            add(R, 'NOT_IN_WORLD_CATALOG', 'GAP', 'stateId', r.stateId, `visualStateId ${v} is not an id in ${displayPath(ctx.files.worldCatalog)}, and no resolved catalogue entry cites one`, at, v);
         }
     }
-    // Asset families of art-required rows must exist in the catalogue.
+    // Every asset family a registry row names (not composed) must exist in the catalogue.
     const accepted = new Map(ctx.map.assetFamilies.filter(m => m.status === 'ACCEPTED').map(m => [m.assetFamily, m]));
     const byFam = new Map();
     for (const r of ctx.reg.rows) {
         const f = r.cells.assetFamily;
-        if (artRequired(ctx, r) && !isComposed(r) && f && f.kind === 'VALUE') push(byFam, f.value, r);
+        if (!isComposed(r) && f && f.kind === 'VALUE') push(byFam, f.value, r);
     }
     for (const [fam, rows] of [...byFam].sort((a, b) => cmp(a[0], b[0]))) {
         const m = accepted.get(fam);
         if (ctx.cat.families.has(fam) || (m && ctx.cat.families.has(m.catalogueFamily))) continue;
-        add(R, 'FAMILY_NOT_IN_CATALOGUE', 'GAP', 'assetFamily', fam, `${rows.length} art-required state(s) use it; no catalogue entry has family ${fam} and no ACCEPTED map row points it at a catalogue family (catalogue families: ${[...ctx.cat.families].sort(cmp).join(', ') || 'none'})`, `${reg}:${rows[0].line}`);
+        add(R, 'FAMILY_NOT_IN_CATALOGUE', 'GAP', 'assetFamily', fam, `${rows.length} state(s) use it; no catalogue entry has family ${fam} and no ACCEPTED map row points it at a catalogue family (catalogue families: ${[...ctx.cat.families].sort(cmp).join(', ') || 'none'})`, `${reg}:${rows[0].line}`);
     }
     // The map must point at things that exist and be used.
     const mapFile = displayPath(ctx.files.map);
     const usedVis = new Set(ctx.reg.rows.map(r => r.cells.visualStateId).filter(c => c && c.kind === 'VALUE').map(c => c.value));
     const usedFam = new Set(ctx.reg.rows.map(r => r.cells.assetFamily).filter(c => c && c.kind === 'VALUE').map(c => c.value));
     for (const m of ctx.map.visualStates) {
-        if (!mapTargets(ctx.cat, m).length) add(R, 'MAP_TARGET_UNKNOWN', 'VIOLATION', 'visualStateId', m.visualStateId, `map row (${m.status}) points at ${describeTarget(m)}, which is not in the catalogue`, mapFile);
-        if (!usedVis.has(m.visualStateId)) add(R, 'MAP_UNUSED', 'VIOLATION', 'visualStateId', m.visualStateId, 'map row for a visualStateId no registry row uses', mapFile);
+        if (!mapTargets(ctx.cat, m).length) add(R, 'MAP_TARGET_UNKNOWN', 'VIOLATION', 'visualStateId', m.visualStateId, `map row (${m.status}) points at ${describeTarget(m)}, which is not in the catalogue`, mapFile, describeTarget(m));
+        if (!usedVis.has(m.visualStateId)) add(R, 'MAP_UNUSED', 'VIOLATION', 'visualStateId', m.visualStateId, 'map row for a visualStateId no registry row uses', mapFile, describeTarget(m));
     }
     for (const m of ctx.map.assetFamilies) {
-        if (!ctx.cat.families.has(m.catalogueFamily)) add(R, 'MAP_TARGET_UNKNOWN', 'VIOLATION', 'assetFamily', m.assetFamily, `map row (${m.status}) points at catalogue family ${m.catalogueFamily}, which no entry has`, mapFile);
-        if (!usedFam.has(m.assetFamily)) add(R, 'MAP_UNUSED', 'VIOLATION', 'assetFamily', m.assetFamily, 'map row for an asset family no registry row uses', mapFile);
+        if (!ctx.cat.families.has(m.catalogueFamily)) add(R, 'MAP_TARGET_UNKNOWN', 'VIOLATION', 'assetFamily', m.assetFamily, `map row (${m.status}) points at catalogue family ${m.catalogueFamily}, which no entry has`, mapFile, m.catalogueFamily);
+        if (!usedFam.has(m.assetFamily)) add(R, 'MAP_UNUSED', 'VIOLATION', 'assetFamily', m.assetFamily, 'map row for an asset family no registry row uses', mapFile, m.catalogueFamily);
     }
 }
 
 function ruleWsr04(ctx, add) {
     const R = 'WSR-04';
-    const undeclared = new Map();
+    // A cited source id counts only if it is real: a non-empty string that the catalogue's sourceIdIndex
+    // lists for that kind (when the index has the kind) and, for catalog ids, a WorldCatalog id.
+    const real = (k, sid) => typeof sid === 'string' && sid.trim() !== '' &&
+        (k === 'catalog' ? ctx.wc.prefixed.has(sid) : (!ctx.cat.sourceIndex[k] || ctx.cat.sourceIndex[k].has(sid)));
     for (const s of ctx.cat.slots) {
         const e = ctx.cat.entries.get(s.entryId);
         const cls = classOf(e);
         const decl = ctx.scope.classes[cls];
-        if (!decl) { push(undeclared, cls, s); continue; }
+        if (!decl) { add(R, 'SLOT_CLASS_UNDECLARED', 'VIOLATION', 'slotId', s.slotId, `${e.id} is of class ${cls}; ${displayPath(ctx.files.scope)} declares no scope for this class`, catSource(ctx, e.id), cls); continue; }
         if (decl.scope === 'NATURAL_WORLD') {
-            if (!ctx.traced.has(e.id)) add(R, 'SLOT_NO_STATE', 'GAP', 'slotId', s.slotId, `${e.id} (${cls}, NATURAL_WORLD scope) traces to no registry state: no state's visualStateId resolves to it or to a variant derived from it`, catSource(ctx, e.id));
+            if (!ctx.traced.has(e.id)) add(R, 'SLOT_NO_STATE', 'GAP', 'slotId', s.slotId, `${e.id} (${cls}, NATURAL_WORLD scope) traces to no registry state: no state's visualStateId resolves to it or to a variant derived from it`, catSource(ctx, e.id), e.id);
         } else {
             const kinds = ctx.scope.sourceClasses[decl.sourceClass].kinds;
             const src = isObj(e.sourceIds) ? e.sourceIds : {};
-            if (!kinds.some(k => Array.isArray(src[k]) && src[k].length)) add(R, 'SLOT_SOURCE_UNDECLARED', 'VIOLATION', 'slotId', s.slotId, `${e.id} (${cls}) is declared NON_WORLD_STATE/${decl.sourceClass} but cites no ${kinds.join('/')} source id`, catSource(ctx, e.id));
+            const cited = [].concat(...kinds.map(k => (Array.isArray(src[k]) ? src[k] : []).map(sid => ({ k, sid }))));
+            if (!cited.some(x => real(x.k, x.sid))) {
+                add(R, 'SLOT_SOURCE_UNDECLARED', 'VIOLATION', 'slotId', s.slotId, `${e.id} (${cls}) is declared NON_WORLD_STATE/${decl.sourceClass} but cites no real ${kinds.join('/')} source id (cited: ${cited.map(x => `${x.k} ${JSON.stringify(x.sid)}`).join(', ') || 'none'})`, catSource(ctx, e.id), e.id);
+            }
         }
-    }
-    for (const [cls, list] of undeclared) {
-        add(R, 'SLOT_CLASS_UNDECLARED', 'VIOLATION', 'class', cls, `${list.length} slot(s) of class ${cls} (first ${list[0].slotId}); ${displayPath(ctx.files.scope)} declares no scope for this class`, displayPath(ctx.files.scope));
     }
 }
 
@@ -751,7 +811,7 @@ function ruleWsr05(ctx, add) {
         const at = `${displayPath(ctx.reg.file)}:${r.line}`;
         const c = r.cells.performanceClass;
         if (!c || c.kind === 'EMPTY' || c.kind === 'NONE') add(R, 'PERFORMANCE_CLASS_MISSING', 'VIOLATION', 'stateId', r.stateId, c ? 'performanceClass cell is empty' : 'the seed table has no Performance Class column', at);
-        else if (c.kind !== 'VALUE' || !ctx.reg.enums.performanceClass.includes(c.value)) add(R, 'PERFORMANCE_CLASS_INVALID', 'VIOLATION', 'stateId', r.stateId, `performanceClass ${JSON.stringify(c.raw)} is not in the enum (${ctx.reg.enums.performanceClass.join(', ')})`, at);
+        else if (c.kind !== 'VALUE' || !ctx.reg.enums.performanceClass.includes(c.value)) add(R, 'PERFORMANCE_CLASS_INVALID', 'VIOLATION', 'stateId', r.stateId, `performanceClass ${JSON.stringify(c.raw)} is not in the enum (${ctx.reg.enums.performanceClass.join(', ')})`, at, c.raw);
     }
 }
 
@@ -769,16 +829,22 @@ function ruleSchema(ctx, add) {
         const at = `${reg}:${r.line}`;
         if (!STATE_ID_RE.test(r.stateId)) add(R, 'STATE_ID_FORMAT', 'VIOLATION', 'stateId', r.stateId, 'stateId is not STATE_<SYSTEM>_<NAME> in upper case', at);
         const vc = r.cells.visualClass;
-        if (vc !== undefined && (vc.kind !== 'VALUE' || !ctx.reg.enums.visualClass.includes(vc.value))) add(R, 'ENUM_INVALID', 'VIOLATION', 'stateId', r.stateId, `visualClass ${JSON.stringify(vc ? vc.raw : '')} is not in the enum (${ctx.reg.enums.visualClass.join(', ')})`, at);
+        if (vc !== undefined && (vc.kind !== 'VALUE' || !ctx.reg.enums.visualClass.includes(vc.value))) add(R, 'ENUM_INVALID', 'VIOLATION', 'stateId', r.stateId, `visualClass ${JSON.stringify(vc ? vc.raw : '')} is not in the enum (${ctx.reg.enums.visualClass.join(', ')})`, at, `visualClass=${vc.raw}`);
         for (const f of BOOLEAN_FIELDS) {
             const c = r.cells[f];
-            if (c && !(c.kind === 'VALUE' && /^(true|false)$/.test(c.value))) add(R, 'TYPE_INVALID', 'VIOLATION', 'stateId', r.stateId, `${f} ${JSON.stringify(c.raw)} is not true or false`, at);
+            if (c && !(c.kind === 'VALUE' && /^(true|false)$/.test(c.value))) add(R, 'TYPE_INVALID', 'VIOLATION', 'stateId', r.stateId, `${f} ${JSON.stringify(c.raw)} is not true or false`, at, `${f}=${c.raw}`);
+        }
+        // Required plain-string fields (description, authoritativeSource) may not be empty.
+        for (const f of ctx.reg.stringFields) {
+            if (OWN_RULE_FIELDS.has(f) || f === 'visualClass') continue;
+            const c = r.cells[f];
+            if (c && (c.kind === 'EMPTY' || c.kind === 'NONE')) add(R, 'VALUE_MISSING', 'VIOLATION', 'stateId', r.stateId, `required string field ${f} is empty`, at, f);
         }
         const t = r.cells.transitionStates;
         if (t && t.kind !== 'EMPTY' && t.kind !== 'NONE') {
             const list = t.kind === 'VALUE' ? [t.value] : t.tokens;
             const unknown = list.filter(x => !ids.has(x));
-            if (unknown.length) add(R, 'TRANSITION_UNKNOWN', 'VIOLATION', 'stateId', r.stateId, `transitionStates names unknown state(s): ${unknown.join(', ')}`, at);
+            if (unknown.length) add(R, 'TRANSITION_UNKNOWN', 'VIOLATION', 'stateId', r.stateId, `transitionStates names unknown state(s): ${unknown.join(', ')}`, at, unknown.join('+'));
         }
     }
 }
@@ -790,18 +856,30 @@ function ruleManifestTemplate(ctx, add) {
     for (const id of cat.dupSheets) add(R, 'DUPLICATE_SHEET_ID', 'VIOLATION', 'sheetId', id, 'sheetId appears more than once in the catalogue', catSource(ctx, id));
     for (const id of cat.dupEntries) add(R, 'DUPLICATE_ENTRY_ID', 'VIOLATION', 'entryId', id, 'entry id appears more than once in the catalogue', catSource(ctx, id));
     for (const id of cat.badSlots) add(R, 'SLOT_INVALID', 'VIOLATION', 'entryId', id, 'slot must be {sheetId, slotId, x, y, w, h} with non-negative integer x, y and positive integer w, h', catSource(ctx, id));
-    for (const s of cat.dupSlots) add(R, 'DUPLICATE_SLOT_ID', 'VIOLATION', 'slotId', s.slotId, `slotId is owned by ${cat.slotById.get(s.slotId).entryId} and ${s.entryId}`, catSource(ctx, s.entryId));
+    const rect = o => `${o.x},${o.y} ${o.w}x${o.h}`;
+    for (const s of cat.dupSlots) add(R, 'DUPLICATE_SLOT_ID', 'VIOLATION', 'slotId', s.slotId, `slotId is owned by ${cat.slotById.get(s.slotId).entryId} and ${s.entryId}`, catSource(ctx, s.entryId), s.entryId);
     for (const s of cat.slots) {
-        if (!cat.sheets.has(s.sheetId)) add(R, 'SLOT_SHEET_UNKNOWN', 'VIOLATION', 'slotId', s.slotId, `slot of ${s.entryId} is on sheet ${s.sheetId}, which is not a catalogue sheet`, catSource(ctx, s.entryId));
+        const sh = cat.sheets.get(s.sheetId);
+        if (!sh) add(R, 'SLOT_SHEET_UNKNOWN', 'VIOLATION', 'slotId', s.slotId, `slot of ${s.entryId} is on sheet ${s.sheetId}, which is not a catalogue sheet`, catSource(ctx, s.entryId), s.sheetId);
+        else if (s.x + s.w > sh.w || s.y + s.h > sh.h) add(R, 'SLOT_OUTSIDE_SHEET', 'VIOLATION', 'slotId', s.slotId, `slot of ${s.entryId} (${rect(s)}) leaves sheet ${s.sheetId} (${sh.w}x${sh.h})`, catSource(ctx, s.entryId), rect(s));
         const colon = s.slotId.lastIndexOf(':');
-        if (colon < 0 || s.slotId.slice(0, colon) !== s.sheetId) add(R, 'SLOT_ID_SHEET_MISMATCH', 'VIOLATION', 'slotId', s.slotId, `slotId is not <sheetId>:<index> for sheet ${s.sheetId}`, catSource(ctx, s.entryId));
+        if (colon < 0 || s.slotId.slice(0, colon) !== s.sheetId) add(R, 'SLOT_ID_SHEET_MISMATCH', 'VIOLATION', 'slotId', s.slotId, `slotId is not <sheetId>:<index> for sheet ${s.sheetId}`, catSource(ctx, s.entryId), s.sheetId);
+    }
+    // Dimensions against geometry.json: an ATLAS sheet uses the tile grid and stays within atlasMaxPx.
+    if (cat.geometry) {
+        const g = cat.geometry;
+        for (const [id, sh] of cat.sheets) {
+            if (sh.kind !== 'ATLAS') continue;
+            if (sh.gridPx !== g.tilePx) add(R, 'SHEET_GRID_MISMATCH', 'VIOLATION', 'sheetId', id, `ATLAS grid ${sh.gridPx} px is not the geometry tilePx ${g.tilePx}`, catSource(ctx, id), String(sh.gridPx));
+            if (g.atlasMaxPx !== null && (sh.w > g.atlasMaxPx || sh.h > g.atlasMaxPx)) add(R, 'SHEET_TOO_LARGE', 'VIOLATION', 'sheetId', id, `ATLAS ${sh.w}x${sh.h} exceeds the geometry atlasMaxPx ${g.atlasMaxPx}`, catSource(ctx, id), `${sh.w}x${sh.h}`);
+        }
     }
     for (const x of tpl.refusals) {
-        add(R, `TEMPLATE_REFUSED_${x.code}`, 'GAP', x.idKind, x.id, `the template generator refused ${x.level === 'catalogue' ? 'the catalogue' : `this ${x.level}`}: ${x.message}`, GENERATOR);
+        add(R, `TEMPLATE_REFUSED_${x.code}`, 'GAP', x.idKind, x.id, `the template generator refused ${x.level === 'catalogue' ? 'the catalogue' : `this ${x.level}`}: ${x.message}`, GENERATOR, x.value);
     }
     for (const b of tpl.bad) add(R, 'TEMPLATE_SIDECAR_INVALID', 'VIOLATION', 'file', b.file, b.why, b.file);
     for (const id of tpl.dupSheets) add(R, 'DUPLICATE_TEMPLATE_SHEET', 'VIOLATION', 'sheetId', id, 'two template sidecars describe this sheet', tplSrc(id));
-    for (const s of tpl.dupSlots) add(R, 'DUPLICATE_TEMPLATE_SLOT', 'VIOLATION', 'slotId', s.slotId, `slotId appears twice in the template output (sheets ${tpl.slotById.get(s.slotId).sheetId}, ${s.sheetId})`, tplSrc(s.sheetId));
+    for (const s of tpl.dupSlots) add(R, 'DUPLICATE_TEMPLATE_SLOT', 'VIOLATION', 'slotId', s.slotId, `slotId appears twice in the template output (sheets ${tpl.slotById.get(s.slotId).sheetId}, ${s.sheetId})`, tplSrc(s.sheetId), s.sheetId);
     const refusedSheets = new Set(tpl.refusals.filter(x => x.sheetId).map(x => x.sheetId));
     for (const [id, sh] of cat.sheets) {
         const t = tpl.sheets.get(id);
@@ -810,22 +888,21 @@ function ruleManifestTemplate(ctx, add) {
             const why = tpl.mode === 'GENERATED' ? (refusedSheets.has(id) ? 'the generator refused this sheet or slots on it' : 'the generator wrote no template for it') : 'no sidecar for it in the template folder';
             add(R, 'SHEET_NOT_IN_TEMPLATE', 'GAP', 'sheetId', id, `${why}; ${n} catalogue slot(s) on it are not compared`, catSource(ctx, id));
         } else if (!sameSheet(sh, t)) {
-            add(R, 'SHEET_GEOMETRY_DIFFERS', 'VIOLATION', 'sheetId', id, `catalogue ${sh.kind} ${sh.w}x${sh.h} grid ${sh.gridPx} vs template ${t.kind} ${t.w}x${t.h} grid ${t.gridPx}`, tplSrc(id));
+            add(R, 'SHEET_GEOMETRY_DIFFERS', 'VIOLATION', 'sheetId', id, `catalogue ${sh.kind} ${sh.w}x${sh.h} grid ${sh.gridPx} vs template ${t.kind} ${t.w}x${t.h} grid ${t.gridPx}`, tplSrc(id), `${t.kind} ${t.w}x${t.h}/${t.gridPx}`);
         }
     }
     for (const [id] of tpl.sheets) if (!cat.sheets.has(id)) add(R, 'SHEET_NOT_IN_CATALOGUE', 'VIOLATION', 'sheetId', id, 'template sheet that the catalogue does not list', tplSrc(id));
     for (const s of cat.slots) {
         if (!tpl.sheets.has(s.sheetId)) continue;
         const t = tpl.slotById.get(s.slotId);
-        const rect = o => `${o.x},${o.y} ${o.w}x${o.h}`;
-        if (!t) add(R, 'SLOT_NOT_IN_TEMPLATE', 'VIOLATION', 'slotId', s.slotId, `catalogue slot of ${s.entryId} (${rect(s)}) is missing from the template for ${s.sheetId}`, catSource(ctx, s.entryId));
-        else if (t.sheetId !== s.sheetId) add(R, 'SLOT_SHEET_DIFFERS', 'VIOLATION', 'slotId', s.slotId, `catalogue sheet ${s.sheetId}, template sheet ${t.sheetId}`, catSource(ctx, s.entryId));
+        if (!t) add(R, 'SLOT_NOT_IN_TEMPLATE', 'VIOLATION', 'slotId', s.slotId, `catalogue slot of ${s.entryId} (${rect(s)}) is missing from the template for ${s.sheetId}`, catSource(ctx, s.entryId), s.entryId);
+        else if (t.sheetId !== s.sheetId) add(R, 'SLOT_SHEET_DIFFERS', 'VIOLATION', 'slotId', s.slotId, `catalogue sheet ${s.sheetId}, template sheet ${t.sheetId}`, catSource(ctx, s.entryId), t.sheetId);
         else {
-            if (!sameRect(s, t)) add(R, 'SLOT_RECT_DIFFERS', 'VIOLATION', 'slotId', s.slotId, `catalogue ${rect(s)} vs template ${rect(t)}`, catSource(ctx, s.entryId));
-            if (t.entryId !== s.entryId) add(R, 'SLOT_ENTRY_DIFFERS', 'VIOLATION', 'slotId', s.slotId, `catalogue entry ${s.entryId} vs template entry ${t.entryId}`, catSource(ctx, s.entryId));
+            if (!sameRect(s, t)) add(R, 'SLOT_RECT_DIFFERS', 'VIOLATION', 'slotId', s.slotId, `catalogue ${rect(s)} vs template ${rect(t)}`, catSource(ctx, s.entryId), `${rect(s)} vs ${rect(t)}`);
+            if (t.entryId !== s.entryId) add(R, 'SLOT_ENTRY_DIFFERS', 'VIOLATION', 'slotId', s.slotId, `catalogue entry ${s.entryId} vs template entry ${t.entryId}`, catSource(ctx, s.entryId), `${s.entryId} vs ${t.entryId}`);
         }
     }
-    for (const t of tpl.slots) if (!cat.slotById.has(t.slotId)) add(R, 'SLOT_NOT_IN_CATALOGUE', 'VIOLATION', 'slotId', t.slotId, `template slot on ${t.sheetId} (entry ${t.entryId}) that the catalogue does not have`, tplSrc(t.sheetId));
+    for (const t of tpl.slots) if (!cat.slotById.has(t.slotId)) add(R, 'SLOT_NOT_IN_CATALOGUE', 'VIOLATION', 'slotId', t.slotId, `template slot on ${t.sheetId} (entry ${t.entryId}) that the catalogue does not have`, tplSrc(t.sheetId), String(t.entryId));
 }
 
 function rulePlaced(ctx, add) {
@@ -836,7 +913,7 @@ function rulePlaced(ctx, add) {
         if (L.errors.length) add(R, 'LEDGER_MALFORMED', 'VIOLATION', 'file', where, L.errors.slice(0, 5).map(e => `line ${e.line}: ${e.message}`).join('; '), where);
         for (const row of L.rows) {
             for (const id of row.ids) {
-                if (!ctx.cat.entries.has(id) && !ctx.cat.slotById.has(id)) add(R, 'LEDGER_ID_UNKNOWN', 'VIOLATION', 'id', id, `${row.decision} row names an id that is neither a catalogue entry nor a catalogue slot`, `${where}:${row.line}`);
+                if (!ctx.cat.entries.has(id) && !ctx.cat.slotById.has(id)) add(R, 'LEDGER_ID_UNKNOWN', 'VIOLATION', 'id', id, `${row.decision} row names an id that is neither a catalogue entry nor a catalogue slot`, `${where}:${row.line}`, row.sha256);
             }
         }
     }
@@ -849,12 +926,16 @@ function rulePlaced(ctx, add) {
         p.obj.filled.forEach((f, i) => {
             const ok = isObj(f) && typeof f.sheetId === 'string' && [f.x, f.y, f.w, f.h].every(Number.isInteger);
             if (!ok) { add(R, 'PLACEMENT_REPORT_INVALID', 'VIOLATION', 'file', where, `filled[${i}] has no sheetId and integer x, y, w, h`, where); return; }
-            const s = typeof f.slotId === 'string' ? ctx.cat.slotById.get(f.slotId) : null;
-            const inside = s ? s.sheetId === f.sheetId && contains(s, f) : (ctx.cat.slotsBySheet.get(f.sheetId) || []).some(x => contains(x, f));
-            if (!inside) {
-                const id = typeof f.slotId === 'string' ? f.slotId : `${f.sheetId}@${f.x},${f.y},${f.w}x${f.h}`;
-                const what = s ? `catalogue slot ${s.sheetId} ${s.x},${s.y} ${s.w}x${s.h}` : 'any catalogue slot on that sheet';
-                add(R, 'PLACED_OUTSIDE_SLOT', 'VIOLATION', 'slotId', id, `placed region ${f.sheetId} ${f.x},${f.y} ${f.w}x${f.h} (entry ${f.entryId}) is not inside ${what}`, where);
+            const region = `${f.sheetId} ${f.x},${f.y} ${f.w}x${f.h}`;
+            // A named slot must exist (no fallback to "some other slot"); a region without a slot id must
+            // lie inside some catalogue slot on its sheet.
+            if (typeof f.slotId === 'string') {
+                const s = ctx.cat.slotById.get(f.slotId);
+                if (!s) { add(R, 'PLACED_SLOT_UNKNOWN', 'VIOLATION', 'slotId', f.slotId, `placed region ${region} names slot ${f.slotId}, which is not a catalogue slot`, where, region); return; }
+                if (s.sheetId !== f.sheetId || !contains(s, f)) add(R, 'PLACED_OUTSIDE_SLOT', 'VIOLATION', 'slotId', f.slotId, `placed region ${region} (entry ${f.entryId}) is not inside catalogue slot ${s.sheetId} ${s.x},${s.y} ${s.w}x${s.h}`, where, region);
+                if (typeof f.entryId === 'string' && f.entryId !== s.entryId) add(R, 'PLACED_ENTRY_MISMATCH', 'VIOLATION', 'slotId', f.slotId, `placed as entry ${f.entryId}, but the catalogue slot belongs to ${s.entryId}`, where, f.entryId);
+            } else if (!(ctx.cat.slotsBySheet.get(f.sheetId) || []).some(x => contains(x, f))) {
+                add(R, 'PLACED_OUTSIDE_SLOT', 'VIOLATION', 'slotId', `${f.sheetId}@${f.x},${f.y},${f.w}x${f.h}`, `placed region ${region} (entry ${f.entryId}) is not inside any catalogue slot on that sheet`, where, region);
             }
         });
     }
@@ -872,18 +953,32 @@ function finalizeFindings(list) {
         prev.sources.push(f.source);
     }
     const out = [...byKey.values()].map(f => ({
-        rule: f.rule, code: f.code, severity: f.severity, idKind: f.idKind, id: f.id,
+        rule: f.rule, code: f.code, severity: f.severity, idKind: f.idKind, id: f.id, value: f.value,
         detail: uniq(f.details).sort(cmp).join(' | '), source: uniq(f.sources).sort(cmp)[0]
     }));
-    return out.sort((a, b) => RULES.indexOf(a.rule) - RULES.indexOf(b.rule) || cmp(a.code, b.code) || cmp(a.id, b.id));
+    return out.sort((a, b) => RULES.indexOf(a.rule) - RULES.indexOf(b.rule) || cmp(a.code, b.code) || cmp(a.id, b.id) || cmp(a.value, b.value));
 }
 
 function evaluate(input) {
     const reg = parseRegistry(input.registryText, input.files.registry);
     const cat = indexCatalogue(input.catalogue, input.catalogueText, input.files.catalogue);
     const scope = loadScope(input.scope, input.files.scope);
+    const badVc = scope.artRequiredClasses.filter(v => !reg.enums.visualClass.includes(v));
+    const badSys = scope.composedExemptSystems.filter(v => !reg.enums.system.includes(v));
+    if (badVc.length || badSys.length) {
+        throw new InputError(`scope ${displayPath(input.files.scope)} names values that are not in the registry schema enums: ${[...badVc.map(v => `artRequiredClasses ${v}`), ...badSys.map(v => `composedExemptSystems ${v}`)].join(', ')}`);
+    }
     const map = loadMap(input.map, input.files.map);
     const wc = worldCatalogIds(input.worldCatalog, input.files.worldCatalog);
+    // geometry.json (for dimensions): the file the catalogue references, when it references one.
+    let geometry = null;
+    if (isObj(input.catalogue.geometry) && typeof input.catalogue.geometry.path === 'string') {
+        const gf = path.isAbsolute(input.catalogue.geometry.path) ? input.catalogue.geometry.path : path.join(REPO_ROOT, input.catalogue.geometry.path);
+        const g = readJson(gf, 'geometry');
+        if (!isObj(g) || !Number.isInteger(g.tilePx) || g.tilePx < 1) throw new InputError(`geometry ${displayPath(gf)} has no positive integer tilePx`);
+        geometry = { file: gf, tilePx: g.tilePx, atlasMaxPx: Number.isInteger(g.atlasMaxPx) ? g.atlasMaxPx : null };
+    }
+    cat.geometry = geometry;
     let rawTpl;
     if (input.templatesDir) rawTpl = Object.assign({ mode: 'DIR', source: displayPath(input.templatesDir), dir: input.templatesDir, runs: [], refusals: [] }, readSidecars(input.templatesDir));
     else rawTpl = generateTemplates(input.files.catalogue, input.catalogue, cat, input.workDir);
@@ -893,10 +988,10 @@ function evaluate(input) {
         const V = require(path.join(REPO_ROOT, LEDGER_PARSER));
         ledger = V.parseLedger(input.approvalsText, displayPath(input.files.approvals));
     }
-    const ctx = { files: input.files, reg, cat, scope, map, wc, tpl, ledger, placements: input.placements };
+    const ctx = { files: input.files, reg, cat, scope, map, wc, tpl, ledger, placements: input.placements, placementsHow: input.placementsHow || 'GIVEN' };
     resolveStates(ctx);
     const raw = [];
-    const add = (rule, code, severity, idKind, id, detail, source) => raw.push({ rule, code, severity, idKind, id: String(id), detail, source });
+    const add = (rule, code, severity, idKind, id, detail, source, value) => raw.push({ rule, code, severity, idKind, id: String(id), value: value === undefined || value === null ? '' : String(value), detail, source });
     ruleWsr01(ctx, add);
     ruleWsr02(ctx, add);
     ruleWsr03(ctx, add);
@@ -1003,7 +1098,7 @@ function computeCounts(ctx, g) {
             approvals: ctx.ledger ? displayPath(ctx.files.approvals) : null,
             ledgerSection: ctx.ledger ? (ctx.ledger.present ? 'PRESENT' : 'ABSENT') : 'NO_FILE',
             ledgerRows: ctx.ledger ? ctx.ledger.rows.length : 0,
-            placementReports: ctx.placements.length,
+            placementReports: ctx.placements.length, placementReportsHow: ctx.placementsHow,
             placedRegions: ctx.placements.reduce((n, p) => n + (isObj(p.obj) && Array.isArray(p.obj.filled) ? p.obj.filled.length : 0), 0)
         },
         rules,
@@ -1039,7 +1134,8 @@ function buildReport(ctx, g) {
     const inputs = {
         registry: displayPath(f.registry), catalogue: displayPath(f.catalogue), worldCatalog: displayPath(f.worldCatalog),
         approvals: ctx.ledger ? displayPath(f.approvals) : null, scope: displayPath(f.scope), map: displayPath(f.map),
-        baseline: displayPath(f.baseline), placements: ctx.placements.map(p => displayPath(p.file)),
+        baseline: displayPath(f.baseline), placements: { how: ctx.placementsHow, files: ctx.placements.map(p => displayPath(p.file)) },
+        geometry: ctx.cat.geometry ? { path: displayPath(ctx.cat.geometry.file), tilePx: ctx.cat.geometry.tilePx, atlasMaxPx: ctx.cat.geometry.atlasMaxPx } : null,
         templates: { mode: tpl.mode, source: tpl.source, runs: tpl.runs, ignoredFiles: tpl.ignored || [] }
     };
     const parameters = {
@@ -1057,11 +1153,11 @@ function buildReport(ctx, g) {
         assetFamily: x.row.cells.assetFamily ? x.row.cells.assetFamily.raw.replace(/`/g, '') : null,
         visualStateId: x.row.cells.visualStateId ? x.row.cells.visualStateId.raw.replace(/`/g, '') : null,
         performanceClass: x.row.cells.performanceClass ? x.row.cells.performanceClass.raw.replace(/`/g, '') : null,
-        entries: x.entries, slots: x.slots, proposals: x.proposals,
+        entries: x.entries, rejected: x.rejected || [], slots: x.slots, proposals: x.proposals,
         worldCatalogId: !!x.visualStateId && ctx.wc.bare.has(x.visualStateId)
     }));
     const findings = ctx.findings.map(x => Object.assign({}, x, { gate: GATING.has(x.severity) ? (g.base.has(keyOf(x)) ? 'BASELINED' : 'NEW') : 'NOT_GATING' }));
-    const report = { schema: SCHEMA.report, tool: TOOL, inputs, parameters, notCheckable: NOT_CHECKABLE, counts, states, findings, staleBaseline: g.stale.map(b => ({ rule: b.rule, code: b.code, id: b.id, reason: b.reason })) };
+    const report = { schema: SCHEMA.report, tool: TOOL, inputs, parameters, notCheckable: NOT_CHECKABLE, counts, states, findings, staleBaseline: g.stale.map(b => ({ rule: b.rule, code: b.code, id: b.id, value: b.value || '', reason: b.reason })) };
     return { json: jsonLines(report, ['states', 'findings', 'staleBaseline']), md: reportMarkdown(report) };
 }
 
@@ -1076,7 +1172,8 @@ function reportMarkdown(rep) {
     table(['Input', 'Path'], [
         ['Registry', i.registry], ['Catalogue (atlas of record)', i.catalogue], ['WorldCatalog', i.worldCatalog],
         ['Approvals ledger', i.approvals || '(none)'], ['Scope parameter', i.scope], ['Visual-state map', i.map], ['Baseline', i.baseline],
-        ['Placement reports', i.placements.join(', ') || '(none given)'],
+        ['Placement reports', `${i.placements.how}: ${i.placements.files.join(', ') || 'none'}`],
+        ['Geometry (dimensions)', i.geometry ? `${i.geometry.path} (tilePx ${i.geometry.tilePx}, atlasMaxPx ${i.geometry.atlasMaxPx === null ? 'none' : i.geometry.atlasMaxPx})` : '(the catalogue references none)'],
         ['Template slot map', `${i.templates.mode}: ${i.templates.source}`]
     ]);
     if (i.templates.runs.length) {
@@ -1128,11 +1225,12 @@ function reportMarkdown(rep) {
     if (Object.keys(m.findingsByCode).length) table(['Finding code', 'Count'], Object.entries(m.findingsByCode));
     L.push('## Placed art', '');
     const p = c.placed;
-    L.push(`Approvals file: ${p.approvals || '(none)'}; SHA-256 ledger section: ${p.ledgerSection}; ledger rows: ${p.ledgerRows}. Placement reports given: ${p.placementReports}; placed regions: ${p.placedRegions}.`, '');
+    L.push(`Approvals file: ${p.approvals || '(none)'}; SHA-256 ledger section: ${p.ledgerSection}; ledger rows: ${p.ledgerRows}. Placement reports (${p.placementReportsHow}): ${p.placementReports}; placed regions: ${p.placedRegions}.`, '');
     L.push('## States', '');
-    table(['State', 'Line', 'System', 'Visual class', 'Family', 'Visual state', 'Perf. class', 'Entries', 'Slots (template)', 'Candidates (PROPOSED)'],
+    table(['State', 'Line', 'System', 'Visual class', 'Family', 'Visual state', 'Perf. class', 'Entries', 'Rejected matches (class may not display a world state)', 'Slots (template)', 'Candidates (PROPOSED)'],
         rep.states.map(s => [s.stateId, s.line, s.system, s.visualClass, s.assetFamily, s.visualStateId, s.performanceClass || '(no column)',
             s.entries.length ? s.entries.map(e => `${e.entryId} (${e.methods.join('+')})`).join(', ') : '-',
+            s.rejected.join(', ') || '-',
             s.slots.length ? s.slots.map(x => `${x.slotId} ${x.template}`).join(', ') : '-',
             s.proposals.join(', ') || '-']));
     L.push('## Findings', '');
@@ -1141,10 +1239,10 @@ function reportMarkdown(rep) {
         const list = rep.findings.filter(x => x.rule === r);
         if (!list.length) continue;
         L.push(`### ${r} (${list.length})`, '');
-        table(['Code', 'Severity', 'Gate', 'Id', 'Detail', 'Source'], list.map(x => [x.code, x.severity, x.gate, `${x.idKind} ${x.id}`, x.detail, x.source]));
+        table(['Code', 'Severity', 'Gate', 'Id', 'Detail', 'Source'], list.map(x => [x.code, x.severity, x.gate, `${x.idKind} ${x.id}${x.value ? ` [${x.value}]` : ''}`, x.detail, x.source]));
     }
     L.push('## Stale baseline entries', '');
-    if (rep.staleBaseline.length) table(['Rule', 'Code', 'Id', 'Reason'], rep.staleBaseline.map(b => [b.rule, b.code, b.id, b.reason]));
+    if (rep.staleBaseline.length) table(['Rule', 'Code', 'Id', 'Reason'], rep.staleBaseline.map(b => [b.rule, b.code, `${b.id}${b.value ? ` [${b.value}]` : ''}`, b.reason]));
     else L.push('None.', '');
     return L.join('\n').replace(/\n+$/, '') + '\n';
 }
@@ -1190,6 +1288,21 @@ function parseArgs(argv) {
     return o;
 }
 
+// Placement reports: the files given with --placements; "--placements none" for none; without the option,
+// every tracked placement_report.json under art/ (git ls-files, so untracked scratch output never counts).
+function placementInputs(given) {
+    let files, how;
+    if (given.length === 1 && given[0] === 'none') { files = []; how = 'NONE (--placements none)'; }
+    else if (given.length) { files = given.map(f => path.resolve(f)); how = 'GIVEN (--placements)'; }
+    else {
+        const r = childProcess.spawnSync('git', ['ls-files', '-z', '--', 'art/*placement_report.json'], { cwd: REPO_ROOT, encoding: 'utf8' });
+        if (r.status !== 0) throw new InputError('cannot list tracked placement reports (git ls-files failed); pass --placements <file> or --placements none');
+        files = r.stdout.split('\0').filter(Boolean).sort(cmp).map(f => path.join(REPO_ROOT, f));
+        how = 'DISCOVERED (tracked art/**/placement_report.json)';
+    }
+    return { placementsHow: how, placements: files.map(f => ({ file: f, obj: readJson(f, 'placement report') })) };
+}
+
 function loadInputs(opts) {
     const p = k => (opts[k] !== undefined ? path.resolve(opts[k]) : path.join(REPO_ROOT, DEFAULTS[k]));
     const files = { registry: p('registry'), catalogue: p('catalogue'), worldCatalog: p('worldCatalog'), approvals: p('approvals'), scope: p('scope'), map: p('map'), baseline: p('baseline'), report: p('report') };
@@ -1205,7 +1318,7 @@ function loadInputs(opts) {
         scope: readJson(files.scope, 'scope'),
         map: readJson(files.map, 'visual-state map'),
         approvalsText,
-        placements: opts.placements.map(f => ({ file: path.resolve(f), obj: readJson(path.resolve(f), 'placement report') })),
+        ...placementInputs(opts.placements),
         templatesDir: opts.templates !== undefined ? path.resolve(opts.templates) : null,
         workDir: opts.workDir !== undefined ? path.resolve(opts.workDir) : null
     };
@@ -1255,12 +1368,12 @@ function runChecker(argv) {
     }
     if (opts.strict) {
         const gating = ctx.findings.filter(x => GATING.has(x.severity));
-        for (const x of gating) out(`${x.severity} ${x.rule} ${x.code} ${x.id}: ${x.detail} (${x.source})`);
+        for (const x of gating) out(`${x.severity} ${x.rule} ${x.code} ${x.id}${x.value ? ` [${x.value}]` : ''}: ${x.detail} (${x.source})`);
         out(gating.length ? `STRICT: FAILED (${gating.length} violation(s) or gap(s); the baseline is ignored)` : 'STRICT: OK (no violation or gap)');
         return { code: gating.length ? 1 : 0, lines, ctx, report };
     }
-    for (const x of g.fresh) out(`NEW ${x.rule} ${x.code} ${x.id}: ${x.detail} (${x.source})`);
-    for (const b of g.stale) out(`STALE ${b.rule} ${b.code} ${b.id}: baseline entry no longer occurs; remove it (reason was: ${b.reason})`);
+    for (const x of g.fresh) out(`NEW ${x.rule} ${x.code} ${x.id}${x.value ? ` [${x.value}]` : ''}: ${x.detail} (${x.source})`);
+    for (const b of g.stale) out(`STALE ${b.rule} ${b.code} ${b.id}${b.value ? ` [${b.value}]` : ''}: baseline entry no longer occurs; remove it (reason was: ${b.reason})`);
     out(`BASELINE ${displayPath(f.baseline)}: ${g.base.size} entr${g.base.size === 1 ? 'y' : 'ies'}, ${g.matched} matched, ${g.fresh.length} new, ${g.stale.length} stale`);
     const failed = g.fresh.length > 0 || g.stale.length > 0;
     out(failed ? `GATE: FAILED (${g.fresh.length} new, ${g.stale.length} stale)` : 'GATE: OK (every violation and gap is baselined; no stale entry)');

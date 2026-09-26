@@ -5,33 +5,41 @@
   "artRequiredClassesWhy": "Spec WSR-02 names VISUAL_REQUIRED; the WG.33.01 brief adds VFX_REQUIRED (vfx states also need an asset family and a slot). VISUAL_OPTIONAL, AUDIO_REQUIRED and UI_ONLY states are not required to have art; if they name a visual state it still traces slots for WSR-04.",
   "composedExemptSystems": ["LANDMARKS_HISTORY"],
   "composedWhy": "Registry rows whose family is '*Compositional Assembly*' and visual state '*None (Composed)*' are landmarks assembled from catalogue pieces (WG.63.02; DEUS_NATURAL_WORLD_SYSTEMS.md section 8 item 4). The brief declares them an exemption class for landmarks only, so the exemption is limited to the LANDMARKS_HISTORY system.",
+  "mayDisplayWorldStateWhy": "A registry visual state resolves (WSR-03) and traces slots (WSR-04) only through entries whose class may display a world state: every NATURAL_WORLD class, and NON_WORLD_STATE classes whose source class sets mayDisplayWorldState true (addendum terrain pieces and overlays, effects, props). People, creatures, item icons and faces never display a world state, so a visual state id that merely shares a word with one of them does not count as resolved (review finding, 2026-09-26).",
   "sourceClasses": {
     "ADDENDUM_FAMILIES": {
       "kinds": ["addendum"],
+      "mayDisplayWorldState": true,
       "why": "Owner addendum families (TOP, EDGE, SHADE, RAMP, RAMPSIDE, CONNECTOR, DECAY, WALLFACE, RIMSHADOW, HANGING, LIGHT, FRAMECLASS; docs/art/catalogue/SCHEMA.md section 8). The brief lists addendum families as a declared non-world-state source class."
     },
     "CHARACTERS": {
       "kinds": ["catalog", "assetIndex", "brief", "ar", "manifest"],
+      "mayDisplayWorldState": false,
       "why": "People and body sheets from WorldCatalog people/skins, the SEG-11 briefs and AR rows (brief: characters)."
     },
     "CREATURES": {
       "kinds": ["catalog", "assetIndex", "brief", "ar", "manifest"],
+      "mayDisplayWorldState": false,
       "why": "Wildlife and monster sprites from WorldCatalog wildlife.species, briefs and AR rows (brief: creatures). The registry's CREATURE_ECOLOGY rows are density and habitat states, not sprites."
     },
     "EFFECTS": {
       "kinds": ["catalog", "assetIndex", "brief", "ar", "manifest"],
+      "mayDisplayWorldState": true,
       "why": "Combat and spell effect sprites (arrow, blood, cast, hit) from the SEG-17 brief and AR rows. Not named in the brief's list; declared here explicitly because none of them displays a natural-world state. Registry VFX states (flame, smoke, steam) have no catalogue entry today and are reported under WSR-03."
     },
     "ITEMS": {
       "kinds": ["catalog", "assetIndex", "brief", "ar", "manifest"],
+      "mayDisplayWorldState": false,
       "why": "Item icons and equipment layers from WorldCatalog items.types, the SEG-17 briefs and AR rows (brief: items)."
     },
     "PROPS": {
       "kinds": ["catalog", "assetIndex", "brief", "ar", "manifest"],
+      "mayDisplayWorldState": true,
       "why": "Furniture, workshops and built structures from WorldCatalog objects, briefs, AR rows and the asset manifest (brief: props sourced from WorldCatalog/briefs/AR rows). manifest is allowed because 7 structure entries cite only asset-manifest rows."
     },
     "UI": {
       "kinds": ["catalog", "assetIndex", "brief", "ar", "manifest"],
+      "mayDisplayWorldState": false,
       "why": "Face/portrait sheets shown in windows, from WorldCatalog faces and AR rows (brief: UI)."
     }
   },
