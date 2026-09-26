@@ -1,0 +1,39 @@
+$ git rev-parse HEAD
+6b15462c3732755377f8491fec763586746c29bc
+$ git diff --name-only 9cba41eaf6378048d50004dcf243defbfe7f17f4..HEAD
+game/js/sim/ledger.js
+game/js/sim/ledger_defaults.js
+tasks/WG.65.15/lane-l1/BRIEF.md
+tasks/WG.65.15/lane-l1/LEDGER_API.md
+tasks/WG.65.15/lane-l1/gen_ledger_tables.js
+tasks/WG.65.15/lane-l1/lane.json
+tasks/WG.65.15/lane-l1/launches/20260926_042828_prompt.txt
+tools/sim/fixtures/ledger/longrun_expected.json
+tools/sim/test_ledger.js
+tools/sim/test_ledger_longrun.js
+EXIT=0
+$ (each path matched against lane.json allowedPaths: game/js/sim/ledger*, tools/sim/test_ledger*.js, tools/sim/fixtures/ledger/**, tasks/WG.65.15/**)
+IN   game/js/sim/ledger.js
+IN   game/js/sim/ledger_defaults.js
+IN   tasks/WG.65.15/lane-l1/BRIEF.md
+IN   tasks/WG.65.15/lane-l1/LEDGER_API.md
+IN   tasks/WG.65.15/lane-l1/gen_ledger_tables.js
+IN   tasks/WG.65.15/lane-l1/lane.json
+IN   tasks/WG.65.15/lane-l1/launches/20260926_042828_prompt.txt
+IN   tools/sim/fixtures/ledger/longrun_expected.json
+IN   tools/sim/test_ledger.js
+IN   tools/sim/test_ledger_longrun.js
+10 paths, 0 outside allowedPaths
+EXIT=0
+$ git diff --name-only 9cba41eaf6378048d50004dcf243defbfe7f17f4..HEAD -- game/js/plugins game/js/plugins.js game/data docs art tools/ops tools/governance
+EXIT=0 (no output = no such path changed)
+$ git log --format='%h %an %s' 9cba41eaf6378048d50004dcf243defbfe7f17f4..HEAD
+6b15462c deus-claude [claude] WG.65.15 WIP: LEDGER_API.md citation fixes (F-04 line, ADR lines, tamper count)
+34dda721 deus-claude [claude] WG.65.15 WIP: LEDGER_API.md with generated default tables and hook-up notes
+d63b901c deus-claude [claude] WG.65.15 WIP: freeze shared defaults; amount errors name class and cause
+3304ca2e deus-claude [claude] WG.65.15 WIP: deterministic long-run conservation harness, faults and pinned checksums
+3900a050 deus-claude [claude] WG.65.15 WIP: unit, purity and mutation tests (115 checks, 41 mutants)
+d06afa27 deus-claude [claude] WG.65.15 WIP: host-agnostic mass ledger module and default tables
+99197924 snewt [ops] WG.65.15 lane-l1 launch prompt 20260926_042828
+e2cbe558 deus-pm [pm] Open lane-l1 (WG.65.15): BRIEF.md and lane.json
+EXIT=0

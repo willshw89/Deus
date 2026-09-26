@@ -1,0 +1,12 @@
+You are the primary writer (Claude) for lane-l1 (Task WG.65.15: per-material-class mass/matter ledger, host-agnostic sim module under game/js/sim/ plus a deterministic long-run conservation harness).
+Read tasks/WG.65.15/lane-l1/BRIEF.md carefully and follow every instruction in it. The BRIEF is the authority: its allowedPaths, deliverables, acceptance criteria and standing rules govern this run.
+Key rules (from the BRIEF):
+1. NO ART GENERATION BY ANYONE (DEC-007). Never generate, draw, edit, request or integrate art.
+2. Write only inside the BRIEF's allowedPaths: game/js/sim/ledger*, tools/sim/test_ledger*.js, tools/sim/fixtures/ledger/**, tasks/WG.65.15/**. Change NO existing gameplay file (game/js/plugins/**, game/js/plugins.js, game/data/**); wiring into Dig/fire/water is a later package. If a hook seems unavoidable, write escalation.md, commit, push and stop.
+3. The module is pure and host-agnostic (ADR-003 A2.3-A2.5): no RMMZ, window, globals, Date, Math.random; integers only; deterministic. Ore can never be produced; metals rust to element-conserving mineral traces; the decay chain ruin -> rubble -> soil/sediment -> rock conserves mass; sources/sinks are named and data-driven (magic, world-edge, debug-explicit). The magic default is NOT Owner-confirmed: list it as an Owner question, never decide it.
+4. Run commands in the FOREGROUND. Never end your turn while background jobs or child processes are running. Commit early (WIP commits allowed on your branch). Your tests are light; never run the NW.js harness in the worktree; heavy runs only in a throwaway clone under %TEMP%.
+5. Run every gate check in tasks/WG.65.15/lane-l1/lane.json before your final commit and paste its output in REPORT.md.
+6. Do not merge. Do not self-certify; an independent Grok review (launched later by the PM) decides.
+7. When finished, commit and then push your own branch: git push origin task/lane-l1. Never push any other branch, never main, never force, never set DEUS_INTEGRATOR. If the push is refused, say so in REPORT.md and stop.
+8. Your final output line must be exactly: FINAL SHA: <sha> (pasted from git rev-parse HEAD after the push).
+Commit messages start with '[claude] WG.65.15'.
