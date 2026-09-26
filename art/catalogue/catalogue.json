@@ -27,7 +27,7 @@
     {"path":"art/catalogue/size_inputs.json","sha256":"a2b8a33b0168e1c7bfc68e890d586e5b49ac29cd997acc73cfaa93ffa08fb858","role":"SIZE_INPUTS"},
     {"path":"art/catalogue/strip_transcription.json","sha256":"afb05f6b5e5a07a99675474869cd31bbb8aa341c8e82de6dc4b51e582df3fa60","role":"STRIP_TRANSCRIPTION"},
     {"path":"art/palette/deus_master_world_palette_v1.hex","sha256":"befb46410b27e74558771b3d624b895c084f0a94734521125fe15ebc2eab6c57","role":"MASTER_PALETTE"},
-    {"path":"art/palette/uf.hex","sha256":"2e45f1761da29d6aec587c4b875c4387afb92addd1d3e724f84d8af7664ff1ec","role":"UF_PALETTE"},
+    {"path":"art/palette/uf.hex","sha256":"0ba3b8e49e5b6b9596124e77f1041b2b3b6833368c961d6d0bf25361af040313","role":"UF_PALETTE"},
     {"path":"docs/ASSET_INVENTORY.md","sha256":"1e484e43eb174635de21cb57db068daffa726195f127ce9f582c735378909e17","role":"ASSET_INVENTORY"},
     {"path":"docs/ASSET_MANIFEST.md","sha256":"d3f5a32a5f51ed40ee41206acc14839ae3d398e68a262e7d0e5450c9e551caf7","role":"ASSET_MANIFEST"},
     {"path":"docs/ASSET_REQUESTS.md","sha256":"e3b25c478192f3bbb1e4c3ef2b3736286e8ac2a0e9791aa482142b68958b2ba1","role":"ASSET_REQUESTS+CITED"},

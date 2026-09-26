@@ -128,6 +128,12 @@ function makeCtx(root) {
     // Every file read through read() is recorded as a source of the catalogue.
     ctx.read = (rel, role) => { ctx.used.add(rel + '\u0000' + role); return ctx.text(rel); };
     ctx.readJson = (rel, role) => JSON.parse(ctx.read(rel, role));
+    // Text files are hashed with CRLF normalised to LF (the git blob), so the catalogue does not depend
+    // on the checkout's line-ending setting; binary files (no NUL-free text) are hashed as they are.
+    ctx.hashFile = rel => {
+        const b = ctx.buf(rel);
+        return sha256(b.includes(0) ? b : Buffer.from(b.toString('latin1').replace(/\r\n/g, '\n'), 'latin1'));
+    };
     // First 1-based line that contains `find` (literal), or 0.
     ctx.lineOf = (rel, find) => {
         if (!ctx.exists(rel)) return 0;
@@ -1673,8 +1679,8 @@ function build(opts) {
     const cat = {
         schemaVersion: SCHEMA_VERSION,
         tileSizePx: g.tilePx,
-        geometry: { path: SRC.geometry, sha256: sha256(ctx.buf(SRC.geometry)) },
-        palette: { path: SRC.paletteHex, sha256: sha256(ctx.buf(SRC.paletteHex)) },
+        geometry: { path: SRC.geometry, sha256: ctx.hashFile(SRC.geometry) },
+        palette: { path: SRC.paletteHex, sha256: ctx.hashFile(SRC.paletteHex) },
         scaleChart: { path: OUT.scaleChart, sha256: sha256(Buffer.from(scaleChartText)) },
         sizeClasses: { path: OUT.sizeClasses, sha256: sha256(Buffer.from(sizeText)) },
         sources: [],
@@ -1696,7 +1702,7 @@ function build(opts) {
     const srcList = uniq(Array.from(ctx.used)).map(s => s.split('\u0000')).sort((a, b) => sortStr(a[0], b[0]) || sortStr(a[1], b[1]));
     const seen = new Map();
     for (const [p, role] of srcList) { if (!seen.has(p)) seen.set(p, []); seen.get(p).push(role); }
-    cat.sources = Array.from(seen.entries()).map(([p, roles]) => ({ path: p, sha256: sha256(ctx.buf(p)), role: uniq(roles).sort(sortStr).join('+') }));
+    cat.sources = Array.from(seen.entries()).map(([p, roles]) => ({ path: p, sha256: ctx.hashFile(p), role: uniq(roles).sort(sortStr).join('+') }));
     // Validate.
     const rowsForValidate = new Map(scale.rows.map(r => [r.rowId, r]));
     for (const r of sizeClasses.doc.races) rowsForValidate.set(r.id, { wMin: r.drawnWidthPx.min, wTarget: r.drawnWidthPx.target, wMax: r.drawnWidthPx.max, hMin: r.drawnHeightPxMin, hTarget: r.drawnHeightPxTarget, hMax: r.drawnHeightPxMax });
