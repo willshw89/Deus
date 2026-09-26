@@ -1,0 +1,20 @@
+{
+  "case": "z_out_of_range",
+  "base": "tools/art/fixtures/catalogue/mini/catalogue.json",
+  "context": "tools/art/fixtures/catalogue/mini/context.json",
+  "code": "Z_OUT_OF_RANGE",
+  "rule": "a zMin/zMax outside the geometry range",
+  "patch": [
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "id": "SURFACE_SHARED_TREE_OAK_V1_DEFAULT"
+        },
+        "zMax"
+      ],
+      "value": 40
+    }
+  ]
+}

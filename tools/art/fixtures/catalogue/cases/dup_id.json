@@ -1,0 +1,54 @@
+{
+  "case": "dup_id",
+  "base": "tools/art/fixtures/catalogue/mini/catalogue.json",
+  "context": "tools/art/fixtures/catalogue/mini/context.json",
+  "code": "DUP_ID",
+  "rule": "a duplicate id",
+  "patch": [
+    {
+      "op": "dup",
+      "path": [
+        "entries",
+        {
+          "id": "ALL_SHARED_ITEM_LOG_V1_DEFAULT"
+        }
+      ]
+    },
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "index": -1
+        },
+        "slot",
+        "slotId"
+      ],
+      "value": "ATLAS_ALL_SHARED_ITEM_01:9998"
+    },
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "index": -1
+        },
+        "slot",
+        "y"
+      ],
+      "value": 0
+    },
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "index": -1
+        },
+        "slot",
+        "x"
+      ],
+      "value": 2880
+    }
+  ]
+}

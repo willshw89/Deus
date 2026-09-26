@@ -1,0 +1,33 @@
+{
+  "case": "paperdoll_frames",
+  "base": "tools/art/fixtures/catalogue/mini/catalogue.json",
+  "context": "tools/art/fixtures/catalogue/mini/context.json",
+  "code": "PAPERDOLL_MISMATCH",
+  "rule": "a paper-doll part whose frame layout differs from its bodyType base",
+  "patch": [
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "id": "ALL_SHARED_EQUIPMENT_STONE-AXE_LAYER_DEFAULT"
+        },
+        "frames",
+        "cols"
+      ],
+      "value": 16
+    },
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "id": "ALL_SHARED_EQUIPMENT_STONE-AXE_LAYER_DEFAULT"
+        },
+        "slot",
+        "w"
+      ],
+      "value": 768
+    }
+  ]
+}

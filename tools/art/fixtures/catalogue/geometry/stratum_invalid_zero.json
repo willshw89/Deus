@@ -1,0 +1,14 @@
+{
+  "base": "art/catalogue/geometry.json",
+  "about": "Brief example of invalid input: [24,24,24,24,0] sums to 96 but has an empty stratum; the builder must reject it.",
+  "set": {
+    "stratumPx": [
+      24,
+      24,
+      24,
+      24,
+      0
+    ]
+  },
+  "expect": "REJECT"
+}

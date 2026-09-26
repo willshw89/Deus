@@ -1,0 +1,46 @@
+{
+  "base": "art/catalogue/geometry.json",
+  "about": "A 9-layer world (z -4..+4) with five bands: the builder must read the layer count and bands from geometry and still build (DEC-013: tests must run at 9 and 32 layers).",
+  "set": {
+    "layerCount": 9,
+    "zMin": -4,
+    "zMax": 4,
+    "bands": [
+      {
+        "id": "LOWER2",
+        "zMin": -4,
+        "zMax": -3,
+        "ownerOpen": true,
+        "name": "fixture"
+      },
+      {
+        "id": "LOWER1",
+        "zMin": -2,
+        "zMax": -1,
+        "ownerOpen": true,
+        "name": "fixture"
+      },
+      {
+        "id": "SURFACE",
+        "zMin": 0,
+        "zMax": 1,
+        "ownerOpen": true,
+        "name": "fixture"
+      },
+      {
+        "id": "UPPER1",
+        "zMin": 2,
+        "zMax": 3,
+        "ownerOpen": true,
+        "name": "fixture"
+      },
+      {
+        "id": "UPPER2",
+        "zMin": 4,
+        "zMax": 4,
+        "ownerOpen": true,
+        "name": "fixture"
+      }
+    ]
+  }
+}

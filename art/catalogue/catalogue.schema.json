@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "deus-art-catalogue/1.1.0",
+  "title": "DEUS art catalogue",
+  "description": "Contract deus-art-catalogue/1.1.0 (tasks/WG.20.02/lane-s/BRIEF.md; field-by-field in docs/art/catalogue/SCHEMA.md). No image data. Validated by tools/art/test_catalogue.js with an in-file validator for the keywords used here: $ref, type, properties, required, additionalProperties (boolean), enum, const, pattern, minimum, minLength, items, minItems.",
+  "type": "object",
+  "required": ["schemaVersion", "tileSizePx", "geometry", "palette", "scaleChart", "sources", "sheets", "entries", "outOfScope"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": "deus-art-catalogue/1.1.0" },
+    "tileSizePx": { "type": "integer", "minimum": 1 },
+    "geometry": { "$ref": "#/$defs/fileRef" },
+    "palette": { "$ref": "#/$defs/fileRef" },
+    "scaleChart": { "$ref": "#/$defs/fileRef" },
+    "sizeClasses": { "$ref": "#/$defs/fileRef" },
+    "references": { "$ref": "#/$defs/fileRef" },
+    "sources": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/source" } },
+    "bands": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/band" } },
+    "biomes": { "$ref": "#/$defs/biomes" },
+    "depthPalettes": { "type": "array", "items": { "$ref": "#/$defs/depthPalette" } },
+    "sourceIdIndex": { "$ref": "#/$defs/sourceIds" },
+    "sheets": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/sheet" } },
+    "entries": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/entry" } },
+    "outOfScope": { "type": "array", "items": { "$ref": "#/$defs/outOfScope" } }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "fileRef": {
+      "type": "object", "required": ["path", "sha256"], "additionalProperties": false,
+      "properties": { "path": { "type": "string", "minLength": 1 }, "sha256": { "$ref": "#/$defs/sha256" } }
+    },
+    "source": {
+      "type": "object", "required": ["path", "sha256", "role"], "additionalProperties": false,
+      "properties": { "path": { "type": "string", "minLength": 1 }, "sha256": { "$ref": "#/$defs/sha256" }, "role": { "type": "string", "minLength": 1 } }
+    },
+    "band": {
+      "type": "object", "required": ["id", "zMin", "zMax", "ownerOpen"], "additionalProperties": false,
+      "properties": { "id": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*$" }, "zMin": { "type": "integer" }, "zMax": { "type": "integer" }, "ownerOpen": { "type": "boolean" } }
+    },
+    "biomes": {
+      "type": "object", "required": ["canonical", "forbidden", "placeholders"], "additionalProperties": false,
+      "properties": {
+        "canonical": { "type": "array", "items": { "type": "string" } },
+        "forbidden": { "type": "array", "items": { "type": "string" } },
+        "placeholders": {
+          "type": "array",
+          "items": {
+            "type": "object", "required": ["id", "band", "ownerOpen"], "additionalProperties": false,
+            "properties": { "id": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*_B[0-9]+$" }, "band": { "type": "string" }, "ownerOpen": { "const": true } }
+          }
+        }
+      }
+    },
+    "depthPalette": {
+      "type": "object", "required": ["id", "band", "colors", "status"], "additionalProperties": false,
+      "properties": { "id": { "type": "string", "pattern": "^DEPTH_[A-Z][A-Z0-9]*$" }, "band": { "type": "string" }, "colors": { "type": "null" }, "status": { "const": "OWNER_OPEN" } }
+    },
+    "stringList": { "type": "array", "items": { "type": "string" } },
+    "sourceIds": {
+      "type": "object", "required": ["catalog", "assetIndex", "brief", "ar", "manifest", "matrix", "addendum"], "additionalProperties": false,
+      "properties": {
+        "catalog": { "$ref": "#/$defs/stringList" }, "assetIndex": { "$ref": "#/$defs/stringList" }, "brief": { "$ref": "#/$defs/stringList" },
+        "ar": { "$ref": "#/$defs/stringList" }, "manifest": { "$ref": "#/$defs/stringList" }, "matrix": { "$ref": "#/$defs/stringList" },
+        "addendum": { "$ref": "#/$defs/stringList" }
+      }
+    },
+    "sheet": {
+      "type": "object", "required": ["sheetId", "kind", "group", "w", "h", "gridPx", "runtimeFile"], "additionalProperties": false,
+      "properties": {
+        "sheetId": { "type": "string", "pattern": "^(ATLAS|RMMZ)_[A-Z0-9_-]+$" },
+        "kind": { "enum": ["ATLAS", "RMMZ_TILESET", "RMMZ_CHARACTER"] },
+        "group": {
+          "type": "object", "required": ["band", "biome", "type"], "additionalProperties": false,
+          "properties": { "band": { "type": "string" }, "biome": { "type": "string" }, "type": { "type": "string" } }
+        },
+        "w": { "type": "integer", "minimum": 1 },
+        "h": { "type": "integer", "minimum": 1 },
+        "gridPx": { "type": "integer", "minimum": 1 },
+        "runtimeFile": { "type": ["string", "null"] }
+      }
+    },
+    "entry": {
+      "type": "object",
+      "required": ["id", "category", "band", "biome", "zMin", "zMax", "sizeClass", "frameClass", "sourceIds", "scaleRow", "envelope", "footprint", "anchor", "paletteRampIds", "frames", "slot", "runtime", "variants", "paperDoll", "references", "standardPending", "alphaMode", "status", "statusWhy"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Z0-9]+(-[A-Z0-9]+)*(_[A-Z0-9]+(-[A-Z0-9]+)*){5}$" },
+        "category": { "enum": ["TERRAIN", "WATER", "TOP", "EDGE", "RAMP", "RAMPSIDE", "WALLFACE", "CONNECTOR", "VEIN", "SHADE", "RIMSHADOW", "DECAY", "TREE", "FLORA", "STONE", "REMAINS", "STRUCTURE", "FURNITURE", "WORKSHOP", "HANGING", "LIGHT", "ITEM", "CHARACTER", "CREATURE", "EQUIPMENT", "FACE", "EFFECT"] },
+        "band": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*$" },
+        "biome": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+        "zMin": { "type": "integer" },
+        "zMax": { "type": "integer" },
+        "sizeClass": { "enum": ["Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan", null] },
+        "frameClass": { "type": ["string", "null"], "pattern": "^[A-Z][A-Z_]*$" },
+        "sourceIds": { "$ref": "#/$defs/sourceIds" },
+        "scaleRow": { "type": ["string", "null"], "minLength": 1 },
+        "envelope": { "type": ["object", "null"], "required": ["wMin", "wTarget", "wMax", "hMin", "hTarget", "hMax"], "additionalProperties": false, "properties": { "wMin": { "type": "integer", "minimum": 0 }, "wTarget": { "type": "integer", "minimum": 0 }, "wMax": { "type": "integer", "minimum": 1 }, "hMin": { "type": "integer", "minimum": 0 }, "hTarget": { "type": "integer", "minimum": 0 }, "hMax": { "type": "integer", "minimum": 1 } } },
+        "footprint": {
+          "type": ["object", "null"], "required": ["w", "h"], "additionalProperties": false,
+          "properties": { "w": { "type": "number", "minimum": 0 }, "h": { "type": "number", "minimum": 0 } }
+        },
+        "anchor": {
+          "type": ["object", "null"], "required": ["type", "x", "y"], "additionalProperties": false,
+          "properties": { "type": { "enum": ["GROUND", "CEILING", "WALL", "CENTER"] }, "x": { "type": "integer", "minimum": 0 }, "y": { "type": "integer", "minimum": 0 } }
+        },
+        "paletteRampIds": { "type": "array", "items": { "type": "string", "pattern": "^[A-Z0-9_]+$" } },
+        "frames": {
+          "type": "object", "required": ["cols", "rows", "facings", "rate"], "additionalProperties": false,
+          "properties": {
+            "cols": { "type": "integer", "minimum": 1 }, "rows": { "type": "integer", "minimum": 1 },
+            "facings": { "type": "array", "minItems": 1, "items": { "enum": ["S", "SW", "W", "NW", "N", "NE", "E", "SE"] } },
+            "rate": { "type": ["string", "null"] }
+          }
+        },
+        "slot": {
+          "type": ["object", "null"], "required": ["sheetId", "slotId", "x", "y", "w", "h"], "additionalProperties": false,
+          "properties": {
+            "sheetId": { "type": "string", "pattern": "^ATLAS_[A-Z0-9_-]+$" },
+            "slotId": { "type": "string", "pattern": "^ATLAS_[A-Z0-9_-]+:[0-9]{4}$" },
+            "x": { "type": "integer", "minimum": 0 }, "y": { "type": "integer", "minimum": 0 },
+            "w": { "type": "integer", "minimum": 1 }, "h": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "runtime": {
+          "type": "object", "required": ["kind", "file"], "additionalProperties": false,
+          "properties": {
+            "kind": { "enum": ["NONE", "RMMZ_CHARACTER", "RMMZ_TILESET", "RMMZ_FACE"] },
+            "file": { "type": ["string", "null"] },
+            "index": { "type": ["integer", "null"] },
+            "tileId": { "type": ["integer", "null"] },
+            "slotText": { "type": "string" },
+            "grid": { "type": "string" }
+          }
+        },
+        "variants": {
+          "type": "object", "required": ["derivedFrom", "flipH", "flipV", "rot", "paletteSwap", "lightingSafe"], "additionalProperties": false,
+          "properties": {
+            "derivedFrom": { "type": ["string", "null"] }, "flipH": { "type": "boolean" }, "flipV": { "type": "boolean" },
+            "rot": { "enum": [0, 90, 180, 270] }, "paletteSwap": { "type": ["string", "null"] }, "lightingSafe": { "type": "boolean" }
+          }
+        },
+        "paperDoll": {
+          "type": ["object", "null"], "required": ["bodyType", "layer", "zOrder"], "additionalProperties": false,
+          "properties": { "bodyType": { "type": "string" }, "layer": { "enum": ["held", "shield", "head", "torso", "legs", "back", "clothes", "fx"] }, "zOrder": { "type": ["integer", "null"] } }
+        },
+        "references": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "standardPending": { "type": ["string", "null"] },
+        "alphaMode": { "enum": ["BINARY", "OWNER_OPEN"] },
+        "status": { "enum": ["MISSING", "EXISTING_UNAPPROVED", "STAND_IN", "STOCK", "APPROVED", "OUT_OF_SCOPE"] },
+        "statusWhy": { "type": "string", "minLength": 1 },
+        "family": { "enum": ["SOURCE", "EDGE", "SHADE", "TOP", "RAMP", "RAMPSIDE", "CONNECTOR", "DECAY", "WALLFACE", "RIMSHADOW", "DEPTH", "HANGING", "LIGHT", "FRAMECLASS"] },
+        "groupType": { "enum": ["TILE", "OVERLAY", "PROP", "ITEM", "CHARACTER", "FACE", "EFFECT"] },
+        "mapping": {
+          "type": ["object", "null"], "required": ["scaleBasis", "rampBasis", "rule"], "additionalProperties": false,
+          "properties": { "scaleBasis": { "enum": ["MATCH", "PROPOSED"] }, "rampBasis": { "enum": ["MATCH", "PROPOSED"] }, "rule": { "type": "string" } }
+        },
+        "geometryDerived": {
+          "type": "object", "required": ["rule", "strata"], "additionalProperties": false,
+          "properties": { "rule": { "enum": ["STRATA_WINDOW", "LAYER_FACE", "RAMP_CELL"] }, "strata": { "type": "integer", "minimum": 1 } }
+        },
+        "ownerOpen": { "const": true },
+        "notes": { "type": "string" }
+      }
+    },
+    "outOfScope": {
+      "type": "object", "required": ["sourceId", "kind", "reason"], "additionalProperties": false,
+      "properties": {
+        "sourceId": { "type": "string" },
+        "kind": { "enum": ["catalog", "assetIndex", "brief", "ar", "manifest", "matrix", "addendum"] },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

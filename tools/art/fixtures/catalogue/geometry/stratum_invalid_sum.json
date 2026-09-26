@@ -1,0 +1,14 @@
+{
+  "base": "art/catalogue/geometry.json",
+  "about": "stratumPx that does not sum to layerPx; the builder must reject it.",
+  "set": {
+    "stratumPx": [
+      19,
+      19,
+      19,
+      19,
+      19
+    ]
+  },
+  "expect": "REJECT"
+}

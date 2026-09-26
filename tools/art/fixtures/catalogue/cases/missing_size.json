@@ -1,0 +1,21 @@
+{
+  "case": "missing_size",
+  "base": "tools/art/fixtures/catalogue/mini/catalogue.json",
+  "context": "tools/art/fixtures/catalogue/mini/context.json",
+  "code": "MISSING_FIELD",
+  "rule": "a missing size (frames)",
+  "patch": [
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "id": "SURFACE_SHARED_TREE_OAK_V1_DEFAULT"
+        },
+        "frames",
+        "cols"
+      ],
+      "value": 0
+    }
+  ]
+}

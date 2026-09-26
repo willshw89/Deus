@@ -104,7 +104,7 @@ const SHARED = 'SHARED';
 function sha256(buf) { return crypto.createHash('sha256').update(buf).digest('hex'); }
 function sortStr(a, b) { return a < b ? -1 : a > b ? 1 : 0; }
 function uniq(arr) { return Array.from(new Set(arr)); }
-function idField(v) { return String(v).toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
+function idField(v) { return String(v).toUpperCase().replace(/[^A-Z\d]+/g, '-').replace(/^-+|-+$/g, ''); }
 function makeId(band, biome, category, type, variant, state) {
     return [band, biome, category, type, variant, state].map(idField).join('_');
 }
@@ -131,6 +131,7 @@ function makeCtx(root) {
     // First 1-based line that contains `find` (literal), or 0.
     ctx.lineOf = (rel, find) => {
         if (!ctx.exists(rel)) return 0;
+        ctx.used.add(rel + '\u0000CITED');
         const L = ctx.lines(rel);
         for (let i = 0; i < L.length; i++) if (L[i].includes(find)) return i + 1;
         return 0;
@@ -162,7 +163,7 @@ function validateGeometry(g) {
     if (!bands.length) e('bands missing');
     let z = g.zMin;
     for (const b of bands) {
-        if (!/^[A-Z][A-Z0-9]*$/.test(b.id || '') || b.id === ALL_BAND) e(`bad band id ${b.id}`);
+        if (!/^[A-Z][A-Z\d]*$/.test(b.id || '') || b.id === ALL_BAND) e(`bad band id ${b.id}`);
         if (b.zMin !== z) e(`band ${b.id} starts at ${b.zMin}, expected ${z}`);
         if (b.zMax < b.zMin) e(`band ${b.id} is empty`);
         z = b.zMax + 1;
@@ -184,8 +185,10 @@ function validateGeometry(g) {
     return errs;
 }
 
-// Face / strip heights from the stratum split. k strata can sit anywhere in the layer, so the slot
-// must fit the tallest run of k consecutive strata and the envelope minimum is the shortest run.
+// Face / strip heights from the stratum split (stratumPx is listed bottom-up). A step of k strata can
+// start at any stratum, so the slot must fit the tallest run of k consecutive strata (max) and the
+// envelope minimum is the shortest run (min); the target is the step that starts on the lowest stratum
+// (the first k values), so the order of stratumPx matters for the target but not for the slot size.
 function strataWindow(g, k) {
     let min = Infinity, max = 0;
     for (let i = 0; i + k <= g.stratumPx.length; i++) {
@@ -193,7 +196,8 @@ function strataWindow(g, k) {
         if (s < min) min = s;
         if (s > max) max = s;
     }
-    return { min, max };
+    const target = g.stratumPx.slice(0, k).reduce((a, b) => a + b, 0);
+    return { min, target, max };
 }
 function bandIds(g) { return g.bands.map(b => b.id); }
 function bandOfZ(g, z) { const b = g.bands.find(x => z >= x.zMin && z <= x.zMax); return b ? b.id : null; }
@@ -243,7 +247,8 @@ function parseManifest(ctx) {
         if (!/^\| `/.test(l)) return;
         const c = l.split('|').slice(1, -1).map(s => s.trim().replace(/^`|`$/g, '').trim());
         if (c.length < 15) return;
-        rows.push({ id: c[0], sheet: c[1], grid: c[2], category: c[3], material: c[4], type: c[5], footprint: c[6], frames: c[7], rate: c[8], anchor: c[9], zext: c[10], blackTop: c[11], system: c[12], promptVer: c[13], verified: c[14], line: i + 1 });
+        const [id, sheet, grid, category, material, type, footprint, frames, rate, anchor, zext, blackTop, system, promptVer, verified] = c;
+        rows.push({ id, sheet, grid, category, material, type, footprint, frames, rate, anchor, zext, blackTop, system, promptVer, verified, line: i + 1 });
     });
     return rows;
 }
@@ -358,16 +363,16 @@ function buildScaleChart(ctx, g, rmmz, strip, stats) {
     }
     // Geometry rows, computed from geometry.json only.
     const T = g.tilePx;
-    const geo = (rowId, w, hMin, h, note, extra) => rows.push(Object.assign({ rowId, source: 'GEOMETRY', category: 'GEOMETRY', wMin: w, wTarget: w, wMax: w, hMin, hTarget: h, hMax: h, footprint: { w: Math.max(1, Math.ceil(w / T)), h: 1 }, anchor: 'CENTER', overhangAllowed: false, ref: `${SRC.geometry} (${note})` }, extra || {}));
+    const geo = (rowId, w, hMin, h, note, extra, hTarget) => rows.push(Object.assign({ rowId, source: 'GEOMETRY', category: 'GEOMETRY', wMin: w, wTarget: w, wMax: w, hMin, hTarget: hTarget === undefined ? h : hTarget, hMax: h, footprint: { w: Math.max(1, Math.ceil(w / T)), h: 1 }, anchor: 'CENTER', overhangAllowed: false, ref: `${SRC.geometry} (${note})` }, extra || {}));
     geo('GEOM_TILE', T, T, T, 'tilePx');
     for (let k = 1; k <= g.strataPerLayer; k++) {
         const w = strataWindow(g, k);
-        geo('GEOM_STRATUM_' + k, T, w.min, w.max, `${k} consecutive stratumPx; min..max over positions`, { strata: k });
+        geo('GEOM_STRATUM_' + k, T, w.min, w.max, `${k} consecutive stratumPx: min..max over start positions, target = the lowest ${k}`, { strata: k }, w.target);
     }
     geo('GEOM_LAYER_FACE', T, g.layerPx, g.layerPx, 'layerPx');
     for (let k = 1; k <= g.strataPerLayer; k++) {
         const w = strataWindow(g, k);
-        geo('GEOM_RAMP_' + k, T, T + w.min, T + w.max, `ramp cell ${k}: tilePx + rise of ${k} strata`, { strata: k });
+        geo('GEOM_RAMP_' + k, T, T + w.min, T + w.max, `ramp cell ${k}: tilePx + rise of ${k} strata`, { strata: k }, T + w.target);
     }
     for (const [cls, fc] of Object.entries(g.frameClasses)) {
         if (!fc.frame) continue;
@@ -521,19 +526,24 @@ function statusFromIndex(key, catalogId, inv, idx, stats) {
     if (!invRow && !ix) return { status: 'MISSING', why: `no asset index row for ${key || '(empty key)'}` };
     const word = invRow ? invRow.status : ix.status;
     if (invRow && ix && invRow.status !== ix.status) stats.conflicts.push({ topic: 'status', text: `status of \`${key}\` differs: ${SRC.inventory}:${invRow.line} says "${invRow.status}", ${SRC.ufIndex} says "${ix.status}"` });
-    // A catalog id that borrows another id's image (tint, or not the first user) has no art of its own.
+    // A catalog id that borrows another id's original image (tinted, or not its first user) has no art
+    // of its own. Stock sheets stay STOCK whoever uses them (a tint only tells stock users apart).
+    let tinted = false;
     if (ix && catalogId) {
         const users = ix.usedBy || [];
         const mine = users.find(u => new RegExp('\\b' + catalogId.replace(/[-_]/g, '[-_ ]') + '\\b').test(u)) || '';
         const first = users[0] || '';
-        if (/\(.*tint #/.test(mine) || (mine && mine !== first && word !== 'stock RMMZ')) {
-            return { status: 'STAND_IN', why: `borrows ${key} (drawn for ${first.split('"')[0].trim() || 'another id'}${/tint #([0-9a-f]+)/.test(mine) ? ', tinted' : ''}); ${SRC.ufIndex}` };
+        tinted = /tint #[0-9a-f]+/i.test(mine);
+        if (word === 'original' && (tinted || (mine && mine !== first))) {
+            const firstId = first.split('"')[0].trim();
+            const why = mine !== first ? `borrows ${key}, drawn for ${firstId || 'another id'}${tinted ? ' (tinted)' : ''}` : `uses ${key} recoloured by a tint`;
+            return { status: 'STAND_IN', why: `${why}; ${SRC.ufIndex}` };
         }
     }
     const map = { missing: 'MISSING', 'stock RMMZ': 'STOCK', 'U7 stand-in': 'STAND_IN', generated: 'STAND_IN', original: 'EXISTING_UNAPPROVED' };
     const status = map[word] || 'MISSING';
     const why = { MISSING: 'file missing', STOCK: 'stock RMMZ art in use', STAND_IN: word === 'generated' ? 'drawn in code (generated placeholder)' : 'U7 stand-in', EXISTING_UNAPPROVED: 'original art on disk; not Owner-approved under DEC-007' }[status];
-    return { status, why: `${why} (${invRow ? SRC.inventory + ':' + invRow.line : SRC.ufIndex})` };
+    return { status, why: `${why}${tinted ? ', shared sheet told apart by a tint' : ''} (${invRow ? SRC.inventory + ':' + invRow.line : SRC.ufIndex})` };
 }
 
 function runtimeFromKey(key, idx, g) {
@@ -674,7 +684,7 @@ function buildEntries(ctx, S) {
         add(e); reg('wildlife:' + sp.id, e);
     }
 
-    // D. People (the 9 WorldCatalog species), start-pair colonists, brief-only species, generic person, children.
+    // D. People (the WorldCatalog species), start-pair colonists, brief-only species, generic person, children.
     const raceIdOf = sp => 'RACE_' + idField(sp).replace(/-/g, '_');
     const peopleKeys = Object.keys(wc.people).filter(k => k !== 'about');
     const personEntry = (p) => {
@@ -745,6 +755,7 @@ function buildEntries(ctx, S) {
             mapping: { scaleBasis: 'MATCH', rampBasis: 'PROPOSED', rule: 'paper-doll part shares its body base frame and anchor' },
         }, p));
         e.scaleRow = body.scaleRow;
+        e.frameClass = body.frameClass; // the layer rides on the body's frame; it has no SRD size of its own
         e.envelope = Object.assign({}, body.envelope);
         e.footprint = Object.assign({}, body.footprint);
         e.anchor = Object.assign({}, body.anchor);
@@ -848,35 +859,41 @@ function buildEntries(ctx, S) {
 
     // I. Vertical-world pieces from their AR rows (UF_Levels_* slots; legacy five-level engine).
     const levelDefs = [
-        ['AR-1200', 'rock-solid', 'TOP', 'TERRAIN', 'RMMZ_AUTOTILE_A4', 'UF_Levels_A4', 'kind 0', ['HIGH_STONE_GRANITE', 'NEUT_VOID_BLACK']],
-        ['AR-1200', 'rock-solid', 'SIDE', 'TERRAIN', 'RMMZ_AUTOTILE_A4', 'UF_Levels_A4', 'kind 8', ['HIGH_STONE_GRANITE'], ['AR-2100']],
-        ['AR-1201', 'soil-solid', 'TOP', 'TERRAIN', 'RMMZ_AUTOTILE_A4', 'UF_Levels_A4', 'kind 1', ['TEMP_SOIL_LOAM', 'NEUT_VOID_BLACK']],
-        ['AR-1201', 'soil-solid', 'SIDE', 'TERRAIN', 'RMMZ_AUTOTILE_A4', 'UF_Levels_A4', 'kind 9', ['TEMP_SOIL_LOAM'], ['AR-2101']],
-        ['AR-1202', 'cave_floor', 'A2', 'TERRAIN', 'RMMZ_AUTOTILE_A2', 'UF_Levels_A2', 'kind 0', mapping.terrains.cave_floor, [], 'underground:cave_floor'],
-        ['AR-1203', 'mined_stone', 'A2', 'TERRAIN', 'RMMZ_AUTOTILE_A2', 'UF_Levels_A2', 'kind 1', mapping.terrains.mined_stone, [], 'underground:mined_stone'],
-        ['AR-1203', 'mined_soil', 'A2', 'TERRAIN', 'RMMZ_AUTOTILE_A2', 'UF_Levels_A2', 'kind 2', mapping.terrains.mined_soil, [], 'underground:mined_soil'],
-        ['AR-1204', 'deck-wood', 'A2', 'TERRAIN', 'RMMZ_AUTOTILE_A2', 'UF_Levels_A2', 'kind 3', ['CONSTRUCT_TIMBER_FRESH']],
-        ['AR-1205', 'deck-stone', 'A2', 'TERRAIN', 'RMMZ_AUTOTILE_A2', 'UF_Levels_A2', 'kind 4', ['CONSTRUCT_STONE_DRESSED']],
-        ['AR-1206', 'open-air', 'A2', 'TERRAIN', 'RMMZ_AUTOTILE_A2', 'UF_Levels_A2', 'kind 5', ['NEUT_VOID_BLACK']],
-        ['AR-1207', 'hole-edge', 'A2', 'TERRAIN', 'RMMZ_AUTOTILE_A2', 'UF_Levels_A2', 'kind 6', ['NEUT_VOID_BLACK', 'NEUT_WARM_GRAY']],
-        ['AR-1219', 'roof-marker', 'A2', 'TERRAIN', 'RMMZ_AUTOTILE_A2', 'UF_Levels_A2', 'kind 7', ['CONSTRUCT_TIMBER_AGED']],
-        ['AR-1208', 'stairs-up', 'V1', 'CONNECTOR', 'ARCH_STAIR_RAMP', 'UF_Levels_B', 'tile 1', null],
-        ['AR-1209', 'stairs-down', 'V1', 'CONNECTOR', 'ARCH_STAIR_RAMP', 'UF_Levels_B', 'tile 2', null],
-        ['AR-1210', 'stairs-both', 'V1', 'CONNECTOR', 'ARCH_STAIR_RAMP', 'UF_Levels_B', 'tile 3', null],
-        ['AR-1211', 'ramp-up', 'V1', 'CONNECTOR', 'ARCH_STAIR_RAMP', 'UF_Levels_B', 'tile 4', null, ['AR-2102']],
-        ['AR-1212', 'ramp-down', 'V1', 'CONNECTOR', 'ARCH_STAIR_RAMP', 'UF_Levels_B', 'tile 5', null],
-        ['AR-1213', 'ladder-foot', 'V1', 'CONNECTOR', 'ARCH_STAIR_RAMP', 'UF_Levels_B', 'tile 6', null],
-        ['AR-1213', 'ladder-top', 'V1', 'CONNECTOR', 'ARCH_STAIR_RAMP', 'UF_Levels_B', 'tile 7', null],
-        ['AR-1214', 'vein-iron', 'OVERLAY', 'VEIN', 'RMMZ_TILE_48', 'UF_Levels_B', 'tile 8', ['CONSTRUCT_METAL_IRON', 'NEUT_WARM_GRAY']],
-        ['AR-1215', 'vein-copper', 'OVERLAY', 'VEIN', 'RMMZ_TILE_48', 'UF_Levels_B', 'tile 9', ['NEUT_WARM_GRAY']],
-        ['AR-1216', 'vein-gold', 'OVERLAY', 'VEIN', 'RMMZ_TILE_48', 'UF_Levels_B', 'tile 10', ['NEUT_WARM_GRAY', 'NEUT_PALE_CREST']],
-        ['AR-1217', 'vein-gems', 'OVERLAY', 'VEIN', 'RMMZ_TILE_48', 'UF_Levels_B', 'tile 11', ['MAGIC_ARCANE_CYAN']],
-        ['AR-1218', 'pool-underground', 'A1', 'WATER', 'RMMZ_AUTOTILE_A1', 'UF_Levels_A1', 'kind 0', ['WATER_DEEP_FRESH']],
+        ['AR-1200', 'rock-solid', 'TOP', 'TERRAIN', 'RMMZ_AUTOTILE_A4', 0, ['HIGH_STONE_GRANITE', 'NEUT_VOID_BLACK']],
+        ['AR-1200', 'rock-solid', 'SIDE', 'TERRAIN', 'RMMZ_AUTOTILE_A4', 1, ['HIGH_STONE_GRANITE'], ['AR-2100']],
+        ['AR-1201', 'soil-solid', 'TOP', 'TERRAIN', 'RMMZ_AUTOTILE_A4', 0, ['TEMP_SOIL_LOAM', 'NEUT_VOID_BLACK']],
+        ['AR-1201', 'soil-solid', 'SIDE', 'TERRAIN', 'RMMZ_AUTOTILE_A4', 1, ['TEMP_SOIL_LOAM'], ['AR-2101']],
+        ['AR-1202', 'cave_floor', 'A2', 'TERRAIN', 'RMMZ_AUTOTILE_A2', 0, mapping.terrains.cave_floor, [], 'underground:cave_floor'],
+        ['AR-1203', 'mined_stone', 'A2', 'TERRAIN', 'RMMZ_AUTOTILE_A2', 0, mapping.terrains.mined_stone, [], 'underground:mined_stone'],
+        ['AR-1203', 'mined_soil', 'A2', 'TERRAIN', 'RMMZ_AUTOTILE_A2', 1, mapping.terrains.mined_soil, [], 'underground:mined_soil'],
+        ['AR-1204', 'deck-wood', 'A2', 'TERRAIN', 'RMMZ_AUTOTILE_A2', 0, ['CONSTRUCT_TIMBER_FRESH']],
+        ['AR-1205', 'deck-stone', 'A2', 'TERRAIN', 'RMMZ_AUTOTILE_A2', 0, ['CONSTRUCT_STONE_DRESSED']],
+        ['AR-1206', 'open-air', 'A2', 'TERRAIN', 'RMMZ_AUTOTILE_A2', 0, ['NEUT_VOID_BLACK']],
+        ['AR-1207', 'hole-edge', 'A2', 'TERRAIN', 'RMMZ_AUTOTILE_A2', 0, ['NEUT_VOID_BLACK', 'NEUT_WARM_GRAY']],
+        ['AR-1219', 'roof-marker', 'A2', 'TERRAIN', 'RMMZ_AUTOTILE_A2', 0, ['CONSTRUCT_TIMBER_AGED']],
+        ['AR-1208', 'stairs-up', 'V1', 'CONNECTOR', 'ARCH_STAIR_RAMP', 0, null],
+        ['AR-1209', 'stairs-down', 'V1', 'CONNECTOR', 'ARCH_STAIR_RAMP', 0, null],
+        ['AR-1210', 'stairs-both', 'V1', 'CONNECTOR', 'ARCH_STAIR_RAMP', 0, null],
+        ['AR-1211', 'ramp-up', 'V1', 'CONNECTOR', 'ARCH_STAIR_RAMP', 0, null, ['AR-2102']],
+        ['AR-1212', 'ramp-down', 'V1', 'CONNECTOR', 'ARCH_STAIR_RAMP', 0, null],
+        ['AR-1213', 'ladder-foot', 'V1', 'CONNECTOR', 'ARCH_STAIR_RAMP', 0, null],
+        ['AR-1213', 'ladder-top', 'V1', 'CONNECTOR', 'ARCH_STAIR_RAMP', 1, null],
+        ['AR-1214', 'vein-iron', 'OVERLAY', 'VEIN', 'RMMZ_TILE_48', 0, ['CONSTRUCT_METAL_IRON', 'NEUT_WARM_GRAY']],
+        ['AR-1215', 'vein-copper', 'OVERLAY', 'VEIN', 'RMMZ_TILE_48', 0, ['NEUT_WARM_GRAY']],
+        ['AR-1216', 'vein-gold', 'OVERLAY', 'VEIN', 'RMMZ_TILE_48', 0, ['NEUT_WARM_GRAY', 'NEUT_PALE_CREST']],
+        ['AR-1217', 'vein-gems', 'OVERLAY', 'VEIN', 'RMMZ_TILE_48', 0, ['MAGIC_ARCANE_CYAN']],
+        ['AR-1218', 'pool-underground', 'A1', 'WATER', 'RMMZ_AUTOTILE_A1', 0, ['WATER_DEEP_FRESH']],
     ];
     const connectorBases = [];
-    for (const [ar, type, variant, cat, rowId, sheet, slotText, ramps, moreArs, catalogId] of levelDefs) {
+    // The slot (sheet and kind/tile number) is read from the AR row's own text, never typed here.
+    const slotsOfAr = title => { const out = []; const re = /\b(kind|tiles?)\s+(\d+)(?:\s+and\s+(\d+))?/g; let m; while ((m = re.exec(title))) { const w = m[1].replace(/s$/, ''); out.push(`${w} ${m[2]}`); if (m[3]) out.push(`${w} ${m[3]}`); } return out; };
+    for (const [ar, type, variant, cat, rowId, slotIndex, ramps, moreArs, catalogId] of levelDefs) {
         const req = requests.find(r => r.id === ar);
         if (!req) { stats.errors.push({ code: 'AR_MISSING', id: ar, msg: `${ar} not found in ${SRC.requests}` }); continue; }
+        const sheetM = /`(UF_Levels_[A-Z\d]+)\.png`/.exec(req.title);
+        const slotText = slotsOfAr(req.title)[slotIndex];
+        if (!sheetM || !slotText) { stats.errors.push({ code: 'AR_MISSING', id: ar, msg: `${ar} names no UF_Levels sheet or slot ${slotIndex}` }); continue; }
+        const sheet = sheetM[1];
         const row = rowOf(rowId);
         const e = entryBase(g, { category: cat, band: ALL_BAND, type, variant, sourceIds: { ar: [ar].concat(moreArs || []), catalog: catalogId ? [catalogId] : [] }, scaleRow: rowId, ramps: ramps || mapping.addendum.CONNECTOR, frames: { cols: cat === 'WATER' ? 3 : 1, rows: 1, facings: ['S'], rate: null }, runtime: { kind: 'RMMZ_TILESET', file: `img/tilesets/${sheet}.png`, tileId: null, slotText }, references: worldRefs.slice(), status: /stock/i.test(req.statusText) ? 'STOCK' : 'MISSING', statusWhy: `${ar} ${req.status} (${SRC.requests}:${req.line}): ${req.statusText.replace(/\s+/g, ' ').slice(0, 140)}`, standardPending: cat === 'TERRAIN' || cat === 'WATER' ? 'DW.01.06' : null, alphaMode: cat === 'VEIN' || type === 'hole-edge' ? 'OWNER_OPEN' : 'BINARY', mapping: { scaleBasis: rowId === 'ARCH_STAIR_RAMP' ? 'MATCH' : 'MATCH', rampBasis: 'PROPOSED', rule: `${ar} slot ${sheet} ${slotText}` } });
         if (row) applySize(g, e, row, cat === 'CONNECTOR' ? 'GROUND' : 'CENTER');
@@ -1120,10 +1137,10 @@ function validateCatalogue(cat, ctx) {
             let want = null;
             if (!gd) err('GEOM_HEIGHT', e.id, 'geometry piece without geometryDerived');
             else if (gd.rule === 'STRATA_WINDOW') want = strataWindow(g, gd.strata);
-            else if (gd.rule === 'LAYER_FACE') want = { min: g.layerPx, max: g.layerPx };
-            else if (gd.rule === 'RAMP_CELL') { const w = strataWindow(g, gd.strata); want = { min: T + w.min, max: T + w.max }; }
+            else if (gd.rule === 'LAYER_FACE') want = { min: g.layerPx, target: g.layerPx, max: g.layerPx };
+            else if (gd.rule === 'RAMP_CELL') { const w = strataWindow(g, gd.strata); want = { min: T + w.min, target: T + w.target, max: T + w.max }; }
             else err('GEOM_HEIGHT', e.id, `unknown geometry rule ${gd.rule}`);
-            if (want && e.envelope && (e.envelope.hMin !== want.min || e.envelope.hMax !== want.max)) err('GEOM_HEIGHT', e.id, `height ${e.envelope.hMin}..${e.envelope.hMax} is not ${want.min}..${want.max} from stratumPx/layerPx`);
+            if (want && e.envelope && (e.envelope.hMin !== want.min || e.envelope.hTarget !== want.target || e.envelope.hMax !== want.max)) err('GEOM_HEIGHT', e.id, `height ${e.envelope.hMin}/${e.envelope.hTarget}/${e.envelope.hMax} is not ${want.min}/${want.target}/${want.max} from stratumPx/layerPx`);
             if (want && e.slot && e.frames && e.slot.h !== ceilTo(want.max, T) * e.frames.rows) err('GEOM_HEIGHT', e.id, `slot height ${e.slot.h} is not computed from geometry (${ceilTo(want.max, T) * e.frames.rows})`);
         }
         if (e.paperDoll) {
@@ -1294,12 +1311,13 @@ function buildReferences(ctx, S, cat) {
 function buildConflicts(ctx, S, cat, sizeDoc, scaleRows) {
     const { g, idx, deusIdx, wc, biomeReg, matrix, manifest, briefs, requests, stats } = S;
     const out = [];
-    const sec = (title) => out.push('', `## ${title}`, '');
+    let secN = 0;
+    const sec = (title) => out.push('', `## ${++secN}. ${title.replace(/^\d+\.\s*/, '')}`, '');
     const li = s => out.push(`- ${s}`);
     const at = (file, find) => { const n = ctx.lineOf(file, find); return n ? `${file}:${n}` : `${file}:NOT FOUND ("${find.slice(0, 40)}")`; };
     out.push('# Art catalogue: conflicts between sources (generated)', '', `Generated by \`tools/art/build_catalogue.js\` (schema ${SCHEMA_VERSION}). Every line names both sides with file:line. **Nothing here is resolved**: the catalogue follows the size authority of DEC-016 (the scale chart) and the geometry of DEC-013 where an entry needs a size, and lists the other side here for the Owner.`);
 
-    sec('1. UF_AssetIndex (runtime) vs DEUS_AssetIndex (stale fork)');
+    sec('UF_AssetIndex (runtime) vs DEUS_AssetIndex (stale fork)');
     const ka = Object.keys(idx), kb = Object.keys(deusIdx);
     const onlyA = ka.filter(k => !(k in deusIdx)).sort(sortStr), onlyB = kb.filter(k => !(k in idx)).sort(sortStr);
     li(`${onlyA.length} keys only in ${SRC.ufIndex}: ${onlyA.map(k => '`' + (k || '(empty key)') + '`').join(', ')} (lines: ${onlyA.map(k => ctx.lineOf(SRC.ufIndex, JSON.stringify(k) + ': {')).join(', ')})`);
@@ -1326,7 +1344,7 @@ function buildConflicts(ctx, S, cat, sizeDoc, scaleRows) {
         if (rq.length) li(`\`${k || '(empty key)'}\` cites ${rq.join(', ')} which has no row in ${SRC.requests} (${SRC.ufIndex}:${ctx.lineOf(SRC.ufIndex, JSON.stringify(k) + ': {')})`);
     }
 
-    sec('2. Biomes');
+    sec('Biomes');
     const mb = uniq(matrix.packages.map(p => p.biome));
     li(`${SRC.matrix}:${ctx.lineOf(SRC.matrix, '"description"')} has ${mb.length} biomes (${mb.join(', ')}) including "Cold"; ${SRC.biomeReg}:${ctx.lineOf(SRC.biomeReg, '"canonicalBiomes"')} has ${biomeReg.canonicalBiomes.length} canonical biomes (${biomeReg.canonicalBiomes.join(', ')}) and forbids ${biomeReg.forbiddenBiomes.join(', ')} (${SRC.biomeReg}:${ctx.lineOf(SRC.biomeReg, '"forbiddenBiomes"')}).`);
     li(`${biomeReg.canonicalBiomes.length} canonical biomes (${SRC.biomeReg}) vs 25 biomes in 5 bands (${at(SRC.decisions, 'The 25 pipeline biomes are partitioned into 5 vertical bands')}); names and band assignment are OWNER_OPEN (${at(SRC.decisions, 'Biome Assignment per Band')}). The catalogue lists 25 placeholder ids <BAND>_B1..B5 (catalogue.json biomes.placeholders, ownerOpen) and uses SHARED for every entry: no entry needs a per-biome slot before the Owner rules.`);
@@ -1337,7 +1355,7 @@ function buildConflicts(ctx, S, cat, sizeDoc, scaleRows) {
     li(`${SRC.worldCatalog} still names snow/ice content the registry forbids: ${hits.join(', ')}. Each is catalogued as the source names it (not dropped, not renamed).`);
     li(`${at('docs/worldgen/DEUS_WORLDGEN_WBS.md', '| **WG.22.01–25**|')} counts 25 as "5 biomes x 5 macro-Z" and mentions HIGH snowpack; DEC-013 counts 25 as 5 bands x 5 biomes (${at(SRC.decisions, 'The 25 pipeline biomes are partitioned into 5 vertical bands')}) and the registry forbids snow.`);
 
-    sec('3. Scale: the chart (DEC-016) vs other sources');
+    sec('Scale: the chart (DEC-016) vs other sources');
     const reg = S.scaleReg;
     const stripRows = scaleRows.filter(r => r.source === 'STRIP+REGISTRY');
     for (const r of stripRows) if (r.chartHeightPx !== reg.classes[r.rowId].visualHeightTarget) li(`strip label ${r.chartLabel} reads ${r.chartHeightPx} px (${SRC.strip}) but ${SRC.scaleReg}:${ctx.lineOf(SRC.scaleReg, '"' + r.rowId + '"')} ${r.rowId} visualHeightTarget is ${reg.classes[r.rowId].visualHeightTarget}`);
@@ -1348,7 +1366,7 @@ function buildConflicts(ctx, S, cat, sizeDoc, scaleRows) {
     // Registry classes with no row in the scale standard's class tables.
     const stdLines = ctx.exists(SRC.scaleStandard) ? ctx.read(SRC.scaleStandard, 'SCALE_STANDARD').split(/\r?\n/) : [];
     const inTables = new Set();
-    for (const l of stdLines) if (/^\|/.test(l)) for (const m of l.match(/`([A-Z]+(?:_[A-Z0-9]+)+)`/g) || []) inTables.add(m.replace(/`/g, ''));
+    for (const l of stdLines) if (/^\|/.test(l)) for (const m of l.match(/`([A-Z]+(?:_[A-Z\d]+)+)`/g) || []) inTables.add(m.replace(/`/g, ''));
     const notStd = Object.keys(reg.classes).filter(k => !inTables.has(k));
     const guide = k => { const h = reg.classes[k].visualHeightTarget; const n = stdLines.findIndex(l => l.includes('$' + h + '\\text{ px}$')); return n >= 0 ? `${k} target ${h} px appears only as a guide height at ${SRC.scaleStandard}:${n + 1}` : `${k} (target ${h} px) appears nowhere`; };
     if (notStd.length) li(`registry classes with no row in the class tables of ${SRC.scaleStandard}: ${notStd.map(k => `${k} (${SRC.scaleReg}:${ctx.lineOf(SRC.scaleReg, '"' + k + '"')})`).join(', ')}. Of these: ${notStd.map(guide).join('; ')}. The catalogue uses the registry (DEC-016).`);
@@ -1375,7 +1393,7 @@ function buildConflicts(ctx, S, cat, sizeDoc, scaleRows) {
     li(`${briefVsChart.length} brief drawn sizes fall outside the chart row the catalogue uses (the briefs of 2026-09-18 fit everything in one 48x48 square): ${uniq(briefVsChart).sort(sortStr).join('; ')}`);
     li(`geometry vs chart px/ft: the grid is ${g.tilePx} px per ${g.squareFt} ft = ${(g.tilePx / g.squareFt).toFixed(1)} px/ft (${SRC.geometry}), creatures are drawn at ${g.pxPerFootCreature} px/ft (a 6-ft human = ${g.pxPerFootCreature * 6} px, chart HUMAN ${g.humanPx}). This is the Owner's deliberate choice (01:55 CT, ${at('tasks/WG.20.02/lane-s/BRIEF.md', 'Humans stay deliberately small')}), recorded here as a difference, not as an error.`);
 
-    sec('4. Frames, footprints and sheet layouts');
+    sec('Frames, footprints and sheet layouts');
     for (const c of claims.filter(x => x.topic === 'frames' || x.topic === 'animation')) li(claimLine(c));
     const large = reg.classes.CREATURE_LARGE_2TILE;
     if (large) li(`${SRC.scaleReg}:${ctx.lineOf(SRC.scaleReg, '"CREATURE_LARGE_2TILE"')} CREATURE_LARGE_2TILE is ${large.visualWidthMin}-${large.visualWidthMax} x ${large.visualHeightMin}-${large.visualHeightMax} px; the frame classes put a Large creature in ${g.frameClasses.LARGE_TALL.frame.join('x')} (LARGE_TALL) or ${g.frameClasses.LARGE_LONG.frame.join('x')} (LARGE_LONG), so a LARGE_LONG body cannot reach the registry's minimum height ${large.visualHeightMin} (${SRC.geometry}:${ctx.lineOf(SRC.geometry, '"LARGE_LONG"')}). Creature entries cite GEOM_FRAME_* rows.`);
@@ -1392,22 +1410,24 @@ function buildConflicts(ctx, S, cat, sizeDoc, scaleRows) {
     li(`7 px/ft checks of the race rows against the SRD text: ${sizeDoc.checks.length - bad.length} of ${sizeDoc.checks.length} pass${bad.length ? '; failing: ' + bad.map(c => `${c.race} ${c.side} ${c.px} px (${c.rule})`).join(', ') : ''}.`);
     for (const c of claims.filter(x => x.topic === 'people')) li(claimLine(c));
 
-    sec('5. Palette');
+    sec('Palette');
     const nMaster = ctx.read(SRC.paletteHex, 'MASTER_PALETTE').split(/\r?\n/).filter(l => /^#?[0-9A-Fa-f]{6}$/.test(l.trim())).length;
     const nUf = ctx.exists(SRC.ufHex) ? ctx.read(SRC.ufHex, 'UF_PALETTE').split(/\r?\n/).filter(l => /^#?[0-9A-Fa-f]{6}$/.test(l.trim())).length : 0;
     li(`${SRC.ufHex} has ${nUf} colours; ${SRC.paletteHex} has ${nMaster} (${SRC.paletteReg}:${ctx.lineOf(SRC.paletteReg, '"masterColorCount"')} masterColorCount ${S.paletteReg.masterColorCount}). Approved art was snapped to uf.hex (${at('art/APPROVALS.md', 'uf.hex')}); the catalogue cites the master palette and its ramps.`);
     for (const c of claims.filter(x => x.topic === 'palette')) li(claimLine(c));
 
-    sec('6. Manifest, standards and naming');
+    sec('Manifest, standards and naming');
     li(`${SRC.manifest} has ${manifest.length} registered rows (lines ${manifest.length ? manifest[0].line + '-' + manifest[manifest.length - 1].line : '-'}); 20 are claimed (${at('tasks/WG.20.02/lane-s/BRIEF.md', 'ASSET_MANIFEST 18 rows vs 20 claimed')}). The claim's own location was not found in docs/, tasks/ or art/.`);
     for (const c of claims.filter(x => ['standards', 'manifest', 'naming', 'lighting', 'biomes', 'bands'].includes(x.topic))) li(claimLine(c));
+    const ghost = manifest.filter(r => /YES/.test(r.verified) && !ctx.exists('game/' + r.sheet));
+    if (ghost.length) li(`${SRC.manifest} marks ${ghost.length} rows IN-GAME VERIFIED YES whose sheet file is not in game/: ${ghost.map(r => '`' + r.id + '` -> game/' + r.sheet + ` (${SRC.manifest}:${r.line})`).join('; ')}. The catalogue marks them MISSING.`);
     const briefVsAr = [];
     for (const b of briefs) for (const a of b.ars) if (!requests.some(r => r.id === a)) briefVsAr.push(`${b.sourceId} cites ${a} (${b.file}:${b.line})`);
     if (briefVsAr.length) li(`brief headings citing AR ids with no request row: ${uniq(briefVsAr).join('; ')}`);
 
-    sec('7. Legacy layer-count assumptions (DEC-013: 32 layers supersede 9 and the old -2..+2 range)');
+    sec(`Legacy layer-count assumptions (DEC-013: the ${g.layerCount} layers of geometry.json supersede the old counts and the -2..+2 range)`);
     const scanFiles = [SRC.requests, SRC.manifest, SRC.inventory, SRC.rmmzSpec].concat(briefs.map(b => b.file)).concat(['docs/design/SCALE.md', 'docs/art/DEUS_TILESET_SCALE_STANDARD.md', 'docs/art/DEUS_WORLD_ART_VISUAL_CHARTER.md', 'docs/art/DEUS_SCALE_AND_ASSET_MASTER_BIBLE.md']);
-    const pat = /\b(nine|9)[- ](z[- ])?(layers?|levels?)\b|\bfive[- ]level\b|\b5[- ]levels?\b|\bfive levels\b|-2\s*\.\.\s*\+?2\b|\bZ\+2\b|\$z\s*=\s*-2\$|\+1\/\+2|-1\/-2/i;
+    const pat = /\b(nine|\x39)[- ](z[- ])?(layers?|levels?)\b|\bfive[- ]level\b|\b5[- ]levels?\b|\bfive levels\b|-2\s*\.\.\s*\+?2\b|\bZ\+2\b|\$z\s*=\s*-2\$|\+1\/\+2|-1\/-2/i;
     const layerHits = [];
     for (const f of uniq(scanFiles).sort(sortStr)) {
         if (!ctx.exists(f)) continue;
@@ -1423,11 +1443,11 @@ function buildConflicts(ctx, S, cat, sizeDoc, scaleRows) {
     const manZ = uniq(manifest.map(r => r.zext)).filter(z => /-|\+/.test(z));
     li(`${SRC.manifest} Z EXTENT values use the old level numbers (${manZ.join(', ')}); the catalogue bands legacy z by containment (${bandIds(g).map(b => `${b} ${bandRange(g, b).join('..')}`).join(', ')}).`);
 
-    sec('8. Status: inventory vs AssetIndex');
+    sec('Status: inventory vs AssetIndex');
     const st = stats.conflicts.filter(c => c.topic === 'status');
     li(st.length ? uniq(st.map(c => c.text)).join('; ') : `${SRC.inventory} and ${SRC.ufIndex} agree on every status.`);
 
-    sec('9. Owner questions (asked, not answered)');
+    sec('Owner questions (asked, not answered)');
     const qs = ownerQuestions(S, cat);
     qs.forEach((q, i) => out.push(`${i + 1}. **${q.id}** ${q.text}`));
     out.push('');
@@ -1456,7 +1476,7 @@ function ownerQuestions(S, cat) {
         { id: 'Q-TALL-MEDIUM', text: 'Turn on TALL_MEDIUM (48x64) and the Gnome/Halfling readability floor (26-28 px)? Both are OFF.' },
         { id: 'Q-SRD-OPEN', text: 'Accept the PM pixel readings of open-ended SRD heights (Dragonborn 46-48, Human/Half-Orc/Tiefling 35-46, Elf 33-44) and the PROPOSED widths of races with no registry row?' },
         { id: 'Q-CHILD', text: 'Baby and teen sizes (only CHARACTER_CHILD exists in the chart); child frames are catalogued with CHARACTER_CHILD.' },
-        { id: 'Q-PEOPLE', text: 'Are goblin, orc and automaton (people briefs, cultures) people, monsters or neither under "exactly 9 races"? They are catalogued as MISSING character entries until ruled.' },
+        { id: 'Q-PEOPLE', text: 'Are goblin, orc and automaton (people briefs, cultures) people, monsters or neither under the DEC-013 rule of exactly nine races? They are catalogued as MISSING character entries until ruled.' },
         { id: 'Q-SNOW', text: 'The registry forbids snow/ice biomes but the WorldCatalog has snow, ice, icy water, snow fir, snow bush, arctic fox, ice wraith, glacier and tundra. Keep or drop them? (Catalogued as the sources name them.)' },
         { id: 'Q-SCALE-MAP', text: `${proposed.length} painted entries use a PROPOSED scale row or palette ramp (${proposedSrc.length} source entries, ${proposed.length - proposedSrc.length} addendum placeholders; no chart row or ramp names the thing; see mapping.scaleBasis / mapping.rampBasis per entry and art/catalogue/mapping.json). Confirm or reassign.` },
         { id: 'Q-LIVING-PAL', text: 'The palette registry has no skin, fur, hair or feather ramps; people, creatures, faces and body layers carry placeholder ramps. Which ramps should living beings use?' },
@@ -1529,7 +1549,7 @@ function mdTable(head, rows) {
     return [`| ${head.join(' | ')} |`, `|${head.map(() => '---').join('|')}|`].concat(rows.map(r => `| ${r.join(' | ')} |`)).join('\n');
 }
 
-function buildDocs(cat, S, cov, terrains, conflicts) {
+function buildDocs(cat, S, cov, terrains, conflicts, famCite) {
     const files = {};
     const { g } = S;
     const bands = [ALL_BAND].concat(bandIds(g));
@@ -1556,7 +1576,7 @@ function buildDocs(cat, S, cov, terrains, conflicts) {
     const unc = cov.rows.filter(r => r.uncovered);
     if (unc.length) idx.push('Uncovered: ' + unc.map(r => `${r.label}: ${r.missing.slice(0, 20).join(', ')}`).join('; '), '');
     idx.push('## Owner addendum families x band (entry counts; every cell must be > 0)', '');
-    idx.push(mdTable(['Family', 'Addendum'].concat(cov.bands), cov.famBand.map(f => [f.family, f.section].concat(f.cells.map(String)))), '');
+    idx.push(mdTable(['Family', 'Addendum', 'ordered by'].concat(cov.bands), cov.famBand.map(f => [f.family, f.section, famCite[f.family]].concat(f.cells.map(String)))), '');
     idx.push('## Terrain list used by the terrain families', '', `From \`${SRC.worldCatalog}\` \`groundKinds\` (home band ${bandOfZ(g, 0)}) and the \`ground\` values of \`undergroundBiomes\` (home band ${bandOfZ(g, -1)}): ${terrains.map(t => `\`${t.id}\``).join(', ')} (${terrains.length}).`, '');
     idx.push('## Sheets', '');
     idx.push(mdTable(['sheetId', 'kind', 'group', 'size', 'slots'], cat.sheets.map(s => [s.sheetId, s.kind, `${s.group.band}/${s.group.biome}/${s.group.type}`, `${s.w}x${s.h}`, String(cat.entries.filter(e => e.slot && e.slot.sheetId === s.sheetId).length)])), '');
@@ -1693,7 +1713,9 @@ function build(opts) {
     files[OUT.sizeClasses] = sizeText;
     files[OUT.references] = refsText;
     files[OUT.conflicts] = conflicts.text;
-    Object.assign(files, buildDocs(cat, S, cov, add.terrains, conflicts));
+    const famCite = {};
+    for (const f of FAMILIES) { const n = ctx.lineOf(f.file, f.find); famCite[f.id] = n ? `${f.file}:${n}` : `${f.file}:NOT FOUND`; }
+    Object.assign(files, buildDocs(cat, S, cov, add.terrains, conflicts, famCite));
     return { ok: errors.length === 0, errors, warnings: stats.warnings, files, catalogue: cat, coverage: cov, questions: conflicts.questions, terrains: add.terrains, scaleRows: scale.rows, sizeClasses: sizeClasses.doc, references: refs, validateCtx: vctx, S };
 }
 

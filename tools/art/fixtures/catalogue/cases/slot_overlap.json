@@ -1,0 +1,33 @@
+{
+  "case": "slot_overlap",
+  "base": "tools/art/fixtures/catalogue/mini/catalogue.json",
+  "context": "tools/art/fixtures/catalogue/mini/context.json",
+  "code": "SLOT_OVERLAP",
+  "rule": "overlapping slot rects in a sheet",
+  "patch": [
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "id": "SURFACE_SHARED_RAMP_MEADOW_N-C3_DEFAULT"
+        },
+        "slot",
+        "x"
+      ],
+      "value": 1104
+    },
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "id": "SURFACE_SHARED_RAMP_MEADOW_N-C3_DEFAULT"
+        },
+        "slot",
+        "y"
+      ],
+      "value": 240
+    }
+  ]
+}

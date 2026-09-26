@@ -1,0 +1,20 @@
+{
+  "case": "sheet_not_grid",
+  "base": "tools/art/fixtures/catalogue/mini/catalogue.json",
+  "context": "tools/art/fixtures/catalogue/mini/context.json",
+  "code": "SHEET_NOT_GRID",
+  "rule": "a sheet side not a multiple of 48",
+  "patch": [
+    {
+      "op": "set",
+      "path": [
+        "sheets",
+        {
+          "sheetId": "ATLAS_SURFACE_SHARED_PROP_01"
+        },
+        "h"
+      ],
+      "value": 150
+    }
+  ]
+}
