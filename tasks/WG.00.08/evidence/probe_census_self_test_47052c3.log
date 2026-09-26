@@ -1,0 +1,8 @@
+=== WG.00.08 2.2c probe: seeds 18; suite tools\test_strata_cuts_and_caves.js; mutants taken from its MUTANTS table; census only, generator 5 with MUTANT probe_self_test ===
+--- seed 18
+FLUID seed 18: generator 4 fluid strata 406 {"-2":128,"-1":278}; generator 5 405 {"-2":127,"-1":278}; generator-4 fluid strata not the same fluid in generator 5: 1
+UNDER-FLUID seed 18: fluid strata resting on air: generator 4 0, generator 5 2; strata carved (solid in 4, air in 5) below a fluid stratum of the same column: 1 e.g. (14,8) e 0
+CARVED seed 18 (MUTANT probe_self_test, uninstrumented): cave networks 15, shafts 1, skylights carved 3 [{"network":4,"x":73,"y":155,"floor":15,"cells":5},{"network":7,"x":30,"y":206,"floor":10,"cells":5},{"network":11,"x":215,"y":208,"floor":5,"cells":5}]
+TIME 18 s
+RESULT: 2 problem(s) with the MUTANT probe_self_test code (exit 1)
+exit=1
