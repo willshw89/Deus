@@ -1438,7 +1438,7 @@
             while (packedGrids.map.size > GRID_KEEP) {
                 const k0 = packedGrids.map.keys().next().value, g0 = packedGrids.map.get(k0);
                 packedGrids.map.delete(k0);
-                for (const sl of gridSlots) if (sl.grid === g0) { sl.st = null; sl.ai = -1; sl.grid = null; }
+                for (const sl of gridSlots) if (sl && sl.grid === g0) { sl.st = null; sl.ai = -1; sl.grid = null; }
             }
         }
         slot.st = st; slot.ai = ai; slot.grid = grid;
