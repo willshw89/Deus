@@ -1,0 +1,23 @@
+{
+  "case": "ramp_unknown",
+  "base": "tools/art/fixtures/catalogue/mini/catalogue.json",
+  "context": "tools/art/fixtures/catalogue/mini/context.json",
+  "code": "RAMP_UNKNOWN",
+  "rule": "a ramp id not in the palette registry",
+  "patch": [
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "id": "SURFACE_SHARED_TREE_OAK_V1_DEFAULT"
+        },
+        "paletteRampIds"
+      ],
+      "value": [
+        "TEMP_BARK_OAK",
+        "NOT_A_REGISTRY_RAMP"
+      ]
+    }
+  ]
+}

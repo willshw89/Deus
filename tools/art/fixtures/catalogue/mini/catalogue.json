@@ -1,0 +1,911 @@
+{
+ "schemaVersion": "deus-art-catalogue/1.1.0",
+ "tileSizePx": 48,
+ "geometry": {
+  "path": "art/catalogue/geometry.json",
+  "sha256": "e6160905b50d025e8b8c68d4f38da2be1e9b45fd90560b78781da02cc8be9c6f"
+ },
+ "palette": {
+  "path": "art/palette/deus_master_world_palette_v1.hex",
+  "sha256": "befb46410b27e74558771b3d624b895c084f0a94734521125fe15ebc2eab6c57"
+ },
+ "scaleChart": {
+  "path": "art/catalogue/scale_chart.json",
+  "sha256": "f3af0b1140eaa8643914832fced0e0f07a260662e331bf8da2cf1c8ae805d29d"
+ },
+ "sources": [
+  {
+   "path": "art/catalogue/conflict_claims.json",
+   "sha256": "40a1b724a174f94035294805bc163850c4c54fb8672f96bc7fbf92892190cf09",
+   "role": "CONFLICT_CLAIMS"
+  },
+  {
+   "path": "art/catalogue/geometry.json",
+   "sha256": "e6160905b50d025e8b8c68d4f38da2be1e9b45fd90560b78781da02cc8be9c6f",
+   "role": "GEOMETRY"
+  }
+ ],
+ "sourceIdIndex": {
+  "catalog": [
+   "groundKinds:meadow",
+   "items:log",
+   "items:stone_axe",
+   "objects:oak",
+   "people:human",
+   "skins:human",
+   "wildlife:troll"
+  ],
+  "assetIndex": [
+   "!$UF_Item_Log",
+   "!$UF_Oak",
+   "$UF_Human_Male",
+   "$UF_Stock_Monster_1"
+  ],
+  "brief": [
+   "SEG-00:human",
+   "SEG-00:oak",
+   "SEG-01:anchor_person",
+   "SEG-01:anchor_tree",
+   "SEG-02:oak",
+   "SEG-06:log",
+   "SEG-10:troll",
+   "SEG-11:human:male",
+   "SEG-17:eq_weapon_stone_axe"
+  ],
+  "ar": [
+   "AR-010",
+   "AR-021",
+   "AR-102",
+   "AR-200",
+   "AR-2000",
+   "AR-2010",
+   "AR-400",
+   "AR-401",
+   "AR-402",
+   "AR-512",
+   "AR-600"
+  ],
+  "manifest": [
+   "item_log_oak",
+   "item_log_pine"
+  ],
+  "matrix": [],
+  "addendum": [
+   "ADD-DEPTH",
+   "ADD-EDGE",
+   "ADD-RAMP"
+  ]
+ },
+ "sheets": [
+  {
+   "sheetId": "ATLAS_ALL_SHARED_CHARACTER_01",
+   "kind": "ATLAS",
+   "group": {
+    "band": "ALL",
+    "biome": "SHARED",
+    "type": "CHARACTER"
+   },
+   "w": 4032,
+   "h": 960,
+   "gridPx": 48,
+   "runtimeFile": null
+  },
+  {
+   "sheetId": "ATLAS_ALL_SHARED_ITEM_01",
+   "kind": "ATLAS",
+   "group": {
+    "band": "ALL",
+    "biome": "SHARED",
+    "type": "ITEM"
+   },
+   "w": 2928,
+   "h": 48,
+   "gridPx": 48,
+   "runtimeFile": null
+  },
+  {
+   "sheetId": "ATLAS_SURFACE_SHARED_PROP_01",
+   "kind": "ATLAS",
+   "group": {
+    "band": "SURFACE",
+    "biome": "SHARED",
+    "type": "PROP"
+   },
+   "w": 2880,
+   "h": 144,
+   "gridPx": 48,
+   "runtimeFile": null
+  },
+  {
+   "sheetId": "ATLAS_SURFACE_SHARED_TILE_01",
+   "kind": "ATLAS",
+   "group": {
+    "band": "SURFACE",
+    "biome": "SHARED",
+    "type": "TILE"
+   },
+   "w": 4080,
+   "h": 2592,
+   "gridPx": 48,
+   "runtimeFile": null
+  }
+ ],
+ "entries": [
+  {
+   "id": "SURFACE_SHARED_TREE_OAK_V1_DEFAULT",
+   "category": "TREE",
+   "band": "SURFACE",
+   "biome": "SHARED",
+   "zMin": 0,
+   "zMax": 3,
+   "sizeClass": null,
+   "frameClass": null,
+   "sourceIds": {
+    "catalog": [
+     "objects:oak"
+    ],
+    "assetIndex": [
+     "!$UF_Oak"
+    ],
+    "brief": [
+     "SEG-00:oak",
+     "SEG-01:anchor_tree",
+     "SEG-02:oak"
+    ],
+    "ar": [
+     "AR-021",
+     "AR-102"
+    ],
+    "manifest": [],
+    "matrix": [],
+    "addendum": []
+   },
+   "scaleRow": "TREE_COMMON_OAK",
+   "envelope": {
+    "wMin": 56,
+    "wTarget": 68,
+    "wMax": 80,
+    "hMin": 72,
+    "hTarget": 84,
+    "hMax": 96
+   },
+   "footprint": {
+    "w": 1,
+    "h": 1
+   },
+   "anchor": {
+    "type": "GROUND",
+    "x": 48,
+    "y": 95
+   },
+   "paletteRampIds": [
+    "TEMP_BARK_OAK",
+    "TEMP_FOLIAGE_OAK"
+   ],
+   "frames": {
+    "cols": 1,
+    "rows": 1,
+    "facings": [
+     "S"
+    ],
+    "rate": null
+   },
+   "slot": {
+    "sheetId": "ATLAS_SURFACE_SHARED_PROP_01",
+    "slotId": "ATLAS_SURFACE_SHARED_PROP_01:0036",
+    "x": 2064,
+    "y": 0,
+    "w": 96,
+    "h": 96
+   },
+   "runtime": {
+    "kind": "RMMZ_CHARACTER",
+    "file": "img/characters/!$UF_Oak.png",
+    "index": 0
+   },
+   "variants": {
+    "derivedFrom": null,
+    "flipH": false,
+    "flipV": false,
+    "rot": 0,
+    "paletteSwap": null,
+    "lightingSafe": false
+   },
+   "paperDoll": null,
+   "references": [
+    "pack:WORLD",
+    "art/u7_reference_squares/u7_oak_tree_48.png"
+   ],
+   "standardPending": null,
+   "alphaMode": "BINARY",
+   "status": "EXISTING_UNAPPROVED",
+   "statusWhy": "original art on disk; not Owner-approved under DEC-007 (docs/ASSET_INVENTORY.md:132)",
+   "family": "SOURCE",
+   "groupType": "PROP",
+   "mapping": {
+    "scaleBasis": "MATCH",
+    "rampBasis": "MATCH",
+    "rule": "mapping.objects.oak"
+   }
+  },
+  {
+   "id": "ALL_SHARED_ITEM_LOG_V1_DEFAULT",
+   "category": "ITEM",
+   "band": "ALL",
+   "biome": "SHARED",
+   "zMin": -16,
+   "zMax": 15,
+   "sizeClass": null,
+   "frameClass": null,
+   "sourceIds": {
+    "catalog": [
+     "items:log"
+    ],
+    "assetIndex": [
+     "!$UF_Item_Log"
+    ],
+    "brief": [
+     "SEG-06:log"
+    ],
+    "ar": [
+     "AR-200",
+     "AR-2000",
+     "AR-2010"
+    ],
+    "manifest": [
+     "item_log_oak",
+     "item_log_pine"
+    ],
+    "matrix": [],
+    "addendum": []
+   },
+   "scaleRow": "RMMZ_TILE_48",
+   "envelope": {
+    "wMin": 48,
+    "wTarget": 48,
+    "wMax": 48,
+    "hMin": 48,
+    "hTarget": 48,
+    "hMax": 48
+   },
+   "footprint": {
+    "w": 1,
+    "h": 1
+   },
+   "anchor": {
+    "type": "GROUND",
+    "x": 24,
+    "y": 47
+   },
+   "paletteRampIds": [
+    "CONSTRUCT_TIMBER_FRESH"
+   ],
+   "frames": {
+    "cols": 1,
+    "rows": 1,
+    "facings": [
+     "S"
+    ],
+    "rate": null
+   },
+   "slot": {
+    "sheetId": "ATLAS_ALL_SHARED_ITEM_01",
+    "slotId": "ATLAS_ALL_SHARED_ITEM_01:0034",
+    "x": 1584,
+    "y": 0,
+    "w": 48,
+    "h": 48
+   },
+   "runtime": {
+    "kind": "RMMZ_CHARACTER",
+    "file": "img/characters/!$UF_Item_Log.png",
+    "index": 0
+   },
+   "variants": {
+    "derivedFrom": null,
+    "flipH": false,
+    "flipV": false,
+    "rot": 0,
+    "paletteSwap": null,
+    "lightingSafe": false
+   },
+   "paperDoll": null,
+   "references": [
+    "pack:WORLD"
+   ],
+   "standardPending": null,
+   "alphaMode": "BINARY",
+   "status": "EXISTING_UNAPPROVED",
+   "statusWhy": "original art on disk; not Owner-approved under DEC-007 (docs/ASSET_INVENTORY.md:210)",
+   "family": "SOURCE",
+   "groupType": "ITEM",
+   "mapping": {
+    "scaleBasis": "PROPOSED",
+    "rampBasis": "PROPOSED",
+    "rule": "mapping.itemRampRules.IR01"
+   },
+   "notes": "item icon occupies one 48x48 frame (RMMZ_ASSET_SPEC §2; briefs: 48x48 ground icon); drawn size inside the frame is not charted"
+  },
+  {
+   "id": "SURFACE_SHARED_EDGE_MEADOW_S-H2_DEFAULT",
+   "category": "EDGE",
+   "band": "SURFACE",
+   "biome": "SHARED",
+   "zMin": 0,
+   "zMax": 3,
+   "sizeClass": null,
+   "frameClass": null,
+   "sourceIds": {
+    "catalog": [
+     "groundKinds:meadow"
+    ],
+    "assetIndex": [],
+    "brief": [],
+    "ar": [],
+    "manifest": [],
+    "matrix": [],
+    "addendum": [
+     "ADD-EDGE"
+    ]
+   },
+   "scaleRow": "GEOM_STRATUM_2",
+   "envelope": {
+    "wMin": 48,
+    "wTarget": 48,
+    "wMax": 48,
+    "hMin": 38,
+    "hTarget": 38,
+    "hMax": 39
+   },
+   "footprint": {
+    "w": 1,
+    "h": 1
+   },
+   "anchor": {
+    "type": "WALL",
+    "x": 24,
+    "y": 0
+   },
+   "paletteRampIds": [
+    "TEMP_GRASS_FERTILE",
+    "TEMP_SOIL_LOAM"
+   ],
+   "frames": {
+    "cols": 1,
+    "rows": 1,
+    "facings": [
+     "S"
+    ],
+    "rate": null
+   },
+   "slot": {
+    "sheetId": "ATLAS_SURFACE_SHARED_TILE_01",
+    "slotId": "ATLAS_SURFACE_SHARED_TILE_01:0279",
+    "x": 1104,
+    "y": 288,
+    "w": 48,
+    "h": 48
+   },
+   "runtime": {
+    "kind": "NONE",
+    "file": null,
+    "index": null
+   },
+   "variants": {
+    "derivedFrom": null,
+    "flipH": false,
+    "flipV": false,
+    "rot": 0,
+    "paletteSwap": null,
+    "lightingSafe": false
+   },
+   "paperDoll": null,
+   "references": [
+    "pack:WORLD",
+    "pack:BIOME"
+   ],
+   "standardPending": "DW.01.06",
+   "alphaMode": "BINARY",
+   "status": "MISSING",
+   "statusWhy": "EDGE placeholder (Owner addendum); no art",
+   "family": "EDGE",
+   "groupType": "TILE",
+   "mapping": {
+    "scaleBasis": "MATCH",
+    "rampBasis": "PROPOSED",
+    "rule": "geometry + mapping.terrains.meadow"
+   },
+   "geometryDerived": {
+    "rule": "STRATA_WINDOW",
+    "strata": 2
+   }
+  },
+  {
+   "id": "LOWER1_SHARED_EDGE_MEADOW_S-H2_DEFAULT",
+   "category": "EDGE",
+   "band": "LOWER1",
+   "biome": "SHARED",
+   "zMin": -8,
+   "zMax": -1,
+   "sizeClass": null,
+   "frameClass": null,
+   "sourceIds": {
+    "catalog": [
+     "groundKinds:meadow"
+    ],
+    "assetIndex": [],
+    "brief": [],
+    "ar": [],
+    "manifest": [],
+    "matrix": [],
+    "addendum": [
+     "ADD-DEPTH",
+     "ADD-EDGE"
+    ]
+   },
+   "scaleRow": "GEOM_STRATUM_2",
+   "envelope": {
+    "wMin": 48,
+    "wTarget": 48,
+    "wMax": 48,
+    "hMin": 38,
+    "hTarget": 38,
+    "hMax": 39
+   },
+   "footprint": {
+    "w": 1,
+    "h": 1
+   },
+   "anchor": {
+    "type": "WALL",
+    "x": 24,
+    "y": 0
+   },
+   "paletteRampIds": [
+    "TEMP_GRASS_FERTILE",
+    "TEMP_SOIL_LOAM"
+   ],
+   "frames": {
+    "cols": 1,
+    "rows": 1,
+    "facings": [
+     "S"
+    ],
+    "rate": null
+   },
+   "slot": null,
+   "runtime": {
+    "kind": "NONE",
+    "file": null,
+    "index": null
+   },
+   "variants": {
+    "derivedFrom": "SURFACE_SHARED_EDGE_MEADOW_S-H2_DEFAULT",
+    "flipH": false,
+    "flipV": false,
+    "rot": 0,
+    "paletteSwap": "DEPTH_LOWER1",
+    "lightingSafe": false
+   },
+   "paperDoll": null,
+   "references": [
+    "pack:WORLD",
+    "pack:BIOME"
+   ],
+   "standardPending": "DW.01.06",
+   "alphaMode": "BINARY",
+   "status": "MISSING",
+   "statusWhy": "DEPTH_LOWER1 recolour at export (placeholder palette, OWNER_OPEN); no paint slot",
+   "family": "EDGE",
+   "groupType": "TILE",
+   "mapping": {
+    "scaleBasis": "MATCH",
+    "rampBasis": "PROPOSED",
+    "rule": "geometry + mapping.terrains.meadow"
+   },
+   "geometryDerived": {
+    "rule": "STRATA_WINDOW",
+    "strata": 2
+   }
+  },
+  {
+   "id": "SURFACE_SHARED_RAMP_MEADOW_N-C3_DEFAULT",
+   "category": "RAMP",
+   "band": "SURFACE",
+   "biome": "SHARED",
+   "zMin": 0,
+   "zMax": 3,
+   "sizeClass": null,
+   "frameClass": null,
+   "sourceIds": {
+    "catalog": [
+     "groundKinds:meadow"
+    ],
+    "assetIndex": [],
+    "brief": [],
+    "ar": [],
+    "manifest": [],
+    "matrix": [],
+    "addendum": [
+     "ADD-RAMP"
+    ]
+   },
+   "scaleRow": "GEOM_RAMP_3",
+   "envelope": {
+    "wMin": 48,
+    "wTarget": 48,
+    "wMax": 48,
+    "hMin": 105,
+    "hTarget": 105,
+    "hMax": 106
+   },
+   "footprint": {
+    "w": 1,
+    "h": 1
+   },
+   "anchor": {
+    "type": "GROUND",
+    "x": 24,
+    "y": 143
+   },
+   "paletteRampIds": [
+    "TEMP_GRASS_FERTILE",
+    "TEMP_SOIL_LOAM"
+   ],
+   "frames": {
+    "cols": 1,
+    "rows": 1,
+    "facings": [
+     "S"
+    ],
+    "rate": null
+   },
+   "slot": {
+    "sheetId": "ATLAS_SURFACE_SHARED_TILE_01",
+    "slotId": "ATLAS_SURFACE_SHARED_TILE_01:0852",
+    "x": 48,
+    "y": 1104,
+    "w": 48,
+    "h": 144
+   },
+   "runtime": {
+    "kind": "NONE",
+    "file": null,
+    "index": null
+   },
+   "variants": {
+    "derivedFrom": null,
+    "flipH": false,
+    "flipV": false,
+    "rot": 0,
+    "paletteSwap": null,
+    "lightingSafe": false
+   },
+   "paperDoll": null,
+   "references": [
+    "pack:WORLD",
+    "pack:BIOME"
+   ],
+   "standardPending": "DW.01.06",
+   "alphaMode": "BINARY",
+   "status": "MISSING",
+   "statusWhy": "RAMP placeholder (Owner addendum); no art",
+   "family": "RAMP",
+   "groupType": "TILE",
+   "mapping": {
+    "scaleBasis": "MATCH",
+    "rampBasis": "PROPOSED",
+    "rule": "geometry + mapping.terrains.meadow"
+   },
+   "geometryDerived": {
+    "rule": "RAMP_CELL",
+    "strata": 3
+   }
+  },
+  {
+   "id": "ALL_SHARED_CHARACTER_HUMAN_MALE-T0_DEFAULT",
+   "category": "CHARACTER",
+   "band": "ALL",
+   "biome": "SHARED",
+   "zMin": -16,
+   "zMax": 15,
+   "sizeClass": "Medium",
+   "frameClass": "MEDIUM",
+   "sourceIds": {
+    "catalog": [
+     "people:human"
+    ],
+    "assetIndex": [
+     "$UF_Human_Male"
+    ],
+    "brief": [
+     "SEG-00:human",
+     "SEG-01:anchor_person",
+     "SEG-11:human:male"
+    ],
+    "ar": [
+     "AR-010",
+     "AR-400"
+    ],
+    "manifest": [],
+    "matrix": [],
+    "addendum": []
+   },
+   "scaleRow": "RACE_HUMAN",
+   "envelope": {
+    "wMin": 14,
+    "wTarget": 18,
+    "wMax": 22,
+    "hMin": 35,
+    "hTarget": 42,
+    "hMax": 46
+   },
+   "footprint": {
+    "w": 1,
+    "h": 1
+   },
+   "anchor": {
+    "type": "GROUND",
+    "x": 24,
+    "y": 47
+   },
+   "paletteRampIds": [
+    "NEUT_WARM_GRAY",
+    "CONSTRUCT_FABRIC_LEATHER"
+   ],
+   "frames": {
+    "cols": 3,
+    "rows": 4,
+    "facings": [
+     "S",
+     "W",
+     "E",
+     "N"
+    ],
+    "rate": null
+   },
+   "slot": {
+    "sheetId": "ATLAS_ALL_SHARED_CHARACTER_01",
+    "slotId": "ATLAS_ALL_SHARED_CHARACTER_01:0040",
+    "x": 1584,
+    "y": 192,
+    "w": 144,
+    "h": 192
+   },
+   "runtime": {
+    "kind": "RMMZ_CHARACTER",
+    "file": "img/characters/$UF_Human_Male.png",
+    "index": 0
+   },
+   "variants": {
+    "derivedFrom": null,
+    "flipH": false,
+    "flipV": false,
+    "rot": 0,
+    "paletteSwap": null,
+    "lightingSafe": false
+   },
+   "paperDoll": null,
+   "references": [
+    "pack:WORLD"
+   ],
+   "standardPending": null,
+   "alphaMode": "BINARY",
+   "status": "EXISTING_UNAPPROVED",
+   "statusWhy": "original art on disk; not Owner-approved under DEC-007 (docs/ASSET_INVENTORY.md:260); start.pair male clothing tier 0",
+   "family": "SOURCE",
+   "groupType": "CHARACTER",
+   "mapping": {
+    "scaleBasis": "PROPOSED",
+    "rampBasis": "PROPOSED",
+    "rule": "size_classes.RACE_HUMAN"
+   }
+  },
+  {
+   "id": "ALL_SHARED_EQUIPMENT_STONE-AXE_LAYER_DEFAULT",
+   "category": "EQUIPMENT",
+   "band": "ALL",
+   "biome": "SHARED",
+   "zMin": -16,
+   "zMax": 15,
+   "sizeClass": null,
+   "frameClass": "MEDIUM",
+   "sourceIds": {
+    "catalog": [
+     "items:stone_axe"
+    ],
+    "assetIndex": [],
+    "brief": [
+     "SEG-17:eq_weapon_stone_axe"
+    ],
+    "ar": [
+     "AR-512",
+     "AR-600"
+    ],
+    "manifest": [],
+    "matrix": [],
+    "addendum": []
+   },
+   "scaleRow": "RACE_HUMAN",
+   "envelope": {
+    "wMin": 14,
+    "wTarget": 18,
+    "wMax": 22,
+    "hMin": 35,
+    "hTarget": 42,
+    "hMax": 46
+   },
+   "footprint": {
+    "w": 1,
+    "h": 1
+   },
+   "anchor": {
+    "type": "GROUND",
+    "x": 24,
+    "y": 47
+   },
+   "paletteRampIds": [
+    "NEUT_WARM_GRAY",
+    "CONSTRUCT_TIMBER_FRESH"
+   ],
+   "frames": {
+    "cols": 3,
+    "rows": 4,
+    "facings": [
+     "S",
+     "W",
+     "E",
+     "N"
+    ],
+    "rate": null
+   },
+   "slot": {
+    "sheetId": "ATLAS_ALL_SHARED_CHARACTER_01",
+    "slotId": "ATLAS_ALL_SHARED_CHARACTER_01:0100",
+    "x": 2448,
+    "y": 768,
+    "w": 144,
+    "h": 192
+   },
+   "runtime": {
+    "kind": "RMMZ_CHARACTER",
+    "file": "img/characters/$UF_Layer_stone_axe.png",
+    "index": 0
+   },
+   "variants": {
+    "derivedFrom": null,
+    "flipH": false,
+    "flipV": false,
+    "rot": 0,
+    "paletteSwap": null,
+    "lightingSafe": false
+   },
+   "paperDoll": {
+    "bodyType": "ALL_SHARED_CHARACTER_HUMAN_MALE-T0_DEFAULT",
+    "layer": "held",
+    "zOrder": 6
+   },
+   "references": [
+    "pack:WORLD"
+   ],
+   "standardPending": null,
+   "alphaMode": "BINARY",
+   "status": "EXISTING_UNAPPROVED",
+   "statusWhy": "layer file game/img/characters/$UF_Layer_stone_axe.png on disk; not Owner-approved",
+   "family": "SOURCE",
+   "groupType": "CHARACTER",
+   "mapping": {
+    "scaleBasis": "MATCH",
+    "rampBasis": "PROPOSED",
+    "rule": "paper-doll part shares its body base frame and anchor"
+   }
+  },
+  {
+   "id": "ALL_SHARED_CREATURE_TROLL_V1_DEFAULT",
+   "category": "CREATURE",
+   "band": "ALL",
+   "biome": "SHARED",
+   "zMin": -16,
+   "zMax": 15,
+   "sizeClass": "Large",
+   "frameClass": "LARGE_TALL",
+   "sourceIds": {
+    "catalog": [
+     "wildlife:troll"
+    ],
+    "assetIndex": [
+     "$UF_Stock_Monster_1"
+    ],
+    "brief": [
+     "SEG-10:troll"
+    ],
+    "ar": [
+     "AR-401",
+     "AR-402",
+     "AR-600"
+    ],
+    "manifest": [],
+    "matrix": [],
+    "addendum": []
+   },
+   "scaleRow": "GEOM_FRAME_LARGE_TALL",
+   "envelope": {
+    "wMin": 48,
+    "wTarget": 48,
+    "wMax": 48,
+    "hMin": 96,
+    "hTarget": 96,
+    "hMax": 96
+   },
+   "footprint": {
+    "w": 2,
+    "h": 2
+   },
+   "anchor": {
+    "type": "GROUND",
+    "x": 24,
+    "y": 95
+   },
+   "paletteRampIds": [
+    "NEUT_WARM_GRAY",
+    "CONSTRUCT_FABRIC_LEATHER"
+   ],
+   "frames": {
+    "cols": 3,
+    "rows": 4,
+    "facings": [
+     "S",
+     "W",
+     "E",
+     "N"
+    ],
+    "rate": null
+   },
+   "slot": {
+    "sheetId": "ATLAS_ALL_SHARED_CHARACTER_01",
+    "slotId": "ATLAS_ALL_SHARED_CHARACTER_01:0066",
+    "x": 1584,
+    "y": 384,
+    "w": 144,
+    "h": 384
+   },
+   "runtime": {
+    "kind": "RMMZ_CHARACTER",
+    "file": "img/characters/$UF_Stock_Monster_1.png",
+    "index": 0
+   },
+   "variants": {
+    "derivedFrom": null,
+    "flipH": false,
+    "flipV": false,
+    "rot": 0,
+    "paletteSwap": null,
+    "lightingSafe": false
+   },
+   "paperDoll": null,
+   "references": [
+    "pack:WORLD",
+    "art/u7_reference_squares/u7_ranger_south_48.png",
+    "art/u7_reference_squares/u7_boulder_48.png"
+   ],
+   "standardPending": null,
+   "alphaMode": "BINARY",
+   "status": "STOCK",
+   "statusWhy": "stock RMMZ art in use, shared sheet told apart by a tint (docs/ASSET_INVENTORY.md:222)",
+   "family": "SOURCE",
+   "groupType": "CHARACTER",
+   "mapping": {
+    "scaleBasis": "MATCH",
+    "rampBasis": "PROPOSED",
+    "rule": "SRD srd:creature:troll size Large; SRD Large giant -> tall body"
+   }
+  }
+ ],
+ "outOfScope": [
+  {
+   "sourceId": "skins:human",
+   "kind": "catalog",
+   "reason": "window skin (interface art); fixture copy of a real outOfScope row"
+  }
+ ]
+}

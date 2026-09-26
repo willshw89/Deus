@@ -1,0 +1,21 @@
+{
+  "case": "paperdoll_anchor",
+  "base": "tools/art/fixtures/catalogue/mini/catalogue.json",
+  "context": "tools/art/fixtures/catalogue/mini/context.json",
+  "code": "PAPERDOLL_MISMATCH",
+  "rule": "a paper-doll part whose anchor differs from its bodyType base",
+  "patch": [
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "id": "ALL_SHARED_EQUIPMENT_STONE-AXE_LAYER_DEFAULT"
+        },
+        "anchor",
+        "y"
+      ],
+      "value": 40
+    }
+  ]
+}

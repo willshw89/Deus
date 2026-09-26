@@ -1,0 +1,13 @@
+{
+  "base": "art/catalogue/geometry.json",
+  "about": "Brief example: stratumPx [20,19,19,19,19]. Slot sizes use the tallest run of k strata (unchanged); the target height of every strip, wall face and ramp cell changes because it is the lowest k strata.",
+  "set": {
+    "stratumPx": [
+      20,
+      19,
+      19,
+      19,
+      19
+    ]
+  }
+}

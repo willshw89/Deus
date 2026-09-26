@@ -1,0 +1,21 @@
+{
+  "case": "size_outside_row",
+  "base": "tools/art/fixtures/catalogue/mini/catalogue.json",
+  "context": "tools/art/fixtures/catalogue/mini/context.json",
+  "code": "SIZE_OUTSIDE_ROW",
+  "rule": "a size outside its chart row min/max",
+  "patch": [
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "id": "SURFACE_SHARED_TREE_OAK_V1_DEFAULT"
+        },
+        "envelope",
+        "hTarget"
+      ],
+      "value": 120
+    }
+  ]
+}

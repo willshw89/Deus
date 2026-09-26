@@ -1,0 +1,21 @@
+{
+  "case": "derived_missing_base",
+  "base": "tools/art/fixtures/catalogue/mini/catalogue.json",
+  "context": "tools/art/fixtures/catalogue/mini/context.json",
+  "code": "DERIVED_BAD_BASE",
+  "rule": "a derivedFrom pointing at a missing base",
+  "patch": [
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "id": "LOWER1_SHARED_EDGE_MEADOW_S-H2_DEFAULT"
+        },
+        "variants",
+        "derivedFrom"
+      ],
+      "value": "SURFACE_SHARED_EDGE_NOSUCH_S-H2_DEFAULT"
+    }
+  ]
+}

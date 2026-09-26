@@ -1,0 +1,15 @@
+{
+  "base": "art/catalogue/geometry.json",
+  "about": "Owner parameter TALL_MEDIUM switched on (default OFF): adds the 48x64 frame class, whose slots appear in every band.",
+  "set": {
+    "optionalParams": {
+      "TALL_MEDIUM": {
+        "frame": [
+          48,
+          64
+        ],
+        "enabled": true
+      }
+    }
+  }
+}

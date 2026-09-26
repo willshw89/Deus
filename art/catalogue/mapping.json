@@ -1,0 +1,1328 @@
+{
+  "schemaVersion": "deus-art-catalogue/1.1.0",
+  "about": "Hand-authored mapping from source ids to the size and palette authorities. scaleRow names a row of art/catalogue/scale_chart.json (or a size_classes.json race row); ramps name ramps of game/data/DEUS_PaletteRegistry.json. basis MATCH = the source names the same thing as the chart row / ramp (for example oak -> TREE_COMMON_OAK); basis PROPOSED = the nearest row or ramp chosen by the catalogue writer because no row or ramp names the thing. Every PROPOSED line is counted in docs/art/catalogue/INDEX.md and listed as an Owner question in conflicts.md. band is only given where the builder cannot compute it from the WorldCatalog biome tables (surface biomes -> SURFACE, undergroundBiomes -> LOWER1 by containment of the legacy levels -1/-2, both -> ALL, tag building -> ALL).",
+  "objects": {
+    "oak": {
+      "category": "TREE",
+      "scaleRow": "TREE_COMMON_OAK",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "TEMP_BARK_OAK",
+        "TEMP_FOLIAGE_OAK"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "birch": {
+      "category": "TREE",
+      "scaleRow": "TREE_COMMON_BIRCH",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "TEMP_BARK_BIRCH",
+        "TEMP_FOLIAGE_OAK"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "pine": {
+      "category": "TREE",
+      "scaleRow": "TREE_COMMON_PINE",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "HIGH_BARK_CONIFER",
+        "HIGH_FOLIAGE_CONIFER"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "fir_snow": {
+      "category": "TREE",
+      "scaleRow": "TREE_COMMON_PINE",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "HIGH_BARK_CONIFER",
+        "HIGH_FOLIAGE_CONIFER"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "fruit_tree": {
+      "category": "TREE",
+      "scaleRow": "TREE_COMMON_OAK",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "TEMP_BARK_OAK",
+        "TEMP_FOLIAGE_OAK"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "fruit_tree_bare": {
+      "category": "TREE",
+      "scaleRow": "TREE_COMMON_OAK",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "TEMP_BARK_OAK",
+        "TEMP_FOLIAGE_OAK"
+      ],
+      "rampBasis": "PROPOSED",
+      "band": "SURFACE"
+    },
+    "tree_savanna": {
+      "category": "TREE",
+      "scaleRow": "TREE_COMMON_OAK",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "ARID_WOOD_BLEACHED",
+        "TEMP_FOLIAGE_OAK"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "tree_swamp": {
+      "category": "TREE",
+      "scaleRow": "TREE_COMMON_OAK",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "WET_WOOD_DRIFTWOOD",
+        "WET_FOLIAGE_WILLOW"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "mangrove": {
+      "category": "TREE",
+      "scaleRow": "TREE_COMMON_OAK",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "WET_WOOD_DRIFTWOOD",
+        "WET_FOLIAGE_WILLOW"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "tree_tropical": {
+      "category": "TREE",
+      "scaleRow": "TREE_LARGE_ACCENT",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "TEMP_BARK_OAK",
+        "TEMP_FOLIAGE_OAK"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "palm": {
+      "category": "TREE",
+      "scaleRow": "TREE_COMMON_PINE",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "ARID_WOOD_BLEACHED",
+        "TEMP_FOLIAGE_OAK"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "dead_tree": {
+      "category": "TREE",
+      "scaleRow": "TREE_COMMON_OAK",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "ARID_WOOD_BLEACHED"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "tree_cursed": {
+      "category": "TREE",
+      "scaleRow": "TREE_COMMON_OAK",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "VOLC_WOOD_CHARRED"
+      ],
+      "rampBasis": "PROPOSED",
+      "band": "SURFACE"
+    },
+    "stump": {
+      "category": "TREE",
+      "scaleRow": "DEBRIS_STUMP",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "TEMP_BARK_OAK"
+      ],
+      "rampBasis": "PROPOSED",
+      "band": "SURFACE"
+    },
+    "berry_bush": {
+      "category": "FLORA",
+      "scaleRow": "SHRUB_MEDIUM_BUSH",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "TEMP_FOLIAGE_OAK"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "berry_bush_bare": {
+      "category": "FLORA",
+      "scaleRow": "SHRUB_MEDIUM_BUSH",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "TEMP_FOLIAGE_OAK"
+      ],
+      "rampBasis": "PROPOSED",
+      "band": "SURFACE"
+    },
+    "bush": {
+      "category": "FLORA",
+      "scaleRow": "SHRUB_MEDIUM_BUSH",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "TEMP_FOLIAGE_OAK"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "desert_shrub": {
+      "category": "FLORA",
+      "scaleRow": "SHRUB_SMALL_BUSH",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "ARID_SCRUB_THORN"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "snow_bush": {
+      "category": "FLORA",
+      "scaleRow": "SHRUB_SMALL_BUSH",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "HIGH_FOLIAGE_CONIFER"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "cactus": {
+      "category": "FLORA",
+      "scaleRow": "SHRUB_SMALL_BUSH",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "ARID_SCRUB_THORN"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "cactus_tall": {
+      "category": "FLORA",
+      "scaleRow": "TREE_SAPLING",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "ARID_SCRUB_THORN"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "grass_tuft": {
+      "category": "FLORA",
+      "scaleRow": "MICRO_TALL_GRASS",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "TEMP_GRASS_FERTILE"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "reeds": {
+      "category": "FLORA",
+      "scaleRow": "MICRO_REEDS",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "WET_REED_RUSH"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "flowers": {
+      "category": "FLORA",
+      "scaleRow": "MICRO_FLOWERS",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "TEMP_GRASS_FERTILE"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "flowers_purple": {
+      "category": "FLORA",
+      "scaleRow": "MICRO_FLOWERS",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "TEMP_GRASS_FERTILE"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "flowers_blue": {
+      "category": "FLORA",
+      "scaleRow": "MICRO_FLOWERS",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "TEMP_GRASS_FERTILE"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "flowers_white": {
+      "category": "FLORA",
+      "scaleRow": "MICRO_FLOWERS",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "TEMP_GRASS_FERTILE"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "fern": {
+      "category": "FLORA",
+      "scaleRow": "MICRO_TALL_GRASS",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "TEMP_FOLIAGE_OAK"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "lichen": {
+      "category": "FLORA",
+      "scaleRow": "MICRO_SHORT_GRASS",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "HIGH_GRASS_ALPINE"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "wild_grain": {
+      "category": "FLORA",
+      "scaleRow": "MICRO_TALL_GRASS",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "TEMP_GRASS_DRY"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "wheat_wild": {
+      "category": "FLORA",
+      "scaleRow": "MICRO_TALL_GRASS",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "TEMP_GRASS_DRY"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "lily_pad": {
+      "category": "FLORA",
+      "scaleRow": "MICRO_SHORT_GRASS",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "WET_REED_RUSH"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "rocks_small": {
+      "category": "STONE",
+      "scaleRow": "STONE_SMALL_ROCK",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "TEMP_STONE_FIELDSTONE"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "gravel": {
+      "category": "STONE",
+      "scaleRow": "STONE_PEBBLES",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "HIGH_GRAVEL_SCREE"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "granite_boulder": {
+      "category": "STONE",
+      "scaleRow": "STONE_LARGE_BOULDER",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "HIGH_STONE_GRANITE"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "ironstone": {
+      "category": "STONE",
+      "scaleRow": "STONE_MEDIUM_ROCK",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "NEUT_WARM_GRAY",
+        "CONSTRUCT_METAL_IRON"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "copper_outcrop": {
+      "category": "STONE",
+      "scaleRow": "STONE_MEDIUM_ROCK",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "NEUT_WARM_GRAY"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "gold_outcrop": {
+      "category": "STONE",
+      "scaleRow": "STONE_MEDIUM_ROCK",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "NEUT_WARM_GRAY",
+        "NEUT_PALE_CREST"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "crystal": {
+      "category": "STONE",
+      "scaleRow": "STONE_MEDIUM_ROCK",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "MAGIC_ARCANE_CYAN"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "crystal_small": {
+      "category": "STONE",
+      "scaleRow": "STONE_SMALL_ROCK",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "MAGIC_ARCANE_CYAN"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "bones_pile": {
+      "category": "REMAINS",
+      "scaleRow": "DEBRIS_FALLEN_BRANCH",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "ARID_BONE_CALICHE"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "rubble": {
+      "category": "REMAINS",
+      "scaleRow": "STONE_MEDIUM_ROCK",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "CONSTRUCT_STONE_DRESSED"
+      ],
+      "rampBasis": "PROPOSED",
+      "band": "ALL"
+    },
+    "rubble_pillar": {
+      "category": "REMAINS",
+      "scaleRow": "DEBRIS_FALLEN_LOG",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "CONSTRUCT_STONE_DRESSED"
+      ],
+      "rampBasis": "PROPOSED",
+      "band": "ALL"
+    },
+    "campfire": {
+      "category": "STRUCTURE",
+      "scaleRow": "ARCH_HEARTH",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "CONSTRUCT_TIMBER_AGED",
+        "NEUT_WARM_GRAY"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "wall_wood": {
+      "category": "STRUCTURE",
+      "scaleRow": "ARCH_WALL_2GRID",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "CONSTRUCT_TIMBER_FRESH",
+        "NEUT_VOID_BLACK"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "wall_stone": {
+      "category": "STRUCTURE",
+      "scaleRow": "ARCH_WALL_2GRID",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "CONSTRUCT_STONE_DRESSED",
+        "NEUT_VOID_BLACK"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "floor_straw": {
+      "category": "FURNITURE",
+      "scaleRow": "ARCH_BED",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "TEMP_GRASS_DRY",
+        "CONSTRUCT_FABRIC_LEATHER"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "crib": {
+      "category": "FURNITURE",
+      "scaleRow": "ARCH_BED",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "CONSTRUCT_TIMBER_FRESH",
+        "CONSTRUCT_FABRIC_LEATHER"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "stockpile": {
+      "category": "STRUCTURE",
+      "scaleRow": "RMMZ_TILE_48",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "NEUT_PALE_CREST"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "workbench": {
+      "category": "WORKSHOP",
+      "scaleRow": "ARCH_WORKBENCH",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "CONSTRUCT_TIMBER_FRESH",
+        "CONSTRUCT_METAL_IRON"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "furnace": {
+      "category": "WORKSHOP",
+      "scaleRow": "ARCH_HEARTH",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "CONSTRUCT_STONE_DRESSED",
+        "CONSTRUCT_METAL_IRON"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "smithy": {
+      "category": "WORKSHOP",
+      "scaleRow": "ARCH_WORKBENCH",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "CONSTRUCT_METAL_IRON",
+        "CONSTRUCT_STONE_DRESSED"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "bowyer_bench": {
+      "category": "WORKSHOP",
+      "scaleRow": "ARCH_WORKBENCH",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "CONSTRUCT_TIMBER_FRESH"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "fletcher_bench": {
+      "category": "WORKSHOP",
+      "scaleRow": "ARCH_WORKBENCH",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "CONSTRUCT_TIMBER_FRESH"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "tanning_rack": {
+      "category": "WORKSHOP",
+      "scaleRow": "ARCH_WORKBENCH",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "CONSTRUCT_TIMBER_AGED",
+        "CONSTRUCT_FABRIC_LEATHER"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "weapon_rack": {
+      "category": "WORKSHOP",
+      "scaleRow": "ARCH_WORKBENCH",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "CONSTRUCT_TIMBER_FRESH",
+        "CONSTRUCT_METAL_IRON"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "bridge": {
+      "category": "STRUCTURE",
+      "scaleRow": "RMMZ_TILE_48",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "CONSTRUCT_TIMBER_AGED"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "farm_plot": {
+      "category": "STRUCTURE",
+      "scaleRow": "RMMZ_TILE_48",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "TEMP_SOIL_LOAM"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "well": {
+      "category": "STRUCTURE",
+      "scaleRow": "ARCH_BARREL",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "CONSTRUCT_STONE_DRESSED",
+        "WATER_DEEP_FRESH"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "door_wood": {
+      "category": "STRUCTURE",
+      "scaleRow": "ARCH_DOORWAY",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "CONSTRUCT_TIMBER_FRESH",
+        "CONSTRUCT_METAL_IRON"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "door_stone": {
+      "category": "STRUCTURE",
+      "scaleRow": "ARCH_DOORWAY",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "CONSTRUCT_STONE_DRESSED"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "door_iron": {
+      "category": "STRUCTURE",
+      "scaleRow": "ARCH_DOORWAY",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "CONSTRUCT_METAL_IRON"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "glow_caps": {
+      "category": "FLORA",
+      "scaleRow": "MICRO_FUNGI",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "MAGIC_ARCANE_CYAN",
+        "TEMP_WOODLAND_FLOOR"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "cave_mushrooms": {
+      "category": "FLORA",
+      "scaleRow": "MICRO_FUNGI",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "TEMP_WOODLAND_FLOOR",
+        "NEUT_PALE_CREST"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "tower_cap": {
+      "category": "TREE",
+      "scaleRow": "TREE_LARGE_ACCENT",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "TEMP_WOODLAND_FLOOR",
+        "NEUT_PALE_CREST"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "cave_moss": {
+      "category": "FLORA",
+      "scaleRow": "MICRO_SHORT_GRASS",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "WET_GRASS_SATURATED"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "spore_reeds": {
+      "category": "FLORA",
+      "scaleRow": "MICRO_REEDS",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "WET_REED_RUSH"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "stalagmite": {
+      "category": "STONE",
+      "scaleRow": "STONE_LARGE_BOULDER",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "TEMP_STONE_LIMESTONE"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "crystal_spire": {
+      "category": "STONE",
+      "scaleRow": "STONE_HERO_OUTCROP",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "MAGIC_ARCANE_CYAN",
+        "MAGIC_ASTRAL_VIOLET"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "sapling": {
+      "category": "TREE",
+      "scaleRow": "TREE_SAPLING",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "TEMP_BARK_OAK",
+        "TEMP_FOLIAGE_OAK"
+      ],
+      "rampBasis": "PROPOSED",
+      "band": "SURFACE"
+    },
+    "bed_wood": {
+      "category": "FURNITURE",
+      "scaleRow": "ARCH_BED",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "CONSTRUCT_TIMBER_FRESH",
+        "CONSTRUCT_FABRIC_LEATHER"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "chest_wood": {
+      "category": "FURNITURE",
+      "scaleRow": "ARCH_CHEST",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "CONSTRUCT_TIMBER_FRESH",
+        "CONSTRUCT_METAL_IRON"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "dining_table": {
+      "category": "FURNITURE",
+      "scaleRow": "ARCH_TABLE",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "CONSTRUCT_TIMBER_FRESH"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "dining_bench": {
+      "category": "FURNITURE",
+      "scaleRow": "ARCH_CHAIR",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "CONSTRUCT_TIMBER_FRESH"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "kitchen_counter": {
+      "category": "FURNITURE",
+      "scaleRow": "ARCH_TABLE",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "CONSTRUCT_TIMBER_FRESH"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "kitchen_pantry": {
+      "category": "FURNITURE",
+      "scaleRow": "ARCH_BARREL",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "CONSTRUCT_TIMBER_FRESH"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "kitchen_hearth": {
+      "category": "WORKSHOP",
+      "scaleRow": "ARCH_HEARTH",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "CONSTRUCT_STONE_DRESSED"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "shop_counter": {
+      "category": "FURNITURE",
+      "scaleRow": "ARCH_TABLE",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "CONSTRUCT_TIMBER_FRESH"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "apothecary_bench": {
+      "category": "WORKSHOP",
+      "scaleRow": "ARCH_WORKBENCH",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "CONSTRUCT_TIMBER_FRESH"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "skeleton": {
+      "category": "REMAINS",
+      "scaleRow": "DEBRIS_FALLEN_LOG",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "ARID_BONE_CALICHE"
+      ],
+      "rampBasis": "MATCH",
+      "band": "ALL"
+    },
+    "clay_deposit": {
+      "category": "STONE",
+      "scaleRow": "STONE_PEBBLES",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "ARID_SOIL_CLAY"
+      ],
+      "rampBasis": "PROPOSED",
+      "band": "ALL"
+    },
+    "sand_deposit": {
+      "category": "STONE",
+      "scaleRow": "STONE_PEBBLES",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "ARID_SAND_COARSE"
+      ],
+      "rampBasis": "PROPOSED",
+      "band": "ALL"
+    },
+    "pottery_kiln": {
+      "category": "WORKSHOP",
+      "scaleRow": "ARCH_HEARTH",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "ARID_SOIL_CLAY",
+        "CONSTRUCT_STONE_DRESSED"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "mason_bench": {
+      "category": "WORKSHOP",
+      "scaleRow": "ARCH_WORKBENCH",
+      "scaleBasis": "PROPOSED",
+      "ramps": [
+        "CONSTRUCT_STONE_DRESSED",
+        "CONSTRUCT_TIMBER_FRESH"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "wall_timber_frame": {
+      "category": "STRUCTURE",
+      "scaleRow": "ARCH_WALL_2GRID",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "CONSTRUCT_TIMBER_AGED",
+        "NEUT_VOID_BLACK"
+      ],
+      "rampBasis": "MATCH"
+    },
+    "wall_brick": {
+      "category": "STRUCTURE",
+      "scaleRow": "ARCH_WALL_2GRID",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "ARID_SOIL_CLAY",
+        "NEUT_VOID_BLACK"
+      ],
+      "rampBasis": "PROPOSED"
+    },
+    "wall_ashlar": {
+      "category": "STRUCTURE",
+      "scaleRow": "ARCH_WALL_2GRID",
+      "scaleBasis": "MATCH",
+      "ramps": [
+        "CONSTRUCT_STONE_DRESSED",
+        "NEUT_VOID_BLACK"
+      ],
+      "rampBasis": "MATCH"
+    }
+  },
+  "itemRampRules": [
+    {
+      "rule": "IR01",
+      "ids": [
+        "log",
+        "firewood",
+        "plank_dressed",
+        "charcoal"
+      ],
+      "ramps": [
+        "CONSTRUCT_TIMBER_FRESH"
+      ]
+    },
+    {
+      "rule": "IR02",
+      "ids": [
+        "stone",
+        "stone_block",
+        "brick_clay",
+        "mortar_lime",
+        "clay",
+        "sand"
+      ],
+      "ramps": [
+        "NEUT_WARM_GRAY"
+      ]
+    },
+    {
+      "rule": "IR03",
+      "ids": [
+        "ore_iron",
+        "ore_copper",
+        "gold",
+        "gold_coin",
+        "bar_iron",
+        "bar_copper",
+        "hardware_iron"
+      ],
+      "ramps": [
+        "NEUT_WARM_GRAY",
+        "CONSTRUCT_METAL_IRON"
+      ]
+    },
+    {
+      "rule": "IR04",
+      "ids": [
+        "gem_rough",
+        "gem_cut"
+      ],
+      "ramps": [
+        "MAGIC_ARCANE_CYAN"
+      ]
+    },
+    {
+      "rule": "IR05",
+      "ids": [
+        "berries",
+        "fruit",
+        "mushroom",
+        "root",
+        "seeds",
+        "fiber",
+        "straw"
+      ],
+      "ramps": [
+        "TEMP_FOLIAGE_OAK",
+        "TEMP_GRASS_DRY"
+      ]
+    },
+    {
+      "rule": "IR06",
+      "ids": [
+        "meat_raw",
+        "meat_cooked",
+        "fish",
+        "rations",
+        "hide",
+        "leather",
+        "wool",
+        "feathers",
+        "bone",
+        "pouch",
+        "common_clothes",
+        "fiber_wrap",
+        "hide_cloak"
+      ],
+      "ramps": [
+        "CONSTRUCT_FABRIC_LEATHER",
+        "NEUT_PALE_CREST"
+      ]
+    },
+    {
+      "rule": "IR07",
+      "tags": [
+        "weapon",
+        "tool",
+        "ammo"
+      ],
+      "ramps": [
+        "CONSTRUCT_METAL_IRON",
+        "CONSTRUCT_TIMBER_FRESH"
+      ]
+    },
+    {
+      "rule": "IR08",
+      "tags": [
+        "armor",
+        "shield",
+        "wear"
+      ],
+      "ramps": [
+        "CONSTRUCT_FABRIC_LEATHER",
+        "CONSTRUCT_METAL_IRON"
+      ]
+    },
+    {
+      "rule": "IR99",
+      "ids": [],
+      "tags": [],
+      "ramps": [
+        "NEUT_WARM_GRAY"
+      ],
+      "default": true
+    }
+  ],
+  "terrains": {
+    "meadow": [
+      "TEMP_GRASS_FERTILE",
+      "TEMP_SOIL_LOAM"
+    ],
+    "tropical_grass": [
+      "TEMP_GRASS_FERTILE",
+      "TEMP_SOIL_LOAM"
+    ],
+    "dry_grass": [
+      "TEMP_GRASS_DRY",
+      "TEMP_SOIL_LOAM"
+    ],
+    "shrub_soil": [
+      "ARID_SOIL_CLAY",
+      "ARID_SCRUB_THORN"
+    ],
+    "forest_floor": [
+      "TEMP_WOODLAND_FLOOR",
+      "TEMP_SOIL_LOAM"
+    ],
+    "needle_floor": [
+      "TEMP_WOODLAND_FLOOR",
+      "HIGH_FOLIAGE_CONIFER"
+    ],
+    "jungle_floor": [
+      "TEMP_WOODLAND_FLOOR",
+      "TEMP_GRASS_FERTILE"
+    ],
+    "tundra": [
+      "HIGH_GRASS_ALPINE",
+      "HIGH_SOIL_STONY_LOAM"
+    ],
+    "snow": [
+      "NEUT_PALE_CREST",
+      "NEUT_COOL_GRAY"
+    ],
+    "ice": [
+      "WATER_SHALLOW_CLEAR",
+      "NEUT_PALE_CREST"
+    ],
+    "sand": [
+      "ARID_SAND_COARSE"
+    ],
+    "stony": [
+      "HIGH_GRAVEL_SCREE",
+      "HIGH_SOIL_STONY_LOAM"
+    ],
+    "red_clay": [
+      "ARID_SOIL_CLAY"
+    ],
+    "rock": [
+      "HIGH_STONE_GRANITE"
+    ],
+    "peak_rock": [
+      "HIGH_STONE_GRANITE",
+      "NEUT_VOID_BLACK"
+    ],
+    "mud": [
+      "WET_MUD_ANAEROBIC",
+      "WET_SILT_RIVER"
+    ],
+    "swamp_mud": [
+      "WET_SOIL_PEAT",
+      "WET_MUD_ANAEROBIC"
+    ],
+    "dirt": [
+      "TEMP_SOIL_LOAM"
+    ],
+    "cursed_grass": [
+      "TEMP_GRASS_DRY",
+      "NEUT_WARM_GRAY"
+    ],
+    "blessed_grass": [
+      "TEMP_GRASS_FERTILE"
+    ],
+    "ash": [
+      "VOLC_ASH_DRIFT"
+    ],
+    "scree": [
+      "HIGH_GRAVEL_SCREE"
+    ],
+    "road": [
+      "TEMP_SOIL_LOAM",
+      "NEUT_WARM_GRAY"
+    ],
+    "floor_wood": [
+      "CONSTRUCT_TIMBER_FRESH"
+    ],
+    "floor_stone": [
+      "CONSTRUCT_STONE_DRESSED"
+    ],
+    "floor_rushes": [
+      "WET_REED_RUSH",
+      "TEMP_GRASS_DRY"
+    ],
+    "mined_soil": [
+      "TEMP_SOIL_LOAM",
+      "NEUT_WARM_GRAY"
+    ],
+    "mined_stone": [
+      "NEUT_COOL_GRAY",
+      "NEUT_WARM_GRAY"
+    ],
+    "cave_floor": [
+      "NEUT_COOL_GRAY",
+      "TEMP_STONE_LIMESTONE"
+    ]
+  },
+  "water": {
+    "fresh": [
+      "WATER_SHALLOW_CLEAR",
+      "WATER_DEEP_FRESH"
+    ],
+    "pond": [
+      "WATER_SHALLOW_CLEAR",
+      "WATER_DEEP_FRESH"
+    ],
+    "marsh": [
+      "WATER_MURKY_WETLAND"
+    ],
+    "swamp": [
+      "WATER_MURKY_WETLAND"
+    ],
+    "icy": [
+      "WATER_SHALLOW_CLEAR",
+      "NEUT_PALE_CREST"
+    ],
+    "brackish": [
+      "WATER_MURKY_WETLAND",
+      "WATER_SHALLOW_CLEAR"
+    ],
+    "salt": [
+      "WATER_DEEP_FRESH",
+      "WATER_FOAM_RAPIDS"
+    ],
+    "deep": [
+      "WATER_DEEP_FRESH"
+    ],
+    "blighted": [
+      "WATER_MURKY_WETLAND",
+      "NEUT_WARM_GRAY"
+    ]
+  },
+  "living": {
+    "about": "DEUS_PaletteRegistry.json has no skin, fur, hair or feather ramps (it is a world-material palette). Every living being (people, creatures, faces, body-riding equipment) uses these ramps as a PROPOSED placeholder until the Owner rules; listed in conflicts.md.",
+    "ramps": [
+      "NEUT_WARM_GRAY",
+      "CONSTRUCT_FABRIC_LEATHER"
+    ],
+    "rampBasis": "PROPOSED"
+  },
+  "equipmentRamps": {
+    "wood": [
+      "CONSTRUCT_TIMBER_FRESH",
+      "CONSTRUCT_FABRIC_LEATHER"
+    ],
+    "stone": [
+      "NEUT_WARM_GRAY",
+      "CONSTRUCT_TIMBER_FRESH"
+    ],
+    "iron": [
+      "CONSTRUCT_METAL_IRON",
+      "CONSTRUCT_FABRIC_LEATHER"
+    ],
+    "leather": [
+      "CONSTRUCT_FABRIC_LEATHER"
+    ],
+    "cloth": [
+      "CONSTRUCT_FABRIC_LEATHER",
+      "NEUT_PALE_CREST"
+    ],
+    "fx": [
+      "MAGIC_ARCANE_CYAN"
+    ]
+  },
+  "effects": {
+    "ui_fx_hit": [
+      "NEUT_PALE_CREST",
+      "MAGIC_DIVINE_GOLD"
+    ],
+    "ui_fx_arrow": [
+      "CONSTRUCT_TIMBER_FRESH",
+      "CONSTRUCT_METAL_IRON"
+    ],
+    "ui_fx_blood": [
+      "CONSTRUCT_FABRIC_LEATHER"
+    ],
+    "eq_cast_effect": [
+      "MAGIC_ARCANE_CYAN"
+    ]
+  },
+  "addendum": {
+    "SHADE": [
+      "NEUT_VOID_BLACK"
+    ],
+    "RIMSHADOW": [
+      "NEUT_VOID_BLACK"
+    ],
+    "WALLFACE": [
+      "NEUT_COOL_GRAY",
+      "NEUT_VOID_BLACK"
+    ],
+    "CONNECTOR": [
+      "CONSTRUCT_TIMBER_FRESH",
+      "CONSTRUCT_STONE_DRESSED"
+    ],
+    "FRAMECLASS": [
+      "NEUT_WARM_GRAY",
+      "CONSTRUCT_FABRIC_LEATHER"
+    ],
+    "HANGING": {
+      "ROOTS": [
+        "TEMP_BARK_OAK",
+        "TEMP_WOODLAND_FLOOR"
+      ],
+      "VINES": [
+        "TEMP_FOLIAGE_OAK"
+      ],
+      "STALACTITES": [
+        "TEMP_STONE_LIMESTONE"
+      ],
+      "WATERFALL": [
+        "WATER_SHALLOW_CLEAR",
+        "WATER_FOAM_RAPIDS"
+      ],
+      "DUST": [
+        "NEUT_WARM_GRAY"
+      ],
+      "LIGHT-SHAFT": [
+        "NEUT_PALE_CREST"
+      ]
+    },
+    "DECAY": {
+      "WEATHERED": [
+        "CONSTRUCT_TIMBER_AGED",
+        "NEUT_WARM_GRAY"
+      ],
+      "OVERGROWN": [
+        "TEMP_FOLIAGE_OAK",
+        "WET_GRASS_SATURATED"
+      ],
+      "COLLAPSED": [
+        "CONSTRUCT_STONE_DRESSED",
+        "NEUT_VOID_BLACK"
+      ],
+      "BURIED": [
+        "TEMP_SOIL_LOAM",
+        "HIGH_GRAVEL_SCREE"
+      ]
+    }
+  },
+  "lightSources": [
+    {
+      "object": "campfire",
+      "basis": "UF_WorldCatalog objects.campfire tags include \"light\" and \"lit\""
+    },
+    {
+      "object": "kitchen_hearth",
+      "basis": "UF_WorldCatalog objects.kitchen_hearth tags include \"lit\""
+    },
+    {
+      "object": "glow_caps",
+      "basis": "docs/ASSET_REQUESTS.md AR-1906: \"providing natural subterranean illumination\""
+    },
+    {
+      "object": "crystal_spire",
+      "basis": "docs/ASSET_REQUESTS.md AR-1908: \"luminous violet/amethyst and deep sapphire crystal clusters\""
+    }
+  ],
+  "arMap": {
+    "AR-500": [
+      "objects:workbench",
+      "objects:furnace",
+      "objects:smithy",
+      "objects:bowyer_bench",
+      "objects:fletcher_bench",
+      "objects:tanning_rack",
+      "objects:weapon_rack",
+      "objects:kitchen_hearth",
+      "objects:apothecary_bench",
+      "objects:mason_bench",
+      "objects:pottery_kiln",
+      "objects:bed_wood",
+      "objects:chest_wood",
+      "objects:dining_table",
+      "objects:dining_bench",
+      "objects:kitchen_counter",
+      "objects:kitchen_pantry",
+      "objects:shop_counter",
+      "items:stone_axe",
+      "items:stone_knife",
+      "items:stone_pick",
+      "items:club",
+      "items:spear",
+      "items:dagger_iron",
+      "items:sword_short",
+      "items:axe_iron"
+    ],
+    "AR-300": [
+      "objects:wall_wood",
+      "objects:wall_stone",
+      "objects:door_wood",
+      "objects:door_stone",
+      "objects:door_iron",
+      "objects:campfire",
+      "objects:bed_wood",
+      "objects:floor_straw",
+      "groundKinds:floor_wood",
+      "groundKinds:floor_stone",
+      "groundKinds:floor_rushes"
+    ],
+    "AR-100": [
+      "groundKinds:meadow"
+    ],
+    "AR-101": [
+      "water:fresh",
+      "water:pond",
+      "water:marsh",
+      "water:swamp",
+      "water:icy",
+      "water:brackish",
+      "water:salt",
+      "water:deep",
+      "water:blighted"
+    ],
+    "AR-1901": [
+      "objects:cave_moss"
+    ],
+    "AR-1902": [
+      "objects:cave_mushrooms"
+    ],
+    "AR-1903": [
+      "objects:stalagmite"
+    ],
+    "AR-1905": [
+      "objects:tower_cap"
+    ],
+    "AR-1906": [
+      "objects:glow_caps"
+    ],
+    "AR-1907": [
+      "objects:spore_reeds"
+    ],
+    "AR-1908": [
+      "objects:crystal_spire"
+    ],
+    "AR-2011": [
+      "objects:chest_wood"
+    ],
+    "AR-010": [
+      "people:human"
+    ],
+    "AR-011": [
+      "people:human"
+    ],
+    "AR-400": [
+      "people:human",
+      "people:elf",
+      "people:dwarf",
+      "people:gnome"
+    ],
+    "AR-600": [
+      "people:human"
+    ]
+  },
+  "arMapAbout": "AR rows whose table text names catalog ids (docs/ASSET_REQUESTS.md); the builder adds the AR id to every entry carrying one of these catalog source ids. AR ids also reach entries through UF_AssetIndex requests[] and brief headings."
+}

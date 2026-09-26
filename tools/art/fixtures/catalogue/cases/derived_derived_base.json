@@ -1,0 +1,32 @@
+{
+  "case": "derived_derived_base",
+  "base": "tools/art/fixtures/catalogue/mini/catalogue.json",
+  "context": "tools/art/fixtures/catalogue/mini/context.json",
+  "code": "DERIVED_BAD_BASE",
+  "rule": "a derivedFrom pointing at a derived base",
+  "patch": [
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "id": "SURFACE_SHARED_RAMP_MEADOW_N-C3_DEFAULT"
+        },
+        "variants",
+        "derivedFrom"
+      ],
+      "value": "LOWER1_SHARED_EDGE_MEADOW_S-H2_DEFAULT"
+    },
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "id": "SURFACE_SHARED_RAMP_MEADOW_N-C3_DEFAULT"
+        },
+        "slot"
+      ],
+      "value": null
+    }
+  ]
+}

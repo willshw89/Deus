@@ -1,0 +1,17 @@
+{
+  "case": "source_dropped",
+  "base": "tools/art/fixtures/catalogue/mini/catalogue.json",
+  "context": "tools/art/fixtures/catalogue/mini/context.json",
+  "code": "SOURCE_DROPPED",
+  "rule": "a source id dropped without an outOfScope reason",
+  "patch": [
+    {
+      "op": "push",
+      "path": [
+        "sourceIdIndex",
+        "catalog"
+      ],
+      "value": "objects:fixture_only_id"
+    }
+  ]
+}

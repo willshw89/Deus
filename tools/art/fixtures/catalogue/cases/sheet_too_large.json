@@ -1,0 +1,20 @@
+{
+  "case": "sheet_too_large",
+  "base": "tools/art/fixtures/catalogue/mini/catalogue.json",
+  "context": "tools/art/fixtures/catalogue/mini/context.json",
+  "code": "SHEET_TOO_LARGE",
+  "rule": "an atlas side over 4096",
+  "patch": [
+    {
+      "op": "set",
+      "path": [
+        "sheets",
+        {
+          "sheetId": "ATLAS_SURFACE_SHARED_PROP_01"
+        },
+        "w"
+      ],
+      "value": 4128
+    }
+  ]
+}

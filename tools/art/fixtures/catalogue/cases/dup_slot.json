@@ -1,0 +1,21 @@
+{
+  "case": "dup_slot",
+  "base": "tools/art/fixtures/catalogue/mini/catalogue.json",
+  "context": "tools/art/fixtures/catalogue/mini/context.json",
+  "code": "DUP_SLOT",
+  "rule": "a duplicate slotId",
+  "patch": [
+    {
+      "op": "set",
+      "path": [
+        "entries",
+        {
+          "id": "ALL_SHARED_ITEM_LOG_V1_DEFAULT"
+        },
+        "slot",
+        "slotId"
+      ],
+      "value": "ATLAS_SURFACE_SHARED_PROP_01:0036"
+    }
+  ]
+}

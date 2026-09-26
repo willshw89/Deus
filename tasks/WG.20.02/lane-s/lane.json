@@ -1,0 +1,32 @@
+{
+  "lane": "lane-s",
+  "taskId": "WG.20.02",
+  "branch": "task/lane-s",
+  "writer": "claude",
+  "reviewer": "grok",
+  "allowedPaths": [
+    "art/catalogue/**",
+    "docs/art/catalogue/**",
+    "tools/art/build_catalogue.js",
+    "tools/art/test_catalogue.js",
+    "tools/art/fixtures/catalogue/**",
+    "tasks/WG.20.02/lane-s/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "node",
+      "args": [
+        "tools/art/test_catalogue.js"
+      ],
+      "timeoutSec": 600
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/art/build_catalogue.js",
+        "--check"
+      ],
+      "timeoutSec": 600
+    }
+  ]
+}

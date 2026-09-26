@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "deus-art-catalogue/1.1.0",
+  "source": "tasks/WG.20.02/lane-s/BRIEF.md:27-28 (PM 01:59 CT 2026-09-26: race drawn heights derived from SRD 5.1 Size traits at 7 px per foot, all in 48x48 frames)",
+  "srdFile": "game/data/srd51/character_options.json",
+  "sizeTableFile": "game/data/srd51/rules.json",
+  "sizeTableEntryId": "srd:table:size-categories",
+  "notes": "Hand-transcribed inputs. The builder checks every quoted SRD trait against the SRD file verbatim, checks every px value against pxPerFootCreature x feet per the relation given, and writes any disagreement to conflicts.md. Relations: EQ = drawn px equals 7 x feet; LT = drawn px is below 7 x feet (SRD says 'under'); GT = drawn px is above 7 x feet (SRD says 'over'); NONE = the SRD gives no bound on this side (the 48-px frame caps it).",
+  "races": [
+    {
+      "id": "RACE_DRAGONBORN", "srdEntryId": "srd:race:dragonborn",
+      "srdTraitQuote": "Dragonborn are taller and heavier than humans, standing well over 6 feet tall and averaging almost 250 pounds. Your size is Medium.",
+      "feetMin": 6, "minRel": "GT", "feetMax": null, "maxRel": "NONE",
+      "drawnHeightPxMin": 46, "drawnHeightPxMax": 48, "heightTargetRule": "MIDPOINT",
+      "frameClass": "MEDIUM", "widthRow": "CHARACTER_HUMAN_ADULT", "widthStatus": "PROPOSED"
+    },
+    {
+      "id": "RACE_HALF_ORC", "srdEntryId": "srd:race:half-orc",
+      "srdTraitQuote": "Half-orcs are somewhat larger and bulkier than humans, and they range from 5 to well over 6 feet tall. Your size is Medium.",
+      "feetMin": 5, "minRel": "EQ", "feetMax": 6, "maxRel": "GT",
+      "drawnHeightPxMin": 35, "drawnHeightPxMax": 46, "heightTargetRule": "MIDPOINT",
+      "frameClass": "MEDIUM", "widthRow": "CHARACTER_HUMAN_ADULT", "widthStatus": "PROPOSED"
+    },
+    {
+      "id": "RACE_HUMAN", "srdEntryId": "srd:race:human",
+      "srdTraitQuote": "Humans vary widely in height and build, from barely 5 feet to well over 6 feet tall. Regardless of your position in that range, your size is Medium.",
+      "feetMin": 5, "minRel": "EQ", "feetMax": 6, "maxRel": "GT",
+      "drawnHeightPxMin": 35, "drawnHeightPxMax": 46, "heightTargetRule": "HUMAN_PX",
+      "frameClass": "MEDIUM", "widthRow": "CHARACTER_HUMAN_ADULT", "widthStatus": "DERIVED"
+    },
+    {
+      "id": "RACE_TIEFLING", "srdEntryId": "srd:race:tiefling",
+      "srdTraitQuote": "Tieflings are about the same size and build as humans. Your size is Medium.",
+      "feetMin": null, "minRel": "SAME_AS_HUMAN", "feetMax": null, "maxRel": "SAME_AS_HUMAN",
+      "drawnHeightPxMin": 35, "drawnHeightPxMax": 46, "heightTargetRule": "HUMAN_PX",
+      "frameClass": "MEDIUM", "widthRow": "CHARACTER_HUMAN_ADULT", "widthStatus": "PROPOSED"
+    },
+    {
+      "id": "RACE_ELF", "srdEntryId": "srd:race:elf",
+      "srdTraitQuote": "Elves range from under 5 to over 6 feet tall and have slender builds. Your size is Medium.",
+      "feetMin": 5, "minRel": "LT", "feetMax": 6, "maxRel": "GT",
+      "drawnHeightPxMin": 33, "drawnHeightPxMax": 44, "heightTargetRule": "MIDPOINT",
+      "frameClass": "MEDIUM", "widthRow": "CHARACTER_ELF_ADULT", "widthStatus": "DERIVED"
+    },
+    {
+      "id": "RACE_HALF_ELF", "srdEntryId": "srd:race:half-elf",
+      "srdTraitQuote": "Half-elves are about the same size as humans, ranging from 5 to 6 feet tall. Your size is Medium.",
+      "feetMin": 5, "minRel": "EQ", "feetMax": 6, "maxRel": "EQ",
+      "drawnHeightPxMin": 35, "drawnHeightPxMax": 42, "heightTargetRule": "MIDPOINT",
+      "frameClass": "MEDIUM", "widthRow": "CHARACTER_HUMAN_ADULT", "widthStatus": "PROPOSED"
+    },
+    {
+      "id": "RACE_DWARF", "srdEntryId": "srd:race:dwarf",
+      "srdTraitQuote": "Dwarves stand between 4 and 5 feet tall and average about 150 pounds. Your size is Medium.",
+      "feetMin": 4, "minRel": "EQ", "feetMax": 5, "maxRel": "EQ",
+      "drawnHeightPxMin": 28, "drawnHeightPxMax": 35, "heightTargetRule": "MIDPOINT",
+      "frameClass": "MEDIUM", "widthRow": "CHARACTER_DWARF_ADULT", "widthStatus": "DERIVED"
+    },
+    {
+      "id": "RACE_GNOME", "srdEntryId": "srd:race:gnome",
+      "srdTraitQuote": "Gnomes are between 3 and 4 feet tall and average about 40 pounds. Your size is Small.",
+      "feetMin": 3, "minRel": "EQ", "feetMax": 4, "maxRel": "EQ",
+      "drawnHeightPxMin": 21, "drawnHeightPxMax": 28, "heightTargetRule": "MIDPOINT",
+      "frameClass": "SMALL", "widthRow": "CHARACTER_HUMAN_ADULT", "widthStatus": "PROPOSED"
+    },
+    {
+      "id": "RACE_HALFLING", "srdEntryId": "srd:race:halfling",
+      "srdTraitQuote": "Halflings average about 3 feet tall and weigh about 40 pounds. Your size is Small.",
+      "feetMin": 3, "minRel": "EQ", "feetMax": 3, "maxRel": "EQ",
+      "drawnHeightPxMin": 21, "drawnHeightPxMax": 21, "heightTargetRule": "MIDPOINT",
+      "frameClass": "SMALL", "widthRow": "CHARACTER_HUMAN_ADULT", "widthStatus": "PROPOSED"
+    }
+  ],
+  "bodyPlanRules": {
+    "about": "Large creatures pick LARGE_TALL or LARGE_LONG by SRD creature type (tasks/WG.20.02/lane-s/BRIEF.md:30: tall-bodied Large = humanoids such as ogres and trolls; long-bodied Large = horses, big beasts). Any other type is OWNER_OPEN and gets no paint slot.",
+    "LARGE_TALL": ["humanoid", "giant"],
+    "LARGE_LONG": ["beast"]
+  }
+}

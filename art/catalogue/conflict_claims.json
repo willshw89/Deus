@@ -1,0 +1,454 @@
+{
+  "schemaVersion": "deus-art-catalogue/1.1.0",
+  "about": "Document claims that disagree with another source, found by reading the documents. Each side is located at build time by the first line containing the literal text 'find' (so file:line stays correct when the file moves; a side that is no longer found is reported as NOT FOUND). Nothing here is resolved. Computed conflicts (AssetIndex fork, biome sets, chart vs registry, SRD vs size inputs, brief sizes vs chart, legacy layer counts, ...) are produced by the builder itself and are not listed here.",
+  "claims": [
+    {
+      "id": "SC-01",
+      "topic": "scale",
+      "a": {
+        "file": "docs/art/DEUS_WORLD_ART_VISUAL_CHARTER.md",
+        "find": "**Short Grass**",
+        "says": "short grass 16-20 px"
+      },
+      "b": {
+        "file": "game/data/DEUS_ScaleRegistry.json",
+        "find": "\"MICRO_SHORT_GRASS\"",
+        "says": "MICRO_SHORT_GRASS height 8/12/16 px; strip SHORT GRASS 12 PX"
+      }
+    },
+    {
+      "id": "SC-02",
+      "topic": "scale",
+      "a": {
+        "file": "docs/art/DEUS_WORLD_ART_VISUAL_CHARTER.md",
+        "find": "**Tall Grass / Reeds**",
+        "says": "tall grass / reeds 28-32 px"
+      },
+      "b": {
+        "file": "game/data/DEUS_ScaleRegistry.json",
+        "find": "\"MICRO_REEDS\"",
+        "says": "MICRO_REEDS height 28/34/42 px (target 34 outside 28-32); MICRO_TALL_GRASS 20/28/36"
+      }
+    },
+    {
+      "id": "SC-03",
+      "topic": "scale",
+      "a": {
+        "file": "docs/art/DEUS_WORLD_ART_VISUAL_CHARTER.md",
+        "find": "**Small Bush**",
+        "says": "small bush 24x24 px"
+      },
+      "b": {
+        "file": "game/data/DEUS_ScaleRegistry.json",
+        "find": "\"SHRUB_SMALL_BUSH\"",
+        "says": "SHRUB_SMALL_BUSH 26 wide x 18 tall target; strip SMALL BUSH 18 PX"
+      }
+    },
+    {
+      "id": "SC-04",
+      "topic": "scale",
+      "a": {
+        "file": "docs/art/DEUS_WORLD_ART_VISUAL_CHARTER.md",
+        "find": "**Medium Bush**",
+        "says": "medium bush 36x36 px"
+      },
+      "b": {
+        "file": "game/data/DEUS_ScaleRegistry.json",
+        "find": "\"SHRUB_MEDIUM_BUSH\"",
+        "says": "SHRUB_MEDIUM_BUSH 36 wide x 26 tall target; strip MED BUSH 26 PX"
+      }
+    },
+    {
+      "id": "SC-05",
+      "topic": "scale",
+      "a": {
+        "file": "docs/art/DEUS_SCALE_AND_ASSET_MASTER_BIBLE.md",
+        "find": "**Door Height**",
+        "says": "door height 64-80 px (1.5-2 tiles)"
+      },
+      "b": {
+        "file": "game/data/DEUS_ScaleRegistry.json",
+        "find": "\"ARCH_DOORWAY\"",
+        "says": "ARCH_DOORWAY height 56/58/60 px; strip DOORWAY 58 PX"
+      }
+    },
+    {
+      "id": "SC-06",
+      "topic": "scale",
+      "a": {
+        "file": "docs/asset_briefs/INDEX.md",
+        "find": "every asset inside **one 48×48 screen-pixel square",
+        "says": "every asset inside one 48x48 square"
+      },
+      "b": {
+        "file": "game/data/DEUS_ScaleRegistry.json",
+        "find": "\"TREE_COMMON_OAK\"",
+        "says": "trees 84-140 px target (TREE_COMMON_OAK 84 ... TREE_HERO_LANDMARK 140); strip OAK 84 .. HERO 140"
+      }
+    },
+    {
+      "id": "SC-07",
+      "topic": "scale",
+      "a": {
+        "file": "docs/design/SCALE.md",
+        "find": "a grown human 44–48 px tall in a 48×48 frame",
+        "says": "grown human 44-48 px tall"
+      },
+      "b": {
+        "file": "game/data/DEUS_ScaleRegistry.json",
+        "find": "\"canonicalHumanHeightPx\"",
+        "says": "canonical human 42 px (range 40-44); strip HUMAN 42 PX"
+      }
+    },
+    {
+      "id": "SC-08",
+      "topic": "scale",
+      "a": {
+        "file": "art/APPROVALS.md",
+        "find": "46 px tall, upright 3/4 top-down RPG view",
+        "says": "approved human male anchor 46 px tall"
+      },
+      "b": {
+        "file": "game/data/DEUS_ScaleRegistry.json",
+        "find": "\"canonicalHumanHeightPx\"",
+        "says": "canonical human 42 px, max 44"
+      }
+    },
+    {
+      "id": "SC-09",
+      "topic": "scale",
+      "a": {
+        "file": "art/APPROVALS.md",
+        "find": "Height 46 px, grounded row 47",
+        "says": "human female settler 46 px tall"
+      },
+      "b": {
+        "file": "game/data/DEUS_ScaleRegistry.json",
+        "find": "\"canonicalHumanHeightPx\"",
+        "says": "canonical human 42 px, max 44"
+      }
+    },
+    {
+      "id": "SC-10",
+      "topic": "scale",
+      "a": {
+        "file": "docs/ASSET_REQUESTS.md",
+        "find": "| AR-1600 |",
+        "says": "sapling 48x48 frame, 16-22 px tall (V81 micro scale)"
+      },
+      "b": {
+        "file": "game/data/DEUS_ScaleRegistry.json",
+        "find": "\"TREE_SAPLING\"",
+        "says": "TREE_SAPLING height 36/44/50 px"
+      }
+    },
+    {
+      "id": "SC-11",
+      "topic": "scale",
+      "a": {
+        "file": "docs/design/SCALE.md",
+        "find": "a wild horse 72 px long and 56 px tall in 96×96",
+        "says": "wild horse 72 x 56 px in a 96x96 frame; troll 88 px"
+      },
+      "b": {
+        "file": "art/catalogue/geometry.json",
+        "find": "\"LARGE_LONG\"",
+        "says": "LARGE_LONG frame 96 wide x 48 tall (no 96x96 Large frame)"
+      }
+    },
+    {
+      "id": "FR-01",
+      "topic": "frames",
+      "a": {
+        "file": "docs/RMMZ_ASSET_SPEC.md",
+        "find": "2-square creature (96×96 frames)",
+        "says": "2-square creature 96x96 frames, 288x384 sheet; 2.5-square 96x144, 288x576"
+      },
+      "b": {
+        "file": "art/catalogue/geometry.json",
+        "find": "\"LARGE_TALL\"",
+        "says": "Large frames are 48x96 (LARGE_TALL) or 96x48 (LARGE_LONG), never 96x96 (Owner 02:04 CT, BRIEF.md:30)"
+      }
+    },
+    {
+      "id": "FR-02",
+      "topic": "frames",
+      "a": {
+        "file": "docs/ASSET_REQUESTS.md",
+        "find": "larger beings and trees use 96×96 or 96×144 frames",
+        "says": "larger beings and trees use 96x96 or 96x144 frames"
+      },
+      "b": {
+        "file": "art/catalogue/geometry.json",
+        "find": "\"LARGE_TALL\"",
+        "says": "Large frames 48x96 / 96x48; tree frames follow the scale chart (e.g. oak cell 96x96, hero 144x192)"
+      }
+    },
+    {
+      "id": "FR-03",
+      "topic": "frames",
+      "a": {
+        "file": "docs/ASSET_REQUESTS.md",
+        "find": "| Character sheet | AR-600: 8 rows × 20 columns",
+        "says": "character sheet AR-600: 8 rows x 20 columns"
+      },
+      "b": {
+        "file": "docs/asset_briefs/SEG-11_people.md",
+        "find": "AR-600 body sheet, 768×192 = 16 columns × 4 rows",
+        "says": "AR-600 body sheet 16 columns x 4 rows; the catalogue lays characters out in RMMZ 3x4-frame blocks (BRIEF.md:32, :57)"
+      }
+    },
+    {
+      "id": "FR-04",
+      "topic": "frames",
+      "a": {
+        "file": "docs/RMMZ_ASSET_SPEC.md",
+        "find": "| **A4** | Walls & Cliffs",
+        "says": "A4 autotile block 96x120 (2 x 2.5 tiles)"
+      },
+      "b": {
+        "file": "docs/ASSET_REQUESTS.md",
+        "find": "| AR-2100 |",
+        "says": "A4 side kind 8 at y 144-239: a 96x96 wall-side block (A4 alternates 96x144 top and 96x96 side blocks)"
+      }
+    },
+    {
+      "id": "FR-05",
+      "topic": "frames",
+      "a": {
+        "file": "docs/ASSET_REQUESTS.md",
+        "find": "| AR-1904 |",
+        "says": "hanging roots: 48x48 frame, anchor [24, 24]"
+      },
+      "b": {
+        "file": "tasks/WG.20.02/lane-s/BRIEF.md",
+        "find": "Hanging props with a CEILING anchor",
+        "says": "hanging props hang between layers with a CEILING anchor; the catalogue sizes them to one layer face (GEOM_LAYER_FACE, 48 x layerPx)"
+      }
+    },
+    {
+      "id": "FR-06",
+      "topic": "frames",
+      "a": {
+        "file": "docs/ASSET_REQUESTS.md",
+        "find": "| AR-1905 |",
+        "says": "tower-cap 288x384 sheet of 96x96 frames, anchor [48, 95], footprint [2, 2]"
+      },
+      "b": {
+        "file": "game/data/DEUS_ScaleRegistry.json",
+        "find": "\"TREE_LARGE_ACCENT\"",
+        "says": "no chart row for a giant mushroom; nearest TREE_LARGE_ACCENT has footprint 1x1 (PROPOSED mapping)"
+      }
+    },
+    {
+      "id": "FR-07",
+      "topic": "frames",
+      "a": {
+        "file": "docs/ASSET_REQUESTS.md",
+        "find": "| AR-1908 |",
+        "says": "crystal spire 48x96 frame, anchor [24, 95], footprint [1, 2]"
+      },
+      "b": {
+        "file": "game/data/DEUS_ScaleRegistry.json",
+        "find": "\"STONE_HERO_OUTCROP\"",
+        "says": "nearest chart row STONE_HERO_OUTCROP is 2x1 footprint, 36-56 px tall (PROPOSED mapping)"
+      }
+    },
+    {
+      "id": "FR-08",
+      "topic": "frames",
+      "a": {
+        "file": "docs/asset_briefs/SEG-05_buildings_and_camp.md",
+        "find": "a SET of sixteen 48×48 pieces",
+        "says": "wall sets are sixteen 48x48 pieces on a 768x48 sheet"
+      },
+      "b": {
+        "file": "game/data/DEUS_ScaleRegistry.json",
+        "find": "\"ARCH_WALL_2GRID\"",
+        "says": "ARCH_WALL_2GRID 48 x 92-96 px (2-grid wall); approved wall anchor 48x96 (art/APPROVALS.md)"
+      }
+    },
+    {
+      "id": "FR-09",
+      "topic": "animation",
+      "a": {
+        "file": "game/data/UF_WorldCatalog.json",
+        "find": "\"motion\": \"sway\"",
+        "says": "UF_WorldCatalog ambient rules sway trees in code (shear, amp, period)"
+      },
+      "b": {
+        "file": "AGENTS.md",
+        "find": "All animation must happen through the sprite",
+        "says": "Rule 12: no code motion; tree sway must be sprite frames. Tree briefs deliver one frame (stand [0]), so the catalogue gives trees frames.cols = 1 until the Owner sets sway frame counts"
+      }
+    },
+    {
+      "id": "PA-01",
+      "topic": "palette",
+      "a": {
+        "file": "docs/RMMZ_ASSET_SPEC.md",
+        "find": "| **Palette** | `art/palette/uf.hex`",
+        "says": "palette art/palette/uf.hex, 256 colours (approved art was snapped to it, art/APPROVALS.md)"
+      },
+      "b": {
+        "file": "game/data/DEUS_PaletteRegistry.json",
+        "find": "\"masterColorCount\"",
+        "says": "master world palette 226 colours (art/palette/deus_master_world_palette_v1.hex); the catalogue cites the master palette"
+      }
+    },
+    {
+      "id": "PA-02",
+      "topic": "palette",
+      "a": {
+        "file": "game/data/DEUS_PaletteRegistry.json",
+        "find": "\"materialFamily\": \"SUPERNATURAL\"",
+        "says": "ramp families are world materials (NEUTRALS, GRASS, SOIL, WOOD_BARK, FOLIAGE, STONE, FLORA, MINERAL, LAVA, WATER, CONSTRUCTION, SUPERNATURAL)"
+      },
+      "b": {
+        "file": "tasks/WG.20.02/lane-s/BRIEF.md",
+        "find": "a missing size, envelope, footprint, anchor or palette ramp",
+        "says": "every entry needs a palette ramp, including people and creatures; no skin/fur/hair ramp exists, so living beings get PROPOSED placeholder ramps (art/catalogue/mapping.json living)"
+      }
+    },
+    {
+      "id": "BI-01",
+      "topic": "biomes",
+      "a": {
+        "file": "docs/OWNER_DECISIONS.md",
+        "find": "The 25 pipeline biomes are partitioned into 5 vertical bands",
+        "says": "25 biomes = 5 bands x 5 biomes (names and assignment OPEN)"
+      },
+      "b": {
+        "file": "game/data/DEUS_BiomeRegistry.json",
+        "find": "\"canonicalBiomes\"",
+        "says": "5 canonical biomes TEMP, WET, ARID, HIGH, VOLC; no band assignment"
+      }
+    },
+    {
+      "id": "BI-02",
+      "topic": "biomes",
+      "a": {
+        "file": "docs/worldgen/DEUS_WORLDGEN_WBS.md",
+        "find": "| **WG.22.01–25**|",
+        "says": "25 = 5 biomes x 5 macro-Z; mentions HIGH snowpack"
+      },
+      "b": {
+        "file": "docs/OWNER_DECISIONS.md",
+        "find": "The 25 pipeline biomes are partitioned into 5 vertical bands",
+        "says": "25 = 5 bands x 5 biomes; DEUS_BiomeRegistry.json forbids SNOW/ICE"
+      }
+    },
+    {
+      "id": "BI-03",
+      "topic": "bands",
+      "a": {
+        "file": "docs/ASSET_REQUESTS.md",
+        "find": "| AR-1905 |",
+        "says": "AR-1905..1908 call z=-2 'Deep Caverns'"
+      },
+      "b": {
+        "file": "art/catalogue/geometry.json",
+        "find": "\"LOWER1\"",
+        "says": "z = -2 lies in LOWER1 (-8..-1, 'Shallow Underground'); DEC-013 names LOWER2 (-16..-9) 'Deep Caverns'. The catalogue bands legacy z by numeric containment"
+      }
+    },
+    {
+      "id": "NM-01",
+      "topic": "naming",
+      "a": {
+        "file": "docs/worldgen/DEUS_WORLDGEN_WBS.md",
+        "find": "| **WG.20.01** |",
+        "says": "schema id BIOME_Z_CATEGORY_TYPE_VARIANT_STATE"
+      },
+      "b": {
+        "file": "tasks/WG.20.02/lane-s/BRIEF.md",
+        "find": "`id` (`BAND_BIOME_CATEGORY_TYPE_VARIANT_STATE`)",
+        "says": "entry id BAND_BIOME_CATEGORY_TYPE_VARIANT_STATE (the catalogue follows the brief)"
+      }
+    },
+    {
+      "id": "NM-02",
+      "topic": "naming",
+      "a": {
+        "file": "docs/worldgen/DEUS_WORLDGEN_WBS.md",
+        "find": "| 4 | **WG.20.01 + WG.20.02** art catalogue",
+        "says": "outputs game/data/DEUS_ArtCatalogue.json, tools/art_catalogue/*"
+      },
+      "b": {
+        "file": "tasks/WG.20.02/lane-s/BRIEF.md",
+        "find": "It regenerates `art/catalogue/catalogue.json`",
+        "says": "outputs art/catalogue/catalogue.json, tools/art/build_catalogue.js (the catalogue follows the brief; game/** is forbidden to this lane)"
+      }
+    },
+    {
+      "id": "NM-03",
+      "topic": "naming",
+      "a": {
+        "file": "docs/art/DEUS_SCALE_AND_ASSET_MASTER_BIBLE.md",
+        "find": "art/reference/DEUS_SCALE_STRIP",
+        "says": "scale strip file art/reference/DEUS_SCALE_STRIP_V1.png (does not exist)"
+      },
+      "b": {
+        "file": "docs/OWNER_DECISIONS.md",
+        "find": "art/reference/DEUS_HUMAN_SCALE_STRIP_V1.png",
+        "says": "the scale chart is art/reference/DEUS_HUMAN_SCALE_STRIP_V1.png (DEC-016)"
+      }
+    },
+    {
+      "id": "PE-01",
+      "topic": "people",
+      "a": {
+        "file": "docs/asset_briefs/SEG-11_people.md",
+        "find": "### goblin — Goblin, male",
+        "says": "people briefs: human, elf, dwarf, gnome, goblin, orc, automaton (7 species)"
+      },
+      "b": {
+        "file": "docs/OWNER_DECISIONS.md",
+        "find": "Exactly 9 races exist in the world",
+        "says": "exactly 9 races (UF_WorldCatalog people: the 9 SRD races human, elf, dwarf, gnome, halfling, dragonborn, half-elf, half-orc, tiefling)"
+      }
+    },
+    {
+      "id": "ST-01",
+      "topic": "standards",
+      "a": {
+        "file": "docs/art/DEUS_WORLD_WBS.md",
+        "find": "| `DW.01.06` |",
+        "says": "DW.01.06 autotile & terrain assembly standard AUTHORIZED / PAUSED AT GATE"
+      },
+      "b": {
+        "file": "docs/worldgen/DEUS_WORLDGEN_WBS.md",
+        "find": "| OD-17 | DW.01.06 autotile standard",
+        "says": "OD-17 DW.01.06 OPEN; rim shadows and autotile/edge assembly carry standardPending DW.01.06"
+      }
+    },
+    {
+      "id": "ST-02",
+      "topic": "standards",
+      "a": {
+        "file": "docs/RMMZ_ASSET_SPEC.md",
+        "find": "| **A2** | Ground Autotiles | **768 × 576 px**",
+        "says": "runtime RMMZ sheets have fixed sizes (A1/A2 768x576, A3 768x384, A4 768x720, A5 384x768, B-E 768x768)"
+      },
+      "b": {
+        "file": "tasks/WG.20.02/lane-s/BRIEF.md",
+        "find": "ATLAS sides are multiples of 48 and at most 4096",
+        "says": "paint atlases up to 4096 px; the atlas is the paint sheet, the RMMZ sheet is the runtime export (runtime{} per entry)"
+      }
+    },
+    {
+      "id": "ST-03",
+      "topic": "lighting",
+      "a": {
+        "file": "docs/PROJECT_DEUS_ART_DIRECTION_SPEC.md",
+        "find": "Light source is standardized from the **upper-left**",
+        "says": "light from the upper left (135 degrees)"
+      },
+      "b": {
+        "file": "tasks/WG.20.02/lane-s/BRIEF.md",
+        "find": "flips/rotations vs upper-left lighting",
+        "says": "a flipped or rotated variant moves the light; every variant carries lightingSafe false by default"
+      }
+    }
+  ]
+}

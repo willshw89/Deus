@@ -1,0 +1,20 @@
+{
+  "case": "oos_no_reason",
+  "base": "tools/art/fixtures/catalogue/mini/catalogue.json",
+  "context": "tools/art/fixtures/catalogue/mini/context.json",
+  "code": "OOS_NO_REASON",
+  "rule": "an outOfScope row without a reason",
+  "patch": [
+    {
+      "op": "set",
+      "path": [
+        "outOfScope",
+        {
+          "index": 0
+        },
+        "reason"
+      ],
+      "value": ""
+    }
+  ]
+}
