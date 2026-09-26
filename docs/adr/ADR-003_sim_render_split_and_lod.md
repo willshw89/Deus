@@ -1,23 +1,50 @@
 # ADR-003: Sim/Render Split and Level-of-Detail (LOD) Simulation
 
-**Status:** Rev 2, PROPOSED (Lane M, 2026-09-26). Written by Claude, the Lane M writer. Grok reviews it adversarially and the PM signs it off. The author does not self-certify.
-- Rev 1 (`ddd1b865`) predates the Lane M review checklist (`tasks/SIM.00.01/lane-m/review_checklist.md`, committed as `f4e3b56d` for directive 0021-V).
-- Rev 2 adds:
-  - DEC-013 nine layers (§15);
-  - structural integrity and collapse, V137 (§16);
-  - decay and reclamation, V138 (§17);
-  - regions of one vertical band instead of full-height columns (§5.1);
-  - the mass-per-material invariant (§7.8).
+**Status:** Rev 3, PROPOSED (Lane M, 2026-09-26). Written by Claude, the Lane M writer. Grok reviews it adversarially. It stays PROPOSED until the Owner and the PM sign it off. The author does not self-certify.
+- Rev 1 (`ddd1b865`) predates the Lane M review checklist (`tasks/SIM.00.01/lane-m/review_checklist.md`).
+- Rev 2 (`c456cb73`) added DEC-013 at nine layers (§15), structural integrity and collapse, V137 (§16), decay and reclamation, V138 (§17), regions of one vertical band (§5.1) and the mass-per-material invariant (§7.8). The independent Grok review of Rev 2 (`tasks/SIM.00.01/lane-m/review_grok_c456cb73.md`, committed as `8e2fed13`) returned FAIL.
+- Rev 3 answers that review finding by finding (change log below) and follows `tasks/SIM.00.01/lane-m/BRIEF_REV3.md`. It adds:
+  - 32 layers, the governing scale and the amended bands (§5.1, §15);
+  - memory and save budgets that grow with MIXED and changed chunks, not with 32 × area, and harnesses at 9 and at 32 layers (§9, §15);
+  - cross-layer blasts, volume damage and targeting (§18);
+  - DEC-017 as the engine exit path (§13);
+  - the other Owner decisions that touch the sim/render boundary, DEC-016 and DEC-019 to DEC-022 (§19);
+  - every citation re-checked at `b612bc72` (Appendix C).
 
-**Decision authority:** DEC-012 (Owner, 2026-09-26 00:00 CT, directive 0018-R), recorded in `docs/OWNER_DECISIONS.md`. This ADR is the detailed design that DEC-012 asks for. It does not reopen DEC-012.
+**Decision authority:** DEC-012 (Owner, 2026-09-26 00:00 CT, directive 0018-R), recorded in `docs/OWNER_DECISIONS.md:161-168`. This ADR is the detailed design that DEC-012 asks for. It does not reopen DEC-012, and it does not restate or change any other Owner decision; it cites them by id and heading.
 
-**WBS:** SIM.00.01, WBS Rev 18 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:509`). **This package contains no code.**
+**WBS:** SIM.00.01, WBS Rev 24 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:519`). **This package contains no code.**
 
-**Evidence baseline:** the lane base `ebeec892`, which was `main` when the lane opened.
-- `git diff --stat ebeec892 0c1baf8d -- game tools` is empty (EXIT=0). Every code `file:line` below therefore also holds on the current `main` (`0c1baf8d`).
-- Documents that changed on `main` after the lane base are cited with the commit they were read at, e.g. "`docs/VISION.md:131` at `0c1baf8d`". This applies to DEC-013, V137/V138 and the WBS Rev 19 SIM.40 rows.
+**Evidence baseline:** `main` at `b612bc72`, the commit the Rev 3 brief names.
+- `git diff --stat ebeec892 b612bc72 -- game` is empty (EXIT=0). Under `tools/`, the only changes since the lane base are the merged governance and ops tools (`tools/governance/**`, `tools/ops/**`), which this ADR does not cite. So every code `file:line` below reads the same at the lane base and at `b612bc72`.
+- Documents are cited at `b612bc72` unless a commit is named. That includes DEC-013 as amended, DEC-016 to DEC-022, V133 to V151 and WBS Rev 24.
 - Plugin paths are relative to `game/js/plugins/` unless a directory is given. `rmmz_*.js` files are in `game/js/`.
-- Commands and exit codes are in Appendix B and in `tasks/SIM.00.01/lane-m/notes.md`.
+- Commands and exit codes are in Appendix B, `tasks/SIM.00.01/lane-m/notes.md` (Rev 1 and 2) and `tasks/SIM.00.01/lane-m/REPORT_REV3.md` (Rev 3).
+
+### Rev 3 change log
+
+Each row is one finding of `review_grok_c456cb73.md`, in the review's order, with the Rev 3 answer and where it is. Line numbers are lines of this file. No finding is disputed.
+
+| # | Finding (review heading) | Rev 3 answer | Where |
+|---|---|---|---|
+| 1 | Checklist 1 (32 layers): §0 item 7, §5.1, §15 and the §8 row Z specify 9 levels, −4..+4 and the old bands | Retargeted to 32 continuous layers, default −16..+15, surface 0, 320 ft, with the amended bands as PM defaults that stay OPEN for the Owner. A 9-layer range remains only as the named test configuration and −2..+2 as the legacy one | @@CL1@@ |
+| 2 | Checklist 1: no 32-layer region count and no amended band table | Region = 32×32 cells × a 2-layer slab: 16 slabs and 1,024 regions per area at 32 layers. Band table added. Nothing in storage or LOD is sized by 32, and the text says how each part scales past it | @@CL2@@ |
+| 3 | Checklist 1: fixtures at −2..+2 and −4..+4 only; Q16 asks 5 → 9 | Every core fixture and harness runs at 9 layers (−4..+4) and at 32 layers (−16..+15), plus the legacy −2..+2 for save migration. Q16 retargeted to 32 | @@CL3@@ |
+| 4 | Checklist 1: budgets only at 5 and 9 levels; §15.4's worst case multiplies by 9; no 32-layer memory or save target | Budgets restated as formulas in MIXED, damaged and changed chunks, with a 32-layer worst case, 9-vs-32 sparsity checks and absolute targets on named fixtures. The UNIFORM-chunk rule is kept | @@CL4@@ |
+| 5 | Checklist 2 (scale): no foot measure; `CELL_FT = 5` and the 1 ft stratum comments not reconciled | Governing scale stated: 5 ft × 5 ft cell, 10 ft layer, 2 ft stratum. The engine's 1 ft assumptions (`DEUS_Levels.js:985-986`, `:1790-1791` and the sphere math) are listed with who changes them. The core measures in integer half-feet | @@CL5@@ |
+| 6 | Checklist 3 (blasts): no floor-thickness rule; the existing box, falloff and resist behaviour not taken as design | New §18: the existing behaviour cited as design input; attenuation by material, damage type and thickness along the line to each target; a floor destroyed by the blast lets the rest through; vertical falloff in true feet; fire versus impact; targeting and line of sight | @@CL6@@ |
+| 7 | Checklist 4 (V137, PASS): keep, and state that the queue runs on −16..+15 | Kept. The range statement and 9/32 fixtures added | @@CL7@@ |
+| 8 | Checklist 5 (V138, PASS): keep | Kept. The range statement and 9/32 fixtures added | @@CL8@@ |
+| 9 | Checklist 6 (sections, PASS): §5 band geometry and the §9 32-layer rows missing | See rows 2 and 4 | @@CL9@@ |
+| 10 | Checklist 7.1: `applyVolumeDamage` (`:1785-1795`) "calls `damageCell`" | Cited at the JSDoc `:1783-1794`, the signature `:1795`, the box call `:1815` and the sphere call `:1849`; `damageCell` at `:1709-1725` | @@CL10@@ |
+| 11 | Checklist 7.2: ecology "each game hour" cited to the six-hour header `:22-27` | Hourly plants and breeding (`:876`, `:888-905`) and the six-hourly population roll (`:907-914`, header `:22-27`) cited separately | @@CL11@@ |
+| 12 | Minor: WBS SIM.00.01 pointer `:509` is the table header | Now `docs/worldgen/DEUS_WORLDGEN_WBS.md:519` at `b612bc72` | @@CL12@@ |
+| 13 | Minor: Factions "every 120 (`:631-632`)"; `:631` is `CONTACT_CELLS` | Cited as `:632` | @@CL13@@ |
+| 14 | "current `main` (`0c1baf8d`)" is stale as a tip name | The baseline is `b612bc72`, with the identity check above | @@CL14@@ |
+| 15 | Revision required, items 1 to 5 | Items 1 and 2: rows 1 to 4. Item 3: row 5. Item 4: rows 6, 10 and 11. Item 5: rows 7 and 8; §2 to §4 and §7 to §8 are kept and their Z assumptions now read "any range" (§4.3 key, §7.7 faces, §8 row Z) | @@CL15@@ |
+| 16 | Not in the review: the Rev 3 re-check of all 476 Rev 2 citations found 7 FALSE and 23 IMPRECISE ones | Each is corrected, including a wrong claim about Factions counters (`DEUS_Factions.js:619-625`) | @@CL16@@ |
+
+The Rev 3 brief's other items: DEC-017 → §13; DEC-016, DEC-018 to DEC-022 → §18 and §19; `docs/adr/README.md` → Rev 3, PROPOSED; report → `tasks/SIM.00.01/lane-m/REPORT_REV3.md`.
 
 ---
 
@@ -34,24 +61,37 @@
    - Out: a versioned, read-only `SimView` with no per-frame copy, plus a preallocated integer change feed.
    - In: one command queue.
 4. **LOD.**
-   - A region is 32×32 cells across the levels of one DEC-013 vertical band. A 256×256 area has 64 regions per band: 192 today (3 bands over −2..+2) and 320 at 9 levels.
+   - A region is 32×32 cells across one **slab** of two adjacent layers (§5.1). A 256×256 area has 64 regions per slab. At the DEC-013 default of 32 layers (−16..+15) that is 16 slabs and 1,024 regions per area. The same rule gives 320 at the 9-layer test range and 192 at today's 5 levels.
    - Three levels:
      - **L0 full:** every tick.
      - **L1 near:** fine state, stepped in batches every 10 ticks.
      - **L2 summary:** summary state (anonymous creatures as counts; fluid frozen in place), stepped every 100 ticks (1 game hour).
+   - Only regions that hold state are ever scheduled. So LOD work grows with occupied regions, not with the layer count (§5.5).
 5. **Conservation.** Every conserved quantity is an integer with a named unit. A ledger records explicit sources and sinks. Promotion and demotion are atomic and checked against the ledger.
 6. **Migration.** The work lands in increments, and the game stays playable after each one.
    - Increment 0 is Lane N.
    - LOD stays in `full` mode (every region L0) until SIM.30.04.
-7. **Nine layers (DEC-013).** The core takes its Z range from data, not constants.
-   - Storage is by 32×32 chunk per level. A uniform chunk (all air, or untouched rock) holds no cell arrays, so empty sky and deep rock cost almost no memory, save space or step time (§15).
-8. **Structure and decay (V137, V138).**
+7. **Thirty-two layers (DEC-013 as amended).** The core takes its Z range from data, not constants.
+   - The default is DEC-013's: 32 continuous layers, −16..+15, surface 0, 320 ft. The range itself is OPEN with that PM default. 9 layers (−4..+4) is the second configuration every test runs; −2..+2 is the legacy range of today's saves.
+   - Nothing in the core is sized by 32, so the same code runs past it (§15.2).
+   - Storage is by 32×32 chunk per layer. A uniform chunk (all air, or untouched rock) holds no cell arrays. Memory and save size therefore grow with MIXED and changed chunks, not with 32 × area, and empty sky and deep rock cost almost nothing to store, save or step (§15).
+8. **Scale (DEC-013).** A cell is 5 ft × 5 ft, a layer is 10 ft and a stratum is 2 ft. The core measures distance in integer half-feet. Today's engine comments and sphere damage assume 1 ft strata; the core doesn't (§15.0).
+9. **Structure and decay (V137, V138).**
    - Support, collapse, decay and reclamation are core systems.
    - They are change-driven (dirty queues fed by mutations), never scanned per tick.
    - Decay is a closed-form function of elapsed time, so it gives the same result at any LOD and in deep history. The one exception is when an exposure change takes effect (§17.5); §16 and §17 cover the rest.
-9. **Budgets.** The performance budgets in §9 are design ceilings marked **PENDING-K3**.
-   - Lane K's K3 baseline did not exist when this was written: there was no `tasks/WG.00.09b/lane-k/perf/` in the lane-k worktree on 2026-09-26 (Appendix B).
-   - The ceilings must be amended with measured baselines before SIM.00.03 starts (§9).
+10. **Blasts, spells and targeting (DEC-013, DEC-018, DEC-022).** Volume damage is one core system (§18).
+    - Damage falls off with true 3D distance.
+    - Every solid stratum between the centre and a target attenuates it, by material and damage type, so a thicker floor stops more.
+    - A floor the blast destroys lets the remainder through to the layer below.
+    - Spell effects are data that call core primitives (ignite, blast, fluid source and sink, freeze, terrain edit), never per-spell code.
+11. **Engine exit path (DEC-017).** RMMZ stays the application shell.
+    - If its map drawing can't meet the goals, a custom multi-layer PixiJS map renderer replaces map drawing inside `Scene_Map` only.
+    - The renderer only reads `SimView` and sends commands, so the swap touches no sim code (§13).
+12. **Budgets.**
+    - Storage budgets (memory and save size at 9 and 32 layers) follow from the storage design, so they are set now (§9).
+    - Time budgets are design ceilings marked **PENDING-K3**. Each names the Lane K K3 measurement that will fill it. At the time of writing, Lane K's K3 baselines were on a local, unreviewed Lane K commit only, not on `main` (Appendix B).
+    - The time ceilings must be amended with measured baselines before SIM.00.03 starts (§9).
 
 ### 0.1 Section crosswalk
 
@@ -71,11 +111,15 @@ The Lane M BRIEF lists nine sections. Directive 0018-R §3c lists sixteen items,
 | §10 Determinism | (3, 7) | 10 |
 | §11 Save Format & Compatibility | — | 13 |
 | §12 Alternatives, Risks, Open Questions | — | 14 |
-| §13 Engine Exit Path | — | 15 |
+| §13 Engine Exit Path (DEC-017) | — | 15; Rev 3 brief item 4 |
 | §14 Deep-History World Generation | — | 16 |
-| §15 Nine Z Layers (DEC-013) | — | review checklist item 1 (0021-V §1, §3) |
-| §16 Structural Integrity & Collapse (V137) | — | review checklist item 2 (0021-V §6) |
-| §17 Decay & Reclamation (V138) | — | review checklist item 3 (0021-V §7, §8) |
+| §15 Thirty-Two Z Layers and the Governing Scale (DEC-013) | — | review checklist items 1 and 2 |
+| §16 Structural Integrity & Collapse (V137) | — | review checklist item 4 |
+| §17 Decay & Reclamation (V138) | — | review checklist item 5 |
+| §18 Cross-Layer Blasts, Volume Damage and Targeting | — | review checklist item 3; DEC-018; DEC-022 |
+| §19 Owner Decisions at the Sim/Render Boundary | — | Rev 3 brief item 5: DEC-016, DEC-019, DEC-020, DEC-021 |
+
+The checklist item numbers are those of `review_checklist.md` as the Rev 2 review applied it: 1 layers, 2 scale, 3 blasts, 4 support, 5 decay, 6 sections, 7 facts.
 
 ---
 
@@ -89,7 +133,7 @@ The Lane M BRIEF lists nine sections. Directive 0018-R §3c lists sixteen items,
   - at refresh rates above 60 Hz it skips frames;
   - at 30 FPS it returns 2.
 - `updateMain` increments `Graphics.frameCount` and updates the scene (`rmmz_managers.js:2102-2112`). The scene is updated only while the window has focus (`rmmz_managers.js:2146`, `:2157-2165`).
-- `Scene_Map.update` calls `updateMain`, which calls `$gameMap.update(this.isActive())` (`rmmz_scenes.js:819-831`, `:841-846`). RMMZ's fast-forward runs `updateMain` twice (`rmmz_scenes.js:833-839`).
+- `Scene_Map.update` calls `updateMainMultiply` (`rmmz_scenes.js:819-831`, the call at `:824`). That runs `updateMain` once, or twice under RMMZ's fast-forward (`rmmz_scenes.js:833-839`). `updateMain` calls `$gameMap.update(this.isActive())` (`rmmz_scenes.js:841-846`).
 
 **The simulation is a chain of aliases.**
 - There are 32 reassignments of `Game_Map.prototype.update` / `Scene_Map.prototype.update` across 26 plugins (§1.2; grep in Appendix B).
@@ -135,7 +179,7 @@ The Lane M BRIEF lists nine sections. Directive 0018-R §3c lists sixteen items,
 | DEUS_Jobs.js:1777 | Game_Map.update | **sim**: job step | every call |
 | DEUS_Projects.js:1596 | Game_Map.update | **sim**: projects | cycle every `cadenceTicks: 3000` (`:38`) |
 | DEUS_Combat.js:1414 | Game_Map.update | **sim**: `step()` | every call |
-| DEUS_Factions.js:657 | Game_Map.update | **sim**: `checkContact` | every 120 (`:631-632`) |
+| DEUS_Factions.js:657 | Game_Map.update | **sim**: `checkContact` | every 120 (`DEUS_Factions.js:632`) |
 | DEUS_Ownership.js:613 | Game_Map.update | **sim**: `scanSleep` / `reconcile` | own counters |
 | DEUS_TimeSpeed.js:189 | Game_Map.update | **sim**: `UF.Time.after/every` timers (closures) | every call |
 | DEUS_Anim.js:1506 | Game_Map.update | **render writing sim**: death queue calls `W.removeUnit` (`:1509-1522`) | every call |
@@ -163,14 +207,14 @@ That is 15 `Game_Map.update` hooks and 17 `Scene_Map.update` hooks.
   - On screen, speed follows `u.data.moveSpeed` and conditions (`unitMoveSpeed`, `:847-855`), through RMMZ's `2^speed / 256` cells per frame (`rmmz_objects.js:7062-7064`). The default speed 4 gives 1/16 cell per frame.
   - Off screen, every unit takes 16 frames per cell.
   - So a slowed or hasted unit moves at a different speed depending on whether it is watched.
-- Every unit on view is a `Game_Event` with a `Sprite_Character` (`:888-911`).
+- Every unit on view is a `Game_Event` with a `Sprite_Character` (`spawnUnitEvent`, `DEUS_World.js:888-911`).
 
 **Fluid.**
 - `Fluid.tick` steps only the viewed area when there is a view (`DEUS_Fluid.js:737-745`).
-- *Correction to the PM survey:* by default `AreasX = AreasY = 1` (`DEUS_World.js:127-128`), and the `DEUS_World` parameters are `{}` (`plugins.js:58`). So there is exactly one area, and `stepArea` works through that area's whole queue on all 5 levels (`DEUS_Fluid.js:356-376`). The view restriction only matters in multi-area worlds.
+- *Correction to the PM survey:* by default `AreasX = AreasY = 1` (`DEUS_World.js:127-128`), and the `DEUS_World` parameters are `{}` (`plugins.js:58`). So there is exactly one area. `stepArea` works through that area's one queue, up to its budget per call (`DEUS_Fluid.js:356-376`), and the queue holds cells of all 5 levels (the level is decoded per cell, `DEUS_Fluid.js:380-383`). The view restriction only matters in multi-area worlds.
 
 **Ecology.**
-- Each game hour it steps the current area plus one rotating area (header `DEUS_Ecology.js:22-27`; `tickHour`, `:888-920`; `cursorArea`, `:878-886`). The same 1×1 qualification applies.
+- Each game hour it spreads plants and steps breeding in the current area plus one rotating area (driver comment `DEUS_Ecology.js:876`; `tickHour`, `:888-905`; `cursorArea`, `:878-886`). Every sixth hour (`POPULATION_INTERVAL = 6`, `DEUS_Ecology.js:45`) the same two areas also get the population roll (`DEUS_Ecology.js:907-914`; header `:22-27`). The same 1×1 qualification applies.
 - Its other view dependences do matter:
   - `currentArea()` is ground-only and returns null while another level is viewed (`DEUS_World.js:532`; header `:106-108`);
   - sprouts spawn only in the current area (`DEUS_Ecology.js:803`);
@@ -201,7 +245,7 @@ That is 15 `Game_Map.update` hooks and 17 `Scene_Map.update` hooks.
   - a barter-credit ledger (`DEUS_Colonists.js:648-670`);
   - a death log;
   - UI window names (Appendix B).
-- **Faction counters depend on removal events.** Faction population goes up and down on unit events, including `world:unitRemoved` (`DEUS_Factions.js:594-625`). This constrains LOD absorption (§7.7).
+- **Faction counters depend on unit events.** Faction population goes up on `factions:born` and `factions:immigrated`, and down on `combat:kill` and on `world:unitRemoved` for a unit that is dead or dying (`DEUS_Factions.js:594-625`; the dead-or-dying test is at `:620`). It is a running counter, not a count of units, so LOD absorption must keep it equal to the members it stands for (§7.4, §7.8).
 - **Save/load loses state that shapes future ticks:**
   - the clock's sub-minute `_timer` (the save holds hour..year only, `DEUS_Core.js:448-468`);
   - the Fluid queue order (cells are woken again in record order, `DEUS_Fluid.js:846-866`);
@@ -219,7 +263,7 @@ That is 15 `Game_Map.update` hooks and 17 `Scene_Map.update` hooks.
   - items (`DEUS_Items.js:304`);
   - jobs (`DEUS_Jobs.js:101-107`);
   - fires (`DEUS_Fire.js:214`).
-- **Integer fluid.** Depth is 0..7, packed in `Uint8Array` grids (`DEUS_Fluid.js:50-58`, `:127-137`). A dirty-queue stepper runs against a work budget (`:55`, `:356-376`).
+- **Integer fluid.** Depth is 0..7 (`DEPTH_MAX`, `DEUS_Fluid.js:50`), packed with the type into one byte (`:127-137`) in one `Uint8Array` grid per level (`:179`, `:187-189`). A dirty-queue stepper runs against a work budget (`:55`, `:356-376`).
 - **Headless tools:**
   - 78 files under `tools/` use `vm` (Appendix B).
   - DEUS_Fluid runs alone in a vm (`tools/test_liquid_depth_simulation.js:121-125`) and exports `module.exports` (`DEUS_Fluid.js:1025-1026`).
@@ -607,26 +651,51 @@ Cadences are expressed as `(everyTicks, phaseOffset)`, for example needs `(10, 5
 
 ### 5.1 The region grid
 
-- **Size.** A region is 32×32 cells across the levels of one **vertical band**.
-  - Bands are those of DEC-013, recorded on `main` at `0c1baf8d` (`docs/OWNER_DECISIONS.md:171-187`): Lower-2 (−4, −3), Lower-1 (−2, −1), Surface (0), Upper-1 (+1, +2), Upper-2 (+3, +4).
-  - With today's 5 levels (−2..+2, `DEUS_World.js:155`) three bands exist: Lower-1, Surface and Upper-1. After WG.00.17 raises the range to 9 levels, all five exist.
-  - Horizontal index within an area: `ri = (y >> 5) * 8 + (x >> 5)`, 64 per band.
-  - Regions per 256×256 area: 64 × bands, which is 192 today and 320 at 9 levels.
-- **Region key.** `(ax, ay, band, ri)`.
-- **Chunk.** The *storage* unit is one `(region, z)`: 32×32 cells of one level (§15.3).
-- **Why 32×32 × one band:**
+- **Size.** A region is 32×32 cells across one **slab** of two adjacent layers.
+  - Slabs are counted up from the bottom of the world: `slab(z) = (z − zMin) >> SLAB_SHIFT`, with `SLAB_SHIFT = 1` a core constant. A range with an odd layer count ends in a one-layer slab.
+  - Horizontal index within an area: `ri = (y >> 5) * 8 + (x >> 5)`, 64 per slab.
+  - Regions per 256×256 area are 64 × slabs:
+
+    | Configuration | Range | Layers | Slabs | Regions per area |
+    |---|---|---|---|---|
+    | DEC-013 default | −16..+15 | 32 | 16 | 1,024 |
+    | test (every harness also runs it, §15.2) | −4..+4 | 9 | 5 | 320 |
+    | legacy: today's saves (`DEUS_World.js:155`) | −2..+2 | 5 | 3 | 192 |
+    | any range | zMin..zMax | L | ⌈L/2⌉ | 64 × ⌈L/2⌉ |
+
+- **Region key.** `(ax, ay, slab, ri)`. The slab takes 8 bits in packed keys, so ranges up to 512 layers fit without a format change.
+- **Chunk.** The *storage* unit is one `(region, z)`: 32×32 cells of one layer (§15.3).
+- **Bands.** DEC-013 as amended (`docs/OWNER_DECISIONS.md:172-195`) splits the 32 layers into five vertical biome bands. The ranges are PM defaults and stay OPEN for the Owner, as does the assignment of biomes and races to bands:
+
+  | Band | Layers | Count | Slabs at −16..+15 |
+  |---|---|---|---|
+  | LOWER2 (deep caverns) | −16..−9 | 8 | 0–3 |
+  | LOWER1 (shallow underground) | −8..−1 | 8 | 4–7 |
+  | SURFACE | 0..+3 | 4 | 8–9 |
+  | UPPER1 (low sky, towers, canopy) | +4..+9 | 6 | 10–12 |
+  | UPPER2 (high sky, peaks, cloud realm) | +10..+15 | 6 | 13–15 |
+
+  - In the core the band table is **data**: `bands: [{ id, zMin, zMax }]` in world state, read by biome, home-layer and summary rules. The table above is not written into code.
+  - Every default band boundary (−16, −8, 0, +4, +10) is an even offset from −16, so it falls on a slab boundary, and no default slab spans two bands. If the Owner picks a boundary that splits a slab, nothing breaks: band-keyed rules inside that slab work per layer.
+  - The 9-layer test configuration carries its own test band table (the Rev 2 one: −4..−3, −2..−1, 0, +1..+2, +3..+4). Its slab 2 (0..+1) spans two bands, so the tests exercise the per-layer rule.
+- **Why 32×32 × one slab:**
   1. **They align with the minimap.** The minimap chunk is 16×16 (`DEUS_Minimap.js:56-58`), so one region is exactly 2×2 chunks.
   2. **They cover the screen.**
      - The screen is 816×624 px with 48 px tiles (`game/data/System.json`: `advanced.screenWidth` / `screenHeight`, `tileSize`), which is 17×13 cells.
      - Zoom is locked at 1.0 (`DEUS_Camera.js:35-51`).
-     - A 17×13 view touches at most 2×2 regions per band.
-  3. **Promotion work is bounded.** At most 32 × 32 × 2 = 2,048 cells per region (§9). Uniform chunks (all air, or untouched solid rock) cost nothing to promote (§15.3).
-  4. **Bands follow DEC-013.** A band shares one biome set and is a race's home (DEC-013). A colony or camera on the surface doesn't promote the deep bands, which at 9 levels would otherwise put four extra levels at L0 for nothing.
-     - Vertical faces between bands are handled like horizontal faces (§7.7): fluid falling across a band border, and units taking stairs, ramps or NaturalConnections links across it.
-  5. **The index is cheap.** Powers of two make it a shift. A level set of 320 regions fits in ten `Uint32` words.
+     - A 17×13 view touches at most 2×2 regions per slab.
+  3. **Promotion work is bounded.** At most 32 × 32 × 2 = 2,048 cells per region (§9), whatever the layer count. UNIFORM chunks (all air, or untouched solid rock) cost nothing to promote (§15.3).
+  4. **A slab, not a band or a column.** At 32 layers a band is 4 to 8 layers deep and a column is 32. Promoting by slab keeps L0 to the layers in play. A colony on the surface promotes slab 8 (layers 0 and +1) plus whatever the camera sees beneath it, not all 8 layers of LOWER1, and not all 32.
+     - Vertical faces between slabs are handled like horizontal faces (§7.7): fluid falling across a slab border, and units taking stairs, ramps (DEC-020) or NaturalConnections links across it.
+  5. **The index is cheap.** It is all shifts. The region set of one area at 32 layers (1,024 regions) fits in 32 `Uint32` words, and one level byte per region is 1 KiB per area.
+- **Past 32 layers.** Nothing in the region model is sized by 32.
+  - The slab count, the region table and the bitsets are sized from `zMin..zMax` when the world loads.
+  - LOD cost doesn't grow with the slab count, because only regions that hold state are scheduled (§5.5) and the L0 cap is a work cap (§5.4).
 - **Alternatives:**
   - **16×16** (one minimap chunk): finer promotions, but four times the borders and bookkeeping. `REGION_SHIFT` is a constant, so SIM.30.04's bench can choose 4 instead of 5 without a design change (Q10).
-  - **Full-height columns** (Rev 1 of this ADR): no vertical borders, but at 9 levels every focus promotes all nine levels. Rejected for the reason in item 4.
+  - **One band per region** (Rev 2 of this ADR): bands are 4 to 8 layers deep at 32 layers, so a surface camera would promote SURFACE and all of LOWER1, 12 layers. The band ranges are also still OPEN, and a region grid shouldn't move when the Owner rules on them. Rejected.
+  - **Full-height columns** (Rev 1 of this ADR): at 32 layers every focus promotes all 32 layers. Rejected.
+  - **4-layer slabs:** half as many regions, but a 4-layer slab spans the default UPPER1/UPPER2 boundary at +10, and the per-region promotion bound doubles. `SLAB_SHIFT` is a constant, so SIM.30.04's bench may still revisit it (Q13).
 
 ### 5.2 Levels
 
@@ -643,37 +712,51 @@ L1 exists for three reasons:
 
 ### 5.3 Focus set
 
-The LOD phase evaluates the focus sources every 10 ticks. Each source makes regions L0 (its core) or L1 (a ring). Unless the table says otherwise, "+1" means one region horizontally and one band up and down.
+The LOD phase evaluates the focus sources every 10 ticks. Each source makes regions L0 (its core) or L1 (a ring). Unless the table says otherwise, "+1" means one region horizontally and one slab up and down.
 
 | Source | L0 core | L1 ring | Input |
 |---|---|---|---|
-| Camera | regions the view rectangle touches, plus a 4-cell margin, in the band of the viewed level and the band(s) of the levels drawn beneath it (DEC-011 see-through, down to Depth `MaxDepth`) | +1 horizontally, ±1 band vertically | **`FOCUS_SET` command** from the host (logged) |
+| Camera | every region that has an **exposed** cell inside the view rectangle plus a 4-cell margin. That is the viewed layer, and each layer beneath it that is drawn because no opaque surface covers it (DEC-021 occlusion; DEC-011 flat layers). The host computes the set from its visible-depth mask (§19) | +1 horizontally, ±1 slab vertically | **`FOCUS_SET` command** from the host (logged) |
 | Player-controlled units | unit's region | +1 | sim state |
 | Colonists (the player faction's persons) | unit's region | +1 | sim state |
 | Active jobs and projects with an assigned worker | target and worker regions | +1 | sim state |
 | Combat involving any tracked unit | regions of the combatants | +1 | sim state |
 | Burning cells | the region | +1 | sim state (fire never exists in L2, §6) |
 
-- **The camera enters only as a logged command.** The host sends `FOCUS_SET(ax, ay, x0, y0, x1, y1)` only when the camera's *region set* changes. So a replay reproduces every LOD decision (§10.6).
-- **The core never reads the camera directly.**
+- **The camera enters only as a logged command.** The host sends `FOCUS_SET(ax, ay, regionKeys)` only when the camera's exposed *region set* changes. That happens on:
+  - a scroll across a region border;
+  - a layer switch, including the camera following the player over a ramp (DEC-020);
+  - a dig, build or collapse that opens or closes a view downward (a `CELL_SHAPE` record the host's mask reads).
+
+  So a replay reproduces every LOD decision (§10.6).
+- **The core never reads the camera directly,** and it never computes occlusion. What is exposed is a presentation fact; the core only sees the logged region set.
 
 ### 5.4 Hysteresis
 
 - **Promotion is immediate.** When a region's desired level is higher than its current level, it is promoted in the same LOD phase (L2 → L1 → L0, §7.1).
 - **Demotion is slower.** It needs the desired level to stay lower for `DEMOTE_AFTER = 300` ticks in a row (30 s at 1x, 5 game hours). At most `MAX_DEMOTIONS_PER_PHASE = 1`.
 - **Minimum dwell.** A promoted region stays at least 100 ticks.
-- **Cap.** At most `MAX_L0 = 32` regions per area are L0 (of 192 today, 320 at 9 levels). The camera alone can need 2×2 regions in each of up to 3 bands. If the focus set asks for more, the lowest-priority sources fall to L1. Priority order: camera > combat > fire > colonists > jobs. Collapse (§16) runs the same way at every level, so it isn't a focus source.
+- **Cap.** At most `MAX_L0 = 64` regions per area are L0 (of 1,024 at 32 layers).
+  - The camera needs 2×2 regions in each slab where it sees an exposed cell. Looking down an open shaft through all 16 slabs, that is 64.
+  - The cap is a safety net. What an L0 region costs is the work it holds (dirty cells, units, fires), not its volume. An exposed region whose chunks are all UNIFORM has no work.
+  - If the focus set asks for more, the lowest-priority sources fall to L1. Priority order: camera > combat > fire > colonists > jobs. Within the camera, slabs nearer the viewed layer come first.
+  - Collapse (§16) runs the same way at every level, so it isn't a focus source.
 - **Prewarm on approach.** The host predicts the next camera region from scroll velocity. The core may *stage* an expansion ahead of time, in slices between ticks (§7.2). Staging never changes when or how a region is promoted. It only means the work may already be done.
 
 ### 5.5 Frequency per level, and scheduling
 
 - L0 regions step on every tick.
-- L1 region `ri` steps its batch on ticks where `(tick + ri) % 10 == 0`.
-- L2 region `ri` steps on ticks where `(tick + ri) % 100 == 0`.
-- So with R regions, at most ⌈R/10⌉ L1 batches and ⌈R/100⌉ L2 steps fall on any tick, which spreads the cost. The index here is the region's position in the area's canonical region list.
-  - For R = 320 (9 levels) that is at most 32 L1 batches, and only if every region were L1, which the focus cap prevents (§5.4).
-  - It is at most 4 L2 steps per tick.
-- The LOD phase itself runs on `tick % 10 == 9`.
+- Let `rk = slab × 64 + ri`, the region's index within its area.
+  - An L1 region steps its batch on ticks where `(tick + rk) % 10 == 0`.
+  - An L2 region steps on ticks where `(tick + rk) % 100 == 0`.
+- **Only regions that hold state are scheduled.** An L2 region is **dormant** when it has none of these: bucket members, tracked units, wet cells, inflow buffer or reservoir, and queued support, decay or reclamation work.
+  - A dormant region is in no schedule list and costs nothing per tick.
+  - It wakes on the same events that feed the dirty queues: a mutation, or a unit or fluid crossing into it.
+  - Active L1 and L2 regions sit in 10 and 100 lists keyed by `rk % 10` and `rk % 100`. Each tick visits only the list that is due, in `rk` order. Nothing scans all regions.
+- So the per-tick LOD work is at most ⌈active L1 / 10⌉ batches plus ⌈active L2 / 100⌉ coarse steps, whatever the layer count.
+  - Example: 200 active L2 regions in an area give at most 2 coarse steps per tick at 9 layers and at 32 alike.
+  - Sky above the tallest structure, and rock with no caves, veins or fluid, never becomes active.
+- The LOD phase itself runs on `tick % 10 == 9`. It reads the focus sources and the region wake-ups, and doesn't scan all regions either.
 
 ### 5.6 Modes
 
@@ -704,17 +787,17 @@ These are the aggregate representations for L2 regions. "Tracked" and "anonymous
 | System | Fine state (L0/L1) | L2 summary state | Coarse rule (every 100 ticks) |
 |---|---|---|---|
 | **Tracked units and people** | full record: cell, `progress`, path, needs | the same record in *abstract* mode: `{cell, goal, remainingCost, needs}`. Individual, never aggregated. `remainingCost` is the sum of the plan's step costs left, or 1000 × the octile distance if there is no plan | `remainingCost −= speed × Δ` (integer). The abstract `cell` advances along the straight line from the cell where abstract mode began to the goal, in proportion to the cost used; it is only a position, and terrain is re-checked when the unit is placed (§7.3). Needs are integrated in closed form. A job accrues progress if the worker is at the site |
-| **Wildlife and monsters** (anonymous) | unit records; herd membership lives on the unit (`u.data.herd`, `DEUS_Ecology.js:214`, `:672-678`) | **buckets** `count[species][ageBand][sex]` (`Uint16`) per region; herd records `{herdId, species, lastBirth, members per bucket}` keep today's fields (`:722`) | Ecology's hourly births and caps (`tickHour`, `:888-920`) applied to counts; migration between adjacent L2 regions by a deterministic rule; every change goes through the ledger |
+| **Wildlife and monsters** (anonymous) | unit records; herd membership lives on the unit (`u.data.herd`, `DEUS_Ecology.js:214`, `:672-678`) | **buckets** `count[species][ageBand][sex]` (`Uint16`) per region; herd records `{herdId, species, lastBirth, members per bucket}` keep today's fields (`:722`) | Ecology's rules applied to counts: its hourly breeding (`stepBreeding`, called from `tickHour`, `DEUS_Ecology.js:897-905`) and its six-hourly population roll with caps (`:907-914`); migration between adjacent L2 regions by a deterministic rule; every change goes through the ledger |
 | **Flora and resources** | object grid (seed + `objectDiffs`); sprouts and regrowth records (`blankState`, `DEUS_Ecology.js:127`) | **no summary needed**: objects stay seed + diffs; sprout and regrowth records stay records; a derived per-region count per object type is kept for statistics | sprouts mature by beat count (today's rule, `:772-796`); the ore sprouts (`:736-752`) are Q7 |
-| **Fluids** | packed depth grid (`DEUS_Fluid.js:127-137`); a dirty queue *per region* | **the fine cells are kept but frozen.** A region's grid is at most 2 levels × 32 × 32 = 2,048 bytes, and none at all for a uniform chunk (§15.3), so dropping it would save nothing. What L2 drops is per-tick stepping. A derived **basin index** sits on top: 4-connected *wet* cells of one fluid type per z (types never mix, `:457`), each basin with its volume, free capacity, drain faces to z−1, and faces to neighbouring regions. It is rebuilt from the cells, so it isn't saved (§10.7) | drain through drain faces and settle across linked faces with integer amounts; each transfer is applied to cells in canonical order (a gaining basin fills its lowest-floor cells first, then row-major; a losing basin drains its highest cells first) as a paired integer subtract and add |
+| **Fluids** | packed depth grid (`DEUS_Fluid.js:127-137`); a dirty queue *per region* | **the fine cells are kept but frozen.** A region's grid is at most 2 layers × 32 × 32 = 2,048 bytes at any layer count, and none at all for a chunk with no fluid (§15.3), so dropping it would save nothing. What L2 drops is per-tick stepping. A derived **basin index** sits on top: 4-connected *wet* cells of one fluid type per z (types never mix, `:457`), each basin with its volume, free capacity, drain faces to z−1, and faces to neighbouring regions. It is rebuilt from the cells, so it isn't saved (§10.7) | drain through drain faces and settle across linked faces with integer amounts; each transfer is applied to cells in canonical order (a gaining basin fills its lowest-floor cells first, then row-major; a losing basin drains its highest cells first) as a paired integer subtract and add |
 | **Fire** | `W.state.fire.burning` records, integer fuel (`DEUS_Fire.js:214`, `:389`) | **none**: a burning cell is a focus source, so its region is at least L0/L1; demotion waits until no cell burns | — |
-| **Geology and terrain** | strata and shapes (Levels) from seed + diffs | **none**: resident in chunk storage at every level (§15.3). A new game or a load builds it from seed + diffs, as today's builds do (`DEUS_World.js:595-640`, `:811-822`) | changes only through mutation: mining, building, collapse (§16), decay (§17) |
+| **Geology and terrain** | strata and shapes (Levels) from seed + diffs | **none**: resident in chunk storage at every level (§15.3). A new game or a load builds it from seed + diffs, as today's builds do (`World.buildArea`, `DEUS_World.js:599-689`: generators at `:650`, diffs replayed at `:682-685`; cache `:811-822`) | changes only through mutation: mining, building, collapse (§16), decay (§17) |
 | **History** | aggregate already: sites, people, dynasties (`History.generate`, `DEUS_History.js:363-410`, which calls `D.step` once per year, `:390-395`; `step` is at `DEUS_HistoricalDemographics.js:468`) | L2-native. It runs at world creation, and nothing steps it during play (the demographics header says "No listeners, automatic generation, live units, terrain edits, or save hooks", `DEUS_HistoricalDemographics.js:8-9`) | §14 |
 | **Jobs and projects** | records (`W.state.jobs`, `DEUS_Jobs.js:101-107`; projects, `DEUS_Projects.js:179-189`) | records unchanged. Jobs with an assigned worker are focus sources (L0). Unassigned jobs need no stepping | non-player factions' jobs (future) accrue abstract work per coarse tick |
 | **Items and containers** | records with integer `count` (`DEUS_Items.js:304`) | **records unchanged**: never aggregated, and they need no stepping at rest | — |
 | **Environment** | weather per area (`DEUS_Environment.js:88`, `:120`); thermal state per unit | ambient temperature is a boundary condition, derived from season and biome, not a stock; unit thermal stays with the (tracked) unit | re-derived |
 | **Factions** | contact checks (`DEUS_Factions.js:656-660`); integer population counters (`:194`, `:594-625`) | contact between tracked units in the same L2 region is resolved at the coarse tick; counters must equal tracked + bucket members (§7.8) | co-location test |
-| **Natural connections** | links (`W.state.naturalConnections`) | links are static. A link inside one band is movement *within* the region; a link across a band border is a border crossing (§7.7) | bucket z-distribution within a band unchanged; cross-band use by the migration rule |
+| **Natural connections** | links (`W.state.naturalConnections`) | links are static. A link inside one slab is movement *within* the region; a link across a slab border is a border crossing (§7.7) | bucket z-distribution within a slab unchanged; cross-slab use by the migration rule |
 
 *"Energy".* DEC-012 says demotion conserves "mass, energy and population". The code has no energy stock. This ADR maps "energy" to fuel (burnable objects and items, plus fire fuel) and to food and drink (items, needs). Temperature is a boundary condition. The Owner confirms or corrects this (Q5).
 
@@ -776,7 +859,7 @@ These are the aggregate representations for L2 regions. "Tracked" and "anonymous
 - **Anonymous units.** Absorbed into buckets:
   - `count += 1`;
   - the record is deleted and its ID *retired*, with reason `ABSORBED`. `nextUnitId` never reuses an ID (`DEUS_World.js:1133`).
-  - Absorption **does not emit `world:unitRemoved`**. That event would lower faction population counters (`DEUS_Factions.js:594-625`). The feed carries `UNIT_REMOVED` with cause `LOD_ABSORB` instead, and the legacy translation (§4.3) maps it to no legacy event.
+  - Absorption **does not emit `world:unitRemoved`**. To legacy listeners that event means the unit has left the world, and Factions lowers its population for a removed unit that is dead or dying (`DEUS_Factions.js:619-625`). An absorbed unit is still in the world, as a bucket member counted in Q-FACTPOP (§7.8). The feed carries `UNIT_REMOVED` with cause `LOD_ABSORB` instead, and the legacy translation (§4.3) maps it to no legacy event.
 - **Tracked units** switch to abstract mode.
 
 ### 7.5 Tracked units and named persons
@@ -804,8 +887,9 @@ Crowd LOD for people (0021-V addendum §9) is an open Owner question (Q14). The 
 
 ### 7.7 Units and fluid crossing region borders
 
-- **A unit's region** is the region of its current cell and level, which are integers.
-- **Faces.** Regions meet at horizontal faces (same band) and at vertical faces (between bands, where level `z` of one band sits on level `z − 1` of the band below). Every rule below applies to both kinds.
+- **A unit's region** is the region of its current cell and layer, which are integers.
+- **Faces.** Regions meet at horizontal faces (same slab) and at vertical faces (between slabs, where the bottom layer of one slab sits on the top layer of the slab below). Every rule below applies to both kinds, at any layer count.
+- **Ramps (DEC-020).** A unit walking up a ramp changes `z` to `z + 1` at the top stratum (§3.9). If that crosses a slab border, it is an ordinary border crossing under the rules below; there is no transfer and no pause.
 - **A unit moves from an L0/L1 region into an L2 region:**
   - a tracked unit switches to abstract mode in the destination region;
   - an anonymous unit is absorbed at the next LOD phase (a ledger `ABSORB` event, as in §7.4).
@@ -823,9 +907,9 @@ Crowd LOD for people (0021-V addendum §9) is an open Owner question (Q14). The 
 
 | Id | Quantity | Unit | Integer representation (fine / summary) |
 |---|---|---|---|
-| Q-WATER | water volume | depth unit (1/7 of a full cell, `DEUS_Fluid.js:9-18`, `:52`) | low 3 bits of a `Uint8` per cell at every level (L2 keeps the cells, frozen), plus the `Uint32` reservoir and inflow buffers per region |
+| Q-WATER | water volume | depth unit (1/7 of a full cell, `DEUS_Fluid.js:9-18`; `DEPTH_MAX = 7`, `:50`). Under DEC-013 a full cell is 5 × 5 × 10 ft, so one unit is 250/7 ft³; the integer unit does not change (§15.0) | low 3 bits of a `Uint8` per cell at every level (L2 keeps the cells, frozen), plus the `Uint32` reservoir and inflow buffers per region |
 | Q-LAVA | lava volume | depth unit | same as Q-WATER |
-| Q-POP[species, band, sex] | anonymous creatures | individuals | unit records / `Uint16` buckets |
+| Q-POP[species, ageBand, sex] | anonymous creatures | individuals | unit records / `Uint16` buckets |
 | Q-TRACKED | tracked units | set of IDs | records, fine or abstract |
 | Q-UNITID | the unit ID space | IDs | `live ∪ retired = [1, nextUnitId)`, disjoint; every retired ID has a reason: `DIED`, `ABSORBED`, `REMOVED_BY_COMMAND` |
 | Q-FACTPOP[f] | faction population counter | individuals | must equal tracked + bucket members of faction f |
@@ -833,7 +917,7 @@ Crowd LOD for people (0021-V addendum §9) is an open Owner question (Q14). The 
 | Q-OBJ[type] | placed objects: flora, boulders, outcrops, structures | objects | `Uint16` object grid + `objectDiffs` |
 | Q-STRATA[material] | solid material in place | strata units | Levels strata + diffs |
 | Q-FUEL | burning fuel | fuel units | integer per burning cell (`DEUS_Fire.js:389`) |
-| Q-FOOD, Q-DRINK | nourishment held by units | milli-units | today `foodLb` / `waterGal` are floats rounded to 0.001 (`DEUS_Colonists.js:1548`); the needs sub-lane converts them to integer milli-units |
+| Q-FOOD, Q-DRINK | nourishment held by units | milli-units | today `foodLb` / `waterGal` are floats rounded to 0.001 (`DEUS_Colonists.js:5389`, `:5410-5411`); the needs sub-lane converts them to integer milli-units |
 | Q-HIST | history person IDs | set of IDs | History `people` records |
 | **Q-MASS[family]** | **total matter per material family** (stone, soil and sediment, wood and organics, each metal element, water, …). This is LIFE-001 as restated by the Owner in 0021-V §8 | mass units (integer; one table per material and form, set by SIM.40.01 with WG.65.15) | Σ over every form the family takes: strata (+ diffs), placed objects, items, rubble and talus, sediment, fluid, and the matter held in creatures |
 
@@ -846,6 +930,8 @@ Crowd LOD for people (0021-V addendum §9) is an open Owner question (Q14). The 
   - metal item → oxidised sediment (rust);
   - food → body mass → soil (life cycle, 0021-V addendum §9).
 - Only explicitly modelled flows may change Q-MASS[family] (0021-V §8). Rain and evaporation are the example. They are sources and sinks with a named cause.
+- **Conjured matter** (*create water*, *wall of stone*) is DEC-018's open sub-question (`docs/OWNER_DECISIONS.md:262`). The ledger supports the PM default as it stands: a magical source or sink with its own cause, like rain. If the Owner rules otherwise, only the cause table changes (§18.6).
+- **Blasts and freezing** are transforms too. A stratum a blast destroys becomes debris at the cell (§18.4). Water that freezes stays Q-MASS[water] in an ice form. Burning stays the named sink it already is (§7.9).
 - **LIFE-002.** No transform may output an *ore* form (`docs/RISK_REGISTER.md:61`). Oxidised metal becomes a trace-mineral sediment form. A test fails any transform table entry whose output is an ore material.
 
 ### 7.9 Ledger checks and tolerances
@@ -904,45 +990,74 @@ Each increment is one lane and one merge. The game boots and plays after each on
 | **8** | SIM.30.03 | Promotion, demotion, transactions, border buffers; game mode stays `full` | the DoD 1-4 list | revert |
 | **9** | SIM.30.04 | Scheduler, hysteresis, cap, prewarm staging; budgets measured; `lod` mode offered in play after PM sign-off | the DoD list; no frame spike above the §9 budget when focus crosses a border (Lane K harness) | set `lod.mode = "full"` |
 | **10** | SIM.30.05 | Long-run QA, mixed vs `full` (§7.9), as a nightly | the DoD list | — |
-| **Z** | WG.00.17 (WBS Rev 19, `docs/worldgen/DEUS_WORLDGEN_WBS.md:105` at `0c1baf8d`) | Z range as one setting, then 9 levels. It lands on the legacy plugins after Lanes K and N, as Rev 19 says. The core reads the range from world state from Increment 1 on (§15.2), so it needs no change of its own | WG.00.17's DoD; the core fixtures run at −2..+2 and at −4..+4 | WG.00.17's own |
-| **S1** | SIM.40.01–.04 (`:525-528` at `0c1baf8d`) | Support model, collapse, colonist behaviour, collapse QA (§16), in the core. Depends on SIM.00.05/terrain and WG.00.17 | §16.6 | revert; support stays passive (no collapse), as today |
-| **S2** | SIM.40.05–.09 (`:529-533` at `0c1baf8d`) | Decay, reclamation, item weathering, deep-history decay, decay QA (§17), in the core. SIM.40.08 depends on SIM.30.02 | §17.6 | revert; nothing decays, as today |
+| **Z** | WG.00.17 (WBS Rev 24, `docs/worldgen/DEUS_WORLDGEN_WBS.md:105`) | Z range as one setting, then 32 layers (−16..+15) with sparse storage and a 9-layer test mode, as the row says. It lands on the legacy plugins after Lanes K and N. The core reads the range and the band table from world state from Increment 1 on (§15.2), so it needs no change of its own | WG.00.17's DoD; every core fixture runs at −4..+4 and at −16..+15, and the save-migration fixtures at −2..+2 (§15.2); the §9 storage rows at 9 and at 32 layers | WG.00.17's own |
+| **S1** | SIM.40.01–.04 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:533-536`) | Support model and blast propagation (SIM.40.01 names both), collapse, colonist behaviour, collapse QA (§16, §18), in the core. Depends on SIM.00.05/terrain and WG.00.17 | §16.6, §18.8 | revert; support stays passive (no collapse) and volume damage stays today's (no attenuation), as today |
+| **S2** | SIM.40.05–.09 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:537-541`) | Decay, reclamation, item weathering, deep-history decay, decay QA (§17), in the core. SIM.40.08 depends on SIM.30.02 | §17.6 | revert; nothing decays, as today |
+| **E** | SIM.60.02–.04 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:559-561`) | The spell-effect schema (data), the runtime in the core that turns an effect into the §18.6 primitives, and the QA fixtures. SIM.60.03's dependencies are in its row (SIM.00.03, SIM.40.01–.02, fire, water, seasons, GP.07.02) | §18.8 and SIM.60.04's fixtures | revert; spells keep their SRD numbers and have no physical effect, as today |
+| **T** | GP.07.02 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:577`) | Cross-layer targeting in the core: line of sight, 3D range and height modifiers (§18.5). The target picker is on the host side (§19) | §18.8 | revert |
+| **P** | WG.00.19–.21 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:107-109`) | Stratum height, ramps and occlusion. The movement rules are core (§3.9); the draw offset, camera follow and occlusion are host (§19) | their own; the §19 boundary tests | their own |
+| **R** | WG.00.24 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:112`) | The DEC-017 fallback map renderer, opened only after the Owner's go/no-go (§13) | §13.4 | the host goes back to the stock `Spriteset_Map` |
 
-**Dependencies:** as WBS Rev 18.
-- SIM.00.02 waits on the PM's sign-off of this ADR, the OPS.10.01 merge gate and OPS.50.04.
-- SIM.00.03 also waits for Lanes N and K.
-- WG.61.01/.02 are written against the core after SIM.00.03 (WBS `:609`).
+**Dependencies:** as WBS Rev 24.
+- SIM.00.02 waits on the PM's sign-off of this ADR, the OPS.10.01 merge gate and OPS.50.04 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:520`).
+- SIM.00.03 also waits for Lanes N and K (`:521`).
+- WG.61.01/.02 are written against the core after SIM.00.03 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:650`).
 
 ---
 
 ## 9. Performance Budgets
 
-**Status: PENDING-K3.**
-- The numbers below are design **ceilings**, not measurements.
-- Lane K's K3 harness (`tools/bench_render_layers.js`, 0017-Q §4; the stress scenario, 0019-T §2) writes `tasks/WG.00.09b/lane-k/perf/baseline_<sha8>.json` and `stress_baseline_<sha8>.json`. Neither existed on 2026-09-26 (Appendix B).
-- **Before SIM.00.03 starts,** this section must be amended with, for each metric: the K3 baseline value, the measured headless value, and the budget derived from them. Per 0018-R §3c item 12, the PM may sign off with PENDING-K3 only on that condition.
+There are two kinds. Storage budgets (§9.1) follow from the storage design, so they are set now. Time budgets (§9.2) need Lane K's K3 baselines and are PENDING-K3.
 - Every figure must come with its method (`docs/ENGINE_RULES.md` §6).
 - Reference machine: the Owner's laptop, identified by the GL renderer string and CPU that K3 records.
+- **Both ranges.** Every row that depends on the layer count is measured at 9 layers (−4..+4) and at 32 layers (−16..+15), by the same harness with a `--z-range` argument (§15.2). A row that passes at only one range fails.
 
-| Metric | Definition | Method | Ceiling at 1x | Ceiling at 8x | K3 input |
+### 9.1 Storage budgets (set now; they follow from §15.3)
+
+These don't depend on Lane K. They are ceilings the storage design already implies, so a lane that exceeds one has found a bug in the design or in the code, and amends this ADR rather than raising the number quietly.
+
+**Terms** (per 256×256 area):
+- `C`: chunks in the range: 64 × layers (2,048 at 32 layers, 576 at 9).
+- `M`: MIXED chunks. `W`: MIXED chunks with a fluid array. `H`: MIXED chunks with an HP array (some stratum damaged).
+- **The sparse fixture:** hand-built, generator-free. Terrain, fluid, units and a small colony on layers −1..+1; every other layer UNIFORM (air above, full-HP stone below). It exists at −4..+4 and at −16..+15 with identical content on −1..+1.
+- **The seed fixture:** seed 18, Year 0, generated at each range, plus the 1-game-day play script of §11.4.
+
+| Metric | Definition | Method | Budget |
+|---|---|---|---|
+| `sim.grid_bytes` | chunk storage of one area (§15.3) | headless: sum of the directory and all chunk array byte lengths; the harness also prints `C`, `M`, `W`, `H` | **Formula**, every fixture, both ranges: ≤ 2 × C + 7,680 × M + 1,024 × W + 5,120 × H + 16 KiB. **Worst case** (every chunk MIXED, wet and damaged): 27 MiB per area at 32 layers. Without damage it is 17 MiB at 32 layers and 4.8 MiB at 9. **Sparse fixture:** `grid_bytes(32) − grid_bytes(9) ≤ 2 × (2,048 − 576) = 2,944 B`. **Seed fixture:** ≤ 8 MiB at 32 layers (a ceiling; the first measurement confirms it or amends this row) |
+| `save.bytes` | size of `deusSim` (§11.2) | headless save, JSON length in bytes | **Fresh world:** the terrain and fluid parts are 0 bytes at both ranges, because a fresh world has no diffs. **Sparse fixture after the play script:** `save.bytes(32) − save.bytes(9) ≤ 256 B` (the range, band table and header differ; untouched chunks aren't saved). **General:** grows only with changed cells, moved fluid and records (§15.5) |
+| `sim.heap_mib` | retained heap of the whole core state (grids, records, history), after GC | headless: `v8.getHeapStatistics().used_heap_size` after `global.gc()` (`--expose-gc`), on the seed fixture at Year 0 and on an age-500 fixture | absolute value PENDING: the first measurement sets it. **Sparse fixture:** `heap(32) − heap(9) ≤ grid_bytes(32) − grid_bytes(9) + 64 KiB`. So no structure other than the chunk directory may be dense in the layer count |
+| `lod.active_regions` | L1 and L2 regions in the schedule lists (§5.5) | core counter | **Sparse fixture:** the same count at 9 and at 32 layers. Dormant regions are never listed |
+| `support.work_per_tick` | support cells re-evaluated in one tick | core counter | 0 while nothing changes (V133); ≤ `SUPPORT_BUDGET` (§16.3) otherwise; the same at 9 and 32 layers on the sparse fixture |
+| `decay.work_per_tick` | structures stepped by decay in one tick | core counter | ≤ ⌈active decaying structures / 2,400⌉ (spread over a game day, §17.4) |
+| `blast.strata_visited` | strata visited by one volume-damage event (§18.3) | core counter | ≤ the strata inside the blast's bounding box, clipped to the range; one visit each (no ray re-walks) |
+
+### 9.2 Time budgets (PENDING-K3)
+
+**Status: PENDING-K3.**
+- The numbers below are design **ceilings**, not measurements.
+- Lane K's K3 harness (`tools/bench_render_layers.js`, 0017-Q §4; the stress scenario, 0019-T §2) writes `tasks/WG.00.09b/lane-k/perf/baseline_<sha8>.json` (normal) and `stress_baseline_<sha8>.json` (stress).
+- At the time of writing (2026-09-26, 02:40 CT), those files existed only on Lane K's local branch, at commit `4da2e734`. That commit wasn't on `origin` and hadn't been reviewed (Appendix B). This ADR doesn't adopt its numbers.
+- The column "K3 measurement" names the field that fills each row. The field names are as in that commit. If the reviewed K3 schema renames them, the amendment uses the reviewed names.
+- **Before SIM.00.03 starts,** this section must be amended with, for each row: the K3 value, the measured headless value, and the budget derived from them. Per 0018-R §3c item 12, the PM may sign off with PENDING-K3 only on that condition.
+- **Benchmark hygiene (DEC-017, `docs/OWNER_DECISIONS.md:247`).** Each perf record notes the concurrent worker count and CPU %, and go/no-go evidence needs one quiet-machine rerun.
+
+| Metric | Definition | Method | Ceiling at 1x | Ceiling at 8x | K3 measurement that fills it |
 |---|---|---|---|---|---|
-| `sim.tick.full_ms` | one `sim.step()`, all regions L0, on the fixture (seed 18, Year-0 colony) | headless: `performance.now()` around each step for 36,000 ticks → median, p95, worst; NW.js: SimHost timer | p95 ≤ 3.0, worst ≤ 8.0 | same per tick | `Game_Map.update ms` (today's sim step, includes `World.update`) |
-| `sim.frame_ms` | sum of the ticks run in one displayed frame | SimHost per-frame timer, via the K3 harness | p95 ≤ 3.0 | p95 ≤ 6.0 (80 ticks/s ≈ 1.33 per frame; some frames run 2) | K3 frame total and render ms, so sim + render ≤ 16.7 ms |
-| `sim.tick.l1_region_ms` | one L1 region batch (Δ = 10) | headless bench, every region of the fixture × 1,000 batches | p95 ≤ 1.0 | same | — |
-| `sim.tick.coarse_region_ms` | one L2 region coarse step | headless bench | p95 ≤ 0.5 | same | — |
-| `view.read_ms` | the renderer's view-interface cost per frame (accessor calls + feed reads + projection patches) | K3 harness timer around the SimHost adapters | p95 ≤ 1.0 | p95 ≤ 1.5 | `Sprite_DepthRoot.update`, minimap `updateOverlay` / `processDirty`, Fog, glow timers (for comparison) |
-| `layer_switch` | Lane N's `UF.Levels.stats().lastSwitch` ms and frames | K3 / Lane N scenario | frames ≤ 1; ms ≤ 16.7 | same | per-switch record |
-| `lod.promote_ms` | L2 → L1 expansion of one region | headless + NW.js | total ≤ 20 in ≤ 10 staged slices of ≤ 2.0 each; unstaged (synchronous) ≤ 16.7 | same | stress scenario frame worst |
+| `sim.tick.full_ms` | one `sim.step()`, all regions L0, on the seed fixture | headless: `performance.now()` around each step for 36,000 ticks → median, p95, worst; NW.js: SimHost timer. At 9 and at 32 layers | p95 ≤ 3.0, worst ≤ 8.0 | same per tick | today's sim step for comparison: `parts["update.map"]` (it wraps `Scene_Map.prototype.updateMain`, which runs `$gameMap.update`) `p95` and `mean`, in each `steady_*` phase of `baseline_<sha8>.json` and in `stress_day_30s` / `stress_night_30s` of `stress_baseline_<sha8>.json` |
+| `sim.frame_ms` | sum of the ticks run in one displayed frame | SimHost per-frame timer, via the K3 harness | p95 ≤ 3.0 | p95 ≤ 6.0 (80 ticks/s ≈ 1.33 per frame; some frames run 2) | the render share R = `parts.render.p95` + `parts["update.spriteset"].p95` in the same phases. The amendment sets the ceiling so that `sim.frame_ms` + R ≤ 16.7 ms |
+| `sim.tick.l1_region_ms` | one L1 region batch (Δ = 10) | headless bench, every region of the seed fixture × 1,000 batches, at 9 and at 32 layers | p95 ≤ 1.0 | same | — (headless only) |
+| `sim.tick.coarse_region_ms` | one L2 region coarse step | headless bench, both ranges | p95 ≤ 0.5 | same | — (headless only) |
+| `view.read_ms` | the renderer's view-interface cost per frame (accessor calls + feed reads + projection patches) | K3 harness timer around the SimHost adapters | p95 ≤ 1.0; on the DEC-021 solid-cover scene, the value at 32 layers ≤ 1.10 × the value at 5 layers | p95 ≤ 1.5 | today's render-side reads for comparison: `parts["depth.root.updateUnits"]`, `parts["update.minimap"]`, `parts["update.fog"]`, `parts["update.daynight_glow"]` p95 in the `steady_*` phases |
+| `layer_switch` | Lane N's `UF.Levels.stats().lastSwitch` ms and frames | K3 / Lane N scenario | frames ≤ 1; ms ≤ 16.7 | same | `frameMs.worst` and `frames` of each `switch_<from>_to_<to>` phase |
+| `lod.promote_ms` | L2 → L1 expansion of one region | headless + NW.js, both ranges | total ≤ 20 in ≤ 10 staged slices of ≤ 2.0 each; unstaged (synchronous) ≤ 16.7 | same | `frameMs.worst` in `stress_day_30s` / `stress_night_30s`: the headroom an unstaged promotion must fit |
 | `lod.demote_ms` | L1 → L2 condensation of one region | same | ≤ 10, in the LOD phase | same | — |
 | `sim.alloc` | heap allocation in steady state | inner loops (movement, fluid, feed write): 10⁶ iterations under `v8.GCProfiler` → **0 scavenges**; whole tick: scavenges × semi-space ÷ ticks over 10,000 steady ticks | inner loops 0; tick ≤ 2 KiB average | same | — |
-| `host.dropped` | ticks dropped by the guard (§3.7) | SimHost counter over the K3 scenario | 0 | 0 at 8x on the stress scenario | stress scenario |
-| `sim.grid_mib` | grid storage of one 256×256 area (chunks, §15.3) | headless: sum of the chunk array byte lengths, fixture at −2..+2 and at −4..+4 | ≤ 2.7 at 5 levels, ≤ 4.8 at 9 levels (the all-mixed worst case, §15.4) | same | — |
-| `sim.heap_mib` | retained heap of the whole core state (grids, records, history), after GC | headless: `v8.getHeapStatistics().used_heap_size` after `global.gc()` (`--expose-gc`), on a Year-0 and an age-500 fixture | PENDING: first measurement sets it; at 9 levels no more than grid growth above the 5-level value | same | — |
-| `save.bytes` | size of `deusSim` for the fixture after 1 game day of play | headless save, JSON length (bytes) | ≤ 1.25 × the 5-level size at 9 levels (§15.5) | same | — |
-| `support.work_per_tick` | support cells re-evaluated in one tick | core counter | 0 while nothing changes (V133); ≤ `SUPPORT_BUDGET` (§16.3) otherwise | same | — |
-| `decay.work_per_tick` | structures stepped by decay in one tick | core counter | ≤ ⌈active decaying structures / 2,400⌉ (spread over a game day, §17.4) | same | — |
+| `host.dropped` | ticks dropped by the guard (§3.7) | SimHost counter over the K3 scenario | 0 | 0 at 8x on the stress scenario | an 8x run of the stress scenario. K3 runs at 1x, so that run doesn't exist yet |
+| `blast.event_ms` | one volume-damage event of the largest radius the spell schema allows (§18.3) | headless bench on the seed fixture, both ranges | ≤ 2.0 | same | — (headless only) |
 
-- **Speed coverage.** K3's scenario runs at 1x (0017-Q §4). So an 8x run of the same harness is needed. Until it exists, "8× today's `Game_Map.update` p95" serves as the implied 8x baseline, labelled as an estimate.
+- **Speed coverage.** K3's scenario runs at 1x (0017-Q §4). So an 8x run of the same harness is needed. Until it exists, "8× today's `update.map` p95" serves as the implied 8x baseline, labelled as an estimate.
+- **What K3 is expected to show.** Lane K's unreviewed note at `4da2e734` (`tasks/WG.00.09b/lane-k/escalation.md`) reports steady-view frame medians of 30–90 ms with the simulation running and 6.95 ms with it paused, mostly in Environment, World and Colonists code. If the reviewed baseline confirms that, today's sim step is far above every ceiling here. The ceilings, not today's cost, are then the target, and the DEC-017 go/no-go must use render-only fields (§13.3).
 - **The logging path.** The legacy `UF.Events` bridge must not keep the per-listener synchronous log write on `world:*` events (`DEUS_Core.js:264-270`). Its cost must show up in `view.read_ms` if it stays.
 
 ---
@@ -990,6 +1105,7 @@ Each increment is one lane and one merge. The game boots and plays after each on
 - **`Math.sqrt`** may be used only inside an integer square root: `r = floor(sqrt(n))`, then corrected with integer checks until `r*r ≤ n < (r+1)*(r+1)`. A one-ulp difference between engines then can't change the result.
 - **Forbidden in sim decisions:** `Math.sin/cos/tan/exp/log/pow` (non-integer)/`hypot/atan2/cbrt`, and the rest of the functions ECMAScript lets engines approximate. They may differ between node's V8 and NW.js's V8, and SIM.00.06 requires cross-runtime saves.
   - Example: Ecology's `Math.hypot` distance checks (`DEUS_Ecology.js:442-453`) become integer squared distances.
+  - Example: sphere damage today uses float falloff functions and `Math.sqrt` (`DEUS_Levels.js:1764`, `:1846`). In the core, distance is an integer squared distance in half-feet and falloff is an integer table (§18.3).
 - **No float state accumulated across ticks,** unless it is recomputed from integer state each tick.
 
 ### 10.5 Independence from the view
@@ -1038,6 +1154,7 @@ RMMZ's own contents are saved beside these (`rmmz_managers.js:389`, `:405`). The
 ```
 contents.deusSim  = { format: "deus-sim", saveSchemaVersion: 1,
                       core: { tick, seed, nextSeq, commandLogTail? },
+                      world: { zMin, zMax, bands, scale: { cellFt, stratumFt, strataPerLayer } },   // §15
                       systems: { terrainDiffs, units, paths, items, jobs, projects, fluid, fire, environment,
                                  ecology, needs, factions, households, ownership, connections, timers, history },
                       lod: { mode, regions: [{ key, level, lodEpoch, since }], summaries, buffers },
@@ -1060,6 +1177,7 @@ contents.deusView = { viewLevel, camera, select, plans, fog, minimapDiscovery, a
   - `World.state` sub-bags → systems.
   - Path plans → replanned once.
   - Presentation keys → `deusView`.
+  - `world.zMin`/`zMax` = −2/+2 and the legacy band table: a legacy save stays a 5-level world. Whether an old world can be raised to 32 layers is Q16.
 - **During the hybrid period (Inc 1-4)**, each increment may add a sub-record and bump `saveSchemaVersion`.
   - Loading accepts every older version.
   - Saving always writes the newest.
@@ -1068,7 +1186,8 @@ contents.deusView = { viewLevel, camera, select, plans, fog, minimapDiscovery, a
 
 ### 11.4 Fixtures
 
-Legacy-save fixtures are captured from `main` **at Increment 1, before any sim state changes shape**. They are stored under `tools/sim/fixtures/`, one per seed: 18, 0 and 424242, at Year 0 and after a 5-minute play script. They are the "old-save fixtures" for SIM.00.06 DoD 1.
+- Legacy-save fixtures are captured from `main` **at Increment 1, before any sim state changes shape**. They are stored under `tools/sim/fixtures/`, one per seed: 18, 0 and 424242, at Year 0 and after a 5-minute play script. They are the "old-save fixtures" for SIM.00.06 DoD 1. They are 5-level (−2..+2) worlds.
+- The range fixtures sit beside them in `tools/sim/fixtures/zrange/`: the sparse fixture and the seed fixture of §9.1, each at −4..+4 and at −16..+15.
 
 ---
 
@@ -1081,7 +1200,8 @@ Legacy-save fixtures are captured from `main` **at Increment 1, before any sim s
 | **A. Decouple the tick but stay in-engine**: keep the plugins, add only the accumulator | small; fixes frame-rate dependence | no headless purity; view dependence stays; history can't reuse the code; doesn't meet DEC-012 | rejected as an end state. It is effectively the hybrid state during Increments 1-4 |
 | **B. Web Worker**: sim in a worker, view by `postMessage` or `SharedArrayBuffer` | parallel CPU; hard isolation | `SharedArrayBuffer` needs cross-origin isolation in Chromium, and NW.js support for it is **not checked**; `postMessage` copies every frame; the synchronous facades legacy plugins use (§2.6) can't cross threads, which forces a big-bang switch | **not now.** The purity boundary keeps it possible after SIM.00.06, as a future ADR |
 | **C. Status quo** | no work | §1.3, §1.4; the 8x cost | rejected by DEC-012 |
-| **D. Leave RMMZ first**, then split | one move | a big-bang rewrite of render, UI and sim together | rejected. §13 shows that leaving becomes a contained job *after* the split |
+| **D. Leave RMMZ first**, then split | one move | a big-bang rewrite of render, UI and sim together | rejected. DEC-017 keeps RMMZ as the shell in any case; §13 shows that even replacing its map renderer is a contained job *after* the split |
+| **E. Region = one DEC-013 band** (Rev 2) or **full-height column** (Rev 1) | fewer regions | 4 to 32 layers promoted per focus at 32 layers; tied to an OPEN band table | rejected for 2-layer slabs (§5.1) |
 
 ### 12.2 Risks
 
@@ -1097,12 +1217,16 @@ Legacy-save fixtures are captured from `main` **at Increment 1, before any sim s
   - Minimap calls `UF.Fluid.getFluid`, `W.groundAt`, `UF.Projects.activeProjects`, `UF.NaturalConnections.listConnectors` and `UF.Select.selectedUnit`, none of which exist.
   - Tiles calls `UF.World.on`, which doesn't exist.
   - These are left for Lane K and later lanes. They don't block this design.
+- **R10. Worldgen density at 32 layers.** The storage budgets grow with MIXED chunks (§9.1). If WorldGen fills most of the 28 non-surface layers with caves, veins and biome detail, memory approaches the 17 MiB-per-area worst case. Mitigations: the seed-fixture ceiling in §9.1 makes that visible at the first measurement, and a MIXED chunk whose arrays equal the generated baseline can be dropped and regenerated when its region is dormant (§15.4).
+- **R11. The legacy plugins at 32 layers before the terrain sub-lane.** If WG.00.17 raises the legacy range before SIM.00.05/terrain, today's per-level arrays grow 32/5 times (§15.4). WG.00.17's row already requires sparse storage; §15.1 lists where the legacy stores are dense.
+- **R12. Blast cost.** A large blast visits every stratum in its box (§18.3). Mitigations: one visit per stratum, a radius cap from the spell schema, and `blast.event_ms` (§9.2).
+- **R13. Scale change in legacy numbers.** Today's 1 ft strata are baked into comments, sphere damage and V135's fluid depth labels (§15.0). Porting them to 2 ft changes blast reach and wading depths in feet. Each system's sub-lane records the change with a before/after fixture.
 
 ### 12.3 Open questions
 
 | # | For | Question | Recommendation |
 |---|---|---|---|
-| Q1 | PM | Move the calendar into the core at SIM.00.02, rather than SIM.00.05 as Rev 18 lists? | Yes (Increment 1) |
+| Q1 | PM | Move the calendar into the core at SIM.00.02, rather than SIM.00.05 as WBS Rev 24 lists (`docs/worldgen/DEUS_WORLDGEN_WBS.md:523`)? | Yes (Increment 1) |
 | Q2 | PM | Add to SIM.00.05: terrain (the Levels strata writer, World diffs and objects; first, §8), Ownership (`DEUS_Ownership.js:613`), TimeSpeed timers (`DEUS_TimeSpeed.js:84-95`, `:188-203`), the Anim death lifecycle (`DEUS_Anim.js:1504-1522`, `:1605-1631`)? Households runs on events only | Yes |
 | Q3 | Owner | Keep 16x and 32x? | Keep them as best-effort, with the effective rate shown |
 | Q4 | Owner | In `lod` mode, may watching a region change anonymous micro-state (camera as a focus, per DEC-012), or should the camera never change fidelity (`cameraFocus: false`)? | DEC-012 as written (`true`), with the G1-G3 and G5 guarantees |
@@ -1114,18 +1238,83 @@ Legacy-save fixtures are captured from `main` **at Increment 1, before any sim s
 | Q10 | PM | Region size 32 (chosen) or 16 | 32; SIM.30.04's bench confirms |
 | Q11 | PM | Fog-of-war memory: presentation (`deusView`) until a gameplay rule reads it? | Yes |
 | Q12 | Owner/PM | What is a game year? The code has 1 per game day (`DEUS_Core.js:321-325`); `UF_History.md:1161` says over 100 real hours at 1x | The calendar owner settles it before SIM.30.05 |
-| Q13 | PM | Regions per DEC-013 band (Rev 2, §5.1) rather than full-height columns (Rev 1)? | Bands |
-| Q14 | Owner | Crowd LOD for people (0021-V addendum §9, OPEN): no population cap; a budget of fully simulated individuals; the rest as counts keyed by species, age band, sex, craft, civic office, class, obligation, faction and settlement. §7.5 keeps every person tracked by default. If the Owner adopts crowd LOD, persons with no history record, household role or reference could be bucketed under those keys, and promotion would rebuild them. History persons always stay individual | Keep persons tracked until the post-split benchmark sizes the budget |
-| Q15 | PM | SIM.40 (§16, §17) runs in the core, so it needs the terrain sub-lane of SIM.00.05 first. Should that dependency be added to SIM.40.01 and .05 (Rev 19 lists WG.00.17 and SIM.00.01 only)? | Yes |
-| Q16 | Owner | When WG.00.17 raises the range, are existing 5-level saves upgraded to 9 levels (new levels generated from the seed), or kept at 5? | Keep old saves at 5; new worlds at 9 |
+| Q13 | PM | Regions per 2-layer slab (Rev 3, §5.1) rather than per DEC-013 band (Rev 2) or full-height column (Rev 1)? | Slabs; SIM.30.04's bench may change `SLAB_SHIFT` |
+| Q14 | Owner | Crowd LOD for people (DEC-014, `docs/OWNER_DECISIONS.md:199-208`, OPEN with PM defaults): no population cap; a budget of fully simulated individuals; the rest as counts keyed by species, age band, sex, craft, civic office, class, obligation, faction and settlement. §7.5 keeps every person tracked by default. If the Owner adopts crowd LOD, persons with no history record, household role or reference could be bucketed under those keys, and promotion would rebuild them. History persons always stay individual | Keep persons tracked until the post-split benchmark sizes the budget |
+| Q15 | PM | SIM.40 (§16, §17, §18) runs in the core, so it needs the terrain sub-lane of SIM.00.05 first. Should that dependency be added to SIM.40.01 and .05 (WBS Rev 24 lists WG.00.17 and SIM.00.01, and SIM.40.01 and SIM.00.01: `docs/worldgen/DEUS_WORLDGEN_WBS.md:533`, `:537`)? | Yes |
+| Q16 | Owner | When WG.00.17 raises the range, are existing 5-level saves upgraded to 32 layers (the new layers generated from the seed), or kept at 5? | Keep old saves at 5; new worlds at 32. An upgrade path can come later: the core's range is data (§15.2) |
+| Q17 | Owner | V135 labels the five fluid depth states 1 to 5 ft, for 1 ft strata (`docs/VISION.md:129`). With DEC-013's 2 ft strata the same five states are 2 to 10 ft deep. Keep the five states and relabel them in feet, or change the states? | Keep the states; the feet become 2, 4, 6, 8, 10 |
+| Q18 | PM → Owner | Blast numbers: per material and damage type, the fraction that passes one stratum, and the fire ignition thresholds (§18.2). SIM.40.01 proposes them | SIM.40.01 proposes; the Owner approves the feel on the SIM.60.04 fixtures |
+| Q19 | Owner | DEC-018's open sub-question: conjured matter versus LIFE-001 (`docs/OWNER_DECISIONS.md:262`) | None from this ADR. The ledger supports the PM default and the alternatives (§7.8) |
+| Q20 | Coordinator | WBS rows WG.00.20, WG.00.21 and GP.07.02 (`docs/worldgen/DEUS_WORLDGEN_WBS.md:108`, `:109`, `:577`) cite DEC-017, DEC-018 and "DEC-019; V148" for the decisions `docs/OWNER_DECISIONS.md` records as DEC-020 (`:282`), DEC-021 (`:293`) and DEC-022 (`:304`), and VISION as V151 (`docs/VISION.md:412`). This ADR cites `docs/OWNER_DECISIONS.md` | Correct the WBS references (`tasks/SIM.00.01/lane-m/escalation.md`) |
 
 ---
 
-## 13. Engine Exit Path
+## 13. Engine Exit Path (DEC-017)
 
-This section is a recommendation only. The decision is the Owner's.
+**The decision.** DEC-017, "Keep RMMZ for menus, dialogue, saving, database and battle; fallback map renderer is a custom multi-layer PixiJS renderer inside RMMZ, decided after demo benchmarks" (`docs/OWNER_DECISIONS.md:239-247`).
+- It is DECIDED for the shell. The fallback trigger is OPEN until the benchmarks.
+- This ADR adopts it as its exit path, as DEC-017's consequences ask (`:245`).
+- It replaces Rev 2's recommendation, which left a later "leave RMMZ" decision open. DEC-017 has settled that: RMMZ stays, and at most its map drawing is replaced.
 
-**Scope of the survey** (Appendix B):
+### 13.1 What stays RMMZ, and what the fallback replaces
+
+| Part | Under DEC-017 | Touches the sim core? |
+|---|---|---|
+| Boot, title, menus and windows, dialogue and messages, battle screens, every scene other than `Scene_Map` | stock RMMZ, untouched | no. After the split they reach the sim only through commands and the view (§2.2) |
+| Saving and loading | stock RMMZ `DataManager` / `StorageManager`. They store `deusSim` and `deusView` (§11.2) | no. The save *content* is the core's; RMMZ only stores it |
+| Database JSON and catalogs | stock | no. `$dataMap` becomes a render projection either way (§4.6) |
+| Input and audio | stock | no. Input becomes commands in the host (§4.4) |
+| The `Scene_Map` shell: its update entry, the map's windows, input dispatch, the message window | stock. `DEUS_SimHost` wraps the frame there (§3.4) | no |
+| **Map drawing:** `Spriteset_Map`, `Tilemap`, the `Sprite_Character` per unit, the DEUS_Depth planes | stock today. **Replaced by one custom multi-layer PixiJS map renderer, a child of `Scene_Map`, if the Owner says GO** | **no.** It is a reader of `SimView` and the feed, like the stock path after SIM.00.03 |
+
+### 13.2 Why the boundary makes the swap sim-neutral
+
+- **Two crossings only.** The core's only crossings are `sim.command` in and `sim.view()` plus the feed out (§2.2). Neither names a renderer.
+- **The renderer is one more reader.** After SIM.00.03, every render plugin reads through the view (§4.5), and the RMMZ tile arrays are projections the host builds (§4.6). A custom renderer uses the same accessors:
+  - `copyRow` for the tile, shape, object and fluid rows of each `(area, z)`;
+  - `unitsInRect` and `unitInto`, with `from`, `to`, `progress` and `speed` for interpolation (§3.9);
+  - feed records (`CELL_*`, `UNIT_*`, `EFFECT`, `PROJECTILE`);
+  - `rev()` to skip what hasn't changed.
+- **What the renderer computes itself** is presentation, never sim state:
+  - DEC-011 flat 1:1 layers;
+  - the DEC-019 stratum draw offset;
+  - DEC-021 occlusion;
+  - Rule 12 sprite frames.
+- **Exposure and focus.** The exposed-region set, which drives `FOCUS_SET` (§5.3), is computed by one shared host module, not by the renderer. It is a pure function of the view's shape rows, the view rectangle and the viewed layer. Both renderers use it, so both send identical `FOCUS_SET` commands, and LOD decisions don't depend on which renderer runs. The camera and camera follow (DEC-020) are host state too.
+- **Nothing on the sim side changes.** The core, the command set, the feed format and the save stay as they are. A test proves it (§13.4, guard 1).
+
+### 13.3 The go/no-go
+
+The Owner decides with the benchmarks DEC-017 names (`docs/OWNER_DECISIONS.md:243`):
+- Lane K's normal baseline plus the 0019-T stress baseline;
+- the 32-vs-5-layer occlusion benchmark (DEC-021, `:300`; WBS WG.00.21, `docs/worldgen/DEUS_WORLDGEN_WBS.md:109`).
+
+This ADR adds one rule for reading them. **Judge the map renderer only on render-side measurements:**
+- K3 `parts.render`, `parts["render.depth"]`, `parts["render.tilemap_layers"]`, `parts["update.spriteset"]` and `drawCalls`;
+- or whole-frame numbers from phases with the simulation paused.
+
+Whole-frame time with the simulation running includes today's sim step. Lane K's unreviewed note reports that step as most of the frame (§9.2). If whole-frame time were used, the stock renderer would be blamed for sim cost that SIM.00.02 to SIM.00.05 remove, whichever renderer draws.
+
+DEC-017's hygiene rule applies: each perf record notes the concurrent worker count and CPU %, and the go/no-go evidence includes one quiet-machine rerun (`:247`).
+
+### 13.4 Sequencing and guard tests (WG.00.24, `docs/worldgen/DEUS_WORLDGEN_WBS.md:112`)
+
+- **When.** No renderer code opens before the go/no-go (DEC-017).
+  - After a GO, the lane is best started after SIM.00.03, so it is written against `SimView` alone.
+  - If the go/no-go comes earlier, the renderer reads through the `UF.*` facades (§2.6). SIM.00.03 later re-points those to `SimView` with no change to the renderer.
+- **Where.** The renderer is a host plugin under `game/js/plugins/` (for example `DEUS_MapRenderer.js`), never under `game/js/sim/`.
+- **Guard tests:**
+  1. **Renderer independence:** the core's checksum over the fixture script is identical with the stock map renderer and with the custom one. The inputs are the same commands and the same `FOCUS_SET` records.
+  2. The SIM.00.03 lint (§4.4) lists the renderer as a read-only consumer, with no allowlist entries.
+  3. **DEC-021:** the stress scene at 32 layers with solid upper layers costs about the same as at 5 layers (WG.00.21's benchmark).
+  4. **DEC-011:** screenshots of the fixture views match the stock renderer 1:1. The Owner judges them.
+- **Rollback:** a host flag switches back to the stock `Spriteset_Map`. Both read the same view, so the sim doesn't notice.
+
+### 13.5 RMMZ dependencies after the split (survey)
+
+This survey sizes the fallback. It is the Rev 2 survey, re-read under DEC-017.
+
+**Scope** (Appendix B):
 - `game/js/plugins/` holds 95 files. 41 of the `UF_*.js` files are 16-line shims such as `UF_Core.js:13` `PluginManager.loadScript("DEUS_Core")`.
 - 54 files contain real code. Of those, 48 reference at least one RMMZ global. The 6 that reference none are the first candidates to move into the core: `DEUS_Callings.js`, `DEUS_Conditions.js`, `DEUS_DeathForensics.js`, `DEUS_Dnd5e.js`, `DEUS_HistoricalDemographics.js` and `UF_Time.js` (which nothing loads).
 - Only 5 files export `module.exports`:
@@ -1137,24 +1326,21 @@ This section is a recommendation only. The decision is the Owner's.
 
 After the split (end of Increment 5), DEUS still uses these parts of RMMZ:
 
-| What DEUS uses | Evidence | Replacement if the game ran as plain PIXI in NW.js | Size | Risk |
-|---|---|---|---|---|
-| **NW.js runtime** (window, fs, argv) | `game/package.json:3`; `DEUS_Core.js:69`, `:98`, `:134`; `DEUS_FactionMenus.js:455` (`nw.gui`) | keep NW.js; it is not RMMZ | S | low |
-| **PIXI through `rmmz_core`** (`Graphics`, `Bitmap`, `Sprite`; PIXI v5.3.12 in `game/js/libs/`) | `rmmz_core.js` `Graphics` `:471`, `_onTick` `:808`, `Bitmap` `:1177`, `Sprite` `:1851`; `DEUS_Depth.js:219`, `:685`; `new Bitmap(` in 23 plugins | a thin app on PIXI v5, and a `Bitmap` replacement: a canvas plus a texture | M | medium |
-| **Tilemap** (autotile rendering, tile-ID encoding) | `rmmz_core.js` `Tilemap` `:2185`; statics `TILE_ID_A1` `:2672`, `isAutotile` `:2682`, `makeAutotileId` `:2694`, `isWaterTile` `:2726`, `FLOOR_AUTOTILE_TABLE` `:2793`; `Tilemap.*` helpers in 16 plugins | the tile-ID *encoding* moves to `sim/world/tilecodes.js` at Inc 1-3; the *renderer* needs its own tilemap for A1-A4 autotiles | L | high: autotile correctness |
-| **Scene / Spriteset / Sprite_Character** | `rmmz_scenes.js` `Scene_Map` `:747`; `rmmz_sprites.js` `Spriteset_Map` `:3345`; `Scene_Map.prototype.*` overridden in 20 plugins, `Spriteset_Map.prototype.*` in 18, `Scene_Boot.start` in 39 | own scene graph and boot sequence | L | medium |
-| **Input** (`Input`, `TouchInput`, `keyMapper`) | `rmmz_core.js` `:5652`, `:6021`; 18 plugins; private `_currentState` read ×73 | small input module (keys, mouse, wheel) | M | low |
-| **Audio** (`AudioManager`, `SoundManager`) | `rmmz_managers.js:1103`, `:1491`; 8 plugins | WebAudio wrapper | S | low |
-| **Save / storage** (`DataManager`, `StorageManager`, `JsonEx`) | `rmmz_managers.js:345`, `:389`, `:405`, `:538`; `rmmz_core.js:6416`; 15 plugins alias save hooks | `deusSim` + `deusView` written with `fs` (§11) | S (after Inc 5) | low |
-| **Database JSON** (`$dataMap`, `$dataTilesets`, `$dataSystem`; custom databases through `_databaseFiles`) | `$dataMap` in 21 plugins; `$dataTilesets` in 5; `$dataSystem` in 3; loaders `DEUS_WorldGen.js:45-46`, `DEUS_Look.js:93`, `DEUS_World.js:2813` | catalogs load directly; `$dataMap` becomes a render projection (§4.6) | M | low |
-| **Menus / windows** (`Window_*`, `Scene_MenuBase`) | 13 plugins use `Window_*`, 9 subclass them (e.g. `DEUS_Sheet.js:1158`, `DEUS_Interact.js:525`); the stock menu is disabled (`DEUS_ColonyOverseer.js:173`) | own UI toolkit: panels, lists, text, 9-slice skins | L | high: largest UX surface |
-| **Events / characters** (`Game_Event`, `Game_CharacterBase`, `Game_Player`) | every unit on view is a `Game_Event` (`DEUS_World.js:899`); `Game_CharacterBase` overrides in 11 plugins | after Inc 3 they are puppets; replaced by plain sprites fed by the view | S (after Inc 3) | low |
-| **Main loop** (`SceneManager`) | `rmmz_managers.js:1982-2112`; TimeSpeed overrides (§1.1) | the host loop is already the accumulator (§3.4); becomes `requestAnimationFrame` | S | low |
+| What DEUS uses | Evidence | Under DEC-017 | If the fallback renderer is built |
+|---|---|---|---|
+| **NW.js runtime** (window, fs, argv) | `game/package.json:4-11` (`chromium-args`, `window`); `DEUS_Core.js:69`, `:98`, `:134`; `DEUS_FactionMenus.js:455` (`nw.gui`) | kept; NW.js is not RMMZ | unchanged |
+| **PIXI through `rmmz_core`** (`Graphics`, `Bitmap`, `Sprite`; PIXI v5.3.12 in `game/js/libs/`) | `rmmz_core.js` `Graphics` `:471`, `_onTick` `:808`, `Bitmap` `:1177`, `Sprite` `:1851`; `DEUS_Depth.js:219`, `:685`; `new Bitmap(` in 23 plugins | kept | the renderer uses the same PIXI v5 and `Graphics` loop |
+| **Tilemap** (autotile rendering, tile-ID encoding) | `rmmz_core.js` `Tilemap` `:2185`; statics `TILE_ID_A1` `:2672`, `isAutotile` `:2682`, `makeAutotileId` `:2694`, `isWaterTile` `:2726`, `FLOOR_AUTOTILE_TABLE` `:2793`; `Tilemap.*` helpers in 16 plugins | the tile-ID *encoding* moves to `sim/world/tilecodes.js` at Inc 1-3 either way | the renderer needs its own multi-layer tilemap for A1-A4 autotiles: size L, risk high (autotile correctness) |
+| **Scene / Spriteset / Sprite_Character** | `rmmz_scenes.js` `Scene_Map` `:747`; `rmmz_sprites.js` `Spriteset_Map` `:3345`; `Scene_Map.prototype.*` overridden in 20 plugins, `Spriteset_Map.prototype.*` in 18, `Scene_Boot.start` in 39 | `Scene_Map` and `Scene_Boot` kept | `Spriteset_Map` and the unit `Sprite_Character`s are replaced for map drawing; the 18 `Spriteset_Map` overrides move into the renderer or are retired: size L, risk medium |
+| **Input** (`Input`, `TouchInput`, `keyMapper`) | `rmmz_core.js` `:5652`, `:6021`; 18 plugins; private `_currentState` read ×73 | kept | unchanged |
+| **Audio** (`AudioManager`, `SoundManager`) | `rmmz_managers.js:1103`, `:1491`; 8 plugins | kept | unchanged |
+| **Save / storage** (`DataManager`, `StorageManager`, `JsonEx`) | `rmmz_managers.js:345`, `:389`, `:405`, `:538`; `rmmz_core.js:6416`; 15 plugins alias save hooks | kept; they store `deusSim` + `deusView` (§11) | unchanged |
+| **Database JSON** (`$dataMap`, `$dataTilesets`, `$dataSystem`; custom databases through `_databaseFiles`) | `$dataMap` in 21 plugins; `$dataTilesets` in 5; `$dataSystem` in 3; loaders `DEUS_WorldGen.js:45-46`, `DEUS_Look.js:93`, `DEUS_World.js:2813` | kept; `$dataMap` becomes a render projection (§4.6) | the renderer reads the view, not `$dataMap` |
+| **Menus / windows** (`Window_*`, `Scene_MenuBase`) | 13 plugins use `Window_*`, 9 subclass them (e.g. `DEUS_Sheet.js:1158`, `DEUS_Interact.js:525`); the stock menu is disabled (`DEUS_ColonyOverseer.js:173`) | kept | unchanged |
+| **Events / characters** (`Game_Event`, `Game_CharacterBase`, `Game_Player`) | every unit on view is a `Game_Event` (`DEUS_World.js:899`); `Game_CharacterBase` overrides in 11 plugins | after Inc 3 they are puppets fed by the view | the renderer draws units from the view; puppets stay only where RMMZ's event interpreter needs them (dialogue, common events) |
+| **Main loop** (`SceneManager`) | `rmmz_managers.js:1982-2112`; TimeSpeed overrides (§1.1) | kept; `DEUS_SimHost` wraps it (§3.4) | unchanged |
 
-**When leaving becomes contained.** After Increment 5 (SIM.00.06), the sim, its save and its clock no longer touch RMMZ. What remains is render, input, audio and UI.
-- Leaving RMMZ is then a render/input/UI job of about L + L + M + … in size. The two large, risky items are the tilemap renderer and the window toolkit.
-- It needs no change to the simulation.
-- **Recommendation:** don't leave RMMZ before Increment 5. At that point, measure the tilemap and UI replacements as a separate WBS package and let the Owner decide.
+**Size of the fallback.** It is the two map-drawing rows, a multi-layer tilemap and a unit and effect layer, about L + L. Nothing else in the table changes. The simulation needs no change for it at any increment, because it never reads a renderer.
 
 ---
 
