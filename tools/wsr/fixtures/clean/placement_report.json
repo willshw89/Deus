@@ -1,0 +1,33 @@
+{
+  "tool": "place_art",
+  "schema": "deus-art-placement/1",
+  "result": "PLACED",
+  "about": "TEST_ fixture placement report (filled regions only; no image data).",
+  "sheets": [],
+  "filled": [
+    {
+      "slotId": "ATLAS_SURFACE_TEST_TILE_01:0006",
+      "entryId": "SURFACE_SHARED_STONE_TEST-BOULDER_V1_DEFAULT",
+      "sheetId": "ATLAS_SURFACE_TEST_TILE_01",
+      "x": 240,
+      "y": 0,
+      "w": 48,
+      "h": 96,
+      "sha256": "37f79bab6cc7a9f7be3d4e4856965c383a9013207c5502fd2e26cd7c135a94ae",
+      "rectSha256": null,
+      "source": "SURFACE_SHARED_STONE_TEST-BOULDER_V1_DEFAULT.png"
+    },
+    {
+      "slotId": "ATLAS_ALL_TEST_PROP_01:0002",
+      "entryId": "ALL_SHARED_ITEM_TEST-LOG_V1_DEFAULT",
+      "sheetId": "ATLAS_ALL_TEST_PROP_01",
+      "x": 48,
+      "y": 0,
+      "w": 48,
+      "h": 48,
+      "sha256": "4dbe2d0cec3f82fe71d890424ca0b5c47d7036fdb5bc0a85bbc8eacd7ce79d6d",
+      "rectSha256": null,
+      "source": "ALL_SHARED_ITEM_TEST-LOG_V1_DEFAULT.png"
+    }
+  ]
+}

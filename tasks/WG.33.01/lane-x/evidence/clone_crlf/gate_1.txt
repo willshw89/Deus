@@ -1,0 +1,147 @@
+PASS clean_fixture_passes: 0 gating findings, 1 exempt
+PASS clean_fixture_strict_passes: exit 0
+PASS clean_resolution_methods: ID, SOURCE, MAP and derived-variant resolution
+PASS clean_counts: rows 8, art 5, slots 9, natural 4/4 traced, 9/9 agree
+PASS neg_wsr01_duplicate_state: WSR-01 DUPLICATE_STATE STATE_TEST_BOULDER
+PASS neg_wsr01_two_systems: WSR-01 MULTIPLE_SYSTEMS STATE_TEST_SPRING
+PASS neg_wsr01_system_not_in_enum: WSR-01 SYSTEM_NOT_IN_ENUM STATE_TEST_TRAIL
+PASS neg_wsr01_no_system: WSR-01 NO_SYSTEM STATE_TEST_AQUIFER
+PASS neg_wsr02_visual_state_null_family: WSR-02 ASSET_FAMILY_MISSING STATE_TEST_BOULDER
+PASS neg_wsr02_visual_state_null_id: WSR-02 VISUAL_STATE_ID_MISSING STATE_TEST_BOULDER
+PASS neg_wsr02_visual_state_id_not_an_id: WSR-02 VISUAL_STATE_ID_INVALID STATE_TEST_BOULDER
+PASS neg_wsr02_vfx_null_family: WSR-02 ASSET_FAMILY_MISSING STATE_TEST_FLAME
+PASS neg_wsr02_simulation_has_visual: WSR-02 SIMULATION_HAS_VISUAL STATE_TEST_AQUIFER
+PASS neg_wsr02_composed_other_system: WSR-02 COMPOSED_NOT_ALLOWED STATE_TEST_ARCH
+PASS neg_wsr02_composed_incomplete: WSR-02 COMPOSED_INCOMPLETE STATE_TEST_ARCH
+PASS neg_wsr03_visual_state_without_entry: WSR-03 NO_CATALOGUE_ENTRY STATE_TEST_BOULDER
+PASS neg_wsr03_entry_without_slot: WSR-03 NO_SLOT STATE_TEST_SPRING
+PASS neg_wsr03_slot_not_in_template: WSR-03 SLOT_NOT_IN_TEMPLATE STATE_TEST_SPRING
+PASS neg_wsr03_slot_rect_differs_in_template: WSR-03 SLOT_NOT_IN_TEMPLATE STATE_TEST_SPRING
+PASS neg_wsr03_template_unavailable: WSR-03 TEMPLATE_UNAVAILABLE STATE_TEST_FLAME
+PASS neg_wsr03_not_in_world_catalog: WSR-03 NOT_IN_WORLD_CATALOG STATE_TEST_SPRING
+PASS neg_wsr03_family_not_in_catalogue: WSR-03 FAMILY_NOT_IN_CATALOGUE FAM_TEST_WATER
+PASS neg_wsr03_proposed_mapping_not_used: WSR-03 NO_CATALOGUE_ENTRY STATE_TEST_FLAME
+PASS neg_wsr03_map_target_unknown: WSR-03 MAP_TARGET_UNKNOWN test_flame
+PASS neg_wsr03_map_unused: WSR-03 MAP_UNUSED test_unused
+PASS neg_wsr03_optional_state_without_entry: WSR-03 NO_CATALOGUE_ENTRY STATE_TEST_TRAIL
+PASS neg_wsr03_optional_state_unknown_family: WSR-03 FAMILY_NOT_IN_CATALOGUE FAM_TEST_UNKNOWN
+PASS neg_wsr03_item_icon_does_not_display_a_state: WSR-03 NO_CATALOGUE_ENTRY STATE_TEST_BOULDER (item match rejected)
+PASS neg_wsr04_natural_slot_without_state: WSR-04 SLOT_NO_STATE ATLAS_ALL_TEST_PROP_01:0003
+PASS neg_wsr04_class_undeclared: WSR-04 SLOT_CLASS_UNDECLARED ATLAS_ALL_TEST_PROP_01:0002
+PASS neg_wsr04_empty_source_id: WSR-04 SLOT_SOURCE_UNDECLARED ATLAS_ALL_TEST_CHARACTER_01:0001
+PASS neg_wsr04_unknown_catalog_source: WSR-04 SLOT_SOURCE_UNDECLARED ATLAS_ALL_TEST_PROP_01:0002
+PASS neg_wsr04_non_world_slot_without_source: WSR-04 SLOT_SOURCE_UNDECLARED ATLAS_ALL_TEST_CHARACTER_01:0001
+PASS neg_wsr05_missing_performance_class: WSR-05 PERFORMANCE_CLASS_MISSING STATE_TEST_SPRING
+PASS neg_wsr05_invalid_performance_class: WSR-05 PERFORMANCE_CLASS_INVALID STATE_TEST_SPRING
+PASS neg_wsr05_no_column: WSR-05 PERFORMANCE_CLASS_MISSING x8
+PASS neg_schema_column_missing: WSR-SCHEMA COLUMN_MISSING description
+PASS neg_schema_visual_class_not_in_enum: WSR-SCHEMA ENUM_INVALID STATE_TEST_TRAIL
+PASS neg_schema_state_id_format: WSR-SCHEMA STATE_ID_FORMAT State_Test_Aquifer
+PASS neg_schema_transition_unknown: WSR-SCHEMA TRANSITION_UNKNOWN STATE_TEST_SPRING
+PASS neg_schema_required_string_empty: WSR-SCHEMA VALUE_MISSING STATE_TEST_SPRING
+PASS neg_schema_boolean_invalid: WSR-SCHEMA TYPE_INVALID STATE_TEST_SPRING
+PASS neg_mt_slot_rect_differs: MANIFEST-TEMPLATE SLOT_RECT_DIFFERS ATLAS_ALL_TEST_PROP_01:0002
+PASS neg_mt_template_slot_missing_from_catalogue: MANIFEST-TEMPLATE SLOT_NOT_IN_CATALOGUE ATLAS_ALL_TEST_PROP_01:0009
+PASS neg_mt_catalogue_slot_missing_from_template: MANIFEST-TEMPLATE SLOT_NOT_IN_TEMPLATE ATLAS_ALL_TEST_PROP_01:0002
+PASS neg_mt_sheet_missing_from_template: MANIFEST-TEMPLATE SHEET_NOT_IN_TEMPLATE RMMZ_TEST_A2
+PASS neg_mt_sheet_missing_from_catalogue: MANIFEST-TEMPLATE SHEET_NOT_IN_CATALOGUE RMMZ_TEST_B
+PASS neg_mt_sheet_geometry_differs: MANIFEST-TEMPLATE SHEET_GEOMETRY_DIFFERS RMMZ_TEST_A2
+PASS neg_mt_slot_entry_differs: MANIFEST-TEMPLATE SLOT_ENTRY_DIFFERS ATLAS_ALL_TEST_PROP_01:0002
+PASS neg_mt_slot_on_other_sheet: MANIFEST-TEMPLATE SLOT_SHEET_DIFFERS ATLAS_ALL_TEST_PROP_01:0002
+PASS neg_mt_slot_id_not_of_its_sheet: MANIFEST-TEMPLATE SLOT_ID_SHEET_MISMATCH ATLAS_ALL_TEST_OTHER_01:0002
+PASS neg_mt_slot_on_unknown_sheet: MANIFEST-TEMPLATE SLOT_SHEET_UNKNOWN ATLAS_ALL_TEST_GONE_01:0001
+PASS neg_mt_duplicate_template_slot: MANIFEST-TEMPLATE DUPLICATE_TEMPLATE_SLOT ATLAS_ALL_TEST_PROP_01:0002
+PASS neg_mt_duplicate_entry_id: MANIFEST-TEMPLATE DUPLICATE_ENTRY_ID ALL_SHARED_ITEM_TEST-LOG_V1_DEFAULT
+PASS neg_mt_slot_outside_its_sheet: MANIFEST-TEMPLATE SLOT_OUTSIDE_SHEET ATLAS_ALL_TEST_PROP_01:0002
+PASS neg_mt_sheet_grid_not_tile: MANIFEST-TEMPLATE SHEET_GRID_MISMATCH ATLAS_ALL_TEST_PROP_01
+PASS neg_mt_sheet_too_large: MANIFEST-TEMPLATE SHEET_TOO_LARGE ATLAS_ALL_TEST_PROP_01
+PASS neg_mt_sidecar_not_json: MANIFEST-TEMPLATE TEMPLATE_SIDECAR_INVALID BROKEN.json
+PASS neg_mt_duplicate_catalogue_slot: MANIFEST-TEMPLATE DUPLICATE_SLOT_ID ATLAS_ALL_TEST_PROP_01:0002
+PASS neg_placed_region_outside_slot: PLACED-IN-SLOT PLACED_OUTSIDE_SLOT ATLAS_ALL_TEST_PROP_01:0002
+PASS neg_placed_region_larger_than_slot: PLACED-IN-SLOT PLACED_OUTSIDE_SLOT ATLAS_SURFACE_TEST_TILE_01:0006
+PASS neg_placed_unknown_slot_outside: PLACED-IN-SLOT PLACED_OUTSIDE_SLOT ATLAS_ALL_TEST_PROP_01@144,0,48x48
+PASS neg_placed_unknown_slot_id_no_fallback: PLACED-IN-SLOT PLACED_SLOT_UNKNOWN ATLAS_ALL_TEST_PROP_01:0009
+PASS neg_placed_entry_not_slot_owner: PLACED-IN-SLOT PLACED_ENTRY_MISMATCH ATLAS_ALL_TEST_PROP_01:0002
+PASS neg_placed_ledger_unknown_id: PLACED-IN-SLOT LEDGER_ID_UNKNOWN ATLAS_ALL_TEST_PROP_01:0007
+PASS neg_placed_ledger_malformed: PLACED-IN-SLOT LEDGER_MALFORMED approvals.md
+PASS neg_placed_report_invalid: PLACED-IN-SLOT PLACEMENT_REPORT_INVALID placement_0.json
+PASS placed_region_inside_without_slot_id: exit 0
+PASS placed_none_reported: ledger ABSENT, 0 regions
+PASS baseline_new_gap_fails: exit 1, 1 new
+PASS baseline_baselined_gap_passes: exit 0
+PASS baseline_stale_entry_fails: exit 1, 1 stale
+PASS strict_fails_on_baselined_gap: exit 1
+PASS baseline_exempt_is_not_baselinable: exit 1
+PASS baseline_reason_required: exit 2
+PASS baseline_duplicate_rejected: exit 2
+PASS baseline_value_is_part_of_the_key: same value: exit 0; other value: NEW + STALE, exit 1
+PASS scope_value_not_in_schema_enum: exit 2
+PASS map_of_wrong_shape_refused: exit 2, no crash
+PASS report_deterministic: wsr_report.json 4dc7ec4e6239f087fb4759bf0555e2b675041d32533e24b200c6fb903ff479fb; WSR_REPORT.md 8c945dc5432477530a91243938442dda63d6e42071d0b794ff8dc2c29c439646
+PASS report_has_no_paths_or_times: no temp path, timestamp or Windows path
+PASS report_lists_every_finding: 4 findings in both files
+PASS check_matches_committed_report: exit 0
+PASS check_detects_changed_report: edited: exit 1; missing: exit 1
+PASS check_detects_stale_input: exit 1
+PASS check_folds_crlf: exit 0
+PASS parse_error_names_the_line: registry.md:109
+PASS parse_bad_schema_names_the_line: registry.md:7
+PASS parse_every_seed_table_read: 2 tables, 9 rows; second-table row and its missing columns reported
+PASS parse_row_without_leading_pipe_refused: exit 2 at registry.md:114
+PASS parse_row_after_blank_line_refused: exit 2 at registry.md:115
+PASS parse_row_after_comment_refused: exit 2 at registry.md:108
+PASS parse_indented_row_refused: exit 2 at registry.md:114
+PASS parse_short_separator_accepted: exit 0
+PASS parse_no_seed_table: exit 2
+PASS usage_errors: unknown 2, --check --strict 2, --help 0
+PASS gen_lane_t_fixture_agrees: 5 sheets, 28/28 slots agree
+PASS gen_refusals_recorded_and_rest_compared: 2 refusals, 3 sheets / 4 slots still compared
+PASS gen_split_run_keeps_slots: 3 sheets identical (slots and template sha256)
+PASS gen_catalogue_refusal_blocks_all: 1 run, 5 sheets unavailable
+PASS gen_temp_folder_removed: no wsr-templates-* folder left in the work folder
+PASS gen_work_dir_missing: exit 2
+PASS cli_exit_codes: clean 0, strict 0, negative 1, bad argument 2
+PASS placements_discovered_when_not_given: DISCOVERED, 0 tracked report(s) under art/
+PASS real_baseline_valid: 1248 entries, every one with a reason
+PASS mutation_control: the unmutated source compiled in memory passes all 102 checks
+PASS mutant_wsr01_off_killed: by neg_wsr01_duplicate_state (want exit 1 and WSR-01/DUPLICATE_STATE/STATE_TEST_BOULDER; got exit 0; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH)
+PASS mutant_wsr02_off_killed: by clean_fixture_passes (want one COMPOSED_EXEMPT for STATE_TEST_ARCH; got exit 0; findings: none)
+PASS mutant_wsr03_off_killed: by neg_wsr03_visual_state_without_entry (want exit 1 and WSR-03/NO_CATALOGUE_ENTRY/STATE_TEST_BOULDER; got exit 1; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH, WSR-04/SLOT_NO_STATE/ATLAS_SURFACE_T)
+PASS mutant_wsr04_off_killed: by neg_wsr04_natural_slot_without_state (want exit 1 and WSR-04/SLOT_NO_STATE/ATLAS_ALL_TEST_PROP_01:0003; got exit 0; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH)
+PASS mutant_wsr05_off_killed: by neg_wsr05_missing_performance_class (want exit 1 and WSR-05/PERFORMANCE_CLASS_MISSING/STATE_TEST_SPRING; got exit 0; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH)
+PASS mutant_schema_off_killed: by neg_schema_column_missing (want exit 1 and WSR-SCHEMA/COLUMN_MISSING/description; got exit 0; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH)
+PASS mutant_manifest_template_off_killed: by neg_mt_slot_rect_differs (want exit 1 and MANIFEST-TEMPLATE/SLOT_RECT_DIFFERS/ATLAS_ALL_TEST_PROP_01:0002; got exit 0; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH)
+PASS mutant_placed_off_killed: by neg_placed_region_outside_slot (want exit 1 and PLACED-IN-SLOT/PLACED_OUTSIDE_SLOT/ATLAS_ALL_TEST_PROP_01:0002; got exit 0; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH)
+PASS mutant_baseline_staleness_ignored_killed: by baseline_stale_entry_fails (want exit 1 with one STALE line; got RULE PLACED-IN-SLOT: 0 violation(s), 0 gap(s), 0 exempt / BASELINE known_gaps.json: 1 entry, 0 matched, 0 new, 0 stale / GA)
+PASS mutant_baseline_new_gaps_ignored_killed: by neg_wsr01_duplicate_state (want exit 1 and WSR-01/DUPLICATE_STATE/STATE_TEST_BOULDER; got exit 0; findings: WSR-01/DUPLICATE_STATE/STATE_TEST_BOULDER, WSR-02/COMPOSED_EXEMPT/STATE_TEST_AR)
+PASS mutant_strict_uses_baseline_killed: by strict_fails_on_baselined_gap (want exit 1 from --strict; got BASELINE known_gaps.json: 1 entry, 1 matched, 0 new, 0 stale / GATE: OK (every violation and gap is baselined; no stale entry))
+PASS mutant_slot_ids_only_no_rects_killed: by neg_wsr03_slot_rect_differs_in_template (want exit 1 and WSR-03/SLOT_NOT_IN_TEMPLATE/STATE_TEST_SPRING; got exit 0; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH)
+PASS mutant_sheet_geometry_ignored_killed: by neg_mt_sheet_geometry_differs (want exit 1 and MANIFEST-TEMPLATE/SHEET_GEOMETRY_DIFFERS/RMMZ_TEST_A2; got exit 0; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH)
+PASS mutant_template_to_catalogue_direction_off_killed: by neg_mt_template_slot_missing_from_catalogue (want exit 1 and MANIFEST-TEMPLATE/SLOT_NOT_IN_CATALOGUE/ATLAS_ALL_TEST_PROP_01:0009; got exit 0; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH)
+PASS mutant_refusals_dropped_killed: by gen_refusals_recorded_and_rest_compared (MANIFEST-TEMPLATE findings ["SHEET_NOT_IN_TEMPLATE $TEST_Horse","SHEET_NOT_IN_TEMPLATE TEST_ATLAS_SURFACE"])
+PASS mutant_work_dir_ignored_killed: by gen_work_dir_missing (want exit 2; got WSR: registry.md: 8 rows, 8 states; tools/art/fixtures/templates/catalogue.fixture.json: 5 sheets, 28 slots / TEMPLATES: GENERATED (tools/art/m)
+PASS mutant_temp_folder_kept_killed: by gen_temp_folder_removed (temp folders left behind: wsr-templates-IpVxN0)
+PASS mutant_composed_exempt_any_system_killed: by neg_wsr02_composed_other_system (want exit 1 and WSR-02/COMPOSED_NOT_ALLOWED/STATE_TEST_ARCH; got exit 0; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH)
+PASS mutant_proposed_mapping_resolves_killed: by neg_wsr03_proposed_mapping_not_used (want exit 1 and WSR-03/NO_CATALOGUE_ENTRY/STATE_TEST_FLAME; got exit 0; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH)
+PASS mutant_derived_variant_base_ignored_killed: by clean_fixture_passes (want exit 0; got exit 1; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH, WSR-03/NO_SLOT/STATE_TEST_MOSS_DEEP, WSR-04/SLOT_NO_STATE/ATLAS_SURFACE_TEST_TILE_01:)
+PASS mutant_world_catalog_leg_off_killed: by neg_wsr03_not_in_world_catalog (want exit 1 and WSR-03/NOT_IN_WORLD_CATALOG/STATE_TEST_SPRING; got exit 0; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH)
+PASS mutant_family_leg_off_killed: by neg_wsr03_family_not_in_catalogue (want exit 1 and WSR-03/FAMILY_NOT_IN_CATALOGUE/FAM_TEST_WATER; got exit 0; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH)
+PASS mutant_undeclared_class_allowed_killed: by neg_wsr04_class_undeclared (want exit 1 and WSR-04/SLOT_CLASS_UNDECLARED/ATLAS_ALL_TEST_PROP_01:0002; got exit 0; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH)
+PASS mutant_baseline_reason_not_required_killed: by baseline_reason_required (want exit 2 naming the reason; got WSR: registry.md: 8 rows, 8 states; catalogue.json: 4 sheets, 9 slots / TEMPLATES: DIR (templates); sidecars read; 4 template)
+PASS mutant_check_always_matches_killed: by check_detects_changed_report (want exit 1 and a DIFF line; got DIFF rep3108/WSR_REPORT.md / CHECK: FAILED (1 report file(s) differ from a fresh run; rerun with --report rep3108))
+PASS mutant_report_timestamped_killed: by report_deterministic (wsr_report.json differs between two runs: 8582597ddb157a20d01abe3acf1ece88ddcc2e08efbff7342b454c6457c0010b vs 7c85d341143b36920bb977c961ff303eb3a0ef2a1ba3fe60f4)
+PASS mutant_later_seed_tables_ignored_killed: by parse_every_seed_table_read (want a report (the second table must parse); got exit 2: ERROR: registry.md:123: line looks like a seed-table row (a state id followed by "|") but is not inside)
+PASS mutant_row_outside_table_accepted_killed: by parse_row_without_leading_pipe_refused (want exit 2 naming registry.md:114; got WSR: registry.md: 8 rows, 8 states; catalogue.json: 4 sheets, 9 slots / TEMPLATES: DIR (templates); sidecars read; 4 tem)
+PASS mutant_wsr03_art_required_rows_only_killed: by neg_wsr03_optional_state_without_entry (want exit 1 and WSR-03/NO_CATALOGUE_ENTRY/STATE_TEST_TRAIL; got exit 0; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH)
+PASS mutant_any_class_displays_a_state_killed: by neg_wsr03_item_icon_does_not_display_a_state (want NO_CATALOGUE_ENTRY naming the rejected item match; got exit 1; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH, WSR-04/SLOT_NO_STATE/ATLAS_SURFACE_TEST_TI)
+PASS mutant_source_ids_not_checked_real_killed: by neg_wsr04_empty_source_id (want exit 1 and WSR-04/SLOT_SOURCE_UNDECLARED/ATLAS_ALL_TEST_CHARACTER_01:0001; got exit 0; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH)
+PASS mutant_value_not_in_gate_key_killed: by baseline_value_is_part_of_the_key (a different value must be NEW + STALE; got RULE PLACED-IN-SLOT: 0 violation(s), 0 gap(s), 0 exempt / BASELINE known_gaps.json: 1 entry, 1 matched, 0 new, 0 stal)
+PASS mutant_placed_unknown_slot_falls_back_killed: by neg_placed_unknown_slot_id_no_fallback (want exit 1 and PLACED-IN-SLOT/PLACED_SLOT_UNKNOWN/ATLAS_ALL_TEST_PROP_01:0009; got exit 0; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH)
+PASS mutant_scope_enums_not_checked_killed: by scope_value_not_in_schema_enum (want exit 2 naming the typo; got WSR: registry.md: 8 rows, 8 states; catalogue.json: 4 sheets, 9 slots / TEMPLATES: DIR (templates); sidecars read; 4 template s)
+PASS mutant_required_strings_not_checked_killed: by neg_schema_required_string_empty (want exit 1 and WSR-SCHEMA/VALUE_MISSING/STATE_TEST_SPRING; got exit 0; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH)
+PASS mutant_geometry_dimensions_off_killed: by neg_mt_sheet_grid_not_tile (want exit 1 and MANIFEST-TEMPLATE/SHEET_GRID_MISMATCH/ATLAS_ALL_TEST_PROP_01; got exit 0; findings: WSR-02/COMPOSED_EXEMPT/STATE_TEST_ARCH)
+PASS mutant_parse_line_dropped_killed: by parse_error_names_the_line (want exit 2 naming registry.md:109; got ERROR: registry.md: seed table row has 10 cells; the header has 11)
+PASS mutants_left_tool_untouched: the tool file on disk is unchanged
+PASS repo_untouched: git status is the same before and after the run
+RESULT: 145 passed, 0 failed
+EXIT=0

@@ -1,0 +1,29 @@
+Source: docs/worldgen/DEUS_NATURAL_WORLD_SYSTEMS.md section 7 table (header at line 262) vs docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md section 3 (base 425b594c).
+families in section 7: 13 FAM_WATER_GROUND, FAM_DRAINAGE_EDGE, FAM_SOIL_MOISTURE, FAM_SOIL_HORIZON, FAM_SUCCESSION_STAGE, FAM_FIRE_TERRAIN, FAM_FIRE_VFX, FAM_SNOW_ACCUMULATION, FAM_GEOMORPHIC_DEPOSIT, FAM_GEOLOGICAL_EXPOSURE, FAM_GEOTHERMAL_SURFACE, FAM_GEOTHERMAL_VFX, FAM_HISTORICAL_RUIN
+reserved members: 58 ; members without a registry row: 21
+  NO ROW FAM_WATER_GROUND.underground_stream (NAT-SYS:264)
+  NO ROW FAM_DRAINAGE_EDGE.stream_bank (NAT-SYS:265)
+  NO ROW FAM_DRAINAGE_EDGE.delta_sandbar (NAT-SYS:266)
+  NO ROW FAM_DRAINAGE_EDGE.low_water_gravel (NAT-SYS:266)
+  NO ROW FAM_DRAINAGE_EDGE.flood_overflow (NAT-SYS:266)
+  NO ROW FAM_SOIL_HORIZON.soil_rocky_thin (NAT-SYS:268)
+  NO ROW FAM_SOIL_HORIZON.soil_pale_subsoil (NAT-SYS:268)
+  NO ROW FAM_FIRE_TERRAIN.log_burnt_hollow (NAT-SYS:272)
+  NO ROW FAM_FIRE_VFX.vfx_embers_ambient (NAT-SYS:273)
+  NO ROW FAM_GEOMORPHIC_DEPOSIT.rubble_loose (NAT-SYS:276)
+  NO ROW FAM_GEOMORPHIC_DEPOSIT.mud_deposit (NAT-SYS:276)
+  NO ROW FAM_GEOMORPHIC_DEPOSIT.quarry_scar_weathered (NAT-SYS:277)
+  NO ROW FAM_GEOMORPHIC_DEPOSIT.tailings_overgrown (NAT-SYS:277)
+  NO ROW FAM_GEOLOGICAL_EXPOSURE.rock_fracture_fissure (NAT-SYS:279)
+  NO ROW FAM_GEOTHERMAL_SURFACE.basalt_porous (NAT-SYS:280)
+  NO ROW FAM_GEOTHERMAL_SURFACE.lava_shore_crusted (NAT-SYS:281)
+  NO ROW FAM_GEOTHERMAL_SURFACE.ash_volcanic_bed (NAT-SYS:281)
+  NO ROW FAM_GEOTHERMAL_VFX.vfx_lava_bubble (NAT-SYS:282)
+  NO ROW FAM_HISTORICAL_RUIN.road_abandoned_cracked (NAT-SYS:283)
+  NO ROW FAM_HISTORICAL_RUIN.road_overgrown (NAT-SYS:283)
+  NO ROW FAM_HISTORICAL_RUIN.foundation_buried (NAT-SYS:284)
+family differs: 0
+registry visual states not reserved in section 7: 2
+  game_trail_trampled <- STATE_WILDLIFE_GAME_TRAIL FAM_SUCCESSION_STAGE (registry:155)
+  lair_beast_entrance <- STATE_LAIR_ACTIVE FAM_HISTORICAL_RUIN (registry:160)
+unique registry visualStateIds: 39 ; shared: scrub_dense <- STATE_SUCC_SCRUB_DENSE,STATE_REGION_OVERGRAZED

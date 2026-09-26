@@ -1,0 +1,34 @@
+{
+  "schema": "deus-wsr-map/1",
+  "about": "TEST_ fixture map.",
+  "visualStates": [
+    {
+      "visualStateId": "test_flame",
+      "target": {
+        "entryId": "ALL_SHARED_EFFECT_FX-FLAME_V1_DEFAULT"
+      },
+      "status": "ACCEPTED",
+      "reason": "TEST: the flame VFX resolves only through this accepted row."
+    }
+  ],
+  "assetFamilies": [
+    {
+      "assetFamily": "FAM_TEST_SOIL",
+      "catalogueFamily": "SOURCE",
+      "status": "ACCEPTED",
+      "reason": "TEST family mapping."
+    },
+    {
+      "assetFamily": "FAM_TEST_WATER",
+      "catalogueFamily": "SOURCE",
+      "status": "ACCEPTED",
+      "reason": "TEST family mapping."
+    },
+    {
+      "assetFamily": "FAM_TEST_ROCK",
+      "catalogueFamily": "SOURCE",
+      "status": "ACCEPTED",
+      "reason": "TEST family mapping."
+    }
+  ]
+}

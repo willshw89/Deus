@@ -1,0 +1,12 @@
+WSR: docs/worldgen/DEUS_WORLD_STATE_REGISTRY.md: 49 rows, 49 states; art/catalogue/catalogue.json: 207 sheets, 2494 slots
+TEMPLATES: GENERATED (tools/art/make_blank_templates.js); run 1: 207 sheet(s) exit 2, 963 refusal(s); run 2: 187 sheet(s) exit 0; 187 template sheet(s), 542 slot(s) compared, 542 agree
+RULE WSR-01: 9 violation(s), 0 gap(s), 0 exempt
+RULE WSR-02: 0 violation(s), 0 gap(s), 2 exempt
+RULE WSR-03: 0 violation(s), 93 gap(s), 0 exempt
+RULE WSR-04: 0 violation(s), 110 gap(s), 0 exempt
+RULE WSR-05: 49 violation(s), 0 gap(s), 0 exempt
+RULE WSR-SCHEMA: 4 violation(s), 0 gap(s), 0 exempt
+RULE MANIFEST-TEMPLATE: 0 violation(s), 983 gap(s), 0 exempt
+RULE PLACED-IN-SLOT: 0 violation(s), 0 gap(s), 0 exempt
+CHECK: OK (tools/wsr/report matches a fresh run)
+EXIT=0

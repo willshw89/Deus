@@ -1,0 +1,26 @@
+{
+  "format": "deus-blank-template/1",
+  "generator": "tools/art/make_blank_templates.js",
+  "about": "TEST_ fixture sidecar (mini template slot map); the real sidecars also carry colours, ticks and labels, which the checker does not read. No image data.",
+  "sheetId": "ATLAS_ALL_TEST_CHARACTER_01",
+  "kind": "ATLAS",
+  "group": {
+    "band": "ALL",
+    "biome": "SHARED",
+    "type": "CHARACTER"
+  },
+  "runtimeFile": null,
+  "w": 144,
+  "h": 192,
+  "gridPx": 48,
+  "slots": [
+    {
+      "slotId": "ATLAS_ALL_TEST_CHARACTER_01:0001",
+      "entryId": "ALL_SHARED_CHARACTER_TEST-HUMAN_MALE_DEFAULT",
+      "x": 0,
+      "y": 0,
+      "w": 144,
+      "h": 192
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "about": "TEST_ fixture: the WorldCatalog lists the checker reads (the same lists the art catalogue ingests).",
+  "objects": [
+    {
+      "id": "test_boulder"
+    },
+    {
+      "id": "test_campfire"
+    }
+  ],
+  "items": {
+    "about": "x",
+    "types": [
+      {
+        "id": "test_log"
+      }
+    ]
+  },
+  "wildlife": {
+    "about": "x",
+    "species": []
+  },
+  "people": {
+    "about": "x",
+    "test_human": {}
+  },
+  "groundKinds": [
+    {
+      "id": "test_soil_dry"
+    },
+    {
+      "id": "test_trail"
+    }
+  ],
+  "water": {
+    "about": "x",
+    "surface": {
+      "about": "x",
+      "test_spring": {}
+    }
+  },
+  "faces": {
+    "about": "x",
+    "cultures": {},
+    "species": {}
+  },
+  "skins": {
+    "about": "x",
+    "cultures": {}
+  },
+  "undergroundBiomes": {
+    "test_cave": {
+      "ground": "test_moss"
+    }
+  }
+}

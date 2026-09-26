@@ -1,0 +1,5 @@
+lines committed 11865 rebuilt 11865 differing lines 65
+TEMPLATES: GENERATED (tools/art/make_blank_templates.js); run 1: 207 sheet(s) exit 2, 963 refusal(s); run 2: 187 sheet(s) exit 0; 187 template sheet(s), 542 slot(s) compared, 542 agree
+BASELINE tools/wsr/known_gaps.json: 1248 entries, 1248 matched, 0 new, 0 stale
+GATE: OK (every violation and gap is baselined; no stale entry)
+exit 0

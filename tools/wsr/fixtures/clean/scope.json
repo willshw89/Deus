@@ -1,0 +1,86 @@
+{
+  "schema": "deus-wsr-scope/1",
+  "about": "TEST_ fixture scope.",
+  "artRequiredClasses": [
+    "VISUAL_REQUIRED",
+    "VFX_REQUIRED"
+  ],
+  "composedExemptSystems": [
+    "LANDMARKS_HISTORY"
+  ],
+  "sourceClasses": {
+    "ADDENDUM_FAMILIES": {
+      "kinds": [
+        "addendum"
+      ],
+      "mayDisplayWorldState": true,
+      "why": "TEST addendum families."
+    },
+    "CHARACTERS": {
+      "kinds": [
+        "catalog",
+        "brief",
+        "ar"
+      ],
+      "mayDisplayWorldState": false,
+      "why": "TEST characters."
+    },
+    "EFFECTS": {
+      "kinds": [
+        "catalog",
+        "brief",
+        "ar"
+      ],
+      "mayDisplayWorldState": true,
+      "why": "TEST effects."
+    },
+    "ITEMS": {
+      "kinds": [
+        "catalog",
+        "brief",
+        "ar"
+      ],
+      "mayDisplayWorldState": false,
+      "why": "TEST items."
+    }
+  },
+  "classes": {
+    "SOURCE:TERRAIN": {
+      "scope": "NATURAL_WORLD",
+      "why": "TEST ground."
+    },
+    "SOURCE:WATER": {
+      "scope": "NATURAL_WORLD",
+      "why": "TEST water."
+    },
+    "SOURCE:STONE": {
+      "scope": "NATURAL_WORLD",
+      "why": "TEST stone."
+    },
+    "TOP:TOP": {
+      "scope": "NON_WORLD_STATE",
+      "sourceClass": "ADDENDUM_FAMILIES",
+      "why": "TEST top."
+    },
+    "EDGE:EDGE": {
+      "scope": "NON_WORLD_STATE",
+      "sourceClass": "ADDENDUM_FAMILIES",
+      "why": "TEST edge."
+    },
+    "FAM_TEST_FIRE_VFX:EFFECT": {
+      "scope": "NON_WORLD_STATE",
+      "sourceClass": "EFFECTS",
+      "why": "TEST flame effect."
+    },
+    "SOURCE:ITEM": {
+      "scope": "NON_WORLD_STATE",
+      "sourceClass": "ITEMS",
+      "why": "TEST item."
+    },
+    "SOURCE:CHARACTER": {
+      "scope": "NON_WORLD_STATE",
+      "sourceClass": "CHARACTERS",
+      "why": "TEST person."
+    }
+  }
+}
