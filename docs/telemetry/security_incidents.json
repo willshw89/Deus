@@ -27,7 +27,7 @@
                                                },
                           "exposure":  "Private GitHub repository willshw89/Deus. The token remains in git history of main and in the trees of the task/salvage branches cut before the fix (80 of 81 local/origin refs at time of finding).",
                           "actions_taken":  [
-                                                "Removed from the working tree on main in the commit that adds this record on task/lane-z (sha filled in by the follow-up commit): tools/generate_nano_banana_pro.js now reads process.env.GEMINI_API_KEY only and exits with a clear error when it is unset; the docs occurrence is replaced by a redaction marker.",
+                                                "Removed from the working tree on main in commit e8375c904a8287fd7afd1c76bc63ab94d9dd6a62 on task/lane-z (merged to main with Lane Z): tools/generate_nano_banana_pro.js now reads process.env.GEMINI_API_KEY only and exits with a clear error when it is unset; the docs occurrence is replaced by a redaction marker.",
                                                 "Full tracked-tree search after the fix: 0 occurrences."
                                             ],
                           "runbook":  {
