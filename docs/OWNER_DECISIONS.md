@@ -399,3 +399,11 @@ Every decision item recorded in this log must provide:
   3. **Revocation Authority:** Credential revocation is handled directly by the Owner externally.
 
 
+
+### Decision DEC-030: World Grid and Vertical Biomes (Owner & PM delegated, 2026-09-26)
+- **Vertical extent:** 32 layers (-16..+15). Top 4 layers (+12..+15) are reserved open air (no natural terrain). Natural terrain tops out at +11.
+- **Biomes (6):** VOLCANIC, WET, ARID, TEMPERATE, COLD, WILD.
+- **Depth bands (5):** Deep Earth (-16..-11), Caverns (-10..-5), Lowlands (-4..+1), Uplands (+2..+6), Highlands (+7..+11).
+- **Geology-first method:** Rock bodies span layers. Per-biome placement rules on top of geology. Vertical links: physical cause, surface tells, passages, shared resources.
+- **Supersedes:** WG.00.04 (old 5 biomes) and DEC-013 band ranges. Replaces 25-biome drafting (Directive 0069-BR). Each of the 6 biomes is expressed across all 5 depths (30 biome-depth combinations).
+- **World Map:** 3x3 grid of 256x256 maps (approx 768x768 tiles). Wraps on all edges (round world). Coarse resolution whole-world generation first. Current map runs full detail, other 8 run at ADR-003 LOD summary level.
