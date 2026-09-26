@@ -98,3 +98,16 @@ Every decision item recorded in this log must provide:
 - **Status:** `DECIDED`
 - **Owner Ruling & Date:** 2026-09-25 (Decider: Owner): Option D. Scale-only depth separation, no colour darkening, until tile art is migrated to the master palette. Revisit shading after migration. Fold R1=D plus items R2–R11 into the depth attack plan.
 
+---
+
+### Decision `DEC-007`: No art generation without Owner involvement
+- **Date Logged:** 2026-09-25
+- **Question:** May agents generate, request from generators, or integrate newly generated art autonomously?
+- **Options:**
+  1. Autonomous generation permitted under Rules 11 and 13.
+  2. No art generated, requested, or integrated without direct Owner involvement.
+- **Recommended Default:** Option 2.
+- **Status:** `DECIDED`
+- **Owner Ruling & Date:** 2026-09-25 (Owner, relayed by PM 001-L): No art of any kind may be generated, requested from a generator, or integrated as newly generated art by anyone (the PM, Gemini or any worker) without the Owner's direct involvement. All earlier autonomous-generation mandates (AGENTS.md Rules 11/13, GEMINI.md, CLAUDE.md, art briefs, packets) are suspended until the Owner rewrites them.
+
+

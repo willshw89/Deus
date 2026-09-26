@@ -7,6 +7,22 @@
 
 ---
 
+## 0. Global Rules and Freezes
+- **DEC-007 Art Freeze (Owner, 2026-09-25):** No art of any kind may be generated, requested from any generator, or integrated as newly generated art by anyone (PM, Gemini, or any worker) without direct Owner involvement. All earlier autonomous-generation mandates are suspended. Test-harness PNG renders used as test evidence are allowed and not art.
+- **Migration Freeze:** The physical copy to `C:\Dev\DEUS` is frozen until all active writers commit and pause at a synchronized freeze point.
+- **Pre-Commit Hook Status:** Hook is **NOT installed** (waits for Grok pass on Lane C2b AND Lane E merge, per Directive 001-I §C).
+- **WG.00.08 Gate:** WG.00.08 cannot close until a passing Lane H proof, independent Grok verification, and PM sign-off.
+- **Core Process Rules:**
+  - One primary writer per file set (strict non-overlapping ownership).
+  - Reviewers form their first verdict independently.
+  - Gemini alone controls WBS transitions; zero self-certification.
+  - Independent closure review required before marking any WBS item `DONE`.
+  - Only the integrator pushes to `origin`, after each merge; workers never push.
+  - A running CLI `-p` session reads its prompt only at launch.
+  - Command captures must record `EXIT=$LASTEXITCODE` per command directly in shell (never inside `powershell -Command "..."`).
+
+---
+
 ## 1. Hardware, Remote & Execution State
 - **Hardware Status:** `GREEN` (Clean restarts 17:16/17:18; no Kernel-Power 41).
 - **Heavy Job Cap:** Formally **LIFTED** as of 2026-09-25 per Owner decision.
