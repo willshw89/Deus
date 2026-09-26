@@ -1,0 +1,48 @@
+{
+  "lane": "lane-z",
+  "taskId": "OPS.70.02",
+  "branch": "task/lane-z",
+  "writer": "claude",
+  "reviewer": "grok",
+  "allowedPaths": [
+    "tools/security/**",
+    "tasks/OPS.70.02/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "node",
+      "args": [
+        "tools/security/test_scan_secrets.js"
+      ],
+      "timeoutSec": 600
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/security/test_check_dependencies.js"
+      ],
+      "timeoutSec": 600
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/security/scan_secrets.js"
+      ],
+      "timeoutSec": 600
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/security/check_dependencies.js"
+      ],
+      "timeoutSec": 600
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/check_deus_syntax.js"
+      ],
+      "timeoutSec": 600
+    }
+  ]
+}
