@@ -1,0 +1,121 @@
+# fresh clone C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gatetests (git clone --shared --no-checkout C:/Users/snewt/OneDrive/Desktop/UF/.git; checkout --detach e5f1dafc42defd88590a703f45393607b4a868c5; system core.autocrlf, CRLF files), cwd = clone
+$ node tools/ops/test_run_gate.js
+test_run_gate: fixtures in C:\Users\snewt\AppData\Local\Temp\deus-test-run-gate-MSZ25O
+PASS gate_all_pass_exit_0
+PASS gate_default_timeout_600
+PASS gate_line_format
+PASS gate_one_suite_broken_exit_1
+PASS gate_failure_shows_deciding_line
+PASS gate_refuses_nwjs_in_list_exit_2_runs_nothing
+PASS gate_refuses_nwjs_suite_named_exit_2
+PASS gate_refuses_transitive_nwjs_exit_2
+PASS gate_timeout_exit_1
+PASS gate_timeout_killed_suite_and_child
+PASS gate_empty_list_exit_2
+PASS gate_invalid_list_exit_2
+PASS gate_missing_suite_exit_2
+PASS screen_mode_runs_nothing
+PASS usage_unknown_flag_exit_2
+PASS usage_concurrency_above_3_exit_2
+PASS usage_census_without_out_exit_2
+PASS census_complete_exit_0
+PASS census_rows_are_the_tracked_suites
+PASS category_test_pass_PASS
+PASS category_test_pass_nested_PASS
+PASS category_test_fail_FAIL_OTHER
+PASS category_test_hang_KILLED_TIMEOUT
+PASS category_test_leak_PASS
+PASS category_test_missing_module_FAIL_MISSING_DEPENDENCY
+PASS category_test_missing_plugin_FAIL_MISSING_REFERENCE
+PASS category_test_enoent_FAIL_MISSING_REFERENCE
+PASS category_test_type_error_FAIL_API_DRIFT
+PASS category_test_stdout_only_FAIL_MISSING_REFERENCE
+PASS category_test_stderr_decides_FAIL_OTHER
+PASS category_test_nw_binary_ref_NEEDS_NWJS
+PASS category_test_harness_runner_ref_NEEDS_NWJS
+PASS category_test_via_helper_NEEDS_NWJS
+PASS category_test_via_spawned_script_NEEDS_NWJS
+PASS category_test_plugin_comment_PASS
+PASS category_test_guard_evasion_NEEDS_NWJS
+PASS category_test_dotnet_missing_file_FAIL_MISSING_REFERENCE
+PASS category_test_plugin_not_loaded_FAIL_MISSING_REFERENCE
+PASS census_needs_nwjs_never_spawned
+PASS census_every_other_suite_ran
+PASS census_nwjs_rows_carry_screen_evidence
+PASS census_hang_killed_with_its_child
+PASS census_leak_child_swept
+PASS census_guard_evasion_blocked
+PASS census_deciding_lines
+PASS census_row_fields
+PASS census_gate_flag
+PASS census_lines_hide_root_path
+PASS census_log_dir_one_log_per_run_suite
+PASS census_defaults_180s_3_at_once
+PASS census_budget_partial_exit_3
+PASS census_resume_completes_exit_0
+PASS census_refuses_to_overwrite_complete_exit_2
+PASS census_refuses_nwjs_suite_named_exit_2
+PASS check_lists_ok_exit_0
+PASS check_lists_default_gate_list_exit_0
+PASS check_lists_duplicate_in_gate
+PASS check_lists_unlisted_suite
+PASS check_lists_duplicate_in_quarantine
+PASS check_lists_missing_path
+PASS check_lists_suite_in_gate_and_quarantine
+PASS check_lists_suite_in_gate_and_gate_tests_quarantine
+PASS check_lists_bad_schema
+PASS check_lists_needs_nwjs_in_gate
+PASS check_lists_needs_nwjs_recorded_passing
+PASS check_lists_stale_needs_nwjs
+PASS check_lists_invalid_gate_list
+PASS check_lists_missing_quarantine_file
+PASS check_lists_runs_no_suite
+PASS merge_three_agreeing_runs
+PASS merge_output_passes_check_lists
+PASS merge_flaky_suite_is_fail_other
+PASS merge_refuses_partial_census_exit_2
+PASS merge_refuses_missing_run_exit_2
+PASS stdin_baseline_setGateFail
+PASS mutant_gate_ignores_failing_exit_killed
+    mutant gate_ignores_failing_exit caught by: gate_one_suite_broken_exit_1
+PASS stdin_baseline_setTimeoutKill
+PASS mutant_timeout_removed_killed
+    mutant timeout_removed caught by: gate_timeout_exit_1, gate_timeout_killed_suite_and_child
+PASS stdin_baseline_setScreenGate
+PASS mutant_needs_nwjs_screen_removed_killed
+    mutant needs_nwjs_screen_removed caught by: gate_refuses_nwjs_suite_named_exit_2
+PASS stdin_baseline_setMissingModule
+PASS mutant_missing_module_rule_swapped_killed
+    mutant missing_module_rule_swapped caught by: census_missing_module_category
+PASS stdin_baseline_setDuplicate
+PASS mutant_check_lists_duplicate_check_removed_killed
+    mutant check_lists_duplicate_check_removed caught by: check_lists_duplicate_in_gate
+PASS stdin_baseline_setTreeKill
+PASS mutant_tree_kill_removed_killed
+    mutant tree_kill_removed caught by: census_timeout_tree_killed_before_sweep
+PASS stdin_baseline_setTransitive
+PASS mutant_transitive_screen_removed_killed
+    mutant transitive_screen_removed caught by: gate_refuses_transitive_nwjs_exit_2
+PASS mutant_gate_nwjs_refusal_removed_killed
+    mutant gate_nwjs_refusal_removed caught by: gate_refuses_nwjs_suite_named_exit_2
+PASS stdin_baseline_setGuard
+PASS mutant_runtime_guard_removed_killed
+    mutant runtime_guard_removed caught by: census_runtime_guard_blocks_launch
+PASS stdin_baseline_setLeak
+PASS mutant_leftover_sweep_removed_killed
+    mutant leftover_sweep_removed caught by: census_leftover_child_swept
+PASS stdin_baseline_setUnlisted
+PASS mutant_check_lists_unlisted_check_removed_killed
+    mutant check_lists_unlisted_check_removed caught by: check_lists_unlisted_suite
+PASS run_gate_on_disk_unchanged
+PASS no_leftover_processes
+RESULT: 97 passed, 0 failed
+EXIT=0
+$ node tools/ops/run_gate.js --check-lists
+run_gate: check-lists, root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gatetests, gate list C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gatetests\tools\ops\gate_tests.json, quarantine C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gatetests\tools\ops\quarantine.json
+NOTE: tools/test_generated_z2_cut_proof.js is on the gate_tests.json quarantine list but quarantine.json records it passing in every run
+CHECK-LISTS: OK (9 gate, 117 quarantined, 63 passingNotGated, 188 tracked suites)
+EXIT=0
+$ node tools/check_deus_syntax.js
+Checked 52 DEUS plugin files. Errors: 0
+EXIT=0

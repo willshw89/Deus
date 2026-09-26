@@ -7,6 +7,13 @@
 No art was generated, requested or integrated (DEC-007). See "DEC-007 note" for what the census suites wrote inside
 their throwaway clones.
 
+**Escalation (standing rule 6):** `tasks/OPS.30.01/lane-y/escalation.md`. lane.json gateTest 3
+(`node tools/ops/run_gate.js`) exits 1 in a clone made the way `merge_gate.js` makes one on this machine (system
+`core.autocrlf=true`, CRLF files): three gate suites (`test_strata_cuts_and_caves.js`, `test_new_game_year0.js`,
+`test_historical_carrying_capacity.js`) fail on CRLF checkouts and pass on LF checkouts of the same commit. The
+census and the gate runs follow the brief's `core.autocrlf=false` clones, where all 9 gate suites pass. The fix lies
+in read-only files; nothing was worked around.
+
 ## What changed
 
 | Path | What |
@@ -16,6 +23,7 @@ their throwaway clones.
 | `tools/ops/fixtures/run_gate/**` | New. 18 synthetic suites, 5 helpers, 19 list files, README. |
 | `tools/ops/quarantine.json` | New. The measured census of `425b594c` (3 runs) plus `tools/ops/test_run_gate.js` (3 runs on this branch). |
 | `tasks/OPS.30.01/lane-y/REPORT.md` | This report. |
+| `tasks/OPS.30.01/lane-y/escalation.md` | The CRLF finding (standing rule 6). |
 | `tasks/OPS.30.01/lane-y/evidence/**` | Raw logs and census files of every run below; per-suite logs of census runs 1-3 (`evidence/logs/run<k>/`). |
 | `tasks/OPS.30.01/lane-y/analysis/report_tables.js` | Builds the census tables of this report from the evidence (runs nothing). |
 | `tasks/OPS.30.01/lane-y/leftover_check.js`, `wait_for_exit.js` | Evidence helpers: list processes naming a path; wait in the foreground for a job's `EXIT=` line. |
@@ -169,8 +177,9 @@ clone of this branch at `2d9f513c` (`evidence/census_tip_run<k>.log`): PASS 3/3,
 commit these results were pasted on.
 
 Leftover checks after every clone (`node tasks/OPS.30.01/lane-y/leftover_check.js <clone>`, which leaves out its
-own process chain): `LEFTOVER CHECK: 0 process(es)` for census clones 1-3, the gate clone, the three tip clones and
-the supplementary clone.
+own process chain): `LEFTOVER CHECK: 0 process(es)` for census clones 1-3, the gate clone, the three tip clones,
+the supplementary clone and the gate-test clone, and a final check for any process naming `%TEMP%\deus-lane-y-`,
+`%TEMP%\deus-run-gate-` or `%TEMP%\deus-test-run-gate-`: `LEFTOVER CHECK: 0 process(es)`.
 
 ### Merge into quarantine.json (`evidence/merge.log`)
 
@@ -697,6 +706,14 @@ writing anything: their source folders do not exist on this machine.
 
 ## Not done / known problems
 
+- **CRLF checkouts** (escalated): the census describes LF checkouts, as briefed. On a CRLF checkout three gate
+  suites fail (A/B above), so lane.json gateTest 3 fails in `merge_gate.js`'s clones on this machine. How the other
+  suites behave on CRLF checkouts was not measured.
+- `test_run_gate.js` leaves one empty-ish runner scratch folder (`%TEMP%\deus-run-gate-*`, holding the guard file
+  and one suite folder) per run: the `timeout_removed` mutant's runner is killed by the test's watchdog before it can
+  clean up. Seven such folders from this session's seven direct runs were found (times matching the runs) and
+  deleted; no process was left. Not fixed: it was found after the escalation above, and changing the test would
+  invalidate its three measured runs.
 - The screen is text-based. It follows literal requires and path tokens; a path assembled at run time is only caught
   by the runtime guard, and only while the suite keeps `NODE_OPTIONS` for its node children. A suite that merely
   names the harness in a comment is NEEDS_NWJS (deliberately conservative).
@@ -716,8 +733,433 @@ writing anything: their source folders do not exist on this machine.
 
 ## lane.json gateTests (run before the final commit)
 
-<!-- GATETESTS -->
+All four entries of `tasks/OPS.30.01/lane-y/lane.json` `gateTests`, exactly as written, on commit `e5f1dafc42defd88590a703f45393607b4a868c5` (the commits after it add only this report, `escalation.md` and evidence).
+
+**In the worktree** (entries 1, 2 and 4; the brief runs these from the worktree root), `evidence/gatetests_worktree.log`:
+
+```
+# worktree C:/Users/snewt/.deus_worktrees/lane-y at e5f1dafc42defd88590a703f45393607b4a868c5
+$ node tools/ops/test_run_gate.js
+test_run_gate: fixtures in C:\Users\snewt\AppData\Local\Temp\deus-test-run-gate-bBxUjN
+PASS gate_all_pass_exit_0
+PASS gate_default_timeout_600
+PASS gate_line_format
+PASS gate_one_suite_broken_exit_1
+PASS gate_failure_shows_deciding_line
+PASS gate_refuses_nwjs_in_list_exit_2_runs_nothing
+PASS gate_refuses_nwjs_suite_named_exit_2
+PASS gate_refuses_transitive_nwjs_exit_2
+PASS gate_timeout_exit_1
+PASS gate_timeout_killed_suite_and_child
+PASS gate_empty_list_exit_2
+PASS gate_invalid_list_exit_2
+PASS gate_missing_suite_exit_2
+PASS screen_mode_runs_nothing
+PASS usage_unknown_flag_exit_2
+PASS usage_concurrency_above_3_exit_2
+PASS usage_census_without_out_exit_2
+PASS census_complete_exit_0
+PASS census_rows_are_the_tracked_suites
+PASS category_test_pass_PASS
+PASS category_test_pass_nested_PASS
+PASS category_test_fail_FAIL_OTHER
+PASS category_test_hang_KILLED_TIMEOUT
+PASS category_test_leak_PASS
+PASS category_test_missing_module_FAIL_MISSING_DEPENDENCY
+PASS category_test_missing_plugin_FAIL_MISSING_REFERENCE
+PASS category_test_enoent_FAIL_MISSING_REFERENCE
+PASS category_test_type_error_FAIL_API_DRIFT
+PASS category_test_stdout_only_FAIL_MISSING_REFERENCE
+PASS category_test_stderr_decides_FAIL_OTHER
+PASS category_test_nw_binary_ref_NEEDS_NWJS
+PASS category_test_harness_runner_ref_NEEDS_NWJS
+PASS category_test_via_helper_NEEDS_NWJS
+PASS category_test_via_spawned_script_NEEDS_NWJS
+PASS category_test_plugin_comment_PASS
+PASS category_test_guard_evasion_NEEDS_NWJS
+PASS category_test_dotnet_missing_file_FAIL_MISSING_REFERENCE
+PASS category_test_plugin_not_loaded_FAIL_MISSING_REFERENCE
+PASS census_needs_nwjs_never_spawned
+PASS census_every_other_suite_ran
+PASS census_nwjs_rows_carry_screen_evidence
+PASS census_hang_killed_with_its_child
+PASS census_leak_child_swept
+PASS census_guard_evasion_blocked
+PASS census_deciding_lines
+PASS census_row_fields
+PASS census_gate_flag
+PASS census_lines_hide_root_path
+PASS census_log_dir_one_log_per_run_suite
+PASS census_defaults_180s_3_at_once
+PASS census_budget_partial_exit_3
+PASS census_resume_completes_exit_0
+PASS census_refuses_to_overwrite_complete_exit_2
+PASS census_refuses_nwjs_suite_named_exit_2
+PASS check_lists_ok_exit_0
+PASS check_lists_default_gate_list_exit_0
+PASS check_lists_duplicate_in_gate
+PASS check_lists_unlisted_suite
+PASS check_lists_duplicate_in_quarantine
+PASS check_lists_missing_path
+PASS check_lists_suite_in_gate_and_quarantine
+PASS check_lists_suite_in_gate_and_gate_tests_quarantine
+PASS check_lists_bad_schema
+PASS check_lists_needs_nwjs_in_gate
+PASS check_lists_needs_nwjs_recorded_passing
+PASS check_lists_stale_needs_nwjs
+PASS check_lists_invalid_gate_list
+PASS check_lists_missing_quarantine_file
+PASS check_lists_runs_no_suite
+PASS merge_three_agreeing_runs
+PASS merge_output_passes_check_lists
+PASS merge_flaky_suite_is_fail_other
+PASS merge_refuses_partial_census_exit_2
+PASS merge_refuses_missing_run_exit_2
+PASS stdin_baseline_setGateFail
+PASS mutant_gate_ignores_failing_exit_killed
+    mutant gate_ignores_failing_exit caught by: gate_one_suite_broken_exit_1
+PASS stdin_baseline_setTimeoutKill
+PASS mutant_timeout_removed_killed
+    mutant timeout_removed caught by: gate_timeout_exit_1, gate_timeout_killed_suite_and_child
+PASS stdin_baseline_setScreenGate
+PASS mutant_needs_nwjs_screen_removed_killed
+    mutant needs_nwjs_screen_removed caught by: gate_refuses_nwjs_suite_named_exit_2
+PASS stdin_baseline_setMissingModule
+PASS mutant_missing_module_rule_swapped_killed
+    mutant missing_module_rule_swapped caught by: census_missing_module_category
+PASS stdin_baseline_setDuplicate
+PASS mutant_check_lists_duplicate_check_removed_killed
+    mutant check_lists_duplicate_check_removed caught by: check_lists_duplicate_in_gate
+PASS stdin_baseline_setTreeKill
+PASS mutant_tree_kill_removed_killed
+    mutant tree_kill_removed caught by: census_timeout_tree_killed_before_sweep
+PASS stdin_baseline_setTransitive
+PASS mutant_transitive_screen_removed_killed
+    mutant transitive_screen_removed caught by: gate_refuses_transitive_nwjs_exit_2
+PASS mutant_gate_nwjs_refusal_removed_killed
+    mutant gate_nwjs_refusal_removed caught by: gate_refuses_nwjs_suite_named_exit_2
+PASS stdin_baseline_setGuard
+PASS mutant_runtime_guard_removed_killed
+    mutant runtime_guard_removed caught by: census_runtime_guard_blocks_launch
+PASS stdin_baseline_setLeak
+PASS mutant_leftover_sweep_removed_killed
+    mutant leftover_sweep_removed caught by: census_leftover_child_swept
+PASS stdin_baseline_setUnlisted
+PASS mutant_check_lists_unlisted_check_removed_killed
+    mutant check_lists_unlisted_check_removed caught by: check_lists_unlisted_suite
+PASS run_gate_on_disk_unchanged
+PASS no_leftover_processes
+RESULT: 97 passed, 0 failed
+EXIT=0
+$ node tools/ops/run_gate.js --check-lists
+run_gate: check-lists, root C:\Users\snewt\.deus_worktrees\lane-y, gate list C:\Users\snewt\.deus_worktrees\lane-y\tools\ops\gate_tests.json, quarantine C:\Users\snewt\.deus_worktrees\lane-y\tools\ops\quarantine.json
+NOTE: tools/test_generated_z2_cut_proof.js is on the gate_tests.json quarantine list but quarantine.json records it passing in every run
+CHECK-LISTS: OK (9 gate, 117 quarantined, 63 passingNotGated, 188 tracked suites)
+EXIT=0
+$ node tools/check_deus_syntax.js
+Checked 52 DEUS plugin files. Errors: 0
+EXIT=0
+```
+
+**In a clone made the way `merge_gate.js` makes one** (`git clone --shared --no-checkout <common dir>`, `checkout --detach`, system `core.autocrlf=true`, so CRLF files), entries 1, 2 and 4, `evidence/gatetests_clone.log`:
+
+```
+# fresh clone C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gatetests (git clone --shared --no-checkout C:/Users/snewt/OneDrive/Desktop/UF/.git; checkout --detach e5f1dafc42defd88590a703f45393607b4a868c5; system core.autocrlf, CRLF files), cwd = clone
+$ node tools/ops/test_run_gate.js
+test_run_gate: fixtures in C:\Users\snewt\AppData\Local\Temp\deus-test-run-gate-MSZ25O
+PASS gate_all_pass_exit_0
+PASS gate_default_timeout_600
+PASS gate_line_format
+PASS gate_one_suite_broken_exit_1
+PASS gate_failure_shows_deciding_line
+PASS gate_refuses_nwjs_in_list_exit_2_runs_nothing
+PASS gate_refuses_nwjs_suite_named_exit_2
+PASS gate_refuses_transitive_nwjs_exit_2
+PASS gate_timeout_exit_1
+PASS gate_timeout_killed_suite_and_child
+PASS gate_empty_list_exit_2
+PASS gate_invalid_list_exit_2
+PASS gate_missing_suite_exit_2
+PASS screen_mode_runs_nothing
+PASS usage_unknown_flag_exit_2
+PASS usage_concurrency_above_3_exit_2
+PASS usage_census_without_out_exit_2
+PASS census_complete_exit_0
+PASS census_rows_are_the_tracked_suites
+PASS category_test_pass_PASS
+PASS category_test_pass_nested_PASS
+PASS category_test_fail_FAIL_OTHER
+PASS category_test_hang_KILLED_TIMEOUT
+PASS category_test_leak_PASS
+PASS category_test_missing_module_FAIL_MISSING_DEPENDENCY
+PASS category_test_missing_plugin_FAIL_MISSING_REFERENCE
+PASS category_test_enoent_FAIL_MISSING_REFERENCE
+PASS category_test_type_error_FAIL_API_DRIFT
+PASS category_test_stdout_only_FAIL_MISSING_REFERENCE
+PASS category_test_stderr_decides_FAIL_OTHER
+PASS category_test_nw_binary_ref_NEEDS_NWJS
+PASS category_test_harness_runner_ref_NEEDS_NWJS
+PASS category_test_via_helper_NEEDS_NWJS
+PASS category_test_via_spawned_script_NEEDS_NWJS
+PASS category_test_plugin_comment_PASS
+PASS category_test_guard_evasion_NEEDS_NWJS
+PASS category_test_dotnet_missing_file_FAIL_MISSING_REFERENCE
+PASS category_test_plugin_not_loaded_FAIL_MISSING_REFERENCE
+PASS census_needs_nwjs_never_spawned
+PASS census_every_other_suite_ran
+PASS census_nwjs_rows_carry_screen_evidence
+PASS census_hang_killed_with_its_child
+PASS census_leak_child_swept
+PASS census_guard_evasion_blocked
+PASS census_deciding_lines
+PASS census_row_fields
+PASS census_gate_flag
+PASS census_lines_hide_root_path
+PASS census_log_dir_one_log_per_run_suite
+PASS census_defaults_180s_3_at_once
+PASS census_budget_partial_exit_3
+PASS census_resume_completes_exit_0
+PASS census_refuses_to_overwrite_complete_exit_2
+PASS census_refuses_nwjs_suite_named_exit_2
+PASS check_lists_ok_exit_0
+PASS check_lists_default_gate_list_exit_0
+PASS check_lists_duplicate_in_gate
+PASS check_lists_unlisted_suite
+PASS check_lists_duplicate_in_quarantine
+PASS check_lists_missing_path
+PASS check_lists_suite_in_gate_and_quarantine
+PASS check_lists_suite_in_gate_and_gate_tests_quarantine
+PASS check_lists_bad_schema
+PASS check_lists_needs_nwjs_in_gate
+PASS check_lists_needs_nwjs_recorded_passing
+PASS check_lists_stale_needs_nwjs
+PASS check_lists_invalid_gate_list
+PASS check_lists_missing_quarantine_file
+PASS check_lists_runs_no_suite
+PASS merge_three_agreeing_runs
+PASS merge_output_passes_check_lists
+PASS merge_flaky_suite_is_fail_other
+PASS merge_refuses_partial_census_exit_2
+PASS merge_refuses_missing_run_exit_2
+PASS stdin_baseline_setGateFail
+PASS mutant_gate_ignores_failing_exit_killed
+    mutant gate_ignores_failing_exit caught by: gate_one_suite_broken_exit_1
+PASS stdin_baseline_setTimeoutKill
+PASS mutant_timeout_removed_killed
+    mutant timeout_removed caught by: gate_timeout_exit_1, gate_timeout_killed_suite_and_child
+PASS stdin_baseline_setScreenGate
+PASS mutant_needs_nwjs_screen_removed_killed
+    mutant needs_nwjs_screen_removed caught by: gate_refuses_nwjs_suite_named_exit_2
+PASS stdin_baseline_setMissingModule
+PASS mutant_missing_module_rule_swapped_killed
+    mutant missing_module_rule_swapped caught by: census_missing_module_category
+PASS stdin_baseline_setDuplicate
+PASS mutant_check_lists_duplicate_check_removed_killed
+    mutant check_lists_duplicate_check_removed caught by: check_lists_duplicate_in_gate
+PASS stdin_baseline_setTreeKill
+PASS mutant_tree_kill_removed_killed
+    mutant tree_kill_removed caught by: census_timeout_tree_killed_before_sweep
+PASS stdin_baseline_setTransitive
+PASS mutant_transitive_screen_removed_killed
+    mutant transitive_screen_removed caught by: gate_refuses_transitive_nwjs_exit_2
+PASS mutant_gate_nwjs_refusal_removed_killed
+    mutant gate_nwjs_refusal_removed caught by: gate_refuses_nwjs_suite_named_exit_2
+PASS stdin_baseline_setGuard
+PASS mutant_runtime_guard_removed_killed
+    mutant runtime_guard_removed caught by: census_runtime_guard_blocks_launch
+PASS stdin_baseline_setLeak
+PASS mutant_leftover_sweep_removed_killed
+    mutant leftover_sweep_removed caught by: census_leftover_child_swept
+PASS stdin_baseline_setUnlisted
+PASS mutant_check_lists_unlisted_check_removed_killed
+    mutant check_lists_unlisted_check_removed caught by: check_lists_unlisted_suite
+PASS run_gate_on_disk_unchanged
+PASS no_leftover_processes
+RESULT: 97 passed, 0 failed
+EXIT=0
+$ node tools/ops/run_gate.js --check-lists
+run_gate: check-lists, root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gatetests, gate list C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gatetests\tools\ops\gate_tests.json, quarantine C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gatetests\tools\ops\quarantine.json
+NOTE: tools/test_generated_z2_cut_proof.js is on the gate_tests.json quarantine list but quarantine.json records it passing in every run
+CHECK-LISTS: OK (9 gate, 117 quarantined, 63 passingNotGated, 188 tracked suites)
+EXIT=0
+$ node tools/check_deus_syntax.js
+Checked 52 DEUS plugin files. Errors: 0
+EXIT=0
+```
+
+Entry 3 in the same clone (run as a job, waited on in the foreground: about 10 minutes), `evidence/gatetests_clone_gate.log`:
+
+```
+# same clone C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gatetests at e5f1dafc42defd88590a703f45393607b4a868c5, cwd = clone
+$ node tools/ops/run_gate.js
+run_gate: gate mode, 9 suites from C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gatetests\tools\ops\gate_tests.json, root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gatetests, HEAD e5f1dafc42defd88590a703f45393607b4a868c5, timeout 600 s each, one at a time
+GATE tools/check_deus_syntax.js EXIT=0 2867ms
+GATE tools/test_palette.js EXIT=0 41ms
+GATE tools/governance/test_check_claims.js EXIT=0 135315ms
+GATE tools/test_strata_cuts_and_caves.js EXIT=2 167148ms FAIL_OTHER
+    | decided by other: RESULT: 18 passed, 0 failed (exit 2)
+    | PASS cave_free_terrain - 18: cave columns 2058 (3.14 %), massif 691 (1.05 %); 3: cave columns 1531 (2.34 %), massif 290 (0.44 %); 21: cave columns 1927 (2.94 %), massif 262 (0.40 %); 4: cave columns 1686 (2.57 %), massif 1006 (1.54 %) (limits 5 % and 3 %)
+    | PASS traversable_terrain - 18: standable 125240/124320 (100.7 %), ground 24408/23939 (102.0 %), largest ground region 14148/14537 (97.3 %), start valley untouched true; 3: standable 128150/127194 (100.8 %), ground 39962/39468 (101.3 %), largest ground region 39557/39320 (100.6 %), start valley untouched true; 21: standable 127618/126036 (101.3 %), ground 12686/11478 (110.5 %), largest ground region 3348/3348 (100.0 %), start valley untouched true; 4: standable 123812/123627 (100.1 %), ground 15315/14346 (106.8 %), largest ground region 4442/4457 (99.7 %), start valley untouched true
+    | PASS cave_overburden - seed 18: 2128 roofed generated cave floors (hasOpaqueOverburden true and continuousAirHeight = the air run of the strata), 2989 sky-open cut floors (no overburden, Infinity); wrong 0; network chambers roofed at their centres 47/48 (want >= 90 %: a mouth or a cut can open a few): #7 (22,201) floor 10: open to the sky
+    | PASS cave_void_minimum - roofed generated cave voids over 4 seeds by height (ft): {"3":852,"4":1995,"5":2130,"6":1071,"7":1047,"8":301,"9":77,"10":20,"11":5,"12":8,"13":3,"14":2}; under 3 ft 0
+    | PASS roof_breach - cave (167,31,0) under 1 ft of roof: before {"ob":true,"cl":"5","shape":"floor"}, dug 1 strata (want 1) -> {"ob":false,"cl":"Infinity","shape":"floor"}, restored {"ob":true,"cl":"5","records":0}; +2 cave (136,176,2) under a stone cap 10 ft: overburden true -> breached (true, levels:capBreached 1) false, clearance 4 -> Infinity; saved and loaded: overburden false, cap gone, saved record true; restored: overburden true, clearance 4, record kept false
+    | PASS clearance_4_5_more - fixture column (64,30): 1 solid + 4 air under solid 4 ft (derived shape floor: the compatibility view; the clearance is the data), 5 air on -2's S4 5, across -1 and the ground 6 (airRunAt 6), up to +1 9, open sky Infinity, a 2 ft slot 2 (shape solid), solid 0, no floor -1; restored records 0; generated floors: 4 ft (176,39,0), 5 ft (167,31,0), > 5 ft 7 ft (175,46,0); 1,000,000 queries 1403 ns each, heap growth 105840 B (checksum 6075000)
+    | PASS clearance_stops_at_fluid - fixture column (64,30): -1 stone + 4 water, ground solid: continuousAirHeight 0 (want 0), airRunAt(6) 0 (want 0); -1 stone + 2 air + 2 water: continuousAirHeight 2 (want 2), airRunAt(6) 2 (want 2); -1 stone + water + 3 air (from the floor): continuousAirHeight 0 (want 0), airRunAt(6) 0 (want 0); the same, air run from S2: continuousAirHeight 0 (want 0), airRunAt(7) 3 (want 3); -2 stone + 4 lava, -1 solid: continuousAirHeight 0 (want 0), airRunAt(1) 0 (want 0); -2 stone + 4 air, -1 solid (control): continuousAirHeight 4 (want 4), airRunAt(1) 4 (want 4); restored records 0
+    | PASS multi_z_connectivity - 3 networks flagged multi-Z in seed 18; #6 from (202,50) floor 10 ft: 658 air strata (roofed), floors on levels [-1,0]; natural ramp connectors added 294, e.g. (71,24,-1) derived ramp
+    | HARNESS shafts_keep_fluid: the shaft loop to instrument is missing
+    | RESULT: 18 passed, 0 failed (exit 2)
+GATE tools/test_new_game_year0.js EXIT=1 2560ms FAIL_OTHER
+    | decided by other: Error: Override anchor found 0 times in DEUS_FactionMenus.js: this._factionIndex = 0;
+    |     at createMenusEnv (<root>\tools\test_new_game_year0.js:131:17)
+    |     at runSectionA (<root>\tools\test_new_game_year0.js:153:17)
+    |     at main (<root>\tools\test_new_game_year0.js:452:35)
+    |     at Object.<anonymous> (<root>\tools\test_new_game_year0.js:490:1)
+    |     at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    |     at Object..js (node:internal/modules/cjs/loader:2003:10)
+    |     at Module.load (node:internal/modules/cjs/loader:1594:32)
+    |     at Module._load (node:internal/modules/cjs/loader:1396:12)
+    |     at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    | Node.js v24.19.0
+GATE tools/test_history_materialization_and_world_age.js EXIT=0 92289ms
+GATE tools/test_historical_carrying_capacity.js EXIT=1 365ms FAIL_OTHER
+    | decided by other: FAIL: Error: CANDIDATE_MISMATCH: working plugin differs from frozen candidate
+    |     at assert (<root>\tools\test_historical_carrying_capacity.js:51:50)
+    |     at sourceBundle (<root>\tools\test_historical_carrying_capacity.js:95:9)
+    |     at main (<root>\tools\test_historical_carrying_capacity.js:603:18)
+    |     at Object.<anonymous> (<root>\tools\test_historical_carrying_capacity.js:608:36)
+    |     at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    |     at Object..js (node:internal/modules/cjs/loader:2003:10)
+    |     at Module.load (node:internal/modules/cjs/loader:1594:32)
+    |     at Module._load (node:internal/modules/cjs/loader:1396:12)
+    |     at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    |     at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+GATE tools/test_geology_strata.js EXIT=0 17084ms
+GATE tools/test_strata_foundation.js EXIT=0 101044ms
+LEFTOVERS: none
+RESULT: 6 passed, 3 failed
+EXIT=1
+```
+
+**Entry 3 exits 1 in the CRLF clone.** Three gate suites fail there and pass on an LF checkout of the same commit (`evidence/crlf_ab.log`, A/B on the same clone):
+
+```
+# A/B on C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gatetests at e5f1dafc42defd88590a703f45393607b4a868c5: A = checkout with system core.autocrlf=true (JavaScript source, Unicode text, UTF-8 text, with CRLF line terminators)
+$ node tools/ops/run_gate.js --root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gatetests --suite tools/test_new_game_year0.js --suite tools/test_historical_carrying_capacity.js --suite tools/test_strata_cuts_and_caves.js
+GATE tools/test_new_game_year0.js EXIT=1 2656ms FAIL_OTHER
+GATE tools/test_historical_carrying_capacity.js EXIT=1 363ms FAIL_OTHER
+GATE tools/test_strata_cuts_and_caves.js EXIT=2 170568ms FAIL_OTHER
+LEFTOVERS: none
+RESULT: 0 passed, 3 failed
+EXIT=1
+# B = same clone after: git config core.autocrlf false; git rm -q --cached -r .; git reset -q --hard  (JavaScript source, Unicode text, UTF-8 text), HEAD e5f1dafc42defd88590a703f45393607b4a868c5
+$ node tools/ops/run_gate.js --root C:\Users\snewt\AppData\Local\Temp\deus-lane-y-gatetests --suite tools/test_new_game_year0.js --suite tools/test_historical_carrying_capacity.js --suite tools/test_strata_cuts_and_caves.js
+GATE tools/test_new_game_year0.js EXIT=0 14120ms
+GATE tools/test_historical_carrying_capacity.js EXIT=0 17751ms
+GATE tools/test_strata_cuts_and_caves.js EXIT=0 245837ms
+LEFTOVERS: none
+RESULT: 3 passed, 0 failed
+EXIT=0
+```
+
+This is escalated in `tasks/OPS.30.01/lane-y/escalation.md` (standing rule 6): the fix is in read-only files (`merge_gate.js` clone options, a repo `.gitattributes`, or the three suites). Entry 3 passed on the LF fresh clone of main (`evidence/gate_fresh_clone.log`, `EXIT=0`, see above).
 
 ## Scope
 
-<!-- SCOPE -->
+`node tasks/OPS.30.01/lane-y/analysis/scope_check.js --cached` (every path changed since the base, matched against `lane.json` allowedPaths; run with the final commit staged; `git diff --name-only 425b594c..HEAD` after the commit gives the same list):
+
+```
+$ git diff --cached --name-only 425b594c146d5f353c10faa11f4b5d47f499b45f: 522 paths, 0 outside allowedPaths
+  tools/ops/run_gate.js: 1
+  tools/ops/test_run_gate.js: 1
+  tools/ops/quarantine.json: 1
+  tools/ops/fixtures/run_gate/**: 43
+  tasks/OPS.30.01/**: 476
+paths other than evidence/logs/** and evidence/superseded/**:
+  tasks/OPS.30.01/lane-y/BRIEF.md
+  tasks/OPS.30.01/lane-y/REPORT.md
+  tasks/OPS.30.01/lane-y/analysis/report_tables.js
+  tasks/OPS.30.01/lane-y/analysis/scope_check.js
+  tasks/OPS.30.01/lane-y/escalation.md
+  tasks/OPS.30.01/lane-y/evidence/census_run1.json
+  tasks/OPS.30.01/lane-y/evidence/census_run1.log
+  tasks/OPS.30.01/lane-y/evidence/census_run2.json
+  tasks/OPS.30.01/lane-y/evidence/census_run2.log
+  tasks/OPS.30.01/lane-y/evidence/census_run3.json
+  tasks/OPS.30.01/lane-y/evidence/census_run3.log
+  tasks/OPS.30.01/lane-y/evidence/census_slow_580s.json
+  tasks/OPS.30.01/lane-y/evidence/census_slow_580s.log
+  tasks/OPS.30.01/lane-y/evidence/census_slow_580s_chunk2.log
+  tasks/OPS.30.01/lane-y/evidence/census_slow_580s_chunk3.log
+  tasks/OPS.30.01/lane-y/evidence/census_tip_run1.json
+  tasks/OPS.30.01/lane-y/evidence/census_tip_run1.log
+  tasks/OPS.30.01/lane-y/evidence/census_tip_run2.json
+  tasks/OPS.30.01/lane-y/evidence/census_tip_run2.log
+  tasks/OPS.30.01/lane-y/evidence/census_tip_run3.json
+  tasks/OPS.30.01/lane-y/evidence/census_tip_run3.log
+  tasks/OPS.30.01/lane-y/evidence/check_lists_worktree.log
+  tasks/OPS.30.01/lane-y/evidence/classify_tests_output_at_425b594c.md
+  tasks/OPS.30.01/lane-y/evidence/classify_tests_run.log
+  tasks/OPS.30.01/lane-y/evidence/crlf_ab.log
+  tasks/OPS.30.01/lane-y/evidence/gate_broken_suite.log
+  tasks/OPS.30.01/lane-y/evidence/gate_fresh_clone.log
+  tasks/OPS.30.01/lane-y/evidence/gatetests_clone.log
+  tasks/OPS.30.01/lane-y/evidence/gatetests_clone_gate.log
+  tasks/OPS.30.01/lane-y/evidence/gatetests_worktree.log
+  tasks/OPS.30.01/lane-y/evidence/merge.log
+  tasks/OPS.30.01/lane-y/evidence/strata_cuts_standalone.log
+  tasks/OPS.30.01/lane-y/lane.json
+  tasks/OPS.30.01/lane-y/launches/20260926_070955_prompt.txt
+  tasks/OPS.30.01/lane-y/leftover_check.js
+  tasks/OPS.30.01/lane-y/wait_for_exit.js
+  tools/ops/fixtures/run_gate/README.md
+  tools/ops/fixtures/run_gate/helpers/api.js
+  tools/ops/fixtures/run_gate/helpers/harness_helper.js
+  tools/ops/fixtures/run_gate/helpers/launcher.js
+  tools/ops/fixtures/run_gate/helpers/plugin_notes.js
+  tools/ops/fixtures/run_gate/helpers/sleeper.js
+  tools/ops/fixtures/run_gate/lists/cl_gate_duplicate.json
+  tools/ops/fixtures/run_gate/lists/cl_gate_in_both.json
+  tools/ops/fixtures/run_gate/lists/cl_gate_missing_path.json
+  tools/ops/fixtures/run_gate/lists/cl_gate_nw.json
+  tools/ops/fixtures/run_gate/lists/cl_gate_ok.json
+  tools/ops/fixtures/run_gate/lists/cl_gate_quarantined_in_gate_tests.json
+  tools/ops/fixtures/run_gate/lists/cl_quarantine_bad_schema.json
+  tools/ops/fixtures/run_gate/lists/cl_quarantine_duplicate.json
+  tools/ops/fixtures/run_gate/lists/cl_quarantine_no_nw.json
+  tools/ops/fixtures/run_gate/lists/cl_quarantine_nw_as_pass.json
+  tools/ops/fixtures/run_gate/lists/cl_quarantine_nw_stale.json
+  tools/ops/fixtures/run_gate/lists/cl_quarantine_ok.json
+  tools/ops/fixtures/run_gate/lists/cl_quarantine_unlisted.json
+  tools/ops/fixtures/run_gate/lists/gate_all_pass.json
+  tools/ops/fixtures/run_gate/lists/gate_empty.json
+  tools/ops/fixtures/run_gate/lists/gate_invalid.json
+  tools/ops/fixtures/run_gate/lists/gate_missing_suite.json
+  tools/ops/fixtures/run_gate/lists/gate_names_nw.json
+  tools/ops/fixtures/run_gate/lists/gate_one_fails.json
+  tools/ops/fixtures/run_gate/suites/dotnet_missing_file.js
+  tools/ops/fixtures/run_gate/suites/enoent.js
+  tools/ops/fixtures/run_gate/suites/fail.js
+  tools/ops/fixtures/run_gate/suites/guard_evasion.js
+  tools/ops/fixtures/run_gate/suites/hang.js
+  tools/ops/fixtures/run_gate/suites/harness_runner_ref.js
+  tools/ops/fixtures/run_gate/suites/leak.js
+  tools/ops/fixtures/run_gate/suites/missing_module.js
+  tools/ops/fixtures/run_gate/suites/missing_plugin.js
+  tools/ops/fixtures/run_gate/suites/nw_binary_ref.js
+  tools/ops/fixtures/run_gate/suites/pass.js
+  tools/ops/fixtures/run_gate/suites/plugin_comment.js
+  tools/ops/fixtures/run_gate/suites/plugin_not_loaded.js
+  tools/ops/fixtures/run_gate/suites/stderr_decides.js
+  tools/ops/fixtures/run_gate/suites/stdout_only.js
+  tools/ops/fixtures/run_gate/suites/type_error.js
+  tools/ops/fixtures/run_gate/suites/via_helper.js
+  tools/ops/fixtures/run_gate/suites/via_spawned_script.js
+  tools/ops/quarantine.json
+  tools/ops/run_gate.js
+  tools/ops/test_run_gate.js
+EXIT=0
+```
+
+`BRIEF.md`, `lane.json` and `launches/20260926_070955_prompt.txt` come from the `[pm]` commit `63e07276` and the `[ops]` launcher commit `7a02e1b5`; this lane did not edit them. `git diff --cached --name-only 425b594c -- tools/ops/gate_tests.json 'tools/test_*.js' tools/classify_tests.js tools/run_tests.js tools/governance docs game art` prints nothing (0 lines).
+
+Final `git rev-parse HEAD`: recorded in the next line by a follow-up commit (a commit cannot hold its own hash).
