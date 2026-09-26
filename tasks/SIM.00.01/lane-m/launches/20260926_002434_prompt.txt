@@ -1,0 +1,28 @@
+﻿You are the primary author for Lane M (Task SIM.00.01: Architectural Decision Record â€” Sim/Render Split & LOD Architecture).
+Read tasks/SIM.00.01/lane-m/BRIEF.md carefully.
+Your allowed paths are (exact):
+- docs/adr/ADR-003_sim_render_split_and_lod.md
+- docs/adr/README.md
+- tasks/SIM.00.01/lane-m/**
+
+ZERO CODE RULE: Pure architecture and specification. No modifications to game/ or tools/.
+Every claim about current engine code MUST cite exact file:line on main (commit ebeec892).
+Address the 9 required sections in docs/adr/ADR-003_sim_render_split_and_lod.md:
+1. Context & Motivation
+2. Sim/Render Boundary & Module Layout
+3. Tick Model & Sub-tick Accumulator
+4. Snapshot Interface & Change Feed
+5. LOD Region Model
+6. Summary Simulation
+7. Promotion & Demotion with Conservation Invariants
+8. Migration Increments
+9. Performance Budgets
+
+Update docs/adr/README.md with ADR-003 entry.
+Commit your work to task/lane-m with message starting with '[claude] SIM.00.01'.
+Standing rules:
+1. One primary writer per file set.
+2. Workers never push. Only the integrator pushes.
+3. Capture the exit code of every command, one per command ('EXIT=$LASTEXITCODE'). Put raw values in your reports.
+4. FOREGROUND rule: Run tests in the FOREGROUND. Never end your turn while background jobs or child processes are running.
+5. NO ART (DEC-007).
