@@ -11,10 +11,13 @@
  * Runs the real game in NW.js on a snapshot copy of game/ (robocopy to %TEMP%; nothing under game/ is written). The
  * snapshot gets one extra, test-only plugin (DEUS_TestLayerSwitch.js, registered after DEUS_Test) holding the suite
  * "layer_switch_inplace", and a fixed world seed (DEUS_World parameter Seed, default 18) so runs are comparable.
- * The suite switches 0 -> +1 -> +2 -> 0 -> -1 -> 0 from the ground, repeats that sequence twice more as the bench
- * scenario, switches to -1 and +1, then saves, loads and switches once more.
+ * The suite puts a TEST unit on every level near the view, waits for the prewarm, then switches 0 -> +1 -> +2 -> 0 ->
+ * -1 -> 0 from the ground twice: round 1 with the fog as in play (disabled), round 2 with the fog forced on. Rounds 3 and
+ * 4 repeat the sequence as the bench scenario (fog as in play). Round 5 switches to -1 and +1, then the game is saved and
+ * loaded, and round 6 switches once more. Every switch is written to test_output/layer_switch_perf.json (lastSwitch, the
+ * World's swap and rebind numbers, UF.World.buildArea calls, the slowest SceneManager.updateMain in its window).
  *
- * Checks (each prints PASS or FAIL; each is shown failing by a mutant below):
+ * Checks (each prints PASS or FAIL; each is shown failing by a mutant below). Checks 1-5 judge rounds 1 and 2:
  *   same_scene_and_spriteset        the switch sequence creates no Scene_Map and no Spriteset_Map (constructors counted)
  *                                   and the scene and its spriteset are the same objects before and after every switch
  *   ticks_never_skipped             every SceneManager.updateMain from each switch request to 2 frames after it completed
@@ -36,7 +39,7 @@
  *                                   restores the world state (units with cells and levels, tile and object diffs, level
  *                                   strata, seed) and, after a new Scene_Map, the same level, map, view cell, camera, plate
  *                                   and saved view record (state.view); a switch after the load is in place again
- *   no_errors                       no window error, unhandled rejection or scene exception during the suite
+ *   no_errors                       no window error, unhandled rejection, scene exception or console.error during the suite
  *
  * Mutants (--mutant=<name>; --mutants runs all, each must exit 1 with its designated check among the failures). Each is
  * an exact source edit in the snapshot's plugin copy; the target must occur exactly once (else exit 2):
@@ -47,7 +50,8 @@
  *   stale_sprites        -> new_level_shown_at_once       the rebind makes no sprites for the new level's events
  *   no_fog_refresh       -> new_level_shown_at_once       the fog is not refreshed when the switch completes
  *   save_view_stale      -> save_load_keeps_view_and_world  the in-place switch doesn't record state.view
- *   error_injected       -> no_errors                     the rebind throws from a timer
+ *   error_injected       -> no_errors                     the rebind logs a console.error (an uncaught throw or rejection
+ *                                                         stops RMMZ itself: the run then fails as suite_completed)
  *
  * Options:
  *   --ref=<git ref>   run the files under game/ as they are in <ref> (e.g. main): every file that differs between the
@@ -102,7 +106,7 @@ const MUTANTS = {
         "            /* MUTANT: the view is not recorded */"]] },
     error_injected: { check: "no_errors", edits: [[W_,
         "        ss._ufBoundMap = map;\n",
-        "        ss._ufBoundMap = map;\n        setTimeout(() => { throw new Error(\"MUTANT: injected error\"); }, 0);\n"]] }
+        "        ss._ufBoundMap = map;\n        console.error(\"MUTANT: injected error\");\n"]] }
 };
 
 //-----------------------------------------------------------------------------
@@ -113,10 +117,15 @@ function suitePlugin() {
     const T = window.UF && window.UF.Test;
     if (!T || !T.active) return;
     T.suite("layer_switch_inplace", async t => {
-        const W = UF.World, L = UF.Levels, O = UF.Objects;
+        const W = UF.World, L = UF.Levels;
         const fs = require("fs"), path = require("path");
         const outDir = path.join(nw.__dirname || process.cwd(), "test_output");
-        const errors0 = t.errorsSoFar().length;
+        // Errors during the suite: the harness's (window errors, rejections, scene exceptions) and console.error (F8).
+        const errors0 = t.errorsSoFar().length, consoleErrors = [], realConsoleError = console.error;
+        console.error = function(...a) {
+            consoleErrors.push(a.map(x => (x && x.stack) || String(x)).join(" ").slice(0, 300));
+            return realConsoleError.apply(this, a);
+        };
         const perf = { suite: "layer_switch_inplace", made: new Date().toISOString(), seed: W.state ? W.state.seed : null, inPlaceApi: typeof W.switchViewInPlace === "function",
             units: 0, unitsByLevel: {}, prewarm: null, prewarmWaitMs: null, switches: [], load: null };
         const writePerf = () => { try { fs.writeFileSync(path.join(outDir, "layer_switch_perf.json"), JSON.stringify(perf, null, 2)); } catch (_) { /* reported by the tool */ } };
@@ -193,6 +202,7 @@ function suitePlugin() {
             W.buildArea = realBuild;
             SceneManager.updateMain = realUpdateMain;
             if (Fog) Fog.enabled = fogWas;
+            console.error = realConsoleError;
         };
 
         //------------------------------------------------------------ what is on screen right now
@@ -315,7 +325,7 @@ function suitePlugin() {
             `prewarm: ${perf.prewarm ? `cold ring levels ${JSON.stringify(cold)} after ${perf.prewarmWaitMs} ms, ${perf.prewarm.builds} prewarm builds (${round2(perf.prewarm.ms)} ms, worst ${round2(perf.prewarm.maxMs)} ms), ${perf.prewarm.loadSteps} steps while the map loaded` : "NO PREWARM API"}; ` +
             recs.map(r => `${fmt(r)}: UF.World.buildArea calls ${r.builds}`).join(", ") + ` (levels built: ${JSON.stringify(buildLog.filter(b => b.phase !== "idle"))})`);
         t.check("switch_within_one_frame", recs.every(r => r.newRecord && r.last && r.last.to === r.to && r.last.inPlace === true && r.last.frames <= 1 && r.last.renderFrames <= 1 && Number.isFinite(r.last.ms)),
-            recs.map(r => `${fmt(r)}: ${r.last ? `frames ${r.last.frames}, renderFrames ${r.last.renderFrames}, ms ${r.last.ms} (work ${r.last.workMs}: swap ${r.last.swapMs}, rebind ${r.last.rebindMs}), in place ${r.last.inPlace}, reused ${r.last.reused}` : "NO lastSwitch"}${r.newRecord ? "" : ", NOT A NEW RECORD"}; worst update ${r.maxUpdateMs} ms`).join("; "));
+            recs.map(r => `${fmt(r)}: ${r.last ? `frames ${r.last.frames}, renderFrames ${r.last.renderFrames}, ms ${r.last.ms} (work ${r.last.workMs}: swap ${r.last.swapMs}, rebind ${r.last.rebindMs}, fog ${r.last.fogMs}), in place ${r.last.inPlace}, reused ${r.last.reused}` : "NO lastSwitch"}${r.newRecord ? "" : ", NOT A NEW RECORD"}; worst update ${r.maxUpdateMs} ms`).join("; "));
         t.check("new_level_shown_at_once", recs.every(r => r.shown && r.shown.ok),
             recs.map(r => `${fmt(r)}: ${r.shown ? (r.shown.ok ? `ok (${r.shown.events} unit events for ${r.shown.units} units; fog ${r.shown.fog}; minimap ${r.shown.minimap})` : `WRONG: ${r.shown.bad.join(" | ")}`) : "not inspected"}`).join("; "));
 
@@ -372,7 +382,8 @@ function suitePlugin() {
         restore();
         await t.waitFrames(5);
         const errs = t.errorsSoFar().slice(errors0);
-        t.check("no_errors", errs.length === 0, errs.length ? `${errs.length} error(s) during the suite, first: ${errs[0]}` : `none during the suite (${errors0} before it)`);
+        t.check("no_errors", errs.length === 0 && consoleErrors.length === 0,
+            `harness errors during the suite: ${errs.length ? `${errs.length}, first: ${errs[0]}` : `none (${errors0} before it)`}; console.error calls: ${consoleErrors.length ? `${consoleErrors.length}, first: ${consoleErrors[0]}` : "none"}`);
         writePerf();
     }, { isDefault: false });
 }

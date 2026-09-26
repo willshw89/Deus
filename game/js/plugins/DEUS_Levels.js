@@ -4223,7 +4223,7 @@
 
     // An in-place switch completes when the Spriteset binds to the new level: at the start of its update, before any of
     // its layers (tiles, characters, objects, items, fog, depth planes) update, so all of them show the new level in the
-    // same frame. This alias sits outside UF_Culling's (loaded earlier), so the rebind sees the full character list.
+    // same frame. This alias sits outside DEUS_Culling's (loaded earlier), so the rebind sees the full character list.
     const _Spriteset_Map_update_inPlace = Spriteset_Map.prototype.update;
     Spriteset_Map.prototype.update = function() {
         if (this._ufBoundMap !== window.$dataMap) finishSwitch(this);
@@ -4234,16 +4234,17 @@
         if (!W || !W.rebindSpriteset) return;
         const t0 = performance.now();
         if (!W.rebindSpriteset(ss)) return;
-        // What the faction sees on the new level now, not a fog refresh later (UF_Fog re-keys its buffers by map id).
+        const t1 = performance.now();
+        // What the faction sees on the new level now, not a fog refresh later (DEUS_Fog re-keys its buffers by map id).
         if (window.UF.Fog && typeof UF.Fog.refresh === "function") UF.Fog.refresh();
         const p = pending;
         if (!p || !p.swap || viewZ() !== p.to) return;
-        const rebindMs = performance.now() - t0;
+        const rebindMs = t1 - t0, fogMs = performance.now() - t1;
         pending = null;
         stats.switches++;
         stats.lastSwitch = {
             from: p.from, to: p.to, ms: performance.now() - p.t0, frames: mapFrames - p.frames0, renderFrames: Graphics.frameCount - p.frame0,
-            reused: !p.swap.built, follow: !!p.center, inPlace: true, swapMs: p.swap.ms, rebindMs, workMs: p.swap.ms + rebindMs,
+            reused: !p.swap.built, follow: !!p.center, inPlace: true, swapMs: p.swap.ms, rebindMs, fogMs, workMs: p.swap.ms + rebindMs + fogMs,
             syncBuilds: p.swap.built ? 1 : 0, events: p.swap.events
         };
         emit("levels:viewChanged", p.from, p.to);
