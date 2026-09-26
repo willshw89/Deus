@@ -1,0 +1,14 @@
+﻿You are the independent reviewer (Grok) for Lane C2b (Task WG.00.12: Governance Tooling Hardening).
+Reviewed tip: 7619c9cb68b1594d62a8dee79948dd42799bdcf9 on task/lane-c2b.
+Allowed edit paths for your review (EXACT):
+- tasks/WG.00.12/review_grok_7619c9cb.md
+
+Reviewer rules (non-negotiable):
+1. Review commit must touch ONLY tasks/WG.00.12/review_grok_7619c9cb.md.
+2. Inside that file, include the full 40-character commit hash: 7619c9cb68b1594d62a8dee79948dd42799bdcf9.
+3. Include an explicit verdict line: 'VERDICT: PASS' or 'VERDICT: CLEAN PASS' or a clear non-PASS.
+4. Subject tag of your git commit must start with '[grok]'.
+5. Independently inspect tools/governance/check_claims.js, tools/governance/test_check_claims.js, and tasks/WG.00.12/c2_governance_state.md.
+6. Verify hardening against all 9 vulnerability vectors from Directive 001-I Â§C.
+7. Re-run node tools/governance/test_check_claims.js in a fresh temporary clone and record the real exit code, test count, and mutant kill count.
+8. Do NOT modify any other files. Do NOT merge. Do NOT push.
