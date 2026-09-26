@@ -31,7 +31,7 @@
 - **Lane E (Grok Writer / Claude Reviewer):** WG.00.09 Follow-up: Grok revision (`37fc1473`) re-reviewed by Claude (`2150c513`). Verdict: **CHANGES REQUESTED** (0 blocker, 1 major R1, 10 minor). Grok committed `5964f772` claiming N1–N4 addressed; review pending. Claude diff review active (`task-35543`, PID 6480).
 - **Lane F (Claude CLI):** WG.00.12 Merged into `main` (`d09a1295`). 8-test post-F suite all passed with EXIT=0. Pushed to `origin`.
 - **Lane G (Claude CLI):** WG.00.11 Merged into `main` (`da2c16b2`). Provenance: coordinator re-ran in lane-g worktree; PM reproduced exit 0 on lane-g and on merged main da2c16b2 (30/30 gating checks pass, 15 mutants caught, world_age 29/29 pass, carrying capacity 23/23 pass).
-- **Lane H (Claude / Fable):** WG.00.08 Fresh Z-2 cut proof (`tools/test_generated_z2_cut_proof.js`) per Directive 001-I sec B. Worktree `lane-h`. Original worker `task-35425` (PID 6276) exited; relaunched as `task-35727` (PID 21660).
+- **Lane H (Claude / Fable):** WG.00.08 Fresh Z-2 cut proof (`tools/test_generated_z2_cut_proof.js`) per Directive 001-I sec B. Committed `c8694f01` and pushed to `origin/task/lane-h`. Baseline 12/12 pass (exit 0), 8/8 mutants exit 1 (including `floating_slab_left`). Claude claims proof hardened and fluid ruling aligned; Grok verification pending.
 - **Lane C2b (Claude):** WG.00.12 Governance hardener (`tools/governance/check_claims.js`) per Directive 001-I sec C. Worktree `lane-c2b`.
 
 ---
@@ -50,7 +50,7 @@
 | **Lane E** | **WG.00.09 DEFINE / PRE-ATTACK** (`WG.00.09`) | Grok CLI (Writer) / Claude (Reviewer) | `task-35543` (PID 6480)<br>`task/lane-e` | `C:\Users\snewt\.deus_worktrees\lane-e` | 2026-09-25 23:17:10 | **STATUS: DIFF REVIEW ACTIVE (Claude).**<br>• Grok committed `5964f772` claiming N1–N4 addressed (review pending), pushed to origin. Claude task-35543 diff-reviewing against `710fa095`. |
 | **Lane F** | **OneDrive-Link Migration Prep** (`WG.00.12`) | Claude CLI / `claude-opus-5-5` | Merged `d09a1295`<br>`task/lane-f` | `C:\Users\snewt\.deus_worktrees\lane-f` | 2026-09-25 16:52:09 | **STATUS: INTEGRATED TO MAIN.**<br>• Post-F test suite 8/8 EXIT=0; pushed to origin. |
 | **Lane G** | **ATK-YEAR0-002 Runtime Fix & Test Maint** (`WG.00.11`) | Claude CLI / `claude-opus-5-5` | Merged `da2c16b2`<br>`task/lane-g` | `C:\Users\snewt\.deus_worktrees\lane-g` | 2026-09-25 17:50:51 | **STATUS: INTEGRATED TO MAIN.**<br>• Runtime Year 0 integrated. |
-| **Lane H** | **Z-2 Cut Proof & Fluid Hardening** (`WG.00.08`) | Claude CLI (Fable) / `claude-opus-5-5` | `task-35727` (PID 21660)<br>ex-`task-35425` (PID 6276)<br>`task/lane-h` | `C:\Users\snewt\.deus_worktrees\lane-h` | Active | **STATUS: ACTIVE WRITER (RELAUNCHED).**<br>• PID 6276 exited at 23:18:50 with uncommitted work while background runs completed. Relaunched as task-35727 (PID 21660) at 23:25. |
+| **Lane H** | **Z-2 Cut Proof & Fluid Hardening** (`WG.00.08`) | Claude CLI (Fable) / `claude-opus-5-5` | Committed `c8694f01`<br>`task/lane-h` (pushed) | `C:\Users\snewt\.deus_worktrees\lane-h` | 2026-09-25 23:30:59 | **STATUS: COMMITTED & PUSHED (REVIEW PENDING).**<br>• Committed `c8694f01`, pushed to origin. Baseline 12/12 pass (exit 0), 8/8 mutants exit 1. Claude claims Z-2 proof hardened and fluid ruling aligned; Grok verification pending. |
 
 ---
 
