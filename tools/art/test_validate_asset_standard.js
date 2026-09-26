@@ -174,6 +174,9 @@ const propsBad = standard.readableProps.filter(p => p !== 'gravestone');
 kills('props', 'AS-PROP-001', V.checkProps(standard.readableProps, standard), V.checkProps(propsBad, standard));
 
 kills('outfit-matrix', 'AS-HUM-015', V.checkMatrix(standard.outfitMatrix, standard), V.checkMatrix(standard.outfitMatrix.slice(1), standard));
+const pixelBad = V.clone(standard.outfitMatrix);
+pixelBad[0].pixels = 'shared';
+kills('outfit-pixels', 'AS-HUM-015', V.checkMatrix(standard.outfitMatrix, standard), V.checkMatrix(pixelBad, standard));
 const lifeBad = V.clone(standard.bodyTemplates);
 delete lifeBad.elder;
 kills('life', 'AS-HUM-019', V.checkLife(standard.bodyTemplates), V.checkLife(lifeBad));
@@ -184,6 +187,133 @@ kills('summon-map', 'AS-SUMMON-001', summonGood, V.checkSummons(spells.entries.c
 const tableBad = V.clone(standard.summons);
 tableBad[0].dismiss = '';
 kills('summon-parts', 'AS-SUMMON-002', summonGood, V.checkSummons(spells.entries, tableBad, standard.summonDerivation));
+
+const skinBad = V.clone(standard.uiSkins);
+skinBad.skins = skinBad.skins.filter(skin => skin.id !== 'deus-dark');
+kills('skins', 'AS-UI-004', V.checkSkins(standard.uiSkins, standard), V.checkSkins(skinBad, standard));
+
+const religionBad = V.clone(standard.religion);
+religionBad.pieces = religionBad.pieces.filter(piece => piece !== 'altar');
+kills('religion', 'AS-REL-001', V.checkReligion(standard.religion), V.checkReligion(religionBad));
+const deityBad = V.clone(standard.religion);
+deityBad.deities = [{ id: 'unnamed', holySymbolId: '' }];
+kills('religion-symbol', 'AS-REL-001', V.checkReligion(standard.religion), V.checkReligion(deityBad));
+
+const farmBad = V.clone(standard.farming);
+farmBad.stages = farmBad.stages.filter(stage => stage !== 'mature');
+kills('farm', 'AS-FARM-001', V.checkFarm(standard.farming), V.checkFarm(farmBad));
+const foodBad = V.clone(standard.food);
+foodBad.states = ['raw'];
+kills('food', 'AS-FOOD-001', V.checkFood(standard.food), V.checkFood(foodBad));
+kills('dungeon', 'AS-DUNG-001', V.checkClosed('AS-DUNG-001', standard.dungeonKit, standard.dungeonKit, 'dungeon'), V.checkClosed('AS-DUNG-001', standard.dungeonKit.slice(1), standard.dungeonKit, 'dungeon'));
+kills('traps', 'AS-TRAP-001', V.checkClosed('AS-TRAP-001', standard.traps, standard.traps, 'traps'), V.checkClosed('AS-TRAP-001', standard.traps.slice(1), standard.traps, 'traps'));
+kills('lore', 'AS-LORE-001', V.checkClosed('AS-LORE-001', standard.loreVisuals, standard.loreVisuals, 'lore'), V.checkClosed('AS-LORE-001', standard.loreVisuals.slice(1), standard.loreVisuals, 'lore'));
+kills('zones', 'AS-ZONE-001', V.checkClosed('AS-ZONE-001', standard.designations, standard.designations, 'zones'), V.checkClosed('AS-ZONE-001', standard.designations.slice(1), standard.designations, 'zones'));
+const sceneBad = V.clone(standard.eventScenes);
+sceneBad.required = true;
+kills('scenes', 'AS-SCENE-001', V.checkScenes(standard.eventScenes), V.checkScenes(sceneBad));
+const marketingBad = V.clone(standard.marketing);
+marketingBad.required = true;
+kills('marketing', 'AS-MKTG-001', V.checkMarketing(standard.marketing), V.checkMarketing(marketingBad));
+
+const tameArtBad = V.clone(standard.domestication);
+tameArtBad.art = tameArtBad.art.filter(piece => piece !== 'cage');
+kills('tame-art', 'AS-TAME-001', V.checkTame(standard.domestication), V.checkTame(tameArtBad));
+const tameSlotBad = V.clone(standard.domestication);
+tameSlotBad.creatureEquipmentSlots = ['barding'];
+kills('tame-slots', 'AS-TAME-002', V.checkTame(standard.domestication), V.checkTame(tameSlotBad));
+
+const varietyBad = V.clone(standard.variety);
+varietyBad.surface.TEMPERATE.trees = 11;
+kills('variety', 'AS-VAR-001', V.checkVariety(standard.variety, standard), V.checkVariety(varietyBad, standard));
+const seasonBad = V.clone(standard.variety);
+seasonBad.surface.WILD.seasons = 'redraw';
+kills('variety-season', 'AS-VAR-002', V.checkVariety(standard.variety, standard), V.checkVariety(seasonBad, standard));
+const flipBad = V.clone(standard.variety);
+flipBad.surface.ARID.flip = true;
+kills('variety-flip', 'AS-VAR-002', V.checkVariety(standard.variety, standard), V.checkVariety(flipBad, standard));
+
+const geneBad = V.clone(standard.genes);
+geneBad.perRace.human.bodyTypes.male.styles.pop();
+kills('genes', 'AS-GENE-001', V.checkGenes(standard.genes, standard), V.checkGenes(geneBad, standard));
+
+const portraitBad = V.clone(standard.portraitSample);
+delete portraitBad.portrait;
+kills('portrait', 'AS-PORT-001', V.checkPortrait(standard.portraitSample, standard), V.checkPortrait(portraitBad, standard));
+const portraitName = V.clone(standard.portraitSample);
+portraitName.portrait.file = 'portrait.png';
+kills('portrait-name', 'AS-STYLE-001', V.checkPortrait(standard.portraitSample, standard), V.checkPortrait(portraitName, standard));
+
+const headBad = V.clone(standard.headGrid.sample);
+headBad.frames = headBad.frames.slice(0, 11);
+kills('head-grid', 'AS-HEAD-001', V.checkHeadLayer(standard.headGrid.sample), V.checkHeadLayer(headBad));
+const longBad = V.clone(standard.headGrid.longHairSample);
+longBad.extras = longBad.extras.concat([{ pose: 'swing', dir: 'S' }]);
+kills('head-extra', 'AS-HEAD-001', V.checkHeadLayer(standard.headGrid.longHairSample), V.checkHeadLayer(longBad));
+const anchorBad = V.clone(standard.elderReuse.frames);
+delete anchorBad[0].headAnchor;
+kills('head-anchor', 'AS-HEAD-001', V.checkBodyAnchors(standard.elderReuse.frames, standard), V.checkBodyAnchors(anchorBad, standard));
+
+const elderBad = V.clone(standard.elderReuse);
+elderBad.garbSheet = 'elder';
+kills('elder-sheet', 'AS-ELDER-001', V.checkElder(standard.elderReuse, standard), V.checkElder(elderBad, standard));
+const elderGap = V.clone(standard.elderReuse);
+elderGap.frames = elderGap.frames.slice(0, -1);
+elderGap.frameCount = elderGap.frames.length;
+kills('elder-offset', 'AS-ELDER-001', V.checkElder(standard.elderReuse, standard), V.checkElder(elderGap, standard));
+
+const gearBad = V.clone(standard.gearPolicy.rows);
+gearBad[1].silhouetteId = 'sil:longsword-elf';
+kills('gear', 'AS-GEAR-001', V.checkGear(standard.gearPolicy.rows), V.checkGear(gearBad));
+
+const mirrorBad = V.clone(addenda.mirror);
+mirrorBad.symmetric = false;
+kills('mirror', 'AS-MIRROR-001', V.checkMirror(addenda.mirror), V.checkMirror(mirrorBad));
+
+const poseBad = V.clone(standard);
+poseBad.humanoidRows = poseBad.humanoidRows.filter(row => row !== 'prone');
+kills('poses', 'AS-POSE-001', V.checkPoses(standard), V.checkPoses(poseBad));
+
+const six = load('biomes_six.json');
+const realBiomes = V.readJson(path.join(ROOT, 'game', 'data', 'DEUS_BiomeRegistry.json'));
+kills('biome-set', 'AS-BIOME-005', V.checkBiomeRegistry(six, standard, 'biomes_six.json'), V.checkBiomeRegistry(realBiomes, standard, 'DEUS_BiomeRegistry.json'));
+const docsBiomes = V.readJson(path.join(ROOT, 'docs', 'art', 'DEUS_BiomeRegistry.json'));
+check('biome-docs', hit(V.checkBiomeRegistry(docsBiomes, standard, 'docs'), 'AS-BIOME-005', 'violate'));
+
+const sizeBad = V.clone(valid);
+sizeBad.sizeClass = 'Gargantuan';
+sizeBad.bodyShape = 'square';
+sizeBad.framePx = [48, 48];
+kills('size', 'AS-SIZE-001', [V.sizeResult(valid, standard)], [V.sizeResult(sizeBad, standard)]);
+
+const sheetBad = V.clone(standard.sheetSample);
+sheetBad.w = 512;
+kills('sheet', 'AS-SLOT-001', V.checkSheet(standard.sheetSample, standard), V.checkSheet(sheetBad, standard));
+const atlasBad = V.clone(standard.runtimeAtlas);
+atlasBad.squares = [40, 40];
+kills('atlas', 'AS-SLOT-001', V.checkAtlas(standard.runtimeAtlas), V.checkAtlas(atlasBad));
+
+const pipeBad = V.clone(standard.pipelineSample);
+pipeBad.scaled = true;
+kills('pipeline', 'AS-PIPE-001', V.checkPipeline(standard.pipelineSample), V.checkPipeline(pipeBad));
+
+const promptBad = V.clone(standard.promptSpecTemplates);
+promptBad.categories.creature.promptText = 'not-a-field-template';
+kills('prompt-fields', 'AS-PROMPT-001', V.checkPromptTemplates(standard.promptSpecTemplates), V.checkPromptTemplates(promptBad));
+
+const logBad = V.clone(standard.generationLogSample);
+delete logBad.seed;
+kills('gen-log', 'AS-GEN-001', V.checkGenerationLog(standard.generationLogSample, standard.generationLog), V.checkGenerationLog(logBad, standard.generationLog));
+const yieldBad = V.clone(standard.yieldSample);
+delete yieldBad.costPerUsableSlot;
+kills('yield', 'AS-GEN-002', V.checkYield(standard.yieldSample), V.checkYield(yieldBad));
+const versionBad = V.clone(standard.promptVersionSample);
+versionBad.abYieldBeatsCurrent = false;
+kills('prompt-version', 'AS-GEN-003', V.checkPromptVersion(standard.promptVersionSample), V.checkPromptVersion(versionBad));
+const routeBad = V.clone(standard);
+routeBad.routingPolicy = V.clone(standard.routingPolicy);
+routeBad.routingPolicy.objective = 'cheapest-only';
+kills('generators', 'AS-GEN-004', V.checkGenerators(standard), V.checkGenerators(routeBad));
 
 function idsMatch(mdText, rules) {
     const mdIds = new Set(mdText.match(/AS-[A-Z]+-\d{3}/g) || []);
@@ -221,12 +351,12 @@ function quiet(fn) {
         process.stdout.write = write;
     }
 }
-const strictOk = quiet(() => V.main(['--catalogue', path.join(FIX, 'mini_catalogue.json'), '--strict', '--json'], { noExit: true }));
+const strictOk = quiet(() => V.main(['--catalogue', path.join(FIX, 'mini_catalogue.json'), '--biome-registry', path.join(FIX, 'biomes_six.json'), '--strict', '--json'], { noExit: true }));
 check('cli-strict-clean', strictOk === 0, 'exit ' + strictOk);
 const strictBad = quiet(() => V.main(['--catalogue', path.join(FIX, 'eight_catalogue.json'), '--strict'], { noExit: true }));
 check('cli-strict-eight', strictBad === 1, 'exit ' + strictBad);
 
-const checked = ['AS-GLOBAL-010', 'AS-GLOBAL-014', 'AS-GLOBAL-019', 'AS-GLOBAL-022', 'AS-GLOBAL-023', 'AS-CRIT-001', 'AS-CRIT-004', 'AS-BEAST-001', 'AS-HUM-004', 'AS-HUM-009', 'AS-HUM-015', 'AS-HUM-016', 'AS-HUM-017', 'AS-HUM-019', 'AS-FACE-001', 'AS-FACE-002', 'AS-FACE-003', 'AS-FACE-004', 'AS-ICON-001', 'AS-ICON-003', 'AS-ITEM-001', 'AS-ITEM-002', 'AS-NODE-001', 'AS-ANIM-001', 'AS-FX-003', 'AS-FX-005', 'AS-UI-003', 'AS-SUMMON-001', 'AS-SUMMON-002', 'AS-REMAIN-001', 'AS-HAUL-001', 'AS-VEH-001', 'AS-LIGHT-001', 'AS-MAP-001', 'AS-PROP-001', 'AS-STYLE-001'];
+const checked = ['AS-GLOBAL-010', 'AS-GLOBAL-014', 'AS-GLOBAL-019', 'AS-GLOBAL-022', 'AS-GLOBAL-023', 'AS-CRIT-001', 'AS-CRIT-004', 'AS-BEAST-001', 'AS-HUM-004', 'AS-HUM-009', 'AS-HUM-015', 'AS-HUM-016', 'AS-HUM-017', 'AS-HUM-019', 'AS-FACE-001', 'AS-FACE-002', 'AS-FACE-003', 'AS-FACE-004', 'AS-ICON-001', 'AS-ICON-003', 'AS-ITEM-001', 'AS-ITEM-002', 'AS-NODE-001', 'AS-ANIM-001', 'AS-FX-003', 'AS-FX-005', 'AS-UI-003', 'AS-UI-004', 'AS-SUMMON-001', 'AS-SUMMON-002', 'AS-REMAIN-001', 'AS-HAUL-001', 'AS-VEH-001', 'AS-LIGHT-001', 'AS-MAP-001', 'AS-PROP-001', 'AS-STYLE-001', 'AS-REL-001', 'AS-FARM-001', 'AS-FOOD-001', 'AS-DUNG-001', 'AS-TRAP-001', 'AS-LORE-001', 'AS-SCENE-001', 'AS-ZONE-001', 'AS-MKTG-001', 'AS-TAME-001', 'AS-TAME-002', 'AS-VAR-001', 'AS-VAR-002', 'AS-GENE-001', 'AS-PORT-001', 'AS-HEAD-001', 'AS-ELDER-001', 'AS-GEAR-001', 'AS-MIRROR-001', 'AS-POSE-001', 'AS-BIOME-005', 'AS-SIZE-001', 'AS-SLOT-001', 'AS-PIPE-001', 'AS-PROMPT-001', 'AS-GEN-001', 'AS-GEN-002', 'AS-GEN-003', 'AS-GEN-004'];
 const srcHas = checked.filter(id => src.indexOf(id) === -1);
 check('checks-present', srcHas.length === 0, srcHas.join(','));
 

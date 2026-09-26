@@ -6,12 +6,12 @@ No art was generated. No image prompts. Deliverables are markdown, JSON and Node
 
 ## Files
 
-- `docs/art/DEUS_ASSET_STANDARD.md` — normative standard, 89 rule ids, appendices A–C.
-- `game/data/UF_AssetStandard.json` — `schemaVersion` `deus-asset-standard/1.0.0`. Same 89 rule ids. `outfitMatrix` length 135. `summons` length 29.
+- `docs/art/DEUS_ASSET_STANDARD.md` — normative standard, 119 rule ids, appendices A–C.
+- `game/data/UF_AssetStandard.json` — `schemaVersion` `deus-asset-standard/1.1.0`. Same 119 rule ids. `outfitMatrix` length 135. `summons` length 29.
 - `game/data/UF_SpellVisualTable.schema.json` — JSON Schema draft 2020-12 (`$schema` is `https://json-schema.org/draft/2020-12/schema`). Six example rows: Fire Bolt, Fireball, Cone of Cold, Lightning Bolt, Shield, Cure Wounds. Not the 319-spell table.
 - `tools/art/validate_asset_standard.js` — coverage checker. Reads the catalogue, the standard, the spell schema and `game/data/srd51/spells.json`. Does not write files and does not read pixels.
 - `tools/art/test_validate_asset_standard.js` and `tools/art/fixtures/asset_standard/**` — each check has a passing case and a mutant that the check must reject.
-- `tasks/WG.20.01/lane-al/BRIEF_ADDENDUM_A1.md` — Owner addenda A1–A6, applied below.
+- `tasks/WG.20.01/lane-al/BRIEF_ADDENDUM_A1.md` — Owner addenda A1–A9. A1–A6 were already in the standard at the PM merge. This resume adds A7–A9 and the later amendments, in the Addendum A1 section below.
 
 `art/catalogue/**` was not modified.
 
@@ -176,3 +176,89 @@ No WBS ids. No art.
 - `PROPOSED-AL-09` — resource-node states for six biomes.
 - `PROPOSED-AL-10` — child and working-elder templates.
 - `PROPOSED-AL-11` — the WBS leaves in Appendix B item 3, when the Owner wants them.
+
+## Addendum A1
+
+Resume on `task/lane-al` after the PM merge `ad674159` (writer tip `dc6696e9` is an ancestor). No art was generated. No image prompt was run. `promptSpecTemplates` is a field list with sources. `prosePrompt` is null.
+
+A1 through A6 were already encoded (135 outfits, face stack, race-neutral item ids, icon grid, 29 summon rows, remains, carry, vehicles, child and working elder, night hook, map, props, file names). This pass keeps those gates and applies A7, A8 and A9. Later rulings amend earlier sentences. They do not delete the old rule ids.
+
+- **A1, amended by A9.** The 135 outfit ids stay race-neutral. Pixels are custom per race (`pixels: custom-per-race`). The silhouette name is the slot pattern. Weapons, tools and accessories are one silhouette, a race ramp and a decal slot (**AS-GEAR-001**).
+- **A7 (12:56 and 12:57 CT).** Eleven player-selectable window skins: `deus`, `deus-dark`, and one per race. RMMZ 192×192 regions, opaque pixels. Religion pieces with an open deity list (no invented pantheon). Farming stages, food, underground kit, traps, lore visuals, optional event scenes, designation overlays. Marketing is a later note, `required: false`.
+- **A8 (12:59, 13:01, 13:02, 13:03 CT).** Tamed and bound art, cages and pens. No creature equipment slots, no barding, no crafted creature gear. Collar, saddle and harness are visual markers with no slot and no stats; whether they are wanted at all is Appendix B. Variety floors for six biomes and for `DEEP` and `CAVERN`. Hair 12 per body type, 3 balding overlays, 8 facial-hair parts plus `dwarf-plait`, face-gene counts. Seasons on variety pieces are palette-swap frames (PM, Owner may amend). Every non-face entity needs an icon and a 144×144 portrait.
+- **A9 (13:14 through 13:24 CT).** Head grid of 12 frames and a head anchor on every body frame (236 frames). Elder reuses adult garb, gear and hair via offsets. Mirror is an offline W-to-E bake of a symmetric, light-neutral layer. Pose rows prone, unconscious, sleep, sit, sneak, climb. **AS-BIOME-005** flags a canonical biome set that is not the six DEC-030 ids. Creature squares from 1×1 through 4×4, largest sheet 768×768. Slot templates and a 2048 atlas (42×42). Pipeline rejects off-size output and does not scale. Field templates, generation log, yield, template versions, generator adapters, routing and a golden test set are schemas. Generators are `unassigned`. Style tune is optional and later. No registry, catalogue or tool file outside `allowedPaths` was edited.
+
+`game/data/DEUS_BiomeRegistry.json` and `docs/art/DEUS_BiomeRegistry.json` still list `TEMP`, `WET`, `ARID`, `HIGH`, `VOLC`. Catalogue `biomes.canonical` is the same five, and all 10,089 entry biome tokens are `SHARED`. The checker reports those three lists. It does not rewrite them. Mapping `HIGH` and `WILD` is Appendix B, not a guess in this lane.
+
+Catalogue rows that have no icon or portrait field are `unknown` for **AS-PORT-001**, not a pass. That moved 139 former passes (items, equipment that already passed, structures, furniture, workshops, veins, and the stone rows that had passed) into unknown. The 11 filename violations are unchanged.
+
+### Catalogue coverage (this pass)
+
+`node tools/art/validate_asset_standard.js` against `art/catalogue/catalogue.json`. Exit 0. `--json` carries the same summary object. `--strict` would exit 1 because violations are non-zero (11 filenames plus 3 biome-set globals). Nothing was written under `art/` or `game/img/`.
+
+```
+entries 10089 pass 77 violate 11 unknown 10001
+rule-results pass 10985 violate 11 unknown 10195
+global-violations 3
+global violate AS-BIOME-005 game/data/DEUS_BiomeRegistry.json canonical TEMP,WET,ARID,HIGH,VOLC
+global violate AS-BIOME-005 docs/art/DEUS_BiomeRegistry.json canonical TEMP,WET,ARID,HIGH,VOLC
+global violate AS-BIOME-005 catalogue canonical TEMP,WET,ARID,HIGH,VOLC
+```
+
+| Category | Entries | Pass | Violate | Unknown |
+|---|---:|---:|---:|---:|
+| CHARACTER | 47 | 0 | 0 | 47 |
+| CONNECTOR | 42 | 7 | 0 | 35 |
+| CREATURE | 48 | 0 | 0 | 48 |
+| DECAY | 100 | 0 | 0 | 100 |
+| EDGE | 3480 | 0 | 0 | 3480 |
+| EFFECT | 4 | 4 | 0 | 0 |
+| EQUIPMENT | 34 | 0 | 7 | 27 |
+| FACE | 52 | 48 | 4 | 0 |
+| FLORA | 22 | 0 | 0 | 22 |
+| FURNITURE | 9 | 0 | 0 | 9 |
+| HANGING | 30 | 0 | 0 | 30 |
+| ITEM | 61 | 0 | 0 | 61 |
+| LIGHT | 20 | 0 | 0 | 20 |
+| RAMP | 2900 | 0 | 0 | 2900 |
+| RAMPSIDE | 2900 | 0 | 0 | 2900 |
+| REMAINS | 4 | 3 | 0 | 1 |
+| RIMSHADOW | 20 | 0 | 0 | 20 |
+| SHADE | 25 | 0 | 0 | 25 |
+| STONE | 12 | 0 | 0 | 12 |
+| STRUCTURE | 21 | 0 | 0 | 21 |
+| TERRAIN | 42 | 14 | 0 | 28 |
+| TOP | 145 | 0 | 0 | 145 |
+| TREE | 16 | 0 | 0 | 16 |
+| VEIN | 4 | 0 | 0 | 4 |
+| WALLFACE | 30 | 0 | 0 | 30 |
+| WATER | 10 | 1 | 0 | 9 |
+| WORKSHOP | 11 | 0 | 0 | 11 |
+
+The other global checks passed, including 135 outfits, 29 summon spells, 11 skins, gene counts, the 12-frame head grid, 236 elder offsets, and the field templates.
+
+### Gate output (this pass)
+
+`node tools/art/test_validate_asset_standard.js`
+
+```
+RESULT: 171 passed, 0 failed
+```
+
+Exit 0. Each check printed `PASS` for the good record and for the mutant (171 lines) before that result line.
+
+`node tools/check_deus_syntax.js`
+
+```
+Checked 52 DEUS plugin files. Errors: 0
+```
+
+Exit 0. This pass did not edit a plugin.
+
+### Follow-ups added
+
+- `PROPOSED-AL-12` — biome registry and catalogue canonical-set fix to the six DEC-030 ids. Do not guess `HIGH` → `COLD` or a source token for `WILD` here.
+- `PROPOSED-AL-13` — sizing manifest, blank template generator, slot map, atlas packer and lookup file.
+- `PROPOSED-AL-14` — generation log, yield store, and routing re-benchmark on the golden test set.
+- `PROPOSED-AL-15` — icon and 144 px portrait for every non-face entity.
+- `PROPOSED-AL-16` — the 11 window skins and the hair, balding and face-gene part expansion.
