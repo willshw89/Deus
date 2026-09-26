@@ -150,7 +150,7 @@ same lane (`lane-c2b`) and the same state.
 
 ### The worker's environment
 
-- `GIT_AUTHOR_NAME` and `GIT_COMMITTER_NAME` = `deus-<provider>` (`deus-claude`, `deus-grok`, `deus-codex`).
+- `GIT_AUTHOR_NAME` and `GIT_COMMITTER_NAME` = `deus-<provider>` (`deus-claude`, `deus-grok`, `deus-codex`, `deus-gemini`).
 - `DEUS_RUN_ID` = the run id.
 - `DEUS_INTEGRATOR` is removed, so a worker can never pass the push guard, even if the launching shell is the
   integrator's. `CLAUDECODE` and `CLAUDE_CODE_ENTRYPOINT` are removed as well.
@@ -348,9 +348,9 @@ Shared JSON files are updated under a lock in `%TEMP%\deus_ops_locks\` and repla
 ## 7. Tests
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File tools/ops/test_launch_worker.ps1            # about 1 minute
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/ops/test_launch_worker.ps1            # about 2 minutes
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/ops/test_resume_queue.ps1             # about 30 s
-powershell -NoProfile -ExecutionPolicy Bypass -File tools/ops/test_launch_worker.ps1 -Mutants   # about 3.5 minutes
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/ops/test_launch_worker.ps1 -Mutants   # about 5 minutes
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/ops/test_resume_queue.ps1 -Mutants    # about 1.5 minutes
 ```
 
@@ -367,7 +367,9 @@ matches a multi-line fault's text with the file's own line ending. Before WG.00.
 fault was a SETUP-ERROR in such a clone.
 
 Counts (WG.00.12b; before it: 147 and 68 checks, 24 and 15 mutants): `test_launch_worker.ps1` 216 checks and 40
-mutants, `test_resume_queue.ps1` 95 checks and 20 mutants. The new tests cover the push rule (brief, other branch,
+mutants, `test_resume_queue.ps1` 95 checks and 20 mutants. OPS.20.06 adds the effort mapping, the DEC-032 floor,
+the gemini provider and the `-ProviderArgs` byte-identity cases, each with a mutant: `test_launch_worker.ps1` is
+268 checks and 44 mutants. `test_resume_queue.ps1` is unchanged at 95 checks. The WG.00.12b tests cover the push rule (brief, other branch,
 `lane.json` true / false / invalid), prompt reuse (`-PromptFile` recorded then reused, resume without stacking, an
 explicit file with an old resume line, relaunch notes, reviewer vs writer both ways, a committed prompt without the
 registry, generated prompts not reused, another task or provider not reused) and, in the resume queue, the saved
