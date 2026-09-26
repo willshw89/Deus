@@ -22,9 +22,10 @@
  * top and is a floor (DEUS_Levels derivePacked), so -2 has had no open cell in any run: the 0->-1 switch is case (b)
  * and the other four are case (a) with depth 2 on a level of -2..+2. Each switch is classified from the probe, not
  * assumed. The "open" variants have the probe open one cell of -2 at the first map start (its five strata air over a
- * -3 cell cut to a stone floor; a solid cell with solid neighbours and nobody standing there, at x and y 3..9 of the
- * area: outside every place the fixture scene can be built, whose centre is at least 20 cells from the area's edges),
- * so the 0->-1 switch becomes case (a) with depth 2 on the new level -3.
+ * -3 cell cut to a stone floor; a solid cell with solid neighbours and nobody standing there, in rows 2..9 of the area:
+ * the scene's centre is at least 22 cells from the top edge (DEUS_Depth sceneCentre), so these rows are outside every
+ * place the fixture scene can be built and off screen in every view of it), so the 0->-1 switch becomes case (a) with
+ * depth 2 on the new level -3.
  *
  * Variants (edits: exact source edits of the clone's DEUS_Depth.js, each target exactly once):
  *   plain           no edit. PASS when switch_same_frame PASSes with both cases seen: every case (a) switch has the planes
@@ -122,7 +123,7 @@ function probePlugin() {
         const W = UF.World, L = UF.Levels, v = W.viewLevel();
         const ref = (x, y, z) => ({ area: { x: v.x, y: v.y }, x, y, z });
         opened = { tried: true, area: { x: v.x, y: v.y } };
-        for (let y = 3; y <= 9 && !opened.cell; y++) for (let x = 3; x <= 9 && !opened.cell; x++) {
+        for (let y = 2; y <= 9 && !opened.cell; y++) for (let x = 2; x <= W.state.size - 3 && !opened.cell; x++) {
             let solid = true;
             for (let dy = -1; dy <= 1 && solid; dy++) for (let dx = -1; dx <= 1 && solid; dx++) if (L.shapeAt(ref(x + dx, y + dy, -2)) !== "solid") solid = false;
             if (!solid || [-3, -2, -1].some(z => W.standerAt(v.x, v.y, x, y, z))) continue;
