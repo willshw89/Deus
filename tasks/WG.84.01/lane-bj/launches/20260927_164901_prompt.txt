@@ -1,0 +1,5 @@
+Implement WG.84.01 in lane-bj as the Codex writer. Read the lane BRIEF and lane.json first, then inspect the existing worldgen entry points and test harnesses as read-only context.
+
+Build a deterministic headless 20-seed procedural-world audit using the real registered worldgen path. It must check stability, completion, reproducibility, fatal/runtime errors, and concrete settlement viability invariants without changing production plugins or data. Avoid fixture-only or source-string proofs. Each new acceptance check needs a provocation or mutant that demonstrably fails. Keep runtime bounded and report per-seed failures with seed and stage. Do not create, edit, request, catalogue, move, or integrate art or audio.
+
+Write only in the allowed paths. Run every lane.json gate in the foreground and all provocations. Record exact commands, exits, measured runtime, limitations, and any owner questions in REPORT.md. Do not edit WBS/status, owner decisions, provider status, plugin registration, or any other task. Commit on task/lane-bj with a [codex] WG.84.01 subject. Do not merge or push. End with FINAL SHA: <full sha>.
