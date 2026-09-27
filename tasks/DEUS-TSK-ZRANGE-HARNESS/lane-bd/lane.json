@@ -1,0 +1,36 @@
+{
+    "lane": "lane-bd",
+    "taskId": "DEUS-TSK-ZRANGE-HARNESS",
+    "branch": "task/lane-bd",
+    "writer": "grok",
+    "reviewer": "gemini",
+    "push": true,
+    "allowedPaths": [
+        "tools/test_column_landforms.js",
+        "tools/test_vertical_worldgen_proof.js",
+        "tasks/DEUS-TSK-ZRANGE-HARNESS/**"
+    ],
+    "gateTests": [
+        {
+            "cmd": "node",
+            "args": [
+                "tools/test_column_landforms.js"
+            ],
+            "timeoutSec": 900
+        },
+        {
+            "cmd": "node",
+            "args": [
+                "tools/test_vertical_worldgen_proof.js"
+            ],
+            "timeoutSec": 900
+        },
+        {
+            "cmd": "node",
+            "args": [
+                "tools/check_deus_syntax.js"
+            ],
+            "timeoutSec": 900
+        }
+    ]
+}
