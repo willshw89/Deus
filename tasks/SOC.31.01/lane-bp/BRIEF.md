@@ -2,7 +2,7 @@
 
 **NO ART OR AUDIO WORK.**
 
-**Lane:** lane-bp | **Task:** SOC.31.01 | **Branch:** task/lane-bp | **Writer:** Gemini 3.8 Flash HIGH | **Reviewer:** Grok | **Base:** main `368632d629bb65a773ee8c204578d7bf1ab74c61`
+**Lane:** lane-bp | **Task:** SOC.31.01 | **Branch:** task/lane-bp | **Writer:** Codex GPT-5.6 Sol MEDIUM (fallback after Gemini API credit exhaustion) | **Reviewer:** Grok | **Base:** main `368632d629bb65a773ee8c204578d7bf1ab74c61`
 
 ## Scope
 Implement a deterministic, data-oriented faction treasury ledger for balance sheets, public revenue entries, expenditure authorizations, and debt records. Preserve INV-SOC-06: monetary accounts and Quartermaster physical stores are distinct. Use integer quantities and explicit transaction identities; reject unbalanced postings, duplicate transaction identities, unauthorized expenditure, malformed debt transitions, and silent mutation. Supply a strict JSON schema for persisted treasury state, documentation, and deterministic validation with a targeted failing fixture for every substantive rule.
@@ -27,3 +27,4 @@ Do not invent tax rates, wage rates, interest rates, credit limits, currencies, 
 4. Preserve exact integer arithmetic and treasury/store separation. Every accepted state transition must conserve the accounting equation as defined from tracked authority or explicitly documented neutral bookkeeping identities.
 5. Every validator rule needs a targeted negative fixture. Include provocations/mutants for unbalanced entries, duplicate IDs, unauthorized spending, stores-as-money, invalid debt state changes, rounding/floating values, and hidden mutation.
 6. Run all gates in the foreground and record exact evidence in REPORT.md. Commit on this branch. Do not merge or push. Independent cross-family review follows PM fresh-clone verification.
+

@@ -2,7 +2,7 @@
   "lane": "lane-bp",
   "taskId": "SOC.31.01",
   "branch": "task/lane-bp",
-  "writer": "gemini",
+  "writer": "codex",
   "reviewer": "grok",
   "push": false,
   "effortClass": "standard",
@@ -14,7 +14,19 @@
     "tasks/SOC.31.01/**"
   ],
   "gateTests": [
-    {"cmd":"node","args":["tools/society/test_treasury.js"],"timeoutSec":1200},
-    {"cmd":"node","args":["tools/check_deus_syntax.js"],"timeoutSec":900}
+    {
+      "cmd": "node",
+      "args": [
+        "tools/society/test_treasury.js"
+      ],
+      "timeoutSec": 1200
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/check_deus_syntax.js"
+      ],
+      "timeoutSec": 900
+    }
   ]
 }
