@@ -1,0 +1,4 @@
+FIRST 0 28320.324 []
+SECOND 0 28036.483 []
+COMPARE {"name":"reproducibility","seed":288419699,"stage":"cold_replay","pass":true,"detail":{"changedLayers":[],"changedState":[]}}
+EXIT=0 ELAPSED_MS=56436.7792
