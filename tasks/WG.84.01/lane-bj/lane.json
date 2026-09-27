@@ -1,0 +1,28 @@
+{
+    "lane":  "lane-bj",
+    "taskId":  "WG.84.01",
+    "branch":  "task/lane-bj",
+    "writer":  "codex",
+    "reviewer":  "grok",
+    "push":  false,
+    "allowedPaths":  [
+                         "tools/worldgen_qa/**",
+                         "tasks/WG.84.01/**"
+                     ],
+    "gateTests":  [
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/worldgen_qa/test_multiseed_worldgen_qa.js"
+                                   ],
+                          "timeoutSec":  3600
+                      },
+                      {
+                          "cmd":  "node",
+                          "args":  [
+                                       "tools/check_deus_syntax.js"
+                                   ],
+                          "timeoutSec":  900
+                      }
+                  ]
+}
