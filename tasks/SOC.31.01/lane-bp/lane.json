@@ -1,0 +1,20 @@
+{
+  "lane": "lane-bp",
+  "taskId": "SOC.31.01",
+  "branch": "task/lane-bp",
+  "writer": "gemini",
+  "reviewer": "grok",
+  "push": false,
+  "effortClass": "standard",
+  "allowedPaths": [
+    "game/data/society/treasury.schema.json",
+    "game/js/sim/society/DEUS_Treasury.js",
+    "docs/systems/DEUS_Treasury.md",
+    "tools/society/test_treasury.js",
+    "tasks/SOC.31.01/**"
+  ],
+  "gateTests": [
+    {"cmd":"node","args":["tools/society/test_treasury.js"],"timeoutSec":1200},
+    {"cmd":"node","args":["tools/check_deus_syntax.js"],"timeoutSec":900}
+  ]
+}
