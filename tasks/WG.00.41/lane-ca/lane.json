@@ -1,0 +1,30 @@
+{
+  "lane": "lane-ca",
+  "taskId": "WG.00.41",
+  "branch": "task/lane-ca",
+  "writer": "gemini",
+  "reviewer": "grok",
+  "allowedPaths": [
+    "game/js/plugins.js",
+    "game/js/plugins/DEUS_Levels.js",
+    "game/js/plugins/DEUS_World.js",
+    "tools/test_proof_bridge_32z.js",
+    "tasks/WG.00.41/lane-ca/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "node",
+      "args": [
+        "tools/test_proof_bridge_32z.js"
+      ],
+      "timeoutSec": 120
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/test_region_seam_continuity.js"
+      ],
+      "timeoutSec": 600
+    }
+  ]
+}
