@@ -1,0 +1,346 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://deus.local/society/treasury.schema.json",
+  "title": "DEUS faction treasury state",
+  "description": "SOC.31.01 persisted financial ledger. All amounts are exact non-negative safe integers in one opaque caller-supplied unit of account. Accounts are FINANCIAL only; physical stores and item quantities are excluded by INV-SOC-06. Cross-record accounting and lifecycle constraints are additionally enforced by DEUS_Treasury.validate.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "treasuryId",
+    "factionId",
+    "unitOfAccountId",
+    "accounts",
+    "transactions",
+    "revenueEntries",
+    "expenditureAuthorizations",
+    "expenditureExecutions",
+    "debts"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "treasuryId": { "$ref": "#/$defs/id" },
+    "factionId": { "$ref": "#/$defs/id" },
+    "unitOfAccountId": { "$ref": "#/$defs/id" },
+    "accounts": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/account" }
+    },
+    "transactions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/transaction" }
+    },
+    "revenueEntries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/revenue" }
+    },
+    "expenditureAuthorizations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/authorization" }
+    },
+    "expenditureExecutions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/execution" }
+    },
+    "debts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/debt" }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 96,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,95}$"
+    },
+    "postingId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "amount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "positiveAmount": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "time": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["domain", "tick"],
+      "properties": {
+        "domain": {
+          "type": "string",
+          "enum": ["action", "historical", "presentation", "engine"]
+        },
+        "tick": { "$ref": "#/$defs/amount" }
+      }
+    },
+    "account": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accountId", "domain", "category"],
+      "properties": {
+        "accountId": { "$ref": "#/$defs/id" },
+        "domain": { "const": "FINANCIAL" },
+        "category": {
+          "type": "string",
+          "enum": ["ASSET", "LIABILITY", "NET_POSITION", "REVENUE", "EXPENSE"]
+        }
+      }
+    },
+    "posting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["postingId", "accountId", "debit", "credit"],
+      "properties": {
+        "postingId": { "$ref": "#/$defs/postingId" },
+        "accountId": { "$ref": "#/$defs/id" },
+        "debit": { "$ref": "#/$defs/amount" },
+        "credit": { "$ref": "#/$defs/amount" }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "debit": { "$ref": "#/$defs/positiveAmount" },
+            "credit": { "const": 0 }
+          }
+        },
+        {
+          "properties": {
+            "debit": { "const": 0 },
+            "credit": { "$ref": "#/$defs/positiveAmount" }
+          }
+        }
+      ]
+    },
+    "transaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transactionId", "kind", "sourceRecordId", "occurredAt", "postings"],
+      "properties": {
+        "transactionId": { "$ref": "#/$defs/id" },
+        "kind": {
+          "type": "string",
+          "enum": ["REVENUE", "EXPENDITURE", "DEBT_ISSUANCE", "DEBT_REPAYMENT"]
+        },
+        "sourceRecordId": { "$ref": "#/$defs/id" },
+        "occurredAt": { "$ref": "#/$defs/time" },
+        "postings": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "$ref": "#/$defs/posting" }
+        }
+      }
+    },
+    "revenue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "revenueId",
+        "transactionId",
+        "revenueTypeId",
+        "policyId",
+        "sourceEntityId",
+        "amount",
+        "assetAccountId",
+        "revenueAccountId",
+        "occurredAt"
+      ],
+      "properties": {
+        "revenueId": { "$ref": "#/$defs/id" },
+        "transactionId": { "$ref": "#/$defs/id" },
+        "revenueTypeId": { "$ref": "#/$defs/id" },
+        "policyId": { "$ref": "#/$defs/id" },
+        "sourceEntityId": {
+          "anyOf": [
+            { "$ref": "#/$defs/id" },
+            { "type": "null" }
+          ]
+        },
+        "amount": { "$ref": "#/$defs/positiveAmount" },
+        "assetAccountId": { "$ref": "#/$defs/id" },
+        "revenueAccountId": { "$ref": "#/$defs/id" },
+        "occurredAt": { "$ref": "#/$defs/time" }
+      }
+    },
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authorizationId",
+        "decisionId",
+        "policyId",
+        "authorizerOfficeId",
+        "purposeType",
+        "subjectId",
+        "debitAccountId",
+        "settlementAccountId",
+        "requestedAmount",
+        "approvedAmount",
+        "executedAmount",
+        "status",
+        "decidedAt"
+      ],
+      "properties": {
+        "authorizationId": { "$ref": "#/$defs/id" },
+        "decisionId": { "$ref": "#/$defs/id" },
+        "policyId": { "$ref": "#/$defs/id" },
+        "authorizerOfficeId": { "$ref": "#/$defs/id" },
+        "purposeType": {
+          "type": "string",
+          "enum": ["GENERAL_EXPENDITURE", "DEBT_REPAYMENT"]
+        },
+        "subjectId": { "$ref": "#/$defs/id" },
+        "debitAccountId": { "$ref": "#/$defs/id" },
+        "settlementAccountId": { "$ref": "#/$defs/id" },
+        "requestedAmount": { "$ref": "#/$defs/positiveAmount" },
+        "approvedAmount": { "$ref": "#/$defs/amount" },
+        "executedAmount": { "$ref": "#/$defs/amount" },
+        "status": {
+          "type": "string",
+          "enum": ["APPROVED", "DENIED", "EXHAUSTED"]
+        },
+        "decidedAt": { "$ref": "#/$defs/time" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["status"],
+            "properties": { "status": { "const": "DENIED" } }
+          },
+          "then": {
+            "properties": {
+              "approvedAmount": { "const": 0 },
+              "executedAmount": { "const": 0 }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["status"],
+            "properties": { "status": { "enum": ["APPROVED", "EXHAUSTED"] } }
+          },
+          "then": {
+            "properties": {
+              "approvedAmount": { "$ref": "#/$defs/positiveAmount" }
+            }
+          }
+        }
+      ]
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["executionId", "authorizationId", "transactionId", "operationType", "subjectId", "amount", "executedAt"],
+      "properties": {
+        "executionId": { "$ref": "#/$defs/id" },
+        "authorizationId": { "$ref": "#/$defs/id" },
+        "transactionId": { "$ref": "#/$defs/id" },
+        "operationType": {
+          "type": "string",
+          "enum": ["GENERAL_EXPENDITURE", "DEBT_REPAYMENT"]
+        },
+        "subjectId": { "$ref": "#/$defs/id" },
+        "amount": { "$ref": "#/$defs/positiveAmount" },
+        "executedAt": { "$ref": "#/$defs/time" }
+      }
+    },
+    "repayment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repaymentId", "executionId", "transactionId", "authorizationId", "amount", "paidAt"],
+      "properties": {
+        "repaymentId": { "$ref": "#/$defs/id" },
+        "executionId": { "$ref": "#/$defs/id" },
+        "transactionId": { "$ref": "#/$defs/id" },
+        "authorizationId": { "$ref": "#/$defs/id" },
+        "amount": { "$ref": "#/$defs/positiveAmount" },
+        "paidAt": { "$ref": "#/$defs/time" }
+      }
+    },
+    "debt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "debtId",
+        "creditorEntityId",
+        "liabilityAccountId",
+        "proceedsAccountId",
+        "principalAmount",
+        "outstandingPrincipal",
+        "status",
+        "policyId",
+        "decisionId",
+        "authorizerOfficeId",
+        "authorizedAt",
+        "issuanceTransactionId",
+        "issuedAt",
+        "settledAt",
+        "repayments"
+      ],
+      "properties": {
+        "debtId": { "$ref": "#/$defs/id" },
+        "creditorEntityId": { "$ref": "#/$defs/id" },
+        "liabilityAccountId": { "$ref": "#/$defs/id" },
+        "proceedsAccountId": { "$ref": "#/$defs/id" },
+        "principalAmount": { "$ref": "#/$defs/positiveAmount" },
+        "outstandingPrincipal": { "$ref": "#/$defs/amount" },
+        "status": {
+          "type": "string",
+          "enum": ["OPEN", "SETTLED"]
+        },
+        "policyId": { "$ref": "#/$defs/id" },
+        "decisionId": { "$ref": "#/$defs/id" },
+        "authorizerOfficeId": { "$ref": "#/$defs/id" },
+        "authorizedAt": { "$ref": "#/$defs/time" },
+        "issuanceTransactionId": { "$ref": "#/$defs/id" },
+        "issuedAt": { "$ref": "#/$defs/time" },
+        "settledAt": {
+          "anyOf": [
+            { "$ref": "#/$defs/time" },
+            { "type": "null" }
+          ]
+        },
+        "repayments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/repayment" }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["status"],
+            "properties": { "status": { "const": "OPEN" } }
+          },
+          "then": {
+            "properties": {
+              "outstandingPrincipal": { "$ref": "#/$defs/positiveAmount" },
+              "settledAt": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["status"],
+            "properties": { "status": { "const": "SETTLED" } }
+          },
+          "then": {
+            "properties": {
+              "outstandingPrincipal": { "const": 0 },
+              "settledAt": { "$ref": "#/$defs/time" }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
