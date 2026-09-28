@@ -27,4 +27,3 @@ Do not invent tax rates, wage rates, interest rates, credit limits, currencies, 
 4. Preserve exact integer arithmetic and treasury/store separation. Every accepted state transition must conserve the accounting equation as defined from tracked authority or explicitly documented neutral bookkeeping identities.
 5. Every validator rule needs a targeted negative fixture. Include provocations/mutants for unbalanced entries, duplicate IDs, unauthorized spending, stores-as-money, invalid debt state changes, rounding/floating values, and hidden mutation.
 6. Run all gates in the foreground and record exact evidence in REPORT.md. Commit on this branch. Do not merge or push. Independent cross-family review follows PM fresh-clone verification.
-

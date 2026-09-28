@@ -167,6 +167,24 @@ function safeAdd(left, right, code, path, errors) {
     return result;
 }
 
+function assertNonNegativeSafeInteger(value, path) {
+    if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) {
+        throw treasuryError("E_INTEGER", path, "must be a non-negative safe integer");
+    }
+}
+
+function assertPositiveSafeInteger(value, path) {
+    if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 1) {
+        throw treasuryError("E_INTEGER", path, "must be a positive safe integer");
+    }
+}
+
+function compareCodeUnits(left, right) {
+    const a = String(left);
+    const b = String(right);
+    return a < b ? -1 : (a > b ? 1 : 0);
+}
+
 function validateTime(value, path, errors) {
     if (!exactKeys(value, TIME_KEYS, path, errors)) return false;
     let ok = true;
@@ -466,6 +484,64 @@ function replayAccounts(state, accounts, errors) {
     return totals;
 }
 
+function aggregateAccounts(accounts, replayed, errors) {
+    const rows = {};
+    const totals = { ASSET: 0, LIABILITY: 0, NET_POSITION: 0, REVENUE: 0, EXPENSE: 0 };
+    const categorySafe = { ASSET: true, LIABILITY: true, NET_POSITION: true, REVENUE: true, EXPENSE: true };
+    const ids = Object.keys(accounts).sort(compareCodeUnits);
+    for (const id of ids) {
+        const account = accounts[id];
+        const replay = replayed[id] || { debit: 0, credit: 0 };
+        const debitNormal = account.category === "ASSET" || account.category === "EXPENSE";
+        const balance = debitNormal ? replay.debit - replay.credit : replay.credit - replay.debit;
+        rows[id] = {
+            accountId: id,
+            category: account.category,
+            debitTotal: replay.debit,
+            creditTotal: replay.credit,
+            balance: balance
+        };
+        if (!Number.isSafeInteger(balance)) {
+            addError(errors, "E_INTEGER", "/transactions", "account balance for " + id + " would exceed the safe integer range");
+            if (has(categorySafe, account.category)) categorySafe[account.category] = false;
+            continue;
+        }
+        if (!has(totals, account.category) || !categorySafe[account.category]) continue;
+        const aggregate = totals[account.category] + balance;
+        if (!Number.isSafeInteger(aggregate)) {
+            addError(errors, "E_INTEGER", "/transactions",
+                "aggregate " + account.category + " balance would exceed the safe integer range");
+            categorySafe[account.category] = false;
+        } else totals[account.category] = aggregate;
+    }
+
+    let left = null;
+    if (categorySafe.ASSET && categorySafe.EXPENSE) {
+        const candidate = totals.ASSET + totals.EXPENSE;
+        if (!Number.isSafeInteger(candidate)) {
+            addError(errors, "E_INTEGER", "/transactions",
+                "left accounting equation total would exceed the safe integer range");
+        } else left = candidate;
+    }
+
+    let right = null;
+    if (categorySafe.LIABILITY && categorySafe.NET_POSITION && categorySafe.REVENUE) {
+        const liabilityAndNet = totals.LIABILITY + totals.NET_POSITION;
+        const candidate = liabilityAndNet + totals.REVENUE;
+        if (!Number.isSafeInteger(liabilityAndNet) || !Number.isSafeInteger(candidate)) {
+            addError(errors, "E_INTEGER", "/transactions",
+                "right accounting equation total would exceed the safe integer range");
+        } else right = candidate;
+    }
+
+    return {
+        rows: rows,
+        accountIds: ids,
+        totals: totals,
+        equation: { left: left, right: right, balanced: left !== null && right !== null && left === right }
+    };
+}
+
 function validate(state) {
     const errors = [];
     if (!exactKeys(state, STATE_KEYS, "", errors)) return { ok: false, errors: errors };
@@ -554,7 +630,8 @@ function validate(state) {
             "/expenditureAuthorizations/" + i, "linked executions exceed approved amount");
     }
 
-    replayAccounts(state, accounts, errors);
+    const replayed = replayAccounts(state, accounts, errors);
+    aggregateAccounts(accounts, replayed, errors);
     return { ok: errors.length === 0, errors: errors };
 }
 
@@ -633,7 +710,7 @@ function create(config) {
         factionId: config.factionId,
         unitOfAccountId: config.unitOfAccountId,
         accounts: Array.isArray(config.accounts) ? clone(config.accounts).sort(function(a, b) {
-            return String(a.accountId).localeCompare(String(b.accountId));
+            return compareCodeUnits(a.accountId, b.accountId);
         }) : config.accounts,
         transactions: [],
         revenueEntries: [],
@@ -647,6 +724,7 @@ function create(config) {
 function recordRevenue(state, input) {
     assertValid(state);
     assertExactInput(input, REVENUE_KEYS, "/input");
+    assertPositiveSafeInteger(input.amount, "/input/amount");
     ensureUnused(state, "revenue", input.revenueId);
     ensureUnused(state, "transaction", input.transactionId);
     const next = clone(state);
@@ -660,11 +738,13 @@ function authorizeExpenditure(state, request, decision) {
     assertValid(state);
     assertExactInput(request, ["authorizationId", "purposeType", "subjectId", "debitAccountId", "settlementAccountId", "requestedAmount"], "/request");
     assertExactInput(decision, ["decisionId", "policyId", "authorizerOfficeId", "authorized", "approvedAmount", "decidedAt"], "/decision");
+    assertPositiveSafeInteger(request.requestedAmount, "/request/requestedAmount");
+    assertNonNegativeSafeInteger(decision.approvedAmount, "/decision/approvedAmount");
     ensureUnused(state, "authorization", request.authorizationId);
     ensureUnused(state, "decision", decision.decisionId);
     if (typeof decision.authorized !== "boolean") throw treasuryError("E_AUTH_DECISION", "/decision/authorized", "must be a caller-supplied boolean policy result");
-    if (decision.authorized && (!(Number.isSafeInteger(decision.approvedAmount)) || decision.approvedAmount < 1)) {
-        throw treasuryError("E_AUTH_DECISION", "/decision/approvedAmount", "an authorized decision needs a positive safe integer approval");
+    if (decision.authorized && decision.approvedAmount < 1) {
+        throw treasuryError("E_AUTH_DECISION", "/decision/approvedAmount", "an authorized decision needs a positive approval");
     }
     if (!decision.authorized && decision.approvedAmount !== 0) {
         throw treasuryError("E_AUTH_DECISION", "/decision/approvedAmount", "a denied decision must approve zero");
@@ -692,6 +772,7 @@ function authorizeExpenditure(state, request, decision) {
 function executeExpenditure(state, input) {
     assertValid(state);
     assertExactInput(input, ["executionId", "authorizationId", "transactionId", "amount", "executedAt"], "/input");
+    assertPositiveSafeInteger(input.amount, "/input/amount");
     ensureUnused(state, "execution", input.executionId);
     ensureUnused(state, "transaction", input.transactionId);
     const index = indexState(state);
@@ -699,8 +780,8 @@ function executeExpenditure(state, input) {
     if (!auth || auth.status === "DENIED" || auth.purposeType !== "GENERAL_EXPENDITURE") {
         throw treasuryError("E_UNAUTHORIZED", "/input/authorizationId", "general expenditure requires matching approved external authority");
     }
-    if (!Number.isSafeInteger(input.amount) || input.amount < 1 || input.amount > auth.approvedAmount - auth.executedAmount) {
-        throw treasuryError("E_AUTH_LIMIT", "/input/amount", "execution exceeds remaining approved authority or is not a positive safe integer");
+    if (input.amount > auth.approvedAmount - auth.executedAmount) {
+        throw treasuryError("E_AUTH_LIMIT", "/input/amount", "execution exceeds remaining approved authority");
     }
     if (accountBalance(state, auth.settlementAccountId) < input.amount) {
         throw treasuryError("E_INSUFFICIENT_FUNDS", "/input/amount", "implicit overdraft is unavailable; issue explicit debt or supply funds first");
@@ -727,6 +808,8 @@ function issueDebt(state, terms, decision) {
     assertValid(state);
     assertExactInput(terms, ["debtId", "transactionId", "creditorEntityId", "liabilityAccountId", "proceedsAccountId", "principalAmount", "issuedAt"], "/terms");
     assertExactInput(decision, ["decisionId", "policyId", "authorizerOfficeId", "authorized", "approvedPrincipalAmount", "decidedAt"], "/decision");
+    assertPositiveSafeInteger(terms.principalAmount, "/terms/principalAmount");
+    assertNonNegativeSafeInteger(decision.approvedPrincipalAmount, "/decision/approvedPrincipalAmount");
     ensureUnused(state, "debt", terms.debtId);
     ensureUnused(state, "transaction", terms.transactionId);
     ensureUnused(state, "decision", decision.decisionId);
@@ -759,6 +842,7 @@ function issueDebt(state, terms, decision) {
 function repayDebt(state, input) {
     assertValid(state);
     assertExactInput(input, ["repaymentId", "executionId", "authorizationId", "transactionId", "debtId", "amount", "paidAt"], "/input");
+    assertPositiveSafeInteger(input.amount, "/input/amount");
     ensureUnused(state, "repayment", input.repaymentId);
     ensureUnused(state, "execution", input.executionId);
     ensureUnused(state, "transaction", input.transactionId);
@@ -772,8 +856,8 @@ function repayDebt(state, input) {
         auth.debitAccountId !== debt.liabilityAccountId) {
         throw treasuryError("E_UNAUTHORIZED", "/input/authorizationId", "debt repayment requires matching approved external authority");
     }
-    if (!Number.isSafeInteger(input.amount) || input.amount < 1 || input.amount > debt.outstandingPrincipal) {
-        throw treasuryError("E_DEBT_TRANSITION", "/input/amount", "repayment must be a positive safe integer no greater than outstanding principal");
+    if (input.amount > debt.outstandingPrincipal) {
+        throw treasuryError("E_DEBT_TRANSITION", "/input/amount", "repayment cannot exceed outstanding principal");
     }
     if (input.amount > auth.approvedAmount - auth.executedAmount) {
         throw treasuryError("E_AUTH_LIMIT", "/input/amount", "repayment exceeds remaining approved authority");
@@ -815,41 +899,24 @@ function repayDebt(state, input) {
 
 function balanceSheet(state) {
     assertValid(state);
-    const rows = {};
-    for (const account of state.accounts) rows[account.accountId] = {
-        accountId: account.accountId,
-        category: account.category,
-        debitTotal: 0,
-        creditTotal: 0,
-        balance: 0
-    };
-    for (const transaction of state.transactions) for (const posting of transaction.postings) {
-        const row = rows[posting.accountId];
-        row.debitTotal += posting.debit;
-        row.creditTotal += posting.credit;
+    const accounts = {};
+    for (const account of state.accounts) accounts[account.accountId] = account;
+    const errors = [];
+    const replayed = replayAccounts(state, accounts, errors);
+    const derived = aggregateAccounts(accounts, replayed, errors);
+    if (errors.length) {
+        const first = errors[0];
+        throw treasuryError(first.code, first.path, first.message, errors);
     }
-    const totals = { ASSET: 0, LIABILITY: 0, NET_POSITION: 0, REVENUE: 0, EXPENSE: 0 };
-    for (const id of Object.keys(rows)) {
-        const row = rows[id];
-        row.balance = row.category === "ASSET" || row.category === "EXPENSE" ?
-            row.debitTotal - row.creditTotal : row.creditTotal - row.debitTotal;
-        totals[row.category] += row.balance;
-        if (!Number.isSafeInteger(row.balance) || !Number.isSafeInteger(totals[row.category])) {
-            throw treasuryError("E_INTEGER", "/transactions", "balance sheet overflow");
-        }
-    }
-    const left = totals.ASSET + totals.EXPENSE;
-    const right = totals.LIABILITY + totals.NET_POSITION + totals.REVENUE;
-    if (!Number.isSafeInteger(left) || !Number.isSafeInteger(right)) throw treasuryError("E_INTEGER", "/transactions", "accounting equation overflow");
     return deepFreeze({
         schemaVersion: SCHEMA_VERSION,
         treasuryId: state.treasuryId,
         factionId: state.factionId,
         unitOfAccountId: state.unitOfAccountId,
         transactionCount: state.transactions.length,
-        accounts: Object.keys(rows).sort().map(function(id) { return rows[id]; }),
-        totals: totals,
-        equation: { left: left, right: right, balanced: left === right }
+        accounts: derived.accountIds.map(function(id) { return derived.rows[id]; }),
+        totals: derived.totals,
+        equation: derived.equation
     });
 }
 

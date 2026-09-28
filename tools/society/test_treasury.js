@@ -53,6 +53,20 @@ function errorCode(fn) {
     }
 }
 
+function captureError(fn) {
+    try {
+        return { value: fn(), error: null };
+    } catch (error) {
+        return { value: null, error: error };
+    }
+}
+
+function hasExactError(value, message) {
+    return !!value && Array.isArray(value.errors) && value.errors.some(function(error) {
+        return error.code === "E_INTEGER" && error.path === "/transactions" && error.message === message;
+    });
+}
+
 function hasCode(result, code) {
     return !!result && Array.isArray(result.errors) && result.errors.some(function(error) { return error.code === code; });
 }
@@ -88,6 +102,137 @@ function config() {
             { accountId: ACCOUNTS.liability, domain: "FINANCIAL", category: "LIABILITY" }
         ]
     };
+}
+
+function unsafeAppendRevenue(state, input) {
+    const candidate = clone(state);
+    candidate.revenueEntries.push(clone(input));
+    candidate.transactions.push({
+        transactionId: input.transactionId,
+        kind: "REVENUE",
+        sourceRecordId: input.revenueId,
+        occurredAt: clone(input.occurredAt),
+        postings: [
+            { postingId: input.transactionId + ":debit", accountId: input.assetAccountId, debit: input.amount, credit: 0 },
+            { postingId: input.transactionId + ":credit", accountId: input.revenueAccountId, debit: 0, credit: input.amount }
+        ]
+    });
+    return candidate;
+}
+
+function categoryAggregateOverflowScenario() {
+    const ids = {
+        assetA: "account.asset.a",
+        assetB: "account.asset.b",
+        revenueA: "account.revenue.a",
+        revenueB: "account.revenue.b"
+    };
+    let accepted = Treasury.create({
+        treasuryId: "treasury.TEST_category_boundary",
+        factionId: "faction.TEST_category_boundary",
+        unitOfAccountId: "unit.TEST_financial",
+        accounts: [
+            { accountId: ids.revenueB, domain: "FINANCIAL", category: "REVENUE" },
+            { accountId: ids.assetB, domain: "FINANCIAL", category: "ASSET" },
+            { accountId: ids.revenueA, domain: "FINANCIAL", category: "REVENUE" },
+            { accountId: ids.assetA, domain: "FINANCIAL", category: "ASSET" }
+        ]
+    });
+    accepted = Treasury.recordRevenue(accepted, {
+        revenueId: "revenue.TEST_category_max",
+        transactionId: "transaction.TEST_category_max",
+        revenueTypeId: "revenue-type.TEST",
+        policyId: "policy.TEST",
+        sourceEntityId: null,
+        amount: Treasury.MAX_SAFE_AMOUNT,
+        assetAccountId: ids.assetA,
+        revenueAccountId: ids.revenueA,
+        occurredAt: time(1)
+    });
+    const crossingInput = {
+        revenueId: "revenue.TEST_category_cross",
+        transactionId: "transaction.TEST_category_cross",
+        revenueTypeId: "revenue-type.TEST",
+        policyId: "policy.TEST",
+        sourceEntityId: null,
+        amount: 1,
+        assetAccountId: ids.assetB,
+        revenueAccountId: ids.revenueB,
+        occurredAt: time(2)
+    };
+    return { accepted: accepted, crossingInput: crossingInput, candidate: unsafeAppendRevenue(accepted, crossingInput) };
+}
+
+function equationSideOverflowScenario() {
+    const ids = {
+        cash: "account.asset.cash",
+        bank: "account.asset.bank",
+        expense: "account.expense.public",
+        liability: "account.liability.debt",
+        revenue: "account.revenue.public"
+    };
+    let accepted = Treasury.create({
+        treasuryId: "treasury.TEST_equation_boundary",
+        factionId: "faction.TEST_equation_boundary",
+        unitOfAccountId: "unit.TEST_financial",
+        accounts: [
+            { accountId: ids.revenue, domain: "FINANCIAL", category: "REVENUE" },
+            { accountId: ids.expense, domain: "FINANCIAL", category: "EXPENSE" },
+            { accountId: ids.cash, domain: "FINANCIAL", category: "ASSET" },
+            { accountId: ids.liability, domain: "FINANCIAL", category: "LIABILITY" },
+            { accountId: ids.bank, domain: "FINANCIAL", category: "ASSET" }
+        ]
+    });
+    accepted = Treasury.issueDebt(accepted, {
+        debtId: "debt.TEST_equation_max",
+        transactionId: "transaction.TEST_equation_debt",
+        creditorEntityId: "entity.TEST_creditor",
+        liabilityAccountId: ids.liability,
+        proceedsAccountId: ids.cash,
+        principalAmount: Treasury.MAX_SAFE_AMOUNT,
+        issuedAt: time(10)
+    }, {
+        decisionId: "decision.TEST_equation_debt",
+        policyId: "policy.TEST",
+        authorizerOfficeId: "office.TEST_treasurer",
+        authorized: true,
+        approvedPrincipalAmount: Treasury.MAX_SAFE_AMOUNT,
+        decidedAt: time(9)
+    });
+    accepted = Treasury.authorizeExpenditure(accepted, {
+        authorizationId: "authorization.TEST_equation_spend",
+        purposeType: "GENERAL_EXPENDITURE",
+        subjectId: "entity.TEST_payee",
+        debitAccountId: ids.expense,
+        settlementAccountId: ids.cash,
+        requestedAmount: 1
+    }, {
+        decisionId: "decision.TEST_equation_spend",
+        policyId: "policy.TEST",
+        authorizerOfficeId: "office.TEST_treasurer",
+        authorized: true,
+        approvedAmount: 1,
+        decidedAt: time(11)
+    });
+    accepted = Treasury.executeExpenditure(accepted, {
+        executionId: "execution.TEST_equation_spend",
+        authorizationId: "authorization.TEST_equation_spend",
+        transactionId: "transaction.TEST_equation_spend",
+        amount: 1,
+        executedAt: time(12)
+    });
+    const crossingInput = {
+        revenueId: "revenue.TEST_equation_cross",
+        transactionId: "transaction.TEST_equation_cross",
+        revenueTypeId: "revenue-type.TEST",
+        policyId: "policy.TEST",
+        sourceEntityId: null,
+        amount: 1,
+        assetAccountId: ids.bank,
+        revenueAccountId: ids.revenue,
+        occurredAt: time(13)
+    };
+    return { accepted: accepted, crossingInput: crossingInput, candidate: unsafeAppendRevenue(accepted, crossingInput) };
 }
 
 function unchanged(name, inputs, fn) {
@@ -362,6 +507,16 @@ function negativeFixtures(validState, partialDebtState) {
             run: function() { const s = clone(validState); s.revenueEntries[0].amount = 999.5; return Treasury.validate(s); }
         },
         {
+            name: "cross_account_category_aggregation_overflow",
+            rule: "E_INTEGER",
+            run: function() { return Treasury.validate(categoryAggregateOverflowScenario().candidate); }
+        },
+        {
+            name: "accounting_equation_side_overflow",
+            rule: "E_INTEGER",
+            run: function() { return Treasury.validate(equationSideOverflowScenario().candidate); }
+        },
+        {
             name: "implicit_wall_clock",
             rule: "E_TIME",
             run: function() { const s = clone(validState); s.revenueEntries[0].occurredAt.domain = "wall"; return Treasury.validate(s); }
@@ -514,18 +669,25 @@ function runProvocations(validState, negativeResults) {
     ];
     for (const pair of named) check("provocation." + pair[0] + ".killed", pair[1] === true, "targeted detector fired");
 
-    const mutableState = clone(validState);
-    const mutableInput = { amount: 7, nested: { value: 9 } };
-    const beforeState = stable(mutableState);
-    const beforeInput = stable(mutableInput);
-    function hiddenMutationMutant(state, input) {
-        state.factionId = "faction.MUTATED";
-        input.nested.value = 10;
-        return state;
-    }
-    hiddenMutationMutant(mutableState, mutableInput);
-    const detectorFired = stable(mutableState) !== beforeState && stable(mutableInput) !== beforeInput;
-    check("provocation.hidden_input_mutation.killed", detectorFired, "mutation detector observed state and nested input changes");
+    const guardedInput = {
+        revenueId: "revenue.TEST_mutation_guard",
+        transactionId: "transaction.TEST_mutation_guard",
+        revenueTypeId: "revenue-type.TEST",
+        policyId: "policy.TEST",
+        sourceEntityId: null,
+        amount: 7,
+        assetAccountId: ACCOUNTS.asset,
+        revenueAccountId: ACCOUNTS.revenue,
+        occurredAt: Object.freeze(time(102))
+    };
+    Object.freeze(guardedInput);
+    const beforeState = Treasury.serialize(validState);
+    const beforeInput = stable(guardedInput);
+    const guardedCall = captureError(function() { return Treasury.recordRevenue(validState, guardedInput); });
+    const callerUnchanged = Treasury.serialize(validState) === beforeState && stable(guardedInput) === beforeInput;
+    check("provocation.hidden_input_mutation.killed", !guardedCall.error && callerUnchanged &&
+        guardedCall.value.revenueEntries.length === validState.revenueEntries.length + 1,
+        guardedCall.error ? String(guardedCall.error) : "real module call completed with frozen caller input unchanged");
 
     let frozenBlocked = false;
     try { validState.accounts[0].category = "FOOD_STORE"; }
@@ -541,6 +703,178 @@ function runProvocations(validState, negativeResults) {
         });
     });
     check("provocation.runtime_float_refused", roundingCode === "E_INTEGER", "got " + roundingCode);
+}
+
+function checkAcceptedApiClosure(prefix, state) {
+    const validation = Treasury.validate(state);
+    check(prefix + ".validate", validation.ok, validation.ok ? "accepted state validates" : stable(validation.errors));
+
+    const sheetCall = captureError(function() { return Treasury.balanceSheet(state); });
+    check(prefix + ".balance_sheet", !sheetCall.error && sheetCall.value.equation.balanced,
+        sheetCall.error ? String(sheetCall.error) : stable(sheetCall.value.equation));
+
+    const auditCall = captureError(function() { return Treasury.audit(state); });
+    check(prefix + ".audit", !auditCall.error && auditCall.value.ok && auditCall.value.balanceSheet.equation.balanced,
+        auditCall.error ? String(auditCall.error) : stable(auditCall.value.balanceSheet.equation));
+
+    const serializeCall = captureError(function() { return Treasury.serialize(state); });
+    check(prefix + ".serialize", !serializeCall.error && typeof serializeCall.value === "string",
+        serializeCall.error ? String(serializeCall.error) : "canonical state serialized");
+
+    const deserializeCall = serializeCall.error ? { error: serializeCall.error, value: null } :
+        captureError(function() { return Treasury.deserialize(serializeCall.value); });
+    check(prefix + ".deserialize", !deserializeCall.error && Treasury.validate(deserializeCall.value).ok,
+        deserializeCall.error ? String(deserializeCall.error) : "serialized state loaded and validates");
+}
+
+function runAggregateSafeIntegerChecks() {
+    console.log("\n=== AGGREGATE SAFE-INTEGER BOUNDARY ===");
+    const category = categoryAggregateOverflowScenario();
+    checkAcceptedApiClosure("aggregate.category_boundary", category.accepted);
+    const categoryBefore = Treasury.serialize(category.accepted);
+    const categoryTransition = captureError(function() {
+        return Treasury.recordRevenue(category.accepted, category.crossingInput);
+    });
+    const assetMessage = "aggregate ASSET balance would exceed the safe integer range";
+    const revenueMessage = "aggregate REVENUE balance would exceed the safe integer range";
+    check("aggregate.category_transition_rejected", categoryTransition.error && categoryTransition.error.code === "E_INTEGER" &&
+        hasExactError(categoryTransition.error, assetMessage) && hasExactError(categoryTransition.error, revenueMessage),
+        categoryTransition.error ? stable(categoryTransition.error.errors) : "overflow transition was accepted");
+    check("aggregate.category_rejection_is_atomic", Treasury.serialize(category.accepted) === categoryBefore,
+        "accepted input state remained unchanged after rejection");
+
+    const categoryValidation = Treasury.validate(category.candidate);
+    check("provocation.cross_account_category_aggregation.killed", !categoryValidation.ok &&
+        hasExactError(categoryValidation, assetMessage) && hasExactError(categoryValidation, revenueMessage),
+        stable(categoryValidation.errors));
+    const categoryAudit = captureError(function() { return Treasury.audit(category.candidate); });
+    check("aggregate.invalid_state_audit_reports", !categoryAudit.error && !categoryAudit.value.ok &&
+        hasExactError(categoryAudit.value, assetMessage),
+        categoryAudit.error ? String(categoryAudit.error) : stable(categoryAudit.value.errors));
+    check("aggregate.invalid_state_balance_sheet_rejected",
+        errorCode(function() { Treasury.balanceSheet(category.candidate); }) === "E_INTEGER", "got E_INTEGER");
+    check("aggregate.invalid_state_serialize_rejected",
+        errorCode(function() { Treasury.serialize(category.candidate); }) === "E_INTEGER", "got E_INTEGER");
+    check("aggregate.invalid_state_deserialize_rejected",
+        errorCode(function() { Treasury.deserialize(JSON.stringify(category.candidate)); }) === "E_INTEGER", "got E_INTEGER");
+
+    const equation = equationSideOverflowScenario();
+    checkAcceptedApiClosure("aggregate.equation_boundary", equation.accepted);
+    const equationBefore = Treasury.serialize(equation.accepted);
+    const equationTransition = captureError(function() {
+        return Treasury.recordRevenue(equation.accepted, equation.crossingInput);
+    });
+    const leftMessage = "left accounting equation total would exceed the safe integer range";
+    const rightMessage = "right accounting equation total would exceed the safe integer range";
+    check("aggregate.equation_transition_rejected", equationTransition.error && equationTransition.error.code === "E_INTEGER" &&
+        hasExactError(equationTransition.error, leftMessage) && hasExactError(equationTransition.error, rightMessage),
+        equationTransition.error ? stable(equationTransition.error.errors) : "overflow transition was accepted");
+    check("aggregate.equation_rejection_is_atomic", Treasury.serialize(equation.accepted) === equationBefore,
+        "accepted input state remained unchanged after rejection");
+    const equationValidation = Treasury.validate(equation.candidate);
+    check("provocation.equation_left_overflow.killed", !equationValidation.ok && hasExactError(equationValidation, leftMessage),
+        stable(equationValidation.errors));
+    check("provocation.equation_right_overflow.killed", !equationValidation.ok && hasExactError(equationValidation, rightMessage),
+        stable(equationValidation.errors));
+}
+
+function runPreciseIntegerErrorChecks(scenario) {
+    console.log("\n=== PRECISE INTEGER ERRORS ===");
+    let spendState = Treasury.recordRevenue(Treasury.create(config()), {
+        revenueId: "revenue.TEST_integer_spend",
+        transactionId: "transaction.TEST_integer_spend",
+        revenueTypeId: "revenue-type.TEST",
+        policyId: "policy.TEST",
+        sourceEntityId: null,
+        amount: 10,
+        assetAccountId: ACCOUNTS.asset,
+        revenueAccountId: ACCOUNTS.revenue,
+        occurredAt: time(200)
+    });
+    spendState = Treasury.authorizeExpenditure(spendState, {
+        authorizationId: "authorization.TEST_integer_spend",
+        purposeType: "GENERAL_EXPENDITURE",
+        subjectId: "entity.TEST_payee",
+        debitAccountId: ACCOUNTS.expense,
+        settlementAccountId: ACCOUNTS.asset,
+        requestedAmount: 10
+    }, {
+        decisionId: "decision.TEST_integer_spend",
+        policyId: "policy.TEST",
+        authorizerOfficeId: "office.TEST_treasurer",
+        authorized: true,
+        approvedAmount: 10,
+        decidedAt: time(201)
+    });
+    check("integer.execute_fraction_reports_E_INTEGER", errorCode(function() {
+        Treasury.executeExpenditure(spendState, {
+            executionId: "execution.TEST_fraction",
+            authorizationId: "authorization.TEST_integer_spend",
+            transactionId: "transaction.TEST_fraction",
+            amount: 0.2,
+            executedAt: time(202)
+        });
+    }) === "E_INTEGER", "fraction is an integer-domain error, not an authority-limit error");
+
+    let repayState = Treasury.authorizeExpenditure(scenario.partialDebt, {
+        authorizationId: "authorization.TEST_fraction_repay",
+        purposeType: "DEBT_REPAYMENT",
+        subjectId: "debt.TEST_1",
+        debitAccountId: ACCOUNTS.liability,
+        settlementAccountId: ACCOUNTS.asset,
+        requestedAmount: 2
+    }, {
+        decisionId: "decision.TEST_fraction_repay",
+        policyId: "policy.TEST",
+        authorizerOfficeId: "office.TEST_treasurer",
+        authorized: true,
+        approvedAmount: 2,
+        decidedAt: time(203)
+    });
+    check("integer.repay_fraction_reports_E_INTEGER", errorCode(function() {
+        Treasury.repayDebt(repayState, {
+            repaymentId: "repayment.TEST_fraction",
+            executionId: "execution.TEST_fraction_repay",
+            authorizationId: "authorization.TEST_fraction_repay",
+            transactionId: "transaction.TEST_fraction_repay",
+            debtId: "debt.TEST_1",
+            amount: 1.2,
+            paidAt: time(204)
+        });
+    }) === "E_INTEGER", "fraction is an integer-domain error, not a debt-transition error");
+
+    check("integer.bigint_reports_E_INTEGER", errorCode(function() {
+        Treasury.recordRevenue(scenario.empty, {
+            revenueId: "revenue.TEST_bigint",
+            transactionId: "transaction.TEST_bigint",
+            revenueTypeId: "revenue-type.TEST",
+            policyId: "policy.TEST",
+            sourceEntityId: null,
+            amount: 1n,
+            assetAccountId: ACCOUNTS.asset,
+            revenueAccountId: ACCOUNTS.revenue,
+            occurredAt: time(205)
+        });
+    }) === "E_INTEGER", "non-Number integer cannot escape through JSON cloning");
+}
+
+function runOrderingChecks() {
+    console.log("\n=== CODE-UNIT ACCOUNT ORDERING ===");
+    const state = Treasury.create({
+        treasuryId: "treasury.TEST_ordering",
+        factionId: "faction.TEST_ordering",
+        unitOfAccountId: "unit.TEST_financial",
+        accounts: [
+            { accountId: "account.asset.i", domain: "FINANCIAL", category: "ASSET" },
+            { accountId: "account.asset.I", domain: "FINANCIAL", category: "ASSET" }
+        ]
+    });
+    const expected = ["account.asset.I", "account.asset.i"];
+    check("ordering.persisted_accounts_code_unit", stable(state.accounts.map(function(row) { return row.accountId; })) === stable(expected),
+        stable(state.accounts.map(function(row) { return row.accountId; })));
+    const sheetIds = Treasury.balanceSheet(state).accounts.map(function(row) { return row.accountId; });
+    check("ordering.balance_sheet_accounts_code_unit", stable(sheetIds) === stable(expected), stable(sheetIds));
+    check("ordering.no_locale_compare", source.indexOf("localeCompare") < 0, "module ordering has no host-locale dependency");
 }
 
 function runSchemaChecks(validState) {
@@ -629,6 +963,9 @@ function main() {
         process.exit(1);
     }
     runModuleChecks(scenario);
+    runAggregateSafeIntegerChecks();
+    runPreciseIntegerErrorChecks(scenario);
+    runOrderingChecks();
     runSchemaChecks(scenario.state);
     const negativeResults = runNegativeFixtures(scenario.state, scenario.partialDebt);
     runProvocations(scenario.state, negativeResults);

@@ -20,7 +20,7 @@ The derived balance sheet uses the neutral expanded accounting identity:
 assets + expenses = liabilities + net position + revenue
 ```
 
-Assets and expenses have debit-normal balances. Liabilities, net position, and revenue have credit-normal balances. Balances are derived by replaying transactions; they are not separately persisted and cannot drift from the journal. All amounts are JavaScript safe integers (`0..9007199254740991`), and every sum is checked before it is accepted. Floats, `NaN`, infinities, negative amounts, rounding, and overflow are refused.
+Assets and expenses have debit-normal balances. Liabilities, net position, and revenue have credit-normal balances. Balances are derived by replaying transactions; they are not separately persisted and cannot drift from the journal. All amounts are JavaScript safe integers (`0..9007199254740991`). Validation checks each posting accumulation, each account balance, every cross-account category aggregate, and both complete equation-side sums before a state is accepted. A state accepted by `create`, a transition, or `deserialize` is therefore safe for `validate`, `balanceSheet`, `audit`, `serialize`, and a subsequent `deserialize`. Floats, `NaN`, infinities, negative amounts, rounding, and overflow are refused with `E_INTEGER` before policy-limit or debt-transition checks.
 
 New treasuries start at zero. There is no generic posting escape hatch: the only transaction kinds are produced by the revenue, authorized expenditure, debt issuance, and authorized debt-repayment transitions below. This prevents an `ADJUSTMENT` transaction from bypassing authorization or debt reconciliation.
 
@@ -80,7 +80,7 @@ All transition inputs are strict objects: missing or unknown keys are rejected. 
 
 | Call | Result |
 |---|---|
-| `create({ treasuryId, factionId, unitOfAccountId, accounts })` | Creates a zero-balance, deeply frozen version-1 state. Accounts are sorted by ID. |
+| `create({ treasuryId, factionId, unitOfAccountId, accounts })` | Creates a zero-balance, deeply frozen version-1 state. Accounts are sorted by deterministic JavaScript UTF-16 code-unit order, independent of host locale. |
 | `validate(state)` | Returns `{ ok, errors }` without mutating or throwing. Performs shape, type, integer, duplicate-ID, balanced-posting, cross-link, authorization, debt, and replay checks. |
 | `recordRevenue(state, input)` | Returns a new state with one revenue record and matching balanced transaction. |
 | `authorizeExpenditure(state, request, decision)` | Returns a new state with an `APPROVED` or `DENIED` external policy decision. Makes no policy decision itself. |
@@ -108,9 +108,11 @@ The complete state object is save truth. Store the object under a future SOC.60.
 
 - strict schema acceptance/rejection and module/schema agreement for representative failures;
 - deterministic revenue, partial/exhaustive expenditure, debt issue, authorized debt repayment, balance-sheet derivation, audit, and canonical save round trip;
+- safe-integer boundary rejection for cross-account category aggregation and for both full accounting-equation sides, including transition atomicity and all accepted-state API surfaces;
+- deterministic code-unit account ordering and precise `E_INTEGER` transition errors for fractional numeric inputs;
 - copy-on-write and deep-freeze behavior for state, request, decision, terms, and record inputs;
 - one named negative fixture for every exported substantive validation rule;
-- explicit provocations for unbalanced postings, duplicate transaction identities, unauthorized expenditure, invalid debt transitions, float/rounding leakage, physical stores presented as money, and hidden input mutation;
+- explicit provocations for unbalanced postings, duplicate transaction identities, unauthorized expenditure, invalid debt transitions, float/rounding leakage, cross-account/category and equation-side overflow, physical stores presented as money, and hidden input mutation through the real module API;
 - deterministic replay equality.
 
 The repository-wide recorded syntax gate is `node tools/check_deus_syntax.js`. It scans registered `game/js/plugins/DEUS_*.js`; SOC.31.01 does not register or edit a runtime plugin, so its executable syntax and behavior are exercised by the targeted treasury gate.
