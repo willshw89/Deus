@@ -4921,6 +4921,17 @@
         /** A cell's five strata: { materials, constructed, hp, bytes, connector, fill, changed } (S0 first), or null. */
         strataAt,
         setStrata,
+        strataMaterialsAt: ref => {
+            const s = strataAt(ref);
+            return s ? s.materials : null;
+        },
+        setStratumMaterial: (ref, s, material) => {
+            const cur = strataAt(ref);
+            if (!cur) return false;
+            const m = cur.materials.slice();
+            m[s] = material;
+            return setStrata(ref, { m, connector: cur.connector });
+        },
         applyStrataDamage,
         damageStrata: applyStrataDamage,
         applyVolumeDamage,

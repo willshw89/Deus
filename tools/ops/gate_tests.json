@@ -8,7 +8,8 @@
     "tools/test_history_materialization_and_world_age.js",
     "tools/test_historical_carrying_capacity.js",
     "tools/test_geology_strata.js",
-    "tools/test_strata_foundation.js"
+    "tools/test_strata_foundation.js",
+    "tools/check_plugin_boot.js"
   ],
   "quarantine": [
     {
