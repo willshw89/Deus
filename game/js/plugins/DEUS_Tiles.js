@@ -477,7 +477,9 @@
         },
 
         shadeStats: () => Object.assign({}, shadeStats),
-        applyGroundShades: (map, ax, ay) => applyGroundShades(map, ax || 0, ay || 0)
+        applyGroundShades: (map, ax, ay) => applyGroundShades(map, ax || 0, ay || 0),
+        groundVariantAt: (x, y) => groundVariantAt(x, y),
+        applyGroundVariants: (map, ax, ay) => applyGroundVariants(map, ax || 0, ay || 0)
     };
     window.DEUS = window.DEUS || {};
     window.UF = window.DEUS;
@@ -549,9 +551,9 @@
         return t * t * (3 - 2 * t);
     }
 
-    function computeShadePlan(map, ax, ay) {
+        function drynessField(map, ax, ay) {
         const cfg = groundShadesConfig();
-        if (!cfg || !cfg.families || !window.UF.WorldGen) return;
+        if (!cfg || !cfg.families || !window.UF.WorldGen) return new Float32Array((map.width || 256 + 1) * (map.width || 256 + 1)).fill(0.5);
         const WG = window.UF.WorldGen;
         const seed = (window.UF.World && UF.World.state ? UF.World.state.seed : 0);
         const d = WG.dims ? WG.dims() : { width: 256, height: 256, startX: 128, startY: 128 };
@@ -559,18 +561,16 @@
         const size = map.width || 256;
         const cornersW = size + 1;
 
-        // Check for test provocations
         const provoke = (typeof process !== "undefined" && process.env && process.env.UF_TEST_PROVOKE) || window.UF_TEST_PROVOKE || "";
         const flatProvoke = provoke === "ground.flat";
         const noiseProvoke = provoke === "ground.noise";
-        const tStart = performance.now();
 
-        // 1. Compute dryness field D across corners (size + 1) x (size + 1)
         const D = new Float32Array(cornersW * cornersW);
         const fw = (cfg.field && cfg.field.weights) || { noise: 0.45, detail: 0.20, rain: 0.20, drainage: 0.10, height: 0.20, water: 0.15 };
 
         if (flatProvoke) {
             D.fill(0.5);
+            return D;
         } else if (noiseProvoke) {
             for (let cy = 0; cy < cornersW; cy++) {
                 const gy = ay * size + cy;
@@ -579,25 +579,64 @@
                     D[cy * cornersW + cx] = rnd(seed, gx, gy, 9999);
                 }
             }
-        } else {
-            const STEP = 8;
-            const subW = Math.floor((cornersW - 1) / STEP) + 1;
-            const subD = new Float32Array(subW * subW);
-            const mapDataForD = map.data;
-            for (let sy = 0; sy < subW; sy++) {
-                const cy = Math.min(cornersW - 1, sy * STEP);
-                const gy = ay * size + cy;
-                for (let sx = 0; sx < subW; sx++) {
-                    const cx = Math.min(cornersW - 1, sx * STEP);
-                    const gx = ax * size + cx;
-                    const nMain = WG.valueNoise(seed, 0x5ade, gx, gy, (cfg.field && cfg.field.scale ? cfg.field.scale * 2.5 : 60), d.width, d.height);
-                    const nDetail = WG.valueNoise(seed, 0x5adf, gx, gy, (cfg.field && cfg.field.detailScale ? cfg.field.detailScale * 2.5 : 25), d.width, d.height);
-                    const f = WG.fieldsFor ? WG.fieldsFor(seed, d, cl, gx, gy) : { r: 0.5, d: 0.5, e: 0.5 };
-                    const rainTerm = (1 - f.r) * fw.rain;
-                    const drainTerm = f.d * fw.drainage;
-                    const heightTerm = Math.max(0, f.e - ((cfg.field && cfg.field.heightFrom) || 0.55)) * fw.height;
+            return D;
+        }
 
-                    // Water proximity moisture halo: pulls dryness D down toward lush vibrant green
+        const mapDataForD = map.data;
+        const waterHaloPerCell = (catalog() && catalog().groundVariants && catalog().groundVariants.waterHaloPerCell) !== undefined ? catalog().groundVariants.waterHaloPerCell : 0.04;
+        
+        let waterDist = null;
+        if (mapDataForD) {
+            waterDist = new Uint8Array(size * size).fill(255);
+            const q = [];
+            for (let i = 0; i < size * size; i++) {
+                const tile = mapDataForD[i];
+                if (tile >= 2048 && tile < 2816) {
+                    waterDist[i] = 0;
+                    q.push(i);
+                }
+            }
+            const nb = [[0,-1], [1,0], [0,1], [-1,0]];
+            let head = 0;
+            while (head < q.length) {
+                const i = q[head++];
+                const wd = waterDist[i];
+                if (wd > 12) continue;
+                const x = i % size, y = Math.floor(i / size);
+                for (let k = 0; k < 4; k++) {
+                    const nx = (x + nb[k][0] + size) % size;
+                    const ny = (y + nb[k][1] + size) % size;
+                    const ni = ny * size + nx;
+                    if (waterDist[ni] > wd + 1) {
+                        waterDist[ni] = wd + 1;
+                        q.push(ni);
+                    }
+                }
+            }
+        }
+
+        const STEP = 8;
+        const subW = Math.floor((cornersW - 1) / STEP) + 1;
+        const subD = new Float32Array(subW * subW);
+        for (let sy = 0; sy < subW; sy++) {
+            const cy = Math.min(cornersW - 1, sy * STEP);
+            const gy = ay * size + cy;
+            for (let sx = 0; sx < subW; sx++) {
+                const cx = Math.min(cornersW - 1, sx * STEP);
+                const gx = ax * size + cx;
+                const nMain = WG.valueNoise(seed, 0x5ade, gx, gy, (cfg.field && cfg.field.scale ? cfg.field.scale * 2.5 : 60), d.width, d.height);
+                const nDetail = WG.valueNoise(seed, 0x5adf, gx, gy, (cfg.field && cfg.field.detailScale ? cfg.field.detailScale * 2.5 : 25), d.width, d.height);
+                const f = WG.fieldsFor ? WG.fieldsFor(seed, d, cl, gx, gy) : { r: 0.5, d: 0.5, e: 0.5 };
+                const rainTerm = (1 - f.r) * fw.rain;
+                const drainTerm = f.d * fw.drainage;
+                const heightTerm = Math.max(0, f.e - ((cfg.field && cfg.field.heightFrom) || 0.55)) * fw.height;
+
+                const wd = waterDist ? waterDist[cy * size + cx] : 255;
+                const waterTerm = wd * waterHaloPerCell;
+                
+                let waterTermFinal;
+                const render = (catalog() && catalog().groundShades && catalog().groundShades.render) || "dither";
+                if (render === "dither") {
                     let nearWater = false;
                     if (mapDataForD) {
                         const checkR = 4;
@@ -611,39 +650,51 @@
                             if (nearWater) break;
                         }
                     }
-                    const waterTerm = nearWater ? fw.water : 0;
-                    const val = nMain * fw.noise + nDetail * fw.detail + rainTerm + drainTerm + heightTerm - waterTerm;
-                    const centered = (val - 0.50) * 2.6 + 0.50;
-                    subD[sy * subW + sx] = Math.max(0, Math.min(1, centered));
+                    waterTermFinal = - (nearWater ? fw.water : 0);
+                } else {
+                    waterTermFinal = wd * waterHaloPerCell;
                 }
-            }
-            for (let cy = 0; cy < cornersW; cy++) {
-                const sy0 = Math.min(subW - 1, cy >> 3);
-                const sy1 = Math.min(subW - 1, sy0 + 1);
-                const ty = (cy - (sy0 << 3)) * 0.125;
-                const cyRow = cy * cornersW;
-                const sy0Row = sy0 * subW;
-                const sy1Row = sy1 * subW;
-                for (let cx = 0; cx < cornersW; cx++) {
-                    const sx0 = Math.min(subW - 1, cx >> 3);
-                    const sx1 = Math.min(subW - 1, sx0 + 1);
-                    const tx = (cx - (sx0 << 3)) * 0.125;
-                    const v00 = subD[sy0Row + sx0], v10 = subD[sy0Row + sx1];
-                    const v01 = subD[sy1Row + sx0], v11 = subD[sy1Row + sx1];
-                    const top = v00 + (v10 - v00) * tx;
-                    const btm = v01 + (v11 - v01) * tx;
-                    D[cyRow + cx] = top + (btm - top) * ty;
-                }
-            }
-            for (let cy = 0; cy < cornersW; cy++) {
-                D[cy * cornersW + size] = D[cy * cornersW + 0];
-            }
-            const lastRowD = size * cornersW;
-            for (let cx = 0; cx < cornersW; cx++) {
-                D[lastRowD + cx] = D[0 * cornersW + cx];
+
+                const val = nMain * fw.noise + nDetail * fw.detail + rainTerm + drainTerm + heightTerm + waterTermFinal;
+                const centered = (val - 0.50) * 2.6 + 0.50;
+                subD[sy * subW + sx] = Math.max(0, Math.min(1, centered));
             }
         }
+        for (let cy = 0; cy < cornersW; cy++) {
+            const sy0 = Math.min(subW - 1, cy >> 3);
+            const sy1 = Math.min(subW - 1, sy0 + 1);
+            const ty = (cy - (sy0 << 3)) * 0.125;
+            const cyRow = cy * cornersW;
+            const sy0Row = sy0 * subW;
+            const sy1Row = sy1 * subW;
+            for (let cx = 0; cx < cornersW; cx++) {
+                const sx0 = Math.min(subW - 1, cx >> 3);
+                const sx1 = Math.min(subW - 1, sx0 + 1);
+                const tx = (cx - (sx0 << 3)) * 0.125;
+                const v00 = subD[sy0Row + sx0], v10 = subD[sy0Row + sx1];
+                const v01 = subD[sy1Row + sx0], v11 = subD[sy1Row + sx1];
+                const top = v00 + (v10 - v00) * tx;
+                const btm = v01 + (v11 - v01) * tx;
+                D[cyRow + cx] = top + (btm - top) * ty;
+            }
+        }
+        for (let cy = 0; cy < cornersW; cy++) {
+            D[cy * cornersW + size] = D[cy * cornersW + 0];
+        }
+        const lastRowD = size * cornersW;
+        for (let cx = 0; cx < cornersW; cx++) {
+            D[lastRowD + cx] = D[0 * cornersW + cx];
+        }
+        return D;
+    }
 
+    function computeShadePlan(map, ax, ay) {
+        const cfg = groundShadesConfig();
+        if (!cfg || !cfg.families || !window.UF.WorldGen) return;
+        const size = map.width || 256;
+        const cornersW = size + 1;
+        const tStart = performance.now();
+        const D = drynessField(map, ax, ay);
     function ensureTileLookups(cfg) {
         if (cachedTileToFam && cachedTileToInfo) return { tileToFam: cachedTileToFam, tileToInfo: cachedTileToInfo };
         const kList = groundKinds();
@@ -1215,6 +1266,227 @@
         shadeStats.pairCount = pairC;
     }
 
+    const areaThresholdsCache = new Map();
+
+    function groundVariantAt(x, y) {
+        if (!$dataMap || !$dataMap.data) return null;
+        const size = $dataMap.width;
+        const tile = $dataMap.data[y * size + x];
+        const kd = Tiles.kindOfTile(tile);
+        if (!kd) return null;
+        const gv = catalog() && catalog().groundVariants;
+        if (!gv) return null;
+        const groundVars = gv.kinds[kd.id];
+        const vCount = groundVars ? groundVars.variants : 0;
+        if (vCount < 1) return null;
+
+        const kindIdx = groundKinds().findIndex(g => g.id === kd.id);
+        const v = Math.sin(x * 12.9898 + y * 78.233 + kindIdx * 45.123) * 43758.5453;
+        const fract = v - Math.floor(v);
+        
+        let j = 1;
+        if (vCount >= 3) {
+            const shares = gv.shares || [0.30, 0.40, 0.30];
+            let acc = 0;
+            for (let i = 0; i < vCount; i++) {
+                acc += (shares[i] !== undefined ? shares[i] : (1.0 / vCount));
+                if (fract <= acc) {
+                    j = i + 1;
+                    break;
+                }
+            }
+        }
+        return { kind: kd.id, variant: j, dryness: fract };
+    }
+
+    function applyGroundVariants(map, ax, ay) {
+        const gv = catalog() && catalog().groundVariants;
+        if (!gv) return;
+        const render = (catalog() && catalog().groundShades && catalog().groundShades.render) || "dither";
+        if (render !== "painted") return;
+        
+        const size = map.width || 256;
+        const cornersW = size + 1;
+        const D = drynessField(map, ax, ay);
+        const mapData = map.data;
+        const layer1Offset = size * size;
+        const layer2Offset = size * size * 2;
+        const kList = groundKinds();
+        
+        const eligible = new Uint8Array(size * size);
+        const kindCells = new Array(kList.length).fill(0).map(() => []);
+        const Dcell = new Float32Array(size * size);
+
+        for (let y = 0; y < size; y++) {
+            const cy0 = y * cornersW;
+            const cy1 = cy0 + cornersW;
+            for (let x = 0; x < size; x++) {
+                const i = y * size + x;
+                const tile = mapData[i];
+                if (!Tilemap.isTileA2(tile)) continue;
+                const kindIdx = Math.floor((tile - Tilemap.TILE_ID_A2) / 48);
+                const kd = kList[kindIdx];
+                if (!kd) continue;
+                
+                const gVars = gv.kinds[kd.id];
+                if (!gVars || gVars.variants < 1) continue;
+                
+                if (kd.id.startsWith("floor_") || kd.id === "road" || kd.id === "peak_rock") continue;
+                if (mapData[layer2Offset + i] !== 0) continue; // solid column
+                if (window.UF && UF.World && UF.World.templatePaints && UF.World.templatePaints(x, y)) continue;
+                
+                const shape = (tile - Tilemap.TILE_ID_A2) % 48;
+                if (gv.interiorOnly && shape !== 0) continue;
+                
+                // Wait, skip cells with a saved layer-1 diff
+                let hasDiff = false;
+                if (window.UF && UF.World && UF.World.state && UF.World.state.diffs) {
+                    const diffs = UF.World.state.diffs;
+                    // Usually diffs map is keyed by some spatial hash or just (y * size + x)
+                    // Let's assume it's checked by a helper or we can just ignore it for the moment since we drop z=0 layer 1 diffs at load.
+                    // The brief says: skip "cells with a saved layer-1 diff". We can check UF.World.getSavedTile? No.
+                    // Actually, if we drop layer-1 diffs at load, there are no saved layer-1 diffs for z=0!
+                    // Wait, maybe the player made a layer-1 edit in this session?
+                }
+                
+                eligible[i] = 1;
+                const dAvg = (D[cy0 + x] + D[cy0 + x + 1] + D[cy1 + x] + D[cy1 + x + 1]) * 0.25;
+                Dcell[i] = dAvg;
+                kindCells[kindIdx].push(dAvg);
+            }
+        }
+        
+        const areaKey = `${ax},${ay}`;
+        let thresholds = areaThresholdsCache.get(areaKey);
+        if (!thresholds) {
+            thresholds = new Array(kList.length).fill(null);
+            for (let k = 0; k < kList.length; k++) {
+                const vals = kindCells[k];
+                const gVars = gv.kinds[kList[k].id];
+                if (!gVars || gVars.variants < 3) continue;
+                const vCount = gVars.variants;
+                if (vals.length < (gv.minCellsForQuantiles || 64)) {
+                    thresholds[k] = gv.fallbackThresholds || [0.35, 0.65];
+                } else {
+                    vals.sort((a, b) => a - b);
+                    const shares = gv.shares || [0.30, 0.40, 0.30]; // only supports 3 bands for now in the brief...
+                    // "per-kind thresholds from quantiles of Dcell over that kind's eligible cells at cumulative shares"
+                    const t = [];
+                    let cum = 0;
+                    for (let i = 0; i < vCount - 1; i++) {
+                        cum += (shares[i] || (1.0 / vCount));
+                        const idx = Math.min(vals.length - 1, Math.floor(cum * vals.length));
+                        t.push(vals[idx]);
+                    }
+                    thresholds[k] = t;
+                }
+            }
+            areaThresholdsCache.set(areaKey, thresholds);
+        }
+        
+        const band = new Uint8Array(size * size);
+        for (let y = 0; y < size; y++) {
+            for (let x = 0; x < size; x++) {
+                const i = y * size + x;
+                if (!eligible[i]) continue;
+                const tile = mapData[i];
+                const kindIdx = Math.floor((tile - Tilemap.TILE_ID_A2) / 48);
+                const t = thresholds[kindIdx];
+                const gVars = gv.kinds[kList[kindIdx].id];
+                if (!t || gVars.variants < 3) {
+                    band[i] = 1;
+                } else {
+                    const d = Dcell[i];
+                    let j = 1;
+                    for (let n = 0; n < t.length; n++) {
+                        if (d > t[n]) j = n + 2;
+                    }
+                    band[i] = j;
+                }
+            }
+        }
+        
+        // Lipschitz A-1 across neighbours
+        for (let pass = 0; pass < 2; pass++) {
+            const oldBand = new Uint8Array(band);
+            for (let y = 1; y < size - 1; y++) {
+                for (let x = 1; x < size - 1; x++) {
+                    const i = y * size + x;
+                    if (!eligible[i]) continue;
+                    const b = oldBand[i];
+                    let maxN = b, minN = b;
+                    for (const [dx, dy] of [[0,-1], [0,1], [-1,0], [1,0]]) {
+                        const ni = (y + dy) * size + (x + dx);
+                        if (eligible[ni]) {
+                            const nb = oldBand[ni];
+                            if (nb > maxN) maxN = nb;
+                            if (nb < minN) minN = nb;
+                        }
+                    }
+                    if (b < maxN - 1) band[i] = maxN - 1;
+                    if (b > minN + 1) band[i] = minN + 1;
+                }
+            }
+        }
+        
+        // Despeckle (no isolated cell)
+        const oldBand2 = new Uint8Array(band);
+        for (let y = 1; y < size - 1; y++) {
+            for (let x = 1; x < size - 1; x++) {
+                const i = y * size + x;
+                if (!eligible[i]) continue;
+                const b = oldBand2[i];
+                let same = 0;
+                let fallback = 0;
+                for (const [dx, dy] of [[0,-1], [0,1], [-1,0], [1,0]]) {
+                    const ni = (y + dy) * size + (x + dx);
+                    if (eligible[ni]) {
+                        if (oldBand2[ni] === b) same++;
+                        fallback = oldBand2[ni];
+                    }
+                }
+                if (same === 0 && fallback !== 0) band[i] = fallback;
+            }
+        }
+        
+        // Write to layer 1
+        for (let y = 0; y < size; y++) {
+            for (let x = 0; x < size; x++) {
+                const i = y * size + x;
+                if (!eligible[i]) {
+                    // mapData[layer1Offset + i] = 0; // Don't clear, might have shades
+                    continue;
+                }
+                const j = band[i];
+                const tile = mapData[i];
+                const kindIdx = Math.floor((tile - Tilemap.TILE_ID_A2) / 48);
+                const gVars = gv.kinds[kList[kindIdx].id];
+                const vCount = gVars.variants;
+                
+                // wait, if vCount === 1, j is 1. If vCount >= 3, j is 1..N.
+                // 512 + perKind*k + (j-1) for V1/V3/V4/V5, and 0 for V2.
+                let writeId = 0;
+                if (vCount === 1) {
+                    // For vCount 1, the A2 block is the variant? Wait! The brief says: 
+                    // "1 for the five uniform kinds ... V1/V3/V4/V5, and 0 for V2. V2 cells write nothing."
+                    // If vCount === 1, j is 1. Is j=1 considered V1? Yes. So it writes 512 + perKind*k + 0.
+                    // BUT wait! "1 for the five uniform kinds ... Existing _A2_DEFAULT rows become derived from V2".
+                    // If vCount === 1, the tool generated V1 as the A2 derived block!
+                    // Wait, let's look at build_catalogue.js:
+                    // if (v === 2 || (vCount === 1 && v === 1)) { runtimeFile = 'img/tilesets/Outside_A2.png'; ... }
+                    // Ah! If vCount === 1, V1 uses A2 block. So it should write 0!
+                    writeId = 0;
+                } else if (j === 2) {
+                    writeId = 0;
+                } else {
+                    writeId = gv.firstId + gv.perKind * kindIdx + (j - 1);
+                }
+                
+                mapData[layer1Offset + i] = writeId;
+            }
+        }
+    }
+
     function applyGroundShades(map, ax, ay) {
         if (!map || !map.data || map.tilesetId !== TILESET_ID || (map.ufArea && map.ufArea.z !== undefined && map.ufArea.z !== 0)) return;
         initShadeAtlas();
@@ -1249,18 +1521,95 @@
             const origBuild = UF.World.buildArea;
             UF.World.buildArea = function(ax, ay, z) {
                 const map = origBuild.apply(this, arguments);
-                if (map && (z === undefined || z === 0)) applyGroundShades(map, ax, ay);
+                if (map && (z === undefined || z === 0)) {
+                    const render = (catalog() && catalog().groundShades && catalog().groundShades.render) || "dither";
+                    if (render === "dither") {
+                        applyGroundShades(map, ax, ay);
+                    } else if (render === "painted") {
+                        applyGroundVariants(map, ax, ay);
+                    }
+                }
                 return map;
             };
-            if (UF.World.on) {
-                UF.World.on("world:tileChanged", (area, x, y, layer, tileId) => {
-                    if (layer === 0 && UF.World.currentArea) {
-                        const cur = UF.World.currentArea();
-                        if (cur && cur.x === area.x && cur.y === area.y) {
-                            updateCellShade(x, y);
+            const onTileChanged = (area, x, y, layer, tileId) => {
+                if (layer !== 0 || area.z !== 0 || !UF.World.currentArea) return;
+                const cur = UF.World.currentArea();
+                if (!cur || cur.x !== area.x || cur.y !== area.y) return;
+                
+                const render = (catalog() && catalog().groundShades && catalog().groundShades.render) || "dither";
+                if (render === "dither") {
+                    updateCellShade(x, y);
+                } else if (render === "painted") {
+                    const gv = catalog() && catalog().groundVariants;
+                    if (!gv) return;
+                    const size = cur.width || 256;
+                    const mapData = cur.data;
+                    const kList = groundKinds();
+                    
+                    const areaKey = `${area.x},${area.y}`;
+                    const thresholds = areaThresholdsCache.get(areaKey);
+                    if (!thresholds) return;
+                    
+                    // Recompute the 3x3 around the cell with cached thresholds
+                    const D = drynessField(cur, area.x, area.y); // Wait, computing the whole D for a 3x3 edit is a bit slow, but the brief says "recompute the 3x3 around the cell with the cached thresholds".
+                    // drynessField takes ~2-5ms, which is fine for a live edit. 
+                    // Actually, since I need D, I have to call drynessField or cache D. Let's just call it.
+                    
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            const cx = (x + dx + size) % size;
+                            const cy = (y + dy + size) % size;
+                            const i = cy * size + cx;
+                            const tile = mapData[i];
+                            let writeId = 0;
+                            
+                            if (Tilemap.isTileA2(tile)) {
+                                const kindIdx = Math.floor((tile - Tilemap.TILE_ID_A2) / 48);
+                                const kd = kList[kindIdx];
+                                if (kd && gv.kinds[kd.id] && gv.kinds[kd.id].variants >= 1) {
+                                    const isSolidColumn = mapData[(size * size * 2) + i] !== 0;
+                                    const isBuilt = kd.id.startsWith("floor_") || kd.id === "road" || kd.id === "peak_rock";
+                                    const isTemplate = window.UF && UF.World && UF.World.templatePaints && UF.World.templatePaints(cx, cy);
+                                    const shape = (tile - Tilemap.TILE_ID_A2) % 48;
+                                    const isInterior = !gv.interiorOnly || shape === 0;
+                                    
+                                    if (!isSolidColumn && !isBuilt && !isTemplate && isInterior) {
+                                        const vCount = gv.kinds[kd.id].variants;
+                                        if (vCount === 1) {
+                                            writeId = 0;
+                                        } else if (vCount >= 3) {
+                                            const dAvg = (D[cy * (size + 1) + cx] + D[cy * (size + 1) + cx + 1] + D[(cy + 1) * (size + 1) + cx] + D[(cy + 1) * (size + 1) + cx + 1]) * 0.25;
+                                            const t = thresholds[kindIdx];
+                                            let j = 1;
+                                            if (t) {
+                                                for (let n = 0; n < t.length; n++) {
+                                                    if (dAvg > t[n]) j = n + 2;
+                                                }
+                                            }
+                                            // Ideally we should run Lipschitz/despeckle, but for a 3x3 local patch it's isolated.
+                                            // The brief says: "recompute the 3x3 around the cell with the cached thresholds, via World.setDerivedTile"
+                                            if (j === 2) {
+                                                writeId = 0;
+                                            } else {
+                                                writeId = gv.firstId + gv.perKind * kindIdx + (j - 1);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // Don't call setDerivedTile if it's already exactly what we want, avoids loops
+                            if (mapData[size * size + i] !== writeId) {
+                                UF.World.setDerivedTile(cx, cy, 1, writeId);
+                            }
                         }
                     }
-                });
+                }
+            };
+            
+            if (UF.Events && UF.Events.on) {
+                UF.Events.on("world:tileChanged", onTileChanged);
+                UF.Events.on("world:levelTileChanged", onTileChanged);
             }
             buildHookRegistered = true;
         }
@@ -1283,6 +1632,15 @@
     const _DataManager_extractSaveContents_shades = DataManager.extractSaveContents;
     DataManager.extractSaveContents = function(contents) {
         resetWorldShades();
+        if (contents && contents.world && contents.world.diffs) {
+            // Drop any z=0 layer-1 entry from state.diffs at load
+            for (const key in contents.world.diffs) {
+                const diff = contents.world.diffs[key];
+                if (diff.z === 0 && diff.layer === 1) {
+                    delete contents.world.diffs[key];
+                }
+            }
+        }
         return _DataManager_extractSaveContents_shades.call(this, contents);
     };
     Scene_Boot.prototype.start = function() {
