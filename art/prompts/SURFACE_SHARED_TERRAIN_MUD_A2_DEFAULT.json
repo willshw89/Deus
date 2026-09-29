@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "assetId": "SURFACE_SHARED_TERRAIN_MUD_A2_DEFAULT",
+  "contentId": "groundKinds:mud",
+  "sheetId": "ATLAS_SURFACE_SHARED_TILE_01",
+  "slotId": "ATLAS_SURFACE_SHARED_TILE_01:1677",
+  "coordinates": {
+    "x": 3504,
+    "y": 2160,
+    "w": 96,
+    "h": 144
+  },
+  "runtimeFile": "img/tilesets/Outside_A2.png",
+  "tool": "PixelLab",
+  "settings": {
+    "view": "High Top-Down",
+    "outline": "none",
+    "detail": "Highly detailed",
+    "canvasSize": [
+      48,
+      48
+    ],
+    "background": "solid flat seamless"
+  },
+  "positivePrompt": "flat 2D top-down saturated dark wetland mud ground tile, wet organic muck with tiny trickles of dark water, seamless edges, no cliff, no elevation drop, flat ground surface, high top-down view, readable high-contrast fantasy pixel art in the DEUS master palette; world feel: English countryside and old British Isles material culture, in the spirit of Ultima VII and EverQuest.",
+  "negativePrompt": "blurry, 3D render, anime, cute, isometric, cliff, elevation drop, perspective tilt, dither noise, glowing neon, borders, frames, UI, text, watermark",
+  "paletteRamp": "WET_MUD_ANAEROBIC",
+  "masterPalette": "art/palette/deus_master_world_palette_v1.hex",
+  "anchor": {
+    "type": "TILE",
+    "x": 0,
+    "y": 0
+  },
+  "envelope": {
+    "wMin": 48,
+    "wTarget": 48,
+    "wMax": 48,
+    "hMin": 48,
+    "hTarget": 48,
+    "hMax": 48
+  },
+  "status": "QA_PENDING",
+  "provenance": "reconstructed 2026-09-29",
+  "notes": "reconstructed 2026-09-29; style tail added 2026-09-29"
+}
