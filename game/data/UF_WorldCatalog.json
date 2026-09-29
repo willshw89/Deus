@@ -8,7 +8,8 @@
       "A1": "Outside_A1",
       "A2": "Outside_A2",
       "B": "Outside_B",
-      "C": "Outside_C"
+      "C": "Outside_C",
+      "D": "DEUS_GroundVar_D"
     }
   },
   "groundKinds": [
@@ -12572,8 +12573,48 @@
       }
     }
   },
+  "groundVariants": {
+    "about": "Ground tile variants with gradient placement (lane-ce).",
+    "sheet": "DEUS_GroundVar_D",
+    "firstId": 512,
+    "perKind": 4,
+    "shares": [0.30, 0.40, 0.30],
+    "fallbackThresholds": [0.35, 0.65],
+    "minCellsForQuantiles": 64,
+    "waterHaloPerCell": 0.04,
+    "interiorOnly": true,
+    "kinds": {
+      "meadow": { "variants": 5, "enabled": false },
+      "tropical_grass": { "variants": 3, "enabled": false },
+      "dry_grass": { "variants": 5, "enabled": false },
+      "shrub_soil": { "variants": 3, "enabled": false },
+      "forest_floor": { "variants": 5, "enabled": false },
+      "needle_floor": { "variants": 3, "enabled": false },
+      "jungle_floor": { "variants": 3, "enabled": false },
+      "tundra": { "variants": 3, "enabled": false },
+      "snow": { "variants": 3, "enabled": false },
+      "ice": { "variants": 3, "enabled": false },
+      "sand": { "variants": 3, "enabled": false },
+      "stony": { "variants": 3, "enabled": false },
+      "red_clay": { "variants": 3, "enabled": false },
+      "rock": { "variants": 3, "enabled": false },
+      "peak_rock": { "variants": 1, "enabled": false },
+      "mud": { "variants": 3, "enabled": false },
+      "swamp_mud": { "variants": 3, "enabled": false },
+      "dirt": { "variants": 5, "enabled": false },
+      "cursed_grass": { "variants": 3, "enabled": false },
+      "blessed_grass": { "variants": 3, "enabled": false },
+      "ash": { "variants": 3, "enabled": false },
+      "scree": { "variants": 3, "enabled": false },
+      "road": { "variants": 1, "enabled": false },
+      "floor_wood": { "variants": 1, "enabled": false },
+      "floor_stone": { "variants": 1, "enabled": false },
+      "floor_rushes": { "variants": 1, "enabled": false }
+    }
+  },
   "groundShades": {
     "about": "VISION V93, docs/design/GROUND_SHADES.md: rolling terrain shades and gradient ramps across all overworld and subterranean biomes.",
+    "render": "dither",
     "field": {
       "scale": 24,
       "detailScale": 10,
