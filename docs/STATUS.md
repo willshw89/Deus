@@ -14,17 +14,22 @@ As of 2026-09-29. main `e1554c63` (this rewrite is based on `5b300427`; main mov
 - Package 5 Climate (NAT.05.01, lane-bw): locked until the Owner approves opening it (DEC-037; DEC-041 item 5). Civilization work stays frozen except the Owner's sack-inventory and racial-banner exceptions; DEC-043 build/craft design is recorded, not authorized.
 
 ## C. Open lanes
+Coordinator channel: the PM mailbox (`C:\Users\snewt\.deus_pm\inbox` directives 0155-A..0165-K; boards in `outbox\`) resumed 2026-09-29 13:20 CT; the coordinator may open the lanes listed in directive 0158-D itself.
+
 | Lane | Task | Writer | Tip | Review | Next step |
 |---|---|---|---|---|---|
-| lane-by | NAT.04.01 soil kernel (Package 4) | Claude (writer `94e89cff`) | `148f048b`, merged `e1554c63` | Grok PASS `148f048b` | PM closes the lane (`[pm]`); opens the engine-bridge lane; Owner F5 |
-| lane-pm-streamline | GOV.01.01 (provisional id, D.10): process docs, decision log, art banners, ops and governance docs, registry (A11) | Claude (PM) | base `5b300427`; manifest `tasks/GOV.01.01/lane-pm-streamline/lane.json` written, `[pm]` commit pending | none yet; reviewer Grok (never Claude) | `[pm]` manifest commit; rebase onto `e1554c63`; gate tests (`lane.json`); Grok review; merge_gate |
-| none (direct commits) | Sack / creature inventory: `DEUS_Bag.js`, `DEUS_Containers.js`, `DEUS_Sheet.js`, `DEUS_Core.js`, `DEUS_Items.js`, `DEUS_Objects.js`, `DEUS_History.js` | Gemini | `cd8e43b7`, `eb790a68` on main | UNREVIEWED; in-game proof NOT RUN | PM assigns an independent review (Grok); Owner F5 of the bag |
-| none (direct commit) | Racial banners: 9 `!$UF_Banner_*` and 10 `!$UF_Item_*` PixelLab sheets, `tools/art/assemble_racial_banners.js`, `assemble_batch_10_items.js` | Gemini | `cd8e43b7` on main | UNREVIEWED; no catalogue-first, QA or Owner sign-off record (DEC-007 amendment) | PM presents each sheet to the Owner; validate against `docs/art/DEUS_ASSET_STANDARD.md` |
-| lane-ca | WG.00.41 32-Z RMMZ proof bridge (F5 New Game into the 3x3 x 32-Z world, HUD, bookmarks, seam, save and reload) | Gemini | `000341d8` (brief and lane.json only, no code) | none yet (reviewer Grok) | Gemini implements `tools/test_proof_bridge_32z.js` and the plugin changes; Grok review; Owner F5 |
-| lane-bb | DEUS-TSK-GEOLOGY-GATE FIX2 | Grok | `d171c0fd` (2026-09-27, about 150 commits behind main) | none; escalation: `tools/test_strata_cuts_and_caves.js` red outside the lane's scope (7 fails) | PM widens the scope or exits the lane PAUSED-BLOCKED |
-| lane-bd | DEUS-TSK-ZRANGE-HARNESS FIX1 | Grok | `3ea1ab69` (2026-09-28 brief; about 150 behind) | none; escalation: z=-1 stair landing wet after the fluid sim | Owner or PM ruling on wet landings; relaunch or PAUSED-BLOCKED |
-| lane-bj | WG.84.01 multi-seed worldgen QA | Codex | `d134315d` (2026-09-27, about 150 behind) | none; escalation: surface camps generated without starter resources (proposed MAJOR) | Grok reviews the audit; defect for camp placement; then exit |
-| lane-bw | NAT.05.01 climate engine (Package 5) | none | no commits | held | opens only after Owner approval (DEC-037) |
+| lane-by | NAT.04.01 soil kernel (Package 4) | Claude (`94e89cff`) | merged `e1554c63` | Grok PASS `148f048b` | closed; L1 only until lane-cf |
+| lane-cf | NAT.04.01 engine bridge (`DEUS_SimBridge`, boot check, dig-and-slide proof) | Gemini | `fb8ffd36` | Grok FAIL `fe193188` (8 defects); attempt 2 approved 2026-09-29 | fix the 13-point list; needs an editor-closed window for `plugins.js` |
+| lane-ce | WG.21.01 ground tile variants with gradient placement (DEC-045) | Claude family | `0834b8fc` (brief) | none yet (Grok) | runtime + tooling + 68 catalogue rows; then Tiles-generator pilot (meadow) |
+| lane-cl | NAT.05.01 climate kernel, L1 (opened by the coordinator under 0158-D) | Gemini | kernel + 8 tests + 5 mutants (see the 13:20 board) | pending Grok | Grok review; no bridge in this lane |
+| lane-pm-streamline | GOV.01.01: process docs, decision log, STATUS, engineering rulebook, art SOP, ops guide, registry | Claude (PM) | `6eee2a4f` (merged main `8115eff6`) | none yet; reviewer Grok | `[pm]` manifest commit; gate tests; Grok findings-only review; merge_gate |
+| lane-cg / ch / ci / cj / ck (assigned, 0158-D) | gate-suite repair; 32-Z proof; sack fix; catalogue rebuild; registry checker | Codex / Gemini / Gemini / Gemini / Codex | not opened yet | Grok | coordinator opens per 0158-D |
+| lane-cm / cn (assigned, 0159-E) | ART.NAT.01 natural-phenomena presentation; NAT.02.02 barrier integrity and breach (DEC-046) | Gemini / Claude family | not opened yet | Grok | coordinator opens per 0159-E |
+| none (direct commits) | Sack / creature inventory: `DEUS_Bag.js`, `DEUS_Containers.js`, `DEUS_Sheet.js`, `DEUS_Core.js`, `DEUS_Items.js`, `DEUS_Objects.js`, `DEUS_History.js` | Gemini | `cd8e43b7`, `eb790a68` on main | UNREVIEWED; in-game proof NOT RUN | lane-ci: Grok findings-only review, double-load fix, Playtest evidence |
+| none (direct commit) | Racial banners: 9 `!$UF_Banner_*` and 10 `!$UF_Item_*` PixelLab sheets | Gemini | `cd8e43b7` on main | in the PM's all-assets YEA/NAY pass (2026-09-29) | ledger rows or replacement per verdict |
+| lane-ca | WG.00.41 32-Z RMMZ proof bridge | Gemini | `000341d8` (brief only) | none | superseded by lane-ch unless the coordinator resumes it |
+| lane-bb, lane-bd | geology gate FIX2; Z-range harness FIX1 | Grok | `d171c0fd`; `3ea1ab69` (about 150 commits behind) | escalations open | lane-cg covers the four red gate suites; then close or resume |
+| lane-bj | WG.84.01 multi-seed worldgen QA | Codex | `d134315d` | escalation: camps without starter resources | Grok reviews the audit; defect for camp placement; then exit |
 
 ## D. Blockers and Owner decisions pending
 1. Packages 1-4 have no in-game proof. Owner: run F5 on the current build (or on the lane-ca bridge build) as the proof, or accept HEADLESS DONE until then.
@@ -35,7 +40,7 @@ As of 2026-09-29. main `e1554c63` (this rewrite is based on `5b300427`; main mov
 6. Pre-commit hook still not installed (was gated on Lane C2b and Lane E). `C:\Dev\DEUS` migration freeze (2026-09-25): still wanted, or drop it? `tools/ops/hooks/pre-push` says "lane workers never push" while the launcher (`-Push`) and `AGENTS.md` let a writer push its own lane branch: tooling lane to align the hook text.
 7. lane-ca has had no writer output since its brief (2026-09-28). main moved during this rewrite (`d33df336` art catalogue telemetry; `e1554c63` lane-by merge): re-base before merging this lane.
 8. Four PASS reviews are `[grok]` commits authored `deus-ops` (NAT.02.01 `54f67436`, WG.00.41 `592ea869`, WG.00.40 `1bd2cd2b`, NAT.03.01 `593c5232`; `tools/governance/MERGE_GATE.md` §11.1 says `deus-ops` can never author a review). Owner: grandfather them, or order re-reviews.
-9. Owner answer "1. purge history" (2026-09-29) was read as "no history in `docs/DECISIONS_DIGEST.md`"; DEC-029 (no git history purge) stays LIVE until the Owner says it meant git. Governance records go to `main` directly by the PM or coordinator (`AGENTS.md` commit rules, DEC-042 "for reviewed code"): Owner to confirm or narrow that boundary.
+9. Resolved: the Owner's "1. purge history" (2026-09-29) ordered the git purge of the leaked MiniMax key; done (`a24bafe6` -> `4aa51e1a`, DEC-029 amended). Governance records go to `main` directly by the PM or coordinator (`AGENTS.md` commit rules, DEC-042 "for reviewed code"): Owner to confirm or narrow that boundary. Open: lane-cf needs the RMMZ editor closed to register `DEUS_SimBridge` in `plugins.js` (Owner tells the PM when).
 10. Provisional WBS ids need Owner approval (`AGENTS.md` Rule 6): GOV.01.01 (this lane), CIV-EX-SACK-INVENTORY, CIV-EX-RACIAL-BANNERS.
 
 ## E. In-progress claims (one row per writer; `tools/governance/check_claims.js` rule 4.4 reads the Whitelist column)

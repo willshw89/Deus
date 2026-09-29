@@ -4,7 +4,7 @@
   "lastUpdated": "2026-09-29",
   "updatedBy": "claude (PM under DEC-042), lane-pm-streamline",
   "repository": "willshw89/Deus",
-  "mainSha": "e1554c6383ed81c6920d2ebff7c7d31d8ed9c51f",
+  "mainSha": "8115eff6",
   "mainShaNote": "main at the time of this edit (2026-09-29) is e1554c63, the merge_gate merge of task/lane-by (NAT.04.01). The lane-pm-streamline branch is based on 5b3004273c745346e74be75d79a8557504049e4c; main advanced twice while this file was written (d33df336 [gemini] art catalogue telemetry; e1554c63 lane-by merge). The previous value 4100f7ff was stale. Short SHAs in notes and in the untouched SOC rows are 8 characters; git rev-parse resolves them.",
   "activeMilestone": "Pre-Faction World Lock",
   "governingPhaseLock": "DEC-037 (Natural World Phase Lock: Physical Space -> Matter -> Water -> Soil -> Climate -> Flora -> Fauna)",
@@ -237,11 +237,11 @@
     "NAT.04.01": {
       "title": "Lean Geomorphology & Soil Kernel",
       "package": "PKG-04",
-      "status": "MERGED",
+      "status": "MERGED_L1",
       "lane": "lane-by",
       "branch": "task/lane-by",
       "writer": "claude",
-      "writerSha": "94e89cffb7981d6e0c82adf2199d52f6b8495955",
+      "writerSha": "94e89cff",
       "writerNote": "Attempt 1 ace19c25 [minimax] and attempt 2 c96dfce8 [gemini] both got Grok FAIL (50c08991, 97432c21). Attempt 3 was approved by the Owner on 2026-09-29 under AGENTS.md Rule 10 with Claude as writer ([pm] 8eb7202a). The registry previously said 'MiniMax M3'.",
       "reviewer": "grok",
       "reviewVerdict": "PASS",
@@ -249,9 +249,9 @@
       "reviewAuthor": "deus-grok",
       "reviewDoc": "tasks/NAT.04.01/lane-by/review_grok_94e89cff.md",
       "reviewNote": "Gate 136 passed / 0 failed; mutation sweep 14 caught / 0 survived; coverage gaps noted as non-blocking.",
-      "mergedSha": "e1554c6383ed81c6920d2ebff7c7d31d8ed9c51f",
+      "mergedSha": "e1554c63",
       "mergedOn": "2026-09-29",
-      "inGameProof": "NOT_RUN",
+      "inGameProof": "NOT_PROVEN",
       "engineBridge": "NOT_IMPLEMENTED",
       "reportDoc": "tasks/NAT.04.01/lane-by/REPORT_attempt3.md",
       "briefDoc": "tasks/NAT.04.01/lane-by/BRIEF.md",
@@ -259,7 +259,8 @@
       "gateTests": [
         "tools/test_soil_geomorphology.js",
         "tools/test_soil_geomorphology.js --mutation-sweep"
-      ]
+      ],
+      "bridgeLane": "lane-cf (task/lane-cf): attempt 1 fb8ffd36 Grok FAIL fe193188; attempt 2 approved 2026-09-29"
     },
     "GOV.01.01": {
       "title": "Governance and process document streamline (rulebook, decisions digest, STATUS Now page, registry, art and ops doc banners)",
@@ -286,9 +287,18 @@
     "NAT.05.01": {
       "title": "Continuous Climate Engine",
       "package": "PKG-05",
-      "status": "DEPENDENCY_LOCKED",
-      "lane": "lane-bw",
-      "haltReason": "Package 4 merged 2026-09-29 without an engine bridge or in-game proof; opening this lane needs Owner approval (DEC-037; DEC-041 item 5). Branch task/lane-bw has no commits of its own."
+      "status": "IN_PROGRESS_L1",
+      "lane": "lane-cl",
+      "haltReason": "Package 4 merged 2026-09-29 without an engine bridge or in-game proof; opening this lane needs Owner approval (DEC-037; DEC-041 item 5). Branch task/lane-bw has no commits of its own.",
+      "branch": "task/lane-cl",
+      "writer": "gemini",
+      "reviewer": "grok",
+      "briefDoc": "tasks/NAT.05.01/lane-cl/BRIEF.md",
+      "laneManifest": "tasks/NAT.05.01/lane-cl/lane.json",
+      "gateTests": [
+        "tools/test_climate_kernel.js"
+      ],
+      "note": "Opened by the coordinator under directive 0158-D on 2026-09-29 (Soil kernel merged); lane-bw superseded. Kernel L1 only; Grok review pending."
     },
     "CIV-EX-SACK-INVENTORY": {
       "title": "Sack / creature inventory (Ultima VII-style drag-and-drop bag, creature inventory screen, equipment grid, weight capacity)",
