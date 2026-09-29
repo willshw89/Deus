@@ -1,6 +1,6 @@
 # Ground shades: rolling earth colours across the terrain (design)
 
-**Status:** design only, written 2026-09-19 by Claude Code. Nothing described here is built.
+**Status:** design implemented, updated 2026-09-29 by Claude Code. Dither implementation kept behind a `render: "dither"` switch.
 **Implements:** VISION V93 (user, 2026-09-19 14:09: "I want a larger gradient of earth colors/shades across the terrain. I want rolling terrain types/colors").
 **Constrained by:** V2 and ART_STANDARD F1–F5 (pixel art, discrete tones, palette `art/palette/uf.hex`, alpha 0 or 255, no blur, no gradients inside a sprite), V27/V30 (biomes from DF-style fields), V50 (the map builds in ≤ 1.5 s, no per-frame cost, small saves), V80/V91 and `docs/design/TERRAIN_LEVELS.md` (five levels; `z=0`, `+1`, `+2` share tileset 91), `docs/RMMZ_ASSET_SPEC.md` (A2 autotiles).
 **Owner of the build:** Claude Code (claim in `docs/STATUS.md`, "Rolling ground colours"). Files: `UF_Tiles.js` (new section), catalog key `groundShades`, two lines in `UF_WorldGen.js`, `docs/systems/UF_Tiles.md`.

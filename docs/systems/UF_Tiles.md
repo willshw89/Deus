@@ -58,7 +58,7 @@ None, aliases only (`ImageManager.loadTileset`, `DataManager.onLoad`, `Scene_Boo
 
 ## Known limits
 - Z integration (Codex, 2026-09-19): surface shading is limited to Ground and tileset 91. A2 IDs overlap between tilesets; applying surface shade tiles to tileset 92 hid its blocking/open-air flags. Shade atlas runtime allocations now reset on new-world initialization and save extraction, so a previously loaded seed cannot change the next world's shade IDs. Regression evidence is recorded in STATUS; editor F5/F8 remains unchecked.
-- Up to 32 ground kinds (one A2 sheet); the catalog has 22.
+- The drawn A2 sheet is `game/img/tilesets/Outside_A2.png` (catalog `tilesets.surface.A2 = "Outside_A2"`), with only A2 blocks 0-3 painted; blocks 4-25 are transparent. (Note: older docs stating the code-drawn `UF_GenGround_A2` is drawn are stale and incorrect).
 - The sheet is regenerated per game start (not cached on disk); it takes a few milliseconds.
 - Water passability is forced in tileset 91 only; editor maps using tileset 2 keep the stock flags.
 - Ground textures are placeholders (`UF_Gen*`); the real art is AR-100 (A2) and AR-101 (A1) in `docs/ASSET_REQUESTS.md`.

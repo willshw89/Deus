@@ -370,3 +370,5 @@ Every hill is solid down to the ground level now (owner directive 2026-09-24). O
   - *Tool Note for Claude Code*: In `tools/art_check.js` line 39, `FACING_NAMES` only lists cardinal directions `['s', 'w', 'e', 'n']`. For 8-directional character sheets that use the engine's diagonal facings (`SW`, `NW`, `NE`, `SE`), `art_check.js` flags unknown entries in the sidecar check. Recommend expanding `FACING_NAMES` to include `["sw", "nw", "ne", "se"]` to recognize 8-way facings.
 - **Underground Delver Test Sprite**: In test suite `underground.below_zoom_1.png`, the test delver uses a stock front-facing RTP anime sprite (`$People1`). Stand-in `$U7_Ranger.png` or `$U7_Guard.png` should be used instead.
 
+
+- **WG.21.01 Ground Variants (AR-110)**: Need 26 ground variant sets mapped to SURFACE_SHARED_TERRAIN_<KIND>_V<n>_DEFAULT in the catalog. Delivered via separate art lane.\n
