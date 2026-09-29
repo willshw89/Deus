@@ -1,3 +1,8 @@
+> **SUPERSEDED (2026-09-29; DEC-007 amendment, PM under DEC-042).** One of three overlapping scale documents with different door and large-creature sizes. Reference only.
+> Replaced by `docs/art/DEUS_ASSET_STANDARD.md` AS-SIZE-001, AS-PM-001 and AS-GLOBAL-021 (the DEC-016 scale chart: `game/data/DEUS_ScaleRegistry.json` and `art/reference/DEUS_HUMAN_SCALE_STRIP_V1.png`). Layer height is OPEN: AS-GLOBAL-018 / AS-SCALE-001 / AS-QTR-001 (5 ft = 48 px, four 12 px quarters) versus DEC-013 item 2 / DEC-038 item 3 (10 ft, five 2 ft strata); `docs/OWNER_DECISIONS.md` governs until the Owner rules (`docs/STATUS.md` D.5).
+> Where this file, `DEUS_TILESET_SCALE_STANDARD.md`, `DEUS_HUMAN_WORLD_SCALE_STANDARD.md` and the asset standard disagree, the asset standard wins, except on layer height (OPEN, above).
+> Do not update this file. New rulings go to `docs/OWNER_DECISIONS.md`.
+
 # DEUS — Scale, Dimensions & Visual Asset Master Technical Bible
 **Document ID:** `DEUS-SCALE-BIBLE-01`  
 **Status:** Authoritative Architectural Framework & Candidate Baseline (V1 Golden Pack Input)  

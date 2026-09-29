@@ -6,6 +6,9 @@ description: >-
   deus-content, deus-implementation, deus-governance) in native Google Antigravity sessions.
 ---
 
+> **SUPERSEDED (2026-09-29).** The binding rules, roles, Definition of Done and report format are in `AGENTS.md` (DEC-042). This skill's role tables, handoff schema and report templates are historical; where they differ from `AGENTS.md`, `AGENTS.md` governs.
+> Same-family specialist subagents may assist but never supply independent review or approve work.
+
 # DEUS Specialist Coordination & Subagent Architecture
 
 Project DEUS uses a centralized Hub-and-Spoke coordination framework.

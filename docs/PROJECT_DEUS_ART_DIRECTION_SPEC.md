@@ -1,7 +1,12 @@
 # PROJECT DEUS — ART DIRECTION & PRODUCTION SPECIFICATION (MASTER SPEC)
 **Document Version:** 2.0.0 (Updated 2026-09-25 by Owner Directive)  
 **Applies To:** All visual generation tasks, tools, sprite cleaners, and engine integration pipelines across Project DEUS.  
-**Approved Source Art Providers:** Google Nano Banana Pro (`gemini-3-pro-image` / `generate_image`), Grok (`grok-4.7`), and Astra (when configured).
+**Approved Source Art Providers:** SUPERSEDED 2026-09-29. PixelLab OBJECTS and MAPS tools only (DEC-007 amendment; AS-GEN-004, AS-GEN-005). The earlier list (Google Nano Banana Pro, Grok, Astra) no longer applies.
+
+> **SUPERSEDED (2026-09-29; DEC-007 amendment, PM under DEC-042), except §1.2.** The providers, the multi-provider workflow (§1.4), the chibi and FF5/FF6 direction (§2, §4), the black wall-top convention (§3; AGENTS.md Rule 13 is suspended), the `uf.hex` palette (§4) and the Nano Banana Pro prompt template (§8) are reference only.
+> Replaced by `docs/art/DEUS_ASSET_STANDARD.md`: §3 (natural-world SOP), AS-GEN-004 (PixelLab only), AS-VIEW-002 (high top-down), AS-LOOK-001 (realistic proportions), AS-GLOBAL-004 (master palette), AS-ANIM-001 (animation classes).
+> **§1.2 (the lineage chain) stays live**: nothing is generated without a catalogue record, and the chain is read with the one status ladder (asset standard §3.6). Where this file and the asset standard disagree, the asset standard wins.
+> Do not update this file. New rulings go to `docs/OWNER_DECISIONS.md`.
 
 ---
 
@@ -13,6 +18,9 @@
 This rule supersedes any wording that could imply image providers may independently invent, explore, or generate production assets outside the canonical WorldGen workflow.
 
 ### 1.2 The Required Lineage Chain
+
+**STILL LIVE (2026-09-29).** This subsection stays in force under the DEC-007 amendment: every generation traces to a catalogue record before a prompt exists (asset standard §3.2, step 2). Read the chain with today's names: the WBS leaf is a WG leaf in `docs/worldgen/DEUS_WORLDGEN_WBS.md`; "READY STATUS" is `CATALOGUED` then `PROMPTED` in the one ladder (§3.6); "PROVIDER ASSIGNMENT" is always PixelLab OBJECTS or MAPS.
+
 Every production image generation must strictly trace through the unbroken chain:
 ```text
 WBS LEAF
@@ -38,7 +46,7 @@ GENERATION JOB
 - Available image-generation capacity is consumed strictly by advancing **READY catalogue entries**.
 - If no catalogue entries are marked READY, image workers must wait or assist with non-generation catalogue/QC work.
 
-### 1.4 Distributed Multi-Provider Source Art Generation
+### 1.4 Distributed Multi-Provider Source Art Generation (SUPERSEDED 2026-09-29: one generator, PixelLab; no multi-provider candidates)
 - **Source Art Only:** Image providers generate raw source art candidates only. They never directly edit canonical runtime tilesheets.
 - **Coherent Family Ownership:** One provider produces the entire assigned family/batch (including all animation frames).
 - **Multi-Provider Candidates:** Different providers work different READY catalogue entries (e.g. Grok on trees, Nano Banana Pro on flora/crops, Astra on stone). For critical hero assets, multiple providers may generate candidate variations for visual critique, but the owner retains final visual YEA / NAY.
@@ -222,7 +230,7 @@ Row 3: UP     UP     UP     (North facing / rear from behind:    Frame 0, Frame 
 
 ---
 
-## 8. Nano Banana Pro Production Prompt Template
+## 8. Nano Banana Pro Production Prompt Template (SUPERSEDED 2026-09-29: prompts are `art/prompts/<id>.json` per asset standard §3.2 step 3; no prose template is run)
 
 All generation prompts for non-living assets must follow this rigid technical structure:
 

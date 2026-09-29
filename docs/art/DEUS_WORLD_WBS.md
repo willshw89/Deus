@@ -1,3 +1,8 @@
+> **SUPERSEDED (2026-09-29; DEC-007 amendment, PM under DEC-042).** The DW namespace is not the live WBS. Reference only.
+> Replaced by `docs/worldgen/DEUS_WORLDGEN_WBS.md` (the WG leaves) for work breakdown, and by `docs/art/DEUS_ASSET_STANDARD.md` §3 for the natural-world art procedure. Its five-biome set is superseded by DEC-030 (asset standard Appendix A, item 1).
+> Lanes are opened and closed only by `[pm]` commits (DEC-042). No WBS status is changed by this banner.
+> Do not update this file. New rulings go to `docs/OWNER_DECISIONS.md`.
+
 # DEUS — World-Art Work Breakdown Structure (DEUS-WORLD-WBS-v1.0)
 
 **Document ID:** `DEUS-WORLD-WBS-v1.0`  

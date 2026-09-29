@@ -7,7 +7,7 @@ Windows PowerShell 5.1 scripts; nothing here is loaded by the game.
 |---|---|
 | `launch_worker.ps1` | Starts one provider CLI session (claude, grok, codex or gemini) in a lane worktree, watches it to the end and records what happened. Also the shared function library for the other scripts. |
 | `resume_queue.ps1` | One pass of auto-resume: probes providers whose usage limit should have reset, then relaunches queued lanes. Run it on a schedule. |
-| `gate_tests.json` | The suites the merge gate runs, and the suites it deliberately does not run (with reasons). |
+| `gate_tests.json` | Two lists. `gate`: the shared suites that `run_gate.js` runs and that every lane's `lane.json` `gateTests` is expected to include; the merge gate itself runs only the manifest's `gateTests`, not this file. `quarantine`: suites the merge gate refuses to run, with reasons (ENGINE_RULES §5). |
 | `hooks/pre-push` | Blocks `git push` unless `DEUS_INTEGRATOR=1`. |
 | `install_lane_hooks.ps1` | Installs the pre-push guard in lane worktrees only (worktree-scoped git config). |
 | `test_launch_worker.ps1` | Tests for the launcher, the hook, the installer and `gate_tests.json`. |

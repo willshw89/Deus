@@ -1,3 +1,8 @@
+> **SUPERSEDED (2026-09-29; DEC-007 amendment, PM under DEC-042).** Its 3/4 chibi charter, its three reference images and its generator belong to the Nano Banana Pro era. Reference only.
+> Replaced by `docs/art/DEUS_ASSET_STANDARD.md` AS-VIEW-002 (high top-down, the one camera), AS-LOOK-001 (readable high-contrast fantasy, realistic proportions), AS-GLOBAL-021 (DEC-016 scale chart) and §3 for production.
+> Where this file and the asset standard disagree, the asset standard wins. "Frozen and approved: 2026-09-24" no longer binds.
+> Do not update this file. New rulings go to `docs/OWNER_DECISIONS.md`.
+
 # DEUS — World-Art Visual Charter (DW.01.01)
 
 Authoritative visual-reference standard for all future Project DEUS world art generation.

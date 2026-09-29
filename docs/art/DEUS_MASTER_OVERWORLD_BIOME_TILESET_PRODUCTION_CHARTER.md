@@ -1,3 +1,8 @@
+> **SUPERSEDED (2026-09-29; DEC-007 amendment, recorded by the PM under DEC-042).** This file is a pasted chat transcript from the Nano Banana Pro era. It is reference only, not an instruction to generate anything.
+> Replaced by `docs/art/DEUS_ASSET_STANDARD.md` §3 (natural-world SOP: PixelLab OBJECTS and MAPS only), AS-TERR-001 (48 px dual-grid terrain), AS-BIOME-001 (six DEC-030 biomes, five bands) and AS-VIEW-002 (high top-down camera).
+> Where this file and the asset standard disagree, the asset standard wins. Its "6 biomes x 5 Z layers x 6 tileset variants" plan, its generator and its five-Z model are not the standard.
+> Do not update this file. New rulings go to `docs/OWNER_DECISIONS.md`.
+
 <USER_REQUEST>
 Yes. I’d make this a **master production charter**, not a loose image prompt.
 

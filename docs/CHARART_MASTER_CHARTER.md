@@ -1,4 +1,7 @@
 # DEUS — CHARART MASTER CHARTER & PRESENTATION SPECIFICATION
+
+> **SUPERSEDED FOR GENERATION (2026-09-29; DEC-007 amendment, DEC-044; PM under DEC-042).** The "Mandatory Generator: Google Nano Banana Pro" line is void (AS-GEN-004: PixelLab only). Character art is not open at all: the DEC-007 amendment allows PixelLab OBJECTS and MAPS for the natural world and bans Creator and Character prompts; living beings are never generated without the Owner (`AGENTS.md` Rule 11). The charter is reference for the day the Owner opens characters; sizes and the camera are `docs/art/DEUS_ASSET_STANDARD.md`.
+> Do not update this file. New rulings go to `docs/OWNER_DECISIONS.md`.
 **Document ID:** `CHARART-SPEC-01`  
 **Status:** `CHARART-02 CANDIDATE / HUMAN-GOLDEN-PACK INPUT` (NOT PRODUCTION-FROZEN)  
 **Authority:** Gemini (Full-Stack Coordinator & Art Authority)  

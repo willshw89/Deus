@@ -1,41 +1,21 @@
-# DEUS — QUALITY ENGINEERING & VERIFICATION POLICY
-**Integration Authority:** Gemini / Antigravity (DEUS Coordinator)
-**Approved by Owner Directive:** 2026-09-25
+# QUALITY_ENGINEERING_POLICY: what ENGINE_RULES does not say
 
----
+> The rules are in `docs/ENGINE_RULES.md` §5 (testing), §6 (the three Definition-of-Done levels) and §7 (performance). Reduced 2026-09-29 from the 2026-09-25 policy; its gate checklist (automated suite, mutants, performance, native smoke, observability) is now ENGINE_RULES §5-§9 and is not repeated here.
 
-## 1. Executive Quality Charter
-
-Every capability in Project DEUS is governed by the five-phase quality lifecycle:
+## The lifecycle of a capability
 ```text
-SPECIFY → IMPLEMENT → BREAK (Rule 4 Mutants) → BENCHMARK → INTEGRATE
+SPECIFY -> IMPLEMENT -> BREAK (mutants, Rule 4) -> BENCHMARK (targets in PERFORMANCE_ARCHITECTURE; enforced numbers in ENGINE_RULES §7) -> INTEGRATE (merge gate)
 ```
+The Definition of Done is compiled before coding starts and is not redefined afterwards. Every lane's brief says which of the three DoD levels it must reach and which proof is planned versus observed (`tools/ops/GAME_TRANSLATION_TEMPLATE.md`).
 
-### Core Tenets
-1. **Tests Must Be Able to Fail (Binding Rule 4)**: No hardcoded passes. Every verification suite must include negative testing, boundary conditions, and pinned mutation tests proving that defects are detected.
-2. **Nothing is Done Until Seen Working**: Definition of Done requires automated verification, native RMMZ/NW.js playtest execution, and screenshot proof of visual acceptance.
-3. **Performance as an Acceptance Gate**: Code that functions correctly but introduces an unexplained performance regression is not integration-ready. All substantive tasks adhere to [`docs/PERFORMANCE_ARCHITECTURE.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/PERFORMANCE_ARCHITECTURE.md).
-4. **Adversarial Independent Review**: Major systems undergo adversarial review by independent models (e.g. Grok red-team review, Gemini independent verification) before canonical merge.
+## Review
+- Independent, cross-family, adversarial review before any merge (`.agents/rules/deus-review-policy.md`). The reviewer reads the diff and the tests before the writer's narrative.
+- A correct feature with an unexplained performance regression against a recorded baseline is not integration-ready; the PM classifies it as defect, justified tradeoff, or noise (five repeated runs).
 
----
-
-## 2. Quality & Performance Verification Gates
-
-Before any implementation branch is merged into canonical `main`:
-1. **Automated Suite**: 100% pass on dedicated and regression test suites.
-2. **Mutation Suite**: Pinned mutant detection verifying that altered logic triggers test failure.
-3. **Performance Baseline**: Benchmarked against golden scenarios defined in [`docs/PERFORMANCE_ARCHITECTURE.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/PERFORMANCE_ARCHITECTURE.md). Zero unexplained regressions.
-4. **Native Playtest Smoke**: NW.js boots cleanly with zero new F8 console errors.
-5. **Observability Verification**: System state is inspectable via `UF_Look` and `UF_Sheet`.
-
----
-
-## 3. Cross-System Architecture References
-- **Agent Communication Protocol:** [`docs/AGENT_COMMUNICATION_PROTOCOL.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/AGENT_COMMUNICATION_PROTOCOL.md) (Structured task mailbox & evidence bus)
-- **Agent Quality & Continuous-Learning Standard:** [`docs/AGENT_QUALITY_LEARNING_LOOP.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/AGENT_QUALITY_LEARNING_LOOP.md) (Evidence-based learning, corrections & telemetry)
-- **Performance Standard**: [`docs/PERFORMANCE_ARCHITECTURE.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/PERFORMANCE_ARCHITECTURE.md)
-- **Multi-Agent Orchestration**: [`docs/AGENT_UTILIZATION_POLICY.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/AGENT_UTILIZATION_POLICY.md)
-- **Repository Consolidation**: [`docs/CONSOLIDATION_PLAN_V1.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/CONSOLIDATION_PLAN_V1.md)
-- **WorldGen Work Breakdown**: [`docs/worldgen/DEUS_WORLDGEN_WBS.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/worldgen/DEUS_WORLDGEN_WBS.md)
-- **Risk Register**: [`docs/RISK_REGISTER.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/RISK_REGISTER.md)
-
+## Where the related documents are
+- Agent mailboxes and evidence: `docs/AGENT_COMMUNICATION_PROTOCOL.md`
+- Learning loop and telemetry: `docs/AGENT_QUALITY_LEARNING_LOOP.md`
+- Performance targets: `docs/PERFORMANCE_ARCHITECTURE.md`
+- Multi-agent orchestration: `docs/AGENT_UTILIZATION_POLICY.md`, `tools/ops/ANTIGRAVITY.md`
+- Risk register: `docs/RISK_REGISTER.md`
+- WorldGen WBS: `docs/worldgen/DEUS_WORLDGEN_WBS.md`

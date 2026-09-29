@@ -1,83 +1,72 @@
-> **ART FREEZE — DEC-007 (Owner, 2026-09-25), with one opening added by the Owner on 2026-09-29.** Art generation stays frozen except for **PixelLab, OBJECTS and MAPS tools only**, used as needed to complete the natural world (tilesets, charsets, chipsets and the like). **No PixelLab "Creator" or "Character" prompts**, and no other generator or scope without the Owner's direct involvement. Every generated asset must (1) have its record in `art/catalogue/catalogue.json` before it is generated, (2) be prompted consistent with the SOP, `docs/art/DEUS_ASSET_STANDARD.md`, and (3) pass QA vetting before it enters the game: art style, dimensions, camera orientation, and animation that works as intended; nothing substandard gets through. The Owner is the final QA: Claude presents each QA-passed asset to the Owner for sign-off, and nothing enters the game without it (AGENTS.md Rule 6). Use the variety object prompts produce to make the world diverse, but keep it readable: nothing that confuses the player. AGENTS.md Rules 11 and 13 stay SUSPENDED. Allowed without the Owner (these are not art): test-harness PNG renders used as evidence, the art CATALOGUE (manifest of every tile/sprite with sheet, slot, pixel coordinates, size and palette), BLANK template tilesets (empty grids and slot IDs generated from the catalogue), and PLACEMENT/validation tooling that places Owner-approved art into catalogue slots. Full text: `docs/OWNER_DECISIONS.md` DEC-007.
+# AGENTS.md — the one rulebook for every AI agent on Project DEUS (rewritten 2026-09-29)
 
-# AGENTS.md — Binding rules for every AI agent on Project DEUS
+**DEUS**: a retro CRPG plus world simulation (Ultima VII interactive world, Dwarf Fortress depth and geology, D&D 5.1 SRD rules, RimWorld jobs). Flat 2D top-down; the 2.5D offsets are retired (Owner 2026-09-29). Formally named DEUS on 2026-09-20 (VISION V124), replacing the working titles "UF", "Ultima Frontier" and "Wayfarer"; the `UF_` prefixes and the `window.UF` alias predate the rename.
+**The Owner's word wins over every document.** Owner decisions are recorded as DEC entries in `docs/OWNER_DECISIONS.md`; this file is rewritten to match them, never the other way round.
+**Read order at session start:** this file -> `docs/DECISIONS_DIGEST.md` -> `docs/STATUS.md` -> your lane brief (`tasks/<id>/<lane>/BRIEF.md`). Reference only when the work needs it: `docs/OWNER_DECISIONS.md` (full decision text), `docs/ENGINE_RULES.md` (code, data, testing, git).
+**Unit of work:** a WBS leaf in `tasks/wbs_registry.json` (DEC-041), worked in one lane worktree under `C:\Users\snewt\.deus_worktrees\`. Slices (`docs/SLICES.md`) are history.
+**Art:** frozen except as Rule 11 says (DEC-007, amended 2026-09-29). The SOP is `docs/art/DEUS_ASSET_STANDARD.md`; the catalogue is `art/catalogue/catalogue.json`.
+Older rule files (`.agents/rules/*.md`, `docs/CANONICAL_ROLES.md`, `CLAUDE.md`, `GEMINI.md`) point here. Where any of them still differs, this file governs.
 
-Project formal name: **DEUS** (formally renamed by user directive 2026-09-20; replaces working titles "UF", "Ultima Frontier", and "Wayfarer").
-Applies to every AI agent working in this folder (Claude Code, Gemini, anything else). Read it at the start of every session, before touching anything.
-If a rule here conflicts with your habits, this file wins. If it conflicts with something the user tells you directly, the user wins. Then record the change in `docs/VISION.md` → Decision log.
+## Roles (DEC-042, 2026-09-29)
+- **Owner**: approves every lane, package and art asset; is the final art QA; is the only person who can mark work seen in RMMZ Playtest (F5). Owner 2026-09-29: ask the Owner only for design choices, art sign-off and destructive repository actions; keep agents working in parallel and show results in the game.
+- **PM: Claude Code**: interprets Owner intent, records decisions in `docs/OWNER_DECISIONS.md`, opens and closes lanes with `[pm]` commits to `tasks/<id>/<lane>/lane.json` (which `tools/governance/merge_gate.js` trusts), runs the gate tests on writer tips before review (DEC-035), routes review, presents QA-passed art to the Owner. The PM never reviews its own family's code.
+- **Coordinator: Gemini / Antigravity**: runs its own worker fleet (and runs the gate tests for it), keeps the integration duties it already has (merge gate, pushing `main`), keeps `tasks/wbs_registry.json` and `docs/STATUS.md` current. Does not self-certify.
+- **Writers**: Claude, Gemini, Grok or Codex, named per lane in `lane.json`; one writer per file set. Hard logic goes to the strongest available model at `xhigh`; cheaper models or `high` only for mechanical work (DEC-032, DEC-035).
+- **Reviewers**: a different model family from the writer (Grok by default; Gemini Pro or Codex when assigned). A reviewer forms the first verdict from the actual diff and its own test run, records the reviewed SHA, and is the only one who closes a defect.
+- **Codex**: bounded tooling, harnesses, governance and telemetry utilities; writes plugin code only when a lane assigns it.
+- **MiniMax and any other provider**: manual-only until a reviewed adapter and family mapping exist; never relabelled as one of the four families to pass a gate.
 
-## Persistent orchestration rules (Owner request, 2026-09-28)
+## Binding rules
+Slots 1-14 keep the meaning they had on 2026-09-21, so every older citation of "Rule N" (decisions, docs, code comments) stays valid; a retired or suspended slot says so in one line. Rules 15 and up were added 2026-09-29.
+1. **RETIRED 2026-09-29 (slices).** "One slice at a time" ended with `docs/SLICES.md`; the unit of work is a WBS leaf in a lane (DEC-041), and Rule 6 says what may open.
+2. **Nothing is done until it has been seen working**, in RMMZ Playtest (F5) by the Owner (Owner 2026-09-29). The Definition of Done below is the only one that counts; headless tests alone never make anything done.
+3. **Never claim what you did not observe.** "Verified", "working", "0 errors", any FPS figure: only with evidence you produced and looked at in this session; otherwise write "not checked". Audit findings go in `docs/AUDIT_LOG.md`, graded BLOCKER / MAJOR / MINOR, each citing a file:line, an opened screenshot or a command output ("looks wrong" is not a finding); open findings in your area come before new work.
+4. **Tests must be able to fail.** No hardcoded success. Each check is shown failing once (a mutant or a broken fixture) before it counts (`docs/ENGINE_RULES.md` §5).
+5. **Look at every screenshot you produce.** Open it (Read tool), describe what is actually in it and compare it to the acceptance criteria before anyone else sees it; if it is wrong, fix it or report it as wrong.
+6. **The Owner approves every lane, package and art asset.** Owner approval before any new WBS leaf or lane, before widening a lane, and before the next package opens (DEC-041); a backlog row, a plan or an idle provider is not approval. A generated asset enters the game only with the Owner's sign-off (Rule 11; VISION V11).
+7. **Don't invent the game.** No new lore, place names, races, factions or named characters unless approved in `docs/VISION.md`; placeholder names start with `TEST_`. Player-facing text never uses Ultima or DF proper nouns or signature terms (Avatar, Britannia, Guardian, Lord British, Iolo, Dupre, Shamino, Fellowship, moongate, Urist, Armok, strange mood, fey mood) nor D&D product-identity creatures (beholder, mind flayer/illithid, displacer beast, githyanki); generic fantasy (elves, dwarves, goblins, trolls, dragons) is fine; the longer list is `docs/design/THEME.md`. SRD 5.1 text is CC-BY-4.0 and is credited.
+8. **Ultima VII is reference and stand-in only** (Owner 2026-09-18/19). Stand-ins in `game/` start with `U7_`, use exactly 3x scale, are listed in `docs/STATUS.md` -> Stand-ins (the section `tools/originality_check.js`, `tools/generate_asset_inventory.js` and `tools/switch_things_to_stock.js` read), and are replaced before release. No shipped asset may be a copy, trace, recolour, crop or near-copy of a U7 image; every delivered asset passes `tools/originality_check.js`. Dwarf Fortress is a mechanics reference; its raws and text never enter `game/`. `reference/` is local only. Git whitelist and never-committed derived files: `docs/ENGINE_RULES.md` §11.
+9. **The engine core is read-only:** `game/js/rmmz_*.js`, `game/js/main.js`, `game/js/libs/`. Behaviour lives in `game/js/plugins/DEUS_*.js` and `game/js/sim/`.
+10. **Two failed fixes means stop.** Write down what you know and what you ruled out, then ask the Owner through the PM.
+11. **Art (DEC-007, amended by the Owner 2026-09-29).** The 2026-09-19 Nano Banana Pro mandate that stood in this slot is SUSPENDED since DEC-007 (2026-09-25); the generator is DEC-044 (PixelLab only). Generation stays frozen except PixelLab **OBJECTS and MAPS tools only**, as needed for natural-world tilesets, charsets, chipsets and the like. No PixelLab "Creator" or "Character" prompts; no other generator, tool or scope without the Owner's direct involvement. Every generated asset: (1) has its record in `art/catalogue/catalogue.json` before generation; (2) is prompted per the SOP `docs/art/DEUS_ASSET_STANDARD.md`; (3) passes QA vetting (art style, dimensions, camera orientation, animation that works as intended; nothing substandard gets through); (4) is presented by Claude to the Owner, the final QA, and enters the game only with the Owner's sign-off.
+    Camera is **high top-down** for every asset class (AS-VIEW-002). Use the variety object prompts produce for a diverse but READABLE world; each ground kind gets several tile variants so the ground reads as a gradient. Not art, allowed without the Owner: test-harness PNG renders used as evidence, the catalogue, blank template tilesets, and placement/validation tooling.
+12. **All animation is sprite frames** (Owner 2026-09-19, VISION V108). Every motion is stepped from discrete frames on the sheet. No procedural scaling, squash, sine sway, rotation or shader distortion; the engine draws no motion of its own.
+13. **SUSPENDED under DEC-007 (2026-09-25).** The 2026-09-21 continuous Nano Banana Pro non-living pipeline and its DF black wall-top convention (48x96 near-black cap) stood in this slot; neither binds until the Owner rewrites them. Living beings are never generated without the Owner (DEC-007).
+14. **Engineering health (Owner 2026-09-21)** stays binding: `docs/ENGINEERING_STANDARD.md` and `docs/ARCHITECTURE.md`; no full-world scans per frame; data over hardcoding; stable persistent IDs; tagged timers; versioned saves; the sim explains itself through `DEUS_Sheet` and `DEUS_Look`.
+15. **Natural World first (DEC-037).** Order: Physical Space -> Matter -> Water -> Soil -> Climate -> Flora -> Fauna. No downstream system until its upstream contract exists and has passed its gate. Civilization, farming, factions and society are frozen; the only Owner-authorized exceptions are the sack inventory and the racial banners. DEC-043 (ghost-model build/craft) is a recorded design, not a lane.
+16. **Closed mass (DEC-040 as clarified 2026-09-29).** A lifecycle weight ledger for material generated with the world (stone, soil, sand, clay, ores, metals such as iron and copper) and for water: mined, crafted, rusted, broken, reclaimed, the weight stays the same. Type, volume and density may change; weight may not. Plants, creatures and gases are outside the rule. It must not complicate soil. Material or water that appears from nothing or vanishes without a destination is a blocking defect.
+17. **One writer per file set.** Claim in `docs/STATUS.md` section E (one row: lane, writer, whitelist) before editing. Work only in your lane worktree on your `lane.json` `allowedPaths`. Never edit, reset, stash, rebase, prune or repurpose another lane or its worktree; unknown ownership means hold and report.
+18. **The merge gate is the only door into `main`.** The integrator runs `node tools/governance/merge_gate.js --lane <lane> --manifest tasks/<id>/<lane>/lane.json --branch <branch> --dry-run`, then the same without `--dry-run` after PASS; it performs `git merge --no-ff`. Nobody commits runtime code (`game/`, `tools/`) to `main` directly, merges by hand, cherry-picks, squashes, or weakens a check to get past a refusal. The PM, or the coordinator for its own fleet, runs the gate tests on the writer tip in a fresh clone before any review (DEC-035).
+19. **Independent cross-family review; zero self-certification.** Nobody approves their own family's work, directly or through a subagent. The reviewer records provider, model, reviewed SHA, commands and real exit codes; a WBS closure needs that verdict recorded before the closing edit; any change after review is re-reviewed. The `[tag]` in a commit subject names the agent that actually did the work, and a review commit is authored by the reviewer's own account (`deus-grok`, `deus-codex`, `deus-gemini`; `deus-ops` belongs to no family); never relabel an author or backdate a verdict.
+20. **RMMZ editor closed** before anyone changes `game/data/*.json` or `game/js/plugins.js` (confirm with the Owner); afterwards tell the Owner to reopen the project. The editor overwrites both on save.
+21. **Absolute dates** (2026-09-29), never "today" or "yesterday", in every doc, commit and report.
 
-Read these rules at every session start, including through non-Antigravity providers:
-- `.agents/rules/deus-governance.md`: DEC-007, Owner approval before any new WBS leaf/lane or scope expansion, engine-core protection, and existing lane/worktree isolation.
-- `.agents/rules/deus-review-policy.md`: zero self-certification, independent model-family review, evidence before closure, and mandatory `merge_gate` / `--no-ff` integration.
-- `.agents/rules/deus-natural-world.md`: DEC-037 Natural World phase lock and the lean upstream-first critical path; civilization/farming/faction implementation remains frozen.
-- `.agents/rules/deus-multiagent-routing.md`: quality-preserving failover, protected local files, and bounded Teamwork/Goal operation.
-- `.agents/rules/deus-game-translation.md`: mandatory code-to-game traceability, named consumers, bridge status, and separate headless/playable proof. Templates: `tools/ops/GAME_TRANSLATION_TEMPLATE.md`.
+## Definition of Done (three levels)
+- **L1 Headless:** every gate test in `lane.json` passes on the writer tip in a fresh clone with exit codes recorded; each check has been seen to fail; an independent cross-family review PASS names that SHA.
+- **L2 Bridged:** the plugin is registered in `game/js/plugins.js`; the boot check is clean (no new F8 console errors); automated NW.js Playtest evidence exists (nw.exe harness on a snapshot copy, `docs/systems/UF_Test.md`), with its screenshot opened and described; the GAME TRANSLATION block (`tools/ops/GAME_TRANSLATION_TEMPLATE.md`) is filled with observed, not planned, results.
+- **L3 Seen by the Owner:** the Owner ran RMMZ Playtest (F5) and saw the behaviour; the record quotes the Owner's words and date.
+Required level: tooling, docs and design lanes reach L1 to merge. A lane that changes `game/js/plugins/**` or `game/data/**` reaches L2 to merge. A lane that changes `game/js/sim/**` only may merge at L1 when its brief names the bridge lane that will reach L2 (NAT.02.01, NAT.03.01 and NAT.04.01 merged this way; their bridge lanes are not yet open). A WBS leaf, a package (DEC-041 §5) and every Natural World v1 exit item (DEC-041 §7) is complete only at L3. `docs/STATUS.md` may say **VERIFIED** only at L3, quoting the Owner. Headless tests alone never make anything done.
 
-The practical procedure and launch templates are in `tools/ops/ANTIGRAVITY.md`. This supplement records the Owner's current orchestration request; it does not open a task lane, change WBS status, or grant self-review/merge authority. Current explicit Owner instructions and recorded freezes override older role descriptions and autonomous art mandates in this file, `GEMINI.md`, or other guides. Continue only already approved work; preserve existing lanes and their local files. The setup changes remain working-copy configuration pending independent review and normal integration, not a self-certified completion.
-
-## Read order
-1. `AGENTS.md` (this file)
-2. `docs/STATUS.md`: what actually works, what's broken, who is working on what (current state; historical ledger archived in `docs/archive/STATUS_LEDGER_20260925.md`)
-3. `docs/AUDIT_LOG.md`: the latest audit entry and its open findings
-4. `docs/SLICES.md`: the current slice and its acceptance criteria
-5. `docs/VISION.md`: what the game is, locked decisions, rejected directions
-6. `docs/ENGINE_RULES.md`: before touching code or data
-7. `docs/ART_STANDARD.md`: before touching any image
-8. `docs/systems/`: the documented API of any system you build on
-9. `docs/ASSET_REQUESTS.md`: the art the engine needs, with specs (Gemini's work queue)
-
-## The fourteen binding rules
-1. **One slice at a time.** Work only on the slice marked `IN PROGRESS` in `docs/SLICES.md`. No bonus features, nothing extra "while I was in there". Ideas go to `docs/STATUS.md` → Backlog.
-2. **Nothing is done until it's been seen working.** The Definition of Done below is the only one that counts.
-3. **Never claim what you didn't observe.** "Verified", "working", "0 errors", "60 FPS" need evidence you produced and looked at in this session. If you didn't check, write "not checked".
-4. **Tests must be able to fail.** No hardcoded success messages. A check that can never print FAIL is not a check. See `docs/ENGINE_RULES.md` §6.
-5. **Look at every screenshot you produce.** Open the image, describe what's actually in it, and compare it to the acceptance criteria before the user sees anything. If it's wrong, fix it or report it as wrong.
-6. **The user approves every slice and every art asset.** Stop at the gate. Don't start the next slice without an explicit "approved".
-7. **Don't invent the game.** No new lore, place names, races, factions, or named characters unless they're approved in `docs/VISION.md`. Placeholder names start with `TEST_`.
-8. **Ultima VII art may be used as examples, stand-ins, style references and training data for our art generators; everything that ships is our own original work.** (User decisions 2026-09-18 and 2026-09-19; the user accepted the risk of training on it.) No shipped asset may be a copy, trace, recolour, crop or near-copy of a U7 image: every delivered asset passes `tools/originality_check.js` against the U7 shape library before it goes into `game/`. Stand-in files in `game/` must start with `U7_` (`$U7_Man.png`), use exactly 3× scale, and be listed in `docs/STATUS.md` → Stand-ins. They all get replaced with original art before any release. See `docs/GUIDE_25D.md` §2 and "Reference vs. shipped content" below.
-9. **The engine core is read-only.** Never edit `game/js/rmmz_*.js`, `game/js/main.js`, or `game/js/libs/`. All behavior goes in `game/js/plugins/UF_*.js`.
-10. **Two failed fixes means stop.** If the same problem survives two attempts, stop patching. Write down what you know and what you've ruled out, then ask the user.
-11. **All generation tasks are to utilize Google Nano Banana Pro.** (User decisions 2026-09-19: "Nano Banana Pro: The Gemini 3 Pro Image model (gemini-3-pro-image). The premium choice for complex visual tasks, utilizing advanced reasoning (\"Thinking\") to follow complex instructions, maintain brand consistency, and render high-fidelity text. REWRITE EVERYTHING TO USE NANO BANANA PRO NOT NANO BANANA II".) Every visual asset across every category (characters, creatures, wildlife, monsters, terrain, tilesets, autotiles, world objects, items, equipment layers, portraits, facesets, icons, and UI) MUST originate from Google Nano Banana Pro (`gemini-3-pro-image` / `generate_image`). Nano Banana Pro utilizes advanced reasoning ("Thinking") to follow complex instructions, maintain brand consistency, and render high-fidelity visual assets. No other generator model is allowed, and no agent is permitted to type in sprites pixel-by-pixel in code. Everything starts from an authentic Nano Banana Pro generation, processed into RMMZ standard formats via our palette and cleaning tools.
-12. **All animation must happen through the sprite; no after-effect animations.** (User decisions 2026-09-19: "The animation for these things should come from the sprites, not an after effect. this applies to everything we generate" and "Also, ENFORCE THAT ALL ANIMATION IS TO HAPPEN THROUGH THE SPRITE. NO AFTER EFFECT ANIMATIONS"; VISION V108.) All animations across every entity and environmental feature—humanoids, wildlife, monsters, trees, flora, crops, fire, campfires, water ripples, doors, workshops, and world objects—must be delivered and played as distinct pixel sprite animation frames on the sprite sheets (e.g. 8-direction walk/action cycles, multi-frame wind sway, flickering flame loops, rippling water waves). No animation is to be faked or produced using code-driven after-effects, procedural scaling/squashing, sine-wave swaying, rotation, or shader distortions. The engine draws no motion of its own.
-13. **Continuous Nano Banana Pro Non-Living Asset Production Pipeline with DF Black Wall-Top Convention & Strict Living Exclusion.** (User directive 2026-09-21):
-    - *Autonomous Non-Living Pipeline:* Whenever current implementation requires NON-LIVING artwork (walls, doors, terrain, flora, crops, furniture, workshops, machinery, items, effects), agents continuously identify those needs, batch them aggressively into packed character/sprite sheets (80–100% useful area), prompt Nano Banana Pro with explicit slot maps, process approved results, integrate them into the project, log them in `docs/ASSET_MANIFEST.md`, and verify them in context. DO NOT wait for the user to manually request individual non-living assets.
-    - *Absolute Exclusion of Living Beings:* This autonomous pipeline DOES NOT apply to living beings (humans, colonists, humanoids, animals, wildlife, monsters, creatures, living portraits, living character sprites/animation sheets). When living assets are needed, register the requirement in `docs/ASSET_REQUESTS.md` / `docs/STATUS.md`, but do NOT generate autonomously.
-    - *Dwarf-Fortress-Style Black Wall-Top Convention:* For TWO-GRID-HIGH walls, doors, gates, cliff-adjacent elements, and vertical architectural pieces (48×96 px), the upper 48 px cap MUST read as flat near-black (`#08080C` to `#121218`) with minimal edge definition for readability, creating an unbroken horizontal black occlusion line connecting with DEUS void and darkness language. The lower 48 px displays the authentic material face. The black cap is an architectural/occlusion convention, not a dynamic shadow. Follow `docs/PROJECT_DEUS_ART_DIRECTION_SPEC.md` for all prompts.
-14. **Engineering Health, Lean Architecture & Long-Term Maintainability** (User directive 2026-09-21): Treat project health as an ongoing system. Follow `docs/ENGINEERING_STANDARD.md` and `docs/ARCHITECTURE.md` as binding standards across all tasks:
-    - *One canonical project:* Exactly one authoritative working copy (`c:\Users\snewt\OneDrive\Desktop\UF`); single integration authority for canonical changes.
-    - *One source of truth per concept:* Strict subsystem ownership (World, WorldGen, Entities, Time, Capabilities, Jobs, Inventory, Resources, Construction, Pathfinding, AI, Combat, Rendering, Save, Diagnostics). No duplicated implementations.
-    - *Data over hardcoding:* `System + Data = Content`. Logic stays general; content lives in catalogs (`game/data/UF_WorldCatalog.json`).
-    - *No global full-world scans every frame:* Hard performance rule. Use spatial registries, localized queries, dirty flags, and event-driven updates. Never iterate all units, objects, or items per frame.
-    - *Small refactors over rewrites:* Incremental debt cleanup; no risky monolithic engine rewrites.
-    - *Stable persistent IDs:* Identify entities by ID (`Creature #1042`, `Household #83`), never live JS object references across ticks or saves.
-    - *Explicit multi-domain time:* Disallow naked ambiguous timers; tag all timers/conditions (`domain: "action" | "historical" | "presentation" | "engine"`).
-    - *Versioned saves:* Save truth, rebuild temporary caches upon load. Provide explicit schema migrations (`saveSchemaVersion`).
-    - *Observability before complexity:* The simulation must be able to explain itself via `UF_Sheet` and `UF_Look` (why this goal, why this resource, capability breakdown, cell geology/moisture).
-
-
-## Definition of Done
-A task is done only when all of these are true:
-- [ ] It runs in the RMMZ editor's Playtest (F5), not only through a script.
-- [ ] Its automated checks exist and pass, and you've seen each one able to fail.
-- [ ] You took a screenshot of the relevant moment, opened it, and it matches the acceptance criteria.
-- [ ] No new errors in the dev console (F8) while running the user test steps.
-- [ ] `docs/STATUS.md` matches reality.
-
-## Report format (end of every work session)
-Use this structure. No marketing language, no emoji headings, no percentages of "operational".
-
+## Report format (end of every work session; one template for everyone)
 ```text
 ## What changed
 - <file>: <one-line reason>
 
 ## How I tested it
-- <commands / steps actually run>
+- <commands / steps actually run, with exit codes>
 
 ## Evidence
 - Screenshot <path>: <one sentence on what is visible in it>
 - Log excerpt (copied from the real output, trimmed):
+
+## Game translation (YES/NO each, with evidence or the reason)
+Simulation implemented: YES/NO - evidence or reason
+Engine bridge implemented: YES/NO - evidence or reason
+Presentation implemented: YES/NO - evidence or reason
+Input/player interaction implemented: YES/NO - evidence or reason
+Save/load implemented: YES/NO - evidence or reason
+Playable verification performed: YES/NO - evidence or reason
+Done level reached: L1 / L2 / L3
 
 ## Not done / known problems
 - ...
@@ -89,55 +78,17 @@ Expected: ...
 ## Decisions needed
 - ...
 ```
-
-If "Not done / known problems" is empty, reread your evidence. It's almost never empty.
+If "Not done / known problems" is empty, reread your evidence. It is almost never empty. Unknown is written as NO plus "NOT VERIFIED", never as a success.
 
 ## Banned in reports
-- "verified 100%", "fully operational", "production-ready", "seamless", "authentic" (about our own work)
-- Any FPS figure without the measurement method (see `docs/ENGINE_RULES.md` §6)
-- Describing an image you didn't open, or a file you didn't read
-- Listing features that aren't in the code
+- "verified 100%", "fully operational", "production-ready", "seamless", "authentic" (about our own work), and any "% operational"
+- Any FPS figure without the measurement method (`docs/ENGINE_RULES.md` §7)
+- Describing an image you did not open, or a file you did not read
+- Listing features that are not in the code; calling planned proof observed proof
 
-## Reference vs. shipped content
-| Location | What it is | Rule |
-|---|---|---|
-| `Ultima VII - * [GOG.com]/` | The original games | Read-only reference; a source of **stand-in** art (rule 8: `U7_`-prefixed, 3×, listed in STATUS, replaced before release); and **style references and training data** for our art generators (2026-09-19). Exported training material lives in `reference/` only (local, never committed, never loaded by the game). |
-| Root `Dwarf Fortress.exe`, `data/`, DLLs | The original game | Read-only reference for mechanics. Raws and text never go into `game/`. |
-| `reference/` (create when needed) | Extracted frames, measurements, screenshots for study | Local only. Never loaded by the game. |
-| `game/` | The RMMZ project | Original or properly licensed content, plus `U7_` stand-ins during development. |
-
-Player-facing text never uses Ultima or DF proper nouns or signature terms (Avatar, Britannia, Guardian, Lord British, Iolo, Dupre, Shamino, Fellowship, moongate, Urist, Armok, "strange mood", "fey mood", …). It also never uses D&D product-identity creatures (beholder, mind flayer/illithid, displacer beast, githyanki, …). Generic fantasy is fine: elves, dwarves, goblins, trolls, dragons. If any text comes from the D&D SRD 5.1, it's CC-BY-4.0 and needs attribution in the game credits.
-
-## Agents and collaboration
-Cross-model agent roles, decision authorities, and responsibilities are canonically governed by [`docs/CANONICAL_ROLES.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/CANONICAL_ROLES.md) (Owner Directive 2026-09-25):
-- **Gemini / Antigravity**: Coordinator, WBS controller, integration authority, non-living art production pipeline via Google Nano Banana Pro. Does not self-certify.
-- **Claude / Fable**: Primary implementer for engine, simulation, and society leaves.
-- **Grok**: Independent adversarial review, mutation design, defect closure, performance attack plans.
-- **Codex**: Bounded tooling, test harnesses, scripts, governance & telemetry utilities.
-
-Who touches what:
-| Path | Owner |
-|---|---|
-| `game/js/`, `tools/`, `game/data/`, `run_tests.bat`, `docs/systems/` | Gemini & Claude Code (collaborative / task-claimed) |
-| `art/`, `game/img/` (new or replaced images), `docs/ASSET_REQUESTS.md` | Gemini & Claude Code |
-| `docs/` | Gemini & Claude Code |
-
-Rules:
-- **Claim before you start.** Add a line under "In progress" in `docs/STATUS.md`: agent, task, files/folders you'll touch.
-- Don't edit files another agent owns or has claimed. If you have to, ask the user first.
-- **Commit at the end of every task** (the project is a git repo). Start the message with your agent name, e.g. `[gemini] AR-021 wild tree stand-ins`. One task per commit, so a review can diff exactly what changed.
-- **Stage only your own files:** `git add <paths>`. Never `git add -A`, `git add .`, or `git commit -a`, which sweep the other agent's unfinished work into your commit.
-- Remove your claim when you report.
-
-## Reviews and audits
-- Claude Code checks every asset delivery against its request and ART_STANDARD §8, and records the result in the request's status (`CHECKED`, or back to `IN PROGRESS` with the reason). Bigger problems go in `docs/AUDIT_LOG.md`: numbered findings graded **BLOCKER / MAJOR / MINOR**.
-- Findings cite evidence: a file and line, a screenshot the reviewer opened, or a command's output. "Looks wrong" isn't a finding.
-- Before starting, read the latest audit entry. Open findings in your area come before new work.
-
-## RMMZ editor safety
-The RMMZ editor keeps the database and plugin list in memory and overwrites the files when it saves.
-- Before changing `game/data/*.json` or `game/js/plugins.js`, confirm with the user that the editor is closed.
-- After changing them, tell the user to reopen the project.
-
-## Dates
-Use absolute dates (2026-09-18), never "today" or "yesterday", in every doc.
+## Commit and claim rules
+- Claim before you start (Rule 17); remove the claim when you report.
+- Commit at the end of every task, one task per commit, subject starting with your tag. The seven tags: `[claude]`, `[gemini]`, `[grok]`, `[codex]` (the four families; the tag is the agent that did the work), `[minimax]` (manual MiniMax results, never relabelled), `[pm]` (lane administration by the PM only; never a review), `[ops]` (launcher prompt commits; never a review; never touches `lane.json`).
+- Stage only your own files: `git add <paths>`. Never `git add -A`, `git add .`, `git commit -a`, `--no-verify`, or a blanket clean or reset; protected untracked files (art, references, saves, secrets, prompts, telemetry, worker logs) stay where they are.
+- A writer pushes only its own lane branch (`git push origin task/<lane>`), and only when its launch prompt says so (`lane.json` `push: true`); otherwise the integrator pushes the lane branch. The gate needs the lane branch on `origin`. Nobody but the integrator pushes `main`, after a gate merge. Runtime code reaches `main` only through the gate (Rule 18); DEC-042 words it "the only way into `main` for reviewed code", so governance records (decisions, `docs/STATUS.md`, `tasks/wbs_registry.json`, lane manifests, briefs) may be committed to `main` directly by the PM or the coordinator, pending Owner confirmation of that boundary (asked 2026-09-29, `docs/STATUS.md` section D).
+- A running CLI worker reads its prompt only at launch: editing a rule file does not change an in-flight worker.

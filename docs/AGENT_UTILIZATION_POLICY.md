@@ -1,5 +1,9 @@
 # DEUS — MAXIMUM AGENT UTILIZATION & MULTIAGENT ORCHESTRATION POLICY
 
+> **SUPERSEDED FOR GENERATION AND ROLES (2026-09-29; DEC-007 amendment, DEC-044, DEC-042; PM under DEC-042).** The parallel image providers and Nano Banana Pro assignments below ("Distributed Multi-Provider Image Generation" and its examples) do not bind: generation is PixelLab OBJECTS and MAPS only, catalogue record first, QA vetting, Owner sign-off (`AGENTS.md` Rule 11; AS-GEN-004).
+> Roles are `AGENTS.md` -> Roles (DEC-042); the procedure is `tools/ops/ANTIGRAVITY.md`. Kept as the record of the 2026-09-25 policy.
+> Do not update this file. New rulings go to `docs/OWNER_DECISIONS.md`.
+
 **Effective Date:** 2026-09-25  
 **Integration Authority:** Gemini / Antigravity (DEUS Coordinator)  
 **Status:** CANONICAL & BINDING (Approved by Owner Directives)  

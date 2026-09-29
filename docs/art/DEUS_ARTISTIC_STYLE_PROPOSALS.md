@@ -1,3 +1,8 @@
+> **SUPERSEDED (2026-09-29; DEC-007 amendment, PM under DEC-042).** Nano Banana Pro era style matrix (chibi proportions, `uf.hex`, black wall-top cap). Reference only.
+> Replaced by `docs/art/DEUS_ASSET_STANDARD.md` AS-LOOK-001 (readable high-contrast fantasy, realistic proportions, head about 1/5 of body), AS-VIEW-002 (high top-down), AS-LOCK-001 (locked style defaults, one master palette) and §3 for production.
+> Where this file and the asset standard disagree, the asset standard wins.
+> Do not update this file. New rulings go to `docs/OWNER_DECISIONS.md`.
+
 # DEUS — 10 ARTISTIC STYLE PROPOSALS & SPECIFICATION MATRIX
 **Document ID:** `DEUS-ART-STYLE-01`  
 **Status:** Approved Candidate Matrix for Direction Refinement  

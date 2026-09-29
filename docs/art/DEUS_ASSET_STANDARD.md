@@ -4,13 +4,13 @@
 **Machine form:** `game/data/UF_AssetStandard.json` (`schemaVersion` `deus-asset-standard/1.5.0`)
 **Spell rows:** `game/data/UF_SpellVisualTable.schema.json` (JSON Schema draft 2020-12)
 **Checker:** `tools/art/validate_asset_standard.js`
-**Status:** Normative for new asset work. No art is produced by this document (DEC-007).
+**Status:** Normative for new asset work. No art is produced by this document (DEC-007). §3 is the production SOP the Owner confirmed on 2026-09-29 (DEC-007 amendment: PixelLab OBJECTS and MAPS only).
 
 This standard is the required set for every DEUS asset: what must exist, what it is named, how big it is, and how it is drawn. Rule ids (`AS-GLOBAL-003` and the rest of the index) are the same ids as the keys of `rules` in the JSON. A rule stated here with **MUST** is required. **SHOULD** is the default when a later Owner amendment is explicitly marked on that rule.
 
 Owner rulings win over older art docs. The conflicts and the winning line are in Appendix A. Questions this document does not answer are in Appendix B. How today's files sit against the standard is in Appendix C.
 
-The pose grid in **AS-HUM-016** is the standard's default and is marked **PM-proposed, Owner may amend**. Addenda A7 through A9 (Owner 12:56 CT through 13:24 CT, and the PM decisions marked on those rules) are §§2.13–2.16. Addendum A9b (Owner 13:30 CT through 14:10 CT) is §2.17. Addendum A9c (Owner 14:38 CT through 17:09 CT) is §2.18 and §2.19. Item 38 sets the RMMZ standard top-down 3/4 view. Item 43 gives characters eight directions. Items 39, 40 and 41 are retired for character map sprites by §2.19. Item 42 makes each faceset one complete image. Each A9c rule ends with a note for the future Deus Art manual.
+The pose grid in **AS-HUM-016** is the standard's default and is marked **PM-proposed, Owner may amend**. Addenda A7 through A9 (Owner 12:56 CT through 13:24 CT, and the PM decisions marked on those rules) are §§2.13–2.16. Addendum A9b (Owner 13:30 CT through 14:10 CT) is §2.17. Addendum A9c (Owner 14:38 CT through 17:09 CT) is §2.18 and §2.19. Item 38 sets the RMMZ standard top-down 3/4 view. Item 43 gives characters eight directions. Items 39, 40 and 41 are retired for character map sprites by §2.19. Item 42 makes each faceset one complete image. Each A9c rule ends with a note for the future Deus Art manual. §3 (added 2026-09-29) is the natural-world production SOP and the one status ladder. The Create Character and Create State steps in §2.19 are suspended under the DEC-007 amendment of the same day.
 
 ## 1. Global rules
 
@@ -34,7 +34,7 @@ The pose grid in **AS-HUM-016** is the standard's default and is marked **PM-pro
 
 **AS-GLOBAL-009.** The `DEUS_Anim` data order, bottom to top, stays: feet, legs, waist, armor, torso, neck, shoulders, arms, hands, ring1, ring2, head, eyes, back, offHand, shield, mainHand, weapon. Pixels drawn on a charset follow **AS-VIS-001**. Slots outside that stack are items, icons, portraits and world sprites.
 
-**AS-GLOBAL-018.** Thirty-two Z layers (−16..+15) and exactly nine races stay (human, elf, halfling, dwarf, gnome, dragonborn, half-elf, half-orc, tiefling). Which race lives on which layer is open (Appendix B). A 9-layer test configuration may still exist. It is not the world. Owner items 26 and 29 replace the layer height. One Z layer is 5 ft and 48 px. Partial height is four quarters of 1.25 ft, 12 px each. `stratumPx` is `[12, 12, 12, 12]`. The earlier 10 ft layer, and the five 2 ft strata, are not the geometry. The numbers are **AS-SCALE-001** and **AS-QTR-001**. A 64 px tile was not adopted.
+**AS-GLOBAL-018.** Thirty-two Z layers (−16..+15) and exactly nine races stay (human, elf, halfling, dwarf, gnome, dragonborn, half-elf, half-orc, tiefling). Which race lives on which layer is open (Appendix B). A 9-layer test configuration may still exist. It is not the world. Owner items 26 and 29 set the layer height here: one Z layer is 5 ft and 48 px; partial height is four quarters of 1.25 ft, 12 px each; `stratumPx` is `[12, 12, 12, 12]`. **OPEN (2026-09-29; the DEC-016 `stratumPx` question):** `docs/OWNER_DECISIONS.md` DEC-013 item 2 and DEC-038 item 3 say 1 layer = 10 ft with five 2 ft strata, and `art/catalogue/geometry.json` and `DEUS_Levels.js` follow them; the decision log governs until the Owner rules once (Appendix A item 41; `docs/STATUS.md` D.5). The numbers are **AS-SCALE-001** and **AS-QTR-001**. A 64 px tile was not adopted.
 
 **AS-GLOBAL-019.** DEC-030 replaces the old band ranges and the 5-biome set. Depth bands:
 
@@ -579,7 +579,7 @@ Manual note. Near the player, items are drawn in full. Far away, the sim keeps c
 
 Manual note. A container opens a movable window of free-placed sprites. Backpack capacity in the worked example is 1 cu ft and 30 lb. Art is open and closed, four facings, plus a window background.
 
-**AS-SCALE-001.** Item 26, as amended by items 38 and 43. One Z layer is 5 ft and 48 px. One quarter is 1.25 ft and 12 px. SRD squares are 5 ft. SRD 5-5-5 applies to spell areas and ranges only. Character movement is 8-way. The diagonal walk step is 3 px per axis per frame. Cardinal walk is 4 px per frame and run is 6 px per frame at 60 fps. Feet convert to squares for movement, spell areas, light and vision. A torch is 20 ft bright and 20 ft dim, which is 4 tiles plus 4 tiles. Falling is 1d6 per 2 layers. Carry is Str × 15 lb. Animation holds are an integer number of 60 fps frames (150 ms is 9 frames and still divides evenly). One sim tick is one 6 s SRD round, and 10 ticks are one game minute. This is the action-domain tick. The historical domain stays as already recorded. Day length targets 24 to 48 real minutes, as a depth-demo toggle. Bright light is a solid glow. Dim light is a 2 or 3 step dithered palette falloff, with no gradients, and that falloff is also a depth-demo toggle. Positions are whole pixels. Terrain sits on the 48 px square grid. Heights sit on 12 px steps. A 64 px tile is not adopted.
+**AS-SCALE-001.** Item 26, as amended by items 38 and 43. One Z layer is 5 ft and 48 px. One quarter is 1.25 ft and 12 px. SRD squares are 5 ft. SRD 5-5-5 applies to spell areas and ranges only. Character movement is 8-way. The diagonal walk step is 3 px per axis per frame. Cardinal walk is 4 px per frame and run is 6 px per frame at 60 fps. Feet convert to squares for movement, spell areas, light and vision. A torch is 20 ft bright and 20 ft dim, which is 4 tiles plus 4 tiles. Falling is 1d6 per 2 layers. Carry is Str × 15 lb. Animation holds are an integer number of 60 fps frames (150 ms is 9 frames and still divides evenly). One sim tick is one 6 s SRD round, and 10 ticks are one game minute. This is the action-domain tick. The historical domain stays as already recorded. Day length targets 24 to 48 real minutes, as a depth-demo toggle. Bright light is a solid glow. Dim light is a 2 or 3 step dithered palette falloff, with no gradients, and that falloff is also a depth-demo toggle. Positions are whole pixels. Terrain sits on the 48 px square grid. Heights sit on 12 px steps. A 64 px tile is not adopted. **OPEN (2026-09-29):** the 5 ft layer and the 12 px quarter conflict with DEC-013 item 2 / DEC-038 item 3 (10 ft layer, five 2 ft strata); the decision log governs until the Owner rules (Appendix A item 41; `docs/STATUS.md` D.5). The rest of this rule is not in conflict.
 
 Manual note. One Z layer is 5 ft and 48 px. A quarter is 1.25 ft and 12 px. SRD 5-5-5 applies to spell areas and ranges only. Character movement is 8-way on the eight directions. The diagonal walk step is 3 px per axis per frame. Terrain stays on the square grid. A 64 px tile is not adopted.
 
@@ -591,7 +591,7 @@ Manual note. The finished frame scales by an integer only. The default is 2×, n
 
 Manual note. Cross-layer destruction covers ground collapse, wall breaches of 4 stages, and cave-ins, through the mass ledger.
 
-**AS-QTR-001.** Item 29, as amended by item 38. Partial heights are quarters of a layer, 12 px steps. That replaces the earlier strata split on strata, ramps, half-step slopes, cliff and edge strips, and surfaces. Cliff and wall pieces are standard RMMZ-style tiles (**AS-DEPTH-001**), not quarter-height front strips. `strataPerLayer` is 4. `stratumPx` is `[12, 12, 12, 12]`. `stratumFt` is 1.25. The head ratio of about 1/5 stays a proportion rule.
+**AS-QTR-001.** Item 29, as amended by item 38. Partial heights are quarters of a layer, 12 px steps. That replaces the earlier strata split on strata, ramps, half-step slopes, cliff and edge strips, and surfaces. Cliff and wall pieces are standard RMMZ-style tiles (**AS-DEPTH-001**), not quarter-height front strips. `strataPerLayer` is 4. `stratumPx` is `[12, 12, 12, 12]`. `stratumFt` is 1.25. The head ratio of about 1/5 stays a proportion rule. **OPEN (2026-09-29):** the quarter split conflicts with DEC-013 item 2 / DEC-038 item 3 (five 2 ft strata; `art/catalogue/geometry.json` `strataPerLayer` 5, `stratumPx` `[19, 19, 19, 19, 20]`); the decision log governs until the Owner rules (Appendix A item 41; `docs/STATUS.md` D.5).
 
 Manual note. Partial heights are quarters of 12 px. Cliff and wall pieces are RMMZ-style tiles, not quarter-height front strips. The old strata split is not used. The head ratio of about 1/5 stays a proportion rule.
 
@@ -633,6 +633,8 @@ Manual note. There are no class outfits. The map sprite is the armor state. Face
 
 ### 2.19 Character map sprites (item 43)
 
+**Suspended (DEC-007 amendment, Owner 2026-09-29).** The PixelLab Create Character and Create State steps in this section (web UI steps 1 and 2, the Base and Armor State prompt templates, and the v3 base and State counts that depend on them) are suspended. The Owner opened PixelLab for the OBJECTS and MAPS tools only; Creator and Character prompts are banned. The text below is kept as the record of the character map sprite design. It is not deleted. Nothing in this section is run until the Owner reopens character generation. The live production procedure is §3.
+
 Owner 16:10 CT through 16:47 CT, amended 17:09 CT by `tasks/WG.20.01/lane-al/refs/ADDENDUM_0509_RULINGS.md` (sha256 `87210fe055efa306c4ba4ec55b9e286e27161da71fa88425f47803d4790077f4`). This section is the character map sprite rule. It cites `tasks/WG.20.01/lane-al/refs/DEUS_CLASS_SPRITE_STANDARD.md` v3 (sha256 `27f74ee271f3777f8ab1d11606c17ca2d56638ed8f714be010a964b4ce5593ce`, superseding v1 `7baffd45ce4e0558` and v2 `bf34763f41327644`) and `tasks/WG.20.01/lane-al/refs/DEUS_GENERATION_RECIPES.md` (sha256 `9785c0690a402be8916b1c9ceaed93ac14c24c6e5c2ed873c408f67e9c2ba32e`). Recipes section 3.0 still describes 216 class sprites and is superseded. No art is generated in this lane. The Owner generates all art in the PixelLab web UI.
 
 **AS-CHMAP-001.** Each race and sex has one unarmored PixelLab v3 base, plain clothes, empty hands. That is 9 races by 2 sexes, 18 bases. ROBE, LIGHT, MEDIUM and HEAVY are PixelLab States of that base, 72 States. With the unarmored base that is 90 armor states. There is no per-class map sprite and no commoner sprite set. Unarmored covers commoners and villagers. Robe covers casters. The armor state follows the worn armor category. The attack animation follows the wielded weapon group. No other gear changes the map sprite. Bases and armor States carry no weapon. The weapon is drawn only inside its attack animation. Class shows in the portrait and the selected-unit panel. An unarmored unit shows ROBE when its highest-level class is a caster, and UNARMORED otherwise. That caster list is Owner-open.
@@ -665,7 +667,7 @@ Worked example, human man, medium armor, south:
 
 `facing the viewer. He swings a longsword in a rising diagonal slash. High top-down view, readable high-contrast fantasy pixel art.`
 
-The Owner's web UI steps, which this lane does not run, are: fill the template (step 0); Create Character for the unarmored base (step 1); Create State for robe, light, medium and heavy (step 2); Animations, one direction at a time (step 3); keep all eight directions, with no mirror (step 5); pack 48 by 48 frames in the row order above (step 6); post-process palette, anchor, height, outline, grayscale and weapon length (step 7). A failed measurable check may be retried twice. After that the item is flagged for the Owner.
+The Owner's web UI steps, which this lane does not run, and which are suspended under the DEC-007 amendment of 2026-09-29 (note at the top of §2.19), are: fill the template (step 0); Create Character for the unarmored base (step 1); Create State for robe, light, medium and heavy (step 2); Animations, one direction at a time (step 3); keep all eight directions, with no mirror (step 5); pack 48 by 48 frames in the row order above (step 6); post-process palette, anchor, height, outline, grayscale and weapon length (step 7). A failed measurable check may be retried twice. After that the item is flagged for the Owner.
 
 Post-process weapon lengths, not prompt text: unarmed has none, dagger 7, longsword 18, greatsword 22, spear 30, quarterstaff 30, shortbow 20, light crossbow 12. The one-hand group draws the longsword only. Thrown weapons have no group yet (Owner-open).
 
@@ -677,7 +679,72 @@ Owner-open items O1 through O25 stay open except O5 and O20, which are resolved:
 
 Manual note. Eighteen unarmored bases and 72 armor States make 90 armor states. Each state has 19 animations in eight directions. Idle and walk are 4 frames. The other clips are 6. The first-pass estimate is 15,200 generation calls, and production waits for Owner sign-off. Prompts are plain language. The post-process checks palette, anchor, height and weapon length. No art is generated here.
 
-## 3. Worked spell rows
+## 3. Natural-world production SOP (PixelLab OBJECTS and MAPS), Owner 2026-09-29
+
+This section is the operating procedure for every natural-world asset made under the DEC-007 amendment of 2026-09-29 (`docs/OWNER_DECISIONS.md`). It applies to terrain tiles, ground objects, flora, stone, remains and the other non-living pieces the natural-world phase needs (DEC-037). Living beings stay under DEC-007 as written: nothing is generated for them without the Owner. The PM (Claude Code, DEC-042) runs the procedure and presents the results. Nothing here changes the rules in §1 and §2. Where a §2 rule and this section name the same check, the §2 rule is the definition.
+
+### 3.1 Tools
+
+- Allowed: the PixelLab **OBJECTS** tool and the PixelLab **MAPS** tool, for natural-world tilesets, charsets and chipsets.
+- Banned: PixelLab **Creator** and **Character** prompts, every other generator, and any other scope, unless the Owner opens it. AS-GEN-004 and AS-GEN-005 stand: PixelLab is the one generator. Nano Banana Pro is not a production generator; the Retro Diffusion standby and the Nano Banana Pro concept role in DEC-044 are dormant under DEC-007 (nothing but PixelLab OBJECTS and MAPS without the Owner).
+- The §2.19 Create Character and Create State steps are suspended (note at the top of §2.19).
+
+### 3.2 The ten steps
+
+Each asset walks these steps in order. A step that is skipped, or whose output is missing, stops the asset where it is.
+
+1. **Requirement.** A named consumer needs the asset: an object, ground kind or water kind in `game/data/UF_WorldCatalog.json`, or a system doc in `docs/systems/`. The request is written as a catalogue record (step 2), not as a row in `docs/ASSET_REQUESTS.md`.
+2. **Catalogue record.** `art/catalogue/catalogue.json` gets the entry first: six-field id (AS-GLOBAL-010), band and biome (AS-GLOBAL-019), frame class and cell size (AS-SIZE-001), envelope, anchor, animation class (AS-ANIM-001) or its named static exception, the typical ground for AS-READ-001, and status `CATALOGUED`. No record, no prompt.
+3. **Prompt file.** `art/prompts/<id>.json`, one per entry. Fields: the entry id, `tool` (`OBJECTS` or `MAPS`), `settings` (view **high top-down**, AS-VIEW-002; outline; detail; canvas size), `positivePrompt`, `negativePrompt`, `seed`, and the style tail. The prompt is short plain language: what the thing is, its material and state, the view, the style tail. It carries no pixel coordinates, no hex values and no pixel sizes; the canvas, the outline setting and the post-process enforce those (the same rule as the §2.19 prompts). The seed of every generation that is kept is recorded in the file. Status `PROMPTED`.
+4. **Generation.** Run the prompt in the allowed tool. Every raw output that is kept goes under `art/masters/source_sets/<id>/` (one PNG per variant or frame, plus `manifest.json` naming tool, settings, seed and date). Raw files are never edited in place. Status `GENERATED`.
+5. **Post-process.** Allowed operations, and no others: crop transparent margins, shift by whole pixels onto the anchor (AS-ANCHOR-001), snap to the master palette (AS-GLOBAL-004). No resample, no rotation, no tint, no redraw, no hand-typed pixels. Output is the master at `art/masters/<id>.png` with its sidecar (AS-GLOBAL-012).
+6. **QA.** `tools/art/validate_art.js` runs the machine checks in §3.3 and prints pass or fail per item. The items the tool does not measure yet are judged on the review board (step 7) and written down pass or fail by name. One fail is `QA_FAILED`, with the failing item named; the asset goes back to step 4 with a new seed. All pass is `QA_PASSED`. An agent may set `QA_PASSED`. No agent may set any status past it.
+7. **Review board.** The PM builds one image per asset: every variant and every frame at 1:1 and at 3x, on that asset's typical ground, beside the 42 px human scale strip (`art/reference/DEUS_HUMAN_SCALE_STRIP_V1.png`), with the entry id, the seed and the checklist results printed beside the picture, never inside the art. Animated assets are also shown as an in-game clip or a frame strip. The PM opens the board and describes what is in it before the Owner sees it (AGENTS.md Rule 5).
+8. **Owner sign-off.** The Owner writes the SHA-256 ledger row in `art/APPROVALS.md` per `docs/art/APPROVALS_FORMAT.md`: `YEA` is `OWNER_APPROVED`, `NAY` is `OWNER_REJECTED`. That row is the only thing that may move the catalogue past `QA_PASSED`. A tool or an agent that writes `APPROVED` or `OWNER_APPROVED` without a matching `YEA` hash is a defect, and the status is void.
+9. **Induction.** `tools/art/place_art.js` places the approved file into its slot (it refuses a hash the ledger has not approved) and `tools/art/assemble_v8_sheet.js`, or the matching assembler, builds the runtime sheet. Animated classes get their real frames in the cells. A sheet that copies one frame into every cell is correct only for a static exception named in AS-ANIM-001. Status `INDUCTED`.
+10. **Placement data and in-game check.** The consumer in `game/data/UF_WorldCatalog.json` gets its placement data (§3.5). The PM runs the game (RMMZ Playtest, F5, or the harness), takes a screenshot with the asset on screen, opens it, confirms the frames advance for animated classes, and confirms no F8 console error. Status `IN_GAME`. Headless output alone does not reach this status (Owner 2026-09-29).
+
+### 3.3 QA checklist
+
+Every item is written pass or fail for every variant and every frame. Items marked "tool" are measured by `tools/art/validate_art.js` today, with its refusal code. Items marked "board" are judged on the review board until the tool grows the check; the judge writes the item name and pass or fail.
+
+| # | Item | Rule | Who |
+|---|---|---|---|
+| 1 | Exact cell size: the file is the slot's width by height | AS-GLOBAL-001, AS-SIZE-001 | tool, `DIMS_MISMATCH` |
+| 2 | Drawn bounding box inside the envelope | AS-PIPE-001 | tool, `SCALE_OUT_OF_ENVELOPE` |
+| 3 | Anchor within 1 px of the slot anchor | AS-ANCHOR-001 | tool, `ANCHOR_GROUND` / `ANCHOR_CEILING` |
+| 4 | Alpha is 0 or 255 only | AS-GLOBAL-003 | tool, `ALPHA_NOT_BINARY` |
+| 5 | Every opaque pixel is in the master palette | AS-GLOBAL-004 | tool, `OFF_PALETTE` |
+| 6 | High top-down view, the one camera | AS-VIEW-002 | board |
+| 7 | Light from the upper left | AS-GLOBAL-005 | board |
+| 8 | Outline rule: 1 px self-tinted on objects, none on terrain | AS-GLOBAL-006, AS-LOCK-001 | board |
+| 9 | Grayscale step of 3 or more against each target ground the record names | AS-READ-001 | board until the tool reads the recorded ground |
+| 10 | The variants of one object stay within one silhouette family and one value band | §3.4 | board |
+| 11 | Frame count matches the animation class; base pixels stable across frames; no strobing | AS-ANIM-001, AS-GLOBAL-017 | board, in-game clip |
+| 12 | Originality check passes | AGENTS.md Rule 8, `tools/originality_check.js` | tool |
+
+A static asset names its exception from AS-ANIM-001 in the record. Item 11 then checks that the sheet holds one frame, not a fake loop.
+
+### 3.4 Variants
+
+- A variant is a distinct front-view generation: a new run of the prompt, usually with a new seed, sometimes with a changed descriptor. Variants are never rotations of one image. A rotation is a facing, and it moves the light off the upper left (AS-GLOBAL-005).
+- The variants of one object must still read as that object: one silhouette family, one value band, one material. Different objects must stay easy to tell apart (Owner 2026-09-29: diverse but readable).
+- A set already inducted as eight rotations of one generation is recorded as one variant plus seven facings until it is regenerated. It is not counted as eight variants.
+
+### 3.5 Terrain tiles and placement data
+
+- Terrain tiles are flat, seamless, 48 px, on the dual-grid path in AS-TERR-001. Each ground kind gets several variants placed as a gradient across the ground, so the ground shifts instead of repeating one stamp (Owner 2026-09-29, recorded under DEC-007). Variant counts per kind and the placement rule are pending their own decision. Until then a kind ships with at least 3 variants and the rule below.
+- Placement data lives with the consumer in `game/data/UF_WorldCatalog.json`: for each object or ground kind, the variant list with a weight per variant, a flag that forbids identical orthogonal neighbours, and per-ground-kind variant sets where one object is split by ground. The runtime picks by weight and refuses the variant already used by an orthogonal neighbour of the same object. On 2026-09-29 `game/js/plugins/DEUS_Objects.js` picks by a uniform hash with no weights and no neighbour rule. Closing that gap is an engine leaf, not a change to this SOP.
+
+### 3.6 One status ladder
+
+`CATALOGUED` -> `PROMPTED` -> `GENERATED` -> `QA_PASSED` | `QA_FAILED` -> `OWNER_APPROVED` | `OWNER_REJECTED` -> `INDUCTED` -> `IN_GAME`
+
+This ladder replaces the six status vocabularies in use on 2026-09-29: the `docs/ASSET_REQUESTS.md` flow (REQUESTED through INTEGRATED), the `docs/art/ART_QA_DASHBOARD.md` ladder (GENERATED through COMPLETE), the catalogue status enum in `docs/art/catalogue/SCHEMA.md` §7, the prompt-file `READY_FOR_OWNER`, the READY status in `docs/PROJECT_DEUS_ART_DIRECTION_SPEC.md`, and the production-matrix `qcPassed` flag. Legacy tokens map as follows. `MISSING` is no record, or `CATALOGUED` once the record exists. `EXISTING_UNAPPROVED`, `STAND_IN` and `STOCK` are `GENERATED` at best; none is QA-passed. `APPROVED` is `OWNER_APPROVED` only when a `YEA` ledger row holds the file's hash; otherwise it is `GENERATED`. `QA_FAILED` and `OWNER_REJECTED` return the asset to step 4. Every writer of a status uses these words and no others.
+
+Where the ladder is recorded on 2026-09-29. `art/catalogue/catalogue.json` keeps its old enum (`MISSING`, `EXISTING_UNAPPROVED`, `STAND_IN`, `STOCK`, `APPROVED`, `OUT_OF_SCOPE`; `docs/art/catalogue/SCHEMA.md` §7) because `tools/art/build_catalogue.js` regenerates every entry's status from `docs/ASSET_INVENTORY.md` with those words and `tools/art/test_catalogue.js` is a merge-gate test (TOOL.01.01, TOOL.01.02); a hand-set ladder word there would be overwritten and would fail the gate. Until a tooling leaf teaches the builder and SCHEMA §7 the ladder (`docs/STATUS.md` F), an asset's ladder status lives in its prompt file (`art/prompts/<id>.json`, field `status`) and in `docs/art/ART_QA_DASHBOARD.md`, and the catalogue word is read through the mapping above. Step 2's `CATALOGUED` therefore means "the record exists in the catalogue"; the catalogue file itself still says `MISSING` for it.
+
+## 4. Worked spell rows
 
 The schema examples are the normative samples. In short: Fire Bolt is evocation, one-hand, projectile, fire, `ignite-unattended`. Fireball is evocation, one-hand, sphere with projectile travel, fire, `fire-tiles-spread` and `crossesZ` true (the burst is also stamped on lower layers when the sim says the volume crosses Z). Cone of Cold is evocation, two-hand, cone, cold, `cold-freezes`. Lightning Bolt is evocation, focus-raise, line, lightning, `ignite-unattended`. Shield is abjuration, one-hand, self-aura, no damage, aura `ward`, drawn with the force ramp (the rules text says an invisible barrier; the pixels are opaque). Cure Wounds is evocation, one-hand, touch, sim `heal`, heal ramp `RAMP_DMG_RADIANT`. `customPiece` is null on all six.
 
@@ -725,7 +792,7 @@ Owner rulings win. The source line is the conflict. The resolution is the ruling
 38. **One anchor vs two hands.** **AS-HUM-016** stores one `{x, y, angle}` cel. **AS-EQUIP-001** stores main-hand and off-hand points, the grip angle and the draw-order flag. The eight angle cels stay.
 39. **Catalogue slot ids vs permanent ids.** Existing catalogue `slot.slotId` values are atlas addresses. **AS-ID-001** is the id the runtime keeps. The catalogue file was not edited.
 40. **Generator routing.** Item 39 names PixelLab as the primary generator for every category. Retro Diffusion is standby. Nano Banana Pro is for concepts only. The multi-generator bake-off is off. One generator per layered set still holds, and that generator is PixelLab.
-41. **Layer height.** DEC-013, and **AS-GLOBAL-018** as first written, used 1 layer = 10 ft and five strata of 2 ft. Owner items 26 and 29 replace that with 1 layer = 5 ft = 48 px and four quarters of 12 px. `stratumPx` is `[12, 12, 12, 12]`. Lanes that still assume a 10 ft step are not edited here.
+41. **Layer height (OPEN, 2026-09-29).** DEC-013 item 2 and DEC-038 item 3 (Owner, 2026-09-26 and 2026-09-28): 1 layer = 10 ft, five strata of 2 ft; `art/catalogue/geometry.json` (`layerFt` 10, `strataPerLayer` 5, `stratumPx` `[19, 19, 19, 19, 20]`, `layerPx` 96) and `game/js/plugins/DEUS_Levels.js` (`STRATA = 5`) follow them. Owner items 26 and 29 (2026-09-26), as **AS-GLOBAL-018**, **AS-SCALE-001** and **AS-QTR-001** record them: 1 layer = 5 ft = 48 px, four quarters of 12 px, `stratumPx` `[12, 12, 12, 12]`. Both are Owner-sourced, and DEC-016 already names px/ft as an Owner question (`stratumPx`). No winner is declared here: `docs/OWNER_DECISIONS.md` governs until the Owner rules once (`docs/STATUS.md` D.5); the losing rows are then corrected in a follow-up lane.
 42. **A 64 px tile.** It was considered and was not adopted. Terrain stays 48 px. Integer presentation scale is **AS-RENDER-001**. The 64 by 64 SV battler frame stays.
 43. **Art-direction wording.** The 14:38 CT direction is replaced by readable high-contrast fantasy (Owner 15:02 CT). Mood sits in lighting and grading.
 44. **Outline weight.** A heavier outline gives way to the 1 px self-tinted outline on map sprites and items, and none on terrain (**AS-LOCK-001**). A character faceset does not require that outline. A black contour is allowed on a character faceset (Owner 16:39 CT).
@@ -949,4 +1016,5 @@ The JSON `rules` object carries the same ids. The sentence here is the short for
 - **AS-MELEE-001.** Weapon-group clips. Fixed grip and rotating weapons are retired for characters.
 - **AS-PM-001.** PM defaults the Owner may override. Elf is 43. Characters are not mirrored.
 - **AS-VIS-001.** Whole-sprite map. No class outfits. Facesets never change with gear and are not built from layers.
-- **AS-CHMAP-001.** 18 unarmored bases, 72 armor States, 90 armor states, 19 animations, eight directions. Plain-language prompts. Post-process checks. Owner sign-off.
+- **AS-CHMAP-001.** 18 unarmored bases, 72 armor States, 90 armor states, 19 animations, eight directions. Plain-language prompts. Post-process checks. Owner sign-off. Create Character and Create State steps suspended (DEC-007 amendment, 2026-09-29).
+- **§3 SOP.** Natural-world production: OBJECTS and MAPS only, ten steps, twelve QA items, one status ladder. Owner 2026-09-29.

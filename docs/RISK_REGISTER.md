@@ -1,5 +1,7 @@
 # RISK REGISTER — Project DEUS
 
+> **Note (2026-09-29; DEC-007 amendment, DEC-044; PM under DEC-042).** Rows that cite "Binding Rule 8 & 11: All shipped art must originate from Google Nano Banana Pro" predate DEC-007: `AGENTS.md` Rule 11 is now the PixelLab OBJECTS and MAPS opening (catalogue first, QA vetting, Owner sign-off) and Rule 8 (Ultima VII stand-ins, originality check) stands unchanged. The register itself (dated 2026-09-22) is not maintained; live blockers are `docs/STATUS.md` section D.
+
 **Risk Management Authority:** Owner Terminal (Gemini)  
 **Last Updated:** 2026-09-22  
 

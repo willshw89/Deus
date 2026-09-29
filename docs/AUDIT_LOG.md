@@ -1,8 +1,34 @@
 # AUDIT LOG
 
-Claude Code audits Gemini's work here (AGENTS.md → Audits). Newest entry at the top.
+Audit findings are recorded here (AGENTS.md Rule 3: graded findings, each citing a file:line, an opened screenshot or a command output; open findings in your area come before new work). Newest entry at the top.
 Grades: **BLOCKER** (can't ship or show; breaks a locked decision) · **MAJOR** (wrong result; must be fixed before the slice is approved) · **MINOR** (process or cleanup).
 Every finding cites evidence. When a finding is fixed, mark it `FIXED <date> <commit>`. Don't delete it.
+
+---
+
+## A11: Process audit of the tracking documents, five slices (2026-09-29)
+
+**Audited by:** Fable (Claude Code, PM under DEC-042), lane-pm-streamline, in the worktree at base `5b300427` (main moved to `d33df336` and then `e1554c63` during the audit).
+**Scope:** `docs/STATUS.md`, `tasks/wbs_registry.json`, `docs/SLICES.md`, `docs/WORK_QUEUE.md`, `docs/MODEL_AVAILABILITY.md`, `docs/packets/`, this log; the Package 1-3 proof claim of `5cb93343`.
+**Native Editor Playtest:** `NOT RUN`. Evidence: `git log` / `git show` in the worktree, `wc -l`, `grep -c`, and the files named per finding.
+
+### Headline numbers
+- `docs/STATUS.md`: 242 lines (about 31k tokens, more than one read); header "Last Updated 2026-09-28" above 2026-09-29 edits; section 2 is the 2026-09-25/26 lane roster; section 3 has 53 lane rows (30 marked MERGED) plus 18 retired bullets, and lists 18 lanes as ACTIVE WRITER or MERGE PENDING that are merged on main; "NO ART GENERATION" appears 40 times; section 4 has 31 defect rows, 27 OPEN, all dated 2026-09-25/26; the Stand-ins section dates from 2026-09-19.
+- `tasks/wbs_registry.json`: 252 lines; `mainSha` 4100f7ff stale; `mergedSha` for NAT.02.01 (54f67436), SOC.10.01 (37f3814b) and SOC.10.02 (1228ed9d) were review commits, not merges (real merges c00ada72, 099be7b9, 13fea065); the NAT.02.01 gate test `tools/test_structural_support.js` is not on main; writer wrong for NAT.02.01 (registry Claude; commit fdb5c0a0 `[codex]`; REPORT.md MiniMax), WG.00.40 (registry Claude; commit 9ff79bf2 `[gemini]`) and NAT.04.01 (registry MiniMax; attempt 3 commit 94e89cff `[claude]`); TOOL.01.02 (merged 3ab738b2) missing.
+- `docs/SLICES.md` 83 lines, `docs/WORK_QUEUE.md` 228 lines, `docs/MODEL_AVAILABILITY.md` 20 lines: superseded, dated 2026-09-25 or earlier. `docs/packets/`: 18 files of 2026-09-22, superseded. This log: newest entry was 2026-09-24.
+- No tracker row existed for the sack / creature inventory (`cd8e43b7`, `eb790a68`: direct commits to main, unreviewed) or the racial banners (`cd8e43b7`). Nothing described what is in the Owner's game.
+
+### Findings
+| # | Grade | Finding | Evidence | Status |
+|---|---|---|---|---|
+| A11-1 | MAJOR | Packages 1-3 recorded as "COMPLETED, In-Game Proof: VERIFIED" on a harness run, not an Owner F5. `tools/test_package_proofs_ingame.js` copies `game/` to a temp snapshot and injects a suite into `DEUS_Test.js`; `plugins.js` gives `DEUS_World` no parameters, so the world is the 1x1 default (`AreasX` 1, `AreasY` 1, `AreaSize` 256) and `DEUS_Depth` `MaxDepth` is 2; the suite places a chest, drops one stone and checks that values exist; no seam, collapse or seepage; screenshots go to gitignored `art/review/`; "DEUS-RPT-INENGINE-PROOF-01" occurs only in STATUS.md and the registry; the harness and the COMPLETED claim are the same commit `5cb93343`; `tasks/NAT.03.01/lane-bx/REPORT.md` line 76: "Playable verification performed: NO". | as cited | OPEN: registry set to HEADLESS_DONE / NOT_PROVEN; Owner F5 needed |
+| A11-2 | MAJOR | `cd8e43b7` and `eb790a68` (`[gemini]`, 2026-09-29) changed seven plugins and added 19 PixelLab PNGs to `game/img/characters/` directly on main: no lane.json, no review, no merge gate, and no catalogue-first, QA or Owner sign-off record (DEC-007 amendment 2026-09-29). | `git show --stat cd8e43b7 eb790a68` | OPEN: Owner decision (STATUS.md D.2, D.3) |
+| A11-3 | MINOR | Registry provenance and merge SHAs wrong or stale, as listed under headline numbers. | `git log -1` on each SHA | FIXED 2026-09-29 in this lane (`tasks/wbs_registry.json`) |
+| A11-4 | MINOR | Tracking documents superseded but still presented as current (STATUS sections 0-5, SLICES, WORK_QUEUE, MODEL_AVAILABILITY, packets). | line counts and dates above | FIXED 2026-09-29 in this lane: STATUS rewritten as a Now page, full copy in `docs/archive/STATUS_2026-09-29_full.md`, stubs and archive banners on the rest |
+| A11-5 | MINOR | `tools/generate_asset_inventory.js` (lines 43, 154) reads the Stand-ins section of STATUS.md; after the rewrite its `standins_parsed` check fails until the tool is repointed to the archive or to a stand-ins file. | the tool's source | OPEN: bounded tooling task |
+
+### Closed here
+- **A7-1** (2026-09-22, "DEUS_Fluid.js MISSING"): `game/js/plugins/DEUS_Fluid.js` is on main (50,080 bytes at `5b300427`; merged by Lanes AU SIM.50.02 and AE SIM.50.13, see `docs/archive/STATUS_2026-09-29_full.md` section 3), and `DEUS_Core.js` loads it as a companion plugin. It is still not listed in `plugins.js`, and its continuous-volume behaviour in the game is NOT PROVEN. A7-1 is `FIXED 2026-09-29` for the missing-file finding; the A7 table below is left as written.
 
 ---
 

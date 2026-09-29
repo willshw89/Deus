@@ -1,5 +1,7 @@
 # DEUS WorldGen Work Breakdown Structure
 
+> **Note (2026-09-29; PM under DEC-042).** The "NO ART GENERATION, BY ANYONE" rows predate the DEC-007 amendment of 2026-09-29 (PixelLab OBJECTS and MAPS opening, catalogue first, QA vetting, Owner sign-off; `AGENTS.md` Rule 11) and read as that rule. Statuses in this file are history; the live master truth for packages, leaves and lanes is `tasks/wbs_registry.json` (DEC-041).
+
 **Namespace:** WG  
 **Rev:** 32  
 **IDs:** Stable. Next free in WG.00 is WG.00.40  

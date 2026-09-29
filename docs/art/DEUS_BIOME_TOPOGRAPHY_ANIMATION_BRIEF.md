@@ -1,3 +1,8 @@
+> **SUPERSEDED (2026-09-29; DEC-007 amendment, PM under DEC-042).** This brief targets Google Nano Banana Pro, which is not a production generator (AS-GEN-004). Reference only, not a brief to run.
+> Replaced by `docs/art/DEUS_ASSET_STANDARD.md` §3 (PixelLab OBJECTS and MAPS only), AS-ANIM-001 (animation classes and frame counts), AS-TERR-001 (48 px dual-grid terrain) and AGENTS.md Rule 12 (all animation is sprite frames; that rule stands).
+> Where this file and the asset standard disagree, the asset standard wins.
+> Do not update this file. New rulings go to `docs/OWNER_DECISIONS.md`.
+
 # DEUS — OVERWORLD BIOME TILESET & ANIMATED TOPOGRAPHY ART BRIEF
 **Document ID:** `DEUS-ART-BRIEF-BIOME-01`  
 **Target Generator:** Google Nano Banana Pro (`gemini-3-pro-image` / `generate_image`) exclusively.  

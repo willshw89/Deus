@@ -1,5 +1,8 @@
 # RMMZ Asset Specifications (measured from stock files)
 
+> **SUPERSEDED FOR GENERATION (2026-09-29; DEC-007 amendment, DEC-044; PM under DEC-042).** The Nano Banana Pro mandate in this file (the intro and the "Image Generator" row) is void: generation is PixelLab OBJECTS and MAPS only, catalogue record first, QA vetting, Owner sign-off (`AGENTS.md` Rule 11; AS-GEN-004). The measured stock RMMZ formats stay a reference; frame classes, sizes and the high top-down camera are `docs/art/DEUS_ASSET_STANDARD.md` (AS-SIZE-001, AS-VIEW-002). The animation rule stands as `AGENTS.md` Rule 12.
+> Do not update this file. New rulings go to `docs/OWNER_DECISIONS.md`.
+
 Binding specification for standard RPG Maker MZ asset formats (VISION Rules V70, V108, V109; AGENTS.md Rules 11, 12). **ALL GENERATION TASKS ARE TO UTILIZE GOOGLE NANO BANANA PRO (`gemini-3-pro-image` / `generate_image`).** All animation must happen through distinct sprite frames authored on the sheets; **NO AFTER-EFFECT ANIMATIONS** (no programmatic distortion, squashing/stretching, sine-wave sway, or shader warps).
 
 ---

@@ -1,10 +1,12 @@
 # DEUS game translation and proof templates
 
-Mandatory under the Owner's 2026-09-28 traceability request and `.agents/rules/deus-game-translation.md`. Fill these within the current approved scope; a template does not open a WBS leaf or authorize art, engine edits, integration, or new gameplay work. Existing work is not retrospectively declared playable by adding this document.
+Mandatory under the Owner's 2026-09-28 traceability request and `.agents/rules/deus-game-translation.md`. Revised 2026-09-29 under DEC-042: one brief block, one report block, one exit table. Fill them within the approved scope; a template opens no WBS leaf and authorizes no art, engine edit, integration or new gameplay work. Adding this block to existing work does not make it playable.
 
-## Every lane brief and completion report
+Nothing is complete without in-game proof: the Owner sees it in RMMZ Playtest (F5). Headless tests alone never count.
 
-In a brief, describe expected behavior and planned proof. In a completion report, replace plans with observed results, exact commits, evidence paths and commands; mark anything not run explicitly. Retain all fields. Use `N/A - <specific reason>` for genuinely inapplicable details, never to conceal a missing bridge or consumer. For tooling/governance work, explain the indirect assurance it supplies and the gameplay work that relies on it.
+## 1. Every lane brief and completion report: the GAME TRANSLATION block
+
+In a brief, describe the expected behavior and the planned proof. In a completion report, replace plans with observed results, exact commits, evidence paths and commands; mark anything not run. Keep all ten fields and all six YES/NO lines. Use `N/A - <specific reason>` only for a genuinely inapplicable detail, never to hide a missing bridge or consumer. Tooling and governance lanes explain the indirect assurance they give and the gameplay work that relies on it.
 
 ```text
 GAME TRANSLATION
@@ -62,78 +64,49 @@ Playable verification performed: YES/NO - evidence or reason
 Remaining step before player can experience it:
 ```
 
-Use NO plus `NOT VERIFIED` when a YES has not been established. A foundation whose bridge belongs elsewhere reports, without implying downstream completion:
+Write `NO - NOT VERIFIED` when a YES has not been established. Class A and B results need a direct playable demonstration or an in-game outcome scenario before the behavior is called complete. Class C results name their consumers, say how corruption would show in gameplay, and supply the consumer integration test or state that it is blocked or not run. A foundation whose bridge belongs to another lane reports `Engine bridge: DEFERRED TO <named integration>` and `Player-facing status: NOT YET PLAYABLE`; it does not widen its scope to make the fields look complete. A passing headless test cannot establish the RMMZ connection; a screenshot cannot establish conservation or persistence.
+
+## 2. One report block: WBS proposal, review record, overnight report
+
+One block serves the three uses that had their own templates before 2026-09-29. Fill every line; write `NOT RUN`, `NOT YET APPROVED` or `N/A - <reason>` rather than leaving one empty.
 
 ```text
-Simulation authority: COMPLETE within <approved scope>, supported by <evidence>
-Game translation consumer: DEFINED as <named system/contract>
-Engine bridge: DEFERRED TO <specific existing integration or explicitly unapproved proposal>
-Player-facing status: NOT YET PLAYABLE
-```
+GAME TRANSLATION REPORT   (use: WBS PROPOSAL | REVIEW | STATUS)
 
-A/B results require a direct playable demonstration or in-game outcome scenario before claiming those behaviors complete. C results name consumers and how corruption would affect gameplay, and supply the consumer integration test or explicitly state that it is blocked/not run. A passing headless test cannot establish the RMMZ connection; a screenshot cannot establish deterministic conservation or persistence. Do not widen a foundation lane to make these fields look complete.
-
-## Every future WBS proposal
-
-```text
-WHY THE PLAYER CARES:
-<Concrete action or world consequence, not a general realism/depth claim.>
-
-Translation class and named consumer:
-Upstream dependency / current bridge status:
-Proposed scope / acceptance proof:
-Owner approval: NOT YET APPROVED unless an explicit approval is cited.
-```
-
-For example, a wet permeable formation flooding an excavation while impermeable rock at the same depth does not is a concrete consequence. A disappearing prey population changing predator survival is another. These are illustrative requirements, not assertions about current implementation or new scope approvals.
-
-## Review and merge record
-
-```text
-GAME TRANSLATION REVIEW
-Lane / exact writer SHA:
-Brief and completion GAME TRANSLATION block references:
-Class / consumer chain checked:
-Deterministic proof independently checked:
-RMMZ bridge / playable proof independently checked (or NOT RUN):
-Persistence proof checked:
-Six bridge-status fields supported by evidence:
+Lane / WBS / exact writer SHA:
+Why the player cares (a concrete action or world consequence, not "realism" or "depth"):
+Translation class / named consumer / upstream dependency:
+Simulation behavior and headless proof (command, fixture, exit code, tested SHA):
+In-game consequence and in-engine proof (playtest steps, observed result, or NOT RUN):
+Persistence proof (save/load, region unload/reload):
+Six bridge-status lines supported by evidence: YES / NO - which ones are not
 Permitted claim: bounded foundation complete | behavior demonstrated | NOT YET PLAYABLE
-Missing evidence / deferred integration / remaining approval:
-Reviewer identity, actual model family, review artifact/commit and timestamp:
+Remaining step before the player can experience it / missing evidence / missing approval:
+Author, actual model family, review artifact or commit, timestamp:
 ```
 
-This block supplements the existing review format. It is not a replacement for the required single VERDICT line, review-commit structure, family independence or `merge_gate`. The integration record references the reviewed writer SHA and this evidence; missing fields must be resolved before lane completion or gameplay-complete claims. Preserve truthful foundation-only outcomes.
+Rules for each use:
+- **WBS proposal:** the "Why the player cares" line is mandatory (`.agents/rules/deus-game-translation.md`); a weak consequence is grounds to recommend deferral, never to open a leaf. "Owner approval" is `NOT YET APPROVED` unless an explicit approval is cited.
+- **Review:** this block supplements, and never replaces, the single `VERDICT:` line, the review-commit structure, family independence and `merge_gate.js` (`tools/governance/MERGE_GATE.md` §5 (b)). The reviewer checks the chain, class, six status lines, persistence, exact SHA and both levels of proof independently. Missing fields block a gameplay-complete claim; a truthful foundation-only outcome is a valid outcome.
+- **Status (overnight or morning):** state the concrete consequence first, then separate simulation evidence from RMMZ integration and playtest evidence. "Support calculation enforces the span rule and conserves mass in the fixture; engine bridge/playtest: NOT VERIFIED" stays that way until the Owner has seen it in the game.
 
-## Natural World v1 final playable exit proof
+## 3. Natural World v1 exit gate
 
-The coordinator assembles a controlled, reproducible in-engine sequence before final Owner sign-off, using approved content and known seeds. Record commands/steps, tested SHAs, expected and observed outcomes, conservation/identity checks, saved state and opened evidence. A scenario requiring unapproved work remains blocked; it does not approve that work.
+DEC-041 item 7 (2026-09-28) is the authority for the exit gate. The table below merges the twelve DEC-041 points with the six observable scenarios (A to F) this template carried before 2026-09-29; where they differ, DEC-041 governs. The coordinator assembles one controlled, fixed-seed in-engine sequence before final Owner sign-off, with approved content only, and records commands, tested SHAs, expected and observed outcomes, conservation and identity checks, saved state and the evidence the Owner opened. A point that needs unapproved work stays an explicit exit blocker; it approves nothing.
 
-| Scenario | Required observable proof |
-|---|---|
-| A - Physical world | Move an object; put it in a container and take it out; carry it across a region seam; save/reload; verify the same object identity, placement and count. |
-| B - Vertical geology | Traverse elevation, inspect a deep cut, descend multiple Z levels and cross an underground region seam; expose existing strata and verify continuity and persistence. |
-| C - Structural physics | Show a safe span surviving, remove critical support, observe collapse and physical rubble, verify mass conservation and persistent collapsed state. |
-| D - Water | Observe surface runoff; inspect pre-existing groundwater, breach a saturated formation, observe inflow/pooling/equilibrium, and verify water-state persistence. Groundwater implementation still needs its own Owner approval. |
-| E - Soil / climate / flora | Compare dry, wet and cold terrain, observe appropriate differences in vegetation suitability, and verify environmental state persistence. |
-| F - Wildlife | Observe habitat/resource dependence and persistent populations rather than arbitrary respawns; verify consequences and persistence. |
+| # | DEC-041 point | Observable in-engine proof | Was |
+|---|---|---|---|
+| 1 | World topology survives region seams and save/load cycles | Walk across a surface region seam and an underground one; save, reload; the same cells, strata and objects are there. | A, B |
+| 2 | Physical world objects remain persistent | Move an object; put it in a container and take it out; carry it across a seam; save and reload; same identity, placement and count. | A |
+| 3 | Excavation exposes predetermined geological strata | Inspect a deep cut and descend several Z levels; the strata match the generated record and stay continuous after reload. | B |
+| 4 | Unsupported terrain triggers cascading collapse into rubble | Show a safe span standing; remove the critical support; observe the collapse and physical rubble; the collapsed state persists. | C |
+| 5 | Groundwater breach produces conserved Darcy seepage | Breach a saturated formation; observe inflow, pooling and equilibrium; the water ledger balances (DEC-040) and the water state persists. | D |
+| 6 | Groundwater and surface water hydrate soil moisture | Observe surface runoff and groundwater raising soil moisture in the cells they reach, and dry cells staying dry. | D, E |
+| 7 | Terrain elevation and volcanism dynamically drive continuous climate | Compare temperature across elevation and near volcanism (DEC-038 continua); the gradient is continuous, not a biome stamp. | E |
+| 8 | Soil moisture, light and temperature govern plant germination and growth | Compare dry, wet and cold terrain; vegetation suitability and growth differ accordingly and persist. | E |
+| 9 | Vegetation biomass determines herbivore carrying capacity | Reduce biomass in one area; the herbivore population there falls or moves; it does not stay constant. | F |
+| 10 | Wildlife populations persist and reproduce rather than respawning | Populations follow habitat and resources over time and reload; no arbitrary respawn timers (DEC-039 regeneration law). | F |
+| 11 | Full region unload and reload reproduces bit-identical state | Unload a region, reload it, compare the serialized state byte for byte with the pre-unload snapshot. | A, B |
+| 12 | Quiescent sleep guarantees zero global full-world per-frame scans | With the world at rest, the diagnostics show no per-frame iteration over all units, objects or items (AGENTS.md Rule 14). | new |
 
-The pasted examples for physical objects, 32-layer worlds, support/collapse and aquifers describe intended game translation, not verification that those features are present. Actual dimensions, consumers and behavior must come from the approved lane contracts and observed runtime. No new art is required or authorized by this proof plan.
-
-## Every overnight / morning report
-
-```text
-GAME TRANSLATION STATUS
-
-Lane:
-Simulation behavior:
-In-game consequence:
-Engine bridge status:
-Player-visible status:
-Save/load status:
-Headless proof:
-In-engine proof:
-Remaining step before player can experience it:
-```
-
-Report the concrete consequence first, then distinguish simulation evidence from RMMZ integration and playtest evidence. For example: "Support calculation enforces the approved span rule and conserves mass in the tested fixture; engine bridge/playtest: NOT VERIFIED." Do not change that to "rock roofs collapse in the game" until observed in the game.
+The old A to F wording, and any pasted example about objects, 32-layer worlds, support or aquifers, described intended translation, not verified features. Actual dimensions, consumers and behavior come from the approved lane contracts and the observed runtime. No new art is required or authorized by this proof plan (DEC-007 as amended 2026-09-29).

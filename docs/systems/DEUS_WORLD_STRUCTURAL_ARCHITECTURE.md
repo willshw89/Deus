@@ -1,4 +1,6 @@
 # DEUS — World-Cell Stack, Structural Support & Volumetric Terrain Architecture
+
+> **Note (2026-09-29; DEC-007 amendment, DEC-044; PM under DEC-042).** The line that prompts Nano Banana Pro for material kits is superseded: art generation is PixelLab OBJECTS and MAPS only, catalogue record first, QA vetting, Owner sign-off (`AGENTS.md` Rule 11; AS-GEN-004). The structural model itself is unaffected; the shipped kernel is `game/js/sim/structural/**` (NAT.02.01, headless only, `docs/STATUS.md` B).
 **Document ID:** `DEUS-SYS-STRUCT-01`  
 **Status:** Authoritative Architecture Standard (Frozen System Model V1)  
 **Authority:** Gemini (Full-Stack Coordinator & Art Authority) & Fable / Claude Code (Engine Authority)  

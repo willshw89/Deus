@@ -4,6 +4,16 @@ WG.41.01 (Lane U), 2026-09-26. This page describes the section of `art/APPROVALS
 
 Tools that read the ledger: `tools/art/validate_art.js` and `tools/art/place_art.js`. A file is placed only if its SHA-256 is approved here for the catalogue entry or slot it is placed into.
 
+## The ledger and the status ladder (2026-09-29)
+
+Under the DEC-007 amendment of 2026-09-29 (`docs/OWNER_DECISIONS.md`; SOP in `docs/art/DEUS_ASSET_STANDARD.md` §3), this ledger is the only thing that moves an asset past `QA_PASSED` on the one status ladder (`CATALOGUED` -> `PROMPTED` -> `GENERATED` -> `QA_PASSED` | `QA_FAILED` -> `OWNER_APPROVED` | `OWNER_REJECTED` -> `INDUCTED` -> `IN_GAME`).
+
+- A `YEA` row for a file's SHA-256 is `OWNER_APPROVED` for the entries it names. A `NAY` row is `OWNER_REJECTED`.
+- An agent may write at most `QA_PASSED` (or `QA_FAILED`) into `art/catalogue/catalogue.json`, `docs/art/ART_QA_DASHBOARD.md`, a prompt file or any other status field. `APPROVED`, `OWNER_APPROVED` and anything after them are written only when a `YEA` row with that file's hash exists here, and the writer cites the row's date.
+- A tool that hard-codes `APPROVED` (on 2026-09-29: `tools/art/induct_batch_10.js`, untracked in the main working copy) is a defect. Statuses it wrote are void and read as `GENERATED` until a ledger row exists. The eight batch-3 objects set `APPROVED` on 2026-09-29 without ledger rows are listed in `docs/art/ART_QA_DASHBOARD.md` as QA pending.
+- The Owner's `YEA` follows the review board (SOP step 7), not the other way round. The PM presents; the Owner writes the row; then `place_art.js` may run.
+- The format below is unchanged. The tools parse it as written, and this section does not change how they read it.
+
 ## The section
 
 Append this heading to `art/APPROVALS.md`, exactly as written, on its own line:

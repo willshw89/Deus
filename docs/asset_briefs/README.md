@@ -1,5 +1,8 @@
 # Asset briefs for Gemini (started 2026-09-18)
 
+> **SUPERSEDED FOR GENERATION (2026-09-29; DEC-007 amendment, DEC-044; PM under DEC-042).** The Nano Banana Pro mandate below is void: generation is PixelLab OBJECTS and MAPS only, catalogue record first, prompt per `docs/art/DEUS_ASSET_STANDARD.md` §3, QA vetting, Owner sign-off (`AGENTS.md` Rule 11; AS-GEN-004). The `uf.hex` palette and the 2.5D lean are superseded by AS-GLOBAL-004 and AS-VIEW-002. The animation rule (sprite frames only) stands as `AGENTS.md` Rule 12. The briefs are reference; see `INDEX.md`.
+> Do not update this file. New rulings go to `docs/OWNER_DECISIONS.md`.
+
 This folder holds the prompts Gemini draws from: one `SEG-<nn>_<family>.md` file per family of assets, each a list of briefs in the format of `art/briefs/FABLE_ASSET_BRIEF.md` §6 with the HD FF6 48×48 precisions (48×48 at native resolution, anchor `[24, 47]`, palette-only ramps from `art/palette/uf.hex`). `INDEX.md` lists the segments and the order to work them.
 
 **MANDATORY GENERATION & ANIMATION RULES:**

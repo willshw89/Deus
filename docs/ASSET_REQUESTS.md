@@ -1,17 +1,21 @@
-# ASSET REQUESTS: art the engine needs, with specs
+# ASSET REQUESTS: the art queue (history and status ledger from 2026-09-29)
 
-**Claude Code** (engine) adds a request here whenever a feature needs art. **Gemini** (art) makes the assets to these specs. Claude Code checks each delivery against its spec and integrates it, and **the user approves** every asset before it counts as final (VISION V11).
+**Read this first (2026-09-29; DEC-007 amendment, PM under DEC-042).** A request for art is now a catalogue record, not a row here. The procedure is `docs/art/DEUS_ASSET_STANDARD.md` §3: catalogue record in `art/catalogue/catalogue.json` (step 2), prompt file `art/prompts/<id>.json` (step 3), PixelLab OBJECTS or MAPS (step 4; Creator and Character prompts are banned), post-process (step 5), QA (step 6), review board (step 7), the Owner's SHA-256 ledger row in `art/APPROVALS.md` (step 8; `docs/art/APPROVALS_FORMAT.md`), induction (step 9), placement data and in-game check (step 10). The PM (Claude Code) opens the record and presents the review board. The Owner is the final QA (VISION V11 stands).
 
-Every rule in `docs/ART_STANDARD.md` applies. **The look is High-Resolution 2.5D Ultima VII Oblique contained in 1-square tile (48×48 px)** (approved by user 2026-09-18, night): authentic 45° up-and-left lean (showing Top, South, and East faces), micro-dithered shading, and U7 Daylight Palette (`art/palette/uf.hex`). All assets fit strictly inside the 48×48 tile boundary. If a spec here seems wrong or impossible, write it under the request's **Notes** and tell the user. Don't silently change the asset or the spec.
+The header that stood here until 2026-09-29 (Nano Banana Pro as the only generator, the 2.5D 45-degree lean, the `uf.hex` palette, the AR-600 eight-facing sheet, the `REQUESTED` to `INTEGRATED` flow) is superseded. Nano Banana Pro is not a production generator (AS-GEN-004). The view is high top-down for every asset class (AS-VIEW-002). The palette is `art/palette/deus_master_world_palette_v1.hex` (AS-GLOBAL-004). Sidecar fields are AS-GLOBAL-012. Living beings stay under DEC-007 as written: no generation without the Owner.
 
-## Status flow
-`REQUESTED` → `IN PROGRESS` (Gemini) → `DELIVERED` (files in place, sidecar written) → `CHECKED` (Claude Code: ART_STANDARD §8 checks pass and it works in the engine) → `APPROVED` (user) → `INTEGRATED`
-A delivery that fails its check goes back to `IN PROGRESS`, with the reason in Notes.
+## Status words
 
-Briefs: every asset has a brief in `docs/asset_briefs/` (segments; start with `INDEX.md`). The brief is the spec; this table is the queue and status.
+The one ladder (asset standard §3.6): `CATALOGUED` -> `PROMPTED` -> `GENERATED` -> `QA_PASSED` | `QA_FAILED` -> `OWNER_APPROVED` | `OWNER_REJECTED` -> `INDUCTED` -> `IN_GAME`. The rows below still carry the old words. Read them as: `REQUESTED` = no catalogue record yet; `IN PROGRESS` and `DELIVERED` = `GENERATED` at best; `CHECKED` = `QA_PASSED` only if the twelve checklist items in §3.3 were run, else `GENERATED`; `APPROVED` = `OWNER_APPROVED` only where `art/APPROVALS.md` holds a `YEA` row with the file's SHA-256, else `GENERATED`; `INTEGRATED` = `INDUCTED`, and `IN_GAME` only with an opened screenshot. Nobody rewrites the old rows. A row moves to the new words only when its asset walks the SOP. New rows are not added here; open a catalogue record instead.
 
-## Shared spec (applies to every request unless it says otherwise)
-Set 2026-09-19 by the user (VISION V2, V3, V44, V9). `docs/ART_STANDARD.md` has the full rules; the prompts in `docs/handoffs/GENERATOR_PROMPTS.md` carry them to the generators.
+## How the table below is used
+
+- It is the history of the requests made from 2026-09-18 to 2026-09-29 and the status each reached. It is not the work queue.
+- An `AR-` id may be cited in a catalogue record's notes to link the old request to the new record.
+- Every stock RMMZ asset still in use keeps its row until its replacement reaches `IN_GAME`.
+- The shared spec, the sidecar example, the per-request detail sections and "Notes for Claude Code" below are kept as written. Where they name a generator, a lean, a palette or a sheet layout, the asset standard wins.
+
+## Shared spec of 2026-09-19 (SUPERSEDED 2026-09-29; kept as a record)
 
 | Item | Spec (HD pixel art in the style of Final Fantasy VI) |
 |---|---|
@@ -29,7 +33,7 @@ Set 2026-09-19 by the user (VISION V2, V3, V44, V9). `docs/ART_STANDARD.md` has 
 | Original art | Passes `tools/art_check.js --native` and `tools/originality_check.js`, then the user approves it |
 
 
-### Sprite sheet + sidecar format (what the engine reads)
+### Sprite sheet + sidecar format of 2026-09-19 (SUPERSEDED 2026-09-29 by AS-GLOBAL-012 and AS-GLOBAL-007; the bottom-right anchor below is the old U7 stand-in convention)
 Every object or character image comes with a JSON sidecar of the same name (`UF_Human_Male.png` + `UF_Human_Male.json`). Sheets are a grid: **one row per facing, one column per frame**, all frames the same size, in final pixels (1 art pixel = 1 screen pixel).
 
 ```json

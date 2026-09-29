@@ -1,3 +1,8 @@
+> **SUPERSEDED (2026-09-29; DEC-007 amendment, PM under DEC-042).** One of three overlapping scale documents with different door and large-creature sizes. Reference only.
+> Replaced by `docs/art/DEUS_ASSET_STANDARD.md` AS-SIZE-001 (frame classes in 48 px squares; Large is 48 by 96 tall or 96 by 48 long), AS-PM-001 (doors 1 tile wide and at least 72 px tall; walls whole layers) and AS-TERR-001 (48 px terrain). Layer height is OPEN: AS-GLOBAL-018 / AS-QTR-001 (5 ft = 48 px, quarters of 12 px) versus DEC-013 item 2 / DEC-038 item 3 (10 ft, five 2 ft strata); `docs/OWNER_DECISIONS.md` governs until the Owner rules (`docs/STATUS.md` D.5).
+> Where this file, `DEUS_SCALE_AND_ASSET_MASTER_BIBLE.md`, `DEUS_HUMAN_WORLD_SCALE_STANDARD.md` and the asset standard disagree, the asset standard wins, except on layer height (OPEN, above). The 48 by 96 black cap belongs to suspended AGENTS.md Rule 13.
+> Do not update this file. New rulings go to `docs/OWNER_DECISIONS.md`.
+
 # DEUS — Tileset Asset Size, Dimensions & Proportions Standard v1
 **Document ID:** `DEUS-TILE-SCALE-01`  
 **Status:** Authoritative Dimension & Proportions Specification (Frozen V1 Standard)  

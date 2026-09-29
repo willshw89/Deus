@@ -1,58 +1,31 @@
-# DEUS — CANONICAL AI ROLES & DIVISION OF LABOR
-**Document ID:** `DEUS-GOV-ROLES-01`  
-**Status:** AUTHORITATIVE & BINDING  
-**Authority:** Owner Directive (2026-09-25, drafted with Grok / Incoming PM)  
-**Applicability:** All AI Agents (Gemini, Claude / Fable, Grok, Codex)
+# DEUS — Roles and division of labour (rewritten 2026-09-29 per DEC-042)
 
----
+**Document ID:** `DEUS-GOV-ROLES-01`. **Authority:** Owner (DEC-042, 2026-09-29; DEC-041; DEC-035). This document matches `AGENTS.md` -> Roles; where the two differ, `AGENTS.md` governs and this file is corrected. Neither outranks `docs/OWNER_DECISIONS.md`.
 
-## 1. Executive Principle & Single Authority
+## 1. Roles
+| Who | Does | Does not |
+|---|---|---|
+| **Owner** | Decides scope, approves every lane, package and art asset; final art QA; the only person who marks work seen in RMMZ F5. | |
+| **PM: Claude Code** | Records Owner decisions; opens and closes lanes with `[pm]` commits to `tasks/<id>/<lane>/lane.json`; runs gate tests on writer tips before review (DEC-035); routes review; presents QA-passed art to the Owner. | Review its own family's code; certify its own work. |
+| **Coordinator: Gemini / Antigravity** | Runs its worker fleet; keeps its integration duties (merge gate, push `main`); keeps `tasks/wbs_registry.json` and `docs/STATUS.md` current; may record `FIX_READY`. | Self-certify; mark DONE before an independent verdict is recorded; open leaves or lanes without the Owner. |
+| **Writers** (Claude, Gemini, Grok, Codex) | Implement one lane on its whitelist in its worktree; hard logic at `xhigh` on the strongest available model. | Change WBS status; merge; push; touch the engine core or another lane's files. |
+| **Reviewers** (a different family from the writer; Grok by default, Gemini Pro or Codex when assigned) | Form the first verdict from the diff and their own test run; record provider, model, SHA, commands, exit codes; close defects (`closedBy`). | Review their own family; certify from the writer's report alone. |
+| **Codex** | Bounded tooling, harnesses, governance and telemetry utilities; plugin code only when a lane assigns it. | |
+| **MiniMax, others** | Manual-only until a reviewed adapter and family mapping exist. | Stand in for one of the four families. |
 
-This document is the **single source of truth** for AI agent roles, responsibilities, and decision authorities on Project DEUS. It reconciles, supersedes, and unifies all prior role descriptions in `GEMINI.md`, `AGENTS.md`, `docs/DIVISION_OF_LABOR.md`, and `docs/WORK_QUEUE.md`. All other governance documents must point directly to this specification.
+Grok and Codex have been lane writers since 2026-09-26 (`docs/archive/STATUS_2026-09-29_full.md` sections 2-3: Lane AA Grok on `DEUS_Levels.js`, Lane BO Codex on `DEUS_Mint.js`). Any family may write; the reviewer must be a different family.
 
-Review interval: Roles are reviewed after approximately **10 completed tasks**, using telemetry and verified output, not impressions.
+## 2. Verification gate
+Implementation + independent cross-family review + merge gate (`tools/governance/merge_gate.js`, `git merge --no-ff`) = merged. Done levels are in `AGENTS.md` -> Definition of Done: L1 headless, L2 bridged, L3 seen by the Owner. Nothing is complete below L3.
 
----
+Defect lifecycle:
+- `OPEN`: found by a reviewer or a test harness.
+- `FIX_READY`: the writer (or coordinator) commits the fix and cites the evidence run.
+- `CLOSED`: the reviewer independently verifies the fix commit in the tree and records the closure with its timestamp.
+No retroactive backfill: closure timestamps are the real verification moments.
 
-## 2. Allocation of Roles by Aptitude
+## 3. File ownership
+One writer per file set. Each lane's whitelist is in its `lane.json` `allowedPaths` and published as a row of `docs/STATUS.md` section E before the lane launches. Migration or directory restructuring needs a synchronized freeze in which every active lane commits and pauses.
 
-| Agent / Model | Primary Role | Core Responsibilities | Hard Constraints & Invariant Boundaries |
-|---|---|---|---|
-| **Gemini / Antigravity** | **Coordinator & Integration Authority** | • Orchestration, task routing, and WBS state transitions.<br>• Integration authority for all merges into `main`.<br>• Repository health, architectural alignment, and baseline profiling.<br>• Autonomous non-living art production pipeline via Google Nano Banana Pro.<br>• Telemetry monitoring and 3-minute pulse reporting. | • **Does not self-certify.** A WBS item CANNOT be marked `DONE` until an independent closure reviewer's verdict is recorded with a timestamp that precedes the `DONE` edit.<br>• Cannot close defects as `grok`. May record `FIX_READY`. |
-| **Claude / Fable** | **Primary Implementer** | • Core engine leaves (`DEUS_Levels.js`, `DEUS_WorldGen.js`, `DEUS_Fluid.js`, etc.).<br>• Simulation leaves and society systems (`DEUS_Projects.js`, `DEUS_Colonists.js`, `DEUS_Jobs.js`).<br>• Primary code authoring for deep mechanics and algorithmic implementations. | • Does not modify WBS statuses directly (submits evidence packets to Coordinator).<br>• Does not edit files outside assigned worktree/lane. |
-| **Grok** | **Adversarial Reviewer & Defect Closer** | • Independent adversarial code audit and vulnerability identification.<br>• Failure mutation design and defect verification.<br>• Defect closure authority (`closedBy: "grok"`).<br>• Performance attack plans and boundary condition audits. | • **Not the author of specs, protocols, or results documents.**<br>• Any Grok document or report stating results **must cite the specific execution run and commit** that produced them.<br>• Does not implement production engine code. |
-| **Codex** | **Tooling & Harness Engineer** | • Bounded diagnostic tooling, test harnesses, and validation scripts.<br>• Telemetry collectors, governance parsers, and performance probes.<br>• Auxiliary automation scripts and CI/CD harnesses (when usage/model is available). | • Strictly bounded to `tools/` and `docs/telemetry/`.<br>• Does not modify runtime engine plugins (`game/js/plugins/`). |
-
----
-
-## 3. The Independent Verification Gate
-
-No WBS leaf, feature milestone, or defect may be declared closed without meeting the two-party verification rule:
-
-$$\textbf{Implementation (Claude/Fable or Gemini)} \;\;+\;\; \textbf{Independent Adversarial Audit (Grok)} \;\;+\;\; \textbf{Coordinator Merge (Gemini)} \;\;=\;\; \textbf{DONE}$$
-
-1. **Independent First Verdict**: Reviewers (Grok / Codex) must inspect actual git commits and execute tests independently, forming their first verdict without relying on the implementer's self-reported text.
-2. **Defect Lifecycle**:
-   - `OPEN`: Discovered by reviewer or test harness.
-   - `FIX_READY`: Implementer commits fix and provides evidence run.
-   - `CLOSED`: Reviewer independently verifies fix commit in tree and records formal closure signature with timestamp.
-3. **No Retroactive Backfill**: Closure timestamps must reflect genuine verification moments; rapid sequential backfilling is prohibited.
-
----
-
-## 4. File Ownership & Concurrency Boundaries
-
-To ensure zero merge conflicts and preserve codebase integrity during parallel execution:
-- **One Primary Writer per File Set**: Each active task lane possesses exclusive write access to its designated whitelist.
-- **Published Matrix**: Active file ownership must be published in `docs/STATUS.md` prior to launching parallel work lanes.
-- **Migration Freeze Protocol**: Migration or directory restructuring (e.g. copying to `C:\Dev\DEUS`) requires a synchronized **Migration Freeze** where all active lanes commit their work and pause. Zero edits may occur during file migration.
-
----
-
-## 5. Pointer References
-
-The following documents defer to and are governed by this specification:
-- `GEMINI.md` → Refers to Section 2 (Gemini Role: Coordinator, Integration, Non-Living Art).
-- `AGENTS.md` → Refers to Section 2 & 4 (Collaborative multi-agent boundaries).
-- `docs/DIVISION_OF_LABOR.md` → Refers to Section 2 (Gemini / Fable domain split).
-- `docs/WORK_QUEUE.md` → Refers to Section 3 (Routing and approval gates).
+## 4. Pointers
+`GEMINI.md`, `CLAUDE.md` and `.agents/rules/*.md` import or point at `AGENTS.md`; this file adds only the table above and the defect states. `docs/DIVISION_OF_LABOR.md` and `docs/WORK_QUEUE.md` are historical.

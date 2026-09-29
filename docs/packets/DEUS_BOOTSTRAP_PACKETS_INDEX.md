@@ -1,5 +1,7 @@
 # DEUS BOOTSTRAP PACKETS — MASTER HUB-AND-SPOKE INDEX
 
+> **ARCHIVED 2026-09-29.** These packets (2026-09-22) predate DEC-037 (Natural World phase lock), DEC-041 (`tasks/wbs_registry.json` is the master truth) and DEC-042 (Claude Code is PM). They are history, not instructions. Current state: `docs/STATUS.md`.
+
 **System Authority:** Owner Terminal (Gemini)  
 **Creation Date:** 2026-09-22  
 **Target Repository:** `C:\Users\snewt\OneDrive\Desktop\UF`  

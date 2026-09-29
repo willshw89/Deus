@@ -3,6 +3,10 @@
 **Authority:** Owner Directive 001 (2026-09-25)  
 **Rule:** Nothing in Project DEUS waits on Owner input unless it is explicitly logged as an open entry in this file.
 
+**This file is the only decision log (2026-09-29, PM under DEC-042).** From 2026-09-29, `docs/STATUS.md` section 0 and the `docs/VISION.md` decision log no longer carry rules; they point here. `docs/DECISIONS_DIGEST.md` is a one-line-per-rule view of the LIVE entries, derived from this file; where the two disagree, this file wins.
+**How a decision is recorded:** the Owner's own words where they exist, the date, the decider (Owner, or PM with "Owner may object"), and a record status line under the date: `LIVE`, `SUPERSEDED by DEC-xxx`, `PARTLY SUPERSEDED (which items, by what)`, `DORMANT under DEC-037`, or `OPEN`. Ruling text is never deleted or reworded; a later ruling is added as a dated amendment or a new decision.
+**How to read a status:** obey LIVE items. A SUPERSEDED entry is history. A DORMANT entry waits for the Owner to lift the DEC-037 freeze. An OPEN entry applies its stated default until the Owner rules.
+
 ---
 
 ## 1. Decision Schema
@@ -10,6 +14,7 @@
 Every decision item recorded in this log must provide:
 - **Decision ID:** Stable identifier (e.g. `DEC-001`)
 - **Date Logged:** ISO date (`YYYY-MM-DD`)
+- **Record status (added 2026-09-29):** `LIVE` | `SUPERSEDED by DEC-xxx` | `PARTLY SUPERSEDED (which items, by what)` | `DORMANT under DEC-037` | `OPEN`, directly under the date
 - **Question:** Concrete, unambiguous question requiring Owner ruling
 - **Options:** Distinct, enumerated options
 - **Recommended Default:** The engineering/architecture team's recommended choice
@@ -23,6 +28,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-001`: Native Playtest Proof Requirement for A10-1 (WG.00.08)
 - **Date Logged:** 2026-09-25
+- **Record status (2026-09-29):** PARTLY SUPERSEDED: Option 1 (headless Node run plus rendered PNG is enough for gate closure) is superseded by the Owner's rule that nothing is complete without in-game RMMZ F5 proof seen by the Owner (Owner 2026-09-29; AGENTS.md Definition of Done; DEC-041 item 7). The fluids-over-voids ruling (fluid above a void needs at least one solid layer between) is LIVE.
 - **Question:** Does the Owner require an interactive human RMMZ editor Playtest (F5) inspection of a natural Z-2 ravine cut before WG.00.08 returns to `DONE`, or is the automated plain Node run with RMMZ stubs + real engine sources plus the rendered 512×512 PNG proof (`game/test_output/z2_cut_proof_seed18_194_89.png`) sufficient?
 - **Options:**
   1. Automated plain Node run with RMMZ stubs + real engine sources + rendered 2D visual map proof is sufficient for gate closure.
@@ -38,6 +44,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-002`: Society WBS Baseline Approval (DEUS_SOCIETY_WBS.md)
 - **Date Logged:** 2026-09-25
+- **Record status (2026-09-29):** OPEN; DORMANT under DEC-037 (the society WBS is civilization scope, frozen).
 - **Question:** Does the Owner approve freezing the planning baseline of `docs/society/DEUS_SOCIETY_WBS.md` (Rev 2, covering SOC.01 through SOC.70), transitioning it from a planning skeleton to an active authoritative WBS?
 - **Options:**
   1. Approve `DEUS_SOCIETY_WBS.md` as canonical frozen baseline.
@@ -50,6 +57,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-003`: Authorization to Create `CRFT` Branch from SRD 5.1
 - **Date Logged:** 2026-09-25
+- **Record status (2026-09-29):** SUPERSEDED by DEC-037 (crafting is frozen civilization scope) and DEC-043 (the craft design is recorded, implementation deferred). The `C:\Dev\DEUS` migration it waited on never happened.
 - **Question:** Is the team authorized to create the dedicated `CRFT` task branch to ingest D&D 5.1 SRD open equipment, crafting recipes, and material properties (from local `SRD_CC_v5.1.pdf`) into `game/data/UF_WorldCatalog.json`?
 - **Options:**
   1. Authorize creation of `CRFT` branch for SRD 5.1 crafting schema drafting.
@@ -62,6 +70,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-004`: Git Pre-Commit Hook Bypass Policy
 - **Date Logged:** 2026-09-25
+- **Record status (2026-09-29):** OPEN; the Option 1 default applies: no `--no-verify` without a written Owner entry in this file.
 - **Question:** Under what exceptional emergency circumstances may an agent utilize `--no-verify` to bypass `tools/governance/check_claims.js`?
 - **Options:**
   1. `--no-verify` is strictly prohibited under all circumstances without prior written entry in this document signed by Owner.
@@ -74,6 +83,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-005`: External Off-Disk Backup Target Selection (WG.00.12)
 - **Date Logged:** 2026-09-25
+- **Record status (2026-09-29):** LIVE. The Owner's off-laptop copy of the untracked-essentials zip is still pending.
 - **Question:** What is the authoritative off-disk backup target for the pre-migration backup of Project DEUS before any copy to `C:\Dev\DEUS`?
 - **Options:**
   1. Private git remote (e.g. GitHub/GitLab), pushing all branches, then verifying by cloning into a temporary folder and executing full test suite.
@@ -87,6 +97,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-006` / `R1`: WG.00.09 Depth Shading Rule vs Palette Reality
 - **Date Logged:** 2026-09-25
+- **Record status (2026-09-29):** SUPERSEDED by DEC-011.
 - **Question:** How should multi-Z lower levels darken under WG.00.09 depth rendering given current tile art palette?
 - **Options:**
   - Option A: Plan's 2-step rule (~33% darker at depth 1, ~67% darker at depth 3).
@@ -102,6 +113,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-007`: No art generation without Owner involvement
 - **Date Logged:** 2026-09-25
+- **Record status (2026-09-29):** LIVE, as amended 2026-09-25 (catalogue, blank templates and placement tooling are not art) and 2026-09-29 (PixelLab OBJECTS/MAPS opening for the natural world, Owner final QA, high top-down camera, ground tile variants). Which generator: DEC-044.
 - **Question:** May agents generate, request from generators, or integrate newly generated art autonomously?
 - **Options:**
   1. Autonomous generation permitted under Rules 11 and 13.
@@ -123,6 +135,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-008`: Heavy-Job Cap Lifted & Power-Off Concurrency Tripwire
 - **Date Logged:** 2026-09-25
+- **Record status (2026-09-29):** LIVE.
 - **Question:** Is the laptop thermal issue resolved, and can multi-worker concurrent execution proceed?
 - **Status:** `DECIDED`
 - **Owner Ruling & Date:** 2026-09-25 (Decider: Owner): Heavy-job cap lifted; power-off tripwire reinstates MAX_SIMULTANEOUS_HEAVY_LOCAL_JOBS=1; laptop power-loss issue considered fixed.
@@ -131,6 +144,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-009`: Master Palette Engine Migration Release-Blocking Status
 - **Date Logged:** 2026-09-25
+- **Record status (2026-09-29):** OPEN; the default applies: `uf.hex` is an interim runtime palette and the master-palette migration is release-blocking. `docs/art/DEUS_ASSET_STANDARD.md` AS-GLOBAL-004 names the master file (`art/palette/deus_master_world_palette_v1.hex`); it does not close this question.
 - **Question:** Is `art/palette/uf.hex` (the Ultima VII daylight palette) allowed to ship, or must the master-palette migration (WG.00.13) be release-blocking?
 - **Source:** ADR-002 §7 item 3.
 - **Options:**
@@ -144,6 +158,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-010`: Rock Ledge Support vs. Lateral Edge Connectivity in Cuts/Caves
 - **Date Logged:** 2026-09-25
+- **Record status (2026-09-29):** OPEN; the Option 1 default applies (lateral connectivity is sufficient). NAT.02.01's `evalCellSupport` (`game/js/sim/structural/support.js`) evaluates horizontal neighbours, which matches the default; the Owner has not ruled.
 - **Question:** In procedural cut and cave carving (WG.00.08), does a solid stone stratum require direct vertical support from below, or is horizontal/lateral connectivity to the rock wall / bedrock / area edge sufficient (e.g. natural rock overhangs or ledges over air, as found at (190,72))?
 - **Source:** Directive 0016-P / `DEF-Z2-PROOF-LEDGE-01`.
 - **Options:**
@@ -157,6 +172,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-011`: Owner overrides DEC-006/R1 (Option D). Flat layer rendering
 - **Date Logged:** 2026-09-25
+- **Record status (2026-09-29):** LIVE (1:1 flat layers, no filters). Cues 7-9 of the §19 amendment are approved in principle only and wait for an Owner-led session. The 0083-CF (lower-layer overlays at 1:1) and 0084-CG (cross-layer selection) amendments are LIVE.
 - **Decider:** Owner (23:54 CT, relayed by PM 0017-Q)
 - **Status:** `DECIDED`
 - **Owner Ruling:** Owner overrides R1/Option D. Every Z layer renders 1:1. That means no blur, no scale or zoom, no parallax or projection offset, and no ColorMatrix, alpha or tint depth shading or any other filter. The first goal is correct layer display. Visual depth effects will be revisited later, and only with the Owner.
@@ -170,6 +186,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-012`: Sim/render split and level-of-detail simulation are adopted architecture
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** LIVE.
 - **Status:** `DECIDED` (Owner order 2026-09-26 00:00 CT, directive 0018-R)
 - **Decider:** Owner
 - **Summary:**
@@ -181,6 +198,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-013`: Thirty-Two Z Layers, Nine Races, Home Layer Ranges, Five Biome Bands, and Governing Scale
 - **Date Logged:** 2026-09-26 (Amended 01:10 CT per Owner Directive 0021-V Addendum §12–§13; supersedes 9-layer baseline)
+- **Record status (2026-09-29):** PARTLY SUPERSEDED: item 7 (five biome bands of 25 biomes and their layer ranges) and the biome-per-band sub-question by DEC-030 and then DEC-038 items 1-2 (physical continua; six depth bands). Items 1-4 and amendments D-2 and D-3 (32 layers, 5 ft cells, 10 ft layers, 2 ft strata, sparse storage, cross-layer blast damage) are LIVE. Items 5-6 and the race-to-band sub-question (nine races, home layer ranges) are DORMANT under DEC-037. OPEN (2026-09-29): item 2's layer height (10 ft, five 2 ft strata; `art/catalogue/geometry.json` and `DEUS_Levels.js` follow it) conflicts with `docs/art/DEUS_ASSET_STANDARD.md` AS-GLOBAL-018 / AS-SCALE-001 / AS-QTR-001 (5 ft, 48 px, four 12 px quarters; the DEC-016 `stratumPx` question); this log governs until the Owner rules once (`docs/STATUS.md` D.5).
 - **Status:** `DECIDED` (Owner ruling 00:34, 00:37, 01:06–01:10 CT)
 - **Decider:** Owner
 - **Summary:**
@@ -211,6 +229,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-014`: Population Simulation Budget, Crowd Counts LOD, and Anti-Snowball Pressures
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** OPEN; DORMANT under DEC-037 (population, factions and crowd LOD are civilization scope; item 5 monster origins waits for the Fauna step).
 - **Status:** `OPEN` (Owner discussion 00:46-00:50 CT, directive 0021-V Addendum §9; PM defaults recorded)
 - **Decider:** Owner
 - **Summary:**
@@ -224,6 +243,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-015`: Data-Driven Per-Faction Development Plans
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** DORMANT under DEC-037 (faction and civilization implementation is frozen).
 - **Status:** `DECIDED` (Owner ruling 00:52 CT, directive 0021-V Addendum §10)
 - **Decider:** Owner
 - **Summary:**
@@ -242,6 +262,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-016`: The scale chart is the governing size authority for the art catalogue, templates and placement
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** LIVE.
 - **Decider:** Owner (00:11 CT, "the most important is the scale chart"; relayed by PM 0019-S/0028-AC)
 - **Status:** `DECIDED`
 - **Ruling:** Every catalogue entry's pixel size, envelope, footprint and anchor derive from the scale chart (`art/reference/DEUS_HUMAN_SCALE_STRIP_V1.png`, whose numeric source is `game/data/DEUS_ScaleRegistry.json`; the two are not independent evidence), citing one chart row per entry. The catalogue builder (`tools/art/build_catalogue.js`), template generator (`tools/art/make_blank_templates.js`) and placement validator (`tools/art/validate_art.js`) enforce it. Disagreements with other documents go to the Owner and are never resolved by workers. Sim distances (DEC-013 geometry) govern the simulation. Where geometry and chart imply different px/ft, it is an Owner question (`stratumPx`).
@@ -251,6 +272,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-017`: Keep RMMZ for menus, dialogue, saving, database and battle; fallback map renderer is a custom multi-layer PixiJS renderer inside RMMZ, decided after demo benchmarks
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** LIVE (shell). The fallback go/no-go is OPEN until the benchmarks; no renderer lane opens before the Owner decides.
 - **Decider:** Owner (01:38 CT, relayed by PM 0028-AC)
 - **Status:** `DECIDED` (shell). The fallback trigger is `OPEN` until the benchmarks.
 - **Ruling:** RMMZ remains the engine for menus, dialogue, saving, the database and battle screens. If the stock RMMZ map (`Spriteset_Map`/`Tilemap`) cannot meet the goals, the fallback is a **custom multi-layer PixiJS map renderer inside RMMZ**. It replaces map drawing inside `Scene_Map` only; all other scenes, windows, save, database and battle are untouched, so it is not an engine swap. The goals are 32 layers, the §18 occlusion rule, DEC-011 1:1 flat layers, and the stress scene within frame budget. The go/no-go is decided with the Owner after the demo benchmarks: Lane K normal plus 0019-T stress baselines, and the §18 32-vs-5-layer occlusion benchmark. No renderer code lane opens before then.
@@ -263,6 +285,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-018`: SRD spells are hyper-realistic: effects play out physically in the simulation; SRD numbers stay the rules baseline
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** PARTLY SUPERSEDED: the sub-question's PM default (conjured matter as an explicit magical source/sink in the conservation ledger) by DEC-040 item 2 and its 2026-09-29 clarification (no sinks; material or water that appears from nothing is a blocking defect). How conjured water and stone get a source is therefore OPEN. The ruling itself (physical effects on top of unchanged SRD numbers, one schema, zero per-spell code) is LIVE; runtime work follows the DEC-037 order.
 - **Decider:** Owner (01:39 CT, relayed by PM 0028-AC)
 - **Status:** `DECIDED`. Per-spell details are `OPEN` pending the audit.
 - **Ruling:** Spell effects play out physically in the living-world simulation:
@@ -279,6 +302,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-019`: In-Layer Height (Strata) Presentation & Movement Rules
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** LIVE. Item 1 is a straight vertical pixel shift under DEC-011, not the 2.5D projection retired by VISION V131; the Owner has not said otherwise. OPEN question for the Owner (2026-09-29): whether "the 2.5D offsets are retired" includes this per-stratum pixel shift (INV-GEO-05).
 - **Status:** `DECIDED` (Owner ruling 01:17–01:19 CT, directive 0021-V Addendum §15)
 - **Decider:** Owner
 - **Summary:**
@@ -294,6 +318,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-020`: Seamless Inter-Layer Ramps and Camera-Follow Behavior
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** LIVE, with the 0090-CM multi-layer hills amendment.
 - **Status:** `DECIDED` (Owner ruling 01:21 CT, directive 0021-V Addendum §16)
 - **Decider:** Owner
 - **Summary:**
@@ -306,6 +331,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-021`: Occlusion Rule for Layer Rendering (Zero-Cost Solid Cover)
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** LIVE.
 - **Status:** `DECIDED` (Owner ruling 01:24 CT, directive 0021-V Addendum §18)
 - **Decider:** Owner
 - **Summary:**
@@ -317,6 +343,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-022`: Cross-Layer 3D Targeting, Ballistics, and Volume Damage
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** LIVE; implementation waits on the DEC-037 upstream order.
 - **Status:** `DECIDED` (Owner ruling 01:35 CT, directive 0021-V Addendum §20)
 - **Decider:** Owner
 - **Summary:**
@@ -329,6 +356,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-023`: Ore and Mineral Deposits Never Respawn (Ruling D-5)
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** LIVE.
 - **Status:** `DECIDED` (Owner ruling relayed by PM, Directive 0035-AJ §1)
 - **Decider:** Owner
 - **Summary:**
@@ -340,6 +368,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-024`: Unified Water Simulation Authority (`DEUS_Fluid`) & Legacy Flood Retirement (Ruling D-4)
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** LIVE as a PM ruling (Grok Bot, 2026-09-26); the Owner has not objected. `DEUS_Fluid` is the open-water authority; groundwater is the NAT.03.01 aquifer kernel (DEC-038 items 5 and 9), which hands seeped water to `DEUS_Fluid`.
 - **Status:** `DECIDED (PM)` (Owner may object; Directive 0035-AJ §1)
 - **Decider:** PM (Grok Bot)
 - **Summary:**
@@ -351,6 +380,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-025`: Nine SRD Culture and Faction Development Plans (Ruling D-6)
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** DORMANT under DEC-037 (PM ruling, Grok Bot, 2026-09-26; the Owner has not objected; faction plans are frozen civilization scope).
 - **Status:** `DECIDED (PM)` (Owner may object; Directive 0035-AJ §1)
 - **Decider:** PM (Grok Bot)
 - **Summary:**
@@ -362,6 +392,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-026`: Calendar Scale vs Solar Day (`OWNER_OPEN`, Ruling D-1)
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** SUPERSEDED by DEC-038 item 8 (360-day calendar: 12 months of 30 days, 4 seasons of 90 days), which is Option A. The real-time length of one game day is not set by DEC-038.
 - **Status:** `OPEN` (Owner question relayed by PM, Directive 0035-AJ §1)
 - **Decider:** Owner
 - **Question:** How should the game calendar reconcile the solar day with the annual seasonal cycle given VISION rule V123 (1 game day = 1 year, making seasons the four 6-hour quarters of a day)?
@@ -376,6 +407,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-027`: SRD 5.1 Combat Authority (d20 vs AC, SRD Damage, HP, Actions, Conditions; V64 Retired)
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** LIVE.
 - **Status:** `DECIDED` (Owner ruling 08:20 CT, Directive 0062-BK)
 - **Decider:** Owner
 - **Summary:**
@@ -387,6 +419,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-028`: Matter Conservation by Weight & Closed-Loop World Reclamation
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** PARTLY SUPERSEDED: item 2's organic path (wood, organic detritus, corpses, bone -> soil) by the DEC-040 clarification of 2026-09-29 (plants, creatures and gases are outside the closed-mass rule). Items 1, 2 (stone -> stone; metal -> rust, scrap or trace, never virgin ore), 3 and 4 are LIVE, read as DEC-040 clarifies: world material and water, by weight, not chemistry.
 - **Status:** `DECIDED` (Owner ruling 08:25 CT, Directive 0063-BL)
 - **Decider:** Owner
 - **Summary:**
@@ -402,6 +435,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-029`: Handling Policy for Credential Incidents (SEC-2026-09-26-01)
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** LIVE (no git history purge, filter-repo or force push on `origin/main`). The Owner's relayed answer "1. purge history" of 2026-09-29 was applied to `docs/DECISIONS_DIGEST.md` (no history in the digest), not to git; if it meant git history, this decision needs an Owner amendment before anyone acts (`docs/STATUS.md` D.9).
 - **Status:** `DECIDED` (Owner ruling ~07:40 CT, Directive 0060-BI)
 - **Decider:** Owner
 - **Summary:**
@@ -412,6 +446,8 @@ Every decision item recorded in this log must provide:
 
 
 ### Decision DEC-030: World Grid and Vertical Biomes (Owner & PM delegated, 2026-09-26)
+- **Date Logged:** 2026-09-26 (added 2026-09-29 from the heading; the entry had no date line)
+- **Record status (2026-09-29):** PARTLY SUPERSEDED: the six biome enums and the 15 pairwise transitions by DEC-038 item 1 (biomes are derived labels over the temperature, moisture, volcanism and wildness continua); the five depth bands are restated by DEC-038 item 2 with the same ranges plus Sky +12..+15. LIVE: 32 layers with the top four as open air, geology-first method, the 3x3 grid of 256x256 wrapping maps, data-driven grid size, seamless edges.
 - **Vertical extent:** 32 layers (-16..+15). Top 4 layers (+12..+15) are reserved open air (no natural terrain). Natural terrain tops out at +11.
 - **Biomes (6):** VOLCANIC, WET, ARID, TEMPERATE, COLD, WILD.
 - **Depth bands (5):** Deep Earth (-16..-11), Caverns (-10..-5), Lowlands (-4..+1), Uplands (+2..+6), Highlands (+7..+11).
@@ -426,6 +462,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-031`: Crossload Routing and Effort Policy
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** SUPERSEDED by DEC-032 (model standard, no same-provider review) and DEC-035 (routing and effort by lane type); the Claude-constraint window it addressed ended 2026-09-29. Item 4's Gemini review-file conventions survive only as tooling practice.
 - **Status:** `DECIDED` (Owner ruling 10:19 CT)
 - **Decider:** Owner
 - **Summary:**
@@ -438,6 +475,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-032`: Owner Model Standard
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** PARTLY SUPERSEDED: items 5-6 (Grok `xhigh` floor) narrowed by DEC-035 item 2 for purely mechanical Grok writer lanes only. Item 3's Codex-exhausted note (until 2026-09-29 21:34 CT) and item 10 are time-bound. Items 1-2, 4, 7-9 are LIVE. Roles: DEC-042.
 - **Status:** `DECIDED` (Owner ruling 11:23–11:24 CT, Directive 0082-CE)
 - **Decider:** Owner
 - **Summary:**
@@ -456,6 +494,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-033`: Recruitable Non-Core Humanoids, Capture/Domestication, and Tamed Party Creatures
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** DORMANT under DEC-037 (recruitment, capture, taming and party creatures are society systems; they wait for the Fauna step and the Owner lifting the freeze).
 - **Status:** `DECIDED` (Owner rulings 12:59 CT and 13:01 CT, Directive 0096-CS)
 - **Decider:** Owner
 - **Summary:**
@@ -467,6 +506,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-034`: Gemini Flash Final Merge Gate During Pro Quota Block
 - **Date Logged:** 2026-09-26
+- **Record status (2026-09-29):** SUPERSEDED by DEC-035 item 3 (Gemini 3.1 Pro is the merge-gate reviewer again once available); the Pro quota window (~2026-09-27 19:04 CT) has expired. The Lane AA and Lane AL merges it authorized stand.
 - **Status:** `DECIDED` (Owner ruling 20:45 CT, Directive 0122-DR)
 - **Decider:** Owner
 - **Summary:**
@@ -478,6 +518,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-035`: Gate Tests Before Review, Mechanical Writer Effort, and Model Routing Rules
 - **Date Logged:** 2026-09-27
+- **Record status (2026-09-29):** LIVE.
 - **Status:** `DECIDED` (Owner rulings 11:26 CT and 11:49 CT, Directives 0141-EK, 0142-EL)
 - **Decider:** Owner
 - **Summary:**
@@ -489,6 +530,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-036`: Race-Class Affinities, No Race-Class Locks, and Role Distribution Rule
 - **Date Logged:** 2026-09-27
+- **Record status (2026-09-29):** DORMANT under DEC-037 (classes and race affinities are society scope); the item 4 `OWNER_TODO` values stay OPEN.
 - **Status:** `DECIDED` (Owner rulings 11:59 CT, 12:30 CT, 12:31 CT, 12:33 CT, Directives 0143-EM, 0144-EN)
 - **Decider:** Owner
 - **Summary:**
@@ -517,6 +559,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-037`: Lean Natural World v1 Phase Lock & Causal Dependency Chain
 - **Date Logged:** 2026-09-28
+- **Record status (2026-09-29):** LIVE. Owner-authorized exceptions to the civilization freeze, per the PM brief of 2026-09-29: the sack inventory and racial banners. The Owner's exact words for those two exceptions are not in this file; the PM records them when it has them.
 - **Status:** `DECIDED` (Owner Directive 2026-09-28)
 - **Decider:** Owner
 - **Summary:**
@@ -536,6 +579,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-038`: Lean Natural World v1 Physical Foundations & Mathematical Calibration (Amended)
 - **Date Logged:** 2026-09-28
+- **Record status (2026-09-29):** LIVE.
 - **Status:** `DECIDED` (Owner rulings 2026-09-28 on Mathematical and Physical Foundations, with Final Ratification Amendments)
 - **Decider:** Owner
 - **Summary:**
@@ -570,6 +614,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-039`: Rules-Source Hierarchy (SRD 5.1 -> Minecraft Reference -> DEUS Law)
 - **Date Logged:** 2026-09-28
+- **Record status (2026-09-29):** LIVE.
 - **Status:** `DECIDED` (Owner Directive 2026-09-28)
 - **Decider:** Owner
 - **Summary:**
@@ -590,6 +635,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-040`: Universal Closed-Mass World Invariant & Magma/Core Reservoirs
 - **Date Logged:** 2026-09-28
+- **Record status (2026-09-29):** PARTLY SUPERSEDED: items 3-4 narrowed by the Owner clarification of 2026-09-29 below. The living-plant, creature-body and gas reservoirs, and the logging/harvesting, fauna/digestion and smoke/gas contracts, are outside the rule. Items 1-2 and 5 are LIVE as the clarification reads them: a lifecycle weight ledger for material generated with the world (stone, soil, sand, clay, ores, metals) and for water; type, volume and density may change, weight may not; no sinks; nothing that complicates soil.
 - **Status:** `DECIDED` (Owner Directive 2026-09-28)
 - **Decider:** Owner
 - **Summary:**
@@ -620,6 +666,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-041`: 24/7 Multi-Agent Orchestration Architecture & Natural World v1 Exit Gate
 - **Date Logged:** 2026-09-28
+- **Record status (2026-09-29):** LIVE. The Owner asked on 2026-09-29 for fewer approval loops and questionnaires; item 5's package gate stands until the Owner changes it.
 - **Status:** `DECIDED` (Owner Directive 2026-09-28)
 - **Decider:** Owner
 - **Summary:**
@@ -655,6 +702,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-042`: Claude Code is the current PM
 - **Date Logged:** 2026-09-29
+- **Record status (2026-09-29):** LIVE.
 - **Status:** `DECIDED` (Owner, in chat with Claude Code, 2026-09-29: "You are the current PM")
 - **Decider:** Owner
 - **Summary:** Claude Code holds the PM role from 2026-09-29: it interprets Owner intent, records Owner decisions in this file, opens and closes lanes (`[pm]` commits to `tasks/<id>/<lane>/lane.json`, which `tools/governance/merge_gate.js` trusts), routes review, and presents QA-passed art to the Owner for sign-off (DEC-007 amendment). Gemini / Antigravity remains the coordinator for its own worker fleet and keeps the integration duties it already has; the merge gate stays the only way into `main` for reviewed code. Where `docs/CANONICAL_ROLES.md` or older briefs say otherwise, this decision governs until the roles document is rewritten. Zero self-certification still applies to the PM: the PM never reviews its own family's code.
@@ -663,6 +711,7 @@ Every decision item recorded in this log must provide:
 
 ### Decision `DEC-043`: Construction and crafting model (recorded design; implementation deferred)
 - **Date Logged:** 2026-09-29
+- **Record status (2026-09-29):** LIVE as recorded design; implementation DORMANT under DEC-037.
 - **Status:** `DECIDED` as design direction (Owner, in chat with Claude Code, 2026-09-29). **Not a lane authorization:** building and crafting are civilization systems and stay frozen under DEC-037 until the Owner opens them.
 - **Decider:** Owner
 - **Summary (Owner's words, lightly trimmed):** "The way building will work, is there will be a 'Ghost model' when there is intent to build. The ghost model will also have a black box inventory like a creature. Once the correct construction items are placed in the ghost model, you can click 'Construct', the model will become 'the under construction model' and then once construction is complete, there will be the final model. Crafting works the same way. Say there's a workbench, there will be a black inventory box on the workbench, and then the opportunity to 'combine', the creature will make a craft attempt. All of this bears in mind skill checks using SRD."
@@ -672,3 +721,13 @@ Every decision item recorded in this log must provide:
   4. **Skill checks:** construction and craft attempts use SRD 5.1 skill checks (DEC-039).
   5. **Closed mass (DEC-040):** the items placed in a ghost or workbench are the material of the result; nothing is created from nothing.
 - **Art implication (when opened):** every buildable structure needs ghost, under-construction and final art; every workbench needs an interior-inventory presentation. Catalogue records first, per DEC-007.
+
+---
+
+### Decision `DEC-044`: PixelLab is the sole production generator (AS-GEN-004 / AS-GEN-005)
+- **Date Logged:** 2026-09-29 (ruling given 2026-09-26 15:44 CT; until now recorded only in `docs/art/DEUS_ASSET_STANDARD.md`)
+- **Record status (2026-09-29):** LIVE.
+- **Status:** `DECIDED`
+- **Decider:** Owner (2026-09-26 15:44 CT, encoded as AS-GEN-004 by WG.20.01 commit `282def92`; AS-GEN-005 is the one-generator-per-set rule stated inside that ruling)
+- **Ruling, as the asset standard records it:** "PixelLab is the primary generator for every category. Retro Diffusion is standby and is not assigned to a category. Nano Banana Pro is for concepts only and is not a production generator. The multi-generator bake-off is off." One generator per category and per layered set, and that generator is PixelLab: a paper-doll set or a creature family carries that one id, a set whose members disagree fails, and Retro Diffusion and Nano Banana Pro are not mixed into a layered set. A style LoRA or fine-tune is `optional-later` and needs an Owner decision after approved art exists.
+- **Relation to other decisions:** DEC-007 decides whether art may be generated at all (frozen, except the 2026-09-29 PixelLab OBJECTS/MAPS opening for the natural world). DEC-044 decides which generator: PixelLab only. AGENTS.md Rule 11 and the CLAUDE.md Nano Banana Pro mandate stay suspended under DEC-007 and, when rewritten, follow this decision. Every PixelLab prompt uses the high top-down view (AS-VIEW-002; DEC-007 amendment of 2026-09-29).

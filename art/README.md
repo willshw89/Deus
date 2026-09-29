@@ -1,3 +1,8 @@
+> **SUPERSEDED (2026-09-29; DEC-007 amendment, PM under DEC-042).** The 2.5D lean, the `uf.hex` palette, the Nano Banana Pro mandate, the magenta masters and the Gemini delivery roles below are the 2026-09-18 pipeline. Reference only.
+> Replaced by `docs/art/DEUS_ASSET_STANDARD.md` §3: catalogue record, `art/prompts/<id>.json`, PixelLab OBJECTS and MAPS, raw sets under `art/masters/source_sets/<id>/`, QA, review board, the Owner's SHA-256 ledger in `art/APPROVALS.md` (`docs/art/APPROVALS_FORMAT.md`), `tools/art/place_art.js`.
+> Folder roles that still hold: `art/APPROVALS.md` is written by the Owner only; `art/masters/` holds masters; the palette is `art/palette/deus_master_world_palette_v1.hex` (AS-GLOBAL-004), not `uf.hex`.
+> Do not update this file. New rulings go to `docs/OWNER_DECISIONS.md`.
+
 # art/: the original-art pipeline
 
 Rewritten 2026-09-18 (night) by Claude Code when the asset briefs moved to `docs/asset_briefs/`. The rules come from `docs/ART_STANDARD.md` (binding), `docs/GUIDE_25D.md` (the lean, the faces, the transposed facings), `docs/ASSET_REQUESTS.md` (the requests, the AR-600 sheet standard, the status flow), `GEMINI.md` and `AGENTS.md` (who does what). Where this file and those disagree, they win.

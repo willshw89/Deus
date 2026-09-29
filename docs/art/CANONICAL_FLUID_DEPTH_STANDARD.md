@@ -1,3 +1,8 @@
+> **REFERENCE ONLY (2026-09-29; PM under DEC-042).** Layer height is in conflict and no winner is declared here: `docs/OWNER_DECISIONS.md` DEC-013 item 2 and DEC-038 item 3 (1 layer = 10 ft, five 2 ft strata; `art/catalogue/geometry.json` and `DEUS_Levels.js` follow them) versus `docs/art/DEUS_ASSET_STANDARD.md` AS-GLOBAL-018 / AS-SCALE-001 / AS-QTR-001 (5 ft, 48 px, four 12 px quarters), both dated 2026-09-26 to 2026-09-28. The decision log governs until the Owner records which is live (DEC-016 `stratumPx`; `docs/STATUS.md` D.5). The five-strata depth states in this file stand or fall with that ruling.
+> Not in conflict: the five-Z world in this file is superseded by 32 layers (DEC-013 item 1); water and lava frames are AS-ANIM-001 (water 3 frames at 300 ms, lava 3 frames at 150 ms); production is §3 of the asset standard.
+> Water depth presentation beyond those rules is Owner-open.
+> Do not update this file. New rulings go to `docs/OWNER_DECISIONS.md`.
+
 # CANONICAL DEUS FLUID DEPTH STANDARD
 **5 Visual Depth Bands for Water & Lava Grounded in 5-Strata Physical Geometry**
 **Integration Authority:** Gemini / Antigravity

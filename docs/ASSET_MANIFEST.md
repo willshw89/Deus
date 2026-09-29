@@ -1,5 +1,8 @@
 # PROJECT DEUS — ASSET MANIFEST
 
+> **Header rewritten 2026-09-29 (DEC-007 amendment, PM under DEC-042).** This manifest is a record of runtime sheets already in `game/img/`. It is not the asset registry: that is `art/catalogue/catalogue.json` (every asset has its record there first; asset standard §3.2 step 2), and the status of every asset is the one ladder in `docs/art/DEUS_ASSET_STANDARD.md` §3.6. A row here means at most `INDUCTED`; `VERIFIED = YES` means `IN_GAME` only where an opened screenshot exists.
+> The generator column and the closing note below are Nano Banana Pro era wording and are superseded (AS-GEN-004: PixelLab OBJECTS and MAPS only). The `BLACK-TOP` column belongs to suspended AGENTS.md Rule 13. Rows are kept as written; new rows are added only by induction (`tools/art/place_art.js`, asset standard §3.2 step 9).
+
 Master registry of all packed asset sheets, individual sprite slots, architectural components, and animated props in Project DEUS.
 
 ## Schema Definition

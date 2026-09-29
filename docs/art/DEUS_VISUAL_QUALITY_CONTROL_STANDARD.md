@@ -1,3 +1,8 @@
+> **SUPERSEDED (2026-09-29; DEC-007 amendment, PM under DEC-042).** This six-gate roadmap was written for `tools/art_check.js` and Nano Banana Pro output. Reference only.
+> Replaced by `docs/art/DEUS_ASSET_STANDARD.md` §3.3 (the twelve-item QA checklist: tool items in `tools/art/validate_art.js`, board items on the review board, every item pass or fail) and §3.6 (the one status ladder; an agent may set at most `QA_PASSED`).
+> Where this file and the asset standard disagree, the asset standard wins. Its exemption of translucent VFX from the palette clamp is void under DEC-011 (asset standard Appendix A, item 9).
+> Do not update this file. New rulings go to `docs/OWNER_DECISIONS.md`.
+
 # DEUS — Visual Asset Quality Control & Validation Standard
 **Document ID:** `DEUS-QC-ART-01`  
 **Status:** Authoritative Quality Control Design & Tooling Specification (Implementation Roadmap)  

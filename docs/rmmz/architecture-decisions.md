@@ -4,7 +4,8 @@
 **Status**: APPROVED / ARCHITECTURAL BASELINE  
 **Integration Authority**: Single designated integration authority for shared canonical commits  
 **Repository Root**: `C:\Users\snewt\OneDrive\Desktop\UF`  
-**Installed Target Engine**: RPG Maker MZ v1.10.00 (`RPGMZ.exe` v1.10.0.0, Core Scripts v1.10.0, NW.js v0.48.4)  
+**Installed Target Engine**: RPG Maker MZ v1.10.00 (`RPGMZ.exe` v1.10.0.0, Core Scripts v1.10.0 per `game/js/rmmz_core.js`, Playtest runtime `nwjs-win\nw.exe` NW.js 0.48.4; host Node.js v24.19.0 for tools and headless suites). Checked 2026-09-29. Any other document that names NW.js 0.84 or RMMZ Core 1.8.0 is wrong.  
+**Rules**: the binding engineering rules are `docs/ENGINE_RULES.md` (rewritten 2026-09-29). This record explains the decisions behind them and is corrected where it had gone stale.  
 
 ---
 
@@ -21,7 +22,7 @@ This audit establishes explicit architectural boundaries between the neutral sim
 ## 2. Decision Topics & Directives
 
 ### 2.1 Neutral Simulation versus RPG Maker Integration
-- **Decision**: The core simulation (World, WorldGen, Entities, Time, Capabilities, Jobs, Inventory, Resources, Construction, Pathfinding, AI, Combat) must remain **engine-neutral plain JavaScript** (`UF_*.js` / `DEUS_*.js`).
+- **Decision**: The core simulation (World, WorldGen, Entities, Time, Capabilities, Jobs, Inventory, Resources, Construction, Pathfinding, AI, Combat) must remain **engine-neutral plain JavaScript**: rules and ledgers in `game/js/sim/**` (host-agnostic CommonJS, no RMMZ global, no clock, no `Math.random`), state and bridging in `game/js/plugins/DEUS_*.js` (ENGINE_RULES §2; `docs/ARCHITECTURE.md`).
 - **Rationale**:
   1. Simulation rules must be 100% testable in headless Node.js test harnesses without requiring DOM, WebGL, or NW.js execution.
   2. Presentation never defines simulation truth. A closed UI window, an off-screen entity, or an occluded sprite cannot alter game rules or inventory counts.
@@ -35,7 +36,7 @@ This audit establishes explicit architectural boundaries between the neutral sim
 - **Directive**:
   - In the historical WAYFARER proof framework, `packages/mz-core/src/WF_MZBridge.js` served as this exclusive hook.
   - In the unified canonical DEUS project (`C:\Users\snewt\OneDrive\Desktop\UF`), `DEUS_Core.js` acts as the authoritative engine integration gateway.
-  - Domain plugins must NEVER independently alias `rmmz_*.js` prototypes directly; they register callbacks with `DEUS.Core` or emit lifecycle events (`world:created`, `world:areaBuilt`).
+  - Domain plugins must NEVER independently alias `rmmz_*.js` prototypes directly; they register callbacks with `DEUS.Core` or emit lifecycle events (`world:created`, `world:areaBuilt`). State on 2026-09-29: most existing plugins still alias core prototypes directly (a grep matched 51 of 62 files). The rule binds new work (ENGINE_RULES §2); the existing aliases are debt.
 
 ### 2.3 Map and World-Data Responsibilities
 - **Core Question**: Should DEUS treat RPG Maker maps as primary world representation, or host maps with neutral simulation data driving rendering?
@@ -46,7 +47,8 @@ This audit establishes explicit architectural boundaries between the neutral sim
   - `DEUS_World.js` intercepts `DataManager.loadMapData` and dynamically synthesizes an in-memory `$dataMap` projection of the active viewing area. The editor map (`Map001.json`, "The Bastion of Kraghold") exists strictly as a host container and tileset reference template for the RMMZ engine.
 
 ### 2.4 Render-Layer Ownership & 2.5D Projection
-- **Decision**: The Pixi display tree hierarchy is owned by `Spriteset_Map`, but custom 2.5D axonometric projection, dynamic depth sorting, and canopy occlusion are owned by `DEUS_Perspective25D.js` and `DEUS_Tiles.js`.
+- **Superseded 2026-09-29 (Owner):** the game is flat 2D top-down; 2.5D offsets are retired. Layers render 1:1 (DEC-011); every asset uses the one high top-down camera (AS-VIEW-002). `DEUS_Perspective25D.js` now describes itself as "pure 2D top-down perspective, camera viewport culling, and foot-Y depth sorting". Directive 1 below (the axonometric depth key) is historical. The black wall-top convention (directive 2, AGENTS.md Rule 13) is suspended under DEC-007. Directive 3 (sprite-only animation, Rule 12) stands.
+- **Decision (historical)**: The Pixi display tree hierarchy is owned by `Spriteset_Map`, but custom 2.5D axonometric projection, dynamic depth sorting, and canopy occlusion are owned by `DEUS_Perspective25D.js` and `DEUS_Tiles.js`.
 - **Directives**:
   1. Standard RMMZ depth sorting (`Tilemap.prototype._compareChildOrder`: `a.z - b.z` then `a.y - b.y`) is augmented by calculated topological keys:
      $$\text{DepthKey} = (Z \times 10000) + (Y \times 100) + X$$
@@ -76,8 +78,9 @@ This audit establishes explicit architectural boundaries between the neutral sim
 
 ### 2.8 Generated Plugin Copies & Forwarding
 - **Decision**: Single source of truth for plugin implementation:
-  - All substantive plugin implementations reside in `game/js/plugins/DEUS_*.js`.
-  - Legacy `UF_*.js` files serve strictly as lightweight backward-compatibility forwarders pointing to `DEUS_*.js`.
+  - All substantive plugin implementations reside in `game/js/plugins/DEUS_*.js` and `game/js/sim/**`.
+  - Legacy `UF_*.js` files serve as lightweight backward-compatibility forwarders pointing to `DEUS_*.js`. State on 2026-09-29: 41 of the 43 `UF_*.js` files are 16-line forwarders. Two are not: `UF_Households.js` is a 1,073-line plugin with no `DEUS_` counterpart, loaded only by DEUS_Core's `require()` companion list (`DEUS_Core.js:89-105`); `UF_Time.js` is a 589-line multi-domain time plugin loaded by nothing in the game (two host-Node tools `require()` it). Both are exceptions to this decision until a lane registers `UF_Households` in `plugins.js` under a `DEUS_` name and either retires `UF_Time.js` or registers it (ENGINE_RULES §2, §3).
+  - Loading: every plugin the game needs is registered in `game/js/plugins.js`. The `require()` companion list and the `PluginManager.loadScript` chains (`DEUS_Items`, `DEUS_History`, `DEUS_ColonyOverseer`, `DEUS_Camera`) are debt; `tools/check_plugin_boot.js` (to be built) proves every plugin loads once (ENGINE_RULES §3).
   - Plugin metadata (`@plugindesc`) and descriptions in `game/js/plugins.js` must adhere to the standardized `[DEUS <System>]` format.
 
 ### 2.9 Dynamic Asset Loading & Defensive Error Handling
@@ -95,9 +98,9 @@ This audit establishes explicit architectural boundaries between the neutral sim
   - Web deployments (if ever enabled) must route through `localforage` (IndexedDB) and cannot access Node APIs.
 
 ### 2.11 Performance Limitations & Frame Budgets
-- **Decision**: Hard budget of 16.6 ms per frame (60 FPS):
+- **Decision**: Hard budget of 16.6 ms per frame (60 FPS). Enforced numbers are only those `DEUS_Test.js` measures (avg <= 17.0 ms, worst < 50 ms over 30 s, ENGINE_RULES §7); the rest of this section is target:
   1. **No global full-world scans every frame**: Hard performance invariant. All entity lookups, item searches, and resource proximity tests must query spatial hash buckets.
-  2. **Entity Ticking**: Synthetic probes prove that up to 1,000 entities can update in < 2 ms. When entity count exceeds 1,000, tick execution must be staggered across 4 distinct time slices (250 entities per frame).
+  2. **Entity Ticking**: Synthetic probes (run on host Node, not in NW.js; audit 2026-09-29) suggested that up to 1,000 entities can update in < 2 ms. When entity count exceeds 1,000, tick execution must be staggered across 4 distinct time slices (250 entities per frame). Not measured in the game.
   3. **Rendering**: WebGL draw call batching in PixiJS requires texture atlas packing. Autonomous art pipeline must pack sprites into 144×192 or packed sheet formats (80–100% useful area).
 
 ### 2.12 Unresolved Risks & Mitigations

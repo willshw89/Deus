@@ -1,3 +1,8 @@
+> **SUPERSEDED (2026-09-29; DEC-007 amendment, PM under DEC-042).** Nano Banana Pro era palette architecture. Reference only.
+> Replaced by `docs/art/DEUS_ASSET_STANDARD.md` AS-GLOBAL-004 and AS-LOCK-001 (one master: `art/palette/deus_master_world_palette_v1.hex`, 226 active colours), AS-GLOBAL-019 and AS-BIOME-001 (six DEC-030 biomes; Highland is a depth band, not a biome) and §3 for production.
+> The 15-boundary set here pairs the wrong six biomes (asset standard Appendix A, item 2). Where this file and the asset standard disagree, the asset standard wins.
+> Do not update this file. New rulings go to `docs/OWNER_DECISIONS.md`.
+
 # DEUS — Global Biome Palette Lattice & 15-Boundary Transition Architecture
 **Document ID:** `DEUS-PAL-LATTICE-01`  
 **Status:** Authoritative Palette Architecture & Production Specification (Phase A Revision)  
