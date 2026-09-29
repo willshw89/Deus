@@ -19,8 +19,8 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const SCHEMA_VERSION = 'deus-art-catalogue/1.2.0';
-const ACCEPTED_GEOMETRY_SCHEMAS = new Set(['deus-art-catalogue/1.1.0', 'deus-art-catalogue/1.2.0']);
+const SCHEMA_VERSION = 'deus-art-catalogue/1.3.0';
+const ACCEPTED_GEOMETRY_SCHEMAS = new Set(['deus-art-catalogue/1.1.0', 'deus-art-catalogue/1.2.0', 'deus-art-catalogue/1.3.0']);
 
 const OUT = {
     catalogue: 'art/catalogue/catalogue.json',
@@ -872,9 +872,51 @@ function buildEntries(ctx, S) {
         const st = statusFromIndex(key, null, inv, idx, stats);
         const ramps = mapping.terrains[gk.id];
         if (!ramps) stats.errors.push({ code: 'MAPPING_MISSING', id: 'groundKinds:' + gk.id, msg: 'terrain has no ramps in mapping.terrains' });
+        
+        const groundVars = wc.groundVariants.kinds[gk.id];
+        const vCount = groundVars ? groundVars.variants : 0;
+        const kIdx = wc.groundKinds.indexOf(gk);
+        const perKind = wc.groundVariants.perKind;
+        let deriveBase = 'V1';
+        
+        if (vCount > 0) {
+            deriveBase = vCount >= 2 ? 'V2' : 'V1';
+            for (let v = 1; v <= vCount; v++) {
+                const variantId = `V${v}`;
+                let runtimeFile = `img/tilesets/${wc.groundVariants.sheet}.png`;
+                let tileId = wc.groundVariants.firstId + perKind * kIdx + (v - 1);
+                
+                if (v === 2 || (vCount === 1 && v === 1)) {
+                    runtimeFile = 'img/tilesets/Outside_A2.png';
+                    tileId = 2816 + 48 * kIdx;
+                }
+                
+                const ve = entryBase(g, {
+                    category: 'TERRAIN', band: surfaceBand, type: gk.id, variant: variantId,
+                    sourceIds: { catalog: ['groundKinds:' + gk.id], assetIndex: [], brief: [], ar: [] },
+                    scaleRow: 'GEOM_TILE', ramps: ramps || [],
+                    frames: { cols: 1, rows: 1, facings: ['S'], rate: null },
+                    runtime: { kind: 'RMMZ_TILESET', file: runtimeFile, tileId: tileId, index: null },
+                    references: worldRefs.concat(['pack:BIOME']),
+                    status: 'REQUESTED', statusWhy: 'WG.21.01 gradient placement',
+                    standardPending: 'DW.01.06',
+                    mapping: { scaleBasis: 'PROPOSED', rampBasis: 'PROPOSED', rule: 'groundVariants ' + gk.id },
+                    promptFile: `art/prompts/TERRAIN_${gk.id.toUpperCase()}_V123.json`,
+                    specFile: 'docs/design/GROUND_VARIANTS.md'
+                });
+                const vRow = rowOf('GEOM_TILE');
+                if (vRow) applySize(g, ve, vRow, 'CENTER');
+                add(ve); reg('groundKinds:' + gk.id + ':' + variantId, ve);
+            }
+        }
+
         const e = entryBase(g, { category: 'TERRAIN', band: surfaceBand, type: gk.id, variant: 'A2', sourceIds: { catalog: ['groundKinds:' + gk.id], assetIndex: key ? [key] : [], brief: briefIds(gk.id), ar: uniq(arsOfKey(key).concat(briefArs(gk.id)).concat(briefIds(gk.id).length ? [] : [])) }, scaleRow: 'RMMZ_AUTOTILE_A2', ramps: ramps || [], runtime: runtimeFromKey(key, idx, g), references: worldRefs.concat(['pack:BIOME']).concat(briefRefs(gk.id)), status: st.status, statusWhy: st.why, standardPending: 'DW.01.06', mapping: { scaleBasis: 'MATCH', rampBasis: 'PROPOSED', rule: 'mapping.terrains.' + gk.id } });
         const row = rowOf('RMMZ_AUTOTILE_A2');
         if (row) applySize(g, e, row, 'CENTER');
+        if (vCount > 0) {
+            e.variants = { derivedFrom: makeId(surfaceBand, SHARED, 'TERRAIN', gk.id, deriveBase, 'DEFAULT'), flipH: false, flipV: false, rot: 0, paletteSwap: null, lightingSafe: false, derivation: 'A2_REPEAT_2x3' };
+            e.slot = null;
+        }
         add(e); reg('groundKinds:' + gk.id, e);
     }
     for (const [kind] of Object.entries(wc.water.surface)) {

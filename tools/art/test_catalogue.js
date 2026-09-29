@@ -51,7 +51,7 @@ function geometryWith(fixtureName) {
 const byId = cat => new Map(cat.entries.map(e => [e.id, e]));
 
 // ---------------------------------------------------------------- JSON Schema (2020-12 subset)
-const SCHEMA_KEYWORDS = new Set(['$schema', '$id', 'title', 'description', 'type', 'required', 'additionalProperties', 'properties', '$defs', '$ref', 'enum', 'const', 'pattern', 'minimum', 'minLength', 'items', 'minItems']);
+const SCHEMA_KEYWORDS = new Set(['$schema', '$id', 'title', 'description', 'type', 'required', 'additionalProperties', 'properties', '$defs', '$ref', 'enum', 'const', 'pattern', 'minimum', 'minLength', 'items', 'minItems', 'default']);
 function schemaKeywordErrors(schema) {
     const errs = [];
     const walk = (s, p, isMap) => {
@@ -503,6 +503,56 @@ check('conflicts_required', p => {
     const miss = need.filter(([, re]) => !re.test(md)).map(([n]) => n);
     const lines = md.split('\n').length;
     return { ok: !miss.length, detail: `${need.length - miss.length}/${need.length} required topics present; conflicts.md ${lines} lines${miss.length ? '; missing: ' + miss.join(', ') : ''}` };
+});
+
+// 13. Terrain variant rows (lane-ce).
+check('terrain_variant_rows', p => {
+    const cat = committedCatalogue();
+    const gK = readJson(rel(B.SRC.worldCatalog)).groundKinds.map(x => x.id);
+    const gV = readJson(rel(B.SRC.worldCatalog)).groundVariants;
+    const entries = cat.entries;
+    let vRows = 0;
+    const bad = [];
+    
+    for (let kIdx = 0; kIdx < gK.length; kIdx++) {
+        const gk = gK[kIdx];
+        const vCount = gV.kinds[gk] ? gV.kinds[gk].variants : 0;
+        const a2Id = `SURFACE_SHARED_TERRAIN_${B.idField(gk)}_A2_DEFAULT`;
+        const a2Entry = entries.find(e => e.id === a2Id);
+        if (!a2Entry) { bad.push(`${a2Id} missing`); continue; }
+        
+        if (vCount > 0) {
+            const baseV = vCount >= 2 ? 'V2' : 'V1';
+            const expDerived = `SURFACE_SHARED_TERRAIN_${B.idField(gk)}_${baseV}_DEFAULT`;
+            if (p) a2Entry.variants.derivedFrom = 'INVALID';
+            if (!a2Entry.variants || a2Entry.variants.derivedFrom !== expDerived || a2Entry.variants.derivation !== 'A2_REPEAT_2x3') {
+                bad.push(`${a2Id} not derived from ${expDerived} via A2_REPEAT_2x3`);
+            }
+            if (a2Entry.slot !== null) bad.push(`${a2Id} should have no slot`);
+            
+            for (let v = 1; v <= vCount; v++) {
+                vRows++;
+                const vId = `SURFACE_SHARED_TERRAIN_${B.idField(gk)}_V${v}_DEFAULT`;
+                const ve = entries.find(e => e.id === vId);
+                if (!ve) { bad.push(`${vId} missing`); continue; }
+                if (p) ve.runtime.tileId = 0;
+                
+                let expRuntimeFile = `img/tilesets/${gV.sheet}.png`;
+                let expTileId = gV.firstId + gV.perKind * kIdx + (v - 1);
+                
+                if (v === 2 || (vCount === 1 && v === 1)) {
+                    expRuntimeFile = 'img/tilesets/Outside_A2.png';
+                    expTileId = 2816 + 48 * kIdx;
+                }
+                
+                if (ve.runtime.file !== expRuntimeFile || ve.runtime.tileId !== expTileId) {
+                    bad.push(`${vId} runtime ${ve.runtime.file}:${ve.runtime.tileId} expected ${expRuntimeFile}:${expTileId}`);
+                }
+            }
+        }
+    }
+    
+    return { ok: !bad.length && vRows === 76, detail: `${vRows} V rows found (expected 76); ${bad.length} problems${bad.length ? ': ' + bad.slice(0, 3).join('; ') : ''}` };
 });
 
 // ---------------------------------------------------------------- summary
