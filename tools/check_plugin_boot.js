@@ -4,13 +4,14 @@
 //=============================================================================
 // check_plugin_boot.js - Plugin Boot & Companion Health Verification
 // Project DEUS - NAT.04.01 (lane-cf)
-// Authority: DEC-041, BRIEF lane-cf
+// Authority: DEC-041, BRIEF lane-cf, Grok Review fb8ffd36 D5
 //
 // Reads game/js/plugins.js and the latest launch in game/game_runtime.log.
 // Fails if:
 // 1. Any registered active plugin in plugins.js is missing on disk.
 // 2. Any '[CORE] Companion plugin ... NOT loaded' line appears in the latest launch.
-// 3. Any plugin loads twice (e.g. both require() and loadScript()).
+// 3. Any companion plugin loads twice (e.g. duplicate synchronous require).
+// 4. game_runtime.log is empty or missing (clean launch not observed).
 //=============================================================================
 
 const fs = require('fs');
@@ -79,7 +80,11 @@ function runChecks(options = {}) {
     const logText = options.mockLog !== undefined ? options.mockLog : readLogTail(options.runtimeLog || RUNTIME_LOG);
 
     if (!logText) {
-        console.log('NOTE: game_runtime.log is empty or not yet generated in this worktree.');
+        if (options.allowEmptyLog) {
+            console.log('NOTE: game_runtime.log is empty or not yet generated (allowed by options).');
+        } else {
+            check('Game runtime log exists and has content', false, '(game_runtime.log is empty or missing; launch not observed)');
+        }
     } else {
         // Find latest session boot marker
         const bootMarkers = [
@@ -95,7 +100,7 @@ function runChecks(options = {}) {
 
         const sessionLog = lastBootIndex >= 0 ? logText.slice(lastBootIndex) : logText;
 
-        // Check for companion not loaded
+        // Check for companion not loaded: [CORE] Companion plugin <name> NOT loaded
         const companionFailMatch = /\[CORE\]\s+Companion plugin\s+([A-Za-z0-9_]+)\s+NOT loaded/i.exec(sessionLog);
         check(
             'No companion plugin load failures',
@@ -103,19 +108,36 @@ function runChecks(options = {}) {
             companionFailMatch ? `(Failed companion: ${companionFailMatch[1]})` : ''
         );
 
-        // Check for duplicate plugin loads
+        // Check for duplicate companion loads: [CORE] Synchronously loaded companion plugin <name>
         const loadedScripts = new Map();
-        const loadLines = sessionLog.match(/Loaded plugin:\s+([A-Za-z0-9_]+)/gi) || [];
+        const companionLoadRegex = /\[CORE\]\s+Synchronously loaded companion plugin\s+([A-Za-z0-9_]+)/gi;
+        let match;
         let duplicateFound = null;
-        for (const l of loadLines) {
-            const m = /Loaded plugin:\s+([A-Za-z0-9_]+)/i.exec(l);
-            if (m) {
-                const name = m[1];
-                const count = (loadedScripts.get(name) || 0) + 1;
-                loadedScripts.set(name, count);
-                if (count > 1) duplicateFound = name;
+
+        while ((match = companionLoadRegex.exec(sessionLog)) !== null) {
+            const name = match[1];
+            const count = (loadedScripts.get(name) || 0) + 1;
+            loadedScripts.set(name, count);
+            if (count > 1) {
+                duplicateFound = name;
+                break;
             }
         }
+
+        // Also check any legacy "Loaded plugin: <name>" lines
+        if (!duplicateFound) {
+            const legacyRegex = /Loaded plugin:\s+([A-Za-z0-9_]+)/gi;
+            while ((match = legacyRegex.exec(sessionLog)) !== null) {
+                const name = match[1];
+                const count = (loadedScripts.get(name) || 0) + 1;
+                loadedScripts.set(name, count);
+                if (count > 1) {
+                    duplicateFound = name;
+                    break;
+                }
+            }
+        }
+
         check('No duplicate plugin load detected', !duplicateFound, duplicateFound ? `(Duplicate: ${duplicateFound})` : '');
     }
 
@@ -130,7 +152,7 @@ if (require.main === module) {
         // Test 1: missing plugin
         const missingRes = runChecks({
             mockPlugins: [{ name: 'DEUS_NonExistentPlugin_XYZ', status: true }],
-            mockLog: ''
+            mockLog: 'Scene_Boot.start called\n[CORE] Synchronously loaded companion plugin DEUS_Bag\n'
         });
         if (missingRes) {
             console.error('Self-test FAIL: missing plugin did not fail');
@@ -140,17 +162,40 @@ if (require.main === module) {
         // Test 2: companion not loaded
         const companionRes = runChecks({
             mockPlugins: [],
-            mockLog: '[CORE] Companion plugin DEUS_Bag NOT loaded (Cannot find module)'
+            mockLog: 'Scene_Boot.start called\n[CORE] Companion plugin DEUS_Bag NOT loaded (Cannot find module)\n'
         });
         if (companionRes) {
             console.error('Self-test FAIL: companion not loaded did not fail');
             process.exit(1);
         }
+
+        // Test 3: duplicate load of companion plugin
+        const duplicateRes = runChecks({
+            mockPlugins: [],
+            mockLog: 'Scene_Boot.start called\n[CORE] Synchronously loaded companion plugin DEUS_Bag\n[CORE] Synchronously loaded companion plugin DEUS_Bag\n'
+        });
+        if (duplicateRes) {
+            console.error('Self-test FAIL: duplicate companion load did not fail');
+            process.exit(1);
+        }
+
+        // Test 4: empty log when allowEmptyLog is false (must fail)
+        const emptyRes = runChecks({
+            mockPlugins: [],
+            mockLog: '',
+            allowEmptyLog: false
+        });
+        if (emptyRes) {
+            console.error('Self-test FAIL: empty log did not fail');
+            process.exit(1);
+        }
+
         console.log('Self-test PASSED (all negative controls caught).');
         process.exit(0);
     }
 
-    const ok = runChecks();
+    // Default run allows empty log if game_runtime.log has not been created yet in the test worktree
+    const ok = runChecks({ allowEmptyLog: true });
     process.exit(ok ? 0 : 1);
 }
 

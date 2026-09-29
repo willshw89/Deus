@@ -11,6 +11,7 @@
     "game/data/UF_WorldCatalog.json",
     "tools/test_soil_bridge.js",
     "tools/test_soil_geomorphology.js",
+    "tools/test_package_proofs_ingame.js",
     "tools/check_plugin_boot.js",
     "tools/ops/gate_tests.json",
     "docs/systems/DEUS_SimBridge.md",

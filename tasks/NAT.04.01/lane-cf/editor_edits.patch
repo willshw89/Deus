@@ -1,0 +1,21 @@
+diff --git a/game/data/UF_WorldCatalog.json b/game/data/UF_WorldCatalog.json
+--- a/game/data/UF_WorldCatalog.json
++++ b/game/data/UF_WorldCatalog.json
+@@ -3,2 +3,5 @@
+   "about": "World generation and world content catalog. Read by UF_WorldGen, UF_Tiles, UF_Objects, UF_Items, UF_Jobs, UF_Wildlife, UF_History, UF_Colonists, UF_Factions, UF_Stance, UF_Look. Art and content are added here without touching code: docs/design/WORLD_ARCHITECTURE.md (schema), docs/handoffs/HANDOFF_world_generation.md (how to add an object), docs/ASSET_INVENTORY.md (every asset in use and its status). The world is one surface layer (the underground layer was removed 2026-09-18). Owner: Claude Code; Gemini may edit objects, items.types, wildlife.species and people only.",
++  "soil": {
++    "tickFrames": 10
++  },
+   "tilesets": {
+diff --git a/game/js/plugins.js b/game/js/plugins.js
+--- a/game/js/plugins.js
++++ b/game/js/plugins.js
+@@ -244,2 +244,7 @@
+   },
++  {
++    "name": "DEUS_SimBridge",
++    "status": true,
++    "description": "[DEUS Sim Bridge] Bridges Lean Geomorphology & Soil simulation kernel with DEUS_Levels strata, slope cascades, and closed-mass persistence.",
++    "parameters": {}
++  },
+   {

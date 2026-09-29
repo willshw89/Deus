@@ -4925,12 +4925,32 @@
             const s = strataAt(ref);
             return s ? s.materials : null;
         },
-        setStratumMaterial: (ref, s, material) => {
+        setStratumMaterial: (ref, s, material, opts = {}) => {
             const cur = strataAt(ref);
             if (!cur) return false;
-            const m = cur.materials.slice();
-            m[s] = material;
-            return setStrata(ref, { m, connector: cur.connector });
+            if (!Number.isInteger(s) || s < 0 || s >= STRATA) return false;
+            const m = cur.bytes.slice();
+            const hp = cur.hp.slice();
+            let matId = material;
+            if (typeof matId === "string") {
+                const id = MATERIAL_ID.get(matId);
+                if (id === undefined) return false;
+                matId = id;
+            }
+            const wasConstructed = (opts.constructed !== undefined) ? Boolean(opts.constructed) : cur.constructed[s];
+            if (wasConstructed && SOLID_B[matId & 0xff] === 1) {
+                matId |= M_BUILT;
+            }
+            m[s] = matId;
+            const solid = SOLID_B[matId & 0xff] === 1;
+            if (opts.hp !== undefined && opts.hp[s] !== undefined) {
+                hp[s] = opts.hp[s];
+            } else if (solid) {
+                hp[s] = cur.hp[s] > 0 ? cur.hp[s] : 255;
+            } else {
+                hp[s] = 0;
+            }
+            return setStrata(ref, { m, hp, connector: cur.connector }, opts);
         },
         applyStrataDamage,
         damageStrata: applyStrataDamage,
