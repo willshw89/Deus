@@ -1,0 +1,22 @@
+{
+  "lane": "lane-cl",
+  "taskId": "NAT.05.01",
+  "branch": "task/lane-cl",
+  "writer": "gemini",
+  "reviewer": "grok",
+  "allowedPaths": [
+    "game/js/sim/climate/**",
+    "tools/test_climate_kernel.js",
+    "tasks/NAT.05.01/lane-cl/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "node",
+      "args": [
+        "tools/test_climate_kernel.js"
+      ],
+      "timeoutSec": 300
+    }
+  ],
+  "push": true
+}
