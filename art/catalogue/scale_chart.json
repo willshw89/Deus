@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "deus-art-catalogue/1.2.0",
+  "schemaVersion": "deus-art-catalogue/1.3.0",
   "about": "Size rows cited by catalogue entries (DEC-016). Registry rows copy game/data/DEUS_ScaleRegistry.json; chartLabel/chartHeightPx are transcribed from the strip (art/catalogue/strip_transcription.json); RMMZ_SPEC rows are parsed from docs/RMMZ_ASSET_SPEC.md; GEOMETRY rows are computed from art/catalogue/geometry.json. No other rows.",
   "strip": {
     "path": "art/reference/DEUS_HUMAN_SCALE_STRIP_V1.png",

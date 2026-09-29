@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "deus-art-catalogue/1.2.0",
+  "schemaVersion": "deus-art-catalogue/1.3.0",
   "about": "Links by path + sha256 only; no reference is copied into git. Tracked references are re-hashed at every build (a mismatch fails the build). Untracked reference/** material is Ultima VII-derived third-party material: thirdParty true, styleAnchorEligible false, recorded as UNVERIFIED_ABSENT (warning only). An entry's references[] holds pack ids (pack:<id>) and paths; byEntry lists entries with their own paths.",
   "references": [
     {"path":"art/reference/DEUS_GAMEPLAY_PERSPECTIVE_MASTER_V1.png","sha256":"d514c6ce4ecd3456ddd840be592a19c8c23686d1d16b89f066bc571340cbff42","kind":"PERSPECTIVE","tracked":true,"ownerApproved":"UNKNOWN","thirdParty":false,"styleAnchorEligible":false,"verification":"HASH_MATCH"},
