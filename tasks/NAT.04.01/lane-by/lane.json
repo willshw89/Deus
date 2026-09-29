@@ -1,0 +1,30 @@
+{
+  "lane": "lane-by",
+  "taskId": "NAT.04.01",
+  "branch": "task/lane-by",
+  "writer": "claude",
+  "reviewer": "grok",
+  "allowedPaths": [
+    "game/js/sim/geomorphology/**",
+    "tools/test_soil_geomorphology.js",
+    "tasks/NAT.04.01/lane-by/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "node",
+      "args": [
+        "tools/test_soil_geomorphology.js"
+      ],
+      "timeoutSec": 300
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/test_soil_geomorphology.js",
+        "--mutation-sweep"
+      ],
+      "timeoutSec": 600
+    }
+  ],
+  "push": true
+}

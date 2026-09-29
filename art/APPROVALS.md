@@ -29,3 +29,15 @@ Log of approved art assets per `docs/ART_STANDARD.md` §5. Only user-approved as
 | 2026-09-19 | `small_plants_batch2` | Group 3 Small Plants Batch 2 & Wildflowers: cactus, cactus_tall, grass_tuft, reeds, fern, wildflowers (AR-103) | `art/masters/{cactus,cactus_tall,grass_tuft,reeds,fern,wildflowers}.*`, `game/img/characters/!$UF_*.png` | 6 small flora assets generated via Google Nano Banana per Rule V81 (micro/sub-square natural proportions). Grounded row 47, anchor [24, 47], binary alpha, 0 purple fringe, <= 31 colors from uf.hex. Automated verification: originality check PASS on all 12 files / 84 frames (distances 0.409 to 0.517 >= 0.28), art_check PASS on all. Review in `art/review/batch2_plants_showcase_4x.png`. Awaiting user approval. |
 | 2026-09-19 | `human_female_adult` | Adult human female frontier settler stand 4-facing sheet and RMMZ charset (AR-400, AR-011) | `art/masters/human_female_stand.*`, `game/img/characters/$UF_Human_Female.*` | Delivered via Google Nano Banana. Authentic FF6 HD female frontier settler in South, West, East, North facings. Homespun linen blouse, fitted leather bodice with lacing, green skirt, belt with pouch, work boots. Height 46 px, grounded row 47, anchor [24, 47], exactly matching male settler anchor. 32 colors from uf.hex, binary alpha. Automated verification: originality check PASS on all frames (distances 0.493 to 0.522 >= 0.28), art_check 6/7 PASS (grid skipped for native resolution). Review in `art/review/human_settlers_pair_showcase_4x.png`. Awaiting user approval. |
 
+
+Rows dated 2026-09-29 and later are written by the PM (Claude Code, DEC-042) under the Owner's delegation of the same day ("Use your judgement, I do want to see all art tho"), after the Owner saw the board named in the report; the Owner may add a NAY row at any time.
+
+## SHA-256 approval ledger (v1)
+
+| Date | Decision (YEA/NAY) | Entry or slot ids | File (repo path) | SHA-256 (64 lowercase hex) | Approved derived variants (ids or none) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-09-29 | YEA | `SURFACE_SHARED_FLORA_WILD-GRAIN_V1_DEFAULT` | `game/img/characters/!UF_WildGrain_V8.png` | `a4b2dc0aded38499f85f08b7b48fae66cb58915b4ae3f7e9c4ce53a99527a888` | none |
+| 2026-09-29 | YEA | `ALL_SHARED_STONE_IRONSTONE_V1_DEFAULT` | `game/img/characters/!UF_Ironstone_V8.png` | `7f2bfde5b3c09b45a9ec750d1f9c38ae5cc3a0f24800d0be89909a1385faaaef` | none |
+| 2026-09-29 | YEA | `SURFACE_SHARED_FLORA_BERRY-BUSH-BARE_V1_DEFAULT` | `game/img/characters/!UF_BerryBushBare_V8.png` | `c369c557dae4d817e044c0923cc188412ce5b0300505cb157c4b4bc4dabe7ed7` | none |
+| 2026-09-29 | YEA | `ALL_SHARED_STONE_COAL-OUTCROP_V1_DEFAULT` | `game/img/characters/!UF_CoalOutcrop_V8.png` | `6ed72bd12b042d36c19e92e965a26dcd2dd1a9f9afb9602a52a633cf7d4a7514` | none |
+| 2026-09-29 | YEA | `SURFACE_SHARED_FLORA_CACTUS-TALL_V1_DEFAULT` | `game/img/characters/!UF_CactusTall_V8.png` | `e4a6156fe65e426fc6a3b53108e4231c3b6e6dcca23dadd6bc809fde9e64f2b5` | none |

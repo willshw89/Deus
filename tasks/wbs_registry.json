@@ -24,7 +24,10 @@
       "claimedProofEvidence": "DEUS-RPT-INENGINE-PROOF-01 / art/review/package_proofs.proof_pkg1_physical_space.png",
       "proofNote": "The VERIFIED claim (commit 5cb93343, 2026-09-28) rests on tools/test_package_proofs_ingame.js, which copies game/ to a temp snapshot and injects a suite into DEUS_Test.js. plugins.js gives DEUS_World no parameters, so the world is the 1x1 default (AreasX 1, AreasY 1, AreaSize 256) and DEUS_Depth MaxDepth is 2. The suite places a chest, drops one stone item and checks that values exist; no region seam was exercised. Its screenshot is in gitignored art/review/ (not on main). 'DEUS-RPT-INENGINE-PROOF-01' names no document. The harness landed in the same commit that declared COMPLETE. No Owner F5 record.",
       "causalOrder": 1,
-      "leaves": ["WG.00.40", "WG.00.41"]
+      "leaves": [
+        "WG.00.40",
+        "WG.00.41"
+      ]
     },
     {
       "id": "PKG-02",
@@ -35,7 +38,9 @@
       "claimedProofEvidence": "DEUS-RPT-INENGINE-PROOF-01 / art/review/package_proofs.proof_pkg2_collapse_rubble.png",
       "proofNote": "Same harness and same 1x1 world as PKG-01 (commit 5cb93343). No collapse was shown in the engine. The kernel is game/js/sim/structural/**; its gate test is tools/test_structural_collapse.js (tasks/NAT.02.01/lane-bv/lane.json on main). No Owner F5 record.",
       "causalOrder": 2,
-      "leaves": ["NAT.02.01"]
+      "leaves": [
+        "NAT.02.01"
+      ]
     },
     {
       "id": "PKG-03",
@@ -46,7 +51,9 @@
       "claimedProofEvidence": "DEUS-RPT-INENGINE-PROOF-01 / art/review/package_proofs.proof_pkg3_aquifer_seepage.png",
       "proofNote": "Same harness and same 1x1 world as PKG-01 (commit 5cb93343). No seepage was shown in the engine. tasks/NAT.03.01/lane-bx/REPORT.md line 76: 'Playable verification performed: NO - Foundational kernel; headless gate passed'. No Owner F5 record.",
       "causalOrder": 3,
-      "leaves": ["NAT.03.01"]
+      "leaves": [
+        "NAT.03.01"
+      ]
     },
     {
       "id": "PKG-04",
@@ -57,7 +64,9 @@
       "mergedSha": "e1554c6383ed81c6920d2ebff7c7d31d8ed9c51f",
       "proofNote": "NAT.04.01 merged 2026-09-29 (e1554c63). Engine bridge NOT IMPLEMENTED: no plugin loads game/js/sim/geomorphology and the kernel state is not in the game save (tasks/NAT.04.01/lane-by/REPORT_attempt3.md). Exit gate: a bridge lane plus an Owner F5 showing soil moisture and a slope cascade.",
       "causalOrder": 4,
-      "leaves": ["NAT.04.01"]
+      "leaves": [
+        "NAT.04.01"
+      ]
     },
     {
       "id": "PKG-05",
@@ -65,28 +74,36 @@
       "status": "DEPENDENCY_LOCKED",
       "gate": "Owner approval before opening implementation lanes (DEC-041 item 5); Package 4 is merged headless only",
       "causalOrder": 5,
-      "leaves": ["NAT.05.01"]
+      "leaves": [
+        "NAT.05.01"
+      ]
     },
     {
       "id": "PKG-06",
       "name": "Package 6: Flora & Biomass Succession",
       "status": "DEPENDENCY_LOCKED",
       "causalOrder": 6,
-      "leaves": ["NAT.06.01"]
+      "leaves": [
+        "NAT.06.01"
+      ]
     },
     {
       "id": "PKG-07",
       "name": "Package 7: Fauna & Monsters",
       "status": "DEPENDENCY_LOCKED",
       "causalOrder": 7,
-      "leaves": ["NAT.07.01"]
+      "leaves": [
+        "NAT.07.01"
+      ]
     },
     {
       "id": "PKG-08",
       "name": "Package 8: Pre-Faction World Proof",
       "status": "DEPENDENCY_LOCKED",
       "causalOrder": 8,
-      "leaves": ["NAT.08.01"]
+      "leaves": [
+        "NAT.08.01"
+      ]
     },
     {
       "id": "CIV-EX",
@@ -95,7 +112,10 @@
       "inGameProof": "NOT_RUN",
       "complete": false,
       "causalOrder": null,
-      "leaves": ["CIV-EX-SACK-INVENTORY", "CIV-EX-RACIAL-BANNERS"],
+      "leaves": [
+        "CIV-EX-SACK-INVENTORY",
+        "CIV-EX-RACIAL-BANNERS"
+      ],
       "note": "Provisional ids. No WBS leaf ids were assigned; any new WBS leaf needs Owner approval (.agents/rules/deus-governance.md). Both landed as direct [gemini] commits on main with no lane.json, no review and no merge gate."
     }
   ],
@@ -131,7 +151,10 @@
       "reviewNote": "The review file is named after the [ops] launch-prompt commit 152c1915 that sits above the writer commit (the REVIEW_FILE_NAME situation in tools/ops/ANTIGRAVITY.md section 3); the review subject names the reviewed writer SHA 0e6d74e4.",
       "mergedSha": "3ab738b26aa673bb7df277b1d2acfcc83bb9b692",
       "mergedOn": "2026-09-28",
-      "gateTests": ["tools/art/test_multi_variant_topology.js", "tools/art/test_catalogue.js"],
+      "gateTests": [
+        "tools/art/test_multi_variant_topology.js",
+        "tools/art/test_catalogue.js"
+      ],
       "note": "Added 2026-09-29; the row was missing from the registry although the merge is on main."
     },
     "NAT.03.01": {
@@ -149,7 +172,9 @@
       "mergedSha": "4794e67068933ebe427e34523d776cfbd4686be5",
       "inGameProof": "NOT_RUN",
       "inGameProofNote": "tasks/NAT.03.01/lane-bx/REPORT.md line 76: 'Playable verification performed: NO'",
-      "gateTests": ["tools/test_aquifer_seepage.js"]
+      "gateTests": [
+        "tools/test_aquifer_seepage.js"
+      ]
     },
     "NAT.02.01": {
       "title": "Structural Support & Cascading Collapse Engine",
@@ -167,7 +192,9 @@
       "mergedSha": "c00ada72c4117996f77736599c03a3a655d1c2ee",
       "mergedShaNote": "Previous value 54f67436 was the Grok review commit, not the merge.",
       "inGameProof": "NOT_PROVEN",
-      "gateTests": ["tools/test_structural_collapse.js"]
+      "gateTests": [
+        "tools/test_structural_collapse.js"
+      ]
     },
     "WG.00.41": {
       "title": "32-Layer Column Architecture & Region-Seam Continuity",
@@ -184,7 +211,9 @@
       "mergedSha": "a0a44eb858201859e06fb18d370a060172088ebf",
       "inGameProof": "NOT_PROVEN",
       "inGameProofNote": "The 32-Z in-engine proof is lane-ca's job (open, no code yet).",
-      "gateTests": ["tools/test_region_seam_continuity.js"]
+      "gateTests": [
+        "tools/test_region_seam_continuity.js"
+      ]
     },
     "WG.00.40": {
       "title": "Physical World Objects & 3x3 Continuous Coordinate Space",
@@ -201,7 +230,9 @@
       "reviewDoc": "tasks/WG.00.40/lane-bs/review_grok_9ff79bf2.md",
       "mergedSha": "cdc0fb95d8f79463738b2078cb60dd5fbf7becaa",
       "inGameProof": "NOT_PROVEN",
-      "gateTests": ["tools/test_physical_inventory_proof.js"]
+      "gateTests": [
+        "tools/test_physical_inventory_proof.js"
+      ]
     },
     "NAT.04.01": {
       "title": "Lean Geomorphology & Soil Kernel",
@@ -225,7 +256,10 @@
       "reportDoc": "tasks/NAT.04.01/lane-by/REPORT_attempt3.md",
       "briefDoc": "tasks/NAT.04.01/lane-by/BRIEF.md",
       "laneManifest": "tasks/NAT.04.01/lane-by/lane.json",
-      "gateTests": ["tools/test_soil_geomorphology.js", "tools/test_soil_geomorphology.js --mutation-sweep"]
+      "gateTests": [
+        "tools/test_soil_geomorphology.js",
+        "tools/test_soil_geomorphology.js --mutation-sweep"
+      ]
     },
     "GOV.01.01": {
       "title": "Governance and process document streamline (rulebook, decisions digest, STATUS Now page, registry, art and ops doc banners)",
@@ -241,7 +275,12 @@
       "laneManifest": "tasks/GOV.01.01/lane-pm-streamline/lane.json",
       "briefDoc": "tasks/GOV.01.01/lane-pm-streamline/BRIEF.md",
       "inGameProof": "N/A - documentation and governance records only; no game code changed",
-      "gateTests": ["tools/check_deus_syntax.js", "tools/governance/test_check_claims.js", "tools/governance/check_invariants.js", "node -e JSON.parse(tasks/wbs_registry.json)"],
+      "gateTests": [
+        "tools/check_deus_syntax.js",
+        "tools/governance/test_check_claims.js",
+        "tools/governance/check_invariants.js",
+        "node -e JSON.parse(tasks/wbs_registry.json)"
+      ],
       "note": "Six writers plus one reviewer-fix pass on 2026-09-29, all Claude; the manifest was written by the PM and awaits its [pm] commit; rebase onto e1554c63 before the gate."
     },
     "NAT.05.01": {
@@ -257,13 +296,28 @@
       "status": "LANDED_UNREVIEWED",
       "lane": null,
       "writer": "gemini",
-      "writerShas": ["cd8e43b7a45cb4ba3d962a30198c499d81508f65", "eb790a6857ceb8dcc6de781dd037837debe7d363"],
+      "writerShas": [
+        "cd8e43b7a45cb4ba3d962a30198c499d81508f65",
+        "eb790a6857ceb8dcc6de781dd037837debe7d363"
+      ],
       "reviewer": null,
       "reviewVerdict": "NONE",
       "mergedSha": null,
       "inGameProof": "NOT_RUN",
-      "files": ["game/js/plugins/DEUS_Bag.js", "game/js/plugins/DEUS_Containers.js", "game/js/plugins/DEUS_Sheet.js", "game/js/plugins/DEUS_Core.js", "game/js/plugins/DEUS_Items.js", "game/js/plugins/DEUS_Objects.js", "game/js/plugins/DEUS_History.js"],
-      "tests": ["tools/test_bag_and_racial_banners.js", "tools/test_creature_inventory_black_box.js", "tools/test_starter_kit_and_stockpile.js"],
+      "files": [
+        "game/js/plugins/DEUS_Bag.js",
+        "game/js/plugins/DEUS_Containers.js",
+        "game/js/plugins/DEUS_Sheet.js",
+        "game/js/plugins/DEUS_Core.js",
+        "game/js/plugins/DEUS_Items.js",
+        "game/js/plugins/DEUS_Objects.js",
+        "game/js/plugins/DEUS_History.js"
+      ],
+      "tests": [
+        "tools/test_bag_and_racial_banners.js",
+        "tools/test_creature_inventory_black_box.js",
+        "tools/test_starter_kit_and_stockpile.js"
+      ],
       "note": "Direct [gemini] commits to main on 2026-09-29 (cd8e43b7, eb790a68): no lane.json, no independent review, no merge gate, no claim recorded before writing. The Owner authorized the sack inventory as a DEC-037 exception. Next step: PM assigns an independent review (Grok) and the Owner tries the bag in F5."
     },
     "CIV-EX-RACIAL-BANNERS": {
@@ -277,7 +331,12 @@
       "reviewVerdict": "NONE",
       "mergedSha": null,
       "inGameProof": "NOT_RUN",
-      "files": ["game/img/characters/!$UF_Banner_{Dragonborn,Dwarf,Elf,Gnome,Half_Elf,Half_Orc,Halfling,Human,Tiefling}.png/.json", "game/img/characters/!$UF_Item_{BreadLoaf,Campfire,Firewood,MeatCooked,MeatRaw,OreCopper,OreIron,StoneAxe,StoneKnife,StonePick}.png/.json", "tools/art/assemble_racial_banners.js", "tools/art/assemble_batch_10_items.js"],
+      "files": [
+        "game/img/characters/!$UF_Banner_{Dragonborn,Dwarf,Elf,Gnome,Half_Elf,Half_Orc,Halfling,Human,Tiefling}.png/.json",
+        "game/img/characters/!$UF_Item_{BreadLoaf,Campfire,Firewood,MeatCooked,MeatRaw,OreCopper,OreIron,StoneAxe,StoneKnife,StonePick}.png/.json",
+        "tools/art/assemble_racial_banners.js",
+        "tools/art/assemble_batch_10_items.js"
+      ],
       "artGovernance": "No catalogue-first record, QA vetting record or Owner sign-off found for these 19 sheets (DEC-007 amendment 2026-09-29: catalogue first, prompt per docs/art/DEUS_ASSET_STANDARD.md, QA, Owner is final QA). The camp centre object is now the banner (DEUS_History.js).",
       "note": "Owner authorized racial banners as a DEC-037 exception. Next step: PM presents each sheet to the Owner for sign-off; validate with tools/art/validate_asset_standard.js."
     },
@@ -381,19 +440,90 @@
     }
   },
   "openLanes": [
-    { "lane": "lane-by", "taskId": "NAT.04.01", "writer": "claude", "tip": "148f048b", "state": "MERGED (e1554c63); [pm] close pending", "next": "open the engine-bridge lane; Owner F5" },
-    { "lane": "lane-pm-streamline", "taskId": "GOV.01.01 (provisional)", "writer": "claude", "reviewer": "grok", "tip": "base 5b300427; manifest tasks/GOV.01.01/lane-pm-streamline/lane.json written, [pm] commit pending", "state": "WRITER_DONE, review pending (reviewer must not be Claude)", "next": "[pm] manifest commit; rebase onto e1554c63; gate tests per lane.json; Grok review; merge_gate" },
-    { "lane": "lane-ca", "taskId": "WG.00.41 32-Z RMMZ proof bridge", "writer": "gemini", "reviewer": "grok", "tip": "000341d8", "state": "OPEN, brief and lane.json only, no code since 2026-09-28", "next": "implement tools/test_proof_bridge_32z.js and plugin changes; Grok review; Owner F5" },
-    { "lane": "lane-bb", "taskId": "DEUS-TSK-GEOLOGY-GATE FIX2", "writer": "grok", "tip": "d171c0fd", "state": "STALLED since 2026-09-27; escalation: cuts/caves harness red outside scope (7 fails)", "next": "PM widens scope or exits PAUSED-BLOCKED" },
-    { "lane": "lane-bd", "taskId": "DEUS-TSK-ZRANGE-HARNESS FIX1", "writer": "grok", "tip": "3ea1ab69", "state": "STALLED since 2026-09-28; escalation: z=-1 landing wet after fluid sim", "next": "Owner/PM ruling; relaunch or PAUSED-BLOCKED" },
-    { "lane": "lane-bj", "taskId": "WG.84.01", "writer": "codex", "tip": "d134315d", "state": "AUDIT DELIVERED 2026-09-27, unreviewed; escalation: camps without starter resources", "next": "Grok review; defect; exit" },
-    { "lane": "lane-bw", "taskId": "NAT.05.01", "writer": null, "tip": null, "state": "HELD (DEC-037)", "next": "Owner approval to open" }
+    {
+      "lane": "lane-by",
+      "taskId": "NAT.04.01",
+      "writer": "claude",
+      "tip": "148f048b",
+      "state": "MERGED (e1554c63); [pm] close pending",
+      "next": "open the engine-bridge lane; Owner F5"
+    },
+    {
+      "lane": "lane-pm-streamline",
+      "taskId": "GOV.01.01 (provisional)",
+      "writer": "claude",
+      "reviewer": "grok",
+      "tip": "base 5b300427; manifest tasks/GOV.01.01/lane-pm-streamline/lane.json written, [pm] commit pending",
+      "state": "WRITER_DONE, review pending (reviewer must not be Claude)",
+      "next": "[pm] manifest commit; rebase onto e1554c63; gate tests per lane.json; Grok review; merge_gate"
+    },
+    {
+      "lane": "lane-ca",
+      "taskId": "WG.00.41 32-Z RMMZ proof bridge",
+      "writer": "gemini",
+      "reviewer": "grok",
+      "tip": "000341d8",
+      "state": "OPEN, brief and lane.json only, no code since 2026-09-28",
+      "next": "implement tools/test_proof_bridge_32z.js and plugin changes; Grok review; Owner F5"
+    },
+    {
+      "lane": "lane-bb",
+      "taskId": "DEUS-TSK-GEOLOGY-GATE FIX2",
+      "writer": "grok",
+      "tip": "d171c0fd",
+      "state": "STALLED since 2026-09-27; escalation: cuts/caves harness red outside scope (7 fails)",
+      "next": "PM widens scope or exits PAUSED-BLOCKED"
+    },
+    {
+      "lane": "lane-bd",
+      "taskId": "DEUS-TSK-ZRANGE-HARNESS FIX1",
+      "writer": "grok",
+      "tip": "3ea1ab69",
+      "state": "STALLED since 2026-09-28; escalation: z=-1 landing wet after fluid sim",
+      "next": "Owner/PM ruling; relaunch or PAUSED-BLOCKED"
+    },
+    {
+      "lane": "lane-bj",
+      "taskId": "WG.84.01",
+      "writer": "codex",
+      "tip": "d134315d",
+      "state": "AUDIT DELIVERED 2026-09-27, unreviewed; escalation: camps without starter resources",
+      "next": "Grok review; defect; exit"
+    },
+    {
+      "lane": "lane-bw",
+      "taskId": "NAT.05.01",
+      "writer": null,
+      "tip": null,
+      "state": "HELD (DEC-037)",
+      "next": "Owner approval to open"
+    }
   ],
   "proposedLeaves": [
-    { "id": null, "status": "NOT_APPROVED", "title": "tools/art/build_catalogue.js and docs/art/catalogue/SCHEMA.md section 7 learn the SOP status ladder (docs/art/DEUS_ASSET_STANDARD.md section 3.6) and stop overwriting hand-set statuses; until then catalogue.json keeps its old enum (MISSING, EXISTING_UNAPPROVED, STAND_IN, STOCK, APPROVED, OUT_OF_SCOPE)" },
-    { "id": null, "status": "NOT_APPROVED", "title": "tools/governance/check_claims.js rule 4.4 reads lane.json allowedPaths instead of the docs/STATUS.md whitelist table" },
-    { "id": null, "status": "NOT_APPROVED", "title": "tools/governance/merge_gate.js author-family check (MERGE_GATE.md section 11.1)" },
-    { "id": null, "status": "NOT_APPROVED", "title": "Add AS-VIEW-002 to game/data/UF_AssetStandard.json so tools/art/test_validate_asset_standard.js passes (406 passed, 1 failed on 2026-09-29)" },
-    { "id": null, "status": "NOT_APPROVED", "title": "Align tools/ops/hooks/pre-push with the push rule in AGENTS.md (writer pushes its own lane branch when lane.json push is true; only the integrator pushes main)" }
+    {
+      "id": null,
+      "status": "NOT_APPROVED",
+      "title": "tools/art/build_catalogue.js and docs/art/catalogue/SCHEMA.md section 7 learn the SOP status ladder (docs/art/DEUS_ASSET_STANDARD.md section 3.6) and stop overwriting hand-set statuses; until then catalogue.json keeps its old enum (MISSING, EXISTING_UNAPPROVED, STAND_IN, STOCK, APPROVED, OUT_OF_SCOPE)"
+    },
+    {
+      "id": null,
+      "status": "NOT_APPROVED",
+      "title": "tools/governance/check_claims.js rule 4.4 reads lane.json allowedPaths instead of the docs/STATUS.md whitelist table"
+    },
+    {
+      "id": null,
+      "status": "NOT_APPROVED",
+      "title": "tools/governance/merge_gate.js author-family check (MERGE_GATE.md section 11.1)"
+    },
+    {
+      "id": null,
+      "status": "NOT_APPROVED",
+      "title": "Add AS-VIEW-002 to game/data/UF_AssetStandard.json so tools/art/test_validate_asset_standard.js passes (406 passed, 1 failed on 2026-09-29)"
+    },
+    {
+      "id": null,
+      "status": "NOT_APPROVED",
+      "title": "Align tools/ops/hooks/pre-push with the push rule in AGENTS.md (writer pushes its own lane branch when lane.json push is true; only the integrator pushes main)"
+    }
   ]
 }

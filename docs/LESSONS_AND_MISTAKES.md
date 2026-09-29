@@ -199,3 +199,38 @@ An entry cites a commit object (`git cat-file -e <sha>` exits 0) or a path that 
 - It does not close any `DEF-*` row. Where a current file no longer shows the damage (LM-008's restore, LM-009's repaired line), the defect row is still OPEN and this log leaves it OPEN.
 - It does not answer the Owner questions named in `tasks/OPS.40.06/lane-at/REPORT.md`.
 - It does not generate, request, or integrate art.
+
+## Checklist by work class (added 2026-09-29 by the PM; the launcher prepends the matching block to every writer prompt once lane-co lands)
+
+### Simulation kernels and physics (game/js/sim/**)
+- Assert `getTotalMass().total` (or the subsystem's total) on EVERY tick of a multi-tick run, not two fields after one tick (NAT.04.01 attempt 2 minted 187,500 cp per tick unseen; review 97432c21).
+- A new cell/record starts at zero mass; constructors that default to "full" mint matter (soil.js attempt 2).
+- Unknown neighbours are unknown, not "elevation 0"; state which authority supplies missing data (groundElevationProvider pattern).
+- Every mutant must fail on an assertion line; a hard-coded `process.exit(1)` is not a caught mutant (review 50c08991).
+- Tests call the production engine, never stub helpers (6 of 15 failing lanes in the 2026-09-29 audit).
+- Separate work queues per pass so one pass cannot clear another's dirty set.
+
+### Engine bridges and RMMZ plugins
+- Register plugins in `game/js/plugins.js`; a Node `require()` companion cannot see RMMZ globals and its "Cannot find module" log line hides the real error (DEUS_Bag never loaded while its test passed 5/5, 2026-09-29).
+- Check `game/game_runtime.log` for `[CORE] Companion plugin ... NOT loaded` after every launch until `tools/check_plugin_boot.js` exists.
+- A plugin loaded by both `require()` and `loadScript` runs twice; keep one path.
+- Live-edit hooks must use `UF.Events.on` with the positional `(area, x, y, layer, tileId)` signature; `UF.World.on` is undefined (DEUS_Tiles.js:1255).
+- "In-game VERIFIED" needs a screenshot you opened that shows the feature, on the shipped `plugins.js` parameters (the 3×3 world claim was made on a 1×1 world).
+
+### Tooling, tests and gates
+- A check that only prints cannot fail; every check_*.js exits non-zero on a finding (9 of 13 did not, audit 2026-09-29).
+- Gate suites run in a fresh clone with `core.autocrlf=false`; CRLF clones broke three suites (Lane Y).
+- Launch prompts must not be committed onto the lane branch above the writer commit (`-NoCommitPrompt`); they became the gate's "review target" and caused REVIEW_FILE_NAME refusals.
+
+### Art (PixelLab OBJECTS/MAPS)
+- Catalogue row and prompt file exist BEFORE the call; a prompt written afterwards is a reconstruction and is labelled so.
+- Only OBJECTS and MAPS tools; `create_image_pro_flash` and Character/Creator tools are banned (DEC-007 amendment). The 26 individual_48 tiles were made with the wrong tool.
+- "Seamless" in the prompt is not seamless: measure the wrap-edge ratio (14 of 26 tiles failed at 1.0).
+- Variants are distinct front-view generations; rotations are facings and move the light (granite set used 8 rotations as 8 variants).
+- `APPROVED` is written only from the Owner's SHA-256 ledger; agents set at most QA states (8 batch-3 objects were self-approved 2026-09-29).
+- Within one set, variants stay within one grey-value step and one silhouette family; check the set against its neighbours (Cave Moss vs Bush confusion).
+
+### Process and source control
+- Never commit runtime code straight to main (cd8e43b7, eb790a68); never commit keys (5842f6f8 leaked a MiniMax key, purged the same day); never `git clean -x`/`-X` (dee6a400's .gitignore hid protected files).
+- A review is independent only if the reviewer's own account authored the commit; six "[grok]" reviews were authored by the ops account.
+- Record Owner decisions in docs/OWNER_DECISIONS.md the same session; a rule that lives only in chat does not reach the next agent.

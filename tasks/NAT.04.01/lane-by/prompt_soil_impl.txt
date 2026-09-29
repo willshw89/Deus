@@ -1,0 +1,66 @@
+You are MiniMax, implementing Package 4 (NAT.04.01): Lean Geomorphology & Soil Kernel for Project DEUS.
+Authorities: DEC-037 (Natural World Phase Lock), DEC-039 (Rules Hierarchy), DEC-040 (Closed-Mass Invariant), DEC-041 (Exit Gate).
+
+Please write the complete, production-grade implementation of `game/js/sim/geomorphology/soil.js`.
+
+Requirements:
+1. Multi-strata soil representation:
+   - 5 strata per 10-ft Z cell ($s \in [0..4]$), volume $5\text{ ft} \times 5\text{ ft} \times 2\text{ ft} = 50\text{ cu ft}$ per stratum cell.
+   - Classes / structures:
+     - `SoilStratum`:
+       - `id`: string (encoded via `encodeStratumId(x, y, z, s)`)
+       - `x, y, z, s`: integers
+       - `horizon`: string ("O", "A", "B", "C")
+       - `sand, silt, clay, organic`: integers in basis points ($0..10000$, sum = 10000)
+       - `bulkDensity`: integer centipounds per cu ft (3750 for A, 4750 for B, 6000 for C)
+       - `porosity`: integer basis points (e.g. 4500 for loam)
+       - `fieldCapacity`: integer basis points (e.g. 3500 for loam)
+       - `moisture`: integer basis points ($0..10000$)
+       - `loose`: boolean (true for sand, gravel, weathered regolith)
+       - `angleRepose`: integer degrees (gravel 35, dry sand 34, moist loam 45, wet mud 20)
+       - Methods:
+         - `getMaxWaterMass()`: `Math.floor(VOLUME_PER_STRATUM * (this.porosity / 10000) * WATER_DENSITY_CP_PER_CUFT)`
+         - `getCurrentWaterMass()`: `Math.floor(this.getMaxWaterMass() * (this.moisture / 10000))`
+         - `getFieldCapacityWaterMass()`: `Math.floor(this.getMaxWaterMass() * (this.fieldCapacity / 10000))`
+         - `getAvailablePoreCapacity()`: `Math.max(0, this.getMaxWaterMass() - this.getCurrentWaterMass())`
+         - `getExcessDrainableWater()`: `Math.max(0, this.getCurrentWaterMass() - this.getFieldCapacityWaterMass())`
+2. `GeomorphologyEngine`:
+   - Properties:
+     - `strata`: Map<string, SoilStratum>
+     - `signedResidualMap`: Map<string, number>
+     - `dirtyColumns`: Set<string>
+     - `ledgerMassRock`: integer centipounds
+     - `ledgerMassSediment`: integer centipounds
+     - `ledgerMassSoilWater`: integer centipounds
+   - Methods:
+     - `addStratum(stratum)`
+     - `getStratum(id)`
+     - `markDirty(x, y, z, s)`
+     - `processMoistureTick(dt = 1, aquiferEngine = null, ledger = null)`:
+       - Upward capillary draw from saturated stratum / aquifer beneath up to field capacity.
+       - Gravitational drainage downwards into lower stratum when moisture > field capacity.
+       - Signed residual tracking on canonical undirected interface edges (`canonicalEdgeKey`).
+       - Strict clamping against donor available water and receiver available pore capacity.
+     - `processSlopeStability(dt = 1, ledger = null)`:
+       - Evaluates angle of repose across adjacent orthogonal columns for loose strata.
+       - If vertical height difference exceeds `tan(theta) * dx`, transfer excess loose mass down-gradient.
+       - Conserves mass 100% into `ledgerMassSediment`.
+     - `applyWeathering(x, y, z, s, exposedSurface, dt, ledger = null)`:
+       - Fractures exposed rock into regolith: $\Delta \text{Rock} = -\Delta \text{Regolith}$ in centipounds.
+     - `applyWaterErosion(x, y, z, s, fluidVelocity, dt, ledger = null)`:
+       - Strips topsoil into suspended sediment.
+     - `applyThermalDegradation(x, y, z, s, tempKelvin, dt, ledger = null)`:
+       - Bakes clay into ceramic; vaporizes organic matter into ash/gas.
+     - `getTotalMass()`: returns `{ rock, sediment, water, total }` in centipounds.
+     - `serialize()` / `deserialize(jsonStr)`
+3. Helper functions:
+   - `encodeStratumId(x, y, z, s)`
+   - `decodeStratumId(id)`
+   - `canonicalEdgeKey(idA, idB)`
+4. Standard constants:
+   - `VOLUME_PER_STRATUM = 50.0` (cu ft)
+   - `WATER_DENSITY_CP_PER_CUFT = 6240` (62.4 lbs/cu ft * 100)
+   - `MAX_WATER_MASS_PER_STRATUM = VOLUME_PER_STRATUM * WATER_DENSITY_CP_PER_CUFT` (312,000 cp)
+5. Zero dependencies. CommonJS `module.exports` and browser window exports (`window.DEUS.Sim.Soil = ...`).
+
+Output ONLY valid JavaScript code in your response without markdown fencing or commentary.

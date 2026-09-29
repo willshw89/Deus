@@ -1,0 +1,107 @@
+# DEUS TASK ASSIGNMENT: GROK INDEPENDENT ADVERSARIAL RE-REVIEW
+# Task: NAT.04.01 / lane-by (Lean Geomorphology & Soil Kernel)
+# Target Commit: c96dfce8afbdb986c655c0a07cd3194a465390fb
+# Authority: DEC-034 (Independent Adversarial Review), DEC-035 (Merge Gate Isolation), DEC-037, DEC-038, DEC-039, DEC-040
+
+You are Grok acting as the Independent Adversarial Reviewer on Project DEUS.
+DO NOT self-certify. Form an independent verdict from actual git diff, code inspection, and test execution.
+
+TARGET DETAILS:
+- Task ID: NAT.04.01
+- Lane ID: lane-by
+- Branch: task/lane-by
+- Writer: MiniMax (repaired by Gemini under coordinator bounded authority)
+- Reviewer: Grok (Grok 4.7)
+- Target Commit Tip: c96dfce8afbdb986c655c0a07cd3194a465390fb
+- Merge Base with main: 5cb93343bf2e3026f42f9606d69233a9bbfaaf0b
+- Worktree: C:\Users\snewt\.deus_worktrees\lane-by
+
+CONTEXT & BACKGROUND:
+Your previous review on commit ace19c25 returned VERDICT: FAIL citing 9 critical physical and architectural defects:
+1. Capillary rise created 25,740 cp of water out of thin air due to unbonded transfer and missing donor debit.
+2. Downward gravity drainage flowed upward to z+1.
+3. Slope failure compared z - below.z = -1, making collapse mathematically impossible while scanning 2,000 undisturbed strata.
+4. Weathering, water erosion, and thermal degradation lost solid mass without transferring it to recipient sediment/rock reservoirs.
+5. Runtime entry point used 'require' without browser/UMD guard, throwing ReferenceError in clean browser environments.
+6. Test suite tested fake stub helpers instead of the real GeomorphologyEngine kernel.
+7. Total mass mixed incompatible mass and percentage units.
+8. Signed residual map stored wrong quantities and was never applied to fractional flow.
+9. Mutants failed via hardcoded process.exit(1) rather than failing genuine physical assertions.
+
+BOUNDED REPAIR PASS DELIVERED IN c96dfce8:
+- All fake stubs removed; public API directly delegates to GeomorphologyEngine.
+- Integer centipounds strictly enforced as physical mass authority (DEC-040: 50 cu ft * 6240 cp/cu ft = 312,000 cp max water).
+- Downward percolation strictly traverses s-1 (or z-1, s=4) and clamps to lower stratum available pore capacity; zero upward drainage.
+- Capillary rise strictly debits donor stratum in integer centipounds; zero water creation.
+- True undirected edge key format ('idA:idB') and accumulateFractionalTransfer method for DEC-038 signed residual tracking.
+- Dirty region tracking: undisturbed regions skip all moisture and slope processing.
+- Closed-mass transfers: weathering transfers rock -> regolith; water erosion transfers soil -> suspended sediment; thermal degradation bakes clay -> ceramic and vaporizes organic -> ash/gas; net ledger delta = 0.
+- Universal UMD wrapper in index.js tested in browser/Node without require error.
+- Full test suite in tools/test_soil_geomorphology.js: 57 genuine assertions exercising GeomorphologyEngine.
+- 5 real mutants tested and confirmed to fail real assertions without process.exit(1):
+  --mutant=no_donor_debit (fails capillary conservation)
+  --mutant=reverse_drainage (fails downward percolation)
+  --mutant=bypass_pore_clamp (fails receiver pore space clamp)
+  --mutant=discard_signed_residuals (fails sub-centipound accumulation)
+  --mutant=unbalanced_weathering (fails closed mass weathering balance)
+
+REVIEW INSTRUCTIONS:
+
+1. WORKTREE & GIT INTEGRITY:
+   Run:
+     git rev-parse HEAD
+     git merge-base HEAD origin/main
+     git log -1 --oneline
+     git diff --stat 5cb93343bf2e3026f42f9606d69233a9bbfaaf0b HEAD
+   Verify that all touched files fall strictly within tasks/NAT.04.01/lane-by/lane.json allowedPaths:
+     - game/js/sim/geomorphology/**
+     - tools/test_soil_geomorphology.js
+     - tasks/NAT.04.01/lane-by/**
+   Verify zero edits to engine core (game/js/rmmz_*.js) (Rule 9).
+   Verify zero civilization / faction / farming implementation (DEC-037).
+
+2. EXECUTE GATE TESTS & MUTANTS:
+   In C:\Users\snewt\.deus_worktrees\lane-by, run:
+     node tools/test_soil_geomorphology.js
+   Verify all 57 tests pass cleanly (exit code 0).
+   Verify mutant checks fail naturally when provoked:
+     node tools/test_soil_geomorphology.js --mutant=no_donor_debit
+     node tools/test_soil_geomorphology.js --mutant=reverse_drainage
+     node tools/test_soil_geomorphology.js --mutant=bypass_pore_clamp
+     node tools/test_soil_geomorphology.js --mutant=discard_signed_residuals
+     node tools/test_soil_geomorphology.js --mutant=unbalanced_weathering
+
+3. ADVERSARIAL INSPECTION OF IMPLEMENTATION:
+   Inspect game/js/sim/geomorphology/soil.js and index.js:
+   - Check if any water can be created or destroyed.
+   - Check if gravity drainage moves upward under any circumstance.
+   - Check if slope cascades conserve sediment mass and honor angle of repose.
+   - Check if UMD wrapper executes safely without node 'require'.
+   - Check if serialization roundtrips all parameters.
+
+4. RECORD FINDINGS & VERDICT:
+   Write your complete review report to:
+     tasks/NAT.04.01/lane-by/review_grok_c96dfce8.md
+   MUST include:
+   - Target Commit: c96dfce8afbdb986c655c0a07cd3194a465390fb
+   - Verdict line:
+     VERDICT: PASS
+     (or VERDICT: CLEAN PASS or VERDICT: FAIL)
+   Follow the established review structure:
+     # Independent Grok Review — NAT.04.01 / lane-by
+     - Writer: MiniMax / Gemini repair
+     - Reviewer: Grok (Grok 4.7)
+     - Reviewed Commit: c96dfce8afbdb986c655c0a07cd3194a465390fb
+     - Merge Base: 5cb93343bf2e3026f42f9606d69233a9bbfaaf0b
+     - Branch: task/lane-by
+     - Worktree: C:\Users\snewt\.deus_worktrees\lane-by
+     - Review Date: 2026-09-28
+     ## 1. Commit & Diff Verification
+     ## 2. Gate Test Execution & Results
+     ## 3. Technical Evaluation of Soil Kernel
+     ## 4. Verdict (PASS, PASS_WITH_FIXES, or FAIL)
+
+5. COMMIT REVIEW REPORT:
+   Stage and commit only the review file:
+     git add tasks/NAT.04.01/lane-by/review_grok_c96dfce8.md
+     git commit -m "[grok] NAT.04.01 Independent review of soil geomorphology simulation (commit c96dfce8)"

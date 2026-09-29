@@ -1,0 +1,63 @@
+# PROJECT DEUS TASK ASSIGNMENT FOR MINIMAX M3
+# Task ID: NAT.04.01 (lane-by) — Lean Geomorphology & Soil Kernel
+
+## 1. Objective
+Implement the Lean Geomorphology & Soil Kernel for Project DEUS in `game/js/sim/geomorphology/` and verify it with `tools/test_soil_geomorphology.js`.
+Authority: Owner Directive 2026-09-28 14:28 CT, DEC-037 Natural World Phase Lock, DEC-039 Rules Hierarchy, DEC-040 Universal Closed-Mass Invariant, DEC-041 Multi-Agent Architecture.
+
+## 2. Target Worktree & Whitelist
+- Working Directory: `C:\Users\snewt\.deus_worktrees\lane-by`
+- Branch: `task/lane-by`
+- Target Write Paths:
+  - `game/js/sim/geomorphology/soil.js`
+  - `game/js/sim/geomorphology/index.js`
+  - `tools/test_soil_geomorphology.js`
+  - `tasks/NAT.04.01/lane-by/REPORT.md`
+- STRICT EXCLUSIONS: Zero edits to engine core (`rmmz_*.js`), zero art generation (`DEC-007`), zero civilization/farming (`DEC-037`).
+
+## 3. Physical & Mathematical Calibration
+
+### 3.1 2-ft Strata Soil Horizons
+- 5 discrete strata per 10-ft Z cell ($s \in [0..4]$), volume $5\text{ ft} \times 5\text{ ft} \times 2\text{ ft} = 50\text{ cu ft}$ per stratum cell.
+- Soil types:
+  - **Horizon O / A (Topsoil)**: upper stratum ($s = s_{\text{top}}$), organic fraction $\ge 2000\text{ bp}$, bulk density $\approx 3750\text{ cp/cu ft}$.
+  - **Horizon B (Subsoil)**: intermediate stratum, clay/silt enrichment, bulk density $\approx 4750\text{ cp/cu ft}$.
+  - **Horizon C (Regolith / Saprolite)**: lower stratum directly overlying unweathered bedrock, bulk density $\approx 6000\text{ cp/cu ft}$.
+- Composition tracked as integer basis points ($0 \dots 10000$): `sand`, `silt`, `clay`, `organic` (sum must equal 10000 bp).
+
+### 3.2 Dynamic Moisture & Capillary Coupling
+- Soil moisture $m \in [0 \dots 10000]\text{ bp}$ tracks pore saturation.
+- Capillary draw: Unsaturated soil strata draw moisture from saturated strata beneath (coupling with `NAT.03.01` aquifer) up to field capacity ($\approx 3500\text{ bp}$ for loam).
+- Gravitational percolation: Moisture exceeding field capacity drains downward into lower permeable strata or cracks under gravity.
+- Canonical undirected edge signed residual tracking:
+  $$\text{grossSignedFlow} = \text{calculatedSignedFlow}_{A \to B} + \text{residual}[\text{edgeKey}]$$
+  $$\text{integerFlow} = \text{truncTowardZero}(\text{grossSignedFlow})$$
+  $$\text{residual}[\text{edgeKey}] = \text{grossSignedFlow} - \text{integerFlow}$$
+  Ensures zero water lost to integer truncation.
+- Receiver-side clamping: Transfers must not exceed available pore capacity or cause oversaturation (>10000 bp).
+
+### 3.3 Sediment Transport & Angle of Repose
+- Loose sediment observes material friction angle $\theta$:
+  - Gravel: $35^\circ$
+  - Dry Sand: $34^\circ$
+  - Moist Loam: $45^\circ$ (cohesion)
+  - Saturated Mud / Clay: $20^\circ$ (liquefaction risk)
+- If vertical step to adjacent cell exceeds stable angle of repose threshold, unsupported loose mass cascades down-gradient into the lower cell. Mass is 100% conserved into ledger.
+
+### 3.4 Weathering, Thermal Degradation & Closed Mass (DEC-040)
+- Mechanical/chemical rock weathering: Exposed bedrock in contact with water/frost slowly fractures top stratum into mineral regolith ($C$-horizon):
+  $$\Delta \text{Rock} = -\Delta \text{Regolith}$$
+  in exact integer centipounds.
+- Water-driven erosion: High fluid flow across surface strips topsoil into suspended sediment, depositing alluvial loam downstream.
+- Thermal degradation: Contact with molten lava ($Z \in [-16 \dots -11]$) bakes clay into ceramic and vaporizes organic topsoil into carbonaceous ash/gas, conserving mass into atmospheric/sediment accounts.
+
+### 3.5 Event-Driven & Quiescent Operation
+- Zero per-frame full-world loops.
+- Undisturbed soil is quiescent.
+- Disturbed/hydrated cells mark dirty flags. Only dirty cells update during simulation ticks until steady state.
+
+## 4. Required Deliverables
+1. `game/js/sim/geomorphology/soil.js`: Complete Soil & Geomorphology subsystem implementing the above physics. Must export clean CommonJS module and browser `window.DEUS.Sim.Soil` / `window.UF.Sim.Soil`.
+2. `game/js/sim/geomorphology/index.js`: Re-export clean public API.
+3. `tools/test_soil_geomorphology.js`: Standalone Node test suite running 12 contract tests without dependencies (`node tools/test_soil_geomorphology.js` exits 0 on success, prints PASS/FAIL per check, supports `--mutant=<name>` exiting 1 for negative controls).
+4. `tasks/NAT.04.01/lane-by/REPORT.md`: Comprehensive completion report following DEUS reporting standards with GAME TRANSLATION block and 6 status fields.

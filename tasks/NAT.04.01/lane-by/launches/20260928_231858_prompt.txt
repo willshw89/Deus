@@ -1,0 +1,82 @@
+# DEUS TASK ASSIGNMENT: GROK INDEPENDENT ADVERSARIAL REVIEW
+# Task: NAT.04.01 / lane-by (Lean Geomorphology & Soil Kernel)
+# Authority: DEC-034 (Independent Adversarial Review), DEC-035 (Merge Gate Isolation), DEC-037, DEC-039, DEC-040
+
+You are Grok acting as the Independent Adversarial Reviewer on Project DEUS.
+DO NOT self-certify. Form an independent verdict from actual git diff, code inspection, and test execution.
+
+TARGET DETAILS:
+- Task ID: NAT.04.01
+- Lane ID: lane-by
+- Branch: task/lane-by
+- Writer: MiniMax (MiniMax M3)
+- Reviewer: Grok
+- Target Commit Tip: ace19c25
+- Merge Base: 3056cf86
+- Worktree: C:\Users\snewt\.deus_worktrees\lane-by
+
+CONTEXT & REQUIREMENTS:
+- BRIEF: tasks/NAT.04.01/lane-by/BRIEF.md
+- Manifest: tasks/NAT.04.01/lane-by/lane.json
+- Scope: Lean Geomorphology & Soil simulation kernel operating on 2-ft strata lattice (5 strata per 10-ft Z cell).
+- Physics laws to enforce:
+  1. Soil horizons: O/A (topsoil/humus), B (subsoil/mineral), C (regolith/saprolite) with realistic bulk densities (3750, 4750, 6000 cp/cu ft) and 10,000 basis points composition.
+  2. Moisture & Capillary Coupling: Capillary rise from underlying aquifer clamped to field capacity; gravity drainage above field capacity; signed residual tracking on undirected edges (DEC-038) for zero-loss integer conservation.
+  3. Angle of Repose & Sediment Collapse: Gravel (35 deg), dry sand (34 deg), moist loam (45 deg capillary cohesion), saturated mud/clay (20 deg).
+  4. Weathering & Thermal Degradation: Bedrock fractures into regolith conserving exact centipounds; lava thermal degradation with closed-mass ledger accounting (DEC-040).
+  5. Dirty Region Quiescence: Zero-allocation and zero-processing for undisturbed regions.
+  6. Persistence: JSON serialization/deserialization roundtrip preserving all soil parameters.
+
+REVIEW INSTRUCTIONS:
+
+1. WORKTREE & GIT INTEGRITY:
+   Run:
+     git rev-parse HEAD
+     git merge-base HEAD origin/main
+     git log -1 --oneline
+     git diff --stat 3056cf86 HEAD
+   Verify that all touched files fall strictly within tasks/NAT.04.01/lane-by/lane.json allowedPaths:
+     - game/js/sim/geomorphology/**
+     - tools/test_soil_geomorphology.js
+     - tasks/NAT.04.01/lane-by/**
+   Verify zero edits to engine core (game/js/rmmz_*.js) (Rule 9).
+   Verify zero civilization / faction / farming implementation (DEC-037).
+
+2. EXECUTE GATE TESTS:
+   Run the gate test in C:\Users\snewt\.deus_worktrees\lane-by:
+     node tools/test_soil_geomorphology.js
+   Verify all 23 tests pass cleanly (exit code 0).
+   Verify mutant checks are capable of failing when provoked:
+     node tools/test_soil_geomorphology.js --mutant=infinite_capillary
+     node tools/test_soil_geomorphology.js --mutant=no_drain
+     node tools/test_soil_geomorphology.js --mutant=dry_spill
+
+3. ADVERSARIAL INSPECTION OF IMPLEMENTATION:
+   - Inspect game/js/sim/geomorphology/soil.js and index.js:
+     - Verify mass conservation in all transitions (weathering, thermal degradation, sediment cascading).
+     - Verify capillary wicking stops at field capacity and does not create free water out of thin air.
+     - Verify signed residual tracking for moisture transfers.
+     - Verify dual environment support (Node.js module.exports and browser window.DEUS).
+     - Verify performance / quiescence safeguards (dirty region tracking, no full world scans per tick).
+
+4. RECORD FINDINGS & VERDICT:
+   Write your complete review report to:
+     tasks/NAT.04.01/lane-by/review_grok_ace19c25.md
+   Following the structure:
+     # Independent Grok Review — NAT.04.01 / lane-by
+     - Writer: MiniMax (MiniMax M3)
+     - Reviewer: Grok (Grok 4.7)
+     - Reviewed Commit: ace19c25
+     - Merge Base: 3056cf86
+     - Branch: task/lane-by
+     - Worktree: C:\Users\snewt\.deus_worktrees\lane-by
+     - Review Date: 2026-09-28
+     ## 1. Commit & Diff Verification (git status, diffstat, path checks)
+     ## 2. Gate Test Execution & Results (exact command, exit code, test counts, mutant provocation)
+     ## 3. Technical Evaluation of Soil Kernel (horizons, hydrology coupling, angle of repose, closed-mass ledger, quiescence, serialization)
+     ## 4. Verdict (PASS, PASS_WITH_FIXES, or FAIL)
+
+5. COMMIT REVIEW REPORT:
+   Stage and commit only the review file:
+     git add tasks/NAT.04.01/lane-by/review_grok_ace19c25.md
+     git commit -m "[grok] NAT.04.01 Independent review of soil geomorphology simulation (commit ace19c25)"

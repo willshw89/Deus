@@ -4,21 +4,42 @@
   "contentId": "objects:granite_boulder",
   "sheetId": "ATLAS_SURFACE_SHARED_PROP_01",
   "slotId": "ATLAS_SURFACE_SHARED_PROP_01:0028",
-  "coordinates": { "x": 1392, "y": 0, "w": 48, "h": 48 },
-  "runtimeFile": "img/characters/!$UF_GraniteBoulder.png",
+  "coordinates": {
+    "x": 1392,
+    "y": 0,
+    "w": 48,
+    "h": 48
+  },
+  "runtimeFile": "img/characters/!UF_GraniteBoulder_V8.png",
   "tool": "PixelLab",
   "settings": {
     "view": "High Top-Down",
     "outline": "Selective outline",
     "detail": "Highly detailed",
-    "canvasSize": [48, 48],
+    "canvasSize": [
+      48,
+      48
+    ],
     "background": "transparent"
   },
   "positivePrompt": "A single large granite boulder, solitary natural landscape stone rock prop, 16-bit top-down RPG Maker pixel art in the style of Ultima VII and EverQuest. Rich saturated palette, strong contrast, bold silhouette, top-left light. Heavy, weathered, natural, angular intrusive igneous stone, coarse crystalline texture, sharp cleavage facets, readable at native scale. No magic, no vegetation, no civilization, no scenery. Transparent background.",
-  "negativePrompt": "blurry, 3D render, anime, cute, grass, vines, moss, cracks with lava, runes, flat shading, dither noise, black background, borders",
+  "negativePrompt": "blurry, 3D render, cartoon, anime, cute, isometric, cliff, elevation drop, perspective tilt, dither noise, glowing neon, borders, frames, UI, text, watermark",
   "paletteRamp": "HIGH_STONE_GRANITE",
   "masterPalette": "art/palette/deus_master_world_palette_v1.hex",
-  "anchor": { "type": "GROUND", "x": 24, "y": 47 },
-  "envelope": { "wMin": 32, "wTarget": 42, "wMax": 48, "hMin": 28, "hTarget": 38, "hMax": 44 },
-  "status": "READY_FOR_OWNER"
+  "anchor": {
+    "type": "GROUND",
+    "x": 24,
+    "y": 47
+  },
+  "envelope": {
+    "wMin": 32,
+    "wTarget": 42,
+    "wMax": 48,
+    "hMin": 28,
+    "hTarget": 38,
+    "hMax": 44
+  },
+  "status": "APPROVED",
+  "provenance": "reconstructed 2026-09-29",
+  "notes": "reconstructed 2026-09-29"
 }

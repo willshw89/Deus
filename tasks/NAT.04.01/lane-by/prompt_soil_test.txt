@@ -1,0 +1,29 @@
+You are MiniMax, creating the comprehensive gate test suite `tools/test_soil_geomorphology.js` for Package 4 (NAT.04.01) Lean Geomorphology & Soil Kernel in Project DEUS.
+Authorities: DEC-037 (Natural World Phase Lock), DEC-039 (Rules Hierarchy), DEC-040 (Closed-Mass Invariant), DEC-041 (Exit Gate), AGENTS.md Rule 4 (Tests must be able to fail).
+
+Please write the complete, standalone Node.js test suite `tools/test_soil_geomorphology.js`.
+
+Requirements:
+1. Zero external npm dependencies (uses only standard Node `path`, `fs`).
+2. Requires `../game/js/sim/geomorphology/index.js` or `../game/js/sim/geomorphology/soil.js`.
+3. Implements all 12 non-negotiable contract tests:
+   1. `test_soil_horizon_stratification`: Verifies O/A, B, C horizon properties, bulk densities (3750, 4750, 6000 cp/cu ft), basis points summing to 10000.
+   2. `test_capillary_rise_from_aquifer`: Verifies upward capillary wicking from saturated lower stratum into dry upper stratum up to field capacity.
+   3. `test_gravity_percolation_field_capacity`: Verifies downward gravity drainage of gravitational water exceeding field capacity.
+   4. `test_signed_residual_moisture_conservation`: Verifies sub-unit signed residual tracking on canonical undirected edges, guaranteeing zero integer truncation loss.
+   5. `test_receiver_side_clamping_pore_space`: Verifies receiver pore space clamping (no moisture exceeding 10000 bp).
+   6. `test_angle_of_repose_gravel_sand`: Verifies cascading collapse of loose sediment when slope angle exceeds angle of repose.
+   7. `test_angle_of_repose_moist_cohesion`: Verifies capillary cohesion allows steeper slope in moist loam than dry sand.
+   8. `test_weathering_mass_balance`: Verifies rock to regolith weathering with 100% integer centipound closed-mass conservation.
+   9. `test_water_erosion_sediment_wash`: Verifies surface fluid flow strips topsoil particles into suspended sediment.
+   10. `test_lava_thermal_degradation`: Verifies high heat bakes clay and vaporizes organics with closed-mass ledger accounting.
+   11. `test_dirty_region_quiescence`: Verifies undisturbed resting soil processes 0 transfers and consumes 0 dirty cells.
+   12. `test_save_load_serialization`: Verifies complete JSON serialize / deserialize roundtrip.
+4. Negative control mutants (Rule 4):
+   - `--mutant=infinite_capillary`: Wicking ignores field capacity (oversaturates past field capacity).
+   - `--mutant=no_drain`: Gravity percolation disabled (excess water remains trapped).
+   - `--mutant=dry_spill`: Stable cohesive loam forced to collapse at 0 degrees.
+   - When a mutant is active, the corresponding test MUST fail and process must exit with code 1.
+5. Exit code: 0 on success, 1 on any failure. Clear stdout output: `PASS: <name> - <detail>` or `FAIL: <name> - <detail>`, ending with `RESULT: <n> passed, <m> failed`.
+
+Output ONLY valid JavaScript code in your response without markdown fencing or commentary.
