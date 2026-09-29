@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "deus-art-catalogue/1.2.0",
+  "$id": "deus-art-catalogue/1.3.0",
   "title": "DEUS art catalogue",
-  "description": "Contract deus-art-catalogue/1.2.0 (tasks/TOOL.01.01/lane-bz/BRIEF.md; field-by-field in docs/art/catalogue/SCHEMA.md). No image data. Validated by tools/art/test_catalogue.js with an in-file validator for the keywords used here: $ref, type, properties, required, additionalProperties (boolean), enum, const, pattern, minimum, minLength, items, minItems.",
+  "description": "Contract deus-art-catalogue/1.3.0 (tasks/TOOL.01.01/lane-bz/BRIEF.md; field-by-field in docs/art/catalogue/SCHEMA.md). No image data. Validated by tools/art/test_catalogue.js with an in-file validator for the keywords used here: $ref, type, properties, required, additionalProperties (boolean), enum, const, pattern, minimum, minLength, items, minItems.",
   "type": "object",
   "required": ["schemaVersion", "tileSizePx", "geometry", "palette", "scaleChart", "sources", "sheets", "entries", "outOfScope"],
   "additionalProperties": false,
   "properties": {
-    "schemaVersion": { "const": "deus-art-catalogue/1.2.0" },
+    "schemaVersion": { "const": "deus-art-catalogue/1.3.0" },
     "tileSizePx": { "type": "integer", "minimum": 1 },
     "geometry": { "$ref": "#/$defs/fileRef" },
     "palette": { "$ref": "#/$defs/fileRef" },
@@ -136,7 +136,8 @@
           "type": "object", "required": ["derivedFrom", "flipH", "flipV", "rot", "paletteSwap", "lightingSafe"], "additionalProperties": false,
           "properties": {
             "derivedFrom": { "type": ["string", "null"] }, "flipH": { "type": "boolean" }, "flipV": { "type": "boolean" },
-            "rot": { "enum": [0, 90, 180, 270] }, "paletteSwap": { "type": ["string", "null"] }, "lightingSafe": { "type": "boolean" }
+            "rot": { "enum": [0, 90, 180, 270] }, "paletteSwap": { "type": ["string", "null"] }, "lightingSafe": { "type": "boolean" },
+            "derivation": { "enum": ["PALETTE_SWAP", "A2_REPEAT_2x3"], "default": "PALETTE_SWAP" }
           }
         },
         "paperDoll": {
