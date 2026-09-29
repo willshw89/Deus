@@ -159,10 +159,12 @@ const suiteInjection = `
             t.check("pkg4_bridge_present", !!SimBridge, "Soil Bridge namespace present in engine");
 
             const soilEng = (SimBridge && typeof SimBridge.getEngine === "function" && SimBridge.getEngine(area)) || new soilMod.GeomorphologyEngine();
-            // Seed 1337 bank setup: loose bank at (px+1, py) at s=2, foot at (px+2, py)
+            // Seed 1337 bank setup: steep loose bank at (px+1, py) at s=3, foot at (px+2, py) at s=0
+            // Height diff = 168.0 ft - 162.0 ft = 6.0 ft > 3.373 ft angle of repose limit -> cascades!
             const sandSpec = ["C", 6000, 2500, 1500, 0, 6000, 3000, 2500];
-            const steepCell = new soilMod.SoilStratum(px + 1, py, 0, 2, ...sandSpec, 0, true, 34);
-            steepCell.looseMassCp = 150000; // 150,000 cp loose sand
+            const steepCell = new soilMod.SoilStratum(px + 1, py, 0, 3, ...sandSpec, 0, true, 34);
+            steepCell.material = "sand";
+            steepCell.looseMassCp = 250000; // 250,000 cp loose sand
             soilEng.addStratum(steepCell);
 
             const floorCell = new soilMod.SoilStratum(px + 2, py, 0, 0, ...sandSpec, 0, false, 34);

@@ -1,82 +1,62 @@
 //=============================================================================
-// DEUS_SimBridge.js - Soil Engine Bridge & Geomorphology Coupling
-// Project DEUS - NAT.04.01 (lane-cf)
-// Authority: DEC-037, DEC-038, DEC-039, DEC-040, DEC-041
+// DEUS_SimBridge.js - Project DEUS Simulation Engine Bridge (NAT.04.01)
 //=============================================================================
-
 /*:
  * @target MZ
- * @plugindesc [DEUS Sim Bridge] Bridges Lean Geomorphology & Soil simulation kernel with DEUS_Levels strata, slope cascades, and closed-mass persistence.
- * @author DEUS Project
- * @base DEUS_Levels
- * @orderAfter DEUS_Levels
- * @orderAfter DEUS_Tiles
- * @orderAfter DEUS_Fluid
+ * @plugindesc Connects pure simulation modules to the Project DEUS RPG Maker MZ runtime.
+ * @author DEUS Engineering Team
  *
  * @help
- * DEUS_SimBridge binds the headless Geomorphology & Soil simulation kernel
- * (game/js/sim/geomorphology/soil.js) with the RPG Maker MZ engine and DEUS_Levels.
+ * DEUS_SimBridge bridges headless continuous physical simulation kernels (such as
+ * Geomorphology & Soil Mechanics) into the DEUS RPG Maker MZ engine runtime.
  *
- * Capabilities:
- * 1. Area Engine Management: Owns one GeomorphologyEngine per loaded world area.
- * 2. Stratum Feeding: Feeds soil and loose strata from DEUS_Levels into GeomorphologyEngine.
- * 3. Quiescent Action Ticking: Ticks only when dirty under domain: "action" (no full map scan).
- * 4. Mirroring: Mirrors slope-cascade loose sediment transfers back into DEUS_Levels.
- * 5. Closed-Mass Conservation: Zero loss across all transitions (DEC-040).
- * 6. Save/Load Persistence: Serializes area engines into World.state.soil (soilSchemaVersion: 1).
- * 7. UF.Look Integration: Displays soil horizon, moisture, mass and slope stability.
+ * Authority: DEC-037, DEC-040, DEC-041, Lean Natural World v1.
  */
 
 var Imported = Imported || {};
 Imported.DEUS_SimBridge = true;
 
-(() => {
-    "use strict";
+(function() {
+    'use strict';
 
-    const root = typeof window !== "undefined" ? window : (typeof global !== "undefined" ? global : this);
+    const root = (typeof window !== "undefined") ? window : (typeof global !== "undefined" ? global : this);
     root.DEUS = root.DEUS || {};
     root.UF = root.UF || root.DEUS;
 
-    // Mutants for lane-cf gate test sweep
     const MUTANTS = {
-        no_mirror: false,
-        tick_when_quiet: false,
-        skip_provider: false,
-        save_without_engine: false,
-        double_load: false
+        no_mirror: (typeof process !== "undefined" && process.env && process.env.MUTANT === "no_mirror") || false,
+        tick_when_quiet: (typeof process !== "undefined" && process.env && process.env.MUTANT === "tick_when_quiet") || false,
+        skip_provider: (typeof process !== "undefined" && process.env && process.env.MUTANT === "skip_provider") || false,
+        save_without_engine: (typeof process !== "undefined" && process.env && process.env.MUTANT === "save_without_engine") || false,
+        double_load: (typeof process !== "undefined" && process.env && process.env.MUTANT === "double_load") || false
     };
 
-    if (typeof process !== "undefined" && process.env && process.env.MUTANT) {
-        if (MUTANTS[process.env.MUTANT] !== undefined) {
-            MUTANTS[process.env.MUTANT] = true;
-        }
-    }
-    if (typeof process !== "undefined" && process.argv) {
-        for (const arg of process.argv) {
-            if (arg.startsWith("--mutant=")) {
-                const m = arg.split("=")[1];
-                if (MUTANTS[m] !== undefined) MUTANTS[m] = true;
-            }
-        }
-    }
-
+    /**
+     * Attempts to dynamically load the soil simulation kernel.
+     * Searches CommonJS require paths and global window bindings.
+     */
     function loadSoilKernel() {
-        if (root.DEUS && root.DEUS.Sim && root.DEUS.Sim.Soil) {
-            return root.DEUS.Sim.Soil;
+        if (typeof window !== "undefined" && window.DEUS && window.DEUS.Sim && window.DEUS.Sim.Soil) {
+            return window.DEUS.Sim.Soil;
+        }
+        if (typeof window !== "undefined" && window.DEUS && window.DEUS.Soil) {
+            return window.DEUS.Soil;
         }
         if (typeof require === "function") {
             const attempts = [
-                "../sim/geomorphology/index.js",
-                "../sim/geomorphology/soil.js"
+                "../sim/geomorphology/soil",
+                "../../sim/geomorphology/soil",
+                "./game/js/sim/geomorphology/soil",
+                "../game/js/sim/geomorphology/soil"
             ];
             try {
-                const path = require("path");
                 if (typeof __dirname !== "undefined") {
-                    attempts.unshift(path.join(__dirname, "..", "sim", "geomorphology", "index.js"));
-                    attempts.unshift(path.join(__dirname, "..", "sim", "geomorphology", "soil.js"));
+                    const path = require("path");
+                    attempts.push(path.join(__dirname, "..", "sim", "geomorphology", "soil.js"));
+                    attempts.push(path.join(__dirname, "..", "..", "sim", "geomorphology", "soil.js"));
                 }
                 if (typeof process !== "undefined" && process.cwd) {
-                    attempts.push(path.join(process.cwd(), "game", "js", "sim", "geomorphology", "index.js"));
+                    const path = require("path");
                     attempts.push(path.join(process.cwd(), "game", "js", "sim", "geomorphology", "soil.js"));
                 }
             } catch (_) {}
@@ -95,6 +75,7 @@ Imported.DEUS_SimBridge = true;
 
     // Map of areaKey ("ax,ay") -> GeomorphologyEngine
     const engines = new Map();
+    const fedAreas = new Set();
     let tickCount = 0;
     let lastCascadeEvent = null;
     let frameCounter = 0;
@@ -108,7 +89,7 @@ Imported.DEUS_SimBridge = true;
         if (!sim) return null;
         const eng = new sim.GeomorphologyEngine();
 
-        // Connect groundElevationProvider to DEUS_Levels (Grok Resubmission Item 3)
+        // Connect groundElevationProvider to DEUS_Levels
         // Returns kernel datum elevation in feet, or null when ground is unknown/no solid floor.
         if (!MUTANTS.skip_provider) {
             eng.groundElevationProvider = (x, y) => {
@@ -121,8 +102,20 @@ Imported.DEUS_SimBridge = true;
                 if (typeof Levels.worldStrataElevationAt === "function") {
                     const e = Levels.worldStrataElevationAt(area, x, y, 0);
                     if (Number.isFinite(e) && e >= 0) {
-                        // Top of stratum e in feet above bottom of Z = -16: (e + 1) * 2 ft
-                        return (e + 1) * 2;
+                        let zMin = -16;
+                        if (Levels.zMin !== undefined) {
+                            zMin = Levels.zMin;
+                        } else if (Levels.ZR && Levels.ZR.zMin !== undefined) {
+                            zMin = Levels.ZR.zMin;
+                        } else if (root.UF && root.UF.World && root.UF.World.state && root.UF.World.state.zMin !== undefined) {
+                            zMin = root.UF.World.state.zMin;
+                        }
+
+                        // e = (z - zMin) * 5 + stratum
+                        const stratum = ((e % 5) + 5) % 5;
+                        const z = Math.floor(e / 5) + zMin;
+                        // Kernel datum elevation (in feet above bottom of Z = -16):
+                        return ((z + 16) * 5 + stratum + 1) * 2;
                     }
                     return null;
                 }
@@ -145,8 +138,10 @@ Imported.DEUS_SimBridge = true;
     }
 
     function getTickFrames() {
-        const cat = root.$ufWorldCatalog || (root.UF && root.UF.WorldCatalog);
-        if (cat && cat.soil && Number.isInteger(cat.soil.tickFrames) && cat.soil.tickFrames > 0) {
+        const cat = (typeof $ufWorldCatalog !== "undefined" && $ufWorldCatalog)
+            ? $ufWorldCatalog
+            : (root.UF && root.UF.Catalog);
+        if (cat && cat.soil && typeof cat.soil.tickFrames === "number") {
             return cat.soil.tickFrames;
         }
         return 10; // Default 10 frames per spec
@@ -166,6 +161,7 @@ Imported.DEUS_SimBridge = true;
 
         resetEngines() {
             engines.clear();
+            fedAreas.clear();
             tickCount = 0;
             lastCascadeEvent = null;
         },
@@ -180,7 +176,8 @@ Imported.DEUS_SimBridge = true;
 
         /**
          * Feeds DEUS_Levels strata into the area's GeomorphologyEngine.
-         * Ingests soil and loose strata only; stone, air, wood, water, lava stay out. (Grok Resubmission Item 2)
+         * Ingests soil and loose strata only; stone, air, wood, water, lava stay out.
+         * A solid rock lid above soil prevents that soil from being treated as the surface or shedding.
          */
         feedColumnFromLevels(area, x, y, z = 0, options = {}) {
             if (!sim) return [];
@@ -193,12 +190,12 @@ Imported.DEUS_SimBridge = true;
             const eng = this.getEngine(area);
             const added = [];
 
-            // Find top solid stratum
-            let topS = -1;
+            // Find world's highest solid stratum
+            let worldTopSolidS = -1;
             for (let s = 4; s >= 0; s--) {
                 const mat = cellStrata.materials[s];
-                if (mat === "soil" || mat === "sand" || mat === "gravel" || mat === "rubble" || mat === "regolith") {
-                    topS = s;
+                if (mat && mat !== "air" && mat !== "water" && mat !== "lava") {
+                    worldTopSolidS = s;
                     break;
                 }
             }
@@ -207,31 +204,41 @@ Imported.DEUS_SimBridge = true;
                 const mat = cellStrata.materials[s];
                 // Ingest soil and loose strata ONLY. Exclude stone, air, wood, water, lava.
                 if (mat === "soil" || mat === "sand" || mat === "gravel" || mat === "rubble" || mat === "regolith") {
-                    const isSurface = (s === topS);
+                    const hasRockLidAbove = (worldTopSolidS > s && (
+                        cellStrata.materials[worldTopSolidS] === "stone" ||
+                        cellStrata.materials[worldTopSolidS] === "granite" ||
+                        cellStrata.materials[worldTopSolidS] === "basalt" ||
+                        cellStrata.materials[worldTopSolidS] === "diorite" ||
+                        cellStrata.materials[worldTopSolidS] === "andesite" ||
+                        cellStrata.materials[worldTopSolidS] === "obsidian" ||
+                        cellStrata.materials[worldTopSolidS] === "wood"
+                    ));
+
+                    const isSurface = (s === worldTopSolidS);
                     let horizon = "C", bulkDensity = 6000, porosity = 3000, fieldCapacity = 2500;
                     let sand = 6000, silt = 2500, clay = 1500, organic = 0;
                     let loose = false, angle = 34;
 
                     if (mat === "soil") {
-                        if (isSurface) {
+                        if (isSurface && !hasRockLidAbove) {
                             // Surface soil: Horizon O/A per HORIZON_SPECS['O/A']
                             horizon = "O/A"; sand = 4000; silt = 3000; clay = 1000; organic = 2000;
                             bulkDensity = 3750; porosity = 4500; fieldCapacity = 3500;
                             loose = Boolean(options.loose || cellStrata.constructed[s] === false && options.surfaceLoose);
                         } else {
-                            // Buried soil: Horizon B per HORIZON_SPECS.B
+                            // Buried soil (or soil under rock lid): Horizon B per HORIZON_SPECS.B
                             horizon = "B"; sand = 3000; silt = 4000; clay = 2500; organic = 500;
                             bulkDensity = 4750; porosity = 3800; fieldCapacity = 4000;
-                            loose = Boolean(options.loose);
+                            loose = Boolean(options.loose && !hasRockLidAbove);
                         }
                     } else {
-                        // Loose material: sand, gravel, rubble, regolith -> Horizon C with loose: true
+                        // Loose material: sand, gravel, rubble, regolith -> Horizon C
                         horizon = "C"; sand = 6000; silt = 2500; clay = 1500; organic = 0;
                         bulkDensity = 6000; porosity = 3000; fieldCapacity = 2500;
-                        loose = true;
+                        loose = !hasRockLidAbove;
                     }
 
-                    if (options.forceLoose) loose = true;
+                    if (options.forceLoose && !hasRockLidAbove) loose = true;
 
                     const stratum = new sim.SoilStratum(
                         x, y, z, s,
@@ -240,7 +247,8 @@ Imported.DEUS_SimBridge = true;
                         0, loose, angle
                     );
 
-                    // For loose strata, physical mass is loose mass that can slide (Grok D1)
+                    stratum.material = mat;
+
                     if (loose) {
                         stratum.looseMassCp = stratum.solidMassCp;
                         stratum.solidMassCp = 0;
@@ -250,80 +258,129 @@ Imported.DEUS_SimBridge = true;
                     added.push(stratum);
                 }
             }
+
             return added;
         },
 
+        feedAreaFromLevels(area) {
+            if (!sim) return 0;
+            const W = root.UF && root.UF.World;
+            const Levels = root.UF && root.UF.Levels;
+            if (!Levels || typeof Levels.strataAt !== "function") return 0;
+
+            const areaKey = getAreaKey(area);
+            if (fedAreas.has(areaKey)) return 0;
+
+            let width = 64, height = 64;
+            if (typeof $dataMap !== "undefined" && $dataMap && $dataMap.width) {
+                width = $dataMap.width;
+                height = $dataMap.height;
+            } else if (W && W.activeRegion) {
+                width = W.activeRegion.width || 64;
+                height = W.activeRegion.height || 64;
+            }
+
+            let fedCount = 0;
+            for (let x = 0; x < width; x++) {
+                for (let y = 0; y < height; y++) {
+                    const added = this.feedColumnFromLevels(area, x, y, 0);
+                    if (added && added.length > 0) fedCount++;
+                }
+            }
+            fedAreas.add(areaKey);
+            return fedCount;
+        },
+
         /**
-         * Advances simulation tick for an area under domain: "action".
-         * Returns true if work was done, false if area was quiet.
+         * Advances slope stability and hydrology for the area's GeomorphologyEngine.
+         * Executes only while dirty queues are non-empty, conserving CPU when quiescent.
          */
         tickArea(area = null, ledger = null) {
             const eng = this.getEngine(area);
             if (!eng) return false;
 
-            const isDirty = eng.dirtyMoisture.size > 0 || eng.dirtySlope.size > 0;
+            // Quiescent check: do not tick if dirty queues are empty (unless mutant forces it)
+            const isDirty = (eng.dirtySlope && eng.dirtySlope.size > 0) || (eng.dirtyMoisture && eng.dirtyMoisture.size > 0);
             if (!isDirty && !MUTANTS.tick_when_quiet) {
                 return false;
             }
 
             tickCount++;
 
-            // Snapshot mass and transfer counts before tick (Grok Resubmission Item 6 & 7)
-            const preTotalMass = eng.getTotalMass().total;
-            const preSedimentTransfers = eng.stats.sedimentTransfers;
-            const preWaterTransfers = eng.stats.waterTransfers;
-
+            // Snapshot loose mass of all strata before tick
             const preLooseMap = new Map();
             for (const [id, st] of eng.strata.entries()) {
-                if (st.looseMassCp > 0) preLooseMap.set(id, st.looseMassCp);
+                preLooseMap.set(id, st.looseMassCp);
             }
+            const preTotalMass = eng.getTotalMass().total;
+            const preSedimentTransfers = eng.stats.sedimentTransfers || 0;
 
-            // 1. Moisture tick
-            eng.processMoistureTick(1);
-
-            if (eng.stats.waterTransfers > preWaterTransfers) {
-                if (root.UF && root.UF.Events && typeof root.UF.Events.emit === "function") {
-                    root.UF.Events.emit("soil:moisture", {
-                        area,
-                        transfers: eng.stats.waterTransfers - preWaterTransfers
-                    });
+            // 1. Moisture percolation tick
+            if (eng.dirtyMoisture && eng.dirtyMoisture.size > 0) {
+                if (typeof eng.processMoistureTick === "function") {
+                    eng.processMoistureTick(1, ledger);
                 }
             }
 
-            // 2. Slope stability & cascade tick (returns void, so we detect transfers via stats)
+            // 2. Slope stability & cascade tick
             eng.processSlopeStability(1, ledger);
             const postTotalMass = eng.getTotalMass().total;
 
-            // Log total mass before and after tick at debug level (Grok Resubmission Item 7)
             console.debug(`[DEUS_SimBridge] Mass tick ${tickCount}: before=${preTotalMass} cp, after=${postTotalMass} cp, delta=${postTotalMass - preTotalMass}`);
             if (preTotalMass !== postTotalMass) {
                 console.error(`[DEUS_SimBridge] Mass conservation violated: ${preTotalMass} -> ${postTotalMass}`);
             }
 
-            // 3. Mirror results into DEUS_Levels if loose mass relocated (Grok Resubmission Item 6)
+            // 3. Mirror results into DEUS_Levels if loose mass relocated
             if (eng.stats.sedimentTransfers > preSedimentTransfers && !MUTANTS.no_mirror) {
                 const Levels = root.UF && root.UF.Levels;
                 if (Levels && typeof Levels.setStratumMaterial === "function") {
+                    let sourceStratum = null;
+                    let targetStratum = null;
+                    let deltaCp = 0;
+
                     for (const [id, st] of eng.strata.entries()) {
                         const prev = preLooseMap.get(id) || 0;
-                        if (st.looseMassCp > prev) {
-                            // Target stratum received loose sediment -> update to soil in DEUS_Levels
-                            Levels.setStratumMaterial({ area, x: st.x, y: st.y, z: st.z }, st.s, "soil");
-                            lastCascadeEvent = {
-                                x: st.x,
-                                y: st.y,
-                                z: st.z,
-                                s: st.s,
-                                massCp: st.looseMassCp - prev,
-                                toX: st.x,
-                                toY: st.y
-                            };
-                            if (root.UF && root.UF.Events && typeof root.UF.Events.emit === "function") {
-                                root.UF.Events.emit("soil:cascade", lastCascadeEvent);
+                        if (st.looseMassCp < prev) {
+                            sourceStratum = st;
+                            deltaCp = prev - st.looseMassCp;
+                        } else if (st.looseMassCp > prev) {
+                            targetStratum = st;
+                        }
+                    }
+
+                    if (sourceStratum && targetStratum) {
+                        const movingMat = sourceStratum.material || "soil";
+                        targetStratum.material = movingMat;
+
+                        // Target stratum receives loose sediment with the actual material that moved
+                        Levels.setStratumMaterial({ area, x: targetStratum.x, y: targetStratum.y, z: targetStratum.z }, targetStratum.s, movingMat);
+
+                        // Source stratum loose stratum lowered in the same tick
+                        Levels.setStratumMaterial({ area, x: sourceStratum.x, y: sourceStratum.y, z: sourceStratum.z }, sourceStratum.s, "air");
+
+                        lastCascadeEvent = {
+                            x: sourceStratum.x,
+                            y: sourceStratum.y,
+                            z: sourceStratum.z,
+                            s: sourceStratum.s,
+                            massCp: deltaCp,
+                            toX: targetStratum.x,
+                            toY: targetStratum.y
+                        };
+
+                        if (root.UF && root.UF.Events && typeof root.UF.Events.emit === "function") {
+                            root.UF.Events.emit("soil:cascade", lastCascadeEvent);
+                        }
+                    } else {
+                        // Fallback per-stratum mirror
+                        for (const [id, st] of eng.strata.entries()) {
+                            const prev = preLooseMap.get(id) || 0;
+                            if (st.looseMassCp > prev) {
+                                Levels.setStratumMaterial({ area, x: st.x, y: st.y, z: st.z }, st.s, st.material || "soil");
+                            } else if (st.looseMassCp < prev) {
+                                Levels.setStratumMaterial({ area, x: st.x, y: st.y, z: st.z }, st.s, "air");
                             }
-                        } else if (prev > 0 && st.looseMassCp === 0 && st.solidMassCp === 0) {
-                            // Source stratum was completely emptied -> clear to air in DEUS_Levels
-                            Levels.setStratumMaterial({ area, x: st.x, y: st.y, z: st.z }, st.s, "air");
                         }
                     }
                 }
@@ -339,57 +396,40 @@ Imported.DEUS_SimBridge = true;
             }
         },
 
-        /**
-         * Serializes all area simulation engines for save persistence.
-         */
         serialize() {
             if (MUTANTS.save_without_engine) return {};
-            const out = {};
+            const out = {
+                lastCascadeEvent: lastCascadeEvent ? Object.assign({}, lastCascadeEvent) : null,
+                areas: {}
+            };
             for (const [key, eng] of engines.entries()) {
                 if (eng && typeof eng.serialize === "function") {
-                    out[key] = eng.serialize();
+                    out.areas[key] = eng.serialize();
                 }
             }
             return out;
         },
 
-        /**
-         * Deserializes saved simulation engines from save data.
-         */
         deserialize(data) {
             engines.clear();
-            if (!data || !sim) return;
-            for (const [key, engData] of Object.entries(data)) {
-                if (engData) {
-                    const eng = new sim.GeomorphologyEngine();
-                    eng.deserialize(typeof engData === "string" ? engData : JSON.stringify(engData));
-                    if (!MUTANTS.skip_provider) {
-                        eng.groundElevationProvider = (x, y) => {
-                            const Levels = root.UF && root.UF.Levels;
-                            if (!Levels) return null;
-                            const parts = key.split(",").map(Number);
-                            const area = { x: parts[0], y: parts[1] };
-                            if (typeof Levels.worldStrataElevationAt === "function") {
-                                const e = Levels.worldStrataElevationAt(area, x, y, 0);
-                                if (Number.isFinite(e) && e >= 0) return (e + 1) * 2;
-                                return null;
-                            }
-                            if (typeof Levels.surfaceHeightAt === "function") {
-                                const h = Levels.surfaceHeightAt(area, x, y, 0);
-                                if (Number.isFinite(h) && h >= 0) return 160 + (h + 1) * 2;
-                                return null;
-                            }
-                            return null;
-                        };
+            fedAreas.clear();
+            if (!data || typeof data !== "object") return;
+            if (data.lastCascadeEvent !== undefined) {
+                lastCascadeEvent = data.lastCascadeEvent;
+            }
+            const areaMap = data.areas || data;
+            for (const key in areaMap) {
+                if (areaMap.hasOwnProperty(key) && key !== "lastCascadeEvent") {
+                    const eng = createEngineForArea(key);
+                    if (eng && typeof eng.deserialize === "function") {
+                        eng.deserialize(areaMap[key]);
+                        engines.set(key, eng);
+                        fedAreas.add(key);
                     }
-                    engines.set(key, eng);
                 }
             }
         },
 
-        /**
-         * Save bridge state to World.state.soil (Grok Resubmission Item 8)
-         */
         saveToWorldState() {
             const W = root.UF && root.UF.World;
             if (W && W.state) {
@@ -398,9 +438,6 @@ Imported.DEUS_SimBridge = true;
             }
         },
 
-        /**
-         * Load bridge state from World.state.soil
-         */
         loadFromWorldState() {
             const W = root.UF && root.UF.World;
             if (W && W.state && W.state.soil) {
@@ -408,87 +445,134 @@ Imported.DEUS_SimBridge = true;
             }
         },
 
-        /**
-         * Observability for UF.Look. (Grok Resubmission Item 9)
-         */
         getSoilInfo(x, y, z = 0, area = null) {
             const eng = this.getEngine(area);
             if (!eng) return null;
             const top = eng.getHighestStratumAt(x, y);
             if (!top) return null;
-            const cascade = this.getLastCascadeEvent();
-            const isActive = (cascade && cascade.toX === x && cascade.toY === y);
+
             return {
-                kind: top.horizon === "C" ? "gravel/sand" : "soil",
                 horizon: top.horizon,
-                moistureBp: top.moisture,
-                bulkDensity: top.bulkDensity,
+                moistureBp: top.waterMassCp,
                 looseMassCp: top.looseMassCp,
                 solidMassCp: top.solidMassCp,
-                totalWaterCp: top.waterMassCp,
-                slopeStatus: isActive ? "Active" : "Stable"
+                slopeStatus: (lastCascadeEvent && (lastCascadeEvent.toX === x && lastCascadeEvent.toY === y || lastCascadeEvent.x === x && lastCascadeEvent.y === y))
+                    ? "Active"
+                    : "Stable"
             };
         }
     };
 
-    // Event hooks (Grok Resubmission Item 5)
+    function decorateSoilLines(lines, x, y) {
+        if (!Array.isArray(lines)) return lines;
+        const W = root.UF && root.UF.World;
+        const area = W && (typeof W.viewLevel === "function" ? W.viewLevel() : (typeof W.currentArea === "function" ? W.currentArea() : null));
+        const soil = SimBridge.getSoilInfo(x, y, 0, area);
+        if (!soil) return lines;
+
+        const out = lines.slice();
+        let cascadeStr = "";
+        if (lastCascadeEvent && lastCascadeEvent.toX === x && lastCascadeEvent.toY === y) {
+            cascadeStr = ` · Last Cascade: +${lastCascadeEvent.massCp}cp from (${lastCascadeEvent.x},${lastCascadeEvent.y})`;
+        } else if (lastCascadeEvent && lastCascadeEvent.x === x && lastCascadeEvent.y === y) {
+            cascadeStr = ` · Last Cascade: -${lastCascadeEvent.massCp}cp to (${lastCascadeEvent.toX},${lastCascadeEvent.toY})`;
+        }
+        const soilLine = `Soil: ${soil.horizon} · Moist: ${soil.moistureBp}bp · Loose: ${soil.looseMassCp}cp · Solid: ${soil.solidMassCp}cp · Slope: ${soil.slopeStatus}${cascadeStr}`;
+        out.push(soilLine);
+        return out;
+    }
+
+    // Hook game events
     if (root.UF && root.UF.Events && typeof root.UF.Events.on === "function") {
-        // Hook interact:dug (area, x, y, kindId) emitted by DEUS_Interact.js line 262
+        // Hook interact:dug
         root.UF.Events.on("interact:dug", (area, x, y, kindId) => {
-            if (typeof x === "number" && typeof y === "number") {
-                const eng = SimBridge.getEngine(area);
-                if (eng) {
-                    const top = eng.getHighestStratumAt(x, y);
-                    if (top) {
-                        // Digging loosens topsoil into loose sediment that can slide
-                        if (!top.loose && top.solidMassCp > 0) {
-                            top.loose = true;
-                            top.looseMassCp = top.solidMassCp;
-                            top.solidMassCp = 0;
-                        }
-                        eng.markDirty(x, y, top.z, top.s);
-                    } else {
-                        eng.markDirty(x, y, 0, 0);
+            const eng = SimBridge.getEngine(area);
+            if (eng) {
+                let top = eng.getHighestStratumAt(x, y);
+                if (!top) {
+                    SimBridge.feedColumnFromLevels(area, x, y, 0);
+                    top = eng.getHighestStratumAt(x, y);
+                }
+                if (top) {
+                    if (!top.loose && top.solidMassCp > 0) {
+                        top.loose = true;
+                        top.looseMassCp = top.solidMassCp;
+                        top.solidMassCp = 0;
                     }
+                    eng.markDirty(x, y, top.z, top.s);
+                } else {
+                    eng.markDirty(x, y, 0, 0);
                 }
             }
         });
 
-        // Hook levels:strataDestroyed (destroyed, area) emitted by DEUS_Levels.js line 2049
-        root.UF.Events.on("levels:strataDestroyed", (destroyed, area) => {
-            if (Array.isArray(destroyed)) {
-                for (const d of destroyed) {
-                    SimBridge.markDirty(d.x, d.y, d.z, d.stratum, area);
+        // Hook levels:strataDestroyed - supports both single object {area, x, y, z, stratum} and array
+        root.UF.Events.on("levels:strataDestroyed", (eventOrArray, areaArg) => {
+            if (Array.isArray(eventOrArray)) {
+                for (const d of eventOrArray) {
+                    SimBridge.feedColumnFromLevels(d.area || areaArg, d.x, d.y, d.z);
+                    SimBridge.markDirty(d.x, d.y, d.z, d.stratum, d.area || areaArg);
                 }
+            } else if (eventOrArray && typeof eventOrArray === "object") {
+                const e = eventOrArray;
+                SimBridge.feedColumnFromLevels(e.area || areaArg, e.x, e.y, e.z);
+                SimBridge.markDirty(e.x, e.y, e.z, e.stratum, e.area || areaArg);
             }
         });
 
-        // Hook world:levelTileChanged (area, x, y, layer, tileId)
+        // Hook world:levelTileChanged
         root.UF.Events.on("world:levelTileChanged", (area, x, y, layer, tileId) => {
+            SimBridge.feedColumnFromLevels(area, x, y, 0);
             SimBridge.markDirty(x, y, 0, 0, area);
         });
+
+        // Hook world:created and world:areaLoaded
+        root.UF.Events.on("world:created", (area) => {
+            SimBridge.feedAreaFromLevels(area);
+        });
+        root.UF.Events.on("world:areaLoaded", (area) => {
+            SimBridge.feedAreaFromLevels(area);
+        });
     }
 
-    // UF.Look Integration: hook cellAt to display soil telemetry (Grok Resubmission Item 9)
-    if (root.UF && root.UF.Look && typeof root.UF.Look.cellAt === "function") {
-        const _origCellAt = root.UF.Look.cellAt;
-        root.UF.Look.cellAt = function(x, y) {
-            const cell = _origCellAt.call(this, x, y);
-            if (cell) {
-                const W = root.UF.World;
-                const area = W && typeof W.currentArea === "function" ? W.currentArea() : null;
-                const soil = SimBridge.getSoilInfo(x, y, 0, area);
-                if (soil) {
-                    const soilPart = `Soil: ${soil.horizon} · Moist: ${soil.moistureBp}bp · Loose: ${soil.looseMassCp}cp · Solid: ${soil.solidMassCp}cp · Slope: ${soil.slopeStatus}`;
-                    cell.text = cell.text ? `${cell.text} · ${soilPart}` : soilPart;
-                    cell.soil = soil;
+    // UF.Look Integration: hook describeCell, inspect, and cellAt
+    if (root.UF && root.UF.Look) {
+        const L = root.UF.Look;
+        if (typeof L.describeCell === "function") {
+            const _origDescribe = L.describeCell;
+            L.describeCell = function(x, y) {
+                return decorateSoilLines(_origDescribe.call(this, x, y), x, y);
+            };
+        }
+        if (typeof L.inspect === "function") {
+            const _origInspect = L.inspect;
+            L.inspect = function(x, y) {
+                const info = _origInspect.call(this, x, y);
+                if (!info) return info;
+                const lines = decorateSoilLines(info.lines || [], x, y);
+                return Object.assign({}, info, { lines });
+            };
+        }
+        if (typeof L.cellAt === "function") {
+            const _origCellAt = L.cellAt;
+            L.cellAt = function(x, y) {
+                const cell = _origCellAt.call(this, x, y);
+                if (cell) {
+                    const W = root.UF && root.UF.World;
+                    const area = W && (typeof W.viewLevel === "function" ? W.viewLevel() : (typeof W.currentArea === "function" ? W.currentArea() : null));
+                    const soil = SimBridge.getSoilInfo(x, y, 0, area);
+                    if (soil) {
+                        const soilPart = `Soil: ${soil.horizon} · Moist: ${soil.moistureBp}bp · Loose: ${soil.looseMassCp}cp · Solid: ${soil.solidMassCp}cp · Slope: ${soil.slopeStatus}`;
+                        cell.text = cell.text ? `${cell.text} · ${soilPart}` : soilPart;
+                        cell.soil = soil;
+                    }
                 }
-            }
-            return cell;
-        };
+                return cell;
+            };
+        }
     }
 
-    // DataManager Save/Load Persistence Hooks (Grok Resubmission Item 8)
+    // DataManager Save/Load Persistence Hooks
     if (typeof DataManager !== "undefined") {
         if (typeof DataManager.makeSaveContents === "function") {
             const _orig_makeSaveContents = DataManager.makeSaveContents;
@@ -507,7 +591,7 @@ Imported.DEUS_SimBridge = true;
         }
     }
 
-    // Scene_Map Frame Ticking Hook (Grok Resubmission Item 4)
+    // Scene_Map Frame Ticking Hook
     if (typeof Scene_Map !== "undefined" && Scene_Map.prototype) {
         const _Scene_Map_update = Scene_Map.prototype.update;
         Scene_Map.prototype.update = function() {
@@ -518,6 +602,8 @@ Imported.DEUS_SimBridge = true;
                 const W = root.UF && root.UF.World;
                 const area = W && typeof W.currentArea === "function" ? W.currentArea() : null;
                 if (area) {
+                    // Feed area if not yet fed
+                    SimBridge.feedAreaFromLevels(area);
                     SimBridge.tickArea(area);
                 }
             }
