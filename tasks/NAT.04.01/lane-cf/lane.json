@@ -1,0 +1,27 @@
+{
+  "lane": "lane-cf",
+  "taskId": "NAT.04.01",
+  "branch": "task/lane-cf",
+  "writer": "gemini",
+  "reviewer": "grok",
+  "allowedPaths": [
+    "game/js/plugins/DEUS_SimBridge.js",
+    "game/js/plugins/DEUS_Levels.js",
+    "game/js/sim/geomorphology/**",
+    "game/data/UF_WorldCatalog.json",
+    "tools/test_soil_bridge.js",
+    "tools/test_soil_geomorphology.js",
+    "tools/check_plugin_boot.js",
+    "tools/ops/gate_tests.json",
+    "docs/systems/DEUS_SimBridge.md",
+    "docs/systems/UF_Levels.md",
+    "tasks/NAT.04.01/lane-cf/**"
+  ],
+  "gateTests": [
+    { "cmd": "node", "args": ["tools/check_deus_syntax.js"], "timeoutSec": 120 },
+    { "cmd": "node", "args": ["tools/test_soil_geomorphology.js"], "timeoutSec": 300 },
+    { "cmd": "node", "args": ["tools/test_soil_bridge.js"], "timeoutSec": 300 },
+    { "cmd": "node", "args": ["tools/test_soil_bridge.js", "--mutation-sweep"], "timeoutSec": 600 }
+  ],
+  "push": true
+}
