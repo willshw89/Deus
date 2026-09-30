@@ -1,0 +1,94 @@
+{
+  "topologyClass": "STATIC_VARIANT_8",
+  "variantCount": 8,
+  "variantSelectionMode": "DETERMINISTIC_HASH",
+  "runtime": {
+    "kind": "RMMZ_CHARACTER_8",
+    "file": "img/characters/!UF_Bush_V8.png",
+    "index": 0
+  },
+  "status": "APPROVED",
+  "statusWhy": "Owner-generated on PixelLab, inducted per Owner directive 2026-09-30",
+  "sourceVariants": [
+    {
+      "variantIndex": 0,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_BUSH_V1_DEFAULT/variant_0.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "21a96b81-07dd-4f17-957f-e5db77b419dd",
+        "notes": "Owner-approved variant 0 for SURFACE_SHARED_FLORA_BUSH_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 1,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_BUSH_V1_DEFAULT/variant_1.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "4a3b538e-6213-4523-9668-9159589e52c5",
+        "notes": "Owner-approved variant 1 for SURFACE_SHARED_FLORA_BUSH_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 2,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_BUSH_V1_DEFAULT/variant_2.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "55173f0f-9015-4671-8b26-a80d2833ff24",
+        "notes": "Owner-approved variant 2 for SURFACE_SHARED_FLORA_BUSH_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 3,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_BUSH_V1_DEFAULT/variant_3.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "6152108d-a792-4d38-8ad1-f9e1d527671d",
+        "notes": "Owner-approved variant 3 for SURFACE_SHARED_FLORA_BUSH_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 4,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_BUSH_V1_DEFAULT/variant_4.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "67ab68bc-46f4-4b8b-a195-5e8993790757",
+        "notes": "Owner-approved variant 4 for SURFACE_SHARED_FLORA_BUSH_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 5,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_BUSH_V1_DEFAULT/variant_5.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "8bee6632-5ded-4e52-be31-1c40604fec60",
+        "notes": "Owner-approved variant 5 for SURFACE_SHARED_FLORA_BUSH_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 6,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_BUSH_V1_DEFAULT/variant_6.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "9fb2baf6-cd69-46f2-af92-e82989d0c777",
+        "notes": "Owner-approved variant 6 for SURFACE_SHARED_FLORA_BUSH_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 7,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_BUSH_V1_DEFAULT/variant_7.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "b477781e-e156-4ed4-b794-ef1a44822cdc",
+        "notes": "Owner-approved variant 7 for SURFACE_SHARED_FLORA_BUSH_V1_DEFAULT"
+      }
+    }
+  ]
+}

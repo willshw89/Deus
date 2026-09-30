@@ -7,96 +7,88 @@
     "file": "img/characters/!UF_GraniteBoulder_V8.png",
     "index": 0
   },
+  "status": "APPROVED",
+  "statusWhy": "Owner-generated on PixelLab, inducted per Owner directive 2026-09-30",
   "sourceVariants": [
     {
       "variantIndex": 0,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_STONE_GRANITE-BOULDER_V1_DEFAULT/variant_0.png",
       "provenance": {
-        "sourceFacing": "south",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "4ed35006-4259-4526-b5ba-799a72dba451",
-        "originalityDistance": null,
-        "notes": null
+        "generationId": "0004df92-9308-436f-a662-97a5da02659b",
+        "notes": "Owner-approved variant 0 for SURFACE_SHARED_STONE_GRANITE-BOULDER_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 1,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_STONE_GRANITE-BOULDER_V1_DEFAULT/variant_1.png",
       "provenance": {
-        "sourceFacing": "south-west",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "4ed35006-4259-4526-b5ba-799a72dba451",
-        "originalityDistance": null,
-        "notes": null
+        "generationId": "09a1a4c1-ee51-47ad-856d-ee618c52330c",
+        "notes": "Owner-approved variant 1 for SURFACE_SHARED_STONE_GRANITE-BOULDER_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 2,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_STONE_GRANITE-BOULDER_V1_DEFAULT/variant_2.png",
       "provenance": {
-        "sourceFacing": "west",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "4ed35006-4259-4526-b5ba-799a72dba451",
-        "originalityDistance": null,
-        "notes": null
+        "generationId": "21e09236-b440-48de-a713-549d70b98d5f",
+        "notes": "Owner-approved variant 2 for SURFACE_SHARED_STONE_GRANITE-BOULDER_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 3,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_STONE_GRANITE-BOULDER_V1_DEFAULT/variant_3.png",
       "provenance": {
-        "sourceFacing": "north-west",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "4ed35006-4259-4526-b5ba-799a72dba451",
-        "originalityDistance": null,
-        "notes": null
+        "generationId": "263b619a-5f3d-4f59-8b39-5efe0152a563",
+        "notes": "Owner-approved variant 3 for SURFACE_SHARED_STONE_GRANITE-BOULDER_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 4,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_STONE_GRANITE-BOULDER_V1_DEFAULT/variant_4.png",
       "provenance": {
-        "sourceFacing": "north",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "4ed35006-4259-4526-b5ba-799a72dba451",
-        "originalityDistance": null,
-        "notes": null
+        "generationId": "2dbc008f-9e5a-4f3d-b039-74c8e2f61daa",
+        "notes": "Owner-approved variant 4 for SURFACE_SHARED_STONE_GRANITE-BOULDER_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 5,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_STONE_GRANITE-BOULDER_V1_DEFAULT/variant_5.png",
       "provenance": {
-        "sourceFacing": "north-east",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "4ed35006-4259-4526-b5ba-799a72dba451",
-        "originalityDistance": null,
-        "notes": null
+        "generationId": "35186625-7c07-4a9a-af6a-0bfc3824eaa2",
+        "notes": "Owner-approved variant 5 for SURFACE_SHARED_STONE_GRANITE-BOULDER_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 6,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_STONE_GRANITE-BOULDER_V1_DEFAULT/variant_6.png",
       "provenance": {
-        "sourceFacing": "east",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "4ed35006-4259-4526-b5ba-799a72dba451",
-        "originalityDistance": null,
-        "notes": null
+        "generationId": "3f1dc7e7-0948-4ee9-a674-2d4ee73d253f",
+        "notes": "Owner-approved variant 6 for SURFACE_SHARED_STONE_GRANITE-BOULDER_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 7,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_STONE_GRANITE-BOULDER_V1_DEFAULT/variant_7.png",
       "provenance": {
-        "sourceFacing": "south-east",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "4ed35006-4259-4526-b5ba-799a72dba451",
-        "originalityDistance": null,
-        "notes": null
+        "generationId": "410ce98c-d140-4b9a-9ef5-90f8f9ee20e9",
+        "notes": "Owner-approved variant 7 for SURFACE_SHARED_STONE_GRANITE-BOULDER_V1_DEFAULT"
       }
     }
-  ],
-  "status": "APPROVED",
-  "statusWhy": "Owner-generated on PixelLab, ingested as 8-variant V8 sheet (DEC-007 Owner involvement)"
+  ]
 }

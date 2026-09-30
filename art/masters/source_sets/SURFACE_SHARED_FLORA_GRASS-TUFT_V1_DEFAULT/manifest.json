@@ -1,0 +1,94 @@
+{
+  "topologyClass": "STATIC_VARIANT_8",
+  "variantCount": 8,
+  "variantSelectionMode": "DETERMINISTIC_HASH",
+  "runtime": {
+    "kind": "RMMZ_CHARACTER_8",
+    "file": "img/characters/!UF_GrassTuft_V8.png",
+    "index": 0
+  },
+  "status": "APPROVED",
+  "statusWhy": "Owner-generated on PixelLab, inducted per Owner directive 2026-09-30",
+  "sourceVariants": [
+    {
+      "variantIndex": 0,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_GRASS-TUFT_V1_DEFAULT/variant_0.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "027ea7d9-c899-46de-84c4-d2ba74dae968",
+        "notes": "Owner-approved variant 0 for SURFACE_SHARED_FLORA_GRASS-TUFT_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 1,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_GRASS-TUFT_V1_DEFAULT/variant_1.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "5b68be1c-85ce-4111-9c4d-7dd9fcd59dd2",
+        "notes": "Owner-approved variant 1 for SURFACE_SHARED_FLORA_GRASS-TUFT_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 2,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_GRASS-TUFT_V1_DEFAULT/variant_2.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "68822454-4b50-4227-ba55-b8fd2308a976",
+        "notes": "Owner-approved variant 2 for SURFACE_SHARED_FLORA_GRASS-TUFT_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 3,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_GRASS-TUFT_V1_DEFAULT/variant_3.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "70e641f5-28e3-4aac-9dd3-95536c5a6ee1",
+        "notes": "Owner-approved variant 3 for SURFACE_SHARED_FLORA_GRASS-TUFT_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 4,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_GRASS-TUFT_V1_DEFAULT/variant_4.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "7b5c6123-6f83-47d8-9858-4137dce834c2",
+        "notes": "Owner-approved variant 4 for SURFACE_SHARED_FLORA_GRASS-TUFT_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 5,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_GRASS-TUFT_V1_DEFAULT/variant_5.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "7d0fcdb5-c85a-429c-b167-a6b12d355cca",
+        "notes": "Owner-approved variant 5 for SURFACE_SHARED_FLORA_GRASS-TUFT_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 6,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_GRASS-TUFT_V1_DEFAULT/variant_6.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "86189277-91a4-4e64-b34e-17e2454b4f53",
+        "notes": "Owner-approved variant 6 for SURFACE_SHARED_FLORA_GRASS-TUFT_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 7,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_GRASS-TUFT_V1_DEFAULT/variant_7.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "87060f42-1096-49b3-a957-e3c91ad10382",
+        "notes": "Owner-approved variant 7 for SURFACE_SHARED_FLORA_GRASS-TUFT_V1_DEFAULT"
+      }
+    }
+  ]
+}

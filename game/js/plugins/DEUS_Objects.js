@@ -111,8 +111,24 @@
     const V8_REMAP = {
         "!$UF_GraniteBoulder": "!UF_GraniteBoulder_V8",
         "!$UF_LooseStones": "!UF_RocksSmall_V8",
+        "!$UF_GrassTuft": "!UF_GrassTuft_V8",
+        "!$UF_Wildflowers": "!UF_Flowers_V8",
+        "!$UF_Flowers_Blue": "!UF_FlowersBlue_V8",
+        "!$UF_Flowers_White": "!UF_FlowersWhite_V8",
+        "!$UF_Bush": "!UF_Bush_V8",
+        "!$UF_Stump": "!UF_TreeStump_V8",
+        "!$UF_IronstoneDeposit": "!UF_Ironstone_V8",
+        "!$UF_Wild_Grain": "!UF_WildGrain_V8",
         "granite_boulder": "!UF_GraniteBoulder_V8",
-        "rocks_small": "!UF_RocksSmall_V8"
+        "rocks_small": "!UF_RocksSmall_V8",
+        "grass_tuft": "!UF_GrassTuft_V8",
+        "flowers": "!UF_Flowers_V8",
+        "flowers_blue": "!UF_FlowersBlue_V8",
+        "flowers_white": "!UF_FlowersWhite_V8",
+        "bush": "!UF_Bush_V8",
+        "stump": "!UF_TreeStump_V8",
+        "ironstone": "!UF_Ironstone_V8",
+        "wild_grain": "!UF_WildGrain_V8"
     };
 
     let typeCache = null;

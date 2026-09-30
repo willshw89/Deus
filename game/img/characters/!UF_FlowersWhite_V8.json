@@ -20,122 +20,42 @@
     {
       "index": 0,
       "sourceMaster": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-WHITE_V1_DEFAULT/variant_0.png",
-      "provenance": {
-        "variantIndex": 0,
-        "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-WHITE_V1_DEFAULT/variant_0.png",
-        "provenance": {
-          "sourceFacing": "south",
-          "generator": "pixellab",
-          "generationId": "a13fdfad-57f6-4c7d-b03a-9be960d345b2",
-          "originalityDistance": null,
-          "notes": "A low cluster of sunny wh..."
-        }
-      }
+      "provenance": null
     },
     {
       "index": 1,
       "sourceMaster": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-WHITE_V1_DEFAULT/variant_1.png",
-      "provenance": {
-        "variantIndex": 1,
-        "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-WHITE_V1_DEFAULT/variant_1.png",
-        "provenance": {
-          "sourceFacing": "south",
-          "generator": "pixellab",
-          "generationId": "7f1f49a7-82ba-4c89-8a15-fa2feeacf0cf",
-          "originalityDistance": null,
-          "notes": "A low cluster of sunny wh..."
-        }
-      }
+      "provenance": null
     },
     {
       "index": 2,
       "sourceMaster": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-WHITE_V1_DEFAULT/variant_2.png",
-      "provenance": {
-        "variantIndex": 2,
-        "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-WHITE_V1_DEFAULT/variant_2.png",
-        "provenance": {
-          "sourceFacing": "south",
-          "generator": "pixellab",
-          "generationId": "68065494-4e92-4303-8b43-a982e3b2ad2a",
-          "originalityDistance": null,
-          "notes": "A low cluster of sunny wh..."
-        }
-      }
+      "provenance": null
     },
     {
       "index": 3,
       "sourceMaster": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-WHITE_V1_DEFAULT/variant_3.png",
-      "provenance": {
-        "variantIndex": 3,
-        "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-WHITE_V1_DEFAULT/variant_3.png",
-        "provenance": {
-          "sourceFacing": "south",
-          "generator": "pixellab",
-          "generationId": "7ead9da2-56ac-4ff8-9da8-e13e0e9bb2b3",
-          "originalityDistance": null,
-          "notes": "A low cluster of sunny wh..."
-        }
-      }
+      "provenance": null
     },
     {
       "index": 4,
       "sourceMaster": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-WHITE_V1_DEFAULT/variant_4.png",
-      "provenance": {
-        "variantIndex": 4,
-        "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-WHITE_V1_DEFAULT/variant_4.png",
-        "provenance": {
-          "sourceFacing": "south",
-          "generator": "pixellab",
-          "generationId": "89f67bdf-f7d0-4af0-a9e7-2ead4429b623",
-          "originalityDistance": null,
-          "notes": "A low cluster of sunny wh..."
-        }
-      }
+      "provenance": null
     },
     {
       "index": 5,
       "sourceMaster": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-WHITE_V1_DEFAULT/variant_5.png",
-      "provenance": {
-        "variantIndex": 5,
-        "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-WHITE_V1_DEFAULT/variant_5.png",
-        "provenance": {
-          "sourceFacing": "south",
-          "generator": "pixellab",
-          "generationId": "2f16c87a-f02b-4fab-ab93-827466d855ab",
-          "originalityDistance": null,
-          "notes": "A low cluster of sunny wh..."
-        }
-      }
+      "provenance": null
     },
     {
       "index": 6,
       "sourceMaster": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-WHITE_V1_DEFAULT/variant_6.png",
-      "provenance": {
-        "variantIndex": 6,
-        "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-WHITE_V1_DEFAULT/variant_6.png",
-        "provenance": {
-          "sourceFacing": "south",
-          "generator": "pixellab",
-          "generationId": "2ea23a3f-2264-4e40-8098-4dfebacc863a",
-          "originalityDistance": null,
-          "notes": "A low cluster of sunny wh..."
-        }
-      }
+      "provenance": null
     },
     {
       "index": 7,
       "sourceMaster": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-WHITE_V1_DEFAULT/variant_7.png",
-      "provenance": {
-        "variantIndex": 7,
-        "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-WHITE_V1_DEFAULT/variant_7.png",
-        "provenance": {
-          "sourceFacing": "south",
-          "generator": "pixellab",
-          "generationId": "7c853ad2-6494-4725-b4bc-f3c90aa67313",
-          "originalityDistance": null,
-          "notes": "A low cluster of sunny wh..."
-        }
-      }
+      "provenance": null
     }
   ]
 }

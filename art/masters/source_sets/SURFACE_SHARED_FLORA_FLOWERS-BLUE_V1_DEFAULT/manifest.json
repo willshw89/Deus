@@ -7,96 +7,88 @@
     "file": "img/characters/!UF_FlowersBlue_V8.png",
     "index": 0
   },
+  "status": "APPROVED",
+  "statusWhy": "Owner-generated on PixelLab, inducted per Owner directive 2026-09-30",
   "sourceVariants": [
     {
       "variantIndex": 0,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-BLUE_V1_DEFAULT/variant_0.png",
       "provenance": {
-        "sourceFacing": "south",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "cda7336b-a67f-4dd8-9638-52422f393e36",
-        "originalityDistance": null,
-        "notes": "A delicate patch of wild ..."
+        "generationId": "0fbf554d-f335-46ce-a032-c4be4b3fdc8a",
+        "notes": "Owner-approved variant 0 for SURFACE_SHARED_FLORA_FLOWERS-BLUE_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 1,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-BLUE_V1_DEFAULT/variant_1.png",
       "provenance": {
-        "sourceFacing": "south",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "63e6a5a5-0e7d-4f40-abd1-4ac6af920cad",
-        "originalityDistance": null,
-        "notes": "A delicate patch of wild ..."
+        "generationId": "26abaa1a-40cd-456f-a19b-85a780e356c8",
+        "notes": "Owner-approved variant 1 for SURFACE_SHARED_FLORA_FLOWERS-BLUE_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 2,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-BLUE_V1_DEFAULT/variant_2.png",
       "provenance": {
-        "sourceFacing": "south",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "97498966-04e7-4d9d-a2d3-d373c776f071",
-        "originalityDistance": null,
-        "notes": "A delicate patch of wild ..."
+        "generationId": "2750a101-9624-4f8a-8173-2557e7b6cdc2",
+        "notes": "Owner-approved variant 2 for SURFACE_SHARED_FLORA_FLOWERS-BLUE_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 3,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-BLUE_V1_DEFAULT/variant_3.png",
       "provenance": {
-        "sourceFacing": "south",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "9359592c-21e4-418a-8e35-dfa460a7d2c3",
-        "originalityDistance": null,
-        "notes": "A delicate patch of wild ..."
+        "generationId": "411e7a65-6140-440b-8f02-da775696540a",
+        "notes": "Owner-approved variant 3 for SURFACE_SHARED_FLORA_FLOWERS-BLUE_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 4,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-BLUE_V1_DEFAULT/variant_4.png",
       "provenance": {
-        "sourceFacing": "south",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "f9979013-fc5f-4574-8890-5a62bfc3a0e0",
-        "originalityDistance": null,
-        "notes": "A delicate patch of wild ..."
+        "generationId": "5d039e78-2af6-4ac5-9b74-0841ead2ad48",
+        "notes": "Owner-approved variant 4 for SURFACE_SHARED_FLORA_FLOWERS-BLUE_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 5,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-BLUE_V1_DEFAULT/variant_5.png",
       "provenance": {
-        "sourceFacing": "south",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "d0976279-2068-40b5-8986-5a82f0c1f3d0",
-        "originalityDistance": null,
-        "notes": "A delicate patch of wild ..."
+        "generationId": "617f46f7-5a59-4bec-96b0-dbc547eb64c8",
+        "notes": "Owner-approved variant 5 for SURFACE_SHARED_FLORA_FLOWERS-BLUE_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 6,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-BLUE_V1_DEFAULT/variant_6.png",
       "provenance": {
-        "sourceFacing": "south",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "fe02d701-f9f5-44ea-a551-4749e6460cfd",
-        "originalityDistance": null,
-        "notes": "A delicate patch of wild ..."
+        "generationId": "8a5b3a50-dea6-40a6-a962-ce7ff4c2ad21",
+        "notes": "Owner-approved variant 6 for SURFACE_SHARED_FLORA_FLOWERS-BLUE_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 7,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS-BLUE_V1_DEFAULT/variant_7.png",
       "provenance": {
-        "sourceFacing": "south",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "1d348df1-19ed-4fda-8fb3-bc6a32f28374",
-        "originalityDistance": null,
-        "notes": "A delicate patch of wild ..."
+        "generationId": "9066e59e-5e5f-44af-8f26-7b10be9f331e",
+        "notes": "Owner-approved variant 7 for SURFACE_SHARED_FLORA_FLOWERS-BLUE_V1_DEFAULT"
       }
     }
-  ],
-  "status": "APPROVED",
-  "statusWhy": "Owner-generated on PixelLab Object Creator, inducted with 8 variants"
+  ]
 }

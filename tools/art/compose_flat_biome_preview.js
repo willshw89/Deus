@@ -1,4 +1,3 @@
-// Composes flat 2D top-down biome scene previews with terrain, props, and flora.
 const fs = require('fs');
 const path = require('path');
 const { readPNG } = require('../png_read');

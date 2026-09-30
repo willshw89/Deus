@@ -1,4 +1,3 @@
-// Composes multi-biome overview collage comparing canonical biomes.
 const fs = require('fs');
 const path = require('path');
 const { readPNG } = require('../png_read');

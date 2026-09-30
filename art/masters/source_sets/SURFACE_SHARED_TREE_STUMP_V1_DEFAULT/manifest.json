@@ -7,90 +7,88 @@
     "file": "img/characters/!UF_TreeStump_V8.png",
     "index": 0
   },
+  "status": "APPROVED",
+  "statusWhy": "Owner-generated on PixelLab, inducted per Owner directive 2026-09-30",
   "sourceVariants": [
     {
       "variantIndex": 0,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_TREE_STUMP_V1_DEFAULT/variant_0.png",
       "provenance": {
-        "sourceFacing": "south",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "79e4e8ac-c113-47cf-924e-13c612ed15a6",
-        "originalityDistance": null
+        "generationId": "10bc6956-573b-4d07-ad03-d1e3b8d06fea",
+        "notes": "Owner-approved variant 0 for SURFACE_SHARED_TREE_STUMP_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 1,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_TREE_STUMP_V1_DEFAULT/variant_1.png",
       "provenance": {
-        "sourceFacing": "south-west",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "79e4e8ac-c113-47cf-924e-13c612ed15a6",
-        "originalityDistance": null
+        "generationId": "1d3a0e26-fde3-470f-aecd-4989d24163d5",
+        "notes": "Owner-approved variant 1 for SURFACE_SHARED_TREE_STUMP_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 2,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_TREE_STUMP_V1_DEFAULT/variant_2.png",
       "provenance": {
-        "sourceFacing": "west",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "79e4e8ac-c113-47cf-924e-13c612ed15a6",
-        "originalityDistance": null
+        "generationId": "21cfbdd8-4cc7-4e16-844d-0d5c807b5bd0",
+        "notes": "Owner-approved variant 2 for SURFACE_SHARED_TREE_STUMP_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 3,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_TREE_STUMP_V1_DEFAULT/variant_3.png",
       "provenance": {
-        "sourceFacing": "north-west",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "79e4e8ac-c113-47cf-924e-13c612ed15a6",
-        "originalityDistance": null
+        "generationId": "3f66735d-9e78-4d62-93df-306f81ce0592",
+        "notes": "Owner-approved variant 3 for SURFACE_SHARED_TREE_STUMP_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 4,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_TREE_STUMP_V1_DEFAULT/variant_4.png",
       "provenance": {
-        "sourceFacing": "north",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "79e4e8ac-c113-47cf-924e-13c612ed15a6",
-        "originalityDistance": null
+        "generationId": "47aafc1c-9721-4526-a49c-35ff28b97f18",
+        "notes": "Owner-approved variant 4 for SURFACE_SHARED_TREE_STUMP_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 5,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_TREE_STUMP_V1_DEFAULT/variant_5.png",
       "provenance": {
-        "sourceFacing": "north-east",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "79e4e8ac-c113-47cf-924e-13c612ed15a6",
-        "originalityDistance": null
+        "generationId": "4b45e8b7-584c-4dab-97b8-620305fd0456",
+        "notes": "Owner-approved variant 5 for SURFACE_SHARED_TREE_STUMP_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 6,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_TREE_STUMP_V1_DEFAULT/variant_6.png",
       "provenance": {
-        "sourceFacing": "east",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "79e4e8ac-c113-47cf-924e-13c612ed15a6",
-        "originalityDistance": null
+        "generationId": "594de8d5-0579-4ee5-8243-8c5632179db1",
+        "notes": "Owner-approved variant 6 for SURFACE_SHARED_TREE_STUMP_V1_DEFAULT"
       }
     },
     {
       "variantIndex": 7,
       "masterFile": "art/masters/source_sets/SURFACE_SHARED_TREE_STUMP_V1_DEFAULT/variant_7.png",
       "provenance": {
-        "sourceFacing": "south-east",
+        "sourceFacing": null,
         "generator": "pixellab",
-        "generationId": "79e4e8ac-c113-47cf-924e-13c612ed15a6",
-        "originalityDistance": null
+        "generationId": "59a035cb-34fb-4526-bbd5-88cae8cf1a15",
+        "notes": "Owner-approved variant 7 for SURFACE_SHARED_TREE_STUMP_V1_DEFAULT"
       }
     }
-  ],
-  "status": "APPROVED",
-  "statusWhy": "Owner approved source set inducted with 8 variants",
-  "approvedBy": "Owner",
-  "approvalEvidence": "Owner induction via PixelLab generation"
+  ]
 }

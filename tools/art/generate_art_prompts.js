@@ -1,7 +1,5 @@
-// generate_art_prompts.js - Generates standardized JSON prompt files in art/prompts with DEC-047 English folklore style tail
 const fs = require('fs');
 const path = require('path');
-
 
 const ROOT = path.resolve('.');
 const PROMPTS_DIR = path.join(ROOT, 'art/prompts');
@@ -509,7 +507,7 @@ function buildTilePrompt(tile, entry) {
       "canvasSize": [48, 48],
       "background": "solid flat seamless"
     },
-    "positivePrompt": `${tile.desc}, readable high-contrast fantasy pixel art in the DEUS master palette; world feel: English folklore, in the spirit of Ultima VII and EverQuest`,
+    "positivePrompt": tile.desc,
     "negativePrompt": "blurry, 3D render, anime, cute, isometric, cliff, elevation drop, perspective tilt, dither noise, glowing neon, borders, frames, UI, text, watermark",
     "paletteRamp": tile.ramp,
     "masterPalette": "art/palette/deus_master_world_palette_v1.hex",
@@ -538,8 +536,7 @@ function buildObjectPrompt(obj, entry) {
       "canvasSize": [48, 48],
       "background": "transparent"
     },
-    "positivePrompt": `${obj.desc}, readable high-contrast fantasy pixel art in the DEUS master palette; world feel: English folklore, in the spirit of Ultima VII and EverQuest`,
-
+    "positivePrompt": obj.desc,
     "negativePrompt": "blurry, 3D render, cartoon, anime, cute, isometric, cliff, elevation drop, perspective tilt, dither noise, glowing neon, borders, frames, UI, text, watermark",
     "paletteRamp": obj.ramp,
     "masterPalette": "art/palette/deus_master_world_palette_v1.hex",

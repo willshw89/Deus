@@ -230,4 +230,57 @@ test("zero_canvas_destruction_across_zoom_cycles", () => {
     assert.strictEqual(statsAfter.canvasesDestroyed, 0, "Zero canvases destroyed across zoom cycles (0 GC churn)");
 });
 
+// 6. Multi-Z uncap across all 32 layers
+test("depth_uncap_maxdepth_supports_all_32_layers", () => {
+    assert.strictEqual(Depth.config.maxDepth, 31, "Default maxDepth is 31 (covers all 32 layers from z=+15 down to z=-16)");
+
+    Depth.setMaxDepth(10);
+    assert.strictEqual(Depth.config.maxDepth, 10, "setMaxDepth sets to 10");
+
+    Depth.setMaxDepth(50);
+    assert.strictEqual(Depth.config.maxDepth, 31, "setMaxDepth clamps to max 31");
+
+    Depth.setMaxDepth(-5);
+    assert.strictEqual(Depth.config.maxDepth, 0, "setMaxDepth clamps to min 0");
+
+    Depth.setMaxDepth(31);
+    assert.strictEqual(Depth.config.maxDepth, 31, "Reset back to 31");
+});
+
+// 7. Occlusion culling raycast through 32 layers
+test("occlusion_raycast_through_32_layers_to_bedrock", () => {
+    const O = Depth.occlusion;
+    assert(O, "Occlusion planner exists");
+
+    // Open vertical shaft from z=15 down to z=-15; bedrock solid at z=-16
+    const shaftOpen = (x, y, z) => (x === 10 && y === 10 && z >= -15);
+    const bounds = { minX: 8, minY: 8, maxX: 12, maxY: 12 };
+
+    const input = {
+        viewZ: 15,
+        maxDepth: 31,
+        zMin: -16,
+        zMax: 15,
+        size: 64,
+        bounds,
+        shapeStamp: "test-32-shaft",
+        isOpen: shaftOpen
+    };
+
+    const plan = O.plan(input);
+    assert.strictEqual(plan.rebuilt, true, "Plan successfully rebuilt");
+
+    // All levels from 14 down to -15 must be exposed in the open shaft
+    // There are 30 levels from 14 down to -15 (14 - (-15) + 1 = 30) plus -16 is reached as the first opaque floor!
+    // Total exposed levels in the shaft = 31 (depth 1..31)
+    for (let d = 1; d <= 31; d++) {
+        const targetZ = 15 - d; // down to -16
+        assert(plan.exposed.has(`${targetZ},10,10`), `Shaft cell at z=${targetZ} (depth ${d}) must be exposed`);
+        assert.strictEqual(plan.byDepth[d], 1, `Depth ${d} has 1 exposed cell in the shaft`);
+    }
+
+    // Depth 32 cannot be exposed because zMin is -16
+    assert.strictEqual(plan.byDepth[32] || 0, 0, "No exposure beyond zMin -16");
+});
+
 console.log(`\nResults: ${passed} passed, 0 failed.`);

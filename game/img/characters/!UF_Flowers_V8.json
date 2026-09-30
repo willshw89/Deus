@@ -1,0 +1,61 @@
+{
+  "sheet": "!UF_Flowers_V8.png",
+  "width": 576,
+  "height": 384,
+  "characterCount": 8,
+  "blockWidth": 144,
+  "blockHeight": 192,
+  "cellWidth": 48,
+  "cellHeight": 48,
+  "cellsPerCharacter": 12,
+  "topologyClass": "STATIC_VARIANT_8",
+  "rmmzConfig": {
+    "isObjectCharacter": true,
+    "shiftY": 0,
+    "directionFix": true,
+    "walkAnime": false,
+    "stepAnime": false
+  },
+  "variants": [
+    {
+      "index": 0,
+      "sourceMaster": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT/variant_0.png",
+      "provenance": null
+    },
+    {
+      "index": 1,
+      "sourceMaster": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT/variant_1.png",
+      "provenance": null
+    },
+    {
+      "index": 2,
+      "sourceMaster": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT/variant_2.png",
+      "provenance": null
+    },
+    {
+      "index": 3,
+      "sourceMaster": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT/variant_3.png",
+      "provenance": null
+    },
+    {
+      "index": 4,
+      "sourceMaster": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT/variant_4.png",
+      "provenance": null
+    },
+    {
+      "index": 5,
+      "sourceMaster": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT/variant_5.png",
+      "provenance": null
+    },
+    {
+      "index": 6,
+      "sourceMaster": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT/variant_6.png",
+      "provenance": null
+    },
+    {
+      "index": 7,
+      "sourceMaster": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT/variant_7.png",
+      "provenance": null
+    }
+  ]
+}

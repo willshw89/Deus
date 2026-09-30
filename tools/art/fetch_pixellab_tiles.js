@@ -1,4 +1,3 @@
-// Fetches Owner-generated PixelLab Maps -> Tiles sets into art staging.
 const fs = require('fs');
 const https = require('https');
 const path = require('path');

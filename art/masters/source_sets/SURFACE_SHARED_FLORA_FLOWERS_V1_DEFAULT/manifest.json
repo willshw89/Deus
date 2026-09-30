@@ -1,0 +1,94 @@
+{
+  "topologyClass": "STATIC_VARIANT_8",
+  "variantCount": 8,
+  "variantSelectionMode": "DETERMINISTIC_HASH",
+  "runtime": {
+    "kind": "RMMZ_CHARACTER_8",
+    "file": "img/characters/!UF_Flowers_V8.png",
+    "index": 0
+  },
+  "status": "APPROVED",
+  "statusWhy": "Owner-generated on PixelLab, inducted per Owner directive 2026-09-30",
+  "sourceVariants": [
+    {
+      "variantIndex": 0,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT/variant_0.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "12efa5ee-35da-4521-a6ea-086e900f7529",
+        "notes": "Owner-approved variant 0 for SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 1,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT/variant_1.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "15dd9a37-9945-44f5-ae76-427d47d8ea22",
+        "notes": "Owner-approved variant 1 for SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 2,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT/variant_2.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "24b576b0-9dd4-4c98-bd0e-63a462601672",
+        "notes": "Owner-approved variant 2 for SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 3,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT/variant_3.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "3add2839-6177-4d18-ab84-4459972855e9",
+        "notes": "Owner-approved variant 3 for SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 4,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT/variant_4.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "6112191a-84e7-4fc5-94a9-5cb5b7dc195d",
+        "notes": "Owner-approved variant 4 for SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 5,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT/variant_5.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "6a5bf13e-e50f-4417-b8b8-22edbc89594e",
+        "notes": "Owner-approved variant 5 for SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 6,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT/variant_6.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "7f68875f-64d4-41aa-86c7-b06a498abd8f",
+        "notes": "Owner-approved variant 6 for SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT"
+      }
+    },
+    {
+      "variantIndex": 7,
+      "masterFile": "art/masters/source_sets/SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT/variant_7.png",
+      "provenance": {
+        "sourceFacing": null,
+        "generator": "pixellab",
+        "generationId": "827d3c9e-62bc-4c5d-95fa-7017d9950139",
+        "notes": "Owner-approved variant 7 for SURFACE_SHARED_FLORA_FLOWERS_V1_DEFAULT"
+      }
+    }
+  ]
+}

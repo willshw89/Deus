@@ -1,4 +1,3 @@
-// Scans PixelLab library assets using .pixellab_token without printing tokens.
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
