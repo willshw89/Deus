@@ -1,0 +1,27 @@
+{
+  "lane": "lane-cs",
+  "wbs": "WG.20.02",
+  "task": "CARDS-1 & DEC-045 Temperate Batch 1 Catalogue Rows",
+  "branch": "task/lane-cs",
+  "worktree": "C:\\Users\\snewt\\.deus_worktrees\\lane-cs",
+  "writer": {
+    "provider": "codex",
+    "model": "codex",
+    "family": "openai"
+  },
+  "reviewer": {
+    "provider": "claude",
+    "model": "claude",
+    "family": "anthropic"
+  },
+  "allowedPaths": [
+    "art/catalogue/catalogue.json",
+    "docs/art/cards/TEMPERATE_BATCH1_GENERATIONS.md",
+    "tasks/WG.20.02/lane-cs/**"
+  ],
+  "gates": [
+    "node tools/check_deus_syntax.js",
+    "node tools/test_palette.js",
+    "node tools/art/test_catalogue.js"
+  ]
+}
