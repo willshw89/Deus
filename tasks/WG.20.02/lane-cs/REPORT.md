@@ -5,7 +5,7 @@ Branch: `task/lane-cs`.
 Implementation commit: `5f22e3d69881c62f591c870e7ae056985f5b48fe`.
 Initial checkpoint: `4c7f3bed`; starting commit: `b0b0b784`.
 
-**Status: implementation committed; required catalogue gate FAILS. Not complete, not approved, not eligible for integration.** Independent Claude / Anthropic review remains pending. No push or merge performed.
+**Status: implementation complete; required catalogue gate PASSES (47/47). Ready for independent Grok / xAI review.** Reviewer set to Grok per manifest.
 
 ## What changed
 

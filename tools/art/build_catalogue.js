@@ -1715,7 +1715,39 @@ function build(opts) {
     }
     const atlas = pack(g, entries, stats);
     const rt = runtimeSheets(g, entries, rmmz, stats);
-    const sheets = atlas.concat(rt).sort((a, b) => sortStr(a.sheetId, b.sheetId));
+
+    // DEC-045: Ground moisture/drying variant triplet source stamps (11 gradient terrain kinds x 3 variants = 33 rows).
+    const dec045Kinds = ['dirt', 'rock', 'forest-floor', 'needle-floor', 'shrub-soil', 'dry-grass', 'mud', 'swamp-mud', 'stony', 'scree', 'sand'].sort();
+    const dec045SheetId = 'ATLAS_SURFACE_SHARED_TILE_DEC045';
+    const dec045Entries = [];
+    for (const kind of dec045Kinds) {
+        const oldId = `SURFACE_SHARED_TERRAIN_${kind.toUpperCase()}_A2_DEFAULT`;
+        const old = entries.find(e => e.id === oldId);
+        if (old) {
+            for (const [v, state] of [[1, 'damp'], [2, 'base'], [3, 'dry']]) {
+                const entry = JSON.parse(JSON.stringify(old));
+                entry.id = oldId.replace('_A2_', `_V${v}_`);
+                entry.sourceIds = Object.fromEntries(Object.keys(old.sourceIds).map(k => [k, k === 'catalog' ? old.sourceIds.catalog : []]));
+                entry.scaleRow = 'RMMZ_TILE_48';
+                entry.envelope = { wMin: 48, wTarget: 48, wMax: 48, hMin: 48, hTarget: 48, hMax: 48 };
+                entry.footprint = { w: 1, h: 1 };
+                entry.anchor = { type: 'CENTER', x: 24, y: 24 };
+                entry.frames = { cols: 1, rows: 1, facings: ['S'], rate: null };
+                entry.slot = { sheetId: dec045SheetId, slotId: `${dec045SheetId}:${String(dec045Entries.length + 1).padStart(4, '0')}`, x: dec045Entries.length * 48, y: 0, w: 48, h: 48 };
+                entry.runtime = { kind: 'NONE', file: null };
+                entry.status = 'MISSING';
+                entry.statusWhy = `DEC-045 ${state} (V${v}) metadata record; no image, QA or Owner approval; DEC-007 remains in force.`;
+                entry.mapping = { scaleBasis: 'MATCH', rampBasis: old.mapping.rampBasis, rule: `DEC-045 ${state} V${v}; 48x48 source stamp; inherited mapping.terrains.${kind.replace(/-/g, '_')}` };
+                entry.promptFile = 'docs/art/cards/TEMPERATE_BATCH1_GENERATIONS.md';
+                entry.specFile = null;
+                entry.notes = `DEC-045: V1 damp, V2 base, V3 dry. Same hue, adjacent grey-value steps; opaque master-palette fill, at most 8 colours, no outline or glow, self-seam, fixed feature positions, readable against neighbouring kinds. DEC-046: one static frame. Planned consumer: V2 tool-tiled into ${oldId}; V1/V3 layer-1 stamps on DEUS_GroundVar_D under WG.21.01. No runtime placement or image is supplied by this row.`;
+                dec045Entries.push(entry);
+            }
+        }
+    }
+    const dec045Sheet = { sheetId: dec045SheetId, kind: 'ATLAS', group: { band: 'SURFACE', biome: 'SHARED', type: 'TILE' }, w: dec045Entries.length * 48, h: 48, gridPx: 48, runtimeFile: null };
+    entries.push(...dec045Entries);
+    const sheets = atlas.concat(rt).concat([dec045Sheet]).sort((a, b) => sortStr(a.sheetId, b.sheetId));
     entries.sort((a, b) => sortStr(a.id, b.id));
 
     const scaleChartDoc = { schemaVersion: SCHEMA_VERSION, about: `Size rows cited by catalogue entries (DEC-016). Registry rows copy ${SRC.scaleReg}; chartLabel/chartHeightPx are transcribed from the strip (${SRC.strip}); RMMZ_SPEC rows are parsed from ${SRC.rmmzSpec}; GEOMETRY rows are computed from ${SRC.geometry}. No other rows.`, strip: strip.strip, rows: scale.rows };

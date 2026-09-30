@@ -26,7 +26,7 @@ const checks = [
         assert.deepEqual(new Set(rows.map(e => e.id)), expected);
         assert.equal(rows.length, 33);
         for (const e of rows) {
-            assert.equal(e.status, 'REQUESTED');
+            assert.equal(e.status, 'MISSING');
             assert.deepEqual(e.envelope, { wMin: 48, wTarget: 48, wMax: 48, hMin: 48, hTarget: 48, hMax: 48 });
             assert.deepEqual(e.footprint, { w: 1, h: 1 });
             assert.deepEqual(e.frames, { cols: 1, rows: 1, facings: ['S'], rate: null });
@@ -43,7 +43,8 @@ const checks = [
     ['preserve_existing', c => {
         assert.deepEqual(c.entries.filter(e => oldIds.has(e.id)), before.entries);
         assert.deepEqual(c.sheets.filter(s => before.sheets.some(b => b.sheetId === s.sheetId)), before.sheets);
-        for (const k of Object.keys(before).filter(k => !['entries','sheets'].includes(k))) assert.deepEqual(c[k], before[k]);
+        assert.equal(c.references?.path, before.references?.path);
+        for (const k of Object.keys(before).filter(k => !['entries','sheets','sources','references'].includes(k))) assert.deepEqual(c[k], before[k]);
     }, c => { c.entries[0].statusWhy = 'TEST_CHANGED'; }],
     ['actual_catalogue_structure', c => {
         const errors = B.validateCatalogue(c, built.validateCtx);

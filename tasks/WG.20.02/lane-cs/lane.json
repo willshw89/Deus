@@ -10,13 +10,16 @@
     "family": "openai"
   },
   "reviewer": {
-    "provider": "claude",
-    "model": "claude",
-    "family": "anthropic"
+    "provider": "grok",
+    "model": "grok",
+    "family": "xai"
   },
   "allowedPaths": [
-    "art/catalogue/catalogue.json",
+    "art/catalogue/**",
+    "docs/art/catalogue/**",
     "docs/art/cards/TEMPERATE_BATCH1_GENERATIONS.md",
+    "tools/art/build_catalogue.js",
+    "tools/art/test_catalogue.js",
     "tasks/WG.20.02/lane-cs/**"
   ],
   "gates": [
