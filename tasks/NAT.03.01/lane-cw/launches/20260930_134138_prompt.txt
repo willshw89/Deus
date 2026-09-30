@@ -1,0 +1,27 @@
+You are the WRITER (Codex / OpenAI) for Project DEUS, lane-cw (Task NAT.03.01).
+Worktree: C:\Users\snewt\.deus_worktrees\lane-cw
+Branch: task/lane-cw
+Manifest: tasks/NAT.03.01/lane-cw/lane.json
+Brief: tasks/NAT.03.01/lane-cw/BRIEF.md
+
+TASK:
+Implement the design-independent correctness fixes to DEUS_Fluid and sim/hydro per MSG-PRUNE-PM-034 and the BRIEF:
+(a) One shared work budget across all queued areas. tick(0) does zero work. No per-tick enumeration of every lake cell; use area-indexed scheduling, and cost() counts real work.
+(b) Load keeps records outside the legacy range, and zMin re-bases when UF.World expands.
+(c) Coordinate overloads agree: depthAt, typeAt, and fluidFillFractionAt give identical answers for {x, y} and {ax, ay}. walkable uses the caller's z. setCell honours {ax, ay} and capacity.
+(d) Typed conservation in reconciliation: never overwrite another liquid type; displaced lava stays lava, never counted as water. Until D2 defines the store, keep the displaced amount typed and still in the store (no deletion). Record it as a pending item for D2.
+(e) Save isolation: absent keys reset fluid state. A failed hydro require must not drop the saved hydro payload on the next save.
+(f) No |0 narrowing on mass totals.
+(g) Shared passage rules: hydro rain, spill, and seep respect the same closed doors and walls as Fluid.
+(h) Honest docs: in docs/systems/DEUS_Fluid.md, remove 'COMPLETED/VERIFIED', 60 FPS claims, and 'zero GC'. Say what is and is not wired.
+(i) Tests: implement tools/test_fluid_correctness_lane_cw.js testing (a)-(h), where each check can fail. Replace _mutantDelete with a real mass-deletion mutant.
+
+BOUNDARIES (HELD FOR DESIGN D2):
+- Do NOT settle the single authority question between sim/hydro and sim/hydrology.
+- Do NOT merge sim/hydrology into sim/hydro.
+- Do NOT alter displaced-water return path, waiter/spring wakeups, or water/lava reactions.
+
+DELIVERABLES:
+1. Committed changes under [codex] message.
+2. Completed tasks/NAT.03.01/lane-cw/REPORT.md including the GAME TRANSLATION block.
+3. Clean pass on node tools/check_deus_syntax.js and node tools/test_fluid_correctness_lane_cw.js.
