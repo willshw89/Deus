@@ -2,24 +2,18 @@
   "lane": "lane-cv",
   "taskId": "ART.PRUNE.MEADOW_A2",
   "branch": "task/lane-cv",
-  "writer": {
-    "provider": "gemini",
-    "model": "gemini",
-    "family": "google"
-  },
-  "reviewer": {
-    "provider": "grok",
-    "model": "grok",
-    "family": "xai"
-  },
+  "writer": "gemini",
+  "reviewer": "grok",
   "allowedPaths": [
     "tasks/ART.PRUNE.MEADOW_A2/lane-cv/**"
   ],
-  "gates": [
+  "gateTests": [
     {
-      "name": "meadow_board_validation",
-      "command": "node tasks/ART.PRUNE.MEADOW_A2/lane-cv/test_meadow_board.js",
-      "exitCode": 0
+      "cmd": "node",
+      "args": [
+        "tasks/ART.PRUNE.MEADOW_A2/lane-cv/test_meadow_board.js"
+      ],
+      "timeoutSec": 60
     }
   ]
 }
