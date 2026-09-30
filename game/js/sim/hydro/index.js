@@ -51,6 +51,10 @@ function createSession(io) {
     const aquifers = new Map();
     const springs = new Map();
     const lakes = [];
+    // Rebuilt on lake definition/rate changes, never by the tick. Each area
+    // and the all-area schedule has independent cursors and an evap-only list.
+    const lakeAreas = new Map();
+    let lakeIndex = { all: [], evap: [], allCursor: 0, evapCursor: 0 };
     const visits = new Map();
     const waiters = new Map();
     const mutants = {
@@ -62,14 +66,15 @@ function createSession(io) {
     };
     let atmosphere = 0;
     let displaced = 0;
+    let displacedLava = 0;
     let seasonInput = defaultSeason;
     let tick = 0;
     let examined = 0;
     let processed = 0;
-    let lakeCursor = 0;
+    let lakeVisits = 0;
 
     function examine(n) {
-        examined += (n === undefined ? 1 : (n | 0));
+        examined += (n === undefined ? 1 : n);
     }
 
     function aquiferRow(id, create) {
@@ -88,7 +93,8 @@ function createSession(io) {
         return n;
     }
 
-    function stored() {
+    function stored(type) {
+        if (type === "lava") return displacedLava;
         return storedAquifers() + atmosphere + displaced;
     }
 
@@ -127,8 +133,10 @@ function createSession(io) {
     function placeInto(ax, ay, x, y, z, amt) {
         const want = asInt(amt);
         if (want <= 0) return 0;
+        examine(1);
         if (typeof io.inRange === "function" && !io.inRange(z)) return 0;
         if (typeof io.inBounds === "function" && !io.inBounds(ax, ay, x, y)) return 0;
+        if (!mutants.floodSolid && typeof io.blockedAt === "function" && io.blockedAt(ax, ay, x, y, z)) return 0;
         const type = io.typeAt(ax, ay, x, y, z);
         if (type && type !== "water") return 0;
         const cap = io.capacityAt(ax, ay, x, y, z) | 0;
@@ -155,9 +163,14 @@ function createSession(io) {
     function deliver(ax, ay, x, y, z, amt) {
         let left = asInt(amt);
         if (left <= 0) return 0;
+        // Rain cannot teleport from a blocked origin to the other side of it.
+        if (!mutants.floodSolid && typeof io.blockedAt === "function" && io.blockedAt(ax, ay, x, y, z)) return 0;
         left -= placeInto(ax, ay, x, y, z, left);
         for (let i = 0; i < DIRS.length && left > 0; i++) {
-            left -= placeInto(ax, ay, x + DIRS[i][0], y + DIRS[i][1], z, left);
+            const nx = x + DIRS[i][0], ny = y + DIRS[i][1];
+            examine(1);
+            if (typeof io.canPassLaterally === "function" && !io.canPassLaterally(ax, ay, x, y, z, nx, ny)) continue;
+            left -= placeInto(ax, ay, nx, ny, z, left);
         }
         if (left > 0 && typeof io.upOpen === "function" && io.upOpen(ax, ay, x, y, z)) {
             left -= placeInto(ax, ay, x, y, z + 1, left);
@@ -208,6 +221,7 @@ function createSession(io) {
     function seepFrom(ax, ay, x, y, z) {
         const depth = io.depthAt(ax, ay, x, y, z) | 0;
         if (depth <= 0 || io.typeAt(ax, ay, x, y, z) !== "water") return;
+        if (typeof io.objectBarrierAt === "function" && io.objectBarrierAt(ax, ay, x, y, z)) return;
         const range = io.zRange();
         const span = (range.zMax - range.zMin + 1) | 0;
         let zz = (z | 0) - 1;
@@ -217,6 +231,9 @@ function createSession(io) {
         while (steps < span && zz >= range.zMin) {
             steps++;
             examine(1);
+            // Porous terrain is still a seep plug; constructed walls and
+            // closed doors are barriers at every point along that column.
+            if (typeof io.objectBarrierAt === "function" && io.objectBarrierAt(ax, ay, x, y, zz)) return;
             const cap = io.capacityAt(ax, ay, x, y, zz) | 0;
             if (cap > 0) {
                 receiver = zz;
@@ -269,17 +286,25 @@ function createSession(io) {
         if (depth - amt > 0) io.wake(ax, ay, x, y, z);
     }
 
-    function lakeCells(ax, ay) {
-        const out = [];
+    function rebuildLakeIndex() {
+        lakeAreas.clear();
+        lakeIndex = { all: [], evap: [], allCursor: 0, evapCursor: 0 };
         for (let i = 0; i < lakes.length; i++) {
             const lake = lakes[i];
             for (let c = 0; c < lake.cells.length; c++) {
                 const cell = lake.cells[c];
-                if (ax !== null && ax !== undefined && (cell.ax !== ax || cell.ay !== ay)) continue;
-                out.push({ lake: lake, cell: cell });
+                const key = cell.ax + "," + cell.ay;
+                let area = lakeAreas.get(key);
+                if (!area) lakeAreas.set(key, area = { all: [], evap: [], allCursor: 0, evapCursor: 0 });
+                const item = { lake, cell };
+                area.all.push(item);
+                lakeIndex.all.push(item);
+                if (lake.evap > 0) {
+                    area.evap.push(item);
+                    lakeIndex.evap.push(item);
+                }
             }
         }
-        return out;
     }
 
     function precipitation() {
@@ -297,6 +322,7 @@ function createSession(io) {
     function evaporate(cell, rate) {
         const amt = asInt(rate);
         if (amt <= 0) return;
+        examine(1);
         const depth = io.depthAt(cell.ax, cell.ay, cell.x, cell.y, cell.z) | 0;
         if (depth <= 0 || io.typeAt(cell.ax, cell.ay, cell.x, cell.y, cell.z) !== "water") return;
         const take = Math.min(depth, amt);
@@ -305,12 +331,22 @@ function createSession(io) {
         if (!mutants.deleteEvap) atmosphere += take;
     }
 
-    function beginTick(spec) {
-        spec = spec || {};
-        tick += 1;
+    function clearCost() {
         examined = 0;
         processed = 0;
-        const budget = spec.budget > 0 ? (spec.budget | 0) : 512;
+        lakeVisits = 0;
+    }
+
+    function beginTick(spec) {
+        spec = spec || {};
+        clearCost();
+        const rawBudget = spec.budget === undefined ? 512 : spec.budget;
+        const budget = Number.isFinite(rawBudget) ? Math.max(0, Math.floor(rawBudget)) : 0;
+        if (budget === 0) return 0;
+        tick += 1;
+        // A positive Fluid tick still advances outlet time when this frame's
+        // lake share is zero. Only the caller's total budget zero is a no-op.
+        const lakeBudget = spec.lakeBudget === undefined ? budget : Math.min(budget, Math.max(0, Math.floor(spec.lakeBudget)));
         if (mutants.fullScan) {
             const range = io.zRange();
             const size = io.size() | 0;
@@ -320,20 +356,18 @@ function createSession(io) {
                 }
             }
         }
-        const targets = lakeCells(spec.ax, spec.ay);
-        const offer = targets.length > 0 ? precipitation() : 0;
-        let active = 0;
-        for (let i = 0; i < targets.length; i++) {
-            if (offer > 0 || targets[i].lake.evap > 0) active++;
-        }
-        if (active === 0) return;
-        const n = Math.min(active, budget);
-        let seen = 0;
-        const start = lakeCursor;
-        for (let k = 0; k < targets.length && seen < n; k++) {
+        if (lakeBudget === 0) return 0;
+        const index = spec.ax === null || spec.ax === undefined ? lakeIndex : lakeAreas.get((spec.ax | 0) + "," + (spec.ay | 0));
+        if (!index || index.all.length === 0) return 0;
+        const offer = precipitation();
+        const listKey = offer > 0 ? "all" : "evap";
+        const cursorKey = listKey + "Cursor";
+        const targets = index[listKey];
+        const n = Math.min(targets.length, lakeBudget);
+        const start = index[cursorKey];
+        for (let k = 0; k < n; k++) {
             const item = targets[(start + k) % targets.length];
-            if (offer <= 0 && item.lake.evap <= 0) continue;
-            seen++;
+            lakeVisits++;
             examine(1);
             const cell = item.cell;
             if (offer > 0) {
@@ -345,7 +379,8 @@ function createSession(io) {
             }
             if (item.lake.evap > 0) evaporate(cell, item.lake.evap);
         }
-        if (targets.length > 0) lakeCursor = (start + seen) % targets.length;
+        if (targets.length > 0) index[cursorKey] = (start + n) % targets.length;
+        return lakeVisits;
     }
 
     function exportState() {
@@ -376,11 +411,12 @@ function createSession(io) {
         }
         visitRows.sort(function (a, b) { return a[0] < b[0] ? -1 : (a[0] > b[0] ? 1 : 0); });
         if (aquiferRows.length === 0 && springRows.length === 0 && lakeRows.length === 0
-            && visitRows.length === 0 && atmosphere === 0 && displaced === 0) return null;
+            && visitRows.length === 0 && atmosphere === 0 && displaced === 0 && displacedLava === 0) return null;
         return {
-            v: 1,
+            v: 2,
             atmosphere: atmosphere,
             displaced: displaced,
+            displacedLava: displacedLava,
             aquifers: aquiferRows,
             springs: springRows,
             lakes: lakeRows,
@@ -389,9 +425,12 @@ function createSession(io) {
     }
 
     function importState(blob) {
+        reset();
         if (!blob || typeof blob !== "object") return;
         atmosphere = asInt(blob.atmosphere);
         displaced = asInt(blob.displaced);
+        // v1's displaced field was water. v2 retains that field and adds lava.
+        displacedLava = asInt(blob.displacedLava);
         const rows = Array.isArray(blob.aquifers) ? blob.aquifers : [];
         for (let i = 0; i < rows.length; i++) {
             const pair = rows[i];
@@ -464,6 +503,7 @@ function createSession(io) {
         for (let i = lakes.length - 1; i >= 0; i--) if (lakes[i].id === id) lakes.splice(i, 1);
         const lake = { id: id, evap: evap > 0 ? evap : 0, cells: cells };
         lakes.push(lake);
+        rebuildLakeIndex();
         return lake;
     }
 
@@ -472,6 +512,7 @@ function createSession(io) {
         for (let i = 0; i < lakes.length; i++) {
             if (lakes[i].id === key) lakes[i].evap = asInt(n) > 0 ? asInt(n) : 0;
         }
+        rebuildLakeIndex();
     }
 
     function setSeasonInput(fn) {
@@ -491,26 +532,29 @@ function createSession(io) {
         aquifers.clear();
         springs.clear();
         lakes.length = 0;
+        rebuildLakeIndex();
         visits.clear();
         waiters.clear();
         atmosphere = 0;
         displaced = 0;
+        displacedLava = 0;
         tick = 0;
         examined = 0;
         processed = 0;
-        lakeCursor = 0;
+        lakeVisits = 0;
         seasonInput = defaultSeason;
         configure({});
     }
 
     function mass() {
-        const grid = typeof io.gridWater === "function" ? (io.gridWater() | 0) : 0;
+        const grid = typeof io.gridWater === "function" ? io.gridWater() : 0;
         const aquiferDu = storedAquifers();
         return {
             grid: grid,
             aquifers: aquiferDu,
             atmosphere: atmosphere,
             displaced: displaced,
+            displacedByType: { water: displaced, lava: displacedLava },
             total: grid + aquiferDu + atmosphere + displaced
         };
     }
@@ -519,6 +563,11 @@ function createSession(io) {
         return {
             examined: examined,
             processed: processed,
+            lakeVisits: lakeVisits,
+            work: processed + lakeVisits,
+            // examined counts actual lake visits, delivery/passage probes,
+            // evaporation reads and seep probes, including refused attempts.
+            // work is the shared scheduler budget (bounded cell operations).
             tick: tick,
             aquifers: aquifers.size,
             springs: springs.size,
@@ -527,7 +576,7 @@ function createSession(io) {
     }
 
     function noteProcessed(n) {
-        processed = n | 0;
+        processed = n;
     }
 
     function seedAtmosphere(n) {
@@ -535,8 +584,14 @@ function createSession(io) {
         return atmosphere;
     }
 
-    function receiveDisplaced(n) {
+    function receiveDisplaced(n, type) {
         const add = asInt(n);
+        // D2-PENDING: typed holding only; no return/reaction policy here.
+        if (type === "lava") {
+            if (add > 0) displacedLava += add;
+            return displacedLava;
+        }
+        if (type !== undefined && type !== "water") throw new Error("Unknown displaced liquid type: " + type);
         if (add > 0) displaced += add;
         return displaced;
     }
@@ -571,6 +626,7 @@ function createSession(io) {
         feedOutlet: feedOutlet,
         seepFrom: seepFrom,
         beginTick: beginTick,
+        clearCost: clearCost,
         reset: reset,
         receiveDisplaced: receiveDisplaced,
         notifyOpened: notifyOpened,

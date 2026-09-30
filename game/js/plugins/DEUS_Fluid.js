@@ -21,11 +21,11 @@
  * 2. Active Dirty Set Architecture:
  *    - "Stable state costs almost nothing. Change creates work."
  *    - Active queue tracks only cells whose liquid may move.
- *    - Quiescent fluid (calm lake, settled basin) costs 0 CPU per tick.
+ *    - Quiescent dirty queues process no cells; tick bookkeeping remains.
  *    - Event-driven wakeup: digging, mining, wall building/demolition,
  *      or door opening wakes affected cells and their 3D orthogonal neighbors.
- *    - Bounded per-tick processing budget (default 512 cells/tick) guarantees
- *      60 FPS at 4x simulation speed.
+ *    - One bounded budget (default 512 work items/tick) across queued areas
+ *      and registered lake visits. This is not a frame-rate guarantee.
  *
  * 3. 3D Elevation Flow:
  *    - Operates across the levels of the world's Z range (UF.World, WG.00.17;
@@ -99,12 +99,14 @@ var UF;
     let qAx = 0, qAy = 0, qX = 0, qY = 0, qZ = 0;
     function parseCoords(a, b, c, d, e) {
         if (typeof a === "object" && a !== null) {
-            const ar = a.area || a;
-            qAx = (ar.x !== undefined ? ar.x : (ar.ax !== undefined ? ar.ax : 0)) | 0;
-            qAy = (ar.y !== undefined ? ar.y : (ar.ay !== undefined ? ar.ay : 0)) | 0;
-            qX = (a.x !== undefined ? a.x : 0) | 0;
-            qY = (a.y !== undefined ? a.y : 0) | 0;
-            qZ = (a.z !== undefined ? a.z : 0) | 0;
+            // (area, x, y, z), nested ref, or flat {ax, ay, x, y, z}.
+            const areaArgs = b !== undefined;
+            const ar = areaArgs ? a : (a.area || {});
+            qAx = (ar.ax !== undefined ? ar.ax : (ar.x !== undefined ? ar.x : a.ax)) | 0;
+            qAy = (ar.ay !== undefined ? ar.ay : (ar.y !== undefined ? ar.y : a.ay)) | 0;
+            qX = (areaArgs ? b : a.x) | 0;
+            qY = (areaArgs ? c : a.y) | 0;
+            qZ = (areaArgs ? d : a.z) | 0;
         } else {
             qAx = a | 0;
             qAy = b | 0;
@@ -135,6 +137,36 @@ var UF;
     // --- State Storage ---
     // Key: "ax,ay" -> AreaFluidData
     const areas = new Map();
+    const activeAreas = new Set();
+    let knownRange = { ...zRange() };
+    let pendingHydro = null;
+    const pendingDisplaced = { water: 0, lava: 0 };
+    let scheduleTick = 0;
+
+    function workBudget(value) {
+        const n = value === undefined ? config.budget : value;
+        return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0;
+    }
+
+    // Range changes are rare. Rebase only then, preserving queued coordinates
+    // and waking saved cells that were outside the previously available range.
+    function syncRange() {
+        const next = zRange();
+        if (next.zMin === knownRange.zMin && next.zMax === knownRange.zMax) return;
+        knownRange = { zMin: next.zMin, zMax: next.zMax };
+        for (const data of areas.values()) {
+            const shift = (data.zMin - next.zMin) * data.n;
+            data.queue = data.queue.slice(data.head).map(id => id + shift);
+            data.head = 0;
+            data.inQueue = new Set(data.queue);
+            data.zMin = next.zMin;
+            for (const [z, indices] of data.dormant) {
+                if (!inRange(z)) continue;
+                data.dormant.delete(z);
+                for (const idx of indices) wakeCellAndNeighbors(data.ax, data.ay, idx % data.size, Math.floor(idx / data.size), z);
+            }
+        }
+    }
 
     // Configuration / Hooks
     const config = {
@@ -200,6 +232,7 @@ var UF;
     // Allocate or retrieve area fluid data. Sparse (WG.00.17): no level's grid exists until fluid is written to it
     // (gridFor); the queued cells' flags are a Set. zMin: the origin of this area's queued cell ids.
     function getAreaData(ax, ay) {
+        syncRange();
         const key = areaKey(ax, ay);
         let data = areas.get(key);
         if (!data) {
@@ -216,6 +249,7 @@ var UF;
                 queue: [],              // cell ids: ((z - zMin) * n + idx)
                 head: 0,
                 inQueue: new Set(),     // the cell ids in the queue
+                dormant: new Map(),    // saved/queued cells outside the live range
                 revision: 1
             };
             areas.set(key, data);
@@ -262,16 +296,26 @@ var UF;
 
     // --- Enqueueing & Wakeup ---
     function enqueueCell(ax, ay, x, y, z) {
-        if (!inRange(z)) return;
         const data = getAreaData(ax, ay);
         const size = data.size;
         if (x < 0 || y < 0 || x >= size || y >= size) return;
+        if (!inRange(z)) {
+            // Only occupied out-of-range cells need a future wakeup.
+            const grid = data.grids.get(z);
+            if (grid && getDepth(grid[y * size + x]) > 0) {
+                let indices = data.dormant.get(z);
+                if (!indices) data.dormant.set(z, indices = new Set());
+                indices.add(y * size + x);
+            }
+            return;
+        }
 
         const cellId = cellIdOf(data, x, y, z);
         if (data.inQueue.has(cellId)) return; // Already dirty and queued
 
         data.inQueue.add(cellId);
         data.queue.push(cellId);
+        activeAreas.add(data);
     }
 
     function wakeCellAndNeighbors(ax, ay, x, y, z) {
@@ -338,7 +382,7 @@ var UF;
         if (z <= zRange().zMin) return false; // The bottom of the world (its lowest level)
 
         // Object barrier at destination
-        if (isObjectBarrier(ax, ay, x, y, z - 1)) return false;
+        if (isObjectBarrier(ax, ay, x, y, z) || isObjectBarrier(ax, ay, x, y, z - 1)) return false;
 
         const L = window.UF && UF.Levels;
         if (L && typeof L.getStrataFluidPassage === "function") {
@@ -405,7 +449,7 @@ var UF;
         const queue = data.queue;
         const size = data.size;
         const n = data.n;
-        const maxBudget = budget !== undefined ? budget : config.budget;
+        const maxBudget = workBudget(budget);
 
         if (data.head >= queue.length) {
             // Queue is quiescent! Stable state costs nothing.
@@ -413,6 +457,7 @@ var UF;
                 queue.length = 0;
                 data.head = 0;
             }
+            activeAreas.delete(data);
             return 0;
         }
 
@@ -427,6 +472,10 @@ var UF;
 
             decodeCellId(data, cellId);
             const x = coordX, y = coordY, z = coordZ;
+            if (!inRange(z)) {
+                enqueueCell(ax, ay, x, y, z);
+                continue;
+            }
             const sessionNow = hydroSession();
             let gridZ = data.grids.get(z);
             const depthStart = gridZ ? getDepth(gridZ[y * size + x]) : 0;
@@ -460,11 +509,11 @@ var UF;
                     if (belowDepth < belowCap && (belowDepth === 0 || belowType === type)) {
                         let transferAmt = Math.min(depth, belowCap - belowDepth);
                         if (config._mutantDuplicate) transferAmt += 1;
-                        if (config._mutantDelete) transferAmt = Math.max(0, transferAmt - 1);
 
                         if (transferAmt > 0) {
                             depth -= transferAmt;
                             belowDepth += transferAmt;
+                            if (config._mutantDelete) belowDepth -= 1;
 
                             // Update destination cell
                             gridBelow[idx] = packVal(type, belowDepth);
@@ -514,11 +563,11 @@ var UF;
                         let maxTransfer = Math.floor(diff / 2);
                         let transferAmt = Math.min(maxTransfer, nCap - nDepth);
                         if (config._mutantDuplicate) transferAmt += 1;
-                        if (config._mutantDelete) transferAmt = Math.max(0, transferAmt - 1);
 
                         if (transferAmt > 0) {
                             depth -= transferAmt;
                             nDepth += transferAmt;
+                            if (config._mutantDelete) nDepth -= 1;
 
                             const targetType = config._mutantTypeCorrupt ? (type === TYPE_WATER ? TYPE_LAVA : TYPE_WATER) : type;
 
@@ -554,6 +603,7 @@ var UF;
             data.queue = data.queue.slice(data.head);
             data.head = 0;
         }
+        if (data.head >= data.queue.length) activeAreas.delete(data);
 
         return processed;
     }
@@ -636,71 +686,21 @@ var UF;
         },
 
         // Direct Coordinate Queries
-        depthAt(ax, ay, x, y, z) {
-            let coords;
-            if (typeof ax === "object" && ax !== null) {
-                const r = ax;
-                const a = r.area || {};
-                coords = {
-                    ax: (a.x !== undefined ? a.x : (r.ax !== undefined ? r.ax : 0)) | 0,
-                    ay: (a.y !== undefined ? a.y : (r.ay !== undefined ? r.ay : 0)) | 0,
-                    x: (r.x !== undefined ? r.x : 0) | 0,
-                    y: (r.y !== undefined ? r.y : 0) | 0,
-                    z: (r.z !== undefined ? r.z : 0) | 0
-                };
-            } else {
-                coords = {
-                    ax: ax | 0,
-                    ay: ay | 0,
-                    x: x | 0,
-                    y: y | 0,
-                    z: (z !== undefined ? z : 0) | 0
-                };
-            }
-
-            if (!inRange(coords.z)) return 0;
-            const data = getAreaData(coords.ax, coords.ay);
-            const size = data.size;
-            if (coords.x < 0 || coords.y < 0 || coords.x >= size || coords.y >= size) return 0;
-
-            const gridZ = data.grids.get(coords.z);
-            if (!gridZ) return 0;
-            return getDepth(gridZ[coords.y * size + coords.x]);
+        depthAt(a, b, c, d, e) {
+            parseCoords(a, b, c, d, e);
+            const data = getAreaData(qAx, qAy);
+            if (qX < 0 || qY < 0 || qX >= data.size || qY >= data.size) return 0;
+            const grid = data.grids.get(qZ);
+            return grid ? getDepth(grid[qY * data.size + qX]) : 0;
         },
 
-        typeAt(ax, ay, x, y, z) {
-            let coords;
-            if (typeof ax === "object" && ax !== null) {
-                const r = ax;
-                const a = r.area || {};
-                coords = {
-                    ax: (a.x !== undefined ? a.x : (r.ax !== undefined ? r.ax : 0)) | 0,
-                    ay: (a.y !== undefined ? a.y : (r.ay !== undefined ? r.ay : 0)) | 0,
-                    x: (r.x !== undefined ? r.x : 0) | 0,
-                    y: (r.y !== undefined ? r.y : 0) | 0,
-                    z: (r.z !== undefined ? r.z : 0) | 0
-                };
-            } else {
-                coords = {
-                    ax: ax | 0,
-                    ay: ay | 0,
-                    x: x | 0,
-                    y: y | 0,
-                    z: (z !== undefined ? z : 0) | 0
-                };
-            }
-
-            if (!inRange(coords.z)) return null;
-            const data = getAreaData(coords.ax, coords.ay);
-            const size = data.size;
-            if (coords.x < 0 || coords.y < 0 || coords.x >= size || coords.y >= size) return null;
-
-            const gridZ = data.grids.get(coords.z);
-            if (!gridZ) return null;
-            const val = gridZ[coords.y * size + coords.x];
-            const d = getDepth(val);
-            if (d === 0) return null;
-            return typeName(getType(val));
+        typeAt(a, b, c, d, e) {
+            parseCoords(a, b, c, d, e);
+            const data = getAreaData(qAx, qAy);
+            if (qX < 0 || qY < 0 || qX >= data.size || qY >= data.size) return null;
+            const grid = data.grids.get(qZ);
+            const val = grid ? grid[qY * data.size + qX] : 0;
+            return getDepth(val) > 0 ? typeName(getType(val)) : null;
         },
 
         rawAt(ax, ay, x, y, z) {
@@ -711,9 +711,11 @@ var UF;
         },
 
         setCell(area, x, y, z, typeStr, depthVal) {
-            const ax = area ? (area.x | 0) : 0, ay = area ? (area.y | 0) : 0;
+            const ax = area ? ((area.ax !== undefined ? area.ax : area.x) | 0) : 0;
+            const ay = area ? ((area.ay !== undefined ? area.ay : area.y) | 0) : 0;
             const tCode = typeof typeStr === "number" ? typeStr : typeCode(typeStr);
-            const dClamped = Math.max(0, Math.min(DEPTH_MAX, depthVal | 0));
+            const cap = Fluid.fluidCapacityAt(ax, ay, x, y, z);
+            const dClamped = tCode === TYPE_NONE ? 0 : Math.max(0, Math.min(cap, Math.trunc(depthVal) || 0));
 
             const data = getAreaData(ax, ay);
             const size = data.size;
@@ -748,10 +750,24 @@ var UF;
             return "submerged";
         },
 
-        walkable(ax, ay, x, y, opts = {}) {
+        walkable(ax, ay, x, y, zOrOpts = {}, opts = {}) {
             if (config._mutantIgnoreDepthWalk) return true;
-
-            const z = opts.z !== undefined ? (opts.z | 0) : 0;
+            let z;
+            if (typeof ax === "object") {
+                if (typeof ay === "number") {
+                    // (area, x, y, z, opts)
+                    parseCoords(ax, ay, x, y);
+                    opts = typeof zOrOpts === "object" ? zOrOpts : {};
+                } else {
+                    // (ref, opts)
+                    parseCoords(ax);
+                    opts = ay || {};
+                }
+                ax = qAx; ay = qAy; x = qX; y = qY; z = qZ;
+            } else {
+                opts = typeof zOrOpts === "object" ? zOrOpts : opts;
+                z = typeof zOrOpts === "number" ? zOrOpts : (opts.z || 0);
+            }
             const type = this.typeAt(ax, ay, x, y, z);
             if (!type) return true;
 
@@ -777,20 +793,28 @@ var UF;
         },
 
         getFloodGrid(area, z) {
-            const ax = area ? (area.x | 0) : 0, ay = area ? (area.y | 0) : 0;
+            const ax = area ? ((area.ax !== undefined ? area.ax : area.x) | 0) : 0;
+            const ay = area ? ((area.ay !== undefined ? area.ay : area.y) | 0) : 0;
             const data = getAreaData(ax, ay);
             if (!inRange(z | 0)) return null;
             return data.floodGrids.get(z | 0) || zeroGrid(data.n);   // a level without fluid: zeros (shared, read only)
         },
 
         step(area, budget) {
-            const ax = area ? (area.x | 0) : 0, ay = area ? (area.y | 0) : 0;
-            const maxBudget = budget !== undefined ? budget : config.budget;
+            const ax = area ? ((area.ax !== undefined ? area.ax : area.x) | 0) : 0;
+            const ay = area ? ((area.ay !== undefined ? area.ay : area.y) | 0) : 0;
+            const maxBudget = workBudget(budget);
+            if (maxBudget === 0) {
+                if (session) session.clearCost();
+                return 0;
+            }
             const sessionNow = hydroSession();
-            if (sessionNow) sessionNow.beginTick({ ax: ax, ay: ay, budget: maxBudget });
-            const n = stepArea(ax, ay, maxBudget);
+            const data = getAreaData(ax, ay);
+            const lakeBudget = lakeShare(maxBudget, data.inQueue.size > 0);
+            const lakeWork = sessionNow ? sessionNow.beginTick({ ax, ay, budget: maxBudget, lakeBudget }) : 0;
+            const n = stepArea(ax, ay, maxBudget - lakeWork);
             if (sessionNow) sessionNow.noteProcessed(n);
-            return n;
+            return n + lakeWork;
         },
 
         tick(budget) {
@@ -798,25 +822,29 @@ var UF;
             const t0 = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
 
             let totalProcessed = 0;
-            const maxBudget = budget !== undefined ? budget : config.budget;
-            const W = window.UF && UF.World;
-            const view = W && typeof W.viewLevel === "function" ? W.viewLevel() : null;
-            const sessionNow = hydroSession();
-            // One hydro tick per frame: lakes in the viewed area, or every lake when no view is set.
-            if (sessionNow) {
-                sessionNow.beginTick({
-                    ax: view ? view.x : null,
-                    ay: view ? view.y : null,
-                    budget: maxBudget
-                });
+            const maxBudget = workBudget(budget);
+            if (maxBudget === 0) {
+                diag.cellsProcessedLastTick = 0;
+                diag.lastTickMs = 0;
+                if (session) session.clearCost();
+                return 0;
             }
-
-            if (view) {
-                totalProcessed += stepArea(view.x, view.y, maxBudget);
-            } else {
-                for (const [key, data] of areas.entries()) {
-                    totalProcessed += stepArea(data.ax, data.ay, maxBudget);
-                }
+            syncRange();
+            const sessionNow = hydroSession();
+            const lakeBudget = lakeShare(maxBudget, activeAreas.size > 0);
+            const lakeWork = sessionNow ? sessionNow.beginTick({ budget: maxBudget, lakeBudget }) : 0;
+            let remaining = maxBudget - lakeWork;
+            let areasLeft = activeAreas.size;
+            // Round-robin only dirty areas. Never enumerate all allocated areas.
+            // Visit each initially queued area at most once: work woken during
+            // this pass must not acquire extra seep visits in the same tick.
+            while (remaining > 0 && activeAreas.size > 0 && areasLeft-- > 0) {
+                const data = activeAreas.values().next().value;
+                activeAreas.delete(data);
+                const n = stepArea(data.ax, data.ay, remaining);
+                totalProcessed += n;
+                remaining -= n;
+                if (data.head < data.queue.length) activeAreas.add(data);
             }
             if (sessionNow) sessionNow.noteProcessed(totalProcessed);
 
@@ -826,7 +854,7 @@ var UF;
             diag.cellsProcessedLastTick = totalProcessed;
             diag.lastTickMs = elapsed;
 
-            return totalProcessed;
+            return totalProcessed + lakeWork;
         },
 
         enqueueCell(ax, ay, x, y, z) {
@@ -885,7 +913,9 @@ var UF;
                 lastTickMs: diag.lastTickMs,
                 totalWaterVolume: totalWater,
                 totalLavaVolume: totalLava,
-                totalWaterMass: totalWater + (session ? session.stored() : 0)
+                totalWaterMass: totalWater + pendingDisplaced.water + (session ? session.stored() : 0),
+                totalLavaMass: totalLava + pendingDisplaced.lava + (session ? session.stored("lava") : 0),
+                queueZMin: ax !== undefined && ay !== undefined ? getAreaData(ax, ay).zMin : null
             };
         },
 
@@ -897,6 +927,11 @@ var UF;
 
         reset() {
             areas.clear();
+            activeAreas.clear();
+            knownRange = { ...zRange() };
+            pendingHydro = null;
+            pendingDisplaced.water = pendingDisplaced.lava = 0;
+            scheduleTick = 0;
             diag.ticks = 0;
             diag.cellsProcessedTotal = 0;
             diag.cellsProcessedLastTick = 0;
@@ -931,6 +966,11 @@ var UF;
             if (session) {
                 const hydroState = session.exportState();
                 if (hydroState) saved.hydro = hydroState;
+            } else if (pendingHydro !== null) {
+                saved.hydro = JSON.parse(JSON.stringify(pendingHydro));
+            }
+            if (pendingDisplaced.water > 0 || pendingDisplaced.lava > 0) {
+                saved.pendingDisplaced = { v: 1, ...pendingDisplaced };
             }
             return saved;
         },
@@ -944,7 +984,7 @@ var UF;
                 const [ax, ay, z, x, y, t, d] = records[i];
                 const data = getAreaData(ax, ay);
                 const size = data.size;
-                if (inRange(z) && x >= 0 && y >= 0 && x < size && y < size) {
+                if (Number.isInteger(z) && x >= 0 && y >= 0 && x < size && y < size) {
                     const gridZ = gridFor(data, z);
                     if (gridZ) {
                         const idx = y * size + x;
@@ -958,6 +998,13 @@ var UF;
             if (saved && typeof saved === "object" && saved.hydro) {
                 const sessionNow = hydroSession();
                 if (sessionNow) sessionNow.importState(saved.hydro);
+                else pendingHydro = JSON.parse(JSON.stringify(saved.hydro));
+            }
+            if (saved.pendingDisplaced) {
+                for (const type of ["water", "lava"]) {
+                    const n = saved.pendingDisplaced[type];
+                    if (Number.isSafeInteger(n) && n > 0) pendingDisplaced[type] = n;
+                }
             }
         },
 
@@ -975,6 +1022,12 @@ var UF;
     // must leave the 0..7 solver running with no extra stores.
     let hydroMod;
     let session = null;
+
+    function lakeShare(budget, hasFluid) {
+        // Keep both solvers progressing, including a caller budget of one.
+        scheduleTick++;
+        return hasFluid ? (budget === 1 ? scheduleTick % 2 : Math.floor(budget / 2)) : budget;
+    }
 
     function loadHydroModule() {
         if (hydroMod !== undefined) return hydroMod;
@@ -1043,6 +1096,11 @@ var UF;
             depthAt: function (ax, ay, x, y, z) { return Fluid.depthAt(ax, ay, x, y, z); },
             typeAt: function (ax, ay, x, y, z) { return Fluid.typeAt(ax, ay, x, y, z); },
             capacityAt: function (ax, ay, x, y, z) { return Fluid.fluidCapacityAt(ax, ay, x, y, z); },
+            blockedAt: isBarrier,
+            objectBarrierAt: isObjectBarrier,
+            canPassLaterally: function (ax, ay, x, y, z, nx, ny) {
+                return fluidCanPassLaterally(ax, ay, x, y, z, nx, ny, z);
+            },
             writeWater: writeWaterCell,
             wake: function (ax, ay, x, y, z) { wakeCellAndNeighbors(ax, ay, x, y, z); },
             zRange: zRange,
@@ -1053,6 +1111,7 @@ var UF;
                 return (x | 0) >= 0 && (y | 0) >= 0 && (x | 0) < data.size && (y | 0) < data.size;
             },
             upOpen: function (ax, ay, x, y, z) {
+                if (isObjectBarrier(ax, ay, x, y, z) || isBarrier(ax, ay, x, y, z + 1)) return false;
                 const L = levelsApi();
                 if (!L || typeof L.getStrataFluidPassage !== "function") return false;
                 const bits = L.getStrataFluidPassage(ax, ay, x, y, z);
@@ -1108,8 +1167,9 @@ var UF;
                 if (z < zRange().zMax) {
                     const aboveCap = Fluid.fluidCapacityAt(ax, ay, x, y, z + 1);
                     const aboveDepth = Fluid.depthAt(ax, ay, x, y, z + 1);
+                    const aboveType = Fluid.typeAt(ax, ay, x, y, z + 1);
                     const spaceAbove = aboveCap - aboveDepth;
-                    if (spaceAbove > 0) {
+                    if (spaceAbove > 0 && (aboveDepth === 0 || typeCode(aboveType) === type)) {
                         const move = Math.min(excess, spaceAbove);
                         Fluid.setCell({ x: ax, y: ay }, x, y, z + 1, typeName(type), aboveDepth + move);
                         excess -= move;
@@ -1132,7 +1192,10 @@ var UF;
                 }
                 if (excess > 0) {
                     const sessionNow = hydroSession();
-                    if (sessionNow) sessionNow.receiveDisplaced(excess);
+                    // D2-PENDING: retain the original type. No return path is
+                    // chosen here, including when optional hydro is unavailable.
+                    if (sessionNow) sessionNow.receiveDisplaced(excess, typeName(type));
+                    else pendingDisplaced[typeName(type)] += excess;
                 }
             }
         }
@@ -1249,9 +1312,7 @@ var UF;
         const _DataManager_extractSaveContents = DataManager.extractSaveContents;
         DataManager.extractSaveContents = function(contents) {
             _DataManager_extractSaveContents.call(this, contents);
-            if (contents && (contents.deusFluid || contents.ufFluid)) {
-                Fluid.extractSaveContents(contents.deusFluid || contents.ufFluid);
-            }
+            Fluid.extractSaveContents(contents && (contents.deusFluid || contents.ufFluid));
         };
     }
 

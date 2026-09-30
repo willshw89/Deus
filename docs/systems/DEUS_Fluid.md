@@ -1,128 +1,100 @@
-# DEUS Fluid Simulation System Specification (`DEUS_Fluid.js`)
+# DEUS Fluid (`DEUS_Fluid.js`)
 
-**Status:** `COMPLETED — VERIFIED` (2026-09-23)  
-**Task ID:** `DEUS-TSK-GEMINI-08`  
-**Subsystem Authority:** `UF.Fluid` (`game/js/plugins/DEUS_Fluid.js`)  
-**Binding Standards:** `AGENTS.md` (Rules 1, 2, 3, 4, 14), `docs/ENGINEERING_STANDARD.md`, `docs/ARCHITECTURE.md`
+Status: NAT.03.01 / lane-cw correctness implementation, 2026-09-30; awaiting independent review. RMMZ F5 playtest: **NOT RUN** in this lane. Headless checks do not establish playability or frame rate.
 
----
+## Purpose and authority boundary
 
-## 1. Executive Summary & Core Mandate
+`game/js/plugins/DEUS_Fluid.js` owns its sparse 0..7 water/lava grids and dirty queues. `game/js/sim/hydro/index.js` holds that solver's aquifers, atmosphere, displaced liquid, lake definitions and seep visit counters. The separate `sim/hydrology` kernel and Levels' legacy flood data still exist. **Design D2 must settle their authority and integration.** This lane does not merge those systems, implement liquid reactions, change displaced-water return behavior, or change waiter/spring wakeup policy.
 
-`DEUS_Fluid.js` implements a high-performance, strictly conserved 0..7 volumetric fluid dynamics engine across the physical Z-levels of the world's Z range (WG.00.17, `docs/systems/DEUS_ZRange.md`: `UF.World.zRange()`, -16..+15 for new worlds, -2..+2 for a save made before it; the legacy range when the file runs without the World, a node test of it alone) for both **water** (freshwater) and **lava** (magma).
+A nonzero cell stores depth in bits 0..2 and type in bits 4..7 (`1` water, `2` lava). Grids and visual caches are allocated per occupied area/layer. An empty level may share a read-only zero flood grid. Geometry comes from `UF.Levels`; range comes from `UF.World.zRange()` with a -2..+2 fallback before World is available.
 
-### Core Architectural Principle
-> **"Stable state costs almost nothing. Change creates work."**
-> A settled lake, a calm reservoir, or an undisturbed underground magma chamber costs effectively **0 ms CPU** per simulation tick. Fluid cells only enter active processing when physical change occurs (e.g. wall breached, door opened, liquid added, floor channeled).
+## Work scheduling and diagnostics
 
-### Key Performance Capabilities
-1. **Active Dirty-Cell Set**: A 256×256 world of 32 levels contains 2,097,152 cells (327,680 at five), but an active waterfall or breached room processes only its active cells (e.g. 50–200 cells), never scanning all cells or Z-levels.
-2. **Bounded Processing Budget**: Throttled at a default budget of `512` cells per tick, ensuring zero frame drops and a rock-solid **60 FPS** even at **4× simulation speed** during catastrophic breaches.
-3. **Strict Mass Conservation**: Zero fluid duplication or deletion in closed chambers ($V_{\text{final}} \equiv V_{\text{initial}}$ across arbitrary simulation steps).
+`tick(budget)` shares one nonnegative integer budget across **all queued areas** and registered lake visits, regardless of view. `step(area, budget)` restricts both to the requested area. The default is 512. An explicit zero returns zero without processing cells, probing geometry, evaluating weather input, or advancing hydro time. `tick` visits each initially active area at most once; newly queued work resumes on subsequent ticks. Areas rotate in a dirty-area Set so off-view work progresses without enumerating every allocated area each frame.
 
----
+One scheduler work item is one dequeued fluid cell or one scheduled lake-cell visit. A fluid item includes the fixed cardinal checks, spring feeding and a seep walk bounded by the current Z span. A lake item includes bounded local delivery/spill and evaporation. This is a count of bounded cell operations, **not** a CPU-time limit or a count of individual JavaScript instructions. A deep seep item can cost more than a dry queue entry. Lakes receive at most half the budget when fluid is queued; budget-one calls alternate the available share. Unused lake allowance remains available to fluid.
 
-## 2. Liquid Depth Classes & Semantics
+Lake definitions build all-cell and evaporation-only indexes, globally and per area. Definitions, replacement and `setEvap` rebuild these derived indexes; ticks use cursors into the chosen index. A dry season with no evaporation does not enumerate lake cells. Definition/import work, save serialization and diagnostic volume sums are explicit operations outside the tick budget.
 
-Every cell holds an integer depth from `0` to `7`, bit-packed into a compact `Uint8Array` per area level.
+`hydro().cost()` reports:
 
-| Depth | Type | Movement Class | Walkability | Pathfinding Step Cost | Visual & Physical Effect |
-|:---:|:---:|:---:|:---:|:---:|:---|
-| **0** | `null` | `"dry"` | Walkable | $1.0\times$ (Normal) | Dry ground / open air. Zero liquid. |
-| **1–2** | `water` | `"shallow"` | Walkable | $1.1\times$ | Ankle-deep water. Splash audio; translucent overlay ($\alpha \approx 0.44–0.54$). |
-| **3–4** | `water` | `"wading"` | Walkable | $2.0\times$ | Knee/waist-deep water. Units wade at half speed. Alpha $\approx 0.63–0.72$. |
-| **5–6** | `water` | `"deep"` | Impassable (`opts.canSwim` required) | $3.0\times$ (if swim) | Chest-deep water. Non-swimmers cannot enter. Alpha $\approx 0.81–0.91$. |
-| **7** | `water` | `"submerged"` | Impassable (`opts.canSwim` required) | $4.0\times$ (if swim) | Full tile depth / submerged head height. Full alpha ($1.0$). Extinguishes fires. |
-| **1–7** | `lava` | `"lethal"` | Impassable (`opts.lavaImmune` required) | N/A (Blocked) | Molten rock. Lethal hazard; burns units, incinerates combustible items. |
+- `processed`: dirty cells dequeued, including dry entries.
+- `lakeVisits`: scheduled lake entries visited.
+- `work`: `processed + lakeVisits`, bounded by the caller's budget.
+- `examined`: actual hydro lake visits, evaporation reads, delivery/passage probes and seep column probes, including refused attempts. This is additional detail within the work items; it is not capped to the same number as `work`.
+- `tick`, `aquifers`, `springs`, `lakes`: hydro sequence and registry counts.
 
----
+Idle queues and inactive lake indexes perform no cell work. Bookkeeping remains. No engine frame-time or garbage-collection performance claim has been measured here. Queue compaction and index construction allocate memory.
 
-## 3. Data Representation & Memory Layout
+## Flow, capacity and passage
 
-Each map area `(ax, ay)` manages one grid per level **that has had fluid** (sparse since WG.00.17: a level's grid and its flood cache are made on the first write of fluid to it, `gridFor`; a level without fluid costs nothing and `getFloodGrid` answers it with a shared read-only grid of zeros). A grid cell:
-- Low 4 bits (`val & 0x07`): Liquid depth (`0` to `7`).
-- High 4 bits (`(val >> 4) & 0x0F`): Liquid type (`0` = none, `1` = water, `2` = lava).
+Gravity checks the source DOWN passage bit and destination capacity. Lateral flow checks source/destination object barriers, capacity and strata height lips. Transfers require the same liquid type or an empty destination. Water and lava do not react in this solver.
 
-```text
-Memory footprint per 256x256 level: 64 KB (Uint8Array)
-Before WG.00.17: 5 grids made up front, 320 KB per area; now 64 KB (and 64 KB of flood cache) per level with fluid
-```
+Hydro delivery uses the same Fluid object/geometry barrier checks. Rain cannot enter or spill from a closed door or wall cell; lateral spill uses Fluid's lateral passage helper; upward spill requires the UP bit and an unblocked destination. Seepage still traverses permeable solid **terrain** (its existing purpose), but refuses constructed wall/closed-door objects at the source, intermediate plugs and receiver. Open doors admit the same passage as Fluid. No new permeability law is introduced.
 
-### Fast $O(1)$ Deduplicated Queue
-The active queue uses a flat integer indexing schema:
-$$\text{cellId} = (z - z_{\min}) \times (\text{size} \times \text{size}) + (y \times \text{size} + x)$$
-($z_{\min}$: the area's origin, the world's lowest level when the area's data was made.) Accompanied by `inQueue`, the `Set` of queued cell ids (WG.00.17; before, a byte map `Uint8Array(5 * size * size)` of every level):
-- Pushes are $O(1)$ and skipped if `inQueue.has(cellId)`.
-- Dequeues use an advancing `head` pointer ($O(1)$ amortized) with periodic compaction, creating **zero GC memory churn** during simulation.
+`setCell` is explicit placement/replacement, not a conserved transfer: it clamps the requested depth to the cell's capacity and accepts both area spellings. Callers transferring counted mass must debit only the accepted amount. Reconciliation after capacity loss tries compatible liquid cells above and beside the source, then retains the remainder in a typed store. It never replaces water with lava or lava with water at a receiving cell.
 
----
+**D2 pending item:** the long-term displaced-liquid store and its return behavior remain undecided. Hydro preserves water in its existing `displaced` field and lava separately in `displacedLava`; neither is deleted or automatically returned. If hydro cannot load, Fluid retains both types in `pendingDisplaced`. This is conservation bookkeeping, not a choice of the future world reservoir. Lava is excluded from every water total.
 
-## 4. Simulation Dynamics & Flow Rules
+## Public API
 
-Every simulation step (`stepArea(ax, ay, budget)`) pops up to `budget` cells from the active queue and executes two sequential priority checks:
+Query overloads use `(ax, ay, x, y, z)`, `(area, x, y, z)`, a nested `{area, x, y, z}` ref, or a flat `{ax, ay, x, y, z}` ref. An `area` accepts `{x, y}` or `{ax, ay}`. Omitted z defaults to 0.
 
-### Priority 1: Vertical Gravity Downward Transfer
-1. Liquid in cell $(x, y, z)$ checks if cell $(x, y, z - 1)$ can receive fluid.
-2. Conditions for downward flow:
-   - $z > z_{\min}$ (not on the lowest level of the world's Z range).
-   - Cell below $(x, y, z - 1)$ is not a solid rock wall or barrier.
-   - Floor boundary is open, excavated, or channeled (shape $\ne$ `solid`).
-3. If valid:
-   $$\text{transferAmt} = \min(D_{\text{source}}, 7 - D_{\text{below}})$$
-   - Source loses `transferAmt`, destination gains `transferAmt`.
-   - Both cells and their 6 orthogonal 3D neighbors are enqueued into the dirty set.
+| Method | Contract |
+|---|---|
+| `depthAt`, `fluidVolumeAt` | Integer depth 0..7; retained out-of-range records remain readable. |
+| `typeAt`, `fluidTypeAt` | `water`, `lava`, or null. |
+| `fluidCapacityAt` | Strata-derived capacity 0..7; zero outside the live world range. |
+| `fluidFillFractionAt` | Depth / capacity clamped to 0..1; zero when capacity is zero. |
+| `fluidPhysicalHeightStateAt`, `fluidPhysicalHeightStringAt` | Existing lookup conversion to 0..5 fluid strata and `FLUID_k_OF_5`. |
+| `fluidCanPassDown` | Whether source gravity passage and receiving space are available. |
+| `fluidCanPassLaterally` | Existing numeric/ref neighbor passage query, including object barriers and strata lips. |
+| `rawAt(ax, ay, x, y, z)` | Packed grid value for numeric coordinates. |
+| `setCell(area, x, y, z, type, depth)` | Set a cell within live range, clamped to capacity; wake the cell and neighbors. |
+| `walkable(ax, ay, x, y, opts)` | Uses `opts.z`; also accepts `(ax, ay, x, y, z, opts)`, `(area, x, y, z, opts)` and `(ref, opts)`. |
+| `movementClass(ref)` | `dry`, `shallow` (1..2 water), `wading` (3..4), `deep` (5..6), `submerged` (7), `lethal` (lava). |
+| `isFlooded(ref)`, `isSubmerged(ref)` | Flooded/type/depth tuple, or full-depth predicate. |
+| `getFloodGrid(area, z)` | Visual type grid; shared zero grid if unallocated; null outside range. |
+| `tick(budget)`, `step(area, budget)` | Work items executed (dirty fluid cells plus lake visits). |
+| `enqueueCell`, `wakeCellAndNeighbors` | Numeric area/cell coordinates; local dirty scheduling. |
+| `diagnostics(ax?, ay?)` | Grid counts, queue size, grid water/lava volumes, global storage added to mass totals, dirty-cell counts and timing. `queueZMin` reports a requested area's current queue origin. Volume queries with area arguments are local; hydro stores remain global. |
+| `hydro()` | Optional API below, or null if require failed. |
+| `makeSaveContents`, `extractSaveContents` | Fluid payload serialization and state replacement. |
+| `reset`, `attach` | Clear state, or bind to the live namespace/event bus. |
 
-### Priority 2: Lateral Equalization (Horizontal Flow)
-1. Occurs only if liquid remains in the source cell ($D_{\text{source}} > 1$) and downward transfer did not drain the cell.
-2. Checks the 4 cardinal neighbors in deterministic order: North $(0,-1)$, East $(1,0)$, South $(0,1)$, West $(-1,0)$.
-3. For each neighbor $N$:
-   - Must be in map bounds and not blocked by a solid wall, cliff, or closed door.
-   - Types must match (or neighbor must be dry; water and lava do not cross-contaminate in V1).
-   - If $D_{\text{source}} > D_N + 1$:
-     $$\text{transferAmt} = \left\lfloor \frac{D_{\text{source}} - D_N}{2} \right\rfloor$$
-     - Exact 1-to-1 transfer preserves strict volume conservation.
-     - Equilibrium is reached when $|D_{\text{source}} - D_N| \le 1$.
-     - When equilibrium is reached across all neighbors, no cells re-enter the queue, and simulation seamlessly settles into quiescence.
+Water depth >=5 requires `canSwim`; lava requires `lavaImmune`. These are passability predicates. Movement-speed penalties, burns, drowning, splash audio and item destruction are not implemented by these predicates.
 
----
+The optional hydro API exposes `defineAquifer(id, du)`, `defineSpring({ax,ay,x,y,z,aquifer,rate})`, `defineLake({id,evap,cells})`, `setEvap(id,n)`, `setSeasonInput(fn)`, `seedAtmosphere(n)`, `storedAt(id)`, `columnId`, `mass()` and `cost()`. `mass()` retains water-only `grid`, `aquifers`, `atmosphere`, `displaced`, `total`; `displacedByType` names water and lava separately. Amounts use JavaScript Numbers without signed 32-bit narrowing; integer precision is limited to the Number safe-integer range. Season callbacks are not saved. The tick is not a calendar integration.
 
-## 5. Event-Driven Wakeups ("Change Creates Work")
+`_configure` and hydro `configure` are test mutation controls, not gameplay APIs. `_mutantDelete` removes one unit at a transfer destination while debiting the full source amount; conservation assertions must fail under it.
 
-Fluid cells are never polled by scanning the map. They are woken up exclusively by state changes:
-1. `levels:cellChanged`: Fired when miners excavate rock, explosives detonate, or a wall is demolished. Wakes the cell and all 6 orthogonal 3D neighbors.
-2. `levels:shapeChanged`: Fired when a floor is channeled into an open shaft or stairs are carved.
-3. `doors:opened` / `doors:closed` / `doors:broken`: Fired when doors change passage state, instantly waking adjacent liquid reservoirs.
-4. `UF.Fluid.setCell(area, x, y, z, type, depth)`: Direct gameplay or script placement wakes the modified cell and its 6 neighbors.
+## Events and existing engine connections
 
----
+Listens to `levels:cellChanged`, `levels:shapeChanged`, `levels:strataChanged`, and `levels:strataDestroyed` to reconcile and wake affected cells. `doors:opened`, `doors:closed`, and `doors:broken` wake the door and neighbors. `world:areaBuilt`, `world:levelBuilt` and aliased `Game_Map.setup` reattach the namespace. Aliased `Game_Map.update` calls `Fluid.tick`. No new events are emitted.
 
-## 6. Persistence & Save / Load Schema
+Existing consumers include:
 
-`DEUS_Fluid.js` hooks into `DataManager.makeSaveContents` and `DataManager.extractSaveContents`:
-- **Sparse Storage**: Only cells with `depth > 0` are serialized:
-  ```json
-  [
-    [ax, ay, z, x, y, type, depth],
-    [0, 0, -1, 32, 32, 1, 7]
-  ]
-  ```
-- **Dynamic Resumption**: Upon loading, `extractSaveContents` populates the `Uint8Array` grids and automatically enqueues all non-zero cells and their neighbors into `activeQueue`, allowing active flows to resume without hitching or state loss.
+- `DEUS_Levels.js`: calls Fluid volume/capacity/height/flood queries and exposes query aliases. It still contains legacy flood behavior, so this is not proof of one world water authority.
+- `DEUS_World.js`: calls `Fluid.walkable` with the caller's z and swim/lava options.
+- `DEUS_Levels.js` also implements `Sprite_UFFloodOverlay`, reading `getFloodGrid` and Fluid depth for tile overlays. The brief names `DEUS_Visuals.js`, but inspection found no fluid query there; it is not established as a fluid consumer. This lane does not replace or prove either renderer in playtest.
+- `DataManager`: aliased save/load hooks carry both `deusFluid` and compatibility `ufFluid` keys.
 
----
+The strata reconciliation suite exercises real Levels-to-Fluid query/event delivery in a headless engine fixture. The lane correctness suite exercises the Fluid/hydro boundary and DataManager aliases with controlled fixtures. Actual editor F5/F8 behavior and presentation: **NOT RUN**. D2 must settle the existing bridge overlap before a unified water/lava gameplay claim.
 
-## 7. Public API Reference (`UF.Fluid`)
+## Save data and range changes
 
-| Method | Parameters | Returns | Description |
-|:---|:---|:---|:---|
-| `depthAt` | `(area, x, y, z)` or `(ax, ay, x, y, z)` | `number` (0..7) | Reads fluid depth at specified cell. |
-| `typeAt` | `(area, x, y, z)` or `(ax, ay, x, y, z)` | `"water"` \| `"lava"` \| `null` | Reads fluid type string at specified cell. |
-| `setCell` | `(area, x, y, z, type, depth)` | `void` | Sets depth/type and wakes cell + 6 neighbors. |
-| `movementClass` | `(ref)` | `string` | Returns `"dry"`, `"shallow"`, `"wading"`, `"deep"`, `"submerged"`, or `"lethal"`. |
-| `walkable` | `(ax, ay, x, y, opts)` | `boolean` | Returns true if cell is passable for unit according to fluid depth/type. |
-| `isFlooded` | `(ref)` | `{ flooded: boolean, type: string, depth: number }` | Backward-compatible query for legacy callers. |
-| `isSubmerged` | `(ref)` | `boolean` | True if water depth $\ge 7$. |
-| `getFloodGrid`| `(area, z)` | `Uint8Array` or `null` | Returns visual overlay grid (1=water, 2=lava); a shared read-only grid of zeros for a level of the range without fluid; `null` outside the range. |
-| `step` | `(area, budget)` | `number` | Steps dirty queue for area up to budget. |
-| `tick` | `(budget)` | `number` | Steps simulation for active view level. |
-| `diagnostics` | `(ax, ay)` | `object` | Returns active queue length, volume, and timing metrics; `gridsAllocated` (level grids made: only levels that had fluid) and `bytes` (their bytes plus about 8 B a queued flag), WG.00.17. |
-| `reset` | `none` | `void` | Clears all allocated grids and resets queue state. |
+Fluid retains `fluidSchemaVersion: 1` and records `[ax, ay, z, x, y, type, depth]`. Bare legacy arrays are accepted. Load preserves occupied records beyond the range available at load time; those cells remain dormant until that range opens. A World range change rebases queued IDs without changing their coordinates and wakes newly available saved cells. This range-change operation may traverse existing areas/queued work once; it is not a per-frame world scan.
+
+Optional hydro payload v2 keeps v1 fields (`atmosphere`, `displaced`, `aquifers`, `springs`, `lakes`, `visits`) and adds `displacedLava`. Import migrates v1's `displaced` as water and defaults lava to zero. Fluid's optional additive `pendingDisplaced: {v:1,water,lava}` holds typed displacement when hydro is unavailable. It remains retained if hydro subsequently becomes available; D2 owns return policy.
+
+Missing fluid keys reset grids, queues, pending payloads and hydro state. Missing hydro keys reset old hydro stores. If hydro require throws, its saved payload is deep-copied unchanged through the next save, including fields this code does not understand; it is not simulated or included in live hydro diagnostics while unavailable. Later loading in a process where hydro is available imports it. Unknown future-schema interpretation when hydro loads is not addressed here.
+
+## Checks and remaining work
+
+- `node tools/test_fluid_correctness_lane_cw.js`: budget/range/coordinate/conservation/save/passage/documentation assertions, each paired with a targeted failing runtime or document mutant.
+- `node tools/test_strata_fluid_reconciliation.js`: existing real Levels fixture, capacity/flow/reconciliation/save assertions and mutation checks.
+- `node tools/sim/test_water_dynamics.js`: existing 9-/32-layer hydro regressions.
+- `node tools/sim/test_fluid_attach.js`: existing namespace/reattachment regression.
+- `node tools/check_deus_syntax.js`: plugin syntax gate.
+
+Evidence and exact outcomes belong in `tasks/NAT.03.01/lane-cw/REPORT.md`. Remaining: independent review, D2 authority/store/reaction design, coordinator integration and editor playtest with inspected visual evidence. No new art or presentation was produced by this lane.

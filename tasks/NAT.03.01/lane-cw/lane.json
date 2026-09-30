@@ -22,6 +22,11 @@
   ],
   "gates": [
     {
+      "name": "fluid_correctness_lane_cw",
+      "command": "node tools/test_fluid_correctness_lane_cw.js",
+      "exitCode": 0
+    },
+    {
       "name": "syntax",
       "command": "node tools/check_deus_syntax.js",
       "exitCode": 0
