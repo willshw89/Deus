@@ -1,0 +1,55 @@
+START=2026-09-30T19:02:00.343Z
+SHA=9d8515d86b548c5a84d2fee6259198f3b615677e
+CWD=C:\Users\snewt\AppData\Local\Temp\deus-lane-cw-9d8515d8-1790794694833
+NODE=v24.19.0
+COMMAND=node tools/test_fluid_correctness_lane_cw.js
+PASS a_shared_budget_all_areas
+PASS a_zero_budget
+PASS a_dirty_area_index
+PASS a_lake_area_index_and_shared_work
+PASS a_cost_counts_probes
+PASS b_load_preserves_outer_layers
+PASS b_rebase_queued_coordinates
+PASS c_query_overloads
+PASS c_set_area_alias
+PASS c_set_capacity
+PASS c_walkable_caller_z
+PASS d_no_cross_type_overwrite
+PASS d_typed_displaced_store
+PASS d_displaced_without_hydro
+PASS d_typed_save_roundtrip
+PASS e_absent_save_keys_reset
+PASS e_failed_require_payload_preserved
+PASS f_large_mass_totals
+PASS g_rain_closed_door_and_wall
+PASS g_spill_shared_barriers
+PASS g_seep_shared_barriers
+PASS i_real_mass_deletion
+PASS h_documentation_status
+PASS mutant_shared_budget -> a_shared_budget_all_areas
+PASS mutant_zero_budget -> a_zero_budget
+PASS mutant_area_scan -> a_dirty_area_index
+PASS mutant_lake_scan -> a_lake_area_index_and_shared_work
+PASS mutant_false_cost -> a_cost_counts_probes
+PASS mutant_drop_range -> b_load_preserves_outer_layers
+PASS mutant_stale_origin -> b_rebase_queued_coordinates
+PASS mutant_bad_coords -> c_query_overloads
+PASS mutant_set_alias -> c_set_area_alias
+PASS mutant_set_capacity -> c_set_capacity
+PASS mutant_walk_z -> c_walkable_caller_z
+PASS mutant_overwrite_type -> d_no_cross_type_overwrite
+PASS mutant_lava_to_water -> d_typed_displaced_store
+PASS mutant_drop_fallback -> d_displaced_without_hydro
+PASS mutant_drop_lava_save -> d_typed_save_roundtrip
+PASS mutant_absent_keys -> e_absent_save_keys_reset
+PASS mutant_drop_hydro -> e_failed_require_payload_preserved
+PASS mutant_narrow_mass -> f_large_mass_totals
+PASS mutant_rain_barrier -> g_rain_closed_door_and_wall
+PASS mutant_spill_barrier -> g_spill_shared_barriers
+PASS mutant_seep_barrier -> g_seep_shared_barriers
+PASS mutant_mass_delete -> i_real_mass_deletion
+PASS mutant_false_docs -> h_documentation_status
+RESULT: 46 passed, 0 failed
+
+EXIT=0
+END=2026-09-30T19:02:02.098Z

@@ -1,0 +1,10 @@
+SHA=9d8515d86b548c5a84d2fee6259198f3b615677e
+EXPECTED_EXIT=1
+COMMAND=node tools/test_fluid_correctness_lane_cw.js --case=i_real_mass_deletion --mutant=mass_delete
+RESULT: 0 passed, 1 failed
+FAIL i_real_mass_deletion: destination lost mass under deletion mutant
+
+4 !== 5
+
+
+EXIT=1

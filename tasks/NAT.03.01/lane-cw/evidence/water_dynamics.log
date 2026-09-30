@@ -1,0 +1,82 @@
+START=2026-09-30T19:02:00.356Z
+SHA=9d8515d86b548c5a84d2fee6259198f3b615677e
+CWD=C:\Users\snewt\AppData\Local\Temp\deus-lane-cw-9d8515d8-1790794694833
+NODE=v24.19.0
+COMMAND=node tools/sim/test_water_dynamics.js
+PASS fixture_passage_bits — capacity 7 down 8
+PASS require_binds — UF.Fluid is the module export
+PASS hydro_loaded — session
+PASS perm_granite_blocks — granite 0
+PASS perm_soil_seeps — soil 3
+PASS perm_sandstone_seeps — sandstone 3
+PASS perm_air_open — air 6
+PASS seep_quantum_blocks — soil visit1 0
+PASS mutant_seep_quantum_fails — mutant 1
+PASS season_default_zero — precipitation 0
+PASS layer_count -16..+15 — layers 32
+PASS sparse_read -16..+15 — grids 0
+PASS sparse_one_write -16..+15 — grids 1 after read 1 volume 3
+PASS seepage_porous -16..+15 — ticks 10 cave 5 plug 0 total 5 soilPerm 3
+PASS seepage_impermeable -16..+15 — source 5 cave 0
+PASS mutant_ignore_perm_fails -16..+15 — source 0 cave 0 aquifer 5 (water left the cell above the granite)
+PASS seepage_by_material -16..+15 — sand perm 4 ticks 2 soil ticks 4 cave 2
+PASS seep_visit_resumes -16..+15 — cave 1 source 0
+PASS mutant_drop_seep_visits_fails -16..+15 — source 1 cave 0 (resume check would fail)
+PASS waterfall_opening -16..+15 — quiet true steps 1 bottom 7
+PASS mutant_no_gravity_waterfall_fails -16..+15 — top 7 bottom 0
+PASS waterfall_range -16..+15 — steps 16 bottom 7 mid 0 grids 32
+PASS spring_stops -16..+15 — depth 4 aquifer 0
+PASS mutant_create_water_fails -16..+15 — total 6 aquifer 3 grid 3
+PASS lake_fills -16..+15 — depth 7 atmo 2 total 9
+PASS lake_dries_evap -16..+15 — depth 0 atmo 9
+PASS mutant_delete_evap_fails -16..+15 — total 3 atmo 0 depth 3
+PASS lake_dries_infiltration -16..+15 — ticks 12 grid 0 aquifer 6 plugs 0
+PASS flood_lateral -16..+15 — a 7 b 7 atmo 6
+PASS flood_up_layer -16..+15 — low 7 high 3
+PASS flood_refuses_solid -16..+15 — rock 0 atmo 4
+PASS mutant_flood_solid_fails -16..+15 — rock 4 (solid-cell check would fail)
+PASS lava_not_seeped -16..+15 — lava 4 cave 0
+PASS displaced_counted -16..+15 — depth 2 displaced 5 total 7
+PASS old_save_array -16..+15 — depth 5 total 5
+PASS old_save_object -16..+15 — depth 4
+PASS save_roundtrip -16..+15 — before 11 after 11 version 1
+PASS season_not_saved -16..+15 — atmo 5 depth 0 (default precipitation is 0; DEC-026 not chosen)
+PASS mass_checkpoints -16..+15 — checkpoints 200 total 25 sigMatch true
+PASS cost_bound -16..+15 — activeExamined 0 activeProcessed 12 settledExamined 0 settledProcessed 0 steps 16 bottom 7 full 32768 size 32 layers 32
+COST-32 activeExamined 0 activeProcessed 12 settledExamined 0 settledProcessed 0 steps 16 bottom 7 full 32768 grids 32
+PASS mutant_full_scan_fails -16..+15 — examined 32768 full 32768 (cost bound would fail)
+PASS layer_count -4..+4 — layers 9
+PASS sparse_read -4..+4 — grids 0
+PASS sparse_one_write -4..+4 — grids 1 after read 1 volume 3
+PASS seepage_porous -4..+4 — ticks 10 cave 5 plug 0 total 5 soilPerm 3
+PASS seepage_impermeable -4..+4 — source 5 cave 0
+PASS mutant_ignore_perm_fails -4..+4 — source 0 cave 0 aquifer 5 (water left the cell above the granite)
+PASS seepage_by_material -4..+4 — sand perm 4 ticks 2 soil ticks 4 cave 2
+PASS seep_visit_resumes -4..+4 — cave 1 source 0
+PASS mutant_drop_seep_visits_fails -4..+4 — source 1 cave 0 (resume check would fail)
+PASS waterfall_opening -4..+4 — quiet true steps 1 bottom 7
+PASS mutant_no_gravity_waterfall_fails -4..+4 — top 7 bottom 0
+PASS waterfall_range -4..+4 — steps 4 bottom 7 mid 0 grids 9
+PASS spring_stops -4..+4 — depth 4 aquifer 0
+PASS mutant_create_water_fails -4..+4 — total 6 aquifer 3 grid 3
+PASS lake_fills -4..+4 — depth 7 atmo 2 total 9
+PASS lake_dries_evap -4..+4 — depth 0 atmo 9
+PASS mutant_delete_evap_fails -4..+4 — total 3 atmo 0 depth 3
+PASS lake_dries_infiltration -4..+4 — ticks 12 grid 0 aquifer 6 plugs 0
+PASS flood_lateral -4..+4 — a 7 b 7 atmo 6
+PASS flood_up_layer -4..+4 — low 7 high 3
+PASS flood_refuses_solid -4..+4 — rock 0 atmo 4
+PASS mutant_flood_solid_fails -4..+4 — rock 4 (solid-cell check would fail)
+PASS lava_not_seeped -4..+4 — lava 4 cave 0
+PASS displaced_counted -4..+4 — depth 2 displaced 5 total 7
+PASS old_save_array -4..+4 — depth 5 total 5
+PASS old_save_object -4..+4 — depth 4
+PASS save_roundtrip -4..+4 — before 11 after 11 version 1
+PASS season_not_saved -4..+4 — atmo 5 depth 0 (default precipitation is 0; DEC-026 not chosen)
+PASS mass_checkpoints -4..+4 — checkpoints 200 total 25 sigMatch true
+PASS cost_bound -4..+4 — activeExamined 0 activeProcessed 12 settledExamined 0 settledProcessed 0 steps 4 bottom 7 full 576 size 8 layers 9
+PASS mutant_full_scan_fails -4..+4 — examined 576 full 576 (cost bound would fail)
+RESULT: PASS (0 failed)
+
+EXIT=0
+END=2026-09-30T19:02:00.811Z

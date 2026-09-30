@@ -1,0 +1,23 @@
+START=2026-09-30T19:02:00.391Z
+SHA=9d8515d86b548c5a84d2fee6259198f3b615677e
+CWD=C:\Users\snewt\AppData\Local\Temp\deus-lane-cw-9d8515d8-1790794694833
+NODE=v24.19.0
+COMMAND=node tools/sim/test_fluid_attach.js
+PASS mutant_site_present — three bind assignments
+PASS mutant_require_does_not_bind — window.UF.Fluid set: false
+PASS require_binds_before_core_lines — window.UF.Fluid is the module export before Core runs: true
+PASS require_survives_core_assign — same object after window.DEUS = window.DEUS || {}; window.UF = window.DEUS: true
+PASS hooks_on_first_map_load — listeners 9
+PASS hooks_not_stacked — before second load 9 after 9 (levels:cellChanged,levels:shapeChanged,levels:strataChanged,levels:strataDestroyed,world:areaBuilt,world:levelBuilt,doors:opened,doors:closed,doors:broken)
+PASS volume_before_place — scanned 0 legacy 0
+PASS volume_after_place — scanned 22 diagnostics 22 legacyCalls 0 legacyVolume 0 expected 22
+PASS volume_after_attach — scanned 22 diagnostics 22 legacyCalls 0 legacyVolume 0 expected 22
+PASS flood_uses_solver — vias solver volume 22
+PASS volume_across_flood_fills — layers 32 volume 22
+PASS volume_across_flow — ticks 10 bottom 22 expected 22
+PASS reattach_on_map_load — was unbound true; restored true; missing
+PASS classic_script_binds — identity kept: true Fluid set: true
+RESULT: PASS (0 failed)
+
+EXIT=0
+END=2026-09-30T19:02:00.606Z
