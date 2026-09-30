@@ -1,0 +1,16 @@
+PASS cards1.metadata
+PASS cards1.reject_metadata: mutated input rejected
+PASS cards1.preserve_existing
+PASS cards1.reject_preserve_existing: mutated input rejected
+PASS cards1.actual_catalogue_structure
+PASS cards1.reject_actual_catalogue_structure: mutated input rejected
+PASS cards1.card_links
+PASS cards1.reject_card_links: mutated input rejected
+PASS cards1.terrain_gates
+PASS cards1.reject_terrain_gates: mutated input rejected
+PASS cards1.static_first
+PASS cards1.reject_static_first: mutated input rejected
+PASS cards1.references_and_text
+PASS cards1.reject_references_and_text: mutated input rejected
+RESULT: 14 passed, 0 failed (lane checks only; required schema/rebuild gate remains separate)
+EXIT=0
