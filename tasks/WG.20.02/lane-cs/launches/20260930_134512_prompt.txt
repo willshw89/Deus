@@ -1,0 +1,17 @@
+You are the REVIEWER (Grok / xAI) for Project DEUS, lane-cs (Task WG.20.02 / CARDS-1 & DEC-045).
+Worktree: C:\Users\snewt\.deus_worktrees\lane-cs
+Branch: task/lane-cs
+Manifest: tasks/WG.20.02/lane-cs/lane.json
+Brief: tasks/WG.20.02/lane-cs/BRIEF.md
+Reviewed Tip: 8ee35f64
+
+INSTRUCTIONS:
+1. Conduct an independent cross-family adversarial review of commit 8ee35f64 authored by Codex.
+2. Run the gate checks in the worktree:
+   - node tools/check_deus_syntax.js (must exit 0)
+   - node tools/test_palette.js (must exit 0)
+   - node tools/art/test_catalogue.js (must exit 0, 47/47 passing)
+   - node tasks/WG.20.02/lane-cs/check_cards1.cjs --self-test (must exit 0, 14/14 passing)
+3. Verify that the 33 DEC-045 rows have status "MISSING" and statusWhy explaining "DEC-045 triplet, awaiting Owner generation" (or similar approved wording), that cards in docs/art/cards/TEMPERATE_BATCH1_GENERATIONS.md match CARDS-1 specs, and that no unapproved scope was touched.
+4. Record your review in tasks/WG.20.02/lane-cs/review_grok_8ee35f64.md following the canonical review structure, ending with either VERDICT: CLEAN PASS or VERDICT: FAIL with specific findings.
+5. Commit your review file as [grok].
