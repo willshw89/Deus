@@ -1,0 +1,35 @@
+{
+  "lane": "lane-cw",
+  "taskId": "NAT.03.01",
+  "branch": "task/lane-cw",
+  "writer": {
+    "provider": "codex",
+    "model": "codex",
+    "family": "openai"
+  },
+  "reviewer": {
+    "provider": "grok",
+    "model": "grok",
+    "family": "xai"
+  },
+  "allowedPaths": [
+    "game/js/plugins/DEUS_Fluid.js",
+    "game/js/sim/hydro/**",
+    "docs/systems/DEUS_Fluid.md",
+    "tools/test_fluid*.js",
+    "tools/test_strata_fluid_reconciliation.js",
+    "tasks/NAT.03.01/lane-cw/**"
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "command": "node tools/check_deus_syntax.js",
+      "exitCode": 0
+    },
+    {
+      "name": "strata_fluid_reconciliation",
+      "command": "node tools/test_strata_fluid_reconciliation.js",
+      "exitCode": 0
+    }
+  ]
+}
