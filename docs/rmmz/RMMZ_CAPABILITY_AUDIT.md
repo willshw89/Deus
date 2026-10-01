@@ -209,7 +209,7 @@ Project DEUS enforces a hard frame budget of **16.6 ms (60 FPS)** during active 
 ### Deployment Pipeline:
 - **Primary Target**: Standalone Windows executable (`Deus.exe` bundling NW.js runtime).
 - **Filesystem Isolation**: Node.js file system calls (`require('fs')`) are strictly guarded behind `typeof nw !== 'undefined'` checks to ensure future web export compatibility.
-- **Originality Compliance**: All shipped assets in `game/` must pass `tools/originality_check.js`. Stand-in references are restricted to development builds.
+- **Originality Compliance**: All shipped assets in `game/` originality check was removed by DEC-061. Stand-in references are restricted to development builds.
 
 ---
 

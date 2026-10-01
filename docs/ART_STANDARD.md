@@ -72,7 +72,7 @@ Every sprite stands on the bottom-centre of its frame. The anchor in the sidecar
 | 2. Master Walk Sheet | Generate the 12-sprite Walk sheet (3 Down, 3 Left, 3 Right, 3 Up) in **Google Nano Banana Pro** (`gemini-3-pro-image` / `generate_image`) | Gemini |
 | 3. Action Sheets with Reference | Generate subsequent 12-sprite action sheets (Melee, Ranged, Magic, Haul, Work, Downed) in **Google Nano Banana Pro** (`gemini-3-pro-image`) passing the Walk sheet via `ImagePaths` | Gemini |
 | 4. Clean & Snap | Process raw generation, remove magenta background, snap to `art/palette/uf.hex`, align frames to 48×48 px on baseline y=47 | cleaning tool |
-| 5. Check | `tools/art_check.js --native` and `tools/originality_check.js` pass | tools |
+| 5. Check | `tools/art_check.js --native` passes (the originality check was removed by DEC-061) | tools |
 | 6. Review | Review 12-sprite grid and live in-game animation loop across all 4 facings | Gemini & user |
 | 7. Approve | User approval of demographic suite | **the user only** |
 | 8. Export | Export to `game/img/characters/` with sidecars | Gemini / Claude Code |

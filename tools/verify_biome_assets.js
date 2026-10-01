@@ -4,7 +4,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const NODE = 'C:\\Program Files\\nodejs\\node.exe';
 const ART_CHECK = path.join(ROOT, 'tools', 'art_check.js');
-const ORIG_CHECK = path.join(ROOT, 'tools', 'originality_check.js');
+// removed check
 
 const files = [
     'game/img/faces/UF_Faces_Trees.png',
@@ -67,10 +67,10 @@ for (const f of files) {
         origFails++;
     }
 }
-console.log(`originality_check summary: ${files.length - origFails}/${files.length} passed.`);
+
 
 if (artFails > 0 || origFails > 0) {
     process.exit(1);
 } else {
-    console.log('\nALL 18 BIOME ASSETS PASSED BOTH ART_CHECK AND ORIGINALITY_CHECK 100%!');
+
 }

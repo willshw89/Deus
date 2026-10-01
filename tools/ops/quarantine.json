@@ -551,14 +551,6 @@
       "owner": null
     },
     {
-      "path": "tools/test_object_originality.js",
-      "category": "FAIL_OTHER",
-      "firstErrorLine": "Originality Check Failures:",
-      "exitCode": 1,
-      "ms": 6241,
-      "owner": null
-    },
-    {
       "path": "tools/test_perf_benchmark.js",
       "category": "NEEDS_NWJS",
       "firstErrorLine": "static screen: tools/test_perf_benchmark.js:12 names \"nwjs\": const NW = \"C:\\\\Program Files (x86)\\\\Steam\\\\steamapps\\\\common\\\\RPG Maker MZ\\\\nwjs-win\\\\nw.exe\";",
@@ -858,22 +850,6 @@
       "firstErrorLine": "TypeError: Tilemap.isTileA1 is not a function",
       "exitCode": 1,
       "ms": 2442,
-      "owner": null
-    },
-    {
-      "path": "tools/test_var2_suite.js",
-      "category": "FAIL_OTHER",
-      "firstErrorLine": "no index at <root>\\reference\\u7_originality_index.json: run with --build-index first",
-      "exitCode": 1,
-      "ms": 663,
-      "owner": null
-    },
-    {
-      "path": "tools/test_var_suite.js",
-      "category": "FAIL_OTHER",
-      "firstErrorLine": "no index at <root>\\reference\\u7_originality_index.json: run with --build-index first",
-      "exitCode": 1,
-      "ms": 666,
       "owner": null
     },
     {

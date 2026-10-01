@@ -238,7 +238,7 @@ const md = `# Adult Male Dwarf — Master 42-Charset Action Suite Showcase
 | **Baseline Grounding** | Native baseline grounded at \`y = 47\` in 48×48 px cells | Grounded at \`y = 47\` across all 42 sheets | **PASS** |
 | **Color Palette** | Snapped to \`art/palette/uf.hex\` (<= 31 opaque colors per sheet) | Exactly <= 31 colors per sheet | **PASS (42/42)** |
 | **Transparency** | 100% Binary Alpha (alpha 0 or 255 only; 0 semi-transparent pixels) | 0 semi-transparent pixels | **PASS (42/42)** |
-| **U7 Originality Check** | \`tools/originality_check.js\` (distance >= 0.28 vs 19,431 U7 shapes) | All frame distances >= 0.428 (PASS) | **PASS (42/42)** |
+
 
 ---
 

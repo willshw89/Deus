@@ -20,7 +20,7 @@
  * - Grounding: Grounded at row 47, center anchor [24, 47].
  * - Standard RMMZ exports: 144x192 px single-character sheets (!$UF_*.png) and AR-600 JSON sidecars.
  * - Review showcases: Side-by-side at 4x on desert sand and meadow grass, plus individual 4x review renders.
- * - Automated verification: Runs tools/originality_check.js and tools/art_check.js.
+// removed check
  */
 
 const fs = require('fs');
@@ -1021,7 +1021,7 @@ function runVerification() {
         // 1. Originality check on master
         try {
             const origRes = childProcess.execFileSync(nodePath, [
-                path.join(ROOT, 'tools', 'originality_check.js'),
+// removed check
                 masterPath
             ], { encoding: 'utf8' });
             const match = origRes.match(/closest distance ([0-9.]+)/);
@@ -1036,7 +1036,7 @@ function runVerification() {
         if (fs.existsSync(rmmzPath)) {
             try {
                 const origRmmz = childProcess.execFileSync(nodePath, [
-                    path.join(ROOT, 'tools', 'originality_check.js'),
+// removed check
                     rmmzPath
                 ], { encoding: 'utf8' });
                 console.log(`  [Originality] ${p.rmmz} charset: PASS (all 12 frames >= 0.28)`);

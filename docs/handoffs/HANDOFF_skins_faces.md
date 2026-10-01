@@ -10,7 +10,7 @@ The user, 2026-09-19 14:42: "Every faction should have a different menu skin"; 1
 - **Until your art arrives,** the engine draws stand-ins in code so the factions already look different: each skin is `Window.png` recoloured in the culture's materials, and each portrait is the older stock face inside a simple code-drawn frame in the culture's colours (`UF_GenFrame`). The screenshots from the `skins` suite show them (below).
 
 ## What needs art (requests in `docs/ASSET_REQUESTS.md`, spec section "AR-1700 to AR-1730")
-Every file is made exclusively with **Google Nano Banana Pro** (`generate_image`, model id `gemini-3-pro-image`, Gemini 3 Pro Image model; AGENTS.md Rule 11, VISION V69, V70, V79, V109) from prompts 11 and 12 in `docs/handoffs/GENERATOR_PROMPTS.md`. Nano Banana Pro utilizes advanced reasoning ("Thinking") to follow complex instructions, maintain brand consistency, and render high-fidelity text and pixel details. Any animated interface elements (e.g. pause sign, cursor pulsing) must be authored as distinct sprite frames—**NO AFTER-EFFECT ANIMATIONS** (AGENTS.md Rule 12, VISION V60, V108). All art is reduced and palette-snapped by the project's tool, and must pass `tools/originality_check.js` before it goes into `game/` (AGENTS rule 8). Deliver the first skin and the first face sheet alone for the user's approval; then batches of three to five.
+Every file is made exclusively with **Google Nano Banana Pro** (`generate_image`, model id `gemini-3-pro-image`, Gemini 3 Pro Image model; AGENTS.md Rule 11, VISION V69, V70, V79, V109) from prompts 11 and 12 in `docs/handoffs/GENERATOR_PROMPTS.md`. Nano Banana Pro utilizes advanced reasoning ("Thinking") to follow complex instructions, maintain brand consistency, and render high-fidelity text and pixel details. Any animated interface elements (e.g. pause sign, cursor pulsing) must be authored as distinct sprite frames—**NO AFTER-EFFECT ANIMATIONS** (AGENTS.md Rule 12, VISION V60, V108). All art is reduced and palette-snapped by the project's tool, and originality check was removed by DEC-061 before it goes into `game/` (AGENTS rule 8). Deliver the first skin and the first face sheet alone for the user's approval; then batches of three to five.
 
 
 ### Window skins: AR-1700 to AR-1710
@@ -75,7 +75,7 @@ Bodies follow `docs/design/PEOPLES.md`. The star-born and the swarm are working 
 1. Make a test copy and run the suite: `"C:\Program Files\nodejs\node.exe" tools/test_snapshot.js --name skins --no-run`, then `"C:\Program Files\nodejs\node.exe" tools/run_tests.js skins --game %TEMP%\uf_snapshots\skins`.
 2. `skins.cultures_differ` and `skins.text_readable` measure your delivered skin (its source then reads `file`). `skins.faces.by_culture` and `skins.faces.fallback` show which sheet each portrait came from.
 3. Open the screenshots in the copy's `test_output/`: `skins.sheet_<culture>.png` (the selection panel under three player cultures) and `skins.talk_stranger.png` (a conversation with a stranger of another culture: both portraits and both skins).
-4. Then do the usual: `tools/art_check.js`, `tools/originality_check.js`, the user's approval, and your status in `docs/ASSET_REQUESTS.md`.
+4. Then do the usual: `tools/art_check.js` (originality check removed by DEC-061), the user's approval, and your status in `docs/ASSET_REQUESTS.md`.
 
 ## Decisions for the user (not for Gemini)
 - Whether the automata (the star-born's constructs, PEOPLES.md) get face sheets of their own. Today they use the star-born's skin and crystal frame around their stock face.

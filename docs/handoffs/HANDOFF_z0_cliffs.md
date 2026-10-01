@@ -17,7 +17,7 @@ Built and checked on 2026-09-24 with **stock placeholders** (section 3). In the 
 - **Non-living assets:** the autonomous pipeline of AGENTS.md rule 13 applies (batch, slot map, process, integrate, log in `docs/ASSET_MANIFEST.md`, verify in context). The user still approves every asset (rule 6).
 - **No animation** in these frames (rule 12): a cliff and a ramp are still.
 - **Style:** `docs/ART_STANDARD.md` and `docs/PROJECT_DEUS_ART_DIRECTION_SPEC.md`: flat top-down 3/4 view, HD pixel art, 1 art pixel = 1 screen pixel on the 48 px grid, palette `art/palette/uf.hex`, alpha 0 or 255, crisp edges. Raw generations stay in `art/raw/`, masters in `art/masters/`.
-- **Checks before delivery:** `tools/art_check.js --native` and `tools/originality_check.js`.
+- **Checks before delivery:** `tools/art_check.js --native` (the originality check was removed by DEC-061).
 - **The black cap is not art.** The engine fills the upper 48 px of every cliff frame with `#0a0a10` and a 2 px `#121218` line along its top (both inside the convention's `#08080C..#121218`). Do not paint a cap, a grass lip or a rock top into the sheets below; it would never be shown.
 
 ## 3. Exactly what the engine reads (and the placeholders it reads today)

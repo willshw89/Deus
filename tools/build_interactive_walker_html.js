@@ -145,7 +145,7 @@ const html = `<!DOCTYPE html>
       </div>
       <div class="bg-[#0d1117] border border-[#30363d] rounded-lg p-3">
         <div class="font-bold text-white mb-1">🛡️ Originality Verification</div>
-        <div>Passes <code class="text-amber-300">tools/originality_check.js</code> (distance &ge; 0.28 vs 19,431 U7 shapes). Zero blurry alpha-blends.</div>
+// removed check
       </div>
     </div>
 

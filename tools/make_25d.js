@@ -1169,10 +1169,6 @@ function runOne(opts) {
         printLog(log);
         if (!opts.dryRun) {
             console.log(`NEXT check: "C:\\Program Files\\nodejs\\node.exe" tools/art_check.js --native --sidecar ${rel(res.outPng)}`);
-            const orig = path.join(ROOT, 'tools', 'originality_check.js');
-            console.log(fs.existsSync(orig)
-                ? `NEXT originality: run tools/originality_check.js on ${rel(res.outPng)} (make_25d does not call it yet: docs/systems/MAKE_25D.md -> Originality hook)`
-                : 'NEXT originality: tools/originality_check.js does not exist yet (planned hook: docs/systems/MAKE_25D.md -> Originality hook)');
         }
         console.log(`DONE ${res.id}: ${res.sidecar.frameWidth}x${res.sidecar.frameHeight} frames, anchor [${res.sidecar.anchor}], ${log.warnings.length} warning(s)`);
         return 0;

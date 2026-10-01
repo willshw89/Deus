@@ -104,7 +104,7 @@ Use the same numbers: set epochs × repeats to land near 2,000 steps, turn flip 
 ### 3.4 Pick the checkpoint
 1. Generate the same 8 test prompts with each checkpoint, at the same seeds. Four prompts are subjects in the dataset (a woman in a grey dress facing south, an oak tree, a wooden table, a wolf facing east). Four are subjects that are **not** in it (a windmill, a goat, a potter at a wheel, a rowboat).
 2. Keep the earliest checkpoint that gives the lean, the upper-left light, the palette feel and the dithered texture on the **unseen** subjects.
-3. Reduce the in-dataset test images (section 5) and run the originality check on them. A FAIL on a test image means the LoRA has started to memorise. Take an earlier checkpoint, or lower the LoRA strength.
+The originality check was removed by DEC-061.
 4. Show the test sheet to the user before any production use.
 
 ## 4. Generate at higher definition than U7
