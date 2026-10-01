@@ -1,0 +1,13 @@
+{
+  "canonicalId": "SURFACE_SHARED_TERRAIN_SCREE-DRY_V1_DEFAULT",
+  "name": "Mountain Scree (Dry)",
+  "date": "2026-09-30",
+  "author": "Owner (PixelLab)",
+  "pixellabId": "9b14146b-62b6-4122-8c84-042e74f619e8",
+  "fillTile": 0,
+  "palette": "deus_master_world_palette_v1.hex",
+  "dimensions": {
+    "width": 48,
+    "height": 48
+  }
+}

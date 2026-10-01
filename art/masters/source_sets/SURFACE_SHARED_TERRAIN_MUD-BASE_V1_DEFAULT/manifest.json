@@ -1,0 +1,13 @@
+{
+  "canonicalId": "SURFACE_SHARED_TERRAIN_MUD-BASE_V1_DEFAULT",
+  "name": "Marsh Mud (Base)",
+  "date": "2026-09-30",
+  "author": "Owner (PixelLab)",
+  "pixellabId": "3bd90e5f-9263-4d11-aabc-586a88020c45",
+  "fillTile": 0,
+  "palette": "deus_master_world_palette_v1.hex",
+  "dimensions": {
+    "width": 48,
+    "height": 48
+  }
+}

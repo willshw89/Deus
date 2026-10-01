@@ -1,0 +1,13 @@
+{
+  "canonicalId": "SURFACE_SHARED_TERRAIN_MEADOW_V1_DEFAULT",
+  "name": "Temperate Meadow Grass",
+  "date": "2026-09-30",
+  "author": "Owner (PixelLab)",
+  "pixellabId": "a7bfcf27-55e9-4cab-9ff3-2992cfd89f59",
+  "fillTile": 15,
+  "palette": "deus_master_world_palette_v1.hex",
+  "dimensions": {
+    "width": 48,
+    "height": 48
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "lane": "lane-cy",
+  "taskId": "ART.GROUND.INDUCT",
+  "branch": "task/lane-cy",
+  "writer": "gemini",
+  "reviewer": "grok",
+  "allowedPaths": [
+    "game/data/Map001.json",
+    "game/data/Tilesets.json",
+    "game/img/tilesets/Outside_A1.png",
+    "game/img/tilesets/Outside_A2.png",
+    "game/img/tilesets/Dungeon_A2.png",
+    "game/img/tilesets/Outside_D.png",
+    "game/img/tilesets/DEUS_GroundVar_D.png",
+    "art/masters/source_sets/**",
+    "art/review/ground_f5_*.png",
+    "tools/art/induct_all_ground_tiles.js",
+    "tools/art/verify_specimens_rgb.js",
+    "tools/art/build_ground_demo_map.js",
+    "tools/test_pixellab_ground_tiles_f5.js",
+    "tasks/ART.GROUND.INDUCT/lane-cy/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "node",
+      "args": [
+        "tools/check_deus_syntax.js"
+      ],
+      "timeoutSec": 600
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/art/verify_specimens_rgb.js"
+      ],
+      "timeoutSec": 600
+    }
+  ]
+}

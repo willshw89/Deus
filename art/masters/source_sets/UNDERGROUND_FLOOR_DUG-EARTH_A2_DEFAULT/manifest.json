@@ -1,0 +1,13 @@
+{
+  "canonicalId": "UNDERGROUND_FLOOR_DUG-EARTH_A2_DEFAULT",
+  "name": "Compacted Dug Earth Floor",
+  "date": "2026-09-30",
+  "author": "Owner (PixelLab)",
+  "pixellabId": "a32533f0-187a-4c2a-a477-433f2fd43212",
+  "fillTile": 15,
+  "palette": "deus_master_world_palette_v1.hex",
+  "dimensions": {
+    "width": 48,
+    "height": 48
+  }
+}

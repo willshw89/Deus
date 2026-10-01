@@ -1,0 +1,13 @@
+{
+  "canonicalId": "SURFACE_SHARED_TERRAIN_NEEDLE-FLOOR-DAMP_V1_DEFAULT",
+  "name": "Needle Floor (Damp)",
+  "date": "2026-09-30",
+  "author": "Owner (PixelLab)",
+  "pixellabId": "10b7c41f-8ef2-44c5-9b5b-1fadc3f37ad7",
+  "fillTile": 0,
+  "palette": "deus_master_world_palette_v1.hex",
+  "dimensions": {
+    "width": 48,
+    "height": 48
+  }
+}

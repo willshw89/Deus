@@ -1,0 +1,13 @@
+{
+  "canonicalId": "UNDERGROUND_FLOOR_MINED-STONE_A2_DEFAULT",
+  "name": "Chiseled Mined Stone Floor",
+  "date": "2026-09-30",
+  "author": "Owner (PixelLab)",
+  "pixellabId": "74a93c7b-3e10-43c5-9c6e-525cbfaf9b28",
+  "fillTile": 0,
+  "palette": "deus_master_world_palette_v1.hex",
+  "dimensions": {
+    "width": 48,
+    "height": 48
+  }
+}

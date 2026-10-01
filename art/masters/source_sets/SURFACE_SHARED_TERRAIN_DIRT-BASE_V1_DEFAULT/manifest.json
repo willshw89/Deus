@@ -1,0 +1,13 @@
+{
+  "canonicalId": "SURFACE_SHARED_TERRAIN_DIRT-BASE_V1_DEFAULT",
+  "name": "Loam Dirt (Base)",
+  "date": "2026-09-30",
+  "author": "Owner (PixelLab)",
+  "pixellabId": "58e1a2c9-7ad0-48ad-bd6f-c0b2a79d1ebd",
+  "fillTile": 15,
+  "palette": "deus_master_world_palette_v1.hex",
+  "dimensions": {
+    "width": 48,
+    "height": 48
+  }
+}

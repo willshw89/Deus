@@ -1,0 +1,13 @@
+{
+  "canonicalId": "SURFACE_SHARED_TERRAIN_SHRUB-SOIL-DAMP_V1_DEFAULT",
+  "name": "Shrub Soil (Damp)",
+  "date": "2026-09-30",
+  "author": "Owner (PixelLab)",
+  "pixellabId": "ff01c30d-0b53-420c-ba4e-6c442d2f4a8a",
+  "fillTile": 0,
+  "palette": "deus_master_world_palette_v1.hex",
+  "dimensions": {
+    "width": 48,
+    "height": 48
+  }
+}
