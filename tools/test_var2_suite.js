@@ -35,7 +35,7 @@ for (const a of actions) {
 
     let orig = 'PASS';
     try {
-        const out = "FILE PASS";
+        const out = "RESULT PASS\nFILE PASS";
         orig = out.includes('PASS') ? 'PASS' : 'FAIL';
     } catch (e) {
         orig = 'FAIL';

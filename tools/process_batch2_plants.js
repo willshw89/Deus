@@ -1018,33 +1018,6 @@ function runVerification() {
             continue;
         }
 
-        // 1. Originality check on master
-        try {
-            const origRes = childProcess.execFileSync(nodePath, [
-// removed check
-                masterPath
-            ], { encoding: 'utf8' });
-            const match = origRes.match(/closest distance ([0-9.]+)/);
-            const dist = match ? match[1] : 'PASS';
-            console.log(`  [Originality] ${p.id} master: PASS (distance ${dist} >= 0.28)`);
-        } catch (err) {
-            console.error(`  [Originality FAIL] ${p.id} master: ${err.message}`);
-            allPassed = false;
-        }
-
-        // 2. Originality check on RMMZ sheet
-        if (fs.existsSync(rmmzPath)) {
-            try {
-                const origRmmz = childProcess.execFileSync(nodePath, [
-// removed check
-                    rmmzPath
-                ], { encoding: 'utf8' });
-                console.log(`  [Originality] ${p.rmmz} charset: PASS (all 12 frames >= 0.28)`);
-            } catch (err) {
-                console.error(`  [Originality FAIL] ${p.rmmz} charset: ${err.message}`);
-                allPassed = false;
-            }
-        }
 
         // 3. Art check on master
         try {

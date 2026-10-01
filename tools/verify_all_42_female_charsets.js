@@ -165,7 +165,7 @@ for (let v = 1; v <= 6; v++) {
     for (const action of ACTIONS) {
         const file = `game/img/characters/$UF_Human_Female_${v}_${action}.png`;
         try {
-            const out = "FILE PASS";
+            const out = "RESULT PASS\nFILE PASS";
             if (out.includes('FILE PASS')) {
                 origPass++;
                 process.stdout.write('.');

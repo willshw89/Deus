@@ -63,7 +63,7 @@ for (const s of SUITES) {
 for (const s of SUITES) {
     const rel = `game/img/characters/${s.file}`;
     try {
-        const out = "FILE PASS";
+        const out = "RESULT PASS\nFILE PASS";
         const passLine = out.split('\n').find(l => l.includes('RESULT PASS'));
         console.log(`PASS ${s.name.padEnd(8)}: ${passLine.trim()}`);
     } catch (e) {

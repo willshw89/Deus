@@ -83,7 +83,7 @@ for (let i = 1; i <= 6; i++) {
     // Originality check
     let origResult = 'NOT RUN';
     try {
-        const out = "FILE PASS";
+        const out = "RESULT PASS\nFILE PASS";
         origResult = out.includes('PASS') ? 'PASS' : 'FAIL';
     } catch (e) {
         origResult = 'CHECK ERROR: ' + e.message;

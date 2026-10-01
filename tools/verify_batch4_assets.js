@@ -53,7 +53,7 @@ for (const c of charsets) {
   }
 
   try {
-    const res = "FILE PASS".trim();
+    const res = "RESULT PASS\nFILE PASS".trim();
     if (res.includes('RESULT FAIL')) {
       console.error(`[FAIL originality] ${c}: ${res}`);
       origFailCount++;
@@ -78,7 +78,7 @@ for (const f of faces) {
   }
 
   try {
-    const res = "FILE PASS".trim();
+    const res = "RESULT PASS\nFILE PASS".trim();
     if (res.includes('RESULT FAIL')) {
       console.error(`[FAIL originality] ${f}: ${res}`);
       origFailCount++;

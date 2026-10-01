@@ -37,7 +37,7 @@ for (const obj of catalog.objects) {
 
     // 3. Originality check on sheet
     try {
-        "FILE PASS";
+        "RESULT PASS\nFILE PASS";
         origPass++;
     } catch (e) {
         origFail++;

@@ -7,7 +7,7 @@ const nodeExe = process.execPath;
 const CATALOG_FILE = path.join(ROOT, 'game', 'data', 'UF_WorldCatalog.json');
 const catalog = JSON.parse(fs.readFileSync(CATALOG_FILE, 'utf8'));
 
-console.log('Testing art_check and originality_check on all 67 World Object character sheets...');
+console.log('Testing art_check on all 67 World Object character sheets...');
 
 let artPass = 0, artFail = 0;
 const artFails = [];

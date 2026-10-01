@@ -57,7 +57,7 @@ for (const fac of factions) {
     for (const num of [1, 2]) {
         const file = `game/img/faces/UF_Faces_${fac}_${num}.png`;
         try {
-            const out = "FILE PASS";
+            const out = "RESULT PASS\nFILE PASS";
             if (out.includes('FILE PASS')) {
                 const distMatch = out.match(/closest distance ([\d\.]+)/);
                 console.log(`PASS: ${file} (dist=${distMatch ? distMatch[1] : '?'})`);

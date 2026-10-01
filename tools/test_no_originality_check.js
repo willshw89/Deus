@@ -43,9 +43,9 @@ function scanDir(dir) {
             scanDir(fullPath);
         } else if (fullPath.endsWith('.js') && fullPath !== __filename) {
             const content = fs.readFileSync(fullPath, 'utf8');
-            assert(!content.includes('originality_check.js'), `${fullPath} contains originality_check.js`);
-            assert(!content.includes('check_furniture_originality.js'), `${fullPath} contains check_furniture_originality.js`);
-            assert(!content.includes('test_object_originality.js'), `${fullPath} contains test_object_originality.js`);
+            assert(!content.includes('originality_check'), `${fullPath} contains originality_check`);
+            assert(!content.includes('check_furniture_originality'), `${fullPath} contains check_furniture_originality`);
+            assert(!content.includes('test_object_originality'), `${fullPath} contains test_object_originality`);
         }
     }
 }

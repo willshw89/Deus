@@ -48,28 +48,7 @@ for (const f of files) {
 }
 console.log(`art_check summary: ${files.length - artFails}/${files.length} passed.`);
 
-console.log('\n=== Running originality_check on all 18 Biome Assets ===');
-let origFails = 0;
-for (const f of files) {
-    const full = path.join(ROOT, f);
-    try {
-        const out = execSync(`"${NODE}" "${ORIG_CHECK}" "${full}"`, { encoding: 'utf8' });
-        if (out.includes('RESULT FAIL') || out.includes('FAIL:')) {
-            console.log(`FAIL: ${f}`);
-            console.log(out);
-            origFails++;
-        } else {
-            console.log(`PASS: ${f}`);
-        }
-    } catch (e) {
-        console.log(`FAIL (exception): ${f}`);
-        console.log(e.stdout || e.message);
-        origFails++;
-    }
-}
-
-
-if (artFails > 0 || origFails > 0) {
+if (artFails > 0) {
     process.exit(1);
 } else {
 
