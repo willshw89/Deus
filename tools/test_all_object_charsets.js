@@ -35,14 +35,7 @@ for (const obj of catalog.objects) {
         console.error(`Icon Art Check FAIL on ${obj.id} (${iconPath}):\n${e.stdout ? e.stdout.toString() : e.message}`);
     }
 
-    // 3. Originality check on sheet
-    try {
-        "RESULT PASS\nFILE PASS";
-        origPass++;
-    } catch (e) {
-        origFail++;
-        console.error(`Originality Check FAIL on ${obj.id} (${sheetPath}):\n${e.stdout ? e.stdout.toString() : e.message}`);
-    }
+
 }
 
 console.log('====================================================');

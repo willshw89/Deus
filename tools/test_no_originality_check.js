@@ -46,6 +46,7 @@ function scanDir(dir) {
             assert(!content.includes('originality_check'), `${fullPath} contains originality_check`);
             assert(!content.includes('check_furniture_originality'), `${fullPath} contains check_furniture_originality`);
             assert(!content.includes('test_object_originality'), `${fullPath} contains test_object_originality`);
+            assert(!content.includes('RESULT PASS\\nFILE PASS'), `${fullPath} contains RESULT PASS stub`);
         }
     }
 }
@@ -66,8 +67,8 @@ try {
         }
     }
 } catch (e) {
-    // If git commands fail (e.g. no main branch), warn but don't fail unless there's a real issue
-    console.error('Warning: Could not check changed files syntax via git diff:', e.message);
+    console.error('FAIL: Could not check changed files syntax via git diff:', e.message);
+    failed = true;
 }
 
 if (failed) {

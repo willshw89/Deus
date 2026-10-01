@@ -20,7 +20,6 @@
  * - Grounding: Grounded at row 47, center anchor [24, 47].
  * - Standard RMMZ exports: 144x192 px single-character sheets (!$UF_*.png) and AR-600 JSON sidecars.
  * - Review showcases: Side-by-side at 4x on desert sand and meadow grass, plus individual 4x review renders.
-// removed check
  */
 
 const fs = require('fs');
@@ -1003,7 +1002,7 @@ function buildShowcase() {
 
 function runVerification() {
     console.log(`\n======================================================`);
-    console.log(`Running Automated Verification (Originality & Art Check)...`);
+    console.log(`Running Automated Verification (Art Check)...`);
     console.log(`======================================================`);
 
     const nodePath = process.execPath;

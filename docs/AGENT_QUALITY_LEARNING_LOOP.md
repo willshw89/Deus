@@ -138,7 +138,7 @@ Every dispatched task is assigned a primary task class and evaluated across six 
 - `MIGRATION`: Structural repository consolidation, path updates, code refactoring.
 - `DOCUMENTATION`: Policy specification, architecture manuals, audit logs, status reports.
 - `ART_GENERATION`: Prompt compilation and Nano Banana Pro source generation.
-- `ART_QC`: Palette verification, scale consistency, sprite grid alignment, originality check.
+- `ART_QC`: Palette verification, scale consistency, sprite grid alignment, The originality check was removed by DEC-061..
 - `DATA_GENERATION`: Catalog generation (`UF_WorldCatalog.json`), biome configuration, tileset slots.
 
 ### Dimensional Risk Flags (Recorded before dispatch):

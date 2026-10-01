@@ -82,12 +82,7 @@ for (let i = 1; i <= 6; i++) {
 
     // Originality check
     let origResult = 'NOT RUN';
-    try {
-        const out = "RESULT PASS\nFILE PASS";
-        origResult = out.includes('PASS') ? 'PASS' : 'FAIL';
-    } catch (e) {
-        origResult = 'CHECK ERROR: ' + e.message;
-    }
+    
 
     console.log(`Variation ${i}: 144x192, ${colors.size} colors (<=31), alpha ${badAlpha === 0 ? 'OK' : 'FAIL'}, side frames distinct (A/Stand/B: OK), U7 originality: ${origResult}`);
 }

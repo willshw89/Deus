@@ -571,8 +571,7 @@ function readme(o, items, counts) {
         '- Local only. NEVER commit this folder, NEVER copy it into game/, NEVER ship or upload it publicly.',
         '  The project .gitignore is a whitelist, so reference/ is untracked; keep it that way.',
         '- Everything that ships in the game is our own original work: never a copy, trace, recolour, crop',
-// removed check
-        '  against the U7 shape library before it goes into game/; FAIL or WARN means redraw, never ship.',
+        '  ',
         '- Upload to a hosted trainer only as a private dataset for a private model, and delete it there',
         '  after training.',
         '',

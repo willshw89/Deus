@@ -82,7 +82,7 @@
 | `tools/art_check.js` palette check | It never reads `uf.hex`. It compares pixels with the master registry only when one of these holds: a sidecar declares `allowedRamps` / `materialFamilies`; a tileset sidecar declares `paletteMode: "MASTER"`; or `--strict-palette` is passed. Otherwise character and object sheets get a colour-count budget only, and tilesets pass with no colour-membership test. So neither palette is enforced on delivered art by default. |
 | `tools/test_palette_standard.js` | Validates the master palette and registry: 503 / 503 PASS, including 226 active colours, 30 reserved slots, 58 ramps, 0 exact duplicates and 0 reported near-duplicates. It says nothing about runtime. |
 | `tools/test_palette.js` | A Lab nearest-colour quantizer against `uf.hex` (`loadPalette`, line 26). `run_tests.bat` does not reference it. |
-| `The originality check was removed by DEC-061.` | Uses `uf.hex` as its fallback palette when the U7 files are absent (lines 756–760). Its self-test logs how many `uf.hex` entries equal the decoded U7 daylight palette (lines 1680–1683). |
+| The originality check was removed by DEC-061. | The originality check was removed by DEC-061. |
 
 ---
 

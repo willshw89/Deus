@@ -4,12 +4,12 @@ Written 2026-09-19 by Claude Code, for the user and Gemini.
 
 The user's decisions behind this (docs/VISION.md V2, V9; AGENTS.md rule 8, all revised 2026-09-19):
 - Ultima VII (U7) art may be used as style reference **and as training data** for the art generators. The user accepted the risk.
-- **Hard rule: everything that ships in the game is our own original work.** It is never a copy, trace, recolour, crop or near-copy of a U7 image. `tools/originality_check.js` checks every asset against the U7 shape library before it goes into `game/`.
+- **Hard rule: everything that ships in the game is our own original work.** It is never a copy, trace, recolour, crop or near-copy of a U7 image. `The originality check was removed by DEC-061.` checks every asset against the U7 shape library before it goes into `game/`.
 - The look is U7's 2.5D, drawn at **higher definition than U7** (V2: "We can even be higher definition than U7").
 
 ## 1. The hard rule, first
 
-1. Every generated image goes through `tools/originality_check.js` after it is reduced to its master size (section 5). **Anything graded FAIL or WARN is redrawn. It is never shipped.**
+1. Every generated image goes through `The originality check was removed by DEC-061.` after it is reduced to its master size (section 5). **Anything graded FAIL or WARN is redrawn. It is never shipped.**
 2. Redrawing means a new image: a new seed, a different pose or design, a different silhouette. You may not recolour, nudge pixels, crop or flip the flagged image until it passes. A recoloured near-copy is still a near-copy.
 3. Never lower the check's thresholds (`--fail-threshold`, `--warn-threshold`) to get a pass. Those options exist only to show that the check can fail.
 4. U7 images are never used as init images, img2img sources, ControlNet or pose guides, inpainting bases or trace layers. The model learns the look from the training set. Every generation starts from noise and a text prompt, or from **our own** approved art.
@@ -104,7 +104,7 @@ Use the same numbers: set epochs × repeats to land near 2,000 steps, turn flip 
 ### 3.4 Pick the checkpoint
 1. Generate the same 8 test prompts with each checkpoint, at the same seeds. Four prompts are subjects in the dataset (a woman in a grey dress facing south, an oak tree, a wooden table, a wolf facing east). Four are subjects that are **not** in it (a windmill, a goat, a potter at a wheel, a rowboat).
 2. Keep the earliest checkpoint that gives the lean, the upper-left light, the palette feel and the dithered texture on the **unseen** subjects.
-The originality check was removed by DEC-061.
+3. Reduce the in-dataset test images (section 5) and run the originality check on them. A FAIL on a test image means the LoRA has started to memorise. Take an earlier checkpoint, or lower the LoRA strength.
 4. Show the test sheet to the user before any production use.
 
 ## 4. Generate at higher definition than U7
@@ -136,7 +136,7 @@ The originality check was removed by DEC-061.
 node tools/make_25d.js art/raw/<id>.png --lean none [--block auto] [--height <px>] --preview game/test_output/make_25d/<id>.png
                                                    -> art/masters/<id>.png + <id>.json
 node tools/art_check.js --native --sidecar art/masters/<id>.png                       palette, alpha, frame size, sidecar
-node tools/originality_check.js art/masters/<id>.png --report game/test_output/originality_<id>.png
+node The originality check was removed by DEC-061. art/masters/<id>.png --report game/test_output/originality_<id>.png
 ```
 - `--native` (the 48-native mode of art_check) was still being added to `tools/art_check.js` by another run on 2026-09-19 (STATUS → In progress). If the flag is refused, run `--sidecar` alone and ignore the old 3× grid check (ART_STANDARD §6).
 - The originality check compares each frame (using the sidecar's frame size) against every frame of both games' shape libraries. It grades each frame PASS, WARN or FAIL. **Only PASS may go forward.** On WARN or FAIL, redraw the image as in section 1.

@@ -72,13 +72,13 @@ Every sprite stands on the bottom-centre of its frame. The anchor in the sidecar
 | 2. Master Walk Sheet | Generate the 12-sprite Walk sheet (3 Down, 3 Left, 3 Right, 3 Up) in **Google Nano Banana Pro** (`gemini-3-pro-image` / `generate_image`) | Gemini |
 | 3. Action Sheets with Reference | Generate subsequent 12-sprite action sheets (Melee, Ranged, Magic, Haul, Work, Downed) in **Google Nano Banana Pro** (`gemini-3-pro-image`) passing the Walk sheet via `ImagePaths` | Gemini |
 | 4. Clean & Snap | Process raw generation, remove magenta background, snap to `art/palette/uf.hex`, align frames to 48×48 px on baseline y=47 | cleaning tool |
-| 5. Check | `tools/art_check.js --native` passes (the originality check was removed by DEC-061) | tools |
+| 5. Check | The originality check was removed by DEC-061. | tools |
 | 6. Review | Review 12-sprite grid and live in-game animation loop across all 4 facings | Gemini & user |
 | 7. Approve | User approval of demographic suite | **the user only** |
 | 8. Export | Export to `game/img/characters/` with sidecars | Gemini / Claude Code |
 
 ## 6. Asset checklist
-Automated: palette colours only; alpha 0 or 255; frame size 48×48 px (or 96×96 for large 2-tile creatures), anchor bottom-centre, 12 frames per sheet on 3×4 grid; originality check passes.
+Automated: palette colours only; alpha 0 or 255; frame size 48×48 px (or 96×96 for large 2-tile creatures), anchor bottom-centre, 12 frames per sheet on 3×4 grid; The originality check was removed by DEC-061.
 By eye: authentic FF5 16-bit chibi proportions; upright, no lean; fits 1 tile (or 2 tiles for large creatures); consistent scale across all actions; reads cleanly at 1×, 2×, and 3× zoom.
 
 ## 7. How image models fail here, and the rule for each

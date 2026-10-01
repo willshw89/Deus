@@ -289,8 +289,7 @@ function main() {
     const art = childProcess.execSync(`"C:\\Program Files\\nodejs\\node.exe" tools\\art_check.js --native "${charsetPath}"`, { cwd: ROOT }).toString();
     console.log(art.trim());
 
-    const orig = "RESULT PASS\nFILE PASS".toString();
-    console.log(orig.trim());
+
 }
 
 if (require.main === module) {

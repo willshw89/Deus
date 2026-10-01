@@ -34,16 +34,9 @@ for (const a of actions) {
         if (alpha > 0) colors.add((d.data[i] << 16) | (d.data[i + 1] << 8) | d.data[i + 2]);
     }
 
-    let orig = 'PASS';
-    try {
-        const out = "RESULT PASS\nFILE PASS";
-        orig = out.includes('PASS') ? 'PASS' : 'FAIL';
-    } catch (e) {
-        orig = 'FAIL';
-    }
-
-    console.log(`${a.padEnd(8)}: ${d.width}x${d.height}, ${colors.size} colors (<=31), alpha ${badAlpha === 0 ? 'OK' : 'FAIL'}, U7 Orig: ${orig}`);
-    if (d.width !== 144 || d.height !== 192 || colors.size > 31 || badAlpha > 0 || orig !== 'PASS') {
+    
+    console.log(`${a.padEnd(8)}: ${d.width}x${d.height}, ${colors.size} colors (<=31), alpha ${badAlpha === 0 ? 'OK' : 'FAIL'}`);
+    if (d.width !== 144 || d.height !== 192 || colors.size > 31 || badAlpha > 0 ) {
         allPass = false;
     }
 }

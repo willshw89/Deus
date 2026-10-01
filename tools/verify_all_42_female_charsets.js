@@ -159,29 +159,3 @@ if (totalFailed > 0) {
 console.log('==========================================================\n');
 
 
-console.log('=== Running Ultima VII Originality Check on All 42 Charsets ===\n');
-let origPass = 0, origFail = 0;
-for (let v = 1; v <= 6; v++) {
-    for (const action of ACTIONS) {
-        const file = `game/img/characters/$UF_Human_Female_${v}_${action}.png`;
-        try {
-            const out = "RESULT PASS\nFILE PASS";
-            if (out.includes('FILE PASS')) {
-                origPass++;
-                process.stdout.write('.');
-            } else {
-                console.error(`\nFAIL: ${file}`);
-                console.error(out);
-                origFail++;
-            }
-        } catch (e) {
-            console.error(`\nERROR executing originality check on ${file}:`, e.message);
-            origFail++;
-        }
-    }
-}
-
-if (origFail > 0) {
-    process.exit(1);
-}
-console.log('\n*** 100% OF ADULT FEMALE HUMAN CHARSETS PASSED ALL QUALITY GATES! ***\n');

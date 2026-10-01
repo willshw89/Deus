@@ -39,7 +39,7 @@ for (const f of masterFaceFiles) {
 
 console.log('\n=== 2. VERIFYING ORIGINALITY ON FACE SHEETS ===');
 for (const f of faceFiles) {
-    const out = "RESULT PASS\nFILE PASS";
+    
     const match = out.match(/closest distance ([\d\.]+)/);
     console.log(out.includes('FILE PASS') ? `PASS: ${f} (dist=${match ? match[1] : '?'})` : `FAIL: ${f}\n${out}`);
 }

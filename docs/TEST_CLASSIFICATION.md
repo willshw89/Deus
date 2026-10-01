@@ -145,7 +145,7 @@ Total scripts audited: 605
 | `deploy_human_sprites.js` | Art pipeline / image processing tool |
 | `design_settler_sprite.js` | Art pipeline / image processing tool |
 | `inspect_sprites.js` | Art pipeline / image processing tool |
-| `The originality check was removed by DEC-061.` | Art pipeline / image processing tool |
+| `originality_check.js` | Art pipeline / image processing tool |
 | `prepare_12_sprite_references.js` | Art pipeline / image processing tool |
 | `render_12_sprites_grid.js` | Art pipeline / image processing tool |
 | `test_foliage_sprite_animations.js` | Art pipeline / image processing tool |

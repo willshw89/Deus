@@ -44,7 +44,7 @@ for (const file of charsets) {
     }
 
     try {
-        const origOut = "RESULT PASS\nFILE PASS";
+        
 
         passed++;
     } catch (err) {
@@ -71,7 +71,7 @@ for (const file of faceSets) {
     }
 
     try {
-        const origOut = "RESULT PASS\nFILE PASS";
+        
 
         passed++;
     } catch (err) {

@@ -97,14 +97,7 @@ for (const v of VARIATIONS) {
             continue;
         }
 
-        let orig = 'PASS';
-        try {
-            const out = "RESULT PASS\nFILE PASS";
-            orig = out.includes('PASS') ? 'PASS' : 'FAIL';
-        } catch (e) {
-            orig = 'FAIL';
-        }
-
+        
         if (orig !== 'PASS') {
 
 

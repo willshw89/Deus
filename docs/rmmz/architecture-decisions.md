@@ -72,7 +72,7 @@ This audit establishes explicit architectural boundaries between the neutral sim
 - **Decision**: Strict physical and logical isolation between development/experimental tools and the production game:
   - **MechanicsLab** (`games/MechanicsLab`, decommissioned per user directive 2026-09-22): Archived to `archive/MechanicsLab_backup.zip`. Contained experimental proofs, camera tests, and isolated licensed reference parsers.
   - **OriginalGame / DEUS** (`c:\Users\snewt\OneDrive\Desktop\UF\game`): The single authoritative production game.
-  - Production Restrictions: Zero licensed reference code, raw extractors, or development-only test harnesses may ship in the production build. All shipped game content originality check was removed by DEC-061.
+  - Production Restrictions: Zero licensed reference code, raw extractors, or development-only test harnesses may ship in the production build. All shipped game content must pass `tools/originality_check.js`.
 
 ### 2.8 Generated Plugin Copies & Forwarding
 - **Decision**: Single source of truth for plugin implementation:

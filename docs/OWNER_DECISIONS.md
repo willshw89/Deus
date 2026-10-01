@@ -261,6 +261,7 @@ Every decision item recorded in this log must provide:
 - **Ruling:** Every catalogue entry's pixel size, envelope, footprint and anchor derive from the scale chart (`art/reference/DEUS_HUMAN_SCALE_STRIP_V1.png`, whose numeric source is `game/data/DEUS_ScaleRegistry.json`; the two are not independent evidence), citing one chart row per entry. The catalogue builder (`tools/art/build_catalogue.js`), template generator (`tools/art/make_blank_templates.js`) and placement validator (`tools/art/validate_art.js`) enforce it. Disagreements with other documents go to the Owner and are never resolved by workers. Sim distances (DEC-013 geometry) govern the simulation. Where geometry and chart imply different px/ft, it is an Owner question (`stratumPx`).
 - **Open:** If "the scale chart" means a different file, the Owner names it and DEC-016 is amended.
 - **Amendment (Owner, 2026-10-01):** nine per-row size overrides for the catalogue-rows lane (lane-pg) are approved; see DEC-066 item 1. Other disagreements still go to the Owner.
+- **Amendment (Owner, 2026-10-01, ~23:25Z):** "I will solve size mismatches when I see them in the game". A size mismatch against a catalogue envelope no longer holds council-passed art back. The PM puts the piece in at its drawn size, in the smallest 48-multiple frame that holds it, and lists each mismatch with the induction. The Owner adjusts sizes after seeing them in the game.
 
 ---
 
@@ -1223,6 +1224,7 @@ Every decision item recorded in this log must provide:
   4. **Unchanged:** catalogue row first, the council (DEC-062 as amended by DEC-069), the PM YEA in `art/APPROVALS.md` (DEC-056). People, facesets and character sheets for people stay with the Owner.
   5. **Temperate bestiary, row-first waived for this batch.** "You can do the fauna and monsters for the biome"; "Use the rest of the credits and present to the art council". Asked whether to waive DEC-007 row-first for the temperate creatures of the adopted bestiary (`docs/design/bestiary/BESTIARY_grok_heavy.md`, NAT.07.01) so the remaining PixelLab credits are spent now, the Owner chose "Waive, generate now". Their catalogue rows land through a reviewed lane before any of them enters the game. The six AS-SEX-002 partners (doe, sow, mare, aurochs cow, ewe, rooster) were generated before their rows the same day and are covered by the same condition.
 - **Records updated with this entry:** pointer lines under DEC-062 and DEC-063; the art banners in `CLAUDE.md` and `AGENTS.md`.
+- **Amendment (Owner, 2026-10-01, ~22:35Z):** "I said use V3 for humanoids. See he difference in animation style? I want V3 for humanoids and pro for animals." Humanoid shapes are generated in PixelLab v3 from text only: no Pixflux front view as a reference image, because that changed the look. Animals and other bodies are generated in Pro. Width is checked under the DEC-072 amendment of ~22:50Z.
 
 ### Decision `DEC-072`: Sprite scale and frames: small races 48 px tall, dwarves 60, humans 72, large races 96; tall humanoids in 48x96, long animals in 96x48, giants up to 96x96 (amends AS-GLOBAL-021, AS-PM-001 and AS-SIZE-001)
 - **Date:** 2026-10-01
@@ -1236,6 +1238,7 @@ Every decision item recorded in this log must provide:
 - **Records updated with this entry:** amendment notes on AS-GLOBAL-021, AS-PM-001 and AS-SIZE-001 in `docs/art/DEUS_ASSET_STANDARD.md`; DEC-071 item 1.
 - **Amendment (Owner, 2026-10-01, later the same day):** "We dont have to use my sizing rule. I Do want sizing to cap out at 96x96, and doors are going to be 48x96". Item 2 is replaced: the frame-shape rule (48x48 / 96x48 / 48x96, with 96x96 for giants only) no longer binds. Every map sprite, in every facing, fits within 96x96, in the smallest 48-multiple frame that holds it (48x48, 96x48, 48x96 or 96x96), so a long animal that is tall when it faces north or south may use a 96x96 frame. Doors are 48x96 (DEC-068). The heights of item 1 stay as the scale anchors (Owner, same exchange: "yeah keep the height anchors, its so all the humanoids fit inside all doors etc"). Relative sizes follow the art council's ART-SCALE-1 advice under the 96x96 cap. Not yet updated (data, through a reviewed lane): `game/data/DEUS_ScaleRegistry.json`, `art/catalogue/scale_chart.json`, the catalogue frame classes for humanoid rows, and the 42 px wording in `docs/art/TEMPERATE_GENERATION_LIST.md` and `docs/art/TEMPERATE_ART_NEEDS.md`.
 - **Amendment (Owner, 2026-10-01, ~20:20Z):** "They need to look good in a 48 pixel wide space because if they are going to walk down a hallway we dont want them clipping". Every humanoid, giants and trolls included, is drawn at most 48 px wide in all four facings the game uses (south, west, east, north), so it walks a one-tile hallway or a 48x96 door without overlapping the walls. Heights stay as item 1. Width comes from the drawing (a narrow pose, arms and weapons held close), never from squeezing a finished sprite. The 18 humanoids measured wider on 2026-10-01 are redrawn.
+- **Amendment (Owner, 2026-10-01, ~22:50Z), on pure v3 humanoids measuring 54-79 px wide:** "As long as the body is within 48px its fine. I dont want to change a bunch of stuff. If weapons or something clip the wall thats fine, as long as its just a pixel or two". The 48-px limit applies to the body in the four game facings. A held weapon or other gear may overhang a one-tile hallway by a pixel or two. A sprite whose body is wider than 48 px is redrawn; otherwise the drawing stands. Generation method: DEC-071 amendment.
 
 ### Decision `DEC-073`: Creatures are spawned, Minecraft-style but intelligent; no ecology simulation for wildlife and monsters
 - **Date:** 2026-10-01
@@ -1355,3 +1358,13 @@ Every decision item recorded in this log must provide:
   3. **Then AG may run merge_gate** (amends DEC-048 items 1 and 3, effective when lane-gg merges). Only through merge_gate, with `--no-ff` and never `--force`. Only on a lane whose review is a real launch by a family independent of the writer, and never on a lane AG wrote or reviewed. Merges run between mail windows (DEC-081). Before then, the PM merges.
   4. **Fauna scripts in the repo:** done, `tools/art/fauna/` on lane-gf (`6ae73064`).
 - **Records updated with this entry:** a pointer under DEC-048; `docs/AUDIT_LOG.md` A12-3 (the lane that answers it).
+
+### Decision `DEC-084`: MiniMax re-enabled temporarily
+- **Date:** 2026-10-01 (~18:25 local)
+- **Decider:** Owner
+- **Status:** `DECIDED`
+- **Quote:** "Task out minimac too until that sub runs out"
+- **Ruling:**
+  1. MiniMax (minimax provider) is authorized for launches and lane roles again, suspending DEC-076.
+- **Records updated with this entry:** .agents/rules/deus-multiagent-routing.md.
+

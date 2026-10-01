@@ -51,24 +51,3 @@ for (const fac of factions) {
 }
 console.log(`Master Face Sheets: ${masterCheckFails === 0 ? 'ALL 22 PASS (100%)' : `${masterCheckFails} FAILED`}\n`);
 
-// removed check
-let origFails = 0;
-for (const fac of factions) {
-    for (const num of [1, 2]) {
-        const file = `game/img/faces/UF_Faces_${fac}_${num}.png`;
-        try {
-            const out = "RESULT PASS\nFILE PASS";
-            if (out.includes('FILE PASS')) {
-                const distMatch = out.match(/closest distance ([\d\.]+)/);
-                console.log(`PASS: ${file} (dist=${distMatch ? distMatch[1] : '?'})`);
-            } else {
-                console.log(`FAIL: ${file}\n${out}`);
-                origFails++;
-            }
-        } catch (e) {
-            console.log(`ERROR: ${file}\n${e.stdout || e.message}`);
-            origFails++;
-        }
-    }
-}
-console.log(`Originality Checks: ${origFails === 0 ? 'ALL 22 PASS (100%)' : `${origFails} FAILED`}\n`);

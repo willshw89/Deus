@@ -542,7 +542,7 @@ This task wrote only `docs/design/TERRAIN_LEVELS.md`. The critic review edited o
 ---
 
 ## 14. Asset requests for Gemini (proposed rows; numbers are proposals, and the build run takes the next free block when it writes `docs/ASSET_REQUESTS.md`)
-Common rules: ART_STANDARD §1 and §5 (HD FF6 style, flat 3/4 view, 48 px grid, palette `art/palette/uf.hex`, alpha 0 or 255, no pure black, Nano Banana 4× raws on `#FF00FF`, `tools/art_check.js --native`, `The originality check was removed by DEC-061.`, the user's approval). Formats are those of `RMMZ_ASSET_SPEC.md` §3, **except A4, which is 768×720** (measured). **Finding for the spec's owner:** `RMMZ_ASSET_SPEC.md` §3 lists A4 as 768×576. The stock sheets measure 768×720 (§1.1), and any A4 drawn to the spec as written will be the wrong size. Every stock tile used in §1.2 is named below as the placeholder to replace (CLAUDE.md).
+Common rules: ART_STANDARD §1 and §5 (HD FF6 style, flat 3/4 view, 48 px grid, palette `art/palette/uf.hex`, alpha 0 or 255, no pure black, Nano Banana 4× raws on `#FF00FF`, `tools/art_check.js --native`, `tools/originality_check.js`, the user's approval). Formats are those of `RMMZ_ASSET_SPEC.md` §3, **except A4, which is 768×720** (measured). **Finding for the spec's owner:** `RMMZ_ASSET_SPEC.md` §3 lists A4 as 768×576. The stock sheets measure 768×720 (§1.1), and any A4 drawn to the spec as written will be the wrong size. Every stock tile used in §1.2 is named below as the placeholder to replace (CLAUDE.md).
 
 | ID (proposal) | Asset | Format and slots | Replaces the stock placeholder |
 |---|---|---|---|
