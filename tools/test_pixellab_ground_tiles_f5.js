@@ -114,6 +114,7 @@ const shots = [
     'ground_f5_zone5_gallery_runway'
 ];
 
+let missingScreenshots = 0;
 for (const name of shots) {
     const src = path.join(SNAPSHOT_DIR, 'test_output', `smoke.${name}.png`);
     if (fs.existsSync(src)) {
@@ -121,8 +122,15 @@ for (const name of shots) {
         fs.copyFileSync(src, dst);
         console.log(`Saved screenshot: ${dst}`);
     } else {
-        console.warn(`Missing screenshot: ${src}`);
+        console.error(`[FAIL - MISSING SCREENSHOT] ${src}`);
+        missingScreenshots++;
     }
 }
 
-console.log('--- In-Engine F5 Playtest Verification Completed Successfully ---');
+if (missingScreenshots > 0) {
+    console.error(`Failed: ${missingScreenshots} screenshots missing.`);
+    process.exit(1);
+}
+
+console.log('--- In-Engine F5 Playtest Verification Completed Successfully (6/6 screenshots captured) ---');
+

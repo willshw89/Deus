@@ -334,10 +334,12 @@ events.push(createPropEvent(eventId++, 10, 4, '!$UF_Wildflowers', 'Vibrant wildf
 // 9. Assemble final Map001 JSON
 const mapObj = {
     autoplayBgm: false,
+    autoplayBgs: false,
     bgs: { name: '', pan: 0, pitch: 100, volume: 90 },
     bgm: { name: '', pan: 0, pitch: 100, volume: 90 },
     battleback1Name: '',
     battleback2Name: '',
+    disableDashing: false,
     displayName: 'DEUS Natural World — PixelLab Ground Showcase',
     dorphan: false,
     encounterList: [],

@@ -1,5 +1,6 @@
 {
   "autoplayBgm": false,
+  "autoplayBgs": false,
   "bgs": {
     "name": "",
     "pan": 0,
@@ -14,6 +15,7 @@
   },
   "battleback1Name": "",
   "battleback2Name": "",
+  "disableDashing": false,
   "displayName": "DEUS Natural World — PixelLab Ground Showcase",
   "dorphan": false,
   "encounterList": [],

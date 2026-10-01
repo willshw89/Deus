@@ -222,7 +222,7 @@ const SPECIMENS = {
         canonicalId: 'SURFACE_SHARED_TERRAIN_TROPICAL-GRASS_V1_DEFAULT',
         name: 'Lush Flowering Grass',
         sourceType: 'owner_master',
-        sourcePath: path.join(ROOT, 'art', 'masters', 'source_sets', 'SURFACE_SHARED_TERRAIN_MEADOW_V1_DEFAULT', 'variant_3.png'),
+        sourcePath: path.join(ROOT, 'art', 'masters', 'source_sets', 'SURFACE_SHARED_TERRAIN_TROPICAL-GRASS_V1_DEFAULT', 'variant_0.png'),
         edge: '#1B3B18', hi: '#6E8A38'
     },
 
@@ -441,9 +441,11 @@ const SPECIMENS = {
     },
     dirt_dry: {
         canonicalId: 'SURFACE_SHARED_TERRAIN_DIRT-DRY_V1_DEFAULT',
-        name: 'Loam Dirt (Dry)',
-        pixellabId: 'deb74b6c-92d9-41fe-a518-2ca4d09c78d4', fillTile: 0,
-        edge: '#62462A', hi: '#A88056'
+        name: 'Loam Dirt (Dry Stand-in)',
+        // PM NAY deb74b6c excluded per DEC-056 / MSG-PRUNE-PM-063; dirt_base stands in until run 1.11 passes
+        pixellabId: '58e1a2c9-7ad0-48ad-bd6f-c0b2a79d1ebd', fillTile: 15,
+        edge: '#4D361F', hi: '#8C6741',
+        standIn: true
     },
 
     // Scree (Broken Angular Stone)
@@ -675,8 +677,10 @@ let swatchIdx = 0;
 for (const [key, spec] of Object.entries(SPECIMENS)) {
     const tileBuf = processedTiles[key];
     if (!tileBuf) continue;
-    const gx = swatchIdx % 16;
-    const gy = Math.floor(swatchIdx / 16);
+    // RMMZ native dual-block layout for sheets B..E:
+    // Tiles 0..127 occupy columns 0..7 across 16 rows; 128..255 occupy columns 8..15 across 16 rows.
+    const gx = (Math.floor(swatchIdx / 128) % 2) * 8 + (swatchIdx % 8);
+    const gy = Math.floor((swatchIdx % 256) / 8) % 16;
     const startX = gx * 48;
     const startY = gy * 48;
 
@@ -694,7 +698,9 @@ for (const [key, spec] of Object.entries(SPECIMENS)) {
 }
 
 const groundVarDPath = path.join(ROOT, 'game', 'img', 'tilesets', 'DEUS_GroundVar_D.png');
+const outsideDPath = path.join(ROOT, 'game', 'img', 'tilesets', 'Outside_D.png');
 writePNG(groundVarDPath, 768, 768, sheetD);
-console.log(`Saved ${groundVarDPath} (${swatchIdx} standalone 48x48 ground swatches in 16x16 gallery)`);
+writePNG(outsideDPath, 768, 768, sheetD);
+console.log(`Saved ${groundVarDPath} and ${outsideDPath} (${swatchIdx} standalone 48x48 ground swatches in RMMZ dual-block gallery)`);
 
 console.log('--- All Ground Tiles Inducted Successfully ---');

@@ -1,10 +1,10 @@
 {
   "canonicalId": "SURFACE_SHARED_TERRAIN_DIRT-DRY_V1_DEFAULT",
-  "name": "Loam Dirt (Dry)",
+  "name": "Loam Dirt (Dry Stand-in)",
   "date": "2026-09-30",
   "author": "Owner (PixelLab)",
-  "pixellabId": "deb74b6c-92d9-41fe-a518-2ca4d09c78d4",
-  "fillTile": 0,
+  "pixellabId": "58e1a2c9-7ad0-48ad-bd6f-c0b2a79d1ebd",
+  "fillTile": 15,
   "palette": "deus_master_world_palette_v1.hex",
   "dimensions": {
     "width": 48,
