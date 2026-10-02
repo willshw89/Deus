@@ -1,4 +1,4 @@
-﻿## What changed
+## What changed
 - tools/art/verify_specimens_rgb.js: Check art against the pinned base commit (a5255704) instead of the moving origin/main ref to avoid failures when main is updated.
 
 ## How I tested it
