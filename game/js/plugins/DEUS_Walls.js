@@ -74,12 +74,17 @@
         const W = World();
         if (!W || !W.inWorld(area.x, area.y, area.z)) return null;
         const i = y * W.state.size + x;
-        const maxHp = W.grid("wallMaxHp", area.x, area.y, area.z);
-        if (!maxHp || !maxHp[i]) return null;
+        const maxHpGrid = W.grid("wallMaxHp", area.x, area.y, area.z);
+        if (!maxHpGrid || !maxHpGrid[i]) return null;
+        const hpGrid = W.grid("wallHp", area.x, area.y, area.z);
+        const factionGrid = W.grid("wallFaction", area.x, area.y, area.z);
         return {
-            hp: W.grid("wallHp", area.x, area.y, area.z)[i],
-            maxHp: maxHp[i],
-            faction: W.grid("wallFaction", area.x, area.y, area.z)[i]
+            get hp() { return hpGrid[i]; },
+            set hp(v) { hpGrid[i] = v; },
+            get maxHp() { return maxHpGrid[i]; },
+            set maxHp(v) { maxHpGrid[i] = v; },
+            get faction() { return factionGrid[i]; },
+            set faction(v) { factionGrid[i] = v; }
         };
     }
 

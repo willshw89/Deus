@@ -101,16 +101,36 @@
         const i = y * W.state.size + x;
         const maxHpGrid = W.grid('doorMaxHp', area.x, area.y, zOf(area));
         if (!maxHpGrid || !maxHpGrid[i]) return null;
+        const stateGrid = W.grid('doorState', area.x, area.y, zOf(area));
+        const hpGrid = W.grid('doorHp', area.x, area.y, zOf(area));
+        const factionGrid = W.grid('doorFaction', area.x, area.y, zOf(area));
+        const keyGrid = W.grid('doorKeyId', area.x, area.y, zOf(area));
+        const openHi = W.grid('doorOpenUntilHi', area.x, area.y, zOf(area));
+        const openLo = W.grid('doorOpenUntilLo', area.x, area.y, zOf(area));
+        const closingHi = W.grid('doorClosingUntilHi', area.x, area.y, zOf(area));
+        const closingLo = W.grid('doorClosingUntilLo', area.x, area.y, zOf(area));
+        const openedHi = W.grid('doorOpenedAtHi', area.x, area.y, zOf(area));
+        const openedLo = W.grid('doorOpenedAtLo', area.x, area.y, zOf(area));
+
         return {
-            hp: W.grid('doorHp', area.x, area.y, zOf(area))[i],
-            maxHp: maxHpGrid[i],
-            faction: W.grid('doorFaction', area.x, area.y, zOf(area))[i],
-            heldOpen: W.grid('doorState', area.x, area.y, zOf(area))[i] & 1,
-            locked: W.grid('doorState', area.x, area.y, zOf(area))[i] & 2,
-            openUntil: (W.grid('doorOpenUntilHi', area.x, area.y, zOf(area))[i] << 16) | W.grid('doorOpenUntilLo', area.x, area.y, zOf(area))[i],
-            closingUntil: (W.grid('doorClosingUntilHi', area.x, area.y, zOf(area))[i] << 16) | W.grid('doorClosingUntilLo', area.x, area.y, zOf(area))[i],
-            openedAt: (W.grid('doorOpenedAtHi', area.x, area.y, zOf(area))[i] << 16) | W.grid('doorOpenedAtLo', area.x, area.y, zOf(area))[i],
-            keyId: W.grid('doorKeyId', area.x, area.y, zOf(area))[i]
+            get hp() { return hpGrid[i]; },
+            set hp(v) { hpGrid[i] = v; },
+            get maxHp() { return maxHpGrid[i]; },
+            set maxHp(v) { maxHpGrid[i] = v; },
+            get faction() { return factionGrid[i]; },
+            set faction(v) { factionGrid[i] = v; },
+            get heldOpen() { return (stateGrid[i] & 1) !== 0; },
+            set heldOpen(v) { if (v) stateGrid[i] |= 1; else stateGrid[i] &= ~1; },
+            get locked() { return (stateGrid[i] & 2) !== 0; },
+            set locked(v) { if (v) stateGrid[i] |= 2; else stateGrid[i] &= ~2; },
+            get openUntil() { return (openHi[i] << 16) | openLo[i]; },
+            set openUntil(v) { openHi[i] = (v >> 16) & 0xFFFF; openLo[i] = v & 0xFFFF; },
+            get closingUntil() { return (closingHi[i] << 16) | closingLo[i]; },
+            set closingUntil(v) { closingHi[i] = (v >> 16) & 0xFFFF; closingLo[i] = v & 0xFFFF; },
+            get openedAt() { return (openedHi[i] << 16) | openedLo[i]; },
+            set openedAt(v) { openedHi[i] = (v >> 16) & 0xFFFF; openedLo[i] = v & 0xFFFF; },
+            get keyId() { return keyGrid[i]; },
+            set keyId(v) { keyGrid[i] = v; }
         };
     };
     const isOpenState = s => !!s && (!!s.heldOpen || (s.openUntil || 0) > now());
@@ -617,7 +637,15 @@
 
     const Doors = {
         OPEN_FRAMES, FRIENDLY_RELATION, CLOSED_PATTERN, AJAR_PATTERN, OPEN_PATTERN, TRANSITION_FRAMES,
-        cellKey, parseKey, store, at: doorAt, stateAt, isDoorType, isOpen: (area, x, y) => isOpenState(stateAt(area, x, y)),
+        cellKey, parseKey, store, at: doorAt, stateAt, isDoorType, isOpen: (area, x, y) => {
+            const W = World();
+            if (!W || !supported(area)) return false;
+            const i = y * W.state.size + x;
+            const maxHpGrid = W.grid('doorMaxHp', area.x, area.y, zOf(area));
+            if (!maxHpGrid || !maxHpGrid[i]) return false;
+            if (W.grid('doorState', area.x, area.y, zOf(area))[i] & 1) return true;
+            return ((W.grid('doorOpenUntilHi', area.x, area.y, zOf(area))[i] << 16) | W.grid('doorOpenUntilLo', area.x, area.y, zOf(area))[i]) > now();
+        },
         canUnitPass, open: openDoor, toggleHeld, lock: lockDoor, unlock: unlockDoor,
         isLocked: (area, x, y) => { const s = stateAt(area, x, y); return !!(s && s.locked); },
         keyOf: (area, x, y) => { const s = stateAt(area, x, y); return s ? s.keyId : null; },
