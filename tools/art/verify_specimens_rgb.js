@@ -1,4 +1,4 @@
-﻿const fs=require('fs'),path=require('path'),cp=require('child_process');
+const fs=require('fs'),path=require('path'),cp=require('child_process');
 const {decodePNG}=require('../png_read');
 const {selectedTile,buildA2Block,SPECS}=require('./induct_all_ground_tiles');
 const kept=require('./ground_kept_sets.json');
