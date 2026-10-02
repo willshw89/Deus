@@ -28,8 +28,9 @@ try{
    if(mutant==='outside-source'&&name==='Outside_A2.png'&&slot===4)got=blocks.shrub_soil_base;
    if(mutant==='grass-slot-'+slot&&name==='Outside_A2.png'&&slot<2)got=block(mainOutside,slot);
    if(key&&got.every((value,index)=>index%4!==3||value===0))fail(name+' slot '+slot+' fully transparent');
-   if(!got.equals(expected))fail(name+' slot '+slot+' is not '+(key||'the specified baseline exception'));
    if(name==='Outside_A2.png'&&slot<2&&got.equals(block(mainOutside,slot)))fail(name+' slot '+slot+' still equals the pre-lane sheets (a5255704)');
+   if(!got.equals(expected))fail(name+' slot '+slot+' is not '+(key||'the specified baseline exception'));
+   
   }
   console.log('[OK] '+name+' 32 slots match table sets, stand-ins or named baseline exceptions');
  }
@@ -41,8 +42,9 @@ try{
   if(mutant==='grass-d-'+i&&i<2)got=swatch(mainD,i);
   if(!key){if(got.some(Boolean))fail('extra gallery pixel '+i);continue}
   const expected=tiles[key];
-  if(!got.equals(expected))fail('gallery swatch '+i+' '+key);
   if(i<2&&got.equals(swatch(mainD,i)))fail('Outside_D swatch '+i+' still equals the pre-lane sheets (a5255704)');
+  if(!got.equals(expected))fail('gallery swatch '+i+' '+key);
+  
  }
  console.log('[OK] gallery and Outside_D match all 34 kept sets, two Owner masters and three stand-in swatches');
  console.log('[OK] Outside A2 slots 0/1 and Outside D swatches 0/1 derive from Owner masters and differ from the pre-lane sheets (a5255704)');
