@@ -104,7 +104,7 @@ Every agent operating within Project DEUS must strictly adhere to the locked pro
 - **No Global Scans**: Full-world entity or tile iteration per frame is strictly prohibited. Spatial hash lookups only.
 - **Save Truth Only**: No DOM elements, Bitmaps, Pixi containers, or circular references in save graphs. Schema versioning is mandatory.
 - **DF Black Wall-Top Convention**: 48×96 px two-grid walls feature a flat near-black upper cap (`#08080C` to `#121218`).
-- **Originality Guarantee**: Zero ripped assets; all content must pass `tools/originality_check.js`.
+The originality check was removed by DEC-061.
 
 ---
 

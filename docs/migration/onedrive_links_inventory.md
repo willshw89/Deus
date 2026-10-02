@@ -232,7 +232,7 @@ Target = the repository path the original pointed at. Exists = `file`/`dir`/`glo
 | 105 | `docs/art/DEUS_VFX_UI_INFORMATION_STANDARD.md:9` | FILE_URI | `docs/art/DEUS_VISUAL_QUALITY_CONTROL_STANDARD.md` | `DEUS_VISUAL_QUALITY_CONTROL_STANDARD.md` | file |
 | 106 | `docs/art/DEUS_VISUAL_QUALITY_CONTROL_STANDARD.md:12` | FILE_URI | `tools/art_check.js` | `../../tools/art_check.js` | file |
 | 107 | `docs/art/DEUS_VISUAL_QUALITY_CONTROL_STANDARD.md:18` | FILE_URI | `tools/art_check.js` | `../../tools/art_check.js` | file |
-| 108 | `docs/art/DEUS_VISUAL_QUALITY_CONTROL_STANDARD.md:18` | FILE_URI | `tools/originality_check.js` | `../../tools/originality_check.js` | file |
+The originality check was removed by DEC-061.
 | 109 | `docs/art/DEUS_VISUAL_QUALITY_CONTROL_STANDARD.md:18` | FILE_URI | `docs/ART_STANDARD.md` | `../ART_STANDARD.md` | file |
 | 110 | `docs/art/SRD_CHARACTER_PRESENTATION_CROSSWALK.md:5` | FILE_URI | `game/data/art/srd_character_presentation.json` | `../../game/data/art/srd_character_presentation.json` | file |
 | 111 | `docs/packets/DEUS_BOOTSTRAP_PACKET_01_RMMZ_CAPABILITY_AUDIT.md:16` | WIN_PATH | `game/game.rmmzproject` | `game/game.rmmzproject` | file |
@@ -277,7 +277,7 @@ Target = the repository path the original pointed at. Exists = `file`/`dir`/`glo
 | 150 | `docs/packets/DEUS_BOOTSTRAP_PACKET_05_VERIFICATION_DEBUG_PERFORMANCE.md:17` | WIN_PATH | `tools/check_deus_syntax.js` | `tools/check_deus_syntax.js` | file |
 | 151 | `docs/packets/DEUS_BOOTSTRAP_PACKET_05_VERIFICATION_DEBUG_PERFORMANCE.md:18` | WIN_PATH | `tools/check_unready_bitmaps.js` | `tools/check_unready_bitmaps.js` | file |
 | 152 | `docs/packets/DEUS_BOOTSTRAP_PACKET_05_VERIFICATION_DEBUG_PERFORMANCE.md:19` | WIN_PATH | `tools/generate_asset_inventory.js` | `tools/generate_asset_inventory.js` | file |
-| 153 | `docs/packets/DEUS_BOOTSTRAP_PACKET_05_VERIFICATION_DEBUG_PERFORMANCE.md:20` | WIN_PATH | `tools/originality_check.js` | `tools/originality_check.js` | file |
+The originality check was removed by DEC-061.
 | 154 | `docs/packets/DEUS_BOOTSTRAP_PACKET_05_VERIFICATION_DEBUG_PERFORMANCE.md:21` | WIN_PATH | `game/test_output` | `game/test_output` | MISSING |
 | 155 | `docs/packets/DEUS_BOOTSTRAP_PACKET_05_VERIFICATION_DEBUG_PERFORMANCE.md:22` | WIN_PATH | `scratch/synthetic_probe.js` | `scratch/synthetic_probe.js` | MISSING |
 | 156 | `docs/packets/DEUS_BOOTSTRAP_PACKET_05_VERIFICATION_DEBUG_PERFORMANCE.md:23` | WIN_PATH | `docs/TEST_CLASSIFICATION.md` | `docs/TEST_CLASSIFICATION.md` | file |
@@ -293,7 +293,7 @@ Target = the repository path the original pointed at. Exists = `file`/`dir`/`glo
 | 166 | `docs/packets/DEUS_BOOTSTRAP_PACKET_07_PROVENANCE_ASSETS_BUILD_RECOVERY.md:17` | WIN_PATH | `docs/ASSET_MANIFEST.md` | `docs/ASSET_MANIFEST.md` | file |
 | 167 | `docs/packets/DEUS_BOOTSTRAP_PACKET_07_PROVENANCE_ASSETS_BUILD_RECOVERY.md:18` | WIN_PATH | `docs/ASSET_INVENTORY.md` | `docs/ASSET_INVENTORY.md` | file |
 | 168 | `docs/packets/DEUS_BOOTSTRAP_PACKET_07_PROVENANCE_ASSETS_BUILD_RECOVERY.md:19` | WIN_PATH | `game/data/DEUS_AssetIndex.json` | `game/data/DEUS_AssetIndex.json` | file |
-| 169 | `docs/packets/DEUS_BOOTSTRAP_PACKET_07_PROVENANCE_ASSETS_BUILD_RECOVERY.md:20` | WIN_PATH | `tools/originality_check.js` | `tools/originality_check.js` | file |
+The originality check was removed by DEC-061.
 | 170 | `docs/packets/DEUS_BOOTSTRAP_PACKET_07_PROVENANCE_ASSETS_BUILD_RECOVERY.md:21` | WIN_PATH | `tools/generate_asset_inventory.js` | `tools/generate_asset_inventory.js` | file |
 | 171 | `docs/packets/DEUS_BOOTSTRAP_PACKET_07_PROVENANCE_ASSETS_BUILD_RECOVERY.md:22` | WIN_PATH | `docs/LEGAL.md` | `docs/LEGAL.md` | file |
 | 172 | `docs/packets/DEUS_BOOTSTRAP_PACKET_07_PROVENANCE_ASSETS_BUILD_RECOVERY.md:23` | WIN_PATH | `docs/RELEASE_CHECKLIST.md` | `docs/RELEASE_CHECKLIST.md` | file |

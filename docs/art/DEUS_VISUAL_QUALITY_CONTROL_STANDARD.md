@@ -15,7 +15,7 @@ The six gates outlined below represent the **formal target specification** for o
 
 ## 2. Executive Diagnosis: Where Assets Currently Slip Through
 
-An audit of existing tooling ([`tools/art_check.js`](file:///c:/Users/snewt/OneDrive/Desktop/UF/tools/art_check.js), [`tools/originality_check.js`](file:///c:/Users/snewt/OneDrive/Desktop/UF/tools/originality_check.js), and [`docs/ART_STANDARD.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/ART_STANDARD.md)) identified seven specific vulnerabilities where deformed, unaligned, or stylistically broken assets can pass automated checks:
+The originality check was removed by DEC-061.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
@@ -122,7 +122,7 @@ Automated Playtest harnesses (`tools/test_visual_regressions.js`) enforce:
 ## 7. Human Review Workflow: Definition of Visual Done
 
 1. **Automated Mechanical Check**: `node tools/art_check.js <file>` passes all active gates.
-2. **Originality Similarity Flagger**: `node tools/originality_check.js <file>` flags any unexpected shape-matching. (Provenance records and human audit remain the authoritative legal gate).
+The originality check was removed by DEC-061.
 3. **In-Context Playtest Screenshot**: The asset is placed into a live RMMZ test map alongside the canonical Human Adult reference sprite at the single canonical camera distance under daytime and twilight lighting.
 4. **Visual Inspection**: The reviewing agent opens the resulting screenshot and verifies that line weights match, texture frequency is proportional, and equipment reads clearly at 1× gameplay scale.
 5. **User Approval Gate**: Work stops at the gate until the user grants explicit approval.

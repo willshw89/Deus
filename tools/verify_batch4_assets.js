@@ -37,7 +37,7 @@ const faces = [
 console.log(`=== Verifying ${charsets.length} charsets and ${faces.length} face sets ===`);
 
 let artFailCount = 0;
-let origFailCount = 0;
+
 
 for (const c of charsets) {
   const p = path.join(ROOT, 'game', 'img', 'characters', c);
@@ -52,7 +52,7 @@ for (const c of charsets) {
     artFailCount++;
   }
 
-
+  
 }
 
 for (const f of faces) {
@@ -68,11 +68,11 @@ for (const f of faces) {
     artFailCount++;
   }
 
-
+  
 }
 
-console.log(`Summary: art_check FAILs = ${artFailCount}, originality FAILs = ${origFailCount}`);
-if (artFailCount === 0 && origFailCount === 0) {
+console.log(`Summary: art_check FAILs = ${artFailCount}`);
+if (artFailCount === 0) {
   console.log('ALL 24 ASSETS 100% PASSED AUTOMATED CHECKS!');
 } else {
   process.exit(1);

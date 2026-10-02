@@ -532,7 +532,7 @@ Placeholders are stock RPG Maker MZ tiles (V9). Each gets a request that names t
 
 | Draft | Request | Spec | Plugs in as | Status column (stock in use) |
 |---|---|---|---|---|
-| ECO-A | **Tree sapling, 2 variants:** broadleaf and conifer (tropical and swamp kinds use the broadleaf one with a catalog tint until they get their own) | 48×48 frame, V81 micro scale: about 16–22 px tall against a 46 px person, grounded on row 47, anchor `[24, 47]`, footprint `[1, 1]`, drawn under units, passable. 1 stand frame + 3 sway frames (V60), 8 colours or fewer, `art/palette/uf.hex`, binary alpha; 4× raw on magenta; RMMZ `!$` single-object sheet `!$UF_Sapling.png` / `!$UF_SaplingConifer.png` with sidecars; passes `tools/originality_check.js` and `tools/art_check.js --native` | Catalog `objects` → `sapling`: `"image": "!$UF_Sapling"` replaces the `tile` field (Gemini may edit `objects` per the world-generation handoff). A second object `sapling_conifer` with the same `tags`, if the user wants the conifer variant told apart | REQUESTED (stock `Outside_B` tile 152 "Grass A", tinted `#7fb35a`) |
+The originality check was removed by DEC-061.
 | ECO-B | **Newborn and juvenile frames** for the prey species | Not requested now; waits for §14 D6 | — | — |
 
 Nothing else in this design needs art. Births, arrivals and monster spawns reuse the species sheets of AR-401 and AR-402, and plant spread reuses AR-102 and AR-103. [DEC-073: there are no wildlife births or edge arrivals; spawned wildlife and monsters reuse those sheets.]

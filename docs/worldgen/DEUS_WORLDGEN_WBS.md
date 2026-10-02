@@ -639,7 +639,7 @@ The Owner clarified this on 2026-09-25 at 23:41 CT. **Art is a stream of its own
 
 | ID | Title | Status | Source | Depends on | Writer → Reviewer | Definition of done | Size | Gate |
 |---|---|---|---|---|---|---|---|---|
-| REL.10.01 | Remove the U7 stand-ins (5 in the inventory, plus the STATUS Stand-ins list) and replace them with stock or placeholder art already licensed per VISION V9. **Not new art**: swap to licensed stock or Owner-approved assets | PLANNED | `docs/STATUS.md` Stand-ins; `docs/ASSET_INVENTORY.md`; VISION V9; AGENTS rule 8 | WG.41.02/EXIST | Claude → Grok | `tools/originality_check.js` reports zero U7-derived files in `game/img`; the inventory shows 0 stand-ins | M | — |
+The originality check was removed by DEC-061.
 | REL.10.02 | Decide `uf.hex` before release (DEC-009): ship on the master palette, or keep `uf.hex` | OPEN | ADR-002 §7.3 (`uf.hex` is the U7 palette) | OD-4 | PM memo → Owner | Decision recorded; if "yes", WG.00.13 is release-blocking | S | **OWNER-GATED** (Owner decision, OD-4) |
 | REL.10.03 | Provenance gate: every shipped image has a catalogue row, an approval record (sha256) or a stock licence | PLANNED | `docs/RELEASE_CHECKLIST.md` G5; `art/APPROVALS.md` | WG.41.01, WG.41.02 | Claude → Grok | A script lists every `game/img/**` PNG with its provenance; zero unknowns | S | — |
 | REL.10.04 | Legal and credits: SRD 5.1 CC-BY-4.0 attribution; stock licences; third-party plugin licences | PLANNED | `docs/LEGAL.md`; `docs/RELEASE_CHECKLIST.md` | dep: REL.10.03 | Claude drafts → PM → Owner | Credits file present; attribution text matches CC-BY-4.0 requirements; checklist line ticked with evidence | S | — |

@@ -26,7 +26,7 @@ Set 2026-09-19 by the user (VISION V2, V3, V44, V9). `docs/ART_STANDARD.md` has 
 | Generation | **Google Nano Banana Pro exclusively** (`generate_image`, model id `gemini-3-pro-image`, Gemini 3 Pro Image model; AGENTS.md Rule 11, VISION V69, V70, V79, V109). 4× canvas (one grid square = 192×192), flat magenta `#FF00FF` background, kept in `art/raw/`. Nano Banana Pro utilizes advanced reasoning ("Thinking") to follow complex instructions, maintain brand consistency, and render high-fidelity text and pixel details. No other generator model allowed, and no agent may type in sprites pixel-by-pixel in code. |
 | Animation | **All animation must happen through the sprite; NO AFTER-EFFECT ANIMATIONS** (AGENTS.md Rule 12, VISION V60, V108). All entity and environment movement (idle breaths, walk, combat, swaying flora, water ripples, flickering flames, doors, workshops) must be delivered as discrete sprite frames in the sheets. Zero programmatic distortion, affine squashing/stretching, sine sway, or shader warps. |
 | Placeholders | Stock RPG Maker MZ art (V9); the `U7_` stand-ins stay on disk, unused |
-| Original art | Passes `tools/art_check.js --native` and `tools/originality_check.js`, then the user approves it |
+The originality check was removed by DEC-061.
 
 
 ### Sprite sheet + sidecar format (what the engine reads)
@@ -265,7 +265,7 @@ The engine side is phase 2 of V55 (the equipment slots, ranged attacks, crafting
 ### AR-1200 to AR-1219 Vertical world (V80, 2026-09-19)
 The art for the five-level world: solid rock and soil, natural, dug and built floors, open air, holes, stairs, ramps, a ladder, ore and gem veins, cave water and roofs. Everything is seen from straight above. The look of each asset, the review renders, a ready Nano Banana Pro prompt and the order of work are in `docs/handoffs/HANDOFF_vertical.md`. This section is the format.
 
-- **Common rules:** ART_STANDARD §1 (flat 3/4 view, HD FF6 style, 1 art pixel = 1 screen pixel, palette `art/palette/uf.hex`, alpha 0/255, no pure black: holes use the palette's darkest blue-black) and §5 (Nano Banana Pro, V69/V79; a 4× canvas where one 48 px cell = 192×192, flat `#FF00FF` background, raw kept in `art/raw/lvl_<name>.png`, master and sidecar in `art/masters/lvl_<name>.*`). Checks: `tools/art_check.js --native` and `tools/originality_check.js`, then the user approves.
+The originality check was removed by DEC-061.
 - **Four sheets in `game/img/tilesets/`**, in RMMZ tileset formats (`docs/RMMZ_ASSET_SPEC.md` §3), with every unused slot fully transparent:
   - `UF_Levels_A4.png`, **A4, 768×720** (measured from `Dungeon_A4.png`; RMMZ_ASSET_SPEC's 768×576 is wrong for A4). Kind k: x = (k % 8)·96. Tops are kinds 0–7 at y 0–143 (96×144 blocks, A2 piece layout). Sides are kinds 8–15 at y 144–239 (96×96 blocks, RMMZ wall-side layout). Kind 0/8 = rock (AR-1200), kind 1/9 = soil (AR-1201). 4× raw per kind: top 384×576, side 384×384.
   - `UF_Levels_A2.png`, **A2, 768×576**. Kind k is the 96×144 block at x = (k % 8)·96, y = ⌊k / 8⌋·144: lone piece top-left, inner corners top-right, edges and centre in the lower 2×2. Kinds: 0 cave floor (AR-1202), 1 dug stone floor, 2 dug soil floor (AR-1203), 3 wooden deck (AR-1204), 4 stone deck (AR-1205), 5 open air (AR-1206), 6 hole edge with a transparent background (AR-1207), 7 wooden roof (AR-1219). 4× raw per kind: 384×576. All 47 autotile shapes must look right.
@@ -283,7 +283,7 @@ The art for the five-level world: solid rock and soil, natural, dug and built fl
 
 ### AR-1600 Tree sapling (V74, 2026-09-19)
 - **Look:** a young tree one or two seasons old, a thin stem with a few leaves (broadleaf) or a small fir-like shoot (conifer); it must read as a tree starting, not as grass, a bush or a flower, at 1× and at zoom ⅓, next to AR-021's stump and AR-102's trees.
-- **Spec:** the Shared spec above; ART_STANDARD §2 (micro scale, V81) and §5; `art/palette/uf.hex`, 8 colours or fewer, alpha 0/255; `tools/art_check.js --native` and `tools/originality_check.js` pass.
+The originality check was removed by DEC-061.
 - **Integration:** the catalog object `sapling` exists (tile placeholder); on approval its `tile` and `tint` give way to `"image": "!$UF_Sapling"` (Gemini may edit `objects`). One object serves every tree kind: what it grows into lives in the cell's growth timer. Details: `docs/handoffs/HANDOFF_df_mechanics.md` → Ecology.
 
 ### AR-1901 to AR-1908 Underground Nature & Cavern Flora (V106, 2026-09-19)
@@ -343,7 +343,7 @@ Owner 2026-10-01: "You can always open more rows for assets we need"; art is del
   - Game face sheets (22 sheets, 576×288 px): `game/img/faces/UF_Faces_<culture>_1.png` (4 males top row, 4 females bottom row) and `game/img/faces/UF_Faces_<culture>_2.png` (remaining 2 males + 2 females, plus elder/leader and champion variants) for all 11 factions (`human`, `elf`, `dwarf`, `gnome`, `goblin`, `orc`, `lizardfolk`, `kobold`, `undead`, `starborn`, `swarm`).
   - Masters & sidecars: `art/masters/face_<culture>_{1,2}.png` and `art/masters/face_<culture>_{1,2}.json`.
   - Review showcases: `art/review/faces_12_<culture>.png` (864×288 px, 6 males top row, 6 females bottom row) and `art/review/all_factions_132_faces_showcase.png` (1728×1584 px grand roster of all 132 faces).
-  - Automated check status: **22/22 PASS (100%)** on `tools/art_check.js --native --sidecar` (576×288, 32 colours, binary alpha, valid sidecars) and **22/22 PASS (100%)** on `tools/originality_check.js` (distance 0.418 to 0.490 ≥ 0.28 vs 19,431 U7 shapes).
+The originality check was removed by DEC-061.
 - **Elf Faction Character Sets & Racial Weapons (V103, V104, AR-400, AR-900..903)**: Delivered complete Elf Sylvan Woodland Folk character suites with dark ink outlines (V104) and three racial weapon types with attack animations (V103).
   - People sheets: `$UF_Elf_Male.png`, `$UF_Elf_Female.png`, `$UF_Elf.png`, `$UF_Elf_8D.png` with sidecars. For `catalog.people.elf`: `"images": ["$UF_Elf_Male", "$UF_Elf_Female"]`.
   - Racial weapon items: `elf_moonblade` (Melee), `elf_longbow` (Ranged), `elf_sylvan_staff` (Magic) with charsets `!$UF_Item_Elf{Moonblade,Longbow,SylvanStaff}.png` and icons in `art/masters/`.

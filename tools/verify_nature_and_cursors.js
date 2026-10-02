@@ -37,12 +37,6 @@ for (const f of masterFaceFiles) {
     console.log(out.includes('FILE PASS') ? `PASS: ${f}` : `FAIL: ${f}\n${out}`);
 }
 
-console.log('\n=== 2. VERIFYING ORIGINALITY ON FACE SHEETS ===');
-for (const f of faceFiles) {
-    
-    const match = out.match(/closest distance ([\d\.]+)/);
-    console.log(out.includes('FILE PASS') ? `PASS: ${f} (dist=${match ? match[1] : '?'})` : `FAIL: ${f}\n${out}`);
-}
 
 console.log('\n=== 3. VERIFYING MENU THEMES & WINDOW SKINS ===');
 for (const f of menuFiles) {

@@ -75,7 +75,7 @@ Bodies follow `docs/design/PEOPLES.md`. The star-born and the swarm are working 
 1. Make a test copy and run the suite: `"C:\Program Files\nodejs\node.exe" tools/test_snapshot.js --name skins --no-run`, then `"C:\Program Files\nodejs\node.exe" tools/run_tests.js skins --game %TEMP%\uf_snapshots\skins`.
 2. `skins.cultures_differ` and `skins.text_readable` measure your delivered skin (its source then reads `file`). `skins.faces.by_culture` and `skins.faces.fallback` show which sheet each portrait came from.
 3. Open the screenshots in the copy's `test_output/`: `skins.sheet_<culture>.png` (the selection panel under three player cultures) and `skins.talk_stranger.png` (a conversation with a stranger of another culture: both portraits and both skins).
-4. Then do the usual: `tools/art_check.js`, `tools/originality_check.js`, the user's approval, and your status in `docs/ASSET_REQUESTS.md`.
+The originality check was removed by DEC-061.
 
 ## Decisions for the user (not for Gemini)
 - Whether the automata (the star-born's constructs, PEOPLES.md) get face sheets of their own. Today they use the star-born's skin and crystal frame around their stock face.

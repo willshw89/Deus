@@ -71,7 +71,7 @@ Every agent operating within Project DEUS must strictly adhere to the locked pro
 
 ## 5. Role Responsibilities
 
-1. **Asset Provenance & Originality Verification**: Execute `tools/originality_check.js` to ensure no shipped asset is a copy, trace, or recolor of Ultima VII, Ultima VIII, or third-party proprietary artwork (Rule 8).
+The originality check was removed by DEC-061.
 2. **Quarantine & Firewall Enforcement**: Strictly ensure that MechanicsLab and U8 payloads remain isolated from `game/` and `OriginalGame`. Block any attempt to import external reference raws or binaries.
 3. **Master Manifest Maintenance**: Log every generated and integrated asset in `docs/ASSET_MANIFEST.md` with SHA-256 hash, generation prompt, dimensions, grid layout, and source model.
 4. **Snapshot & Recovery Management**: Capture cryptographic inventories and archive snapshots prior to major architectural refactors. Maintain rapid rollback capability.
@@ -82,7 +82,7 @@ Every agent operating within Project DEUS must strictly adhere to the locked pro
 ## 6. Allowed & Forbidden Actions
 
 ### Allowed Actions:
-- Inspecting asset metadata, calculating SHA-256 hashes, and running `tools/originality_check.js`.
+The originality check was removed by DEC-061.
 - Maintaining and updating `docs/ASSET_MANIFEST.md` and `docs/LEGAL.md`.
 - Creating zip archives of deprecated components in `archive/`.
 - Generating cryptographic baselines and verifying file system integrity.
@@ -157,7 +157,7 @@ Agent / Model: Gemini (Antigravity)
 Repository Root: C:\Users\snewt\OneDrive\Desktop\UF
 Assigned Task / Work Block: IDLE (Provenance baseline clean; MechanicsLab quarantined; 11,334 files cryptographically inventoried)
 Model Availability State: AVAILABLE
-Paths Whitelisted: docs/ASSET_MANIFEST.md, docs/LEGAL.md, tools/originality_check.js, archive/*
+The originality check was removed by DEC-061.
 Paths Forbidden: game/js/rmmz_*.js, external Ultima VIII installation, MechanicsLab payloads
 Ready for Directives: YES
 ```

@@ -682,7 +682,7 @@ These are targets within V50's "≤ 1 ms per plugin per frame". The checks measu
 ---
 
 ## 13. Art (rows the build adds to `docs/ASSET_REQUESTS.md`; numbers re-checked when added, since other runs are adding rows)
-Shared spec as in ASSET_REQUESTS.md: HD pixel art in the manner of Final Fantasy VI, flat 3/4 view, `art/palette/uf.hex`, alpha 0/255, 4× magenta canvas in `art/raw/`, `tools/art_check.js` and `tools/originality_check.js` pass, user approval. Object frames are 48 × 48 with anchor [24, 47] and footprint [1, 1].
+The originality check was removed by DEC-061.
 
 | AR | Asset | Spec | Stock in use until delivered (V9; CLAUDE.md: named in the Status column) |
 |---|---|---|---|

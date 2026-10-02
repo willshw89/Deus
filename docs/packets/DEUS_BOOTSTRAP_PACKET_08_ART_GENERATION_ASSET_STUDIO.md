@@ -103,7 +103,7 @@ Every agent operating within Project DEUS must strictly adhere to the locked pro
 
 ## 7. Current Architecture & Provenance Rules
 
-- **Zero U7/U8 Ripping**: All shipped art must be 100% original, generated via Nano Banana Pro, and pass `tools/originality_check.js`.
+The originality check was removed by DEC-061.
 - **Grid Discipline**: Rigid grid dimensions declared in every prompt (Cell width/height, columns, rows, slot-by-slot assignment).
 - **No Text in Generations**: Prompts must strictly disallow text, labels, numbers, captions, concept layouts, or borders inside the generated output.
 

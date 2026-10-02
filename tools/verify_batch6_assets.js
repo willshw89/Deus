@@ -43,14 +43,7 @@ for (const file of charsets) {
         failed++;
     }
 
-    try {
-        
-
-        passed++;
-    } catch (err) {
-
-        failed++;
-    }
+    
 }
 
 
@@ -70,14 +63,7 @@ for (const file of faceSets) {
         failed++;
     }
 
-    try {
-        
-
-        passed++;
-    } catch (err) {
-
-        failed++;
-    }
+    
 }
 
 console.log(`\nVerification Summary: ${passed} PASS, ${failed} FAIL`);

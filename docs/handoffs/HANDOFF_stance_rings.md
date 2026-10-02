@@ -31,5 +31,5 @@ The square set delivered 2026-09-19 (`art/masters/ui_stance_friendly.png`, `ui_s
 
 ## Checks before you mark a request DELIVERED
 1. `"C:\Program Files\nodejs\node.exe" tools/art_check.js --sidecar art/masters/ui_stance_ring_1.png` (and the other three): palette and alpha 0/255 must pass. Ignore its 3×-grid check for these native-resolution masters.
-2. `tools/originality_check.js` on each master (rings are simple shapes, so this should pass easily; run it anyway).
+The originality check was removed by DEC-061.
 3. A review render in `art/review/`: the rings under a person, a wolf and a 96 px monster on meadow at zoom 1, 2/3 and 1/3, next to the code-drawn rings from the screenshots above. Open it and describe it in the status line.

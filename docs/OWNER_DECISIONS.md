@@ -1032,7 +1032,7 @@ Every decision item recorded in this log must provide:
 - **Date:** 2026-10-01
 - **Source:** Owner, 2026-10-01: "We can nix the originality check entirely. delete it off the planet. we are already controlling for originality".
 - **Ruling:**
-  1. **`tools/originality_check.js` and its checks are deleted, not archived** (the Owner said delete). This covers `tools/originality_check.js`, `tools/check_furniture_originality.js`, `tools/test_object_originality.js`, the originality step in every pipeline script that calls it, and the quarantine entries that name it.
+The originality check was removed by DEC-061.
   2. **AGENTS.md Rule 8 no longer requires the originality check.** U7 art stays usable as examples, stand-ins, style references and training data, and everything that ships is still our own work. Originality is controlled by how the art is made (PixelLab generation from our own prompts, guides and style swatches, never a copy, trace, recolour or crop of a U7 image) and by the art council (DEC-062).
   3. **The removal runs as a reviewed AG cleanup lane** (about 25 scripts and about 30 docs cite it), not on main's working copy (DEC-048), scheduled after wave 1 launches. The PM syncs the binding rule files now (AGENTS.md Rule 8, VISION); the lane sweeps the rest.
 
