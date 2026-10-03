@@ -1,0 +1,259 @@
+UF_Test run 2026-10-02T23:49:43.639Z args=[]
+HARNESS New Game year 500 (requested 500)
+DEBUG_SHEET: Scene_Boot.start called
+AVAILABLE SUITES: selftest, smoke, perf, native_starting_gear, native_survival_dying, native_perf_4x_benchmark, select, minimap, natural_connections, ownership, ecology, projects, settlement, colonists, overseer, world, spawn, worldgen, biomes, tiles, ground, factions, skins, history, objects, walls, doors, items, jobs, floors, wildlife, wildlife_seeds, stance, combat, anim, fog, daynight, timespeed, camera, culling, speech, overhead, look, sheet, talk, fire, vertical, natural_walls, flooding, strata, environment, faction_menus, title, load, setup, depth, layers_flat, select
+SUITE smoke
+PASS smoke.reached_map - map 1000 ""
+PASS smoke.player_not_visible
+PASS smoke.event_drawn.Yveah - 1 in view drawn at screen (648,522); 2 more elsewhere in the area
+PASS smoke.event_drawn.Helwen - 1 in view drawn at screen (360,378); 1 more elsewhere in the area
+PASS smoke.event_drawn.Verem - 1 in view drawn at screen (552,426); 1 more elsewhere in the area
+PASS smoke.event_drawn.Peran - 1 in view drawn at screen (360,234); 2 more elsewhere in the area
+PASS smoke.event_drawn.Wilina - 1 in view drawn at screen (312,426); 2 more elsewhere in the area
+PASS smoke.event_drawn.Meron - 1 in view drawn at screen (504,186); 2 more elsewhere in the area
+PASS smoke.event_drawn.Zoron - 1 in view drawn at screen (456,426); 1 more elsewhere in the area
+PASS smoke.event_drawn.Verelle - 1 in view drawn at screen (264,234); 3 more elsewhere in the area
+PASS smoke.event_drawn.Liara - 1 in view drawn at screen (504,426); 1 more elsewhere in the area
+PASS smoke.event_drawn.Brara - 1 in view drawn at screen (552,90); 1 more elsewhere in the area
+PASS smoke.event_drawn.Dorys - 1 in view drawn at screen (168,522); 2 more elsewhere in the area
+PASS smoke.event_drawn.Kaah - 1 in view drawn at screen (216,138); 2 more elsewhere in the area
+PASS smoke.event_drawn.Naor - 1 in view drawn at screen (696,42); 1 more elsewhere in the area
+PASS smoke.event_drawn.Liaette - 1 in view drawn at screen (456,282); 2 more elsewhere in the area
+PASS smoke.event_drawn.Merar - 1 in view drawn at screen (552,234); 1 more elsewhere in the area
+PASS smoke.event_drawn.Doria - 1 in view drawn at screen (600,474); 1 more elsewhere in the area
+PASS smoke.event_drawn.Brawen - 1 in view drawn at screen (552,138); 1 more elsewhere in the area
+PASS smoke.event_drawn.Caera - 1 in view drawn at screen (504,90); 1 more elsewhere in the area
+PASS smoke.event_drawn.Braic - 1 in view drawn at screen (264,90); 1 more elsewhere in the area
+PASS smoke.event_drawn.Elor - 1 in view drawn at screen (600,330); 1 more elsewhere in the area
+PASS smoke.event_drawn.Garic - 1 in view drawn at screen (648,570); 2 more elsewhere in the area
+PASS smoke.event_drawn.Dorus - 1 in view drawn at screen (264,330); 1 more elsewhere in the area
+PASS smoke.event_drawn.Verus - 1 in view drawn at screen (552,330); 1 more elsewhere in the area
+PASS smoke.event_drawn.Wilette - 1 in view drawn at screen (168,426); 1 more elsewhere in the area
+PASS smoke.event_drawn.Fenen - 1 in view drawn at screen (600,234); 1 more elsewhere in the area
+PASS smoke.event_drawn.Helen - 1 in view drawn at screen (216,474); 1 more elsewhere in the area
+PASS smoke.event_drawn.Yveem - 1 in view drawn at screen (120,378); 2 more elsewhere in the area
+PASS smoke.event_drawn.Garelle - 1 in view drawn at screen (552,42); 1 more elsewhere in the area
+PASS smoke.event_drawn.Dora - 1 in view drawn at screen (696,138); 2 more elsewhere in the area
+PASS smoke.event_drawn.Elra - 1 in view drawn at screen (312,90); 1 more elsewhere in the area
+PASS smoke.event_drawn.Alwen - 1 in view drawn at screen (648,42); 2 more elsewhere in the area
+PASS smoke.event_drawn.Liaan - 1 in view drawn at screen (312,282); 2 more elsewhere in the area
+PASS smoke.event_drawn.Fenan - 1 in view drawn at screen (456,138); 5 more elsewhere in the area
+PASS smoke.event_drawn.Yveric - 1 in view drawn at screen (552,570); 1 more elsewhere in the area
+PASS smoke.event_drawn.Roen - 1 in view drawn at screen (504,570); 2 more elsewhere in the area
+PASS smoke.event_drawn.Joren - 1 in view drawn at screen (168,570); 1 more elsewhere in the area
+PASS smoke.event_drawn.Elwen - 1 in view drawn at screen (504,330); 2 more elsewhere in the area
+PASS smoke.event_drawn.Wilan - 1 in view drawn at screen (360,138); 2 more elsewhere in the area
+PASS smoke.event_drawn.Elem - 1 in view drawn at screen (360,282)
+PASS smoke.event_drawn.Yvera - 1 in view drawn at screen (360,330); 2 more elsewhere in the area
+PASS smoke.event_drawn.Karic - 1 in view drawn at screen (408,282); 2 more elsewhere in the area
+PASS smoke.event_drawn.Hela - 1 in view drawn at screen (312,378); 2 more elsewhere in the area
+PASS smoke.event_drawn.Kaon - 1 in view drawn at screen (216,570); 1 more elsewhere in the area
+PASS smoke.event_drawn.Isald - 1 in view drawn at screen (456,330)
+PASS smoke.event_drawn.Garwen - 1 in view drawn at screen (408,378); 2 more elsewhere in the area
+PASS smoke.event_drawn.Caear - 1 in view drawn at screen (456,378)
+PASS smoke.event_drawn.Roem - 1 in view drawn at screen (312,234)
+PASS smoke.event_drawn.Tamia - 1 in view drawn at screen (408,234)
+PASS smoke.event_drawn.Liaald - 1 in view drawn at screen (456,234)
+PASS smoke.event_drawn.Helar - 1 in view drawn at screen (504,234); 1 more elsewhere in the area
+PASS smoke.event_drawn.Garine - 1 in view drawn at screen (504,282)
+PASS smoke.event_drawn.Fenah - 1 in view drawn at screen (312,330); 1 more elsewhere in the area
+PASS smoke.event_drawn.Saric - 1 in view drawn at screen (504,378)
+PASS smoke.event_drawn.Tamine - 1 in view drawn at screen (168,42); 4 more elsewhere in the area
+PASS smoke.event_drawn.Verra - 1 in view drawn at screen (360,426)
+PASS smoke.event_drawn.Garia - 1 in view drawn at screen (408,426)
+PASS smoke.event_drawn.Zorric - 1 in view drawn at screen (264,186); 1 more elsewhere in the area
+PASS smoke.event_drawn.Nawen - 1 in view drawn at screen (120,234); 1 more elsewhere in the area
+PASS smoke.event_drawn.Garperelle - 1 in view drawn at screen (312,186)
+PASS smoke.event_drawn.Elon - 1 in view drawn at screen (360,186); 1 more elsewhere in the area
+PASS smoke.event_drawn.Helette - 1 in view drawn at screen (552,186); 1 more elsewhere in the area
+PASS smoke.event_drawn.Dorwen - 1 in view drawn at screen (408,186); 2 more elsewhere in the area
+PASS smoke.event_drawn.Perroette - 1 in view drawn at screen (456,186)
+PASS smoke.event_drawn.Doren - 1 in view drawn at screen (264,522); 1 more elsewhere in the area
+PASS smoke.event_drawn.Zorys - 1 in view drawn at screen (216,426); 1 more elsewhere in the area
+PASS smoke.event_drawn.Saine - 1 in view drawn at screen (120,330); 1 more elsewhere in the area
+PASS smoke.event_drawn.Wilon - 1 in view drawn at screen (600,138); 2 more elsewhere in the area
+PASS smoke.event_drawn.Kaus - 1 in view drawn at screen (600,282); 1 more elsewhere in the area
+PASS smoke.event_drawn.Perus - 1 in view drawn at screen (600,90); 1 more elsewhere in the area
+PASS smoke.event_drawn.Verar - 1 in view drawn at screen (264,282); 1 more elsewhere in the area
+PASS smoke.event_drawn.Braelle - 1 in view drawn at screen (552,282); 1 more elsewhere in the area
+PASS smoke.event_drawn.Naem - 1 in view drawn at screen (552,378); 1 more elsewhere in the area
+PASS smoke.event_drawn.Taman - 1 in view drawn at screen (216,330); 1 more elsewhere in the area
+PASS smoke.event_drawn.Yveys - 1 in view drawn at screen (264,378)
+PASS smoke.event_drawn.Alys - 1 in view drawn at screen (264,426)
+PASS smoke.event_drawn.Rous - 1 in view drawn at screen (264,474)
+PASS smoke.event_drawn.Dorina - 1 in view drawn at screen (312,474)
+PASS smoke.event_drawn.Ulsaan - 1 in view drawn at screen (360,474)
+PASS smoke.event_drawn.Saan - 1 in view drawn at screen (408,474); 1 more elsewhere in the area
+PASS smoke.event_drawn.Braisah - 1 in view drawn at screen (456,474)
+PASS smoke.event_drawn.Braperric - 1 in view drawn at screen (504,474)
+PASS smoke.event_drawn.Kaulem - 1 in view drawn at screen (552,474)
+PASS smoke.event_drawn.Garald - 1 in view drawn at screen (408,138); 1 more elsewhere in the area
+PASS smoke.event_drawn.Fenwen - 1 in view drawn at screen (264,138)
+PASS smoke.event_drawn.Zorus - 1 in view drawn at screen (312,138)
+PASS smoke.event_drawn.Saelle - 1 in view drawn at screen (504,138)
+PASS smoke.event_drawn.Liays - 1 in view drawn at screen (216,186)
+PASS smoke.event_drawn.Zorem - 1 in view drawn at screen (648,474); 1 more elsewhere in the area
+PASS smoke.event_drawn.Iszorem - 1 in view drawn at screen (600,186)
+PASS smoke.event_drawn.Jorah - 1 in view drawn at screen (216,234)
+PASS smoke.event_drawn.Ulen - 1 in view drawn at screen (360,42); 1 more elsewhere in the area
+PASS smoke.event_drawn.Braah - 1 in view drawn at screen (216,282)
+PASS smoke.event_drawn.Verwen - 1 in view drawn at screen (168,90); 2 more elsewhere in the area
+PASS smoke.event_drawn.Isen - 1 in view drawn at screen (216,378)
+PASS smoke.event_drawn.Liaina - 1 in view drawn at screen (600,378)
+PASS smoke.event_drawn.Fenar - 1 in view drawn at screen (600,426); 1 more elsewhere in the area
+PASS smoke.event_drawn.Saor - 1 in view drawn at screen (600,42); 1 more elsewhere in the area
+PASS smoke.event_drawn.Wilus - 1 in view drawn at screen (216,522); 1 more elsewhere in the area
+PASS smoke.event_drawn.Alus - 1 in view drawn at screen (312,522)
+PASS smoke.event_drawn.Yveon - 1 in view drawn at screen (360,522)
+PASS smoke.event_drawn.Liaa - 1 in view drawn at screen (408,522)
+PASS smoke.event_drawn.Elus - 1 in view drawn at screen (456,522)
+PASS smoke.event_drawn.Naa - 1 in view drawn at screen (264,570); 1 more elsewhere in the area
+PASS smoke.event_drawn.Nayveah - 1 in view drawn at screen (504,522)
+PASS smoke.event_drawn.Brabraia - 1 in view drawn at screen (552,522)
+PASS smoke.event_drawn.Aldoror - 1 in view drawn at screen (600,522)
+PASS smoke.event_drawn.Kaia - 1 in view drawn at screen (216,90)
+PASS smoke.event_drawn.Meria - 1 in view drawn at screen (360,90); 1 more elsewhere in the area
+PASS smoke.event_drawn.Nara - 1 in view drawn at screen (408,90)
+PASS smoke.event_drawn.Orelys - 1 in view drawn at screen (456,90)
+PASS smoke.event_drawn.Garoren - 1 in view drawn at screen (648,90)
+PASS smoke.event_drawn.Helorys - 1 in view drawn at screen (168,138)
+PASS smoke.event_drawn.Elald - 1 in view drawn at screen (648,138)
+PASS smoke.event_drawn.Verric - 1 in view drawn at screen (168,186); 1 more elsewhere in the area
+PASS smoke.event_drawn.Ulor - 1 in view drawn at screen (648,186); 1 more elsewhere in the area
+PASS smoke.event_drawn.Ulah - 1 in view drawn at screen (648,234)
+PASS smoke.event_drawn.Alwilan - 1 in view drawn at screen (168,282)
+PASS smoke.event_drawn.Liahelon - 1 in view drawn at screen (648,282)
+PASS smoke.event_drawn.Sawen - 1 in view drawn at screen (168,330)
+PASS smoke.event_drawn.Dorem - 1 in view drawn at screen (648,330)
+PASS smoke.event_drawn.Wilah - 1 in view drawn at screen (168,378)
+PASS smoke.event_drawn.Fenys - 1 in view drawn at screen (648,378); 1 more elsewhere in the area
+PASS smoke.event_drawn.Meric - 1 in view drawn at screen (648,426)
+PASS smoke.event_drawn.Ulus - 1 in view drawn at screen (168,474); 1 more elsewhere in the area
+PASS smoke.event_drawn.Caeina - 1 in view drawn at screen (408,42); 1 more elsewhere in the area
+PASS smoke.event_drawn.Sacaeor - 1 in view drawn at screen (312,570)
+PASS smoke.event_drawn.Garliaor - 1 in view drawn at screen (360,570)
+PASS smoke.event_drawn.Branara - 1 in view drawn at screen (408,570)
+PASS smoke.event_drawn.Wilyveon - 1 in view drawn at screen (456,570)
+PASS smoke.event_drawn.Garys - 1 in view drawn at screen (216,42); 1 more elsewhere in the area
+PASS smoke.event_drawn.Isperra - 1 in view drawn at screen (600,570)
+PASS smoke.event_drawn.Garnaic - 1 in view drawn at screen (120,42)
+PASS smoke.event_drawn.Royveette - 1 in view drawn at screen (264,42)
+PASS smoke.event_drawn.Jorald - 1 in view drawn at screen (312,42)
+PASS smoke.event_drawn.Peren - 1 in view drawn at screen (456,42)
+PASS smoke.event_drawn.Wilulette - 1 in view drawn at screen (504,42)
+PASS smoke.event_drawn.Dorelette - 1 in view drawn at screen (120,90)
+PASS smoke.event_drawn.Tamfenald - 1 in view drawn at screen (696,90)
+PASS smoke.event_drawn.Ula - 1 in view drawn at screen (120,138)
+PASS smoke.event_drawn.Perdorys - 1 in view drawn at screen (696,186)
+PASS smoke.event_drawn.Verine - 1 in view drawn at screen (696,234)
+PASS smoke.event_drawn.Veria - 1 in view drawn at screen (120,282)
+PASS smoke.event_drawn.Orfenan - 1 in view drawn at screen (696,282)
+PASS smoke.event_drawn.Helwilra - 1 in view drawn at screen (696,330)
+PASS smoke.event_drawn.Perette - 1 in view drawn at screen (696,378)
+PASS smoke.save_serializes
+PASS smoke.colony_state_in_save
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\scratchpad\codex-phase0-20261002\controlled-056323db\game\test_output\smoke.map.png
+PASS smoke.no_errors - none in first ~3 s on map
+SUITE minimap
+PASS minimap.minimap_api_exists - Minimap API is present
+PASS minimap.initial_far_tile_unexplored - tile (10,10,0) is unexplored
+PASS minimap.tile_becomes_discovered - tile (10,10,0) is discovered after explore()
+PASS minimap.z_layer_isolation - tile (10,10,-1) remains unexplored when Z0 was explored
+PASS minimap.dirty_chunk_invalidation - invalidating cell marks chunk dirty
+PASS minimap.dirty_chunk_rebuild - processDirty rebuilt 1 chunks
+PASS minimap.minimap_hud_present - Minimap HUD is attached to Scene_Map
+PASS minimap.minimap_overlay_active - Minimap dynamic overlay active
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\scratchpad\codex-phase0-20261002\controlled-056323db\game\test_output\minimap.minimap_verified.png
+SUITE ownership
+PASS ownership.registry_contract - faction claim true; overwrite without force refused; forced owner public; released true
+PASS ownership.bed_assignment - TEST_Ada -> (127,126), owner {"kind":"unit","id":5593}; TEST_Bram -> (126,127); unique true
+PASS ownership.inspection_visible - Look line at (127,126): "Straw bed — dismantle · Owned by TEST_Ada"
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\scratchpad\codex-phase0-20261002\controlled-056323db\game\test_output\ownership.owned_bed.png
+PASS ownership.exhausted_uses_owned_bed - old failed (exhausted); sleep done at (127,126), ownedBed true; need after 5
+PASS ownership.survival_and_danger_win - hungry: reason hunger, sleep false; danger: reason danger, sleep false; original job still active true
+PASS ownership.destroyed_bed_clears - object none; bedOf null; owner null
+PASS ownership.saved - round-trip claim {"kind":"unit","id":5594}; unit bed (126,127); save points at live ownership true
+PASS ownership.perf - 20,000 ownerOf calls: 1.39 us each (budget 20 us); 20 area reconciliations: 2.718 ms each (budget 20 ms)
+PASS ownership.no_errors - 0 uncaught error(s); 0 caught inside UF_Ownership
+SUITE ecology
+PASS ecology.state_saved - version 1; 1 area baseline(s); JsonEx ecology true; save points at live ecology true
+PASS ecology.renewable_only - oak/bush/grass renewable true; iron/stone/crystal finite true; hours tree/bush/plant 672/168/72
+PASS ecology.renewable_timer - chop -> stump; occupied pass due/grown/held 1/0/1; clear pass grown 1; final oak
+PASS ecology.native_regrow_single - UF_Objects timers 1; Ecology timers 0; cell berry_bush_bare
+PASS ecology.deterministic_safe_cell - troll chose (58,224) twice; safe true
+PASS ecology.hard_cap - status capped; population/cap 1/1; spawned 0
+PASS ecology.monster_replenishes - spawned: 1 troll in area (0,0), cap 3
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\scratchpad\codex-phase0-20261002\controlled-056323db\game\test_output\ecology.replenished_monster.png
+PASS ecology.prey_replenishes - spawned: 2 deer; prey 83 -> 85
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\scratchpad\codex-phase0-20261002\controlled-056323db\game\test_output\ecology.replenished_prey.png
+PASS ecology.bounded_work - 100 capped attempts in 12.645 ms (budget 20 ms); current prey/monsters 85/2; hour 305/306 processed 0/1 area(s)
+PASS ecology.beat_sprouting - 5 beats spawned 4 sprouts (total 7 active); levels represented: 0
+PASS ecology.maturation_cycle - sprout sapling at (135,147,z=0) matured into oak: true
+PASS ecology.no_errors - 0 uncaught error(s); 0 caught inside UF_Ecology
+SUITE colonists
+PASS colonists.colonists_exist - 145 colonists present
+PASS colonists.player_faction - player faction f1 (colony: f1)
+PASS colonists.colonist_identity - colonist #4653 name Elem, ai=null
+PASS colonists.order_move - manual move job: 41
+PASS colonists.no_errors - no errors during colonists check
+SUITE world
+PASS world.in_area_map - area (0,0), map 1000, seed 1920951434
+PASS world.area_size - 256x256, data length 393216, objects 65536
+PASS world.level_ids - levels -16, -15, -14, -13, -12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 -> map ids 1032, 1030, 1028, 1026, 1024, 1022, 1020, 1018, 1016, 1014, 1012, 1010, 1008, 1006, 1004, 1003, 1000, 1001, 1002, 1005, 1007, 1009, 1011, 1013, 1015, 1017, 1019, 1021, 1023, 1025, 1027, 1029 (distinct); levelOfMapId round trip true; ground id 1000 (MapIdBase 1000, unchanged); areaOfMapId(level -1) null (want null); inWorld at level 16 / -17: false / false
+PASS world.seeded - area (0,0) built twice: -1972125312 / -1972125312; generators: uf_levels_terrain, uf_worldgen, uf_underground_resources
+PASS world.diff_applies_live - tile (3,3) 3488 -> 2048
+PASS world.object_diffs - on screen (5,5) = 7; area (0,0) cell (9,9) = 3 through the peek cache (same cached build)
+PASS world.save_roundtrip - 6154598 bytes, 1238 units
+PASS world.single_area_world - 1x1 areas, map 1000; walk from x 67 to x 52 on row 172
+PASS world.unit_enters_view - event 6599 at (66,172), sprite created
+PASS world.faces_its_steps - 14 step(s) taken (0 diagonal), 0 not facing the step's direction; facing 4 after walking west (want 4)
+PASS world.unit_walks_to_goal - at (52,172) in area (0,0), goal (52,172) reached
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\scratchpad\codex-phase0-20261002\controlled-056323db\game\test_output\world.unit_in_view.png
+PASS world.spawn_not_in_walls - an oak was set at (100,100) (free: false); the unit spawned at (105,96), 5 cell(s) away, on a free cell: true
+PASS world.unit_image_refresh - event now draws "$U7_Ranger"
+PASS world.view_wraps_in_round_world - view at (0,172) after stepping east at the edge (expected 0)
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\scratchpad\codex-phase0-20261002\controlled-056323db\game\test_output\world.round_seam_wrap.png
+PASS world.view_wraps_back_west - view returned to (255,172) after stepping west from 0
+PASS world.diff_persists - tile (3,3) is 2048 (expected 2048) and object (5,5) is 7 (expected 7) after leaving and returning
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\scratchpad\codex-phase0-20261002\controlled-056323db\game\test_output\world.path_around_wall.png
+PASS world.path_around_wall - 9x9 ring of 31 wall pieces round (61,235), gap at (61,231); TEST_pather from (61,237) inside to (61,246) outside on the far side: arrived after 484 frames and 27 steps (first plan 27 cells), through the gap: true, wall cells stood on: 0; gave up: never; sent again 0x; test site: 66 objects cleared, nearest unit 34 cells away
+PASS world.path_blocked_goal - goal: the wall piece at (61,239); from inside (61,237): 1 cell(s) ending at (61,238) (want (61,238)); from outside (61,246): 6 cell(s) ending at (61,240) (want (61,240)); wall cells on either path: 0
+PASS world.path_blocked_fast - goal (61,235) inside the ring with its gap closed; TEST_pather outside at (61,246): world:unitBlocked after 49 frame(s), reason "too far to plan"; now at (61,240), goal dropped; wall cells stood on: 0
+FAIL world.path_gives_up_when_crowded - gaps at (61,231) and (61,239), each held by a unit standing still; TEST_pather from (61,240) sent to (61,235) inside: no give-up within 266 frames (goal still set), 15 steps, now at (56,230); cells inside the ring entered: 0, wall cells stood on: 0 (progress limit 600 map updates)
+FAIL world.path_replans - TEST_replanner from (54,235) to (68,235) (14 steps in a straight line); a wall went up on its next path cell (58,235) with 11 cells to go; not arrived (at 67,235, goal still set) after 15 steps (a detour round the wall makes it more than 14); steps onto the new wall: 0; re-plans counted (all units) 2; gave up: never
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\scratchpad\codex-phase0-20261002\controlled-056323db\game\test_output\world.eight_way.png
+PASS world.eight_way_steps - FourWay false; open ground, 8 cells each way: TEST_diag8 north-east arrived: 8 steps, 8 diagonal; TEST_diag4 south-east arrived: 8 steps, 8 diagonal (want 8 of 8 diagonal each); TEST_rounder 2 diagonal of 10
+FAIL world.faces_eight_ways - 8-row scratch sheet made; steps not facing their direction 0; rows checked 161 (8-row) / 184 (stock) / 180 (rounder, stock), wrong 6: SE: row 3 (want 2) | SE: row 3 (want 2) | SE: row 3 (want 2) | SE: row 3 (want 2); TEST_diag8 after walking NE: dir8 9 (NE), row 5 drawn by UF_Anim true (want 9, row 5); TEST_diag4 (stock) after walking SE from facing N: dir8 3, direction 6, row 2 (want 3, 6, row 2)
+PASS world.faces_targets - TEST_chopper from (67,243) to chop the tree at (70,240): job now work, stand (69,241) (want (69,241), south-west), at work: dir8 9 (NE), work row 5 (want 9, work row 5); TEST_striker attacking the unit south-west of it: dir8 1 (SW), attack row 1 (want 1, attack row 1); TEST_caster casting at a unit 3 east, 2 south: dir8 3 (SE), cast row 7 (want 3, cast row 7)
+FAIL world.path_budget - 100 plans of 40-80 cells (3179 seeded picks; 71 planned paths outside 40-80 cells, 0 of them capped at 12000 cells): average 1.687 ms, p95 7.565 ms, max 15.780 ms; cells expanded median 107, p95 1047, max 1761
+PASS world.no_wall_steps - 105.3 s of play, 1302 map updates: 5842 one-cell steps (2662 diagonal) by 120 units (0 moves of more than one cell), 0 steps by walkers onto blocking cells; planner in this window: 605 plans (598 found, 6 partial, 1 none), 7.823 ms average, p95 55.720 ms and max 160.86 ms (last 512 / all plans), cells expanded 1181 average, median 8; queue peak 1, 1 queued; re-plans 3, detours round units 39; gave up: {"too far to plan":1}; region map rebuilt 0x (3.68 ms average); slowest plan so far {"ms":160.85999999995693,"expanded":11635,"reason":"found","regionMs":0,"length":160}; 66 of 66 test-site objects put back
+PASS world.no_corner_cut - tree line of 7 at row 239 (x 60-66); TEST_rounder (63,237) -> (63,241): arrived in 10 steps (2 diagonal), round an end of the line true; its plan 10 cells, 2 diagonal, 0 past a tree corner; diagonal steps past a blocking corner in the fixture 0; in 105.3 s of play 2662 diagonal steps, 0 past a blocking corner by walkers
+FAIL world.no_path_is_true - 0 "no path" give-ups re-tested at that moment with a flood fill over $gameMap.isPassable (out of the cell and into the next, no water): 0 could reach the goal after all; 
+FAIL world.frame_cost - UF.World.update 9.191 ms average per map update over 1302 updates, worst 235.50 ms; 1211 units; includes planning (the path checks' own findPath calls are outside it)
+PASS world.no_errors - none during world checks
+SUITE worldgen
+PASS worldgen.catalog_loaded - 87 object types, 33 biomes
+PASS worldgen.catalog_images_exist - 87 object images/sheets found
+PASS worldgen.catalog_ids_resolve - 33 biomes, 26 ground kinds, 9 water kinds, 87 objects all resolve
+PASS worldgen.autotile_matches_editor - 47 shapes derived; a 3-wide vertical strip gives 16,0,24 (the editor painted 16,0,24)
+PASS worldgen.tileset_id - built map tilesetId 91, map on screen 91, UF.Tiles.TILESET_ID 91
+PASS worldgen.start_in_middle - UF_Colonists installed: 0 generator start events (want 0); note "<glade>"
+PASS worldgen.names_vary_by_seed - this world: Alan and Ela; next seed: Dorald and Jorelle
+PASS worldgen.water_near_start - nearest water 10.3 cells from the pair (reach 29)
+PASS worldgen.river_not_through_start - river(s) pass 25, 87 cells from the start (keep away 14)
+PASS worldgen.rivers_count - 2 river(s) (catalog count 1-2) at columns 149 (half-width 1), 208 (half-width 2)
+FAIL worldgen.river_continuous - 239 break(s); first: river at column 149: row 167 dry
+PASS worldgen.objects_placed - 1523 objects in map.ufObjects of the start area (stats sum 1523, 0 object events); most common: grass_tuft 407, reeds 202, oak 168, fir_snow 117, fern 89, pine 86, lichen 79, rocks_small 74
+PASS worldgen.glade_clear - 0 objects inside the start clearing (radius 0) as generated
+PASS worldgen.no_objects_in_water - 4919 water cells; 9 objects on water, 0 of them not water plants; 0 water plants on land
+FAIL worldgen.kit_per_area - 5 factions; 5 area centre(s), kit within 20 cells, drinkable water within 30: Arar Freehold (128,128): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 1/1, ore 2/1; water fresh at 10.3 | Wennoreth Court (228,15): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 15/60, reeds 5/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; water marsh at 22.8 | Solmarwyn Burrow (135,60): berry_bush 8/8, oak 11/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 3/1, ore 2/1; water fresh at 10.6 | Ethmaric Enclave (174,123): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 1/1, ore 2/1; water fresh at 12.8 | Pela Tribe (138,195): berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; water fresh at 24.2; FAILING: Wennoreth Court at (228,15): short grass_tuft 15/60, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; Pela Tribe at (138,195): short berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1
+FAIL worldgen.kit_covers_plan - first stage (hearth, larder, knives, clothes, axe, pick, food, woodpile, shelter, beds, workstone) for 8 founders, the most any of 7 cultures needs, plus 8 meals: log 26, stone 60, fiber 58, straw 16, food 16, ore 2 (human 26/14/58/16/14, elf 24/10/56/16/16, dwarf 3/60/58/16/14, gnome 26/14/58/16/14, goblin 3/14/58/16/14, orc 26/14/58/16/14, automaton 3/60/58/16/14 as log/stone/fiber/straw/food); the kit's minimums alone are worth log 36, stone 47, fiber 60, straw 8, food 19, ore 2 (SHORT: stone 47/60, straw 8/16); within 20 cells of each campfire: Arar Freehold (128,128): log 36, stone 50, fiber 60, straw 10, food 19, ore 4 | Wennoreth Court (228,15): log 32, stone 20, fiber 15, straw 10, food 16, ore 0 | Solmarwyn Burrow (135,60): log 107, stone 50, fiber 71, straw 8, food 25, ore 4 | Ethmaric Enclave (174,123): log 36, stone 50, fiber 60, straw 10, food 19, ore 4 | Pela Tribe (138,195): log 0, stone 0, fiber 0, straw 0, food 0, ore 0; FAILING: Arar Freehold: short stone 50/60, straw 10/16; Wennoreth Court: short stone 20/60, fiber 15/58, straw 10/16, ore 0/2; Solmarwyn Burrow: short stone 50/60, straw 8/16; Ethmaric Enclave: short stone 50/60, straw 10/16; Pela Tribe: short log 0/26, stone 0/60, fiber 0/58, straw 0/16, food 0/16, ore 0/2
+FAIL worldgen.kit_fair - minimums for every area: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 1, ore 1-2 of ironstone/copper_outcrop; per area: Arar Freehold: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 1, ore 2 (copper_outcrop 2); water fresh 10.3 | Wennoreth Court: berry_bush 8, oak 8, rocks_small 10, grass_tuft 15, reeds 5, granite_boulder 0, fruit_tree 0, ore 0 (none); water marsh 22.8 | Solmarwyn Burrow: berry_bush 8, oak 11, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 3, ore 2 (ironstone 2); water fresh 10.6 | Ethmaric Enclave: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 1, ore 2 (copper_outcrop 2); water fresh 12.8 | Pela Tribe: berry_bush 0, oak 0, rocks_small 0, grass_tuft 0, reeds 0, granite_boulder 0, fruit_tree 0, ore 0 (none); water fresh 24.2; SHORT: Wennoreth Court: grass_tuft 15/60, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; Pela Tribe: berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1
+PASS worldgen.kit_seeded - seed 1920951434: 261 kit objects placed (first berry_bush (134,130), berry_bush (121,125), berry_bush (125,116); ore copper_outcrop (129,144), copper_outcrop (117,134), ironstone (121,74), ironstone (122,65), copper_outcrop (159,131), copper_outcrop (161,134)), a second build identical; seed 1920951435: 153 placed, ore copper_outcrop/copper_outcrop, another layout
+PASS worldgen.peaks_region_250 - 40258 peak_rock tiles, 40258 cells with region 250, 0 mismatched in the start area
+FAIL worldgen.autotile_shapes - 7045 interior cells sampled (537 water, the rest ground away from water), 266 wrong shapes; first: (217,4) ground shape 34, expected 0
+PASS worldgen.deterministic - tiles -1972125312 / -1972125312, objects -1008241982 / -1008241982 on rebuild (674 ms first build)
+HARNESS watchdog: whole run took longer than 180 s
+HARNESS current scene: Scene_Map
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\scratchpad\codex-phase0-20261002\controlled-056323db\game\test_output\harness.on_failure.png
+RESULT: 224 passed, 11 failed (exit 2)

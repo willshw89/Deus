@@ -1,0 +1,15 @@
+# tools/test_historical_carrying_capacity.js  category=FAIL_OTHER  exit=1  ms=332  decided by other (stderr)
+== stdout ==
+
+== stderr ==
+FAIL: Error: CANDIDATE_MISMATCH: working plugin differs from frozen candidate
+    at assert (C:\Users\snewt\OneDrive\Desktop\UF\scratchpad\codex-phase0-20261002\baseline-056323db\tools\test_historical_carrying_capacity.js:51:50)
+    at sourceBundle (C:\Users\snewt\OneDrive\Desktop\UF\scratchpad\codex-phase0-20261002\baseline-056323db\tools\test_historical_carrying_capacity.js:95:9)
+    at main (C:\Users\snewt\OneDrive\Desktop\UF\scratchpad\codex-phase0-20261002\baseline-056323db\tools\test_historical_carrying_capacity.js:603:18)
+    at Object.<anonymous> (C:\Users\snewt\OneDrive\Desktop\UF\scratchpad\codex-phase0-20261002\baseline-056323db\tools\test_historical_carrying_capacity.js:608:36)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)

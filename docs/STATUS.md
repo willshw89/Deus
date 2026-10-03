@@ -3,13 +3,17 @@
 **Project Formal Name:** DEUS  
 **Last Updated:** 2026-09-30 (DEC-054..059)  
 **Phase:** Natural World v1 build, straight through with no per-package Owner gate (DEC-058/059). The world is named Emerys (DEC-054). Soil deferred; flora, fauna and monsters placed by seeded rules per biome cell and danger tier (DEC-057). Fire, seasons/weather, migration, rare geological events and structure decay deferred (DEC-059). Art: PixelLab-native layout (DEC-055), the PM picks what goes in game (DEC-056), the Owner generates all art (DEC-007).  
-**PM & Integration Authority:** Claude; **Coordinator / Proposer:** Gemini / Antigravity (DEC-042/DEC-048)  
+**PM & Integration Authority:** Codex (Owner handoff, 2026-10-02); writers and independent reviewers follow the current roster recorded in [WBS-ORG](WBS_ORG.md).
 **Status view (DEC-085 item 8, 2026-10-01):** lane and wave status lives on the Build Board (the claude.ai artifact the PM maintains) and in the live telemetry. This page is not updated per lane or per merge; it keeps the stable description of the live systems below.  
 **Historical Ledger:** Pre-prune operational history is archived in [`docs/archive/STATUS_LEDGER_20260930.md`](archive/STATUS_LEDGER_20260930.md) (and [`docs/archive/STATUS_LEDGER_20260925.md`](archive/STATUS_LEDGER_20260925.md)).
 
 ---
 
 ## 0. Active Lanes
+
+### In progress
+
+- 2026-10-02: Codex PM recorded the Owner's WBS-ORG amendment in [WBS_ORG.md](WBS_ORG.md) and diagnostic results in [BASELINE_565dc5ae.md](baseline/BASELINE_565dc5ae.md). ORG-0.2 is assigned to Claude, with Grok reviewing; its brief is prepared on `task/lane-baseline`, and the writer has not launched. Existing local game changes and processes are preserved. The historical lane rows below have not been re-audited against the rollback. No green baseline, lane closure or architecture start is claimed.
 
 | Lane | Task | Writer -> reviewer | State |
 |---|---|---|---|

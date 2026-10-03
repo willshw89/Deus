@@ -1,5 +1,7 @@
 # tools/ops — worker launcher, resume queue and push guard (WG.00.12 Lane J)
 
+New lane briefs follow [LANE_BRIEF_TEMPLATE.md](LANE_BRIEF_TEMPLATE.md), including the Owner's 2026-10-02 required PM-selected GitHub references and independent claim checks.
+
 Operations tooling for running AI workers in lane worktrees (`%USERPROFILE%\.deus_worktrees\<lane>`).
 Windows PowerShell 5.1 scripts; nothing here is loaded by the game.
 
