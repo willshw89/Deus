@@ -25,7 +25,7 @@ Engine prototype patches:
 - `Scene_Boot.prototype.start` at game/js/plugins/DEUS_Anim.js:1816
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Sprite_Character.prototype.update` saved to `_Sprite_Character_update` at game/js/plugins/DEUS_Anim.js:705
 - `Sprite_Character.prototype.updateCharacterFrame` saved to `_Sprite_Character_updateCharacterFrame` at game/js/plugins/DEUS_Anim.js:728
 - `Spriteset_Map.prototype.createCharacters` saved to `_Spriteset_Map_createCharacters` at game/js/plugins/DEUS_Anim.js:1403
@@ -109,7 +109,7 @@ Engine prototype patches:
 - none
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - none
 Namespace property patches:
 - `UF.Assets.backgroundLoad` at game/js/plugins/DEUS_AssetStreaming.js:17
@@ -142,7 +142,7 @@ Engine prototype patches:
 - `Scene_Map.prototype.processMapTouch` at game/js/plugins/DEUS_Bag.js:652
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Scene_Map.prototype.createAllWindows` saved to `_Scene_Map_createAllWindows` at game/js/plugins/DEUS_Bag.js:575
 - `Scene_Map.prototype.update` saved to `_Scene_Map_update` at game/js/plugins/DEUS_Bag.js:585
 - `Scene_Map.prototype.processMapTouch` saved to `_Scene_Map_processMapTouch` at game/js/plugins/DEUS_Bag.js:651
@@ -184,7 +184,7 @@ Engine prototype patches:
 - none
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - none
 Namespace property patches:
 - none
@@ -266,7 +266,7 @@ Engine prototype patches:
 - `Scene_Boot.prototype.start` at game/js/plugins/DEUS_Camera.js:553
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_Map.prototype.screenTileX` saved to `_Game_Map_screenTileX` at game/js/plugins/DEUS_Camera.js:170
 - `Game_Map.prototype.screenTileY` saved to `_Game_Map_screenTileY` at game/js/plugins/DEUS_Camera.js:175
 - `Game_Map.prototype.canvasToMapX` saved to `_Game_Map_canvasToMapX` at game/js/plugins/DEUS_Camera.js:180
@@ -341,7 +341,7 @@ Engine prototype patches:
 - none
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - none
 Namespace property patches:
 - `UF.World.update` at game/js/plugins/DEUS_CellularFluids.js:18
@@ -373,7 +373,7 @@ Engine object patches (not prototype):
 - `DataManager.makeSaveContents` at game/js/plugins/DEUS_Colonists.js:60
 - `DataManager.extractSaveContents` at game/js/plugins/DEUS_Colonists.js:66
 - `DataManager.extractSaveContents` at game/js/plugins/DEUS_Colonists.js:5830
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_Map.prototype.update` saved to `_Game_Map_update` at game/js/plugins/DEUS_Colonists.js:5841
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_Colonists.js:5886
 - `DataManager.makeSaveContents` saved to `_DataManager_makeSaveContents` at game/js/plugins/DEUS_Colonists.js:59
@@ -617,7 +617,7 @@ Engine prototype patches:
 Engine object patches (not prototype):
 - `TouchInput._x` at game/js/plugins/DEUS_ColonyOverseer.js:601
 - `TouchInput._y` at game/js/plugins/DEUS_ColonyOverseer.js:602
-Saved prior engine methods:
+Engine members read or saved:
 - `Scene_Map.prototype.start` saved to `_Scene_Map_start` at game/js/plugins/DEUS_ColonyOverseer.js:185
 - `Scene_Map.prototype.update` saved to `_Scene_Map_update` at game/js/plugins/DEUS_ColonyOverseer.js:195
 - `Scene_Map.prototype.createAllWindows` saved to `_Scene_Map_createAllWindows` at game/js/plugins/DEUS_ColonyOverseer.js:521
@@ -660,7 +660,7 @@ Engine prototype patches:
 - `Scene_Boot.prototype.start` at game/js/plugins/DEUS_Combat.js:2545
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_Map.prototype.update` saved to `_Game_Map_update` at game/js/plugins/DEUS_Combat.js:1844
 - `Scene_Map.prototype.update` saved to `_Scene_Map_update` at game/js/plugins/DEUS_Combat.js:1914
 - `Spriteset_Map.prototype.createCharacters` saved to `_Spriteset_Map_createCharacters` at game/js/plugins/DEUS_Combat.js:2528
@@ -782,7 +782,7 @@ Engine prototype patches:
 - `Game_Map.prototype.update` at game/js/plugins/DEUS_CombatRT.js:62
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_Map.prototype.update` saved to `prev` at game/js/plugins/DEUS_CombatRT.js:61
 Namespace property patches:
 - none
@@ -807,7 +807,7 @@ Engine prototype patches:
 - `Scene_Map.prototype.update` at game/js/plugins/DEUS_CombatUI.js:61
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Scene_Map.prototype.update` saved to `prev` at game/js/plugins/DEUS_CombatUI.js:60
 Namespace property patches:
 - none
@@ -834,7 +834,7 @@ Engine prototype patches:
 - none
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - none
 Namespace property patches:
 - none
@@ -906,7 +906,7 @@ Engine prototype patches:
 - `Scene_Map.prototype.isAnyWindowUnderMouse` at game/js/plugins/DEUS_Containers.js:1516
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Scene_Map.prototype.createAllWindows` saved to `_Scene_Map_createAllWindows` at game/js/plugins/DEUS_Containers.js:1491
 - `Scene_Map.prototype.update` saved to `_Scene_Map_update` at game/js/plugins/DEUS_Containers.js:1504
 - `Scene_Map.prototype.isAnyWindowUnderMouse` saved to `_Scene_Map_isAnyWindowUnderMouse` at game/js/plugins/DEUS_Containers.js:1515
@@ -994,7 +994,7 @@ Engine object patches (not prototype):
 - `DataManager.extractSaveContents` at game/js/plugins/DEUS_Core.js:526
 - `DataManager.setupNewGame` at game/js/plugins/DEUS_Core.js:551
 - `Graphics.printError` at game/js/plugins/DEUS_Core.js:645
-Saved prior engine methods:
+Engine members read or saved:
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_Core.js:137
 - `Scene_Title.prototype.start` saved to `_Scene_Title_start` at game/js/plugins/DEUS_Core.js:157
 - `Scene_Map.prototype.isReady` saved to `_Scene_Map_isReady` at game/js/plugins/DEUS_Core.js:181
@@ -1211,7 +1211,7 @@ Engine prototype patches:
 - `Scene_Map.prototype.start` at game/js/plugins/DEUS_Culling.js:396
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Sprite_Character.prototype.update` saved to `characterUpdate` at game/js/plugins/DEUS_Culling.js:334
 - `Sprite_Character.prototype.setCharacter` saved to `setCharacter` at game/js/plugins/DEUS_Culling.js:346
 - `Sprite_Character.prototype.destroy` saved to `destroyCharacter` at game/js/plugins/DEUS_Culling.js:353
@@ -1306,7 +1306,7 @@ Engine prototype patches:
 - `Scene_Boot.prototype.start` at game/js/plugins/DEUS_DayNight.js:481
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_Screen.prototype.update` saved to `_Game_Screen_update` at game/js/plugins/DEUS_DayNight.js:120
 - `Spriteset_Map.prototype.createUpperLayer` saved to `_Spriteset_Map_createUpperLayer` at game/js/plugins/DEUS_DayNight.js:461
 - `Scene_Map.prototype.createDisplayObjects` saved to `_Scene_Map_createDisplayObjects` at game/js/plugins/DEUS_DayNight.js:470
@@ -1352,7 +1352,7 @@ Engine prototype patches:
 - none
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - none
 Namespace property patches:
 - `UF.Colonists.deathLedger` at game/js/plugins/DEUS_DeathForensics.js:451
@@ -1503,7 +1503,7 @@ Engine prototype patches:
 - `Scene_Map.prototype.start` at game/js/plugins/DEUS_Depth.js:2371
 Engine object patches (not prototype):
 - `Tilemap.prototype` at game/js/plugins/DEUS_Depth.js:452
-Saved prior engine methods:
+Engine members read or saved:
 - `Spriteset_Map.prototype.createCharacters` saved to `_Spriteset_Map_createCharacters` at game/js/plugins/DEUS_Depth.js:1663
 - `Spriteset_Map.prototype.updateTilemap` saved to `_Spriteset_Map_updateTilemap` at game/js/plugins/DEUS_Depth.js:1673
 - `Scene_Map.prototype.update` saved to `_Scene_Map_update` at game/js/plugins/DEUS_Depth.js:1679
@@ -1654,7 +1654,7 @@ Engine prototype patches:
 - none
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - none
 Namespace property patches:
 - none
@@ -1723,7 +1723,7 @@ Engine prototype patches:
 - `Scene_Map.prototype.update` at game/js/plugins/DEUS_DepthDemo.js:470
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - none
 Namespace property patches:
 - none
@@ -1775,7 +1775,7 @@ Engine prototype patches:
 - none
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - none
 Namespace property patches:
 - none
@@ -1838,7 +1838,7 @@ Engine prototype patches:
 - `Scene_Boot.prototype.start` at game/js/plugins/DEUS_Doors.js:633
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_CharacterBase.prototype.isMapPassable` saved to `_Game_CharacterBase_isMapPassable` at game/js/plugins/DEUS_Doors.js:271
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_Doors.js:632
 Namespace property patches:
@@ -1925,7 +1925,7 @@ Engine prototype patches:
 - `Scene_Boot.prototype.start` at game/js/plugins/DEUS_Ecology.js:1028
 Engine object patches (not prototype):
 - `DataManager.extractSaveContents` at game/js/plugins/DEUS_Ecology.js:1022
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_Map.prototype.update` saved to `_Game_Map_update_ecology` at game/js/plugins/DEUS_Ecology.js:1008
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_Ecology.js:1027
 - `DataManager.extractSaveContents` saved to `_DataManager_extractSaveContents` at game/js/plugins/DEUS_Ecology.js:1021
@@ -2012,7 +2012,7 @@ Engine prototype patches:
 - `Scene_Boot.prototype.start` at game/js/plugins/DEUS_Environment.js:815
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_Map.prototype.update` saved to `_Game_Map_update` at game/js/plugins/DEUS_Environment.js:797
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_Environment.js:814
 Namespace property patches:
@@ -2142,7 +2142,7 @@ Engine object patches (not prototype):
 - `TouchInput._triggerY` at game/js/plugins/DEUS_FactionMenus.js:1778
 - `Input._latestButton` at game/js/plugins/DEUS_FactionMenus.js:1795
 - `Input._pressedTime` at game/js/plugins/DEUS_FactionMenus.js:1796
-Saved prior engine methods:
+Engine members read or saved:
 - `Scene_Title.prototype.start` saved to `_Scene_Title_start` at game/js/plugins/DEUS_FactionMenus.js:96
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_FactionMenus.js:193
 - `Scene_Title.prototype.start` saved to `_Scene_Title_start` at game/js/plugins/DEUS_FactionMenus.js:202
@@ -2255,7 +2255,7 @@ Engine prototype patches:
 - `Scene_Boot.prototype.start` at game/js/plugins/DEUS_Factions.js:1485
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_Map.prototype.update` saved to `_Game_Map_update` at game/js/plugins/DEUS_Factions.js:656
 - `Scene_Map.prototype.createAllWindows` saved to `_Scene_Map_createAllWindows` at game/js/plugins/DEUS_Factions.js:741
 - `Scene_Map.prototype.update` saved to `_Scene_Map_update` at game/js/plugins/DEUS_Factions.js:750
@@ -2371,7 +2371,7 @@ Engine prototype patches:
 - `Scene_Boot.prototype.start` at game/js/plugins/DEUS_Fire.js:1384
 Engine object patches (not prototype):
 - `DataManager.createGameObjects` at game/js/plugins/DEUS_Fire.js:1377
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_Map.prototype.update` saved to `_Game_Map_update` at game/js/plugins/DEUS_Fire.js:616
 - `Game_CharacterBase.prototype.isMapPassable` saved to `_Game_CharacterBase_isMapPassable` at game/js/plugins/DEUS_Fire.js:735
 - `Spriteset_Map.prototype.createCharacters` saved to `_Spriteset_Map_createCharacters` at game/js/plugins/DEUS_Fire.js:1165
@@ -2462,7 +2462,7 @@ Engine prototype patches:
 - `Scene_Boot.prototype.start` at game/js/plugins/DEUS_Floors.js:799
 Engine object patches (not prototype):
 - `DataManager.extractSaveContents` at game/js/plugins/DEUS_Floors.js:791
-Saved prior engine methods:
+Engine members read or saved:
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_Floors.js:798
 - `DataManager.extractSaveContents` saved to `_extractSaveContents` at game/js/plugins/DEUS_Floors.js:790
 Namespace property patches:
@@ -2583,7 +2583,7 @@ Engine prototype patches:
 - none
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - none
 Namespace property patches:
 - `UF.Pathfinding.requestFlowField` at game/js/plugins/DEUS_FlowFields.js:156
@@ -2620,7 +2620,7 @@ Engine prototype patches:
 Engine object patches (not prototype):
 - `DataManager.makeSaveContents` at game/js/plugins/DEUS_Fluid.js:1304
 - `DataManager.extractSaveContents` at game/js/plugins/DEUS_Fluid.js:1313
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_Map.prototype.update` saved to `_Game_Map_update` at game/js/plugins/DEUS_Fluid.js:1321
 - `Game_Map.prototype.setup` saved to `_Game_Map_setup` at game/js/plugins/DEUS_Fluid.js:1328
 - `DataManager.makeSaveContents` saved to `_DataManager_makeSaveContents` at game/js/plugins/DEUS_Fluid.js:1303
@@ -2741,7 +2741,7 @@ Engine object patches (not prototype):
 - `DataManager.makeSaveContents` at game/js/plugins/DEUS_Fog.js:644
 - `DataManager.extractSaveContents` at game/js/plugins/DEUS_Fog.js:650
 - `DataManager.createGameObjects` at game/js/plugins/DEUS_Fog.js:659
-Saved prior engine methods:
+Engine members read or saved:
 - `Spriteset_Map.prototype.createCharacters` saved to `_Spriteset_Map_createCharacters` at game/js/plugins/DEUS_Fog.js:627
 - `Game_Map.prototype.update` saved to `_Game_Map_update` at game/js/plugins/DEUS_Fog.js:637
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_Fog.js:670
@@ -2803,7 +2803,7 @@ Engine prototype patches:
 Engine object patches (not prototype):
 - `ImageManager.loadCharacter` at game/js/plugins/DEUS_Generator.js:283
 - `ImageManager.loadFace` at game/js/plugins/DEUS_Generator.js:299
-Saved prior engine methods:
+Engine members read or saved:
 - `ImageManager.loadCharacter` saved to `_ImageManager_loadCharacter` at game/js/plugins/DEUS_Generator.js:282
 - `ImageManager.loadFace` saved to `_ImageManager_loadFace` at game/js/plugins/DEUS_Generator.js:298
 Namespace property patches:
@@ -2853,7 +2853,7 @@ Engine prototype patches:
 - none
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - none
 Namespace property patches:
 - none
@@ -2928,7 +2928,7 @@ Engine prototype patches:
 - `Scene_Map.prototype.update` at game/js/plugins/DEUS_History.js:3851
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Scene_Map.prototype.createAllWindows` saved to `_Scene_Map_createAllWindows` at game/js/plugins/DEUS_History.js:3723
 - `Scene_Map.prototype.update` saved to `_Scene_Map_update` at game/js/plugins/DEUS_History.js:3732
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_History.js:3742
@@ -3051,7 +3051,7 @@ Engine object patches (not prototype):
 - `TouchInput._y` at game/js/plugins/DEUS_Interact.js:976
 - `TouchInput._x` at game/js/plugins/DEUS_Interact.js:1051
 - `TouchInput._y` at game/js/plugins/DEUS_Interact.js:1052
-Saved prior engine methods:
+Engine members read or saved:
 - `Spriteset_Map.prototype.createCharacters` saved to `_Spriteset_Map_createCharacters` at game/js/plugins/DEUS_Interact.js:915
 - `Spriteset_Map.prototype.update` saved to `_Spriteset_Map_update` at game/js/plugins/DEUS_Interact.js:920
 - `Scene_Map.prototype.updateOverseerControls` saved to `_updateOverseerControls` at game/js/plugins/DEUS_Interact.js:930
@@ -3145,7 +3145,7 @@ Engine prototype patches:
 - `Scene_Boot.prototype.start` at game/js/plugins/DEUS_Items.js:1587
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Spriteset_Map.prototype.createCharacters` saved to `_Spriteset_Map_createCharacters` at game/js/plugins/DEUS_Items.js:1576
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_Items.js:1586
 - `SceneManager._scene` saved to `s` at game/js/plugins/DEUS_Items.js:1572
@@ -3312,7 +3312,7 @@ Engine prototype patches:
 - `Scene_Boot.prototype.start` at game/js/plugins/DEUS_Jobs.js:2041
 Engine object patches (not prototype):
 - `DataManager.extractSaveContents` at game/js/plugins/DEUS_Jobs.js:2019
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_Map.prototype.update` saved to `_Game_Map_update` at game/js/plugins/DEUS_Jobs.js:2011
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_Jobs.js:2040
 - `DataManager.extractSaveContents` saved to `_DataManager_extractSaveContents` at game/js/plugins/DEUS_Jobs.js:2018
@@ -3508,7 +3508,7 @@ Engine prototype patches:
 - none
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - none
 Namespace property patches:
 - none
@@ -3597,7 +3597,7 @@ Engine object patches (not prototype):
 - `ImageManager.loadTileset` at game/js/plugins/DEUS_Levels.js:568
 - `DataManager.onLoad` at game/js/plugins/DEUS_Levels.js:618
 - `DataManager.extractSaveContents` at game/js/plugins/DEUS_Levels.js:4919
-Saved prior engine methods:
+Engine members read or saved:
 - `Scene_Boot.prototype.isReady` saved to `_Scene_Boot_isReady` at game/js/plugins/DEUS_Levels.js:624
 - `Spriteset_Map.prototype.createCharacters` saved to `_Spriteset_Map_createCharacters_naturalWalls` at game/js/plugins/DEUS_Levels.js:4708
 - `Spriteset_Map.prototype.updateParallax` saved to `_Spriteset_Map_updateParallax` at game/js/plugins/DEUS_Levels.js:4717
@@ -3859,7 +3859,7 @@ Engine prototype patches:
 - `Spriteset_Map.prototype.updateLighting` at game/js/plugins/DEUS_Lighting.js:36
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Spriteset_Map.prototype.createLowerLayer` saved to `_Spriteset_Map_createLowerLayer` at game/js/plugins/DEUS_Lighting.js:11
 - `Spriteset_Map.prototype.update` saved to `_Spriteset_Map_update` at game/js/plugins/DEUS_Lighting.js:30
 Namespace property patches:
@@ -3895,7 +3895,7 @@ Engine object patches (not prototype):
 - `TouchInput._y` at game/js/plugins/DEUS_Look.js:769
 - `TouchInput._x` at game/js/plugins/DEUS_Look.js:776
 - `TouchInput._y` at game/js/plugins/DEUS_Look.js:777
-Saved prior engine methods:
+Engine members read or saved:
 - `Scene_Map.prototype.createAllWindows` saved to `_Scene_Map_createAllWindows` at game/js/plugins/DEUS_Look.js:543
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_Look.js:629
 - `SceneManager._scene` saved to `scene` at game/js/plugins/DEUS_Look.js:439
@@ -3960,7 +3960,7 @@ Engine prototype patches:
 - none
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - none
 Namespace property patches:
 - none
@@ -4004,7 +4004,7 @@ Engine prototype patches:
 - `Game_CharacterBase.prototype.deusDir8` at game/js/plugins/DEUS_Move8.js:89 (source text `GB.prototype.deusDir8`; local assigned from `root.Game_CharacterBase at 56`)
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_CharacterBase.prototype.distancePerFrame` saved to `prevDist` at game/js/plugins/DEUS_Move8.js:60 (source text `GB.prototype.distancePerFrame`; local assigned from `root.Game_CharacterBase at 56`)
 - `Game_CharacterBase.prototype.moveStraight` saved to `prevStraight` at game/js/plugins/DEUS_Move8.js:74 (source text `GB.prototype.moveStraight`; local assigned from `root.Game_CharacterBase at 56`)
 - `Game_CharacterBase.prototype.moveDiagonally` saved to `prevDiag` at game/js/plugins/DEUS_Move8.js:81 (source text `GB.prototype.moveDiagonally`; local assigned from `root.Game_CharacterBase at 56`)
@@ -4045,7 +4045,7 @@ Engine prototype patches:
 - `Game_Follower.prototype.chaseCharacter` at game/js/plugins/DEUS_Movement8D.js:636
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_CharacterBase.prototype.initMembers` saved to `_Game_CharacterBase_initMembers` at game/js/plugins/DEUS_Movement8D.js:149
 - `Game_CharacterBase.prototype.setDirection` saved to `_Game_CharacterBase_setDirection` at game/js/plugins/DEUS_Movement8D.js:162
 - `Game_CharacterBase.prototype.distancePerFrame` saved to `_Game_CharacterBase_distancePerFrame` at game/js/plugins/DEUS_Movement8D.js:187
@@ -4092,7 +4092,7 @@ Engine prototype patches:
 - `Scene_Map.prototype.update` at game/js/plugins/DEUS_NaturalConnections.js:434
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Scene_Boot.prototype.start` saved to `_boot` at game/js/plugins/DEUS_NaturalConnections.js:419
 - `Spriteset_Map.prototype.createCharacters` saved to `_characters` at game/js/plugins/DEUS_NaturalConnections.js:421
 - `Spriteset_Map.prototype.update` saved to `_update` at game/js/plugins/DEUS_NaturalConnections.js:423
@@ -4167,7 +4167,7 @@ Engine prototype patches:
 - `Scene_Boot.prototype.start` at game/js/plugins/DEUS_Objects.js:1226
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Spriteset_Map.prototype.createCharacters` saved to `_Spriteset_Map_createCharacters` at game/js/plugins/DEUS_Objects.js:1064
 - `Game_Map.prototype.isPassable` saved to `_Game_Map_isPassable` at game/js/plugins/DEUS_Objects.js:1081
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_Objects.js:1225
@@ -4368,7 +4368,7 @@ Engine prototype patches:
 - `Scene_Boot.prototype.start` at game/js/plugins/DEUS_Ownership.js:630
 Engine object patches (not prototype):
 - `DataManager.extractSaveContents` at game/js/plugins/DEUS_Ownership.js:624
-Saved prior engine methods:
+Engine members read or saved:
 - `Tip.prototype.update` saved to `update` at game/js/plugins/DEUS_Ownership.js:532
 - `Game_Map.prototype.update` saved to `_Game_Map_update` at game/js/plugins/DEUS_Ownership.js:612
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_Ownership.js:629
@@ -4463,7 +4463,7 @@ Engine prototype patches:
 - `Game_CharacterBase.prototype.isPriorityBelow` at game/js/plugins/DEUS_Perspective25D.js:127
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_CharacterBase.prototype.initMembers` saved to `_Game_CharacterBase_initMembers` at game/js/plugins/DEUS_Perspective25D.js:29
 - `Sprite_Character.prototype.update` saved to `_Sprite_Character_update` at game/js/plugins/DEUS_Perspective25D.js:69
 - `Sprite_Character.prototype.updatePosition` saved to `_Sprite_Character_updatePosition` at game/js/plugins/DEUS_Perspective25D.js:107
@@ -4495,7 +4495,7 @@ Engine prototype patches:
 - `Scene_Boot.prototype.start` at game/js/plugins/DEUS_Projects.js:1618
 Engine object patches (not prototype):
 - `DataManager.extractSaveContents` at game/js/plugins/DEUS_Projects.js:1602
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_Map.prototype.update` saved to `_Game_Map_update` at game/js/plugins/DEUS_Projects.js:1595
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_Projects.js:1617
 - `DataManager.extractSaveContents` saved to `_DataManager_extractSaveContents` at game/js/plugins/DEUS_Projects.js:1601
@@ -4654,7 +4654,7 @@ Engine object patches (not prototype):
 - `TouchInput._x` at game/js/plugins/DEUS_Select.js:4039
 - `TouchInput._y` at game/js/plugins/DEUS_Select.js:4040
 - `TouchInput._currentState` at game/js/plugins/DEUS_Select.js:4041
-Saved prior engine methods:
+Engine members read or saved:
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_Select.js:2562
 - `Scene_Map.prototype.createDisplayObjects` saved to `_Scene_Map_createDisplayObjects` at game/js/plugins/DEUS_Select.js:2691
 - `Scene_Map.prototype.isAnyWindowUnderMouse` saved to `_Scene_Map_isAnyWindowUnderMouse` at game/js/plugins/DEUS_Select.js:2707
@@ -4801,7 +4801,7 @@ Engine object patches (not prototype):
 - `TouchInput._y` at game/js/plugins/DEUS_Sheet.js:2699
 - `TouchInput._triggerX` at game/js/plugins/DEUS_Sheet.js:2706
 - `TouchInput._triggerY` at game/js/plugins/DEUS_Sheet.js:2707
-Saved prior engine methods:
+Engine members read or saved:
 - `Scene_Map.prototype.createAllWindows` saved to `_Scene_Map_createAllWindows` at game/js/plugins/DEUS_Sheet.js:2472
 - `Scene_Map.prototype.update` saved to `_Scene_Map_update` at game/js/plugins/DEUS_Sheet.js:2487
 - `Scene_Map.prototype.isAnyWindowUnderMouse` saved to `_isAny` at game/js/plugins/DEUS_Sheet.js:2552
@@ -4900,7 +4900,7 @@ Engine prototype patches:
 - `Game_Map.prototype.setup` at game/js/plugins/DEUS_Spawners.js:47
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_Map.prototype.setup` saved to `alias_Game_Map_setup` at game/js/plugins/DEUS_Spawners.js:46
 Namespace property patches:
 - `DEUS.Spawners.carveGeology` at game/js/plugins/DEUS_Spawners.js:27
@@ -4940,7 +4940,7 @@ Engine prototype patches:
 Engine object patches (not prototype):
 - `DataManager.setupNewGame` at game/js/plugins/DEUS_Speech.js:752
 - `DataManager.extractSaveContents` at game/js/plugins/DEUS_Speech.js:757
-Saved prior engine methods:
+Engine members read or saved:
 - `Spriteset_Map.prototype.createLowerLayer` saved to `_Spriteset_Map_createLowerLayer` at game/js/plugins/DEUS_Speech.js:736
 - `Game_Map.prototype.setup` saved to `_Game_Map_setup` at game/js/plugins/DEUS_Speech.js:746
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_Speech.js:762
@@ -5013,7 +5013,7 @@ Engine prototype patches:
 - `Scene_Boot.prototype.start` at game/js/plugins/DEUS_Stance.js:622
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Spriteset_Map.prototype.createCharacters` saved to `_Spriteset_Map_createCharacters` at game/js/plugins/DEUS_Stance.js:605
 - `Spriteset_Map.prototype.update` saved to `_Spriteset_Map_update` at game/js/plugins/DEUS_Stance.js:612
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_Stance.js:621
@@ -5067,7 +5067,7 @@ Engine prototype patches:
 - none
 Engine object patches (not prototype):
 - `DataManager.extractSaveContents` at game/js/plugins/DEUS_Stockpiles.js:741
-Saved prior engine methods:
+Engine members read or saved:
 - `DataManager.extractSaveContents` saved to `_DataManager_extractSaveContents` at game/js/plugins/DEUS_Stockpiles.js:740
 Namespace property patches:
 - none
@@ -5104,7 +5104,7 @@ Engine prototype patches:
 Engine object patches (not prototype):
 - `DataManager.makeSaveContents` at game/js/plugins/DEUS_Structural.js:729
 - `DataManager.extractSaveContents` at game/js/plugins/DEUS_Structural.js:735
-Saved prior engine methods:
+Engine members read or saved:
 - `DataManager.makeSaveContents` saved to `_DataManager_makeSaveContents` at game/js/plugins/DEUS_Structural.js:728
 - `DataManager.extractSaveContents` saved to `_DataManager_extractSaveContents` at game/js/plugins/DEUS_Structural.js:734
 Namespace property patches:
@@ -5187,7 +5187,7 @@ Engine prototype patches:
 - `Sprite_Character.prototype.update` at game/js/plugins/DEUS_StructuralPhysics.js:87
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Scene_Map.prototype.update` saved to `_Scene_Map_update` at game/js/plugins/DEUS_StructuralPhysics.js:29
 - `Sprite_Character.prototype.update` saved to `_Sprite_Character_update` at game/js/plugins/DEUS_StructuralPhysics.js:86
 Namespace property patches:
@@ -5237,7 +5237,7 @@ Engine object patches (not prototype):
 - `TouchInput._y` at game/js/plugins/DEUS_Talk.js:2466
 - `TouchInput._x` at game/js/plugins/DEUS_Talk.js:2469
 - `TouchInput._y` at game/js/plugins/DEUS_Talk.js:2470
-Saved prior engine methods:
+Engine members read or saved:
 - `MW.prototype.initialize` saved to `_init` at game/js/plugins/DEUS_Talk.js:1905
 - `MW.prototype.setOptions` saved to `_setOptions` at game/js/plugins/DEUS_Talk.js:1917
 - `Scene_Map.prototype.update` saved to `_Scene_Map_update` at game/js/plugins/DEUS_Talk.js:1937
@@ -5327,7 +5327,7 @@ Engine prototype patches:
 - none
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - none
 Namespace property patches:
 - none
@@ -5374,7 +5374,7 @@ Engine object patches (not prototype):
 - `TouchInput._y` at game/js/plugins/DEUS_Test.js:427
 - `Graphics._onTick` at game/js/plugins/DEUS_Test.js:592
 - `Graphics._onTick` at game/js/plugins/DEUS_Test.js:728
-Saved prior engine methods:
+Engine members read or saved:
 - `Spriteset_Map.prototype.update` saved to `origSpritesetUpdate` at game/js/plugins/DEUS_Test.js:623
 - `SceneManager.catchException` saved to `_catchException` at game/js/plugins/DEUS_Test.js:107
 - `SceneManager.updateMain` saved to `_updateMain` at game/js/plugins/DEUS_Test.js:118
@@ -5611,7 +5611,7 @@ Engine object patches (not prototype):
 - `Tilemap.isWaterTile` at game/js/plugins/DEUS_Tiles.js:508
 - `DataManager.onLoad` at game/js/plugins/DEUS_Tiles.js:533
 - `DataManager.extractSaveContents` at game/js/plugins/DEUS_Tiles.js:1284
-Saved prior engine methods:
+Engine members read or saved:
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_Tiles.js:1269
 - `ImageManager.loadTileset` saved to `_ImageManager_loadTileset` at game/js/plugins/DEUS_Tiles.js:409
 - `DataManager.onLoad` saved to `_DataManager_onLoad` at game/js/plugins/DEUS_Tiles.js:532
@@ -5710,7 +5710,7 @@ Engine object patches (not prototype):
 - `DataManager.createGameObjects` at game/js/plugins/DEUS_TimeSpeed.js:221
 - `TouchInput._x` at game/js/plugins/DEUS_TimeSpeed.js:567
 - `TouchInput._y` at game/js/plugins/DEUS_TimeSpeed.js:568
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_Map.prototype.update` saved to `_Game_Map_update` at game/js/plugins/DEUS_TimeSpeed.js:188
 - `Scene_Map.prototype.updateMain` saved to `_Scene_Map_updateMain` at game/js/plugins/DEUS_TimeSpeed.js:209
 - `Scene_Map.prototype.update` saved to `_Scene_Map_update` at game/js/plugins/DEUS_TimeSpeed.js:231
@@ -5803,7 +5803,7 @@ Engine prototype patches:
 - `Game_Screen.prototype.update` at game/js/plugins/DEUS_Visuals.js:247
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_Event.prototype.setupPage` saved to `_Game_Event_setupPage` at game/js/plugins/DEUS_Visuals.js:147
 - `Game_Event.prototype.update` saved to `_Game_Event_update` at game/js/plugins/DEUS_Visuals.js:160
 - `Spriteset_Map.prototype.createUpperLayer` saved to `_Spriteset_Map_createUpperLayer` at game/js/plugins/DEUS_Visuals.js:219
@@ -5841,7 +5841,7 @@ Engine prototype patches:
 - `Scene_Boot.prototype.start` at game/js/plugins/DEUS_Walls.js:293
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_Walls.js:292
 Namespace property patches:
 - none
@@ -5900,7 +5900,7 @@ Engine prototype patches:
 Engine object patches (not prototype):
 - `DataManager.makeSaveContents` at game/js/plugins/DEUS_Wildlife.js:2352
 - `DataManager.extractSaveContents` at game/js/plugins/DEUS_Wildlife.js:2358
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_Map.prototype.update` saved to `_Game_Map_update` at game/js/plugins/DEUS_Wildlife.js:1620
 - `Sprite_Character.prototype.update` saved to `_Sprite_Character_update` at game/js/plugins/DEUS_Wildlife.js:1629
 - `Game_Event.prototype.isThrough` saved to `_Game_Event_isThrough` at game/js/plugins/DEUS_Wildlife.js:1638
@@ -6017,7 +6017,7 @@ Engine object patches (not prototype):
 - `DataManager.createGameObjects` at game/js/plugins/DEUS_World.js:3825
 - `DataManager.makeSaveContents` at game/js/plugins/DEUS_World.js:3876
 - `DataManager.extractSaveContents` at game/js/plugins/DEUS_World.js:3884
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_Player.prototype.moveStraight` saved to `_Game_Player_moveStraight` at game/js/plugins/DEUS_World.js:3707
 - `Game_Player.prototype.moveDiagonally` saved to `_Game_Player_moveDiagonally` at game/js/plugins/DEUS_World.js:3713
 - `Game_Player.prototype.performTransfer` saved to `_Game_Player_performTransfer` at game/js/plugins/DEUS_World.js:3719
@@ -6343,7 +6343,7 @@ Engine prototype patches:
 - `Scene_Boot.prototype.start` at game/js/plugins/DEUS_WorldGen.js:2036
 Engine object patches (not prototype):
 - `DataManager.onLoad` at game/js/plugins/DEUS_WorldGen.js:54
-Saved prior engine methods:
+Engine members read or saved:
 - `Scene_Boot.prototype.start` saved to `_Scene_Boot_start` at game/js/plugins/DEUS_WorldGen.js:2035
 - `DataManager.onLoad` saved to `_DEUS_WorldGen_DataManager_onLoad` at game/js/plugins/DEUS_WorldGen.js:53
 Namespace property patches:
@@ -6505,7 +6505,7 @@ Engine prototype patches:
 - `Scene_Map.prototype.update` at game/js/plugins/DEUS_WorldItems.js:112
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - `Game_CharacterBase.prototype.canPass` saved to `prevPass` at game/js/plugins/DEUS_WorldItems.js:83
 - `Game_CharacterBase.prototype.canPassDiagonally` saved to `prevDiag` at game/js/plugins/DEUS_WorldItems.js:94
 - `Scene_Map.prototype.update` saved to `prevUpdate` at game/js/plugins/DEUS_WorldItems.js:111
@@ -6537,7 +6537,7 @@ Engine prototype patches:
 - `Scene_Boot.prototype.start` at game/js/plugins/UF_Households.js:1064
 Engine object patches (not prototype):
 - `DataManager.extractSaveContents` at game/js/plugins/UF_Households.js:1068
-Saved prior engine methods:
+Engine members read or saved:
 - `Scene_Boot.prototype.start` saved to `boot` at game/js/plugins/UF_Households.js:1063
 - `DataManager.extractSaveContents` saved to `extract` at game/js/plugins/UF_Households.js:1067
 Namespace property patches:
@@ -6658,7 +6658,7 @@ Engine prototype patches:
 - none
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - none
 Namespace property patches:
 - none
@@ -6728,7 +6728,7 @@ Engine prototype patches:
 - none
 Engine object patches (not prototype):
 - none
-Saved prior engine methods:
+Engine members read or saved:
 - none
 Namespace property patches:
 - none

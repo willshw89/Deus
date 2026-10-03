@@ -121,3 +121,53 @@ Raw committed bytes of the five flagged evidence files were copied from `cda7ce5
 The caller index lists all 71 plugin files. It is not the filename field in `scan_summary.txt`. Method and limits are in the audit's lexer section and at the top of `caller_inventory.md`.
 
 `node tools/ops/run_gate.js --check-lists` was rerun in this pass and had finished by 2026-10-03 00:22:39 -05:00. It exited 1 with `CHECK-LISTS: 122 violation(s)`. Those inherited list failures were not repaired. `node tools/run_tests.js` and default `node tools/ops/run_gate.js` were not run.
+
+## Continuation (2026-10-03 08:10 -05:00)
+
+Writer: Grok 4.7, effort xhigh. Git identity on this commit only: `deus-grok <deus-grok@local.invalid>`. Start checkpoint: `71ddedbff38491b4ecaa433572d26bf6c40554a6` on `task/lane-plugin-audit`. This pass is a docs-only heading correction. The sections above stay the record of the passes that wrote them.
+
+The 2026-10-02 audit section records commit `566eb5ecc0c8e2b1b989ba1c8f84d4c2bb75af69` and what was known then. The fix-pass section records `a5257508debdc27a876f384ae0001d56ef0e915c`, `be12288e3c5184b23ad6b62051ec1e723439bc0d`, and the report text that landed in `e1e1b1a88d327ecd7a5729c7e836ce5798a73a96`. The exit 0 in that section is the `git diff --check 565dc5aead7e068230528d573c395ea21ed5cf5d HEAD` measurement on `be12288e`, run 2026-10-03 00:20:32 -05:00. The retracted exit-0 claim for `cda7ce55fd81fe22c301c4b2cf371d724b74aaf1` stays retracted in the audit section.
+
+### Review already on the branch
+
+`REVIEW_CODEX_e1e1b1a8.md` is commit `71ddedbff38491b4ecaa433572d26bf6c40554a6`. Codex, GPT family, reviewed exact tip `e1e1b1a88d327ecd7a5729c7e836ce5798a73a96` from 2026-10-03 00:31:16 CT to 00:36:27 CT. Verdict: PASS_WITH_NITS. That verdict supersedes the FAIL on `cda7ce55fd81fe22c301c4b2cf371d724b74aaf1` for the corrected tip only. Native play, plugin edits, and Deus's laptop verdict stay outside that verdict. The review file says a later audit-content change needs a new check. This heading edit is later audit content, so PASS_WITH_NITS on `e1e1b1a8` is the review of that tip. Whole-lane completion remains open until Codex reviews this commit and Deus checks the lane. Deus confirmation: NOT CHECKED.
+
+Whitespace normalization and the full 71-file caller index remain those earlier commits.
+
+### Heading examples checked
+
+The open nit is the index heading `Saved prior engine methods`. The same list holds saved method aliases and ordinary property reads. Source rechecked 2026-10-03:
+
+- `game/js/plugins/DEUS_Anim.js:705` saves the prior method: `const _Sprite_Character_update = Sprite_Character.prototype.update`, before the patch assignment at line 706. Inventory row: `` `Sprite_Character.prototype.update` saved to `_Sprite_Character_update` ``.
+- `game/js/plugins/DEUS_Anim.js:1121` reads a property inside `spritesetOf`: `const s = SceneManager._scene`. Inventory line 36 remains `` `SceneManager._scene` saved to `s` ``.
+- `game/js/plugins/DEUS_Bag.js:491` reads `const scene = SceneManager._scene`.
+- `game/js/plugins/DEUS_Bag.js:561` reads `const mx = TouchInput.x`. Line 562 reads `const my = TouchInput.y`. Lines 606 and 607 read `TouchInput.x` and `TouchInput.y` into `dropX` and `dropY`. Inventory line 150 remains the `TouchInput.x` / `mx` row.
+
+`caller_inventory.json` already stores the two kinds apart: `savedPriors` has 229 rows and `savedEngine` has 141 rows. That JSON file is unchanged. Markdown bullet text is unchanged, including the words `saved to` on the property reads.
+
+Each of the 71 plugin sections now uses the heading `Engine members read or saved:`. A line compare of `caller_inventory.md` with `71ddedbff38491b4ecaa433572d26bf6c40554a6` found 71 changed lines and no added or removed lines. Each change is `Saved prior engine methods:` to `Engine members read or saved:`. Zero of the old heading remain. Line-ending count matches that commit: no CR and no BOM added. The 71 headings, 71 `##` sections, and 71 JSON file keys still match. Under the headings are 370 entry bullets and 15 `- none` sections. The 370 bullets match the 229 `savedPriors` rows plus the 141 `savedEngine` rows on target and line. Each `- none` section has empty JSON arrays for both keys.
+
+### Carried native status
+
+The one official native attempt remains 48 PASS lines, 6 FAIL lines, no RESULT line, process exit 2, seed 1920951434, year 500. Evidence stays `evidence/attempt1/`. A second identical `run_tests.bat` is still absent, so the before/after comparison is missing. `hashes_after.txt` remains the byte comparison `compared 72 ok 72 mismatch 0 missing 0`. This continuation adds no native run and no native proof. No `nw.exe` was started or stopped. ORG-0.2 keeps the native slot. `node tools/run_tests.js`, default `node tools/ops/run_gate.js`, and `run_gate.js --check-lists` were not run in this pass. The earlier check-lists result stays exit 1 with `CHECK-LISTS: 122 violation(s)`.
+
+### Files in this commit
+
+- `tasks/ORG-0.3/lane-plugin-audit/evidence/static/caller_inventory.md`
+- `tasks/ORG-0.3/lane-plugin-audit/REPORT.md`
+
+No game, plugin, data, engine, art, CI, lib, manifest, or `PROVIDER_USAGE_STATUS` edit.
+
+### Checks on this working tree
+
+`git diff --numstat` for `caller_inventory.md` against `71ddedbff38491b4ecaa433572d26bf6c40554a6` is 71 insertions and 71 deletions. A zero-context diff of that file contains 71 removed `Saved prior engine methods:` lines and 71 added `Engine members read or saved:` lines.
+
+The whitespace commands below were run on the saved working tree, before `git commit`. They include this paragraph.
+
+- `git diff --check 565dc5aead7e068230528d573c395ea21ed5cf5d` exited 0 and printed no diagnostic lines. That diff is the working tree against the lane base.
+- `git diff --check HEAD` exited 0 and printed no diagnostic lines. That diff is the delta from `71ddedbff38491b4ecaa433572d26bf6c40554a6`.
+- `git diff --check` exited 0 and printed no diagnostic lines.
+- `git diff --name-only` listed `tasks/ORG-0.3/lane-plugin-audit/REPORT.md` and `tasks/ORG-0.3/lane-plugin-audit/evidence/static/caller_inventory.md`.
+- `git diff --name-only 565dc5aead7e068230528d573c395ea21ed5cf5d -- game` printed no paths and exited 0.
+
+The manifest form compares `565dc5aead7e068230528d573c395ea21ed5cf5d` to `HEAD`. The three `git diff --check` results above are working-tree measurements. The same manifest command on the committed tip is a later measurement.
