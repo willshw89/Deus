@@ -104,4 +104,4 @@ Process exit 2. No RESULT line. Partial log only: 48 PASS lines, 6 FAIL lines, s
 
 Not claimed. Native is red. Acceptance needs a native green run, a Codex/GPT review, and Deus CONFIRMED. Step 4 (disable or archive) is not authorized. No merge, tag, or closure.
 
-Origin SHA after push: see the last line of this report once the push is verified.
+Local audit commit: `566eb5ecc0c8e2b1b989ba1c8f84d4c2bb75af69`. Push of `task/lane-plugin-audit` to origin was blocked in this session, so origin was not updated and the origin SHA was not verified. The branch tip that contains this sentence is a later local commit. Acceptance remains blocked.
