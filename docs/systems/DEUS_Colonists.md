@@ -111,6 +111,12 @@ Rule 4 mutants (each exit 1 on 2026-09-24): `panics_into_fire_when_choked` (a st
 - The torture suite's World double is not the game's pathfinder; DEUS_Environment's weather can rain a fire out in the sandbox after a few beats, which the ally scenes finish well before. Headless only: no F5 playtest of these scenes.
 
 
+## 7. The `world:unitAdded` listener and History's reserved IDs (ORG-0.2 item (a), 2026-10-02)
+
+`DEUS.World.addUnit` emits `world:unitAdded` synchronously, and this plugin's listener classifies every new unit with `isColonist`, which reads the player's faction id through `factionId()`. `DEUS_History.materialize` adds the historical people inside `world:created` (its listener runs before this plugin's, see Events below) with the unit IDs it reserved, and its guard throws `History: unitAdded listener allocated inside the historical ID range` when a listener allocates a unit in between. Until 2026-10-02 `factionId()` went through `colonyState()`, which runs `setupColony` lazily when `state.colony` does not exist yet; from the first materialized person that setup found fewer than two residents and its fallback `W.addUnit` calls took the next reserved IDs, so the materialization aborted and every New Game started with those fallback persons as its only colonists (seed 1920951434, year 500: `colonists.colonists_exist` "2 colonists present", `worldgen.suite_completed` and `history.suite_completed` with the guard's message).
+
+Rule: `factionId()` is a pure read. It returns `state.colony.factionId` when the colony exists, else `DEUS.Factions.playerId()` (the same value `setupColony` records), and never triggers the lazy setup. Every other `colonyState()` caller and the `world:created` listener still set the colony up as before; `isColonist` during the materialization is true for the player's people (`kind === "colonist"` and the player's faction), so the ECS `isColonist` flag is set for them as they appear. Evidence: `tasks/ORG-0.2/lane-worldgen-green/REPORT.md`.
+
 ## Earlier API, state and integration record (historical; newer rules above take precedence)
 
 The following dated record includes superseded behavior and past observations. Consult the canonical plugin and the newer decision order above before implementing against it. Original text is preserved in the archive linked above.

@@ -330,7 +330,18 @@ window.UF.ECS = window.UF.ECS || {
         const c = colonyState(ref);
         return c ? simulationUnits().filter(u => colonyState(u) === c) : [];
     };
-    const factionId = () => (colonyState() ? colonyState().factionId : (window.UF.Factions ? UF.Factions.playerId() : null));
+    // The player's faction id, read without the lazy colony setup (ORG-0.2 item (a), 2026-10-02). World.addUnit emits
+    // world:unitAdded synchronously, and this plugin's listener classifies the new unit with isColonist -> factionId. While
+    // DEUS_History materializes the historical people inside world:created (before this plugin's own world:created
+    // listener has set the colony up), colonyState() used to run setupColony from here; with too few residents yet, its
+    // fallback W.addUnit calls allocated inside the unit IDs History had reserved and tripped History's guard
+    // ("unitAdded listener allocated inside the historical ID range"), which aborted the materialization. The colony is
+    // still set up lazily by every other colonyState() caller and by world:created.
+    const factionId = () => {
+        const W = World();
+        const c = W && W.state ? W.state.colony : null;
+        return c ? c.factionId : (window.UF.Factions ? UF.Factions.playerId() : null);
+    };
     const isColonist = u => !!u && !!u.data && (u.data.kind === "colonist" || (u.data.founder && u.data.faction === factionId())) && u.data.faction === factionId();
     const isSettler = u => !!(u && u.data && !u.data.manual && u.data.ai !== "manual" && (!u.name || !u.name.startsWith("TEST_"))) && (isColonist(u) || !!(u && u.data && (u.data.kind === "person" || u.data.kind === "colonist") && (u.data.ai === "settlement" || u.data.founder)));
     const isFactionPerson = u => !!(u && u.data && (u.data.kind === "colonist" || u.data.kind === "person") && u.data.faction && !u.data.dead && !u.data._isDying);
