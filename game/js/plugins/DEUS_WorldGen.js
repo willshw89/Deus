@@ -2282,7 +2282,9 @@
             // in two, fails): the carved raster of each river inside this area (the same rasterizeChunk the area build
             // paints from) must be a water tile on the built map at every carved cell (ocean/lake cells count as water),
             // and all of a river's carved cells must lie in one 4-connected body of built water (edges wrap where the area
-            // spans the whole world). No tolerance. A river with no carved cell in this area adds no break.
+            // spans the whole world). No tolerance. A counted river with no carved cell in this area fails when the area is
+            // the whole world (nothing of it exists anywhere); on a multi-area world it may lie wholly outside this area
+            // (documented limit). The raster is the builder's own input, not an independent oracle of river geometry.
             const wm = WorldGen.waterModel(st);
             const micro = wm && wm.micro;
             const breaks = [];
@@ -2297,7 +2299,10 @@
                     const mine = [];
                     for (let i = 0; i < size * size; i++) if (chunk.river[i] === r.id + 1) mine.push(i);
                     carvedCells += mine.length;
-                    if (!mine.length) continue;
+                    if (!mine.length) {
+                        if (wrapsX && wrapsY) breaks.push(`river at column ${r.anchorX} (id ${r.id}): no carved cell anywhere in the world`);
+                        continue;
+                    }
                     const dry = mine.filter(i => !wet(i));
                     if (dry.length) breaks.push(`river at column ${r.anchorX}: ${dry.length} of ${mine.length} carved cell(s) dry on the built map; first ${at(dry[0])}`);
                     // Flood the built water from this river's first carved cell; every carved cell must be reached.
