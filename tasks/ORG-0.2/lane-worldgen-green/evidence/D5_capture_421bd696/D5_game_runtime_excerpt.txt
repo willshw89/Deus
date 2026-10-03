@@ -1,0 +1,13 @@
+# D5_game_runtime.log excerpt (full log 1979234 bytes left untracked here)
+2:[INIT] Game booting at 2026-10-03T07:02:44.846Z
+20:2026-10-03T07:02:46.114Z [TIMING] DataManager.setupNewGame enter (+11.8ms)
+21:2026-10-03T07:02:46.117Z [TIMING] setupForNewGame before World.newWorld
+24:2026-10-03T07:02:47.981Z [TIMING] world:initializing fired (+1878.5ms)
+8914:2026-10-03T07:03:08.415Z [TIMING] world:created fired (+22313.4ms)
+8917:2026-10-03T07:03:08.418Z [TIMING] emit world:created done
+8918:2026-10-03T07:03:08.418Z [TIMING] early seated done, units=0
+8919:2026-10-03T07:03:09.632Z [TIMING] setupForNewGame after World.newWorld
+8920:2026-10-03T07:03:09.633Z [TIMING] setupForNewGame exit (reserved map 1000)
+8921:2026-10-03T07:03:09.633Z [TIMING] DataManager.setupNewGame exit (+23531.2ms)
+8922:2026-10-03T07:03:09.640Z [TIMING] Scene_Boot.start exit (+23538.1ms)
+8925:2026-10-03T07:03:10.419Z [TIMING] world:areaBuilt (0,0) (+24316.5ms)
