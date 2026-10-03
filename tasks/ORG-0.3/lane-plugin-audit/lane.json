@@ -1,0 +1,18 @@
+{
+  "lane": "lane-plugin-audit",
+  "taskId": "ORG-0.3",
+  "branch": "task/lane-plugin-audit",
+  "writer": "grok",
+  "reviewer": "claude",
+  "push": true,
+  "allowedPaths": [
+    "docs/architecture/PLUGIN_AUDIT.md",
+    "docs/ci/WORKTREES.md",
+    "tasks/ORG-0.3/lane-plugin-audit/**"
+  ],
+  "gateTests": [
+    {"cmd": "git", "args": ["diff", "--check", "565dc5aead7e068230528d573c395ea21ed5cf5d", "HEAD"], "timeoutSec": 30},
+    {"cmd": "node", "args": ["tools/run_tests.js"], "timeoutSec": 300, "serial": true},
+    {"cmd": "node", "args": ["tools/ops/run_gate.js"], "timeoutSec": 1800, "serial": true}
+  ]
+}
