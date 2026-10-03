@@ -536,6 +536,7 @@ class Pathfinder {
         this.dirty = new Set();
         this.splitSuspected = false;   // a blocking or door edit since the last flush: components may have split
         this.graphVersion = 0;
+        this.entranceEpoch = 0;        // bumps when a border rescan replaces entrance nodes
         this.built = false;
         this.connectivityStale = true;
         this.cache = new Map();
@@ -679,6 +680,7 @@ class Pathfinder {
             rec.nodesA.push(a); rec.nodesB.push(b);
         }
         this.metrics.entranceChanges++;
+        this.entranceEpoch++;   // node ids on this border were freed and may be reused; outstanding macro paths must not keep them
         return true;
     }
     _rebuildIntra(c) {
@@ -976,6 +978,7 @@ class Search {
     _reset() {
         this.phase = PH.INIT;
         this.version = this.pf.graphVersion;
+        this.entranceEpoch = this.pf.entranceEpoch;
         this.startCluster = this.pf.clusterOf(this.start);
         this.goalCluster = this.pf.clusterOf(this.goal);
         this.startLinks = null;
@@ -987,6 +990,13 @@ class Search {
         this.plainLeft = 0;
         this.smoothIndex = 0;
         this.smoothOut = null;
+        // A restart must not keep tiles from the attempt that just died. Non-found results stay pathless.
+        this.path = null;
+        this.cost = -1;
+        this.abstractPath = null;
+        this.mode = "hpa";
+        this.reason = "";
+        this.refined = false;
     }
     _restart() { this._reset(); this.pf.metrics.restarts++; }
     abandon() {
@@ -1002,6 +1012,7 @@ class Search {
         this.status = status;
         this.reason = reason || "";
         this.phase = PH.DONE;
+        if (status !== "found") this.path = null;
         const m = this.pf.metrics;
         if (status === "found") { m.found++; if (this.refined) this.cost = pathCost(this.grid, this.path); }
         else if (status === "unreachable") m.unreachable++;
@@ -1036,9 +1047,9 @@ class Search {
 
     _init() {
         const pf = this.pf, grid = this.grid;
-        if (this.start === this.goal) { this.path = [this.start]; this.mode = "direct"; this.refined = true; pf.metrics.directQueries++; this._finish("found"); return; }
         if (!grid.canPass(this.start, this.mask)) { this._finish("blocked", "start"); return; }
         if (!grid.canPass(this.goal, this.mask)) { this._finish("blocked", "goal"); return; }
+        if (this.start === this.goal) { this.path = [this.start]; this.mode = "direct"; this.refined = true; pf.metrics.directQueries++; this._finish("found"); return; }
         const dx = torusAbs(grid.xOf(this.start), grid.xOf(this.goal), grid.width);
         const dy = torusAbs(grid.yOf(this.start), grid.yOf(this.goal), grid.height);
         if (this.shortQueryTiles > 0 && Math.max(dx, dy) <= this.shortQueryTiles) {
@@ -1205,12 +1216,15 @@ class Search {
      * Lazy refinement (spec: "refine lazily, only as far as the next portal"). Refines the next abstract hop on the
      * live grid, smooths it and appends it to .path; returns the appended tiles (the hop's tiles after the current
      * end of the path) or null when the path is complete (.refined becomes true and .cost is set). A hop whose
-     * tiles were sealed since the macro path was found ends the search with status "stale" (reason
-     * "portal_sealed") and returns null: discard the macro path and request again after the cluster rebuild.
+     * tiles were sealed since the macro path was found, or a flush has replaced entrance nodes (their ids
+     * may now name a different tile), ends the search with status "stale" (reason "portal_sealed") and
+     * returns null: discard the macro path and request again after the cluster rebuild.
      * Bounded work: one cluster-local A* (at most 256 expansions) plus smoothing of that segment.
      */
     refineNext() {
         if (this.status !== "found" || !this.lazy || this.refined) return null;
+        // Flush replaces entrance nodes in place. The macro path's node ids are then a different tile.
+        if (this.entranceEpoch !== this.pf.entranceEpoch) { this._stale(); return null; }
         const pf = this.pf, nodes = this.abstractPath;
         if (nodes === null) { this.refined = true; this.cost = pathCost(this.grid, this.path); return null; }   // plain or direct result: already whole
         while (this.segIndex < nodes.length - 1) {

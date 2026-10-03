@@ -50,7 +50,7 @@ const MUTANTS = {
     overflow_silent: ["if (this.size === this.cap && !this._grow()) { this.overflowed = true; return false; }", "if (this.size === this.cap && !this._grow()) { return true; }"],
     door_in_run: ["doorway = open && (door[t[0]] !== 0 || door[t[1]] !== 0);", "doorway = false;"],
     no_version_check: ["if (this.version !== this.pf.graphVersion) this._restart();", "/* mutant: no restart */"],
-    keep_loops: ["this.path = removeLoops(out); used++;", "this.path = out; used++;"],
+    keep_loops: ["this.path = removeLoops(out); this.refined = true; used++;", "this.path = out; this.refined = true; used++;"],
     no_same_cluster_fallthrough: ["this.directCost = this.startCluster === this.goalCluster ? local.gAt(this.goal) : -1;\n            this._beginLinks(false);", "this.directCost = this.startCluster === this.goalCluster ? local.gAt(this.goal) : -1;\n            if (this.startCluster === this.goalCluster && this.directCost < 0) { this._finish(\"unreachable\", \"same_cluster\"); return used; }\n            this._beginLinks(false);"],
     no_plain_fallback: ["else if (this.plainLeft <= 0) { pf.metrics.plainFallbacks++; this.mode = \"hpa\"; this._beginLinks(true); }", "else if (this.plainLeft <= 0) { this._finish(\"unreachable\", \"plain_cap\"); }"]
 };
@@ -263,9 +263,9 @@ if (runOnly("optimality")) {
             ratios.push(ownCost(g, r.path) / a.cost);
         }
         ratios.sort((a, b) => a - b);
-        const q = p => ratios[Math.min(ratios.length - 1, Math.floor(p * ratios.length))];
-        const mean = ratios.reduce((a, b) => a + b, 0) / ratios.length;
-        return { label, ratios, disagree, invalid, unreachable, max: ratios[ratios.length - 1], mean, p50: q(0.5), p90: q(0.9), p99: q(0.99), over: ratios.filter(r => r > 1.10).length };
+        const q = p => ratios.length === 0 ? Number.POSITIVE_INFINITY : ratios[Math.min(ratios.length - 1, Math.floor(p * ratios.length))];
+        const mean = ratios.length === 0 ? Number.POSITIVE_INFINITY : ratios.reduce((a, b) => a + b, 0) / ratios.length;
+        return { label, ratios, disagree, invalid, unreachable, max: q(1), mean, p50: q(0.5), p90: q(0.9), p99: q(0.99), over: ratios.filter(r => r > 1.10).length };
     };
     const off = stats("cache off", false);
     const on = stats("cache on", true);
@@ -738,6 +738,65 @@ if (runOnly("heap")) {
     const overflow = !h.push(1, 1, 999, 0) && h.overflowed;
     check("heap", ordered && empty && h.grows === 2 && overflow, `60 entries popped in (f, h, key, key2) order ${ordered}, grew ${h.grows} times, overflow reported ${overflow}`);
 }
+
+//----------------------------------------------------------------------------------------------------------
+// stale_identity: entrance ids are not stable across a flush, and a non-found search must not return tiles
+//----------------------------------------------------------------------------------------------------------
+section("stale_identity", () => {
+    const w = 64, h = 64;
+    const g = P.createGrid({ width: w, height: h });
+    g.setWalkable(3, 3, 0, false);
+    const pf = P.createPathfinder(g, { cache: false });
+    pf.build();
+    const wall = pf.findPath(g.index(3, 3, 0), g.index(3, 3, 0), { mask: 0 });
+    const open = pf.findPath(g.index(4, 4, 0), g.index(4, 4, 0), { mask: 0 });
+    const trivialOk = wall.status === "blocked" && wall.reason === "start" && wall.path === null
+        && open.status === "found" && open.path.length === 1 && open.cost === 0;
+
+    // Two runs on the x=15/16 seam. Opening the tile between them replaces entrance nodes.
+    // A lazy macro path that still holds the old ids must go stale, not walk the reused tiles.
+    for (let x = 15; x < w; x += 16) {
+        for (let y = 0; y < h; y++) {
+            g.setWalkable(x, y, 0, false);
+            g.setWalkable(x + 1, y, 0, false);
+        }
+        for (const y of [0, 1, 2, 4, 5, 6]) {
+            g.setWalkable(x, y, 0, true);
+            g.setWalkable(x + 1, y, 0, true);
+        }
+    }
+    pf.flush();
+    const s = g.index(2, 30, 0), e = g.index(34, 30, 0);
+    const lazy = pf.beginSearch(s, e, { mask: 0, lazy: true, shortQueryTiles: 0 });
+    while (lazy.status === "running") lazy.step(1 << 20);
+    const macroStatus = lazy.status;
+    const macroOk = macroStatus === "found";
+    g.setWalkable(15, 3, 0, true);
+    g.setWalkable(16, 3, 0, true);
+    pf.flush();
+    const seg = lazy.refineNext();
+    const staleOk = seg === null && lazy.status === "stale" && lazy.reason === "portal_sealed";
+
+    // A search already refining, flushed, then the goal walled: restart, and the blocked result has no path.
+    const g2 = P.createGrid({ width: w, height: h });
+    const pf2 = P.createPathfinder(g2, { cache: false, shortQueryTiles: 0 });
+    pf2.build();
+    const s2 = g2.index(1, 1, 0), e2 = g2.index(50, 40, 0);
+    const search = pf2.beginSearch(s2, e2, { mask: 0 });
+    let guard = 0;
+    while (search.status === "running" && !(search.path && search.path.length > 3) && guard++ < 10000) search.step(15);
+    const midOk = search.status === "running" && search.path && search.path.length > 3;
+    g2.setWalkable(50, 40, 0, false);
+    pf2.flush();
+    while (search.status === "running" && guard++ < 20000) search.step(500);
+    const rr = search.result();
+    const restartOk = rr.status === "blocked" && rr.reason === "goal" && rr.path === null;
+
+    check("stale_identity", trivialOk && macroOk && staleOk && midOk && restartOk,
+        `trivial wall ${wall.status}/${wall.reason} path ${wall.path === null ? "null" : "set"}, open ${open.status}; ` +
+        `lazy macro ${macroStatus} then ${lazy.status}/${lazy.reason} seg ${seg === null ? "null" : "tiles"}; ` +
+        `restart mid ${midOk} -> ${rr.status}/${rr.reason} path ${rr.path === null ? "null" : rr.path.length}`);
+});
 
 console.log(`RESULT: ${passed} passed, ${failed} failed (exit ${failed ? 1 : 0})${mutant ? ` [mutant ${mutant}]` : ""}`);
 process.exit(failed ? 1 : 0);
