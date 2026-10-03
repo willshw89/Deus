@@ -1,0 +1,21 @@
+UF_Test run 2026-10-03T10:25:25.737Z args=[]
+HARNESS New Game year 500 (requested 500)
+DEBUG_SHEET: Scene_Boot.start called
+AVAILABLE SUITES: selftest, smoke, perf, native_starting_gear, native_survival_dying, native_perf_4x_benchmark, perf_overlay, select, select, natural_connections, ownership, ecology, projects, settlement, colonists, overseer, world, spawn, worldgen, biomes, tiles, ground, factions, skins, history, objects, walls, doors, items, dig_through_floor, jobs, floors, wildlife, wildlife_seeds, stance, combat, anim, fog, daynight, timespeed, camera, culling, speech, overhead, look, sheet, talk, fire, vertical, natural_walls, flooding, strata, sparse_outer, environment, faction_menus, title, load, setup, depth, layers_flat, select, select
+HARNESS suite budget 180 s each; 1 suite(s) selected: perf_overlay
+SUITE perf_overlay
+PASS perf_overlay.perf_source - UF.Perf present; enabled before this suite: true; installed: true; lifecycle wrapped at boot: true
+PASS perf_overlay.frames_observed - 52 ticker callbacks counted by UF.Perf during a 2027 ms window; an independent ticker listener counted 52; interval last 79.18 avg 80.48 max 2591.59 ms (scheduler delay included; not CPU time)
+PASS perf_overlay.renders_observed - 52 app.render calls in the same window (at most one per ticker callback); draw CPU submission last 1.71 avg 5.28 max 255.72 ms (not GPU completion)
+PASS perf_overlay.sim_ticks_counted - UF.Sim.tickCount 10 -> 21 (+11); Perf counted 11 tick(s); last 0.01 avg 0.39 max 7.20 ms per tick (the shared UF.Sim tick only; other per-update simulation work is outside it)
+PASS perf_overlay.newgame_recorded - New Game: 22560.48 ms synchronous setup (the complete DataManager.setupNewGame as wrapped at Scene_Boot.start: true), 27141.70 ms to the first draw of the started map
+PASS perf_overlay.heap_reported - JS heap 132.6 MB (performance.memory.usedJSHeapSize)
+PASS perf_overlay.load_not_invented - no load so far: load n/a (null)
+PASS perf_overlay.pause_stops_ticks_not_frames - paused for a 1005 ms window: sim ticks +0 (tickCount +0), ticker callbacks +144 (independent listener 144), renders +144
+PASS perf_overlay.off_on_boundary - disabled for 1562 ms (interval cleared on enable: true); after re-enabling: 4 ticker callbacks by the independent listener, 3 new interval samples counted by UF.Perf (want callbacks - 1), last sample 29.29 ms (must be shorter than the disabled span), max 2591.59 -> 2591.59 ms
+PASS perf_overlay.log_line_written - game_runtime.log grew 1289037 -> 1289300 bytes; last [PERF] line carries this call's tag proof-1791023164380: true; line: 2026-10-03T10:26:04.381Z [PERF] frames 279 interval 29.3/8.2/2591.6 ms (last/avg/max); renders 239 draw cpu 1.5/1.6/255.7 ms; sim ticks 21 0.0/0.4/7.2 ms; heap 139000000 bytes; new game sync 22560.5 m
+PASS perf_overlay.log_failure_detected - logNow during a forced append failure returned null (want null); logFailures 1; appendFileSync restored true
+PASS perf_overlay.load_data_recorded - save dir was empty and the target declared disposable (game C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_P4_40ef50c8\game, save dir C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_P4_40ef50c8\game\save\); slot 1 written; DataManager.loadGame resolved; data load 442.77 ms
+PASS perf_overlay.load_to_map_recorded - map transition after the load completed; load-to-first-map-draw 6571.35 ms (this suite's own SceneManager.goto(Scene_Map) transition; a data-only load without a transition is not covered)
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_P4_40ef50c8\game\test_output\perf_overlay.overlay.png
+RESULT: 13 passed, 0 failed (exit 0)

@@ -1,0 +1,14 @@
+# P4_game_runtime.log excerpt (full log 1290269 bytes left untracked here; copy in evidence_large; [PERF] lines in P4_perf_log_lines.txt)
+2:[INIT] Game booting at 2026-10-03T10:25:25.445Z
+20:2026-10-03T10:25:26.815Z [TIMING] DataManager.setupNewGame enter (+14.6ms)
+21:2026-10-03T10:25:26.818Z [TIMING] setupForNewGame before World.newWorld
+24:2026-10-03T10:25:28.652Z [TIMING] world:initializing fired (+1851.8ms)
+8914:2026-10-03T10:25:48.074Z [TIMING] world:created fired (+21273.6ms)
+8917:2026-10-03T10:25:48.077Z [TIMING] emit world:created done
+8918:2026-10-03T10:25:48.077Z [TIMING] early seated done, units=0
+8919:2026-10-03T10:25:49.375Z [TIMING] setupForNewGame after World.newWorld
+8920:2026-10-03T10:25:49.375Z [TIMING] setupForNewGame exit (reserved map 1000)
+8921:2026-10-03T10:25:49.376Z [TIMING] DataManager.setupNewGame exit (+22575.7ms)
+8922:2026-10-03T10:25:49.382Z [TIMING] Scene_Boot.start exit (+22582.5ms)
+8925:2026-10-03T10:25:50.217Z [TIMING] world:areaBuilt (0,0) (+23417.0ms)
+16962:2026-10-03T10:26:08.218Z [TIMING] world:areaBuilt (0,0) (+41417.6ms)
