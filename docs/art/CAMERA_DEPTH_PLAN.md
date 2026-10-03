@@ -28,7 +28,7 @@ This amends DEC-011's earlier prohibition on depth shading while retaining its *
 
 Every level between the view and a lower surface must be open at that location. A solid intervening cell blocks the lower view even when the cell's art has transparent pixels. The two-level draw limit is relative to the **current** z; it does not impose an absolute world-depth limit or stop simulation below the view. Brightness values belong in a data config so the Owner can tune them. The exact cool-blue color value remains unspecified. Water, lava, colonists and enemies retain some identifying tint instead of becoming uniformly gray.
 
-At a drop edge, the current floor gets a 2–4 px dark rim and a short shadow onto the lower level. After ART-WIRE-WALLS, lower wall faces use the Owner's cliff art. Wall-face height remains an Owner choice between 48 and 96 px; this plan does not change the existing size tables or approve new art.
+At a drop edge, the current floor gets a 2–4 px dark rim and a short shadow onto the lower level. After ART-WIRE-WALLS, lower wall faces use the Owner's cliff art. **Owner decision, 2026-10-03 (D-2026-10-03-1): 48 px face + 48 px cap = 96 px total frame.** The 96 px face proposal is not selected. This plan does not approve new art, re-cutting or renderer changes before ORG-0.2 is green.
 
 The renderer must omit lower-level drawing beyond z-2, not render it and then cover it with black; it must never draw every lower level and darken afterward. Bake the static depth grade into cached chunks and rebake affected chunks only when digging, building or collapse changes them. Moving sprites alone receive a live tint. No measured FPS or draw-time improvement is claimed before implementation and testing.
 
