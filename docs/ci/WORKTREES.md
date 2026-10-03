@@ -1,5 +1,79 @@
 # Source-control worktree inventory
 
+## Approved removal execution
+
+Task: Owner-approved source-control hygiene, 2026-10-02. Executed by Codex PM at 2026-10-02 20:09:35 CT. The Owner explicitly approved the exact 22 clean, merged candidates from the original inventory. Each resolved absolute target was checked beneath `C:/Users/snewt/.deus_worktrees`; each branch/tip, main ancestry, clean non-ignored status, archive-tag collision and explicit live-process path reference was rechecked before mutation.
+
+**Current count: 61 registered worktrees beneath the requested directory; 67 registered in the canonical repository total.** The two standalone/unregistered Git directories in the historical inventory were untouched and are not counted as registered worktrees. All 22 original branches still exist at their original tips. No branch deletion, force-push or reset was used. Main remains `565dc5aead7e068230528d573c395ea21ed5cf5d`; the backup branch and pre-existing stash were unchanged.
+
+Commands actually run: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File scratchpad/lane-baseline/remove_approved_worktrees.ps1 -Execute`; for each exact branch, `git tag archive/<branch> <tip>`, then `git worktree remove -- <verified-absolute-path>`; `git push origin <the 22 explicit refs/tags/archive/... refs>`; `git ls-remote --tags origin <the same explicit refs>`. Every resulting remote tag was checked against its original SHA. No broad `git push --tags` was used.
+
+Real operation output:
+
+```text
+RESULT: 22 worktrees removed, 22 branch/tag pairs retained; 61 registered under approved root, 67 total registered.
+RESULT: 22 remote archive tags confirmed, 0 mismatches.
+```
+
+These are source-control checks, not game test results. `run_tests.bat` was not rerun for this operation: no game code, data or assets were changed. No new runtime functions or symbols were added.
+
+### Retained branches and archive tags
+
+| Removed worktree | Retained branch | Archive tag, local and origin | Exact tip SHA |
+|---|---|---|---|
+| lane-arch3 | task/lane-arch3 | archive/task/lane-arch3 | 62b88725b1893195bf14037fbfc8e11db8265215 |
+| lane-biomes | task/lane-biomes | archive/task/lane-biomes | 28af8432c17c24b8a090f362a506e877415c1cae |
+| lane-da | task/lane-da | archive/task/lane-da | 24e67adb7295ef1a3ed2dd52b35b83e71a3c6495 |
+| lane-dd | task/lane-dd | archive/task/lane-dd | 0fb75bd0615cf4171087df7c6af07f2c1ea2b514 |
+| lane-dp | task/lane-dp | archive/task/lane-dp | e59775e30258938f823731be0a3ad8ab0a5f5bfa |
+| lane-ea | task/lane-ea | archive/task/lane-ea | 32b04d5c3edacc7bfd7736a4927415244faf2fc3 |
+| lane-ed | task/lane-ed | archive/task/lane-ed | 2ece96dfc845204545e5aee642ff6322ee9bea92 |
+| lane-fd | task/lane-fd | archive/task/lane-fd | 6c0616089410d7855f428fe9f9d27e139435214f |
+| lane-fi | task/lane-fi | archive/task/lane-fi | c710c969a29c5404a71ac06a484d471c7ab8326d |
+| lane-fluids | task/lane-fluids | archive/task/lane-fluids | ffaee67a5771e295ce77dc79e044b025e1a68637 |
+| lane-geo | task/lane-geo | archive/task/lane-geo | 9be3eb5cc47dfb97fcec36113dc84646068a7b6f |
+| lane-gp | task/lane-gp | archive/task/lane-gp | 9d8db81291086e5978ca078be0b4a202906f8982 |
+| lane-gr | task/lane-gr | archive/task/lane-gr | 847993346f090fda0584649535c9c7e3f449a39c |
+| lane-history | task/lane-history | archive/task/lane-history | baf60e180833a3e171e56f3a6e1c3d03aa1b0657 |
+| lane-hydrology | task/lane-hydrology | archive/task/lane-hydrology | 927ac7f05287ba09e05f61f871e805fa3542e9dc |
+| lane-nx2 | task/lane-nx2 | archive/task/lane-nx2 | 89202d87d23ae67c4a5096edd5c5e63365701ca6 |
+| lane-nx3 | task/lane-nx3 | archive/task/lane-nx3 | c4b60883d4e741c14263c06f43129ab068503cc3 |
+| lane-nx4 | task/lane-nx4 | archive/task/lane-nx4 | 3b680db4a3be093c026c0b4db47a3452ebbbc4f0 |
+| lane-nx5 | task/lane-nx5 | archive/task/lane-nx5 | 3971e5f70abacc70e1f381f1b0ba208c7103e2fd |
+| lane-physics | task/lane-physics | archive/task/lane-physics | 020c58870a27704d42e9ecf2a2d5c8f5a4fe7a65 |
+| lane-render1 | task/lane-render1 | archive/task/lane-render1 | 1382499dc5687c34d81675d40c8e3a4d0634305d |
+| lane-render2 | task/lane-render2 | archive/task/lane-render2 | a2e7c63416d1492346a6d35263ffae140b2cb23e |
+
+### Preserved ignored local files
+
+4342 ignored files were copied before removal, with SHA-256 equality checked on every copy. They are local scratchpad evidence, not committed game content. Preservation receipts: `scratchpad/lane-baseline/removal_result.json`.
+
+- lane-dp: 2 file(s), under `scratchpad/lane-dp/preserved-before-approved-removal-20261002/`.
+- lane-nx4: 4332 file(s), under `scratchpad/lane-nx4/preserved-before-approved-removal-20261002/`.
+- lane-nx5: 6 file(s), under `scratchpad/lane-nx5/preserved-before-approved-removal-20261002/`.
+- lane-render2: 2 file(s), under `scratchpad/lane-render2/preserved-before-approved-removal-20261002/`.
+
+### Main files with unconfirmed owner
+
+Re-read after removal; no disposition applied. Times are last modification, in America/Chicago (CT).
+
+| Relative path in canonical main checkout | Last modified |
+|---|---|
+| game/js/plugins/DEUS_WorldGen.js | 2026-10-02 18:35:45 CT |
+| game/package.json | 2026-10-02 18:39:30 CT |
+| game/js/plugins/DEUS_Simulation_Core.js | 2026-10-02 18:39:00 CT |
+| tools/ops/patch_worldgen.js | 2026-10-02 18:33:36 CT |
+| tools/ops/patch_worldgen2.js | 2026-10-02 18:35:00 CT |
+| tools/ops/patch_worldgen3.js | 2026-10-02 18:35:17 CT |
+
+Recommendation: identify each owner before moving changes into a reviewed lane or a path-specific stash. Do not sweep these into an unrelated commit or blanket stash.
+
+### Report location and integration status
+
+This tracked report is on `task/lane-plugin-audit`, at `C:/Users/snewt/OneDrive/Desktop/UF/.deus_worktrees/lane-plugin-audit/docs/ci/WORKTREES.md`, not canonical main. GitHub: https://github.com/willshw89/Deus/blob/task/lane-plugin-audit/docs/ci/WORKTREES.md . Its documentation update awaits normal independent review and PR integration. The table below is explicitly the **pre-removal historical inventory**, not a current list.
+
+## Original pre-removal inventory
+
 Task: Owner source-control hygiene request, 2026-10-02 19:32 CT. Recorded by Codex PM at 2026-10-02 19:41:39 CT. Compared with canonical main `565dc5aead7e068230528d573c395ea21ed5cf5d`. This is a read-only inventory and removal proposal, not abandonment certification or removal approval. No branch/worktree removal, archive tag, stash, reset or file deletion was performed.
 
 There are 83 registered worktrees beneath `C:/Users/snewt/.deus_worktrees`, plus two standalone/unregistered Git directories examined below. 22 registered tips are ancestors of current main and have zero uncommitted files. These are conditional removal candidates; a clean merged tip does not prove no live owner. Unmerged, dirty, backup, locked or uncertain trees stay on hold.
