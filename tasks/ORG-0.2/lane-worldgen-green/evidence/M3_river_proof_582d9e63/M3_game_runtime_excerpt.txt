@@ -1,0 +1,13 @@
+# M3_game_runtime.log excerpt (full log 1978816 bytes kept in the evidence folder's local copy scratchpad/lane-worldgen-green/evidence_large/M3_game_runtime.log; not committed)
+2:[INIT] Game booting at 2026-10-03T05:34:05.570Z
+20:2026-10-03T05:34:07.298Z [TIMING] DataManager.setupNewGame enter (+14.3ms)
+21:2026-10-03T05:34:07.301Z [TIMING] setupForNewGame before World.newWorld
+24:2026-10-03T05:34:09.318Z [TIMING] world:initializing fired (+2034.3ms)
+8916:2026-10-03T05:34:35.427Z [TIMING] world:created fired (+28142.8ms)
+8919:2026-10-03T05:34:35.431Z [TIMING] emit world:created done
+8920:2026-10-03T05:34:35.431Z [TIMING] early seated done, units=0
+8921:2026-10-03T05:34:36.964Z [TIMING] setupForNewGame after World.newWorld
+8922:2026-10-03T05:34:36.965Z [TIMING] setupForNewGame exit (reserved map 1000)
+8923:2026-10-03T05:34:36.965Z [TIMING] DataManager.setupNewGame exit (+29681.5ms)
+8924:2026-10-03T05:34:36.978Z [TIMING] Scene_Boot.start exit (+29694.5ms)
+8927:2026-10-03T05:34:37.990Z [TIMING] world:areaBuilt (0,0) (+30705.8ms)

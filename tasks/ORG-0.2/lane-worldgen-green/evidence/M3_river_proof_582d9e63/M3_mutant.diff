@@ -1,0 +1,8 @@
+2267c2267
+<             const keep = cat.rivers.keepAwayFromStart;
+---
+>             const keep = 60; // RIVER MUTANT: clearance radius widened so the real rivers fall inside it
+2294c2294
+<                 const wet = i => isWaterTile(here.data[i]);
+---
+>                 const wet = i => isWaterTile(here.data[i]) && i % 97 !== 0; // RIVER MUTANT: every 97th cell reads dry
