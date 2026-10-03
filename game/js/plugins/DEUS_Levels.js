@@ -1054,6 +1054,9 @@
                         const i = y * size + x;
                         if (shape[i] === FLOOR && S_grid[i] === z) {
                             const gx = ax * size + x, gy = ay * size + y;
+                            // A river channel cell stays water: no natural ramp on it (the ground painter paints no water on
+                            // a ramp; the channel's banks beside it may still ramp up). ORG-0.2 item (c), 2026-10-03.
+                            if (riverAt(seed, gx, gy, size, d)) continue;
                             const rampNoise = valueNoise(seed, saltRamp, gx, gy, 8);
                             if (rampNoise > 0.65) {
                                 for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
