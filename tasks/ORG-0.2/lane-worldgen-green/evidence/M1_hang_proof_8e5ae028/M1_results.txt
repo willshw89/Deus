@@ -1,0 +1,11 @@
+UF_Test run 2026-10-03T05:00:17.784Z args=[]
+HARNESS New Game year 500 (requested 500)
+DEBUG_SHEET: Scene_Boot.start called
+AVAILABLE SUITES: selftest, smoke, perf, native_starting_gear, native_survival_dying, native_perf_4x_benchmark, select, select, natural_connections, ownership, ecology, projects, settlement, colonists, overseer, world, spawn, worldgen, biomes, tiles, ground, factions, skins, history, objects, walls, doors, items, dig_through_floor, jobs, floors, wildlife, wildlife_seeds, stance, combat, anim, fog, daynight, timespeed, camera, culling, speech, overhead, look, sheet, talk, fire, vertical, natural_walls, flooding, strata, sparse_outer, environment, faction_menus, title, load, setup, depth, layers_flat, select, select
+HARNESS suite budget 180 s each; 1 suite(s) selected: ownership
+SUITE ownership
+FAIL ownership.suite_completed - watchdog: suite took longer than 180 s (budget per suite); last check none
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_M1_hang_8e5ae028\game\test_output\ownership.on_timeout.png
+HARNESS watchdog: 1 suite(s) exceeded 180 s: ownership
+RESULT: 0 passed, 1 failed (exit 1)
+HARNESS late: suite ownership ended 180.9 s after it started with "suite ownership watchdog: wait abandoned"; 0 late check(s) not counted

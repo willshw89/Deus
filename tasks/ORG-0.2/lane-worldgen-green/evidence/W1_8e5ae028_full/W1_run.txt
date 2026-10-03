@@ -1,0 +1,17 @@
+﻿tag: W1
+lane root (cwd): C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green
+lane HEAD at run time: 8e5ae02814d3bcf29c8750282c25a72ec9e9d24b
+lane working tree changes at run time: 4
+snapshot game dir: C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game
+snapshot Seed override: "Seed": "1920951434"
+env DEUS_TEST_YEAR=500
+nw.exe processes before launch: 8
+stale game_runtime.log in lane root before launch: False
+command: .\run_tests.bat  --game C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game
+start CT: 2026-10-02 23:44:46 -05:00
+end CT: 2026-10-02 23:58:12 -05:00
+shell exit code (cmd /c .\run_tests.bat): 1
+results.txt retained: yes
+snapshot game_runtime.log retained: yes
+RESULT line: RESULT: 463 passed, 65 failed (exit 1)
+nw.exe processes after run: 11

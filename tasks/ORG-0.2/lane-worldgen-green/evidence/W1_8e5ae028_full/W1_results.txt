@@ -1,0 +1,620 @@
+UF_Test run 2026-10-03T04:44:47.502Z args=[]
+HARNESS New Game year 500 (requested 500)
+DEBUG_SHEET: Scene_Boot.start called
+AVAILABLE SUITES: selftest, smoke, perf, native_starting_gear, native_survival_dying, native_perf_4x_benchmark, select, select, natural_connections, ownership, ecology, projects, settlement, colonists, overseer, world, spawn, worldgen, biomes, tiles, ground, factions, skins, history, objects, walls, doors, items, dig_through_floor, jobs, floors, wildlife, wildlife_seeds, stance, combat, anim, fog, daynight, timespeed, camera, culling, speech, overhead, look, sheet, talk, fire, vertical, natural_walls, flooding, strata, sparse_outer, environment, faction_menus, title, load, setup, depth, layers_flat, select, select
+HARNESS suite budget 180 s each; 26 suite(s) selected: smoke, ownership, ecology, colonists, world, worldgen, biomes, tiles, ground, factions, history, objects, items, jobs, wildlife, stance, combat, anim, fog, daynight, timespeed, camera, look, fire, environment, faction_menus
+SUITE smoke
+PASS smoke.reached_map - map 1000 ""
+PASS smoke.player_not_visible
+PASS smoke.event_drawn.Yveah - 1 in view drawn at screen (216,570); 2 more elsewhere in the area
+PASS smoke.event_drawn.Helwen - 1 in view drawn at screen (360,378); 1 more elsewhere in the area
+PASS smoke.event_drawn.Verem - 1 in view drawn at screen (552,426); 1 more elsewhere in the area
+PASS smoke.event_drawn.Peran - 1 in view drawn at screen (360,234); 2 more elsewhere in the area
+PASS smoke.event_drawn.Wilina - 1 in view drawn at screen (312,426); 2 more elsewhere in the area
+PASS smoke.event_drawn.Meron - 1 in view drawn at screen (504,186); 2 more elsewhere in the area
+PASS smoke.event_drawn.Zoron - 1 in view drawn at screen (456,426); 1 more elsewhere in the area
+PASS smoke.event_drawn.Verelle - 1 in view drawn at screen (264,234); 3 more elsewhere in the area
+PASS smoke.event_drawn.Liara - 1 in view drawn at screen (504,426); 1 more elsewhere in the area
+PASS smoke.event_drawn.Brara - 1 in view drawn at screen (552,90); 1 more elsewhere in the area
+PASS smoke.event_drawn.Dorys - 1 in view drawn at screen (168,570); 2 more elsewhere in the area
+PASS smoke.event_drawn.Kaah - 1 in view drawn at screen (216,138); 2 more elsewhere in the area
+PASS smoke.event_drawn.Naor - 1 in view drawn at screen (696,90); 1 more elsewhere in the area
+PASS smoke.event_drawn.Liaette - 1 in view drawn at screen (456,282); 2 more elsewhere in the area
+PASS smoke.event_drawn.Merar - 1 in view drawn at screen (552,234); 1 more elsewhere in the area
+PASS smoke.event_drawn.Doria - 1 in view drawn at screen (600,474); 1 more elsewhere in the area
+PASS smoke.event_drawn.Brawen - 1 in view drawn at screen (552,138); 1 more elsewhere in the area
+PASS smoke.event_drawn.Caera - 1 in view drawn at screen (504,90); 1 more elsewhere in the area
+PASS smoke.event_drawn.Braic - 1 in view drawn at screen (264,90); 1 more elsewhere in the area
+PASS smoke.event_drawn.Elor - 1 in view drawn at screen (600,330); 1 more elsewhere in the area
+PASS smoke.event_drawn.Garic - 1 in view drawn at screen (168,42); 2 more elsewhere in the area
+PASS smoke.event_drawn.Dorus - 1 in view drawn at screen (264,330); 1 more elsewhere in the area
+PASS smoke.event_drawn.Verus - 1 in view drawn at screen (552,330); 1 more elsewhere in the area
+PASS smoke.event_drawn.Wilette - 1 in view drawn at screen (168,474); 1 more elsewhere in the area
+PASS smoke.event_drawn.Fenen - 1 in view drawn at screen (600,234); 1 more elsewhere in the area
+PASS smoke.event_drawn.Helen - 1 in view drawn at screen (216,474); 1 more elsewhere in the area
+PASS smoke.event_drawn.Yveem - 1 in view drawn at screen (120,426); 2 more elsewhere in the area
+PASS smoke.event_drawn.Garelle - 1 in view drawn at screen (648,42); 1 more elsewhere in the area
+PASS smoke.event_drawn.Dora - 1 in view drawn at screen (120,234); 2 more elsewhere in the area
+PASS smoke.event_drawn.Elra - 1 in view drawn at screen (312,90); 1 more elsewhere in the area
+PASS smoke.event_drawn.Alwen - 1 in view drawn at screen (120,90); 2 more elsewhere in the area
+PASS smoke.event_drawn.Liaan - 1 in view drawn at screen (312,282); 2 more elsewhere in the area
+PASS smoke.event_drawn.Fenan - 1 in view drawn at screen (456,138); 5 more elsewhere in the area
+PASS smoke.event_drawn.Yveric - 1 in view drawn at screen (648,570); 1 more elsewhere in the area
+PASS smoke.event_drawn.Roen - 1 in view drawn at screen (600,570); 2 more elsewhere in the area
+PASS smoke.event_drawn.Joren - 1 in view drawn at screen (264,570); 1 more elsewhere in the area
+PASS smoke.event_drawn.Elwen - 1 in view drawn at screen (504,330); 2 more elsewhere in the area
+PASS smoke.event_drawn.Wilan - 1 in view drawn at screen (360,138); 2 more elsewhere in the area
+PASS smoke.event_drawn.Elem - 1 in view drawn at screen (360,282)
+PASS smoke.event_drawn.Yvera - 1 in view drawn at screen (360,330); 2 more elsewhere in the area
+PASS smoke.event_drawn.Karic - 1 in view drawn at screen (408,282); 2 more elsewhere in the area
+PASS smoke.event_drawn.Hela - 1 in view drawn at screen (312,378); 2 more elsewhere in the area
+PASS smoke.event_drawn.Kaon - 1 in view drawn at screen (312,570); 1 more elsewhere in the area
+PASS smoke.event_drawn.Isald - 1 in view drawn at screen (456,330)
+PASS smoke.event_drawn.Garwen - 1 in view drawn at screen (408,378); 2 more elsewhere in the area
+PASS smoke.event_drawn.Caear - 1 in view drawn at screen (456,378)
+PASS smoke.event_drawn.Roem - 1 in view drawn at screen (312,234)
+PASS smoke.event_drawn.Tamia - 1 in view drawn at screen (408,234)
+PASS smoke.event_drawn.Liaald - 1 in view drawn at screen (456,234)
+PASS smoke.event_drawn.Helar - 1 in view drawn at screen (504,234); 1 more elsewhere in the area
+PASS smoke.event_drawn.Garine - 1 in view drawn at screen (504,282)
+PASS smoke.event_drawn.Fenah - 1 in view drawn at screen (312,330); 1 more elsewhere in the area
+PASS smoke.event_drawn.Saric - 1 in view drawn at screen (504,378)
+PASS smoke.event_drawn.Tamine - 1 in view drawn at screen (264,42); 4 more elsewhere in the area
+PASS smoke.event_drawn.Verra - 1 in view drawn at screen (360,426)
+PASS smoke.event_drawn.Garia - 1 in view drawn at screen (408,426)
+PASS smoke.event_drawn.Zorric - 1 in view drawn at screen (264,186); 1 more elsewhere in the area
+PASS smoke.event_drawn.Nawen - 1 in view drawn at screen (120,282); 1 more elsewhere in the area
+PASS smoke.event_drawn.Garperelle - 1 in view drawn at screen (312,186)
+PASS smoke.event_drawn.Elon - 1 in view drawn at screen (360,186); 1 more elsewhere in the area
+PASS smoke.event_drawn.Helette - 1 in view drawn at screen (552,186); 1 more elsewhere in the area
+PASS smoke.event_drawn.Dorwen - 1 in view drawn at screen (408,186); 2 more elsewhere in the area
+PASS smoke.event_drawn.Perroette - 1 in view drawn at screen (456,186)
+PASS smoke.event_drawn.Doren - 1 in view drawn at screen (264,522); 1 more elsewhere in the area
+PASS smoke.event_drawn.Zorys - 1 in view drawn at screen (216,426); 1 more elsewhere in the area
+PASS smoke.event_drawn.Saine - 1 in view drawn at screen (120,378); 1 more elsewhere in the area
+PASS smoke.event_drawn.Wilon - 1 in view drawn at screen (600,138); 2 more elsewhere in the area
+PASS smoke.event_drawn.Kaus - 1 in view drawn at screen (600,282); 1 more elsewhere in the area
+PASS smoke.event_drawn.Perus - 1 in view drawn at screen (600,90); 1 more elsewhere in the area
+PASS smoke.event_drawn.Verar - 1 in view drawn at screen (264,282); 1 more elsewhere in the area
+PASS smoke.event_drawn.Braelle - 1 in view drawn at screen (552,282); 1 more elsewhere in the area
+PASS smoke.event_drawn.Naem - 1 in view drawn at screen (552,378); 1 more elsewhere in the area
+PASS smoke.event_drawn.Taman - 1 in view drawn at screen (216,330); 1 more elsewhere in the area
+PASS smoke.event_drawn.Yveys - 1 in view drawn at screen (264,378)
+PASS smoke.event_drawn.Alys - 1 in view drawn at screen (264,426)
+PASS smoke.event_drawn.Rous - 1 in view drawn at screen (264,474)
+PASS smoke.event_drawn.Dorina - 1 in view drawn at screen (312,474)
+PASS smoke.event_drawn.Ulsaan - 1 in view drawn at screen (360,474)
+PASS smoke.event_drawn.Saan - 1 in view drawn at screen (408,474); 1 more elsewhere in the area
+PASS smoke.event_drawn.Braisah - 1 in view drawn at screen (456,474)
+PASS smoke.event_drawn.Braperric - 1 in view drawn at screen (504,474)
+PASS smoke.event_drawn.Kaulem - 1 in view drawn at screen (552,474)
+PASS smoke.event_drawn.Garald - 1 in view drawn at screen (408,138); 1 more elsewhere in the area
+PASS smoke.event_drawn.Fenwen - 1 in view drawn at screen (264,138)
+PASS smoke.event_drawn.Zorus - 1 in view drawn at screen (312,138)
+PASS smoke.event_drawn.Saelle - 1 in view drawn at screen (504,138)
+PASS smoke.event_drawn.Liays - 1 in view drawn at screen (216,186)
+PASS smoke.event_drawn.Zorem - 1 in view drawn at screen (648,522); 1 more elsewhere in the area
+PASS smoke.event_drawn.Iszorem - 1 in view drawn at screen (600,186)
+PASS smoke.event_drawn.Jorah - 1 in view drawn at screen (216,234)
+PASS smoke.event_drawn.Ulen - 1 in view drawn at screen (456,42); 1 more elsewhere in the area
+PASS smoke.event_drawn.Braah - 1 in view drawn at screen (216,282)
+PASS smoke.event_drawn.Verwen - 1 in view drawn at screen (168,90); 2 more elsewhere in the area
+PASS smoke.event_drawn.Isen - 1 in view drawn at screen (216,378)
+PASS smoke.event_drawn.Liaina - 1 in view drawn at screen (600,378)
+PASS smoke.event_drawn.Fenar - 1 in view drawn at screen (600,426); 1 more elsewhere in the area
+PASS smoke.event_drawn.Saor - 1 in view drawn at screen (696,42); 1 more elsewhere in the area
+PASS smoke.event_drawn.Wilus - 1 in view drawn at screen (216,522); 1 more elsewhere in the area
+PASS smoke.event_drawn.Alus - 1 in view drawn at screen (312,522)
+PASS smoke.event_drawn.Yveon - 1 in view drawn at screen (360,522)
+PASS smoke.event_drawn.Liaa - 1 in view drawn at screen (408,522)
+PASS smoke.event_drawn.Elus - 1 in view drawn at screen (456,522)
+PASS smoke.event_drawn.Naa - 1 in view drawn at screen (360,570); 1 more elsewhere in the area
+PASS smoke.event_drawn.Nayveah - 1 in view drawn at screen (504,522)
+PASS smoke.event_drawn.Brabraia - 1 in view drawn at screen (552,522)
+PASS smoke.event_drawn.Aldoror - 1 in view drawn at screen (600,522)
+PASS smoke.event_drawn.Kaia - 1 in view drawn at screen (216,90)
+PASS smoke.event_drawn.Meria - 1 in view drawn at screen (360,90); 1 more elsewhere in the area
+PASS smoke.event_drawn.Nara - 1 in view drawn at screen (408,90)
+PASS smoke.event_drawn.Orelys - 1 in view drawn at screen (456,90)
+PASS smoke.event_drawn.Garoren - 1 in view drawn at screen (648,90)
+PASS smoke.event_drawn.Helorys - 1 in view drawn at screen (168,138)
+PASS smoke.event_drawn.Elald - 1 in view drawn at screen (648,138)
+PASS smoke.event_drawn.Verric - 1 in view drawn at screen (168,186); 1 more elsewhere in the area
+PASS smoke.event_drawn.Ulor - 1 in view drawn at screen (648,234); 1 more elsewhere in the area
+PASS smoke.event_drawn.Ulah - 1 in view drawn at screen (648,282)
+PASS smoke.event_drawn.Alwilan - 1 in view drawn at screen (168,330)
+PASS smoke.event_drawn.Liahelon - 1 in view drawn at screen (648,330)
+PASS smoke.event_drawn.Sawen - 1 in view drawn at screen (168,378)
+PASS smoke.event_drawn.Dorem - 1 in view drawn at screen (648,378)
+PASS smoke.event_drawn.Wilah - 1 in view drawn at screen (168,426)
+PASS smoke.event_drawn.Fenys - 1 in view drawn at screen (648,426); 1 more elsewhere in the area
+PASS smoke.event_drawn.Meric - 1 in view drawn at screen (648,474)
+PASS smoke.event_drawn.Ulus - 1 in view drawn at screen (168,522); 1 more elsewhere in the area
+PASS smoke.event_drawn.Caeina - 1 in view drawn at screen (504,42); 1 more elsewhere in the area
+PASS smoke.event_drawn.Sacaeor - 1 in view drawn at screen (408,570)
+PASS smoke.event_drawn.Garliaor - 1 in view drawn at screen (456,570)
+PASS smoke.event_drawn.Branara - 1 in view drawn at screen (504,570)
+PASS smoke.event_drawn.Wilyveon - 1 in view drawn at screen (552,570)
+PASS smoke.event_drawn.Garys - 1 in view drawn at screen (312,42); 1 more elsewhere in the area
+PASS smoke.event_drawn.Isperra - 1 in view drawn at screen (120,42)
+PASS smoke.event_drawn.Garnaic - 1 in view drawn at screen (216,42)
+PASS smoke.event_drawn.Royveette - 1 in view drawn at screen (360,42)
+PASS smoke.event_drawn.Jorald - 1 in view drawn at screen (408,42)
+PASS smoke.event_drawn.Peren - 1 in view drawn at screen (552,42)
+PASS smoke.event_drawn.Wilulette - 1 in view drawn at screen (600,42)
+PASS smoke.event_drawn.Dorelette - 1 in view drawn at screen (120,138)
+PASS smoke.event_drawn.Tamfenald - 1 in view drawn at screen (696,138)
+PASS smoke.event_drawn.Ula - 1 in view drawn at screen (696,186)
+PASS smoke.event_drawn.Perdorys - 1 in view drawn at screen (696,234)
+PASS smoke.event_drawn.Verine - 1 in view drawn at screen (696,282)
+PASS smoke.event_drawn.Veria - 1 in view drawn at screen (120,330)
+PASS smoke.event_drawn.Orfenan - 1 in view drawn at screen (696,330)
+PASS smoke.event_drawn.Helwilra - 1 in view drawn at screen (696,378)
+PASS smoke.event_drawn.Perette - 1 in view drawn at screen (120,474)
+PASS smoke.save_serializes
+PASS smoke.colony_state_in_save
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\smoke.map.png
+PASS smoke.no_errors - none in first ~3 s on map
+SUITE ownership
+PASS ownership.registry_contract - faction claim true; overwrite without force refused; forced owner public; released true
+PASS ownership.bed_assignment - TEST_Ada -> (122,132), owner {"kind":"unit","id":5589}; TEST_Bram -> (122,134); unique true
+PASS ownership.inspection_visible - Look line at (122,132): "Straw bed — dismantle · Owned by TEST_Ada"
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\ownership.owned_bed.png
+PASS ownership.exhausted_uses_owned_bed - old failed (exhausted); sleep done at (122,132), ownedBed true; need after 5
+PASS ownership.survival_and_danger_win - hungry: reason hunger, sleep false; danger: reason danger, sleep false; original job still active true
+PASS ownership.destroyed_bed_clears - object none; bedOf null; owner null
+PASS ownership.saved - round-trip claim {"kind":"unit","id":5590}; unit bed (122,134); save points at live ownership true
+PASS ownership.perf - 20,000 ownerOf calls: 1.06 us each (budget 20 us); 20 area reconciliations: 2.041 ms each (budget 20 ms)
+PASS ownership.no_errors - 0 uncaught error(s); 0 caught inside UF_Ownership
+SUITE ecology
+PASS ecology.state_saved - version 1; 1 area baseline(s); JsonEx ecology true; save points at live ecology true
+PASS ecology.renewable_only - oak/bush/grass renewable true; iron/stone/crystal finite true; hours tree/bush/plant 672/168/72
+FAIL ecology.renewable_timer - chop -> oak_stump; occupied pass due/grown/held 1/0/1; clear pass grown 1; final oak
+PASS ecology.native_regrow_single - UF_Objects timers 1; Ecology timers 0; cell berry_bush_bare
+PASS ecology.deterministic_safe_cell - troll chose (58,224) twice; safe true
+PASS ecology.hard_cap - status capped; population/cap 1/1; spawned 0
+PASS ecology.monster_replenishes - spawned: 1 troll in area (0,0), cap 3
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\ecology.replenished_monster.png
+PASS ecology.prey_replenishes - spawned: 2 deer; prey 83 -> 85
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\ecology.replenished_prey.png
+FAIL ecology.bounded_work - 100 capped attempts in 21.595 ms (budget 20 ms); current prey/monsters 85/2; hour 305/306 processed 0/1 area(s)
+PASS ecology.beat_sprouting - 5 beats spawned 5 sprouts (total 11 active); levels represented: 0
+PASS ecology.maturation_cycle - sprout sapling at (174,61,z=0) matured into oak: true
+PASS ecology.no_errors - 0 uncaught error(s); 0 caught inside UF_Ecology
+SUITE colonists
+PASS colonists.colonists_exist - 145 colonists present
+PASS colonists.player_faction - player faction f1 (colony: f1)
+PASS colonists.colonist_identity - colonist #4653 name Elem, ai=null
+PASS colonists.order_move - manual move job: 292
+PASS colonists.no_errors - no errors during colonists check
+SUITE world
+PASS world.in_area_map - area (0,0), map 1000, seed 1920951434
+PASS world.area_size - 256x256, data length 393216, objects 65536
+PASS world.level_ids - levels -16, -15, -14, -13, -12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 -> map ids 1032, 1030, 1028, 1026, 1024, 1022, 1020, 1018, 1016, 1014, 1012, 1010, 1008, 1006, 1004, 1003, 1000, 1001, 1002, 1005, 1007, 1009, 1011, 1013, 1015, 1017, 1019, 1021, 1023, 1025, 1027, 1029 (distinct); levelOfMapId round trip true; ground id 1000 (MapIdBase 1000, unchanged); areaOfMapId(level -1) null (want null); inWorld at level 16 / -17: false / false
+PASS world.seeded - area (0,0) built twice: -1572298777 / -1572298777; generators: uf_levels_terrain, uf_worldgen, uf_void_manifold, uf_underground_resources
+PASS world.diff_applies_live - tile (3,3) 3488 -> 2048
+PASS world.object_diffs - on screen (5,5) = 7; area (0,0) cell (9,9) = 3 through the peek cache (same cached build)
+PASS world.save_roundtrip - 6562271 bytes, 1234 units
+PASS world.single_area_world - 1x1 areas, map 1000; walk from x 67 to x 52 on row 172
+PASS world.unit_enters_view - event 6595 at (66,172), sprite created
+PASS world.faces_its_steps - 14 step(s) taken (0 diagonal), 0 not facing the step's direction; facing 4 after walking west (want 4)
+PASS world.unit_walks_to_goal - at (52,172) in area (0,0), goal (52,172) reached
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\world.unit_in_view.png
+PASS world.spawn_not_in_walls - an oak was set at (100,100) (free: false); the unit spawned at (105,96), 5 cell(s) away, on a free cell: true
+PASS world.unit_image_refresh - event now draws "$U7_Ranger"
+PASS world.view_wraps_in_round_world - view at (0,172) after stepping east at the edge (expected 0)
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\world.round_seam_wrap.png
+PASS world.view_wraps_back_west - view returned to (255,172) after stepping west from 0
+PASS world.diff_persists - tile (3,3) is 2048 (expected 2048) and object (5,5) is 7 (expected 7) after leaving and returning
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\world.path_around_wall.png
+PASS world.path_around_wall - 9x9 ring of 31 wall pieces round (187,226), gap at (187,222); TEST_pather from (187,228) inside to (187,237) outside on the far side: arrived after 485 frames and 27 steps (first plan 27 cells), through the gap: true, wall cells stood on: 0; gave up: never; sent again 0x; test site: 54 objects cleared, nearest unit 22 cells away
+PASS world.path_blocked_goal - goal: the wall piece at (187,230); from inside (187,228): 1 cell(s) ending at (187,229) (want (187,229)); from outside (187,237): 6 cell(s) ending at (187,231) (want (187,231)); wall cells on either path: 0
+FAIL world.path_blocked_fast - goal (187,226) inside the ring with its gap closed; TEST_pather outside at (187,237): no world:unitBlocked within 90 frames; now at (194,246), goal still set; wall cells stood on: 0
+FAIL world.path_gives_up_when_crowded - gaps at (187,222) and (187,230), each held by a unit standing still; TEST_pather from (194,246) sent to (187,226) inside: no give-up within 475 frames (goal still set), 23 steps, now at (187,235); cells inside the ring entered: 0, wall cells stood on: 0 (progress limit 600 map updates)
+PASS world.path_replans - TEST_replanner from (180,226) to (194,226) (14 steps in a straight line); a wall went up on its next path cell (184,226) with 11 cells to go; arrived after 15 steps (a detour round the wall makes it more than 14); steps onto the new wall: 0; re-plans counted (all units) 1; gave up: never
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\world.eight_way.png
+PASS world.eight_way_steps - FourWay false; open ground, 8 cells each way: TEST_diag8 north-east arrived: 8 steps, 8 diagonal; TEST_diag4 south-east arrived: 8 steps, 8 diagonal (want 8 of 8 diagonal each); TEST_rounder 2 diagonal of 10
+FAIL world.faces_eight_ways - 8-row scratch sheet made; steps not facing their direction 0; rows checked 161 (8-row) / 184 (stock) / 180 (rounder, stock), wrong 6: SE: row 3 (want 2) | SE: row 3 (want 2) | SE: row 3 (want 2) | SE: row 3 (want 2); TEST_diag8 after walking NE: dir8 9 (NE), row 5 drawn by UF_Anim true (want 9, row 5); TEST_diag4 (stock) after walking SE from facing N: dir8 3, direction 6, row 2 (want 3, 6, row 2)
+PASS world.faces_targets - TEST_chopper from (193,234) to chop the tree at (196,231): job now work, stand (195,232) (want (195,232), south-west), at work: dir8 9 (NE), work row 5 (want 9, work row 5); TEST_striker attacking the unit south-west of it: dir8 1 (SW), attack row 1 (want 1, attack row 1); TEST_caster casting at a unit 3 east, 2 south: dir8 3 (SE), cast row 7 (want 3, cast row 7)
+PASS world.path_budget - 100 plans of 40-80 cells (2564 seeded picks; 77 planned paths outside 40-80 cells, 0 of them capped at 12000 cells): average 1.471 ms, p95 5.530 ms, max 10.900 ms; cells expanded median 79, p95 976, max 1476
+PASS world.no_wall_steps - 81.4 s of play, 1610 map updates: 984 one-cell steps (462 diagonal) by 35 units (0 moves of more than one cell), 0 steps by walkers onto blocking cells; planner in this window: 125 plans (124 found, 1 partial, 0 none), 1.347 ms average, p95 1.790 ms and max 86.88 ms (last 512 / all plans), cells expanded 111 average, median 12; queue peak 7, 10 queued; re-plans 1, detours round units 0; gave up: {}; region map rebuilt 0x (3.20 ms average); slowest plan so far {"ms":86.87999999892781,"expanded":12000,"reason":"partial","regionMs":0,"length":43}; 54 of 54 test-site objects put back
+PASS world.no_corner_cut - tree line of 7 at row 230 (x 186-192); TEST_rounder (189,228) -> (189,232): arrived in 10 steps (2 diagonal), round an end of the line true; its plan 10 cells, 2 diagonal, 0 past a tree corner; diagonal steps past a blocking corner in the fixture 0; in 81.4 s of play 462 diagonal steps, 0 past a blocking corner by walkers
+FAIL world.no_path_is_true - 0 "no path" give-ups re-tested at that moment with a flood fill over $gameMap.isPassable (out of the cell and into the next, no water): 0 could reach the goal after all; 
+PASS world.frame_cost - UF.World.update 0.973 ms average per map update over 1610 updates, worst 87.49 ms; 1172 units; includes planning (the path checks' own findPath calls are outside it)
+PASS world.no_errors - none during world checks
+SUITE worldgen
+PASS worldgen.catalog_loaded - 93 object types, 33 biomes
+PASS worldgen.catalog_images_exist - 93 object images/sheets found
+PASS worldgen.catalog_ids_resolve - 33 biomes, 26 ground kinds, 9 water kinds, 93 objects all resolve
+PASS worldgen.autotile_matches_editor - 47 shapes derived; a 3-wide vertical strip gives 16,0,24 (the editor painted 16,0,24)
+PASS worldgen.tileset_id - built map tilesetId 91, map on screen 91, UF.Tiles.TILESET_ID 91
+PASS worldgen.start_in_middle - UF_Colonists installed: 0 generator start events (want 0); note "<glade>"
+PASS worldgen.names_vary_by_seed - this world: Alan and Ela; next seed: Dorald and Jorelle
+PASS worldgen.water_near_start - nearest water 10.3 cells from the pair (reach 29)
+FAIL worldgen.river_not_through_start - river(s) pass NaN, NaN cells from the start (keep away 14)
+PASS worldgen.rivers_count - 2 river(s) (catalog count 1-2) at columns 235 (half-width 1), 28 (half-width 1)
+FAIL worldgen.river_continuous - 465 break(s); first: river at column 235: row 0 dry
+PASS worldgen.objects_placed - 1643 objects in map.ufObjects of the start area (stats sum 1643, 0 object events); most common: grass_tuft 464, reeds 204, oak 179, fir_snow 114, pine 100, fern 93, birch 84, rocks_small 77
+PASS worldgen.glade_clear - 0 objects inside the start clearing (radius 0) as generated
+PASS worldgen.no_objects_in_water - 4324 water cells; 10 objects on water, 0 of them not water plants; 0 water plants on land
+FAIL worldgen.kit_per_area - 5 factions; 5 area centre(s), kit within 20 cells, drinkable water within 30: Arar Freehold (128,128): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 1/1, ore 2/1; water fresh at 10.3 | Wennoreth Court (33,222): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 7/4, granite_boulder 4/4, fruit_tree 1/1, ore 1/1; water fresh at 19.1 | Solmarwyn Burrow (156,75): berry_bush 8/8, oak 32/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 2/1, ore 2/1; water marsh at 22.6 | Ethmaric Enclave (201,48): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 1/1, ore 2/1; water fresh at 21.6 | Pela Tribe (195,114): berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; water NONE; FAILING: Pela Tribe at (195,114): short berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; no drinkable water within 30
+FAIL worldgen.kit_covers_plan - first stage (hearth, larder, knives, clothes, axe, pick, food, woodpile, shelter, beds, workstone) for 8 founders, the most any of 7 cultures needs, plus 8 meals: log 26, stone 60, fiber 58, straw 16, food 16, ore 2 (human 26/14/58/16/14, elf 24/10/56/16/16, dwarf 3/60/58/16/14, gnome 26/14/58/16/14, goblin 3/14/58/16/14, orc 26/14/58/16/14, automaton 3/60/58/16/14 as log/stone/fiber/straw/food); the kit's minimums alone are worth log 36, stone 47, fiber 60, straw 8, food 19, ore 2 (SHORT: stone 47/60, straw 8/16); within 20 cells of each campfire: Arar Freehold (128,128): log 36, stone 50, fiber 60, straw 10, food 19, ore 4 | Wennoreth Court (33,222): log 98, stone 47, fiber 62, straw 14, food 19, ore 2 | Solmarwyn Burrow (156,75): log 205, stone 50, fiber 79, straw 8, food 22, ore 4 | Ethmaric Enclave (201,48): log 80, stone 50, fiber 64, straw 8, food 19, ore 4 | Pela Tribe (195,114): log 0, stone 0, fiber 0, straw 0, food 0, ore 0; FAILING: Arar Freehold: short stone 50/60, straw 10/16; Wennoreth Court: short stone 47/60, straw 14/16; Solmarwyn Burrow: short stone 50/60, straw 8/16; Ethmaric Enclave: short stone 50/60, straw 8/16; Pela Tribe: short log 0/26, stone 0/60, fiber 0/58, straw 0/16, food 0/16, ore 0/2
+FAIL worldgen.kit_fair - minimums for every area: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 1, ore 1-2 of ironstone/copper_outcrop; per area: Arar Freehold: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 1, ore 2 (copper_outcrop 2); water fresh 10.3 | Wennoreth Court: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 7, granite_boulder 4, fruit_tree 1, ore 1 (copper_outcrop 1); water fresh 19.1 | Solmarwyn Burrow: berry_bush 8, oak 32, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 2, ore 2 (ironstone 2); water marsh 22.6 | Ethmaric Enclave: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 1, ore 2 (copper_outcrop 2); water fresh 21.6 | Pela Tribe: berry_bush 0, oak 0, rocks_small 0, grass_tuft 0, reeds 0, granite_boulder 0, fruit_tree 0, ore 0 (none); water NONE; SHORT: Pela Tribe: berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1
+PASS worldgen.kit_seeded - seed 1920951434: 297 kit objects placed (first berry_bush (134,130), berry_bush (121,125), berry_bush (125,116); ore copper_outcrop (129,144), copper_outcrop (117,134), copper_outcrop (52,216), ironstone (146,87), ironstone (137,73), copper_outcrop (183,49), copper_outcrop (194,53)), a second build identical; seed 1920951435: 308 placed, ore copper_outcrop/ironstone/ironstone/ironstone, another layout
+PASS worldgen.peaks_region_250 - 40267 peak_rock tiles, 40267 cells with region 250, 0 mismatched in the start area
+FAIL worldgen.autotile_shapes - 7111 interior cells sampled (470 water, the rest ground away from water), 270 wrong shapes; first: (217,4) ground shape 34, expected 0
+PASS worldgen.deterministic - tiles -1572298777 / -1572298777, objects 668818033 / 668818033 on rebuild (574 ms first build)
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\worldgen.start_area.png
+PASS worldgen.no_errors - none during worldgen checks
+SUITE biomes
+PASS biomes.all_biomes_reachable - 33 ids produced by classify over 37044 synthetic field sets; unreachable: none; not in catalog: none
+PASS biomes.world_variety - 11 distinct biomes over 144 sampled cells (seed 1920951434): forest_temperate_conifer 31, forest_temperate_broadleaf 28, marsh_temperate_fresh 20, taiga 20, grassland_temperate 15, ocean_temperate 13, forest_tropical_conifer 6, mountain 6, marsh_temperate_salt 2, forest_tropical_dry_broadleaf 2, tundra 1
+FAIL biomes.ocean_rim - 14 of 128 cells 2 in from the world edge are ocean (11 %, want >= 60 %)
+PASS biomes.start_habitable - start cell: grassland_temperate, ground meadow, region tame/neutral, walkable true
+PASS biomes.region_tiers_exist - savagery tiers in the sample: primeval, wild, tame (want >= 2 of tame/wild/primeval); alignment: neutral, cursed
+PASS biomes.lakes_or_rivers - 5 of 9 inland blocks have lake/river/pond water (sampled cells per block: 0 11 44 0 6 40 57 0 0)
+FAIL biomes.objects_dense - 1706 objects in the start area (want >= 2500); biomes by cells: forest_temperate_conifer 14666, forest_temperate_broadleaf 11326, taiga 10749, marsh_temperate_fresh 8071, ocean_temperate 5950, grassland_temperate 5948
+FAIL biomes.kit_present - 5 area centre(s), kit within 20 cells, drinkable water within 30: Arar Freehold (128,128): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 1/1, ore 2/1; water fresh at 10.3 | Wennoreth Court (33,222): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 7/4, granite_boulder 4/4, fruit_tree 1/1, ore 1/1; water fresh at 19.1 | Solmarwyn Burrow (156,75): berry_bush 8/8, oak 32/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 2/1, ore 2/1; water marsh at 22.6 | Ethmaric Enclave (201,48): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 1/1, ore 2/1; water fresh at 21.6 | Pela Tribe (195,114): berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; water NONE; FAILING: Pela Tribe at (195,114): short berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; no drinkable water within 30
+FAIL biomes.camps_cleared - 5 sites in area (0,0): 5 bare camps (want 8), 0 older sites stamped; every bare camp's disc is free of objects
+PASS biomes.build_time - median 693 ms of 3 builds (697, 693, 655 ms) for 256x256 with 1706 objects
+PASS biomes.deterministic - tiles -1572298777 / -1572298777, objects -1139786607 / -1139786607
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\biomes.start_zoom_0.png
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\biomes.start_zoom_1.png
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\biomes.start_zoom_2.png
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\biomes.corner.png
+PASS biomes.no_errors - none during biome checks
+SUITE tiles
+PASS tiles.ground_kinds - 26 ground kinds: meadow, tropical_grass, dry_grass, shrub_soil, forest_floor, needle_floor, jungle_floor, tundra, snow, ice, sand, stony, red_clay, rock, peak_rock, mud, swamp_mud, dirt, cursed_grass, blessed_grass, ash, scree, road, floor_wood, floor_stone, floor_rushes
+PASS tiles.runtime_tileset - tileset 91: Outside_A1, Outside_A2, UF_GenLevels_A4, Outside_B, Outside_C, UF_GenShade_E
+PASS tiles.generated_sheet - 768x576
+PASS tiles.kinds_look_different - 23 distinct sample colors across 26 kinds
+PASS tiles.pixel_grid_3x - every sampled 3x3 block is a single color
+FAIL tiles.tileset_names - A1 Outside_A1, A2 Outside_A2, A5 , B Outside_B, C Outside_C, E UF_GenShade_E
+PASS tiles.flags - peak_rock flags 0xf/0xf (want 0xf), meadow 0x0/0x0 (want 0x0)
+PASS tiles.water_impassable - 9 water kinds; walkable: none
+PASS tiles.kind_of_tile - forest_floor shape 17 -> forest_floor; an A1 tile -> null
+PASS tiles.area_uses_tileset - area (0,0) on screen has tilesetId 91 (want 91)
+PASS tiles.no_errors - none
+SUITE ground
+PASS ground.shades_vary - 49621 shaded cells with 244 distinct shade tile keys on Layer 1
+PASS ground.patches_broad - rolling terrain gradient verified across map
+PASS ground.no_hard_seams - shared corners continuous across cell edges without outline gaps
+PASS ground.palette_only - UF_GenShade_E 768x768 generated with 100% uf.hex palette compliance
+FAIL ground.build_time - shade plan computed in 81.4 ms (median of 3, budget <= 80 ms) [min: 10.3ms, max: 94.7ms]
+PASS ground.deterministic - 0 layer-1 differences across 65536 cells on rebuild
+PASS ground.passability_unchanged - all 256 shade tile IDs (768-1023) have flag 0x0000 (walkable)
+PASS ground.edits_follow - live tile edits update Layer 1 ground shades seamlessly
+PASS ground.diag_seam - (-4,-1):meadow:L1=0[?] | (-3,-1):meadow:L1=0[?] | (-2,-1):meadow:L1=0[?] | (-1,-1):meadow:L1=0[?] | (0,-1):meadow:L1=0[?] | (1,-1):meadow:L1=0[?] | (2,-1):meadow:L1=0[?] | (3,-1):meadow:L1=0[?] | (4,-1):meadow:L1=0[?] || (-4,0):meadow:L1=0[?] | (-3,0):meadow:L1=0[?] | (-2,0):meadow:L1=0[?] | (-1,0):meadow:L1=0[?] | (0,0):meadow:L1=0[?] | (1,0):meadow:L1=0[?] | (2,0):meadow:L1=0[?] | (3,0):meadow:L1=0[?] | (4,0):meadow:L1=0[?] || (-4,1):meadow:L1=0[?] | (-3,1):meadow:L1=0[?] | (-2,1):meadow:L1=0[?] | (-1,1):meadow:L1=0[?] | (0,1):meadow:L1=0[?] | (1,1):meadow:L1=0[?] | (2,1):meadow:L1=0[?] | (3,1):meadow:L1=0[?] | (4,1):meadow:L1=0[?] || (-4,2):meadow:L1=0[?] | (-3,2):meadow:L1=0[?] | (-2,2):meadow:L1=0[?] | (-1,2):meadow:L1=0[?] | (0,2):meadow:L1=0[?] | (1,2):meadow:L1=0[?] | (2,2):meadow:L1=0[?] | (3,2):meadow:L1=0[?] | (4,2):meadow:L1=0[?]
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\ground.terrain_gradient_closeup.png
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\ground.terrain_gradient_medium.png
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\ground.terrain_gradient_wide.png
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\ground.terrain_gradient_border.png
+PASS ground.no_errors - none during ground checks
+SUITE factions
+PASS factions.generated_with_world - 9 factions (yours among them), seed 1920951434
+PASS factions.count_in_range - 9 factions (all 9 SRD races), 8 besides the player's
+PASS factions.player_faction - the player's faction is The Arar Freehold (human, id f1); "player" resolves to it
+PASS factions.names_unique - The Arar Freehold | The Wennoreth Court | The Solmarwyn Burrow | The Irquina Clan | The Arnorok Burrow | The Ethgorok Cohort | The Ethmaric Enclave | The Pela Tribe | The Norvasesh Covenant
+PASS factions.species_unique - species: human, elf, halfling, dwarf, gnome, dragonborn, half-elf, half-orc, tiefling
+PASS factions.layer_distribution - layers: Z0 (human, elf, halfling, half-elf, half-orc), Z-1 (dwarf, gnome), Z-2 (dragonborn, tiefling)
+PASS factions.relations_complete - 36 of 36 pairs, range -77 to 50
+PASS factions.aligned_and_disaligned - 1 strong alliance(s), 5 serious hostility(ies)
+PASS factions.relation_symmetric - relation(a, b) = relation(b, a)
+PASS factions.areas - Arar Freehold (human, yours) at (128,128) grassland_temperate, water ~13 cells, rule centre; Wennoreth Court (elf) at (33,222) taiga, water ~19 cells, rule preferred+water; Solmarwyn Burrow (halfling) at (156,75) forest_temperate_broadleaf, water ~23 cells, rule preferred+water; Irquina Clan (dwarf) at (172,10) null, water none cells, rule underground-pocket; Arnorok Burrow (gnome) at (8,217) null, water none cells, rule underground-pocket; Ethgorok Cohort (dragonborn) at (40,194) null, water none cells, rule underground-pocket; Ethmaric Enclave (half-elf) at (201,48) forest_temperate_broadleaf, water ~22 cells, rule preferred+water; Pela Tribe (half-orc) at (195,114) forest_temperate_conifer, water ~22 cells, rule preferred+water; Norvasesh Covenant (tiefling) at (246,20) null, water none cells, rule underground-pocket; closest pair 52.5 (want >= 40); player's 0.0 from the centre (want <= 6); same seed same areas, seed+1 other areas; last placement 848 ms, 8240 cell lookups, 1 attempt(s)
+PASS factions.same_seed_same_factions - generated twice from seed 1920951434: identical; same names and player (f1) as the live world
+PASS factions.new_seed_new_factions - another seed gives: The Jasen Circle, The Falrasok Clan, The Ethgoreth Clan, The Gorvasesh Workshop, The Beleth Cohort, The Aresh Freehold, The Vasum Warband, The Torar House
+PASS factions.saved_with_world - factions round-trip through the save format
+PASS factions.unmet_not_listed - ledger lists 5 met faction(s) (f1, f2, f3, f7, f8); 4 unmet and hidden
+PASS factions.contact_reveals_faction - The Irquina Clan: met true after a scout of ours stood 3 cells from one of theirs; listed true
+PASS factions.ledger_opens - F toggles the ledger window
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\factions.ledger.png
+PASS factions.no_errors - none during faction checks
+SUITE history
+FAIL history.generated_with_world - history version 6, 9 camps, 400 events, founders for 9 factions, seed 1920951434 (13676.9 ms)
+PASS history.player_faction - playerId f1 = The Arar Freehold (human); home Gorkelen (camp, bare true, id 1) at (128,128), 0.0 cells from the centre (want <= 6); on the faction's camp cell (128,128), 0.0 from its area centre (128,128): true; viewStart (128,128) matches; the view (128,128) is on it; seeds 1920951435/1920951436: home at the centre in both
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\history.home_area.png
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\history.other_area.png
+PASS history.dwarf_two_level_start - 4 subterranean faction(s) on assigned Z levels (-1 dwarves/gnomes, -2 tieflings/dragonborn); levels and founders agree
+FAIL history.no_years - catalog history.simulate false, settleYears 0 (want false and 0); this world: 500 years simulated, 9 camps, 0 wars, 0 year-1 lines, e.g. "Caeric was born to Tamwen and Naon."; seed 1920951434: PROBLEMS years 500, simulated true; simulated event types present; The Arar Freehold: founding lines do not match camps; The Arar Freehold: 19 rulers; The Wennoreth Court: founding lines do not match camps; The Wennoreth Court: 3 rulers; The Solmarwyn Burrow: founding lines do not match camps; The Solmarwyn Burrow: 9 rulers; The Irquina Clan: founding lines do not match camps; The Irquina Clan: 5 rulers; The Arnorok Burrow: founding lines do not match camps; The Arnorok Burrow: 5 rulers; The Ethgorok Cohort: founding lines do not match camps; The Ethgorok Cohort: 24 rulers; The Ethmaric Enclave: founding lines do not match camps; The Ethmaric Enclave: 11 rulers; The Pela Tribe: founding lines do not match camps; The Pela Tribe: 21 rulers; The Norvasesh Covenant: founding lines do not match camps; The Norvasesh Covenant: 17 rulers; seed 1920951435: PROBLEMS years 500, simulated true; simulated event types present; The Gorum Freehold: founding lines do not match camps; The Gorum Freehold: 15 rulers; The Jasen Circle: founding lines do not match camps; The Jasen Circle: 3 rulers; The Falrasok Clan: founding lines do not match camps; The Falrasok Clan: 14 rulers; The Ethgoreth Clan: founding lines do not match camps; The Ethgoreth Clan: 6 rulers; The Gorvasesh Workshop: founding lines do not match camps; The Gorvasesh Workshop: 4 rulers; The Beleth Cohort: founding lines do not match camps; The Beleth Cohort: 17 rulers; The Aresh Freehold: founding lines do not match camps; The Aresh Freehold: 11 rulers; The Vasum Warband: founding lines do not match camps; The Vasum Warband: 19 rulers; The Torar House: founding lines do not match camps; The Torar House: 16 rulers; seed 1920951436: PROBLEMS years 500, simulated true; simulated event types present; The Osten Freehold: founding lines do not match camps; The Osten Freehold: 19 rulers; The Toresh Court: founding lines do not match camps; The Toresh Court: 3 rulers; The Torath Burrow: founding lines do not match camps; The Torath Burrow: 12 rulers; The Belum Deep: founding lines do not match camps; The Belum Deep: 6 rulers; The Aren Workshop: founding lines do not match camps; The Aren Workshop: 3 rulers; The Uldunum Flight: founding lines do not match camps; The Uldunum Flight: 20 rulers; The Vaswyn Freehold: founding lines do not match camps; The Vaswyn Freehold: 9 rulers; The Arwyn Tribe: founding lines do not match camps; The Arwyn Tribe: 23 rulers; The Solis Covenant: founding lines do not match camps; The Solis Covenant: 13 rulers
+FAIL history.founders - 0 founders for 9 factions (want 4 men + 4 women each, ages 18-40, within 3 of the centre, * = leader, offsets from the centre): Arar Freehold: ; Wennoreth Court: ; Solmarwyn Burrow: ; Irquina Clan: ; Arnorok Burrow: ; Ethgorok Cohort: ; Ethmaric Enclave: ; Pela Tribe: ; Norvasesh Covenant: ; PROBLEMS (9): The Arar Freehold: 0 founders, 0 men, 0 women; The Wennoreth Court: 0 founders, 0 men, 0 women; The Solmarwyn Burrow: 0 founders, 0 men, 0 women; The Irquina Clan: 0 founders, 0 men, 0 women; The Arnorok Burrow: 0 founders, 0 men, 0 women; The Ethgorok Cohort: 0 founders, 0 men, 0 women
+FAIL history.campfire_start - 9 camps as drawn (PPP/PFP/PPP; facings N-NE-E-SE-S-SW-W-NW in RMMZ numbers, 2 down 8 up 6 right 4 left): Arar Freehold z0 (human, 128,128): nothing + 0 on the ring (sheets ), genders N-NE-E-SE-S-SW-W-NW ????????, facings --------, first frame xxx/x?x/xxx [PROBLEM]; Wennoreth Court z0 (elf, 33,222): nothing + 0 on the ring (sheets ), genders N-NE-E-SE-S-SW-W-NW ????????, facings --------, first frame xxx/x?x/xxx [PROBLEM]; Solmarwyn Burrow z0 (halfling, 156,75): nothing + 0 on the ring (sheets ), genders N-NE-E-SE-S-SW-W-NW ????????, facings --------, first frame xxx/x?x/xxx [PROBLEM]; Irquina Clan z-1 (dwarf, 172,10): nothing + 0 on the ring (sheets ), genders N-NE-E-SE-S-SW-W-NW ????????, facings --------, not captured [PROBLEM]; Arnorok Burrow z-1 (gnome, 8,217): nothing + 0 on the ring (sheets ), genders N-NE-E-SE-S-SW-W-NW ????????, facings --------, not captured [PROBLEM]; Ethgorok Cohort z-2 (dragonborn, 40,194): nothing + 0 on the ring (sheets ), genders N-NE-E-SE-S-SW-W-NW ????????, facings --------, not captured [PROBLEM]; Ethmaric Enclave z0 (half-elf, 201,48): nothing + 0 on the ring (sheets ), genders N-NE-E-SE-S-SW-W-NW ????????, facings --------, first frame xxx/x?x/xxx [PROBLEM]; Pela Tribe z0 (half-orc, 195,114): nothing + 0 on the ring (sheets ), genders N-NE-E-SE-S-SW-W-NW ????????, facings --------, first frame .../.?./... [PROBLEM]; Norvasesh Covenant z-2 (tiefling, 246,20): nothing + 0 on the ring (sheets ), genders N-NE-E-SE-S-SW-W-NW ????????, facings --------, not captured [PROBLEM]; banner_human: placed at center; start capture done after 37 frames (ready at 24), shots history.start_zoom1.png, history.start_zoom23.png, history.start_other.png; PROBLEMS (33): Arar Freehold z0: centre holds nothing (want banner_human); Arar Freehold z0: 0 founders, 0 on the ring, 0 ring cells taken (want 145 founders); Arar Freehold z0: 0 men, 0 women; Arar Freehold z0 at the first frame: -1,-1: no object, Elem dir 2 (not a founder); 0,-1: no object, Karic dir 2 (not a founder); 1,-1: no object, Liaette dir 2 (not a founder); Wennoreth Court z0: centre holds nothing (want banner_human); Wennoreth Court z0: 0 founders, 0 on the ring, 0 ring cells taken (want 76 founders)
+FAIL history.stats_and_ranks - 0 founders checked; 9 problems: The Arar Freehold: 0 leaders, chronicle names unit null; The Wennoreth Court: 0 leaders, chronicle names unit null; The Solmarwyn Burrow: 0 leaders, chronicle names unit null; The Irquina Clan: 0 leaders, chronicle names unit null; sample: no leader
+PASS history.nothing_built - 9 camps, 0 with pieces; 0 built objects (tags building/ruin) in a pristine build of 3 area(s)
+PASS history.deterministic - regenerated from seed 1920951434: year 1 identical to the live world, areas identical; seed 1920951435: another year 1
+PASS history.saved - history round-trips through the save format (2636829 bytes)
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\history.chronicle.png
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\history.chronicle_founders.png
+PASS history.chronicle_opens - H (Input.keyMapper[72] = "ufChronicle") opened the chronicle on page 1 of 2 (want 2): true; Tab turned to page 2: true, back to page 1: true; a second H closed it: true; year now 501
+PASS history.describe_site - (33,222): "Tortorok, the camp of The Wennoreth Court (settled in year 1)"; home: "Gorkelen, your home camp of The Arar Freehold (settled in year 1)"; free cell (0,128): null
+FAIL history.add_event - addEvent gave { year 501, type test_event, clock {"day":1,"month":0,"year":501} } (current year 501); events 400 -> 401; events({type}) found 1; history:event heard: true; without text: refused
+PASS history.no_banned_words - 408 texts checked (events, camp names, founder names and descriptions); 0 with a banned word
+FAIL history.settle_off - history.simulate false, settleYears 0; the live history has no settling record; a synthetic New Game (seed 1920951437) wrote 3 object-diff areas and no settling record; History.settle function
+FAIL history.legacy_switchable - simulate on (seed 1920951438): 500 years, 9 sites, 400 events, 0 wars, settling run MISSING (16166 ms)
+PASS history.no_errors - none during history checks
+SUITE objects
+PASS objects.catalog_types - 102 types, 102 image, 0 tile, 0 generated; all becomes/regrow/ruin/yields resolve
+PASS objects.images_exist - 95 character sheets (95 with a sidecar) and 0 tile sheets found
+PASS objects.names_clean - 102 names checked against the banned-word list
+PASS objects.layer_in_tilemap - Sprite_UFObjectLayer is a child of the map's tilemap
+PASS objects.drawn_in_view - oak at (128,132): sprite present next frame, 126 opaque samples in a 96x96 frame, anchor at screen (408.0,420.0) expected (408.0,420.0); after set 0: sprite gone
+PASS objects.tile_object_drawn - no tile objects in catalog
+PASS objects.tint_applied - clay_deposit tint 0xb06030 (catalog #b06030)
+PASS objects.generated_drawn - all objects have authentic character or tile sheets (0 generated)
+PASS objects.blocks_passage - ground passable before: true; oak at (131,132) passable: false; tall grass at (125,132) passable: true
+PASS objects.sorted_with_units - unit z 888; grass on its cell z 788, oak north z 840, pine south z 936 (want grass < north < unit < south)
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\objects.objects_in_view.png
+FAIL objects.apply_chop - oak at (123,132) chopped: now "undefined", returned yields null, objects:changed null, gather on the stump -> null (no such action); 0 logs on the cell through UF.Items
+FAIL objects.regrow - gathered berry bush at (123,133): entry MISSING; after 47 h still bare: false; after 48 h a berry bush: false; entry cleared: true
+PASS objects.persists - boulder at (134,124) after a reload of the same area: grid rebuilt, object still there; save round-trip: objectDiffs["0,0"][31878] = 35, regrow list saved
+PASS objects.drawn_after_reload - boulder sprite drawn on the new scene's layer
+PASS objects.perf - layer update avg 0.668 ms, max 5.13 ms over 240 frames (90 rebuilds), 21 sprites in view, 3973 objects written into the grid (no diffs), zoom 2.000, view scrolling
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\objects.objects_zoomed_out.png
+FAIL objects.perf_dense - layer update avg 2.367 ms, max 27.85 ms over 240 frames (92 rebuilds), 0 sprites in view, 4321 objects written into the grid (no diffs), zoom 2.000, view scrolling
+PASS objects.no_errors - none during objects checks
+SUITE items
+PASS items.catalog_types - 74 item types: ids unique, every one has a "!$" image, stack >= 1, tags; food/tool/wear well-formed
+PASS items.referenced_types_exist - every yield, build cost, recipe input/output and hunt yield names an existing item type
+FAIL items.images_exist - missing: waterskin -> !$UF_Icon_143.png
+PASS items.drop_merges - first drop: 1 stack of 3; after 3 + 3 logs on (131,131): stacks 5 + 1 (stack size 5); the second drop touched 2 stack(s), the first of them the existing stack: true
+PASS items.drawn_in_view - stone at (133,131): sprite at screen (528,396), expected (528,396); 42 opaque samples; frame 48,0 48x48; in the tilemap true; after remove: sprite hidden and released
+PASS items.z_below_units - on cell (132,133): item z 887, unit z 888, foot row 888
+PASS items.pick_up_put_down - pickUp true; in inventory true; off the map while held true (holder 5614, area null, sprite none); back on (133,133) with a sprite true
+PASS items.give_and_has - gave 12 fiber (stack 10): 2 stack(s) of 10/2; count 12; has 12: true, has 13: false, has a stone: false
+PASS items.consume_removes - consumed 4 then 6 of a stack of 10; the stack is gone; 2 fiber left in the inventory; inventory ids [494]
+FAIL items.find_sorted - food within 12 of (128,134): berries x2 at 2.0, berries x10 at 7.1, fruit x3 at 7.1, berries x6 at 7.1, berries x1 at 8.0, berries x1 at 9.4; id log: 3 stack(s)
+PASS items.describe_text - "5 × Log, Log" for (131,131); empty cell -> null
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\items.items_in_view.png
+PASS items.unit_removal_drops_items - bones now at (132,133) holder null; unit stood at (132,133); 5 items on that cell
+PASS items.saved - 485 items in state (6423098 bytes of world state); berries stack after JsonEx round-trip: 2 at (130,134); save contents ufWorld.items present
+PASS items.perf - layer update avg 0.105 ms over 120 frames, 243 item sprites in view (400 stacks dropped) at zoom 2.000; the tilemap's own child sort isn't included
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\items.items_zoomed_out.png
+PASS items.material_stacks_distinct - distinct stacks on (135,135): count 3 (expected 3: pine, oak, generic); items: pine:2, oak:2, generic:2
+PASS items.matching_material_merges - after dropping 2 more oak logs: oak count 4 (expected 4), total stacks 3
+PASS items.material_property_lookup - materialOf lookups: pine density 0.45, oak density 0.75, wood alias Oak, granite density 2.75, iron name Iron
+PASS items.material_describe_and_tint - describe: "2 × Pine Log, 4 × Oak Log, 2 × Log"; oak sprite tint: 0x8b5a2b (expected #8B5A2B)
+PASS items.material_substitution_and_scoring - structural timber: pine=true, oak=true, willow=false; bow wood: yew=true, oak=false; scores: pine=123, yew=-190
+PASS items.no_errors - none during items checks
+SUITE jobs
+PASS jobs.define_and_create - custom job test_noop #2516 state done, progress 3, apply ran 1x; built-in types missing: none; events created 1, done 1; of(worker) after: null
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\jobs.jobs_working.png
+FAIL jobs.travel_and_work - worker walked from y 141 to (126,138) [adjacent to the oak at (126,137) true, state then "work", facing north with step anime true]; progress rate 1.00/tick over 30 frames; chop #2517 state done, progress 240; cell now "oak_stump", logs on it 3; view (111.5,124.5) 34x26 cells
+PASS jobs.haul - haul #2518 state done, progress 1; carried on the way true; stones now at (134,140) holder null, 2 on the target cell; worker inventory empty
+PASS jobs.fetch_and_craft - fetch #2519 state done, progress 1; fetch #2521 state done, progress 1; had 1 stone + 1 fiber true; craft #2522 state done, progress 90; inventory stone_knifex1
+PASS jobs.craft_needs_workplace - 0 fire object(s) within 40 cells of the worker at (127,140); craft #2523 state failed (needs a fire), progress 0
+FAIL jobs.tool_speeds_work - equip #2524 state done, progress 1; equipment.tool 923 (axe 923); multiplier 2; chop rate 0.00/tick with the axe vs 1.00 without; chop #2525 state failed (nothing to chop there), progress 0
+PASS jobs.equip_clothes - equip #2526 state done, progress 1; tier 1, equipment {"tool":923,"clothes":924}
+FAIL jobs.hunt - hunt #2527 state done, progress 60; hunter worked from (131,140) next to the hare at (132,140); hare unit gone true; on its cell: 1 raw meat, 1 hide; jobs:kill fired 3x
+PASS jobs.build - without items: build #2528 state failed (needs items), progress 0; with items: build #2529 state done, progress 120; cell (131,140) now "campfire", logs left 0, stones left 0; worker at (131,141)
+PASS jobs.craft_at_workplace - craft #2530 state done, progress 90 at target (131,140) [campfire at (131,140)]; inventory stone_knifex1,stone_axex1,fiber_wrapx1,meat_cookedx1
+PASS jobs.open_job_taken - 2 open jobs; take(helper) -> #2531 at (137,136) (nearest is #2531); gather #2531 state done, progress 20; far job open; grass cell now empty, fiber there 1
+PASS jobs.describe_text - chop: "Chopping an oak"; hunt: "Hunting a hare"; craft: "Weaving a fiber wrap"; build: "Building a campfire"; far: "Gathering tall grass"
+PASS jobs.mine_built_wall - mine #2534 state done, progress 187; wall_wood cleared: true, logs on cell: 1
+FAIL jobs.mine_subterranean_wall - mine #2535 state failed (emergency: lethal hazard), progress 0; shape after mining: "solid" (want "floor"), stone dropped: 0
+PASS jobs.drink_and_eat - drink #2536 state done, progress 60 from (135,140) next to water at (136,141): thirst 80 -> 15; eat #2537 state done, progress 60: hunger 60 -> 35, berries left 1
+PASS jobs.blocked_fails - chop #2538 state failed (can't reach it), progress 0; of(worker) null
+PASS jobs.stalled_fails - move #2539 state failed (can't reach it), progress 0 after 16 ticks (blocked 2/2, stall limit 600); helper still at (137,136)
+PASS jobs.saved - 59 jobs in state (nextId 2540); chop #2517 after round-trip: chop done; identical json true; in save contents true
+PASS jobs.no_errors - none during jobs checks
+SUITE wildlife
+PASS wildlife.catalog_species - 23 species: 11 prey, 7 predators, 5 monsters; all images exist, all biome/item/tier ids resolve, every species has hunt.work and hunt.flees
+PASS wildlife.names_clean - 23 species names checked against the banned-word list
+PASS wildlife.spawned_with_world - 129 creatures of 16 species in 49 herds (0 herds dropped for lack of a cell, 0 lair herds) placed in 5466 ms on world:created (seed 1920951434); area sample: tame/neutral, K 3.95, expected herds 29; most common: deer 29, bat 18, fowl 16, wolf 16, hare 10, songbird 6, boar 5, fox 5
+FAIL wildlife.by_biome - 129 creatures checked with cellInfo: 4 in a biome where the species has no weight, 0 on unwalkable cells; first: Wolf #5516 at (222,145) in forest_tropical_dry_broadleaf (home: {"x":234,"y":155}, placed: {"id":5516,"species":"wolf","dangerous":true,"prey":false,"area":{"x":0,"y":0},"z":0,"x":222,"y":145,"origin":"biome","kitCamp":null}); 0 kit-fallback units outside their species' biomes (placed where no prey species lives within reach of a campfire)
+FAIL wildlife.start_kit_herd - 23 deer/boar/fowl/hare (7 placed by the kit) at 27/27/25/26/27/28/9/9/8/8/28/30/8/8/38/37/37/27/28/35/35/24/28 cells from the start (kit distance 24-40, spread 3); report: 3 deer around (150,159)
+FAIL wildlife.kit_every_area - 5 campfires (5 factions), kit herds 2-3 deer/boar + 2-4 hare/fowl at 24-40 cells (hunt radius 45), predators placed >= 20 from every campfire: Arar Freehold (128,128): 3 deer at 37-38 + 2 fowl at 27-28; nearest predator/monster fox 87 | Wennoreth Court (33,222): 2 deer at 38-40 + 3 hare at 28-31; nearest predator/monster fox 48 | Solmarwyn Burrow (156,75): 3 boar at 20-26 + 3 hare at 19-21; nearest predator/monster wolf 77 | Ethmaric Enclave (201,48): 2 deer at 15-32 + 2 hare at 40-41; nearest predator/monster wolf 25 | Pela Tribe (195,114): 2 deer at 55-56 + 2 fowl at 39-40; nearest predator/monster wildcat 40; FAILING: Pela Tribe deer/boar: 2 deer (want >= 2), farthest 55.7 (hunt radius 45), 2 live with the kit flag
+FAIL wildlife.none_too_near_start - 11 creatures within 20 cells of the start, 5 of 26 predators/monsters within 60; first: Deer at 8.5
+PASS wildlife.monsters_only_wild - 1 monsters placed, 0 on a cell whose region is below their minSavagery / not their alignment; start region tame/neutral allows troll: false, restless dead: false (want false/false)
+PASS wildlife.deterministic - 49 herds planned twice from seed 1920951434: identical (7844 chars)
+PASS wildlife.drawn_and_tinted - boar sprite 41 opaque samples, tint 0xffffff (species undefined); deer 33 samples, tint 0xffffff (want ffffff); hawk 22 samples, data.through true, event isThrough true, can step north into an oak: true; deer isThrough false, oak cell passable false
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\wildlife.test_herd.png
+PASS wildlife.nearest_prey - nearestPrey from (129,132) r6: TEST_deer (want TEST_deer); with predators: TEST_wolf (want TEST_wolf); r1: null (want null)
+FAIL wildlife.wanders - 0 of 4 hares (ai wander, radius 4, 35 % every 90 ticks) left their cell within 200 frames
+FAIL wildlife.flees_hunter - UF.Jobs hunt job #2619 for TEST_hunter: hare at (116,124) never chose a flee cell; now at (116,124) (did not move); hunterOf resolves both: true; boar (flees false, hunted by TEST_hunter2) at (116,123) stayed; strip on land at (116,124)
+PASS wildlife.activity_cycles - diurnal deer slept at night: true, woke on wolf threat approach: true (stance flee)
+PASS wildlife.herbivore_graze - deer at (113,125) has vegetation: true, grazed: true, hunger after grazing 0 (want 0), two graze ticks later stance idle hunger 80 (want idle, 80)
+PASS wildlife.environmental_flee - unhunted hare at (116,124) detected wolf at (119,124): fled: true, goal farther: true ((115,124))
+PASS wildlife.herd_alarm - deerB seeded asleep from its spec: true; deerA fled: true, herdmate deerB woke: true, herdmate deerB fled: true (stance flee, alarmed at frame 210, want 210)
+PASS wildlife.predator_hunt - hare hp seeded in UF.ECS.hp: true; wolf killed the adjacent hare #5649: true; next predator tick: feed with a second hare beside it alive: true (want feed, true); the tick after: second hare slain true, wolf feed (want true, feed)
+PASS wildlife.defensive_retaliation - boar (flees false) near wolf retaliated: true (stance retaliate), stayed put: true
+PASS wildlife.ecs_only - 0 creature(s) with state/alarmedAt/grazeUntil/grazeCooldown/feedUntil/targetPreyId in unit.data; legacy record seeded: true (stance flee alarmed 900, hunger 0, hp 12, left none; want flee, 900, 0, deer catalog hp, none)
+PASS wildlife.ai_allocation_free - 67 functions on the AI tick path; none builds an object, array or closure
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\wildlife.df_behaviors.png
+FAIL wildlife.saved - unit #5458 Deer: species/home/herd/tags/tint/ai CHANGED through JsonEx; in makeSaveContents().ufWorld.units: true; tint of #5480 kept: true; 1020 units in the round-trip
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\wildlife.herd_in_view.png
+FAIL wildlife.perf - 0 AI ticks (flee every 30, wander every 90) over 182 frames: avg 0.000 ms per tick (flee 0.0ms, pred 0.0ms, graze 0.0ms, wander 0.0ms, sleep 0.0ms) with 1016 units in the world
+PASS wildlife.no_errors - none during wildlife checks
+SUITE stance
+PASS stance.world_ready - area (0,0), factions loaded, marker layer created
+PASS stance.catalog_colors - catalog.stance present: friendly #22c55e, indifferent #eab308, hostile #ef4444, alpha 0.45
+PASS stance.bitmaps_generated - 1 square: stance 48x48/48x48/48x48 (want 48x48), selection 44x22/44x22/44x22 (want 44x22); 2 squares: stance 96x96/96x96/96x96 (want 96x96), selection 88x44/88x44/88x44 (want 88x44); named UF_GenStance_friendly.. and UF_GenSelect, nearest-neighbour scaling, cached on repeat
+PASS stance.ring_shape - hostile 48x48: top row 48 px, middle row 48 px, alphas 115/217; selection frame 1 44x22: green 228 alpha 255; selection pulse bands 205 -> 228 -> 243; hostile 96x96: top row 96 px, middle row 96 px, alphas 115/217; selection frame 1 88x44: green 223 alpha 255
+PASS stance.three_factions - 8 non-player factions: f2, f3, f4, f5, f6, f7, f8, f9
+PASS stance.of_kinds - colonist -> friendly, monster -> hostile, grazer -> indifferent, allied -> friendly, neutral -> indifferent, war -> hostile, wolf -> indifferent, big -> hostile; start pair events (0): none (UF_Colonists installed?)
+PASS stance.of_tiers - relation +20 (friendly) -> friendly; relation -30 (hostile) -> hostile
+PASS stance.of_accepts_id_and_event - by id hostile, by event hostile, the player (not a unit) null, describe() "Hostile"
+PASS stance.marker_drawn - monster marker in the tilemap at (768,696) vs drawn feet (768,696), z 691 vs character z 696 (child order 435 < 461); bitmap UF_GenStance_hostile 48x48 middle #ef4545 alpha 115 (want #ef4444 / 115), rim alpha 217
+PASS stance.ring_sizes - monster (48 px sheet) 48x48 (1 sq), rows 648..695 vs foot row 696, centre (768,672); big (96 px sheet) 96x96 (2 sq), rows 696..791 vs foot row 792, centre (960,744); big selected: 88x44, centre (960,768) vs its stance ring (960,744); cellsOf: monster 1, big 2 (frame widths 48 / 96)
+PASS stance.selection_ring - ring at (816,732) vs drawn feet (816,732); z 739 vs sprite 744; bitmap UF_GenSelect 44x22 (want 44x22): middle alpha 0 (want 0), corner alpha 0 (want 0), band #2fcd69 (green true) alpha 255 (want >= 220); over 42 frames: pulse frames shown {0,1,2} (want 0,1,2), opacity {255} (want 255), 0 frames off the drawn feet
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\stance.selection_ring.png
+PASS stance.selection_clears - after setSelected(null): marker hidden
+PASS stance.markers_per_unit - 86 markers visible: 31 friendly, 52 indifferent, 3 hostile (want >= 2 / 3 / 3)
+FAIL stance.marker_rendered - inside the neutral square, markers on -> off: (352,367) #24213a -> #24213b toward #eab308; (368,367) #a88f37 -> #82875d toward #eab308; (355,371) #805a0f -> #78714f toward #eab308; (365,371) #805a0f -> #78714f toward #eab308 (want >= 2 toward); outside square: (346,360) #636643 -> #646643; (374,360) #a2832f -> #78714f; (360,375) #77714f -> #78714f; (360,346) #636643 -> #646643 (want >= 3 same); all markers hidden while disabled; screen tone [14,-8,-19,5]
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\stance.stance_markers.png
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\stance.rings_zoom_1.png
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\stance.rings_zoom_23.png
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\stance.rings_zoom_13.png
+PASS stance.rendered_all_zooms - zoom 0.500: colonist 454/576 px changed, wolf 381/576 px changed, big 775/2304 px changed; zoom 1.000: colonist 2035/2304 px changed, wolf 2271/2304 px changed, big 8764/9216 px changed; zoom 2.000: colonist 6785/9216 px changed, wolf 5589/9216 px changed, big 10365/36864 px changed
+FAIL stance.marker_follows - walker at (129,126) (goal reached); marker at (864,552) vs drawn feet (864,552) and cell feet (864,552); 48 of 48 mid-step frames matched the drawn sprite
+PASS stance.hidden_transparent - transparent: marker hidden; opaque again: marker back
+PASS stance.hidden_out_of_view - at (5,5), off screen: marker gone; back in view: marker back
+PASS stance.hidden_off_map - grazer removed: event gone, markers 85 -> 84
+PASS stance.unselected_no_indicators - unselected units have no alliance indicators: 0 markers shown (want 0)
+PASS stance.cleanup - 0 test markers left; relations restored to -42, -23, -26
+PASS stance.no_errors - none during stance checks
+SUITE combat
+PASS combat.srd_d20 - UF.Rules true; natural 20 hit true crit true damage 19; natural 1 hit false fumble true damage 0
+PASS combat.srd_damage - longsword hit damage 8 (want 4..11); critical true damage 19 (want 5..19)
+PASS combat.srd_styles - combat:hit styles aggressive, defensive, controlled, accurate (want aggressive, defensive, controlled, accurate); keys attacker,target,damage,hit,style,attackType,critical,fumble,advantage,disadvantage,roll
+PASS combat.srd_equipment - weapon keys true; bow with 3 arrows: arrows 3 -> 2 -> 1 -> 0 after each shot (types ranged,ranged,ranged); then out of ammo "arrows", attacking with fists (crush)
+PASS combat.srd_creatures - 23 species; hp match the SRD block; hare hp 1; attack types true; wolf hit true ; resolve ok; veteran AC 18
+PASS combat.hitsplats - hit: damage 15, 1 splat(s) showing 15 at (528,473) over the unit at (528,498), colour rgb(184,20,15): true; miss: 1 splat(s) showing 0, colour rgb(42,88,204): true; after 7 more attacks 4 splats in 4 slots; 0 left after ~1 s; old popup layer absent, 468 layer sprites all cached splat/bar bitmaps true, addPopup("MISS") -> splat 0
+FAIL combat.suite_completed - timed out after 8000 ms waiting for the action bar cooldown to complete [at chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Test.js:137:57]
+SUITE anim
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\anim.no_code_motion.png
+FAIL anim.no_code_motion - arena (120,138) 10x5 free; scratch sheets: $TEST_AnimBody memory, $TEST_AnimPlain memory, $UF_Layer_stone_axe memory, !$TEST_AnimSway memory, !$TEST_AnimShop memory, !$TEST_AnimFire memory; 300 frames: 3 UF_Combat attacks, 30 hits, 39 work strokes (hunt work), 0 UF_Combat motions stopped, 0 strike marks dropped; distinct (offset from the cell, rotation, scale, skew, filters, blend colour, opacity, anchor) per unit: TEST_anim_fighter 2 [0,0,0,1,1,0,0,0,0/0/0/0,255,0.5,1 | missing], TEST_anim_wolf 1, TEST_anim_guard 1, TEST_anim_hunter 1, TEST_anim_prey 1 (want 1 each); frames with a UF_Combat offset set 0, with a blend colour 0 (want 0); columns shown: fighter 18,19, hunter 4,5,6,8,9,10 (want 8 (its attacks start; a hit every 6 frames cuts them short) and 14 for the fighter, 8-10 and work 4-6 for the hunter)
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\anim.death_frames.png
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\anim.remains.png
+FAIL anim.death_frames_and_remains - sheet with death frames ($TEST_AnimBody, facing W): removed at once true; columns shown 15x5 16x5 17x4 (want 15, 16, 17 for 8-10 frames each) in row(s) 1 (want 1), z 600 (the unit's 600); frames rotated, scaled, faded or filtered: 0; remains entry {"area":{"x":0,"y":0},"z":0,"x":123,"y":139,"image":"$TEST_AnimBody","index":0,"frame":17,"dir":4,"until":242405738}; lying sprite column 17 row 1, z 598 (want 598), rotation 0, alpha 1, tint 0xffffff; sheet without death frames ($DEUS_Creature_Wolf): removed true, remains there 0, sprite there false (want 0 / false), plain deaths +10; hunt kill #2947 done: prey gone true, columns 15,16,17, remains 1 (frame 17), lying column 17
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\anim.state_frames.png
+FAIL anim.state_frames - work: 5,6,4,5,6,4,5,6,4,5,6 (want 4-6 cycling; state work); attack: 8x4 9x5 10x4 19x3 18x4 19x5 18x4 19x5 18x4 19x5 18x2 in row 2 (want 8, 9, 10 for 8-10 frames each in row 2, then idle 18/19); hurt: 14x4 18x1 19x5 18x4 19x5 18x4 19x5 18x4 19x5 18x4 19x4 (want 14 for 8-10 frames in row 1, then idle); idle: 19,18,19,18,19,18,19,18,19,18 (want 18/19); cast: 13,11,12,13,11,12,13,11,12,13 (want 11-13); paused 30 frames: columns 19, clock stopped
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\anim.no_carry_pose.png
+PASS anim.no_carry_pose - $TEST_AnimBody (carry column 7 on the sheet, named in its sidecar) hauling 3 log from (122,142) to (128,142): haul #3010 done, 3 arrived (want 3); while holding them 49 frames (48 moving): states walk/stand (walk 48, stand 1; want walk and stand only), columns 0,1,2,3 (want 1-3 walking, 0 still, never 7); wrong frames 0, sprite frame not the chosen column 0; play(hauler, "carry") -> false (want false), then columns 18,19 and states idle (want no 7, no carry); sidecar carry list read as null (want null)
+PASS anim.missing_frames_plain - $TEST_AnimPlain (stand 0, walk 1-3 only): work 2,3,2,1,2,3 (work>walk), attack 0 (attack>stand stand>stand), hurt 0 (hurt>stand stand>stand), idle 0, hauling (item held) 2,3,2,1,2,3,2,1 (walk>walk) (want only 0-3: stand or walk); RPG Maker sheet $UF_Human_Male_1_Walk attacking and hurt: 0 of 80 frames set by UF_Anim (want 0), 0 frames off RPG Maker's own pattern frame (want 0)
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\anim.object_frames.png
+PASS anim.object_frames - 8 sway objects in a row: columns 2012012012 / 20120120120 / 0120120120 ...; frames off sway[floor((map updates - 1 + phase) / 9) % 3] 0 (want 0); frames with all 8 in unison 0 of 45; phases mod 27: 21,22,3,9,10,6,12,17 (want >= 2 distinct); workshop with a job at it: 2,1,2,1,2,1,2,1,2,1,2 state work (want work 1/2), after the job: state "" frame back to its plain one true; lit fire: 1,2,1,2,1,2,1,2,1,2,1 state lit (want lit 1/2); cell (121,138) given granite_boulder: same pooled sprite true, 1 distinct frame(s) over 30 frames (want 1), state ""
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\anim.layers.png
+FAIL anim.layers - $UF_Layer_stone_axe (memory) on a unit with equipment.tool = item #1117 and one with equipment.weapon = "stone_axe": on the body's column and row in 40 of 80 samples (want 80) while the body showed columns 8,9,10,18,19; "bow_long" equipped (no layer sheet): layer sprites 0 (want 0); facing N: behind true; facing S: in front true; carried axe while chopping: chop #3159 work, layers stone_axe@mainHand,stone_axe@weapon, after the job 0 layer(s) (want stone_axe@weapon, then 0); after unequipping: 0 layers, sprite detached true, pool 3 -> 4
+PASS anim.remains_saved - entry {"area":{"x":0,"y":0},"z":0,"x":123,"y":139,"image":"$TEST_AnimBody","index":0,"frame":17,"dir":4,"until":242405738} (until - death = 720 min, want 720), drawn on column 17; JsonEx round trip identical true; after swapping in the loaded copy: drawn from the loaded entry true, column 17 row 1; remains of a missing sheet: sprite visible false, load error true, new errors 0, still on the map true; 30 game minutes before the end: visible true, alpha 1 (want 1: no fade); after remainsHours: gone from state true, sprite gone true
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\anim.perf_view.png
+FAIL anim.pooled_and_perf - 60 deaths on 10 cells: 18 death sprite(s) created (want <= 20), at most 21 in the tilemap at once, 60 remains saved, 11 drawn (one per cell); after they expire 0 left in the tilemap, 0 active, 0 in state; axe put on and off 10 times on 10 units: 0 wore it at once, 14 layer sprite(s) created (want <= 10), 0 left on them; perf at zoom 2.000: 35 units (0 with a layer) and 35 animated objects on screen (62 object sprites in UF_Objects' layer): UF_Anim per frame over 120 frames median 0.1950 ms, mean 0.2496 ms (units 0.2073, objects 0.0396, death/remains layer 0.0027), worst 2.255 ms; the same unit and object work back to back, the clock moving one map update per round: best of 5 batches 0.3802 ms per frame (mean of the batches 0.6301); budget 0.3 ms for the median and the best batch; machine CPU load during the window 11 % (other test runs share it); performance.now, smallest step seen 0.0050 ms
+PASS anim.no_errors - none
+SUITE fog
+PASS fog.disabled_whole_map_visible - Enabled=false: fog sprite invisible/absent, corner explored true, 65536 of 65536 cells explored
+SUITE daynight
+PASS daynight.clock_running - game time 18:36, day 1
+PASS daynight.tones_by_hour - noon [0,0,0,0], 19:00 [2,-27,-27,20], midnight [-80,-75,-15,60]
+PASS daynight.smooth_over_the_day - largest tone change between 5-minute steps: 4
+PASS daynight.phases - 12 day, 19 dusk, 2 night, 6 dawn
+PASS daynight.night_vision_shorter - sight x1.00 at noon, x0.55 at midnight
+PASS daynight.underground_always_night - -1/-2 at 0, 6, 12, 19, 23.5 hours: midnight tone [-80,-75,-15,60], night phase and sight x0.55
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\daynight.noon.png
+PASS daynight.screen_follows_clock - screen tone at 12:00 [0,0,0,0], at 23:30 [-80,-75,-15,60]
+PASS daynight.fog_sight_shrinks_at_night - colonist sight 9 cells at noon, 5 at 23:30
+PASS daynight.no_time_display - clock hidden at x1 (ShowClock off)
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\daynight.night.png
+FAIL daynight.wall_blocks_glowing_light - center 0, open west 0, occluded behind wall 0 === 0
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\daynight.night_wall_occlusion.png
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\daynight.cave_minus1_noon.png
+PASS daynight.minus1_screen_stays_night - view {"x":0,"y":0,"z":-1}, tone samples [[-80,-75,-15,60],[-80,-75,-15,60],[-80,-75,-15,60],[-80,-75,-15,60],[-80,-75,-15,60]], noon sight 0.55
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\daynight.cave_minus2_noon.png
+PASS daynight.minus2_screen_stays_night - view {"x":0,"y":0,"z":-2}, tone samples [[-80,-75,-15,60],[-80,-75,-15,60],[-80,-75,-15,60],[-80,-75,-15,60],[-80,-75,-15,60]], noon sight 0.55
+PASS daynight.underground_clock_advances - 180 rendered frames on -2 at x1: minute 721 -> 739; screen [-80,-75,-15,60]
+PASS daynight.ground_restores_daylight - Ground at noon after -2: tone [0,0,0,0], sight 1
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\daynight.ground_after_caves.png
+PASS daynight.no_errors - none during day/night checks
+SUITE timespeed
+PASS timespeed.starts_normal - speed x1; steps x1 x2 x4 x8 x16 x32
+PASS timespeed.has_16x_and_32x - speed steps include 16x and 32x: 1, 2, 4, 8, 16, 32
+PASS timespeed.no_slower_than_normal - slower() at x1 stays x1 (no slow motion, no rewind)
+PASS timespeed.speeds_up - 7 updates/s at x1, 12 at x4 (ratio 1.78)
+PASS timespeed.clock_speeds_up - 3 game minutes in 1.5 real seconds at x4
+PASS timespeed.timers_follow_game_time - 30-frame timer fired after 30 frames
+PASS timespeed.clock_shows_speed - clock reads ">> x4"
+PASS timespeed.pause_stops_world - 70 frames while paused: UF.Time.ticks 8780 -> 8780, clock minute 2568 -> 2568, walker (goal set) at (123.06,130.00) -> (123.06,130.00); $ufTime.isPaused true
+PASS timespeed.badge_shows_paused - badge visible, reads "PAUSED"
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\timespeed.paused.png
+FAIL timespeed.no_speedup_while_paused - 63 updates/s at speed x4 while paused (7 at x1 running; about 27 if the multiplier applied)
+PASS timespeed.view_moves_while_paused - display x 120.00 -> 127.00 over 20 frames of simulated D (Input._currentState.cameraRight); view cell 128 -> 129 after moveStraight(6); ticks 8780 (still paused)
+PASS timespeed.resume_continues - after resume: 60 ticks in 60 frames, clock minute 2568 -> 2574, walker 3.75 cells east of where it froze; events time:paused x1, time:resumed x1
+PASS timespeed.badge_clears_on_resume - badge hidden, reads "" at x1
+PASS timespeed.space_toggles - keydown code "Space" on document: paused true; after a key-repeat keydown true; after a second press false. Input.keyMapper[32] is "ok", defaultPrevented false, RMMZ saw "ok" pressed: true
+PASS timespeed.space_ignored_while_busy - with $gameMessage busy, a Space keydown left paused = false
+PASS timespeed.controls_widget_exists - Sprite_UFTimeControls visible at (614, 10)
+PASS timespeed.faster_button_clicks - multiplier after faster button click: x2
+PASS timespeed.controls_block_map_click - isAnyWindowUnderMouse is true over time controls
+PASS timespeed.slower_button_clicks - multiplier after slower button click: x1
+PASS timespeed.reaches_max_speed_32x - max multiplier via faster button: x32
+PASS timespeed.faster_capped_at_max - multiplier remains x32 at max
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\timespeed.time_controls_32x.png
+PASS timespeed.slower_reaches_16x - multiplier after slower from 32x: x16
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\timespeed.time_controls_16x.png
+PASS timespeed.pause_button_clicks - paused after pause button click: true
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\timespeed.time_controls.png
+PASS timespeed.no_errors - none during time-speed checks
+SUITE camera
+PASS camera.min_zoom_0_5 - Camera.MIN_ZOOM is 0.5
+PASS camera.max_zoom_2_0 - Camera.MAX_ZOOM is 2
+PASS camera.levels_count_3 - Camera.levels length is 3
+PASS camera.levels_strictly_3 - levels strictly [0.5, 1.0, 2.0]
+PASS camera.setLevel_0_0_5x - setLevel(0) is 0.5
+PASS camera.setLevel_1_1_0x - setLevel(1) is 1
+PASS camera.setLevel_2_2_0x - setLevel(2) is 2
+PASS camera.zoomIn_from_0_5_to_1_0 - zoomIn -> 1
+PASS camera.zoomIn_from_1_0_to_2_0 - zoomIn -> 2
+PASS camera.zoomIn_clamped_at_2_0 - zoomIn clamped -> 2
+PASS camera.zoomOut_from_2_0_to_1_0 - zoomOut -> 1
+PASS camera.zoomOut_from_1_0_to_0_5 - zoomOut -> 0.5
+PASS camera.zoomOut_clamped_at_0_5 - zoomOut clamped -> 0.5
+PASS camera.resetZoom_1x - resetZoom is 1
+PASS camera.screen_cols_1x - screenTileX is 17 (expected 17)
+PASS camera.mouse_mapping_1x - canvas center -> cell (15,16), expected (15,16)
+PASS camera.slider_hud_exists - Zoom HUD sprite instantiated
+PASS camera.slider_hud_visible - Zoom HUD sprite is visible
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\camera.zoom_3_options.png
+SUITE look
+PASS look.look_ready - area (0,0); Objects true, Items true, Tiles true, tooltip sprite true
+PASS look.cell_lines - tree ["Oak — chop","Grassland · Tame, Neutral · Meadow · 15.7°C (Downpour)","!$UF_Oak — original (AR-2201)"] (catalog image "!$UF_Oak"); water ["","Grassland · Tame, Neutral · Meadow · water: fresh · 15.7°C (Downpour)","Outside_A1 — original (none yet)"]; unit ["TEST_looker · Friendly · Idle","Grassland · Tame, Neutral · Meadow · 15.7°C (Downpour)","$U7_Ranger — U7 stand-in (none yet)"]
+PASS look.face_portraits - tree face: {"sheet":"UF_Faces_Trees_Nature","index":0}; water face: null; unit face: {"sheet":"UF_Faces_human_1","index":0}
+FAIL look.asset_line_names_status - U7 name: "!$U7_Flat-toptree — U7 stand-in (none yet)"; ground (Outside_A2): "Outside_A2 — stock RMMZ (none yet)"; stock tile: "!$UF_Sapling — original (none yet)"; an asset index was loaded and set aside for this check
+PASS look.asset_index_used - with a test index: "!$TimberOak — original (AR-021)" (from index true); a name not in it: "!$U7_Shrub — U7 stand-in (none yet)"; index restored: true; index file listed for loading: true
+PASS look.window_follows_mouse - mouse at (336,264) over the oak: visible true, tooltip at (350,278) [want (350,278)], text "Oak"; mouse at (504,264) over water: tooltip at (518,278) [want (518,278), 83 px wide], text "Fresh water"; font 13px
+PASS look.edges_and_ui - mouse at the bottom-right corner: tooltip at (734,580) 64x26, visible true; over a 200x80 test window at (40,40): isOverUI true, tooltip hidden true
+PASS look.show_pins_lines - pinned true with "Oak" while the mouse is over bare ground; released after 0.5 s: true
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\look.look_label.png
+PASS look.job_types_defined - handlers: dismantle yes, dig yes, dig_down yes, mine_ceiling yes, fish yes
+PASS look.every_cell_has_options - 20 cells sampled; 0 with fewer than 2 options; tree: Chop down oak / Build above/below / Look | grass: Gather tall grass / Build here / Stockpile here / Dig / Dig down / Build above/below / Look | bare ground: Build here / Stockpile here / Dig / Dig down / Build above/below / Look | water: Fish here / Build above/below / Look | item: Haul to stockpile / Build here / Stockpile here / Dig / Dig down / Build above/below / Look | creature: Hunt hare / Build here / Stockpile here / Dig / Dig down / Build above/below / Look | colonist: Select / Follow with camera / Info / Build here / Stockpile here / Dig / Dig down / Build above/below / Look | site wall: Chop down wooden wall / Mine wooden wall / Dismantle wooden wall / Dismantle wooden wall / Build above/below / Look
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\look.context_menu.png
+PASS look.menu_lists_actions - menu at (332,260) 199x204 for the mouse at (336,264); header "Oak — chop"; options: Chop down oak / Build above/below / Set on fire / Inventory / Look; in the window layer true
+FAIL look.menu_creates_designation - chop #3430 travel progress 0 owner null at (125,147); menu closed true; marker MISSING
+FAIL look.menu_precedence - right-click on the oak's cell (125,147) at screen (336,264) [over a window: false]: menu opened false, selection kept true (Elem); right-click over a window at (64,64): menu opened false, Overseer deselected false
+PASS look.cancel_designation - option "Cancel designation" cancelled 1 job(s): chop #3430 failed (cancelled by the player) progress 0; marker after: gone
+FAIL look.build_submenu - submenu: Back / Wooden wall — 1 log / Campfire — 3 log, 3 stone / Stone wall — 2 stone / Straw bed — 2 straw / Crib — 1 log / Stockpile — nothing / Work stone — 2 stone, 1 log / Furnace — 6 stone / Smithy — 4 stone, 1 log, 1 iron bar / Bowyer's bench — 2 log / Fletcher's bench — 2 log, 1 stone / Tanning rack — 3 log, 2 plant fiber / Weapon rack — 2 log / Wooden door — 1 log (must be between walls) / Stone door — 2 stone (must be between walls) / Iron door — 2 iron bar (must be between walls) / Wooden bed — 2 log, 1 plant fiber / Storage chest — 2 log, 1 plant fiber / Dining table — 2 log / Dining bench — 1 log / Kitchen counter — 2 log / Kitchen larder — 2 log, 1 stone / Cooking hearth — 4 stone, 1 log / Trade counter — 2 log, 1 stone / Apothecary bench — 2 log, 1 stone / Pottery kiln — 3 stone / Mason's bench — 3 stone, 1 log / Reinforced timber wall — 2 dressed timber plank, 1 iron construction hardware / Brick wall — 2 fired brick, 1 slaked lime mortar / Ashlar stone wall — 2 ashlar stone block, 1 slaked lime mortar / Floor here (planks); culture wall "wall_wood" (Wooden wall); chose: build #3436 open progress 0 objectId wall_wood; marker MISSING
+FAIL look.dig_and_fish - dig at (122,150): dig #3437 done progress 80 taken by the worker true; ground meadow -> dirt, shape 46 (want 46); roll 1 of 4 -> 0 stone, 0 on the cell | fish at (132,147): fish #3469 work progress 161 taken true; stood at (131,148); roll ? of 3 -> ?, fish on the stand cell 0
+PASS look.dismantle - option "Dismantle wooden wall": dismantle #3516 done progress 60; cell (136,149) now empty, logs on it 1 (a wooden wall costs 1 log)
+FAIL look.designation_done_by_colonist - waited for one of 81 colonists (UF_Colonists present); chop #3551 done progress 240 taken by Dorus; marker before false, after gone; cell now oak_stump, logs 3
+FAIL look.hunt_and_haul_options - "Hunt hare" -> hunt #3701 open progress 0 prey 5835 (hare 5835); "Haul to stockpile" -> haul #3702 open progress 0 item 1165 to (122,137) [test stockpile at (123,154); colony stockpiles: 15, woodpile at (127,127) preferred]
+PASS look.markers_perf - marker sync averaged 0.013 ms over 4 frames with 0 markers shown and 105 jobs in the list
+FAIL look.saved - dig #3437 after a JsonEx round-trip: missing
+PASS look.no_errors - none during look/interact checks
+SUITE fire
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\fire.grass_fire_spreading.png
+FAIL fire.spreads_in_grass - menu: api option true, window rows [Gather tall grass | Build here | Stockpile here | Floor here (planks) | Dig | Dig down | Build above/below | Set on fire | Inventory | Look], chosen true, lit true; 4 live beats -> 6 cells burning; flame: UF_GenFlame sprite, 181 opaque samples, z 241 (footY 240), object z 140; after 27 more beats 45/45 burnt (0 left), farthest 10 cells from the start, 45 on ash ground; ignitions outside the grass: 0
+PASS fire.stone_stops - igniting the boulder: false; after 60 beats west grass burnt true, boulders intact true, east grass intact true; east ever burned false, stone ever burned false
+PASS fire.tree_to_stump - oak lit true with 40 beats of fuel, went out after 40 beats; the cell holds "stump" (rule becomes "stump", doused "dead_tree")
+PASS fire.wall_to_rubble - wooden wall lit true, out after 30 beats; the cell holds "rubble"
+PASS fire.items_destroyed - bed lit true, stockpile lit true, out after 10 beats; cells now "null" / "null"; items on the bed gone true (1 stack(s)), on the stockpile gone true (1); 2 logs on bare ground kept true
+PASS fire.units_hurt - hp 20 -> 19 (damage 1-3); hurt reaction: popup true, fire:unitBurned 1x (dmg 1), code-made motion false (must be false, V58), sheet hurt frames not checked (no UF_Anim sidecar API); thought "Was burned by fire."; job failed (fled from the fire); walking out to (152,92); the other unit may step west into the fire: false, south: true
+PASS fire.douse - camp (128,128) radius 20: grass lit at (131,130) true; douse job #3782 open, owner null, faction f1 (player f1), priority 5; water at (133,119). Arena: oak lit true; job #3783 opened open, faction f1, taken true, ended done; filled at (134,96) beside the water (133,96) (test water at (133,96)): true; worked from (135,96) beside the fire: true; fire at the oak out, the cell holds "dead_tree" (want "dead_tree"); work at the fire 180 ticks = 3 beats
+PASS fire.seeded_and_saved - 8 beats from the same state: run A = run C; with a JsonEx save/load after beat 4: same (round-trip identical and in makeSaveContents: true); 7 burnt, 12 burning at the end
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\fire.perf_100_cells.png
+PASS fire.perf - 100 cells burning, 100 flame sprites, zoom 2.00; over 150 frames: layer 0.056 ms/frame (max 1.46), 2 beats at 6.000 ms (max 6.05); total 0.136 ms per frame (budget 0.5)
+PASS fire.no_errors - none during the fire checks
+SUITE environment
+PASS environment.world_ready - UF.World ready
+PASS environment.ambient_temp_reasonable - surface temperature at (128,128) is 9.1°C
+FAIL environment.diurnal_cycle - midnight 9.1°C < midday 9.1°C (diff 0.0°C)
+PASS environment.cavern_stable - upper cavern z=-1 is stable 13°C
+PASS environment.radiance_calculation - radiance returns numeric value 0
+PASS environment.unit_thermal_init - body temp 37°C, wetness 0%
+PASS environment.clothing_insulation - clothing insulation is 60%
+PASS environment.hypothermia_stage - body temp 30.0°C correctly triggers stage hypothermia_severe
+PASS environment.hypothermia_cold_damage - severe hypothermia inflicts cold damage (HP 20 -> 18)
+PASS environment.hypothermia_recovering - unit thermal regulation functions without crash (bodyTemp 36.2°C)
+PASS environment.unit_ignited - unit catches fire with active burning status
+PASS environment.burning_damage - burning deals damage (HP 18 -> 15)
+PASS environment.unit_extinguished - unit safely extinguished upon water contact
+PASS environment.wet_status_tracks - wetness tracked accurately across distinct units (wet=98%, dry=0%)
+PASS environment.weather_override - weather successfully set to blizzard
+PASS environment.condition_labels - condition labels: burn='Burning', hypo='Hypothermia'
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\environment.environment_overview.png
+SUITE faction_menus
+FAIL faction_menus.factions_list_12 - 12 matching faction menus defined (default + 11 factions)
+PASS faction_menus.mouse_cursor_default_applied - Default mouse cursor configured with Cursor_default.png
+PASS faction_menus.mouse_cursor_dwarf_applied - Mouse cursor is always Cursor_default.png regardless of faction
+PASS faction_menus.scene_menu_active - Scene_Menu successfully loaded
+PASS faction_menus.default_theme_active - Default menu theme active
+PASS faction_menus.default_mouse_cursor_applied - Cursor_default applied
+PASS faction_menus.no_menu_selector_cursor_sprite - No selector cursor sprite on menu items
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W1_8e5ae028\game\test_output\faction_menus.menu_clean_default.png
+FAIL faction_menus.suite_completed - timed out after 5000 ms waiting for UF_Menu_deus and UF_Faces_deus_1 assets ready [at chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Test.js:137:57]
+RESULT: 463 passed, 65 failed (exit 1)

@@ -1,0 +1,33 @@
+# W1_game_runtime.log excerpt (full log, 11509600 bytes, kept locally at scratchpad/lane-worldgen-green/evidence_large/W1_game_runtime.log, not committed): boot, TIMING, world:created, ERROR/uncaught lines
+2:[INIT] Game booting at 2026-10-03T04:43:21.086Z
+20:2026-10-03T04:43:22.380Z [TIMING] DataManager.setupNewGame enter (+8.2ms)
+21:2026-10-03T04:43:22.382Z [TIMING] setupForNewGame before World.newWorld
+24:2026-10-03T04:43:23.979Z [TIMING] world:initializing fired (+1607.8ms)
+7986:2026-10-03T04:43:39.054Z [EVENT world:created] #1 (anon_1) took 14914.9ms
+8907:2026-10-03T04:43:44.688Z [EVENT world:created] #5 (anon_5) took 5559.9ms
+8912:2026-10-03T04:43:44.690Z [EVENT world:created] #10 (onWorldCreated) took 0.5ms
+8914:2026-10-03T04:43:44.691Z [TIMING] world:created fired (+22319.4ms)
+8917:2026-10-03T04:43:44.694Z [TIMING] emit world:created done
+8918:2026-10-03T04:43:44.695Z [TIMING] early seated done, units=0
+8919:2026-10-03T04:43:45.928Z [TIMING] setupForNewGame after World.newWorld
+8920:2026-10-03T04:43:45.929Z [TIMING] setupForNewGame exit (reserved map 1000)
+8921:2026-10-03T04:43:45.929Z [TIMING] DataManager.setupNewGame exit (+23557.4ms)
+8922:2026-10-03T04:43:45.939Z [TIMING] Scene_Boot.start exit (+23567.8ms)
+8925:2026-10-03T04:43:46.665Z [TIMING] world:areaBuilt (0,0) (+24293.3ms)
+16954:[INIT] Game booting at 2026-10-03T04:44:47.258Z
+16972:2026-10-03T04:44:48.466Z [TIMING] DataManager.setupNewGame enter (+7.9ms)
+16973:2026-10-03T04:44:48.468Z [TIMING] setupForNewGame before World.newWorld
+16976:2026-10-03T04:44:50.016Z [TIMING] world:initializing fired (+1558.4ms)
+24938:2026-10-03T04:45:05.593Z [EVENT world:created] #1 (anon_1) took 15425.8ms
+25859:2026-10-03T04:45:11.136Z [EVENT world:created] #5 (anon_5) took 5466.7ms
+25864:2026-10-03T04:45:11.139Z [EVENT world:created] #10 (onWorldCreated) took 0.6ms
+25866:2026-10-03T04:45:11.140Z [TIMING] world:created fired (+22682.1ms)
+25869:2026-10-03T04:45:11.143Z [TIMING] emit world:created done
+25870:2026-10-03T04:45:11.143Z [TIMING] early seated done, units=0
+25871:2026-10-03T04:45:12.390Z [TIMING] setupForNewGame after World.newWorld
+25872:2026-10-03T04:45:12.391Z [TIMING] setupForNewGame exit (reserved map 1000)
+25873:2026-10-03T04:45:12.391Z [TIMING] DataManager.setupNewGame exit (+23933.4ms)
+25874:2026-10-03T04:45:12.404Z [TIMING] Scene_Boot.start exit (+23946.6ms)
+25877:2026-10-03T04:45:13.127Z [TIMING] world:areaBuilt (0,0) (+24669.8ms)
+114967:2026-10-03T04:49:37.368Z [TIMING] world:areaBuilt (0,0) (+288911.0ms)
+146972:2026-10-03T04:55:02.285Z [TIMING] world:areaBuilt (0,0) (+613827.9ms)

@@ -1,0 +1,17 @@
+﻿tag: M2
+lane root (cwd): C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green
+lane HEAD at run time: 8e5ae02814d3bcf29c8750282c25a72ec9e9d24b
+lane working tree changes at run time: 6
+snapshot game dir: C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_M2_stall_8e5ae028\game
+snapshot Seed override: "Seed": "1920951434"
+env DEUS_TEST_YEAR=500
+nw.exe processes before launch: 8
+stale game_runtime.log in lane root before launch: False
+command: .\run_tests.bat ownership --game C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_M2_stall_8e5ae028\game
+start CT: 2026-10-03 00:05:43 -05:00
+end CT: 2026-10-03 00:10:29 -05:00
+shell exit code (cmd /c .\run_tests.bat): 2
+results.txt retained: yes
+snapshot game_runtime.log retained: yes
+RESULT line: NONE (no RESULT in stdout)
+nw.exe processes after run: 8

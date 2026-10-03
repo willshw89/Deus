@@ -1,0 +1,4 @@
+HARNESS: no progress in results.txt for 240 s, killing nw.exe
+HARNESS: nw.exe exited after 285.7 s with code 1 before the harness finished (killed by this runner: no progress in results.txt for 240 s).
+         If another agent or script killed nw.exe processes at that moment, that's the cause (ENGINE_RULES §6).
+HARNESS: results file has no RESULT line (the run didn't finish).

@@ -1,0 +1,2 @@
+641a642
+>             for (;;) { /* WATCHDOG MUTANT stall: blocks the frame loop and every timer */ }
