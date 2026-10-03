@@ -1,0 +1,20 @@
+2306a2307,2325
+>                     if (window.UF.Test && UF.Test.write) { // RIVER DIAG 3 (disposable copy only; writes lines, asserts nothing)
+>                         const L = window.UF.Levels, Wd = window.UF.World;
+>                         const levelMaps = {}; const mapAt = z => { if (!(z in levelMaps)) { try { levelMaps[z] = Wd.buildArea(a.x, a.y, z); } catch (e) { levelMaps[z] = { error: String(e && e.message) }; } } return levelMaps[z]; };
+>                         const wetAt = (z, i) => { const m = mapAt(z); return m && m.data ? isWaterTile(m.data[i]) : `err:${m && m.error}`; };
+>                         const tileAt = (z, i) => { const m = mapAt(z); return m && m.data ? m.data[i] : -1; };
+>                         const hist = {}, samples = [];
+>                         for (const i of dry) {
+>                             const x = i % size, y = Math.floor(i / size), gx = a.x * size + x, gy = a.y * size + y;
+>                             const S = L && typeof L.surfaceElevationAt === "function" ? L.surfaceElevationAt(gx, gy, st.seed) : null;
+>                             const k = `surface ${S}: wet at z=S ${S === null ? "n/a" : wetAt(S, i)}; wet z1 ${wetAt(1, i)}; wet z2 ${wetAt(2, i)}`;
+>                             hist[k] = (hist[k] || 0) + 1;
+>                             if (samples.length < 6) samples.push(`(${x},${y}) S=${S} tiles z0/z1/z2 ${tileAt(0, i)}/${tileAt(1, i)}/${tileAt(2, i)}`);
+>                         }
+>                         const m1 = mapAt(1), m2 = mapAt(2);
+>                         const count = m => m && m.data ? (() => { let n = 0; for (let i = 0; i < size * size; i++) if (isWaterTile(m.data[i])) n++; return n; })() : `err:${m && m.error}`;
+>                         UF.Test.write(`DIAG3 river ${r.anchorX} (id ${r.id}): ${dry.length} dry z0 cells by surface level and upper-level wetness: ${Object.entries(hist).sort((p, q) => q[1] - p[1]).map(([k, v]) => `[${v}] ${k}`).join(" || ")}`);
+>                         UF.Test.write(`DIAG3 river ${r.anchorX} (id ${r.id}): samples ${samples.join("; ")}`);
+>                         UF.Test.write(`DIAG3 level maps: z1 ${m1 && m1.data ? `${m1.width}x${m1.height}, A1 water tiles ${count(m1)}` : `err:${m1 && m1.error}`}; z2 ${m2 && m2.data ? `${m2.width}x${m2.height}, A1 water tiles ${count(m2)}` : `err:${m2 && m2.error}`}; z0 A1 water tiles ${count(here)}`);
+>                     }

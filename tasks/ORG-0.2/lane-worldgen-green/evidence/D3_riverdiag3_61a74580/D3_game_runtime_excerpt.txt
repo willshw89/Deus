@@ -1,0 +1,13 @@
+# D3_game_runtime.log excerpt (full log 1978706 bytes left untracked in this folder; copy at scratchpad/lane-worldgen-green/evidence_large/D3_game_runtime.log)
+2:[INIT] Game booting at 2026-10-03T06:04:32.643Z
+20:2026-10-03T06:04:34.029Z [TIMING] DataManager.setupNewGame enter (+10.1ms)
+21:2026-10-03T06:04:34.032Z [TIMING] setupForNewGame before World.newWorld
+24:2026-10-03T06:04:35.780Z [TIMING] world:initializing fired (+1760.7ms)
+8914:2026-10-03T06:04:58.813Z [TIMING] world:created fired (+24794.3ms)
+8917:2026-10-03T06:04:58.817Z [TIMING] emit world:created done
+8918:2026-10-03T06:04:58.817Z [TIMING] early seated done, units=0
+8919:2026-10-03T06:05:00.145Z [TIMING] setupForNewGame after World.newWorld
+8920:2026-10-03T06:05:00.146Z [TIMING] setupForNewGame exit (reserved map 1000)
+8921:2026-10-03T06:05:00.146Z [TIMING] DataManager.setupNewGame exit (+26127.1ms)
+8922:2026-10-03T06:05:00.152Z [TIMING] Scene_Boot.start exit (+26133.4ms)
+8925:2026-10-03T06:05:00.924Z [TIMING] world:areaBuilt (0,0) (+26905.6ms)

@@ -1,0 +1,13 @@
+# D2_game_runtime.log excerpt (full log 1978698 bytes left untracked in this folder and copied to scratchpad/lane-worldgen-green/evidence_large/D2_game_runtime.log)
+2:[INIT] Game booting at 2026-10-03T05:50:37.984Z
+20:2026-10-03T05:50:39.287Z [TIMING] DataManager.setupNewGame enter (+12.6ms)
+21:2026-10-03T05:50:39.290Z [TIMING] setupForNewGame before World.newWorld
+24:2026-10-03T05:50:41.026Z [TIMING] world:initializing fired (+1751.6ms)
+8914:2026-10-03T05:51:01.605Z [TIMING] world:created fired (+22330.3ms)
+8917:2026-10-03T05:51:01.608Z [TIMING] emit world:created done
+8918:2026-10-03T05:51:01.608Z [TIMING] early seated done, units=0
+8919:2026-10-03T05:51:02.855Z [TIMING] setupForNewGame after World.newWorld
+8920:2026-10-03T05:51:02.855Z [TIMING] setupForNewGame exit (reserved map 1000)
+8921:2026-10-03T05:51:02.856Z [TIMING] DataManager.setupNewGame exit (+23580.9ms)
+8922:2026-10-03T05:51:02.862Z [TIMING] Scene_Boot.start exit (+23587.0ms)
+8925:2026-10-03T05:51:03.590Z [TIMING] world:areaBuilt (0,0) (+24315.5ms)

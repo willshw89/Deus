@@ -1,0 +1,13 @@
+# M4_game_runtime.log excerpt (full log 1978674 bytes left untracked in this folder and copied to scratchpad/lane-worldgen-green/evidence_large/M4_game_runtime.log)
+2:[INIT] Game booting at 2026-10-03T05:49:40.253Z
+20:2026-10-03T05:49:41.563Z [TIMING] DataManager.setupNewGame enter (+12.1ms)
+21:2026-10-03T05:49:41.565Z [TIMING] setupForNewGame before World.newWorld
+24:2026-10-03T05:49:43.300Z [TIMING] world:initializing fired (+1749.0ms)
+8914:2026-10-03T05:50:03.363Z [TIMING] world:created fired (+21811.8ms)
+8917:2026-10-03T05:50:03.366Z [TIMING] emit world:created done
+8918:2026-10-03T05:50:03.366Z [TIMING] early seated done, units=0
+8919:2026-10-03T05:50:04.591Z [TIMING] setupForNewGame after World.newWorld
+8920:2026-10-03T05:50:04.592Z [TIMING] setupForNewGame exit (reserved map 1000)
+8921:2026-10-03T05:50:04.592Z [TIMING] DataManager.setupNewGame exit (+23041.4ms)
+8922:2026-10-03T05:50:04.598Z [TIMING] Scene_Boot.start exit (+23047.6ms)
+8925:2026-10-03T05:50:05.336Z [TIMING] world:areaBuilt (0,0) (+23785.3ms)

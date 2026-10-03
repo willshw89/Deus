@@ -1,0 +1,4 @@
+2300c2300
+<                     for (let i = 0; i < size * size; i++) if (chunk.river[i] === r.id + 1) mine.push(i);
+---
+>                     for (let i = 0; i < size * size; i++) if (chunk.river[i] === r.id + 1 && r.id !== 0) mine.push(i); // RIVER MUTANT 2: river id 0 keeps no raster cell

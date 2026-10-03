@@ -1,0 +1,17 @@
+﻿tag: D2
+lane root (cwd): C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green
+lane HEAD at run time: 61a74580c86c4cfc9ec4ff9eafcdd24c29dbad11
+lane working tree changes at run time: 4
+snapshot game dir: C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_D2_riverdiag_61a74580\game
+snapshot Seed override: "Seed": "1920951434"
+env DEUS_TEST_YEAR=500
+nw.exe processes before launch: 0
+stale game_runtime.log in lane root before launch: False
+command: .\run_tests.bat worldgen --game C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_D2_riverdiag_61a74580\game
+start CT: 2026-10-03 00:50:37 -05:00
+end CT: 2026-10-03 00:51:36 -05:00
+shell exit code (cmd /c .\run_tests.bat): 1
+results.txt retained: yes
+snapshot game_runtime.log retained: yes
+RESULT line: RESULT: 17 passed, 5 failed (exit 1)
+nw.exe processes after run: 0
