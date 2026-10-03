@@ -1,0 +1,1939 @@
+{
+  "schemaVersion": 1,
+  "createdDate": "2026-10-03",
+  "lane": "ART-IMPORT-CLIFFS",
+  "branch": "task/art-import-cliffs",
+  "baseSha": "038a02c35922df825fd7d47d948d7747d4e56755",
+  "scope": "Source recovery only. No runtime induction, art generation, resampling, palette edit, approval certification, or catalogue edit.",
+  "backupRoot": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab",
+  "sourceRecord": "art/COUNCIL_RECORD.md",
+  "provenanceCommits": {
+    "ten": "62aad76b7a541fd3997821dbe78a38202060c572",
+    "limestoneTransient": "2ac5b39335e76e34b186be0002ee17ae8e4c1eb0",
+    "A": "fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+    "B": "b4d724b6dcf7275802d8a784500ccb60cd8ad78f"
+  },
+  "files": [
+    {
+      "material": "granite",
+      "part": "top",
+      "sourceRelative": "cliffs_a4/v6/set01_top_v6.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-GRANITE_TOP_DEFAULT/legacy_set01_v6_top.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 01",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-GRANITE_TOP_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v6/set01_top_v6.png",
+      "sha256": "1fd2a0dbea6455fd4b97b57b3cf574e1bd12c353ae01921f68c906c15a42c341",
+      "byteCount": 6040,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "granite",
+      "part": "face",
+      "sourceRelative": "cliffs_a4/v6/set01_face_v6.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-GRANITE_SIDE_DEFAULT/legacy_set01_v6_face.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 01",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-GRANITE_SIDE_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v6/set01_face_v6.png",
+      "sha256": "d47370590fa388eb54bdd961690584a4fd068a3bca93eb7db79e92403365d5cf",
+      "byteCount": 5315,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "soil",
+      "part": "top",
+      "sourceRelative": "cliffs_a4/v7/set02_top_v7.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-SOIL_TOP_DEFAULT/legacy_set02_v7_top.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 02",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-SOIL_TOP_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v7/set02_top_v7.png",
+      "sha256": "a02740061e0866dcfce2bc7adb09a7deac06b95c157c2c2846f110c260d19e0f",
+      "byteCount": 5316,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "soil",
+      "part": "face",
+      "sourceRelative": "cliffs_a4/v7/set02_face_v7.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-SOIL_SIDE_DEFAULT/legacy_set02_v7_face.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 02",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-SOIL_SIDE_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v7/set02_face_v7.png",
+      "sha256": "345771bef379cc0f1e61af5420312b2f76d3694a7fd2759a22cae64b9d5a1be6",
+      "byteCount": 5694,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "sandstone",
+      "part": "top",
+      "sourceRelative": "cliffs_a4/v6/set03_top_v6.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-SAND_TOP_DEFAULT/legacy_set03_v6_top.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 03",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-SAND_TOP_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v6/set03_top_v6.png",
+      "sha256": "9cbbb5b94631e91eb3c70458ed3bbfe448b004679903bcde2ac875e97952ff17",
+      "byteCount": 4677,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "sandstone",
+      "part": "face",
+      "sourceRelative": "cliffs_a4/v6/set03_face_v6.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-SAND_SIDE_DEFAULT/legacy_set03_v6_face.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 03",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-SAND_SIDE_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v6/set03_face_v6.png",
+      "sha256": "9fadd3a5419bd8153da2989e3ac2d781ebcf7eba6a7dc64ba7556cd272d4fb64",
+      "byteCount": 4949,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "mud",
+      "part": "top",
+      "sourceRelative": "cliffs_a4/v6/set04_top_v6.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-MUD_TOP_DEFAULT/legacy_set04_v6_top.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 04",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-MUD_TOP_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v6/set04_top_v6.png",
+      "sha256": "57bde0dc3a120218ad59cc9e86918ea44d7b5ea4ba9dd805cdf5b27cf4883e2f",
+      "byteCount": 6527,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "mud",
+      "part": "face",
+      "sourceRelative": "cliffs_a4/v6/set04_face_v6.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-MUD_SIDE_DEFAULT/legacy_set04_v6_face.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 04",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-MUD_SIDE_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v6/set04_face_v6.png",
+      "sha256": "6855be1cf200765580821e1477858b330f0f085cf1e8774350c7aebc07bb6805",
+      "byteCount": 4567,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "limestone",
+      "part": "top",
+      "sourceRelative": "cliffs_a4/v6/set05_top_v6.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-LIMESTONE_TOP_DEFAULT/legacy_set05_v6_top.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 05",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-LIMESTONE_TOP_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v6/set05_top_v6.png",
+      "sha256": "d3f1c585334be5bd0df01d912d5a1834b4b52d5999493a85f5e6f41b31ccb78d",
+      "byteCount": 4540,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "limestone",
+      "part": "face",
+      "sourceRelative": "cliffs_a4/v7/set05_face_v7.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-LIMESTONE_SIDE_DEFAULT/legacy_set05_v7_face.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 05",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-LIMESTONE_SIDE_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v7/set05_face_v7.png",
+      "sha256": "50b65b2fc3710891b683c73a2a47b531cd06ba6ff22f4412cea00f8d5c54b561",
+      "byteCount": 6071,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "lichen",
+      "part": "top",
+      "sourceRelative": "cliffs_a4/v6/set06_top_v6.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-LICHEN-ROCK_TOP_DEFAULT/legacy_set06_v6_top.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 06",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-LICHEN-ROCK_TOP_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v6/set06_top_v6.png",
+      "sha256": "bfc0a3160f51df199e3fa4d6c33c2fea7431880a3cfcfaa3ef2c9a520c60ce8f",
+      "byteCount": 4886,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "lichen",
+      "part": "face",
+      "sourceRelative": "cliffs_a4/v7/set06_face_v7.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-LICHEN-ROCK_SIDE_DEFAULT/legacy_set06_v7_face.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 06",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-LICHEN-ROCK_SIDE_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v7/set06_face_v7.png",
+      "sha256": "78c50ab84c603462fe580479313e52e1d355bfeec6183e4be55376432a54f571",
+      "byteCount": 4588,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "rooted",
+      "part": "top",
+      "sourceRelative": "cliffs_a4/v6/set07_top_v6.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-ROOTED-SOIL_TOP_DEFAULT/legacy_set07_v6_top.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 07",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-ROOTED-SOIL_TOP_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v6/set07_top_v6.png",
+      "sha256": "dec18a6021183a5b2fc854b21ebb5fe5aeaa2cd9103abadeba013a8cdebda585",
+      "byteCount": 6469,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "rooted",
+      "part": "face",
+      "sourceRelative": "cliffs_a4/v6/set07_face_v6.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-ROOTED-SOIL_SIDE_DEFAULT/legacy_set07_v6_face.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 07",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-ROOTED-SOIL_SIDE_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v6/set07_face_v6.png",
+      "sha256": "7f186662276bf46fc3c6d49313372390bc7ed0f05e8f4c7e90e3853ed244fc31",
+      "byteCount": 4794,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "banded",
+      "part": "top",
+      "sourceRelative": "cliffs_a4/v6/set08_top_v6.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-BANDED-SANDSTONE_TOP_DEFAULT/legacy_set08_v6_top.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 08",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-BANDED-SANDSTONE_TOP_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v6/set08_top_v6.png",
+      "sha256": "17320c88c0c85f613682a9630f7f3cfe27763648994a0a02033267d3295f85b2",
+      "byteCount": 4392,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "banded",
+      "part": "face",
+      "sourceRelative": "cliffs_a4/v6/set08_face_v6.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-BANDED-SANDSTONE_SIDE_DEFAULT/legacy_set08_v6_face.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 08",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-BANDED-SANDSTONE_SIDE_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v6/set08_face_v6.png",
+      "sha256": "fc0be1e707f1afa3db1910a0aa1cd87e2bbf5afebc58b2aa3ecc0dbab06ac435",
+      "byteCount": 3907,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "clay",
+      "part": "top",
+      "sourceRelative": "cliffs_a4/v6/set09_top_v6.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-RED-CLAY_TOP_DEFAULT/legacy_set09_v6_top.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 09",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-RED-CLAY_TOP_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v6/set09_top_v6.png",
+      "sha256": "e21fba36abbe42d76ca455de60d00a516578cc0f3df8b4736fe1fa498211e914",
+      "byteCount": 4423,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "clay",
+      "part": "face",
+      "sourceRelative": "cliffs_a4/v7/set09_face_v7.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-RED-CLAY_SIDE_DEFAULT/legacy_set09_v7_face.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 09",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-RED-CLAY_SIDE_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v7/set09_face_v7.png",
+      "sha256": "d61baeec9ac6655d2c4c08714daea4290981d6096a66a7b10f83d6c054c1f6f3",
+      "byteCount": 3633,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "strata",
+      "part": "top",
+      "sourceRelative": "cliffs_a4/v7/set10_top_v7.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-LAYERED-STRATA_TOP_DEFAULT/legacy_set10_v7_top.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 10",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-LAYERED-STRATA_TOP_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v7/set10_top_v7.png",
+      "sha256": "5187779925eed389a7095793b817c4427ad6d462166dd65a527f6cc61bd4d74a",
+      "byteCount": 5933,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "strata",
+      "part": "face",
+      "sourceRelative": "cliffs_a4/v7/set10_face_v7.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-LAYERED-STRATA_SIDE_DEFAULT/legacy_set10_v7_face.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; Owner all-ten override 62aad76b7a541fd3997821dbe78a38202060c572; set 10",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-LAYERED-STRATA_SIDE_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/cliffs_a4/v7/set10_face_v7.png",
+      "sha256": "1e1dcb0ede72e949d0561ca73b4476e7a161e6fff519604e94800f5ecd52510a",
+      "byteCount": 4771,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "drygrass",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/drygrass_top.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT/round17_A_final_top.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/drygrass_top.png",
+      "sha256": "b256261f71ec181df6019202c67d36ec2b0db33c3c810305dd01bd909df41c21",
+      "byteCount": 5359,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "drygrass",
+      "part": "face",
+      "sourceRelative": "round17/final_cliffs/drygrass_face.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_SIDE_DEFAULT/round17_A_final_face.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_SIDE_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/drygrass_face.png",
+      "sha256": "f5146b34fe4c003d135f180efcfbb1e73f0b5b74ed88103b63089304fc04f048",
+      "byteCount": 4081,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "drygrass",
+      "part": "top",
+      "sourceRelative": "round17/a4/drygrass_top.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT/round17_A_a4_top.png",
+      "sourceStatus": "related_cut_not_independently_approved",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT"
+      ],
+      "note": "Earlier A4 cut; final_cliffs is the named staged pick.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/drygrass_top.png",
+      "sha256": "b256261f71ec181df6019202c67d36ec2b0db33c3c810305dd01bd909df41c21",
+      "byteCount": 5359,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "drygrass",
+      "part": "face",
+      "sourceRelative": "round17/a4/drygrass_face.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_SIDE_DEFAULT/round17_A_a4_face.png",
+      "sourceStatus": "related_cut_not_independently_approved",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_SIDE_DEFAULT"
+      ],
+      "note": "Earlier A4 cut; final_cliffs is the named staged pick.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/drygrass_face.png",
+      "sha256": "f5146b34fe4c003d135f180efcfbb1e73f0b5b74ed88103b63089304fc04f048",
+      "byteCount": 4081,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "drygrass",
+      "part": "top",
+      "sourceRelative": "round17/a4/drygrass_board.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT/round17_A_a4_board.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_SIDE_DEFAULT"
+      ],
+      "note": "Composite reference spanning top and face; not a separately approved asset.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/drygrass_board.png",
+      "sha256": "021eeb9297dfa3316bfb490a7abf3fd2257fa36c67eef9cedda0e619663464df",
+      "byteCount": 34918,
+      "imageDimensionsPx": {
+        "width": 720,
+        "height": 504
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "drygrass",
+      "part": "top",
+      "sourceRelative": "round17/a4/drygrass_body.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT/round17_A_a4_body.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_SIDE_DEFAULT"
+      ],
+      "note": "Composite reference spanning top and face; not a separately approved asset.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/drygrass_body.png",
+      "sha256": "b22f06886d33af092b6b97523a004776b2b3fd89f82098aeb21054138d0d3497",
+      "byteCount": 4332,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "drygrass",
+      "part": "top",
+      "sourceRelative": "round17/a4/tall_drygrass.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT/round17_A_a4_tall.png",
+      "sourceStatus": "assembly_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_SIDE_DEFAULT"
+      ],
+      "note": "Tall assembly reference; not independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/tall_drygrass.png",
+      "sha256": "5187ff11ae5918b8042dd4a65916641516b44cb075d5a3ee260ec14b42b48c4a",
+      "byteCount": 17665,
+      "imageDimensionsPx": {
+        "width": 416,
+        "height": 512
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "forest",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/forest_top.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT/round17_A_final_top.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/forest_top.png",
+      "sha256": "7182aae2352c80c9613a5f42c0d6d4591239969f6c3fca89e4b0d4547f78b474",
+      "byteCount": 6684,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "forest",
+      "part": "face",
+      "sourceRelative": "round17/final_cliffs/forest_face.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_SIDE_DEFAULT/round17_A_final_face.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/forest_face.png",
+      "sha256": "de30e470f4b4ad02b89693990e58abb21f607e7775deb674a68972a4183a0b99",
+      "byteCount": 4182,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "forest",
+      "part": "top",
+      "sourceRelative": "round17/a4/forest_top.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT/round17_A_a4_top.png",
+      "sourceStatus": "related_cut_not_independently_approved",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT"
+      ],
+      "note": "Earlier A4 cut; final_cliffs is the named staged pick.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/forest_top.png",
+      "sha256": "7182aae2352c80c9613a5f42c0d6d4591239969f6c3fca89e4b0d4547f78b474",
+      "byteCount": 6684,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "forest",
+      "part": "face",
+      "sourceRelative": "round17/a4/forest_face.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_SIDE_DEFAULT/round17_A_a4_face.png",
+      "sourceStatus": "related_cut_not_independently_approved",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Earlier A4 cut; final_cliffs is the named staged pick.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/forest_face.png",
+      "sha256": "de30e470f4b4ad02b89693990e58abb21f607e7775deb674a68972a4183a0b99",
+      "byteCount": 4182,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "forest",
+      "part": "top",
+      "sourceRelative": "round17/a4/forest_board.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT/round17_A_a4_board.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Composite reference spanning top and face; not a separately approved asset.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/forest_board.png",
+      "sha256": "35f5bf6e843b2cfbcd0e941516cf8f59d1c6b921520eff89d00f905554948701",
+      "byteCount": 38626,
+      "imageDimensionsPx": {
+        "width": 720,
+        "height": 504
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "forest",
+      "part": "top",
+      "sourceRelative": "round17/a4/forest_body.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT/round17_A_a4_body.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Composite reference spanning top and face; not a separately approved asset.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/forest_body.png",
+      "sha256": "7f9b538e2384601c06d81c2cf5f16e00ccb07aa48c786608d979417582eac3f2",
+      "byteCount": 5635,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "forest",
+      "part": "top",
+      "sourceRelative": "round17/a4/tall_forest.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT/round17_A_a4_tall.png",
+      "sourceStatus": "assembly_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Tall assembly reference; not independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/tall_forest.png",
+      "sha256": "237279a42e5437688bab52ba3cdaaa939cda95e70c500a57d96d32f042062582",
+      "byteCount": 19735,
+      "imageDimensionsPx": {
+        "width": 416,
+        "height": 512
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "needle",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/needle_top.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT/round17_A_final_top.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/needle_top.png",
+      "sha256": "915b764ae5776f31bee042bb3ccaca4f06385f43ea4605cf3054d804461b5b15",
+      "byteCount": 5218,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "needle",
+      "part": "face",
+      "sourceRelative": "round17/final_cliffs/needle_face.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_SIDE_DEFAULT/round17_A_final_face.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/needle_face.png",
+      "sha256": "26e205702c6eedff3400bc9ea32a64b87800d563b8713f509c2c01ecd4565ff2",
+      "byteCount": 3409,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "needle",
+      "part": "top",
+      "sourceRelative": "round17/a4/needle_top.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT/round17_A_a4_top.png",
+      "sourceStatus": "related_cut_not_independently_approved",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT"
+      ],
+      "note": "Earlier A4 cut; final_cliffs is the named staged pick.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/needle_top.png",
+      "sha256": "915b764ae5776f31bee042bb3ccaca4f06385f43ea4605cf3054d804461b5b15",
+      "byteCount": 5218,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "needle",
+      "part": "face",
+      "sourceRelative": "round17/a4/needle_face.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_SIDE_DEFAULT/round17_A_a4_face.png",
+      "sourceStatus": "related_cut_not_independently_approved",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Earlier A4 cut; final_cliffs is the named staged pick.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/needle_face.png",
+      "sha256": "26e205702c6eedff3400bc9ea32a64b87800d563b8713f509c2c01ecd4565ff2",
+      "byteCount": 3409,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "needle",
+      "part": "top",
+      "sourceRelative": "round17/a4/needle_board.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT/round17_A_a4_board.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Composite reference spanning top and face; not a separately approved asset.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/needle_board.png",
+      "sha256": "68e355eb1c0e68ac3b3b627ecf2b0dc8bdf94de0e17fa48ebdaeb6783319f3ba",
+      "byteCount": 31546,
+      "imageDimensionsPx": {
+        "width": 720,
+        "height": 504
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "needle",
+      "part": "top",
+      "sourceRelative": "round17/a4/needle_body.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT/round17_A_a4_body.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Composite reference spanning top and face; not a separately approved asset.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/needle_body.png",
+      "sha256": "226df4c4484cd7503c411af547f08a9492e149b3efb35d2139d9ef48adb783c6",
+      "byteCount": 4106,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "needle",
+      "part": "top",
+      "sourceRelative": "round17/a4/tall_needle.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT/round17_A_a4_tall.png",
+      "sourceStatus": "assembly_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:230-232; Owner sheet-A pick fbcc847e80e940998d9f0e8ff41b6e7f7b5f4499",
+      "pixelLabJobId": "15b6c85d-3aac-4ee6-859f-b2a017fd7f31",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Tall assembly reference; not independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/tall_needle.png",
+      "sha256": "e1987ecd55da094ddc287bde7312ddd7dd8fe6eedf0848270111e2d49fb55863",
+      "byteCount": 16107,
+      "imageDimensionsPx": {
+        "width": 416,
+        "height": 512
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "drygrass",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/drygrass_B_top.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT/round17_B_final_top.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/drygrass_B_top.png",
+      "sha256": "32f475c530da2a40a68ec98f14d4aa94bd728c6103cca3304c3be474a1d6f333",
+      "byteCount": 5577,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "drygrass",
+      "part": "face",
+      "sourceRelative": "round17/final_cliffs/drygrass_B_face.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_SIDE_DEFAULT/round17_B_final_face.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_SIDE_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/drygrass_B_face.png",
+      "sha256": "48a0bdf34663e5087de3a9300e6abe7c2320ea30eb5efbee518faddbee554b18",
+      "byteCount": 4457,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "drygrass",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/drygrass_B_board.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT/round17_B_final_board.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_SIDE_DEFAULT"
+      ],
+      "note": "Selected-set board/body cut, not independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/drygrass_B_board.png",
+      "sha256": "65fe51f3776d0ed7d3b49155c14e2930b4659e9f29527be9852c3b0ede0e1640",
+      "byteCount": 36508,
+      "imageDimensionsPx": {
+        "width": 720,
+        "height": 504
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "drygrass",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/drygrass_B_body.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT/round17_B_final_body.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_SIDE_DEFAULT"
+      ],
+      "note": "Selected-set board/body cut, not independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/drygrass_B_body.png",
+      "sha256": "af1d3bcb81925ad07c4089b6928f077cf20abdf44261b26e83d973d0459a2e76",
+      "byteCount": 4275,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "drygrass",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/tall_drygrass_B.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT/round17_B_final_tall.png",
+      "sourceStatus": "assembly_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_SIDE_DEFAULT"
+      ],
+      "note": "Selected-set tall assembly, not independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/tall_drygrass_B.png",
+      "sha256": "11c3a07d08a4220de082e43d83a1f7dd393ac0431c84a38dcbfcafe6adb3dc94",
+      "byteCount": 18519,
+      "imageDimensionsPx": {
+        "width": 416,
+        "height": 512
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "drygrass",
+      "part": "top",
+      "sourceRelative": "round17/a4/drygrassB_top.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT/round17_B_a4_top.png",
+      "sourceStatus": "related_cut_not_independently_approved",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT"
+      ],
+      "note": "Earlier A4 cut; final_cliffs is the named staged pick.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/drygrassB_top.png",
+      "sha256": "b256261f71ec181df6019202c67d36ec2b0db33c3c810305dd01bd909df41c21",
+      "byteCount": 5359,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "drygrass",
+      "part": "face",
+      "sourceRelative": "round17/a4/drygrassB_face.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_SIDE_DEFAULT/round17_B_a4_face.png",
+      "sourceStatus": "related_cut_not_independently_approved",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_SIDE_DEFAULT"
+      ],
+      "note": "Earlier A4 cut; final_cliffs is the named staged pick.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/drygrassB_face.png",
+      "sha256": "48a0bdf34663e5087de3a9300e6abe7c2320ea30eb5efbee518faddbee554b18",
+      "byteCount": 4457,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "drygrass",
+      "part": "top",
+      "sourceRelative": "round17/a4/drygrassB_board.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT/round17_B_a4_board.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_SIDE_DEFAULT"
+      ],
+      "note": "Earlier A4 composite reference; not an independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/drygrassB_board.png",
+      "sha256": "5c420b059344602cf1f08b5bc577e0dcf34d79899f4cd40769e83794cdbb252c",
+      "byteCount": 36847,
+      "imageDimensionsPx": {
+        "width": 720,
+        "height": 504
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "drygrass",
+      "part": "top",
+      "sourceRelative": "round17/a4/drygrassB_body.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT/round17_B_a4_body.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_SIDE_DEFAULT"
+      ],
+      "note": "Earlier A4 composite reference; not an independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/drygrassB_body.png",
+      "sha256": "b22f06886d33af092b6b97523a004776b2b3fd89f82098aeb21054138d0d3497",
+      "byteCount": 4332,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "drygrass",
+      "part": "top",
+      "sourceRelative": "round17/a4/tall_drygrassB.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT/round17_B_a4_tall.png",
+      "sourceStatus": "assembly_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_SIDE_DEFAULT"
+      ],
+      "note": "Earlier A4 tall assembly; not an independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/tall_drygrassB.png",
+      "sha256": "1173a517b6bdc18f4ca6237b1591f8255fa0d87a443389897c4d287b0c92df4b",
+      "byteCount": 18658,
+      "imageDimensionsPx": {
+        "width": 416,
+        "height": 512
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "forest",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/forest_B_top.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT/round17_B_final_top.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/forest_B_top.png",
+      "sha256": "45e1ec15174c33e4046c73fbe3a1fecb73dfc325795a2949152d78e951ca037a",
+      "byteCount": 7007,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "forest",
+      "part": "face",
+      "sourceRelative": "round17/final_cliffs/forest_B_face.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_SIDE_DEFAULT/round17_B_final_face.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/forest_B_face.png",
+      "sha256": "ec540e50962cad4e5276643dff5a96174b1ac4633ac9d6907985585b5de91df4",
+      "byteCount": 5470,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "forest",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/forest_B_board.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT/round17_B_final_board.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Selected-set board/body cut, not independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/forest_B_board.png",
+      "sha256": "63a7fba375249339e2a8093c4f9536afb2e5cb4a1fcae08d5b4b84c904675a80",
+      "byteCount": 43499,
+      "imageDimensionsPx": {
+        "width": 720,
+        "height": 504
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "forest",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/forest_B_body.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT/round17_B_final_body.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Selected-set board/body cut, not independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/forest_B_body.png",
+      "sha256": "ff26b31bad04faf65a180c940adca7575b9a7b176defb18fc0b5d5ae6d733261",
+      "byteCount": 5604,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "forest",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/tall_forest_B.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT/round17_B_final_tall.png",
+      "sourceStatus": "assembly_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Selected-set tall assembly, not independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/tall_forest_B.png",
+      "sha256": "1370903f61eb88a3fb1acd158806a0fddc7d3aea3b167a3a29d7f6221ec18ec8",
+      "byteCount": 22261,
+      "imageDimensionsPx": {
+        "width": 416,
+        "height": 512
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "forest",
+      "part": "top",
+      "sourceRelative": "round17/a4/forestB_top.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT/round17_B_a4_top.png",
+      "sourceStatus": "related_cut_not_independently_approved",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT"
+      ],
+      "note": "Earlier A4 cut; final_cliffs is the named staged pick.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/forestB_top.png",
+      "sha256": "7182aae2352c80c9613a5f42c0d6d4591239969f6c3fca89e4b0d4547f78b474",
+      "byteCount": 6684,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "forest",
+      "part": "face",
+      "sourceRelative": "round17/a4/forestB_face.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_SIDE_DEFAULT/round17_B_a4_face.png",
+      "sourceStatus": "related_cut_not_independently_approved",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Earlier A4 cut; final_cliffs is the named staged pick.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/forestB_face.png",
+      "sha256": "ec540e50962cad4e5276643dff5a96174b1ac4633ac9d6907985585b5de91df4",
+      "byteCount": 5470,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "forest",
+      "part": "top",
+      "sourceRelative": "round17/a4/forestB_board.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT/round17_B_a4_board.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Earlier A4 composite reference; not an independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/forestB_board.png",
+      "sha256": "38f90486f360bf01d6cd8e5c5475fabb0fb76604459fe7a039ac7565d8e046ee",
+      "byteCount": 44658,
+      "imageDimensionsPx": {
+        "width": 720,
+        "height": 504
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "forest",
+      "part": "top",
+      "sourceRelative": "round17/a4/forestB_body.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT/round17_B_a4_body.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Earlier A4 composite reference; not an independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/forestB_body.png",
+      "sha256": "7f9b538e2384601c06d81c2cf5f16e00ccb07aa48c786608d979417582eac3f2",
+      "byteCount": 5635,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "forest",
+      "part": "top",
+      "sourceRelative": "round17/a4/tall_forestB.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT/round17_B_a4_tall.png",
+      "sourceStatus": "assembly_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Earlier A4 tall assembly; not an independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/tall_forestB.png",
+      "sha256": "9376d061f433f9f55e3d418825ae71164a0b3485f27f59bfd7709b625f470be5",
+      "byteCount": 22325,
+      "imageDimensionsPx": {
+        "width": 416,
+        "height": 512
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "needle",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/needle_B_top.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT/round17_B_final_top.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/needle_B_top.png",
+      "sha256": "bb92e9f47072f9d194b21cd6ba8f2cb5ed6029c42febf72cff89f0f5daae9bf5",
+      "byteCount": 5886,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "needle",
+      "part": "face",
+      "sourceRelative": "round17/final_cliffs/needle_B_face.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_SIDE_DEFAULT/round17_B_final_face.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/needle_B_face.png",
+      "sha256": "6cb6d734f24476d5d33fb67268e8212d7f5c7302dc1254c86396296fca97b46c",
+      "byteCount": 3807,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "needle",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/needle_B_board.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT/round17_B_final_board.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Selected-set board/body cut, not independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/needle_B_board.png",
+      "sha256": "2a118309e4e6fd61cf5034f11a52d9047089852932c4d7e2a72635c5d71e6401",
+      "byteCount": 34669,
+      "imageDimensionsPx": {
+        "width": 720,
+        "height": 504
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "needle",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/needle_B_body.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT/round17_B_final_body.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Selected-set board/body cut, not independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/needle_B_body.png",
+      "sha256": "a7ebe6ee72768d2f6d51521393d3c108e8e9718706dc9d5dcdd2e70cedd2a9f8",
+      "byteCount": 4705,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "needle",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/tall_needle_B.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT/round17_B_final_tall.png",
+      "sourceStatus": "assembly_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Selected-set tall assembly, not independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/tall_needle_B.png",
+      "sha256": "c9a6c5060521aca6de9675e02e46222259aaf229d525f500d550cffd28509510",
+      "byteCount": 17494,
+      "imageDimensionsPx": {
+        "width": 416,
+        "height": 512
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "needle",
+      "part": "top",
+      "sourceRelative": "round17/a4/needleB_top.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT/round17_B_a4_top.png",
+      "sourceStatus": "related_cut_not_independently_approved",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT"
+      ],
+      "note": "Earlier A4 cut; final_cliffs is the named staged pick.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/needleB_top.png",
+      "sha256": "915b764ae5776f31bee042bb3ccaca4f06385f43ea4605cf3054d804461b5b15",
+      "byteCount": 5218,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "needle",
+      "part": "face",
+      "sourceRelative": "round17/a4/needleB_face.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_SIDE_DEFAULT/round17_B_a4_face.png",
+      "sourceStatus": "related_cut_not_independently_approved",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Earlier A4 cut; final_cliffs is the named staged pick.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/needleB_face.png",
+      "sha256": "6cb6d734f24476d5d33fb67268e8212d7f5c7302dc1254c86396296fca97b46c",
+      "byteCount": 3807,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "needle",
+      "part": "top",
+      "sourceRelative": "round17/a4/needleB_board.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT/round17_B_a4_board.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Earlier A4 composite reference; not an independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/needleB_board.png",
+      "sha256": "63bd111e8da34879a13cb610b3c73420af2e8b894ff440e61d9782ecb71c1815",
+      "byteCount": 33298,
+      "imageDimensionsPx": {
+        "width": 720,
+        "height": 504
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "needle",
+      "part": "top",
+      "sourceRelative": "round17/a4/needleB_body.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT/round17_B_a4_body.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Earlier A4 composite reference; not an independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/needleB_body.png",
+      "sha256": "226df4c4484cd7503c411af547f08a9492e149b3efb35d2139d9ef48adb783c6",
+      "byteCount": 4106,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "needle",
+      "part": "top",
+      "sourceRelative": "round17/a4/tall_needleB.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT/round17_B_a4_tall.png",
+      "sourceStatus": "assembly_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_SIDE_DEFAULT"
+      ],
+      "note": "Earlier A4 tall assembly; not an independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/tall_needleB.png",
+      "sha256": "c939a4abbfaec26d4f8ec6c3927e431ffa248236f51d39c825412e40605382f9",
+      "byteCount": 16758,
+      "imageDimensionsPx": {
+        "width": 416,
+        "height": 512
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "stony",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/stony_B_top.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT/round17_B_final_top.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/stony_B_top.png",
+      "sha256": "fc2e2a6c89000fd78869d9862025c65dd49c36c83a5ebec04d430b4cf0142628",
+      "byteCount": 5939,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "stony",
+      "part": "face",
+      "sourceRelative": "round17/final_cliffs/stony_B_face.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-STONY_SIDE_DEFAULT/round17_B_final_face.png",
+      "sourceStatus": "approved_component",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_SIDE_DEFAULT"
+      ],
+      "note": null,
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/stony_B_face.png",
+      "sha256": "1c1d41d030953f67f03f43d680582b0102b34cd8787bd2d06adcdd10bfd3cff8",
+      "byteCount": 3940,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "stony",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/stony_B_board.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT/round17_B_final_board.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_SIDE_DEFAULT"
+      ],
+      "note": "Selected-set board/body cut, not independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/stony_B_board.png",
+      "sha256": "f8970fee1a0d2e137913ca96403b30a75243d820ee1f1ac957eb3c8a1c7e19c0",
+      "byteCount": 35172,
+      "imageDimensionsPx": {
+        "width": 720,
+        "height": 504
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "stony",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/stony_B_body.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT/round17_B_final_body.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_SIDE_DEFAULT"
+      ],
+      "note": "Selected-set board/body cut, not independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/stony_B_body.png",
+      "sha256": "5b96a965adad42579b97206061546df5cc6e57acff9bde073af03302be8dd69d",
+      "byteCount": 4829,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "stony",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/tall_stony_B.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT/round17_B_final_tall.png",
+      "sourceStatus": "assembly_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_SIDE_DEFAULT"
+      ],
+      "note": "Selected-set tall assembly, not independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/tall_stony_B.png",
+      "sha256": "b3c1e2b6c9f58961258b8b5ba3d85400d40603c00bd826ed353e8463fc82d723",
+      "byteCount": 17959,
+      "imageDimensionsPx": {
+        "width": 416,
+        "height": 512
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "stony",
+      "part": "top",
+      "sourceRelative": "round17/a4/stonyB_top.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT/round17_B_a4_top.png",
+      "sourceStatus": "related_cut_not_independently_approved",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT"
+      ],
+      "note": "Earlier A4 cut; final_cliffs is the named staged pick.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/stonyB_top.png",
+      "sha256": "6b0ca7a54a126b461e16983432a8067a3ade4210ddbf8f2c9d899f126c807f29",
+      "byteCount": 5649,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 144
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "stony",
+      "part": "face",
+      "sourceRelative": "round17/a4/stonyB_face.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-STONY_SIDE_DEFAULT/round17_B_a4_face.png",
+      "sourceStatus": "related_cut_not_independently_approved",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_SIDE_DEFAULT"
+      ],
+      "note": "Earlier A4 cut; final_cliffs is the named staged pick.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/stonyB_face.png",
+      "sha256": "1c1d41d030953f67f03f43d680582b0102b34cd8787bd2d06adcdd10bfd3cff8",
+      "byteCount": 3940,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "stony",
+      "part": "top",
+      "sourceRelative": "round17/a4/stonyB_board.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT/round17_B_a4_board.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_SIDE_DEFAULT"
+      ],
+      "note": "Earlier A4 composite reference; not an independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/stonyB_board.png",
+      "sha256": "8c9587edcd23ba663e225b873c3023d28b0b4247c16ef56466ffaddd5b319766",
+      "byteCount": 35323,
+      "imageDimensionsPx": {
+        "width": 720,
+        "height": 504
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "stony",
+      "part": "top",
+      "sourceRelative": "round17/a4/stonyB_body.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT/round17_B_a4_body.png",
+      "sourceStatus": "composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_SIDE_DEFAULT"
+      ],
+      "note": "Earlier A4 composite reference; not an independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/stonyB_body.png",
+      "sha256": "470e80f91823e0dd28b0e83b92353518b5e858e17991d0b4715a9948064b8300",
+      "byteCount": 4535,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 96
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "stony",
+      "part": "top",
+      "sourceRelative": "round17/a4/tall_stonyB.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT/round17_B_a4_tall.png",
+      "sourceStatus": "assembly_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; Owner sheet-B pick b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_SIDE_DEFAULT"
+      ],
+      "note": "Earlier A4 tall assembly; not an independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/tall_stonyB.png",
+      "sha256": "8ef7fb83a102099172a4c2dbbe0fcb20340e7302fd7404ad88421c4abed682fe",
+      "byteCount": 17800,
+      "imageDimensionsPx": {
+        "width": 416,
+        "height": 512
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "stony",
+      "part": "top",
+      "sourceRelative": "round17/final_cliffs/tall_B4.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT/round17_B_final_tall_B4.png",
+      "sourceStatus": "multi_set_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_SIDE_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_SIDE_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_SIDE_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_SIDE_DEFAULT"
+      ],
+      "note": "Four selected B cliff sets assembled together, not an independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/final_cliffs/tall_B4.png",
+      "sha256": "5f990a11409da553d34b80eef11d0726b55be583393020c72a06d41bf4d17460",
+      "byteCount": 57834,
+      "imageDimensionsPx": {
+        "width": 856,
+        "height": 256
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "stony",
+      "part": "top",
+      "sourceRelative": "round17/a4/tall_4B.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT/round17_B_a4_tall_4B.png",
+      "sourceStatus": "multi_set_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:234-236; b4d724b6dcf7275802d8a784500ccb60cd8ad78f",
+      "pixelLabJobId": "78ea2c3d-cb34-4784-b360-82a24040b55e",
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-DRY-GRASS_SIDE_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-FOREST-FLOOR_SIDE_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-NEEDLE-FLOOR_SIDE_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-STONY_SIDE_DEFAULT"
+      ],
+      "note": "Earlier four-set B assembly, not an independent approval.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round17/a4/tall_4B.png",
+      "sha256": "c580ba9bdc34e31fc464230f4a66d1ea3bcb982d5537cb9e7ba87ebadda3e09e",
+      "byteCount": 80439,
+      "imageDimensionsPx": {
+        "width": 1688,
+        "height": 512
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "limestone",
+      "part": "top",
+      "sourceRelative": "regrid/set_05_cave_limestone.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-LIMESTONE_TOP_DEFAULT/related_regrid_set05.png",
+      "sourceStatus": "related_cut_lineage_unverified",
+      "approvalBasis": "COUNCIL_RECORD.md:197-214; final Owner override 62aad76b7a541fd3997821dbe78a38202060c572",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-LIMESTONE_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-LIMESTONE_SIDE_DEFAULT"
+      ],
+      "note": "A4 composite in backup; pixel equality to approved v6/v7 components has not been established.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/regrid/set_05_cave_limestone.png",
+      "sha256": "13465dce597b5255464eeec84c8b9e10e130d0c599612fcd50b796af4b2b86ce",
+      "byteCount": 7370,
+      "imageDimensionsPx": {
+        "width": 96,
+        "height": 240
+      },
+      "byteIdenticalCopy": true
+    },
+    {
+      "material": "limestone",
+      "part": "top",
+      "sourceRelative": "round9/owner_pick_limestone_strata.png",
+      "targetRelative": "art/masters/source_sets/SURFACE_SHARED_TERRAIN_CLIFF-LIMESTONE_TOP_DEFAULT/round9_owner_pick_limestone_strata.png",
+      "sourceStatus": "historical_composite_reference",
+      "approvalBasis": "COUNCIL_RECORD.md:155-161 transient limestone override 2ac5b39335e76e34b186be0002ee17ae8e4c1eb0; round-9 strata failed COUNCIL_RECORD.md:178-189; later all-ten override 62aad76b7a541fd3997821dbe78a38202060c572",
+      "pixelLabJobId": null,
+      "pixelLabGenerationId": null,
+      "coversCatalogueIds": [
+        "SURFACE_SHARED_TERRAIN_CLIFF-LIMESTONE_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-LIMESTONE_SIDE_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-LAYERED-STRATA_TOP_DEFAULT",
+        "SURFACE_SHARED_TERRAIN_CLIFF-LAYERED-STRATA_SIDE_DEFAULT"
+      ],
+      "note": "The filename is not current approval evidence; limestone override was withdrawn before later all-ten approval, and the round-9 strata recolour failed.",
+      "sourceAbsolutePath": "C:/Users/snewt/DEUS_backups/pm_art_2026-10-01/pixellab/round9/owner_pick_limestone_strata.png",
+      "sha256": "57417eb8c5800c3dcb177f70634cd944a953b1ddeacfeba0bf81198ae20e049e",
+      "byteCount": 52369,
+      "imageDimensionsPx": {
+        "width": 848,
+        "height": 512
+      },
+      "byteIdenticalCopy": true
+    }
+  ]
+}
