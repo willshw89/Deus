@@ -1,0 +1,21 @@
+﻿tag: P1
+lane root (cwd): C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green
+lane HEAD at run time: 7f0cfaec7471a8ceff30dd6c95ff8bb0e709b7f2
+lane working tree changes at run time: 22
+snapshot game dir: C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_P1_7f0cfaec\game
+snapshot Seed override: "Seed": "1920951434"
+snapshot test_output before launch: absent
+env DEUS_TEST_YEAR=500; DEUS_TEST_RETAIN=1; DEUS_PERF=1 (perf counters enabled before boot)
+hardware: AMD Ryzen 7 8845HS w/ Radeon 780M Graphics, 16 logical CPUs, 31.3 GB RAM, GPU AMD Radeon 780M Graphics / NVIDIA GeForce RTX 4060 Laptop GPU
+nw.exe processes before launch: 0; RPGMZ.exe: 1
+run_tests.js runners before launch: 0
+command: .\run_tests.bat perf_overlay --game C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_P1_7f0cfaec\game
+start CT: 2026-10-03 03:02:26 -05:00
+end CT: 2026-10-03 03:03:05 -05:00
+shell exit code (cmd /c .\run_tests.bat): 0
+results.txt copied: yes
+snapshot game_runtime.log copied: yes
+RESULT line: RESULT: 9 passed, 0 failed (exit 0)
+runner retain: HARNESS: retain mode on (DEUS_TEST_RETAIN=1 or --retain): nothing is deleted; C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_P1_7f0cfaec\game\test_output verified free of results/PNGs; browser profile C:\Users\snewt\AppData\Local\Temp\uf_test_profile_24316_1791014546870 will be kept
+runner retain: HARNESS: retain mode kept the browser profile at C:\Users\snewt\AppData\Local\Temp\uf_test_profile_24316_1791014546870
+nw.exe processes after run: 0

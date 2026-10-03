@@ -1,0 +1,17 @@
+UF_Test run 2026-10-03T08:02:27.690Z args=[]
+HARNESS New Game year 500 (requested 500)
+DEBUG_SHEET: Scene_Boot.start called
+AVAILABLE SUITES: selftest, smoke, perf, native_starting_gear, native_survival_dying, native_perf_4x_benchmark, perf_overlay, select, select, natural_connections, ownership, ecology, projects, settlement, colonists, overseer, world, spawn, worldgen, biomes, tiles, ground, factions, skins, history, objects, walls, doors, items, dig_through_floor, jobs, floors, wildlife, wildlife_seeds, stance, combat, anim, fog, daynight, timespeed, camera, culling, speech, overhead, look, sheet, talk, fire, vertical, natural_walls, flooding, strata, sparse_outer, environment, faction_menus, title, load, setup, depth, layers_flat, select, select
+HARNESS suite budget 180 s each; 1 suite(s) selected: perf_overlay
+SUITE perf_overlay
+PASS perf_overlay.perf_source - UF.Perf present; enabled before this suite: true; installed: true
+PASS perf_overlay.frames_observed - 97 ticker callbacks during 120 harness frames; interval last 84.15 avg 66.00 max 2584.90 ms (scheduler delay included; not CPU time)
+PASS perf_overlay.renders_observed - 97 app.render calls; draw CPU submission last 1.93 avg 1.88 max 259.48 ms (not GPU completion)
+PASS perf_overlay.sim_ticks_counted - UF.Sim.tickCount 10 -> 30 (+20); Perf counted 20 tick(s); last 0.00 avg 0.28 max 7.52 ms per tick
+PASS perf_overlay.newgame_recorded - New Game: 21970.39 ms synchronous setup (DataManager.setupNewGame), 26407.39 ms to the first draw of the started map
+PASS perf_overlay.heap_reported - JS heap 132.6 MB (performance.memory.usedJSHeapSize)
+PASS perf_overlay.load_not_invented - no load this run: load n/a (null)
+PASS perf_overlay.pause_stops_ticks_not_frames - paused for 60 harness frames: sim ticks +0 (tickCount +0), ticker callbacks +142, renders +142
+PASS perf_overlay.log_line_written - last [PERF] line in game_runtime.log: 2026-10-03T08:03:05.408Z [PERF] frames 334 interval 12.9/8.5/2584.9 ms (last/avg/max); renders 291 draw cpu 1.3/1.4/259.5 ms; sim ticks 31 0.0/0.3/7.5 ms; heap 139000000 bytes; new game sync 21970.4 ms, first map draw 26
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_P1_7f0cfaec\game\test_output\perf_overlay.overlay.png
+RESULT: 9 passed, 0 failed (exit 0)

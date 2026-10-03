@@ -1,0 +1,13 @@
+# W9a_game_runtime.log excerpt (full log 1978626 bytes left untracked here)
+2:[INIT] Game booting at 2026-10-03T07:48:05.951Z
+20:2026-10-03T07:48:07.225Z [TIMING] DataManager.setupNewGame enter (+11.6ms)
+21:2026-10-03T07:48:07.227Z [TIMING] setupForNewGame before World.newWorld
+24:2026-10-03T07:48:08.996Z [TIMING] world:initializing fired (+1782.8ms)
+8914:2026-10-03T07:48:28.391Z [TIMING] world:created fired (+21177.4ms)
+8917:2026-10-03T07:48:28.393Z [TIMING] emit world:created done
+8918:2026-10-03T07:48:28.394Z [TIMING] early seated done, units=0
+8919:2026-10-03T07:48:29.607Z [TIMING] setupForNewGame after World.newWorld
+8920:2026-10-03T07:48:29.608Z [TIMING] setupForNewGame exit (reserved map 1000)
+8921:2026-10-03T07:48:29.608Z [TIMING] DataManager.setupNewGame exit (+22394.5ms)
+8922:2026-10-03T07:48:29.615Z [TIMING] Scene_Boot.start exit (+22401.6ms)
+8925:2026-10-03T07:48:30.407Z [TIMING] world:areaBuilt (0,0) (+23194.1ms)

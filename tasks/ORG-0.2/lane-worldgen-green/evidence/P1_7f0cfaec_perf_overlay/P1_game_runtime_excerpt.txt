@@ -1,0 +1,16 @@
+# P1_game_runtime.log excerpt (full log 1289322 bytes left untracked here; every [PERF] line is in P1_perf_log_lines.txt)
+2:[INIT] Game booting at 2026-10-03T08:02:27.430Z
+20:2026-10-03T08:02:28.670Z [TIMING] DataManager.setupNewGame enter (+8.2ms)
+21:2026-10-03T08:02:28.673Z [TIMING] setupForNewGame before World.newWorld
+24:2026-10-03T08:02:30.397Z [TIMING] world:initializing fired (+1734.5ms)
+8914:2026-10-03T08:02:49.308Z [TIMING] world:created fired (+20645.3ms)
+8917:2026-10-03T08:02:49.311Z [TIMING] emit world:created done
+8918:2026-10-03T08:02:49.311Z [TIMING] early seated done, units=0
+8919:2026-10-03T08:02:50.640Z [TIMING] setupForNewGame after World.newWorld
+8920:2026-10-03T08:02:50.641Z [TIMING] setupForNewGame exit (reserved map 1000)
+8921:2026-10-03T08:02:50.641Z [TIMING] DataManager.setupNewGame exit (+21978.9ms)
+8922:2026-10-03T08:02:50.654Z [TIMING] Scene_Boot.start exit (+21991.6ms)
+8925:2026-10-03T08:02:51.499Z [TIMING] world:areaBuilt (0,0) (+22836.3ms)
+8929:2026-10-03T08:02:52.385Z [PERF] frames 1 interval n/a/n/a/0.0 ms (last/avg/max); renders 0 draw cpu n/a/n/a/0.0 ms; sim ticks 0 n/a/n/a/0.0 ms; heap 139000000 bytes; new game sync 21970.4 ms, first map draw n/a ms; load n/a
+16955:2026-10-03T08:03:02.449Z [PERF] frames 134 interval 74.4/69.5/2584.9 ms (last/avg/max); renders 91 draw cpu 1.9/5.1/259.5 ms; sim ticks 20 0.0/0.4/7.5 ms; heap 139000000 bytes; new game sync 21970.4 ms, first map draw 26407.4 ms; load n/a
+16959:2026-10-03T08:03:05.408Z [PERF] frames 334 interval 12.9/8.5/2584.9 ms (last/avg/max); renders 291 draw cpu 1.3/1.4/259.5 ms; sim ticks 31 0.0/0.3/7.5 ms; heap 139000000 bytes; new game sync 21970.4 ms, first map draw 26407.4 ms; load n/a
