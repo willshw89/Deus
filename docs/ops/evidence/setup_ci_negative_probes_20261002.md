@@ -1,3 +1,4 @@
+<!-- Transcript whitespace normalized for Markdown; original raw logs remain in the cited scratchpad directory. -->
 # Setup CI post-repair syntax failure probes
 
 Source HEAD: 6b9ec844158c969a144ffae67f2061ebcb7b4f9a
@@ -21,11 +22,11 @@ FAIL tools/fixtures/real_runner.js
     C:\Users\snewt\OneDrive\Desktop\UF\scratchpad\org-setup-review-overnight\probe_3340f71636074629a0198ec74c02f4cf\malformed_executable_fixture\tools\fixtures\real_runner.js:1
     const malformed = ;
                       ^
-    
+
     SyntaxError: Unexpected token ';'
         at wrapSafe (node:internal/modules/cjs/loader:1804:18)
         at checkSyntax (node:internal/main/check_syntax:76:3)
-    
+
     Node.js v24.19.0
 WARN allowlisted path not found (remove it from INTENTIONALLY_INVALID): tools/governance/fixtures/invariants/INV-GOV-02/tools/governance/check_claims.js
 syntax_check: 2 files checked (0 plugins incl. plugins.js, 0 sim, 2 tools), 1 failed; 0 allowlisted invalid fixture(s) skipped
@@ -39,11 +40,11 @@ FAIL game/js/sim/test.js
     C:\Users\snewt\OneDrive\Desktop\UF\scratchpad\org-setup-review-overnight\probe_3340f71636074629a0198ec74c02f4cf\malformed_sim\game\js\sim\test.js:1
     const malformed = ;
                       ^
-    
+
     SyntaxError: Unexpected token ';'
         at wrapSafe (node:internal/modules/cjs/loader:1804:18)
         at checkSyntax (node:internal/main/check_syntax:76:3)
-    
+
     Node.js v24.19.0
 WARN allowlisted path not found (remove it from INTENTIONALLY_INVALID): tools/governance/fixtures/invariants/INV-GOV-02/tools/governance/check_claims.js
 syntax_check: 2 files checked (0 plugins incl. plugins.js, 1 sim, 1 tools), 1 failed; 0 allowlisted invalid fixture(s) skipped
@@ -57,11 +58,11 @@ FAIL game/js/plugins.js
     C:\Users\snewt\OneDrive\Desktop\UF\scratchpad\org-setup-review-overnight\probe_3340f71636074629a0198ec74c02f4cf\malformed_plugins_js\game\js\plugins.js:1
     const malformed = ;
                       ^
-    
+
     SyntaxError: Unexpected token ';'
         at wrapSafe (node:internal/modules/cjs/loader:1804:18)
         at checkSyntax (node:internal/main/check_syntax:76:3)
-    
+
     Node.js v24.19.0
 WARN allowlisted path not found (remove it from INTENTIONALLY_INVALID): tools/governance/fixtures/invariants/INV-GOV-02/tools/governance/check_claims.js
 syntax_check: 2 files checked (1 plugins incl. plugins.js, 0 sim, 1 tools), 1 failed; 0 allowlisted invalid fixture(s) skipped
@@ -83,11 +84,11 @@ FAIL tools/governance/fixtures/invariants/INV-GOV-02/tools/governance/check_clai
     C:\Users\snewt\OneDrive\Desktop\UF\scratchpad\org-setup-review-overnight\probe_3340f71636074629a0198ec74c02f4cf\allowlisted_plus_malformed_neighbor\tools\governance\fixtures\invariants\INV-GOV-02\tools\governance\check_claims_neighbor.js:1
     const malformed = ;
                       ^
-    
+
     SyntaxError: Unexpected token ';'
         at wrapSafe (node:internal/modules/cjs/loader:1804:18)
         at checkSyntax (node:internal/main/check_syntax:76:3)
-    
+
     Node.js v24.19.0
 SKIP tools/governance/fixtures/invariants/INV-GOV-02/tools/governance/check_claims.js (INV-GOV-02 mutant fragment (read as text, not executed))
 syntax_check: 2 files checked (0 plugins incl. plugins.js, 0 sim, 2 tools), 1 failed; 1 allowlisted invalid fixture(s) skipped

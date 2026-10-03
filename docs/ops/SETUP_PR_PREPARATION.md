@@ -1,6 +1,6 @@
 # Setup PR preparation, 2026-10-02 CT
 
-Branch: `org/setup-2026-10-02`. Prepared against `6b9ec844158c969a144ffae67f2061ebcb7b4f9a`. No PR has been opened: the Owner's instruction to open it once it passes is not yet satisfied. No merge is authorized overnight.
+Branch: `org/setup-2026-10-02`. Prepared against `6b9ec844158c969a144ffae67f2061ebcb7b4f9a`. No PR has been opened: hygiene and review findings remain. No merge is authorized overnight. **Owner clarification: inherited expected-red game failures do not block hygiene/CI/docs lanes under WBS-ORG.** Native results remain disclosed evidence, not a requirement to repair the game on this branch.
 
 ## Proposed title
 
@@ -23,11 +23,13 @@ Do not publish this body as a passing review. Resolve the preparation blockers b
 | Whitespace | `git diff --check 038a02c3 6b9ec844` reports the added `.gitignore:85–97` CRLF lines as trailing whitespace. | Owner's setup repair pass must normalize the affected additions and rerun the diff check. No unrelated normalization. |
 | Current staffing policy | `AGENTS.md:17` still requires Owner relay for Gemini; `:28` limits lanes to one or two. The 21:16/21:20 Owner instructions authorize isolated concurrent lanes and direct Codex dispatch. | Reconcile these lines with the current instruction, without overwriting unrelated Owner edits. |
 | Fallback SOP link | Setup has `docs/ops/HANDOFF_TEMPLATE.md`, but lacks `docs/ops/USAGE.md` and the requested AGENTS link. The SOP is on the ORG-0.2 branch. | Coordinate the policy copy/link after the ORG-0.2 writer releases its files; do not merge or cherry-pick overnight. |
-| Native acceptance | At original setup source `2ffa0d3a`, seed 1920951434/year 500, `RESULT: 152 passed, 25 failed (exit 2)`; the global 180-second watchdog interrupted jobs. Runtime/runner bytes have not changed between that source and `6b9ec844`. | A complete green native result remains required. Do not relabel this incomplete result as a CI regression or success. |
+| Native expected-red disclosure (not a PR blocker) | At original setup source `2ffa0d3a`, seed 1920951434/year 500, `RESULT: 152 passed, 25 failed (exit 2)`; the global 180-second watchdog interrupted jobs. Fresh main baseline `565dc5ae` produced `RESULT: 157 passed, 25 failed (exit 2)` with the same named failures, stopping later in jobs. Runtime/runner bytes have not changed between setup sources. | Keep the inherited result visible. Under the Owner's WBS-ORG clarification this CI/docs lane need not wait for ORG-0.2 game green. No runtime failure is excused in ORG-0.2 or other game-logic lanes. |
 | Independent review | Codex's existing review covers Grok (Deus) source `2ffa0d3a`. Owner repair `da9e6906` and Codex-authored template/design docs followed. | Refresh review at the final SHA; an independent family must review Codex's additions. The six fresh probes validate the specific checker repair, not the entire branch. |
 | Laptop claim check | No Deus verdict found for the final setup branch. | Deus must return CONFIRMED before any later merge. |
 
 The Owner previously said they would fix setup findings on this branch. This preparation therefore preserves its clean files and records the remaining work rather than making competing edits while the Owner is asleep.
+
+After Owner CI commit `da9e6906`, there is exactly one setup-branch commit: `6b9ec844`, `deus-pm`, subject `[codex] Record Owner design decisions and parked WBS acceptance gates`, written by Codex/GPT. It changes AGENTS plus nine docs/WBS files (111 additions, 23 deletions), not runtime or CI. Codex's `56a888d4` review/template commit preceded `da9e6906` and is not a later addition.
 
 ## CI coverage boundaries
 
