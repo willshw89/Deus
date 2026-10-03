@@ -2544,9 +2544,11 @@
                     const afterUnequip = Anim.layersOf(Le).list.length;
                     const eqAfter = Le.data.equipment || {};
                     const cleared = !eqAfter.mainHand && !eqAfter.weapon && !eqAfter.tool;
+                    // One layer of the axe in the hand: the explicit mainHand slot is resolved first, so its label is mainHand.
+                    const oneHand = v => v === `${AXE_ID}@mainHand` || v === `${AXE_ID}@weapon`;
                     t.check("layers_equip_api",
-                        mirrored && idleLayers.length === 1 && idleLayers[0] === `${AXE_ID}@weapon` && (oak ? workLayers === `${AXE_ID}@weapon` : false) && afterUnequip === 0 && cleared,
-                        `Items.equip(unit, axe #${axeE ? axeE.id : "?"}, "mainHand") mirrored to weapon and tool: ${mirrored}; idle layers ${idleLayers.join(",") || "none"} (want exactly ${AXE_ID}@weapon); while chopping: ${workLayers} (want ${AXE_ID}@weapon); Items.unequip(mainHand) -> ${unequipped}: ${afterUnequip} layer(s) left (want 0), equipment after ${JSON.stringify(eqAfter)} (want mainHand, weapon and tool cleared)`);
+                        mirrored && idleLayers.length === 1 && oneHand(idleLayers[0]) && (oak ? oneHand(workLayers) : false) && afterUnequip === 0 && cleared,
+                        `Items.equip(unit, axe #${axeE ? axeE.id : "?"}, "mainHand") mirrored to weapon and tool: ${mirrored}; idle layers ${idleLayers.join(",") || "none"} (want exactly one ${AXE_ID} layer in the hand slot); while chopping: ${workLayers} (want exactly one); Items.unequip(mainHand) -> ${unequipped}: ${afterUnequip} layer(s) left (want 0), equipment after ${JSON.stringify(eqAfter)} (want mainHand, weapon and tool cleared)`);
                     removeUnits([Le]);
                     restoreCells();
                     await t.waitFrames(2);
