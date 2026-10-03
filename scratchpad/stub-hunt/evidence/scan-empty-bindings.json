@@ -1,0 +1,1002 @@
+[
+  {
+    "file": "game/js/plugins/DEUS_Anim.js",
+    "name": "out",
+    "declLine": 1861,
+    "use": {
+      "line": 1864,
+      "text": "if (out.length && out[out.length - 1][0] === x) out[out.length - 1][1]++;"
+    },
+    "mut": null,
+    "preview": [
+      "1861|            const out = [];",
+      "1862|            for (const x of a) {",
+      "1863|                if (out.length && out[out.length - 1][0] === x) out[out.length - 1][1]++;",
+      "1864|                else out.push([x, 1]);",
+      "1865|            }",
+      "1866|            return out;",
+      "1867|        };",
+      "1868|        const within = (a, set) => a.length > 0 && a.every(x => set.includes(x));",
+      "1869|        const footRow = y => Math.round($gameMap.adjustY(y) * th + th);",
+      "1870|        const errs0 = () => t.errorsSoFar().length + errors.length;",
+      "1871|        const clockKeys = [\"minute\", \"hour\", \"day\", \"monthIndex\", \"year\"];",
+      "1872|        const saveClock = () => (window.$ufTime ? clockKeys.reduce((o, k) => ((o[k] = $ufTime[k]), o), {}) : null);",
+      "1873|        const restoreClock = c => { if (c) for (const k of clockKeys) $ufTime[k] = c[k]; };"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_Anim.js",
+    "name": "crowd",
+    "declLine": 2614,
+    "use": {
+      "line": 2616,
+      "text": "for (let y = vy0; y <= vy1 && crowd.length < 100; y++) for (let x = vx0; x <= vx1 && crowd.length < 100; x++) {"
+    },
+    "mut": null,
+    "preview": [
+      "2614|                const crowd = [];",
+      "2615|                for (let y = vy0; y <= vy1 && crowd.length < 100; y++) for (let x = vx0; x <= vx1 && crowd.length < 100; x++) {",
+      "2616|                    if ((x + y) % 2 === 0 && free(x, y)) crowd.push(add(`TEST_anim_crowd_${crowd.length}`, BODY, x, y, [2, 4, 6, 8][crowd.length % 4], crowd.length % 5 === 0 ? { equipment: { weapon: AXE_ID } } : {}));",
+      "2617|                }",
+      "2618|                for (let y = vy0; y <= vy1 && crowd.length < 100; y++) for (let x = vx0; x <= vx1 && crowd.length < 100; x++) {",
+      "2619|                    if (free(x, y)) crowd.push(add(`TEST_anim_crowd_${crowd.length}`, BODY, x, y, [2, 4, 6, 8][crowd.length % 4], crowd.length % 5 === 0 ? { equipment: { weapon: AXE_ID } } : {}));",
+      "2620|                }",
+      "2621|                let objs = 0;",
+      "2622|                for (let y = vy0; y <= vy1 && objs < 500; y++) for (let x = vx0; x <= vx1 && objs < 500; x++) {",
+      "2623|                    if (!takes(x, y)) continue;",
+      "2624|                    put(x, y, \"TEST_anim_sway\");",
+      "2625|                    objs++;",
+      "2626|                }"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_Callings.js",
+    "name": "secondaries",
+    "declLine": 314,
+    "use": {
+      "line": 317,
+      "text": "if (c && c.id !== primary.id && !secondaries.some(s => s.id === c.id)) {"
+    },
+    "mut": null,
+    "preview": [
+      "314|            const secondaries = [];",
+      "315|            for (const c of pool) {",
+      "316|                if (c && c.id !== primary.id && !secondaries.some(s => s.id === c.id)) {",
+      "317|                    secondaries.push(c);",
+      "318|                    if (secondaries.length >= 2) break;",
+      "319|                }",
+      "320|            }",
+      "321|            for (const c of PROFESSIONS) {",
+      "322|                if (secondaries.length >= 2) break;",
+      "323|                if (c.id !== primary.id && !secondaries.some(s => s.id === c.id)) {",
+      "324|                    secondaries.push(c);",
+      "325|                }",
+      "326|            }"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_Depth.js",
+    "name": "canvasPool",
+    "declLine": 346,
+    "use": {
+      "line": 350,
+      "text": "for (let i = canvasPool.length - 1; i >= 0; i--) {"
+    },
+    "mut": null,
+    "preview": [
+      "346|    const canvasPool = [];\r",
+      "347|    const POOL_MAX = 64; // two planes x two layers\r",
+      "348|    function takeCanvas(width, height) {\r",
+      "349|        for (let i = canvasPool.length - 1; i >= 0; i--) {\r",
+      "350|            const b = canvasPool[i];\r",
+      "351|            if (b.width !== width || b.height !== height) continue;\r",
+      "352|            canvasPool.splice(i, 1);\r",
+      "353|            b.context.clearRect(0, 0, width, height);\r",
+      "354|            return b;\r",
+      "355|        }\r",
+      "356|        const b = new Bitmap(width, height);\r",
+      "357|        b.smooth = false; // NEAREST sampling, whatever the engine's Bitmap default is\r",
+      "358|        b.context.imageSmoothingEnabled = false;\r"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_DepthCues.js",
+    "name": "bad",
+    "declLine": 849,
+    "use": {
+      "line": 852,
+      "text": "if (bad.length) throw new Error(\"fractional pixel \" + bad.slice(0, 3).join(\", \"));"
+    },
+    "mut": null,
+    "preview": [
+      "849|        const bad = [];",
+      "850|        walkPixels(value, \"\", bad);",
+      "851|        if (bad.length) throw new Error(\"fractional pixel \" + bad.slice(0, 3).join(\", \"));",
+      "852|    }",
+      "853|",
+      "854|    function walkPixels(value, path, bad) {",
+      "855|        if (typeof value === \"number\") {",
+      "856|            if (!Number.isInteger(value)) bad.push(path || \"number\");",
+      "857|            return;",
+      "858|        }",
+      "859|        if (!value || typeof value !== \"object\") return;",
+      "860|        if (typeof value.length === \"number\" && typeof value !== \"string\") {",
+      "861|            for (let i = 0; i < value.length; i++) walkPixels(value[i], path + \"[\" + i + \"]\", bad);"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_Ecology.js",
+    "name": "parents",
+    "declLine": 579,
+    "use": {
+      "line": 583,
+      "text": "for (let i = 0; i < tries && parents.length < limit; i++) {"
+    },
+    "mut": null,
+    "preview": [
+      "579|        let parents = [];",
+      "580|        const limit = o.limit > 0 ? o.limit : 32;",
+      "581|        const tries = o.tries > 0 ? o.tries : 64;",
+      "582|        for (let i = 0; i < tries && parents.length < limit; i++) {",
+      "583|            const sx = Math.floor(rng() * size), sy = Math.floor(rng() * size);",
+      "584|            const p = O.atIn(area, sx, sy);",
+      "585|            if (p && isRenewableObject(p) && p.id !== \"sapling\" && p.id !== \"stump\") {",
+      "586|                parents.push({ x: sx, y: sy, type: p });",
+      "587|            }",
+      "588|        }",
+      "589|        if (!parents.length && typeof O.findIn === \"function\") {",
+      "590|            const searchR = Math.min(32, Math.floor(size / 8));",
+      "591|            parents = (O.findIn(area, { near: { x: Math.floor(size / 2), y: Math.floor(size / 2) }, radius: searchR, limit, unsorted: true }) || [])"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_Ecology.js",
+    "name": "free",
+    "declLine": 1061,
+    "use": {
+      "line": 1064,
+      "text": "for (let r = 3; r < Math.floor(size / 2) && free.length < 4; r++) {"
+    },
+    "mut": null,
+    "preview": [
+      "1061|            const free = [];",
+      "1062|            const size = W.state.size, cx = Math.floor(size / 2), cy = Math.floor(size / 2);",
+      "1063|            for (let r = 3; r < Math.floor(size / 2) && free.length < 4; r++) {",
+      "1064|                for (let dy = -r; dy <= r && free.length < 4; dy++) for (let dx = -r; dx <= r && free.length < 4; dx++) {",
+      "1065|                    if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;",
+      "1066|                    const x = cx + dx, y = cy + dy;",
+      "1067|                    if (W.cellFree(area.x, area.y, x, y)) free.push({ x, y });",
+      "1068|                }",
+      "1069|            }",
+      "1070|            if (free.length < 2) {",
+      "1071|                check(\"renewable_timer\", false, `found ${free.length} free test cells (want 2)`);",
+      "1072|                enabled = priorEnabled;",
+      "1073|                return;"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_Factions.js",
+    "name": "placedSub",
+    "declLine": 481,
+    "use": {
+      "line": 490,
+      "text": "const onLayer = placedSub.filter(p => p.z === z);"
+    },
+    "mut": null,
+    "preview": [
+      "481|        const placedSub = [];",
+      "482|        const pickSubPocket = (anchorArea, anchorX, anchorY, z) => {",
+      "483|            const key = `${anchorArea.x},${anchorArea.y},${z}`;",
+      "484|            const used = usedPockets.get(key) || [];",
+      "485|            const allPockets = (UF.Levels && UF.Levels.habitablePockets) ? UF.Levels.habitablePockets(z, anchorArea.x, anchorArea.y) : [];",
+      "486|            const available = allPockets.filter(p => !used.includes(p.id));",
+      "487|            if (!available.length) return null;",
+      "488|            // Prefer pockets that maintain acfg.minGap distance from already placed factions on the same layer",
+      "489|            const onLayer = placedSub.filter(p => p.z === z);",
+      "490|            const spaced = available.filter(p => onLayer.every(o => Math.hypot(p.x - o.x, p.y - o.y) >= acfg.minGap));",
+      "491|            const pool = spaced.length ? spaced : available;",
+      "492|            pool.sort((a, b) => {",
+      "493|                const distA = Math.min(...onLayer.map(o => Math.hypot(a.x - o.x, a.y - o.y)), 999);"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_History.js",
+    "name": "cells",
+    "declLine": 479,
+    "use": {
+      "line": 481,
+      "text": "for (let r = 1; r < state.size && cells.length < count; r++) {"
+    },
+    "mut": null,
+    "preview": [
+      "479|                const cells = [], count = counts.get(site.id) || 0;",
+      "480|                for (let r = 1; r < state.size && cells.length < count; r++) {",
+      "481|                    for (let dy = -r; dy <= r && cells.length < count; dy++) {",
+      "482|                        for (let dx = -r; dx <= r && cells.length < count; dx++) {",
+      "483|                            if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;",
+      "484|                            const x = site.x + dx, y = site.y + dy;",
+      "485|                            if (x < 0 || y < 0 || x >= state.size || y >= state.size) continue;",
+      "486|                            const key = `${site.area.x},${site.area.y},${site.z},${x},${y}`;",
+      "487|                            if (reserved.has(key) || !W.cellFree(site.area.x, site.area.y, x, y, 0, site.z)) continue;",
+      "488|                            reserved.add(key); cells.push({ x, y });",
+      "489|                        }",
+      "490|                    }",
+      "491|                }"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_History.js",
+    "name": "sites",
+    "declLine": 728,
+    "use": {
+      "line": 740,
+      "text": "id: sites.length + 1, faction: f.id, kind: founding.kind, bare: founding.stamp === false,"
+    },
+    "mut": null,
+    "preview": [
+      "728|        const sites = [], events = [], rulers = {}, founders = {};",
+      "729|        // The player's faction first: its camp is site 1 and its line opens the chronicle.",
+      "730|        const order = F.list.slice().sort((a, b) => (b.id === playerId ? 1 : 0) - (a.id === playerId ? 1 : 0));",
+      "731|        for (const f of order) {",
+      "732|            if (!f.home || !f.home.area) continue;",
+      "733|            // The camp stands on the cell nearest the area centre whose 3 x 3 block is all land (the campfire and the",
+      "734|            const levels = (f.homes && f.homes.length ? f.homes.map(h => h.z) : [f.home.z || 0]);",
+      "735|            const camps = levels.map(z => {",
+      "736|                const cell = z === 0 ? campCell(state, f) : ((f.homes && f.homes.find(c => c.z === z)) || (f.home && f.home.z === z ? f.home : null));",
+      "737|                if (!cell) throw new Error(`No habitable founding cell for ${f.id} on level ${z}`);",
+      "738|                const site = {",
+      "739|                    id: sites.length + 1, faction: f.id, kind: founding.kind, bare: founding.stamp === false,",
+      "740|                    area: { x: f.home.area.x, y: f.home.area.y }, x: cell.x, y: cell.y, z,"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_History.js",
+    "name": "sites",
+    "declLine": 918,
+    "use": {
+      "line": 940,
+      "text": "const livingSites = x => x.sites.filter(s => !s.ruined);"
+    },
+    "mut": null,
+    "preview": [
+      "918|        const sites = [];",
+      "919|        const rulers = {};",
+      "920|        const wars = [];",
+      "921|        let nextSiteId = 1;",
+      "922|        const oneArea = state.areasX * state.areasY === 1;",
+      "923|        const mid = Math.floor(state.size / 2);",
+      "924|        const startCell = { x: mid, y: mid };",
+      "925|        const startArea = state.startArea;",
+      "926|        const cap = cfg.populationCap || 400;",
+      "927|        const growth = (History.sitesConfig() && History.sitesConfig().growth) || [0, 30, 120];",
+      "928|        const record = (year, type, text, factionIds, siteId) => {",
+      "929|            events.push({ year, type, text, factions: factionIds.filter(Boolean), site: siteId === undefined ? null : siteId });",
+      "930|        };"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_History.js",
+    "name": "pairs",
+    "declLine": 3115,
+    "use": {
+      "line": 3141,
+      "text": "id: `${f.id}_fam_${pairs.length + 1}`,"
+    },
+    "mut": null,
+    "preview": [
+      "3115|        const pairs = [];",
+      "3116|        for (const f of st.factions.list) {",
+      "3117|            const rec = st.history.founders && st.history.founders[f.id];",
+      "3118|            const facFamilies = (rec && rec.families) || f.families || [];",
+      "3119|            const facUnits = founders.filter(u => u.data.faction === f.id);",
+      "3120|            const sites = [...new Set(facUnits.map(u => u.data.site))];",
+      "3121|            let famCursor = 0;",
+      "3122|            for (const siteId of sites) {",
+      "3123|                const siteUnits = facUnits.filter(u => u.data.site === siteId);",
+      "3124|                const males = siteUnits.filter(u => u.data.gender === \"male\");",
+      "3125|                const females = siteUnits.filter(u => u.data.gender === \"female\");",
+      "3126|                const pairRng = mulberry32(hash32(st.seed, SALT_PAIRBOND, f.id, siteId));",
+      "3127|                for (let i = males.length - 1; i > 0; i--) {"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_Interact.js",
+    "name": "graveyard",
+    "declLine": 624,
+    "use": {
+      "line": 628,
+      "text": "while (graveyard.length) {"
+    },
+    "mut": null,
+    "preview": [
+      "624|    const graveyard = [];   // closed windows, removed and destroyed on the next frame (never inside their own update)",
+      "625|",
+      "626|    function purgeGraveyard() {",
+      "627|        while (graveyard.length) {",
+      "628|            const w = graveyard.pop();",
+      "629|            try {",
+      "630|                if (w.parent) w.parent.removeChild(w);",
+      "631|                w.destroy();",
+      "632|            } catch (e) { /* already gone with its scene */ }",
+      "633|        }",
+      "634|    }",
+      "635|",
+      "636|    function measureWidth(labels) {"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_Levels.js",
+    "name": "selected",
+    "declLine": 878,
+    "use": {
+      "line": 881,
+      "text": "const tooClose = selected.some(s => Math.hypot(s.x - c.x, s.y - c.y) < 8);"
+    },
+    "mut": null,
+    "preview": [
+      "878|        const selected = [];",
+      "879|        for (const c of candidates) {",
+      "880|            const tooClose = selected.some(s => Math.hypot(s.x - c.x, s.y - c.y) < 8);",
+      "881|            if (!tooClose) selected.push(c);",
+      "882|        }",
+      "883|        return selected;",
+      "884|    }",
+      "885|",
+      "886|    // The Z range a description names. A save stores it as zRange { zMin, zMax }, not as flat fields. Flat zMin/zMax",
+      "887|    // still win when a caller passes them. A description that has a seed and area counts but no usable zRange is a",
+      "888|    // pre-WG.00.17 world: the legacy range. No description at all means the live world's range.",
+      "889|    function resolveDescZRange(desc) {",
+      "890|        if (!desc) return zrSync();"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_Ownership.js",
+    "name": "free",
+    "declLine": 654,
+    "use": {
+      "line": 658,
+      "text": "for (let r = 2; r < 30 && free.length < 6; r++) {"
+    },
+    "mut": null,
+    "preview": [
+      "654|            const free = [];",
+      "655|            const size = W.state.size;",
+      "656|            const cx = Math.floor(size / 2), cy = Math.floor(size / 2);",
+      "657|            for (let r = 2; r < 30 && free.length < 6; r++) {",
+      "658|                for (let dy = -r; dy <= r && free.length < 6; dy++) for (let dx = -r; dx <= r && free.length < 6; dx++) {",
+      "659|                    if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;",
+      "660|                    const x = cx + dx, y = cy + dy;",
+      "661|                    if (!O.atIn(area, x, y) && !occupied(x, y) && J.standable(area, x, y, 0)) free.push({ area: copyArea(area), x, y });",
+      "662|                }",
+      "663|            }",
+      "664|            if (free.length < 6) {",
+      "665|                t.check(\"arena\", false, `found ${free.length} empty passable cells (want 6)`);",
+      "666|                enabled = priorEnabled;"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_Select.js",
+    "name": "selectedGroup",
+    "declLine": 659,
+    "use": {
+      "line": 688,
+      "text": "let units = selectedGroup.map(id => W.unit(id)).filter(Boolean);"
+    },
+    "mut": null,
+    "preview": [
+      "659|    let selectedGroup = [];      // Unit IDs in selection",
+      "660|    let activeTool = null;        // Tool id (string) or null",
+      "661|    let chosenWall = \"wall_wood\"; // Wall id for 'wall' tool",
+      "662|    let statusText = \"\";",
+      "663|    let statusTimer = 0;",
+      "664|    let lastSummaryData = null;",
+      "665|    const perfStats = { previewMs: 0, commitMs: 0, worstFrameMs: 0, frames: 0 };",
+      "666|",
+      "667|    let targetedTileCoord = null;",
+      "668|    function setTargetedTile(x, y) {",
+      "669|        if (typeof x === \"number\" && typeof y === \"number\") {",
+      "670|            targetedTileCoord = { x, y };",
+      "671|        } else if (x && typeof x.x === \"number\" && typeof x.y === \"number\") {"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_Select.js",
+    "name": "validIds",
+    "declLine": 700,
+    "use": {
+      "line": 704,
+      "text": "if (u && isPlayerUnit(u) && !validIds.includes(id)) {"
+    },
+    "mut": null,
+    "preview": [
+      "700|        const validIds = [];",
+      "701|        for (const id of ids) {",
+      "702|            const u = W.unit(id);",
+      "703|            if (u && isPlayerUnit(u) && !validIds.includes(id)) {",
+      "704|                validIds.push(id);",
+      "705|            }",
+      "706|        }",
+      "707|",
+      "708|        if (add) {",
+      "709|            for (const id of validIds) {",
+      "710|                if (!selectedGroup.includes(id)) selectedGroup.push(id);",
+      "711|            }",
+      "712|        } else {"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_Sheet.js",
+    "name": "out",
+    "declLine": 889,
+    "use": {
+      "line": 891,
+      "text": "while (queue.length && out.length < MAX_STOCKPILE_CELLS) {"
+    },
+    "mut": null,
+    "preview": [
+      "889|        const out = [], seen = new Set([`${x},${y}`]), queue = [[x, y]];",
+      "890|        while (queue.length && out.length < MAX_STOCKPILE_CELLS) {",
+      "891|            const [cx, cy] = queue.shift();",
+      "892|            out.push({ x: cx, y: cy });",
+      "893|            for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {",
+      "894|                const nx = cx + dx, ny = cy + dy, k = `${nx},${ny}`;",
+      "895|                if (seen.has(k)) continue;",
+      "896|                seen.add(k);",
+      "897|                if (O.typeIdIn(area, nx, ny) === typeId) queue.push([nx, ny]);",
+      "898|            }",
+      "899|        }",
+      "900|        return out;",
+      "901|    }"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_Speech.js",
+    "name": "cache",
+    "declLine": 394,
+    "use": {
+      "line": 406,
+      "text": "for (let i = cache.length - 1; i >= 0; i--) {"
+    },
+    "mut": null,
+    "preview": [
+      "394|    const cache = []; // { bitmap, key, users, used, w, h, stale }",
+      "395|    let cacheSig = \"\";",
+      "396|    let useClock = 0;",
+      "397|    const sigOf = c => `${c.fontSize}/${c.lineHeight}/${c.maxChars}/${c.maxLines}/${c.outlineWidth}/${c.outlineColor}`;",
+      "398|    const mainFont = () => (window.$gameSystem && $gameSystem.mainFontFace ? $gameSystem.mainFontFace() : \"rmmz-mainfont, sans-serif\");",
+      "399|",
+      "400|    function acquire(u) {",
+      "401|        const c = cfg();",
+      "402|        const sig = sigOf(c);",
+      "403|        if (sig !== cacheSig) {",
+      "404|            // Settings changed: the old bitmaps may not fit. Free ones go now, used ones when released.",
+      "405|            for (let i = cache.length - 1; i >= 0; i--) {",
+      "406|                if (cache[i].users === 0) {"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_Speech.js",
+    "name": "rows",
+    "declLine": 902,
+    "use": {
+      "line": 904,
+      "text": "const rowsOk = rows.every(r => Array.from(r).length <= c.maxChars) && chunks.every(ch => ch.length >= 1 && ch.length <= c.maxLines);"
+    },
+    "mut": null,
+    "preview": [
+      "902|                    const rows = [].concat(...chunks);",
+      "903|                    const rowsOk = rows.every(r => Array.from(r).length <= c.maxChars) && chunks.every(ch => ch.length >= 1 && ch.length <= c.maxLines);",
+      "904|                    const sameText = rows.join(\"\").replace(/\\s+/g, \"\") === long.replace(/\\s+/g, \"\");",
+      "905|                    const cut = rows.some(r => r === \"Unbelievablylongwordth\");",
+      "906|                    const ids = S.say(A.id, long, { frames: 24 });",
+      "907|                    const firstLine = S.lines(A.id)[0];",
+      "908|                    const pad = padOf(c);",
+      "909|                    const hOk = !!firstLine && firstLine.h === pad * 2 + firstLine.rows.length * c.lineHeight;",
+      "910|                    const order = [];",
+      "911|                    let together = 0;",
+      "912|                    await t.waitUntil(() => {",
+      "913|                        const on = S.active().filter(a => a.speaker === \"u\" + A.id);",
+      "914|                        if (on.length > 1) together++;"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_Speech.js",
+    "name": "crowd",
+    "declLine": 1152,
+    "use": {
+      "line": 1156,
+      "text": "if (crowd.length >= 17) break;"
+    },
+    "mut": null,
+    "preview": [
+      "1152|                const crowd = [];",
+      "1153|                for (const dy of [-4, -1, 2, 5]) {",
+      "1154|                    for (const dx of [-6, -3, 0, 3, 6]) {",
+      "1155|                        if (crowd.length >= 17) break;",
+      "1156|                        let spot = null;",
+      "1157|                        for (let r = 0; r <= 1 && !spot; r++) {",
+      "1158|                            for (let ox = -r; ox <= r && !spot; ox++) for (let oy = -r; oy <= r && !spot; oy++) if (free(A.x + dx + ox, A.y + dy + oy)) spot = { x: A.x + dx + ox, y: A.y + dy + oy };",
+      "1159|                        }",
+      "1160|                        if (spot) crowd.push(spawn(`TEST_crowd${crowd.length + 1}`, spot.x, spot.y));",
+      "1161|                    }",
+      "1162|                }",
+      "1163|                await t.waitUntil(() => crowd.every(u => !!W.eventOf(u.id)), 5000, \"the crowd on screen\").catch(() => {});",
+      "1164|                await t.waitFrames(5);"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_Speech.js",
+    "name": "cands",
+    "declLine": 1251,
+    "use": {
+      "line": 1253,
+      "text": "for (let r = 0; r < 10 && cands.length < 4; r++) {"
+    },
+    "mut": null,
+    "preview": [
+      "1251|                        const cands = [];",
+      "1252|                        for (let r = 0; r < 10 && cands.length < 4; r++) {",
+      "1253|                            for (let dy = -r; dy <= r; dy++) {",
+      "1254|                                for (let dx = -r; dx <= r; dx++) {",
+      "1255|                                    if (Math.max(Math.abs(dx), Math.abs(dy)) !== r || cands.length >= 4) continue;",
+      "1256|                                    const x = ca.x + dx, y = ca.y + dy;",
+      "1257|                                    if (open(x, y) && open(x + 1, y) && canReach(ca, x, y) && canReach(cb, x + 1, y)) cands.push({ x, y });",
+      "1258|                                }",
+      "1259|                            }",
+      "1260|                        }",
+      "1261|                        const tried = [];",
+      "1262|                        let px = null, py = null;",
+      "1263|                        for (const cand of cands) {"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_Test.js",
+    "name": "waiters",
+    "declLine": 117,
+    "use": {
+      "line": 122,
+      "text": "for (let i = waiters.length - 1; i >= 0; i--) {"
+    },
+    "mut": null,
+    "preview": [
+      "117|    const waiters = [];\r",
+      "118|    const _updateMain = SceneManager.updateMain;\r",
+      "119|    SceneManager.updateMain = function() {\r",
+      "120|        _updateMain.call(this);\r",
+      "121|        for (let i = waiters.length - 1; i >= 0; i--) {\r",
+      "122|            if (waiters[i].test()) {\r",
+      "123|                waiters[i].resolve();\r",
+      "124|                waiters.splice(i, 1);\r",
+      "125|            }\r",
+      "126|        }\r",
+      "127|    };\r",
+      "128|    const waitUntil = (test, timeoutMs, what) => new Promise((resolve, reject) => {\r",
+      "129|        const timer = setTimeout(() => reject(new Error(`timed out after ${timeoutMs} ms waiting for ${what}`)), timeoutMs);\r"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_World.js",
+    "name": "tried",
+    "declLine": 667,
+    "use": {
+      "line": 680,
+      "text": "if (tried.includes(file)) continue;"
+    },
+    "mut": null,
+    "preview": [
+      "667|        const tried = [];",
+      "668|        if (host && typeof host.require === \"function\") {",
+      "669|            const path = host.require(\"path\");",
+      "670|            const fs = host.require(\"fs\");",
+      "671|            const bases = [];",
+      "672|            // The game runs with the game folder as its working directory; a headless tool runs from the repository root.",
+      "673|            if (host.cwd) bases.push(path.join(host.cwd, \"js\", \"sim\"), path.join(host.cwd, \"game\", \"js\", \"sim\"));",
+      "674|            if (host.dirname) bases.push(path.join(host.dirname, \"..\", \"sim\"));",
+      "675|            const forms = name.endsWith(\".js\") ? [name] : [`${name}.js`, `${name}/index.js`];",
+      "676|            for (const base of bases) {",
+      "677|                for (const form of forms) {",
+      "678|                    const file = path.resolve(base, form);",
+      "679|                    if (tried.includes(file)) continue;"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_World.js",
+    "name": "simTickHandlers",
+    "declLine": 730,
+    "use": {
+      "line": 771,
+      "text": "if (simTickHandlers.some(h => h.name === name)) throw new Error(`UF.Sim.onTick: \"${name}\" is already registered`);"
+    },
+    "mut": null,
+    "preview": [
+      "730|    let simTickHandlers = [];  // frozen { name, order, fn }, sorted by (order, name); replaced, never edited, on register",
+      "731|    let simTicking = false;    // true while handlers run: a handler that moves the calendar is picked up next minute",
+      "732|",
+      "733|    let simTickMod = null;     // host/tick, loaded once (simRequire looks at the disk on every call)",
+      "734|    function simTickModule() { return simTickMod || (simTickMod = simRequire(\"host/tick\")); }",
+      "735|    /** The calendar's absolute minute; null with no calendar (no $ufTime, or a harness stub without day/hour/minute). */",
+      "736|    function simAbsMinute() {",
+      "737|        const t = window.$ufTime;",
+      "738|        if (!t || typeof t.day !== \"number\" || typeof t.hour !== \"number\" || typeof t.minute !== \"number\") return null;",
+      "739|        return simTickModule().absoluteMinute(t.day, t.hour, t.minute);",
+      "740|    }",
+      "741|    function armSimClock() {",
+      "742|        const m = simAbsMinute();"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_World.js",
+    "name": "truth",
+    "declLine": 4220,
+    "use": {
+      "line": 4226,
+      "text": "if (reason !== \"no path\" || truth.length >= 5 || !goal || !sameArea(goal.area, area) || !sameArea(u.area, area)) return;"
+    },
+    "mut": null,
+    "preview": [
+      "4220|        const truth = [];",
+      "4221|        const blockedLog = [];",
+      "4222|        const onBlocked = (u, reason, goal) => {",
+      "4223|            if (!u) return;",
+      "4224|            if (/^TEST_/.test(u.name)) blockedLog.push({ id: u.id, reason: reason || \"?\", at: `${u.x},${u.y}` });",
+      "4225|            if (reason !== \"no path\" || truth.length >= 5 || !goal || !sameArea(goal.area, area) || !sameArea(u.area, area)) return;",
+      "4226|            const t0 = performance.now();",
+      "4227|            const ev = W.eventOf(u.id);",
+      "4228|            const sx = ev ? ev.x : u.x, sy = ev ? ev.y : u.y, gc = cellOf(goal.x, goal.y);",
+      "4229|            // The goal itself when the map lets anyone step onto it, else its 4 neighbours (a tree, a wall site).",
+      "4230|            const around = [[0, 1], [0, -1], [1, 0], [-1, 0]].map(([dx, dy]) => ({ x: goal.x + dx, y: goal.y + dy })).filter(c => c.x >= 0 && c.y >= 0 && c.x < size && c.y < size);",
+      "4231|            const enterable = around.some(c => mapStep(c.x, c.y, c.x < goal.x ? 6 : c.x > goal.x ? 4 : c.y < goal.y ? 2 : 8) === gc);",
+      "4232|            const r = mapReach(sx, sy, new Set(enterable ? [gc] : around.map(c => cellOf(c.x, c.y))));"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_World.js",
+    "name": "trail",
+    "declLine": 4302,
+    "use": {
+      "line": 4312,
+      "text": "if (trail[trail.length - 1] !== c) {"
+    },
+    "mut": null,
+    "preview": [
+      "4302|        const trail = [];",
+      "4303|        let touches = 0, resends = 0, planLen = -1;",
+      "4304|        const arrivedA = () => !pather.goal && pather.x === goalA.x && pather.y === goalA.y;",
+      "4305|        const f0 = Graphics.frameCount; // measuring only",
+      "4306|        W.sendUnit(pather.id, { area, x: goalA.x, y: goalA.y });",
+      "4307|        await t.waitUntil(() => {",
+      "4308|            const ev = W.eventOf(pather.id);",
+      "4309|            if (ev) {",
+      "4310|                const c = cellOf(ev.x, ev.y);",
+      "4311|                if (trail[trail.length - 1] !== c) {",
+      "4312|                    trail.push(c);",
+      "4313|                    if (wallCells.has(c)) touches++;",
+      "4314|                }"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_World.js",
+    "name": "times",
+    "declLine": 4458,
+    "use": {
+      "line": 4461,
+      "text": "while (times.length < 100 && tries < 4000) {"
+    },
+    "mut": null,
+    "preview": [
+      "4458|        const times = [], expandedList = [];",
+      "4459|        let tries = 0, capped = 0, outside = 0;",
+      "4460|        while (times.length < 100 && tries < 4000) {",
+      "4461|            tries++;",
+      "4462|            const sx = 4 + Math.floor(rng() * (size - 8)), sy = 4 + Math.floor(rng() * (size - 8));",
+      "4463|            const dist = 40 + Math.floor(rng() * 41), ax = Math.floor(rng() * (dist + 1));",
+      "4464|            const gx = sx + (rng() < 0.5 ? -ax : ax), gy = sy + (rng() < 0.5 ? ax - dist : dist - ax);",
+      "4465|            if (gx < 0 || gy < 0 || gx >= size || gy >= size) continue;",
+      "4466|            if (!W.walkable(area.x, area.y, sx, sy) || !W.walkable(area.x, area.y, gx, gy) || !W.reachable(area, sx, sy, gx, gy)) continue;",
+      "4467|            const t0 = performance.now();",
+      "4468|            const p = W.findPath(area, sx, sy, gx, gy);",
+      "4469|            const ms = performance.now() - t0;",
+      "4470|            const lp = W.lastPath;"
+    ]
+  },
+  {
+    "file": "game/js/plugins/DEUS_WorldGen.js",
+    "name": "rivers",
+    "declLine": 2225,
+    "use": {
+      "line": 2227,
+      "text": "const gaps = rivers.map(r => Math.abs(Math.round(r.center(a.y * size + mid)) - (a.x * size + mid)));"
+    },
+    "mut": null,
+    "preview": [
+      "2225|            const rivers = [];\r",
+      "2226|            const gaps = rivers.map(r => Math.abs(Math.round(r.center(a.y * size + mid)) - (a.x * size + mid)));\r",
+      "2227|            t.check(\"river_not_through_start\", gaps.every(g => g > cat.rivers.keepAwayFromStart), `river(s) pass ${gaps.join(\", \")} cells from the start (keep away ${cat.rivers.keepAwayFromStart})`);\r",
+      "2228|            const [cMin, cMax] = cat.rivers.count;\r",
+      "2229|            t.check(\"rivers_count\", rivers.length >= 1 && rivers.length >= cMin && rivers.length <= cMax,\r",
+      "2230|                `${rivers.length} river(s) (catalog count ${cMin}-${cMax}) at columns ${rivers.map(r => `${r.anchorX} (half-width ${r.halfWidth})`).join(\", \")}`);\r",
+      "2231|            // Continuity: each river is water on every row of the start area, and consecutive rows touch (ocean/lake cells count as water).\r",
+      "2232|            const breaks = [];\r",
+      "2233|            for (const r of rivers) {\r",
+      "2234|                const col = Math.round(r.center(a.y * size)) - a.x * size;\r",
+      "2235|                if (col < 0 || col >= size) continue;\r",
+      "2236|                let prev = null;\r",
+      "2237|                for (let y = 0; y < size; y++) {\r"
+    ]
+  },
+  {
+    "file": "tools/art/test_catalogue.js",
+    "name": "catIds",
+    "declLine": 404,
+    "use": {
+      "line": 424,
+      "text": "return { ok: !missing.length && !empty.length && catIds.length > 0, detail: `${lines.join('; ')}; addendum family x band cells: ${B.FAMILIES.length * g.bands.length - empty.length}/${B.FAMILIES.length * g.bands.length}${missing.length ? '; uncovered: ' + missing.slice(0, 5).join(', ') : ''}${empty.length ? '; empty: ' + empty.join(', ') : ''}` };"
+    },
+    "mut": null,
+    "preview": [
+      "404|    const catIds = [].concat(wc.objects.map(o => 'objects:' + o.id), items.map(i => 'items:' + i), species.map(s => 'wildlife:' + s), Object.keys(wc.people).filter(k => k !== 'about').map(k => 'people:' + k), wc.groundKinds.map(x => 'groundKinds:' + x.id), Object.keys(wc.water.surface).map(k => 'water:' + k), Object.keys(wc.faces.cultures).map(k => 'faces:' + k), Object.keys(wc.skins.cultures).map(k => 'skins:' + k));",
+      "405|    const briefText = fs.readdirSync(rel(B.SRC.briefsDir)).filter(f => /^SEG-\\d\\d/.test(f)).map(f => ({ f, t: fs.readFileSync(rel(B.SRC.briefsDir + '/' + f), 'utf8') }));",
+      "406|    const special = [];",
+      "407|    for (const { f, t } of briefText) for (const m of t.matchAll(/^### ((anchor|ui|eq|face)_\\S+) — /gm)) special.push(f.slice(0, 6) + ':' + m[1]);",
+      "408|    const manifest = fs.readFileSync(rel(B.SRC.manifest), 'utf8').split(/\\r?\\n/).filter(l => /^\\| `/.test(l)).map(l => l.split('|')[1].trim().replace(/`/g, ''));",
+      "409|    const openAr = fs.readFileSync(rel(B.SRC.requests), 'utf8').split(/\\r?\\n/).filter(l => /^\\|\\s*AR-\\d+/.test(l)).map(l => l.split('|').map(s => s.trim())).filter(c => !/^(DELIVERED|CHECKED|APPROVED|INTEGRATED|WITHDRAWN)/.test(c[c.length - 2])).map(c => c[1]);",
+      "410|    const groups = [['WorldCatalog ids', 'catalog', catIds], ['brief anchor/ui/eq/face ids', 'brief', special], ['manifest rows', 'manifest', manifest], ['open AR rows', 'ar', openAr]];",
+      "411|    const lines = [], missing = [];",
+      "412|    for (const [label, k, ids] of groups) {",
+      "413|        const miss = ids.filter(id => !isCov(k, id));",
+      "414|        missing.push(...miss.map(m => `${k}:${m}`));",
+      "415|        lines.push(`${label} ${ids.length - miss.length}/${ids.length}`);",
+      "416|    }"
+    ]
+  },
+  {
+    "file": "tools/audio/test_validate_audio_standard.js",
+    "name": "tempFiles",
+    "declLine": 18,
+    "use": {
+      "line": 40,
+      "text": "const file = path.join(os.tmpdir(), \"deus-au-\" + process.pid + \"-\" + name + \"-\" + tempFiles.length + \".js\");"
+    },
+    "mut": null,
+    "preview": [
+      "18|const tempFiles = [];",
+      "19|",
+      "20|function check(name, ok, detail) {",
+      "21|    if (ok) {",
+      "22|        passed += 1;",
+      "23|        console.log(\"PASS \" + name);",
+      "24|    } else {",
+      "25|        failed += 1;",
+      "26|        console.log(\"FAIL \" + name + (detail ? \": \" + detail : \"\"));",
+      "27|    }",
+      "28|}",
+      "29|",
+      "30|function mutateSource(name, from, to) {"
+    ]
+  },
+  {
+    "file": "tools/sim/test_ledger.js",
+    "name": "out",
+    "declLine": 71,
+    "use": {
+      "line": 76,
+      "text": "const p = out.length ? out[out.length - 1] : null;"
+    },
+    "mut": null,
+    "preview": [
+      "71|    const out = [];",
+      "72|    let i = 0;",
+      "73|    const n = src.length;",
+      "74|    function regexOk() {",
+      "75|        const p = out.length ? out[out.length - 1] : null;",
+      "76|        if (!p) return true;",
+      "77|        if (p.t === \"num\" || p.t === \"str\" || p.t === \"tpl\" || p.t === \"re\") return false;",
+      "78|        if (p.t === \"id\") return REGEX_AFTER.has(p.v);",
+      "79|        return !(p.v === \")\" || p.v === \"]\" || p.v === \"}\");",
+      "80|    }",
+      "81|    function scan(stopAtBrace) {",
+      "82|        let depth = 0;",
+      "83|        while (i < n) {"
+    ]
+  },
+  {
+    "file": "tools/test_area_generation_speed.js",
+    "name": "problems",
+    "declLine": 189,
+    "use": {
+      "line": 196,
+      "text": "if (row.problems.length) {"
+    },
+    "mut": null,
+    "preview": [
+      "189|    const problems = [];",
+      "190|    for (const grid of GRIDS) {",
+      "191|        const env = makeEnv(grid, grid, levelsSource);",
+      "192|        for (const seed of SEEDS) for (const gen of GENS) {",
+      "193|            const row = checksumCase(env, seed, gen, grid, grid);",
+      "194|            const label = `gen ${gen} seed ${seed} ${grid}x${grid}`;",
+      "195|            if (row.problems.length) {",
+      "196|                problems.push(`${label}: ${row.problems.join(\"; \")}`);",
+      "197|                console.log(`checksum ${label} GRID_REJECT ${row.problems.join(\"; \")}`);",
+      "198|                continue;",
+      "199|            }",
+      "200|            const bad = CORE.filter(z => typeof row.checksums[String(z)] !== \"string\" || !/^[0-9a-f]{8}$/.test(row.checksums[String(z)]));",
+      "201|            if (bad.length) problems.push(`${label}: bad checksum at z ${bad.join(\",\")}`);"
+    ]
+  },
+  {
+    "file": "tools/test_control_board.js",
+    "name": "companionPlugins",
+    "declLine": 276,
+    "use": {
+      "line": 285,
+      "text": "check(\"DEUS_Core.js companionPlugins declaration discovery\", false, \"companionPlugins array not found\");"
+    },
+    "mut": null,
+    "preview": [
+      "276|let companionPlugins = [];",
+      "277|if (!fs.existsSync(corePath)) {",
+      "278|    console.error(`Missing ${corePath}`);",
+      "279|    process.exit(1);",
+      "280|}",
+      "281|const coreJs = fs.readFileSync(corePath, \"utf8\");",
+      "282|const companionMatch = coreJs.match(/const companionPlugins\\s*=\\s*\\[([\\s\\S]*?)\\];/);",
+      "283|if (!companionMatch) {",
+      "284|    check(\"DEUS_Core.js companionPlugins declaration discovery\", false, \"companionPlugins array not found\");",
+      "285|} else {",
+      "286|    companionPlugins = companionMatch[1].split(\"\\n\")",
+      "287|        .map(l => l.replace(/\\/\\/.*$/, \"\").trim())",
+      "288|        .filter(Boolean)"
+    ]
+  },
+  {
+    "file": "tools/test_creature_inventory_black_box.js",
+    "name": "uInv",
+    "declLine": 160,
+    "use": {
+      "line": 172,
+      "text": "carriedWeight: () => uInv.reduce((sum, it) => sum + ((itemsById[it.id] ? itemsById[it.id].weight : 1) * (it.count || 1)), 0),"
+    },
+    "mut": null,
+    "preview": [
+      "160|const uInv = [];",
+      "161|",
+      "162|UF.Items = {",
+      "163|    get: id => itemsById[id] || null,",
+      "164|    type: id => ({",
+      "165|        id,",
+      "166|        name: id === \"sword_iron\" ? \"Iron Sword\" : id === \"bread\" ? \"Bread\" : \"Stone\",",
+      "167|        weight: id === \"sword_iron\" ? 3.0 : id === \"bread\" ? 0.5 : 1.0,",
+      "168|        slot: id === \"sword_iron\" ? \"mainHand\" : null",
+      "169|    }),",
+      "170|    inventoryOf: () => uInv,",
+      "171|    carriedWeight: () => uInv.reduce((sum, it) => sum + ((itemsById[it.id] ? itemsById[it.id].weight : 1) * (it.count || 1)), 0),",
+      "172|    maxWeight: (uid) => {"
+    ]
+  },
+  {
+    "file": "tools/test_ecology.js",
+    "name": "units",
+    "declLine": 37,
+    "use": {
+      "line": 86,
+      "text": "unitsInArea: (ax, ay) => units.filter(u => u.area && u.area.x === ax && u.area.y === ay),"
+    },
+    "mut": null,
+    "preview": [
+      "37|    const units = [];",
+      "38|    const objectsGrid = new Map(); // \"ax,ay,z,x,y\" -> id",
+      "39|    const events = new Map();",
+      "40|    let unitIdCounter = 1;",
+      "41|    let currentHour = 100;",
+      "42|",
+      "43|    class Base {",
+      "44|        start() {}",
+      "45|    }",
+      "46|    const context = {",
+      "47|        console,",
+      "48|        Scene_Boot: class extends Base {},",
+      "49|        Scene_Map: class extends Base {},"
+    ]
+  },
+  {
+    "file": "tools/test_ff5_proportions_and_footsteps.js",
+    "name": "unique",
+    "declLine": 42,
+    "use": {
+      "line": 50,
+      "text": "index.set(k, unique.length);"
+    },
+    "mut": null,
+    "preview": [
+      "42|    const unique = [];",
+      "43|    const index = new Map();",
+      "44|    for (const line of text.split(/\\r?\\n/)) {",
+      "45|        const rgb = parseHex(line);",
+      "46|        if (!rgb) continue;",
+      "47|        const k = (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];",
+      "48|        if (!index.has(k)) {",
+      "49|            index.set(k, unique.length);",
+      "50|            unique.push(rgb);",
+      "51|        }",
+      "52|    }",
+      "53|    const lab = unique.map(c => srgbToLab(...c));",
+      "54|    const cache = new Map();"
+    ]
+  },
+  {
+    "file": "tools/test_generated_z2_cut_proof.js",
+    "name": "results",
+    "declLine": 172,
+    "use": {
+      "line": 176,
+      "text": "console.log(`RESULT: ${results.filter(r => r.ok).length} passed, ${results.filter(r => !r.ok).length} failed (exit 2)`);"
+    },
+    "mut": null,
+    "preview": [
+      "172|const results = [];",
+      "173|function harnessProblem(msg) {",
+      "174|    console.log(`HARNESS ${msg}`);",
+      "175|    console.log(`RESULT: ${results.filter(r => r.ok).length} passed, ${results.filter(r => !r.ok).length} failed (exit 2)`);",
+      "176|    process.exit(2);",
+      "177|}",
+      "178|process.on(\"uncaughtException\", e => harnessProblem(`uncaught: ${e && e.stack ? e.stack.split(\"\\n\").slice(0, 4).join(\" | \") : e}`));",
+      "179|if (mutant && !MUTANTS[mutant]) harnessProblem(`unknown mutant \"${mutant}\"; known: ${Object.keys(MUTANTS).join(\", \")}`);",
+      "180|",
+      "181|// A named check: fn asserts (node:assert) and returns the detail line. An assertion or any error is a FAIL.",
+      "182|function check(name, fn) {",
+      "183|    let ok = false, detail = \"\";",
+      "184|    try {"
+    ]
+  },
+  {
+    "file": "tools/test_haul_builder.js",
+    "name": "unique",
+    "declLine": 31,
+    "use": {
+      "line": 39,
+      "text": "index.set(k, unique.length);"
+    },
+    "mut": null,
+    "preview": [
+      "31|    const unique = [];",
+      "32|    const index = new Map();",
+      "33|    for (const line of text.split(/\\r?\\n/)) {",
+      "34|        const rgb = parseHex(line);",
+      "35|        if (!rgb) continue;",
+      "36|        const k = (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];",
+      "37|        if (!index.has(k)) {",
+      "38|            index.set(k, unique.length);",
+      "39|            unique.push(rgb);",
+      "40|        }",
+      "41|    }",
+      "42|    const lab = unique.map(c => srgbToLab(...c));",
+      "43|    const cache = new Map();"
+    ]
+  },
+  {
+    "file": "tools/test_palette.js",
+    "name": "unique",
+    "declLine": 28,
+    "use": {
+      "line": 36,
+      "text": "index.set(k, unique.length);"
+    },
+    "mut": null,
+    "preview": [
+      "28|    const unique = [];",
+      "29|    const index = new Map();",
+      "30|    for (const line of text.split(/\\r?\\n/)) {",
+      "31|        const rgb = parseHex(line);",
+      "32|        if (!rgb) continue;",
+      "33|        const k = (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];",
+      "34|        if (!index.has(k)) {",
+      "35|            index.set(k, unique.length);",
+      "36|            unique.push(rgb);",
+      "37|        }",
+      "38|    }",
+      "39|    const lab = unique.map(c => srgbToLab(...c));",
+      "40|    const cache = new Map();"
+    ]
+  }
+]

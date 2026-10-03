@@ -1,0 +1,100 @@
+[
+  {
+    "file": "game/js/plugins/DEUS_Combat.js",
+    "line": 1431,
+    "name": "if",
+    "expr": "true",
+    "text": "if (d.ai === \"colonist\" && window.UF.Jobs && typeof UF.Jobs.of === \"function\" && UF.Jobs.of(u.id)) return false; // busy: fights what is in reach / return true;"
+  },
+  {
+    "file": "game/js/plugins/DEUS_Combat.js",
+    "line": 1599,
+    "name": "if",
+    "expr": "true",
+    "text": "if (w && typeof w.stopUnit === \"function\") w.stopUnit(u.id); / return true;"
+  },
+  {
+    "file": "game/js/plugins/DEUS_Fog.js",
+    "line": 512,
+    "name": "resolveEnabled",
+    "expr": "false",
+    "text": "function resolveEnabled() { / return false;"
+  },
+  {
+    "file": "game/js/plugins/DEUS_Jobs.js",
+    "line": 1152,
+    "name": "if",
+    "expr": "null",
+    "text": "if ((E && typeof E.isBurning === \"function\" && E.isBurning(unit)) || (unit.data.burning && typeof unit.data.burning === \"object\")) return { kind: \"burning\", where: \"self\" }; / return null;"
+  },
+  {
+    "file": "game/js/plugins/DEUS_LayerOverlays.js",
+    "line": 251,
+    "name": "if",
+    "expr": "false",
+    "text": "if (S && typeof S.isSelected === \"function\") return S.isSelected(unit.id) === true; / return false;"
+  },
+  {
+    "file": "game/js/plugins/DEUS_Levels.js",
+    "line": 3960,
+    "name": "if",
+    "expr": "null",
+    "text": "if (J && typeof J.isWaterAt === \"function\" && J.isWaterAt({ x: ax, y: ay, z: 0 }, x, y)) return \"water\"; / return null;"
+  },
+  {
+    "file": "game/js/plugins/DEUS_NaturalConnections.js",
+    "line": 296,
+    "name": "if",
+    "expr": "false",
+    "text": "if (jobs && typeof jobs.isWaterAt === \"function\" && jobs.isWaterAt(r.area || { x: 0, y: 0 }, r.x, r.y)) return true; / return false;"
+  },
+  {
+    "file": "game/js/plugins/DEUS_Objects.js",
+    "line": 665,
+    "name": "if",
+    "expr": "null",
+    "text": "if (type.gen && typeof generated[type.gen] === \"function\") return generated[type.gen](); / return null;"
+  },
+  {
+    "file": "game/js/plugins/DEUS_Select.js",
+    "line": 972,
+    "name": "if",
+    "expr": "false",
+    "text": "if (T && typeof T.isOpen === \"function\" && T.isOpen()) return true; / return false;"
+  },
+  {
+    "file": "game/js/plugins/DEUS_Select.js",
+    "line": 1007,
+    "name": "if",
+    "expr": "true",
+    "text": "if (L && typeof L.shapeAt === \"function\" && L.shapeAt({ area, x, y, z }) === \"solid\") { / return true;"
+  },
+  {
+    "file": "game/js/plugins/DEUS_Sheet.js",
+    "line": 2312,
+    "name": "if",
+    "expr": "false",
+    "text": "if (window.UF && UF.Select && typeof UF.Select.selected === \"function\" && UF.Select.selected().length > 1) { / return false;"
+  },
+  {
+    "file": "game/js/plugins/DEUS_StructuralPhysics.js",
+    "line": 55,
+    "name": "hasAnchor",
+    "expr": "false",
+    "text": "DEUS.StructuralPhysics.hasAnchor = function(block) { / return false;"
+  },
+  {
+    "file": "game/js/plugins/DEUS_Test.js",
+    "line": 190,
+    "name": "isGameActive",
+    "expr": "true",
+    "text": "SceneManager.isGameActive = function() { / return true;"
+  },
+  {
+    "file": "game/js/plugins/DEUS_WorldGen.js",
+    "line": 397,
+    "name": "riverModels",
+    "expr": "[]",
+    "text": "WorldGen.riverModels = function(state) { / return [];"
+  }
+]

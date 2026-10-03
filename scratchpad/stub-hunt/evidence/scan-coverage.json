@@ -1,0 +1,1775 @@
+{
+  "pluginFiles": 71,
+  "testFiles": 282,
+  "pluginLines": 92305,
+  "testLines": 102991,
+  "emptyHits": 40,
+  "constHits": 14,
+  "files": [
+    {
+      "file": "game/js/plugins/DEUS_Anim.js",
+      "lines": 2716,
+      "bytes": 145815
+    },
+    {
+      "file": "game/js/plugins/DEUS_AssetStreaming.js",
+      "lines": 47,
+      "bytes": 1206
+    },
+    {
+      "file": "game/js/plugins/DEUS_Bag.js",
+      "lines": 743,
+      "bytes": 32640
+    },
+    {
+      "file": "game/js/plugins/DEUS_Callings.js",
+      "lines": 407,
+      "bytes": 14744
+    },
+    {
+      "file": "game/js/plugins/DEUS_Camera.js",
+      "lines": 623,
+      "bytes": 25382
+    },
+    {
+      "file": "game/js/plugins/DEUS_CellularFluids.js",
+      "lines": 87,
+      "bytes": 2921
+    },
+    {
+      "file": "game/js/plugins/DEUS_Colonists.js",
+      "lines": 5921,
+      "bytes": 328737
+    },
+    {
+      "file": "game/js/plugins/DEUS_ColonyOverseer.js",
+      "lines": 625,
+      "bytes": 32582
+    },
+    {
+      "file": "game/js/plugins/DEUS_Combat.js",
+      "lines": 3197,
+      "bytes": 164590
+    },
+    {
+      "file": "game/js/plugins/DEUS_CombatRT.js",
+      "lines": 69,
+      "bytes": 2849
+    },
+    {
+      "file": "game/js/plugins/DEUS_CombatUI.js",
+      "lines": 72,
+      "bytes": 2951
+    },
+    {
+      "file": "game/js/plugins/DEUS_Conditions.js",
+      "lines": 1187,
+      "bytes": 51534
+    },
+    {
+      "file": "game/js/plugins/DEUS_Containers.js",
+      "lines": 1569,
+      "bytes": 67412
+    },
+    {
+      "file": "game/js/plugins/DEUS_Core.js",
+      "lines": 661,
+      "bytes": 28886
+    },
+    {
+      "file": "game/js/plugins/DEUS_Culling.js",
+      "lines": 532,
+      "bytes": 26788
+    },
+    {
+      "file": "game/js/plugins/DEUS_DayNight.js",
+      "lines": 664,
+      "bytes": 34629
+    },
+    {
+      "file": "game/js/plugins/DEUS_DeathForensics.js",
+      "lines": 545,
+      "bytes": 23628
+    },
+    {
+      "file": "game/js/plugins/DEUS_Depth.js",
+      "lines": 2688,
+      "bytes": 188832
+    },
+    {
+      "file": "game/js/plugins/DEUS_DepthCues.js",
+      "lines": 1091,
+      "bytes": 40283
+    },
+    {
+      "file": "game/js/plugins/DEUS_DepthDemo.js",
+      "lines": 524,
+      "bytes": 21302
+    },
+    {
+      "file": "game/js/plugins/DEUS_Dnd5e.js",
+      "lines": 844,
+      "bytes": 45376
+    },
+    {
+      "file": "game/js/plugins/DEUS_Doors.js",
+      "lines": 875,
+      "bytes": 51072
+    },
+    {
+      "file": "game/js/plugins/DEUS_Ecology.js",
+      "lines": 1242,
+      "bytes": 61050
+    },
+    {
+      "file": "game/js/plugins/DEUS_Environment.js",
+      "lines": 952,
+      "bytes": 42799
+    },
+    {
+      "file": "game/js/plugins/DEUS_FactionMenus.js",
+      "lines": 1864,
+      "bytes": 87032
+    },
+    {
+      "file": "game/js/plugins/DEUS_Factions.js",
+      "lines": 1846,
+      "bytes": 108531
+    },
+    {
+      "file": "game/js/plugins/DEUS_Fire.js",
+      "lines": 1781,
+      "bytes": 106240
+    },
+    {
+      "file": "game/js/plugins/DEUS_Floors.js",
+      "lines": 925,
+      "bytes": 54679
+    },
+    {
+      "file": "game/js/plugins/DEUS_FlowFields.js",
+      "lines": 176,
+      "bytes": 6077
+    },
+    {
+      "file": "game/js/plugins/DEUS_Fluid.js",
+      "lines": 1344,
+      "bytes": 53926
+    },
+    {
+      "file": "game/js/plugins/DEUS_Fog.js",
+      "lines": 810,
+      "bytes": 38631
+    },
+    {
+      "file": "game/js/plugins/DEUS_Generator.js",
+      "lines": 315,
+      "bytes": 13736
+    },
+    {
+      "file": "game/js/plugins/DEUS_HistoricalDemographics.js",
+      "lines": 687,
+      "bytes": 57576
+    },
+    {
+      "file": "game/js/plugins/DEUS_History.js",
+      "lines": 4227,
+      "bytes": 252584
+    },
+    {
+      "file": "game/js/plugins/DEUS_Interact.js",
+      "lines": 1185,
+      "bytes": 68799
+    },
+    {
+      "file": "game/js/plugins/DEUS_Items.js",
+      "lines": 1852,
+      "bytes": 89652
+    },
+    {
+      "file": "game/js/plugins/DEUS_Jobs.js",
+      "lines": 2370,
+      "bytes": 136586
+    },
+    {
+      "file": "game/js/plugins/DEUS_LayerOverlays.js",
+      "lines": 1333,
+      "bytes": 46074
+    },
+    {
+      "file": "game/js/plugins/DEUS_Levels.js",
+      "lines": 6733,
+      "bytes": 407825
+    },
+    {
+      "file": "game/js/plugins/DEUS_Lighting.js",
+      "lines": 43,
+      "bytes": 1413
+    },
+    {
+      "file": "game/js/plugins/DEUS_Look.js",
+      "lines": 800,
+      "bytes": 42599
+    },
+    {
+      "file": "game/js/plugins/DEUS_Mint.js",
+      "lines": 497,
+      "bytes": 25810
+    },
+    {
+      "file": "game/js/plugins/DEUS_Move8.js",
+      "lines": 97,
+      "bytes": 3670
+    },
+    {
+      "file": "game/js/plugins/DEUS_Movement8D.js",
+      "lines": 655,
+      "bytes": 27444
+    },
+    {
+      "file": "game/js/plugins/DEUS_NaturalConnections.js",
+      "lines": 569,
+      "bytes": 40760
+    },
+    {
+      "file": "game/js/plugins/DEUS_Objects.js",
+      "lines": 1537,
+      "bytes": 79422
+    },
+    {
+      "file": "game/js/plugins/DEUS_Ownership.js",
+      "lines": 772,
+      "bytes": 37580
+    },
+    {
+      "file": "game/js/plugins/DEUS_Perspective25D.js",
+      "lines": 133,
+      "bytes": 5778
+    },
+    {
+      "file": "game/js/plugins/DEUS_Projects.js",
+      "lines": 1781,
+      "bytes": 113220
+    },
+    {
+      "file": "game/js/plugins/DEUS_Select.js",
+      "lines": 4083,
+      "bytes": 181541
+    },
+    {
+      "file": "game/js/plugins/DEUS_Sheet.js",
+      "lines": 3155,
+      "bytes": 175636
+    },
+    {
+      "file": "game/js/plugins/DEUS_Spawners.js",
+      "lines": 58,
+      "bytes": 2245
+    },
+    {
+      "file": "game/js/plugins/DEUS_Speech.js",
+      "lines": 1402,
+      "bytes": 76463
+    },
+    {
+      "file": "game/js/plugins/DEUS_Stance.js",
+      "lines": 1053,
+      "bytes": 61503
+    },
+    {
+      "file": "game/js/plugins/DEUS_Stockpiles.js",
+      "lines": 750,
+      "bytes": 28494
+    },
+    {
+      "file": "game/js/plugins/DEUS_Structural.js",
+      "lines": 778,
+      "bytes": 36921
+    },
+    {
+      "file": "game/js/plugins/DEUS_StructuralPhysics.js",
+      "lines": 105,
+      "bytes": 3557
+    },
+    {
+      "file": "game/js/plugins/DEUS_Talk.js",
+      "lines": 2502,
+      "bytes": 143660
+    },
+    {
+      "file": "game/js/plugins/DEUS_Taming.js",
+      "lines": 241,
+      "bytes": 9762
+    },
+    {
+      "file": "game/js/plugins/DEUS_Test.js",
+      "lines": 796,
+      "bytes": 40248
+    },
+    {
+      "file": "game/js/plugins/DEUS_Tiles.js",
+      "lines": 1510,
+      "bytes": 77673
+    },
+    {
+      "file": "game/js/plugins/DEUS_TimeSpeed.js",
+      "lines": 608,
+      "bytes": 31258
+    },
+    {
+      "file": "game/js/plugins/DEUS_Visuals.js",
+      "lines": 307,
+      "bytes": 11808
+    },
+    {
+      "file": "game/js/plugins/DEUS_Walls.js",
+      "lines": 387,
+      "bytes": 19560
+    },
+    {
+      "file": "game/js/plugins/DEUS_Wildlife.js",
+      "lines": 2900,
+      "bytes": 160654
+    },
+    {
+      "file": "game/js/plugins/DEUS_World.js",
+      "lines": 5062,
+      "bytes": 276660
+    },
+    {
+      "file": "game/js/plugins/DEUS_WorldGen.js",
+      "lines": 2553,
+      "bytes": 151580
+    },
+    {
+      "file": "game/js/plugins/DEUS_WorldItems.js",
+      "lines": 129,
+      "bytes": 5918
+    },
+    {
+      "file": "game/js/plugins/test_build_vertical_ingame.js",
+      "lines": 49,
+      "bytes": 1916
+    },
+    {
+      "file": "game/js/plugins/UF_Households.js",
+      "lines": 1074,
+      "bytes": 62657
+    },
+    {
+      "file": "game/js/plugins/UF_Time.js",
+      "lines": 590,
+      "bytes": 22262
+    },
+    {
+      "file": "tools/art/test_blank_templates.js",
+      "lines": 964,
+      "bytes": 62909
+    },
+    {
+      "file": "tools/art/test_blob_edges.js",
+      "lines": 41,
+      "bytes": 1620
+    },
+    {
+      "file": "tools/art/test_catalogue.js",
+      "lines": 525,
+      "bytes": 40662
+    },
+    {
+      "file": "tools/art/test_fauna_induction.js",
+      "lines": 87,
+      "bytes": 7573
+    },
+    {
+      "file": "tools/art/test_ground_kept_sets.js",
+      "lines": 55,
+      "bytes": 4189
+    },
+    {
+      "file": "tools/art/test_multi_variant_topology.js",
+      "lines": 445,
+      "bytes": 21877
+    },
+    {
+      "file": "tools/art/test_place_art.js",
+      "lines": 1123,
+      "bytes": 91528
+    },
+    {
+      "file": "tools/art/test_rmmz_rows.js",
+      "lines": 450,
+      "bytes": 36689
+    },
+    {
+      "file": "tools/art/test_still_charsets.js",
+      "lines": 218,
+      "bytes": 12006
+    },
+    {
+      "file": "tools/art/test_validate_asset_standard.js",
+      "lines": 565,
+      "bytes": 37050
+    },
+    {
+      "file": "tools/audio/test_validate_audio_standard.js",
+      "lines": 346,
+      "bytes": 24903
+    },
+    {
+      "file": "tools/combat_rt/test_combat_rt.js",
+      "lines": 678,
+      "bytes": 29425
+    },
+    {
+      "file": "tools/depth_demo/test_depth_demo.js",
+      "lines": 877,
+      "bytes": 33774
+    },
+    {
+      "file": "tools/governance/fixtures/invariants/INV-FLD-02/tools/test_strata_fluid_reconciliation.js",
+      "lines": 4,
+      "bytes": 97
+    },
+    {
+      "file": "tools/governance/test_check_claims.js",
+      "lines": 1452,
+      "bytes": 106738
+    },
+    {
+      "file": "tools/governance/test_check_invariants.js",
+      "lines": 203,
+      "bytes": 9164
+    },
+    {
+      "file": "tools/governance/test_merge_gate.js",
+      "lines": 1095,
+      "bytes": 76677
+    },
+    {
+      "file": "tools/layer_overlays/test_layer_overlays.js",
+      "lines": 686,
+      "bytes": 25781
+    },
+    {
+      "file": "tools/occlusion/test_occlusion_culling.js",
+      "lines": 315,
+      "bytes": 14236
+    },
+    {
+      "file": "tools/ops/test_pace.js",
+      "lines": 657,
+      "bytes": 42364
+    },
+    {
+      "file": "tools/ops/test_run_gate.js",
+      "lines": 531,
+      "bytes": 34817
+    },
+    {
+      "file": "tools/plans/test_faction_plan_schema.js",
+      "lines": 320,
+      "bytes": 14170
+    },
+    {
+      "file": "tools/plans/test_race_plans.js",
+      "lines": 378,
+      "bytes": 15578
+    },
+    {
+      "file": "tools/rules/test_srd_rules.js",
+      "lines": 696,
+      "bytes": 40107
+    },
+    {
+      "file": "tools/security/test_check_dependencies.js",
+      "lines": 492,
+      "bytes": 35908
+    },
+    {
+      "file": "tools/security/test_scan_secrets.js",
+      "lines": 954,
+      "bytes": 63514
+    },
+    {
+      "file": "tools/security/test_support.js",
+      "lines": 191,
+      "bytes": 7835
+    },
+    {
+      "file": "tools/select_xlayer/test_xlayer_select.js",
+      "lines": 913,
+      "bytes": 37878
+    },
+    {
+      "file": "tools/sim/test_decay_core.js",
+      "lines": 477,
+      "bytes": 26896
+    },
+    {
+      "file": "tools/sim/test_fluid_attach.js",
+      "lines": 300,
+      "bytes": 12558
+    },
+    {
+      "file": "tools/sim/test_global_spawn_density.js",
+      "lines": 504,
+      "bytes": 27763
+    },
+    {
+      "file": "tools/sim/test_ledger.js",
+      "lines": 1158,
+      "bytes": 75064
+    },
+    {
+      "file": "tools/sim/test_ledger_longrun.js",
+      "lines": 657,
+      "bytes": 40727
+    },
+    {
+      "file": "tools/sim/test_living_world_rules.js",
+      "lines": 886,
+      "bytes": 41533
+    },
+    {
+      "file": "tools/sim/test_materials.js",
+      "lines": 434,
+      "bytes": 21016
+    },
+    {
+      "file": "tools/sim/test_ore_sprout.js",
+      "lines": 229,
+      "bytes": 9404
+    },
+    {
+      "file": "tools/sim/test_reclaim.js",
+      "lines": 385,
+      "bytes": 19462
+    },
+    {
+      "file": "tools/sim/test_reclaim_longrun.js",
+      "lines": 141,
+      "bytes": 7614
+    },
+    {
+      "file": "tools/sim/test_sim_forward_guard.js",
+      "lines": 419,
+      "bytes": 23723
+    },
+    {
+      "file": "tools/sim/test_underground_year0.js",
+      "lines": 236,
+      "bytes": 12395
+    },
+    {
+      "file": "tools/sim/test_units.js",
+      "lines": 246,
+      "bytes": 12238
+    },
+    {
+      "file": "tools/sim/test_water_cycle.js",
+      "lines": 557,
+      "bytes": 33653
+    },
+    {
+      "file": "tools/sim/test_water_dynamics.js",
+      "lines": 616,
+      "bytes": 28411
+    },
+    {
+      "file": "tools/sim/test_water_open_cp.js",
+      "lines": 533,
+      "bytes": 31103
+    },
+    {
+      "file": "tools/sim/test_wildlife_rules_damage.js",
+      "lines": 471,
+      "bytes": 20680
+    },
+    {
+      "file": "tools/society/test_craft_catalogue.js",
+      "lines": 692,
+      "bytes": 31358
+    },
+    {
+      "file": "tools/society/test_militia.js",
+      "lines": 1590,
+      "bytes": 96608
+    },
+    {
+      "file": "tools/society/test_minting_engine.js",
+      "lines": 468,
+      "bytes": 26321
+    },
+    {
+      "file": "tools/society/test_offices.js",
+      "lines": 1740,
+      "bytes": 71037
+    },
+    {
+      "file": "tools/society/test_person_identity.js",
+      "lines": 547,
+      "bytes": 34142
+    },
+    {
+      "file": "tools/society/test_quartermaster.js",
+      "lines": 1709,
+      "bytes": 92245
+    },
+    {
+      "file": "tools/society/test_race_class_affinity.js",
+      "lines": 1502,
+      "bytes": 62124
+    },
+    {
+      "file": "tools/society/test_srd_classes.js",
+      "lines": 1263,
+      "bytes": 80192
+    },
+    {
+      "file": "tools/society/test_treasury.js",
+      "lines": 978,
+      "bytes": 46811
+    },
+    {
+      "file": "tools/spells/test_spell_effects.js",
+      "lines": 140,
+      "bytes": 8792
+    },
+    {
+      "file": "tools/taming/test_taming.js",
+      "lines": 676,
+      "bytes": 36049
+    },
+    {
+      "file": "tools/taming_party/test_tamed_party_combat.js",
+      "lines": 987,
+      "bytes": 49343
+    },
+    {
+      "file": "tools/test_19b_performance_determinism.js",
+      "lines": 303,
+      "bytes": 13044
+    },
+    {
+      "file": "tools/test_32_levels_generation.js",
+      "lines": 149,
+      "bytes": 7337
+    },
+    {
+      "file": "tools/test_adam_res.js",
+      "lines": 99,
+      "bytes": 3902
+    },
+    {
+      "file": "tools/test_adam_scales.js",
+      "lines": 189,
+      "bytes": 7217
+    },
+    {
+      "file": "tools/test_aging_and_lifespan.js",
+      "lines": 125,
+      "bytes": 5569
+    },
+    {
+      "file": "tools/test_agriculture.js",
+      "lines": 126,
+      "bytes": 22864
+    },
+    {
+      "file": "tools/test_ally_movement_exclusive_action_square.js",
+      "lines": 236,
+      "bytes": 10111
+    },
+    {
+      "file": "tools/test_all_animated_objects_live.js",
+      "lines": 196,
+      "bytes": 8805
+    },
+    {
+      "file": "tools/test_all_faction_menus.js",
+      "lines": 51,
+      "bytes": 2167
+    },
+    {
+      "file": "tools/test_all_object_charsets.js",
+      "lines": 49,
+      "bytes": 1820
+    },
+    {
+      "file": "tools/test_all_walk_cycles.js",
+      "lines": 81,
+      "bytes": 3402
+    },
+    {
+      "file": "tools/test_aquifer_seepage.js",
+      "lines": 731,
+      "bytes": 35237
+    },
+    {
+      "file": "tools/test_area_generation_speed.js",
+      "lines": 368,
+      "bytes": 18190
+    },
+    {
+      "file": "tools/test_autonomous_project_dispatch.js",
+      "lines": 358,
+      "bytes": 22274
+    },
+    {
+      "file": "tools/test_autonomous_settlement_closure.js",
+      "lines": 615,
+      "bytes": 48518
+    },
+    {
+      "file": "tools/test_autonomous_work_recovery.js",
+      "lines": 529,
+      "bytes": 39478
+    },
+    {
+      "file": "tools/test_bag_and_racial_banners.js",
+      "lines": 269,
+      "bytes": 14204
+    },
+    {
+      "file": "tools/test_bestiary_adaptation.js",
+      "lines": 415,
+      "bytes": 22264
+    },
+    {
+      "file": "tools/test_biomes.js",
+      "lines": 191,
+      "bytes": 7831
+    },
+    {
+      "file": "tools/test_biome_standard.js",
+      "lines": 239,
+      "bytes": 13725
+    },
+    {
+      "file": "tools/test_birth_rate_halved.js",
+      "lines": 74,
+      "bytes": 3084
+    },
+    {
+      "file": "tools/test_building_variety_live.js",
+      "lines": 236,
+      "bytes": 10397
+    },
+    {
+      "file": "tools/test_build_vertical.js",
+      "lines": 903,
+      "bytes": 62839
+    },
+    {
+      "file": "tools/test_callings_and_clearing_live.js",
+      "lines": 283,
+      "bytes": 16081
+    },
+    {
+      "file": "tools/test_callings_system.js",
+      "lines": 372,
+      "bytes": 15476
+    },
+    {
+      "file": "tools/test_camera_zoom.js",
+      "lines": 147,
+      "bytes": 5539
+    },
+    {
+      "file": "tools/test_chest_left_click_info.js",
+      "lines": 160,
+      "bytes": 7057
+    },
+    {
+      "file": "tools/test_clean_attack_sheet.js",
+      "lines": 137,
+      "bytes": 5067
+    },
+    {
+      "file": "tools/test_clean_bow_sheet.js",
+      "lines": 39,
+      "bytes": 1478
+    },
+    {
+      "file": "tools/test_clean_downed_sheet.js",
+      "lines": 39,
+      "bytes": 1541
+    },
+    {
+      "file": "tools/test_clean_haul_sheet.js",
+      "lines": 39,
+      "bytes": 1469
+    },
+    {
+      "file": "tools/test_clean_magic_sheet.js",
+      "lines": 39,
+      "bytes": 1489
+    },
+    {
+      "file": "tools/test_clean_u7_composites.js",
+      "lines": 121,
+      "bytes": 5724
+    },
+    {
+      "file": "tools/test_clean_walk_sheet.js",
+      "lines": 264,
+      "bytes": 9492
+    },
+    {
+      "file": "tools/test_clean_walk_sheet2.js",
+      "lines": 228,
+      "bytes": 8187
+    },
+    {
+      "file": "tools/test_clean_walk_sheet3.js",
+      "lines": 223,
+      "bytes": 8022
+    },
+    {
+      "file": "tools/test_clean_work_sheet.js",
+      "lines": 39,
+      "bytes": 1516
+    },
+    {
+      "file": "tools/test_collapse_ingame.js",
+      "lines": 311,
+      "bytes": 20575
+    },
+    {
+      "file": "tools/test_column_landforms.js",
+      "lines": 514,
+      "bytes": 23178
+    },
+    {
+      "file": "tools/test_combat_dying_integration.js",
+      "lines": 493,
+      "bytes": 20251
+    },
+    {
+      "file": "tools/test_conditions_native_closure.js",
+      "lines": 477,
+      "bytes": 35778
+    },
+    {
+      "file": "tools/test_conditions_system.js",
+      "lines": 505,
+      "bytes": 24136
+    },
+    {
+      "file": "tools/test_container_item_interactions.js",
+      "lines": 307,
+      "bytes": 14098
+    },
+    {
+      "file": "tools/test_continuous_frontier_progression.js",
+      "lines": 193,
+      "bytes": 8987
+    },
+    {
+      "file": "tools/test_control_board.js",
+      "lines": 530,
+      "bytes": 22618
+    },
+    {
+      "file": "tools/test_cooperative_building_and_offspring_pairbonding.js",
+      "lines": 497,
+      "bytes": 23908
+    },
+    {
+      "file": "tools/test_cooperative_homestead_construction.js",
+      "lines": 226,
+      "bytes": 11440
+    },
+    {
+      "file": "tools/test_creatures_ingame.js",
+      "lines": 93,
+      "bytes": 3640
+    },
+    {
+      "file": "tools/test_creature_inventory_black_box.js",
+      "lines": 339,
+      "bytes": 13181
+    },
+    {
+      "file": "tools/test_culling_native.js",
+      "lines": 375,
+      "bytes": 17631
+    },
+    {
+      "file": "tools/test_culture_growth.js",
+      "lines": 242,
+      "bytes": 20764
+    },
+    {
+      "file": "tools/test_d20_equipment_slots.js",
+      "lines": 338,
+      "bytes": 13142
+    },
+    {
+      "file": "tools/test_deep_cuts_and_mountain_cap_wg0041.js",
+      "lines": 344,
+      "bytes": 21925
+    },
+    {
+      "file": "tools/test_deer_action_boxes.js",
+      "lines": 90,
+      "bytes": 2927
+    },
+    {
+      "file": "tools/test_diagonal_corners_and_doorways.js",
+      "lines": 332,
+      "bytes": 14520
+    },
+    {
+      "file": "tools/test_dig_vertical.js",
+      "lines": 158,
+      "bytes": 9052
+    },
+    {
+      "file": "tools/test_duplicate_registration.js",
+      "lines": 250,
+      "bytes": 9869
+    },
+    {
+      "file": "tools/test_dwarves_ingame.js",
+      "lines": 178,
+      "bytes": 8026
+    },
+    {
+      "file": "tools/test_dynamic_armor_reflection.js",
+      "lines": 225,
+      "bytes": 7851
+    },
+    {
+      "file": "tools/test_ecology.js",
+      "lines": 374,
+      "bytes": 16213
+    },
+    {
+      "file": "tools/test_elves_ingame.js",
+      "lines": 228,
+      "bytes": 10101
+    },
+    {
+      "file": "tools/test_encounter_tables.js",
+      "lines": 384,
+      "bytes": 22004
+    },
+    {
+      "file": "tools/test_equipment_drag.js",
+      "lines": 158,
+      "bytes": 6982
+    },
+    {
+      "file": "tools/test_extraction_difficulty.js",
+      "lines": 256,
+      "bytes": 10378
+    },
+    {
+      "file": "tools/test_eye_variations.js",
+      "lines": 163,
+      "bytes": 5949
+    },
+    {
+      "file": "tools/test_facing_detection.js",
+      "lines": 33,
+      "bytes": 1140
+    },
+    {
+      "file": "tools/test_factions_live.js",
+      "lines": 90,
+      "bytes": 4491
+    },
+    {
+      "file": "tools/test_faction_construction_and_homes.js",
+      "lines": 399,
+      "bytes": 15907
+    },
+    {
+      "file": "tools/test_faction_founder_pairbonding.js",
+      "lines": 452,
+      "bytes": 18434
+    },
+    {
+      "file": "tools/test_faction_menus_clean.js",
+      "lines": 34,
+      "bytes": 1034
+    },
+    {
+      "file": "tools/test_faction_reproduction.js",
+      "lines": 395,
+      "bytes": 16177
+    },
+    {
+      "file": "tools/test_faction_starting_gear.js",
+      "lines": 300,
+      "bytes": 12842
+    },
+    {
+      "file": "tools/test_family_compounds_and_shops.js",
+      "lines": 291,
+      "bytes": 11647
+    },
+    {
+      "file": "tools/test_family_integration.js",
+      "lines": 400,
+      "bytes": 34662
+    },
+    {
+      "file": "tools/test_farm_view.js",
+      "lines": 42,
+      "bytes": 4734
+    },
+    {
+      "file": "tools/test_female_u7_composites.js",
+      "lines": 111,
+      "bytes": 4797
+    },
+    {
+      "file": "tools/test_ff5_candidates.js",
+      "lines": 192,
+      "bytes": 8108
+    },
+    {
+      "file": "tools/test_ff5_proportions_and_footsteps.js",
+      "lines": 588,
+      "bytes": 23138
+    },
+    {
+      "file": "tools/test_fire_safety.js",
+      "lines": 189,
+      "bytes": 19105
+    },
+    {
+      "file": "tools/test_fixed_cycle.js",
+      "lines": 53,
+      "bytes": 2130
+    },
+    {
+      "file": "tools/test_fixed_walk_playback.js",
+      "lines": 80,
+      "bytes": 2901
+    },
+    {
+      "file": "tools/test_fix_facings.js",
+      "lines": 117,
+      "bytes": 4596
+    },
+    {
+      "file": "tools/test_fluid_correctness_lane_cw.js",
+      "lines": 493,
+      "bytes": 23455
+    },
+    {
+      "file": "tools/test_fog_z_level_live.js",
+      "lines": 164,
+      "bytes": 7233
+    },
+    {
+      "file": "tools/test_foliage_sprite_animations.js",
+      "lines": 103,
+      "bytes": 3924
+    },
+    {
+      "file": "tools/test_gen3_metrics.js",
+      "lines": 200,
+      "bytes": 7505
+    },
+    {
+      "file": "tools/test_generated_z2_cut_proof.js",
+      "lines": 792,
+      "bytes": 48673
+    },
+    {
+      "file": "tools/test_generator_combinations.js",
+      "lines": 249,
+      "bytes": 9465
+    },
+    {
+      "file": "tools/test_geology_strata.js",
+      "lines": 325,
+      "bytes": 16253
+    },
+    {
+      "file": "tools/test_goals.js",
+      "lines": 214,
+      "bytes": 15012
+    },
+    {
+      "file": "tools/test_golden_art_review_live.js",
+      "lines": 252,
+      "bytes": 11238
+    },
+    {
+      "file": "tools/test_greater_z_roof_live.js",
+      "lines": 179,
+      "bytes": 7612
+    },
+    {
+      "file": "tools/test_ground_shades_prototype.js",
+      "lines": 35,
+      "bytes": 1175
+    },
+    {
+      "file": "tools/test_hare_action_boxes.js",
+      "lines": 76,
+      "bytes": 2948
+    },
+    {
+      "file": "tools/test_haul_builder.js",
+      "lines": 407,
+      "bytes": 17023
+    },
+    {
+      "file": "tools/test_hazard_reflex.js",
+      "lines": 445,
+      "bytes": 32150
+    },
+    {
+      "file": "tools/test_hazard_torture_live.js",
+      "lines": 566,
+      "bytes": 42401
+    },
+    {
+      "file": "tools/test_hearth_containment_and_provenance.js",
+      "lines": 397,
+      "bytes": 19272
+    },
+    {
+      "file": "tools/test_historical_carrying_capacity.js",
+      "lines": 612,
+      "bytes": 50817
+    },
+    {
+      "file": "tools/test_history.js",
+      "lines": 125,
+      "bytes": 6756
+    },
+    {
+      "file": "tools/test_history_materialization_and_world_age.js",
+      "lines": 283,
+      "bytes": 25285
+    },
+    {
+      "file": "tools/test_hist_metadata_contracts.js",
+      "lines": 230,
+      "bytes": 12357
+    },
+    {
+      "file": "tools/test_households.js",
+      "lines": 310,
+      "bytes": 22361
+    },
+    {
+      "file": "tools/test_human_dwarf_8d_live.js",
+      "lines": 185,
+      "bytes": 9838
+    },
+    {
+      "file": "tools/test_human_female_variations_live.js",
+      "lines": 185,
+      "bytes": 8128
+    },
+    {
+      "file": "tools/test_human_inheritance.js",
+      "lines": 66,
+      "bytes": 2507
+    },
+    {
+      "file": "tools/test_human_male_live_ingame.js",
+      "lines": 181,
+      "bytes": 7152
+    },
+    {
+      "file": "tools/test_human_male_variations_live.js",
+      "lines": 179,
+      "bytes": 6967
+    },
+    {
+      "file": "tools/test_hydrology.js",
+      "lines": 534,
+      "bytes": 29599
+    },
+    {
+      "file": "tools/test_l6_docs_preservation.js",
+      "lines": 289,
+      "bytes": 20154
+    },
+    {
+      "file": "tools/test_layer_render_flat.js",
+      "lines": 132,
+      "bytes": 9488
+    },
+    {
+      "file": "tools/test_layer_switch_inplace.js",
+      "lines": 505,
+      "bytes": 38085
+    },
+    {
+      "file": "tools/test_lazy_area_generation.js",
+      "lines": 842,
+      "bytes": 41226
+    },
+    {
+      "file": "tools/test_light_wall_occlusion_live.js",
+      "lines": 176,
+      "bytes": 7766
+    },
+    {
+      "file": "tools/test_liquid_depth_simulation.js",
+      "lines": 601,
+      "bytes": 25537
+    },
+    {
+      "file": "tools/test_live_town_center_progression.js",
+      "lines": 190,
+      "bytes": 9046
+    },
+    {
+      "file": "tools/test_ludeon_planning.js",
+      "lines": 210,
+      "bytes": 11249
+    },
+    {
+      "file": "tools/test_material_recipes.js",
+      "lines": 274,
+      "bytes": 10687
+    },
+    {
+      "file": "tools/test_material_refining_and_tech_pacing.js",
+      "lines": 362,
+      "bytes": 15541
+    },
+    {
+      "file": "tools/test_material_substitution.js",
+      "lines": 272,
+      "bytes": 13459
+    },
+    {
+      "file": "tools/test_menu_ingame.js",
+      "lines": 67,
+      "bytes": 2533
+    },
+    {
+      "file": "tools/test_multi_deficit_settlement.js",
+      "lines": 335,
+      "bytes": 24850
+    },
+    {
+      "file": "tools/test_native_resolution_standard.js",
+      "lines": 296,
+      "bytes": 12861
+    },
+    {
+      "file": "tools/test_native_survival_soak.js",
+      "lines": 578,
+      "bytes": 30271
+    },
+    {
+      "file": "tools/test_natural_connections.js",
+      "lines": 260,
+      "bytes": 19280
+    },
+    {
+      "file": "tools/test_natural_connections_no_mint.js",
+      "lines": 442,
+      "bytes": 30048
+    },
+    {
+      "file": "tools/test_new_game_year0.js",
+      "lines": 493,
+      "bytes": 27578
+    },
+    {
+      "file": "tools/test_no_loadscript_shims.js",
+      "lines": 188,
+      "bytes": 9094
+    },
+    {
+      "file": "tools/test_no_originality_check.js",
+      "lines": 146,
+      "bytes": 5911
+    },
+    {
+      "file": "tools/test_object_art.js",
+      "lines": 35,
+      "bytes": 1333
+    },
+    {
+      "file": "tools/test_package_proofs_ingame.js",
+      "lines": 151,
+      "bytes": 7246
+    },
+    {
+      "file": "tools/test_palette.js",
+      "lines": 61,
+      "bytes": 2129
+    },
+    {
+      "file": "tools/test_palette_standard.js",
+      "lines": 479,
+      "bytes": 22793
+    },
+    {
+      "file": "tools/test_perf_benchmark.js",
+      "lines": 76,
+      "bytes": 2587
+    },
+    {
+      "file": "tools/test_physical_inventory_proof.js",
+      "lines": 331,
+      "bytes": 14244
+    },
+    {
+      "file": "tools/test_population_growth_and_immigration.js",
+      "lines": 532,
+      "bytes": 20541
+    },
+    {
+      "file": "tools/test_portrait_clothing_offsets.js",
+      "lines": 34,
+      "bytes": 1423
+    },
+    {
+      "file": "tools/test_post_town_hall_progression.js",
+      "lines": 181,
+      "bytes": 8671
+    },
+    {
+      "file": "tools/test_process_human_12.js",
+      "lines": 195,
+      "bytes": 9366
+    },
+    {
+      "file": "tools/test_production_history_demographics.js",
+      "lines": 585,
+      "bytes": 43345
+    },
+    {
+      "file": "tools/test_profile_tabs.js",
+      "lines": 189,
+      "bytes": 17929
+    },
+    {
+      "file": "tools/test_project_construction_loop.js",
+      "lines": 417,
+      "bytes": 29997
+    },
+    {
+      "file": "tools/test_r4c2_foreshorten.js",
+      "lines": 80,
+      "bytes": 2786
+    },
+    {
+      "file": "tools/test_race_starts.js",
+      "lines": 643,
+      "bytes": 26111
+    },
+    {
+      "file": "tools/test_region_seam_continuity.js",
+      "lines": 521,
+      "bytes": 32320
+    },
+    {
+      "file": "tools/test_regrowth_construction_guard.js",
+      "lines": 548,
+      "bytes": 20927
+    },
+    {
+      "file": "tools/test_resize_face.js",
+      "lines": 64,
+      "bytes": 2936
+    },
+    {
+      "file": "tools/test_resource_economy_standard.js",
+      "lines": 244,
+      "bytes": 15708
+    },
+    {
+      "file": "tools/test_resource_node_materials.js",
+      "lines": 197,
+      "bytes": 8280
+    },
+    {
+      "file": "tools/test_round_world.js",
+      "lines": 284,
+      "bytes": 12022
+    },
+    {
+      "file": "tools/test_round_world_live.js",
+      "lines": 146,
+      "bytes": 5748
+    },
+    {
+      "file": "tools/test_sack_ui_and_loose_items.js",
+      "lines": 103,
+      "bytes": 4858
+    },
+    {
+      "file": "tools/test_sanitation_system.js",
+      "lines": 562,
+      "bytes": 20891
+    },
+    {
+      "file": "tools/test_scale_standard.js",
+      "lines": 226,
+      "bytes": 10585
+    },
+    {
+      "file": "tools/test_seamless_map_edges.js",
+      "lines": 398,
+      "bytes": 16031
+    },
+    {
+      "file": "tools/test_seamless_seam_live.js",
+      "lines": 109,
+      "bytes": 4262
+    },
+    {
+      "file": "tools/test_second_by_second_history.js",
+      "lines": 912,
+      "bytes": 41870
+    },
+    {
+      "file": "tools/test_settlement_domestic_housing.js",
+      "lines": 512,
+      "bytes": 41447
+    },
+    {
+      "file": "tools/test_settlement_expansion_multi_dwelling.js",
+      "lines": 606,
+      "bytes": 46556
+    },
+    {
+      "file": "tools/test_settlement_pillars.js",
+      "lines": 454,
+      "bytes": 17249
+    },
+    {
+      "file": "tools/test_settlement_projects.js",
+      "lines": 451,
+      "bytes": 29951
+    },
+    {
+      "file": "tools/test_shadow_check_wg0041.js",
+      "lines": 1,
+      "bytes": 0
+    },
+    {
+      "file": "tools/test_sheep_action_boxes.js",
+      "lines": 81,
+      "bytes": 3097
+    },
+    {
+      "file": "tools/test_side_combos.js",
+      "lines": 59,
+      "bytes": 2183
+    },
+    {
+      "file": "tools/test_sim_loader.js",
+      "lines": 371,
+      "bytes": 23978
+    },
+    {
+      "file": "tools/test_sim_tick.js",
+      "lines": 578,
+      "bytes": 38412
+    },
+    {
+      "file": "tools/test_slice_human.js",
+      "lines": 65,
+      "bytes": 2372
+    },
+    {
+      "file": "tools/test_snapshot.js",
+      "lines": 81,
+      "bytes": 4369
+    },
+    {
+      "file": "tools/test_soil_geomorphology.js",
+      "lines": 735,
+      "bytes": 38365
+    },
+    {
+      "file": "tools/test_sparse_outer_save.js",
+      "lines": 417,
+      "bytes": 22376
+    },
+    {
+      "file": "tools/test_srd_character_presentation.js",
+      "lines": 248,
+      "bytes": 10748
+    },
+    {
+      "file": "tools/test_srd_combat_proof.js",
+      "lines": 391,
+      "bytes": 17934
+    },
+    {
+      "file": "tools/test_srd_equipment_proof.js",
+      "lines": 156,
+      "bytes": 7018
+    },
+    {
+      "file": "tools/test_srd_parity.js",
+      "lines": 180,
+      "bytes": 9837
+    },
+    {
+      "file": "tools/test_srd_rules_proof.js",
+      "lines": 258,
+      "bytes": 11388
+    },
+    {
+      "file": "tools/test_stabilization.js",
+      "lines": 339,
+      "bytes": 22405
+    },
+    {
+      "file": "tools/test_standard_4d_ingame.js",
+      "lines": 157,
+      "bytes": 6409
+    },
+    {
+      "file": "tools/test_standard_8d_ingame.js",
+      "lines": 282,
+      "bytes": 14027
+    },
+    {
+      "file": "tools/test_starter_kit_and_stockpile.js",
+      "lines": 132,
+      "bytes": 6273
+    },
+    {
+      "file": "tools/test_stockpiles_designation.js",
+      "lines": 465,
+      "bytes": 19981
+    },
+    {
+      "file": "tools/test_strata_cuts_and_caves.js",
+      "lines": 1284,
+      "bytes": 91977
+    },
+    {
+      "file": "tools/test_strata_fluid_reconciliation.js",
+      "lines": 493,
+      "bytes": 26129
+    },
+    {
+      "file": "tools/test_strata_foundation.js",
+      "lines": 1042,
+      "bytes": 77337
+    },
+    {
+      "file": "tools/test_structural_collapse.js",
+      "lines": 142,
+      "bytes": 5206
+    },
+    {
+      "file": "tools/test_structural_connectivity.js",
+      "lines": 672,
+      "bytes": 28274
+    },
+    {
+      "file": "tools/test_structural_levels.js",
+      "lines": 978,
+      "bytes": 49422
+    },
+    {
+      "file": "tools/test_structural_rooted.js",
+      "lines": 762,
+      "bytes": 38206
+    },
+    {
+      "file": "tools/test_structural_runtime.js",
+      "lines": 690,
+      "bytes": 43404
+    },
+    {
+      "file": "tools/test_structure_fluid.js",
+      "lines": 438,
+      "bytes": 20362
+    },
+    {
+      "file": "tools/test_survival_needs_loop.js",
+      "lines": 464,
+      "bytes": 34315
+    },
+    {
+      "file": "tools/test_survival_regressions.js",
+      "lines": 701,
+      "bytes": 29975
+    },
+    {
+      "file": "tools/test_temperate_arid_transition_live.js",
+      "lines": 331,
+      "bytes": 15221
+    },
+    {
+      "file": "tools/test_tilesets_live.js",
+      "lines": 87,
+      "bytes": 3287
+    },
+    {
+      "file": "tools/test_time_domains_proof.js",
+      "lines": 332,
+      "bytes": 15165
+    },
+    {
+      "file": "tools/test_title_menu.js",
+      "lines": 56,
+      "bytes": 3069
+    },
+    {
+      "file": "tools/test_town_hall_ai_live.js",
+      "lines": 239,
+      "bytes": 11202
+    },
+    {
+      "file": "tools/test_u7_modular_composition.js",
+      "lines": 136,
+      "bytes": 5089
+    },
+    {
+      "file": "tools/test_underground_room.js",
+      "lines": 52,
+      "bytes": 1741
+    },
+    {
+      "file": "tools/test_unified_capability_proof.js",
+      "lines": 412,
+      "bytes": 18291
+    },
+    {
+      "file": "tools/test_unpartnered_shelter_progression.js",
+      "lines": 232,
+      "bytes": 11591
+    },
+    {
+      "file": "tools/test_upper_elevation_terrain.js",
+      "lines": 548,
+      "bytes": 21467
+    },
+    {
+      "file": "tools/test_v2_clean_u7_composites.js",
+      "lines": 129,
+      "bytes": 5917
+    },
+    {
+      "file": "tools/test_var2_suite.js",
+      "lines": 46,
+      "bytes": 1536
+    },
+    {
+      "file": "tools/test_var_suite.js",
+      "lines": 47,
+      "bytes": 1650
+    },
+    {
+      "file": "tools/test_verify_world_state_registry.js",
+      "lines": 701,
+      "bytes": 55437
+    },
+    {
+      "file": "tools/test_vertical_worldgen_proof.js",
+      "lines": 623,
+      "bytes": 31686
+    },
+    {
+      "file": "tools/test_volumetric_terrain_column.js",
+      "lines": 583,
+      "bytes": 39046
+    },
+    {
+      "file": "tools/test_walk_triplets.js",
+      "lines": 91,
+      "bytes": 3095
+    },
+    {
+      "file": "tools/test_walls_ingame.js",
+      "lines": 168,
+      "bytes": 7368
+    },
+    {
+      "file": "tools/test_water_ingame.js",
+      "lines": 51,
+      "bytes": 1917
+    },
+    {
+      "file": "tools/test_wolf_cleanup.js",
+      "lines": 92,
+      "bytes": 2728
+    },
+    {
+      "file": "tools/test_worldgen_quickfixes.js",
+      "lines": 291,
+      "bytes": 14099
+    },
+    {
+      "file": "tools/test_zoom_depth_coverage.js",
+      "lines": 234,
+      "bytes": 8632
+    },
+    {
+      "file": "tools/test_zrange.js",
+      "lines": 502,
+      "bytes": 36503
+    },
+    {
+      "file": "tools/test_z_cavern_gen.js",
+      "lines": 149,
+      "bytes": 5384
+    },
+    {
+      "file": "tools/test_z_doors.js",
+      "lines": 134,
+      "bytes": 8674
+    },
+    {
+      "file": "tools/test_z_fire.js",
+      "lines": 182,
+      "bytes": 11343
+    },
+    {
+      "file": "tools/test_z_floors.js",
+      "lines": 155,
+      "bytes": 9286
+    },
+    {
+      "file": "tools/test_z_flora.js",
+      "lines": 151,
+      "bytes": 10024
+    },
+    {
+      "file": "tools/test_z_ownership.js",
+      "lines": 145,
+      "bytes": 8690
+    },
+    {
+      "file": "tools/test_z_walls.js",
+      "lines": 57,
+      "bytes": 3257
+    },
+    {
+      "file": "tools/worldgen/test_vertical_biome_coupling.js",
+      "lines": 398,
+      "bytes": 19246
+    },
+    {
+      "file": "tools/world_items/test_persistent_objects.js",
+      "lines": 420,
+      "bytes": 16291
+    },
+    {
+      "file": "tools/world_items/test_world_items.js",
+      "lines": 658,
+      "bytes": 38452
+    },
+    {
+      "file": "tools/zrange/test_switch_depth2.js",
+      "lines": 316,
+      "bytes": 22539
+    }
+  ]
+}
