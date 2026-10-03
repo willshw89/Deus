@@ -1,0 +1,15 @@
+# CORE-CHUNKCACHE — static per-z render cache
+
+**Status:** PARKED, 2026-10-03. Proposed M2 work after CORE-HPA and the green 3×3-world baseline. **Writer:** Claude. **Reviewer:** Codex (cross-family).
+
+**Why the player cares:** Large, vertically exposed scenes should retain crisp terrain and readable depth without repainting unchanged ground every frame or hiding moving water and creatures inside a stale image.
+
+## Proposed cache boundary
+
+Use one 16×16 static `PIXI.RenderTexture` cache unit per z-level and visible chunk. Terrain edits mark the affected cache unit dirty; rebake only dirty units. Budget memory with an explicit LRU and expose its hit, miss, rebake, draw-call, and memory counters. Bake the static lower-level depth grade into the cached chunk. Moving water/lava, colonists, and enemies remain live and receive their lower-level tint at draw time. The exact cache invalidation rule for changes in tint configuration or time-dependent lighting remains to be designed and measured; this stub does not require a full rebake or forbid one.
+
+The future cache must bake the Owner's lower-level grading: current z at full brightness; visible z−1 at about 60% brightness with about 50% desaturation; visible z−2 at about 30% with a cool gray cast; z−3 and deeper not drawn; nothing above current z drawn; and lower levels visible only if every intermediate level is open. Brightness and desaturation values live in data for Owner tuning. The separately parked depth/art plan covers the requested 2–4 px edge lip/short shadow and lower wall faces after ART-WIRE. The Owner resolved wall geometry as a **48 px face plus 48 px cap, 96 px total**; wiring that art stays parked under ART-WIRE rather than this cache lane. Water, lava, colonists, and enemies retain some lower-level tint through the live draw path. See the current [depth system description](../../systems/DEUS_Depth.md) and [DEC-011](../../OWNER_DECISIONS.md#decision-dec-011-owner-overrides-dec-006r1-option-d-flat-layer-rendering).
+
+**Acceptance gate:** Native `run_tests.bat` green, then same-seed 3×3-world before/after captures of frame intervals, draw calls, rebakes, texture memory, and LRU evictions on the Owner laptop. A controlled fixture edits one chunk and proves neighboring unchanged chunks are not rebaked. Inspect screenshots for baked static grading at current/z−1/z−2 through an open shaft, z−3 and above absence, live moving-entity tint, terrain seam integrity, and post-edit correctness. Record test counts and exact hardware/method; a CPU draw-submission time alone is not an FPS result. Wall-art wiring and its evidence wait on ART-WIRE. Cross-family review and Deus laptop confirmation precede merge.
+
+**Game translation at implementation:** Static tile changes invalidate the render cache; the RMMZ/PIXI bridge draws the rebaked tile texture plus live layers. Cache textures are derived and rebuilt after load, not serialized as world truth. This page contains no implementation or observed render proof.
