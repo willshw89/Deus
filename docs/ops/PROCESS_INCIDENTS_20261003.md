@@ -35,3 +35,7 @@ Claude implemented `DEUS_TEST_RETAIN=1` / `--retain` in `626d230c`. The mode ref
 ## Current controls and reporting limit
 
 Every subsequent external review brief explicitly prohibits deleting even temporary folders. The runtime writer remains the sole authorized implementation writer. Main, the two preserved stashes, the backup branch and source art backup remain protected; their observed refs are recorded in the queue. These checks do not justify claiming that no deletion occurred overnight. The morning report must carry this record forward and leave any restoration decision with the Owner.
+
+## Launcher classification checked, 01:46–01:47 CT
+
+The completed setup review wrote and pushed `9c575f01` and exited 0, but its registry says `ORPHANED-CHILDREN`. The listed PIDs, 25444 and 24460, are the separately authorized STUB-HUNT correction launcher and Grok writer, started by the PM at 01:44:13/14 CT. A fresh `Win32_Process` read showed the explicit `stub-hunt-corrections/launch.ps1` and prompt paths, with Grok's parent PID 25444 and the launcher's parent 14724. They are not abandoned setup-review work. The registry records `orphansKilled: false`; the PM stopped neither process. The underlying misclassification cause was not investigated or repaired in this run. Treat the registry flag as a lead requiring process identity checks, not authority to kill another lane.
