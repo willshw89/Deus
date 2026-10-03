@@ -4,6 +4,8 @@ on:
   push:
   pull_request:
 
+# Scope: syntax and root hygiene only. Behavioral tests (tools/**/test_*.js) and native NW.js
+# tests are not in CI yet; they are gated locally by run_tests.bat.
 jobs:
   ci:
     runs-on: ubuntu-latest
@@ -12,7 +14,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Syntax check (node --check on game/js/plugins/*.js and tools/**/*.js)
+      - name: Syntax check (node --check on game/js/plugins.js, game/js/plugins/*.js, game/js/sim/**/*.js, tools/**/*.js)
         run: node tools/ci/syntax_check.js
       - name: Root hygiene (no stray .js/.png/.zip in repo root)
         run: node tools/ci/check_root.js
