@@ -23,10 +23,10 @@ Owner directives at 21:16 and 21:20 CT authorize isolated concurrent lanes and d
 
 | Lane | Writer / assignment | Reviewer | State at this update |
 |---|---|---|---|
-| ORG-0.2 | Claude, claude-fable-5-1, max | Grok, grok-4.7, xhigh | Writer stopped at 3a8f982d. Runtime 093a1f41: 243 pass / 17 fail, seed 1920951434 year 500, incomplete at global watchdog. Review queued after STUB-HUNT. Assertions unchanged |
-| STUB-HUNT | Grok, grok-4.7, xhigh; runtime read-only | Codex/GPT | Running on task/stub-hunt, source 565dc5ae; output scratchpad/stub-hunt/STUBS.md |
-| ORG-0.3 | Gemini assignment parked; Grok queued after STUB-HUNT, with ORG-0.2 review first | Codex/GPT | task/lane-plugin-audit checkpoint 86ec44c2 pushed. No audit content produced by Gemini; no incoming writer launched yet |
-| Setup review | Original writer Grok (Deus), per Owner confirmation | Codex/GPT | Reviewing org/setup-2026-10-02 source 2ffa0d3a. CI coverage finding and native red; Owner will repair findings. No PR/merge yet |
+| ORG-0.2 | Claude, claude-fable-5-1, max; stopped | Grok, grok-4.7, xhigh | Review completed 2026-10-02 22:24:58 CT, report e6505826, reviewed d8b36c53. Verdict FAIL overall; no blocking defect found in the two narrow repairs. Independent native 259 pass / 16 fail, seed 1920951434 year 500, global watchdog during factions. Assertions unchanged |
+| STUB-HUNT | Grok, grok-4.7, xhigh; runtime read-only | Codex/GPT PM spot-checks only | Audit completed; output and evidence checkpointed locally at 59dd83f0, audited source 565dc5ae. No runtime edits |
+| ORG-0.3 | Gemini parked; Grok 4.7 xhigh crossloaded at 2026-10-02 22:29:08 CT | Codex/GPT | RUNNING on task/lane-plugin-audit from checkpoint 86ec44c2 and HANDOFF.md, after STUB-HUNT and ORG-0.2 review. Documentation audit only; no Gemini audit content produced |
+| Setup review / design records | Original setup writer Grok (Deus); new design documentation Codex | Codex/GPT reviewed original 2ffa0d3a; new Codex docs need different-family review | Owner CI repair da9e6906 preserved. Design-only decisions/WBS commit 6b9ec844 pushed, syntax 1166 checked / 0 failed, root hygiene passed. Native green not claimed; no PR/merge |
 
 Gemini assignments are recorded in tasks/ORG-0.3/lane-plugin-audit/REPORT.md in that lane. The HANDOFF template is docs/ops/HANDOFF_TEMPLATE.md on org/setup-2026-10-02, pending its separate review/integration. Deus has not issued a laptop verdict for these checkpoints.
 
@@ -73,5 +73,6 @@ Triggers: rate limit, quota, outage, or stall over 30 minutes.
 |---|---|---|---|---|---|
 | 2026-10-02 21:32 | ORG-0.3 | Gemini | parked | UNSUPPORTED_CLIENT before model work; stopped with logs and HANDOFF preserved; WIP checkpoint pushed | c8ba7a48e6f3db5a71dbaeb81c9225a6c941f20d |
 | 2026-10-02 before 21:43 | ORG-0.3 | Gemini | Grok QUEUED, not launched | Owner-bounded recovery started 21:33:53; updated CLI still unsupported, existing API key reached project monthly spending cap. Owner explicitly ordered this fallback after STUB-HUNT; ORG-0.2 review keeps priority | 86ec44c2055f766d17448c8d8f38f800b559059c |
+| 2026-10-02 22:29:08 | ORG-0.3 | Gemini (stopped/parked) | Grok 4.7 xhigh, RUNNING | Owner-authorized fallback launched after STUB-HUNT and the priority ORG-0.2 review completed. Cold handoff and checkpoint supplied; first response must restate goal/SHA. Codex/GPT remains independent reviewer; runtime read-only | 86ec44c2055f766d17448c8d8f38f800b559059c |
 
-The restart recovery retained Claude as writer; recovered evidence was checkpointed at 4811cda0. The ORG-0.3 rows record parking and a queue, not a fabricated model launch. Record the actual incoming launch separately when it occurs. No reset time or subscription quota is inferred from these errors.
+The restart recovery retained Claude as writer; recovered evidence was checkpointed at 4811cda0. ORG-0.3 launch evidence: scratchpad/lane-plugin-audit/grok_crossload_workers.json in that worktree, run lane-plugin-audit_20261002_222908, writer PID 21728 / launcher 20988 at launch. Prompt: grok_crossload_prompt.txt; native test slot released after ORG-0.2 review. No reset time or subscription quota is inferred from the Gemini errors. The new 21:56-22:15 CT design decisions authorize documentation only and open no implementation lane; DEC-037 remains.
