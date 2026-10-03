@@ -37,3 +37,10 @@ False positives include the required references `test_control_board.js:276` and 
 ## PM file
 
 `TEST_INPUT_AUDIT_PM.md` is absent from this worktree. Compared after candidates were locked via `git show 5d333825075b1c71230a1078677451f118e43b20:tasks/ORG-0.2/lane-worldgen-green/TEST_INPUT_AUDIT_PM.md`. That commit is not an ancestor. Findings in `STUBS.md` were not copied from it except agriculture `mutations`, which was re-read at `tools/test_agriculture.js:11`.
+
+## Corrections checked 2026-10-03
+
+Docs-only, on report checkpoint `f244e3dd48909c793df8252b877e2c16f8ca4f96`. Audited code remains `565dc5aead7e068230528d573c395ea21ed5cf5d`. No `nw.exe`, no `tools/run_tests.js`, no node test execution. The command list and author/source chronology above are unchanged. These two checks answer `evidence/CODEX_REVIEW_59dd83f0.md`. They are not a certification.
+
+- D5: `git show c0797396743d915975f0e83e067610c7b58cb992^:game/js/plugins/DEUS_Doors.js` lines 824-826. `seededA` and `seededB` are each `Object.keys(store().byCell).sort().join("|")`, with no reseed between the reads. `seededA === seededB` was already tautological and did not prove deterministic seed behavior. The meaningful predicate removed by `c07973967` is `JSON.stringify(round.doors) === before` after `round = JsonEx.parse(JsonEx.stringify(W.state))` and `before = JSON.stringify(store())`.
+- D10: `git blame -L 7,12 --line-porcelain tools/test_agriculture.js`. Line 7 (`read("UF_Agriculture")`) and line 11 (`const mutations = {}`) blame `e7ddb047af402e120693eeceab3a2bcc7b4ef934`. Line 8, the separate missing `UF_Skills` read, blames `e12e9e727c8314f5bbb2bc92eb8bdeb745a84250`, author `deus-codex <deus-ops@local.invalid>`, author-time 2026-09-30 17:24:19 -0500 (17:24:19 CT), subject `[codex] OPS.PRUNE.02: archive 41 loadScript shims, retarget tools/tests, add test_no_loadscript_shims`. `git merge-base --is-ancestor` for that commit exited 0. Lines 9, 10, and 12 blame `e7ddb047`. The author name and `[codex]` subject are not proof of model identity.

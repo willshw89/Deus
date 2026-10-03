@@ -125,8 +125,8 @@ Last touch of the DEUS lines below: `0544ef02bda3625cb0df901676cfee3ca5be1e9a`, 
 
 - File: `game/js/plugins/DEUS_Doors.js:866-867`. Suite `doors` closes at 873 with `{ isDefault: false }`.
 - Expression: `const before = "";` then `t.check("saved_and_seeded", true, "replaced");`. `before` is unused.
-- Replaced assertion, from `git show c0797396743d915975f0e83e067610c7b58cb992 -- game/js/plugins/DEUS_Doors.js`: `const before = JSON.stringify(store())` plus `JsonEx.parse(JsonEx.stringify(W.state))` and `t.check("saved_and_seeded", JSON.stringify(round.doors) === before && seededA === seededB, ...)`.
-- Fails to test: door-state JSON round-trip and deterministic seeded key order. Neighbor checks `visible_open_close_animation`, `damage_breaks`, and `perf` still evaluate real values.
+- Replaced assertion, from `git show c0797396743d915975f0e83e067610c7b58cb992 -- game/js/plugins/DEUS_Doors.js`: `const before = JSON.stringify(store())`, `round = JsonEx.parse(JsonEx.stringify(W.state))`, and `t.check("saved_and_seeded", JSON.stringify(round.doors) === before && seededA === seededB, ...)`. In that removed hunk, `seededA` and `seededB` are each `Object.keys(store().byCell).sort().join("|")`: the same store, the same sort, and the same join, with no reseed between the two reads. `seededA === seededB` was already tautological. That clause did not prove deterministic seed behavior.
+- Fails to test: the meaningful predicate the replacement removes is the `JsonEx` door-state round-trip, `JSON.stringify(round.doors) === before`. Neighbor checks `visible_open_close_animation`, `damage_breaks`, and `perf` still evaluate real values.
 - Introducing and current blame: `c0797396743d915975f0e83e067610c7b58cb992`, author `deus-pm <deus-pm@local.invalid>`, 2026-10-02T09:39:19-05:00, subject `[pm] Fix WG.GRID.01 and WG.GRID.02 SoA JSON Serialization`. Ancestor. The subject does not mention doors. Proved model identity: none.
 
 ### D6. Faction menu render check is literal true
@@ -173,7 +173,11 @@ Last touch of the DEUS lines below: `0544ef02bda3625cb0df901676cfee3ca5be1e9a`, 
 - Expression: `let agriculture = read("UF_Agriculture");` with `read` joining `game/js/plugins/<name>.js`. Line 8 also reads `UF_Skills`. `const mutations = {};` then, only if `--mutant=` is set, `assert.ok(mutations[mutant], "known mutation")`.
 - `Test-Path` of `game/js/plugins/UF_Agriculture.js`, `UF_Skills.js`, and `DEUS_Agriculture.js` is false. No `UF.Agriculture =` assignment was found under `game/js/plugins`. The script throws on the missing file before `check()`.
 - Fails to test: agriculture behavior. The empty `mutations` object does not green-pass a check. With `--mutant=` it fail-closes on `assert.ok(undefined)`. Without `--mutant` that branch is skipped, and the missing file already aborted the process. Catalog path in this file is `UF_WorldCatalog.json` (line 9), which is not the DEUS boot catalog.
-- Blame of line 11: `e7ddb047af402e120693eeceab3a2bcc7b4ef934`, author `snewt <willshw89@gmail.com>`, 2026-09-20T14:39:44-05:00, subject `[claude] Layer-aware agriculture, cultivation jobs, and farm view integration`. Ancestor. Proved model identity: none.
+- Per-line blame of the cited reads, from `git blame -L 7,12 --line-porcelain tools/test_agriculture.js`. Both commits are ancestors. Recorded author names and subject tags are git metadata, not proof of model identity.
+  - Line 7, `read("UF_Agriculture")`: `e7ddb047af402e120693eeceab3a2bcc7b4ef934`, author `snewt <willshw89@gmail.com>`, 2026-09-20T14:39:44-05:00, subject `[claude] Layer-aware agriculture, cultivation jobs, and farm view integration`.
+  - Line 8, the separate missing `UF_Skills` read: `e12e9e727c8314f5bbb2bc92eb8bdeb745a84250`, author `deus-codex <deus-ops@local.invalid>`, 2026-09-30 17:24:19 CT (`2026-09-30T17:24:19-05:00`), subject `[codex] OPS.PRUNE.02: archive 41 loadScript shims, retarget tools/tests, add test_no_loadscript_shims`.
+  - Line 11, `const mutations = {}`: `e7ddb047af402e120693eeceab3a2bcc7b4ef934`, same author, author-time, and subject as line 7.
+  - Lines 9, 10, and 12 in that blamed range also name `e7ddb047af402e120693eeceab3a2bcc7b4ef934`. Proved model identity: none.
 
 ## Suspected gaps
 
@@ -276,4 +280,4 @@ Not run, by the assignment (no runtime tests competing with the ORG-0.2 native r
 
 ## Blockers
 
-None for this report. `tools/tests` is missing, so coverage is the plugin tree and `tools/**/test_*.js` as stated above. The report is gitignored (`/*scratchpad`) and is not committed.
+None for this report. `tools/tests` is missing, so coverage is the plugin tree and `tools/**/test_*.js` as stated above. Historical, as written before preservation: the report is gitignored (`/*scratchpad`) and is not committed. That report text was preserved at `59dd83f0ea35071dd10e7900baca59dce6786e3d`.
