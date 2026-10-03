@@ -1,5 +1,20 @@
 # Source-control worktree inventory
 
+## Owner-approved path-specific stash (2026-10-02)
+
+Following the Owner's 20:15 CT directive, the six files listed below were stashed with `git stash push --include-untracked --message unowned-gemini-leftovers-2026-10-02 -- game/js/plugins/DEUS_WorldGen.js game/package.json game/js/plugins/DEUS_Simulation_Core.js tools/ops/patch_worldgen.js tools/ops/patch_worldgen2.js tools/ops/patch_worldgen3.js`. No wildcard or broad stash was used. The stash contains exactly two tracked file changes and four untracked files; all six stored Git blobs match their pre-stash content. No lane commit contains these unowned changes.
+
+Stash SHA: `2005b4d9be9318d082b344475e6365fc406e362f`, label `unowned-gemini-leftovers-2026-10-02`, currently `stash@{0}`. The previous stash `4699f7b28df96b84a311f1ea91b9c216de2185ca` remains as `stash@{1}`. Main remains `565dc5aead7e068230528d573c395ea21ed5cf5d`. The backup branch, all unrelated dirty-file contents and statuses, and the index were preserved. Stashes are local; the SHA is not an origin completion claim.
+
+Actual verification output from `node scratchpad/lane-baseline/stash_unowned_main_20261002.js`:
+
+```text
+Saved working directory and index state On main: unowned-gemini-leftovers-2026-10-02
+RESULT: 6 approved files stashed, 0 content mismatches, 0 unrelated files changed; previous stash and backup branch preserved.
+```
+
+Receipt: `scratchpad/lane-baseline/unowned-main-stash-20261002.json`, including hashes before stashing and exact changed-path lists from the stash. The six paths are now clean/absent as appropriate. The timestamp table in the removal section below is a historical pre-stash snapshot. Other PM documentation changes remain in main's working copy; this was not a blanket cleanup. No runtime tests were run for this storage operation.
+
 ## Approved removal execution
 
 Task: Owner-approved source-control hygiene, 2026-10-02. Executed by Codex PM at 2026-10-02 20:09:35 CT. The Owner explicitly approved the exact 22 clean, merged candidates from the original inventory. Each resolved absolute target was checked beneath `C:/Users/snewt/.deus_worktrees`; each branch/tip, main ancestry, clean non-ignored status, archive-tag collision and explicit live-process path reference was rechecked before mutation.
