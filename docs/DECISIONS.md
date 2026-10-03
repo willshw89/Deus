@@ -5,6 +5,16 @@ Add an entry only for an explicit Owner ruling. Agents do not record their own p
 
 ## 2026-10-02
 
+### Owner matter ruling, 22:35 CT
+
+**D-2026-10-02-20 — MATTER RULE.** Replaces any full mass-ledger design. Record now; build in the **digging/building lane after worldgen is green**. This does not authorize implementation during ORG-0.2 or lift DEC-037.
+
+1. Every block and item has `weight_lb`: use the SRD value where one exists; otherwise use a **labeled estimate**.
+2. Mining, building and collapse convert weight **1:1**: block becomes stone items, stone becomes a wall, wall becomes rubble. Nothing creates or deletes weight in these paths.
+3. **One acceptance test:** mine, build and collapse on a fixture; total weight before and after must match.
+
+**NO separate world-ledger system.** Terrain reclaim and regrowth come later as a decay rule using the same weights. Earlier full-ledger requirements and their planned integration/verifier work are superseded; historical descriptions of existing code are not permission to build that design. No runtime code, existing assertions, weights or save formats change in this documentation update. Planning maps to [WBS_SIM SIM-1/SIM-3](WBS_SIM.md) and the queued [digging/building plan](design/COLLAPSE_REPLAN_DEC083.md); older ledger leaves are marked superseded in the [worldgen WBS](worldgen/DEUS_WORLDGEN_WBS.md).
+
 ### Owner art, camera and depth rulings, 22:21-22:32 CT
 
 **DESIGN ONLY; implementation remains parked until ORG-0.2 / world loading is green.** These entries authorize recording the decisions and moving/updating the supplied size tables, not generating art or changing game code. DEC-037 remains in force.

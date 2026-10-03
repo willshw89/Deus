@@ -1,5 +1,7 @@
 # DEUS Matter
 
+> **Design superseded, Owner 2026-10-02 22:35 CT:** [D-2026-10-02-20](../DECISIONS.md) replaces the full mass-ledger design with `weight_lb` on every block/item (SRD value or labeled estimate), 1:1 mining/building/collapse and one fixture comparing total weight before/after. No separate world ledger. Digging/building implementation waits until worldgen is green; reclaim/regrowth come later as decay using the same weights. Existing-code descriptions below are historical/reference material, not an instruction to extend the ledger or evidence that the new rule is implemented.
+
 ## Purpose and status
 
 NAT.02.MASS part 1, lane-dn, 2026-10-01: shared mass units and geometry for

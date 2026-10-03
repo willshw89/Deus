@@ -1,5 +1,7 @@
 # Re-plan: structure, collapse and building across Z after DEC-083
 
+> **Owner amendment, 2026-10-02 22:35 CT — queued after worldgen green:** [D-2026-10-02-20](../DECISIONS.md) supplies the matter rule for the digging/building work discussed below (including proposed nx4/nx5). Every block/item has `weight_lb`, from SRD where available or a labeled estimate. Mining/building/collapse conserve weight 1:1: block -> stone items -> wall -> rubble. One fixture runs mine -> build -> collapse and compares total weight before/after. No separate mass/world ledger; reclaim/regrowth are later decay using the same weights. The earlier "never converted" / "no rubble" proposal below is superseded where it conflicts with the approved wall-to-rubble path. This weight rule does not change the connectivity support rule or authorize implementation during ORG-0.2.
+
 Proposal of 2026-10-02. Read-only study at main 6eedfd33 (DEC-083 plus its two amendments, `docs/OWNER_DECISIONS.md:1387-1399`). Nothing is committed or staged. OWNER QUESTION = the Owner may want to rule. PM TO CONFIRM = my own choice, change freely. First lane: `BRIEF_nx1.md`. Sources and what I could not check: `NOTES.md`.
 
 ## 1. The four rules in one paragraph

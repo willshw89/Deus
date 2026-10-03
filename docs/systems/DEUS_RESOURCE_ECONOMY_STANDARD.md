@@ -1,6 +1,8 @@
 # DEUS Resource Economy & WorldGen Standard
 ## Finite Materials + Renewable Ecology + Physical Currency (Balance v0.1)
 
+> **Owner override, 2026-10-02 22:35 CT:** full mass-ledger requirements in this older standard are superseded by [D-2026-10-02-20](../DECISIONS.md). Every block/item uses `weight_lb` (SRD value or labeled estimate); mining/building/collapse conserve it 1:1, checked by one mine -> build -> collapse fixture. No separate world ledger. Implement in digging/building after worldgen green; terrain reclaim/regrowth are later decay work using the same weights. This record changes no runtime behavior and does not reopen the older economy plan.
+
 **Standard Document ID:** `DEUS-ECON-STD-01`  
 **WBS Leaf ID:** `DEUS-ECON-01` / `DEUS-TSK-FABLE-20`  
 **Authoritative Version:** 1.0.0 (Balance v0.1 Calibration)  
