@@ -560,7 +560,14 @@
         for (let i = 0; i < SLOTS.length; i++) {
             const slot = SLOTS[i];
             let t = null;
-            if ((slot === "weapon" || slot === "mainHand") && workTool) t = workTool;
+            // One visual layer per held item (ORG-0.2, 2026-10-03): an empty mainHand slot would only mirror the weapon
+            // slot (its alias) or the work tool, which the weapon slot already draws; an explicitly equipped mainHand
+            // item still draws.
+            if (slot === "mainHand") {
+                const own = eq ? eq.mainHand : null;
+                if (own === null || own === undefined || own === "") continue;
+            }
+            if (slot === "weapon" && workTool) t = workTool;
             else if (eq) {
                 let v = eq[slot];
                 if ((v === null || v === undefined || v === "") && SLOT_ALIAS[slot]) v = eq[SLOT_ALIAS[slot]];
