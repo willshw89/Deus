@@ -1,5 +1,80 @@
 # ORG-0.2 / lane-worldgen-green: writer report
 
+## 0A. Checkpoint 2 (2026-10-03, written 02:15 CT): river contract and bridge, retention mode, kit minima, camps on the datum
+
+**Status: RED checkpoint, complete coverage every run; the river item is green in the full run W6.** Same writer (Claude, claude-fable-5-1, max effort; per-command identity `deus-claude`), resumed by the PM at 00:45, 01:06 (and later) without a model crossload. Nothing is green overall; no merge, tag, self-review or world-load acceptance is claimed. Times are CT. Section 0 above is the W1 checkpoint; sections 1-11 below are the (a)/(c) checkpoint of 2026-10-02.
+
+### 0A.1 Commits since `8e5ae028` (all on origin, `git ls-remote` checked after each push)
+
+| SHA | Kind | What |
+|---|---|---|
+| `582d9e63` | runtime (c) | option A river checks in the worldgen suite: start clearance from the carved raster (Chebyshev; "more than 14" when nothing is within reach), continuity = every carved cell of each river inside the area is water on the built map and all of a river's carved cells form one 4-connected body of built water (strengthened from the proposal's vertex-only loop); count range, 14-cell clearance, widths unchanged |
+| `13d58406` | evidence | W2, M3 |
+| `61a74580` | runtime (c) | on the whole-world (1x1) area a counted river with no carved cell fails continuity ("no carved cell anywhere in the world"); multi-area worlds keep the documented out-of-area exception |
+| `ba0e3849` | evidence | W3, M4, D2, D3 |
+| `626d230c` | harness | retain mode in `tools/run_tests.js` (`DEUS_TEST_RETAIN=1` or `--retain`): nothing deleted, reused output refused before launch (exit 2), browser profile must not pre-exist and is kept; default unchanged; `DEUS_Test.md`; proof R1 |
+| `b17ae1d3` | evidence | W4 |
+| `b28b5286` | runtime (c) | `DEUS_Levels.js` `riverAt` + `surfaceElevation`: a hydrology river cell's surface is the ground datum (S = 0); `DEUS_Levels.md`, `DEUS_WorldGen.md` |
+| `f1c5f13e` | evidence | W5a, W5 |
+| D4 evidence commit | evidence | D4 trace on `b28b5286` |
+| `421bd696` | runtime (c) | `DEUS_Levels.js`: no natural ramp on a river channel cell; `DEUS_Levels.md` |
+| `da656197` | evidence | W6a, W6, D5 (river captures, Pela scan) |
+| `6e899a15` | data (f) | `DEUS_WorldCatalog.json` start.kit: granite_boulder 4 -> 7, reeds 4 -> 8 (kit minimums worth 65 stone / 16 straw against the measured need 60 / 16); dated sentence in `firstStage.about` |
+| fix 5 commit after `6e899a15` | runtime (f) | `DEUS_History.js` `campCell`: the camp's 3 x 3 block must have surface elevation 0 (the existing nearest-block search moves a camp that sat inside a hill); `DEUS_History.md` |
+
+### 0A.2 Full controlled runs (seed 1920951434, year 500, 1x1 x 256, fresh validated snapshot of the exact SHA, real `run_tests.bat --game <snapshot>`, all 26 default suites entered each time; W4 onward in retain mode)
+
+| Run | Source | Start-end | RESULT | Notes |
+|---|---|---|---|---|
+| W2 | `582d9e63` | 00:18:29-00:32:58 | `461 passed, 67 failed (exit 1)` | option A contract: river_not_through_start PASS, rivers_count PASS, river_continuous FAIL 4 breaks / 625 carved cells (264 of 381 and 49 of 244 dry) |
+| W3 | `61a74580` | 00:51:37-01:04:25 | `463 passed, 65 failed (exit 1)` | guard commit; river lines as W2 |
+| W4 | `626d230c` | 01:12:16-01:25:02 | `468 passed, 60 failed (exit 1)` | first retain-mode run: `test_output` absent before launch, results stamped by the run (`UF_Test run 2026-10-03T06:12:17.486Z`), profile `%TEMP%\uf_test_profile_26412_1791007936114` kept |
+| W5 | `b28b5286` | 01:27:24-01:41:11 | `463 passed, 61 failed (exit 1)` | channel bridge: river_continuous 2 breaks (river 28: 5 of 244 dry; river 235 fully wet). First per-suite watchdog hit in a full run: `look` exceeded 180 s |
+| W6 | `421bd696` | 01:47:04-02:01:14 | `464 passed, 60 failed (exit 1)` | **all three river checks PASS** (`2 river(s): all 625 carved cell(s) inside area (0,0) are water on the built map and each river's cells form one connected body of water`); `look` exceeded 180 s again |
+| W7 | `6e899a15` | launched 02:12 | pending (W7a worldgen-only ran first) | kit minima |
+| W8 | fix 5 | pending | pending | camps on the datum |
+
+No W2-W6 run had a `nw.exe` of another lane or a runner before launch (0 each). W1 had the editor's Playtest tree (8 processes, PID 7776, launched 23:25:00) beside it; by 00:18 that tree was gone; my logs do not show who closed it or when, so I do not explain the difference beyond that observation.
+
+Failure-name stability: 53 names fail in all six full runs W1-W6; per run 3-7 names flip in untouched subsystems (timing and job-state variance). Per-run maps with check file:line and lane scope: `evidence/W*_*/W*_failures.md`. Watch item: the `look` suite reached its 180 s watchdog in W5 and W6 (its `dismantle` and `fish` designations were never taken by a colonist within the suite; W1-W4 completed it; the `jobs` suite, which uses its own worker, is identical in W4 and W6). The look suite is outside allowedPaths; whether colonist job-taking changed after the river channel (new water reachable) is not established.
+
+### 0A.3 Item (c), rivers: what the traces proved and what was changed
+
+1. **Contract** (`582d9e63`, `61a74580`): the suite reads the hydrology raster of the start area (`WorldGen.waterModel(st).micro.rasterizeChunk`, the raster the area build paints from) and the built map (layer 0, `Tilemap.isTileA1`). The raster is the builder's own input, **not an independent oracle** of river geometry: the check proves the built map agrees with the planned course, not that the course is right. Proofs that the checks can fail: M3 (clearance 60 / every 97th cell dry: both FAIL), M4 (river id 0 without raster cells: "no carved cell anywhere in the world", count and clearance unchanged).
+2. **Cause** (D2 on `61a74580`; D3 launched by the PM): every dry cell was a hydrology water cell whose `DEUS_Levels` surface elevation was 1 or 2, ground shape solid (one carved-under), painted as peak rock (tile 3522), no template, no tile diff, pristine build identical; the +1/+2 maps hold 0 A1 water tiles, so the course had no channel anywhere above the datum. `surfaceElevation` derived S from climate elevation plus plateau/relief noise and never consulted the river raster; `WorldGen.generate` read `riverChunk.river` but never `bed`.
+3. **Fix 2** (`b28b5286`): a river cell's surface is S = 0 after the flat start valley rule, so the ground baseline makes it floor and the painter paints its water; the channel's walls are the neighbouring columns' cliffs. W5a/W5: river 235 fully wet; 5 cells of river 28 still dry. The Pela Tribe camp gained fresh water at 20.4 cells (was none).
+4. **Fix 3** (`421bd696`): D4 showed the 5 cells were channel cells turned into natural ramps (shape 4, painter ramp true, tile 3056); the ramp loop now skips river cells. W6a and W6: all 625 carved cells wet, each river one connected body.
+5. **In-game proof** (D5 captures on `421bd696`, opened): `river_235_channel_183_62.png`: a light-blue water channel three to four tiles wide with grass banks running north-south between grey rock faces walled by black-capped cliff frames, lily-pad marsh water to its west, a conifer and ground above; `river_235_lower_205_95.png`: the same channel winding diagonally through grey rock, cliff faces on both banks; `river_28_source_28_182.png`: a narrow channel between rock on the west and brown ground with a fern and bush on the east, cliff frames closing it; `river_28_lower_60_210.png`: the river meandering through dark forest floor with grass banks, snow conifers and a bright-blue pool tile at its bank. The rain overlay is present in all four. These are diagnostic captures, not acceptance.
+6. **Still open, reported not hidden:** lake and sea cells under raised columns are still painted as rock (`volumeStats.waterSuppressed` 2430 after fix 2; the rim captures show rock); `biomes.ocean_rim` reads `cellInfo` biomes (climate), a world-design question; on a multi-area world a river wholly outside the start area adds no break.
+
+### 0A.4 Items (f): kit and camps
+
+- **Kit minima** (`6e899a15`): `kit_covers_plan` measured the first stage at 60 stone / 16 straw while the catalog's guaranteed kit was worth 47 / 8 (`kitMinimumWorth`), and the four camps with kits held 47-50 stone, 8-14 straw. The kit's `granite_boulder` minimum is 7 (4 stone + the 2-stone small rocks it leaves; 10 small rocks 20 + 42 + 3 from the ore outcrop = 65) and `reeds` 8 (16 straw). Need and thresholds untouched. W7a/W7 pending at the time of writing.
+- **Pela site** (fix 5): the D5 scan found the Pela Tribe home (195,114) on a surface-2 solid column, the History camp on that same cell (moved 0), 0 flat floor cells within 20 and 18 within 30, 1254 of 1257 cells within 20 solid; the nearest all-flat 3 x 3 block is (167,107) at 28.9 cells. `campCell` now requires surface elevation 0 for the block; the nearest-block search moves the camp. The faction home (DEUS_Factions, frozen) is unchanged. W8a/W8 pending.
+
+### 0A.5 Attempt counts
+
+River physical cause: round 1 `b28b5286` (308 of 313 cells), round 2 `421bd696` (the 5 ramp cells) -> green in W6. Zero-carved-cell guard: 1 round (`61a74580`, M4). Retention: 1 round (`626d230c`, R1 + W4). Kit minima: round 1 (`6e899a15`, W7 pending). Pela site: round 1 (fix 5, W8 pending). Everything else: 0 rounds.
+
+### 0A.6 Retention mode and the inherited behaviour (PM_HARNESS_RETENTION.md)
+
+Before `626d230c` every run through `tools/run_tests.js` removed `test_output/results.txt` before launch (`fs.rmSync`, a no-op on the fresh snapshots used here: every run metadata says `test_output` absent) and removed its unique temporary browser profile on exit (`fs.rmSync(profile, { recursive: true, force: true })` in a try/catch that swallows errors, so the source does not prove every attempted deletion succeeded). That applies to R0, D1, F1, F2, G1, W0-W3, M1-M4, D2 and D3 (D3 was launched by the PM at 01:04:31 on the old runner). The in-game harness still unlinks old PNGs and `results.txt` in `test_output` when it starts; retain mode makes that a no-op by refusing any populated `test_output` first. Proof R1: a disposable fixture with a stale `RESULT: 999 passed, 0 failed (exit 0)` and a stale PNG was refused by both the environment and the CLI form, exit 2, both files byte-identical afterwards, nothing launched; the legacy default mode was deliberately not exercised. W4-W7 ran in retain mode (metadata records the mode, the runner's retain lines and the kept profile path).
+
+Honest record of my own earlier file operations (before the PM's no-delete correction at 00:35 and 01:05): at about 00:33 I moved the W2 run's metadata out of a stray folder (`...\org-0.2-worldgen-green$ev2`, created by a path-escaping slip in my launch command) into `evidence/W2_582d9e63_full/` and removed the emptied stray folder with `rmdir`; before that I had moved large runtime logs and most W1 PNGs from the evidence folders into `scratchpad/lane-worldgen-green/evidence_large/` (copies of everything are there; nothing was lost). Since 01:06 nothing has been deleted or moved: large logs stay untracked inside their evidence folders with copies in `evidence_large`, mutant and diagnostic copies get fresh unique folders, and every browser profile of a retain-mode run is kept.
+
+### 0A.7 GAME TRANSLATION for `b28b5286`, `421bd696`, fix 5 (DEC-087 scope: `game/js/plugins/DEUS_Levels.js`, `DEUS_History.js`) and `6e899a15` (`game/data/DEUS_WorldCatalog.json`)
+
+Class **B. WORLD-BEHAVIOR VISIBLE.** Player / World Effect: a river now runs from its high source down to the sea as a water channel cut through the hills instead of vanishing inside them, its banks are cliffs (captured, 0A.3.5); a faction camp is never founded inside a hill; every camp's guaranteed kit carries the stone and straw its first buildings need. Trigger: New Game (ground baseline from `surfaceElevation`; History camps at `world:created`; kit placement in the area build). Runtime Authority: `DEUS_Levels` (surface heights, shapes, ramps) reading `DEUS_WorldGen.waterModel`; `DEUS_History.campCell`; `WorldGen` kit placer reading the catalog. Simulation Path: `surfaceGridFor` -> `surfaceElevation` -> `riverAt` -> z0 FLOOR on river cells -> `WorldGen.generate` paints water; `campCell` -> `onDatum` -> nearest flat block -> `kitCentres`. Engine Bridge: existing (area map tiles, natural-wall frames for the cliffs, events for the camp's people). Visible Result: the four D5 captures; camp relocation and kit counts not yet captured. Persistence: baselines and camps are derived from the seed at New Game; no schema change; saved tile diffs untouched. Failure Without This Lane: 313 of 625 carved river cells painted as rock; the Pela camp and its 151 people inside solid rock with no kit or water; every kit short of stone and straw. Automated Proof: W5a, W5, D4, W6a, W6 (rivers); W7a/W7 (kit) and W8a/W8 (camp) pending. In-Game Proof: native `nw.exe` runs and the D5 captures only; no editor F5 walk-through; the Owner's laptop check is pending. Consumed by game systems: the area painter, pathing (`World.walkable` refuses water), kit water search, flora placement, History materialisation. Status: Simulation YES; Engine bridge YES (existing); Presentation YES (captured for rivers); Input NOT APPLICABLE; Save/load PARTIAL (derived data, in-process save checks only); Playable verification PARTIAL (native harness only).
+
+### 0A.8 Decisions needed (Owner / PM), in addition to section 0.8
+
+6. The river channel rule is a world-design statement (rivers cut to the ground datum through every hill they cross; walls are cliffs). The Owner can reverse it; the alternative (water painted on the +1/+2 surfaces) needs those levels to paint water at all, which they do not today.
+7. Lake and sea cells under raised columns (2430 suppressed water cells) and the climate-only `ocean_rim` contract: same family, separate defects, 0 rounds.
+8. The `look` suite's 180 s stalls in W5 and W6 (designations never taken): watchdog-caught; cause not established; the suite's file is outside allowedPaths.
+9. Camps relocated by fix 5 keep the faction home where DEUS_Factions put it (frozen); whether the home itself should move is a faction-phase question.
+
+---
+
 ## 0. Overnight checkpoint W1 (2026-10-03, written 00:25 CT): per-suite watchdog and the first complete default run
 
 **Status: RED checkpoint, complete coverage.** Writer Claude (claude-fable-5-1, max effort, per-command identity `deus-claude <deus-claude@local.invalid>`), under the Owner overnight dispatch (`OVERNIGHT_20261002.md`) and the 23:40 CT steering (watchdog commit first, one full run, river changes kept out of that snapshot). Nothing is green; no merge, tag, self-review or world-load acceptance is claimed. Times are CT. Sections 1-11 below this one are the earlier (a)/(c) checkpoint and stay as written.
