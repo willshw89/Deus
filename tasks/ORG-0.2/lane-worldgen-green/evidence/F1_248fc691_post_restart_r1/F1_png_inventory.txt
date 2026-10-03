@@ -1,0 +1,23 @@
+﻿
+Name                            Length
+----                            ------
+biomes.corner.png               107104
+biomes.start_zoom_0.png         321333
+biomes.start_zoom_1.png         353146
+biomes.start_zoom_2.png         446442
+ecology.replenished_monster.png 291007
+ecology.replenished_prey.png    276173
+harness.on_failure.png          290737
+history.start_other.png         231021
+history.start_zoom1.png         216789
+history.start_zoom23.png        216723
+ownership.owned_bed.png         218376
+smoke.map.png                   223279
+world.eight_way.png             208994
+world.path_around_wall.png      201016
+world.round_seam_wrap.png        96200
+world.unit_in_view.png          108630
+worldgen.start_area.png         459405
+
+
+

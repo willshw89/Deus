@@ -1,0 +1,13 @@
+diag_rivers.js at seed 1920951434 on the working tree with the item (c) patch applied (lane HEAD 997528e2834f7dd83b97ea75ca4dd29a57f89af9, DEUS_WorldGen.js uncommitted), 2026-10-02 21:31:58 -05:00 (CT); tiles proxied by waterModel.isWater (ocean/lake/river/pond), the native run paints the real tiles
+seed 1920951434; seaLevel 0.3; catalog rivers count [1,2] halfWidth [1,2] keepAwayFromStart 14
+macro grid 16x16 nodes: min 0.135 median 0.492 p90 0.687 max 0.834; nodes >= 0.6: 56; nodes <= seaLevel: 25
+planned rivers 2: #0 source (14,7) e=0.834 nodes 6 terminal sea eroded 0 | #1 source (1,11) e=0.709 nodes 5 terminal sea eroded 0
+failed sources 0: []
+riverModels: 2; rivers_count would be PASS
+river_not_through_start: gaps [null,null] (keep away 14) -> FAIL
+river #0: anchorX 235 halfWidth 1 terminal sea course points 70 x 156..235 y 41..118 (unwrapped); rows of 256 with a center: 78; center(128)=NaN
+  river_continuous loop: col NaN (row 0 not crossed): the suite's col<0||col>=size test is false for NaN, so the row loop RUNS
+  river_continuous (proxy wm.isWater for tiles): breaks 185 (dry rows 178, jumps 7); first: row 0 dry (center NaN); last: row 255 dry (center NaN)
+river #1: anchorX 28 halfWidth 1 terminal sea course points 48 x 28..90 y 182..222 (unwrapped); rows of 256 with a center: 41; center(128)=NaN
+  river_continuous loop: col NaN (row 0 not crossed): the suite's col<0||col>=size test is false for NaN, so the row loop RUNS
+  river_continuous (proxy wm.isWater for tiles): breaks 217 (dry rows 215, jumps 2); first: row 0 dry (center NaN); last: row 255 dry (center NaN)

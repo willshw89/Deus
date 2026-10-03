@@ -1,0 +1,17 @@
+﻿F1 snapshot validation (attempt 2; attempt 1 was invalid because the PowerShell pipe prefixed a BOM to the first path and git hashed nothing), 2026-10-02 21:21:02 -05:00 (CT)
+method: git ls-tree -r 248fc691633a96308a34bfb3a639ce6b674078c4 -- game (blob ids) versus git hash-object --stdin-paths over every snapshot file (harness outputs test_output/ and game_runtime.log excluded)
+lane HEAD now: 997528e2834f7dd83b97ea75ca4dd29a57f89af9
+tested source SHA: 248fc691633a96308a34bfb3a639ce6b674078c4
+game/ tree difference 248fc691633a96308a34bfb3a639ce6b674078c4..HEAD (git diff --stat -- game): 0 lines (0 = identical trees)
+snapshot: C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_F1_248fc691\game
+blobs in commit tree under game/: 4347; files in snapshot: 4347; hashes computed: 4347
+entries not matching the commit blob: 1
+DIFFERS: game/js/plugins.js  commit=81bdd308f1d74c5f856d10b8508ffafd387f14b3  snapshot=272df7806ae3784766564edeb7a8a6b1c78cbe76
+--- game/js/plugins.js line difference (commit vs snapshot) ---
+=>       "Seed": "1920951434"
+=>     "parameters": {
+=>     }
+<=     "parameters": {}
+plugins.js differing lines: 4 (expected 4: the empty parameters line replaced by the three Seed lines)
+snapshot Seed line: "Seed": "1920951434"
+tracked plugins.js in lane: 0 Seed occurrences (0 = untouched)
