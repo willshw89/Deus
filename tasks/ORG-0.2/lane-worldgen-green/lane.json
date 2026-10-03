@@ -1,0 +1,56 @@
+{
+  "lane": "lane-worldgen-green",
+  "taskId": "ORG-0.2",
+  "branch": "task/org-0.2-worldgen-green",
+  "writer": "claude",
+  "reviewer": "grok",
+  "push": true,
+  "baseSha": "565dc5aead7e068230528d573c395ea21ed5cf5d",
+  "allowedPaths": [
+    "tools/run_tests.js",
+    "game/js/plugins/DEUS_Test.js",
+    "game/js/plugins/DEUS_Core.js",
+    "game/js/plugins/DEUS_World.js",
+    "game/js/plugins/DEUS_WorldGen.js",
+    "game/js/plugins/DEUS_History.js",
+    "game/js/plugins/DEUS_Items.js",
+    "game/js/plugins/DEUS_Objects.js",
+    "game/js/plugins/DEUS_Ecology.js",
+    "game/js/plugins/DEUS_Movement8D.js",
+    "game/js/plugins/DEUS_Colonists.js",
+    "game/js/plugins/DEUS_Anim.js",
+    "game/js/plugins/DEUS_Tiles.js",
+    "game/js/plugins/DEUS_Levels.js",
+    "game/data/DEUS_WorldCatalog.json",
+    "docs/systems/DEUS_Test.md",
+    "docs/systems/DEUS_World.md",
+    "docs/systems/DEUS_WorldGen.md",
+    "docs/systems/DEUS_History.md",
+    "docs/systems/DEUS_Items.md",
+    "docs/systems/DEUS_Objects.md",
+    "docs/systems/DEUS_Ecology.md",
+    "docs/systems/DEUS_Movement8D.md",
+    "docs/systems/DEUS_Colonists.md",
+    "docs/systems/DEUS_Anim.md",
+    "docs/systems/DEUS_Tiles.md",
+    "docs/systems/DEUS_Levels.md",
+    "docs/STATUS.md",
+    "tasks/ORG-0.2/lane-worldgen-green/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "node",
+      "args": [
+        "tools/run_tests.js"
+      ],
+      "timeoutSec": 300
+    },
+    {
+      "cmd": "node",
+      "args": [
+        "tools/ops/run_gate.js"
+      ],
+      "timeoutSec": 1800
+    }
+  ]
+}
