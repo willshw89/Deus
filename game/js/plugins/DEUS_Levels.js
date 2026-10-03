@@ -781,6 +781,32 @@
         return { biome, water, pockets };
     }
 
+    // Hydrology bridge (ORG-0.2 item (c), 2026-10-03): a cell of a hydrology river (sim/worldgen/DEUS_Hydrology, the raster
+    // UF_WorldGen paints water from) has its surface at the ground datum, S = 0: a river cuts a channel through the hills,
+    // and the channel's walls are the cliffs of the neighbouring columns. Without this the planned source-to-mouth course
+    // ran inside solid columns (surface 1 or 2), where the ground painter rightly paints rock and no level paints water, so
+    // most of a river was missing from the built map (W2/W3 on seed 1920951434: 313 of 625 carved cells dry). One raster
+    // per area, cached like the surface grids; only the live world's own seed consults the raster (a foreign seed keeps the
+    // pure derivation), and a world without the hydrology model is unchanged.
+    const riverMasks = new Map();
+    function riverAt(seed, gx, gy, size, d) {
+        const G = window.UF && UF.WorldGen, W = World(), st = W && W.state;
+        if (!G || typeof G.waterModel !== "function" || !st || st.seed !== seed) return false;
+        const width = d && d.width ? d.width : size, height = d && d.height ? d.height : size;
+        const wx = ((gx % width) + width) % width, wy = ((gy % height) + height) % height;
+        const ax = Math.floor(wx / size), ay = Math.floor(wy / size);
+        const key = `${seed}:${ax},${ay}:${size}:${width}x${height}`;
+        let mask = riverMasks.get(key);
+        if (mask === undefined) {
+            let wm = null;
+            try { wm = G.waterModel(st); } catch (e) { wm = null; }
+            mask = wm && wm.micro && typeof wm.micro.rasterizeChunk === "function" ? wm.micro.rasterizeChunk(ax * size, ay * size, size, size).river : null;
+            riverMasks.set(key, mask);
+            while (riverMasks.size > 8) riverMasks.delete(riverMasks.keys().next().value);
+        }
+        return !!mask && mask[(wy - ay * size) * size + (wx - ax * size)] > 0;
+    }
+
     function surfaceElevation(seed, gx, gy, size, d, cl) {
         const mid = Math.floor(size / 2);
         const lx = ((gx % size) + size) % size;
@@ -789,6 +815,8 @@
 
         // Within starting settlement valley, kit objects and pond radius (r <= 30), always datum S = 0
         if (distToCamp <= 30) return 0;
+        // A hydrology river's channel is at the datum too (bridge above).
+        if (riverAt(seed, gx, gy, size, d)) return 0;
 
         const G = window.UF && UF.WorldGen;
         let e = 0.45;
