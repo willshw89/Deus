@@ -21,7 +21,7 @@ SRD material attribution and CC-BY-4.0 license record: [CREDITS.md](../../CREDIT
 - Door: YES = 1x1 footprint and height 96 or less (Tiny/Small/Medium; a Medium canvas overhang doesn't matter because it passes through lengthwise). SQUEEZE = Large (SRD squeezing: it fits a space one size smaller, with the squeezing penalties). NO = Huge and Gargantuan.
 
 ## Item rules (Ultima VII-style: one sprite everywhere)
-- Each item has exactly one sprite (`sprite_w` x `sprite_h`) at true scale of about 12 px/ft (= 1 px per inch). The same sprite is used in the world, on surfaces and inside container gumps. There is no separate inventory icon. Large ships are walkable maps, as explained below, rather than item sprites.
+- Each item has exactly one sprite (`sprite_w` x `sprite_h`) at true scale of about 12 px/ft (= 1 px per inch). The same sprite is used in the world, on surfaces and inside container gumps. There is no separate inventory icon. Large ships are parked future transport units with sprites that carry units, not walkable tile maps (D-2026-10-02-21). This table approves no large-ship sprite dimensions or footprints.
 - Owner 22:25 CT examples: mug about 4x5 px, candle about 3x8, book about 8x10. These are approximate art targets; pre-existing CSV estimates are not exact generated-art specifications.
 - Every item uses the shared High Top-Down view and a bottom-center contact point (`anchor_x`, `anchor_y`) in its future runtime data. Furniture will carry `surface_height_px` and a placement polygon/rect in tile space. Free placement, surface-relative drawing and fixture checks are specified in D-2026-10-02-17; these fields are not implemented by the CSVs.
 - Small items can be tiny: coin or ring about 4 px, dagger 12 px long, potion 8x12.
@@ -82,20 +82,12 @@ SRD material attribution and CC-BY-4.0 license record: [CREDITS.md](../../CREDIT
 | Cart | 96x72 | 2x1 | - | NO | 200 |
 | Wagon | 144x96 | 3x2 | - | NO | 400 |
 | Rowboat | 144x48 | 3x1 | - | NO | 100 |
-| Galley | 1536x384 map bounds (not a sprite) | 32x8 | - | NO | - |
+| Galley | N/A (future transport unit) | N/A | - | NO | - |
 | Instant Fortress | 1x1 | - | - | YES | - |
 
-Ships are **true-scale walkable tile maps**, not reduced sprites. Their horizontal decks use the ground grid: 5 ft / 48 px per tile; mast heights use 12 px/ft. The existing `sprite_w` / `sprite_h` columns hold **map pixel bounds only** for the five large vessel rows, explicitly marked `MAP BOUNDS` in each note. They do not prescribe a monolithic image. Small boats such as Rowboat remain objects with one sprite.
+Large ships (Keelboat, Longship, Sailing ship, Warship and Galley) are **parked future transport units**. A ship sprite carries units; it is not a walkable tile map. Their CSV sprite sizes and footprints are N/A because no replacement transport-unit geometry is approved. The prior map-bound estimates are retired as game specifications. Rowboat stays an object with its existing sprite and row unchanged.
 
-| Vessel | Walkable map bounds | Ground envelope | Pixel bounds |
-|---|---|---|---|
-| Keelboat | 10x3 tiles | 50x15 ft estimate | 480x144 |
-| Longship | 15x4 tiles | 75x20 ft rounded envelope | 720x192 |
-| Sailing ship | 20x5 tiles | 100x25 ft estimate | 960x240 |
-| Warship | 24x5 tiles | 120x25 ft estimate | 1152x240 |
-| Galley | about 32x8 tiles (Owner) | about 160x40 ft | 1536x384 |
-
-Non-galley footprints convert the source's real-world estimates to whole-tile envelopes; these are labeled documentation estimates, not SRD dimensions or exact Owner-selected hull dimensions. The Owner's galley envelope supersedes the earlier 130x20-ft estimate. The Feather Token's 50x20-ft swan boat is a 10x4 walkable map. Folding Boat's 24x8-ft ship uses a 5x2 map envelope (240x96 px), while its box and smaller boat remain objects.
+Feather Token retains its SRD 50x20-ft swan-boat dimension; Folding Boat retains the SRD 12x6x6-in box, 10x4x2-ft boat and 24x8x6-ft ship dimensions. These source dimensions do not approve walkable maps. The token and box retain their item sprites, the Folding Boat small boat remains an object, and the larger boat/ship forms await the future transport-unit design.
 
 ## Judgement calls
 1. **Creature count = 319 stat blocks.** This includes 2 that sit inside magic-item text: Avatar of Death (Deck of Many Things) and Giant Fly (Figurine of Wondrous Power). The Appendix covers Misc. Creatures (Ape…Wolf) and NPCs (Acolyte…Veteran).
