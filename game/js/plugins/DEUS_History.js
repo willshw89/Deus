@@ -618,13 +618,19 @@
         const size = state.size, ax = f.home.area.x, ay = f.home.area.y;
         const cat = catalog() || {};
         const blocked = new Set((Array.isArray(cat.groundKinds) ? cat.groundKinds : []).filter(g => g.passable === false).map(g => g.id));
+        // The camp stands on the ground datum: a cell whose volumetric surface is above the ground (DEUS_Levels S 1 or 2)
+        // is solid rock at the ground, however walkable the climate says it is, and a camp there has no kit, no water and
+        // its people inside a hill (ORG-0.2, D5 scan 2026-10-03: the Pela Tribe camp on a surface-2 column). Without
+        // DEUS_Levels the climate answer stands, as before.
+        const L = window.UF && UF.Levels;
+        const onDatum = (gx, gy) => !L || typeof L.surfaceElevationAt !== "function" || L.surfaceElevationAt(gx, gy, state.seed) === 0;
         return withWorldState(state, () => {
             const memo = new Map();
             const land = (x, y) => {
                 const k = y * size + x;
                 if (!memo.has(k)) {
                     const c = cellInfo(ax * size + x, ay * size + y);
-                    memo.set(k, !!c && c.walkable && !c.peak && !c.water && !blocked.has(c.ground));
+                    memo.set(k, !!c && c.walkable && !c.peak && !c.water && !blocked.has(c.ground) && onDatum(ax * size + x, ay * size + y));
                 }
                 return memo.get(k);
             };

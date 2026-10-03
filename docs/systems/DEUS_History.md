@@ -90,6 +90,7 @@ Confirmed input SHA-256: History `a5eb0ec691b38877dd4a441e73ee8be70d86421f834800
 
 ### Known limits retained after closure
 
+- **Camp cell on the ground datum (ORG-0.2, 2026-10-03):** `campCell` now also requires every cell of the camp's 3 x 3 block to have DEUS_Levels surface elevation 0 (`surfaceElevationAt(gx, gy, seed) === 0`): a cell under a hill column (S 1 or 2) is solid rock at the ground, so a camp there had no kit, no water and its people inside the hill (the D5 scan on seed 1920951434 found the Pela Tribe camp on a surface-2 column with 0 flat cells within 20). The nearest-block search then moves the camp to real ground (`moved` records the distance); without DEUS_Levels the climate answer stands as before. The faction's home (DEUS_Factions, frozen) is unchanged.
 - This closure establishes the requested headless contracts, not native gameplay. The legacy in-game history suite retains founder-only/version-5 assumptions and was not updated or executed here.
 - Colonists retains existing player display-name and human-based appearance-stage rules. Canonical names/biology remain in the ledger. Live gameplay may form later relationships; synchronization back into the historical snapshot is not implemented.
 - All ancestor person records are retained, but the inherited historical event limit is 400. A deceased record in `graveyard` is a logical index entry, not evidence of a physical grave or burial location.
