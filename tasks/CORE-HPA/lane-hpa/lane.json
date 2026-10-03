@@ -1,0 +1,25 @@
+{
+  "lane": "lane-hpa",
+  "taskId": "CORE-HPA",
+  "branch": "task/core-hpa-impl-fable",
+  "writer": "claude",
+  "reviewer": "grok",
+  "push": false,
+  "allowedPaths": [
+    "game/js/deus/DEUS_Pathfinding.js",
+    "docs/systems/DEUS_Pathfinding.md",
+    "docs/lanes/CORE-HPA.md",
+    "tools/test_pathfinding_hpa.js",
+    "tools/bench_pathfinding_hpa.js",
+    "tasks/CORE-HPA/lane-hpa/**"
+  ],
+  "gateTests": [
+    {
+      "cmd": "node",
+      "args": [
+        "tools/test_pathfinding_hpa.js"
+      ],
+      "timeoutSec": 120
+    }
+  ]
+}
