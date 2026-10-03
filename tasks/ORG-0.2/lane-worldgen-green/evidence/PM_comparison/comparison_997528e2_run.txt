@@ -1,0 +1,11 @@
+﻿Source SHA: 997528e2834f7dd83b97ea75ca4dd29a57f89af9
+Start CT: 2026-10-02 21:44:09 -05:00
+Seed fixture: 1920951434
+Year: 500
+No Z override passed
+No suite argument; unchanged native defaults
+Existing NW processes: 0
+Command: $env:DEUS_TEST_YEAR=500; .\run_tests.bat
+End CT: 2026-10-02 21:47:10 -05:00
+Shell exit: 2
+RESULT: RESULT: 224 passed, 15 failed (exit 2)
