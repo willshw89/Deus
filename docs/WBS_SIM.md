@@ -1,16 +1,30 @@
 # WBS-SIM: Simulation core
 
-**Status: Parked until the world loads green** (WBS-ORG ORG-0.2, ORG-4.2). Recorded 2026-10-02. Nothing here may start without the Owner reopening it.
+**Implementation status: PARKED. Design record only**, updated 2026-10-02 from the Owner's 21:56-22:15 CT decisions ([DECISIONS.md](DECISIONS.md), D-2026-10-02-8 through -15). Nothing new below is built until ORG-0.2 is green. Leaving worldgen additionally requires the WBS_ORG hard exit gates. DEC-037 still blocks faction/society code until the Owner lifts it; green worldgen alone does not lift that freeze.
 
-Constraints: DEC-037 freeze stays (no faction/society work). Race bonuses from SRD 5.1 only; professions replace SRD backgrounds. Every lane cites 1–3 GitHub references; no GPL/AGPL copying. Determinism hash (ORG-4.2) must stay unchanged unless the Owner approves.
+The first gameplay priority after worldgen is SIM-8: arrive, gather, build a hut, survive a night, then Owner assessment of whether it is fun before adding more systems. Foundation/acceptance work below serves that slice and later scale goals; this list does not authorize building every system before the slice. Soft WBS-SPLIT follow-on work is distinct from the hard worldgen gates.
 
-| ID | Task |
+Constraints: SRD 5.1 race bonuses remain unchanged. Racial/cultural backgrounds replace both SRD Background and the earlier Profession design; homebrew racial feats are the explicit approved deviation. Draft values and contents remain proposals under docs/research/ pending Owner approval. Every future lane cites references; no GPL/AGPL copying. The recorded worldgen hash must stay unchanged unless the Owner approves a declared change. Every row below is planned, not an implementation/completion claim.
+
+| ID | Planned task / acceptance |
 |---|---|
-| SIM-0 | Foundations: seeded RNG (`seedrandom` pattern), fixed simulation tick, sim/render boundary, save/load of sim state. |
+| SIM-0 | Foundations: seeded RNG (seedrandom pattern), fixed simulation tick, sim/render boundary, save/load of sim state. Shares the tick with SPLIT-5; no duplicate implementation. |
+| SIM-0.1 | Version the save format from the FIRST save, with explicit migrations and retained old-save fixtures for later schema changes. Plan migration-chain and round-trip evidence; existing SIM.00.06 / REL.20.02 are cross-references, not competing save authorities. |
 | SIM-1 | Data: typed-array entity store (bitECS as reference only; adopt after a measured decision), spatial index (flatbush / rbush), items tracked through the mass ledger. |
+| SIM-1.1 | Data-loading research input: Gemini Deep Research on DF raws, DFHack, Cataclysm DDA JSON and RimWorld Defs. Output only under docs/research/; no GPL/AGPL code copying, adoption or schema implementation without Owner approval. |
 | SIM-2 | Movement: reachability regions, hierarchical pathfinding, flow fields wired into real movers. |
-| SIM-3 | Work: job board with reservations; job score = priority x competence x distance x urgency, where competence = SRD ability modifier + proficiency (from race, class or profession, no stacking); hauling and stockpiles; construction and mining through the mass ledger. |
-| SIM-4 | Colonists: needs, mood, skills/XP (SRD thresholds, no race XP modifier), health and death. |
-| SIM-4.5 | Professions replacing SRD backgrounds: each grants 2 skill proficiencies + 1–2 tool proficiencies. |
-| SIM-5 | Performance: workers via `comlink`, per-tick time budgeting. |
-| SIM-6 | World: creatures as entities, weather and seasons. |
+| SIM-3 | Work: job board with reservations; job score = priority x competence x distance x urgency, where competence uses the SRD ability modifier and applicable proficiency (race, class or racial/cultural background; no duplicate stacking). Hauling, stockpiles, construction and mining use the mass ledger. The background's one job edge is part of the pending draft, not an invented numeric bonus. |
+| SIM-4 | Colonists: needs, mood, skills/XP (SRD thresholds, no race XP modifier), health and death. Population cap 200 per faction, about 1,800 across 9 factions; off-screen colonies are totals, not individually tracked colonists. |
+| SIM-4.5 | Racial/cultural backgrounds replace SRD Background and the earlier Profession design. Culture-flavored skill and tool proficiencies plus exactly one job edge; NO extra ability-score bonuses, avoiding double counting SRD race bonuses. Earlier fixed profession proficiency counts are not carried forward as newly approved requirements. Gemini Deep Think draft -> Deus SRD check -> Owner per-item approval. |
+| SIM-4.6 | Homebrew racial feats, auto-chosen by race. At levels 4, 8, 12, 16, 19 choose between an ability score improvement and a racial feat. This is the Owner-approved deviation from SRD 5.1; individual feats, choice details and balance are draft proposals, not approved content. |
+| SIM-5 | Performance: workers via comlink and per-tick time budgeting, subject to measured design choices and the scale acceptance below. |
+| SIM-5.1 | Tiered colony simulation: full detail near the player, totals-based off-screen development using the SAME data, recipes, job rates, tech tree and food math. On arrival expand totals into consistent individuals. Existing SIM.30 LOD and SOC.60.01 catch-up requirements map here; do not build a second economy or give unattended colonies different rules. |
+| SIM-5.2 | Required parity test: run the SAME colony in full and summarized modes for several in-game years on at least 5 seeds. Compare population, food, buildings and techs against Owner-approved margins; also check that materialized individuals agree with the summary totals. Exact years, seeds and numeric margins are TBD before implementation. |
+| SIM-5.3 | Required scale benchmark: 1,800 total colonists, target 60 FPS on the Owner's laptop, run in CI. Specify the tier mix/visible load, workload, measurement method, duration and CI execution on the actual Owner laptop before acceptance. Generic hosted hardware is not proof of this target. No measured FPS result exists in this design record. |
+| SIM-6 | World: creatures as entities, weather and seasons, subject to existing DEC-059 deferrals and DEC-073 spawner scope; this record does not reopen deferred systems. |
+| SIM-7 | Tech tree data/schema: age gates in the Age of Empires style, about 60 techs, branching choices that lock each other out. AI societies use the same tree as the player, with scored tech selection. Gemini Deep Think proposes JSON schema/content and scoring details under docs/research/; Owner approval required. No tree/runtime code now; SOC.10.02 is a design cross-reference under DEC-037. |
+| SIM-8 | First playable slice after worldgen: colonists arrive, gather, build a hut and survive a night. Establish visible play steps and Owner fun assessment before stacking more systems. Entry: ORG-0.2 green, all worldgen exit gates passed and explicit authorization for any work still frozen by DEC-037. No new implementation is launched by this plan. |
+
+Why the player cares: unattended colonies should develop by the same rules and appear consistent on arrival; race/culture should affect work without hidden duplicate stat bonuses; tech choices should be meaningful; saves should remain usable; and the first arrival-to-night loop must be worth playing before more systems are added.
+
+Open acceptance parameters: parity margins and exact duration/seeds; benchmark scenario, frame-time/FPS method and Owner-laptop CI runner; detailed background/feat entries and tech schema/scoring; first-slice playtest steps. These remain Owner decisions, not agent defaults. See [research intake policy](research/README.md).

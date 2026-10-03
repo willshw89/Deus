@@ -7,6 +7,12 @@
 **Status:** CANONICAL ON MAIN  
 **Permanent Project-Control Anchor:** WBS IDs are immutable. Never silently renumber, merge, or reuse them. Once committed, a leaf changes only by status (`PLANNED` → `DONE`) or retirement via `SUPERSEDED`.
 
+## Owner design addendum, 2026-10-02 21:56-22:15 CT
+
+[DECISIONS.md](../DECISIONS.md) D-2026-10-02-8 through -15 controls where older planning below conflicts. **DESIGN ONLY:** existing ORG-0.2 repair/review continues; no new implementation starts until ORG-0.2 is green. Before leaving worldgen, [WBS_ORG](../WBS_ORG.md) requires all suites green on 5-10 seeds with no fake checks (planned STUB-FIX), a deterministic hash, a load-time budget test, and save/load reproducing the identical hash. These are requirements, not passing evidence.
+
+Soft first-follow-on work is in [WBS_SPLIT](../WBS_SPLIT.md): freeze the worldgen data contract, SRD weight fields, data-tunable densities and RMMZ decoupling. First gameplay priority is [WBS_SIM](../WBS_SIM.md) SIM-8: arrive, gather, hut, survive night, Owner fun assessment. DEC-037 remains; no faction/society implementation is reopened. SIM.30 LOD, SIM.00.06 save ownership and REL.20.02 migrations map to WBS_SIM's new scale/parity/benchmark and first-save requirements. REL.10.03/.04 map to the licensing plan with Deus oversight. No existing immutable ID or historical closure is rewritten by this addendum; it supersedes conflicting older scheduling instructions. Gemini draft contents remain proposals under docs/research/ until Owner approval.
+
 ---
 
 ## 1. Executive Mandate & Production Principles

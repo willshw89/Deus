@@ -8,6 +8,12 @@
 **Maintained by:** Gemini & Claude Code  
 **Status:** CANONICAL & FROZEN HIERARCHY  
 
+## Owner planning addendum, 2026-10-02 21:56-22:15 CT
+
+**DESIGN ONLY; no art production or integration authorized.** [DECISIONS.md](../DECISIONS.md) D-2026-10-02-13 calls for an art throughput plan with a placeholder art policy. The planned work is [WBS_ORG](../WBS_ORG.md) ORG-3.2: asset needs for the first playable slice, Owner production/review capacity, sequencing, placeholder provenance/readability and replacement criteria. Throughput rates and placeholder choices remain proposals for Owner approval. Existing DEC-007 and art approval rules remain in force.
+
+ORG-3.3 tracks a license for every reused repo/asset, the SRD CC-BY credit line and Deus licensing oversight, cross-referencing existing REL.10.03/.04. This authorizes no reuse, generation or asset replacement. New work waits for ORG-0.2 green and appropriate Owner authorization; this note creates no new DW IDs and does not reopen the deprecated DW implementation namespace. Gemini outputs belong under docs/research/ as proposals only.
+
 ---
 
 ## 1. Project-Control Rule: Stable WBS Identifiers

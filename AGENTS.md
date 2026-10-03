@@ -31,7 +31,7 @@ Repository: `willshw89/Deus`. This file applies to every AI agent (Codex, Claude
 4. **No force-push and no deletion** (files, branches, tags, stashes, worktrees) without the Owner's OK. Move with `git mv` instead of deleting.
 5. **Scripts live only under `tools/`** (permanent, reviewed) **or `scratchpad/<lane-id>/`** (throwaway, gitignored). Never in the repo root. CI (`tools/ci/check_root.js`) fails if a `.js`, `.png` or `.zip` appears in the root.
 6. **Every brief cites 1–3 GitHub reference repos** (exact files/functions the PM opened). The writer reads them first and maps new code to them in the report. **No GPL/AGPL code copying.** Permissive-licence adaptation needs attribution.
-7. **Race bonuses come from SRD 5.1 only.** Never invent numbers. **Professions replace SRD backgrounds.**
+7. **Race bonuses come from SRD 5.1 only.** Never invent race bonuses. **Racial/cultural backgrounds replace SRD Background and the earlier Profession design**, with skill/tool proficiencies, one job edge and no extra ability-score bonuses. Homebrew racial feats and the ASI/feat choice at levels 4, 8, 12, 16, 19 are the Owner-approved design exception (2026-10-02 21:56-22:15 CT; `docs/DECISIONS.md` D-2026-10-02-9). Details remain proposals until Owner approval; implementation stays gated on ORG-0.2 green and DEC-037.
 8. **Never loosen a test to make it pass.** Fix the cause. If a test is genuinely wrong, write the reason and get the Owner's OK before changing or retiring it.
 9. **Two failed fixes means stop.** Write down what you know and what you ruled out, then ask.
 10. **Stage only your own files** (`git add <paths>`; never `git add -A`, `git add .`, `git commit -a`). Commit messages start with a lane tag, e.g. `[org-0.2] ...`.

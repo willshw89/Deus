@@ -7,6 +7,14 @@
 **Status:** CANONICAL ON MAIN  
 **Permanent Project-Control Anchor:** WBS IDs are immutable. Never silently renumber, merge, or reuse them. Once committed, a leaf changes only by status (`PLANNED` → `DONE`) or retirement via `SUPERSEDED`.  
 
+## Owner design addendum, 2026-10-02 21:56-22:15 CT
+
+**DEC-037 FREEZE REMAINS. DESIGN ONLY.** [DECISIONS.md](../DECISIONS.md) D-2026-10-02-8 through -15 and [WBS_SIM](../WBS_SIM.md) record the new requirements without opening faction/society implementation. ORG-0.2 green does not by itself lift the freeze.
+
+Design crosswalk: SOC.60.01 remote catch-up and SOC.60.02 persistence must respect the 200-colonist/faction cap (about 1,800 across 9), shared full/totals simulation rules and consistent materialization; WBS_SIM SIM-5.2/.3 own the required parity and Owner-laptop CI scale benchmark criteria. SOC.10.02 development planning references the proposed age-gated, roughly 60-tech data tree and scored AI choices using the same tree as the player. Save-format versioning/migrations start with the first save (SIM-0.1).
+
+Racial/cultural backgrounds replace SRD Background and the earlier Profession design: skill/tool proficiencies plus one job edge, no additional ability-score bonuses. Homebrew racial feats/ASI choice follow levels 4, 8, 12, 16, 19. This does not rename the separate economic craft axis (SOC.12.01). Gemini Deep Think details remain proposals under docs/research/, with Deus SRD checking and Owner approval. No tech entries, scores, feat values or background catalogs are built here. The next gameplay priority after worldgen is the bounded arrival/gather/hut/night slice and fun assessment, not opening this whole society WBS.
+
 ---
 
 ## 1. Executive Mandate & Production Principles
