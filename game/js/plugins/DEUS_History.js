@@ -639,19 +639,46 @@
                 for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (!land(x + dx, y + dy)) return false;
                 return true;
             };
-            const search = r => {
+            // Drinkable water within the kit's reach (catalog start.kit.water, the kit_per_area contract): a climate water
+            // cell of a drinkable kind at the ground datum, which the ground painter paints as water (a water cell under a
+            // raised column is painted as rock and does not count). The nearest flat block with such water wins; a block
+            // without it is the fallback, as before (ORG-0.2, D7 probe 2026-10-03: the nearest flat block for the Pela
+            // Tribe had its water 31.8 cells away, the nearest flat block with water 1.6 cells farther).
+            const kw = Object.assign({ reach: 30, kinds: ["fresh", "pond", "icy", "marsh", "swamp"] }, (cat.start && cat.start.kit && cat.start.kit.water) || {});
+            const drink = new Set(Array.isArray(kw.kinds) ? kw.kinds : []);
+            const reach = Math.max(0, kw.reach | 0);
+            const waterMemo = new Map();
+            const drinkAt = (x, y) => {
+                const k = y * size + x;
+                if (!waterMemo.has(k)) {
+                    const c = cellInfo(ax * size + x, ay * size + y);
+                    waterMemo.set(k, !!c && !!c.water && drink.has(c.water) && onDatum(ax * size + x, ay * size + y));
+                }
+                return waterMemo.get(k);
+            };
+            const waterNear = (x, y) => {
+                for (let dy = -reach; dy <= reach; dy++) for (let dx = -reach; dx <= reach; dx++) {
+                    const nx = x + dx, ny = y + dy;
+                    if (nx < 0 || ny < 0 || nx >= size || ny >= size || dx * dx + dy * dy > reach * reach) continue;
+                    if (drinkAt(nx, ny)) return true;
+                }
+                return false;
+            };
+            const search = (r, needWater) => {
                 let best = null, bestD = Infinity;
                 for (let y = f.home.y - r; y <= f.home.y + r; y++) {
                     for (let x = f.home.x - r; x <= f.home.x + r; x++) {
                         const d = (x - f.home.x) ** 2 + (y - f.home.y) ** 2;
                         if (d > r * r || d >= bestD || !blockOk(x, y)) continue; // scanning north to south, west to east keeps the tie order
+                        if (needWater && !waterNear(x, y)) continue;
                         best = { x, y, moved: Math.sqrt(d) };
                         bestD = d;
                     }
                 }
                 return best;
             };
-            return search(CAMP_SEARCH) || search(size * 2) || { x: Math.max(1, Math.min(size - 2, f.home.x)), y: Math.max(1, Math.min(size - 2, f.home.y)), moved: 0 };
+            return search(CAMP_SEARCH, true) || search(size * 2, true) || search(CAMP_SEARCH, false) || search(size * 2, false)
+                || { x: Math.max(1, Math.min(size - 2, f.home.x)), y: Math.max(1, Math.min(size - 2, f.home.y)), moved: 0 };
         });
     }
     History.campCell = (state, f) => {
