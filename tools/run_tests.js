@@ -1,5 +1,5 @@
 // Runs the UF_Test harness and turns its results file into an exit code.
-// Usage: node tools/run_tests.js [suite] [--game <game folder>]
+// Usage: node tools/run_tests.js [suite] [--game <game folder>] [--retain]
 //   suite: a suite name (e.g. smoke, selftest, perf); omit to run the default suites
 // Exit code: 0 all passed, 1 a check failed, 2 harness/launch problem.
 //
@@ -12,6 +12,13 @@
 // floor, the only kill is the no-progress one: results.txt unchanged for STALL_MS, which is longer than the harness's
 // 180 s map-start wait so a slow New Game is not mistaken for a hang. A kill names its reason on stderr, ends the whole
 // nw.exe tree, and leaves the partial results file for the RESULT check below (no RESULT means exit 2).
+//
+// Retain mode (ORG-0.2, Owner no-delete rule, PM_HARNESS_RETENTION.md 2026-10-03): DEUS_TEST_RETAIN=1 in the environment
+// or --retain. On: this runner deletes nothing. A game folder whose test_output already holds a results.txt or a PNG is
+// refused before launch (exit 2, nothing touched), so a stale RESULT can never be read as this run's and the harness's
+// own output cleanup has nothing to remove; the unique browser profile must not pre-exist and is kept after the run with
+// its path printed. Off (the default): the behaviour below is unchanged (results file removed before launch, profile
+// removed after). The mode is printed on stdout so run metadata can record it.
 "use strict";
 const fs = require("fs");
 const path = require("path");
@@ -27,6 +34,7 @@ const args = process.argv.slice(2);
 const gameIdx = args.indexOf("--game");
 const gameDir = path.resolve(gameIdx >= 0 ? args[gameIdx + 1] : path.join(__dirname, "..", "game"));
 const suite = args.find((a, i) => !a.startsWith("--") && (gameIdx < 0 || i !== gameIdx + 1));
+const retain = process.env.DEUS_TEST_RETAIN === "1" || args.includes("--retain");
 
 const pluginsJs = fs.readFileSync(path.join(gameDir, "js", "plugins.js"), "utf8");
 if (!/"name"\s*:\s*"(?:DEUS_Test|UF_Test)"\s*,\s*"status"\s*:\s*true/.test(pluginsJs)) {
@@ -35,15 +43,31 @@ if (!/"name"\s*:\s*"(?:DEUS_Test|UF_Test)"\s*,\s*"status"\s*:\s*true/.test(plugi
     process.exit(2);
 }
 
-// Remove old results first, so a run where the harness never loads can't be mistaken for a pass.
-const resultsFile = path.join(gameDir, "test_output", "results.txt");
-fs.rmSync(resultsFile, { force: true });
+const outDir = path.join(gameDir, "test_output");
+const resultsFile = path.join(outDir, "results.txt");
+if (retain) {
+    // Reused output is refused, not cleaned: a stale results.txt or capture would be deleted by the harness and could be
+    // mistaken for this run's evidence.
+    const stale = fs.existsSync(outDir) ? fs.readdirSync(outDir).filter(f => f === "results.txt" || f.toLowerCase().endsWith(".png")) : [];
+    if (stale.length) {
+        console.error(`HARNESS: retain mode refuses ${outDir}: it already holds ${stale.length} result/PNG file(s) (${stale.slice(0, 3).join(", ")}${stale.length > 3 ? ", ..." : ""}). Nothing was deleted. Use a fresh snapshot of the tested commit (git archive <sha> game) whose test_output is empty.`);
+        process.exit(2);
+    }
+} else {
+    // Remove old results first, so a run where the harness never loads can't be mistaken for a pass.
+    fs.rmSync(resultsFile, { force: true });
+}
 
 const flag = suite ? `--deus-test=${suite}` : "--deus-test";
 // A fresh browser profile per run: Chromium allows one process per profile, so a shared profile makes
 // back-to-back runs hand off to the previous, still-closing process and exit early.
 const profile = path.join(require("os").tmpdir(), `uf_test_profile_${process.pid}_${Date.now()}`);
+if (retain && fs.existsSync(profile)) {
+    console.error(`HARNESS: retain mode refuses to reuse the existing profile folder ${profile}`);
+    process.exit(2);
+}
 console.log(`Running ${flag} on ${gameDir}`);
+if (retain) console.log(`HARNESS: retain mode on (DEUS_TEST_RETAIN=1 or --retain): nothing is deleted; ${outDir} verified free of results/PNGs; browser profile ${profile} will be kept`);
 // Chromium stops drawing frames for covered or background windows, which stalls checks and ruins timing.
 const noThrottle = [
     "--disable-background-timer-throttling",
@@ -84,7 +108,8 @@ const poll = setInterval(() => {
 child.on("exit", (code, signal) => {
     clearInterval(poll);
     const seconds = ((Date.now() - started) / 1000).toFixed(1);
-    try { fs.rmSync(profile, { recursive: true, force: true }); } catch (_) { /* still locked; it's in the temp folder */ }
+    if (retain) console.log(`HARNESS: retain mode kept the browser profile at ${profile}`);
+    else try { fs.rmSync(profile, { recursive: true, force: true }); } catch (_) { /* still locked; it's in the temp folder */ }
     if (!fs.existsSync(resultsFile) || !/^RESULT:/m.test(fs.readFileSync(resultsFile, "utf8"))) {
         console.error(`HARNESS: nw.exe exited after ${seconds} s with code ${code}${signal ? ", signal " + signal : ""} before the harness finished${killedFor ? ` (killed by this runner: ${killedFor})` : ""}.`);
         console.error("         If another agent or script killed nw.exe processes at that moment, that's the cause (ENGINE_RULES §6).");
