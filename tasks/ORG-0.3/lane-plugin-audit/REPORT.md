@@ -16,7 +16,7 @@ To continue using Gemini, please migrate to the Antigravity suite of products: h
 
 No Gemini code, audit document or commit was produced. Registry shows no orphan children and no changed tracked files. This is a client eligibility failure, not evidence that the Owner lacks a paid plan or has exhausted quota. No downgrade/retry loop or authentication changes were attempted. PATH, the conventional Local Programs location and installed-app registry search did not locate Antigravity; this is not an exhaustive disk search. This session has no callable native Antigravity agent interface.
 
-Logs and cold handoff are preserved in scratchpad/lane-plugin-audit/evidence/ and scratchpad/lane-plugin-audit/HANDOFF.md. No model switch has occurred; the narrow audit remains awaiting a usable provider/crossload. run_tests.bat: NOT RUN for this audit; native slot reserved for ORG-0.2. Cross-family review: NOT RUN. Deus verdict: NOT ISSUED. No merge or completion claim.
+Logs and cold handoff are preserved in scratchpad/lane-plugin-audit/evidence/ and scratchpad/lane-plugin-audit/HANDOFF.md (local evidence, not committed). No model switch has occurred; the narrow audit remains awaiting a usable provider/crossload. run_tests.bat: NOT RUN for this audit; native slot reserved for ORG-0.2. Cross-family review: NOT RUN. Deus verdict: NOT ISSUED. No merge or completion claim.
 
 ## Bounded client recovery and queue (2026-10-02)
 
@@ -26,7 +26,7 @@ Owner authorized up to 15 minutes of Gemini client recovery, then parking Gemini
 - API-key mode using the already-configured GEMINI_API_KEY, with no key printed or changed. The first system-settings-file attempt was rejected by the CLI's administrator-ownership check; no ACL/policy bypass was attempted. The supported GEMINI_CLI_HOME setting then selected an isolated user profile in the lane scratchpad, with security.auth.selectedType=gemini-api-key. The model request reached the API and failed with code 429, RESOURCE_EXHAUSTED: the configured project's monthly spending cap is exceeded. The CLI completed with exit 429; this does not establish the Owner's subscription quota. No spend cap/billing changes or model downgrade were made.
 - Updated Gemini CLI 0.62.0 was resolved with npm exec in its package cache (global install unchanged). Its existing-login probe also exited 1 with UNSUPPORTED_CLIENT. No supported Antigravity installation/interface was located by the bounded checks.
 
-Documentation consulted: https://geminicli.com/docs/get-started/authentication/ and https://geminicli.com/docs/reference/configuration/ (GEMINI_CLI_HOME, security.auth.selectedType). Exact local stderr/stdout is in scratchpad/lane-plugin-audit/evidence/api_profile_probe_* and updated_cli_*. Do not commit credentials or the isolated client profile.
+Documentation consulted: https://geminicli.com/docs/get-started/authentication/ and https://geminicli.com/docs/reference/configuration/ (GEMINI_CLI_HOME, security.auth.selectedType). Exact local stderr/stdout is in scratchpad/lane-plugin-audit/evidence/api_profile_probe_* and updated_cli_* (local evidence, not committed). Do not commit credentials or the isolated client profile.
 
 **Disposition:** Gemini assignment PARKED. Grok is queued as the next ORG-0.3 writer after STUB-HUNT; ORG-0.2 retains top priority for its already-assigned Grok review and native tests. Codex/GPT remains ORG-0.3 reviewer, independent of both Gemini and Grok. No overlapping writer. The manifest reflects the queued writer, not a claim that it has launched. HANDOFF.md records the checkpoint; PM will record the actual launch/switch in docs/ops/USAGE.md when ORG-0.2 releases that governance file.
 
@@ -63,7 +63,7 @@ No game, data, plugin-list, engine, art, CI, STATUS, AGENTS, WBS, DECISIONS, USA
 ### Commands
 
 - `git diff --check 565dc5aead7e068230528d573c395ea21ed5cf5d HEAD` was recorded here as exit 0. That claim was false. On `cda7ce55fd81fe22c301c4b2cf371d724b74aaf1` the same command exited 2 with 212 trailing-whitespace diagnostics in `evidence/attempt1/run_meta.txt` (8), `run_tests_stderr.txt` (9), `run_tests_stdout.txt` (72), `evidence/static/hashes_before.txt` (72), and `scan_summary.txt` (51).
-- Official native: `run_tests.bat --game scratchpad/lane-plugin-audit/snapshot-seed1920951434` with `DEUS_TEST_YEAR=500`. No Z, suite, watchdog, or assertion edits. `tools/test_snapshot.js` was not used.
+- Official native: `run_tests.bat --game scratchpad/lane-plugin-audit/snapshot-seed1920951434` with `DEUS_TEST_YEAR=500` (snapshot: local evidence, not committed). No Z, suite, watchdog, or assertion edits. `tools/test_snapshot.js` was not used.
 - `node tools/ops/run_gate.js --check-lists` — exit 1, `CHECK-LISTS: 122 violation(s)`. Pre-existing list hygiene, not a native RESULT.
 - Not run: `node tools/ops/run_gate.js` (default mode executes suites), `--screen`, and bare `node tools/run_tests.js` against live `game/` (that writes `game/test_output`).
 - No `nw.exe` was running before the launch. No process was killed.
@@ -112,7 +112,7 @@ Local audit commit: `566eb5ecc0c8e2b1b989ba1c8f84d4c2bb75af69`. The push note be
 
 Writer: Grok 4.7, effort xhigh, git identity `deus-grok <deus-grok@local.invalid>`. No game, plugin, engine, art, CI, or `PROVIDER_USAGE_STATUS` edits. No NW process was started or stopped. ORG-0.2 keeps the native slot.
 
-Raw committed bytes of the five flagged evidence files were copied from `cda7ce55fd81fe22c301c4b2cf371d724b74aaf1` with `git cat-file blob` into `scratchpad/lane-plugin-audit/raw-evidence-cda7ce55fd81fe22c301c4b2cf371d724b74aaf1/` before normalization. `git hash-object` of each copy matched `git rev-parse` of that blob. The same bytes stay recoverable from that commit. Normalization changed CR LF to LF and removed trailing whitespace. UTF-8 BOMs that were already in `run_meta.txt`, `run_tests_stdout.txt`, and `hashes_before.txt` were kept. The 72 SHA-256 tokens in `hashes_before.txt` did not change. No evidence file was deleted.
+Raw committed bytes of the five flagged evidence files were copied from `cda7ce55fd81fe22c301c4b2cf371d724b74aaf1` with `git cat-file blob` into `scratchpad/lane-plugin-audit/raw-evidence-cda7ce55fd81fe22c301c4b2cf371d724b74aaf1/` (local evidence, not committed) before normalization. `git hash-object` of each copy matched `git rev-parse` of that blob. The same bytes stay recoverable from that commit. Normalization changed CR LF to LF and removed trailing whitespace. UTF-8 BOMs that were already in `run_meta.txt`, `run_tests_stdout.txt`, and `hashes_before.txt` were kept. The 72 SHA-256 tokens in `hashes_before.txt` did not change. No evidence file was deleted.
 
 `a5257508debdc27a876f384ae0001d56ef0e915c` adds that normalization and `evidence/static/caller_inventory.md` plus `caller_inventory.json`. The manifest command on that commit, run 2026-10-03 00:19:57 -05:00, exited 2 with `caller_inventory.md:6745: new blank line at EOF`.
 
@@ -124,7 +124,7 @@ The caller index lists all 71 plugin files. It is not the filename field in `sca
 
 ## Continuation (2026-10-03 08:10 -05:00)
 
-Writer: Grok 4.7, effort xhigh. Git identity on this commit only: `deus-grok <deus-grok@local.invalid>`. Start checkpoint: `71ddedbff38491b4ecaa433572d26bf6c40554a6` on `task/lane-plugin-audit`. This pass is a docs-only heading correction. The sections above stay the record of the passes that wrote them.
+Writer: Grok 4.7, effort High. Git identity on this commit only: `deus-grok <deus-grok@local.invalid>`. Start checkpoint: `71ddedbff38491b4ecaa433572d26bf6c40554a6` on `task/lane-plugin-audit`. This pass is a docs-only heading correction. The sections above stay the record of the passes that wrote them.
 
 The 2026-10-02 audit section records commit `566eb5ecc0c8e2b1b989ba1c8f84d4c2bb75af69` and what was known then. The fix-pass section records `a5257508debdc27a876f384ae0001d56ef0e915c`, `be12288e3c5184b23ad6b62051ec1e723439bc0d`, and the report text that landed in `e1e1b1a88d327ecd7a5729c7e836ce5798a73a96`. The exit 0 in that section is the `git diff --check 565dc5aead7e068230528d573c395ea21ed5cf5d HEAD` measurement on `be12288e`, run 2026-10-03 00:20:32 -05:00. The retracted exit-0 claim for `cda7ce55fd81fe22c301c4b2cf371d724b74aaf1` stays retracted in the audit section.
 
