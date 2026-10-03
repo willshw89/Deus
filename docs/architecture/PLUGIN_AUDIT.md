@@ -2,7 +2,7 @@
 
 Writer: Grok 4.7, effort xhigh. Reviewer: Codex/GPT. This document is an inventory. It does not disable, merge, or move any plugin. Recommendations are for a later Owner-approved lane. Proposed pillar names are input for a future pillar map. They are not an approved map and this lane does not start pillar work.
 
-Checkpoint the audit was written from: `86ec44c2055f766d17448c8d8f38f800b559059c` on `task/lane-plugin-audit`. Runtime source of the game bytes: that commit, which inherits committed base `565dc5aead7e068230528d573c395ea21ed5cf5d`. `git diff --stat 565dc5aead7e068230528d573c395ea21ed5cf5d HEAD -- game/` is empty, and `git diff --check` on that range exits 0. Gemini produced no audit text. The assignment log in the lane report is the historical record of that park.
+Checkpoint the audit was written from: `86ec44c2055f766d17448c8d8f38f800b559059c` on `task/lane-plugin-audit`. Runtime source of the game bytes: that commit, which inherits committed base `565dc5aead7e068230528d573c395ea21ed5cf5d`. `git diff --stat 565dc5aead7e068230528d573c395ea21ed5cf5d HEAD -- game/` is empty. An earlier sentence in this paragraph said `git diff --check` on that range exited 0. That claim was false. On `cda7ce55fd81fe22c301c4b2cf371d724b74aaf1` the manifest command `git diff --check 565dc5aead7e068230528d573c395ea21ed5cf5d HEAD` exited 2 and reported 212 trailing-whitespace diagnostics in five evidence files. The Gates section records the later measurement by the commit it was run against. Gemini produced no audit text. The assignment log in the lane report is the historical record of that park.
 
 ## What was measured
 
@@ -47,7 +47,9 @@ Other loaders:
 
 TypeScript is not installed in this lane (`require("typescript")` is `MODULE_NOT_FOUND`; no global `tsc`). It was not installed, and no package file was edited. The Apache-2.0 TypeScript wiki page "Using the Compiler API", section "Traversing the AST with a little linter" (`delint`, `ts.createSourceFile`, `ts.forEachChild`, `getLineAndCharacterOfPosition`), was opened before the scanner. The stand-in is not that API.
 
-`scratchpad/lane-plugin-audit/diag_plugin_scan.js` is a diagnostic lexer. It masks each character as code, comment, string/template text, or regex. Comments and strings are excluded from the code counts and reported separately as non-code hits. Regex-versus-division is a heuristic (previous token, keyword, or opener punctuation). Counts in the table are **token occurrences / distinct lines / distinct names** on the code projection, for `Game_`, `$game`, `Sprite_`, `Scene_`, `Window_`, and `PIXI`. A token is not a call. A filename hit is not a consumer: callers say `UF.Households`, not `UF_Households.js`. The scanner's "consumers" field is mostly filename strings and is not used below as proof that a file is dead. A zero grep count is not proof of death. The full per-file dump, including non-code counts, patch assignment lines, and suite registration strings, is `tasks/ORG-0.3/lane-plugin-audit/evidence/static/scan_summary.txt`. Self-test of the lexer passed. This is not a symbol index. Exports below are the assignment sites the lexer recorded, not a proof that every method on that object was called.
+`scratchpad/lane-plugin-audit/diag_plugin_scan.js` is a diagnostic lexer. It masks each character as code, comment, string/template text, or regex. Comments and strings are excluded from the code counts and reported separately as non-code hits. Regex-versus-division is a heuristic (previous token, keyword, or opener punctuation). Counts in the table are **token occurrences / distinct lines / distinct names** on the code projection, for `Game_`, `$game`, `Sprite_`, `Scene_`, `Window_`, and `PIXI`. A token is not a call. A filename hit is not a consumer: callers say `UF.Households`, not `UF_Households.js`. The scanner's "consumers" field is mostly filename strings and is not a caller index. A zero grep count is not proof of death. The full per-file dump, including non-code counts, patch assignment lines, and suite registration strings, is `tasks/ORG-0.3/lane-plugin-audit/evidence/static/scan_summary.txt`. Self-test of the lexer passed. Exports in the count table are the assignment sites the lexer recorded, not a proof that every method on that object was called.
+
+The symbol index is `tasks/ORG-0.3/lane-plugin-audit/evidence/static/caller_inventory.md` (same records in `caller_inventory.json`). It has one section for each of the 71 files. Each section cites exports, classes, engine `prototype` patches, engine object patches such as `SceneManager.determineRepeatNumber`, literal listeners and plugin commands, and code call sites as `file:line`. Comments, strings, and regex text are excluded. Search roots were `game/js` except `game/js/libs`, `tools`, and `archive`. Archive hits are labeled archive-only. A miss is written `no-call-found-after-defined-search` and is not a dead-file label. `DEUS_History.js:219` reads `UF[name]` before `PluginManager.loadScript`, so dynamic access blocks any proof that a missing literal cannot run. Local aliases such as `GB = root.Game_CharacterBase` are resolved in the patch line. A fallback `||` assignment points at the non-fallback assignment of the same name instead of repeating that name's callers.
 
 | File | Lines | Listed | Patches | Game_ | $game | Sprite_ | Scene_ | Window_ | PIXI | Exports |
 |---|---:|---|---:|---|---|---|---|---|---|---|
@@ -123,7 +125,7 @@ TypeScript is not installed in this lane (`require("typescript")` is `MODULE_NOT
 | UF_Time.js | 590 | unlisted | 0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | UF.Time |
 | test_build_vertical_ingame.js | 49 | unlisted | 0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | 0/0/0 | — |
 
-Coupling cells read as tokens/lines/names. `Listed` is the `plugins.js` index and ON/OFF, or `unlisted`. `Patches` is the count of `.prototype` assignments the lexer saw, which includes assignments inside the plugin's own classes.
+Coupling cells read as tokens/lines/names. `Listed` is the `plugins.js` index and ON/OFF, or `unlisted`. `Patches` is the count of `.prototype` assignments the lexer saw, which includes assignments inside the plugin's own classes. Patch names, listener names, and named consumers are in the symbol index linked above, not in this count table.
 
 ## plugins.js order
 
@@ -258,7 +260,7 @@ Every other file under `game/js/sim/` is unknown at runtime for this run. The li
 
 `DEUS_StructuralPhysics.js` (105 lines) looks for `DEUS.Core.update` (lines 21–26). That is not how Core exposes its tick. The fallback patches `Scene_Map.prototype.update` and `Sprite_Character.prototype.update`. `hasAnchor` (lines 52–56) returns `false`. The body walks `DEUS.World.blocks`, which is not the world model `DEUS_World.js` publishes as `UF.World`. The second plugins.js entry does not load. `DEUS_Structural.js` is a different, unlisted plugin (`UF.Structural` at line 764). Jobs' observed structural work is `sim/structural/index.js`, not this stub. Recommendation DISABLE StructuralPhysics. Do not merge it into `DEUS_Structural.js`.
 
-`DEUS_FlowFields.js` (176 lines) is over the 150-line cut and was still inspected. It builds a `FlowField` class and assigns `UF.Pathfinding.requestFlowField` / `getFlowDir` (lines 156–167). A plugins search for `requestFlowField` and `getFlowDir` hit only this file. `DEUS_Movement8D.js` is the live 8-direction path (patches on `distancePerFrame`, `moveStraight`, `moveDiagonally`, `findDirectionTo`, and player input). Zero callers do not prove the file can never be reached by a string built at runtime. Classification UNKNOWN. Recommendation DISABLE, with that uncertainty.
+`DEUS_FlowFields.js` (176 lines) is over the 150-line cut and was still inspected. It builds a `FlowField` class (line 32) and assigns `UF.Pathfinding` as a fallback (line 16), then `UF.Pathfinding.requestFlowField` (line 156) and `getFlowDir` (line 167). The symbol index records `no-call-found-after-defined-search` for `UF.Pathfinding`, `FlowField`, `requestFlowField`, and `getFlowDir` across the searched roots. `DEUS_Movement8D.js` is the live 8-direction path (patches on `distancePerFrame`, `moveStraight`, `moveDiagonally`, `findDirectionTo`, and player input). That miss is not a dead-file label: `DEUS_History.js:219` shows `UF[name]` dynamic access, and a caller outside the searched roots is still possible. Classification UNKNOWN. Recommendation DISABLE, with that uncertainty.
 
 `DEUS_Perspective25D.js` (133 lines) is the only plugins file that assigns `Game_CharacterBase.prototype.screenY` (line 44) and `screenZ`. It also returns early from `Sprite_Character.update` for offscreen sprites, which overlaps `DEUS_Culling.js` (index 30, observed). The header says pure 2D. The screenshots show a top-down tile map and a HUD. That does not prove the screenY/screenZ lean is gone, and it does not prove the file failed to evaluate. Recommendation: Owner decision. It is live render code if the inferred injection evaluated. It is not classified as a stub.
 
@@ -272,7 +274,7 @@ Every other file under `game/js/sim/` is unknown at runtime for this run. The li
 
 `DEUS_DepthCues.js` exports `UF.DepthCues` (line 1089). `DEUS_DepthDemo.js` is the demo driver (`UF.DepthDemo`, and it string-references DepthCues). `DEUS_LayerOverlays.js` exports `UF.LayerOverlays`. `DEUS_Depth.js` line 84 and `DEUS_Select.js` use `UF.LayerOverlays` only when present. None of the three were boot-loaded. Leave them unlisted until the Owner asks for a registration lane. DepthDemo is TEST-DEMO.
 
-`DEUS_Mint.js` exports `UF.Mint` (line 494). No boot loader was found. A full consumer index was not finished, so "no callers" is not claimed. Leave unlisted. UNKNOWN.
+`DEUS_Mint.js` exports `UF.Mint` (line 494). No boot loader was found. The symbol index found one code consumer, `tools/society/test_minting_engine.js:50`, and no hit under `game/js/plugins` or `game/js/sim`. That tool file also quotes `DEUS_Mint.js` at line 13, which is a loader edge, not a second symbol call. Leave unlisted. UNKNOWN.
 
 `DEUS_Taming.js` exports `UF.Taming` (line 235) and requires `sim/taming`. Not boot-loaded. `sim/taming` was not in the observed require log. Leave unlisted. Owner decides. Do not implement taming here.
 
@@ -382,14 +384,18 @@ HUD on these frames shows a level label, a zoom control, a speed readout, and a 
 
 | Check | Result |
 |---|---|
-| `git diff --check 565dc5ae HEAD` | exit 0 |
+| `git diff --check 565dc5aead7e068230528d573c395ea21ed5cf5d HEAD` at `cda7ce55fd81fe22c301c4b2cf371d724b74aaf1` | exit 2. 212 trailing-whitespace diagnostics: `evidence/attempt1/run_meta.txt` 8, `run_tests_stderr.txt` 9, `run_tests_stdout.txt` 72, `evidence/static/hashes_before.txt` 72, `scan_summary.txt` 51. The earlier "exit 0" cell was false. |
+| same command at `a5257508debdc27a876f384ae0001d56ef0e915c` | exit 2. One diagnostic: `caller_inventory.md:6745: new blank line at EOF`. Measured 2026-10-03 00:19:57 -05:00. |
+| same command at `be12288e3c5184b23ad6b62051ec1e723439bc0d` | exit 0. No diagnostic lines. Measured 2026-10-03 00:20:32 -05:00, after that commit existed. |
 | `run_tests.bat --game <snapshot>` seed 1920951434 / year 500 | exit 2, no RESULT line, red |
 | `node tools/ops/run_gate.js --check-lists` | exit 1, `CHECK-LISTS: 122 violation(s)` |
 | `node tools/ops/run_gate.js` default mode | not run. Default mode executes suites and is not read-only. |
 | `node tools/ops/run_gate.js --screen` | not run |
 | `node tools/run_tests.js` against the live `game/` | not run. That path writes `game/test_output`. |
 
-The 122 check-list violations are pre-existing list hygiene on this source (unlisted tracked suites, `NEEDS_NWJS_IN_GATE`, `NEEDS_NWJS_UNRECORDED`). They are not a plugin-byte change and they are not a native RESULT. The full list is `tasks/ORG-0.3/lane-plugin-audit/evidence/static/check_lists.txt`.
+The 122 check-list violations are pre-existing list hygiene on this source (unlisted tracked suites, `NEEDS_NWJS_IN_GATE`, `NEEDS_NWJS_UNRECORDED`). They are not a plugin-byte change and they are not a native RESULT. The full list is `tasks/ORG-0.3/lane-plugin-audit/evidence/static/check_lists.txt`. Documentation, CI, and hygiene work does not have to repair those inherited failures.
+
+The five evidence files were not deleted. Their raw bytes at `cda7ce55fd81fe22c301c4b2cf371d724b74aaf1` remain available with `git cat-file blob cda7ce55fd81fe22c301c4b2cf371d724b74aaf1:<path>` and are copied at `scratchpad/lane-plugin-audit/raw-evidence-cda7ce55fd81fe22c301c4b2cf371d724b74aaf1/`. Normalization changed CR LF to LF, removed trailing spaces, and kept a leading UTF-8 BOM where the committed file had one. The 72 SHA-256 tokens in `hashes_before.txt` are the same tokens as in that raw blob. The measurement named `be12288e3c5184b23ad6b62051ec1e723439bc0d` is the committed tip that was checked. The commit that adds this paragraph is later. A working-tree diff is not that measurement.
 
 ## Owner decisions this inventory asks for
 
@@ -407,4 +413,8 @@ Pillars named above are labels for a future map only: P1 shared clock and core s
 
 ## Acceptance
 
-Native green: no. Cross-family review: not run. Deus CONFIRMED: not issued. This document can be reviewed while those gates stay open. The writer does not pass, merge, tag, or close the lane.
+Native attempt on 2026-10-02 23:01:34 -05:00 through 2026-10-02 23:03:34 -05:00: 48 PASS, 6 FAIL, no RESULT line, process exit 2. That partial result stays red. This documentation fix did not start or stop an NW process and did not add a second native run. The before/after native comparison requested by the brief is still missing. `hashes_after.txt` records `compared 72 ok 72 mismatch 0 missing 0`. Those hashes show the audited plugin bytes did not change. They are not a native RESULT and they are not native green.
+
+Under the Owner's expected-red amendment, documentation, CI, and hygiene work does not have to repair inherited game failures. Native green is not an acceptance condition for this documentation deliverable.
+
+Cross-family review of this tip belongs to Codex. This writer does not pass, merge, tag, or close the lane. Deus CONFIRMED: not issued.
