@@ -82,3 +82,16 @@ docs/telemetry/sessions/provider_status.json
 # Agent mail is local files on this machine (PM, AG and the workers share one checkout). Not committed: a mail commit moves main and
 # makes merge_gate refuse (MAIN_DIRTY / RACE_REF_MOVED; DEC-085). The README stays tracked.
 docs/agents/mailboxes/**/*.jsonl
+
+# Repo organization (WBS-ORG ORG-2.3/2.4, 2026-10-02): CI config and the one-line .clinerules pointer are tracked.
+!/.github/
+!/.clinerules
+# Scratch and generated output (WBS-ORG ORG-2.3). Throwaway scripts go in scratchpad/<lane-id>/.
+scratch/
+scratchpad/
+tmp/
+temp_*
+test_wang*
+*.log
+test_output/
+game/error_stack.txt
