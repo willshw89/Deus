@@ -9,7 +9,7 @@
 | Reviewed source | `d8b36c53e3264a49146b756147b95aaa4faff4e2` |
 | Base | `565dc5aead7e068230528d573c395ea21ed5cf5d` (merge-base of this branch) |
 | Runtime commits reviewed | `248fc691633a96308a34bfb3a639ce6b674078c4` (a), `093a1f41b9f379aafbef0a42bb613a517951c7fc` (c) |
-| Report body commit | `__REPORT_BODY_SHA__` |
+| Report body commit | `547f3cb5dd6008e855a4906ecd13c806925f0b1b` |
 | Reviewer | grok-4.7 at xhigh |
 | Deus | **NOT ISSUED** |
 
@@ -182,4 +182,4 @@ All 21 PNGs under `evidence/G1_reviewer_d8b36c53/shots/` were opened. No contact
 
 ## Stop
 
-Reviewed source remains `d8b36c53e3264a49146b756147b95aaa4faff4e2`. The report-only commit is `__REPORT_BODY_SHA__`. Native counts from the single controlled run: 259 passed, 16 failed, exit 2, ten suites entered, stopped inside `factions` by the 180 s watchdog. Gate not run. Reviewer model grok-4.7. Deus **NOT ISSUED**. No F5, F8, or Deus verdict is claimed. Plugin audit is not started.
+Reviewed source remains `d8b36c53e3264a49146b756147b95aaa4faff4e2`. The report-only commit is `547f3cb5dd6008e855a4906ecd13c806925f0b1b`. Native counts from the single controlled run: 259 passed, 16 failed, exit 2, ten suites entered, stopped inside `factions` by the 180 s watchdog. Gate not run. Reviewer model grok-4.7. Deus **NOT ISSUED**. No F5, F8, or Deus verdict is claimed. Plugin audit is not started.
