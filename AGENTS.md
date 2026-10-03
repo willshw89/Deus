@@ -1,150 +1,91 @@
-> **ART RULES: live summary.** Authority is `docs/OWNER_DECISIONS.md` (DEC-007, 055, 056, 062, 063, 066, 069, 071, 072, 079, 085); the long banners that stood here are retired.
->
-> - **Who makes art.** The Owner generates all art; no agent generates on its own initiative, with any tool. The PM's PixelLab work is the Owner's hand-off (DEC-007, DEC-063): Pixflux and Bitforge for the natural world, the character creator for the fauna (v3 for humanoid shapes, Pro for animals and other bodies, DEC-071). No animations. AGENTS.md Rules 11 and 13 stay suspended.
-> - **Before generating.** The asset has its row in `art/catalogue/catalogue.json`, and its prompt follows `docs/art/DEUS_ASSET_STANDARD.md` (the SOP), which includes the pixel dimensions.
-> - **What enters the game.** The PM chooses (DEC-056), after machine QA (RMMZ format, seams, anchors, palette; a size mismatch does not hold art back, DEC-016 amendment) and with a "PM YEA (DEC-056)" row in `art/APPROVALS.md`. The art council is suspended and the Owner grades art in game (DEC-079); the Owner can reverse any choice. Style: "RMMZ reference, Ultima 7 style"; keep the world varied but readable.
-> - **Obsolete instructions.** The originality check is deleted (DEC-061, DEC-085). A doc line that tells you to run it, or to run `tools/originality_check.js`, is obsolete: originality is controlled by how the art is made (our own prompts, guides and swatches; never a copy, trace, recolour or crop of a U7 image).
-> - **Allowed without the Owner (not art):** test-harness PNG renders used as evidence, the art catalogue, blank template tilesets, and placement and validation tooling.
+# AGENTS.md: the only rulebook for Project DEUS
 
-# AGENTS.md — Binding rules for every AI agent on Project DEUS
+Project: **DEUS**, a colony sim built on RPG Maker MZ (formal name since 2026-09-20; replaces "UF", "Ultima Frontier", "Wayfarer").
+Repository: `willshw89/Deus`. This file applies to every AI agent (Codex, Claude, Grok, Gemini, Deus/Grok Bot, anything else). Read it at the start of every session.
+`CLAUDE.md`, `GEMINI.md` and `.clinerules` only point here. Older role files (`docs/CANONICAL_ROLES.md`, `.agents/rules/*.md`, `tools/ops/ANTIGRAVITY.md`) are superseded wherever they conflict with this file. If this file conflicts with a direct Owner instruction, the Owner wins; record the ruling in `docs/DECISIONS.md`.
 
-Project formal name: **DEUS** (formally renamed by user directive 2026-09-20; replaces working titles "UF", "Ultima Frontier", and "Wayfarer").
-Applies to every AI agent working in this folder (Claude Code, Gemini, anything else). Read it at the start of every session, before touching anything.
-If a rule here conflicts with your habits, this file wins. If it conflicts with something the user tells you directly, the user wins. Then record the change in `docs/VISION.md` → Decision log.
+**Current priority (Owner, 2026-10-02): get the world loading green.** See `docs/WBS_ORG.md` (active: ORG-0.1, ORG-0.2, ORG-1.1, ORG-1.2, ORG-4.2). WBS-SIM and WBS-SPLIT are parked. Do not start other work. Index of all plans: `docs/WBS_INDEX.md`.
 
-## Persistent orchestration rules (Owner request, 2026-09-28)
+## 1. Team
 
-Read these rules at every session start, including through non-Antigravity providers:
-- `.agents/rules/deus-governance.md`: DEC-007, Owner approval before any new WBS leaf/lane or scope expansion, engine-core protection, and existing lane/worktree isolation.
-- `.agents/rules/deus-review-policy.md`: zero self-certification, independent model-family review, evidence before closure, and mandatory `merge_gate` / `--no-ff` integration.
-- `.agents/rules/deus-natural-world.md`: DEC-037 Natural World phase lock and the lean upstream-first critical path; civilization/farming/faction implementation remains frozen.
-- `.agents/rules/deus-multiagent-routing.md`: quality-preserving failover, protected local files, and bounded Teamwork/Goal operation.
-- `.agents/rules/deus-game-translation.md`: mandatory code-to-game traceability, named consumers, bridge status, and separate headless/playable proof. Templates: `tools/ops/GAME_TRANSLATION_TEMPLATE.md`.
+| Who | Role |
+|---|---|
+| **Owner** | Approves scope, design decisions and merges. Only the Owner opens new lanes, changes priorities, or approves force-push, deletion, test retirement or history rewrite. |
+| **Codex** (PM) | Runs on the strongest OpenAI single agent at its highest effort. Writes lane briefs, picks the 1–3 GitHub references, assigns writer and reviewer, tracks the WBS. Does not self-certify. |
+| **Claude** | Writes the hard lanes (engine, simulation, worldgen logic, anything with subtle state). |
+| **Grok** | Writes the mechanical lanes (CI, tooling, hygiene, well-specified refactors). |
+| **Gemini** | Writer only, for narrow lanes that come with references. Reached only through the Owner's relay; agents do not launch or message Gemini directly. |
+| **Deus / Grok Bot** | Independent claim checker. Checks each completion claim (branch, SHA, call sites, RESULT lines) against the repo and returns CONFIRMED / PARTIAL / FALSE. PARTIAL or FALSE holds the merge regardless of review. |
 
-The practical procedure and launch templates are in `tools/ops/ANTIGRAVITY.md`. This supplement records the Owner's current orchestration request; it does not open a task lane, change WBS status, or grant self-review/merge authority. Current explicit Owner instructions and recorded freezes override older role descriptions and autonomous art mandates in this file, `GEMINI.md`, or other guides. Continue only already approved work; preserve existing lanes and their local files. The setup changes remain working-copy configuration pending independent review and normal integration, not a self-certified completion.
+## 2. Review
 
-## Read order
-1. `AGENTS.md` (this file)
-2. `docs/STATUS.md`: what actually works, what's broken, who is working on what (current state; historical ledger archived in `docs/archive/STATUS_LEDGER_20260925.md`)
-3. `docs/AUDIT_LOG.md`: the latest audit entry and its open findings
-4. `docs/SLICES.md`: the current slice and its acceptance criteria
-5. `docs/VISION.md`: what the game is, locked decisions, rejected directions
-6. `docs/ENGINE_RULES.md`: before touching code or data
-7. `docs/art/DEUS_ASSET_STANDARD.md` (the SOP, DEC-007): before touching any image
-8. `docs/systems/`: the documented API of any system you build on
-9. `docs/ASSET_REQUESTS.md`: the art the engine needs, with specs (Gemini's work queue)
+- Review is always done by a **different model family** than the writer. No self-review, no same-family certification.
+- Reviewers **grep for real call sites** (the new code is actually called from the game or test path, not only defined) and **run the tests themselves**. Reading the diff alone is not a review.
+- A merge needs: passing tests, a cross-family PASS review, and a CONFIRMED Deus claim check, then the Owner's merge.
 
-## The fourteen binding rules
-1. **One slice at a time.** Work only on the slice marked `IN PROGRESS` in `docs/SLICES.md`. No bonus features, nothing extra "while I was in there". Ideas go to `docs/STATUS.md` → Backlog.
-2. **Nothing is done until it's been seen working.** The Definition of Done below is the only one that counts.
-3. **Never claim what you didn't observe.** "Verified", "working", "0 errors", "60 FPS" need evidence you produced and looked at in this session. If you didn't check, write "not checked".
-4. **Tests must be able to fail.** No hardcoded success messages. A check that can never print FAIL is not a check. See `docs/ENGINE_RULES.md` §6.
-5. **Look at every screenshot you produce.** Open the image, describe what's actually in it, and compare it to the acceptance criteria before the user sees anything. If it's wrong, fix it or report it as wrong.
-6. **The user approves every slice; the PM chooses the art that goes in game (DEC-056, 2026-09-30), and the user can change any choice.** Stop at the slice gate. Don't start the next slice without an explicit "approved". Exception (DEC-059, 2026-09-30): natural-world slices and packages are built straight through without a gate; the user gets reports and can stop anything.
-7. **Don't invent the game.** No new lore, place names, races, factions, or named characters unless they're approved in `docs/VISION.md`. Placeholder names start with `TEST_`.
-8. **Ultima VII art may be used as examples, stand-ins, style references and training data for our art generators; everything that ships is our own original work.** (User decisions 2026-09-18 and 2026-09-19; the user accepted the risk of training on it.) No shipped asset may be a copy, trace, recolour, crop or near-copy of a U7 image. Originality is controlled by how the art is made and by the unanimous art council (DEC-062); the originality-check tool is removed (DEC-061, Owner 2026-10-01: "delete it off the planet"). Stand-in files in `game/` must start with `U7_` (`$U7_Man.png`), use exactly 3× scale, and be listed in `docs/STATUS.md` → Stand-ins. They all get replaced with original art before any release. See `docs/GUIDE_25D.md` §2 and "Reference vs. shipped content" below.
-9. **The engine core is read-only.** Never edit `game/js/rmmz_*.js`, `game/js/main.js`, or `game/js/libs/`. All behavior goes in `game/js/plugins/UF_*.js`.
-10. **Two failed fixes means stop.** If the same problem survives two attempts, stop patching. Write down what you know and what you've ruled out, then ask the user.
-11. **All generation tasks are to utilize Google Nano Banana Pro.** **SUSPENDED by DEC-007 (2026-09-25); generator routing is DEC-063.** (User decisions 2026-09-19: "Nano Banana Pro: The Gemini 3 Pro Image model (gemini-3-pro-image). The premium choice for complex visual tasks, utilizing advanced reasoning (\"Thinking\") to follow complex instructions, maintain brand consistency, and render high-fidelity text. REWRITE EVERYTHING TO USE NANO BANANA PRO NOT NANO BANANA II".) Every visual asset across every category (characters, creatures, wildlife, monsters, terrain, tilesets, autotiles, world objects, items, equipment layers, portraits, facesets, icons, and UI) MUST originate from Google Nano Banana Pro (`gemini-3-pro-image` / `generate_image`). Nano Banana Pro utilizes advanced reasoning ("Thinking") to follow complex instructions, maintain brand consistency, and render high-fidelity visual assets. No other generator model is allowed, and no agent is permitted to type in sprites pixel-by-pixel in code. Everything starts from an authentic Nano Banana Pro generation, processed into RMMZ standard formats via our palette and cleaning tools.
-12. **All animation must happen through the sprite; no after-effect animations.** (User decisions 2026-09-19: "The animation for these things should come from the sprites, not an after effect. this applies to everything we generate" and "Also, ENFORCE THAT ALL ANIMATION IS TO HAPPEN THROUGH THE SPRITE. NO AFTER EFFECT ANIMATIONS"; VISION V108.) All animations across every entity and environmental feature—humanoids, wildlife, monsters, trees, flora, crops, fire, campfires, water ripples, doors, workshops, and world objects—must be delivered and played as distinct pixel sprite animation frames on the sprite sheets (e.g. 8-direction walk/action cycles, multi-frame wind sway, flickering flame loops, rippling water waves). No animation is to be faked or produced using code-driven after-effects, procedural scaling/squashing, sine-wave swaying, rotation, or shader distortions. The engine draws no motion of its own.
-13. **Continuous Nano Banana Pro Non-Living Asset Production Pipeline with DF Black Wall-Top Convention & Strict Living Exclusion.** **SUSPENDED by DEC-007 (2026-09-25); generator routing is DEC-063.** (User directive 2026-09-21):
-    - *Autonomous Non-Living Pipeline:* Whenever current implementation requires NON-LIVING artwork (walls, doors, terrain, flora, crops, furniture, workshops, machinery, items, effects), agents continuously identify those needs, batch them aggressively into packed character/sprite sheets (80–100% useful area), prompt Nano Banana Pro with explicit slot maps, process approved results, integrate them into the project, log them in `docs/ASSET_MANIFEST.md`, and verify them in context. DO NOT wait for the user to manually request individual non-living assets.
-    - *Absolute Exclusion of Living Beings:* This autonomous pipeline DOES NOT apply to living beings (humans, colonists, humanoids, animals, wildlife, monsters, creatures, living portraits, living character sprites/animation sheets). When living assets are needed, register the requirement in `docs/ASSET_REQUESTS.md` / `docs/STATUS.md`, but do NOT generate autonomously.
-    - *Dwarf-Fortress-Style Black Wall-Top Convention:* For TWO-GRID-HIGH walls, doors, gates, cliff-adjacent elements, and vertical architectural pieces (48×96 px), the upper 48 px cap MUST read as flat near-black (`#08080C` to `#121218`) with minimal edge definition for readability, creating an unbroken horizontal black occlusion line connecting with DEUS void and darkness language. The lower 48 px displays the authentic material face. The black cap is an architectural/occlusion convention, not a dynamic shadow. Follow `docs/PROJECT_DEUS_ART_DIRECTION_SPEC.md` for all prompts.
-14. **Engineering Health, Lean Architecture & Long-Term Maintainability** (User directive 2026-09-21): Treat project health as an ongoing system. Follow `docs/ENGINEERING_STANDARD.md` and `docs/ARCHITECTURE.md` as binding standards across all tasks:
-    - *One canonical project:* Exactly one authoritative working copy (`c:\Users\snewt\OneDrive\Desktop\UF`); single integration authority for canonical changes.
-    - *One source of truth per concept:* Strict subsystem ownership (World, WorldGen, Entities, Time, Capabilities, Jobs, Inventory, Resources, Construction, Pathfinding, AI, Combat, Rendering, Save, Diagnostics). No duplicated implementations.
-    - *Data over hardcoding:* `System + Data = Content`. Logic stays general; content lives in catalogs (`game/data/UF_WorldCatalog.json`).
-    - *No global full-world scans every frame:* Hard performance rule. Use spatial registries, localized queries, dirty flags, and event-driven updates. Never iterate all units, objects, or items per frame.
-    - *Small refactors over rewrites:* Incremental debt cleanup; no risky monolithic engine rewrites.
-    - *Stable persistent IDs:* Identify entities by ID (`Creature #1042`, `Household #83`), never live JS object references across ticks or saves.
-    - *Explicit multi-domain time:* Disallow naked ambiguous timers; tag all timers/conditions (`domain: "action" | "historical" | "presentation" | "engine"`).
-    - *Versioned saves:* Save truth, rebuild temporary caches upon load. Provide explicit schema migrations (`saveSchemaVersion`).
-    - *Observability before complexity:* The simulation must be able to explain itself via `UF_Sheet` and `UF_Look` (why this goal, why this resource, capability breakdown, cell geology/moisture).
+## 3. Lane rules
 
+1. **Small lanes.** 1–2 files ideally. One or two lanes at a time. No swarms, no multi-agent "teamwork" modes, no parallel lanes that share files.
+2. **A lane is NOT done** until the writer pastes the passing `run_tests.bat` RESULT line, the branch name and the full commit SHA (visible on origin). Reports without these are rejected.
+3. **No direct pushes to `main`. PRs only.** The Owner merges.
+4. **No force-push and no deletion** (files, branches, tags, stashes, worktrees) without the Owner's OK. Move with `git mv` instead of deleting.
+5. **Scripts live only under `tools/`** (permanent, reviewed) **or `scratchpad/<lane-id>/`** (throwaway, gitignored). Never in the repo root. CI (`tools/ci/check_root.js`) fails if a `.js`, `.png` or `.zip` appears in the root.
+6. **Every brief cites 1–3 GitHub reference repos** (exact files/functions the PM opened). The writer reads them first and maps new code to them in the report. **No GPL/AGPL code copying.** Permissive-licence adaptation needs attribution.
+7. **Race bonuses come from SRD 5.1 only.** Never invent numbers. **Professions replace SRD backgrounds.**
+8. **Never loosen a test to make it pass.** Fix the cause. If a test is genuinely wrong, write the reason and get the Owner's OK before changing or retiring it.
+9. **Two failed fixes means stop.** Write down what you know and what you ruled out, then ask.
+10. **Stage only your own files** (`git add <paths>`; never `git add -A`, `git add .`, `git commit -a`). Commit messages start with a lane tag, e.g. `[org-0.2] ...`.
+11. Work in a worktree on a lane branch, not in the main checkout. Main is touched only by merges.
 
-## Definition of Done
-A task is done only when all of these are true:
-- [ ] It runs in the RMMZ editor's Playtest (F5), not only through a script.
-- [ ] Its automated checks exist and pass, and you've seen each one able to fail.
-- [ ] You took a screenshot of the relevant moment, opened it, and it matches the acceptance criteria.
-- [ ] No new errors in the dev console (F8) while running the user test steps.
-- [ ] `docs/STATUS.md` matches reality.
+## 4. Freeze: DEC-037 natural world only
 
-## Report format (end of every work session)
-Use this structure. No marketing language, no emoji headings, no percentages of "operational".
+The active milestone is the natural world: Physical Space -> Physical Matter -> Water -> Geomorphology -> Climate -> Flora -> Fauna (fauna = seeded rule-based spawner, DEC-073; soil deferred, DEC-057). **No civilization, farming, faction or society implementation.** Don't invent lore, place names, races, factions or named characters that aren't approved in `docs/VISION.md`; placeholders start with `TEST_`.
+
+## 5. Protected paths and items
+
+Never edit, move, delete or commit changes to these without the Owner's explicit OK:
+- Engine core: `game/js/rmmz_*.js`, `game/js/main.js`, `game/js/libs/`. Behaviour goes in plugins under `game/js/plugins/`.
+- `art/sprites/`, `PROVIDER_USAGE_STATUS.json`, `.pixellab_token` (secret, never committed), `.env*`.
+- Branch `backup/pre-rollback-gemini-swarm-2026-10-02`, every stash, other agents' worktrees and branches.
+- Local untracked work you didn't create (prompts, telemetry, mailboxes, worker logs, saves, `reference/`, the Dwarf Fortress / Ultima VII installs in the project folder). Never `git clean`, never blanket-stage.
+- RMMZ editor: it overwrites `game/data/*.json` and `game/js/plugins.js` when it saves. Before changing them make sure the editor is closed; afterwards tell the Owner to reopen the project.
+
+## 6. Test procedure
+
+- Run `run_tests.bat [suite]` from the root of your worktree (it runs `tools/run_tests.js`, which launches the Steam RMMZ `nw.exe` on that worktree's `game/`). Results: `game/test_output/results.txt`.
+- The only result that counts is the `RESULT: <n> passed, <m> failed (exit <code>)` line. Exit 0 = all passed, 1 = failures, 2 = harness problem (no RESULT, crash, watchdog). "No RESULT line" is a failure, not a pass.
+- Tests must be able to fail: no hardcoded success. Show that a new check can print FAIL.
+- Never claim what you didn't observe. "Verified", "0 errors", "60 FPS" need evidence produced in this session; otherwise write "not checked". FPS/perf numbers need the measurement method.
+- Open every screenshot you cite and describe what is actually in it.
+- CI (`.github/workflows/ci.yml`, job `ci`) runs `tools/ci/syntax_check.js` and `tools/ci/check_root.js`. Run both locally before pushing.
+
+## 7. Art rules
+
+Authority: `docs/OWNER_DECISIONS.md` (DEC-007, 055, 056, 062, 063, 066, 069, 071, 072, 079, 085).
+- **The Owner makes the art.** No agent generates art on its own initiative, with any tool. PixelLab work by the PM is only on the Owner's hand-off (DEC-007, DEC-063). No animations are being generated now.
+- Before generating: the asset has its row in `art/catalogue/catalogue.json` and its prompt follows `docs/art/DEUS_ASSET_STANDARD.md` (the SOP, including pixel dimensions).
+- What enters the game: the PM chooses (DEC-056) after machine QA (RMMZ format, seams, anchors, palette), with a "PM YEA (DEC-056)" row in `art/APPROVALS.md`. The Owner grades art in game and can reverse any choice (DEC-079). Style: "RMMZ reference, Ultima 7 style".
+- All animation comes from sprite frames; the engine draws no procedural motion (no sine sway, squash, rotation or shader distortion).
+- Ultima VII art may be used only as reference/stand-ins; everything that ships is original (no copy, trace, recolour or crop). Stand-ins in `game/` start with `U7_`, 3x scale, listed in `docs/STATUS.md`. Player-facing text uses no Ultima/DF/D&D product-identity names. SRD 5.1 text is CC-BY-4.0 and needs attribution in the credits.
+- Allowed without the Owner (not art): test-harness PNG renders used as evidence, the art catalogue, blank template tilesets, placement and validation tooling.
+
+## 8. Engineering standards (still binding)
+
+`docs/ENGINEERING_STANDARD.md`, `docs/ARCHITECTURE.md`, `docs/ENGINE_RULES.md`: one source of truth per concept; data over hardcoding (catalogs in `game/data/`); no full-world scans every frame; small refactors over rewrites; stable persistent IDs; tagged time domains; versioned saves; observability via `UF_Sheet` / `UF_Look`. Don't generate RMMZ JSON with `ConvertTo-Json`.
+
+## 9. Report format (every lane)
 
 ```text
-## What changed
-- <file>: <one-line reason>
-
-## How I tested it
-- <commands / steps actually run>
-
-## Evidence
-- Screenshot <path>: <one sentence on what is visible in it>
-- Log excerpt (copied from the real output, trimmed):
-
-## Not done / known problems
-- ...
-
-## Try it in RMMZ
-1. ...
-Expected: ...
-
-## Decisions needed
-- ...
+Lane / task:      <id>
+Branch:           <name>
+Commit SHA:       <full SHA, pushed to origin>
+Files changed:    <file>: <one-line reason>
+New symbols:      <functions> and their existing callers
+Test command:     <exact command>
+RESULT:           <pasted RESULT line(s), copied from the real output>
+Evidence:         <screenshot path: what is visible in it>
+Not done / known problems / untested:
+Decisions needed:
 ```
 
-If "Not done / known problems" is empty, reread your evidence. It's almost never empty.
-
-## Banned in reports
-- "verified 100%", "fully operational", "production-ready", "seamless", "authentic" (about our own work)
-- Any FPS figure without the measurement method (see `docs/ENGINE_RULES.md` §6)
-- Describing an image you didn't open, or a file you didn't read
-- Listing features that aren't in the code
-
-## Reference vs. shipped content
-| Location | What it is | Rule |
-|---|---|---|
-| `Ultima VII - * [GOG.com]/` | The original games | Read-only reference; a source of **stand-in** art (rule 8: `U7_`-prefixed, 3×, listed in STATUS, replaced before release); and **style references and training data** for our art generators (2026-09-19). Exported training material lives in `reference/` only (local, never committed, never loaded by the game). |
-| Root `Dwarf Fortress.exe`, `data/`, DLLs | The original game | Read-only reference for mechanics. Raws and text never go into `game/`. |
-| `reference/` (create when needed) | Extracted frames, measurements, screenshots for study | Local only. Never loaded by the game. |
-| `game/` | The RMMZ project | Original or properly licensed content, plus `U7_` stand-ins during development. |
-
-Player-facing text never uses Ultima or DF proper nouns or signature terms (Avatar, Britannia, Guardian, Lord British, Iolo, Dupre, Shamino, Fellowship, moongate, Urist, Armok, "strange mood", "fey mood", …). It also never uses D&D product-identity creatures (beholder, mind flayer/illithid, displacer beast, githyanki, …). Generic fantasy is fine: elves, dwarves, goblins, trolls, dragons. If any text comes from the D&D SRD 5.1, it's CC-BY-4.0 and needs attribution in the game credits.
-
-## Agents and collaboration
-Cross-model agent roles, decision authorities, and responsibilities are canonically governed by [`docs/CANONICAL_ROLES.md`](file:///c:/Users/snewt/OneDrive/Desktop/UF/docs/CANONICAL_ROLES.md) (Owner Directive 2026-09-25):
-- **Gemini / Antigravity**: Coordinator, WBS controller, integration authority, non-living art production pipeline via Google Nano Banana Pro. Does not self-certify.
-- **Claude / Fable**: Primary implementer for engine, simulation, and society leaves.
-- **Grok**: Independent adversarial review, mutation design, defect closure, performance attack plans; production code writer in a lane whose manifest names Grok (natural-world lanes under DEC-058; other lanes while Claude is constrained, DEC-031 item 1; `docs/CANONICAL_ROLES.md` Section 2.1).
-- **Codex**: Bounded tooling, test harnesses, scripts, governance & telemetry utilities; production code writer in natural-world lanes whose manifest names Codex (DEC-058; `docs/CANONICAL_ROLES.md` Section 2.1).
-
-Who touches what:
-| Path | Owner |
-|---|---|
-| `game/js/`, `tools/`, `game/data/`, `run_tests.bat`, `docs/systems/` | Gemini & Claude Code (collaborative / task-claimed) |
-| `art/`, `game/img/` (new or replaced images), `docs/ASSET_REQUESTS.md` | Gemini & Claude Code |
-| `docs/` | Gemini & Claude Code |
-
-Rules:
-- **Claim before you start.** Add a line under "In progress" in `docs/STATUS.md`: agent, task, files/folders you'll touch.
-- Don't edit files another agent owns or has claimed. If you have to, ask the user first.
-- **Commit at the end of every task** (the project is a git repo). Start the message with your agent name, e.g. `[gemini] AR-021 wild tree stand-ins`. One task per commit, so a review can diff exactly what changed.
-- **Stage only your own files:** `git add <paths>`. Never `git add -A`, `git add .`, or `git commit -a`, which sweep the other agent's unfinished work into your commit.
-- Remove your claim when you report.
-
-## Reviews and audits
-- Claude Code checks every asset against its catalogue row and the SOP (DEUS_ASSET_STANDARD), then the art council (DEC-062), and records the result in the request's status (`CHECKED`, or back to `IN PROGRESS` with the reason). Bigger problems go in `docs/AUDIT_LOG.md`: numbered findings graded **BLOCKER / MAJOR / MINOR**.
-- Findings cite evidence: a file and line, a screenshot the reviewer opened, or a command's output. "Looks wrong" isn't a finding.
-- Before starting, read the latest audit entry. Open findings in your area come before new work.
-
-## RMMZ editor safety
-- DEC-059 standing permission (2026-09-30): during the natural-world build the editor stays closed. The PM may change `game/data/*.json` and `game/js/plugins.js` without asking each time, and tells the user when to reopen.
-The RMMZ editor keeps the database and plugin list in memory and overwrites the files when it saves.
-- Before changing `game/data/*.json` or `game/js/plugins.js`, confirm with the user that the editor is closed.
-- After changing them, tell the user to reopen the project.
-
-## Dates
-Use absolute dates (2026-09-18), never "today" or "yesterday", in every doc.
+Banned in reports: "verified 100%", "fully operational", "production-ready", "seamless", describing an image you didn't open or a file you didn't read, listing features that aren't in the code. Use absolute dates (2026-10-02) in every doc.
