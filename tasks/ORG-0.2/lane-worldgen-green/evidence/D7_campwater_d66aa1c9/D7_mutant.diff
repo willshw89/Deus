@@ -1,0 +1,29 @@
+2328a2329,2356
+>             if (window.UF.Test && UF.Test.write) { // CAMP WATER DIAG (disposable copy only)
+>                 const L = window.UF.Levels, H = window.UF.History;
+>                 const pela = st.factions && st.factions.list ? st.factions.list.find(f => /Pela/.test(f.name || '')) : null;
+>                 const kitW = Object.assign({ reach: 30, kinds: ['fresh', 'pond', 'icy', 'marsh', 'swamp'] }, (cat.start.kit && cat.start.kit.water) || {});
+>                 const drink = new Set(kitW.kinds);
+>                 const camp = pela && H && typeof H.campCell === 'function' ? H.campCell(st, pela) : null;
+>                 UF.Test.write(`CAMPW pela live home ${pela ? `(${pela.home.x},${pela.home.y})` : 'n/a'}; History.campCell now ${camp ? `(${camp.x},${camp.y}) moved ${camp.moved}` : 'n/a'}; reach ${kitW.reach}; kinds ${kitW.kinds.join('/')}`);
+>                 // painted drinkable tiles of the pristine build, then a multi-source BFS distance grid (Chebyshev-ish by 8-neighbour steps is not the check's metric; the check uses Euclidean within reach, so record Euclidean to the nearest drinkable tile per candidate)
+>                 const pristine = pristineBuild(a.x, a.y);
+>                 const wetIdx = [];
+>                 for (let i = 0; i < size * size; i++) { const k = waterKindOf(pristine.data[i]); if (k && drink.has(k)) wetIdx.push(i); }
+>                 UF.Test.write(`CAMPW painted drinkable tiles in the area: ${wetIdx.length}`);
+>                 const flat = (x, y) => x >= 1 && y >= 1 && x <= size - 2 && y <= size - 2 && L.surfaceElevationAt(a.x * size + x, a.y * size + y, st.seed) === 0 && L.shapeCodeAt(a.x, a.y, x, y, 0) === 2 && !isWaterTile(pristine.data[y * size + x]);
+>                 const blockOk = (x, y) => { for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (!flat(x + dx, y + dy)) return false; return true; };
+>                 const hx = 195, hy = 114, R = 60;
+>                 const cands = [];
+>                 for (let y = Math.max(1, hy - R); y <= Math.min(size - 2, hy + R); y++) for (let x = Math.max(1, hx - R); x <= Math.min(size - 2, hx + R); x++) {
+>                     const dHome = Math.hypot(x - hx, y - hy); if (dHome > R || !blockOk(x, y)) continue;
+>                     let dw = Infinity; for (const i of wetIdx) { const wx = i % size, wy = Math.floor(i / size); const dd = Math.hypot(wx - x, wy - y); if (dd < dw) dw = dd; }
+>                     cands.push({ x, y, dHome, dw });
+>                 }
+>                 cands.sort((p, q) => p.dHome - q.dHome);
+>                 const withWater = cands.filter(c => c.dw <= kitW.reach);
+>                 UF.Test.write(`CAMPW flat 3x3 blocks within ${R} of (${hx},${hy}): ${cands.length}; with drinkable painted water within ${kitW.reach}: ${withWater.length}; nearest block overall ${cands.length ? `(${cands[0].x},${cands[0].y}) at ${cands[0].dHome.toFixed(1)} (water ${cands[0].dw === Infinity ? 'none' : cands[0].dw.toFixed(1)})` : 'none'}; nearest block with water ${withWater.length ? `(${withWater[0].x},${withWater[0].y}) at ${withWater[0].dHome.toFixed(1)} from home, water at ${withWater[0].dw.toFixed(1)}` : 'none'}`);
+>                 UF.Test.write(`CAMPW first 8 blocks with water: ${withWater.slice(0, 8).map(c => `(${c.x},${c.y}) d${c.dHome.toFixed(1)} w${c.dw.toFixed(1)}`).join(', ')}`);
+>                 const rows = {}; for (const c of cands) { const b = c.dw === Infinity ? 'none' : (c.dw <= 30 ? '<=30' : c.dw <= 45 ? '31-45' : '>45'); rows[b] = (rows[b] || 0) + 1; }
+>                 UF.Test.write(`CAMPW candidate blocks by water distance: ${JSON.stringify(rows)}`);
+>             }

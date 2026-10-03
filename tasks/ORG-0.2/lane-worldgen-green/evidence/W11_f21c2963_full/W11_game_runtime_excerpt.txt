@@ -1,0 +1,18 @@
+# W11_game_runtime.log excerpt (full log 10934846 bytes left untracked here; copy at scratchpad/lane-worldgen-green/evidence_large/W11_game_runtime.log)
+2:[INIT] Game booting at 2026-10-03T08:18:16.801Z
+20:2026-10-03T08:18:18.089Z [TIMING] DataManager.setupNewGame enter (+13.3ms)
+21:2026-10-03T08:18:18.091Z [TIMING] setupForNewGame before World.newWorld
+24:2026-10-03T08:18:19.927Z [TIMING] world:initializing fired (+1851.6ms)
+7986:2026-10-03T08:18:34.701Z [EVENT world:created] #1 (anon_1) took 14626.7ms
+8907:2026-10-03T08:18:38.925Z [EVENT world:created] #5 (anon_5) took 4147.8ms
+8912:2026-10-03T08:18:38.928Z [EVENT world:created] #10 (onWorldCreated) took 0.5ms
+8914:2026-10-03T08:18:38.928Z [TIMING] world:created fired (+20853.0ms)
+8917:2026-10-03T08:18:38.931Z [TIMING] emit world:created done
+8918:2026-10-03T08:18:38.931Z [TIMING] early seated done, units=0
+8919:2026-10-03T08:18:40.164Z [TIMING] setupForNewGame after World.newWorld
+8920:2026-10-03T08:18:40.164Z [TIMING] setupForNewGame exit (reserved map 1000)
+8921:2026-10-03T08:18:40.164Z [TIMING] DataManager.setupNewGame exit (+22089.0ms)
+8922:2026-10-03T08:18:40.173Z [TIMING] Scene_Boot.start exit (+22097.2ms)
+8925:2026-10-03T08:18:40.946Z [TIMING] world:areaBuilt (0,0) (+22870.5ms)
+98054:2026-10-03T08:22:51.760Z [TIMING] world:areaBuilt (0,0) (+273684.2ms)
+128265:2026-10-03T08:27:26.582Z [TIMING] world:areaBuilt (0,0) (+548506.9ms)

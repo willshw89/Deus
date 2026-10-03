@@ -1,0 +1,35 @@
+UF_Test run 2026-10-03T07:41:02.805Z args=[]
+HARNESS New Game year 500 (requested 500)
+DEBUG_SHEET: Scene_Boot.start called
+AVAILABLE SUITES: selftest, smoke, perf, native_starting_gear, native_survival_dying, native_perf_4x_benchmark, select, select, natural_connections, ownership, ecology, projects, settlement, colonists, overseer, world, spawn, worldgen, biomes, tiles, ground, factions, skins, history, objects, walls, doors, items, dig_through_floor, jobs, floors, wildlife, wildlife_seeds, stance, combat, anim, fog, daynight, timespeed, camera, culling, speech, overhead, look, sheet, talk, fire, vertical, natural_walls, flooding, strata, sparse_outer, environment, faction_menus, title, load, setup, depth, layers_flat, select, select
+HARNESS suite budget 180 s each; 1 suite(s) selected: worldgen
+SUITE worldgen
+PASS worldgen.catalog_loaded - 93 object types, 33 biomes
+PASS worldgen.catalog_images_exist - 93 object images/sheets found
+PASS worldgen.catalog_ids_resolve - 33 biomes, 26 ground kinds, 9 water kinds, 93 objects all resolve
+PASS worldgen.autotile_matches_editor - 47 shapes derived; a 3-wide vertical strip gives 16,0,24 (the editor painted 16,0,24)
+PASS worldgen.tileset_id - built map tilesetId 91, map on screen 91, UF.Tiles.TILESET_ID 91
+PASS worldgen.start_in_middle - UF_Colonists installed: 0 generator start events (want 0); note "<glade>"
+PASS worldgen.names_vary_by_seed - this world: Alan and Ela; next seed: Dorald and Jorelle
+PASS worldgen.water_near_start - nearest water 10.3 cells from the pair (reach 29)
+PASS worldgen.river_not_through_start - river(s) pass more than 14, more than 14 cells from the start (keep away 14)
+PASS worldgen.rivers_count - 2 river(s) (catalog count 1-2) at columns 235 (half-width 1), 28 (half-width 1)
+PASS worldgen.river_continuous - 2 river(s): all 625 carved cell(s) inside area (0,0) are water on the built map and each river's cells form one connected body of water
+CAMPW pela live home (167,107); History.campCell now (167,107) moved 0; reach 30; kinds fresh/pond/icy/marsh/swamp
+CAMPW painted drinkable tiles in the area: 961
+CAMPW flat 3x3 blocks within 60 of (195,114): 2587; with drinkable painted water within 30: 1908; nearest block overall (167,107) at 28.9 (water 31.8); nearest block with water (167,102) at 30.5 from home, water at 29.7
+CAMPW first 8 blocks with water: (167,102) d30.5 w29.7, (167,101) d30.9 w29.2, (164,111) d31.1 w29.2, (164,110) d31.3 w29.3, (167,100) d31.3 w28.7, (164,109) d31.4 w29.4, (164,108) d31.6 w29.6, (167,99) d31.8 w28.2
+CAMPW candidate blocks by water distance: {"31-45":408,"<=30":1908,">45":271}
+PASS worldgen.objects_placed - 1739 objects in map.ufObjects of the start area (stats sum 1739, 0 object events); most common: grass_tuft 502, reeds 225, oak 180, fir_snow 114, pine 100, fern 93, rocks_small 85, birch 84
+PASS worldgen.glade_clear - 0 objects inside the start clearing (radius 0) as generated
+PASS worldgen.no_objects_in_water - 4637 water cells; 10 objects on water, 0 of them not water plants; 0 water plants on land
+FAIL worldgen.kit_per_area - 5 factions; 5 area centre(s), kit within 20 cells, drinkable water within 30: Arar Freehold (128,128): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 8/8, granite_boulder 7/7, fruit_tree 1/1, ore 2/1; water fresh at 10.3 | Wennoreth Court (33,222): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 8/8, granite_boulder 7/7, fruit_tree 1/1, ore 1/1; water fresh at 19.1 | Solmarwyn Burrow (156,75): berry_bush 9/8, oak 33/8, rocks_small 11/10, grass_tuft 64/60, reeds 8/8, granite_boulder 7/7, fruit_tree 2/1, ore 2/1; water marsh at 22.6 | Ethmaric Enclave (201,48): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 8/8, granite_boulder 7/7, fruit_tree 1/1, ore 2/1; water fresh at 21.6 | Pela Tribe (167,107): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 8/8, granite_boulder 7/7, fruit_tree 1/1, ore 2/1; water NONE; FAILING: Pela Tribe at (167,107): no drinkable water within 30
+PASS worldgen.kit_covers_plan - first stage (hearth, larder, knives, clothes, axe, pick, food, woodpile, shelter, beds, workstone) for 8 founders, the most any of 7 cultures needs, plus 8 meals: log 26, stone 60, fiber 58, straw 16, food 16, ore 2 (human 26/14/58/16/14, elf 24/10/56/16/16, dwarf 3/60/58/16/14, gnome 26/14/58/16/14, goblin 3/14/58/16/14, orc 26/14/58/16/14, automaton 3/60/58/16/14 as log/stone/fiber/straw/food); the kit's minimums alone are worth log 36, stone 65, fiber 60, straw 16, food 19, ore 2; within 20 cells of each campfire: Arar Freehold (128,128): log 36, stone 68, fiber 60, straw 18, food 19, ore 4 | Wennoreth Court (33,222): log 98, stone 65, fiber 62, straw 16, food 19, ore 2 | Solmarwyn Burrow (156,75): log 209, stone 70, fiber 83, straw 16, food 24, ore 4 | Ethmaric Enclave (201,48): log 80, stone 68, fiber 64, straw 16, food 19, ore 4 | Pela Tribe (167,107): log 36, stone 68, fiber 62, straw 19, food 19, ore 4
+PASS worldgen.kit_fair - minimums for every area: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 8, granite_boulder 7, fruit_tree 1, ore 1-2 of ironstone/copper_outcrop; per area: Arar Freehold: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 8, granite_boulder 7, fruit_tree 1, ore 2 (copper_outcrop 2); water fresh 10.3 | Wennoreth Court: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 8, granite_boulder 7, fruit_tree 1, ore 1 (copper_outcrop 1); water fresh 19.1 | Solmarwyn Burrow: berry_bush 9, oak 33, rocks_small 11, grass_tuft 64, reeds 8, granite_boulder 7, fruit_tree 2, ore 2 (ironstone 2); water marsh 22.6 | Ethmaric Enclave: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 8, granite_boulder 7, fruit_tree 1, ore 2 (copper_outcrop 2); water fresh 21.6 | Pela Tribe: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 8, granite_boulder 7, fruit_tree 1, ore 2 (ironstone 2); water NONE
+PASS worldgen.kit_seeded - seed 1920951434: 395 kit objects placed (first berry_bush (134,130), berry_bush (121,125), berry_bush (125,116); ore copper_outcrop (130,144), copper_outcrop (118,134), copper_outcrop (29,217), ironstone (148,87), ironstone (140,73), copper_outcrop (194,48), copper_outcrop (191,53), ironstone (155,112), ironstone (160,120)), a second build identical; seed 1920951435: 384 placed, ore copper_outcrop/ironstone/ironstone/ironstone, another layout
+PASS worldgen.peaks_region_250 - 39951 peak_rock tiles, 39951 cells with region 250, 0 mismatched in the start area
+FAIL worldgen.autotile_shapes - 7080 interior cells sampled (505 water, the rest ground away from water), 270 wrong shapes; first: (217,4) ground shape 34, expected 0
+PASS worldgen.deterministic - tiles 778434665 / 778434665, objects 1474226156 / 1474226156 on rebuild (605 ms first build)
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_D7_campwater_d66aa1c9\game\test_output\worldgen.start_area.png
+PASS worldgen.no_errors - none during worldgen checks
+RESULT: 20 passed, 2 failed (exit 1)
