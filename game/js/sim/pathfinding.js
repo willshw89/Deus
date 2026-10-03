@@ -618,6 +618,7 @@ class Pathfinder {
         this.nodeAlive[id] = 1;
         this.nodeComp[id] = id;        // a fresh singleton for the incremental union-find
         this.nodeBorn[id] = this.graphVersion + 1;   // allocation happens inside build()/flush(), which bump the version after
+        this.nodeMark[id] = 0; this.nodeG[id] = -1; this.nodeParent[id] = -1;   // a paused open-list entry for this id must not expand the new node
         this.aliveNodes++;
         return id;
     }
@@ -784,8 +785,8 @@ class Pathfinder {
     /**
      * Tick start: rebuilds the clusters whose tiles changed since the last flush (and the intra tables of a
      * neighbour whose shared entrance set changed). Returns the number of clusters whose tables were rebuilt.
-     * Connectivity: edits that only opened tiles are unioned into the live components; any blocking or door
-     * edit marks connectivity stale (a suspected split), rebuilt before the next search that wants it.
+     * Connectivity: open-only edits are unioned in place when they freed no node id. A freed id can sit in a
+     * live union-find chain, so any recycle, wall or door edit marks connectivity stale.
      */
     flush() {
         if (!this.built) return this.build();
@@ -1001,11 +1002,11 @@ class Search {
         this.version = this.pf.graphVersion;
         this.entranceEpoch = this.pf.entranceEpoch;
         this.id = ++this.pf.searchSeq;            // a fresh id: nothing is touched yet
-        this.born = this.pf.graphVersion;         // abstract nodes allocated after this are not this search's
         this.startCluster = this.pf.clusterOf(this.start);
         this.goalCluster = this.pf.clusterOf(this.goal);
         this.pf.touchStamp[this.startCluster] = this.id;
         this.pf.touchStamp[this.goalCluster] = this.id;
+        this.expanded = [];          // abstract node ids this search has expanded; a flush that recycles one restarts it
         this.startLinks = null;
         this.goalLinks = null;
         this.directCost = -1;
@@ -1026,10 +1027,12 @@ class Search {
     _restart() { this._reset(); this.restartCount = (this.restartCount | 0) + 1; this.pf.metrics.restarts++; }
     /**
      * A paused search keeps going after a flush unless the rebuild hit something it stands on: its start or
-     * goal cluster (the links were computed there), a cluster or node on its current abstract path, or, in
-     * the plain phase, a cluster whose tiles it expanded. Abstract nodes freed or re-allocated by a flush are
-     * skipped when popped or relaxed (nodeBorn), refinement runs on the live grid and restarts on a failed hop,
-     * and a finished path is re-validated step by step, so an edit elsewhere on the torus costs nothing.
+     * goal cluster (the links were computed there), a cluster whose tiles it has expanded (plain phase), an
+     * abstract node it has already expanded that this flush freed or reused, or a cluster or node on its
+     * current abstract path. An interior rebuild that keeps those node ids does not restart the abstract
+     * search: later expansions read the live tables, a sealed hop restarts at refinement, and a parent cycle
+     * restarts immediately. Replacement entrances the search has not expanded stay usable, because allocation
+     * clears that id's search marks so a stale open-list entry cannot expand the new node.
      */
     _graphStillValid() {
         const pf = this.pf, ver = this.version;
@@ -1040,17 +1043,25 @@ class Search {
             const stamp = pf.touchStamp, id = this.id;
             for (let c = 0; c < pf.clusterCount; c++) if (stamp[c] === id && cv[c] > ver) return false;
         }
+        if (this.phase === PH.ABSTRACT && this.expanded) {
+            const exp = this.expanded;
+            for (let i = 0; i < exp.length; i++) {
+                const n = exp[i];
+                if (pf.nodeAlive[n] !== 1 || pf.nodeBorn[n] > ver) return false;
+            }
+        }
         const nodes = this.abstractPath;
         if (nodes) {
             for (let i = 1; i < nodes.length - 1; i++) {
                 const n = nodes[i];
-                if (pf.nodeAlive[n] !== 1 || pf.nodeBorn[n] > this.born || cv[pf.nodeCluster[n]] > ver) return false;
+                if (this._nodeStale(n) || cv[pf.nodeCluster[n]] > ver) return false;
             }
         }
         this.version = pf.graphVersion;
         return true;
     }
-    _nodeStale(n) { return n >= FIRST_NODE && (this.pf.nodeAlive[n] !== 1 || this.pf.nodeBorn[n] > this.born); }
+    /** A committed-path id that was freed, or reallocated after the version this search has accepted. */
+    _nodeStale(n) { return n >= FIRST_NODE && (this.pf.nodeAlive[n] !== 1 || this.pf.nodeBorn[n] > this.version); }
     /** Every step adjacent (torus), passable for the mask, and no cut corner. */
     _stepsValid(path) {
         const grid = this.grid, m = this.mask, W = grid.width, H = grid.height;
@@ -1231,7 +1242,7 @@ class Search {
         const pf = this.pf;
         if (pf.nodeMark[m] === tag + 1) return true;
         if (pf.nodeMark[m] === tag && g >= pf.nodeG[m]) return true;
-        if (this._nodeStale(m)) return true;   // allocated by a flush after this search began: not part of its graph
+        if (m >= FIRST_NODE && pf.nodeAlive[m] !== 1) return true;
         pf.nodeMark[m] = tag; pf.nodeG[m] = g; pf.nodeParent[m] = this._current;
         const h = this._nodeH(m);
         return pf.abstractOpen.push(g + h, h, this._nodeTile(m), m);
@@ -1242,15 +1253,24 @@ class Search {
         while (this.status === "running" && used < budget) {
             if (!open.pop()) { this._finish("unreachable", "abstract"); break; }
             const n = open.id2;
+            if (n >= FIRST_NODE && pf.nodeAlive[n] !== 1) continue;   // freed; a recycled id was cleared and misses the g check
             if (pf.nodeMark[n] === closedTag) continue;
-            if (this._nodeStale(n)) continue;   // freed or re-allocated by a flush while this search was paused
             const g = open.f - open.h;
             if (g !== pf.nodeG[n]) continue;
             pf.nodeMark[n] = closedTag;
+            if (n >= FIRST_NODE) this.expanded.push(n);
             used++;
             if (n === GOAL_NODE) {
                 const nodes = [];
-                for (let i = GOAL_NODE; i >= 0; i = pf.nodeParent[i]) nodes.push(i);
+                const seen = new Set();
+                let chain = true;
+                for (let i = GOAL_NODE; i >= 0; i = pf.nodeParent[i]) {
+                    if (seen.has(i)) { chain = false; break; }   // a flush can leave a parent cycle; plan again
+                    seen.add(i);
+                    nodes.push(i);
+                    if (nodes.length > pf.nodeHigh) { chain = false; break; }
+                }
+                if (!chain || nodes[nodes.length - 1] !== START_NODE) { pf.metrics.refineFailures++; this._restart(); break; }
                 nodes.reverse();
                 this.abstractPath = nodes;
                 if (this.cacheEnabled && nodes.length > 2) {

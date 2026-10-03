@@ -46,7 +46,7 @@ const MUTANTS = {
     ignore_doors: ["return d === 0 || (d & this.mask) !== 0;\n    }\n    /**\n     * @param c cluster rectangle", "return true;\n    }\n    /**\n     * @param c cluster rectangle"],
     ignore_doors_plain: ["let dm = door[n];\n                if (dm !== 0 && (dm & mask) === 0) continue;", "let dm = door[n];\n                if (false) continue;"],
     no_dirty: ["this.dirty.add(this.clusterOf(idx));\n        if (kind !== \"open\") this.splitSuspected = true;", "/* mutant: nothing is dirty */"],
-    budget_ignored: ["if (this.version !== this.pf.graphVersion) this._restart();\n        let used = 0;", "if (this.version !== this.pf.graphVersion) this._restart();\n        let used = 0; budget = 1 << 30;"],
+    budget_ignored: ["if (!this._graphStillValid()) this._restart();\n        let used = 0;", "if (!this._graphStillValid()) this._restart();\n        let used = 0; budget = 1 << 30;"],
     greedy_abstract: ["if (n === GOAL_NODE) return 0;\n        const grid = this.grid, t = this._nodeTile(n);\n        return octile(", "if (n === GOAL_NODE) return 0;\n        const grid = this.grid, t = this._nodeTile(n);\n        return 5 * octile("],
     random_ties: ["const aj = this.k1[j]; if (a !== aj) return a < aj ? -1 : 1;", "return Math.random() < 0.5 ? -1 : 1;"],
     no_rollover: ["if (this.epoch >= EPOCH_MAX) { this.mark.fill(0); this.epoch = 0; this.rollovers++; }\n        return ++this.epoch;", "if (this.epoch >= EPOCH_MAX) { this.epoch = 0; this.rollovers++; }\n        return ++this.epoch;"],
@@ -229,10 +229,19 @@ section("wrap_seams", () => {
 // corner_rule: no diagonal step cuts a wall corner (the validator here is independent of the module)
 //----------------------------------------------------------------------------------------------------------
 section("corner_rule", () => {
+    // A diagonal whose east side is walled. Cluster-local search must walk around it; the corner_cut mutant steps through.
+    const g0 = P.createGrid({ width: 32, height: 32, walkable: true });
+    g0.setWalkable(2, 1, 0, false);
+    const ls = new P.LocalSearch(g0);
+    const a0 = g0.index(1, 1, 0), b0 = g0.index(2, 2, 0);
+    ls.begin({ x0: 0, y0: 0, w: 16, h: 16, zo: 0 }, a0, b0, 0, null);
+    ls.run(256);
+    const localPath = ls.status === "found" ? ls.path(b0) : null;
+    const localBad = localPath ? ownValidate(g0, localPath, 0) : "no local path";
     const g = obstacleGrid(11);
     const pf = P.createPathfinder(g);
     pf.build();
-    let bad = "", checked = 0, diagonals = 0;
+    let bad = localBad, checked = 0, diagonals = 0;
     const count = p => { for (let i = 1; i < p.length; i++) if (g.xOf(p[i]) !== g.xOf(p[i - 1]) && g.yOf(p[i]) !== g.yOf(p[i - 1])) diagonals++; };
     for (const [s, e] of randomQueries(g, 5, 60, 40)) {
         for (const r of [pf.findPath(s, e, { mask: 0 }), pf.findPathAStar(s, e, { mask: 0, maxExpansions: 20000 })]) {
@@ -492,6 +501,7 @@ if (runOnly("budget")) {
     // a search paused mid-way when a flush rebuilds the graph restarts and answers for the new grid
     const [s3, e3] = queries[3];
     const probe = pfOne.findPath(s3, e3, { mask: 0 });
+    const refineBefore = pfStep.metrics.refineFailures;
     // the goal cluster's entrance on its route: walling it while the search is paused in the abstract phase replaces
     // the goal-link nodes, so the search must restart (its goal links name freed ids) and answer for the new grid
     const cut = pfOne.nodeTile[probe.abstractPath[probe.abstractPath.length - 2]];
@@ -507,8 +517,9 @@ if (runOnly("budget")) {
     const fr = expectFresh();
     g.setWalkableAt(cut, true);
     pfStep.flush();
-    check("inflight_rebuild", wasRunning && rebuilt >= 1 && pfStep.metrics.restarts === 1 && pr.status === fr.status && (pr.status !== "found" || (!ownValidate(g, pr.path, 0) && !pr.path.includes(cut) && pr.cost === fr.cost)),
-        `paused in the abstract phase after ${stepsBefore} steps of 10, goal-cluster entrance walled, flush rebuilt ${rebuilt}; restarts ${pfStep.metrics.restarts}; result ${pr.status} cost ${pr.cost} vs fresh ${fr.status} cost ${fr.cost}`);
+    const cleanRestart = pfStep.metrics.refineFailures === refineBefore;
+    check("inflight_rebuild", wasRunning && rebuilt >= 1 && pfStep.metrics.restarts === 1 && cleanRestart && pr.status === fr.status && (pr.status !== "found" || (!ownValidate(g, pr.path, 0) && !pr.path.includes(cut) && pr.cost === fr.cost)),
+        `paused in the abstract phase after ${stepsBefore} steps of 10, goal-cluster entrance walled, flush rebuilt ${rebuilt}; restarts ${pfStep.metrics.restarts}; refine failures stayed ${cleanRestart}; result ${pr.status} cost ${pr.cost} vs fresh ${fr.status} cost ${fr.cost}`);
 }
 
 //----------------------------------------------------------------------------------------------------------
@@ -883,6 +894,53 @@ section("stale_identity", () => {
         `trivial wall ${wall.status}/${wall.reason} path ${wall.path === null ? "null" : "set"}, open ${open.status}; ` +
         `lazy macro ${macroStatus} then ${lazy.status}/${lazy.reason} seg ${seg === null ? "null" : "tiles"}; ` +
         `restart mid ${midOk} -> ${rr.status}/${rr.reason} path ${rr.path === null ? "null" : rr.path.length}`);
+});
+
+//----------------------------------------------------------------------------------------------------------
+// abstract_flush: a paused abstract search must keep a reachable goal after entrance ids are recycled.
+// Untouched clusters stay on the live graph (no restart). A cluster already in the frontier restarts.
+//----------------------------------------------------------------------------------------------------------
+section("abstract_flush", () => {
+    const w = 160, h = 48;
+    const shiftGaps = (g) => {
+        const clustersX = Math.ceil(w / 16);
+        for (let cx = 2; cx < clustersX - 2; cx++) {
+            const x = cx * 16 - 1;
+            for (let y = 0; y < h; y++) if (g.walk[g.index(x, y, 0)] === 1) g.setWalkable(x, y, 0, false);
+            g.setWalkable(x, 40, 0, true);
+        }
+    };
+    const run = (absLimit) => {
+        const g = P.createGrid({ width: w, height: h, walkable: true });
+        for (let y = 0; y < h; y++) g.setWalkable(w - 1, y, 0, false);
+        const clustersX = Math.ceil(w / 16);
+        for (let cx = 1; cx < clustersX - 1; cx++) {
+            const x = cx * 16 - 1;
+            for (let y = 0; y < h; y++) g.setWalkable(x, y, 0, false);
+            g.setWalkable(x, 4 + (cx * 3) % (h - 8), 0, true);
+        }
+        const pf = P.createPathfinder(g, { cache: false, shortQueryTiles: 0, useConnectivity: false, smoothWindow: 0 });
+        pf.build();
+        const s = g.index(2, 4, 0), e = g.index(150, 20, 0);
+        const search = pf.beginSearch(s, e, { mask: 0, cache: false, shortQueryTiles: 0, smoothWindow: 0 });
+        let guard = 0, absExp = 0;
+        while (search.status === "running" && search.phase !== P.PH.ABSTRACT && guard++ < 200000) search.step(1);
+        while (search.status === "running" && search.phase === P.PH.ABSTRACT && absExp < absLimit && guard++ < 200000) absExp += search.step(1);
+        const paused = search.status === "running" && search.phase === P.PH.ABSTRACT;
+        const freedBefore = pf.metrics.nodesFreed;
+        shiftGaps(g);
+        pf.flush();
+        const freed = pf.metrics.nodesFreed - freedBefore;
+        while (search.status === "running" && guard++ < 400000) search.step(500);
+        const r = search.result();
+        const astar = pf.findPathAStar(s, e, { mask: 0 });
+        return { paused, absExp, freed, restarts: pf.metrics.restarts, r, astar, bad: r.status === "found" ? ownValidate(g, r.path, 0) : "not found" };
+    };
+    const early = run(12), deep = run(80);
+    const ok = (o) => o.paused && o.freed > 0 && o.r.status === "found" && o.astar.status === "found" && !o.bad && o.r.cost <= o.astar.cost * 1.10;
+    check("abstract_flush", ok(early) && early.restarts === 0 && ok(deep) && deep.restarts >= 1,
+        `early pause ${early.absExp} exp freed ${early.freed} restarts ${early.restarts} hpa ${early.r.status}/${early.r.cost} astar ${early.astar.status}/${early.astar.cost} ${early.bad || "valid"}; ` +
+        `deep pause ${deep.absExp} exp freed ${deep.freed} restarts ${deep.restarts} hpa ${deep.r.status}/${deep.r.cost} astar ${deep.astar.status}/${deep.astar.cost} ${deep.bad || "valid"}`);
 });
 
 console.log(`RESULT: ${passed} passed, ${failed} failed (exit ${failed ? 1 : 0})${mutant ? ` [mutant ${mutant}]` : ""}`);
