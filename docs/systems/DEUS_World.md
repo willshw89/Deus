@@ -146,6 +146,10 @@ How units move:
 | `world:unitLevelChanged` | `unit`, `fromZ`, `toZ` |
 | `world:objectRefused` | `{ area, x, y, type, objectId, unitId, unitName, reason }`: `setObject` refused a blocking object on a unit's cell (V68) |
 
+### Simulation tick timing for `UF.Perf` (ORG-0.2 PERF_NOW, 2026-10-03)
+
+`runSimTicks` is the one place every actual shared simulation tick runs (one iteration of its loop per tick; `time:minute` can owe several ticks and a map update is not a tick). When `UF.Perf` (DEUS_Core: the off-by-default performance counter source, `UF.Perf.setEnabled(true)`, `DEUS_PERF=1` or `--deus-perf`) is enabled, each iteration is timed with `performance.now()` and reported through `UF.Perf.tick(ms)`; the count equals the growth of `UF.Sim.tickCount()` over the same window (the `perf_overlay` suite in `DEUS_Test.md` checks that). With the counters off no timing call is made. `UF.Perf` itself (frame interval = time between Pixi ticker callbacks, draw CPU submission of `Graphics._app.render`, New Game and load boundaries, JS heap or null, the top-left overlay and the throttled `[PERF]` log line) is documented in `DEUS_Core.js` at its definition, because `docs/systems/DEUS_Core.md` is outside this lane's allowed paths.
+
 ## 4. Save data
 `contents.ufWorld` = `DEUS.World.state` (plain objects only). On load it's restored before the map rebuilds, so the area comes back with its tile and object changes and units. Paths are not saved.
 

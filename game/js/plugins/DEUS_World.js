@@ -749,8 +749,13 @@
         try {
             const first = simClock.tickCount() - n + 1;
             const list = simTickHandlers;
+            // UF.Perf (DEUS_Core, off by default) counts and times each actual tick here, the shared simulation tick; map
+            // updates, time:minute events and presentation frames are not ticks.
+            const P = window.UF && UF.Perf, timed = !!(P && typeof P.isEnabled === "function" && P.isEnabled());
             for (let t = first; t < first + n; t++) {
+                const t0 = timed ? performance.now() : 0;
                 for (let i = 0; i < list.length; i++) list[i].fn(t);
+                if (timed) P.tick(performance.now() - t0);
             }
         } finally {
             simTicking = false;

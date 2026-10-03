@@ -554,6 +554,177 @@
     };
 
     //-----------------------------------------------------------------------------
+    // UF.Perf: the central performance counter source, off by default (ORG-0.2, Owner 2026-10-02 23:08 CT, PM PERF_NOW
+    // dispatch 2026-10-03). setEnabled(true) installs passive observers once: a Pixi ticker observer (frame interval =
+    // the time between consecutive ticker callbacks, scheduler delay included; not CPU time, not GPU completion;
+    // Graphics._onTick stays the registered callback), a wrapper around Graphics._app.render that times the CPU
+    // submission of one frame (not GPU completion), the New Game boundaries (DataManager.setupNewGame entry to exit =
+    // synchronous setup; entry to the first render of a started Scene_Map other than the scene at entry = to the first
+    // map draw), the load boundaries (DataManager.loadGame entry to its promise = data load; to the first map render
+    // after it), and the JS heap when performance.memory exists (null when it does not; never zero for "unavailable").
+    // DEUS_World reports every actual simulation tick (one runSimTicks iteration) through Perf.tick(ms). snapshot() is a
+    // plain copy. Nothing here changes game behaviour, and nothing is written per frame: the overlay (a sprite on the
+    // map scene, top left) refreshes every 0.5 s and one "[PERF]" line goes to game_runtime.log every 10 s while enabled.
+    // Enable with UF.Perf.setEnabled(true) (DevTools console), DEUS_PERF=1 in the environment, or --deus-perf.
+    const Perf = (() => {
+        const WINDOW = 120;
+        const st = {
+            enabled: false, installed: false, since: 0,
+            frames: 0, lastTickAt: 0, intervalMs: null, intervalMaxMs: 0, intervals: [],
+            renders: 0, drawMs: null, drawMaxMs: 0, draws: [],
+            simTicks: 0, simTickMs: null, simTickMaxMs: 0, simTicksMs: [],
+            newGame: null, load: null, heapBytes: null, heapAvailable: false,
+            logEverySec: 10, lastLogAt: 0, overlayEverySec: 0.5, lastOverlayAt: 0, logLines: 0
+        };
+        const now = () => performance.now();
+        const avg = a => a.length ? a.reduce((s, v) => s + v, 0) / a.length : null;
+        const push = (a, v) => { a.push(v); if (a.length > WINDOW) a.shift(); };
+        const f1 = v => v === null || v === undefined ? "n/a" : v.toFixed(1);
+        let pendingNewGame = null, pendingLoad = null, overlay = null;
+        const mapStarted = s => s instanceof Scene_Map && typeof s.isStarted === "function" && s.isStarted();
+        function heap() {
+            const m = typeof performance !== "undefined" && performance.memory;
+            if (m && Number.isFinite(m.usedJSHeapSize)) { st.heapAvailable = true; st.heapBytes = m.usedJSHeapSize; }
+            else { st.heapAvailable = false; st.heapBytes = null; }
+        }
+        function snapshot() {
+            return {
+                enabled: st.enabled, installed: st.installed, sinceMs: st.since ? now() - st.since : null,
+                frames: st.frames, intervalMs: st.intervalMs, intervalAvgMs: avg(st.intervals), intervalMaxMs: st.intervalMaxMs,
+                renders: st.renders, drawMs: st.drawMs, drawAvgMs: avg(st.draws), drawMaxMs: st.drawMaxMs,
+                simTicks: st.simTicks, simTickMs: st.simTickMs, simTickAvgMs: avg(st.simTicksMs), simTickMaxMs: st.simTickMaxMs,
+                newGame: st.newGame ? Object.assign({}, st.newGame) : null, load: st.load ? Object.assign({}, st.load) : null,
+                heapBytes: st.heapBytes, heapAvailable: st.heapAvailable, logEverySec: st.logEverySec, logLines: st.logLines
+            };
+        }
+        function line() {
+            const s = snapshot();
+            return `[PERF] frames ${s.frames} interval ${f1(s.intervalMs)}/${f1(s.intervalAvgMs)}/${f1(s.intervalMaxMs)} ms (last/avg/max); renders ${s.renders} draw cpu ${f1(s.drawMs)}/${f1(s.drawAvgMs)}/${f1(s.drawMaxMs)} ms; sim ticks ${s.simTicks} ${f1(s.simTickMs)}/${f1(s.simTickAvgMs)}/${f1(s.simTickMaxMs)} ms; heap ${s.heapBytes === null ? "n/a" : s.heapBytes + " bytes"}; new game ${s.newGame ? `sync ${f1(s.newGame.syncMs)} ms, first map draw ${f1(s.newGame.toFirstMapRenderMs)} ms` : "n/a"}; load ${s.load ? `data ${f1(s.load.dataMs)} ms, first map draw ${f1(s.load.toFirstMapRenderMs)} ms` : "n/a"}`;
+        }
+        function logNow() {
+            if (typeof require !== "function") return null;
+            const text = line();
+            try { require("fs").appendFileSync("game_runtime.log", `${new Date().toISOString()} ${text}\n`); st.logLines++; } catch (_) {}
+            return text;
+        }
+        function refreshOverlay() {
+            if (!overlay || !overlay.bitmap) return;
+            const s = snapshot(), b = overlay.bitmap;
+            b.clear();
+            b.fontSize = 12; b.textColor = "#ffffff"; b.outlineColor = "rgba(0,0,0,0.9)"; b.outlineWidth = 3;
+            const lines = [
+                `PERF frame ${f1(s.intervalMs)} ms avg ${f1(s.intervalAvgMs)} max ${f1(s.intervalMaxMs)} (${s.frames} ticker callbacks)`,
+                `draw cpu ${f1(s.drawMs)} ms avg ${f1(s.drawAvgMs)} max ${f1(s.drawMaxMs)} (${s.renders} renders) heap ${s.heapBytes === null ? "n/a" : (s.heapBytes / 1048576).toFixed(1) + " MB"}`,
+                `sim ticks ${s.simTicks} last ${f1(s.simTickMs)} avg ${f1(s.simTickAvgMs)} max ${f1(s.simTickMaxMs)} ms`,
+                `new game ${s.newGame ? `${f1(s.newGame.syncMs)} ms sync, ${f1(s.newGame.toFirstMapRenderMs)} ms to first map draw` : "n/a"} | load ${s.load ? `${f1(s.load.dataMs)} ms data, ${f1(s.load.toFirstMapRenderMs)} ms to map` : "n/a"}`
+            ];
+            for (let i = 0; i < lines.length; i++) b.drawText(lines[i], 4, 2 + i * 16, b.width - 8, 16, "left");
+        }
+        function attachOverlay(scene) {
+            if (!st.enabled || !scene || typeof Sprite === "undefined" || typeof Bitmap === "undefined") return;
+            if (overlay && overlay.parent === scene) return;
+            overlay = new Sprite(new Bitmap(Math.min(Graphics.width - 16, 470), 68));
+            overlay.x = 8; overlay.y = 8;
+            scene.addChild(overlay);
+            refreshOverlay();
+        }
+        function onTicker() {
+            if (!st.enabled) return;
+            const t = now();
+            if (st.lastTickAt) { const d = t - st.lastTickAt; st.intervalMs = d; push(st.intervals, d); if (d > st.intervalMaxMs) st.intervalMaxMs = d; }
+            st.lastTickAt = t;
+            st.frames++;
+            if (t - st.lastOverlayAt >= st.overlayEverySec * 1000) { st.lastOverlayAt = t; heap(); refreshOverlay(); }
+            if (t - st.lastLogAt >= st.logEverySec * 1000) { st.lastLogAt = t; logNow(); }
+        }
+        function install() {
+            if (st.installed) return true;
+            if (typeof Graphics === "undefined" || !Graphics._app || !Graphics._app.ticker) return false;
+            const app = Graphics._app;
+            app.ticker.add(onTicker);   // a second listener; Graphics._onTick stays registered as it was
+            const origRender = app.render;
+            app.render = function() {
+                if (!st.enabled) return origRender.apply(this, arguments);
+                const t0 = now();
+                const r = origRender.apply(this, arguments);
+                const d = now() - t0;
+                st.renders++; st.drawMs = d; push(st.draws, d); if (d > st.drawMaxMs) st.drawMaxMs = d;
+                const scene = SceneManager._scene;
+                if (pendingNewGame && pendingNewGame.awaitRender && scene !== pendingNewGame.sceneAtEntry && mapStarted(scene)) {
+                    pendingNewGame.toFirstMapRenderMs = now() - pendingNewGame.t0;
+                    st.newGame = { syncMs: pendingNewGame.syncMs, toFirstMapRenderMs: pendingNewGame.toFirstMapRenderMs };
+                    pendingNewGame = null;
+                }
+                if (pendingLoad && pendingLoad.awaitRender && scene !== pendingLoad.sceneAtEntry && mapStarted(scene)) {
+                    pendingLoad.toFirstMapRenderMs = now() - pendingLoad.t0;
+                    st.load = { dataMs: pendingLoad.dataMs, toFirstMapRenderMs: pendingLoad.toFirstMapRenderMs };
+                    pendingLoad = null;
+                }
+                return r;
+            };
+            st.installed = true;
+            return true;
+        }
+        const _Perf_setupNewGame = DataManager.setupNewGame;
+        DataManager.setupNewGame = function() {
+            if (!st.enabled) return _Perf_setupNewGame.apply(this, arguments);
+            const t0 = now();
+            const p = { t0, sceneAtEntry: SceneManager._scene, syncMs: null, toFirstMapRenderMs: null, awaitRender: false };
+            pendingNewGame = p;
+            const r = _Perf_setupNewGame.apply(this, arguments);
+            p.syncMs = now() - t0;
+            p.awaitRender = true;
+            st.newGame = { syncMs: p.syncMs, toFirstMapRenderMs: null };
+            return r;
+        };
+        const _Perf_loadGame = DataManager.loadGame;
+        DataManager.loadGame = function(savefileId) {
+            if (!st.enabled) return _Perf_loadGame.apply(this, arguments);
+            const t0 = now();
+            const p = { t0, sceneAtEntry: SceneManager._scene, dataMs: null, toFirstMapRenderMs: null, awaitRender: false };
+            pendingLoad = p;
+            return _Perf_loadGame.apply(this, arguments).then(res => {
+                p.dataMs = now() - t0;
+                p.awaitRender = true;
+                st.load = { dataMs: p.dataMs, toFirstMapRenderMs: null };
+                return res;
+            }, err => { if (pendingLoad === p) pendingLoad = null; throw err; });
+        };
+        const _Perf_createDisplayObjects = Scene_Map.prototype.createDisplayObjects;
+        Scene_Map.prototype.createDisplayObjects = function() {
+            _Perf_createDisplayObjects.call(this);
+            if (st.enabled) { install(); attachOverlay(this); }
+        };
+        function setEnabled(on) {
+            st.enabled = !!on;
+            if (st.enabled) {
+                if (!st.since) st.since = now();
+                install();
+                const s = SceneManager._scene;
+                if (s instanceof Scene_Map) attachOverlay(s);
+            } else if (overlay && overlay.parent) {
+                overlay.parent.removeChild(overlay);
+                overlay = null;
+            }
+            return st.enabled;
+        }
+        function tick(ms) {
+            if (!st.enabled) return;
+            st.simTicks++;
+            st.simTickMs = ms;
+            push(st.simTicksMs, ms);
+            if (ms > st.simTickMaxMs) st.simTickMaxMs = ms;
+        }
+        return { setEnabled, isEnabled: () => st.enabled, isInstalled: () => st.installed, snapshot, tick, logNow, line, refreshOverlay };
+    })();
+    window.UF.Perf = Perf;
+    {
+        const argv = (typeof nw !== "undefined" && nw.App && nw.App.argv) ? nw.App.argv : [];
+        const env = typeof process !== "undefined" && process.env ? process.env.DEUS_PERF : undefined;
+        if (argv.includes("--deus-perf") || env === "1") Perf.setEnabled(true);
+    }
+
+    //-----------------------------------------------------------------------------
     // Scene_Map Update Hook
     //-----------------------------------------------------------------------------
     const _Scene_Map_update = Scene_Map.prototype.update;

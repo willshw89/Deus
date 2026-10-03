@@ -845,5 +845,54 @@
         t.check("memory_allocation_rate_bounded", memRateMbPerSec < 5.0,
             `heap delta=${memGrowthMb.toFixed(2)} MB (${memRateMbPerSec.toFixed(2)} MB/s, want < 5.0 MB/s)`);
     }, { isDefault: false });
+
+    // UF.Perf proof (ORG-0.2 PERF_NOW, 2026-10-03): the counters observe real Pixi ticker callbacks, real renders and the
+    // actual simulation ticks (one per runSimTicks iteration, cross-checked against UF.Sim.tickCount), the boot New Game
+    // is recorded when the counters were enabled before boot (DEUS_PERF=1), the heap is reported or null, a paused world
+    // stops the ticks while frames go on, one [PERF] line reaches game_runtime.log, and the overlay is captured.
+    // Run on its own: run_tests.bat perf_overlay --game <snapshot>, with DEUS_PERF=1 in the environment.
+    Test.suite("perf_overlay", async t => {
+        const P = window.UF.Perf, Sim = window.UF.Sim, TS = window.UF.TimeSpeed || window.UF.Time;
+        const f1 = v => v === null || v === undefined ? "n/a" : v.toFixed(2);
+        t.check("perf_source", !!P && typeof P.setEnabled === "function" && typeof P.snapshot === "function" && typeof P.tick === "function",
+            P ? `UF.Perf present; enabled before this suite: ${P.isEnabled()}; installed: ${P.isInstalled()}` : "UF.Perf missing");
+        if (!P) return;
+        P.setEnabled(true);
+        const s0 = P.snapshot(), c0 = Sim && typeof Sim.tickCount === "function" ? Sim.tickCount() : null;
+        await t.waitFrames(120);
+        const s1 = P.snapshot(), c1 = Sim && typeof Sim.tickCount === "function" ? Sim.tickCount() : null;
+        t.check("frames_observed", s1.installed && s1.frames - s0.frames >= 60 && s1.intervalAvgMs > 0,
+            `${s1.frames - s0.frames} ticker callbacks during 120 harness frames; interval last ${f1(s1.intervalMs)} avg ${f1(s1.intervalAvgMs)} max ${f1(s1.intervalMaxMs)} ms (scheduler delay included; not CPU time)`);
+        t.check("renders_observed", s1.renders - s0.renders >= 60 && s1.drawAvgMs !== null && s1.drawAvgMs >= 0,
+            `${s1.renders - s0.renders} app.render calls; draw CPU submission last ${f1(s1.drawMs)} avg ${f1(s1.drawAvgMs)} max ${f1(s1.drawMaxMs)} ms (not GPU completion)`);
+        t.check("sim_ticks_counted", c0 !== null && c1 - c0 > 0 && (s1.simTicks - s0.simTicks) === (c1 - c0),
+            `UF.Sim.tickCount ${c0} -> ${c1} (+${c1 === null ? "n/a" : c1 - c0}); Perf counted ${s1.simTicks - s0.simTicks} tick(s); last ${f1(s1.simTickMs)} avg ${f1(s1.simTickAvgMs)} max ${f1(s1.simTickMaxMs)} ms per tick`);
+        t.check("newgame_recorded", !!s1.newGame && s1.newGame.syncMs > 0 && s1.newGame.toFirstMapRenderMs > s1.newGame.syncMs,
+            s1.newGame ? `New Game: ${f1(s1.newGame.syncMs)} ms synchronous setup (DataManager.setupNewGame), ${f1(s1.newGame.toFirstMapRenderMs)} ms to the first draw of the started map` : "no New Game record (UF.Perf must be enabled before boot: DEUS_PERF=1 or --deus-perf)");
+        t.check("heap_reported", s1.heapAvailable ? (Number.isFinite(s1.heapBytes) && s1.heapBytes > 0) : s1.heapBytes === null,
+            s1.heapAvailable ? `JS heap ${(s1.heapBytes / 1048576).toFixed(1)} MB (performance.memory.usedJSHeapSize)` : "performance.memory unavailable: heap reported as null, not zero");
+        t.check("load_not_invented", s1.load === null, s1.load ? `a load record exists although this run never loaded a save: ${JSON.stringify(s1.load)}` : "no load this run: load n/a (null)");
+        const pause = TS && typeof TS.pause === "function" && typeof TS.resume === "function" ? v => (v ? TS.pause() : TS.resume()) : null;
+        if (pause) {
+            pause(true);
+            await t.waitFrames(5);
+            const p0 = P.snapshot(), pc0 = Sim.tickCount();
+            await t.waitFrames(60);
+            const p1 = P.snapshot(), pc1 = Sim.tickCount();
+            pause(false);
+            t.check("pause_stops_ticks_not_frames", pc1 === pc0 && p1.simTicks === p0.simTicks && p1.frames - p0.frames >= 30 && p1.renders - p0.renders >= 30,
+                `paused for 60 harness frames: sim ticks +${p1.simTicks - p0.simTicks} (tickCount +${pc1 - pc0}), ticker callbacks +${p1.frames - p0.frames}, renders +${p1.renders - p0.renders}`);
+        } else {
+            t.check("pause_api", false, "no pause API found on UF.Time (pause/resume)");
+        }
+        await t.waitFrames(10);
+        const written = P.logNow();
+        let tail = "";
+        try { const fs2 = require("fs"); const text = fs2.readFileSync("game_runtime.log", "utf8"); const lines = text.trim().split(/\r?\n/); tail = lines.filter(l => l.includes("[PERF]")).pop() || ""; } catch (e) { tail = `(log unreadable: ${e.message})`; }
+        t.check("log_line_written", !!written && tail.includes("[PERF] frames ") && tail.includes("sim ticks "), `last [PERF] line in game_runtime.log: ${tail.slice(0, 220)}`);
+        P.refreshOverlay();
+        await t.waitFrames(2);
+        t.screenshot("overlay");
+    }, { isDefault: false });
 })();
 

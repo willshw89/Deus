@@ -51,6 +51,7 @@ None. It reads `DataManager.makeSaveContents()` in the `smoke` suite but never s
 | | `colony_state_in_save` | Colonist data is part of the save |
 | | `no_errors` | No uncaught error or scene exception in the first ~3 s on the map |
 | `perf` (on request) | `avg_frame_under_17ms`, `worst_frame_under_50ms` | Frame time over 30 s, with the numbers in the detail |
+| `perf_overlay` (on request, `DEUS_PERF=1`) | `perf_source`, `frames_observed`, `renders_observed`, `sim_ticks_counted`, `newgame_recorded`, `heap_reported`, `load_not_invented`, `pause_stops_ticks_not_frames`, `log_line_written` | `UF.Perf` (DEUS_Core, off by default; `DEUS_World` reports its ticks) counts real Pixi ticker callbacks and `app.render` calls, counts the actual simulation ticks exactly as `UF.Sim.tickCount` does, records the boot New Game (synchronous setup and time to the first draw of the started map), reports the heap or null, records no load when none happened, stops counting ticks while the world is paused, writes a `[PERF]` line to `game_runtime.log`, and shows the overlay (`perf_overlay.overlay.png`). Numbers are provisional measurements on a red SHA, with no pass threshold |
 | any suite | `suite_completed` | FAIL only: the suite threw (`<message> [<where>]`), ran past its 180 s watchdog (`watchdog: suite took longer than 180 s (budget per suite); last check <name>`), or returned only after that budget |
 
 ## 6. Status
