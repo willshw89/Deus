@@ -574,7 +574,7 @@
             renders: 0, drawMs: null, drawMaxMs: 0, draws: [],
             simTicks: 0, simTickMs: null, simTickMaxMs: 0, simTicksMs: [],
             newGame: null, load: null, heapBytes: null, heapAvailable: false,
-            logEverySec: 10, lastLogAt: 0, overlayEverySec: 0.5, lastOverlayAt: 0, logLines: 0
+            logEverySec: 10, lastLogAt: 0, overlayEverySec: 0.5, lastOverlayAt: 0, logLines: 0, logFailures: 0, lifecycleWrapped: false
         };
         const now = () => performance.now();
         const avg = a => a.length ? a.reduce((s, v) => s + v, 0) / a.length : null;
@@ -594,18 +594,19 @@
                 renders: st.renders, drawMs: st.drawMs, drawAvgMs: avg(st.draws), drawMaxMs: st.drawMaxMs,
                 simTicks: st.simTicks, simTickMs: st.simTickMs, simTickAvgMs: avg(st.simTicksMs), simTickMaxMs: st.simTickMaxMs,
                 newGame: st.newGame ? Object.assign({}, st.newGame) : null, load: st.load ? Object.assign({}, st.load) : null,
-                heapBytes: st.heapBytes, heapAvailable: st.heapAvailable, logEverySec: st.logEverySec, logLines: st.logLines
+                heapBytes: st.heapBytes, heapAvailable: st.heapAvailable, logEverySec: st.logEverySec, logLines: st.logLines, logFailures: st.logFailures,
+                lifecycleWrapped: st.lifecycleWrapped
             };
         }
         function line() {
             const s = snapshot();
             return `[PERF] frames ${s.frames} interval ${f1(s.intervalMs)}/${f1(s.intervalAvgMs)}/${f1(s.intervalMaxMs)} ms (last/avg/max); renders ${s.renders} draw cpu ${f1(s.drawMs)}/${f1(s.drawAvgMs)}/${f1(s.drawMaxMs)} ms; sim ticks ${s.simTicks} ${f1(s.simTickMs)}/${f1(s.simTickAvgMs)}/${f1(s.simTickMaxMs)} ms; heap ${s.heapBytes === null ? "n/a" : s.heapBytes + " bytes"}; new game ${s.newGame ? `sync ${f1(s.newGame.syncMs)} ms, first map draw ${f1(s.newGame.toFirstMapRenderMs)} ms` : "n/a"}; load ${s.load ? `data ${f1(s.load.dataMs)} ms, first map draw ${f1(s.load.toFirstMapRenderMs)} ms` : "n/a"}`;
         }
-        function logNow() {
+        function logNow(tag) {
             if (typeof require !== "function") return null;
-            const text = line();
-            try { require("fs").appendFileSync("game_runtime.log", `${new Date().toISOString()} ${text}\n`); st.logLines++; } catch (_) {}
-            return text;
+            const text = line() + (tag ? ` tag ${tag}` : "");
+            try { require("fs").appendFileSync("game_runtime.log", `${new Date().toISOString()} ${text}\n`); st.logLines++; return text; }
+            catch (_) { st.logFailures++; return null; }
         }
         function refreshOverlay() {
             if (!overlay || !overlay.bitmap) return;
@@ -655,7 +656,7 @@
                     st.newGame = { syncMs: pendingNewGame.syncMs, toFirstMapRenderMs: pendingNewGame.toFirstMapRenderMs };
                     pendingNewGame = null;
                 }
-                if (pendingLoad && pendingLoad.awaitRender && scene !== pendingLoad.sceneAtEntry && mapStarted(scene)) {
+                if (pendingLoad && pendingLoad.awaitRender && scene !== pendingLoad.sceneAtEntry && scene !== pendingLoad.sceneAtResolve && mapStarted(scene)) {
                     pendingLoad.toFirstMapRenderMs = now() - pendingLoad.t0;
                     st.load = { dataMs: pendingLoad.dataMs, toFirstMapRenderMs: pendingLoad.toFirstMapRenderMs };
                     pendingLoad = null;
@@ -665,30 +666,45 @@
             st.installed = true;
             return true;
         }
-        const _Perf_setupNewGame = DataManager.setupNewGame;
-        DataManager.setupNewGame = function() {
-            if (!st.enabled) return _Perf_setupNewGame.apply(this, arguments);
-            const t0 = now();
-            const p = { t0, sceneAtEntry: SceneManager._scene, syncMs: null, toFirstMapRenderMs: null, awaitRender: false };
-            pendingNewGame = p;
-            const r = _Perf_setupNewGame.apply(this, arguments);
-            p.syncMs = now() - t0;
-            p.awaitRender = true;
-            st.newGame = { syncMs: p.syncMs, toFirstMapRenderMs: null };
-            return r;
-        };
-        const _Perf_loadGame = DataManager.loadGame;
-        DataManager.loadGame = function(savefileId) {
-            if (!st.enabled) return _Perf_loadGame.apply(this, arguments);
-            const t0 = now();
-            const p = { t0, sceneAtEntry: SceneManager._scene, dataMs: null, toFirstMapRenderMs: null, awaitRender: false };
-            pendingLoad = p;
-            return _Perf_loadGame.apply(this, arguments).then(res => {
-                p.dataMs = now() - t0;
+        // The New Game and load boundaries wrap the then-final DataManager methods once, at Scene_Boot.start, after every
+        // plugin loaded later than Core has added its own wrapper (DEUS_Speech wraps setupNewGame at load), so the
+        // measured span is the complete method; the harness's Scene_Boot.startNormalGame replacement is not touched.
+        function wrapLifecycle() {
+            if (st.lifecycleWrapped) return;
+            st.lifecycleWrapped = true;
+            const _Perf_setupNewGame = DataManager.setupNewGame;
+            DataManager.setupNewGame = function() {
+                if (!st.enabled) return _Perf_setupNewGame.apply(this, arguments);
+                pendingLoad = null;   // a New Game ends any pending load boundary
+                const t0 = now();
+                const p = { t0, sceneAtEntry: SceneManager._scene, syncMs: null, toFirstMapRenderMs: null, awaitRender: false };
+                pendingNewGame = p;
+                const r = _Perf_setupNewGame.apply(this, arguments);
+                p.syncMs = now() - t0;
                 p.awaitRender = true;
-                st.load = { dataMs: p.dataMs, toFirstMapRenderMs: null };
-                return res;
-            }, err => { if (pendingLoad === p) pendingLoad = null; throw err; });
+                st.newGame = { syncMs: p.syncMs, toFirstMapRenderMs: null };
+                return r;
+            };
+            const _Perf_loadGame = DataManager.loadGame;
+            DataManager.loadGame = function(savefileId) {
+                if (!st.enabled) return _Perf_loadGame.apply(this, arguments);
+                pendingNewGame = null;   // a load ends any pending New Game boundary
+                const t0 = now();
+                const p = { t0, sceneAtEntry: SceneManager._scene, sceneAtResolve: null, dataMs: null, toFirstMapRenderMs: null, awaitRender: false };
+                pendingLoad = p;
+                return _Perf_loadGame.apply(this, arguments).then(res => {
+                    p.dataMs = now() - t0;
+                    p.sceneAtResolve = SceneManager._scene;   // the first map draw counts only for a map started after this
+                    p.awaitRender = true;
+                    st.load = { dataMs: p.dataMs, toFirstMapRenderMs: null };
+                    return res;
+                }, err => { if (pendingLoad === p) pendingLoad = null; throw err; });
+            };
+        }
+        const _Perf_Scene_Boot_start = Scene_Boot.prototype.start;
+        Scene_Boot.prototype.start = function() {
+            wrapLifecycle();
+            _Perf_Scene_Boot_start.apply(this, arguments);
         };
         const _Perf_createDisplayObjects = Scene_Map.prototype.createDisplayObjects;
         Scene_Map.prototype.createDisplayObjects = function() {
@@ -696,15 +712,18 @@
             if (st.enabled) { install(); attachOverlay(this); }
         };
         function setEnabled(on) {
+            const was = st.enabled;
             st.enabled = !!on;
+            st.lastTickAt = 0;   // the first callback after an enable (or a disable) is a boundary, not an interval sample
             if (st.enabled) {
                 if (!st.since) st.since = now();
+                if (typeof Scene_Boot !== "undefined" && SceneManager._scene && !(SceneManager._scene instanceof Scene_Boot)) wrapLifecycle();
                 install();
                 const s = SceneManager._scene;
                 if (s instanceof Scene_Map) attachOverlay(s);
-            } else if (overlay && overlay.parent) {
-                overlay.parent.removeChild(overlay);
-                overlay = null;
+            } else {
+                if (was) { pendingNewGame = null; pendingLoad = null; }   // a boundary cannot span disabled time
+                if (overlay && overlay.parent) { overlay.parent.removeChild(overlay); overlay = null; }
             }
             return st.enabled;
         }
