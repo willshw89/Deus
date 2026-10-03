@@ -916,8 +916,8 @@
         "oak": 8,
         "rocks_small": 10,
         "grass_tuft": 60,
-        "reeds": 4,
-        "granite_boulder": 4,
+        "reeds": 8,
+        "granite_boulder": 7,
         "fruit_tree": 1
       },
       "ore": {
@@ -935,7 +935,7 @@
         "reeds"
       ],
       "firstStage": {
-        "about": "Sizing the kit (2026-09-19): the plan steps that give the band its first buildings (larder, woodpile, shelter, beds, the workshop plan's workstone; the hearth is the standing campfire), tools (knives each, an axe, a pick), clothes (a fiber wrap each) and meals (the food step). Hide cloaks, tanning and everything after need hunting and workshops and are not part of it. The most any culture needs, 8 founders (2026-09-19 catalog): 16 logs, 40 stones (dwarf and automaton stone walls), 58 fiber (8 wraps of 6, 8 knives, axe, pick), 6 straw (the forest plan's 3 straw beds), 16 food (the forest plan's 8 in the larder plus a meal each). The kit's minimums alone are worth 36 logs (oaks 4 each with the stump, the fruit tree 4), 44 stones (+3 per ore outcrop), 60 fiber, 8 straw, 19 food.",
+        "about": "Sizing the kit (2026-09-19): the plan steps that give the band its first buildings (larder, woodpile, shelter, beds, the workshop plan's workstone; the hearth is the standing campfire), tools (knives each, an axe, a pick), clothes (a fiber wrap each) and meals (the food step). Hide cloaks, tanning and everything after need hunting and workshops and are not part of it. The most any culture needs, 8 founders (2026-09-19 catalog): 16 logs, 40 stones (dwarf and automaton stone walls), 58 fiber (8 wraps of 6, 8 knives, axe, pick), 6 straw (the forest plan's 3 straw beds), 16 food (the forest plan's 8 in the larder plus a meal each). The kit's minimums alone are worth 36 logs (oaks 4 each with the stump, the fruit tree 4), 44 stones (+3 per ore outcrop), 60 fiber, 8 straw, 19 food. Resized 2026-10-03 (ORG-0.2, from the measured plan): the first stage now needs 26 logs, 60 stones, 58 fiber, 16 straw, 16 food and 2 ore, so the minimums are 7 granite boulders (4 stone each plus the 2-stone small rocks they leave) and 8 reeds (2 straw each): worth 36 logs, 65 stones with the ore outcrop, 60 fiber, 16 straw, 19 food.",
         "steps": [
           "hearth",
           "larder",
