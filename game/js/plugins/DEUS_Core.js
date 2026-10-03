@@ -570,7 +570,7 @@
         const WINDOW = 120;
         const st = {
             enabled: false, installed: false, since: 0,
-            frames: 0, lastTickAt: 0, intervalMs: null, intervalMaxMs: 0, intervals: [],
+            frames: 0, lastTickAt: 0, intervalMs: null, intervalMaxMs: 0, intervals: [], intervalSamples: 0,
             renders: 0, drawMs: null, drawMaxMs: 0, draws: [],
             simTicks: 0, simTickMs: null, simTickMaxMs: 0, simTicksMs: [],
             newGame: null, load: null, heapBytes: null, heapAvailable: false,
@@ -590,7 +590,7 @@
         function snapshot() {
             return {
                 enabled: st.enabled, installed: st.installed, sinceMs: st.since ? now() - st.since : null,
-                frames: st.frames, intervalMs: st.intervalMs, intervalAvgMs: avg(st.intervals), intervalMaxMs: st.intervalMaxMs,
+                frames: st.frames, intervalMs: st.intervalMs, intervalAvgMs: avg(st.intervals), intervalMaxMs: st.intervalMaxMs, intervalSamples: st.intervalSamples,
                 renders: st.renders, drawMs: st.drawMs, drawAvgMs: avg(st.draws), drawMaxMs: st.drawMaxMs,
                 simTicks: st.simTicks, simTickMs: st.simTickMs, simTickAvgMs: avg(st.simTicksMs), simTickMaxMs: st.simTickMaxMs,
                 newGame: st.newGame ? Object.assign({}, st.newGame) : null, load: st.load ? Object.assign({}, st.load) : null,
@@ -632,7 +632,7 @@
         function onTicker() {
             if (!st.enabled) return;
             const t = now();
-            if (st.lastTickAt) { const d = t - st.lastTickAt; st.intervalMs = d; push(st.intervals, d); if (d > st.intervalMaxMs) st.intervalMaxMs = d; }
+            if (st.lastTickAt) { const d = t - st.lastTickAt; st.intervalMs = d; st.intervalSamples++; push(st.intervals, d); if (d > st.intervalMaxMs) st.intervalMaxMs = d; }
             st.lastTickAt = t;
             st.frames++;
             if (t - st.lastOverlayAt >= st.overlayEverySec * 1000) { st.lastOverlayAt = t; heap(); refreshOverlay(); }
@@ -715,6 +715,7 @@
             const was = st.enabled;
             st.enabled = !!on;
             st.lastTickAt = 0;   // the first callback after an enable (or a disable) is a boundary, not an interval sample
+            st.intervalMs = null;   // no retained interval survives an enable or disable
             if (st.enabled) {
                 if (!st.since) st.since = now();
                 if (typeof Scene_Boot !== "undefined" && SceneManager._scene && !(SceneManager._scene instanceof Scene_Boot)) wrapLifecycle();

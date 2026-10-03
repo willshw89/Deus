@@ -863,6 +863,8 @@
         let own = 0;
         const mine = () => { own++; };
         if (ticker) ticker.add(mine);
+        let pausedByUs = false;
+        try {
         const windowMs = async ms => { const t0 = performance.now(); await t.waitUntil(() => performance.now() - t0 >= ms, ms + 30000, `a ${ms} ms wall-clock window`); return performance.now() - t0; };
         own = 0;
         const s0 = P.snapshot(), c0 = Sim && typeof Sim.tickCount === "function" ? Sim.tickCount() : null;
@@ -883,26 +885,37 @@
         const pause = TS && typeof TS.pause === "function" && typeof TS.resume === "function" ? v => (v ? TS.pause() : TS.resume()) : null;
         if (pause) {
             pause(true);
+            pausedByUs = true;
             await t.waitFrames(5);
             own = 0;
             const p0 = P.snapshot(), pc0 = Sim.tickCount();
             const w2 = await windowMs(1000);
             const p1 = P.snapshot(), pc1 = Sim.tickCount(), own2 = own;
             pause(false);
+            pausedByUs = false;
             t.check("pause_stops_ticks_not_frames", pc1 === pc0 && p1.simTicks === p0.simTicks && own2 >= 1 && p1.frames - p0.frames === own2 && p1.renders - p0.renders >= 1,
                 `paused for a ${w2.toFixed(0)} ms window: sim ticks +${p1.simTicks - p0.simTicks} (tickCount +${pc1 - pc0}), ticker callbacks +${p1.frames - p0.frames} (independent listener ${own2}), renders +${p1.renders - p0.renders}`);
         } else {
             t.check("pause_api", false, "no pause API found on UF.Time (pause/resume)");
         }
-        // off/on boundary: no disabled time enters the interval samples
+        // off/on boundary: no disabled time enters the interval samples. The counters are disabled for a measured
+        // wall-clock span, then re-enabled; the independent listener counts the callbacks after the enable, and the
+        // actual new samples (counted by UF.Perf) must be exactly callbacks - 1 (the first callback is a boundary), each
+        // shorter than the disabled span, with the retained interval cleared by the enable.
         P.setEnabled(false);
-        await t.waitFrames(30);
-        const maxBefore = P.snapshot().intervalMaxMs;
+        const offAt = performance.now();
+        const offSnap = P.snapshot();
+        await windowMs(1500);
+        const disabledMs = performance.now() - offAt;
+        const samplesBefore = offSnap.intervalSamples, maxBefore = offSnap.intervalMaxMs;
         P.setEnabled(true);
-        await t.waitFrames(5);
-        const s2 = P.snapshot();
-        t.check("off_on_boundary", s2.intervalMaxMs === maxBefore && s2.intervalMs !== null && s2.intervalMs < 1000,
-            `interval max before the off period ${f1(maxBefore)} ms, after re-enabling ${f1(s2.intervalMaxMs)} ms (must be unchanged); first interval after re-enable ${f1(s2.intervalMs)} ms`);
+        own = 0;
+        const afterEnable = P.snapshot();
+        await t.waitUntil(() => own >= 3, 10000, "three ticker callbacks after re-enabling the counters");
+        const s2 = P.snapshot(), own3 = own;
+        const newSamples = s2.intervalSamples - samplesBefore;
+        t.check("off_on_boundary", afterEnable.intervalMs === null && own3 >= 3 && newSamples === own3 - 1 && s2.intervalMs !== null && s2.intervalMs < disabledMs && (s2.intervalMaxMs === maxBefore || s2.intervalMaxMs < disabledMs),
+            `disabled for ${disabledMs.toFixed(0)} ms (interval cleared on enable: ${afterEnable.intervalMs === null}); after re-enabling: ${own3} ticker callbacks by the independent listener, ${newSamples} new interval samples counted by UF.Perf (want callbacks - 1), last sample ${f1(s2.intervalMs)} ms (must be shorter than the disabled span), max ${f1(maxBefore)} -> ${f1(s2.intervalMaxMs)} ms`);
         // log proof: this call's own line, and a failed append must return null
         const fsN = typeof require === "function" ? require("fs") : null;
         const tag = `proof-${Date.now()}`;
@@ -922,25 +935,45 @@
         const s3 = P.snapshot();
         t.check("log_failure_detected", failedNull === null && restored && s3.logFailures >= 1,
             `logNow during a forced append failure returned ${JSON.stringify(failedNull)} (want null); logFailures ${s3.logFailures}; appendFileSync restored ${restored}`);
-        // real save then load (a new save file in this disposable snapshot; nothing overwritten): both load endpoints
-        let saveOk = false, loadOk = false, loadErr = "";
+        // real save then load, both load endpoints. Fail-closed save isolation before ANY write: the environment must say
+        // DEUS_TEST_DISPOSABLE_SAVES=1 (an explicitly disposable game copy) and the game folder's save directory must hold
+        // no file at all (no slot, no global metadata, no backup; RMMZ's saveToLocalFile would rename and replace an
+        // existing slot and write the global info). Otherwise the suite writes nothing and both load checks fail with the
+        // reason; the suite never deletes, moves or overwrites anything.
+        let saveOk = false, loadOk = false, loadErr = "", refused = "";
         const sceneBefore = SceneManager._scene;
-        try {
-            const slot = 1;
-            if (DataManager.isThisGameFile ? true : true) { /* no-op */ }
-            await DataManager.saveGame(slot);
-            saveOk = true;
-            await DataManager.loadGame(slot);
-            loadOk = true;
-            SceneManager.goto(Scene_Map);
-            if ($gameSystem && typeof $gameSystem.onAfterLoad === "function") $gameSystem.onAfterLoad();
-            await t.waitUntil(() => SceneManager._scene instanceof Scene_Map && SceneManager._scene !== sceneBefore && SceneManager._scene.isStarted(), 120000, "the loaded map to start");
-            await t.waitFrames(10);
-        } catch (e) { loadErr = e && e.message ? e.message : String(e); }
+        const slot = 1;
+        const saveDir = typeof StorageManager !== "undefined" && typeof StorageManager.fileDirectoryPath === "function" ? StorageManager.fileDirectoryPath() : null;
+        const existing = fsN && saveDir && fsN.existsSync(saveDir) ? fsN.readdirSync(saveDir) : [];
+        const optIn = typeof process !== "undefined" && process.env && process.env.DEUS_TEST_DISPOSABLE_SAVES === "1";
+        const slotExists = typeof DataManager.savefileExists === "function" ? DataManager.savefileExists(slot) : true;
+        if (!fsN || !saveDir) refused = "no file system or save directory API";
+        else if (!optIn) refused = "DEUS_TEST_DISPOSABLE_SAVES is not 1 (the target was not declared disposable)";
+        else if (existing.length) refused = `the save directory already holds ${existing.length} file(s): ${existing.slice(0, 5).join(", ")}`;
+        else if (slotExists) refused = `slot ${slot} already exists`;
+        if (!refused) {
+            try {
+                await DataManager.saveGame(slot);
+                saveOk = true;
+                await DataManager.loadGame(slot);
+                loadOk = true;
+                SceneManager.goto(Scene_Map);
+                if ($gameSystem && typeof $gameSystem.onAfterLoad === "function") $gameSystem.onAfterLoad();
+                await t.waitUntil(() => SceneManager._scene instanceof Scene_Map && SceneManager._scene !== sceneBefore && SceneManager._scene.isStarted(), 120000, "the loaded map to start");
+                await t.waitFrames(10);
+            } catch (e) { loadErr = e && e.message ? e.message : String(e); }
+        }
         const s4 = P.snapshot();
-        t.check("load_recorded", saveOk && loadOk && !!s4.load && s4.load.dataMs > 0 && s4.load.toFirstMapRenderMs > s4.load.dataMs,
-            `save slot 1 ${saveOk ? "written" : "FAILED"}; load ${loadOk ? "resolved" : "FAILED"}${loadErr ? ` (${loadErr})` : ""}; load record ${s4.load ? `data ${f1(s4.load.dataMs)} ms, ${f1(s4.load.toFirstMapRenderMs)} ms to the first draw of the loaded map` : "none"}`);
-        if (ticker) ticker.remove(mine);
+        const where = `game ${typeof process !== "undefined" ? process.cwd() : "?"}, save dir ${saveDir || "?"}`;
+        t.check("load_data_recorded", !refused && saveOk && loadOk && !!s4.load && s4.load.dataMs > 0,
+            refused ? `REFUSED before any write: ${refused} (${where})`
+                : `save dir was empty and the target declared disposable (${where}); slot ${slot} ${saveOk ? "written" : "FAILED"}; DataManager.loadGame ${loadOk ? "resolved" : "FAILED"}; data load ${s4.load ? f1(s4.load.dataMs) + " ms" : "not recorded"}`);
+        t.check("load_to_map_recorded", !refused && loadOk && !!s4.load && s4.load.toFirstMapRenderMs !== null && s4.load.toFirstMapRenderMs > s4.load.dataMs,
+            refused ? `not attempted: ${refused}` : `map transition after the load ${loadErr ? "threw: " + loadErr : "completed"}; load-to-first-map-draw ${s4.load && s4.load.toFirstMapRenderMs !== null ? f1(s4.load.toFirstMapRenderMs) + " ms" : "not recorded"} (this suite's own SceneManager.goto(Scene_Map) transition; a data-only load without a transition is not covered)`);
+        } finally {
+            if (ticker) ticker.remove(mine);
+            if (pausedByUs && TS && typeof TS.resume === "function") TS.resume();
+        }
         P.refreshOverlay();
         await t.waitFrames(2);
         t.screenshot("overlay");
