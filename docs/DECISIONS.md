@@ -19,6 +19,7 @@ Add an entry only for an explicit Owner ruling. Agents do not record their own p
 | D-2026-10-02-10 | **Doors are 48x96 px**, one tile wide and two tiles tall (Owner, 20:01 CT). This is a canvas decision; it does not certify the current doorway clearance. |
 | D-2026-10-02-11 | **ART-SCALE-1 remains parked.** When unparked: Grok writes, Claude reviews; renderer supports per-sprite canvases, bottom-center anchors, separate multi-tile footprints and canopy fade. Acceptance is a map screenshot of every race beside every tree size, delivered to the Owner. No art generation or implementation starts from this log. |
 | D-2026-10-02-12 | **Cutaway/opening rules** (Owner, 20:01 CT): sprites taller than one level are clipped or faded by the level-above cutaway; units seen through openings on lower levels are clipped to the opening. Same High Top-Down camera for all art. |
+| D-2026-10-02-13 | **Wall height: option (b), confirmed by the Owner following the 20:15 CT directive.** Walls stay 96 px total: 48 px vertical face plus 48 px top cap. Doors are 48x96, equal to the full wall height. Constructed walls (`DEUS_Walls.js`) must match the natural wall frame. This supersedes the earlier proposed 96 px vertical face. Implementation stays parked under ART-SCALE-1 until ORG-0.2 world-load green. |
 
 ### Art canvas scale details (Owner, 2026-10-02 19:56 CT)
 
@@ -38,10 +39,10 @@ Add an entry only for an explicit Owner ruling. Agents do not record their own p
 
 Vegetation sizes are starting points; the Owner will tune them in game. Doors use 48x96 px canvases. All implementation remains parked until the world loads green.
 
-### Wall-face proposal and current-code evidence (2026-10-02 20:01 CT)
+### Confirmed wall height and current-code evidence (Owner directive, 2026-10-02 20:15 CT)
 
-**Pending Owner confirmation, not an adopted standard:** the Owner proposed a 96 px vertical wall face for one z-level so a 48x96 door and the tallest races fit beneath a lintel.
+**Owner confirmed option (b): 96 px total frame, including the 48 px cap and 48 px vertical face.** Doors are 48x96 and span the full wall height. Constructed and natural walls must use the same height. The earlier proposed 96 px vertical face is superseded; a 144 px total wall frame is not the chosen standard. Implementation remains parked under ART-SCALE-1 until world-load green.
 
 Read-only PM inspection of canonical main `565dc5aead7e068230528d573c395ea21ed5cf5d`: `game/js/plugins/DEUS_Levels.js:4527-4548` defines `NATURAL_WALL_SPEC` as width 48, height 96, capHeight 48. `naturalWallBitmap()` fills the upper 48 px cap and draws four 24x24 material-face quadrants into the lower 48 px. Thus the current natural wall/cliff **total frame is 96 px; the vertical material face is 48 px**. `Sprite_UFNaturalWalls.update()` calls `naturalWallBitmap()` at line 4681 and assigns that bitmap at line 4685. `Sprite_DepthPlane.prototype.rebuildWalls()` in `game/js/plugins/DEUS_Depth.js:1021` consumes `L.naturalWallFrame()` without enlarging it. `game/js/plugins/DEUS_Walls.js:14-16` describes the same lower-face/upper-top split for constructed walls; `TILE` is 48 at line 30 and `drawWoodFace()` fills one TILE of face at line 172.
 
-If the existing 48 px cap is retained, a 96 px vertical face implies a 144 px total wall frame. This is a consequence of the current drawing convention, not an approved renderer change. No game files were changed or playtest run for this read-only answer. The decision-log seed above was taken from Deus's setup branch `org/setup-2026-10-02` at `2ffa0d3a5aa6649d0a8eed0ea7c52edc1c8e4442`; this documentation-branch copy awaits cross-family review and reconciliation with that branch before integration.
+No game files were changed or playtest run for this read-only answer and decision record. The decision-log seed above was taken from Deus's setup branch `org/setup-2026-10-02` at `2ffa0d3a5aa6649d0a8eed0ea7c52edc1c8e4442`; this documentation-branch copy awaits cross-family review and reconciliation with that branch before integration.
