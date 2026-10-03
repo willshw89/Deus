@@ -953,6 +953,10 @@
         else if (slotExists) refused = `slot ${slot} already exists`;
         if (!refused) {
             try {
+                // the real save lifecycle (Scene_Save.executeSave, Scene_Base.executeAutosave; DEUS_Projects and DEUS_Levels
+                // do the same) records the BGM/BGS state that onAfterLoad replays; without this call the loaded Game_System
+                // carries _bgmOnSave = null and onAfterLoad throws "Cannot read property 'name' of null" (P3, Grok finding 3)
+                if ($gameSystem && typeof $gameSystem.onBeforeSave === "function") $gameSystem.onBeforeSave();
                 await DataManager.saveGame(slot);
                 saveOk = true;
                 await DataManager.loadGame(slot);
