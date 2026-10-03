@@ -13,6 +13,8 @@ Claude at max effort is the sole runtime writer; Grok at xhigh reviews the exact
 
 The Owner's overnight wording is the authorization for these watchdog and river-contract changes; earlier proposals are not independently an approval. Other suspected wrong tests still require an Owner decision and are parked. A loaded but phase-frozen system may be diagnosed read-only; do not expand faction/society implementation to clear a test.
 
+PM gate-budget alignment, 2026-10-02 23:34 CT: the native gate's enclosing `lane.json` timeout is 5,400 seconds instead of 300. The inspected default list contains 26 suites; 26 x 180 seconds is 4,680 seconds, leaving 720 seconds for boot and teardown. This changes the enclosing full-run allowance, not any assertion or per-suite 180-second watchdog. The writer must still implement and prove bounded per-suite handling and the matching native runner budget. The separate general `run_gate.js` entry remains unchanged. No merge is authorized.
+
 ## Evidence and handoff
 
 Use `tasks/ORG-0.2/lane-worldgen-green/evidence/` for committed run evidence and `scratchpad/org-0.2/` for working notes and triage. Update attempt counts, remaining failures, and `scratchpad/org-0.2/HANDOFF.md` at each returned checkpoint. No success or lane closure without actual pasted results, independent review and Deus laptop confirmation. Read the existing fallback SOP in `docs/ops/USAGE.md`; a usage limit requires stopping, a WIP checkpoint/push, logs, handoff and PM reassignment, never concurrent writers.

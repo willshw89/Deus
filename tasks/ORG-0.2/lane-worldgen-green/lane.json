@@ -46,7 +46,7 @@
       "args": [
         "tools/run_tests.js"
       ],
-      "timeoutSec": 300
+      "timeoutSec": 5400
     },
     {
       "cmd": "node",
