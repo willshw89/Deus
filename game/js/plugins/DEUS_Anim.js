@@ -574,6 +574,13 @@
                 t = equippedType(u, v);
             }
             if (!t || !usableLayer(t)) continue;
+            // One layer per resolved type per unit (ORG-0.2, 2026-10-03, second round): Items.equip(unit, item, "mainHand")
+            // mirrors the same item id to mainHand, weapon and tool, so the explicit mainHand slot and the weapon slot
+            // resolve to one item; drawing its sheet twice at the same column and row showed nothing more and doubled the
+            // layer sprites. Later slots that resolve to a type an earlier slot already draws are skipped.
+            let dup = false;
+            for (let k = 0; k < n; k++) if (wantTypes[k] === t) { dup = true; break; }
+            if (dup) continue;
             wantTypes[n] = t;
             wantSlots[n] = slot;
             n++;
@@ -2510,6 +2517,40 @@
                     onFrame === 80 && offFrame === 0 && bodyCols.size >= 3 && noLayer && northOk && southOk && workOk && unequipOk && !!bare,
                     `${AXE} (${sources[AXE]}) on a unit with equipment.tool = item #${axe ? axe.id : "?"} and one with equipment.weapon = "${AXE_ID}": on the body's column and row in ${onFrame} of 80 samples (want 80) while the body showed columns ${Array.from(bodyCols).sort((a, b) => a - b).join(",")}; ` +
                     `"${bare}" equipped (no layer sheet): layer sprites ${Anim.layersOf(Lc).list.length} (want 0); facing N: behind ${northOk}; facing S: in front ${southOk}; carried axe while chopping: ${workLayer}, after the job ${afterWork} layer(s) (want stone_axe@weapon, then 0); after unequipping: ${Anim.layersOf(La).list.length} layers, sprite detached ${!!kid && !kid.parent}, pool ${pool0} -> ${animLayer().kidPoolSize()}`);
+                // 6b. layers_equip_api (ORG-0.2, 2026-10-03): through the real Items.equip API, which mirrors one item id to
+                // mainHand, weapon and tool, an owned axe draws exactly one layer while idle and while chopping, and
+                // Items.unequip(mainHand) removes it.
+                {
+                    const Le = add("TEST_anim_axe_equip", BODY, ax + 2, ay + 4, 2, { inventory: [], equipment: {} });
+                    const axeE = I.give(AXE_ID, 1, Le.id)[0];
+                    const equipped = !!axeE && I.equip(Le.id, axeE.id, "mainHand") === true;
+                    const eqE = Le.data.equipment || {};
+                    const mirrored = equipped && eqE.mainHand === axeE.id && eqE.weapon === axeE.id && eqE.tool === axeE.id;
+                    await t.waitUntil(() => drawn(Le), 8000, "the equip-API unit to be drawn").catch(() => {});
+                    await t.waitFrames(3);
+                    const idleLayers = Anim.layersOf(Le).list.map(l => `${l.typeId}@${l.slot}`);
+                    let workLayers = "not run";
+                    if (oak) {
+                        put(Le.x, Le.y - 1, oak);
+                        const chopE = J.create({ type: "chop", target: { area: { x: area.x, y: area.y }, x: Le.x, y: Le.y - 1 }, owner: Le.id });
+                        await t.waitUntil(() => !!chopE && chopE.state === "work", 4000, "the equipped chopper to work").catch(() => {});
+                        await t.waitFrames(2);
+                        workLayers = Anim.layersOf(Le).list.map(l => `${l.typeId}@${l.slot}`).join(",") || "none";
+                        if (chopE) J.cancel(chopE.id, "test over");
+                        await t.waitFrames(2);
+                    }
+                    const unequipped = typeof I.unequip === "function" ? I.unequip(Le.id, "mainHand") : "no unequip API";
+                    await t.waitFrames(3);
+                    const afterUnequip = Anim.layersOf(Le).list.length;
+                    const eqAfter = Le.data.equipment || {};
+                    const cleared = !eqAfter.mainHand && !eqAfter.weapon && !eqAfter.tool;
+                    t.check("layers_equip_api",
+                        mirrored && idleLayers.length === 1 && idleLayers[0] === `${AXE_ID}@weapon` && (oak ? workLayers === `${AXE_ID}@weapon` : false) && afterUnequip === 0 && cleared,
+                        `Items.equip(unit, axe #${axeE ? axeE.id : "?"}, "mainHand") mirrored to weapon and tool: ${mirrored}; idle layers ${idleLayers.join(",") || "none"} (want exactly ${AXE_ID}@weapon); while chopping: ${workLayers} (want ${AXE_ID}@weapon); Items.unequip(mainHand) -> ${unequipped}: ${afterUnequip} layer(s) left (want 0), equipment after ${JSON.stringify(eqAfter)} (want mainHand, weapon and tool cleared)`);
+                    removeUnits([Le]);
+                    restoreCells();
+                    await t.waitFrames(2);
+                }
                 removeUnits(units);
                 restoreCells();
                 await t.waitFrames(2);
