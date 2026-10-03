@@ -7,6 +7,7 @@
   "push": true,
   "baseSha": "565dc5aead7e068230528d573c395ea21ed5cf5d",
   "allowedPaths": [
+    "AGENTS.md",
     "tools/run_tests.js",
     "game/js/plugins/DEUS_Test.js",
     "game/js/plugins/DEUS_Core.js",

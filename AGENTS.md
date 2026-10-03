@@ -14,6 +14,8 @@ If a rule here conflicts with your habits, this file wins. If it conflicts with 
 
 ## Persistent orchestration rules (Owner request, 2026-09-28)
 
+**Owner update, 2026-10-02:** follow the [MODEL FALLBACK / CROSSLOAD SOP](docs/ops/USAGE.md#model-fallback--crossload-sop) for staffing, outage checkpoints, handoffs, reviewer pairing and completion reports. Codex is PM; hard lanes use Claude at top effort and the strongest available different-family reviewer; Gemini is narrow-scope writing only via Owner handoff. No direct commits to main. Newer explicit Owner instructions override conflicting older routing rules below.
+
 Read these rules at every session start, including through non-Antigravity providers:
 - `.agents/rules/deus-governance.md`: DEC-007, Owner approval before any new WBS leaf/lane or scope expansion, engine-core protection, and existing lane/worktree isolation.
 - `.agents/rules/deus-review-policy.md`: zero self-certification, independent model-family review, evidence before closure, and mandatory `merge_gate` / `--no-ff` integration.
