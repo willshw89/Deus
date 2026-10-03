@@ -393,10 +393,47 @@
     //-------------------------------------------------------------------------
     // Water bodies (section 3.2): rivers and the start pond are models in world coordinates
 
+    /**
+     * The rivers of this world as the hydrology network carved them (sim/worldgen/DEUS_Hydrology, planned once per
+     * world in waterModels): [{ id, anchorX, halfWidth, terminal, course, center(gy), isWater(gx, gy) }].
+     * course: the cut course in unwrapped tile coordinates, source first (the polyline rasterizeChunk paints);
+     * anchorX: the source's column (wrapped); halfWidth: the rasterizer's half-width in tiles; terminal: "sea" or
+     * "lake"; center(gy): the course's column (wrapped) where it first crosses world row gy, NaN on a row the course
+     * never crosses (these rivers run from a high source down to the sea or a lake, not through every row);
+     * isWater(gx, gy): whether the rasterized course covers that tile, the same rasterization the area build paints.
+     * [] without the catalog, the hydrology module or a planned river. Every field is read from the planned network
+     * and its rasterizer; nothing is invented (ORG-0.2 item (c), Owner approval 2026-10-02).
+     */
     WorldGen.riverModels = function(state) {
-        return [];
+        const st = state || (window.UF && UF.World && UF.World.state) || null;
+        if (!st || !catalog()) return [];
+        const wm = waterModels(st), net = wm.net, micro = wm.micro;
+        if (!net || !micro) return [];
+        const d = dims(st);
+        const wrapX = x => ((x % d.width) + d.width) % d.width;
+        return net.rivers.map(r => {
+            const course = micro.course(r.id);
+            const center = gy => {
+                for (let k = 1; k < course.length; k++) {
+                    const a = course[k - 1], b = course[k];
+                    const lo = Math.min(a.y, b.y), hi = Math.max(a.y, b.y);
+                    // The course is unwrapped: this piece meets row gy at every Y shift n with lo + nH <= gy <= hi + nH.
+                    const n0 = Math.ceil((gy - hi) / d.height), n1 = Math.floor((gy - lo) / d.height);
+                    if (n0 > n1) continue;
+                    const ay = a.y + n0 * d.height, by = b.y + n0 * d.height;
+                    const t = by === ay ? 0 : (gy - ay) / (by - ay);
+                    return wrapX(a.x + (b.x - a.x) * t);
+                }
+                return NaN;
+            };
+            return {
+                id: r.id, anchorX: course.length ? wrapX(course[0].x) : NaN, halfWidth: micro.halfWidth, terminal: r.terminal, course, center,
+                isWater: (gx, gy) => micro.rasterizeChunk(gx, gy, 1, 1).river[0] === r.id + 1
+            };
+        });
     };
-    WorldGen.riverModel = state => null;
+    /** The first river (older callers). */
+    WorldGen.riverModel = state => WorldGen.riverModels(state)[0] || null;
 
     /** A pond at a random direction and distance from the start (catalog start.pond), so the pair can drink. */
     WorldGen.pondModel = function(state) {
@@ -441,7 +478,7 @@
         const cat = catalog();
         const cl = cat.climate;
         
-        let micro = null;
+        let micro = null, net = null;
         if (Hydrology && cl) {
             const grid = Hydrology.createMacroGrid({
                 width: Math.ceil(d.width / 16),
@@ -455,7 +492,7 @@
             const cMin = R.count ? R.count[0] : 1;
             const cMax = R.count ? (R.count[1] !== undefined ? R.count[1] : cMin) : 1;
             const count = cMin + Math.floor(unit(d.seed, SALT.river, 0xffff) * (cMax - cMin + 1));
-            const net = Hydrology.createRiverNetwork(grid, {
+            net = Hydrology.createRiverNetwork(grid, {
                 seed: d.seed,
                 count: count,
                 minElevation: 0.6,
@@ -472,7 +509,7 @@
             return !!pond && pond.isWater(gx, gy);
         };
         waterCache = {
-            key, micro, pond, isRiverOrPond,
+            key, micro, net, pond, isRiverOrPond,
             isWater(gx, gy) {
                 if (isRiverOrPond(gx, gy)) return true;
                 const f = fieldsFor(d.seed, d, cl, gx, gy);
@@ -481,7 +518,7 @@
         };
         return waterCache;
     }
-    /** { rivers, pond, isWater(gx, gy) } for the world. */
+    /** { micro, net, pond, isRiverOrPond(gx, gy), isWater(gx, gy) } for the world: the hydrology network, its rasterizer, the pond and the any-water lookups. */
     WorldGen.waterModel = state => waterModels(state || UF.World.state);
 
     /**
@@ -2222,7 +2259,7 @@
                 }
             }
             t.check("water_near_start", nearest <= reach, `nearest water ${nearest === Infinity ? "none" : nearest.toFixed(1) + " cells"} from the pair (reach ${reach})`);
-            const rivers = [];
+            const rivers = WorldGen.riverModels(st);
             const gaps = rivers.map(r => Math.abs(Math.round(r.center(a.y * size + mid)) - (a.x * size + mid)));
             t.check("river_not_through_start", gaps.every(g => g > cat.rivers.keepAwayFromStart), `river(s) pass ${gaps.join(", ")} cells from the start (keep away ${cat.rivers.keepAwayFromStart})`);
             const [cMin, cMax] = cat.rivers.count;
