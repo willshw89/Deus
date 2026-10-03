@@ -35,6 +35,8 @@
     "docs/systems/DEUS_Tiles.md",
     "docs/systems/DEUS_Levels.md",
     "docs/STATUS.md",
+    "docs/VISION.md",
+    "docs/ops/USAGE.md",
     "tasks/ORG-0.2/lane-worldgen-green/**"
   ],
   "gateTests": [

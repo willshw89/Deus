@@ -11,6 +11,10 @@
 
 ## 0. Active Lanes
 
+### In progress
+
+- 2026-10-02: ORG-0.2 is the only active lane under the Owner's latest direction. Claude is the sole runtime writer on task/org-0.2-worldgen-green, with Grok reviewing. Codex PM recorded the dispatch and usage policy; its documentation claim is released. Main, stashes and the backup branch are protected. World-load acceptance is not established; all side questions remain queued. See tasks/ORG-0.2/lane-worldgen-green/OWNER_FOLLOWUP.md.
+
 | Lane | Task | Writer -> reviewer | State |
 |---|---|---|---|
 | gp | OPS.MAIN.GREEN | claude -> grok | MERGED 86a51589 |
