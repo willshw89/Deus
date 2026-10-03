@@ -6,7 +6,7 @@
   "reviewer": "grok",
   "push": false,
   "allowedPaths": [
-    "game/js/deus/DEUS_Pathfinding.js",
+    "game/js/sim/pathfinding.js",
     "docs/systems/DEUS_Pathfinding.md",
     "docs/lanes/CORE-HPA.md",
     "tools/test_pathfinding_hpa.js",

@@ -1,5 +1,5 @@
 "use strict";
-// tools/bench_pathfinding_hpa.js - Node timing for game/js/deus/DEUS_Pathfinding.js (CORE-HPA).
+// tools/bench_pathfinding_hpa.js - Node timing for game/js/sim/pathfinding.js (CORE-HPA).
 //
 //   node tools/bench_pathfinding_hpa.js [--seed=12345] [--queries=200]
 //
@@ -9,7 +9,7 @@
 // edits, hierarchical query median/p95 (cache off and on), plain A* median/p95 on the same queries,
 // and expansions per query. Timings depend on the machine; the expansion counts do not.
 const path = require("path");
-const P = require(path.join(__dirname, "..", "game", "js", "deus", "DEUS_Pathfinding.js"));
+const P = require(path.join(__dirname, "..", "game", "js", "sim", "pathfinding.js"));
 
 const argv = process.argv.slice(2);
 const seed = Number((argv.find(a => a.startsWith("--seed=")) || "--seed=12345").slice(7));

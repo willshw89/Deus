@@ -3,7 +3,7 @@
 // DEUS_Pathfinding.js - CORE-HPA hierarchical pathfinder (HPA* with HAA*-style door masks)
 //=============================================================================
 /*
- * Project DEUS, lane CORE-HPA (docs/lanes/CORE-HPA.md; system doc docs/systems/DEUS_Pathfinding.md).
+ * Project DEUS, lane CORE-HPA (docs/lanes/CORE-HPA.md; system doc docs/systems/DEUS_Pathfinding.md). Module file: game/js/sim/pathfinding.js (UF.Sim.require("pathfinding")).
  * Standalone module: no engine, catalogue or plugin imports. Runs headless in Node (CommonJS) and, when
  * loaded in the game, publishes itself as window.DEUS.Pathfinding (window.UF is the runtime alias).
  * Nothing in the game loads it yet (2026-10-03): engine bridge DEFERRED, see the system doc.
@@ -267,6 +267,9 @@ class TileSearch {
         this.open = new OpenList(4096, maxOpen);
         this.status = "idle";
         this.expansions = 0;
+        this.touch = null;      // optional Uint32Array over clusters, stamped with touchId for every expanded tile
+        this.touchId = 0;
+        this.cs = 0; this.cw = 0; this.cpl = 0;
     }
     begin(start, goal, mask) {
         const grid = this.grid;
@@ -292,6 +295,8 @@ class TileSearch {
         const W = grid.width, H = grid.height, walk = grid.walk, door = grid.door, zo = this.zo;
         const mark = ws.mark, g = ws.g, parent = ws.parent;
         const tag = this.epoch * 2, closedTag = tag + 1;
+        const touch = this.touch, touchId = this.touchId, cs = this.cs, cw = this.cw;
+        const cl0 = touch ? ((zo / grid.layer) | 0) * this.cpl : 0;
         let used = 0;
         while (this.status === "running" && used < budget) {
             if (!open.pop()) { this.status = "unreachable"; break; }
@@ -303,6 +308,7 @@ class TileSearch {
             used++;
             if (idx === this.goal) { this.status = "found"; break; }
             const x = idx % W, y = ((idx - zo) / W) | 0;
+            if (touch !== null) touch[cl0 + ((x / cs) | 0) + ((y / cs) | 0) * cw] = touchId;
             for (let d = 0; d < 8; d++) {
                 const nx = wrap(x + DX[d], W), ny = wrap(y + DY[d], H);
                 const n = zo + nx + ny * W;
@@ -517,6 +523,7 @@ class Pathfinder {
         this.nodeLocal = new Int32Array(this.nodeCap);
         this.nodeAlive = new Uint8Array(this.nodeCap);
         this.nodeComp = new Int32Array(this.nodeCap);
+        this.nodeBorn = new Int32Array(this.nodeCap);     // graphVersion at which the id was (re)allocated
         this.nodeMark = new Uint32Array(this.nodeCap);
         this.nodeG = new Int32Array(this.nodeCap);
         this.nodeParent = new Int32Array(this.nodeCap);
@@ -537,6 +544,11 @@ class Pathfinder {
         this.splitSuspected = false;   // a blocking or door edit since the last flush: components may have split
         this.graphVersion = 0;
         this.entranceEpoch = 0;        // bumps when a border rescan replaces entrance nodes
+        this.clusterVersion = new Uint32Array(this.clusterCount);   // graphVersion at which each cluster was last rebuilt
+        this.touchStamp = new Uint32Array(this.clusterCount);       // search id that last touched each cluster
+        this.searchSeq = 0;
+        this.freedThisFlush = 0;       // node ids freed since the last flush: a recycled id can split a union-find chain
+        this.tileSearch.touch = this.touchStamp; this.tileSearch.cs = this.cs; this.tileSearch.cw = this.cw; this.tileSearch.cpl = this.clustersPerLayer;
         this.built = false;
         this.connectivityStale = true;
         this.cache = new Map();
@@ -554,7 +566,7 @@ class Pathfinder {
             clusterRebuilds: 0, borderRescans: 0, entranceChanges: 0, classTables: 0, rebuildExpansions: 0,
             cacheHits: 0, cacheMisses: 0, cacheStores: 0,
             connectivityRebuilds: 0, connectivityMerges: 0, connectivityFastFails: 0,
-            restarts: 0, refineFailures: 0, schedulerStalls: 0
+            restarts: 0, refineFailures: 0, schedulerStalls: 0, nodesFreed: 0
         };
     }
     resetMetrics() { this.metrics = this._freshMetrics(); }
@@ -592,6 +604,7 @@ class Pathfinder {
         this.nodeMark = grow(this.nodeMark, Uint32Array);
         this.nodeG = grow(this.nodeG, Int32Array);
         this.nodeParent = grow(this.nodeParent, Int32Array);
+        this.nodeBorn = grow(this.nodeBorn, Int32Array);
         this.nodeCap = cap;
     }
     _allocNode(tile, cluster) {
@@ -604,6 +617,7 @@ class Pathfinder {
         this.nodeTile[id] = tile; this.nodeCluster[id] = cluster; this.nodePair[id] = -1; this.nodeLocal[id] = -1;
         this.nodeAlive[id] = 1;
         this.nodeComp[id] = id;        // a fresh singleton for the incremental union-find
+        this.nodeBorn[id] = this.graphVersion + 1;   // allocation happens inside build()/flush(), which bump the version after
         this.aliveNodes++;
         return id;
     }
@@ -613,6 +627,8 @@ class Pathfinder {
         this.nodePair[id] = -1;
         this.aliveNodes--;
         this.freeIds.push(id);
+        this.freedThisFlush++;
+        this.metrics.nodesFreed++;
     }
 
     //--- building ----------------------------------------------------------------------------------------------
@@ -691,6 +707,7 @@ class Pathfinder {
         c.classes.clear();
         this._classTable(c, 0);
         this.metrics.clusterRebuilds++;
+        this.clusterVersion[c.id] = this.graphVersion + 1;   // the flush (or build) bumps graphVersion right after its rebuilds
     }
     _classKey(c, mask) {
         const masks = c.doorMasks;
@@ -752,6 +769,7 @@ class Pathfinder {
         for (let id = 0; id < this.clusterCount; id++) this._rebuildIntra(this.clusters[id]);
         this.dirty.clear();
         this.splitSuspected = false;
+        this.freedThisFlush = 0;
         this.graphVersion++;
         this.cache.clear();
         this.connectivityStale = true;
@@ -787,9 +805,12 @@ class Pathfinder {
         for (let i = 0; i < order.length; i++) this._rebuildIntra(this.clusters[order[i]]);
         this.graphVersion++;
         this.cache.clear();          // version stamps also make stale entries miss; clearing bounds memory
-        if (this.splitSuspected) this.connectivityStale = true;
+        // Merge-only unions are exact only while no node id was freed: a freed id can sit inside a live
+        // union-find chain, and reusing it would split that component. Any recycle forces a rebuild.
+        if (this.splitSuspected || this.freedThisFlush > 0) this.connectivityStale = true;
         else if (!this.connectivityStale) this._mergeConnectivity(order);
         this.splitSuspected = false;
+        this.freedThisFlush = 0;
         return order.length;
     }
 
@@ -979,8 +1000,12 @@ class Search {
         this.phase = PH.INIT;
         this.version = this.pf.graphVersion;
         this.entranceEpoch = this.pf.entranceEpoch;
+        this.id = ++this.pf.searchSeq;            // a fresh id: nothing is touched yet
+        this.born = this.pf.graphVersion;         // abstract nodes allocated after this are not this search's
         this.startCluster = this.pf.clusterOf(this.start);
         this.goalCluster = this.pf.clusterOf(this.goal);
+        this.pf.touchStamp[this.startCluster] = this.id;
+        this.pf.touchStamp[this.goalCluster] = this.id;
         this.startLinks = null;
         this.goalLinks = null;
         this.directCost = -1;
@@ -998,7 +1023,51 @@ class Search {
         this.reason = "";
         this.refined = false;
     }
-    _restart() { this._reset(); this.pf.metrics.restarts++; }
+    _restart() { this._reset(); this.restartCount = (this.restartCount | 0) + 1; this.pf.metrics.restarts++; }
+    /**
+     * A paused search keeps going after a flush unless the rebuild hit something it stands on: its start or
+     * goal cluster (the links were computed there), a cluster or node on its current abstract path, or, in
+     * the plain phase, a cluster whose tiles it expanded. Abstract nodes freed or re-allocated by a flush are
+     * skipped when popped or relaxed (nodeBorn), refinement runs on the live grid and restarts on a failed hop,
+     * and a finished path is re-validated step by step, so an edit elsewhere on the torus costs nothing.
+     */
+    _graphStillValid() {
+        const pf = this.pf, ver = this.version;
+        if (ver === pf.graphVersion) return true;
+        const cv = pf.clusterVersion;
+        if (cv[this.startCluster] > ver || cv[this.goalCluster] > ver) return false;
+        if (this.phase === PH.PLAIN) {
+            const stamp = pf.touchStamp, id = this.id;
+            for (let c = 0; c < pf.clusterCount; c++) if (stamp[c] === id && cv[c] > ver) return false;
+        }
+        const nodes = this.abstractPath;
+        if (nodes) {
+            for (let i = 1; i < nodes.length - 1; i++) {
+                const n = nodes[i];
+                if (pf.nodeAlive[n] !== 1 || pf.nodeBorn[n] > this.born || cv[pf.nodeCluster[n]] > ver) return false;
+            }
+        }
+        this.version = pf.graphVersion;
+        return true;
+    }
+    _nodeStale(n) { return n >= FIRST_NODE && (this.pf.nodeAlive[n] !== 1 || this.pf.nodeBorn[n] > this.born); }
+    /** Every step adjacent (torus), passable for the mask, and no cut corner. */
+    _stepsValid(path) {
+        const grid = this.grid, m = this.mask, W = grid.width, H = grid.height;
+        for (let i = 0; i < path.length; i++) {
+            if (!grid.canPass(path[i], m)) return false;
+            if (i === 0) continue;
+            const a = path[i - 1], t = path[i];
+            if (grid.zOf(a) !== grid.zOf(t)) return false;
+            const dx = torusDelta(grid.xOf(a), grid.xOf(t), W), dy = torusDelta(grid.yOf(a), grid.yOf(t), H);
+            if (dx < -1 || dx > 1 || dy < -1 || dy > 1 || (dx === 0 && dy === 0)) return false;
+            if (dx !== 0 && dy !== 0) {
+                const z = grid.zOf(a);
+                if (!grid.canPass(grid.index(grid.xOf(a) + dx, grid.yOf(a), z), m) || !grid.canPass(grid.index(grid.xOf(a), grid.yOf(a) + dy, z), m)) return false;
+            }
+        }
+        return true;
+    }
     abandon() {
         if (this.status === "running") { this.status = "abandoned"; this.phase = PH.DONE; if (this.pf.inflight === this) this.pf.inflight = null; }
     }
@@ -1009,6 +1078,11 @@ class Search {
         };
     }
     _finish(status, reason) {
+        if (status === "found" && this.refined && this.path && !this._stepsValid(this.path)) {
+            this.pf.metrics.refineFailures++;   // never hand out a path the grid refuses: plan again on the live graph
+            this._restart();
+            return;
+        }
         this.status = status;
         this.reason = reason || "";
         this.phase = PH.DONE;
@@ -1024,9 +1098,10 @@ class Search {
     /** Runs until `budget` expansions are used or the search ends. Returns the expansions used. */
     step(budget) {
         if (this.status !== "running" || !(budget > 0)) return 0;
-        if (this.version !== this.pf.graphVersion) this._restart();
+        if (!this._graphStillValid()) this._restart();
         let used = 0;
         while (this.status === "running" && used < budget) {
+            if (this.phase === PH.INIT && this.restartCount > 16) { this._finish("unreachable", "restart_limit"); break; }
             switch (this.phase) {
                 case PH.INIT: this._init(); break;
                 case PH.PLAIN: used += this._plain(budget - used); break;
@@ -1053,6 +1128,7 @@ class Search {
         const dx = torusAbs(grid.xOf(this.start), grid.xOf(this.goal), grid.width);
         const dy = torusAbs(grid.yOf(this.start), grid.yOf(this.goal), grid.height);
         if (this.shortQueryTiles > 0 && Math.max(dx, dy) <= this.shortQueryTiles) {
+            pf.tileSearch.touchId = this.id;
             pf.tileSearch.begin(this.start, this.goal, this.mask);
             this.plainLeft = pf.shortQueryMaxExpansions;
             this.mode = "plain";
@@ -1124,6 +1200,7 @@ class Search {
             const e = pf.cache.get(key);
             if (e && e.version === pf.graphVersion && this._startHas(e.nodes[0]) && this.goalLinks.has(e.nodes[e.nodes.length - 1])) {
                 this.abstractPath = [START_NODE].concat(Array.from(e.nodes), [GOAL_NODE]);
+                for (let i = 0; i < e.nodes.length; i++) pf.touchStamp[pf.nodeCluster[e.nodes[i]]] = this.id;
                 this.mode = "cached";
                 pf.metrics.cacheHits++;
                 this._beginRefine();
@@ -1154,6 +1231,7 @@ class Search {
         const pf = this.pf;
         if (pf.nodeMark[m] === tag + 1) return true;
         if (pf.nodeMark[m] === tag && g >= pf.nodeG[m]) return true;
+        if (this._nodeStale(m)) return true;   // allocated by a flush after this search began: not part of its graph
         pf.nodeMark[m] = tag; pf.nodeG[m] = g; pf.nodeParent[m] = this._current;
         const h = this._nodeH(m);
         return pf.abstractOpen.push(g + h, h, this._nodeTile(m), m);
@@ -1165,6 +1243,7 @@ class Search {
             if (!open.pop()) { this._finish("unreachable", "abstract"); break; }
             const n = open.id2;
             if (pf.nodeMark[n] === closedTag) continue;
+            if (this._nodeStale(n)) continue;   // freed or re-allocated by a flush while this search was paused
             const g = open.f - open.h;
             if (g !== pf.nodeG[n]) continue;
             pf.nodeMark[n] = closedTag;
@@ -1223,8 +1302,9 @@ class Search {
      */
     refineNext() {
         if (this.status !== "found" || !this.lazy || this.refined) return null;
-        // Flush replaces entrance nodes in place. The macro path's node ids are then a different tile.
-        if (this.entranceEpoch !== this.pf.entranceEpoch) { this._stale(); return null; }
+        // Any flush invalidates an in-flight lazy refinement: the macro path's node ids may name other tiles
+        // after entrance replacement, and the tables it was planned on are gone.
+        if (this.version !== this.pf.graphVersion || this.entranceEpoch !== this.pf.entranceEpoch) { this._stale(); return null; }
         const pf = this.pf, nodes = this.abstractPath;
         if (nodes === null) { this.refined = true; this.cost = pathCost(this.grid, this.path); return null; }   // plain or direct result: already whole
         while (this.segIndex < nodes.length - 1) {
@@ -1248,12 +1328,18 @@ class Search {
             if (this.smoothWindow > 0 && tiles.length > 2) tiles = this._smoothTiles(tiles);
             for (let i = 1; i < tiles.length; i++) this.path.push(tiles[i]);
             this.expansions += tiles.length; pf.metrics.expansions += tiles.length;
-            if (this.segIndex >= nodes.length - 1) { this.refined = true; this.cost = pathCost(this.grid, this.path); }
+            if (this.segIndex >= nodes.length - 1) return this._completeLazy() ? tiles.slice(1) : null;
             return tiles.slice(1);
         }
+        this._completeLazy();
+        return null;
+    }
+    /** The whole lazily refined path is re-validated step by step before it counts as found. */
+    _completeLazy() {
+        if (!this._stepsValid(this.path)) { this.status = "stale"; this.reason = "invalid_steps"; this.pf.metrics.refineFailures++; return false; }
         this.refined = true;
         this.cost = pathCost(this.grid, this.path);
-        return null;
+        return true;
     }
     _stale() {
         this.status = "stale";
@@ -1284,6 +1370,7 @@ class Search {
             if (!this.segOpen) {
                 if (this.segIndex >= nodes.length - 1) { this.smoothIndex = 0; this.smoothOut = null; this.phase = PH.SMOOTH; break; }
                 const a = nodes[this.segIndex], b = nodes[this.segIndex + 1];
+                if (this._nodeStale(a) || this._nodeStale(b)) { pf.metrics.refineFailures++; this._restart(); break; }
                 const from = this._nodeTile(a), to = this._nodeTile(b);
                 if (a !== START_NODE && b !== GOAL_NODE && pf.nodePair[a] === b) { this.path.push(to); this.segIndex++; continue; }
                 if (from === to) { this.segIndex++; continue; }
@@ -1300,8 +1387,8 @@ class Search {
                 this.segOpen = false;
                 this.segIndex++;
             } else {
-                pf.metrics.refineFailures++;
-                this._finish("unreachable", "refine");
+                pf.metrics.refineFailures++;   // the hop no longer exists on the live grid: plan again
+                this._restart();
             }
         }
         return used;
@@ -1458,7 +1545,7 @@ function createPathfinder(grid, opts) { return new Pathfinder(grid, opts); }
 function createScheduler(pf, opts) { return new Scheduler(pf, opts); }
 
 return {
-    CLUSTER_SIZE, COST_STRAIGHT, COST_DIAG, MAX_RUN, DEFAULT_BUDGET, EPOCH_MAX, PRIORITY, START_NODE, GOAL_NODE,
+    CLUSTER_SIZE, COST_STRAIGHT, COST_DIAG, MAX_RUN, DEFAULT_BUDGET, EPOCH_MAX, PRIORITY, START_NODE, GOAL_NODE, FIRST_NODE, PH,
     wrap, torusDelta, torusAbs, octile, hashPath, pathCost, validatePath, removeLoops,
     Grid, OpenList, TileWorkspace, TileSearch, LocalSearch, Pathfinder, Search, Scheduler,
     createGrid, createPathfinder, createScheduler

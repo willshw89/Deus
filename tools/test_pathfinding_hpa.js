@@ -1,5 +1,5 @@
 "use strict";
-// tools/test_pathfinding_hpa.js - CORE-HPA headless checks for game/js/deus/DEUS_Pathfinding.js.
+// tools/test_pathfinding_hpa.js - CORE-HPA headless checks for game/js/sim/pathfinding.js.
 //
 //   node tools/test_pathfinding_hpa.js                 all checks (about 20 s on a 768x768 grid)
 //   node tools/test_pathfinding_hpa.js --runs=20       determinism: fresh pathfinders per run (default 10)
@@ -23,6 +23,9 @@
 //   keep_loops        smoothing keeps the loops it makes                    -> smoothing_no_loops
 //   no_same_cluster_fallthrough a same-cluster pair with no local route is unreachable -> same_cluster_detour
 //   no_plain_fallback the short-query A* cap ends the search                -> short_query_detour
+//   global_restart    any flush restarts every paused search                -> dig_storm
+//   merge_on_reuse    recycled node ids are merged into the live union-find  -> connectivity_reuse
+//   no_lazy_flush_check a flush does not end an in-flight lazy refinement    -> lazy_flush_invalidation
 //
 // Output: PASS/FAIL lines, one RESULT line, exit 0 (all passed) or 1 (a failure).
 const fs = require("fs");
@@ -30,7 +33,7 @@ const path = require("path");
 const vm = require("vm");
 
 const ROOT = path.resolve(__dirname, "..");
-const MODULE = path.join(ROOT, "game", "js", "deus", "DEUS_Pathfinding.js");
+const MODULE = path.join(ROOT, "game", "js", "sim", "pathfinding.js");
 const argv = process.argv.slice(2);
 const mutant = (argv.find(a => a.startsWith("--mutant=")) || "").slice(9);
 const runs = Number((argv.find(a => a.startsWith("--runs=")) || "--runs=10").slice(7));
@@ -49,7 +52,10 @@ const MUTANTS = {
     no_rollover: ["if (this.epoch >= EPOCH_MAX) { this.mark.fill(0); this.epoch = 0; this.rollovers++; }\n        return ++this.epoch;", "if (this.epoch >= EPOCH_MAX) { this.epoch = 0; this.rollovers++; }\n        return ++this.epoch;"],
     overflow_silent: ["if (this.size === this.cap && !this._grow()) { this.overflowed = true; return false; }", "if (this.size === this.cap && !this._grow()) { return true; }"],
     door_in_run: ["doorway = open && (door[t[0]] !== 0 || door[t[1]] !== 0);", "doorway = false;"],
-    no_version_check: ["if (this.version !== this.pf.graphVersion) this._restart();", "/* mutant: no restart */"],
+    no_version_check: ["if (ver === pf.graphVersion) return true;\n        const cv = pf.clusterVersion;", "return true;\n        const cv = pf.clusterVersion;"],
+    global_restart: ["if (!this._graphStillValid()) this._restart();", "if (this.version !== this.pf.graphVersion) this._restart();"],
+    merge_on_reuse: ["if (this.splitSuspected || this.freedThisFlush > 0) this.connectivityStale = true;", "if (this.splitSuspected) this.connectivityStale = true;"],
+    no_lazy_flush_check: ["if (this.version !== this.pf.graphVersion || this.entranceEpoch !== this.pf.entranceEpoch) { this._stale(); return null; }", "if (this.entranceEpoch !== this.pf.entranceEpoch) { this._stale(); return null; }"],
     keep_loops: ["this.path = removeLoops(out); this.refined = true; used++;", "this.path = out; this.refined = true; used++;"],
     no_same_cluster_fallthrough: ["this.directCost = this.startCluster === this.goalCluster ? local.gAt(this.goal) : -1;\n            this._beginLinks(false);", "this.directCost = this.startCluster === this.goalCluster ? local.gAt(this.goal) : -1;\n            if (this.startCluster === this.goalCluster && this.directCost < 0) { this._finish(\"unreachable\", \"same_cluster\"); return used; }\n            this._beginLinks(false);"],
     no_plain_fallback: ["else if (this.plainLeft <= 0) { pf.metrics.plainFallbacks++; this.mode = \"hpa\"; this._beginLinks(true); }", "else if (this.plainLeft <= 0) { this._finish(\"unreachable\", \"plain_cap\"); }"]
@@ -486,21 +492,23 @@ if (runOnly("budget")) {
     // a search paused mid-way when a flush rebuilds the graph restarts and answers for the new grid
     const [s3, e3] = queries[3];
     const probe = pfOne.findPath(s3, e3, { mask: 0 });
-    const cut = pfOne.nodeTile[probe.abstractPath[Math.floor(probe.abstractPath.length / 2)]];   // an entrance tile on its abstract route
+    // the goal cluster's entrance on its route: walling it while the search is paused in the abstract phase replaces
+    // the goal-link nodes, so the search must restart (its goal links name freed ids) and answer for the new grid
+    const cut = pfOne.nodeTile[probe.abstractPath[probe.abstractPath.length - 2]];
     const paused = pfStep.beginSearch(s3, e3, { mask: 0 });
     let stepsBefore = 0;
-    while (paused.status === "running" && stepsBefore < 4) { paused.step(50); stepsBefore++; }
-    const wasRunning = paused.status === "running";
+    while (paused.status === "running" && paused.phase < P.PH.ABSTRACT && stepsBefore < 10000) { paused.step(10); stepsBefore++; }
+    const wasRunning = paused.status === "running" && paused.phase === P.PH.ABSTRACT;
     g.setWalkableAt(cut, false);
     const rebuilt = pfStep.flush();
     while (paused.status === "running") paused.step(100);
     const pr = paused.result();
-    const expectFresh = fresh => { const f = P.createPathfinder(g, { cache: false }); f.build(); return f.findPath(s3, e3, { mask: 0 }); };
+    const expectFresh = () => { const f = P.createPathfinder(g, { cache: false }); f.build(); return f.findPath(s3, e3, { mask: 0 }); };
     const fr = expectFresh();
     g.setWalkableAt(cut, true);
     pfStep.flush();
-    check("inflight_rebuild", wasRunning && rebuilt >= 1 && pfStep.metrics.restarts === 1 && pr.status === fr.status && (pr.status !== "found" || (!ownValidate(g, pr.path, 0) && !pr.path.includes(cut) && P.hashPath(pr.path) === P.hashPath(fr.path))),
-        `paused after ${stepsBefore} steps of 50, wall placed on its route, flush rebuilt ${rebuilt}; restarts ${pfStep.metrics.restarts}; result ${pr.status} cost ${pr.cost} vs fresh ${fr.status} cost ${fr.cost}, same path ${pr.path && fr.path ? P.hashPath(pr.path) === P.hashPath(fr.path) : false}`);
+    check("inflight_rebuild", wasRunning && rebuilt >= 1 && pfStep.metrics.restarts === 1 && pr.status === fr.status && (pr.status !== "found" || (!ownValidate(g, pr.path, 0) && !pr.path.includes(cut) && pr.cost === fr.cost)),
+        `paused in the abstract phase after ${stepsBefore} steps of 10, goal-cluster entrance walled, flush rebuilt ${rebuilt}; restarts ${pfStep.metrics.restarts}; result ${pr.status} cost ${pr.cost} vs fresh ${fr.status} cost ${fr.cost}`);
 }
 
 //----------------------------------------------------------------------------------------------------------
@@ -621,22 +629,25 @@ section("dig_storm", () => {
     pf.build();
     const ref = P.createPathfinder(g, { cache: false });   // the plain-A* reference: the scheduler's pathfinder may hold a paused search
     ref.build();
-    const sched = P.createScheduler(pf, { budgetPerTick: 20000 });
+    const sched = P.createScheduler(pf, { budgetPerTick: P.DEFAULT_BUDGET });   // the spec's 2,500 nodes per tick
     const rnd = mulberry32(77);
     const pending = new Map();
-    let completed = 0, invalid = 0, disagree = 0, found = 0, restarts = 0, edits = 0, maxTick = 0;
+    let completed = 0, invalid = 0, disagree = 0, found = 0, restarts = 0, edits = 0, maxTick = 0, duringStorm = 0;
     const randomTile = () => g.index((rnd() * W) | 0, (rnd() * H) | 0, 0);
-    for (let tick = 0; tick < 30; tick++) {
-        for (let k = 0; k < 50; k++) { const t = randomTile(); g.setWalkableAt(t, g.walk[t] !== 1); edits++; }   // 50 digs/walls per tick
-        for (let k = 0; k < 10; k++) {
+    const STORM_TICKS = 60;
+    for (let tick = 0; tick < STORM_TICKS + 400 && (tick < STORM_TICKS || sched.pending() > 0); tick++) {
+        const storm = tick < STORM_TICKS;
+        if (storm) for (let k = 0; k < 50; k++) { const t = randomTile(); g.setWalkableAt(t, g.walk[t] !== 1); edits++; }   // 50 digs/walls per tick
+        if (storm) {   // one new route per tick: about the budget's capacity for a median long route
             let s = randomTile(), e = randomTile();
-            if (!g.walk[s] || !g.walk[e]) continue;
+            while (!g.walk[s] || !g.walk[e]) { s = randomTile(); e = randomTile(); }
             pending.set(sched.request(s, e, { mask: 0, priority: (rnd() * 3) | 0 }), [s, e]);
         }
         const done = sched.tick();
         ref.flush();
         maxTick = Math.max(maxTick, sched.lastTickExpansions);
         restarts = pf.metrics.restarts;
+        if (storm) duringStorm += done.length;
         for (const r of done) {
             const [s, e] = pending.get(r.id);
             pending.delete(r.id);
@@ -649,12 +660,88 @@ section("dig_storm", () => {
             } else if (r.status === "unreachable" && a.status === "found") disagree++;
         }
     }
-    while (sched.pending() > 0) sched.tick();
+    const requested = completed + pending.size;
     const freshPf = P.createPathfinder(g, { cache: false });
     freshPf.build();
     const graphSame = JSON.stringify(pf.snapshotGraph()) === JSON.stringify(freshPf.snapshotGraph());
-    check("dig_storm", completed >= 100 && invalid === 0 && disagree === 0 && maxTick <= 20000 && graphSame,
-        `${edits} edits over 30 ticks, ${completed} routes completed (${found} found), invalid ${invalid}, A* disagreements ${disagree}, restarts ${restarts}, max tick expansions ${maxTick}, graph == fresh ${graphSame}`);
+    // Under edits every tick, routes longer than one tick's budget must still complete: a search restarts only
+    // when a cluster it touched was rebuilt, so completions during the storm stay near the request rate.
+    check("dig_storm", requested === STORM_TICKS && pending.size === 0 && duringStorm >= STORM_TICKS / 3 && restarts <= STORM_TICKS / 3 && invalid === 0 && disagree === 0 && maxTick <= P.DEFAULT_BUDGET && graphSame,
+        `${edits} edits over ${STORM_TICKS} ticks at budget ${P.DEFAULT_BUDGET}: ${requested} routes requested, ${duringStorm} completed during the storm, ${completed} in all (${found} found, ${pending.size} left), invalid ${invalid}, A* disagreements ${disagree}, restarts ${restarts}, max tick expansions ${maxTick}, graph == fresh ${graphSame}`);
+});
+
+//----------------------------------------------------------------------------------------------------------
+// connectivity_reuse: dig-only flushes that free and recycle entrance node ids must leave the live components
+// equal to a from-scratch rebuild (a recycled id inside a union-find chain used to split a component)
+//----------------------------------------------------------------------------------------------------------
+section("connectivity_reuse", () => {
+    const g = P.createGrid({ width: W, height: H });
+    const rnd = mulberry32(4040);
+    for (let i = 0; i < W * H; i++) if (rnd() < 0.40) g.walk[i] = 0;      // dense: entrance runs change on most digs
+    const pf = P.createPathfinder(g, { cache: false });
+    pf.build();
+    const ref = P.createPathfinder(g, { cache: false });
+    ref.build();
+    let rounds = 0, recycled = 0, merged = 0, mismatches = 0, falseUnreachable = 0, queries = 0;
+    const liveRoots = () => { const out = []; for (let id = P.FIRST_NODE; id < pf.nodeHigh; id++) if (pf.nodeAlive[id]) out.push([id, pf.componentOf(id)]); return out; };
+    for (let round = 0; round < 40; round++) {
+        let opened = 0;
+        while (opened < 20) { const t = g.index((rnd() * W) | 0, (rnd() * H) | 0, 0); if (g.walk[t] === 1) continue; g.setWalkableAt(t, true); opened++; }
+        const freedBefore = pf.metrics.nodesFreed;
+        pf.flush();
+        ref.flush();
+        rounds++;
+        if (pf.metrics.nodesFreed > freedBefore) recycled++;
+        if (!pf.connectivityStale) {
+            merged++;
+            const live = liveRoots();
+            pf.rebuildConnectivity();
+            const fresh = new Map(liveRoots());
+            const l2f = new Map(), f2l = new Map();
+            for (const [id, root] of live) {
+                const fr = fresh.get(id);
+                if ((l2f.has(root) && l2f.get(root) !== fr) || (f2l.has(fr) && f2l.get(fr) !== root)) { mismatches++; break; }
+                l2f.set(root, fr); f2l.set(fr, root);
+            }
+        }
+        for (let q = 0; q < 5; q++) {
+            const s = g.index((rnd() * W) | 0, (rnd() * H) | 0, 0), e = g.index((rnd() * W) | 0, (rnd() * H) | 0, 0);
+            if (!g.walk[s] || !g.walk[e]) continue;
+            queries++;
+            const r = pf.findPath(s, e, { mask: 0, shortQueryTiles: 0 });
+            if (r.status === "unreachable" && ref.findPathAStar(s, e, { mask: 0 }).status === "found") falseUnreachable++;
+        }
+    }
+    check("connectivity_reuse", rounds === 40 && recycled >= 10 && mismatches === 0 && falseUnreachable === 0 && queries >= 50,
+        `${rounds} dig-only rounds of 20 tiles: ${recycled} recycled node ids (rebuilt), ${merged} merged in place; live components != fresh ${mismatches}; false unreachable ${falseUnreachable} of ${queries} queries`);
+});
+
+//----------------------------------------------------------------------------------------------------------
+// lazy_flush_invalidation: a flush anywhere ends an in-flight lazy refinement with stale, never a bad path
+//----------------------------------------------------------------------------------------------------------
+section("lazy_flush_invalidation", () => {
+    const g = obstacleGrid(909);
+    const pf = P.createPathfinder(g, { cache: false });
+    pf.build();
+    let n = 0, stale = 0, bad = 0, refinedAfterFlush = 0;
+    for (const [s, e] of randomQueries(g, 13, 15, 120)) {
+        const lazy = pf.beginSearch(s, e, { mask: 0, lazy: true });
+        while (lazy.status === "running") lazy.step(1 << 30);
+        if (lazy.status !== "found") continue;
+        n++;
+        lazy.refineNext();                                           // one hop walked
+        const far = g.index(g.xOf(s) + 384, g.yOf(s) + 384, 0);   // an interior edit on the far side of the torus (index wraps)
+        g.setWalkableAt(far, g.walk[far] !== 1);
+        pf.flush();
+        let seg, hops = 0;
+        while ((seg = lazy.refineNext()) !== null && hops < 500) hops++;
+        const r = lazy.result();
+        if (lazy.status === "stale") stale++;
+        else if (r.refined) { refinedAfterFlush++; if (ownValidate(g, r.path, 0)) bad++; }
+        if (r.path && ownValidate(g, r.path, 0) && lazy.status !== "stale") bad++;
+    }
+    check("lazy_flush_invalidation", n >= 10 && stale === n && refinedAfterFlush === 0 && bad === 0,
+        `${n} lazy routes, one hop walked, then an unrelated flush: ${stale} went stale, ${refinedAfterFlush} kept refining, ${bad} invalid paths`);
 });
 
 //----------------------------------------------------------------------------------------------------------
