@@ -4,7 +4,7 @@
 
 **Why the player cares:** Click orders and AI movement should find the same valid route through doors, terrain, and vertical links without a long path search freezing a frame.
 
-`DEUS_World.js` currently exposes `World.findPath` and path statistics. The main `038a02c3` implementation describes 8-way steps when permitted (otherwise 4-way), blocked-corner handling, a default 12,000-node cap, a region precheck, and vertical links within an area. `DEUS_Movement8D.js` also runs a local 24×24 octile A* with its own heap and 200-iteration cutoff for `findDirection8DTo`. These contracts and call sites need a fresh audit at the implementation SHA.
+`DEUS_World.js` currently exposes `World.findPath` and path statistics. The main `038a02c3` implementation describes 8-way steps when permitted (otherwise 4-way), blocked-corner handling, a default 12,000-node cap, a region precheck, and vertical links within an area. `DEUS_Movement8D.js` also runs an octile A* with its own binary heap and a 200-iteration cutoff for `findDirection8DTo`. Its line 510 comment describes a 24×24 window, but the function uses map dimensions and wrapped neighbors without enforcing a 24-cell window. These contracts and call sites need a fresh audit at the implementation SHA.
 
 ## Proposed change
 
