@@ -1,0 +1,16 @@
+2472a2473,2485
+>                     if (want !== got && window.UF.Test && UF.Test.write) { // AUTOTILE DIAG (disposable copy only)
+>                         if (!window.__atHist) { window.__atHist = {}; window.__atSamples = []; }
+>                         const Wd = window.UF.World, key0 = Wd.levelKey(a.x, a.y, 0), diffs = (st.diffs && st.diffs[key0]) || null;
+>                         const g = WorldGen.groundTilesAt(a.x, a.y, x, y);
+>                         const neigh = NB.map(([dx, dy]) => { const nx = x + dx, ny = y + dy; const ng = WorldGen.groundTilesAt(a.x, a.y, nx, ny); return { nx, ny, solid: ng ? ng.solid : null, kind: kindOf(here.data[ny * size + nx]) }; });
+>                         const sameKindMixedSolid = g && neigh.some(nb => nb.kind === kind && nb.solid !== g.solid);
+>                         const painterAgrees = g && g.layer0 === here.data[y * size + x];
+>                         const tpl = typeof Wd.templatePaints === 'function' ? !!Wd.templatePaints(x, y) : null;
+>                         const dif = diffs && diffs[y * size + x] !== undefined;
+>                         const cls = !painterAgrees ? (dif ? 'overwritten by a saved diff' : (tpl ? 'overwritten by the start template' : 'final tile differs from the painter (unexplained)')) : (g.solid ? (sameKindMixedSolid ? 'solid face beside a non-solid cell of the same kind (painter joins solid only to solid)' : 'solid face, other') : (sameKindMixedSolid ? 'non-solid cell beside a solid face of the same kind' : (g.carved ? 'carved cell' : (g.ramp ? 'ramp cell' : 'non-solid, painter agrees, unexplained'))));
+>                         window.__atHist[cls] = (window.__atHist[cls] || 0) + 1;
+>                         if (window.__atSamples.length < 4) window.__atSamples.push(`(${x},${y}) kind ${kind} got ${got} want ${want} solid ${g ? g.solid : '?'} carved ${g ? g.carved : '?'} ramp ${g ? g.ramp : '?'} layer0 ${g ? g.layer0 : '?'} tile ${here.data[y * size + x]} tpl ${tpl} diff ${dif} neighbours ${neigh.map(nb => `${nb.kind}${nb.solid ? 'S' : nb.solid === false ? 'f' : '?'}`).join(',')}`);
+>                     }
+2474a2488
+>             if (window.UF.Test && UF.Test.write && window.__atHist) { UF.Test.write(`DIAG6 autotile mismatches by class: ${Object.entries(window.__atHist).sort((p, q) => q[1] - p[1]).map(([k, v]) => `[${v}] ${k}`).join(" || ")}`); UF.Test.write(`DIAG6 samples: ${window.__atSamples.join(" ; ")}`); }
