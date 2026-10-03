@@ -1,0 +1,5 @@
+[12768:26412:1003/060320.065:ERROR:google_update_settings.cc(251)] Failed opening key Software\nwjs to set usagestats; result: 5
+
+DevTools listening on ws://127.0.0.1:63885/devtools/browser/9e895d84-488a-4001-9fc6-b03747e4a0f4
+[12768:19412:1003/060328.096:ERROR:device_event_log_impl.cc(208)] [06:03:28.095] USB: usb_device_handle_win.cc:1020 Failed to read descriptor from node connection: A device attached to the system is not functioning. (0x1F)
+[12768:19412:1003/060328.096:ERROR:device_event_log_impl.cc(208)] [06:03:28.095] USB: usb_device_handle_win.cc:1020 Failed to read descriptor from node connection: A device attached to the system is not functioning. (0x1F)

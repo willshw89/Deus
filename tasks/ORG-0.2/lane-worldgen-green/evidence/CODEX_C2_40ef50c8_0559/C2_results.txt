@@ -1,0 +1,7 @@
+UF_Test run 2026-10-03T10:58:03.661Z args=[]
+HARNESS New Game year 500 (requested 500)
+ERROR scene.exception: Error: EPERM: operation not permitted, lstat 'C:\Users\snewt' |     at Object.realpathSync (fs.js:1681:7) |     at toRealPath (internal/modules/cjs/loader.js:381:13)
+HARNESS SceneManager stopped after an exception
+HARNESS current scene: Scene_Boot
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_CODEX_C2_40ef50c8_0559\game\test_output\harness.on_failure.png
+RESULT: 0 passed, 0 failed (exit 2)

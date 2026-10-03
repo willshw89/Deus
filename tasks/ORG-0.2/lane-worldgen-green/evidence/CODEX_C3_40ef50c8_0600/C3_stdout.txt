@@ -1,0 +1,25 @@
+Running --deus-test=perf_overlay on C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_CODEX_C3_40ef50c8_0600\game
+HARNESS: retain mode on (DEUS_TEST_RETAIN=1 or --retain): nothing is deleted; C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_CODEX_C3_40ef50c8_0600\game\test_output verified free of results/PNGs; browser profile C:\Users\snewt\AppData\Local\Temp\uf_test_profile_20192_1791025183141 will be kept
+HARNESS: 1 suite(s) x 180 s budget; hard cap 420 s from launch
+HARNESS: retain mode kept the browser profile at C:\Users\snewt\AppData\Local\Temp\uf_test_profile_20192_1791025183141
+UF_Test run 2026-10-03T10:59:43.808Z args=[]
+HARNESS New Game year 500 (requested 500)
+DEBUG_SHEET: Scene_Boot.start called
+AVAILABLE SUITES: selftest, smoke, perf, native_starting_gear, native_survival_dying, native_perf_4x_benchmark, perf_overlay, select, select, natural_connections, ownership, ecology, projects, settlement, colonists, overseer, world, spawn, worldgen, biomes, tiles, ground, factions, skins, history, objects, walls, doors, items, dig_through_floor, jobs, floors, wildlife, wildlife_seeds, stance, combat, anim, fog, daynight, timespeed, camera, culling, speech, overhead, look, sheet, talk, fire, vertical, natural_walls, flooding, strata, sparse_outer, environment, faction_menus, title, load, setup, depth, layers_flat, select, select
+HARNESS suite budget 180 s each; 1 suite(s) selected: perf_overlay
+SUITE perf_overlay
+PASS perf_overlay.perf_source - UF.Perf present; enabled before this suite: true; installed: true; lifecycle wrapped at boot: true
+PASS perf_overlay.frames_observed - 54 ticker callbacks counted by UF.Perf during a 2014 ms window; an independent ticker listener counted 54; interval last 19.64 avg 85.66 max 2729.63 ms (scheduler delay included; not CPU time)
+PASS perf_overlay.renders_observed - 54 app.render calls in the same window (at most one per ticker callback); draw CPU submission last 1.86 avg 5.29 max 257.90 ms (not GPU completion)
+PASS perf_overlay.sim_ticks_counted - UF.Sim.tickCount 10 -> 20 (+10); Perf counted 10 tick(s); last 0.00 avg 0.39 max 7.02 ms per tick (the shared UF.Sim tick only; other per-update simulation work is outside it)
+PASS perf_overlay.newgame_recorded - New Game: 22534.06 ms synchronous setup (the complete DataManager.setupNewGame as wrapped at Scene_Boot.start: true), 26945.18 ms to the first draw of the started map
+PASS perf_overlay.heap_reported - JS heap 132.6 MB (performance.memory.usedJSHeapSize)
+PASS perf_overlay.load_not_invented - no load so far: load n/a (null)
+PASS perf_overlay.pause_stops_ticks_not_frames - paused for a 1007 ms window: sim ticks +0 (tickCount +0), ticker callbacks +143 (independent listener 143), renders +143
+PASS perf_overlay.off_on_boundary - disabled for 1633 ms (interval cleared on enable: true); after re-enabling: 4 ticker callbacks by the independent listener, 3 new interval samples counted by UF.Perf (want callbacks - 1), last sample 64.51 ms (must be shorter than the disabled span), max 2729.63 -> 2729.63 ms
+PASS perf_overlay.log_line_written - game_runtime.log grew 1289202 -> 1289465 bytes; last [PERF] line carries this call's tag proof-1791025222436: true; line: 2026-10-03T11:00:22.436Z [PERF] frames 276 interval 64.5/8.2/2729.6 ms (last/avg/max); renders 240 draw cpu 2.7/1.8/257.9 ms; sim ticks 20 0.0/0.4/7.0 ms; heap 139000000 bytes; new game sync 22534.1 m
+PASS perf_overlay.log_failure_detected - logNow during a forced append failure returned null (want null); logFailures 1; appendFileSync restored true
+PASS perf_overlay.load_data_recorded - save dir was empty and the target declared disposable (game C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_CODEX_C3_40ef50c8_0600\game, save dir C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_CODEX_C3_40ef50c8_0600\game\save\); slot 1 written; DataManager.loadGame resolved; data load 348.98 ms
+PASS perf_overlay.load_to_map_recorded - map transition after the load completed; load-to-first-map-draw 6572.25 ms (this suite's own SceneManager.goto(Scene_Map) transition; a data-only load without a transition is not covered)
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_CODEX_C3_40ef50c8_0600\game\test_output\perf_overlay.overlay.png
+RESULT: 13 passed, 0 failed (exit 0)

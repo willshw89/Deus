@@ -1,0 +1,63 @@
+{
+  "source": "40ef50c8b79f1e26eeb03e5e2e4222af39d1488b",
+  "game": "C:\\Users\\snewt\\OneDrive\\Desktop\\UF\\.deus_worktrees\\org-0.2-worldgen-green\\scratchpad\\lane-worldgen-green\\snap_CODEX_C4_40ef50c8_0602\\game",
+  "evidence": "C:\\Users\\snewt\\OneDrive\\Desktop\\UF\\.deus_worktrees\\org-0.2-worldgen-green\\tasks\\ORG-0.2\\lane-worldgen-green\\evidence\\CODEX_C4_40ef50c8_0602",
+  "port": 63885,
+  "profileDir": "C:\\Users\\snewt\\AppData\\Local\\Temp\\uf_codex_c4_23616_1791025399964",
+  "env": {
+    "DEUS_TEST_YEAR": "500",
+    "DEUS_PERF": "1",
+    "DEUS_TEST_RETAIN": "1",
+    "DEUS_TEST_DISPOSABLE_SAVES": "1"
+  },
+  "startedAt": "2026-10-03T11:03:19.973Z",
+  "otherNwBefore": null,
+  "notes": [],
+  "scenario": "started Scene_Map during focused perf_overlay; exact test phase recorded from results.txt",
+  "samplingIntervalUs": 500,
+  "pid": 12768,
+  "target": {
+    "id": "0D782B3FDF3EDDCD43C4A7595FCE5872",
+    "type": "page",
+    "url": "chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/index.html"
+  },
+  "mapAtStart": {
+    "started": true,
+    "scene": "Scene_Map",
+    "seed": 1920951434,
+    "areasX": 1,
+    "areasY": 1,
+    "size": 256,
+    "mapId": 1000
+  },
+  "resultTailBefore": [
+    "UF_Test run 2026-10-03T11:03:20.654Z args=[]",
+    "HARNESS New Game year 500 (requested 500)",
+    "DEBUG_SHEET: Scene_Boot.start called"
+  ],
+  "sampleStart": "2026-10-03T11:03:48.138Z",
+  "sampleStop": "2026-10-03T11:03:52.383Z",
+  "mapAtStop": {
+    "started": true,
+    "scene": "Scene_Map",
+    "seed": 1920951434,
+    "areasX": 1,
+    "areasY": 1,
+    "size": 256,
+    "mapId": 1000
+  },
+  "resultTailAfter": [
+    "UF_Test run 2026-10-03T11:03:20.654Z args=[]",
+    "HARNESS New Game year 500 (requested 500)",
+    "DEBUG_SHEET: Scene_Boot.start called"
+  ],
+  "samples": 7757,
+  "nodes": 1045,
+  "profileStartTime": 32215086327,
+  "profileEndTime": 32219166345,
+  "exitCode": 0,
+  "exitSignal": null,
+  "exitedAt": "2026-10-03T11:04:06.213Z",
+  "resultLine": "RESULT: 13 passed, 0 failed (exit 0)",
+  "finishedAt": "2026-10-03T11:04:06.214Z"
+}

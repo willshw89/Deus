@@ -1,0 +1,6 @@
+﻿source runtime: 40ef50c8b79f1e26eeb03e5e2e4222af39d1488b
+snapshot: C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_CODEX_C4_40ef50c8_0602\game
+save: absent
+test_output: absent
+nw.exe: 0
+created CT: 2026-10-03 06:02:54 -05:00

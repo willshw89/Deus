@@ -1,0 +1,8 @@
+﻿source runtime: 40ef50c8b79f1e26eeb03e5e2e4222af39d1488b
+snapshot: C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_CODEX_C2_40ef50c8_0559\game
+fresh path before creation: absent
+save directory before native: absent
+test_output before native: absent
+created CT: 2026-10-03 05:57:08 -05:00
+nw.exe before native: 0
+RPGMZ editor: 17220

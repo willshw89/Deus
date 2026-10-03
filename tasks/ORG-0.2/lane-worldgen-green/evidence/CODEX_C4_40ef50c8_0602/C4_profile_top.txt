@@ -1,0 +1,21 @@
+﻿tasks/ORG-0.2/lane-worldgen-green/evidence/CODEX_C4_40ef50c8_0602/C4_started_map.cpuprofile: 4080 ms sampled
+    600.7 ms  14.7 %  open :0
+    534.3 ms  13.1 %  (anonymous) DEUS_Objects.js:121
+    333.6 ms   8.2 %  table DEUS_Objects.js:119
+    306.2 ms   7.5 %  close :0
+    174.4 ms   4.3 %  computeShadePlan DEUS_Tiles.js:552
+    167.5 ms   4.1 %  writeBuffer :0
+    162.7 ms   4.0 %  valueNoise DEUS_WorldGen.js:146
+    149.6 ms   3.7 %  typeOf DEUS_Objects.js:178
+    118.4 ms   2.9 %  typeFlags DEUS_World.js:2536
+    114.5 ms   2.8 %  generate DEUS_WorldGen.js:1402
+     98.9 ms   2.4 %  all UF_Households.js:66
+     81.8 ms   2.0 %  (program) :0
+     64.8 ms   1.6 %  (garbage collector) :0
+     59.7 ms   1.5 %  corner DEUS_WorldGen.js:127
+     54.1 ms   1.3 %  emit DEUS_Core.js:301
+     44.9 ms   1.1 %  (anonymous) DEUS_WorldGen.js:1637
+     37.9 ms   0.9 %  types DEUS_Objects.js:1101
+     35.7 ms   0.9 %  tintOf DEUS_Objects.js:67
+     30.4 ms   0.7 %  riverAt DEUS_Levels.js:792
+     24.9 ms   0.6 %  setExport :0
