@@ -1,0 +1,13 @@
+# D4_game_runtime.log excerpt (full log 1978699 bytes left untracked here)
+2:[INIT] Game booting at 2026-10-03T06:42:15.009Z
+20:2026-10-03T06:42:16.389Z [TIMING] DataManager.setupNewGame enter (+11.5ms)
+21:2026-10-03T06:42:16.392Z [TIMING] setupForNewGame before World.newWorld
+24:2026-10-03T06:42:18.247Z [TIMING] world:initializing fired (+1869.7ms)
+8914:2026-10-03T06:42:39.631Z [TIMING] world:created fired (+23253.5ms)
+8917:2026-10-03T06:42:39.634Z [TIMING] emit world:created done
+8918:2026-10-03T06:42:39.634Z [TIMING] early seated done, units=0
+8919:2026-10-03T06:42:40.995Z [TIMING] setupForNewGame after World.newWorld
+8920:2026-10-03T06:42:40.996Z [TIMING] setupForNewGame exit (reserved map 1000)
+8921:2026-10-03T06:42:40.996Z [TIMING] DataManager.setupNewGame exit (+24618.3ms)
+8922:2026-10-03T06:42:41.003Z [TIMING] Scene_Boot.start exit (+24625.6ms)
+8925:2026-10-03T06:42:41.779Z [TIMING] world:areaBuilt (0,0) (+25402.0ms)
