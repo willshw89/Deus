@@ -1,6 +1,6 @@
 # Camera, item input and open-space depth plan
 
-Status: **QUEUED / DESIGN ONLY**, 2026-10-02. Owner decisions at 22:27 and 22:32 CT are recorded in [DECISIONS.md](../DECISIONS.md), D-2026-10-02-18 and -19. Fold this into the queued **UI-FULLSCREEN / depth-plan** work after **ORG-0.2 is green**. No implementation, new art or test pass is claimed here. DEC-037 remains in force.
+Status: **QUEUED / DESIGN ONLY**, 2026-10-02. Owner decisions at 22:27, 22:32 and 23:54 CT are recorded in [DECISIONS.md](../DECISIONS.md), D-2026-10-02-18, -19 and -26. Fold this into the queued **UI-FULLSCREEN / depth-plan** work after **ORG-0.2 is green**. No implementation, new art or test pass is claimed here. DEC-037 remains in force.
 
 ## Camera and controls
 
@@ -22,13 +22,15 @@ This amends DEC-011's earlier prohibition on depth shading while retaining its *
 |---|---|---|
 | Above current z | Invisible | Never draw |
 | Current z | Full brightness | Normal current-level drawing |
-| z-1 | About 60% brightness; slight cool tint | Only through open space in the current level |
-| z-2 | About 30% brightness | Only where the current level AND z-1 are open |
+| z-1 | About 60% brightness; about 50% desaturated; cool blue cast | Only through open space in the current level |
+| z-2 | About 30% brightness; mostly gray with a cool blue cast | Only where the current level AND z-1 are open |
 | z-3 and deeper | Black | Do not render these levels at all; show black beyond the two drawn lower levels |
 
-Every level between the view and a lower surface must be open at that location. A solid intervening cell blocks the lower view even when the cell's art has transparent pixels. The two-level draw limit is relative to the **current** z; it does not impose an absolute world-depth limit or stop simulation below the view. Brightness values belong in a data config so the Owner can tune them. The exact tint color is not specified by this decision.
+Every level between the view and a lower surface must be open at that location. A solid intervening cell blocks the lower view even when the cell's art has transparent pixels. The two-level draw limit is relative to the **current** z; it does not impose an absolute world-depth limit or stop simulation below the view. Brightness values belong in a data config so the Owner can tune them. The exact cool-blue color value remains unspecified. Water, lava, colonists and enemies retain some identifying tint instead of becoming uniformly gray.
 
-The renderer must omit lower-level drawing beyond z-2, not render it and then cover it with black. This is the approved way to bound depth draw work; no measured FPS or draw-time improvement is claimed before implementation and testing.
+At a drop edge, the current floor gets a 2–4 px dark rim and a short shadow onto the lower level. After ART-WIRE-WALLS, lower wall faces use the Owner's cliff art. Wall-face height remains an Owner choice between 48 and 96 px; this plan does not change the existing size tables or approve new art.
+
+The renderer must omit lower-level drawing beyond z-2, not render it and then cover it with black; it must never draw every lower level and darken afterward. Bake the static depth grade into cached chunks and rebake affected chunks only when digging, building or collapse changes them. Moving sprites alone receive a live tint. No measured FPS or draw-time improvement is claimed before implementation and testing.
 
 ## Required future acceptance checks
 
@@ -36,9 +38,11 @@ The renderer must omit lower-level drawing beyond z-2, not render it and then co
 2. Prove plain wheel never changes z, Shift+wheel changes z, and PgUp/PgDn provide the same level navigation. Inspect the fade-only transition.
 3. At 1x, select a 4-px item through its minimum 16x16-screen-px hit area; verify minimum hit size also at 0.5x and 2x. Hover must show the outline and name.
 4. Put a mug over a table: overlap selects the mug. Check drag outline/true size at 1x/2x and that item dragging cannot start at 0.5x while look/order still works.
-5. Render a fixture with a three-deep open shaft and objects above the view: current z is full brightness, z-1 is cool/shaded, z-2 is darker, z-3 is black, and nothing above current z appears. Open and inspect the fixture screenshots.
-6. Use draw instrumentation as well as screenshots to prove **zero draws** for z-3/deeper and above-current-z contents; an invisible or black-covered draw is a failure.
+5. Render a fixture looking from z0 into a three-deep open shaft, with objects above the view: current z is full brightness, z-1 is about 60% brightness/50% desaturated with a cool blue cast, z-2 is about 30% brightness and mostly gray, z-3 is black, and nothing above current z appears. Check the 2–4 px dark rim, short shadow and lower cliff-art wall faces when ART-WIRE-WALLS is available; water, lava, colonists and enemies retain some identifying tint. Open and inspect the screenshot, then provide the z0-into-shaft image for Owner review.
+6. Use draw instrumentation as well as screenshots to prove **zero draws** for z-3/deeper and above-current-z contents; drawing all lower levels then darkening or covering them is a failure.
 7. Block an intervening level and confirm deeper contents disappear; reopen it and confirm visibility returns. Repeat from another current z to prove the limit is relative to the view.
 8. Change the brightness data values and verify the two lower levels respond without code edits, while the draw limit and 1:1 geometry remain unchanged.
+9. Show that unchanged static chunks do not rebake each frame; digging, building and collapse dirty/rebake only affected chunks. Moving sprites receive live tint without forcing static chunk rebakes.
+10. On the same seed and scene, capture performance-overlay readings before and after the future depth change. Report the recorded SHA and frame, tick, draw, worldgen/load milliseconds and heap readings without claiming a gain or pass threshold that has not been measured or approved.
 
 The item-on-furniture fixture belongs to ART-SCALE-1, D-2026-10-02-17: table, desk, shelf and counter, with contact anchors, surface heights, free placement, furniture-relative movement and screenshot checks for floating/clipping. It shares the camera above but remains a separate acceptance fixture. All these checks are **planned, not run**.

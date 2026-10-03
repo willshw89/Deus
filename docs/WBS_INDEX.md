@@ -16,7 +16,7 @@ Current runtime priority: ORG-0.2 worldgen green on **1×1**, with already-autho
 | Render optimizations (Phase 6) | `tasks/WBS_RENDER_OPTIMIZATIONS.md` | Unknown |
 | WorldGen completion | `tasks/WBS_WORLDGEN_COMPLETION.md` | Unknown |
 | Research/proposal intake (not a WBS or runtime lane) | `docs/research/README.md` | Gemini drafts/research are proposals only; each item needs Owner approval |
-| ART-SCALE-1 reference/plan | `docs/art/srd_sizes/SIZES.md`; `docs/DECISIONS.md` D-2026-10-02-16/-17 | Owner-approved tables and item-art design recorded; implementation parked until world loads green |
-| UI-FULLSCREEN / depth-plan | `docs/art/CAMERA_DEPTH_PLAN.md`; D-2026-10-02-18/-19 | Camera/input and two-level shaded-depth design queued behind ORG-0.2; no runtime work authorized |
+| ART-SCALE-1 reference/plan | `docs/art/srd_sizes/SIZES.md`; `docs/DECISIONS.md` D-2026-10-02-16/-17/-21 | Owner-approved tables and item-art design, with ship-map supersession, recorded; implementation parked until world loads green |
+| UI-FULLSCREEN / depth-plan | `docs/art/CAMERA_DEPTH_PLAN.md`; D-2026-10-02-18/-19/-26 | Camera/input and two-level depth design with later rim, cliff faces, cached grade and Owner shaft screenshot queued behind ORG-0.2; no runtime work authorized |
 | WBS registry (machine-readable) | `tasks/wbs_registry.json` (checked by `tools/governance/check_wbs_integrity.js`) | Unknown |
 | Engine optimizations (Phase 7) | `WBS_OPTIMIZATION_PHASE.md` (repo root of the main checkout, **untracked**, not in git) | Unknown; target location `docs/optimization/WBS_OPTIMIZATION_PHASE.md` once the Owner adds it to git |

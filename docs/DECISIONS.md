@@ -5,6 +5,12 @@ Add an entry only for an explicit Owner ruling. Agents do not record their own p
 
 ## 2026-10-02
 
+### Owner depth rendering addendum, 23:54 CT
+
+**D-2026-10-02-26 (23:54 CT) — depth faces, color and cache (extends D-2026-10-02-19).** At a drop edge, give the current floor a 2–4 px dark rim and a short shadow onto the lower level. Draw lower wall faces using the Owner's cliff art after ART-WIRE-WALLS; wall-face height remains an open Owner choice between 48 and 96 px, so this decision does not resolve that art dimension. Current z remains full brightness. Through open space only, z-1 is about 60% brightness and about 50% desaturated; z-2 is about 30% brightness and mostly gray. Both use a cool blue cast, while water, lava, colonists and enemies retain some identifying tint. z-3 and deeper remain black and **are not drawn**; nothing above current z is drawn. Preserve D-2026-10-02-19's every-intervening-level-open visibility rule, flat 1:1 geometry and data-configurable brightness.
+
+Bake the static depth grade into cached chunks. Rebake affected chunks only when digging, building or collapse changes them; apply a live tint only to moving sprites. Never render all lower levels and darken or cover them afterward. Future acceptance includes same-seed before/after performance-overlay readings and a screenshot looking from z0 into a shaft for Owner review, in addition to the existing draw-count, open-space and data-config fixtures. No numeric performance threshold or wall-face height was chosen here. This is **DESIGN ONLY** under the queued [camera/depth plan](art/CAMERA_DEPTH_PLAN.md); implementation and new art remain parked until ORG-0.2 is green. DEC-037 remains in force.
+
 ### Owner performance and world-size rulings, 23:08-23:25 CT
 
 **D-2026-10-02-25 (23:25 CT) — 3×3 world after ORG-0.2.** ORG-0.2 remains a 1×1 repair lane. `WORLD-3x3` is the first M1 item after ORG-0.2 is green, with Claude as hard-lane writer, Codex as cross-family reviewer and Deus checking claims on the laptop. The planned shipped defaults are `AreasX=3`, `AreasY=3`, `AreaSize=256`, with wrapping on all edges. This is a design and future lane assignment, not a claim that 3×3 is already shipped or permission to alter ORG-0.2's scope.
