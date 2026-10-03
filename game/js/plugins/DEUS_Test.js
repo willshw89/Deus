@@ -19,6 +19,9 @@
  * Exit code: run_tests.bat returns 0 = all passed, 1 = a check failed,
  * 2 = harness error or timeout. It reads the code from the RESULT line,
  * because NW.js doesn't pass process.exit codes back to the shell.
+ * Every suite has its own 180 s watchdog: past it the suite fails
+ * suite_completed, its pending waits are rejected, and the run moves on
+ * to the next suite (so each default suite is reached and timed).
  *
  * API and rules: docs/systems/UF_Test.md
  *
@@ -114,6 +117,8 @@
     //-------------------------------------------------------------------------
     // Frame waiting
 
+    // Each waiter remembers the suite that registered it (owner), so that suite's watchdog can reject its pending
+    // waits without touching the next suite's. A timed-out or rejected waiter leaves the list.
     const waiters = [];
     const _updateMain = SceneManager.updateMain;
     SceneManager.updateMain = function() {
@@ -125,27 +130,40 @@
             }
         }
     };
-    const waitUntil = (test, timeoutMs, what) => new Promise((resolve, reject) => {
-        const timer = setTimeout(() => reject(new Error(`timed out after ${timeoutMs} ms waiting for ${what}`)), timeoutMs);
-        waiters.push({ test, resolve: () => { clearTimeout(timer); resolve(); } });
+    const waitUntil = (test, timeoutMs, what, owner = null) => new Promise((resolve, reject) => {
+        if (owner && owner.expired) return reject(new Error(`suite ${owner.name} is past its watchdog; wait for ${what} refused`));
+        const entry = { test, owner, resolve: null, reject: null };
+        const drop = () => { const i = waiters.indexOf(entry); if (i >= 0) waiters.splice(i, 1); };
+        const timer = setTimeout(() => { drop(); reject(new Error(`timed out after ${timeoutMs} ms waiting for ${what}`)); }, timeoutMs);
+        entry.resolve = () => { clearTimeout(timer); resolve(); };
+        entry.reject = message => { clearTimeout(timer); drop(); reject(new Error(message)); };
+        waiters.push(entry);
     });
-    const waitFrames = n => {
+    const waitFrames = (n, owner = null) => {
         const target = Graphics.frameCount + n;
-        return waitUntil(() => Graphics.frameCount >= target, n * 100 + 5000, `${n} frames`);
+        return waitUntil(() => Graphics.frameCount >= target, n * 100 + 5000, `${n} frames`, owner);
     };
 
     //-------------------------------------------------------------------------
     // The object handed to each suite
 
-    const makeContext = suiteName => ({
+    // owner: the suite's watchdog record ({ name, expired, late, lastCheck }); null for the harness's own context.
+    const makeContext = (suiteName, owner = null) => ({
         check(name, condition, detail = "") {
             const pass = !!condition;
+            if (owner && owner.expired) {
+                // The suite's watchdog has already failed it and the run has moved on: show the late result, count nothing.
+                owner.late++;
+                write(`LATE ${pass ? "PASS" : "FAIL"} ${suiteName}.${name}${detail ? " - " + detail : ""} (after the suite's watchdog; not counted)`);
+                return pass;
+            }
+            if (owner) owner.lastCheck = name;
             Test.results.push({ suite: suiteName, name, pass, detail });
             write(`${pass ? "PASS" : "FAIL"} ${suiteName}.${name}${detail ? " - " + detail : ""}`);
             return pass;
         },
-        waitFrames,
-        waitUntil,
+        waitFrames: n => waitFrames(n, owner),
+        waitUntil: (test, timeoutMs, what) => waitUntil(test, timeoutMs, what, owner),
         screenshot(name) {
             const file = path.join(outDir, `${suiteName}.${name}.png`);
             const data = SceneManager.snap().canvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, "");
@@ -208,30 +226,66 @@
         SceneManager.goto(Scene_Map);
     };
 
+    // Watchdog, per suite (ORG-0.2, Owner dispatch 2026-10-02/03): the 180 s that used to bound the whole run now
+    // bounds each suite, so every selected suite is reached. A suite past its budget fails suite_completed explicitly,
+    // gets an on_timeout screenshot, has its pending waits rejected, and the run moves to the next suite; whatever it
+    // still records afterwards is written as LATE and not counted. A suite that returns only after its budget (it
+    // blocked the frame loop, so its timer could not fire in time) fails suite_completed too. The map-start wait keeps
+    // its own 180 s. tools/run_tests.js reads the "HARNESS suite budget" line to size its hard cap:
+    // map start + suites x budget, beside its no-progress kill.
+    const SUITE_BUDGET_MS = 180000;
+    const MAP_START_MS = 180000;
+    const timedOut = [];
+
+    async function runSuite(s) {
+        const owner = { name: s.name, expired: false, late: 0, lastCheck: null };
+        const ctx = makeContext(s.name, owner);
+        write(`SUITE ${s.name}`);
+        const started = Date.now();
+        let timer = null;
+        const budget = new Promise(resolve => { timer = setTimeout(() => resolve("watchdog"), SUITE_BUDGET_MS); });
+        const body = Promise.resolve().then(() => s.fn(ctx)).then(() => "done", e => ({ error: e || new Error("suite rejected without an error") }));
+        const outcome = await Promise.race([body, budget]);
+        clearTimeout(timer);
+        const seconds = ((Date.now() - started) / 1000).toFixed(1);
+        if (outcome === "watchdog") {
+            ctx.check("suite_completed", false, `watchdog: suite took longer than ${SUITE_BUDGET_MS / 1000} s (budget per suite); last check ${owner.lastCheck || "none"}`);
+            owner.expired = true;
+            timedOut.push(s.name);
+            try { ctx.screenshot("on_timeout"); } catch (e) { write(`HARNESS screenshot failed: ${e.message}`); }
+            for (let i = waiters.length - 1; i >= 0; i--) {
+                if (waiters[i].owner === owner) waiters[i].reject(`suite ${s.name} watchdog: wait abandoned`);
+            }
+            body.then(r => write(`HARNESS late: suite ${s.name} ended ${((Date.now() - started) / 1000).toFixed(1)} s after it started${r && r.error ? ` with "${r.error.message}"` : ""}; ${owner.late} late check(s) not counted`));
+            return;
+        }
+        if (outcome && outcome.error) {
+            const e = outcome.error;
+            const where = String(e.stack || "").split("\n").slice(1, 4).map(l => l.trim()).join(" | ");
+            ctx.check("suite_completed", false, `${e.message} [${where}]`);
+        } else if (Date.now() - started > SUITE_BUDGET_MS) {
+            ctx.check("suite_completed", false, `watchdog: suite took ${seconds} s (budget ${SUITE_BUDGET_MS / 1000} s per suite)`);
+            timedOut.push(s.name);
+        }
+    }
+
     async function run() {
         try {
             await waitUntil(() => SceneManager._scene instanceof Scene_Map && SceneManager._scene.isStarted() && ImageManager.isReady(),
-                180000, "the map scene to start"); // a New Game world takes about 60 s to create (2026-09-24 runs); 30 s timed out every suite
+                MAP_START_MS, "the map scene to start"); // a New Game world takes about 60 s to create (2026-09-24 runs); 30 s timed out every suite
             await waitFrames(60); // let the fade-in finish
             write(`AVAILABLE SUITES: ${suites.map(s => s.name).join(", ")}`);
             const selected = suites.filter(s => Test.only ? s.name === Test.only : s.isDefault);
             if (selected.length === 0) return finish(2, `no suite named "${Test.only}"`);
-            for (const s of selected) {
-                write(`SUITE ${s.name}`);
-                try {
-                    await s.fn(makeContext(s.name));
-                } catch (e) {
-                    const where = String(e.stack || "").split("\n").slice(1, 4).map(l => l.trim()).join(" | ");
-                    makeContext(s.name).check("suite_completed", false, `${e.message} [${where}]`);
-                }
-            }
+            write(`HARNESS suite budget ${SUITE_BUDGET_MS / 1000} s each; ${selected.length} suite(s) selected: ${selected.map(s => s.name).join(", ")}`);
+            for (const s of selected) await runSuite(s);
+            if (timedOut.length) write(`HARNESS watchdog: ${timedOut.length} suite(s) exceeded ${SUITE_BUDGET_MS / 1000} s: ${timedOut.join(", ")}`);
             finish(0);
         } catch (e) {
             finish(2, e.message);
         }
     }
 
-    setTimeout(() => finish(2, "watchdog: whole run took longer than 180 s"), 180000);
     run(); // plugins load after window "load" has fired, so start directly; run() waits for the map
 
 
