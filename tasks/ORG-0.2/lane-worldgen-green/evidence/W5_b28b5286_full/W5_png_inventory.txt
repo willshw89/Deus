@@ -1,0 +1,70 @@
+﻿
+Name                                 Length LastWriteTime       
+----                                 ------ -------------       
+anim.death_frames.png                225572 10/3/2026 1:35:25 AM
+anim.layers.png                      211158 10/3/2026 1:36:15 AM
+anim.no_carry_pose.png               216736 10/3/2026 1:35:44 AM
+anim.no_code_motion.png              217841 10/3/2026 1:35:07 AM
+anim.object_frames.png               225589 10/3/2026 1:36:02 AM
+anim.perf_view.png                   224075 10/3/2026 1:36:53 AM
+anim.remains.png                     228538 10/3/2026 1:35:35 AM
+anim.state_frames.png                221478 10/3/2026 1:35:37 AM
+biomes.corner.png                     89423 10/3/2026 1:30:19 AM
+biomes.start_zoom_0.png              302988 10/3/2026 1:30:16 AM
+biomes.start_zoom_1.png              334588 10/3/2026 1:30:17 AM
+biomes.start_zoom_2.png              451455 10/3/2026 1:30:18 AM
+camera.zoom_3_options.png             97830 10/3/2026 1:37:37 AM
+daynight.cave_minus1_noon.png        183219 10/3/2026 1:37:01 AM
+daynight.cave_minus2_noon.png        125915 10/3/2026 1:37:06 AM
+daynight.ground_after_caves.png      154785 10/3/2026 1:37:14 AM
+daynight.night.png                   249274 10/3/2026 1:36:56 AM
+daynight.night_wall_occlusion.png    242805 10/3/2026 1:36:57 AM
+daynight.noon.png                    228866 10/3/2026 1:36:55 AM
+ecology.replenished_monster.png      290926 10/3/2026 1:28:12 AM
+ecology.replenished_prey.png         285011 10/3/2026 1:28:13 AM
+environment.environment_overview.png 293138 10/3/2026 1:41:06 AM
+factions.ledger.png                  463532 10/3/2026 1:30:34 AM
+faction_menus.menu_clean_default.png 313275 10/3/2026 1:41:06 AM
+fire.grass_fire_spreading.png        310781 10/3/2026 1:40:50 AM
+fire.perf_100_cells.png              315202 10/3/2026 1:41:03 AM
+ground.terrain_gradient_border.png   129969 10/3/2026 1:30:25 AM
+ground.terrain_gradient_closeup.png  304684 10/3/2026 1:30:22 AM
+ground.terrain_gradient_medium.png   334123 10/3/2026 1:30:22 AM
+ground.terrain_gradient_wide.png     462106 10/3/2026 1:30:24 AM
+history.chronicle.png                518359 10/3/2026 1:31:27 AM
+history.chronicle_founders.png       445085 10/3/2026 1:31:27 AM
+history.home_area.png                329801 10/3/2026 1:31:06 AM
+history.other_area.png               300337 10/3/2026 1:31:08 AM
+history.start_other.png              231021 10/3/2026 1:27:54 AM
+history.start_zoom1.png              216789 10/3/2026 1:27:54 AM
+history.start_zoom23.png             216723 10/3/2026 1:27:54 AM
+items.items_in_view.png              279350 10/3/2026 1:32:42 AM
+items.items_zoomed_out.png           349450 10/3/2026 1:32:51 AM
+jobs.jobs_working.png                230569 10/3/2026 1:32:57 AM
+look.context_menu.png                232551 10/3/2026 1:37:44 AM
+look.look_label.png                  186534 10/3/2026 1:37:43 AM
+look.on_timeout.png                  280565 10/3/2026 1:40:38 AM
+objects.objects_in_view.png          326502 10/3/2026 1:32:10 AM
+objects.objects_zoomed_out.png        83552 10/3/2026 1:32:38 AM
+ownership.owned_bed.png              225434 10/3/2026 1:28:05 AM
+smoke.map.png                        223279 10/3/2026 1:27:56 AM
+stance.rings_zoom_1.png              313097 10/3/2026 1:34:19 AM
+stance.rings_zoom_13.png             445917 10/3/2026 1:34:22 AM
+stance.rings_zoom_23.png             325427 10/3/2026 1:34:21 AM
+stance.selection_ring.png            287177 10/3/2026 1:34:18 AM
+stance.stance_markers.png            318023 10/3/2026 1:34:19 AM
+timespeed.paused.png                 282589 10/3/2026 1:37:24 AM
+timespeed.time_controls.png          235957 10/3/2026 1:37:36 AM
+timespeed.time_controls_16x.png      242244 10/3/2026 1:37:36 AM
+timespeed.time_controls_32x.png      245045 10/3/2026 1:37:33 AM
+wildlife.df_behaviors.png            280401 10/3/2026 1:33:57 AM
+wildlife.herd_in_view.png            219977 10/3/2026 1:33:57 AM
+wildlife.test_herd.png               273446 10/3/2026 1:33:37 AM
+world.eight_way.png                  209247 10/3/2026 1:29:38 AM
+world.path_around_wall.png           196330 10/3/2026 1:28:58 AM
+world.round_seam_wrap.png             96698 10/3/2026 1:28:26 AM
+world.unit_in_view.png               111552 10/3/2026 1:28:25 AM
+worldgen.start_area.png              452285 10/3/2026 1:30:10 AM
+
+
+

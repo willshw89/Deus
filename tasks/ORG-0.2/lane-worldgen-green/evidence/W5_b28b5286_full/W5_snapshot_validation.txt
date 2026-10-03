@@ -1,0 +1,11 @@
+﻿snapshot validation 2026-10-03 01:25:56 -05:00 (CT): git ls-tree -r b28b52869b11bd70946d5f8fc51d2ab43fee1b63 -- game versus git hash-object --stdin-paths over the snapshot (test_output/, save/ and game_runtime.log excluded)
+snapshot: C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W5_b28b5286\game
+blobs in commit: 4347; files in snapshot: 4347; hashes: 4347
+entries not matching: 1
+DIFFERS: game/js/plugins.js commit=81bdd308f1d74c5f856d10b8508ffafd387f14b3 snapshot=272df7806ae3784766564edeb7a8a6b1c78cbe76
+--- plugins.js line difference ---
+=>       "Seed": "1920951434"
+=>     "parameters": {
+=>     }
+<=     "parameters": {}
+plugins.js differing lines: 4
