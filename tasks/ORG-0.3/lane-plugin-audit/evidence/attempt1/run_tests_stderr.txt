@@ -4,6 +4,6 @@ At line:25 char:1
 + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: (HARNESS: nw.exe...rness finished.:String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
- 
+
          If another agent or script killed nw.exe processes at that moment, that's the cause (ENGINE_RULES ┬º6).
 HARNESS: results file has no RESULT line (the run didn't finish).

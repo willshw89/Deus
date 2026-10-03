@@ -37,14 +37,14 @@ FILE DEUS_Anim.js lines=2716 codeChars=71845 listed=25:ON sha=7a4f044cef10 targe
   ns 1813:window.UF.Anim =
   suites UF.Test.suite("anim"
   commands 0 listeners 2
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_AssetStreaming.js lines=47 codeChars=407 listed=0:ON sha=deb8f1dcb4cc target=MZ
   desc [v1.0.0] DEUS PIXI.js VRAM Asset Streaming API
   coupling Game_=0/0l/0n $game=0/0l/0n Sprite_=0/0l/0n Scene_=0/0l/0n Window_=0/0l/0n PIXI=6/4l/1n
   noncode Game_ c0/s0 $game c0/s0 Sprite_ c0/s0 Scene_ c0/s0 Window_ c0/s0 PIXI c2/s1
   ns 11:UF.Assets =
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Bag.js lines=743 codeChars=16010 listed=unlisted sha=2160e28f7068 target=MZ
   desc [DEUS Bag] Ultima VII-style graphical container bag with spatial item arrangement and world drag-and-drop.
   coupling Game_=0/0l/0n $game=6/6l/1n Sprite_=6/4l/1n Scene_=8/7l/1n Window_=10/6l/2n PIXI=0/0l/0n
@@ -74,7 +74,7 @@ FILE DEUS_Camera.js lines=623 codeChars=12273 listed=29:ON sha=01db3f0196ea targ
   ns 165:window.UF.Camera =
   suites UF.Test.suite("camera"
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_CellularFluids.js lines=87 codeChars=1127 listed=45:ON sha=6e42cd2c8846 target=MZ
   desc Cellular Automata Fluid Dynamics Engine
   coupling Game_=0/0l/0n $game=0/0l/0n Sprite_=0/0l/0n Scene_=0/0l/0n Window_=0/0l/0n PIXI=0/0l/0n
@@ -83,7 +83,7 @@ FILE DEUS_CellularFluids.js lines=87 codeChars=1127 listed=45:ON sha=6e42cd2c884
   window UF
   ns 14:window.UF.World = | 83:window.UF.Fluids =
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Colonists.js lines=5921 codeChars=176184 listed=19:ON sha=353af479f66e target=MZ
   desc [DEUS Colonists] Colony population manager, autonomous AI schedules, society planning, and colonist equipment priorities.
   coupling Game_=2/2l/1n $game=0/0l/0n Sprite_=0/0l/0n Scene_=2/2l/1n Window_=0/0l/0n PIXI=0/0l/0n
@@ -95,7 +95,7 @@ FILE DEUS_Colonists.js lines=5921 codeChars=176184 listed=19:ON sha=353af479f66e
   require require("./js/plugins/UF_Callings.js" ;; require("./game/js/plugins/UF_Callings.js"
   suites UF.Test.suite("colonists"
   commands 0 listeners 14
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_ColonyOverseer.js lines=625 codeChars=16886 listed=6:ON sha=f9c16ad56d5a target=MZ
   desc [DEUS ColonyOverseer] Real-time colony simulation, unit selection cards, order issuance, designation markers, and speed controls.
   coupling Game_=6/6l/3n $game=32/21l/3n Sprite_=3/3l/2n Scene_=14/14l/2n Window_=11/9l/3n PIXI=0/0l/0n
@@ -108,7 +108,7 @@ FILE DEUS_ColonyOverseer.js lines=625 codeChars=16886 listed=6:ON sha=f9c16ad56d
   loadScript PluginManager.loadScript("DEUS_Select" dynamic=0
   suites UF.Test.suite("overseer"
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Combat.js lines=3197 codeChars=86663 listed=24:ON sha=fe8dc0a30678 target=MZ
   desc [DEUS Combat] Real-time tick-based combat. Attack rolls go through UF.Rules (SRD 5.1).
   coupling Game_=4/3l/1n $game=15/7l/3n Sprite_=2/2l/1n Scene_=6/5l/2n Window_=0/0l/0n PIXI=0/0l/0n
@@ -128,7 +128,7 @@ FILE DEUS_CombatRT.js lines=69 codeChars=1012 listed=unlisted sha=c1a58c028437 t
   patches 2 60:Game_Map.prototype.__deusCombatRt = | 62:Game_Map.prototype.update =
   functions loadMod
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_CombatUI.js lines=72 codeChars=1216 listed=unlisted sha=a6e51b49c368 target=MZ
   desc [DEUS CombatUI] Commander and hero controls on the map screen.
   coupling Game_=0/0l/0n $game=0/0l/0n Sprite_=0/0l/0n Scene_=6/4l/1n Window_=0/0l/0n PIXI=0/0l/0n
@@ -136,7 +136,7 @@ FILE DEUS_CombatUI.js lines=72 codeChars=1216 listed=unlisted sha=a6e51b49c368 t
   patches 2 59:Scene_Map.prototype.__deusCombatUi = | 61:Scene_Map.prototype.update =
   functions loadMod
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Conditions.js lines=1187 codeChars=21115 listed=unlisted sha=ce74c4549e88 target=MZ
   desc [DEUS Conditions] Authoritative SRD 5.1 condition registry (15 conditions), multi-instance lifecycle engine, and mechanical modifier evaluation.
   coupling Game_=0/0l/0n $game=0/0l/0n Sprite_=0/0l/0n Scene_=0/0l/0n Window_=0/0l/0n PIXI=0/0l/0n
@@ -176,7 +176,7 @@ FILE DEUS_Culling.js lines=532 codeChars=13784 listed=30:ON sha=ec25ea4428d5 tar
   ns 312:UF.Culling = | 414:UF.Camera = | 527:UF.Camera =
   suites UF.Test.suite("culling"
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_DayNight.js lines=664 codeChars=17203 listed=27:ON sha=436cd5447cfa target=MZ
   desc [DEUS DayNight] Celestial day/night cycle, dynamic ambient lighting, solar shadows, underground illumination, and clock HUD.
   coupling Game_=2/2l/1n $game=29/24l/3n Sprite_=6/6l/2n Scene_=7/7l/2n Window_=0/0l/0n PIXI=3/1l/1n
@@ -188,7 +188,7 @@ FILE DEUS_DayNight.js lines=664 codeChars=17203 listed=27:ON sha=436cd5447cfa ta
   ns 115:window.UF.DayNight =
   suites UF.Test.suite("daynight"
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_DeathForensics.js lines=545 codeChars=12041 listed=unlisted sha=527935acc810 target=MZ
   desc [DEUS Forensics] Structured death forensics, bounded event ring buffers, cause classification, and settlement mortality ledger.
   coupling Game_=0/0l/0n $game=0/0l/0n Sprite_=0/0l/0n Scene_=0/0l/0n Window_=0/0l/0n PIXI=0/0l/0n
@@ -225,7 +225,7 @@ FILE DEUS_DepthDemo.js lines=524 codeChars=10670 listed=unlisted sha=2a17a4206f9
   functions colorFor,buildDemoScene,buildBenchmarkScene,benchmarkCases,stateFromCase,roundMs,benchmark,assetNeeds,bundleData,loadBundledJson,currentState,reset,setToggle,setScale,setLightMode,setDayLength,setDimSteps,applyCanvasScale,hudLines,cssColor
   ns 518:DEUS.DepthDemo = | 519:UF.DepthDemo =
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Dnd5e.js lines=844 codeChars=16054 listed=unlisted sha=ab00a092874a target=MZ
   desc [DEUS Dnd5e] D&D 5.1 SRD ability rolling (4d6 drop lowest), 12 core classes, feats, proficiencies, and arcane/divine spellbook engine.
   coupling Game_=0/0l/0n $game=0/0l/0n Sprite_=0/0l/0n Scene_=0/0l/0n Window_=0/0l/0n PIXI=0/0l/0n
@@ -244,7 +244,7 @@ FILE DEUS_Doors.js lines=875 codeChars=31107 listed=14:ON sha=9b8bc971598b targe
   ns 629:window.UF.Doors =
   suites UF.Test.suite("doors"
   commands 0 listeners 5
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Ecology.js lines=1242 codeChars=34310 listed=22:ON sha=2d019897ceab target=MZ
   desc [DEUS Ecology] Environmental regrowth systems: plant spreading, flora regeneration, and sustainable wildlife repopulation.
   coupling Game_=4/3l/1n $game=5/3l/1n Sprite_=0/0l/0n Scene_=2/2l/1n Window_=0/0l/0n PIXI=0/0l/0n
@@ -255,7 +255,7 @@ FILE DEUS_Ecology.js lines=1242 codeChars=34310 listed=22:ON sha=2d019897ceab ta
   ns 1002:window.UF.Ecology =
   suites UF.Test.suite("ecology"
   commands 0 listeners 5
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Environment.js lines=952 codeChars=18898 listed=39:ON sha=bdd472a12774 target=MZ
   desc [DEUS Environment] Environmental simulation: ambient temperature, body regulation, shelter insulation, and weather effects.
   coupling Game_=2/2l/1n $game=9/5l/2n Sprite_=0/0l/0n Scene_=2/2l/1n Window_=0/0l/0n PIXI=0/0l/0n
@@ -266,7 +266,7 @@ FILE DEUS_Environment.js lines=952 codeChars=18898 listed=39:ON sha=bdd472a12774
   ns 790:window.UF.Environment =
   suites UF.Test.suite("environment"
   commands 0 listeners 1
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_FactionMenus.js lines=1864 codeChars=45043 listed=41:ON sha=6e9381417545 target=MZ
   desc [DEUS FactionMenus] Dynamic cultural UI themes, window skins, Title Screen embark setup, and custom faction mouse cursors.
   coupling Game_=4/4l/1n $game=5/4l/1n Sprite_=0/0l/0n Scene_=52/50l/7n Window_=35/33l/5n PIXI=5/4l/1n
@@ -278,7 +278,7 @@ FILE DEUS_FactionMenus.js lines=1864 codeChars=45043 listed=41:ON sha=6e93814175
   ns 287:window.UF.NewGameSetup =
   suites UF.Test.suite("faction_menus" ;; UF.Test.suite("title" ;; UF.Test.suite("load" ;; UF.Test.suite("setup"
   commands 0 listeners 13
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Factions.js lines=1846 codeChars=54392 listed=10:ON sha=260e5284ec24 target=MZ
   desc [DEUS Factions] 11 cultural factions, cultural identities, diplomatic relations, and stance matrices.
   coupling Game_=2/2l/1n $game=2/1l/1n Sprite_=0/0l/0n Scene_=13/13l/2n Window_=8/7l/2n PIXI=0/0l/0n
@@ -290,7 +290,7 @@ FILE DEUS_Factions.js lines=1846 codeChars=54392 listed=10:ON sha=260e5284ec24 t
   ns 91:window.UF.Factions =
   suites UF.Test.suite("factions" ;; UF.Test.suite("skins"
   commands 0 listeners 5
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Fire.js lines=1781 codeChars=54666 listed=36:ON sha=69d34d0dd8b4 target=MZ
   desc [DEUS Fire] Cellular fire propagation, material flammability, burn damage, firefighter water bucket jobs, and burnout.
   coupling Game_=5/5l/3n $game=24/15l/2n Sprite_=4/3l/2n Scene_=2/2l/1n Window_=0/0l/0n PIXI=0/0l/0n
@@ -301,7 +301,7 @@ FILE DEUS_Fire.js lines=1781 codeChars=54666 listed=36:ON sha=69d34d0dd8b4 targe
   window DEUS,UF
   suites UF.Test.suite("fire"
   commands 0 listeners 4
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Floors.js lines=925 codeChars=31476 listed=17:ON sha=8069398517b7 target=MZ
   desc [DEUS Floors] Room enclosure detection, cultural flooring construction, floor autotiles, and architectural room value.
   coupling Game_=0/0l/0n $game=4/3l/1n Sprite_=0/0l/0n Scene_=2/2l/1n Window_=0/0l/0n PIXI=0/0l/0n
@@ -312,7 +312,7 @@ FILE DEUS_Floors.js lines=925 codeChars=31476 listed=17:ON sha=8069398517b7 targ
   ns 462:window.UF.Rooms = | 785:window.UF.Floors =
   suites UF.Test.suite("floors"
   commands 0 listeners 7
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_FlowFields.js lines=176 codeChars=2969 listed=4:ON sha=96208a38a7dd target=MZ
   desc [DEUS FlowFields] Flow Field Crowd Dynamics pathfinding.
   coupling Game_=0/0l/0n $game=7/4l/1n Sprite_=0/0l/0n Scene_=0/0l/0n Window_=0/0l/0n PIXI=0/0l/0n
@@ -321,7 +321,7 @@ FILE DEUS_FlowFields.js lines=176 codeChars=2969 listed=4:ON sha=96208a38a7dd ta
   window UF
   ns 16:window.UF.Pathfinding =
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Fluid.js lines=1344 codeChars=26401 listed=unlisted sha=4c2be38a5a1a target=MZ
   desc [DEUS Fluid] Conserved volumetric 0..7 fluid simulation (water & lava), active dirty queues, and 3D flow.
   coupling Game_=7/6l/1n $game=0/0l/0n Sprite_=0/0l/0n Scene_=0/0l/0n Window_=0/0l/0n PIXI=0/0l/0n
@@ -343,7 +343,7 @@ FILE DEUS_Fog.js lines=810 codeChars=18852 listed=26:ON sha=1a70c4f755eb target=
   ns 517:window.UF.Fog =
   suites UF.Test.suite("fog"
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Generator.js lines=315 codeChars=6777 listed=18:ON sha=a4595d47dc8b target=MZ
   desc [DEUS Generator] Procedural composite character sprite assembly, portrait generation, and demographic variation.
   coupling Game_=0/0l/0n $game=0/0l/0n Sprite_=0/0l/0n Scene_=0/0l/0n Window_=0/0l/0n PIXI=0/0l/0n
@@ -352,7 +352,7 @@ FILE DEUS_Generator.js lines=315 codeChars=6777 listed=18:ON sha=a4595d47dc8b ta
   window UF
   ns 28:UF.Generator =
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_HistoricalDemographics.js lines=687 codeChars=37958 listed=unlisted sha=faab97dcbfe0 target=MZ
   desc [DEUS HistoricalDemographics] Explicit annual demographics and version 7 historical registry.
   coupling Game_=0/0l/0n $game=0/0l/0n Sprite_=0/0l/0n Scene_=0/0l/0n Window_=0/0l/0n PIXI=0/0l/0n
@@ -373,7 +373,7 @@ FILE DEUS_History.js lines=4227 codeChars=125921 listed=11:ON sha=8e742a293acf t
   loadScript PluginManager.loadScript(`DEUS_${name}` dynamic=0
   suites UF.Test.suite("history"
   commands 0 listeners 3
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Interact.js lines=1185 codeChars=36203 listed=33:ON sha=e3bde54ea5d9 target=MZ
   desc [DEUS Interact] Contextual right-click interaction menu, order designation markers, and immediate job creation.
   coupling Game_=0/0l/0n $game=16/12l/2n Sprite_=3/3l/1n Scene_=9/9l/2n Window_=8/7l/3n PIXI=0/0l/0n
@@ -385,7 +385,7 @@ FILE DEUS_Interact.js lines=1185 codeChars=36203 listed=33:ON sha=e3bde54ea5d9 t
   ns 787:window.UF.Interact =
   suites UF.Test.suite("look"
   commands 0 listeners 2
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Items.js lines=1852 codeChars=44319 listed=15:ON sha=51e914d2fcb0 target=MZ
   desc [DEUS Items] Ground item entities, inventory stacks, material properties, decay rates, and container storage.
   coupling Game_=0/0l/0n $game=17/12l/2n Sprite_=4/3l/1n Scene_=2/2l/1n Window_=0/0l/0n PIXI=0/0l/0n
@@ -411,7 +411,7 @@ FILE DEUS_Jobs.js lines=2370 codeChars=68907 listed=16:ON sha=291f618cdcfd targe
   sim UF.Sim.require("structural/index" dynamic=0
   suites UF.Test.suite("dig_through_floor" ;; UF.Test.suite("jobs"
   commands 0 listeners 4
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_LayerOverlays.js lines=1333 codeChars=27253 listed=unlisted sha=d951e89d84a5 target=MZ
   desc [DEUS LayerOverlays] Effects, HP bars, status, and combat/spell overlays on visible lower layers at 1:1.
   coupling Game_=0/0l/0n $game=2/2l/1n Sprite_=0/0l/0n Scene_=0/0l/0n Window_=0/0l/0n PIXI=2/2l/1n
@@ -419,7 +419,7 @@ FILE DEUS_LayerOverlays.js lines=1333 codeChars=27253 listed=unlisted sha=d951e8
   functions wipe,take,takeList,cellKey,prepareOpaque,opaqueAt,pointVisible,cellVisible,unitMarked,shiftOf,unitLift,footOf,writeBar,pushRec,base,damageHex,emitUnit,emitStatus,emitSpell,emitWorldEffect
   ns 1329:DEUS.LayerOverlays = | 1331:UF.LayerOverlays =
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Levels.js lines=6733 codeChars=205023 listed=37:ON sha=4f7891994213 target=MZ
   desc [DEUS Levels] Multi-level vertical world: the persistent layers of the world Z range (new worlds -16..+15), caverns, and Z-level transitions.
   coupling Game_=4/4l/2n $game=128/81l/4n Sprite_=6/6l/3n Scene_=25/25l/2n Window_=1/1l/1n PIXI=0/0l/0n
@@ -438,7 +438,7 @@ FILE DEUS_Lighting.js lines=43 codeChars=876 listed=43:ON sha=1a63de86d428 targe
   noncode Game_ c0/s0 $game c0/s0 Sprite_ c0/s0 Scene_ c0/s0 Window_ c0/s0 PIXI c0/s0
   patches 4 12:Spriteset_Map.prototype.createLowerLayer = | 17:Spriteset_Map.prototype.createLightmap = | 31:Spriteset_Map.prototype.update = | 36:Spriteset_Map.prototype.updateLighting =
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Look.js lines=800 codeChars=21633 listed=32:ON sha=aa5b63b70c14 target=MZ
   desc [DEUS Look] Cursor inspection tooltip: cell terrain, biome properties, occupants, objects, and asset provenance.
   coupling Game_=0/0l/0n $game=21/14l/2n Sprite_=3/3l/1n Scene_=5/5l/2n Window_=1/1l/1n PIXI=0/0l/0n
@@ -450,7 +450,7 @@ FILE DEUS_Look.js lines=800 codeChars=21633 listed=32:ON sha=aa5b63b70c14 target
   ns 623:window.UF.Look = | 624:window.UF.Assets =
   suites UF.Test.suite("look"
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Mint.js lines=497 codeChars=14343 listed=unlisted sha=616b4f771ad9 target=MZ
   desc [DEUS Mint] Deterministic integer-mass mint/remelt core.
   coupling Game_=0/0l/0n $game=0/0l/0n Sprite_=0/0l/0n Scene_=0/0l/0n Window_=0/0l/0n PIXI=0/0l/0n
@@ -458,7 +458,7 @@ FILE DEUS_Mint.js lines=497 codeChars=14343 listed=unlisted sha=616b4f771ad9 tar
   functions fault,isRecord,has,copy,positiveSafeInteger,nonNegativeSafeInteger,add,multiply,gcd,lcm,fraction,sumFractions,sameComponents,compileAuthority,createEngine,validateMaterialMass,normalizeState,componentMass,emptyComponents,addComponents
   ns 494:UF.Mint =
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Move8.js lines=97 codeChars=1698 listed=unlisted sha=87247786b99a target=MZ
   desc [DEUS Move8] Eight-direction character steps on the square tile grid.
   coupling Game_=1/1l/1n $game=3/2l/1n Sprite_=0/0l/0n Scene_=0/0l/0n Window_=0/0l/0n PIXI=0/0l/0n
@@ -466,7 +466,7 @@ FILE DEUS_Move8.js lines=97 codeChars=1698 listed=unlisted sha=87247786b99a targ
   patches 5 58:GB.prototype.__deusMove8 = | 61:GB.prototype.distancePerFrame = | 76:GB.prototype.moveStraight = | 83:GB.prototype.moveDiagonally = | 89:GB.prototype.deusDir8 =
   functions loadMod
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Movement8D.js lines=655 codeChars=12041 listed=3:ON sha=ea9c38ee4249 target=MZ
   desc [DEUS Movement8D] 8-directional movement, Octile A* pathfinding, strict corner collision, and diagonal navigation.
   coupling Game_=23/23l/4n $game=38/28l/2n Sprite_=0/0l/0n Scene_=0/0l/0n Window_=0/0l/0n PIXI=0/0l/0n
@@ -476,7 +476,7 @@ FILE DEUS_Movement8D.js lines=655 codeChars=12041 listed=3:ON sha=ea9c38ee4249 t
   classes AStarNode,AStarNodePool,PriorityQueue,PriorityQueuePool
   window UF_Dir8
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_NaturalConnections.js lines=569 codeChars=23656 listed=40:ON sha=efcc096267c5 target=MZ
   desc [DEUS NaturalConnections] Natural cavern passages, vertical stairwells, and physical traversal between surface and underground.
   coupling Game_=0/0l/0n $game=14/6l/3n Sprite_=0/0l/0n Scene_=6/6l/2n Window_=1/1l/1n PIXI=0/0l/0n
@@ -488,7 +488,7 @@ FILE DEUS_NaturalConnections.js lines=569 codeChars=23656 listed=40:ON sha=efcc0
   ns 405:UF.NaturalConnections =
   suites UF.Test.suite("natural_connections"
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Objects.js lines=1537 codeChars=38777 listed=12:ON sha=e2aabfab73af target=MZ
   desc [DEUS Objects] Catalog-driven world objects, multi-state interaction cycles (intact/ruined/harvested), and spatial placement.
   coupling Game_=3/3l/1n $game=48/29l/2n Sprite_=4/3l/2n Scene_=4/4l/2n Window_=0/0l/0n PIXI=0/0l/0n
@@ -500,7 +500,7 @@ FILE DEUS_Objects.js lines=1537 codeChars=38777 listed=12:ON sha=e2aabfab73af ta
   ns 1184:window.UF.Objects = | 1185:window.UF.Sidecars =
   suites UF.Test.suite("objects"
   commands 0 listeners 6
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Ownership.js lines=772 codeChars=21351 listed=38:ON sha=d3557e864fec target=MZ
   desc [DEUS Ownership] Entity property ownership, personal bed claims, private quarters designation, and sleep allocation.
   coupling Game_=2/2l/1n $game=1/1l/1n Sprite_=0/0l/0n Scene_=2/2l/1n Window_=0/0l/0n PIXI=0/0l/0n
@@ -511,14 +511,14 @@ FILE DEUS_Ownership.js lines=772 codeChars=21351 listed=38:ON sha=d3557e864fec t
   ns 607:window.UF.Ownership =
   suites UF.Test.suite("ownership"
   commands 0 listeners 6
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Perspective25D.js lines=133 codeChars=2355 listed=5:ON sha=7a928bdcb05b target=MZ
   desc [DEUS Perspective25D] Pure 2D top-down perspective, camera viewport culling, and tactile foot-Y depth sorting.
   coupling Game_=10/10l/1n $game=18/13l/2n Sprite_=6/6l/1n Scene_=0/0l/0n Window_=0/0l/0n PIXI=0/0l/0n
   noncode Game_ c1/s0 $game c0/s0 Sprite_ c3/s0 Scene_ c0/s0 Window_ c0/s0 PIXI c0/s0
   patches 12 30:Game_CharacterBase.prototype.initMembers = | 35:Game_CharacterBase.prototype.elevation = | 39:Game_CharacterBase.prototype.setElevation = | 44:Game_CharacterBase.prototype.screenY = | 52:Game_CharacterBase.prototype.groundScreenY = | 58:Game_CharacterBase.prototype.groundScreenX = | 70:Sprite_Character.prototype.update = | 100:Game_CharacterBase.prototype.screenZ =
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Projects.js lines=1781 codeChars=55936 listed=20:ON sha=328fe9db3711 target=MZ
   desc [DEUS Projects] Settlement deficits (shelter, food, sheltered beds, storage), the brain that picks one project per cycle, reserved blueprints, and phased open jobs.
   coupling Game_=2/2l/1n $game=8/3l/2n Sprite_=0/0l/0n Scene_=2/2l/1n Window_=0/0l/0n PIXI=0/0l/0n
@@ -529,7 +529,7 @@ FILE DEUS_Projects.js lines=1781 codeChars=55936 listed=20:ON sha=328fe9db3711 t
   ns 1590:window.UF.Projects =
   suites UF.Test.suite("projects" ;; UF.Test.suite("settlement"
   commands 0 listeners 6
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Select.js lines=4083 codeChars=91124 listed=unlisted sha=25baa97922ec target=MZ
   desc [DEUS Select] Drag rectangles to select units and to mark areas with designation tools (chop, gather, mine, quarry, dismantle, build, zones, cancel), like modern DF.
   coupling Game_=0/0l/0n $game=75/65l/3n Sprite_=6/6l/3n Scene_=13/13l/2n Window_=10/6l/5n PIXI=0/0l/0n
@@ -553,7 +553,7 @@ FILE DEUS_Sheet.js lines=3155 codeChars=90999 listed=34:ON sha=dcd2f43f213c targ
   ns 2466:window.UF.Sheet =
   suites UF.Test.suite("sheet"
   commands 0 listeners 1
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Spawners.js lines=58 codeChars=627 listed=48:ON sha=d33bac4b96b6 target=MZ
   desc [WG.GEO.01] Z-Level Geology and Rule-Driven Spawning
   coupling Game_=2/2l/1n $game=0/0l/0n Sprite_=0/0l/0n Scene_=0/0l/0n Window_=0/0l/0n PIXI=0/0l/0n
@@ -561,7 +561,7 @@ FILE DEUS_Spawners.js lines=58 codeChars=627 listed=48:ON sha=d33bac4b96b6 targe
   patches 1 47:Game_Map.prototype.setup =
   ns 23:DEUS.Spawners =
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Speech.js lines=1402 codeChars=35324 listed=31:ON sha=d9cf6cdf446d target=MZ
   desc [DEUS Speech] Floating overhead dialogue balloons, situational barks, emotional remarks, and colony announcements.
   coupling Game_=8/5l/4n $game=17/9l/4n Sprite_=3/3l/1n Scene_=3/3l/2n Window_=0/0l/0n PIXI=0/0l/0n
@@ -573,7 +573,7 @@ FILE DEUS_Speech.js lines=1402 codeChars=35324 listed=31:ON sha=d9cf6cdf446d tar
   ns 684:window.UF.Speech = | 725:UF.Visuals = | 726:UF.Visuals =
   suites UF.Test.suite("speech" ;; UF.Test.suite("overhead"
   commands 0 listeners 1
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Stance.js lines=1053 codeChars=28549 listed=23:ON sha=6a7e857a8be0 target=MZ
   desc [DEUS Stance] Diplomatic stance indicators: colored selection rings reflecting unit disposition (friendly, neutral, hostile).
   coupling Game_=5/5l/2n $game=14/10l/3n Sprite_=4/4l/1n Scene_=2/2l/1n Window_=0/0l/0n PIXI=0/0l/0n
@@ -585,7 +585,7 @@ FILE DEUS_Stance.js lines=1053 codeChars=28549 listed=23:ON sha=6a7e857a8be0 tar
   ns 117:window.UF.Stance =
   suites UF.Test.suite("stance"
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Stockpiles.js lines=750 codeChars=13823 listed=unlisted sha=61247ae88e30 target=MZ
   desc [DEUS Stockpiles] Physical command stockpiles: designated floor areas, item filters, priorities, physical occupancy, container integration, and hauling reservations.
   coupling Game_=0/0l/0n $game=0/0l/0n Sprite_=0/0l/0n Scene_=0/0l/0n Window_=0/0l/0n PIXI=0/0l/0n
@@ -610,7 +610,7 @@ FILE DEUS_StructuralPhysics.js lines=105 codeChars=1868 listed=46:ON,47:ON sha=b
   patches 2 30:Scene_Map.prototype.update = | 87:Sprite_Character.prototype.update =
   ns 17:DEUS.StructuralPhysics =
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Talk.js lines=2502 codeChars=72494 listed=35:ON sha=943136101b98 target=MZ
   desc [DEUS Talk] Modal conversation interface: faction portraits, branching dialogue keywords, and lore exchange.
   coupling Game_=0/0l/0n $game=3/1l/1n Sprite_=0/0l/0n Scene_=7/7l/2n Window_=0/0l/0n PIXI=0/0l/0n
@@ -622,7 +622,7 @@ FILE DEUS_Talk.js lines=2502 codeChars=72494 listed=35:ON sha=943136101b98 targe
   ns 1872:window.UF.Talk =
   suites UF.Test.suite("talk"
   commands 0 listeners 1
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Taming.js lines=241 codeChars=5146 listed=unlisted sha=2281d7637a85 target=MZ
   desc [DEUS Taming] Capture and domestication of creatures into pets, mounts, livestock, and work animals.
   coupling Game_=0/0l/0n $game=0/0l/0n Sprite_=0/0l/0n Scene_=0/0l/0n Window_=0/0l/0n PIXI=0/0l/0n
@@ -630,7 +630,7 @@ FILE DEUS_Taming.js lines=241 codeChars=5146 listed=unlisted sha=2281d7637a85 ta
   functions loadSim,loadHumanoidTypes,rulesOf,engineOf,speciesOfUnit,installEcologyAlias,population,installJobsAlias,create,installHosts,noEngine
   ns 234:DEUS.Taming = | 235:UF.Taming =
   commands 0 listeners 1
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Test.js lines=796 codeChars=19305 listed=44:ON sha=f26464acad6b target=MZ
   desc [DEUS Test] Automated test harness: PASS/FAIL test suites, screenshot verification, and performance benchmarks.
   coupling Game_=0/0l/0n $game=15/11l/2n Sprite_=0/0l/0n Scene_=4/4l/2n Window_=0/0l/0n PIXI=0/0l/0n
@@ -641,7 +641,7 @@ FILE DEUS_Test.js lines=796 codeChars=19305 listed=44:ON sha=f26464acad6b target
   ns 51:window.DEUS.Test = | 52:window.UF.Test = | 64:UF.Time = | 204:window.UF.NewGameSetup =
   suites Test.suite("selftest" ;; Test.suite("smoke" ;; Test.suite("perf" ;; Test.suite("native_starting_gear" ;; Test.suite("native_survival_dying" ;; Test.suite("native_perf_4x_benchmark"
   commands 0 listeners 2
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Tiles.js lines=1510 codeChars=38597 listed=9:ON sha=99b4f2832f1f target=MZ
   desc [DEUS Tiles] Dynamic terrain autotiling, biome transitions, elevation cliffs, and multi-layer autotile rendering.
   coupling Game_=0/0l/0n $game=8/6l/2n Sprite_=0/0l/0n Scene_=3/3l/2n Window_=0/0l/0n PIXI=0/0l/0n
@@ -652,7 +652,7 @@ FILE DEUS_Tiles.js lines=1510 codeChars=38597 listed=9:ON sha=99b4f2832f1f targe
   ns 484:window.UF.Tiles =
   suites UF.Test.suite("tiles" ;; UF.Test.suite("ground"
   commands 0 listeners 2
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_TimeSpeed.js lines=608 codeChars=15014 listed=28:ON sha=651c19e1abb7 target=MZ
   desc [DEUS TimeSpeed] Simulation speed controller (1x, 2x, 4x, 8x, 16x, 32x), active world pause, and game-time scheduling.
   coupling Game_=2/2l/1n $game=16/14l/4n Sprite_=3/3l/1n Scene_=12/12l/2n Window_=1/1l/1n PIXI=0/0l/0n
@@ -664,7 +664,7 @@ FILE DEUS_TimeSpeed.js lines=608 codeChars=15014 listed=28:ON sha=651c19e1abb7 t
   ns 144:window.UF.Time =
   suites UF.Test.suite("timespeed"
   commands 0 listeners 3
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Visuals.js lines=307 codeChars=5045 listed=2:ON sha=f2db53fd79b9 target=MZ
   desc [DEUS Visuals] Visual pipeline: high-DPI scaling, viewport rendering, 2.5D projection, and pixel-crisp display.
   coupling Game_=6/6l/2n $game=16/12l/2n Sprite_=4/4l/2n Scene_=0/0l/0n Window_=0/0l/0n PIXI=0/0l/0n
@@ -673,7 +673,7 @@ FILE DEUS_Visuals.js lines=307 codeChars=5045 listed=2:ON sha=f2db53fd79b9 targe
   classes Sprite_UFBark,Sprite_UFRoofBuilding
   window UF_Visuals
   commands 1 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Walls.js lines=387 codeChars=11421 listed=13:ON sha=2ef70ba5acf1 target=MZ
   desc [DEUS Walls] Structural 2-tile wall systems with black wall-top occlusion convention, material durability, and construction.
   coupling Game_=0/0l/0n $game=10/8l/2n Sprite_=1/1l/1n Scene_=2/2l/1n Window_=0/0l/0n PIXI=0/0l/0n
@@ -684,7 +684,7 @@ FILE DEUS_Walls.js lines=387 codeChars=11421 listed=13:ON sha=2ef70ba5acf1 targe
   ns 289:window.UF.Walls =
   suites UF.Test.suite("walls"
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_Wildlife.js lines=2900 codeChars=82639 listed=21:ON sha=c602cc0516bd target=MZ
   desc [DEUS Wildlife] Wild fauna populations, grazing herds, predator/prey behaviors, sensory awareness, and flee AI.
   coupling Game_=4/4l/2n $game=20/14l/2n Sprite_=2/2l/1n Scene_=2/2l/1n Window_=0/0l/0n PIXI=0/0l/0n
@@ -695,7 +695,7 @@ FILE DEUS_Wildlife.js lines=2900 codeChars=82639 listed=21:ON sha=c602cc0516bd t
   ns 80:window.UF.ECS = | 2323:window.UF.Wildlife =
   suites UF.Test.suite("wildlife" ;; UF.Test.suite("wildlife_seeds"
   commands 0 listeners 4
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_World.js lines=5062 codeChars=135417 listed=7:ON sha=6b558e0f82d7 target=MZ
   desc [DEUS World] Seeded multi-level procedural world generation, persistent area maps, coordinate translation, and world state.
   coupling Game_=21/20l/4n $game=116/83l/2n Sprite_=2/2l/1n Scene_=9/9l/2n Window_=0/0l/0n PIXI=0/0l/0n
@@ -720,7 +720,7 @@ FILE DEUS_WorldGen.js lines=2553 codeChars=75233 listed=8:ON sha=6aaffdbaeb56 ta
   sim UF.Sim.require("geology/caves" dynamic=0
   suites UF.Test.suite("worldgen" ;; UF.Test.suite("biomes"
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE DEUS_WorldItems.js lines=129 codeChars=3171 listed=unlisted sha=1b0ec4ddf8e8 target=MZ
   desc [DEUS World Items] 6 px placement, surfaces, containers, 8-way item blocking, readability.
   coupling Game_=6/5l/1n $game=10/8l/1n Sprite_=0/0l/0n Scene_=4/3l/1n Window_=0/0l/0n PIXI=0/0l/0n
@@ -729,7 +729,7 @@ FILE DEUS_WorldItems.js lines=129 codeChars=3171 listed=unlisted sha=1b0ec4ddf8e
   functions loadSim
   ns 76:DEUS.WorldItems = | 77:UF.WorldItems =
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 FILE UF_Households.js lines=1074 codeChars=36338 listed=unlisted sha=a856f003c257 target=MZ
   desc [UF Households] Persistent families and exact, material-built household homes.
   coupling Game_=0/0l/0n $game=0/0l/0n Sprite_=0/0l/0n Scene_=4/3l/1n Window_=0/0l/0n PIXI=0/0l/0n
@@ -752,7 +752,7 @@ FILE test_build_vertical_ingame.js lines=49 codeChars=923 listed=unlisted sha=5a
   noncode Game_ c0/s0 $game c0/s0 Sprite_ c0/s0 Scene_ c0/s0 Window_ c0/s0 PIXI c0/s0
   window test_build_room_above,runSuite
   commands 0 listeners 0
-  consumers code=0 string=0 
+  consumers code=0 string=0
 ---WANTED---
 FOUND archive/plugins/UF_Callings.js lines=17 sha=9066cf425b6af67138fd8fc43c0422cef79df2f3cc3461f5a563665cf277d145
 FOUND archive/plugins/UF_Households.js lines=17 sha=97fac3522cc05b24208d2bc379adca6971e432e675d76263eb03b9c38992709d
