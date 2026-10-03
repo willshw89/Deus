@@ -1,6 +1,6 @@
 # DATA-INSPECT — debug entity and system view
 
-**Status:** PARKED Owner-requested lane stub, 2026-10-03; last in [the sequence](README.md), with an earlier parallel slot possible only after ORG-0.2 green and only for an idle non-overlapping writer. **Writer:** Grok. **Reviewer:** Claude (cross-family).
+**Status:** PARKED Owner-requested lane stub, 2026-10-03; last in [the sequence](README.md). An earlier parallel slot is possible only behind the DISPLAY-16x9 baseline gate in that sequence, and only for an idle non-overlapping writer. **Writer:** Grok. **Reviewer:** Claude (cross-family).
 
 **Why the player cares:** The developer must be able to see why a colonist is idle, which job and resource it claimed, and which system is consuming frame time before tuning the game.
 

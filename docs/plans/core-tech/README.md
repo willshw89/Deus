@@ -1,25 +1,26 @@
 # Parked M1/M2 core-tech plans
 
-**Status:** PARKED Owner-requested lane stubs, 2026-10-03. These pages record the core-tech order and acceptance evidence. They do not activate implementation, change WBS status, or authorize a vendor copy, plugin load, or runtime change. ORG-0.2 must be green first; WORLD-3x3 is the first M1 job before any of these lanes. DEC-037 still freezes faction and society implementation.
+**Status:** PARKED Owner-requested lane stubs, 2026-10-03. These pages record the core-tech order and acceptance evidence. They do not activate implementation, change WBS status, or authorize a vendor copy, plugin load, or runtime change. ORG-0.2 must be green first. WORLD-3x3 is the first M1 job, immediately followed by [DISPLAY-16x9](DISPLAY-16x9.md), ahead of DATA-RNG and before further visual baselines. DEC-037 still freezes faction and society implementation.
 
 | Order after WORLD-3x3 | Owner-requested lane | Writer / cross-family reviewer | Group |
 |---|---|---|---|
-| 1 | [DATA-RNG](DATA-RNG.md): deterministic simulation streams | Grok / Claude | M1 foundation |
-| 2 | [DATA-SAVE](DATA-SAVE.md): save version and migrations | Grok / Claude | M1 foundation |
-| 3 | [DATA-TICK](DATA-TICK.md): fixed simulation timestep | Claude / Codex | M2 split proposal |
-| 4 | [DATA-EVENTS](DATA-EVENTS.md): typed event registry | Grok / Claude | Foundation |
-| 5 | [CORE-PQ](CORE-PQ.md): one path queue and path authority | Grok / Claude | Core path |
-| 6 | [CORE-SPATIAL](CORE-SPATIAL.md): dynamic unit index | Grok / Claude | Core spatial |
-| 7 | [DATA-ECS](DATA-ECS.md): entity component store | Claude / Codex | Foundation |
-| 8 | [DATA-SCHED](DATA-SCHED.md): bounded system scheduler | Grok / Claude | Foundation |
-| 9 | [DATA-JOBS](DATA-JOBS.md): job board and claims | Claude / Codex | Foundation |
-| 10 | [CORE-HPA](CORE-HPA.md): hierarchical paths | Claude / Codex | Core path |
-| 11 | [CORE-CHUNKCACHE](CORE-CHUNKCACHE.md): static chunk render cache and baked depth grade | Claude / Codex | Core render |
-| 12 | [DATA-INSPECT](DATA-INSPECT.md): debug inspection and graphs | Grok / Claude | Foundation |
+| 1 | [DISPLAY-16x9](DISPLAY-16x9.md): 1920×1080 logical display and integer outer scale | Grok / Claude | Visual baseline |
+| 2 | [DATA-RNG](DATA-RNG.md): deterministic simulation streams | Grok / Claude | M1 foundation |
+| 3 | [DATA-SAVE](DATA-SAVE.md): save version and migrations | Grok / Claude | M1 foundation |
+| 4 | [DATA-TICK](DATA-TICK.md): fixed simulation timestep | Claude / Codex | M2 split proposal |
+| 5 | [DATA-EVENTS](DATA-EVENTS.md): typed event registry | Grok / Claude | Foundation |
+| 6 | [CORE-PQ](CORE-PQ.md): one path queue and path authority | Grok / Claude | Core path |
+| 7 | [CORE-SPATIAL](CORE-SPATIAL.md): dynamic unit index | Grok / Claude | Core spatial |
+| 8 | [DATA-ECS](DATA-ECS.md): entity component store | Claude / Codex | Foundation |
+| 9 | [DATA-SCHED](DATA-SCHED.md): bounded system scheduler | Grok / Claude | Foundation |
+| 10 | [DATA-JOBS](DATA-JOBS.md): job board and claims | Claude / Codex | Foundation |
+| 11 | [CORE-HPA](CORE-HPA.md): hierarchical paths | Claude / Codex | Core path |
+| 12 | [CORE-CHUNKCACHE](CORE-CHUNKCACHE.md): static chunk render cache and baked depth grade | Claude / Codex | Core render |
+| 13 | [DATA-INSPECT](DATA-INSPECT.md): debug inspection and graphs | Grok / Claude | Foundation |
 
 [DATA-CONTRACT](DATA-CONTRACT.md) is a separate Owner-requested parked data-loading lane stub with Claude writing and Codex reviewing. Its implementation order is not set here. Activation of each lane requires ORG-0.2 green, its preceding dependencies, a bounded brief, an isolated branch/worktree, baseline, native tests, cross-family architectural review, and Deus confirmation before merge.
 
-DATA-INSPECT may move earlier in parallel on an idle writer **only after ORG-0.2 is green**, with non-overlapping files and its own branch/worktree. The table is the proposed interleaved sequence, not evidence that any lane has started. The first green worldgen result does not lift DEC-037 by itself; history/faction/society behavior remains frozen until a separate Owner decision.
+DATA-INSPECT stays last in the table. It may move earlier in parallel on an idle writer only behind the DISPLAY-16x9 baseline gate, with non-overlapping files and its own branch/worktree. That gate waits on ORG-0.2 green and a completed WORLD-3x3. The table is the proposed interleaved sequence, not evidence that any lane has started. The first green worldgen result does not lift DEC-037 by itself; history/faction/society behavior remains frozen until a separate Owner decision.
 
 The existing `DEUS_World.js` owns `World.findPath` (same-area route, up to 12,000 expanded nodes by default, region and vertical-link handling). `DEUS_Movement8D.js` also contains a binary-heap octile A* search with a 200-iteration cutoff. Its line 510 comment calls it a 24×24 window, but the function does not enforce that spatial bound. The plan is to consolidate callers, not to introduce another path authority. `DEUS_FlowFields.js` is enabled in `plugins.js`; a read of main `038a02c3` found definitions of `UF.Pathfinding.requestFlowField` and `getFlowDir` but no plugin callers. The Owner's pending choice is to wire FlowFields for crowds/sieges after HPA **or** remove its code; the choice itself need not wait for HPA. Neither action belongs to these docs stubs. The path and caller baseline must be rechecked on the eventual implementation SHA.
 
