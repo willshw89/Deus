@@ -1,0 +1,6 @@
+Reviewed source archived with git archive d8b36c53e3264a49146b756147b95aaa4faff4e2 game into scratchpad/lane-worldgen-green/reviewer/snap_G1_d8b36c53.
+git ls-tree -r of that SHA -- game: 4347 blobs.
+git hash-object --stdin-paths of the extracted files: 4346 blobs match. The single mismatch is game/js/plugins.js.
+The mismatch is the DEUS_World parameters block. Tracked file has "parameters": {}. The snapshot has "parameters": { "Seed": "1920951434" }. No other plugin parameter was edited. The later line-offset in a textual diff is that three-line insertion.
+No DEUS_Z_RANGE, suite flag, or timeout override was set. The process environment also had DEUS_RUN_ID=lane-worldgen-green_20261002_215859. game/js does not read DEUS_RUN_ID.
+DEUS_TEST_YEAR=500 was set for the run.

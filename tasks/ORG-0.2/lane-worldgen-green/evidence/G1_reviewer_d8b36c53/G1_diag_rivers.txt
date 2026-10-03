@@ -1,0 +1,16 @@
+Independent re-run of the lane diagnostic against committed source d8b36c53 (worktree game/, state.seed 1920951434, areas 1x1, size 256). Script copy: scratchpad/lane-worldgen-green/reviewer/diag_rivers_review.js, same arithmetic as evidence/C_rivers/diag_rivers.js with the lane root set to this worktree. The committed script's LANE = path.resolve(__dirname, "..", "..") points at tasks/ORG-0.2/lane-worldgen-green, which has no game/.
+
+seed 1920951434; seaLevel 0.3; catalog rivers count [1,2] halfWidth [1,2] keepAwayFromStart 14
+macro grid 16x16 nodes: min 0.135 median 0.492 p90 0.687 max 0.834; nodes >= 0.6: 56; nodes <= seaLevel: 25
+planned rivers 2: #0 source (14,7) e=0.834 nodes 6 terminal sea eroded 0 | #1 source (1,11) e=0.709 nodes 5 terminal sea eroded 0
+failed sources 0: []
+riverModels: 2; rivers_count would be PASS
+river_not_through_start: gaps [null,null] (keep away 14) -> FAIL
+river #0: anchorX 235 halfWidth 1 terminal sea course points 70 x 156..235 y 41..118 (unwrapped); rows of 256 with a center: 78; center(128)=NaN
+  river_continuous loop: col NaN (row 0 not crossed): the suite's col<0||col>=size test is false for NaN, so the row loop RUNS
+  river_continuous (proxy wm.isWater for tiles): breaks 185 (dry rows 178, jumps 7)
+river #1: anchorX 28 halfWidth 1 terminal sea course points 48 x 28..90 y 182..222 (unwrapped); rows of 256 with a center: 41; center(128)=NaN
+  river_continuous loop: col NaN
+  river_continuous (proxy wm.isWater for tiles): breaks 217 (dry rows 215, jumps 2)
+
+JSON.stringify prints NaN as null. The native suite stringifies the same gaps as "NaN, NaN". The proxy counts water with waterModel.isWater. The native river_continuous check uses painted tiles and reported 465 breaks.
