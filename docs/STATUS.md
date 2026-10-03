@@ -13,6 +13,8 @@
 
 ### In progress
 
+- 2026-10-02: Codex PM recovery checkpoint prepared; PM claim released for Claude's serial resume. Code and old evidence survived; post-fix native result remains pending. Main is 038a02c3, not 565dc5ae; its local files, both stashes and backup 3c6e2bba are preserved. No direct main commits permitted by the latest Owner instruction. See tasks/ORG-0.2/lane-worldgen-green/RECOVERY_20261002.md.
+
 - 2026-10-02: ORG-0.2 is the only active lane under the Owner's latest direction. Claude is the sole runtime writer on task/org-0.2-worldgen-green, with Grok reviewing. Codex PM recorded the dispatch and usage policy; its documentation claim is released. Main, stashes and the backup branch are protected. World-load acceptance is not established; all side questions remain queued. See tasks/ORG-0.2/lane-worldgen-green/OWNER_FOLLOWUP.md.
 
 | Lane | Task | Writer -> reviewer | State |

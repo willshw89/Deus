@@ -1,0 +1,39 @@
+2026-10-03T01:46:40.349Z DIAG nested World.addUnit depth=1 nextUnitId=4654 colonyExists=false spec.name="" kind=person faction=f1
+Error: DIAG
+    at Object.World.addUnit (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_World.js:1957:3)
+    at setupColony (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Colonists.js:964:29)
+    at colonyState (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Colonists.js:269:19)
+    at factionId (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Colonists.js:333:30)
+    at isColonist (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Colonists.js:334:153)
+    at chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Colonists.js:5858:108
+    at Object.emit (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Core.js:307:23)
+    at emit (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_World.js:161:65)
+    at Object.World.addUnit (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_World.js:1948:9)
+    at Object.World.addUnit (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_World.js:1962:35)
+
+2026-10-03T01:48:38.490Z DIAG nested World.addUnit depth=1 nextUnitId=4514 colonyExists=false spec.name="" kind=person faction=f1
+Error: DIAG
+    at Object.World.addUnit (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_World.js:1957:3)
+    at chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Culling.js:302:81
+    at withAllSprites (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Culling.js:288:62)
+    at Object.wrapped [as addUnit] (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Culling.js:302:24)
+    at setupColony (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Colonists.js:964:29)
+    at colonyState (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Colonists.js:269:19)
+    at factionId (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Colonists.js:333:30)
+    at isColonist (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Colonists.js:334:153)
+    at chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Colonists.js:5858:108
+    at Object.emit (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Core.js:307:23)
+
+2026-10-03T01:49:08.280Z DIAG nested World.addUnit depth=1 nextUnitId=4514 colonyExists=false spec.name="" kind=person faction=f1
+Error: DIAG
+    at Object.World.addUnit (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_World.js:1957:3)
+    at chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Culling.js:302:81
+    at withAllSprites (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Culling.js:288:62)
+    at Object.wrapped [as addUnit] (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Culling.js:302:24)
+    at setupColony (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Colonists.js:964:29)
+    at colonyState (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Colonists.js:269:19)
+    at factionId (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Colonists.js:333:30)
+    at isColonist (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Colonists.js:334:153)
+    at chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Colonists.js:5858:108
+    at Object.emit (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_Core.js:307:23)
+

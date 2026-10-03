@@ -1,0 +1,174 @@
+UF_Test run 2026-10-03T01:42:56.700Z args=[]
+HARNESS New Game year 500 (requested 500)
+DEBUG_SHEET: Scene_Boot.start called
+AVAILABLE SUITES: selftest, smoke, perf, native_starting_gear, native_survival_dying, native_perf_4x_benchmark, select, select, natural_connections, ownership, ecology, projects, settlement, colonists, overseer, world, spawn, worldgen, biomes, tiles, ground, factions, skins, history, objects, walls, doors, items, dig_through_floor, jobs, floors, wildlife, wildlife_seeds, stance, combat, anim, fog, daynight, timespeed, camera, culling, speech, overhead, look, sheet, talk, fire, vertical, natural_walls, flooding, strata, sparse_outer, environment, faction_menus, title, load, setup, depth, layers_flat, select, select
+SUITE smoke
+PASS smoke.reached_map - map 1000 ""
+PASS smoke.player_not_visible
+PASS smoke.event_drawn.Elem - 1 in view drawn at screen (384,297)
+PASS smoke.event_drawn.Orald - 1 in view drawn at screen (408,297)
+PASS smoke.save_serializes
+PASS smoke.colony_state_in_save
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_R0_3f704dc0\game\test_output\smoke.map.png
+PASS smoke.no_errors - none in first ~3 s on map
+SUITE ownership
+PASS ownership.registry_contract - faction claim true; overwrite without force refused; forced owner public; released true
+PASS ownership.bed_assignment - TEST_Ada -> (127,126), owner {"kind":"unit","id":4786}; TEST_Bram -> (130,126); unique true
+PASS ownership.inspection_visible - Look line at (127,126): "Straw bed — dismantle · Owned by TEST_Ada"
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_R0_3f704dc0\game\test_output\ownership.owned_bed.png
+PASS ownership.exhausted_uses_owned_bed - old failed (exhausted); sleep done at (127,126), ownedBed true; need after 5
+PASS ownership.survival_and_danger_win - hungry: reason hunger, sleep false; danger: reason danger, sleep false; original job still active true
+PASS ownership.destroyed_bed_clears - object none; bedOf null; owner null
+PASS ownership.saved - round-trip claim {"kind":"unit","id":4787}; unit bed (130,126); save points at live ownership true
+PASS ownership.perf - 20,000 ownerOf calls: 1.54 us each (budget 20 us); 20 area reconciliations: 1.619 ms each (budget 20 ms)
+PASS ownership.no_errors - 0 uncaught error(s); 0 caught inside UF_Ownership
+SUITE ecology
+PASS ecology.state_saved - version 1; 1 area baseline(s); JsonEx ecology true; save points at live ecology true
+PASS ecology.renewable_only - oak/bush/grass renewable true; iron/stone/crystal finite true; hours tree/bush/plant 672/168/72
+FAIL ecology.renewable_timer - chop -> oak_stump; occupied pass due/grown/held 0/0/0; clear pass grown 0; final oak_stump
+FAIL ecology.native_regrow_single - UF_Objects timers 0; Ecology timers 0; cell berry_bush_bare
+PASS ecology.deterministic_safe_cell - troll chose (58,224) twice; safe true
+PASS ecology.hard_cap - status capped; population/cap 1/1; spawned 0
+PASS ecology.monster_replenishes - spawned: 1 troll in area (0,0), cap 3
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_R0_3f704dc0\game\test_output\ecology.replenished_monster.png
+PASS ecology.prey_replenishes - spawned: 2 deer; prey 83 -> 85
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_R0_3f704dc0\game\test_output\ecology.replenished_prey.png
+PASS ecology.bounded_work - 100 capped attempts in 15.030 ms (budget 20 ms); current prey/monsters 85/2; hour 305/306 processed 0/1 area(s)
+PASS ecology.beat_sprouting - 5 beats spawned 5 sprouts (total 8 active); levels represented: 0
+PASS ecology.maturation_cycle - sprout sapling at (174,61,z=0) matured into oak: true
+PASS ecology.no_errors - 0 uncaught error(s); 0 caught inside UF_Ecology
+SUITE colonists
+FAIL colonists.colonists_exist - 2 colonists present
+PASS colonists.player_faction - player faction f1 (colony: f1)
+PASS colonists.colonist_identity - colonist #4653 name Elem, ai=null
+PASS colonists.order_move - manual move job: 14
+PASS colonists.no_errors - no errors during colonists check
+SUITE world
+PASS world.in_area_map - area (0,0), map 1000, seed 1920951434
+PASS world.area_size - 256x256, data length 393216, objects 65536
+PASS world.level_ids - levels -16, -15, -14, -13, -12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 -> map ids 1032, 1030, 1028, 1026, 1024, 1022, 1020, 1018, 1016, 1014, 1012, 1010, 1008, 1006, 1004, 1003, 1000, 1001, 1002, 1005, 1007, 1009, 1011, 1013, 1015, 1017, 1019, 1021, 1023, 1025, 1027, 1029 (distinct); levelOfMapId round trip true; ground id 1000 (MapIdBase 1000, unchanged); areaOfMapId(level -1) null (want null); inWorld at level 16 / -17: false / false
+PASS world.seeded - area (0,0) built twice: -1572298777 / -1572298777; generators: uf_levels_terrain, uf_worldgen, uf_void_manifold, uf_underground_resources
+PASS world.diff_applies_live - tile (3,3) 3488 -> 2048
+PASS world.object_diffs - on screen (5,5) = 7; area (0,0) cell (9,9) = 3 through the peek cache (same cached build)
+PASS world.save_roundtrip - 3913904 bytes, 504 units
+PASS world.single_area_world - 1x1 areas, map 1000; walk from x 67 to x 52 on row 172
+PASS world.unit_enters_view - event 5792 at (66,172), sprite created
+PASS world.faces_its_steps - 14 step(s) taken (0 diagonal), 0 not facing the step's direction; facing 4 after walking west (want 4)
+PASS world.unit_walks_to_goal - at (52,172) in area (0,0), goal (52,172) reached
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_R0_3f704dc0\game\test_output\world.unit_in_view.png
+PASS world.spawn_not_in_walls - an oak was set at (100,100) (free: false); the unit spawned at (105,96), 5 cell(s) away, on a free cell: true
+PASS world.unit_image_refresh - event now draws "$U7_Ranger"
+PASS world.view_wraps_in_round_world - view at (0,172) after stepping east at the edge (expected 0)
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_R0_3f704dc0\game\test_output\world.round_seam_wrap.png
+PASS world.view_wraps_back_west - view returned to (255,172) after stepping west from 0
+PASS world.diff_persists - tile (3,3) is 2048 (expected 2048) and object (5,5) is 7 (expected 7) after leaving and returning
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_R0_3f704dc0\game\test_output\world.path_around_wall.png
+PASS world.path_around_wall - 9x9 ring of 31 wall pieces round (175,37), gap at (175,33); TEST_pather from (175,39) inside to (175,48) outside on the far side: arrived after 484 frames and 27 steps (first plan 27 cells), through the gap: true, wall cells stood on: 0; gave up: never; sent again 0x; test site: 54 objects cleared, nearest unit 22 cells away
+PASS world.path_blocked_goal - goal: the wall piece at (175,41); from inside (175,39): 1 cell(s) ending at (175,40) (want (175,40)); from outside (175,48): 6 cell(s) ending at (175,42) (want (175,42)); wall cells on either path: 0
+FAIL world.path_blocked_fast - goal (175,37) inside the ring with its gap closed; TEST_pather outside at (175,48): no world:unitBlocked within 90 frames; now at (182,49), goal still set; wall cells stood on: 0
+FAIL world.path_gives_up_when_crowded - gaps at (175,33) and (175,41), each held by a unit standing still; TEST_pather from (182,49) sent to (175,37) inside: no give-up within 671 frames (goal still set), 29 steps, now at (175,42); cells inside the ring entered: 0, wall cells stood on: 0 (progress limit 600 map updates)
+PASS world.path_replans - TEST_replanner from (168,37) to (182,37) (14 steps in a straight line); a wall went up on its next path cell (172,37) with 11 cells to go; arrived after 15 steps (a detour round the wall makes it more than 14); steps onto the new wall: 0; re-plans counted (all units) 1; gave up: never
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_R0_3f704dc0\game\test_output\world.eight_way.png
+PASS world.eight_way_steps - FourWay false; open ground, 8 cells each way: TEST_diag8 north-east arrived: 8 steps, 8 diagonal; TEST_diag4 south-east arrived: 8 steps, 8 diagonal (want 8 of 8 diagonal each); TEST_rounder 2 diagonal of 10
+FAIL world.faces_eight_ways - 8-row scratch sheet made; steps not facing their direction 0; rows checked 184 (8-row) / 184 (stock) / 180 (rounder, stock), wrong 12: NE: row 0 (want 5) | NE: row 0 (want 5) | NE: row 0 (want 5) | NE: row 0 (want 5); TEST_diag8 after walking NE: dir8 9 (NE), row 5 drawn by UF_Anim true (want 9, row 5); TEST_diag4 (stock) after walking SE from facing N: dir8 3, direction 6, row 2 (want 3, 6, row 2)
+PASS world.faces_targets - TEST_chopper from (181,45) to chop the tree at (184,42): job now work, stand (183,43) (want (183,43), south-west), at work: dir8 9 (NE), work row 5 (want 9, work row 5); TEST_striker attacking the unit south-west of it: dir8 1 (SW), attack row 1 (want 1, attack row 1); TEST_caster casting at a unit 3 east, 2 south: dir8 3 (SE), cast row 7 (want 3, cast row 7)
+FAIL world.path_budget - 100 plans of 40-80 cells (2564 seeded picks; 77 planned paths outside 40-80 cells, 0 of them capped at 12000 cells): average 2.605 ms, p95 10.115 ms, max 23.120 ms; cells expanded median 79, p95 976, max 1476
+PASS world.no_wall_steps - 75.9 s of play, 1750 map updates: 108 one-cell steps (49 diagonal) by 6 units (0 moves of more than one cell), 0 steps by walkers onto blocking cells; planner in this window: 9 plans (8 found, 1 partial, 0 none), 14.788 ms average, p95 116.320 ms and max 116.32 ms (last 512 / all plans), cells expanded 1363 average, median 8; queue peak 0, 0 queued; re-plans 1, detours round units 1; gave up: {}; region map rebuilt 0x (4.09 ms average); slowest plan so far {"ms":116.32000000099652,"expanded":12000,"reason":"partial","regionMs":0,"length":45}; 54 of 54 test-site objects put back
+PASS world.no_corner_cut - tree line of 7 at row 41 (x 174-180); TEST_rounder (177,39) -> (177,43): arrived in 10 steps (2 diagonal), round an end of the line true; its plan 10 cells, 2 diagonal, 0 past a tree corner; diagonal steps past a blocking corner in the fixture 0; in 75.9 s of play 49 diagonal steps, 0 past a blocking corner by walkers
+FAIL world.no_path_is_true - 0 "no path" give-ups re-tested at that moment with a flood fill over $gameMap.isPassable (out of the cell and into the next, no water): 0 could reach the goal after all; 
+PASS world.frame_cost - UF.World.update 0.301 ms average per map update over 1750 updates, worst 117.70 ms; 504 units; includes planning (the path checks' own findPath calls are outside it)
+PASS world.no_errors - none during world checks
+SUITE worldgen
+PASS worldgen.catalog_loaded - 93 object types, 33 biomes
+PASS worldgen.catalog_images_exist - 93 object images/sheets found
+PASS worldgen.catalog_ids_resolve - 33 biomes, 26 ground kinds, 9 water kinds, 93 objects all resolve
+PASS worldgen.autotile_matches_editor - 47 shapes derived; a 3-wide vertical strip gives 16,0,24 (the editor painted 16,0,24)
+PASS worldgen.tileset_id - built map tilesetId 91, map on screen 91, UF.Tiles.TILESET_ID 91
+PASS worldgen.start_in_middle - UF_Colonists installed: 0 generator start events (want 0); note "<glade>"
+PASS worldgen.names_vary_by_seed - this world: Alan and Ela; next seed: Dorald and Jorelle
+PASS worldgen.water_near_start - nearest water 10.3 cells from the pair (reach 29)
+PASS worldgen.river_not_through_start - river(s) pass  cells from the start (keep away 14)
+FAIL worldgen.rivers_count - 0 river(s) (catalog count 1-2) at columns 
+PASS worldgen.river_continuous - 0 river(s) wet on every row of area (0,0) with no jumps
+PASS worldgen.objects_placed - 1643 objects in map.ufObjects of the start area (stats sum 1643, 0 object events); most common: grass_tuft 464, reeds 204, oak 179, fir_snow 114, pine 100, fern 93, birch 84, rocks_small 77
+PASS worldgen.glade_clear - 0 objects inside the start clearing (radius 0) as generated
+PASS worldgen.no_objects_in_water - 4324 water cells; 10 objects on water, 0 of them not water plants; 0 water plants on land
+FAIL worldgen.kit_per_area - 5 factions; 5 area centre(s), kit within 20 cells, drinkable water within 30: Arar Freehold (128,128): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 1/1, ore 2/1; water fresh at 10.3 | Wennoreth Court (33,222): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 7/4, granite_boulder 4/4, fruit_tree 1/1, ore 1/1; water fresh at 19.1 | Solmarwyn Burrow (156,75): berry_bush 8/8, oak 32/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 2/1, ore 2/1; water marsh at 22.6 | Ethmaric Enclave (201,48): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 1/1, ore 2/1; water fresh at 21.6 | Pela Tribe (195,114): berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; water NONE; FAILING: Pela Tribe at (195,114): short berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; no drinkable water within 30
+FAIL worldgen.kit_covers_plan - first stage (hearth, larder, knives, clothes, axe, pick, food, woodpile, shelter, beds, workstone) for 8 founders, the most any of 7 cultures needs, plus 8 meals: log 26, stone 60, fiber 58, straw 16, food 16, ore 2 (human 26/14/58/16/14, elf 24/10/56/16/16, dwarf 3/60/58/16/14, gnome 26/14/58/16/14, goblin 3/14/58/16/14, orc 26/14/58/16/14, automaton 3/60/58/16/14 as log/stone/fiber/straw/food); the kit's minimums alone are worth log 36, stone 47, fiber 60, straw 8, food 19, ore 2 (SHORT: stone 47/60, straw 8/16); within 20 cells of each campfire: Arar Freehold (128,128): log 36, stone 50, fiber 60, straw 10, food 19, ore 4 | Wennoreth Court (33,222): log 98, stone 47, fiber 62, straw 14, food 19, ore 2 | Solmarwyn Burrow (156,75): log 205, stone 50, fiber 79, straw 8, food 22, ore 4 | Ethmaric Enclave (201,48): log 80, stone 50, fiber 64, straw 8, food 19, ore 4 | Pela Tribe (195,114): log 0, stone 0, fiber 0, straw 0, food 0, ore 0; FAILING: Arar Freehold: short stone 50/60, straw 10/16; Wennoreth Court: short stone 47/60, straw 14/16; Solmarwyn Burrow: short stone 50/60, straw 8/16; Ethmaric Enclave: short stone 50/60, straw 8/16; Pela Tribe: short log 0/26, stone 0/60, fiber 0/58, straw 0/16, food 0/16, ore 0/2
+FAIL worldgen.kit_fair - minimums for every area: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 1, ore 1-2 of ironstone/copper_outcrop; per area: Arar Freehold: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 1, ore 2 (copper_outcrop 2); water fresh 10.3 | Wennoreth Court: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 7, granite_boulder 4, fruit_tree 1, ore 1 (copper_outcrop 1); water fresh 19.1 | Solmarwyn Burrow: berry_bush 8, oak 32, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 2, ore 2 (ironstone 2); water marsh 22.6 | Ethmaric Enclave: berry_bush 8, oak 8, rocks_small 10, grass_tuft 60, reeds 4, granite_boulder 4, fruit_tree 1, ore 2 (copper_outcrop 2); water fresh 21.6 | Pela Tribe: berry_bush 0, oak 0, rocks_small 0, grass_tuft 0, reeds 0, granite_boulder 0, fruit_tree 0, ore 0 (none); water NONE; SHORT: Pela Tribe: berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1
+FAIL worldgen.suite_completed - History: unitAdded listener allocated inside the historical ID range [at chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_History.js:536:74 | at withWorldState (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_History.js:231:45) | at Object.History.materialize (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_History.js:454:16)]
+SUITE biomes
+PASS biomes.all_biomes_reachable - 33 ids produced by classify over 37044 synthetic field sets; unreachable: none; not in catalog: none
+PASS biomes.world_variety - 11 distinct biomes over 144 sampled cells (seed 1920951434): forest_temperate_conifer 31, forest_temperate_broadleaf 28, marsh_temperate_fresh 20, taiga 20, grassland_temperate 15, ocean_temperate 13, forest_tropical_conifer 6, mountain 6, marsh_temperate_salt 2, forest_tropical_dry_broadleaf 2, tundra 1
+FAIL biomes.ocean_rim - 14 of 128 cells 2 in from the world edge are ocean (11 %, want >= 60 %)
+PASS biomes.start_habitable - start cell: grassland_temperate, ground meadow, region tame/neutral, walkable true
+PASS biomes.region_tiers_exist - savagery tiers in the sample: primeval, wild, tame (want >= 2 of tame/wild/primeval); alignment: neutral, cursed
+PASS biomes.lakes_or_rivers - 5 of 9 inland blocks have lake/river/pond water (sampled cells per block: 0 11 44 0 6 40 57 0 0)
+FAIL biomes.objects_dense - 1727 objects in the start area (want >= 2500); biomes by cells: forest_temperate_conifer 14666, forest_temperate_broadleaf 11326, taiga 10749, marsh_temperate_fresh 8071, ocean_temperate 5950, grassland_temperate 5948
+FAIL biomes.kit_present - 5 area centre(s), kit within 20 cells, drinkable water within 30: Arar Freehold (128,128): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 1/1, ore 2/1; water fresh at 10.3 | Wennoreth Court (33,222): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 7/4, granite_boulder 4/4, fruit_tree 1/1, ore 1/1; water fresh at 19.1 | Solmarwyn Burrow (156,75): berry_bush 8/8, oak 32/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 2/1, ore 2/1; water marsh at 22.6 | Ethmaric Enclave (201,48): berry_bush 8/8, oak 8/8, rocks_small 10/10, grass_tuft 60/60, reeds 4/4, granite_boulder 4/4, fruit_tree 1/1, ore 2/1; water fresh at 21.6 | Pela Tribe (195,114): berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; water NONE; FAILING: Pela Tribe at (195,114): short berry_bush 0/8, oak 0/8, rocks_small 0/10, grass_tuft 0/60, reeds 0/4, granite_boulder 0/4, fruit_tree 0/1, ore 0/1; no drinkable water within 30
+FAIL biomes.camps_cleared - 5 sites in area (0,0): 5 bare camps (want 8), 0 older sites stamped; every bare camp's disc is free of objects
+PASS biomes.build_time - median 730 ms of 3 builds (652, 743, 730 ms) for 256x256 with 1727 objects
+PASS biomes.deterministic - tiles -1572298777 / -1572298777, objects 1026054035 / 1026054035
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_R0_3f704dc0\game\test_output\biomes.start_zoom_0.png
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_R0_3f704dc0\game\test_output\biomes.start_zoom_1.png
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_R0_3f704dc0\game\test_output\biomes.start_zoom_2.png
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_R0_3f704dc0\game\test_output\biomes.corner.png
+PASS biomes.no_errors - none during biome checks
+SUITE tiles
+PASS tiles.ground_kinds - 26 ground kinds: meadow, tropical_grass, dry_grass, shrub_soil, forest_floor, needle_floor, jungle_floor, tundra, snow, ice, sand, stony, red_clay, rock, peak_rock, mud, swamp_mud, dirt, cursed_grass, blessed_grass, ash, scree, road, floor_wood, floor_stone, floor_rushes
+PASS tiles.runtime_tileset - tileset 91: Outside_A1, Outside_A2, UF_GenLevels_A4, Outside_B, Outside_C, UF_GenShade_E
+PASS tiles.generated_sheet - 768x576
+PASS tiles.kinds_look_different - 23 distinct sample colors across 26 kinds
+PASS tiles.pixel_grid_3x - every sampled 3x3 block is a single color
+FAIL tiles.tileset_names - A1 Outside_A1, A2 Outside_A2, A5 , B Outside_B, C Outside_C, E UF_GenShade_E
+PASS tiles.flags - peak_rock flags 0xf/0xf (want 0xf), meadow 0x0/0x0 (want 0x0)
+PASS tiles.water_impassable - 9 water kinds; walkable: none
+PASS tiles.kind_of_tile - forest_floor shape 17 -> forest_floor; an A1 tile -> null
+PASS tiles.area_uses_tileset - area (0,0) on screen has tilesetId 91 (want 91)
+PASS tiles.no_errors - none
+SUITE ground
+PASS ground.shades_vary - 49631 shaded cells with 244 distinct shade tile keys on Layer 1
+PASS ground.patches_broad - rolling terrain gradient verified across map
+PASS ground.no_hard_seams - shared corners continuous across cell edges without outline gaps
+PASS ground.palette_only - UF_GenShade_E 768x768 generated with 100% uf.hex palette compliance
+PASS ground.build_time - shade plan computed in 11.2 ms (median of 3, budget <= 80 ms) [min: 11.2ms, max: 11.6ms]
+PASS ground.deterministic - 0 layer-1 differences across 65536 cells on rebuild
+PASS ground.passability_unchanged - all 256 shade tile IDs (768-1023) have flag 0x0000 (walkable)
+PASS ground.edits_follow - live tile edits update Layer 1 ground shades seamlessly
+PASS ground.diag_seam - (-4,-1):meadow:L1=0[?] | (-3,-1):meadow:L1=0[?] | (-2,-1):meadow:L1=0[?] | (-1,-1):meadow:L1=0[?] | (0,-1):meadow:L1=0[?] | (1,-1):meadow:L1=0[?] | (2,-1):meadow:L1=0[?] | (3,-1):meadow:L1=0[?] | (4,-1):meadow:L1=0[?] || (-4,0):meadow:L1=0[?] | (-3,0):meadow:L1=0[?] | (-2,0):meadow:L1=0[?] | (-1,0):meadow:L1=0[?] | (0,0):meadow:L1=0[?] | (1,0):meadow:L1=0[?] | (2,0):meadow:L1=0[?] | (3,0):meadow:L1=0[?] | (4,0):meadow:L1=0[?] || (-4,1):meadow:L1=0[?] | (-3,1):meadow:L1=0[?] | (-2,1):meadow:L1=0[?] | (-1,1):meadow:L1=0[?] | (0,1):meadow:L1=0[?] | (1,1):meadow:L1=0[?] | (2,1):meadow:L1=0[?] | (3,1):meadow:L1=0[?] | (4,1):meadow:L1=0[?] || (-4,2):meadow:L1=0[?] | (-3,2):meadow:L1=0[?] | (-2,2):meadow:L1=0[?] | (-1,2):meadow:L1=0[?] | (0,2):meadow:L1=0[?] | (1,2):meadow:L1=0[?] | (2,2):meadow:L1=0[?] | (3,2):meadow:L1=0[?] | (4,2):meadow:L1=0[?]
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_R0_3f704dc0\game\test_output\ground.terrain_gradient_closeup.png
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_R0_3f704dc0\game\test_output\ground.terrain_gradient_medium.png
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_R0_3f704dc0\game\test_output\ground.terrain_gradient_wide.png
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_R0_3f704dc0\game\test_output\ground.terrain_gradient_border.png
+PASS ground.no_errors - none during ground checks
+SUITE factions
+PASS factions.generated_with_world - 9 factions (yours among them), seed 1920951434
+PASS factions.count_in_range - 9 factions (all 9 SRD races), 8 besides the player's
+PASS factions.player_faction - the player's faction is The Arar Freehold (human, id f1); "player" resolves to it
+PASS factions.names_unique - The Arar Freehold | The Wennoreth Court | The Solmarwyn Burrow | The Irquina Clan | The Arnorok Burrow | The Ethgorok Cohort | The Ethmaric Enclave | The Pela Tribe | The Norvasesh Covenant
+PASS factions.species_unique - species: human, elf, halfling, dwarf, gnome, dragonborn, half-elf, half-orc, tiefling
+PASS factions.layer_distribution - layers: Z0 (human, elf, halfling, half-elf, half-orc), Z-1 (dwarf, gnome), Z-2 (dragonborn, tiefling)
+PASS factions.relations_complete - 36 of 36 pairs, range -77 to 50
+PASS factions.aligned_and_disaligned - 1 strong alliance(s), 5 serious hostility(ies)
+PASS factions.relation_symmetric - relation(a, b) = relation(b, a)
+PASS factions.areas - Arar Freehold (human, yours) at (128,128) grassland_temperate, water ~13 cells, rule centre; Wennoreth Court (elf) at (33,222) taiga, water ~19 cells, rule preferred+water; Solmarwyn Burrow (halfling) at (156,75) forest_temperate_broadleaf, water ~23 cells, rule preferred+water; Irquina Clan (dwarf) at (172,10) null, water none cells, rule underground-pocket; Arnorok Burrow (gnome) at (8,217) null, water none cells, rule underground-pocket; Ethgorok Cohort (dragonborn) at (40,194) null, water none cells, rule underground-pocket; Ethmaric Enclave (half-elf) at (201,48) forest_temperate_broadleaf, water ~22 cells, rule preferred+water; Pela Tribe (half-orc) at (195,114) forest_temperate_conifer, water ~22 cells, rule preferred+water; Norvasesh Covenant (tiefling) at (246,20) null, water none cells, rule underground-pocket; closest pair 52.5 (want >= 40); player's 0.0 from the centre (want <= 6); same seed same areas, seed+1 other areas; last placement 1098 ms, 8240 cell lookups, 1 attempt(s)
+PASS factions.same_seed_same_factions - generated twice from seed 1920951434: identical; same names and player (f1) as the live world
+PASS factions.new_seed_new_factions - another seed gives: The Jasen Circle, The Falrasok Clan, The Ethgoreth Clan, The Gorvasesh Workshop, The Beleth Cohort, The Aresh Freehold, The Vasum Warband, The Torar House
+PASS factions.saved_with_world - factions round-trip through the save format
+PASS factions.unmet_not_listed - ledger lists 1 met faction(s) (f1); 8 unmet and hidden
+PASS factions.contact_reveals_faction - The Wennoreth Court: met true after a scout of ours stood 3 cells from one of theirs; listed true
+PASS factions.ledger_opens - F toggles the ledger window
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_R0_3f704dc0\game\test_output\factions.ledger.png
+PASS factions.no_errors - none during faction checks
+SUITE history
+FAIL history.generated_with_world - history version 6, 9 camps, 9 events, founders for 9 factions, seed 1920951434 (30.6 ms)
+FAIL history.suite_completed - History: unitAdded listener allocated inside the historical ID range [at chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_History.js:536:74 | at withWorldState (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_History.js:231:45) | at Object.History.materialize (chrome-extension://njgcanhfjdabfmnlmpmdedalocpafnhl/js/plugins/DEUS_History.js:454:16)]
+SUITE objects
+PASS objects.catalog_types - 102 types, 102 image, 0 tile, 0 generated; all becomes/regrow/ruin/yields resolve
+PASS objects.images_exist - 95 character sheets (95 with a sidecar) and 0 tile sheets found
+PASS objects.names_clean - 102 names checked against the banned-word list
+PASS objects.layer_in_tilemap - Sprite_UFObjectLayer is a child of the map's tilemap
+HARNESS watchdog: whole run took longer than 180 s
+HARNESS current scene: Scene_Map
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_R0_3f704dc0\game\test_output\harness.on_failure.png
+RESULT: 117 passed, 20 failed (exit 2)

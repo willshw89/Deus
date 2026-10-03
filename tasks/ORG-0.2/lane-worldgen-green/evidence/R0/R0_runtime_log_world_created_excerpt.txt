@@ -1,0 +1,24 @@
+20:2026-10-03T01:42:57.774Z [TIMING] DataManager.setupNewGame enter (+12.0ms)
+21:2026-10-03T01:42:57.777Z [TIMING] setupForNewGame before World.newWorld
+24:2026-10-03T01:42:59.849Z [TIMING] world:initializing fired (+2087.8ms)
+26:2026-10-03T01:43:00.061Z [EVENT world:created] #0 (anon_0) took 211.1ms
+2876:2026-10-03T01:43:14.523Z [EVENT world:created] #1 (anon_1) took 14461.1ms
+2877:2026-10-03T01:43:14.523Z [EVENT world:created] #2 (anon_2) took 0.1ms
+2878:2026-10-03T01:43:14.524Z [EVENT world:created] #3 (anon_3) took 0.1ms
+2879:2026-10-03T01:43:14.544Z [EVENT world:created] #4 (anon_4) took 20.5ms
+3797:2026-10-03T01:43:20.277Z [EVENT world:created] #5 (anon_5) took 5731.9ms
+3798:2026-10-03T01:43:20.278Z [EVENT world:created] #6 (anon_6) took 0.9ms
+3799:2026-10-03T01:43:20.278Z [EVENT world:created] #7 (anon_7) took 0.1ms
+3800:2026-10-03T01:43:20.278Z [EVENT world:created] #8 (anon_8) took 0.1ms
+3801:2026-10-03T01:43:20.279Z [EVENT world:created] #9 (anon_9) took 0.0ms
+3802:2026-10-03T01:43:20.280Z [EVENT world:created] #10 (onWorldCreated) took 0.8ms
+3803:2026-10-03T01:43:20.280Z [EVENT world:created] #11 (anon_11) took 0.0ms
+3804:2026-10-03T01:43:20.281Z [TIMING] world:created fired (+22519.0ms)
+3805:2026-10-03T01:43:20.281Z [EVENT world:created] #12 (anon_12) took 0.4ms
+3807:2026-10-03T01:43:20.284Z [TIMING] emit world:created done
+3808:2026-10-03T01:43:20.284Z [TIMING] early seated done, units=0
+3809:2026-10-03T01:43:21.732Z [TIMING] setupForNewGame after World.newWorld
+3810:2026-10-03T01:43:21.733Z [TIMING] setupForNewGame exit (reserved map 1000)
+3811:2026-10-03T01:43:21.733Z [TIMING] DataManager.setupNewGame exit (+23971.9ms)
+3812:2026-10-03T01:43:21.745Z [TIMING] Scene_Boot.start exit (+23983.6ms)
+3815:2026-10-03T01:43:22.621Z [TIMING] world:areaBuilt (0,0) (+24859.5ms)
