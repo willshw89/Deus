@@ -2260,28 +2260,67 @@
             }
             t.check("water_near_start", nearest <= reach, `nearest water ${nearest === Infinity ? "none" : nearest.toFixed(1) + " cells"} from the pair (reach ${reach})`);
             const rivers = WorldGen.riverModels(st);
-            const gaps = rivers.map(r => Math.abs(Math.round(r.center(a.y * size + mid)) - (a.x * size + mid)));
-            t.check("river_not_through_start", gaps.every(g => g > cat.rivers.keepAwayFromStart), `river(s) pass ${gaps.join(", ")} cells from the start (keep away ${cat.rivers.keepAwayFromStart})`);
+            // Nearest river tile to the start, from the carved raster: a hydrology river runs from its source to the sea
+            // or a lake and need not cross the start row at all, so the row-based centre is not used here (ORG-0.2 (c),
+            // PROPOSAL_river_checks.md option A, Owner dispatch 2026-10-02/03). Chebyshev distance in tiles; Infinity means
+            // no tile of this river lies within keep of the start.
+            const keep = cat.rivers.keepAwayFromStart;
+            const gaps = rivers.map(r => {
+                let nearest = Infinity;
+                for (let dy = -keep; dy <= keep; dy++) for (let dx = -keep; dx <= keep; dx++) {
+                    if (r.isWater(a.x * size + mid + dx, a.y * size + mid + dy)) nearest = Math.min(nearest, Math.max(Math.abs(dx), Math.abs(dy)));
+                }
+                return nearest;
+            });
+            t.check("river_not_through_start", gaps.every(g => g > keep),
+                `river(s) pass ${gaps.map(g => g === Infinity ? `more than ${keep}` : g).join(", ")} cells from the start (keep away ${keep})`);
             const [cMin, cMax] = cat.rivers.count;
             t.check("rivers_count", rivers.length >= 1 && rivers.length >= cMin && rivers.length <= cMax,
                 `${rivers.length} river(s) (catalog count ${cMin}-${cMax}) at columns ${rivers.map(r => `${r.anchorX} (half-width ${r.halfWidth})`).join(", ")}`);
-            // Continuity: each river is water on every row of the start area, and consecutive rows touch (ocean/lake cells count as water).
+            // Continuity, course-based (ORG-0.2 (c), option A of PROPOSAL_river_checks.md, Owner dispatch 2026-10-02/03,
+            // strengthened from the proposal's vertex-only loop so that a dry cell between two course points, or a river cut
+            // in two, fails): the carved raster of each river inside this area (the same rasterizeChunk the area build
+            // paints from) must be a water tile on the built map at every carved cell (ocean/lake cells count as water),
+            // and all of a river's carved cells must lie in one 4-connected body of built water (edges wrap where the area
+            // spans the whole world). No tolerance. A river with no carved cell in this area adds no break.
+            const wm = WorldGen.waterModel(st);
+            const micro = wm && wm.micro;
             const breaks = [];
-            for (const r of rivers) {
-                const col = Math.round(r.center(a.y * size)) - a.x * size;
-                if (col < 0 || col >= size) continue;
-                let prev = null;
-                for (let y = 0; y < size; y++) {
-                    const c = Math.round(r.center(a.y * size + y)) - a.x * size;
-                    if (c < -r.halfWidth || c >= size + r.halfWidth) { prev = null; continue; }
-                    let wet = false;
-                    for (let x = Math.max(0, c - r.halfWidth); x <= Math.min(size - 1, c + r.halfWidth); x++) if (isWaterTile(here.data[y * size + x])) wet = true;
-                    if (!wet) breaks.push(`river at column ${r.anchorX}: row ${y} dry`);
-                    else if (prev !== null && Math.abs(c - prev) > 2 * r.halfWidth + 1) breaks.push(`river at column ${r.anchorX}: jump ${prev}->${c} at row ${y}`);
-                    prev = c;
+            let carvedCells = 0;
+            if (micro && rivers.length) {
+                const chunk = micro.rasterizeChunk(a.x * size, a.y * size, size, size);
+                const wd = dims(st);
+                const wrapsX = wd.width === size, wrapsY = wd.height === size;
+                const wet = i => isWaterTile(here.data[i]);
+                const at = i => `(${i % size},${Math.floor(i / size)})`;
+                for (const r of rivers) {
+                    const mine = [];
+                    for (let i = 0; i < size * size; i++) if (chunk.river[i] === r.id + 1) mine.push(i);
+                    carvedCells += mine.length;
+                    if (!mine.length) continue;
+                    const dry = mine.filter(i => !wet(i));
+                    if (dry.length) breaks.push(`river at column ${r.anchorX}: ${dry.length} of ${mine.length} carved cell(s) dry on the built map; first ${at(dry[0])}`);
+                    // Flood the built water from this river's first carved cell; every carved cell must be reached.
+                    const seen = new Uint8Array(size * size);
+                    const stack = [mine[0]];
+                    seen[mine[0]] = 1;
+                    while (stack.length) {
+                        const i = stack.pop();
+                        if (!wet(i)) continue;
+                        const x = i % size, y = (i - x) / size;
+                        const next = [];
+                        if (x > 0) next.push(i - 1); else if (wrapsX) next.push(i + size - 1);
+                        if (x < size - 1) next.push(i + 1); else if (wrapsX) next.push(i - size + 1);
+                        if (y > 0) next.push(i - size); else if (wrapsY) next.push(i + size * (size - 1));
+                        if (y < size - 1) next.push(i + size); else if (wrapsY) next.push(i - size * (size - 1));
+                        for (const j of next) if (!seen[j]) { seen[j] = 1; stack.push(j); }
+                    }
+                    const cut = mine.filter(i => !(seen[i] && wet(i)));
+                    if (cut.length) breaks.push(`river at column ${r.anchorX}: ${cut.length} of ${mine.length} carved cell(s) not joined by water to carved cell ${at(mine[0])}; first ${at(cut[0])}`);
                 }
-            }
-            t.check("river_continuous", breaks.length === 0, breaks.length ? `${breaks.length} break(s); first: ${breaks[0]}` : `${rivers.length} river(s) wet on every row of area (${a.x},${a.y}) with no jumps`);
+            } else if (rivers.length) breaks.push("no rasterizer: WorldGen.waterModel(st).micro is missing");
+            t.check("river_continuous", breaks.length === 0, breaks.length ? `${breaks.length} break(s) over ${carvedCells} carved cell(s); first: ${breaks[0]}`
+                : `${rivers.length} river(s): all ${carvedCells} carved cell(s) inside area (${a.x},${a.y}) are water on the built map and each river's cells form one connected body of water`);
             if (W.inWorld(a.x, a.y + 1)) {
                 // Across an area edge: the bottom row of this area and the top row of the one below share water columns.
                 const below = W.buildArea(a.x, a.y + 1);
