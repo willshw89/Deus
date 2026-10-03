@@ -1,0 +1,71 @@
+UF_Test run 2026-10-03T04:01:35.756Z args=[]
+HARNESS New Game year 500 (requested 500)
+DEBUG_SHEET: Scene_Boot.start called
+AVAILABLE SUITES: selftest, smoke, perf, native_starting_gear, native_survival_dying, native_perf_4x_benchmark, select, select, natural_connections, ownership, ecology, projects, settlement, colonists, overseer, world, spawn, worldgen, biomes, tiles, ground, factions, skins, history, objects, walls, doors, items, dig_through_floor, jobs, floors, wildlife, wildlife_seeds, stance, combat, anim, fog, daynight, timespeed, camera, culling, speech, overhead, look, sheet, talk, fire, vertical, natural_walls, flooding, strata, sparse_outer, environment, faction_menus, title, load, setup, depth, layers_flat, select, select
+SUITE smoke
+PASS smoke.reached_map - map 1000 ""
+PASS smoke.player_not_visible
+PASS smoke.event_drawn.Elem - 1 in view drawn at screen (360,282)
+PASS smoke.event_drawn.Orald - 1 in view drawn at screen (408,282)
+PASS smoke.save_serializes
+PASS smoke.colony_state_in_save
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\lane-plugin-audit\scratchpad\lane-plugin-audit\snapshot-seed1920951434\test_output\smoke.map.png
+PASS smoke.no_errors - none in first ~3 s on map
+SUITE ownership
+PASS ownership.registry_contract - faction claim true; overwrite without force refused; forced owner public; released true
+PASS ownership.bed_assignment - TEST_Ada -> (127,126), owner {"kind":"unit","id":4786}; TEST_Bram -> (130,126); unique true
+PASS ownership.inspection_visible - Look line at (127,126): "Straw bed — dismantle · Owned by TEST_Ada"
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\lane-plugin-audit\scratchpad\lane-plugin-audit\snapshot-seed1920951434\test_output\ownership.owned_bed.png
+PASS ownership.exhausted_uses_owned_bed - old failed (exhausted); sleep done at (127,126), ownedBed true; need after 5
+PASS ownership.survival_and_danger_win - hungry: reason hunger, sleep false; danger: reason danger, sleep false; original job still active true
+PASS ownership.destroyed_bed_clears - object none; bedOf null; owner null
+PASS ownership.saved - round-trip claim {"kind":"unit","id":4787}; unit bed (130,126); save points at live ownership true
+PASS ownership.perf - 20,000 ownerOf calls: 1.07 us each (budget 20 us); 20 area reconciliations: 1.614 ms each (budget 20 ms)
+PASS ownership.no_errors - 0 uncaught error(s); 0 caught inside UF_Ownership
+SUITE ecology
+PASS ecology.state_saved - version 1; 1 area baseline(s); JsonEx ecology true; save points at live ecology true
+PASS ecology.renewable_only - oak/bush/grass renewable true; iron/stone/crystal finite true; hours tree/bush/plant 672/168/72
+FAIL ecology.renewable_timer - chop -> oak_stump; occupied pass due/grown/held 0/0/0; clear pass grown 0; final oak_stump
+FAIL ecology.native_regrow_single - UF_Objects timers 0; Ecology timers 0; cell berry_bush_bare
+PASS ecology.deterministic_safe_cell - troll chose (58,224) twice; safe true
+PASS ecology.hard_cap - status capped; population/cap 1/1; spawned 0
+PASS ecology.monster_replenishes - spawned: 1 troll in area (0,0), cap 3
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\lane-plugin-audit\scratchpad\lane-plugin-audit\snapshot-seed1920951434\test_output\ecology.replenished_monster.png
+PASS ecology.prey_replenishes - spawned: 2 deer; prey 83 -> 85
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\lane-plugin-audit\scratchpad\lane-plugin-audit\snapshot-seed1920951434\test_output\ecology.replenished_prey.png
+PASS ecology.bounded_work - 100 capped attempts in 4.835 ms (budget 20 ms); current prey/monsters 85/2; hour 305/306 processed 0/1 area(s)
+PASS ecology.beat_sprouting - 5 beats spawned 5 sprouts (total 8 active); levels represented: 0
+PASS ecology.maturation_cycle - sprout sapling at (174,61,z=0) matured into oak: true
+PASS ecology.no_errors - 0 uncaught error(s); 0 caught inside UF_Ecology
+SUITE colonists
+FAIL colonists.colonists_exist - 2 colonists present
+PASS colonists.player_faction - player faction f1 (colony: f1)
+PASS colonists.colonist_identity - colonist #4653 name Elem, ai=null
+PASS colonists.order_move - manual move job: 8
+PASS colonists.no_errors - no errors during colonists check
+SUITE world
+PASS world.in_area_map - area (0,0), map 1000, seed 1920951434
+PASS world.area_size - 256x256, data length 393216, objects 65536
+PASS world.level_ids - levels -16, -15, -14, -13, -12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 -> map ids 1032, 1030, 1028, 1026, 1024, 1022, 1020, 1018, 1016, 1014, 1012, 1010, 1008, 1006, 1004, 1003, 1000, 1001, 1002, 1005, 1007, 1009, 1011, 1013, 1015, 1017, 1019, 1021, 1023, 1025, 1027, 1029 (distinct); levelOfMapId round trip true; ground id 1000 (MapIdBase 1000, unchanged); areaOfMapId(level -1) null (want null); inWorld at level 16 / -17: false / false
+PASS world.seeded - area (0,0) built twice: -1572298777 / -1572298777; generators: uf_levels_terrain, uf_worldgen, uf_void_manifold, uf_underground_resources
+PASS world.diff_applies_live - tile (3,3) 3488 -> 2048
+PASS world.object_diffs - on screen (5,5) = 7; area (0,0) cell (9,9) = 3 through the peek cache (same cached build)
+PASS world.save_roundtrip - 3911434 bytes, 504 units
+PASS world.single_area_world - 1x1 areas, map 1000; walk from x 67 to x 52 on row 172
+PASS world.unit_enters_view - event 5792 at (66,172), sprite created
+PASS world.faces_its_steps - 14 step(s) taken (0 diagonal), 0 not facing the step's direction; facing 4 after walking west (want 4)
+PASS world.unit_walks_to_goal - at (52,172) in area (0,0), goal (52,172) reached
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\lane-plugin-audit\scratchpad\lane-plugin-audit\snapshot-seed1920951434\test_output\world.unit_in_view.png
+PASS world.spawn_not_in_walls - an oak was set at (100,100) (free: false); the unit spawned at (105,96), 5 cell(s) away, on a free cell: true
+PASS world.unit_image_refresh - event now draws "$U7_Ranger"
+PASS world.view_wraps_in_round_world - view at (0,172) after stepping east at the edge (expected 0)
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\lane-plugin-audit\scratchpad\lane-plugin-audit\snapshot-seed1920951434\test_output\world.round_seam_wrap.png
+PASS world.view_wraps_back_west - view returned to (255,172) after stepping west from 0
+PASS world.diff_persists - tile (3,3) is 2048 (expected 2048) and object (5,5) is 7 (expected 7) after leaving and returning
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\lane-plugin-audit\scratchpad\lane-plugin-audit\snapshot-seed1920951434\test_output\world.path_around_wall.png
+PASS world.path_around_wall - 9x9 ring of 31 wall pieces round (175,37), gap at (175,33); TEST_pather from (175,39) inside to (175,48) outside on the far side: arrived after 444 frames and 6 steps (first plan 27 cells), through the gap: true, wall cells stood on: 0; gave up: never; sent again 0x; test site: 54 objects cleared, nearest unit 22 cells away
+PASS world.path_blocked_goal - goal: the wall piece at (175,41); from inside (175,39): 1 cell(s) ending at (175,40) (want (175,40)); from outside (175,48): 6 cell(s) ending at (175,42) (want (175,42)); wall cells on either path: 0
+FAIL world.path_blocked_fast - goal (175,37) inside the ring with its gap closed; TEST_pather outside at (175,48): no world:unitBlocked within 90 frames; now at (181,49), goal still set; wall cells stood on: 0
+FAIL world.path_gives_up_when_crowded - gaps at (175,33) and (175,41), each held by a unit standing still; TEST_pather from (181,49) sent to (175,37) inside: no give-up within 304 frames (goal still set), 4 steps, now at (189,54); cells inside the ring entered: 0, wall cells stood on: 0 (progress limit 600 map updates)
+FAIL world.path_replans - TEST_replanner from (168,37) to (182,37) (14 steps in a straight line); a wall went up on its next path cell (172,37) with 11 cells to go; arrived after 12 steps (a detour round the wall makes it more than 14); steps onto the new wall: 0; re-plans counted (all units) 1; gave up: never
+SHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\lane-plugin-audit\scratchpad\lane-plugin-audit\snapshot-seed1920951434\test_output\world.eight_way.png

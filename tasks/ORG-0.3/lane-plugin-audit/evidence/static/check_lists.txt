@@ -1,0 +1,129 @@
+run_gate: check-lists, root C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\lane-plugin-audit, gate list C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\lane-plugin-audit\tools\ops\gate_tests.json, quarantine C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\lane-plugin-audit\tools\ops\quarantine.json
+VIOLATION UNLISTED: tools/art/test_blob_edges.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/art/test_fauna_induction.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/art/test_ground_kept_sets.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/art/test_multi_variant_topology.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/art/test_rmmz_rows.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/art/test_still_charsets.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/art/test_validate_asset_standard.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/audio/test_validate_audio_standard.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/combat_rt/test_combat_rt.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/depth_demo/test_depth_demo.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/governance/fixtures/invariants/INV-FLD-02/tools/test_strata_fluid_reconciliation.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/governance/test_check_invariants.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/layer_overlays/test_layer_overlays.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/occlusion/test_occlusion_culling.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/ops/test_pace.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/plans/test_faction_plan_schema.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/plans/test_race_plans.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/rules/test_srd_rules.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/security/test_check_dependencies.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/security/test_scan_secrets.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/security/test_support.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/select_xlayer/test_xlayer_select.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/sim/test_decay_core.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/sim/test_fluid_attach.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/sim/test_global_spawn_density.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/sim/test_living_world_rules.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/sim/test_materials.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/sim/test_ore_sprout.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/sim/test_reclaim.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/sim/test_reclaim_longrun.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/sim/test_sim_forward_guard.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/sim/test_underground_year0.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/sim/test_units.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/sim/test_water_cycle.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/sim/test_water_dynamics.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/sim/test_water_open_cp.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/sim/test_wildlife_rules_damage.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/society/test_craft_catalogue.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/society/test_militia.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/society/test_minting_engine.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/society/test_offices.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/society/test_person_identity.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/society/test_quartermaster.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/society/test_race_class_affinity.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/society/test_srd_classes.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/society/test_treasury.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/spells/test_spell_effects.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/taming/test_taming.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/taming_party/test_tamed_party_combat.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_32_levels_generation.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_aquifer_seepage.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_area_generation_speed.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_bag_and_racial_banners.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_bestiary_adaptation.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_biomes.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_build_vertical.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_camera_zoom.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_collapse_ingame.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_creature_inventory_black_box.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_deep_cuts_and_mountain_cap_wg0041.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_dig_vertical.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_encounter_tables.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_equipment_drag.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_fluid_correctness_lane_cw.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_history.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_hydrology.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_l6_docs_preservation.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_layer_render_flat.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_lazy_area_generation.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_natural_connections_no_mint.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_no_loadscript_shims.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_no_originality_check.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_package_proofs_ingame.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_race_starts.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_region_seam_continuity.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_sack_ui_and_loose_items.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_shadow_check_wg0041.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_sim_loader.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_sim_tick.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_soil_geomorphology.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_sparse_outer_save.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_structural_collapse.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_structural_connectivity.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_structural_levels.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_structural_rooted.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_structural_runtime.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_structure_fluid.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_var2_suite.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_var_suite.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_verify_world_state_registry.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_worldgen_quickfixes.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_zoom_depth_coverage.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/test_zrange.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/world_items/test_persistent_objects.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/world_items/test_world_items.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/worldgen/test_vertical_biome_coupling.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION UNLISTED: tools/zrange/test_switch_depth2.js is a tracked suite in none of: gate list, quarantine.json suites, quarantine.json passingNotGated
+VIOLATION NEEDS_NWJS_IN_GATE: tools/test_strata_cuts_and_caves.js is in the gate list but is NEEDS_NWJS: static screen: tools/test_strata_cuts_and_caves.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_IN_GATE: tools/test_new_game_year0.js is in the gate list but is NEEDS_NWJS: static screen: tools/test_new_game_year0.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_IN_GATE: tools/test_history_materialization_and_world_age.js is in the gate list but is NEEDS_NWJS: static screen: tools/test_history_materialization_and_world_age.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_IN_GATE: tools/test_historical_carrying_capacity.js is in the gate list but is NEEDS_NWJS: static screen: tools/test_historical_carrying_capacity.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_IN_GATE: tools/test_geology_strata.js is in the gate list but is NEEDS_NWJS: static screen: tools/test_geology_strata.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_IN_GATE: tools/test_strata_foundation.js is in the gate list but is NEEDS_NWJS: static screen: tools/test_strata_foundation.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_UNRECORDED: tools/test_19b_performance_determinism.js is recorded FAIL_API_DRIFT but the screen finds the NW.js harness: static screen: tools/test_19b_performance_determinism.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_UNRECORDED: tools/test_extraction_difficulty.js is recorded FAIL_MISSING_REFERENCE but the screen finds the NW.js harness: static screen: tools/test_extraction_difficulty.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_UNRECORDED: tools/test_faction_starting_gear.js is recorded FAIL_MISSING_REFERENCE but the screen finds the NW.js harness: static screen: tools/test_faction_starting_gear.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_UNRECORDED: tools/test_hist_metadata_contracts.js is recorded FAIL_MISSING_REFERENCE but the screen finds the NW.js harness: static screen: tools/test_hist_metadata_contracts.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_UNRECORDED: tools/test_native_survival_soak.js is recorded FAIL_OTHER but the screen finds the NW.js harness: static screen: tools/test_native_survival_soak.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_UNRECORDED: tools/test_natural_connections.js is recorded FAIL_API_DRIFT but the screen finds the NW.js harness: static screen: tools/test_natural_connections.js -> tools/test_natural_connections_no_mint.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_UNRECORDED: tools/test_production_history_demographics.js is recorded FAIL_OTHER but the screen finds the NW.js harness: static screen: tools/test_production_history_demographics.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_UNRECORDED: tools/test_resource_node_materials.js is recorded FAIL_API_DRIFT but the screen finds the NW.js harness: static screen: tools/test_resource_node_materials.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_UNRECORDED: tools/test_round_world.js is recorded FAIL_OTHER but the screen finds the NW.js harness: static screen: tools/test_round_world.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_UNRECORDED: tools/test_seamless_map_edges.js is recorded FAIL_OTHER but the screen finds the NW.js harness: static screen: tools/test_seamless_map_edges.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_UNRECORDED: tools/test_strata_fluid_reconciliation.js is recorded FAIL_OTHER but the screen finds the NW.js harness: static screen: tools/test_strata_fluid_reconciliation.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_UNRECORDED: tools/test_z_flora.js is recorded FAIL_API_DRIFT but the screen finds the NW.js harness: static screen: tools/test_z_flora.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_UNRECORDED: tools/test_combat_dying_integration.js is recorded as passing but the screen finds the NW.js harness: static screen: tools/test_combat_dying_integration.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_UNRECORDED: tools/test_duplicate_registration.js is recorded as passing but the screen finds the NW.js harness: static screen: tools/test_duplicate_registration.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_UNRECORDED: tools/test_generated_z2_cut_proof.js is recorded as passing but the screen finds the NW.js harness: static screen: tools/test_generated_z2_cut_proof.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_UNRECORDED: tools/test_liquid_depth_simulation.js is recorded as passing but the screen finds the NW.js harness: static screen: tools/test_liquid_depth_simulation.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_UNRECORDED: tools/test_starter_kit_and_stockpile.js is recorded as passing but the screen finds the NW.js harness: static screen: tools/test_starter_kit_and_stockpile.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_UNRECORDED: tools/test_survival_regressions.js is recorded as passing but the screen finds the NW.js harness: static screen: tools/test_survival_regressions.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+VIOLATION NEEDS_NWJS_UNRECORDED: tools/test_volumetric_terrain_column.js is recorded as passing but the screen finds the NW.js harness: static screen: tools/test_volumetric_terrain_column.js -> tools/lib/vm_sim_require.js -> tools/test_sim_loader.js:30 names "nwjs": const NW = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\RPG Maker MZ\\nwjs-win\\nw.exe"; // as tools/run_tests.js
+NOTE: tools/test_generated_z2_cut_proof.js is on the gate_tests.json quarantine list but quarantine.json records it passing in every run
+CHECK-LISTS: 122 violation(s)
+
+---stderr---
+
+EXIT 1

@@ -1,0 +1,8 @@
+﻿START 2026-10-02 23:01:34 -05:00
+SOURCE_SHA 86ec44c2055f766d17448c8d8f38f800b559059c
+DEUS_TEST_YEAR 500
+SNAPSHOT C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\lane-plugin-audit\scratchpad\lane-plugin-audit\snapshot-seed1920951434
+SEED_OVERRIDE DEUS_World.parameters.Seed=1920951434
+CWD_FOR_NW C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\lane-plugin-audit\scratchpad\lane-plugin-audit\snapshot-seed1920951434
+END 2026-10-02 23:03:34 -05:00
+EXIT 2

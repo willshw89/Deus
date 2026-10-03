@@ -1,0 +1,7 @@
+snapshot: C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\lane-plugin-audit\scratchpad\lane-plugin-audit\snapshot-seed1920951434
+source_plugins_sha256: e5f36442b8fa05da2ae56179c22017341d62f5e9247a7c6497b626355fde197f
+snapshot_plugins_sha256: 84a4a38ce14ff64bbe0859ce00def9268028d1de220b4cdb0d9b19381c36e87e
+entries: 49
+seed: 1920951434
+missing_files: none
+validation: PASS only DEUS_World.parameters.Seed inserted; live plugins.js unchanged
