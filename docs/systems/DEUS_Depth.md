@@ -1,8 +1,10 @@
 # DEUS_Depth
 
+> **Queued Owner amendment, 2026-10-02 22:32 CT:** D-2026-10-02-19 now authorizes depth shading while preserving DEC-011's flat 1:1 geometry. Current z stays fully bright; z-1 is about 60% with a slight cool tint, z-2 about 30%; z-3/deeper are black and never drawn, nor are levels above the view. Visibility requires open intervening levels. Brightness is data-configurable. See the [camera/depth plan](../art/CAMERA_DEPTH_PLAN.md) for controls and the required three-deep shaft fixture. Implementation is queued behind ORG-0.2. The existing-system description below is retained; its unshaded rendering is not the new design's acceptance target.
+
 Flat layer compositing. On every view, wherever the viewed level's cell is open, the levels below are drawn 1:1 through it, down to `MaxDepth` levels below; beyond them lies the void.
 
-- **Owner decision DEC-011** (2026-09-25 23:54 CT, relayed by PM 0017-Q): every Z layer renders 1:1. There is no blur, no scale or zoom, no parallax or projection offset, and no ColorMatrix, alpha or tint depth shading or any other filter. Visual depth effects will be revisited later, and only with the Owner.
+- **Historical Owner decision DEC-011** (2026-09-25 23:54 CT, relayed by PM 0017-Q): every Z layer renders 1:1. The original rule excluded blur, per-level scale/zoom, parallax/projection offset and depth shading/filters. The Owner revisited shading on 2026-10-02; see the queued amendment above. The flat geometry requirement remains.
 - **Owner, 2026-09-25 23:52 CT**, on the Ground view: "it doesnt look like we have cuts down to z-2 yet". So see-through applies on every view, not only on +1/+2.
 - This supersedes the camera-model projection, the `deus` preset (colour matrix plus blur) and presets A–E of 2026-09-24 (DEC-006/R1, superseded).
 
