@@ -2,8 +2,8 @@
   "lane": "lane-plugin-audit",
   "taskId": "ORG-0.3",
   "branch": "task/lane-plugin-audit",
-  "writer": "grok",
-  "reviewer": "claude",
+  "writer": "gemini",
+  "reviewer": "codex",
   "push": true,
   "allowedPaths": [
     "docs/architecture/PLUGIN_AUDIT.md",

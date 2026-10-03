@@ -1,0 +1,11 @@
+# ORG-0.3 direct Gemini assignment
+
+Owner authority: 2026-10-02 21:16 CT multi-lane instruction, superseded for Gemini routing at 21:20 CT: Codex now commands Gemini directly, no Owner relay. Gemini writes only, one narrow lane at a time, highest available effort, reference examples required. No same-family review. This directive overrides the older Grok assignment and two-worktree limit in BRIEF.md; other scope protections remain.
+
+Assigned writer: Gemini 3.1 Pro preview, highest configured thinking level HIGH (CLI has no separate effort flag; actual launch/provider result must be recorded). Reviewer: Codex/GPT after writing stops. Source: 565dc5aead7e068230528d573c395ea21ed5cf5d; existing branch task/lane-plugin-audit. No runtime edits. Finish docs/architecture/PLUGIN_AUDIT.md covering each plugins.js entry, actual load status, RMMZ coupling and dead/duplicate/unknown classification with real callers. Follow BRIEF.md reference examples and narrow audit scope. Record actual counts, not a target count. Supplemental files not in plugins.js need explicit loader evidence.
+
+Write only PLUGIN_AUDIT.md, lane REPORT.md and task evidence; investigation helpers only in scratchpad/lane-plugin-audit/. No STATUS/AGENTS/WBS/CI/USAGE edits, other branches, engine/libs, art/sprites or PROVIDER_USAGE_STATUS.json. No deletions, force-pushes, stashes, history rewrites, self-review or merges. Per-command git author deus-gemini. Commit and push only this branch normally.
+
+ORG-0.2 has priority on native NW.js tests. Do not launch run_tests.bat while Claude's acceptance run is active. Complete static documentation and record native tests as pending; request the serial test slot in your output. No done/green claim until run_tests.bat passes acceptance, a cross-family review passes and Deus confirms. No provider downgrade. Provider outage: preserve work/logs and report the exact error for SOP crossload.
+
+Every Gemini assignment must be logged in REPORT.md with CT time, task, model/effort, source SHA, permitted output paths and actual outcome. Initial assignment is this 2026-10-02 21:20 CT Owner-directed dispatch. PM adds launch evidence; Gemini appends its work/result under its actual identity.
