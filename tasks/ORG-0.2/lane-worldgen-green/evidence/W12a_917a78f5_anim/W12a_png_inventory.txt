@@ -1,0 +1,14 @@
+﻿
+Name                    Length LastWriteTime       
+----                    ------ -------------       
+anim.death_frames.png   252893 10/3/2026 3:37:36 AM
+anim.layers.png         253150 10/3/2026 3:38:31 AM
+anim.no_carry_pose.png  255861 10/3/2026 3:38:01 AM
+anim.no_code_motion.png 245561 10/3/2026 3:37:25 AM
+anim.object_frames.png  254445 10/3/2026 3:38:24 AM
+anim.perf_view.png      214047 10/3/2026 3:38:54 AM
+anim.remains.png        253429 10/3/2026 3:37:44 AM
+anim.state_frames.png   243125 10/3/2026 3:37:47 AM
+
+
+

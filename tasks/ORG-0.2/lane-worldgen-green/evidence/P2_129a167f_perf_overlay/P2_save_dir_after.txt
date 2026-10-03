@@ -1,0 +1,5 @@
+total 1289
+drwxr-xr-x 1 snewt 197610       0 Oct  3 03:53 .
+drwxr-xr-x 1 snewt 197610       0 Oct  3 03:53 ..
+-rw-r--r-- 1 snewt 197610 1311064 Oct  3 03:53 file1.rmmzsave
+-rw-r--r-- 1 snewt 197610     210 Oct  3 03:53 global.rmmzsave

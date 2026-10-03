@@ -1,0 +1,13 @@
+# P3_game_runtime.log excerpt (full log 1289347 bytes left untracked here; copy at scratchpad/lane-worldgen-green/evidence_large/P3_game_runtime.log; [PERF] lines in P3_perf_log_lines.txt)
+2:[INIT] Game booting at 2026-10-03T09:16:28.057Z
+20:2026-10-03T09:16:29.069Z [TIMING] DataManager.setupNewGame enter (+13.9ms)
+21:2026-10-03T09:16:29.072Z [TIMING] setupForNewGame before World.newWorld
+24:2026-10-03T09:16:30.844Z [TIMING] world:initializing fired (+1788.4ms)
+8914:2026-10-03T09:16:49.828Z [TIMING] world:created fired (+20772.7ms)
+8917:2026-10-03T09:16:49.832Z [TIMING] emit world:created done
+8918:2026-10-03T09:16:49.832Z [TIMING] early seated done, units=0
+8919:2026-10-03T09:16:51.050Z [TIMING] setupForNewGame after World.newWorld
+8920:2026-10-03T09:16:51.051Z [TIMING] setupForNewGame exit (reserved map 1000)
+8921:2026-10-03T09:16:51.051Z [TIMING] DataManager.setupNewGame exit (+21995.6ms)
+8922:2026-10-03T09:16:51.061Z [TIMING] Scene_Boot.start exit (+22005.7ms)
+8925:2026-10-03T09:16:51.856Z [TIMING] world:areaBuilt (0,0) (+22801.0ms)

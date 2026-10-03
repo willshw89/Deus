@@ -1,0 +1,13 @@
+# M5_game_runtime.log excerpt (full log 1289348 bytes left untracked here; copy at scratchpad/lane-worldgen-green/evidence_large/M5_game_runtime.log; [PERF] lines in M5_perf_log_lines.txt)
+2:[INIT] Game booting at 2026-10-03T09:15:46.066Z
+20:2026-10-03T09:15:47.340Z [TIMING] DataManager.setupNewGame enter (+11.6ms)
+21:2026-10-03T09:15:47.342Z [TIMING] setupForNewGame before World.newWorld
+24:2026-10-03T09:15:49.209Z [TIMING] world:initializing fired (+1881.1ms)
+8914:2026-10-03T09:16:09.176Z [TIMING] world:created fired (+21848.2ms)
+8917:2026-10-03T09:16:09.179Z [TIMING] emit world:created done
+8918:2026-10-03T09:16:09.179Z [TIMING] early seated done, units=0
+8919:2026-10-03T09:16:10.393Z [TIMING] setupForNewGame after World.newWorld
+8920:2026-10-03T09:16:10.394Z [TIMING] setupForNewGame exit (reserved map 1000)
+8921:2026-10-03T09:16:10.394Z [TIMING] DataManager.setupNewGame exit (+23065.9ms)
+8922:2026-10-03T09:16:10.405Z [TIMING] Scene_Boot.start exit (+23077.5ms)
+8925:2026-10-03T09:16:11.162Z [TIMING] world:areaBuilt (0,0) (+23833.7ms)

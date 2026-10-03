@@ -1,0 +1,6 @@
+total 7
+drwxr-xr-x 1 snewt 197610  0 Oct  3 03:57 .
+drwxr-xr-x 1 snewt 197610  0 Oct  3 03:57 ..
+-rw-r--r-- 1 snewt 197610 69 Oct  3 03:57 file1.rmmzsave
+-rw-r--r-- 1 snewt 197610 47 Oct  3 03:57 file1.rmmzsave.bak
+-rw-r--r-- 1 snewt 197610 52 Oct  3 03:57 info.rmmzsave

@@ -1,0 +1,13 @@
+# P2_game_runtime.log excerpt (full log 1289186 bytes left untracked here; [PERF] lines in P2_perf_log_lines.txt)
+2:[INIT] Game booting at 2026-10-03T08:52:57.036Z
+20:2026-10-03T08:52:58.252Z [TIMING] DataManager.setupNewGame enter (+8.4ms)
+21:2026-10-03T08:52:58.254Z [TIMING] setupForNewGame before World.newWorld
+24:2026-10-03T08:53:00.082Z [TIMING] world:initializing fired (+1838.1ms)
+8914:2026-10-03T08:53:19.599Z [TIMING] world:created fired (+21355.4ms)
+8917:2026-10-03T08:53:19.602Z [TIMING] emit world:created done
+8918:2026-10-03T08:53:19.602Z [TIMING] early seated done, units=0
+8919:2026-10-03T08:53:20.932Z [TIMING] setupForNewGame after World.newWorld
+8920:2026-10-03T08:53:20.932Z [TIMING] setupForNewGame exit (reserved map 1000)
+8921:2026-10-03T08:53:20.933Z [TIMING] DataManager.setupNewGame exit (+22689.2ms)
+8922:2026-10-03T08:53:20.945Z [TIMING] Scene_Boot.start exit (+22701.8ms)
+8925:2026-10-03T08:53:21.755Z [TIMING] world:areaBuilt (0,0) (+23511.6ms)
