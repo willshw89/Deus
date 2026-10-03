@@ -1,0 +1,3 @@
+﻿2026-10-03T09:46:03.218Z [PERF] frames 1 interval n/a/n/a/0.0 ms (last/avg/max); renders 0 draw cpu n/a/n/a/0.0 ms; sim ticks 0 n/a/n/a/0.0 ms; heap 139000000 bytes; new game sync 22545.0 ms, first map draw n/a ms; load n/a
+2026-10-03T09:46:13.257Z [PERF] frames 124 interval 149.9/82.3/2578.3 ms (last/avg/max); renders 88 draw cpu 2.1/4.9/229.5 ms; sim ticks 20 0.0/0.4/7.1 ms; heap 139000000 bytes; new game sync 22545.0 ms, first map draw 26898.6 ms; load n/a
+2026-10-03T09:46:16.381Z [PERF] frames 279 interval 13.2/7.8/2578.3 ms (last/avg/max); renders 243 draw cpu 1.6/1.5/229.5 ms; sim ticks 20 0.0/0.4/7.1 ms; heap 139000000 bytes; new game sync 22545.0 ms, first map draw 26898.6 ms; load n/a tag proof-1791020776381

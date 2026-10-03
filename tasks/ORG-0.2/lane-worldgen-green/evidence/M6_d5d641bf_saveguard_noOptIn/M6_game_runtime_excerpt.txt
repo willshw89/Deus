@@ -1,0 +1,13 @@
+# M6_game_runtime.log excerpt (full log 1289347 bytes left untracked here; copy in evidence_large)
+2:[INIT] Game booting at 2026-10-03T09:45:37.661Z
+20:2026-10-03T09:45:38.927Z [TIMING] DataManager.setupNewGame enter (+8.4ms)
+21:2026-10-03T09:45:38.930Z [TIMING] setupForNewGame before World.newWorld
+24:2026-10-03T09:45:40.650Z [TIMING] world:initializing fired (+1730.9ms)
+8914:2026-10-03T09:46:00.063Z [TIMING] world:created fired (+21144.4ms)
+8917:2026-10-03T09:46:00.066Z [TIMING] emit world:created done
+8918:2026-10-03T09:46:00.066Z [TIMING] early seated done, units=0
+8919:2026-10-03T09:46:01.472Z [TIMING] setupForNewGame after World.newWorld
+8920:2026-10-03T09:46:01.472Z [TIMING] setupForNewGame exit (reserved map 1000)
+8921:2026-10-03T09:46:01.473Z [TIMING] DataManager.setupNewGame exit (+22553.7ms)
+8922:2026-10-03T09:46:01.490Z [TIMING] Scene_Boot.start exit (+22570.5ms)
+8925:2026-10-03T09:46:02.350Z [TIMING] world:areaBuilt (0,0) (+23430.8ms)

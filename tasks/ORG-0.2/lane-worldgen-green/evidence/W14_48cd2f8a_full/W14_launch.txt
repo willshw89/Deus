@@ -1,0 +1,1 @@
+﻿launched wrapper PID 23532 at 04:33:25 for W14 (wrapper run_controlled3.ps1, snapshot C:\Users\snewt\OneDrive\Desktop\UF\.deus_worktrees\org-0.2-worldgen-green\scratchpad\lane-worldgen-green\snap_W14_48cd2f8a\game)
