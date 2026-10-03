@@ -2,7 +2,7 @@
 
 **Status: Active.** Recorded 2026-10-02. Replaces the earlier pillar-merge plan (`docs/DECISIONS.md` D-2026-10-02-2).
 
-**Runtime priority: ORG-0.2 worldgen green.** The Owner separately authorized isolated support lanes (setup/CI review, STUB-HUNT and ORG-0.3 plugin audit). The 2026-10-02 21:56-22:15 CT decisions below are **DESIGN ONLY**: no new implementation starts until ORG-0.2 is green. DEC-037 remains in force for faction/society code. ORG-4.2 and all newly planned exit-gate work are held behind that first prerequisite; their planning status is not a launch instruction.
+**Runtime priority: ORG-0.2 worldgen green on 1×1.** The Owner separately authorized isolated support lanes (setup/CI review, STUB-HUNT and ORG-0.3 plugin audit). The 2026-10-02 21:56-23:25 CT decisions below are **DESIGN ONLY**, except the approved performance overlay/log: no new world-size, optimization or simulation implementation starts until ORG-0.2 is green. DEC-037 remains in force for faction/society code. ORG-4.2, WORLD-3x3 and newly planned exit-gate work are held behind that first prerequisite; their planning status is not a launch instruction.
 
 Rules: lane rules in `AGENTS.md` apply. Fix causes, never tests. The ORG-0.1 expected-red list only gates ORG-1/2/3 (CI, hygiene, docs) lanes.
 
@@ -24,7 +24,17 @@ ORG-0.2 green is the first prerequisite, not the entire phase exit. These requir
 | Load-time budget | A real load-time budget test with a stated start/end definition, scenario, hardware and numeric threshold. Threshold/procedure TBD for Owner approval; no invented pass limit. | Planned; hard exit gate |
 | Save/load identical hash | Save the generated world, reload it and reproduce the IDENTICAL canonical world hash. Record seed, source/data SHA, save version, scenario and before/after hashes. | Planned; hard exit gate |
 
-The first follow-on work in WBS-SPLIT (worldgen data contract, SRD weight fields, tunable densities, RMMZ separation) is **soft**, not another hard worldgen exit gate. The first gameplay priority is the WBS-SIM SIM-8 arrival/gather/hut/night slice and Owner fun assessment. Neither opens faction/society code under DEC-037.
+The first follow-on work in WBS-SPLIT (worldgen data contract, SRD weight fields, tunable densities, RMMZ separation) is **soft**, not another hard worldgen exit gate. The first gameplay priority after worldgen exit is the WBS-SIM SIM-8 arrival/gather/hut/night slice and Owner fun assessment. Neither opens faction/society code under DEC-037.
+
+### First M1 item after ORG-0.2 green: WORLD-3x3 (D-2026-10-02-25)
+
+The current ORG-0.2 repair and its acceptance stay **1×1**; 3×3 is planned, not shipped by this record. This explicit M1 item maps to existing worldgen WBS leaves WG.00.25 (coarse world grid) and WG.00.26 (wrap stitching) without opening either old lane or adding runtime work now.
+
+| ID | Planned scope and acceptance | Status |
+|---|---|---|
+| WORLD-3x3 | After ORG-0.2 green, make `AreasX=3`, `AreasY=3`, `AreaSize=256` the defaults and wrap every edge. New Game generates the start and faction-home areas/floors; other areas generate on request. No faction starts late. Verify DEC-065/070 lazy-versus-eager and build-order equivalence, time-state catch-up and the condition-C eager fallback for any system that cannot prove equivalence. Exclude transient ordinary wildlife from per-area checksums; include spawn designations, lairs/dens, depletion and persistent notables. On seed `1920951434`, include year 500 and side-by-side 1×1/3×3 New Game overlay numbers with SHAs. Recheck camp, density and ecology thresholds with each labeled per-area or per-world; thresholds and the load-time budget must be approved, not invented. At 3×3 re-run every hard exit gate above, including STUB-FIX/no fake checks, 5–10-seed suite green, determinism, load-time budget and identical-hash save/load. Writer Claude; reviewer Codex/GPT from another family; Deus verifies on laptop. | DESIGN ONLY; first M1 item after ORG-0.2 green; no implementation launched |
+
+The pre-green performance exception is the WBS-SIM SIM-5 overlay/log for frame, tick, draw, worldgen/load milliseconds and heap size, observed with NW.js DevTools. Measure a green-SHA baseline once ORG-0.2 is green. Later optimization is parked under D-2026-10-02-24 and needs same-seed before/after figures.
 
 ## ORG-1: Gatekeeping
 | ID | Task | Status |
@@ -60,6 +70,6 @@ The first follow-on work in WBS-SPLIT (worldgen data contract, SRD weight fields
 | ORG-4.3 | Performance budget: title load, frame time at z+8 and zoomed out on a fixed seed; baseline in `tools/tests/perf/baseline.json`; >10% regression fails. | Parked |
 | ORG-4.4 | Sim/render split design doc (`docs/architecture/SIM_RENDER_SPLIT.md`), design only. Detailed lanes in `docs/WBS_SPLIT.md`. | Parked |
 
-Current order: existing ORG-0.2 repair/review first, with already-authorized isolated support work. After ORG-0.2 green, satisfy ALL worldgen exit gates above before leaving worldgen. Then prioritize the playable SIM-8 slice, with soft first-follow-on WBS-SPLIT work planned to support it; do not stack the rest of WBS-SIM or the older pillar program ahead of the fun assessment. Frozen implementation still needs Owner release under DEC-037. Pillar merge, cleanup, art production and other parked work do not reopen automatically.
+Current order: existing ORG-0.2 repair/review on 1×1 first, with already-authorized isolated support work and the approved performance measurement overlay/log. WORLD-3x3 is the first planned M1 item after ORG-0.2 green; satisfy ALL worldgen exit gates above at 3×3 before leaving worldgen. Then prioritize the playable SIM-8 slice, with soft first-follow-on WBS-SPLIT work planned to support it; do not stack the rest of WBS-SIM or the older pillar program ahead of the fun assessment. Frozen implementation still needs Owner release under DEC-037. Pillar merge, cleanup, art production and other parked work do not reopen automatically.
 
 Why the player cares: the world must load reproducibly, preserve itself through save/load and be checked by real tests before a small playable loop is judged. Licensing and art plans keep that loop's assets traceable without authorizing production now. Research/draft content stays under [docs/research/](research/README.md) until explicit Owner approval.
