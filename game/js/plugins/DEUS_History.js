@@ -122,61 +122,21 @@
     function getCallings() {
         if (typeof window !== "undefined" && window.UF && window.UF.Callings) return window.UF.Callings;
         if (typeof global !== "undefined" && global.UF && global.UF.Callings) return global.UF.Callings;
-        if (typeof require === "function") {
-            const paths = ["./DEUS_Callings.js", "./js/plugins/DEUS_Callings.js", "./game/js/plugins/DEUS_Callings.js", "./UF_Callings.js", "./js/plugins/UF_Callings.js", "./game/js/plugins/UF_Callings.js"];
-            for (const p of paths) {
-                try {
-                    const c = require(p);
-                    if (typeof window !== "undefined" && window.UF && window.UF.Callings) return window.UF.Callings;
-                    if (c && (c.PROFESSIONS || c.sampleCallings)) return c;
-                } catch (_) {}
-            }
-        }
         return null;
     }
     function getDemographics() {
         if (typeof window !== "undefined" && window.UF && window.UF.HistoricalDemographics) return window.UF.HistoricalDemographics;
         if (typeof global !== "undefined" && global.UF && global.UF.HistoricalDemographics) return global.UF.HistoricalDemographics;
-        if (typeof require === "function") {
-            const paths = ["./DEUS_HistoricalDemographics.js", "./js/plugins/DEUS_HistoricalDemographics.js", "./game/js/plugins/DEUS_HistoricalDemographics.js", "./UF_HistoricalDemographics.js"];
-            for (const p of paths) {
-                try {
-                    const d = require(p);
-                    if (typeof window !== "undefined" && window.UF && window.UF.HistoricalDemographics) return window.UF.HistoricalDemographics;
-                    if (d && (d.create || d.step)) return d;
-                } catch (_) {}
-            }
-        }
         return null;
     }
     function getDnd5e() {
         if (typeof window !== "undefined" && window.UF && window.UF.Dnd5e) return window.UF.Dnd5e;
         if (typeof global !== "undefined" && global.UF && global.UF.Dnd5e) return global.UF.Dnd5e;
-        if (typeof require === "function") {
-            const paths = ["./DEUS_Dnd5e.js", "./js/plugins/DEUS_Dnd5e.js", "./game/js/plugins/DEUS_Dnd5e.js", "./UF_Dnd5e.js"];
-            for (const p of paths) {
-                try {
-                    const d = require(p);
-                    if (typeof window !== "undefined" && window.UF && window.UF.Dnd5e) return window.UF.Dnd5e;
-                    if (d && (d.assignClass || d.rollAbilityScores)) return d;
-                } catch (_) {}
-            }
-        }
         return null;
     }
     function getItems() {
         if (typeof window !== "undefined" && window.UF && window.UF.Items) return window.UF.Items;
         if (typeof global !== "undefined" && global.UF && global.UF.Items) return global.UF.Items;
-        if (typeof require === "function") {
-            const paths = ["./DEUS_Items.js", "./js/plugins/DEUS_Items.js", "./game/js/plugins/DEUS_Items.js"];
-            for (const p of paths) {
-                try {
-                    const mod = require(p);
-                    if (typeof window !== "undefined" && window.UF && window.UF.Items) return window.UF.Items;
-                    if (mod && mod.create) return mod;
-                } catch (_) {}
-            }
-        }
         return null;
     }
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -213,14 +173,6 @@
     let materializingNewGame = false;
     let pairingReleaseRegistered = false;
 
-    // These modules are loaded before New Game, using the same dependency loader as Items.
-    if (typeof PluginManager !== "undefined" && typeof PluginManager.loadScript === "function") {
-        for (const name of ["HistoricalDemographics", "Callings"]) {
-            if (!UF[name] && (!PluginManager._scripts || !PluginManager._scripts.includes(`DEUS_${name}`))) {
-                PluginManager.loadScript(`DEUS_${name}`);
-            }
-        }
-    }
 
     //-------------------------------------------------------------------------
     // Terrain access: sites go on walkable land. UF.WorldGen reads UF.World.state, so a synthetic

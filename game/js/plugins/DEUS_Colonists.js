@@ -825,13 +825,6 @@ window.UF.ECS = window.UF.ECS || {
     function getCallings() {
         if (typeof window !== "undefined" && window.UF && window.UF.Callings) return window.UF.Callings;
         if (typeof global !== "undefined" && global.UF && global.UF.Callings) return global.UF.Callings;
-        if (typeof require === "function") {
-            try { return require("./UF_Callings.js"); } catch (_) {
-                try { return require("./js/plugins/UF_Callings.js"); } catch (_) {
-                    try { return require("./game/js/plugins/UF_Callings.js"); } catch (_) {}
-                }
-            }
-        }
         return null;
     }
 
@@ -2820,11 +2813,6 @@ window.UF.ECS = window.UF.ECS || {
         }
 
         let Callings = window.UF && UF.Callings;
-        if (!Callings && typeof require === "function") {
-            try { Callings = require("./UF_Callings.js"); } catch (_) {
-                try { Callings = require("./game/js/plugins/UF_Callings.js"); } catch (_) {}
-            }
-        }
         if (Callings && Callings.assignCallings) {
             Callings.assignCallings(childUnit, pop);
             if (twinUnit) Callings.assignCallings(twinUnit, pop);

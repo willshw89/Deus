@@ -39,14 +39,6 @@
 (() => {
     "use strict";
 
-    if (typeof PluginManager !== "undefined" && typeof PluginManager.loadScript === "function") {
-        if (!PluginManager._scripts || !PluginManager._scripts.includes("DEUS_Containers")) {
-            PluginManager.loadScript("DEUS_Containers");
-        }
-        if (!PluginManager._scripts || !PluginManager._scripts.includes("DEUS_Dnd5e")) {
-            PluginManager.loadScript("DEUS_Dnd5e");
-        }
-    }
 
     const VIEW_MARGIN = 3;     // cells past the screen edge whose items still get a sprite (tall sprites reach up into view)
     const CELL_STRIDE = 4096;  // cell key = y * CELL_STRIDE + x (areas are at most 256 wide)

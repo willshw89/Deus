@@ -116,11 +116,6 @@
 (() => {
     "use strict";
 
-    if (typeof PluginManager !== "undefined" && typeof PluginManager.loadScript === "function") {
-        if (!PluginManager._scripts || !PluginManager._scripts.includes("DEUS_Select")) {
-            PluginManager.loadScript("DEUS_Select");
-        }
-    }
 
     const CAM_SPEED = 0.35;   // cells per frame while a pan key is held
 

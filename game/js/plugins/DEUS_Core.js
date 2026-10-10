@@ -87,50 +87,6 @@
                 }
             }
 
-            // Synchronously ensure all modular plugins are loaded in NW.js desktop runtime
-            const companionPlugins = [
-                "DEUS_Containers",
-                "DEUS_Bag",
-                "DEUS_Stockpiles",
-                "DEUS_Fluid",
-                "DEUS_Conditions",
-                "DEUS_Select",
-                "DEUS_Dnd5e",
-                "DEUS_Callings",
-                "DEUS_HistoricalDemographics",
-                "DEUS_DeathForensics",
-                // Households (partner pairs, families, their homes) for DEUS_Projects' domestic housing
-                // (DEUS-TSK-FABLE-17): not in plugins.js while the editor holds it; register it there when the editor
-                // is closed and drop this line.
-                "UF_Households"
-            ];
-            for (let pi = 0; pi < companionPlugins.length; pi++) {
-                const name = companionPlugins[pi];
-                const paths = [
-                    `./js/plugins/${name}.js`,
-                    `./game/js/plugins/${name}.js`,
-                    `./${name}.js`
-                ];
-                let loaded = false, lastError = null;
-                for (let pj = 0; pj < paths.length; pj++) {
-                    const p = paths[pj];
-                    try {
-                        require(p);
-                        log(`[CORE] Synchronously loaded companion plugin ${name}`);
-                        loaded = true;
-                        break;
-                    } catch (e) { lastError = e; }
-                }
-                // A companion that fails to load says so (DEUS-TSK-FABLE-17: the loop used to swallow every error).
-                if (!loaded) log(`[CORE] Companion plugin ${name} NOT loaded: ${lastError && lastError.message ? lastError.message : lastError}`);
-                // Also ensure DOM script injection if PluginManager is active and not already injected
-                if (typeof window !== "undefined" && typeof PluginManager !== "undefined" && typeof PluginManager.loadScript === "function") {
-                    if (!window[`__deus_loaded_${name}`]) {
-                        window[`__deus_loaded_${name}`] = true;
-                        PluginManager.loadScript(name);
-                    }
-                }
-            }
 
             let isAutoTest = false;
 
